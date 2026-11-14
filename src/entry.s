@@ -1,8 +1,3 @@
-# Cartridge entry point. IPL3 copies the first megabyte of the ROM to
-# 0x80025C00 and jumps here; we clear the main segment's .bss, switch to the
-# boot stack and hand off to NuSystem's nuBoot(). The boot stack is the top of
-# nuMainStack, which NuSystem calls NU_SPEC_BOOT_STACK.
-
 .include "macro.inc"
 
 .set noat

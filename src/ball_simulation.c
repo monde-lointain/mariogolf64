@@ -1,8 +1,3 @@
-/*
- * The ball simulation. It launches the ball with a shot's velocity and wind,
- * then moves it a step at a time as it flies, bounces and rolls over the
- * course. It plays the sounds of the ball's impacts and spawns their effects.
- */
 #include "ball_simulation.h"
 
 #include <math.h>
@@ -38,63 +33,35 @@ BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT] = {0};
 s8 g_ClubTestMode = CLUB_TEST_NONE;
 
 static SurfaceInfo f_SurfaceInfo[SURFACE_COUNT] = {
-    /* SURFACE_OUT_OF_BOUNDS */
     {SURFACE_KIND_OUT_OF_BOUNDS, "O.B.", 100, 100, 0, 0, 0, 0x500, SINK_DEPTH_HALF, 7},
-    /* SURFACE_FAIRWAY */
     {SURFACE_KIND_FAIRWAY, "FAIRWAY", 98, 100, 5, 960, 500, 0x501, SINK_DEPTH_NONE, 0},
-    /* SURFACE_ROUGH */
     {SURFACE_KIND_ROUGH, "ROUGH", 80, 90, 30, 600, 200, 0x508, SINK_DEPTH_HALF, 1},
-    /* SURFACE_BUNKER */
     {SURFACE_KIND_BUNKER, "BUNKER", 70, 85, 30, 600, 0, 0x504, SINK_DEPTH_NONE, 2},
-    /* SURFACE_GREEN */
     {SURFACE_KIND_GREEN, "ON GREEN", 100, 100, 0, 972, 600, 0x50A, SINK_DEPTH_NONE, 6},
-    /* SURFACE_WATER_HAZARD */
     {SURFACE_KIND_WATER_HAZARD, "WATER HAZARD", 100, 100, 0, 900, 400, 0x50C, SINK_DEPTH_NONE, 3},
-    /* SURFACE_CART_WAY */
     {SURFACE_KIND_CART_WAY, "CART WAY", 80, 100, 10, 975, 890, 0x50B, SINK_DEPTH_NONE, 4},
-    /* SURFACE_TEE_GROUND */
     {SURFACE_KIND_TEE_GROUND, "TEE GROUND", 98, 100, 10, 930, 500, 0x501, SINK_DEPTH_NONE, 8},
-    /* SURFACE_ROCK */
     {SURFACE_KIND_ROCK, "ROCK", 80, 90, 30, 930, 800, 0x50D, SINK_DEPTH_NONE, 9},
-    /* SURFACE_GREEN_EDGE */
     {SURFACE_KIND_GREEN_EDGE, "GREEN EDGE", 98, 100, 10, 966, 550, 0x501, SINK_DEPTH_NONE, 0},
-    /* SURFACE_SEMI_ROUGH */
     {SURFACE_KIND_SEMI_ROUGH, "SEMI ROUGH", 90, 98, 30, 930, 500, 0x507, SINK_DEPTH_NONE, 0},
-    /* SURFACE_BARE_GROUND */
     {SURFACE_KIND_BARE_GROUND, "BARE GROUND", 80, 90, 30, 930, 500, 0x50C, SINK_DEPTH_NONE, 1},
-    /* SURFACE_DEEP_ROUGH */
     {SURFACE_KIND_DEEP_ROUGH, "DEEP ROUGH", 50, 80, 30, 430, 100, 0x509, SINK_DEPTH_BURIED, 5},
-    /* SURFACE_NO_DROP_GROUND */
     {SURFACE_KIND_NO_DROP_GROUND, "BARE GROUND", 80, 90, 30, 930, 500, 0x50C, SINK_DEPTH_NONE, 1},
-    /* SURFACE_WASTE_AREA */
     {SURFACE_KIND_WASTE_AREA, "WASTE AREA", 50, 80, 30, 430, 100, 0x8F1, SINK_DEPTH_HALF, 5},
-    /* SURFACE_UNNAMED_ROCK */
     {SURFACE_KIND_ROCK, "            ", 98, 100, 40, 930, 500, 0x500, SINK_DEPTH_NONE, 9},
-    /* SURFACE_BUNKER_FAIR_LIE */
     {SURFACE_KIND_BUNKER_FAIR_LIE, "BUNKER", 50, 70, 30, 600, 0, 0x505, SINK_DEPTH_HALF, 2},
-    /* SURFACE_BUNKER_POOR_LIE */
     {SURFACE_KIND_BUNKER_POOR_LIE, "BUNKER", 40, 60, 30, 600, 0, 0x506, SINK_DEPTH_HALF, 2},
-    /* SURFACE_BUNKER_UNUSED_LIE */
     {SURFACE_KIND_BUNKER_UNUSED_LIE, "BUNKER", 40, 60, 40, 600, 0, 0x506, SINK_DEPTH_HALF, 2},
-    /* SURFACE_FAIRWAY_FAIR_LIE */
     {SURFACE_KIND_FAIRWAY_FAIR_LIE, "FAIRWAY", 94, 98, 7, 950, 380, 0x502, SINK_DEPTH_NONE, 0},
-    /* SURFACE_FAIRWAY_POOR_LIE */
     {SURFACE_KIND_FAIRWAY_POOR_LIE, "FAIRWAY", 90, 94, 7, 950, 380, 0x503, SINK_DEPTH_NONE, 0},
-    /* SURFACE_ROUGH_POOR_LIE */
     {SURFACE_KIND_ROUGH_POOR_LIE, "ROUGH", 70, 85, 30, 600, 200, 0x90C, SINK_DEPTH_HALF, 5},
-    /* SURFACE_OUT_OF_COURSE */
     {SURFACE_KIND_OUT_OF_COURSE, "OUT OF COURSE", 100, 100, 0, 0, 0, 0x500, SINK_DEPTH_NONE, 7},
-    /* SURFACE_TEE_UP */
     {SURFACE_KIND_TEE_UP, "TEE UP", 98, 100, 10, 930, 500, 0x500, SINK_DEPTH_NONE, 8},
-    /* SURFACE_MINI_GOLF_GREEN */
     {SURFACE_KIND_GREEN, "GREEN", 100, 100, 0, 972, 500, 0x8F2, SINK_DEPTH_NONE, 6},
-    /* SURFACE_MINI_GOLF_FAIRWAY */
     {SURFACE_KIND_FAIRWAY, "BLUE", 98, 100, 5, 960, 400, 0x8F3, SINK_DEPTH_NONE, 0},
-    /* SURFACE_MINI_GOLF_CART_WAY */
     {SURFACE_KIND_CART_WAY, "RED", 80, 100, 10, 980, 800, 0x8F4, SINK_DEPTH_NONE, 4},
 };
 
-/* For impactTiming values below and above the entries of f_ImpactEffects */
 static ImpactEffect f_EarlyImpactEffect = {-90, -64, -40, -10, 100, 1};
 static ImpactEffect f_LateImpactEffect = {-80, 64, 30, 10, -5, 1};
 static ImpactEffect f_ImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
@@ -179,7 +146,6 @@ static ImpactEffect f_ImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUN
 };
 
 s32 g_UnusedLaunchCount = 0;
-/* Read by no routine */
 static s32 f_UnusedWordsAfterLaunchCount[4] UNUSED = {0};
 
 SurfaceInfo *GetSurfaceInfo(Surface surface) {
@@ -196,7 +162,7 @@ void ResetBallSimulations(void) {
     for (index = 0; index < BALL_SIMULATION_COUNT; index++) {
         g_BallSimulations[index].position[AXIS_X] = RESET_BALL_X;
         g_BallSimulations[index].position[AXIS_Y] = RESET_BALL_Y;
-        rand(); /* The original has it */
+        rand();
         g_BallSimulations[index].position[AXIS_Z] = RESET_BALL_Z;
         g_BallSimulations[index].velocity[AXIS_X] = rand() & RESET_BALL_SPEED_MASK;
         g_BallSimulations[index].velocity[AXIS_Y] = RESET_BALL_VELOCITY_Y;
@@ -206,14 +172,6 @@ void ResetBallSimulations(void) {
     }
 }
 
-/*
- * Moves the simulated ball through one step, with a second substep when the
- * ball bounces within the first 40% of its path. Each substep tests the path
- * against rings, the ground, billboards, the pin, the cup, walls and hole
- * triangles, then bounces, rolls, sinks or stops the ball, and a flying ball
- * feels drag, curve, lift and the wind. Returns the STEP_FLAG_* bits for the
- * step.
- */
 s32 StepBallSimulation(BallSimulation *simulation) {
     PlaneTriangle hit;
     PlaneTriangle triangle;
@@ -249,10 +207,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
         }
     }
 
-    /*
-     * Points the lift rotation about the ball\'s spin axis, the level axis across
-     * spinHeading, turning a negative spin into a positive one the other way
-     */
     void BuildLiftRotation(void) {
         f32 axisX;
         f32 axisZ;
@@ -310,10 +264,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
     }
 
     inline f32 GetStepNoise(void) {
-        /*
-         * The second term is added to a variable to match: summed in one
-         * expression, the sum's register differs from the original's.
-         */
         f32 noise = (u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
                          g_Players[simulation->playerIndex].noiseSeed) &
                    NOISE_BYTE_MASK) /
@@ -343,10 +293,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
         previousVelocityZ = velocity[AXIS_Z];
         simulation->previousStepFlags = simulation->stepFlags;
         hitsHoleTriangle = FALSE;
-        /*
-         * The goto, to match: the rest of the step in an if on the ball not having
-         * stopped gives 978 words differing, 126 in shape, against 478 and 126.
-         */
         if (simulation->state == BALL_STATE_STOPPED) {
             goto SETTLE;
         }
@@ -391,13 +337,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             }
             else {
                 s32 endY;
-                /*
-                 * Each hit test's result in turn: the putter's ground contact,
-                 * the billboard's hit, then the hole triangle's. One variable
-                 * holds all three to match, as in the opening's copy: with
-                 * another for the hole triangle's, the code differs from the
-                 * original's.
-                 */
                 s32 found;
 
                 if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
@@ -558,7 +497,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                         fraction = hitFraction;
                     }
 
-                    /* Remember the hit even when an earlier contact takes precedence. */
                     hitsHoleTriangle = TRUE;
                 }
             }
@@ -744,15 +682,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                                     alignment = 0.0f;
                                 }
 
-                                /*
-                                 * pull first holds the ball's depth into the
-                                 * pull's range, and is scaled by the alignment
-                                 * in a statement of its own, to match: with a
-                                 * variable for the depth, the code differs
-                                 * from the original's. The depth follows the
-                                 * angle as in the opening's copy, which needs
-                                 * that order.
-                                 */
                                 angle = atan2(toCup[AXIS_Z], toCup[AXIS_X]);
                                 alignment = 1.0f - alignment;
                                 pull = CUP_PULL_OUTER_RADIUS - (f32)cupDistance;
@@ -950,11 +879,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             if (simulation->position[AXIS_Y] >= g_HoleSetup.cupPosition[AXIS_Y] + CUP_DEPTH) {
                 BallSpeed fallSpeed = velocity[AXIS_Y];
 
-                /*
-                 * The chained assignment is there to match: two statements, in
-                 * either order, give 1122 words differing, 262 in shape, against 478
-                 * and 126
-                 */
                 velocity[AXIS_X] = velocity[AXIS_Z] = 0.0f;
                 velocity[AXIS_Y] = (-fallSpeed * CUP_FLOOR_BOUNCE) + CUP_GRAVITY;
                 if (velocity[AXIS_Y] > 0.0f) {
@@ -1050,31 +974,14 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 ) == TRUE &&
                 wall.tag == HOLE_TRIANGLE_KIND_SHADED) {
                 f32 bounce = 1.0f;
-                /*
-                 * The escaping ball's speed with the escape speed added. Its
-                 * initial value and its two-step sum are guesses from the
-                 * assembly, to match: without the value, or with the sum
-                 * inside bounce's quotient, the code differs from the
-                 * original's.
-                 */
                 f32 raisedSpeed = 0.0f;
                 BallSpeed inwardSpeed;
                 f32 slide;
-                /*
-                 * The share of the step before the wall, then the escaping
-                 * ball's horizontal speed. One variable holds both to match:
-                 * the original keeps both in $f4.
-                 */
                 f32 along;
                 f32 edgeX;
                 f32 edgeY;
                 f32 edgeZ;
                 f32 squareX;
-                /*
-                 * Nothing reads it, and the compiler drops it, but without it
-                 * the registers of the squares and the steps around it differ
-                 * from the original's.
-                 */
                 f32 squareY;
                 f32 squareZ;
                 f32 stepX;
@@ -1114,10 +1021,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     along = 0.0f;
                 }
 
-                /*
-                 * The steps are variables to match: the original multiplies
-                 * all three velocities by the share before any by the fraction.
-                 */
                 stepX = velocity[AXIS_X] * WALL_HIT_STEP_SHARE;
                 stepY = velocity[AXIS_Y] * WALL_HIT_STEP_SHARE;
                 stepZ = velocity[AXIS_Z] * WALL_HIT_STEP_SHARE;
@@ -1196,12 +1099,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 simulation->surface = SURFACE_FAIRWAY;
             }
             else {
-                /*
-                 * In its own block for the notes that leaves: they end the
-                 * first cse pass's path from GetTrianglePlane's call, so the
-                 * bounce works out plane's address anew, as the original does,
-                 * rather than keep it in $s0.
-                 */
                 IN_OWN_BLOCK(simulation->surface = SURFACE_WATER_HAZARD);
                 if (simulation->bounceCount == 1) {
                     simulation->firstBounceSurface = simulation->surface;
@@ -1305,13 +1202,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                         ) * SKIP_SPEED_RATIO)) {
                 simulation->state = BALL_STATE_IN_WATER;
                 impactSpeed = 0.0f;
-                /*
-                 * Twice, to match: under -ffast-math, fold-const reassociates one
-                 * expression's two products into a product by 0.04f, where the
-                 * original multiplies by 0.2f twice. As one expression, in any order
-                 * or with the drags' product grouped, 492 words differ, 128 in shape,
-                 * against 478 and 126.
-                 */
                 velocity[AXIS_X] *= WATER_ENTRY_DRAG;
                 velocity[AXIS_X] *= WATER_ENTRY_DRAG;
             }
@@ -1361,12 +1251,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             BallSpeed speed;
             s32 cupDistance;
             BallSpeed impactSpeed;
-            /*
-             * slide and friction are set before either is read. The initial
-             * values are there to match: with them, the block's 0.0f and 1.0f
-             * are loaded into $f20 and $f22 after the cup distance's call, as
-             * in the original.
-             */
             f32 slide = 0.0f;
             SurfaceInfo *info;
             f32 friction = 1.0f;
@@ -1417,7 +1301,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
                 speed >= KilometersPerHour(5) &&
                 !g_GameState.isMiniGolf) {
-                /* Three variables to match: as an array, the code differs from the original's */
                 f32 sideX = velocity[AXIS_X];
                 f32 sideY = 0.0f;
                 f32 sideZ = velocity[AXIS_Z];
@@ -1758,11 +1641,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             s32 slopeZ;
             f32 friction;
             BallSpeed speed;
-            /*
-             * The fairway's and the rough's lie rolls. One variable holds both
-             * to match: the original sums the rough's roll into $f2 before
-             * testing it, as it does for a variable.
-             */
             f32 lie;
 
             isSteep = FALSE;
@@ -1812,12 +1690,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
 
                 if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
                     !g_GameState.isMiniGolf) {
-                    /*
-                     * Written like the landing's tilt, with copies of the
-                     * velocity scaled a step at a time inside a test of their
-                     * own, to match: scaled in one expression, or tested with
-                     * the mode, the original's registers and schedule differ.
-                     */
                     f32 sideX = velocity[AXIS_X];
                     f32 sideZ = velocity[AXIS_Z];
 
@@ -1967,13 +1839,6 @@ TAKE_OFF:
                 slopeZ = slopeZ * STILL_BALL_SLOPE_SCALE;
             }
 
-            /*
-             * Empty, to match: the original loads the simulation's address
-             * ahead of the two velocities' stores, as it does for a test here
-             * whose body compiles to nothing, like a disabled debug print's.
-             * What it tested is a guess; any of the simulation's fields gives
-             * the same code.
-             */
             if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             }
 
@@ -2123,11 +1988,6 @@ ROLLED:
                     simulation->spinSpeed = simulation->spinSpeed * SPIN_DECAY;
                 }
 
-                /*
-                 * height goes on to hold the wind's scale, and windX and windZ
-                 * the wind's push along each axis, to match: the original
-                 * keeps each pair of values in one register.
-                 */
                 height = simulation->startPosition[AXIS_Y] - simulation->position[AXIS_Y];
                 if (height <= 0.0f) {
                     windX = simulation->windVelocityX * LOW_WIND_SCALE;
@@ -2290,7 +2150,6 @@ SETTLE:
     return flags;
 }
 
-/* Returns the ImpactEffect entry for the club's lie rating and impactTiming */
 ImpactEffect *GetImpactTimingEntry(
     Club *club,
     Surface surface,
@@ -2320,20 +2179,12 @@ ImpactEffect *GetImpactTimingEntry(
 }
 
 SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot);
-/*
- * It returns a SignedBinaryAngle; declaring it s32 here is there to match: as a
- * SignedBinaryAngle, LaunchBallSimulation has 2 words differing, 2 in shape
- */
 #ifdef AVOID_UB
 SignedBinaryAngle GetAimSlopeAngle(Player *player, ShotLaunch *shot);
 #else
 s32 GetAimSlopeAngle(Player *player, ShotLaunch *shot);
 #endif
 
-/*
- * Sets the simulation's start, velocity and wind from the shot.
- * Only a stroke spawns debris, starts rumble and prints the launch values.
- */
 s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *shot) {
     s32 percentRange[2];
     Club *club;
@@ -2356,18 +2207,10 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
     f32 spinBase;
     Radians windAngle;
     f32 windScale;
-    /*
-     * Reusing it for the offset-free pitch below is there to match: a variable
-     * of its own gives 4 differing words, though none in shape
-     */
     f32 along;
     s32 index;
     s8 surface;
 
-    /*
-     * Reading the player each time is there to match: a pointer to the player
-     * gives 22 differing words, and a local copy of the field 8
-     */
     f32 PickLieBlend(void) {
         return (u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
                          g_Players[simulation->playerIndex].noiseSeed) &
@@ -2406,12 +2249,6 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
     simulation->stepFlags = 0;
     simulation->isOverCup = 0;
 
-    /*
-     * The tests of purpose, and their senses, are there to match: setting the
-     * player index in the club's test gives 140 words differing (14 in shape),
-     * testing for the club test first in the player index's test 4 (4), and in
-     * the club's test 6 (6)
-     */
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
         simulation->playerIndex = shot->playerIndex;
     }
@@ -2433,10 +2270,6 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
         rumbles = f_ImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT].rumbles;
     }
     else {
-        /*
-         * The same as GetImpactTimingEntry; writing it out is there to match:
-         * calling it gives 33 words differing, 27 in shape
-         */
         s32 row = GetLieRating(club, simulation->surface, shot->shotMode) - 1;
 
         if (row < 0) {
@@ -2486,10 +2319,6 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
             ONE_PER_PERCENT;
     }
     else {
-        /*
-         * The local is there to match: the constant gives 143 words differing, 13
-         * in shape
-         */
         s32 percent = CLUB_TEST_SPEED_HALF_PERCENTS;
 
         speed = speed * percent / HALF_PERCENTS_PER_ONE;
@@ -2501,11 +2330,11 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
     }
 
     if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
-        sinf(pitch); /* The original has it */
+        sinf(pitch);
         along = pitch - (club->offsetPitch * DEGREES_TO_RADIANS);
         pitch +=
             (f32)club->offsetPitch * shot->offsetY * (DEGREES_TO_RADIANS / OFFSET_Y_PER_PITCH_STEP);
-        sinf(pitch); /* The original has it */
+        sinf(pitch);
         launchScale =
             (cosf(along) - LAUNCH_SCALE_COSINE_BASE) * shot->offsetY * LAUNCH_SCALE_PER_OFFSET;
         if (club->kind == CLUB_KIND_WOOD) {
@@ -2573,7 +2402,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
         }
     }
     else {
-        GetSurfaceInfo(simulation->launchSurface); /* The original has it */
+        GetSurfaceInfo(simulation->launchSurface);
         simulation->sideSpin =
             (((sideSign * entry->sideSpinChange * club->mishitScale) / MISHIT_SIDE_SPIN_DIVISOR) +
                 (shot->offsetX * (club->mishitScale * OFFSET_SIDE_SPIN_PER_MISHIT)) + slopeSpin +
@@ -2633,10 +2462,6 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
         simulation->soundStates[index] = 0;
     }
 
-    /*
-     * The local is there to match: the constant gives 75 words differing, 5 in
-     * shape
-     */
     windScale = WIND_SPEED_TO_VELOCITY;
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
         windAngle = g_HoleSetup.conditions.windDirection * BINARY_ANGLE_TO_RADIANS;
@@ -2661,13 +2486,8 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
             StartPlayerRumble(&g_Players[simulation->playerIndex]);
         }
 
-        /* The original tests the purpose again */
         if (simulation->purpose == LAUNCH_PURPOSE_STROKE &&
             IsGameFlagSet(GAME_FLAG_SHOW_LAUNCH_VALUES)) {
-            /*
-             * Declaring it here is there to match: declaring it at the top gives 6
-             * words differing, none in shape
-             */
             char text[DEBUG_TEXT_BUFFER_SIZE];
 
             sprintf(text, "ANGLEY = %3.3d/360", (int)(yawRadians * (f32)RADIANS_TO_DEGREES));

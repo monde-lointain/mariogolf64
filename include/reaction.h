@@ -8,10 +8,6 @@
 #include "course_space.h"
 #include "geometry.h"
 
-/*
- * The reaction animations, picked from the strokes against par. The
- * eagle one also follows three under par.
- */
 enum ReactionAnimation {
     REACTION_ANIMATION_EAGLE = 12,
     REACTION_ANIMATION_BIRDIE,

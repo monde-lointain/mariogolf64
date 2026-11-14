@@ -1,7 +1,3 @@
-/*
- * The help board that the menus show: a chalkboard listing the topics, with a
- * hand and arrows, and each topic's pages of text.
- */
 #include "help_board.h"
 
 #include <nusys.h>
@@ -25,22 +21,17 @@
 
 #define ASSET_HELP_BOARD_CHALKBOARD 0x833
 
-/* The help board lists its topics, the play modes and the record terms, this
- * many at a time */
 #define HELP_TOPIC_COUNT 17
 
 #define HAND_SIZE 24
 #define HAND_LEFT 70
-/* How far the hand swings right and back */
 #define HAND_SWING 8
-/* A second swing like the hand's, which nothing is drawn with */
 #define UNUSED_SWING 8
 #define UNUSED_SWING_STEP 2
 #define ARROW_COUNT 2
 #define ARROW_LEFT 152
 #define ARROW_UP_TOP 54
 #define ARROW_DOWN_TOP 200
-/* The arrows change frame every this many frames */
 #define ARROW_FRAME_TIME 4
 #define LIST_LEFT 160
 
@@ -49,7 +40,6 @@
 #define CHALKBOARD_WIDTH 256
 #define CHALKBOARD_STRIP_HEIGHT 8
 #define CHALKBOARD_STRIP_COUNT 20
-/* Each eight-row strip is drawn nine rows tall */
 #define CHALKBOARD_DRAWN_STRIP_HEIGHT 9
 #define CHALKBOARD_LEFT 36
 #define CHALKBOARD_TOP 40
@@ -71,20 +61,19 @@
 #define LISTED_TOPIC_COUNT 5
 
 typedef struct TextListLayout {
-    /* 0x0 */ s32 top;
-    /* 0x4 */ s32 rowSpacing;
+      s32 top;
+      s32 rowSpacing;
 } TextListLayout;
 
 typedef struct TopicPageTable {
-    /* 0x00 */ u8 unread[11];
-    /* 0x0B */ s8 counts[HELP_TOPIC_COUNT + 1];
-} TopicPageTable; /* size = 0x1D */
+      u8 unread[11];
+      s8 counts[HELP_TOPIC_COUNT + 1];
+} TopicPageTable;
 
 static void *f_HandImages;
 static void *f_ArrowImages;
 static void *f_UnusedImage;
 static void *f_ChalkboardImage;
-/* The open topic, counted from 1, or 0 while the list shows */
 static s8 f_OpenTopic = 0;
 static s8 f_TopicPage = 0;
 static s32 f_HandOffset = 0;
@@ -95,15 +84,10 @@ static Boolean f_IsUnusedSwingReturning = FALSE;
 static s32 f_UnusedSwingOffset = 0;
 static s32 f_FirstListedTopic = 0;
 
-/*
- * Indexed by topic; each topic's pages are the messages that follow its title.
- * The code reads the counts at their own address, 11 bytes into the table.
- */
 static TopicPageTable f_TopicPages = {
     {0x11, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01},
     {1, 4, 4, 4, 4, 3, 4, 5, 4, 4, 3, 5, 4, 4, 4, 4, 3, 6},
 };
-/* The list's first message, then each topic's title */
 static s16 f_TopicTitleMessages[HELP_TOPIC_COUNT + 1] = {
     0x0D6,
     0x0E7,
@@ -126,13 +110,11 @@ static s16 f_TopicTitleMessages[HELP_TOPIC_COUNT + 1] = {
 };
 static f32 f_ListColorPhase = 0.0f;
 static TextListLayout f_HelpListLayout = {84, 22};
-/* Read by no routine */
 static TextListLayout f_UnusedTextListLayouts[8] UNUSED =
     {{86, 18}, {108, 32}, {98, 24}, {104, 24}, {106, 32}, {98, 21}, {80, 20}, {0, 0}};
 
 void DrawChalkboard(Gfx **displayListHead);
 
-/* Reads one of the help board's images into buffer */
 void LoadHelpBoardImage(void *buffer, s32 image) {
     EncodedAsset asset;
     MenuMemory *memory = GetMenuMemory();
@@ -176,7 +158,6 @@ void LoadHelpBoardImage(void *buffer, s32 image) {
     ClearTextSlots();
 }
 
-/* Clears every text slot of the help board */
 static inline void ClearHelpText(void) {
     s32 index;
 
@@ -203,7 +184,6 @@ static inline void SetHelpTextColors(void) {
     SetTextPaletteColor(0x3F, 0xFF, 0x3F, 3);
 }
 
-/* Shows the open topic's title and its current page */
 static inline void ShowTopicPage(void) {
     SetTextSlot(
         0,
@@ -257,8 +237,6 @@ static inline void ShowTopicPage(void) {
     );
 }
 
-/* Opens and pages through topics with A, closes them or leaves with B, and
- * moves through the list */
 void UpdateHelpBoard(void) {
     MenuMemory *memory = GetMenuMemory();
 
@@ -357,18 +335,11 @@ void UpdateHelpBoard(void) {
     }
 }
 
-/*
- * Whether a topic list arrow is shown: up while topics are above the
- * list, down while some are below. It is a macro, as an inline function
- * compiles differently from the original.
- */
 #define IsTopicArrowShown(index) \
     ((((index) == MENU_ARROW_UP) && (f_FirstListedTopic > 0)) || \
         (((index) == MENU_ARROW_DOWN) && \
             (f_FirstListedTopic < HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT)))
 
-/* Draws the chalkboard, the topic list with its hand and arrows, and the text
- */
 void DrawHelpBoard(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
@@ -569,8 +540,6 @@ void DrawHelpBoard(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Draws a tinted intensity image across the board; nothing calls this or loads
- * its image */
 void DrawUnusedHelpBoardImage(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
@@ -634,7 +603,6 @@ void DrawUnusedHelpBoardImage(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Draws the chalkboard in strips, stretching each strip a little taller */
 void DrawChalkboard(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;

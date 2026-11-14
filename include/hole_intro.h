@@ -3,8 +3,6 @@
 
 #include <ultra64.h>
 
-/* The hole intro camera */
-
 s32 UpdateHoleIntroCamera(void);
 void StartHoleIntroCamera(void);
 

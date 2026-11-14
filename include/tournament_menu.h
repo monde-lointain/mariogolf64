@@ -3,22 +3,15 @@
 
 #include <ultra64.h>
 
-/* The club tournaments' code entry and windows, in ovl_01/tournament_menu.c */
-
-/* The buffers that LoadTournamentBuffer keeps, by the kind its caller gives */
 enum TournamentBuffer {
     TOURNAMENT_BUFFER_WIDE_CLOUD = 1,
     TOURNAMENT_BUFFER_YES_NO,
     TOURNAMENT_BUFFER_NINTENDO_BADGE,
-    /* The first of g_TournamentIconAssets */
     TOURNAMENT_BUFFER_ICON,
-    /* The last of f_MenuWindowImageAssets */
     TOURNAMENT_BUFFER_MENU_WINDOW,
-    /* The file of f_MenuWindowPaletteFiles's last row */
     TOURNAMENT_BUFFER_ROW_FILE
 };
 
-/* The buffers that LoadCodeEntryBuffer keeps, by the kind its caller gives */
 enum CodeEntryBuffer {
     CODE_ENTRY_BUFFER_NAME_PLATE = 1,
     CODE_ENTRY_BUFFER_BAR,

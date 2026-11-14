@@ -6,13 +6,8 @@
 #include "compiler.h"
 #include "language.h"
 
-/*
- * The framebuffer that DrawMessageCharacter last drew a message into, which
- * the main loop keeps on screen once set
- */
 extern u16 *g_MessageFramebuffer;
 
-/* The size of the buffers that lines of debug text are formatted into */
 #define DEBUG_TEXT_BUFFER_SIZE 128
 
 void SetUpDebugTextDrawing(Gfx **displayListHead);

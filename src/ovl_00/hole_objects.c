@@ -1,7 +1,3 @@
-/*
- * The creatures that appear on a hole: Cheep Cheeps that leap out of the
- * water where the ball lands, and a monkey that drops onto the cup.
- */
 #include "hole_objects.h"
 
 #include <math.h>
@@ -31,7 +27,6 @@
 
 #define HOLE_CREATURE_COUNT 10
 
-/* HoleCreature.state values */
 enum HoleCreatureKind {
     HOLE_CREATURE_NONE,
     HOLE_CREATURE_CHEEP_CHEEP,
@@ -39,30 +34,20 @@ enum HoleCreatureKind {
 };
 
 #define CHEEP_CHEEP_ASSET 0x6E0
-/* A Cheep Cheep's images as it turns; CHEEP_CHEEP_ASSET is the middle one */
 #define CHEEP_CHEEP_FIRST_VIEW_ASSET 0x6DE
 #define CHEEP_CHEEP_VIEW_COUNT 5
 #define GOLD_CHEEP_CHEEP_ASSET 0x6E5
-/* The first of its frames */
 #define MONKEY_ASSET 0x6F0
 #define MONKEY_FRAME_COUNT 4
 
-/* Course heights grow downwards, so these lift a creature by subtracting */
-/* Below the ball where a Cheep Cheep starts and ends */
 #define CHEEP_CHEEP_DEPTH 0x7800
-/* Upwards */
 #define CHEEP_CHEEP_LEAP_SPEED 9216.0f
-/* Twice the course's gravity */
 #define CHEEP_CHEEP_GRAVITY (GRAVITY * 2)
-/* And the range of random speeds above it */
 #define CHEEP_CHEEP_MIN_SPEED 0x600
 #define CHEEP_CHEEP_SPEED_RANGE 0x600
 #define CHEEP_CHEEP_PITCH_EASING 0.7f
-/* Below the ball, over which a Cheep Cheep fades out */
 #define CHEEP_CHEEP_FADE_DEPTH 46080
-/* Above the cup */
 #define MONKEY_DROP_HEIGHT 0x9600
-/* The frames at which the monkey shows each of its later images */
 #define MONKEY_SECOND_FRAME 16
 #define MONKEY_THIRD_FRAME 20
 #define MONKEY_LAST_FRAME 24
@@ -71,23 +56,21 @@ enum HoleCreatureKind {
 #define HOLE_OBJECT_SOUND_CHANNEL 15
 #define SPLASH_SOUND_VOLUME 0x5A
 
-/* The monkey is drawn as two halves, each loaded as one texture */
 #define MONKEY_HALF_IMAGE_SIZE 0x1000
 
 typedef struct HoleCreature {
-    /* 0x00 */ Mtx matrices[DRAW_BUFFER_COUNT];
-    /* 0x80 */ CoursePoint position;
-    /* 0x8C */ f32 velocity[AXIS_COUNT];
-    /* 0x98 */ s32 groundHeight;
-    /* 0x9C */ Radians yaw;
-    /* 0xA0 */ Radians pitch;
-    /* 0xA4 */ u8 frameCount;
-    /* 0xA5 */ u8 isFacingBack;
-    /* 0xA6 */ u8 isGold;
-    /* 0xA7 */ u8 state;
-} HoleCreature; /* size = 0xA8 */
+      Mtx matrices[DRAW_BUFFER_COUNT];
+      CoursePoint position;
+      f32 velocity[AXIS_COUNT];
+      s32 groundHeight;
+      Radians yaw;
+      Radians pitch;
+      u8 frameCount;
+      u8 isFacingBack;
+      u8 isGold;
+      u8 state;
+} HoleCreature;
 
-/* Read by no routine */
 static AssetId f_CheepCheepViewAssets[CHEEP_CHEEP_VIEW_COUNT] UNUSED = {
     CHEEP_CHEEP_FIRST_VIEW_ASSET,
     CHEEP_CHEEP_FIRST_VIEW_ASSET + 1,
@@ -98,12 +81,9 @@ static AssetId f_CheepCheepViewAssets[CHEEP_CHEEP_VIEW_COUNT] UNUSED = {
 static AssetId f_MonkeyFrameAssets[MONKEY_FRAME_COUNT] =
     {MONKEY_ASSET, MONKEY_ASSET + 1, MONKEY_ASSET + 2, MONKEY_ASSET + 3};
 static Boolean f_AreCheepCheepsLeaping = FALSE;
-/* StartCheepCheepLeap sets these, the first to its only caller's 0, and
- * nothing reads them */
 static s32 f_UnusedLeapStartValue = 0;
 static s32 f_UnusedLeapValue = 0;
 static s32 f_OtherUnusedLeapValue = 0;
-/* Read by no routine */
 static s32 f_UnusedWordBeforeCheepCheepVertices UNUSED = 0;
 static Vtx f_CheepCheepVertices[QUAD_VERTEX_COUNT] = {
     {{{-7, -7, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -125,7 +105,6 @@ static Vtx f_MonkeyVertices[8] = {
 static u8 *f_CheepCheepImages[2];
 static u8 *f_MonkeyImage;
 
-/* Not static: the original left it to the linker's common block */
 HoleCreature f_HoleCreatures[HOLE_CREATURE_COUNT];
 
 void LoadHoleCreatureImages(void) {
@@ -146,7 +125,6 @@ void FreeHoleCreatureImages(void) {
     FreeMemory(&f_MonkeyImage);
 }
 
-/* The yaw the camera looks along, or 0 when it looks straight up or down */
 Radians GetCameraYaw(void) {
     f32 x = g_Cameras->view.lookAt[0] - g_Cameras->view.eye[0];
     Radians yaw = 0.0f;
@@ -173,7 +151,6 @@ Boolean IsMonkeyShown(void) {
     return FALSE;
 }
 
-/* Drops the monkey onto the cup, facing away from cameraYaw */
 void StartMonkeyDrop(Radians cameraYaw) {
     EncodedAsset asset;
     Vec3 translation;
@@ -228,17 +205,6 @@ void ClearHoleCreatures(void) {
     }
 }
 
-/*
- * Sends a Cheep Cheep leaping across the wind from below the ball.
- *
- * Each way of facing sets the velocity in an arm of its own, which
- * cross-jumping merges, and the rotation is set after the translation, as
- * the other creatures' transforms are. Negating the speed in the test and
- * setting the velocity once after it gives 14 words differing, 6 in shape,
- * as sched then lets the velocity's Z store slide past the position's
- * first load; clearing the rotation's X angle before the translation as
- * well gives 2.
- */
 void StartCheepCheepLeap(s32 startValue) {
     EncodedAsset asset;
     Vec3 translation;
@@ -311,7 +277,6 @@ void DrawHoleCreatures(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 i;
     HoleCreature *creature;
-    /* Pads the frame to match; without it 222 words differ */
     f32 unused[6] UNUSED;
     Vec3 translation;
     Vec3 rotation;

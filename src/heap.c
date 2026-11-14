@@ -1,9 +1,3 @@
-/*
- * The heaps and the general memory pool share one allocator: each keeps
- * its blocks, used and free, in a circular list in address order, around
- * a block of its own that is never free. Allocations take the smallest
- * free block that fits, and frees merge a block with free neighbors.
- */
 #include "heap.h"
 
 #include <ultra64.h>
@@ -14,64 +8,42 @@
 
 #define HEAP_COUNT 3
 
-/* Copies $ra, for the messages that name the caller of a failed call */
 #define GET_RETURN_ADDRESS(variable) __asm__ volatile("addu %0, $31, $0" : "=r"(variable))
 
-/* A block's tag */
 #define BLOCK_FREE 0
 #define BLOCK_USED 0x12345678
 #define BLOCK_SENTINEL (-1)
 
-/* Larger than any block, so the first block that fits is the smallest so far */
 #define NO_BLOCK_SIZE S32_MAX
-/* The largest free size before any allocation has measured it */
 #define UNMEASURED_SIZE (-1)
 
-/* The Expansion Pak's memory */
 #define EXPANSION_REGION_START 0x80600000
 #define EXPANSION_REGION_END 0x80800000
 
-/* The header of each block, followed by its memory */
 typedef struct MemoryBlock {
-    /* 0x00 */ u32 size; /* Including the header */
-    /* 0x04 */ s32 tag;
-    /* 0x08 */ struct MemoryBlock *next;
-    /* 0x0C */ struct MemoryBlock *prev;
-} MemoryBlock; /* size = 0x10 */
+      u32 size;
+      s32 tag;
+      struct MemoryBlock *next;
+      struct MemoryBlock *prev;
+} MemoryBlock;
 
-/* Allocations round each block, header included, up to a multiple of this */
 #define BLOCK_ALIGNMENT 8
 
-/* The block that starts offset bytes into block */
 #define BlockAt(block, offset) ((MemoryBlock *)AddressPast((block), (offset)))
-/* Whether second starts where first ends, so that freeing can merge them */
 #define IsBlockFollowedBy(first, second) (BlockAt((first), (first)->size) == (second))
-/* The memory that a block's header precedes, which the caller gets */
 #define BlockMemory(block) ((block) + 1)
-/* The header of the block whose memory pointer is */
 #define BlockOfMemory(pointer) ((MemoryBlock *)(pointer) - 1)
 
 typedef struct Heap {
-    /* 0x00 */ MemoryBlock sentinel;
-    /* 0x10 */ u32 freeSize;
-    /* 0x14 */ u32 largestFreeSize; /* The largest free block, measured by the
-                                       last allocation */
-} Heap; /* size = 0x18 */
+      MemoryBlock sentinel;
+      u32 freeSize;
+      u32 largestFreeSize;
+} Heap;
 
 static Heap f_Heaps[HEAP_COUNT];
-/*
- * The main memory's heap is laid out as a Heap is, but the original keeps
- * its parts in separate variables, which changes the code that uses them.
- *
- * The sentinel is volatile, as InitHeapRegions needs it to match. The
- * allocating and freeing routines mask interrupts around their work on the
- * list, so the original took other threads to share it; the routines that
- * walk the list compile the same either way.
- */
 static volatile MemoryBlock f_MemorySentinel;
 static u32 f_FreeMemorySize;
-static u32 f_LargestFreeMemorySize; /* The largest free block, measured by
-                                       the last allocation */
+static u32 f_LargestFreeMemorySize;
 
 void AddHeapRegion(s32 heapIndex, void *start, void *end) {
     MemoryBlock *block = start;
@@ -105,7 +77,6 @@ s32 GetHeapLargestFreeSize(s32 heapIndex) {
     return f_Heaps[heapIndex].largestFreeSize;
 }
 
-/* "Unable to allocate memory %x" */
 static const char f_OutOfMemoryMessage[] = "メモリが確保できません %x\n";
 
 void *AllocFromHeap(s32 heapIndex, u32 size) {
@@ -123,10 +94,6 @@ void *AllocFromHeap(s32 heapIndex, u32 size) {
     heap = &f_Heaps[heapIndex];
     mask = osSetIntMask(OS_IM_NONE);
 
-    /*
-     * The size is reused for the block's, to match: a blockSize local of its
-     * own gives 66 words differing, 8 in shape
-     */
     size = RoundUpTo(size + sizeof(MemoryBlock), BLOCK_ALIGNMENT);
     bestSize = NO_BLOCK_SIZE;
     block = heap->sentinel.next;
@@ -179,7 +146,6 @@ void *AllocFromHeap(s32 heapIndex, u32 size) {
     return BlockMemory(bestBlock);
 }
 
-/* Frees the block that *pointerToBlock points to and clears the pointer */
 void FreeFromHeap(s32 heapIndex, void *pointerToBlock) {
     void *pointer;
     s32 mask;
@@ -191,7 +157,6 @@ void FreeFromHeap(s32 heapIndex, void *pointerToBlock) {
     if (pointer == NULL) {
         osSetIntMask(mask);
 
-        /* "A NULL pointer was passed to kFree()" */
         osSyncPrintf("NULLポインタがkFree()に渡されました");
         return;
     }
@@ -216,35 +181,6 @@ void FreeFromHeap(s32 heapIndex, void *pointerToBlock) {
     osSetIntMask(mask);
 }
 
-/*
- * AddMemoryRegion is nested, a GNU C extension, as in the original: the
- * calls pass a static chain that it saves but never uses.
- *
- * The original stores the sentinel's size and tag before anything else,
- * and loads its prev back from memory to set next. Both come of the
- * sentinel being volatile: the scheduler keeps volatile accesses in the
- * order written, and a chained assignment reads a volatile target back
- * after storing it, where it would otherwise hand the stored value on
- * (expr.c, store_expr). Setting next from prev in a statement of its own
- * matches too, as does clearing the free size before the sentinel's stores.
- *
- * With the sentinel not volatile, the chained assignment gives 10 words
- * (4 in shape) and the separate statements 6 (4), as cse takes the address
- * just stored for the value read. All three of the size's store, the tag's
- * store and prev's read have to be volatile: casts to a volatile MemoryBlock
- * at those three alone match, but at the read alone they give 12 words
- * (8 in shape), at the read and the tag's store 4 (4), at the read and the
- * size's store 8 (8), and at the two stores 6 (4). A volatile prev member
- * gives 12 (8).
- *
- * With the sentinel volatile, setting next to &f_MemorySentinel rather than
- * to prev gives 10 words (4 in shape), chaining prev = next = 6, none in
- * shape, storing the tag before the size 4, none in shape, and the stores
- * through a pointer local to the sentinel 9 (7).
- *
- * The casts on &f_MemorySentinel only drop the qualifier, which the
- * MemoryBlock pointers that link the list don't carry.
- */
 void InitHeapRegions(Boolean hasExpansionPak) {
     void AddMemoryRegion(void *start, void *end) {
         MemoryBlock *block = start;
@@ -302,10 +238,6 @@ void *AllocMemory(u32 size) {
     largestFreeSize = 0;
     mask = osSetIntMask(OS_IM_NONE);
 
-    /*
-     * The size is reused for the block's, to match: a blockSize local of its
-     * own gives 66 words differing, 8 in shape
-     */
     size = RoundUpTo(size + sizeof(MemoryBlock), BLOCK_ALIGNMENT);
     bestSize = NO_BLOCK_SIZE;
     bestBlock = NULL;
@@ -357,10 +289,8 @@ void *AllocMemory(u32 size) {
     return BlockMemory(bestBlock);
 }
 
-/* "A NULL pointer was passed to free(). Called from %x" */
 static const char f_FreeNullMessage[] = "NULLポインタがfree()に渡されました. call from %x\n";
 
-/* Frees the block that *pointerToBlock points to and clears the pointer */
 void FreeMemory(void *pointerToBlock) {
     u32 callerAddress;
     void *pointer;

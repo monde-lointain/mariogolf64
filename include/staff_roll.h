@@ -3,8 +3,6 @@
 
 #include <ultra64.h>
 
-/* The staff roll */
-
 void LoadStaffRoll(void);
 void UnloadStaffRoll(void);
 void UpdateStaffRoll(void);

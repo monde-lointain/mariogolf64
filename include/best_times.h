@@ -3,13 +3,8 @@
 
 #include <ultra64.h>
 
-/* The clubhouse's best times, in ovl_01/best_times.c */
-
-/* The buffers that LoadBestTimesBuffer keeps, by the kind its caller gives */
 enum BestTimesBuffer {
-    /* Read into g_WorkArea, whatever buffer the caller gives */
     BEST_TIMES_BUFFER_FACE_STRIP = 1,
-    /* Kept without reading an image into it */
     BEST_TIMES_BUFFER_UNREAD,
     BEST_TIMES_BUFFER_PLACES,
     BEST_TIMES_BUFFER_GREEN_ARROWS

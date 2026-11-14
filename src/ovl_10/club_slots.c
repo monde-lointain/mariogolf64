@@ -1,10 +1,3 @@
-/*
- * Club Slots: before play, each player in turn spins a slot machine of
- * three reels. The first reel holds woods, the second long irons and the
- * third short irons and wedges, among stars. Each reel the player stops
- * on a club adds that club to the bag beside the putter; three stars give
- * every club.
- */
 #include "club_slots.h"
 
 #include <framebuffer_count.h>
@@ -32,50 +25,30 @@
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
-/* f_ClubSlotsState values */
 #define CLUB_SLOTS_DONE 0
-/* Before the reels speed up */
 #define CLUB_SLOTS_STARTING 1
-/* The reels speed up while START! grows */
 #define CLUB_SLOTS_SPEEDING 2
-/* The player stops the reels one by one */
 #define CLUB_SLOTS_STOPPING 3
-/* All three reels show their clubs */
 #define CLUB_SLOTS_STOPPED 4
-/* Each of the first two states lasts this many frames */
 #define CLUB_SLOTS_STATE_TIME 20
-/* The clubs are given this many frames after the reels stop */
 #define CLUB_SLOTS_RESULT_DELAY 30
-/* A reel stops by itself after this many frames */
 #define REEL_STOP_WAIT_TIME 150
 
 #define REEL_COUNT 3
 #define LAST_REEL (REEL_COUNT - 1)
 #define REEL_SYMBOL_COUNT 20
-/* Symbols 0 to 12 are the clubs of those types; the star gives every club */
 #define CLUB_SYMBOL_COUNT CLUB_TYPE_PUTTER
 #define SYMBOL_STAR CLUB_SYMBOL_COUNT
 #define SYMBOL_COUNT (CLUB_SYMBOL_COUNT + 1)
 #define NO_SYMBOL (-1)
-/* The reel shows the symbol this many places before its position in the middle
- */
 #define SHOWN_SYMBOL_OFFSET 3
 
-/* A reel moves on a symbol each time it turns this far */
 #define SYMBOL_ANGLE DegreesToRadians(35)
-/* A stopping reel turns this far each frame until its next symbol */
 #define STOPPING_REEL_SPEED DegreesToRadians(2)
-/* A spinning reel speeds up by this many degrees a frame, times the reels from
- * its right */
 #define REEL_SPEED_STEP 0.5f
 #define MAX_REEL_SPEED DegreesToRadians(18)
-/* A reel clicks each time f_TickTime reaches this */
 #define REEL_TICK_TIME 8
 
-/*
- * A reel is a strip of quads around its axis, with an edge every
- * REEL_EDGE_SPACING degrees. Each quad shows one symbol's image.
- */
 #define REEL_EDGE_COUNT 7
 #define REEL_QUAD_COUNT (REEL_EDGE_COUNT - 1)
 #define REEL_VERTEX_COUNT (REEL_EDGE_COUNT * 2)
@@ -89,35 +62,28 @@
 #define SLOTS_Y 8.0f
 #define SLOTS_Z (-100.0f)
 
-/* The reels' window, in screen pixels, and the line across its middle */
 #define REEL_WINDOW_LEFT 96
 #define REEL_WINDOW_TOP 56
 #define REEL_WINDOW_RIGHT 224
 #define REEL_WINDOW_BOTTOM 168
 #define REEL_CENTER_LINE_TOP ((REEL_WINDOW_TOP + REEL_WINDOW_BOTTOM) / 2)
 
-/* Two quads shade the top and bottom of the reels' window */
 #define SHADE_VERTEX_COUNT 8
 #define SHADE_HALF_WIDTH 50
-/* Each quad runs from SHADE_ALPHA at the window's edge to clear inside it */
 #define SHADE_EDGE_Y 48
 #define SHADE_INNER_Y 16
 #define SHADE_Z (-10)
 #define SHADE_ALPHA 230
 
-/* The symbols' images are 32 by 32 RGBA16 texels */
 #define SYMBOL_SIZE 32
 #define SYMBOL_IMAGE_SIZE (IMAGE_HEADER_SIZE + (SYMBOL_SIZE * SYMBOL_SIZE * 2))
-/* The texture coordinate of a symbol's last texel */
 #define SYMBOL_ST_END (TexelCoordinate(SYMBOL_SIZE) - 1)
 
-/* The slot machine, 304 by 224 texels drawn in strips 6 high, the last one 2 */
 #define MACHINE_WIDTH 304
 #define MACHINE_STRIP_HEIGHT 6
 #define MACHINE_LAST_STRIP_HEIGHT 2
 #define MACHINE_BOTTOM (SCREEN_HEIGHT - SCREEN_BORDER)
 
-/* The reels' stop buttons, each pushed in once its reel is told to stop */
 #define BUTTON_WIDTH 64
 #define BUTTON_HEIGHT 64
 #define BUTTON_STRIP_HEIGHT 32
@@ -126,19 +92,15 @@
 #define BUTTON_SHOWN_WIDTH 60
 #define BUTTON_TOP 168
 
-/* START! is 160 texels wide, drawn in strips 10 apart, which overlap */
 #define START_WIDTH 160
 #define START_STRIP_COUNT 6
 #define START_STRIP_SPACING 10
 #define START_STRIP_HEIGHT 12
 #define START_LAST_STRIP_HEIGHT 4
 #define START_SHOWN_HEIGHT 50
-/* START! grows as f_StartAngle turns this far each frame, up to START_MAX_ANGLE
- */
 #define START_ANGLE_STEP DegreesToRadians(20)
 #define START_MAX_ANGLE DegreesToRadians(120)
 
-/* The faces of the players, the one spinning brighter and larger */
 #define FACE_SIZE 32
 #define FACE_BUFFER_COUNT 2
 #define FACE_LEFT 256
@@ -147,15 +109,10 @@
 #define OTHER_FACE_LEFT 264
 #define OTHER_FACE_TOP 76
 #define OTHER_FACE_HEIGHT 24
-/* The spinning player's face changes every FACE_FRAME_TIME frames to the next
- * of its frames */
 #define FACE_FRAME_TIME 3
 #define FACE_LAST_FRAME 4
-/* ...then stays on the last one for this many changes before the next player
- * spins */
 #define FACE_HOLD_COUNT 9
 
-/* The logo, 256 by 72 texels drawn in strips 8 high */
 #define LOGO_WIDTH 256
 #define LOGO_HEIGHT 72
 #define LOGO_STRIP_HEIGHT 8
@@ -164,53 +121,43 @@
 #define LOGO_Y 42
 #define LOGO_BOB_STEP 0.2f
 #define LOGO_BOB_HEIGHT 5.0f
-/* The shine, 64 by 64 texels, crosses the logo from SHINE_DELAY frames on */
 #define SHINE_SIZE 64
 #define SHINE_DELAY 5
 #define SHINE_START_TIME 16
 #define SHINE_SPEED 18
-/* The primitive depths that the logo and its shine are drawn at */
 #define LOGO_PRIM_DEPTH 0x3FFF
 #define SHINE_PRIM_DEPTH 0x4027
-/* The buffer the logo image is read into */
 #define LOGO_IMAGE_BUFFER_SIZE 0x4A20
 
-/* The first fourteen characters have their own club sets; the others use the
- * sets after them */
 #define CHARACTER_CLUB_SET_COUNT 14
 
 #define REEL_CLICK_CHANNEL 13
-/* Each stopping reel's sound pans this much further right */
 #define REEL_STOP_PAN_STEP 127
 
-/* The asset IDs of the images */
 #define MACHINE_ASSET 0x95B
 #define BUTTONS_ASSET 0x971
 #define START_ASSET 0x590
 #define LOGO_ASSET 0x95A
 
 typedef struct ClubSlots {
-    /* 0x00 */ s32 reelPositions[REEL_COUNT]; /* Indices into f_ReelStrips */
-    /* 0x0C */ s32 stoppedSymbols[REEL_COUNT]; /* NO_SYMBOL until the reel stops */
-    /* 0x18 */ s32 stoppedReelCount;
-    /* 0x1C */ Radians reelAngles[REEL_COUNT]; /* How far each reel has turned
-                                              toward its next symbol */
-    /* 0x28 */ f32 reelSpeeds[REEL_COUNT];
-    /* 0x34 */ s32 pressCount; /* The reels told to stop */
-    /* 0x38 */ s32 playerIndex; /* The player spinning */
-    /* 0x3C */ s32 resultTime;
-    /* 0x40 */ Vtx *reelVertices;
-    /* 0x44 */ Vtx *shadeVertices;
-    /* 0x48 */ u8 *machineImage;
-    /* 0x4C */ u8 *buttonsImage;
-    /* 0x50 */ u8 *startImage;
-    /* 0x54 */ u8 *symbolImages;
-    /* 0x58 */ u8 *faceImages[MAX_PLAYER_COUNT][FACE_BUFFER_COUNT];
-} ClubSlots; /* size = 0x78 */
+      s32 reelPositions[REEL_COUNT];
+      s32 stoppedSymbols[REEL_COUNT];
+      s32 stoppedReelCount;
+      Radians reelAngles[REEL_COUNT];
+      f32 reelSpeeds[REEL_COUNT];
+      s32 pressCount;
+      s32 playerIndex;
+      s32 resultTime;
+      Vtx *reelVertices;
+      Vtx *shadeVertices;
+      u8 *machineImage;
+      u8 *buttonsImage;
+      u8 *startImage;
+      u8 *symbolImages;
+      u8 *faceImages[MAX_PLAYER_COUNT][FACE_BUFFER_COUNT];
+} ClubSlots;
 
 void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scale);
-
-/* The faces of the players and their palettes */
 
 static s32 f_ClubSlotsState = CLUB_SLOTS_DONE;
 static u8 f_FaceBufferIndex = 0;
@@ -219,8 +166,6 @@ static u8 f_FaceFrameTime = 0;
 static u8 f_FaceHoldCount = 0;
 static u8 f_IsShowingResult = FALSE;
 static s16 f_StarCount = 0;
-/* The rows of g_FaceAnimationAssets and g_AlternateFaceAnimationAssets by
- * character */
 static s16 f_CharacterFaceRows[CLUB_SET_COUNT] = {
     0,
     1,
@@ -266,11 +211,11 @@ static s32 f_StateTime = 0;
 static s32 f_StopWaitTime = 0;
 static s32 f_TickTime = 0;
 static Radians f_StartAngle = 0.0f;
-static s32 f_ClubSlotsUnusedWord UNUSED = 0; /* Nothing reads or writes it */
+static s32 f_ClubSlotsUnusedWord UNUSED = 0;
 static s32 f_ShineTime = 0;
 static Radians f_LogoBobAngle = 0.0f;
 static f32 f_LogoBob = 0.0f;
-static s32 f_LogoUnusedWord = 0; /* Only ever cleared */
+static s32 f_LogoUnusedWord = 0;
 
 static Mtx f_ReelMatrices[REEL_COUNT][DRAW_BUFFER_COUNT];
 static Mtx f_ShadeMatrix;
@@ -406,15 +351,9 @@ void FreeClubSlots(void) {
     FreeMemory(&f_Slots);
 }
 
-/* Fills the player's bag from the stopped reels */
 void GiveSlotClubs(s32 playerIndex) {
     Player *player;
     s32 starCount;
-    /*
-     * Counts the slots, then the reels; it is reused to match: a reel variable
-     * for the reels gives 30 words differing, and counting the slots with slot
-     * 44, none in shape
-     */
     s32 index;
     s32 slot;
     s32 symbolIndex;
@@ -467,18 +406,12 @@ void GiveSlotClubs(s32 playerIndex) {
     }
 }
 
-/*
- * Whether the next reel stops: on A, once the wait is too long, when the
- * player is the computer, or while GAME_FLAG_FAST_AUTOPLAY is. It is a macro,
- * as an inline function compiles differently from the original.
- */
 #define IsReelStopping(controllerIndex, player) \
     ((g_ControllerStates[controllerIndex].pressedButtons & A_BUTTON) || \
         (f_StopWaitTime > REEL_STOP_WAIT_TIME) || \
         ((player)->isComputer) || \
         IsGameFlagSet(GAME_FLAG_FAST_AUTOPLAY))
 
-/* Returns TRUE once every player has spun */
 s32 UpdateClubSlots(void) {
     Player *player;
     s32 controllerIndex;
@@ -511,7 +444,6 @@ s32 UpdateClubSlots(void) {
 
             break;
         case CLUB_SLOTS_STOPPING:
-            /* A player with no controller of their own uses the first */
             if (player->controllerIndex == NO_CONTROLLER_INDEX) {
                 controllerIndex = 0;
             }
@@ -563,26 +495,6 @@ s32 GetClubSlotsState(void) {
     return f_ClubSlotsState;
 }
 
-/*
- * The machine strips' loop counts their top in the face loop's counter, as
- * the original keeps both in $s4; a top of its own leaves the counter and
- * &gfx, hoisted out of the face loop, in each other's registers, which gives
- * 24 words differing, none in shape, or 22 with the strip loop's steps in
- * this order. Stepping the top before the texel offset gives 2 words;
- * setting it first gives 4, and both 6.
- *
- * Each face image is read into faceImage before its texture load, as the
- * original reads it ahead of the call's other arguments; passing the lookups
- * straight to LoadTextureBlock gives 16 or 14 words differing. Testing the
- * counter with < gives 77.
- *
- * The next frame is opened and read in an if and an else, one per animation
- * set, and GCC merges the two reads. Choosing the asset with ?: and reading
- * once after it gives 31 words, 3 in shape: cse's extended block ends at the
- * ?:'s join, so the read shifts the counter again, and loop.c, combining the
- * two shifts, finds it worth stepping the result instead. Opening in an if
- * and an else with one read after them gives 7 words, all in shape.
- */
 void DrawClubSlots(Gfx **displayListHead) {
     Mat4 matrix;
     Vec3 translation;
@@ -618,7 +530,6 @@ void DrawClubSlots(Gfx **displayListHead) {
                 if (f_Slots->reelAngles[reelIndex] < SYMBOL_ANGLE) {
                     f_Slots->reelAngles[reelIndex] += STOPPING_REEL_SPEED;
                     if (f_Slots->reelAngles[reelIndex] > SYMBOL_ANGLE) {
-                        /* Its own in each loop, as the original allocates it there */
                         s32 symbolIndex;
                         f_Slots->reelAngles[reelIndex] -= SYMBOL_ANGLE;
                         f_Slots->reelPositions[reelIndex]++;
@@ -631,7 +542,6 @@ void DrawClubSlots(Gfx **displayListHead) {
                             symbolIndex += REEL_SYMBOL_COUNT;
                         }
 
-                        /* The last reel stops on a star only after two others */
                         if (reelIndex == LAST_REEL) {
                             if (f_Slots->stoppedReelCount == reelIndex) {
                                 if (f_Slots->stoppedSymbols[0] == SYMBOL_STAR &&
@@ -711,7 +621,6 @@ void DrawClubSlots(Gfx **displayListHead) {
     BuildTransformMatrix(matrix, rotation, translation, scale);
     ConvertMatrixToFixed(matrix, &f_ShadeMatrix);
 
-    /* The black behind the reels */
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -741,7 +650,6 @@ void DrawClubSlots(Gfx **displayListHead) {
         TEXEL_STEP_ONE
     );
 
-    /* The reels */
     gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -764,7 +672,6 @@ void DrawClubSlots(Gfx **displayListHead) {
         );
         gSPVertex(gfx++, f_Slots->reelVertices, REEL_VERTEX_COUNT, 0);
         for (quadIndex = 0; quadIndex != REEL_QUAD_COUNT; quadIndex++) {
-            /* Its own in each loop, as the original allocates it there */
             s32 symbolIndex;
             symbolIndex = f_Slots->reelPositions[reelIndex] - quadIndex;
             if (symbolIndex >= REEL_SYMBOL_COUNT / 2) {
@@ -823,7 +730,6 @@ void DrawClubSlots(Gfx **displayListHead) {
         }
     }
 
-    /* The shading over the reels' edges and the line across their middle */
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
     gDPPipeSync(gfx++);
@@ -850,7 +756,6 @@ void DrawClubSlots(Gfx **displayListHead) {
         TEXEL_STEP_ONE
     );
 
-    /* The slot machine */
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
     gDPPipeSync(gfx++);
@@ -894,7 +799,6 @@ void DrawClubSlots(Gfx **displayListHead) {
             isStripLoaded = TRUE;
         }
         else {
-            /* The tiles stay as the first strip set them */
             gDPSetTextureImage(
                 gfx++,
                 G_IM_FMT_CI,
@@ -929,7 +833,6 @@ void DrawClubSlots(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
     }
 
-    /* The stop buttons pushed so far */
     LoadLargePalette(&gfx, ImageBody(f_Slots->buttonsImage));
     for (buttonOrStartStripIndex = 0; buttonOrStartStripIndex != REEL_COUNT;
         buttonOrStartStripIndex++) {
@@ -988,7 +891,6 @@ void DrawClubSlots(Gfx **displayListHead) {
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);
 
-    /* START!, growing while the reels speed up */
     halfWidth = (sinf(f_StartAngle) * 64.0f) + 20.0f;
     startStripHeight = ((sinf(f_StartAngle) * 50.0f) + 13.75f) * 0.2f;
     dsdx = (START_WIDTH * TEXEL_STEP_ONE / 2) / halfWidth;
@@ -1006,11 +908,6 @@ void DrawClubSlots(Gfx **displayListHead) {
 
         gDPPipeSync(gfx++);
         LoadLargePalette(&gfx, ImageBody(f_Slots->startImage));
-        /*
-         * The button loop's counter steps the strips too, as in the original,
-         * which keeps both in $s4; a counter of their own, declared before or
-         * after stripIndex, takes $t0 and gives 97 words differing, 7 in shape
-         */
         for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, buttonOrStartStripIndex = 0;
             buttonOrStartStripIndex != START_STRIP_COUNT;
             buttonOrStartStripIndex++, texelOffset += START_STRIP_SPACING * START_WIDTH) {
@@ -1054,7 +951,6 @@ void DrawClubSlots(Gfx **displayListHead) {
         }
     }
 
-    /* The players' faces */
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1125,11 +1021,6 @@ void DrawClubSlots(Gfx **displayListHead) {
                             ReadEncodedAsset(f_Slots->faceImages[topOrPlayerIndex][1], &asset);
                         }
 
-                        /*
-                         * f_FaceBufferIndex is cleared twice; it is there to match:
-                         * clearing it only after the frame index gives 2 words
-                         * differing, both in shape, and only first 4, 2 in shape
-                         */
                         f_FaceBufferIndex = 0;
                         f_StarCount = 0;
                         f_IsShowingResult = FALSE;
@@ -1207,15 +1098,10 @@ void DrawClubSlots(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Draws the logo centered there, bobbing until the result, and its shine */
 void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scale) {
     Gfx *gfx;
     s32 starCount;
     s32 symbolIndex;
-    /*
-     * Counts the reels, then the strips; it is reused to match: a reel or
-     * stripIndex variable gives 8 words differing, none in shape
-     */
     s32 index;
     s32 shineTime;
     f32 width;

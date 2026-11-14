@@ -3,8 +3,6 @@
 
 #include <ultra64.h>
 
-/* Bounds of the ROM segments, which the linker script defines */
-
 #define DECLARE_SEGMENT(name) \
     extern u8 name##_ROM_START[]; \
     extern u8 name##_ROM_END[]; \

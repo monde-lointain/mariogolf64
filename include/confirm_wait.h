@@ -3,8 +3,6 @@
 
 #include <ultra64.h>
 
-/* Waits for a button press to confirm */
-
 void WaitForConfirmButton(void);
 
 void RewriteWord(Gfx **displayListHead);

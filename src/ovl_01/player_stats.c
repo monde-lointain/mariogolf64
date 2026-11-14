@@ -1,8 +1,3 @@
-/*
- * The clubhouse's Best Shots, screen 12, a grid of stats over a brick wall with
- * ranked records and page arrows. The file also holds the bet settings screen
- * and the handicap screen, where each player chooses a handicap.
- */
 #include "player_stats.h"
 
 #include <ultra64.h>
@@ -38,33 +33,22 @@
 #include "sram.h"
 #include "text.h"
 
-/* Score labels in Japanese */
 #define ASSET_JAPANESE_BIRDIE_LABEL 0x82D
 #define ASSET_JAPANESE_ALBATROSS_LABEL 0x82E
 #define ASSET_JAPANESE_EAGLE_LABEL 0x82F
 #define ASSET_JAPANESE_HOLE_IN_ONE_LABEL 0x830
 
-/* The images of g_CourseIconAssets that LoadBestShotsCourseIcons reads */
 #define PLAYER_STATS_IMAGE_COUNT 6
 
-/* The bytes of each of the four images that LoadScoreLabelBuffer reads into one
- * buffer
- */
 #define PLAYER_STATS_IMAGE_SIZE 0x258
-/* They are the ASSET_JAPANESE_*_LABEL score labels */
 #define SCORE_LABEL_COUNT 4
 
-/* DrawCharacterFace writes names beside the faces of these first characters
- * only */
 #define NAMED_CHARACTER_COUNT 14
 
-/* The grid of stats that the cursor moves over, and the value of its empty
- * cells */
 #define STATS_GRID_COLUMN_COUNT 5
 #define STATS_GRID_ROW_COUNT 4
 #define STATS_CELL_EMPTY (-1)
 
-/* The rows of the Best Shots grid, by score kind */
 enum BestShotRow {
     BEST_SHOT_ROW_BIRDIE,
     BEST_SHOT_ROW_EAGLE,
@@ -72,7 +56,6 @@ enum BestShotRow {
     BEST_SHOT_ROW_HOLE_IN_ONE
 };
 
-/* The order in which ReadBestShots gathers the kinds before laying them out */
 enum GatheredBestShots {
     GATHERED_BIRDIES,
     GATHERED_EAGLES,
@@ -80,48 +63,28 @@ enum GatheredBestShots {
     GATHERED_ALBATROSSES
 };
 
-/* ReadBestShots lists each kind's records in rows one longer than the grid */
 #define STATS_KIND_LIST_SIZE (STATS_GRID_COLUMN_COUNT + 1)
 
-/* What LoadPlayerStatsBuffer reads into the buffers it fills */
 #define BET_ICON_COUNT 8
-/* Each bet icon's room in the buffer, more than its 0x148 bytes */
 #define BET_ICON_SLOT_SIZE 0x218
-/* An 8x8 orange dot, drawn once per stake level of a bet */
 #define ASSET_STAKE_MARK 0x671
-/* A 64x44 wooden plaque, drawn behind each player's handicap */
 #define ASSET_HANDICAP_PLAQUE 0x6C4
-/*
- * The 128x20 names of the bets: Driving Contest, Closest to Pin, Score, Nassau,
- * a blank, Skins, Match and Doubles
- */
 #define ASSET_BET_LABELS 0x6E8
 #define BET_LABEL_WIDTH 128
 #define BET_LABEL_HEIGHT 20
 #define BET_LABEL_IMAGE_SIZE (BET_LABEL_WIDTH * BET_LABEL_HEIGHT / 2)
 #define ASSET_STATS_BRICK_WALL 0x721
-/* Eight 32x32 frames of flashing triple arrows pointing left */
 #define ASSET_TRIPLE_PAGE_ARROWS 0x828
-/* The same as ASSET_TRIPLE_PAGE_ARROWS, with double arrows */
 #define ASSET_DOUBLE_PAGE_ARROWS 0x829
 #define BET_SET_MAX_COLUMN_COUNT 6
-/*
- * The bet set tables have a row for each set that offers bets, from
- * BET_SET_STROKE on; columns past a set's count in f_BetSetColumnCounts hold
- * UNUSED_BET_COLUMN
- */
 #define OFFERING_BET_SET_COUNT BET_SET_MINI_GOLF_FOUR_PLAYER
 #define UNUSED_BET_COLUMN (-1)
-/* The bet icons are 24x24, and DrawBetIcon shows each of their two frames
- * for 4 video frames */
 #define BET_ICON_SIZE 24
 #define BET_ICON_FRAME_COUNT 2
 #define BET_ICON_FRAME_DURATION 4
 
-/* The text slots that screen 12 clears on leaving */
 #define STATS_TEXT_SLOT_COUNT 4
 
-/* The animated arrows that DrawPageArrows draws either side of the page */
 #define PAGE_ARROW_COUNT 2
 #define PAGE_ARROW_RIGHT 1
 #define PAGE_ARROW_SIZE 32
@@ -132,39 +95,26 @@ enum GatheredBestShots {
 #define PAGE_ARROW_LEFT_X 76
 #define PAGE_ARROW_RIGHT_X 212
 #define PAGE_ARROW_TOP 122
-/*
- * The texel column where the arrow's texture starts. The right arrow's starts
- * a whole image in, where the mirrored wrap reads the left arrow's backward.
- */
 #define MirroredArrowColumn(arrowIndex) (((arrowIndex) == PAGE_ARROW_RIGHT) * PAGE_ARROW_SIZE)
-/* DrawTurnedPageArrows turns the page arrows a quarter turn each way, and draws
- * them as squares away from the camera */
 #define TURNED_ARROW_ANGLE 90.0f
 #define TURNED_ARROW_Z (-100.0f)
 #define TURNED_ARROW_NEAR 10.0f
 #define TURNED_ARROW_FAR 2000.0f
 #define TURNED_ARROW_VERTEX_COUNT 4
 
-/* The blinking arrows that DrawUpDownArrows draws above and below a point */
 #define STATS_ARROW_COUNT 2
 #define STATS_ARROW_BLINK_FRAME_COUNT 4
 #define STATS_ARROW_LEFT 152
 #define STATS_UP_ARROW_OFFSET (-52)
 #define STATS_DOWN_ARROW_OFFSET 36
 
-/* The bytes of each of f_RecordLabels's record labels, such as "Birdie" */
 #define RECORD_LABEL_SIZE 16
 
-/* DrawBestShotsCursor puts the cursor on the stats grid's chosen cell, measured
- * from the screen's center */
 #define STATS_CURSOR_COLUMN_WIDTH 34
 #define STATS_CURSOR_ROW_HEIGHT 26
 #define STATS_CURSOR_LEFT_X 6
 #define STATS_CURSOR_TOP_Y 30
 
-/* The directions that FindNextBestShotCell moves the cursor in, which index
- * f_BestShotDirectionSteps
- */
 enum StatsDirection {
     STATS_DIRECTION_LEFT,
     STATS_DIRECTION_RIGHT,
@@ -174,36 +124,23 @@ enum StatsDirection {
 
 #define STATS_DIRECTION_COUNT 4
 
-/* The rows of the brick wall behind the stats, which slide across together */
 #define STATS_SLIDE_ROW_COUNT 9
-/*
- * DrawBrickWallRows draws the 152x117 brick wall behind the stats in one strip
- * per row, each stretched across the screen
- */
 #define STATS_WALL_IMAGE_WIDTH 152
 #define STATS_WALL_STRIP_HEIGHT 13
 #define STATS_WALL_ROW_HEIGHT 27
-/* Each bet's stake is one of these levels, which f_BetStakeAmounts turns into
- * an amount */
 #define BET_STAKE_LEVEL_COUNT 6
-/* The betStakeLevels value of a bet that ApplyBetPreset's preset leaves out */
 #define NO_BET (-1)
-/* Where UpdateBetSettings types the chosen bet's explanation, and its first
- * message
- */
 #define BET_HELP_X 36
 #define BET_HELP_Y 186
 #define BET_HELP_MESSAGE 0x15
 
-/* Each player's choice of handicap, and where the screen's slide starts */
 #define HANDICAP_CHOICE_COUNT 37
 #define HANDICAP_SLIDE_START (-512)
 
-/* A step from one grid cell to its neighbor */
 typedef struct GridStep {
-    /* 0x0 */ s8 column;
-    /* 0x1 */ s8 row;
-} GridStep; /* size = 0x2 */
+      s8 column;
+      s8 row;
+} GridStep;
 
 void DrawBrickWallRows(Gfx **displayListHead, u8 slide);
 
@@ -221,19 +158,14 @@ void DrawCharacterFace(
 void DrawBetIcon(Gfx **displayListHead, s32 left, s32 top, s32 size, s32 textureStep);
 void DrawBetLabel(Gfx **displayListHead, s32 centerX, s32 top, u8 labelIndex);
 
-/* Set once the chosen bet's help or the handicap prompt has been typed */
 static u8 f_IsBetHelpShown = FALSE;
 static u8 f_IsHandicapPromptShown = FALSE;
-/* The blinking green arrows' frame and its time shown */
 static s16 f_GreenArrowFrame = 0;
 static s16 f_GreenArrowTimer = 0;
-/* The page arrows' animation frame and its time shown */
 static s16 f_PageArrowFrame = 0;
 static s16 f_PageArrowTimer = 0;
-/* Each bet icon's first frame, read for the bet settings' rows */
 static u32 f_BetIconAssets[BET_ICON_COUNT] =
     {0x0674, 0x0678, 0x067A, 0x067E, 0x0680, 0x067C, 0x0676, 0x0672};
-/* Both frames of each bet icon, for the chosen bet's animation */
 static u32 f_BetIconFrameAssets[BET_ICON_COUNT][BET_ICON_FRAME_COUNT] = {
     {0x0674, 0x0675},
     {0x0678, 0x0679},
@@ -244,7 +176,6 @@ static u32 f_BetIconFrameAssets[BET_ICON_COUNT][BET_ICON_FRAME_COUNT] = {
     {0x0676, 0x0677},
     {0x0672, 0x0673},
 };
-/* The bet whose label and icon each column of a bet set shows */
 static s16 f_BetSetBets[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] = {
     {0, 1, 2, 3, 5, UNUSED_BET_COLUMN},
     {0, 1, 2, 3, 5, 7},
@@ -254,7 +185,6 @@ static s16 f_BetSetBets[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] = {
     {2, 3, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
     {2, 3, 5, 7, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
 };
-/* Which of betStakeLevels' stakes each column of a bet set sets */
 static s16 f_BetSetStakeSlots[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] = {
     {0, 1, 2, 3, 4, UNUSED_BET_COLUMN},
     {0, 1, 2, 3, 4, 6},
@@ -264,9 +194,7 @@ static s16 f_BetSetStakeSlots[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] 
     {2, 3, 4, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
     {2, 3, 4, 6, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
 };
-/* How many columns each bet set uses */
 static u8 f_BetSetColumnCounts[OFFERING_BET_SET_COUNT] = {5, 6, 3, 3, 3, 3, 4};
-/* Each BET_PRESET_*'s stake level for each bet */
 static u8 f_BetPresetStakeLevels[BET_PRESET_COUNT][BET_STAKE_SLOT_COUNT] = {
     {4, 4, 1, 0, 0, NO_BET, NO_BET, NO_BET},
     {4, 4, 0, 0, 0, NO_BET, 0, NO_BET},
@@ -277,7 +205,6 @@ static u8 f_BetPresetStakeLevels[BET_PRESET_COUNT][BET_STAKE_SLOT_COUNT] = {
     {NO_BET, NO_BET, 0, 0, 0, NO_BET, 0, NO_BET},
 };
 static u8 f_BetStakeAmounts[BET_STAKE_LEVEL_COUNT] = {0, 1, 2, 3, 5, 10};
-/* The x of each column of a bet set */
 static s32 f_BetSetColumnXs[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] = {
     {68, 108, 148, 188, 228, 228},
     {48, 88, 128, 168, 208, 248},
@@ -287,17 +214,11 @@ static s32 f_BetSetColumnXs[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] = 
     {114, 148, 184, 216, 256, 256},
     {87, 127, 167, 207, 228, 228},
 };
-/* Read by no routine; katakana for "Drive contest", "Near pin", "Score",
- * "Vertical", "Horizontal", "Skins", "Match" and "Doubles" */
 static char f_UnusedGameNames[8][10] UNUSED =
     {"ﾄﾞﾗｺﾝ", "ﾆｱﾋﾟﾝ", "ｽｺｱ", "ﾀﾃ", "ﾖｺ", "ｽｷﾝｽﾞ", "ﾏｯﾁ", "ﾀﾞﾌﾞﾙｽ"};
-/* The handicap screen's golfers' turn, in degrees about X and Y */
 static f32 f_HandicapGolferAngles[2] = {0.0f, 0.0f};
-/* Read by no routine */
 static s32 f_UnusedWordsAfterGolferAngles[3] UNUSED = {0, 0, 0};
-/* Each golfer's scale on the handicap screen */
 static f32 f_HandicapGolferScales[MAX_PLAYER_COUNT] = {4.2f, 4.0f, 4.2f, 4.0f};
-/* Where DrawHandicaps stands each golfer, by the player count */
 static Vec3 f_HandicapGolferPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
     {
         {0.0f, -44.0f, -1000.0f},
@@ -324,40 +245,28 @@ static Vec3 f_HandicapGolferPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
         {96.0f, -54.0f, -1000.0f},
     },
 };
-/* The left of each player's column, by the player count */
 static s32 f_HandicapColumnLefts[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] =
     {{128, 0, 0, 0}, {96, 160, 0, 0}, {64, 128, 192, 0}, {32, 96, 160, 224}};
-/* The frames each brick wall row waits before it moves, from a slide's start */
 static s32 f_BrickRowStartDelays[STATS_SLIDE_ROW_COUNT] = {0, 2, 4, 6, 8, 10, 12, 14, 16};
-/* The frames each row has still to wait */
 static s32 f_BrickRowDelays[STATS_SLIDE_ROW_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-/* How far each row moves a frame */
 static s32 f_BrickRowSpeeds[STATS_SLIDE_ROW_COUNT] = {64, 64, 64, 64, 64, 64, 64, 64, 64};
-/* How far across the screen each row is drawn */
 static s32 f_BrickRowOffsets[STATS_SLIDE_ROW_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-/* Where each slide but STATS_SLIDE_CURRENT starts the rows */
 static s32 f_BrickSlideStartOffsets[STATS_SLIDE_COUNT - 1][STATS_SLIDE_ROW_COUNT] = {
     {320, 320, 320, 320, 320, 320, 320, 320, 320},
     {-320, -320, -320, -320, -320, -320, -320, -320, -320},
     {0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
-/* The slide that the rows were last started on */
 static u8 f_BrickWallSlide = 0;
-/* The corners of each page arrow that DrawTurnedPageArrows tilts */
 static Vtx f_TurnedArrowVertices[TURNED_ARROW_VERTEX_COUNT] = {
     {{{-16, 16, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-16, -16, 0}, 0, {0, 2048}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{16, -16, 0}, 0, {2048, 2048}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{16, 16, 0}, 0, {2048, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
 };
-/* Read by no routine */
 static s32 f_UnusedWordsAfterArrowVertices[2] UNUSED = {0, 0};
-/* Read by no routine; the values of f_BestShotsCursorPhases */
 static f32 f_UnusedCursorPhases[4] UNUSED = {0.0f, 2.0f, 4.0f, 6.0f};
-/* Read by no routine */
 static s32 f_UnusedWordsAfterCursorPhases[2] UNUSED = {0, 0};
-/* Whether ReadBestShots found any recorded best shot */
 static u8 f_HasBestShots = FALSE;
 AssetId g_CharacterFaceAssets[CHARACTER_COUNT] = {
     0x07C5,
@@ -399,32 +308,22 @@ s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT] = {
     {0x080C, 0x080D, 0x080E, 0x080F},
     {0x081A, 0x081B, 0x081C, 0x081D},
 };
-/* Read by no routine; a row like the six that follow the characters' rows of
- * g_CharacterFacePaletteFiles */
 static s16 f_UnusedPaletteFileRow[4] UNUSED = {0x078E, 0x078E, 0x078E, 0x078E};
-/* Read by no routine */
 static s16 f_UnusedCharacterOrder[18] UNUSED =
     {0, 0, 1, 4, 5, 6, 3, 2, 7, 9, 12, 10, 13, 15, 14, 11, 8, 0};
-/* The labels of the Best Shots rows */
 static char f_RecordLabels[STATS_GRID_ROW_COUNT][RECORD_LABEL_SIZE] =
     {"Birdie", "Eagle", "Albatross", "Hole-in-One"};
-/* The column and row step of each way the Best Shots cursor moves */
 static GridStep f_BestShotDirectionSteps[STATS_DIRECTION_COUNT] =
     {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-/* Read by no routine; four widths, each followed by a height of 12 */
 static s32 f_UnusedLabelSizes[8] UNUSED = {64, 12, 48, 12, 80, 12, 96, 12};
-/* The Best Shots cursor's corners, whose colors DrawBestShotsCursor cycles */
 static Vtx f_BestShotsCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-48, 0, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
 };
-/* Read by no routine */
 static s32 f_UnusedWordsAfterBestShotsCursor[2] UNUSED = {0, 0};
-/* The angle, in radians, of each corner's color cycle */
 static f32 f_BestShotsCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {0.0f, 2.0f, 4.0f, 6.0f};
-/* The CharacterChoice of each CharacterId */
 static s32 f_StatsCharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_CHARLIE,
@@ -446,31 +345,23 @@ static s32 f_StatsCharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_JOE,
 };
 
-/* The camera and placement that DrawHandicaps draws each golfer with */
 static Mtx f_HandicapGolferTransforms[MAX_PLAYER_COUNT][DRAW_BUFFER_COUNT];
 static Mtx f_HandicapGolfersProjection;
 static LookAt f_HandicapGolfersLookAts[DRAW_BUFFER_COUNT];
 
-/* Read by no routine */
 static u8 f_UnusedBufferAfterGolferLookAts[0x100] UNUSED;
 
-/* The camera and placement of each arrow that DrawTurnedPageArrows draws */
 static Mtx f_TurnedArrowProjections[PAGE_ARROW_COUNT];
 static Mtx f_TurnedArrowTranslations[PAGE_ARROW_COUNT];
 static Mtx f_TurnedArrowRotations[PAGE_ARROW_COUNT];
 
-/* Read by no routine */
 static u8 f_UnusedBufferAfterArrowRotations[0x100] UNUSED;
 
-/* The scale of each arrow that DrawTurnedPageArrows draws */
 static Mtx f_TurnedArrowScales[PAGE_ARROW_COUNT];
-/* Every bet icon, BET_ICON_SLOT_SIZE apart */
 static void *f_BetIcons;
-/* Set by LoadPlayerStatsBuffer, and read by no routine */
 static void *f_UnusedStatsBuffer;
 static void *f_StakeMark;
 static void *f_StatsNamePlate;
-/* The two frames of the bet icon that DrawBetIcon animates */
 static void *f_ChosenBetIconFrames[BET_ICON_FRAME_COUNT];
 static void *f_StatsGreenArrows;
 static void *f_PageArrows;
@@ -479,33 +370,25 @@ static void *f_BetLabels;
 static void *f_StatsPlayerLabels;
 static void *f_BrickWall;
 
-/* Read by no routine */
 static u8 f_UnusedBufferAfterBrickWall[0xA0] UNUSED;
 
-/* The camera and placement that DrawBestShotsCursor draws the cursor with */
 static Mtx f_BestShotsCursorProjection;
 static Mtx f_BestShotsCursorTranslation;
 static Mtx f_BestShotsCursorRotation;
 
-/* Read by no routine */
 static u8 f_UnusedBufferBeforeBestShotsScale[0x80] UNUSED;
 
 static Mtx f_BestShotsCursorScale;
 
-/* Read by no routine */
 static u8 f_UnusedBufferAfterBestShotsScale[0x50] UNUSED;
 
-/* The Best Shots screen's images: each cell's face, then the course icons,
- * the name plate, the cursor box and the score labels */
 static void *f_BestShotFaces[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 static void **f_BestShotsCourseIcons;
 static void *f_BestShotsNamePlate;
 static void *f_BestShotsCursorBox;
 static u8 *f_ScoreLabels;
-/* Each Best Shots cell's ranked record, or STATS_CELL_EMPTY; a row per kind */
 static s16 f_BestShotRecords[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 
-/* Not static: the original left it to the linker's common block */
 s16 g_ChosenHandicaps[MAX_PLAYER_COUNT];
 
 void LoadPlayerStatsBuffer(void *buffer, s16 bufferKind) {
@@ -602,10 +485,6 @@ void LoadPlayerStatsBuffer(void *buffer, s16 bufferKind) {
     f_IsHandicapPromptShown = FALSE;
 }
 
-/*
- * Sets each bet's stake level and rate from the mode's preset, or none, and
- * resets the handicaps
- */
 void ApplyBetPreset(s32 requestedPreset) {
     s8 presetIndex = requestedPreset;
     MenuMemory *memory = GetMenuMemory();
@@ -641,18 +520,10 @@ void ApplyBetPreset(s32 requestedPreset) {
     memory->unusedHandicapValue = 0;
 }
 
-/* The asset of the given frame of the chosen bet column's icon */
 static inline AssetId ChosenBetIconFrame(MenuMemory *memory, s32 frame) {
     return f_BetIconFrameAssets[f_BetSetBets[g_BetSet - 1][memory->betColumn]][frame];
 }
 
-/*
- * Handles the bet settings screen's buttons. Up and down raise and lower the
- * chosen column's stake, and left and right move between columns, showing
- * the new column's help text and icon. A confirms the stakes and goes on to
- * the handicaps; B cancels. Either way the stakes become the game's bet
- * rates.
- */
 void UpdateBetSettings(void) {
     EncodedAsset asset;
     MenuMemory *memory;
@@ -798,10 +669,6 @@ void UpdateBetSettings(void) {
     }
 }
 
-/*
- * Each bet's column: its icon at the bottom, the stake's amount above it, and
- * above that a stack of five stake marks, those up to the stake lit
- */
 #define BET_ICON_TOP 120
 #define CHOSEN_BET_ICON_TOP 124
 #define BET_AMOUNT_OFFSET_X (-4)
@@ -810,17 +677,12 @@ void UpdateBetSettings(void) {
 #define STAKE_MARK_OFFSET_X 8
 #define STAKE_MARK_BOTTOM 102
 #define STAKE_MARK_SPACING 8
-/* The marks of the top two levels are larger, and the top one is raised */
 #define LARGE_STAKE_LEVEL 3
 #define LARGE_STAKE_GROWTH 4
 #define LARGEST_STAKE_LEVEL 4
 #define LARGEST_STAKE_GROWTH 6
 #define LARGEST_STAKE_RAISE 3
 #define STAKE_MARK_COUNT 5
-/*
- * The banner of f_StatsNamePlate is drawn twice: stretched to 270 columns in
- * overlapping 20-row strips, then narrowed to 160 columns at its own height
- */
 #define WIDE_BANNER_LEFT 26
 #define WIDE_BANNER_RIGHT 296
 #define WIDE_BANNER_TOP 180
@@ -830,54 +692,12 @@ void UpdateBetSettings(void) {
 #define BET_BANNER_LEFT 80
 #define BET_BANNER_RIGHT 240
 #define BET_BANNER_TOP 152
-/* The chosen bet's label is centered on the banner */
 #define BET_LABEL_CENTER_X 160
 #define BET_LABEL_TOP 156
 
-/*
- * Draws the bet settings screen: each bet's icon and stake marks shifted right
- * by slide, and the banner and chosen bet's name moved down by slide (or up,
- * when isSlideReversed is set). Once the screen has settled it types the
- * chosen bet's explanation
- *
- * The stake marks' sizes are signed 16-bit values, halved by a division, and
- * their edges are sums written in a row, which is what matches. Measured
- * against it, in words differing (and how many of them in shape):
- *
- *   markGrowth as u16 or u8                              145 (13)
- *   markGrowth as s32                                    218 (30)
- *   markGrowth as u32                                    284 (98)
- *   markGrowth as s8                                     215 (59)
- *   markRaise as u16 or s32                              4 (0)
- *   markRaise as u8                                      9 (1)
- *   markRaise as s8                                      294 (76)
- *   Halves as "markGrowth >> 1"                          17 (5)
- *   Halves as "/ 2u" or "(u16)markGrowth >> 1"           143 to 145 (13)
- *   Halves as "(u32)markGrowth >> 1"                     146 (16)
- *   Left edge with slide and the offset in parentheses   143 (13)
- *   Left edge with slide before the offset               31 (5)
- *   Right edge with slide and the offset in parentheses  23 (3)
- *   Right edge with slide before the offset              24 (2)
- *   Right edge with the size and the half in parentheses 4 (2)
- *   Top edge less growth, spacing, raise                 120 (10)
- *   Top edge less raise, growth, spacing                 4 (0)
- *   Top edge less growth, raise, spacing                 8 (0)
- *   Top edge less spacing, raise, growth                 8 (0)
- *   Top edge less raise, spacing, growth                 124 (10)
- *   Bottom edge less the raise before the spacing        209 (53)
- *
- * An earlier draft with markGrowth as u32, cast to s16 in the top edge and the
- * steps, came to 10 (0): the same code with two registers swapped, which the
- * allocator orders by how often each is referenced
- */
 void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
-    /*
-     * One index for the bet columns and the banner strips, to match: an s16
-     * strip variable for the strips gives 32 words differing, 0 in shape, and
-     * an s32 one 330 (58)
-     */
     s16 i;
     s16 stakeLevel;
     s16 betIndex;
@@ -886,10 +706,6 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
     s16 bannerShift;
     u8 *icon;
     s32 stripTop;
-    /*
-     * The wide banner's strips, kept apart from stripTop to match: sharing
-     * stripTop gives 324 words differing (36 in shape)
-     */
     s32 wideStripTop;
     s8 stakeAmount;
 
@@ -912,7 +728,6 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
         if (i != memory->betColumn) {
             icon = ImageAt(f_BetIcons, betIndex * BET_ICON_SLOT_SIZE);
             gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(icon)));
-            /* Bets without a stake are dimmed */
             if (memory->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][i]] == 0) {
                 gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
                 gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
@@ -966,7 +781,6 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
         );
     }
 
-    /* The chosen bet's icon is animated */
     DrawBetIcon(
         &gfx,
         f_BetSetColumnXs[g_BetSet - 1][memory->betColumn] + slide,
@@ -1017,7 +831,6 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
         }
 
         for (i = 0; i != f_BetSetColumnCounts[g_BetSet - 1]; i++) {
-            /* Marks above the bet's stake are dimmed */
             if (stakeLevel >= memory->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][i]]) {
                 gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
                 gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
@@ -1164,10 +977,6 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
     *displayListHead = gfx;
 }
 
-/*
- * Draws the chosen bet's icon size pixels square at (left, top), and reads its
- * next frame once the current one has shown long enough
- */
 void DrawBetIcon(Gfx **displayListHead, s32 left, s32 top, s32 size, s32 textureStep) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
@@ -1228,10 +1037,6 @@ void DrawBetIcon(Gfx **displayListHead, s32 left, s32 top, s32 size, s32 texture
     *displayListHead = gfx;
 }
 
-/*
- * Runs the handicap screen. UpdateMenus passes it the first player and the
- * player count, as it does UpdateCharacterSelect, but it ignores them.
- */
 NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
     MenuMemory *memory = GetMenuMemory();
 
@@ -1325,8 +1130,6 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
     }
 }
 
-/* The 200x30 CI8 banner along the handicap screen's foot, drawn in strips of 10
- * rows, each stretched across the screen */
 #define HANDICAP_BANNER_WIDTH 200
 #define HANDICAP_BANNER_STRIP_HEIGHT 10
 #define HANDICAP_BANNER_STRIP_COUNT 3
@@ -1337,14 +1140,11 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
 #define HANDICAP_BANNER_STEP_X \
     TexelRunStep(HANDICAP_BANNER_WIDTH, HANDICAP_BANNER_RIGHT - HANDICAP_BANNER_LEFT)
 
-/* Each player's 64x44 CI4 column, drawn in strips of 22 rows, with the
- * player's label and choice on it */
 #define HANDICAP_COLUMN_WIDTH 64
 #define HANDICAP_COLUMN_STRIP_HEIGHT 22
 #define HANDICAP_COLUMN_STRIP_COUNT 2
 #define HANDICAP_COLUMN_STRIP_SIZE (HANDICAP_COLUMN_WIDTH * HANDICAP_COLUMN_STRIP_HEIGHT / 2)
 #define HANDICAP_COLUMN_TOP 150
-/* The columns of the players other than the chosen one are dimmed */
 #define UNCHOSEN_COLUMN_SHADE 200
 #define HANDICAP_LABEL_OFFSET_X 4
 #define HANDICAP_LABEL_TOP 154
@@ -1354,8 +1154,6 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
 #define HANDICAP_NUMBER_OFFSET_X 16
 #define HANDICAP_NUMBER_Y 166
 
-/* The arrows around the chosen column, each pushed outward while its D-Pad
- * button is held. The left arrow is the right one's image mirrored. */
 #define HANDICAP_ARROW_MASK 4
 #define HANDICAP_ARROW_PUSH 6
 #define HANDICAP_ARROW_MIDDLE_X 24
@@ -1365,80 +1163,10 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
 #define HANDICAP_ARROW_RIGHT_X 48
 #define HANDICAP_ARROW_LEFT_X (-1)
 
-/* The prompt, which names the chosen player */
 #define HANDICAP_PROMPT_X 36
 #define HANDICAP_PROMPT_Y 200
 #define HANDICAP_PROMPT_MESSAGE 0x1D
 
-/*
- * Draws the handicap screen: the players' characters, a column for each player
- * with the player's label and handicap, the banner below them, and the
- * arrows around the column of the player that memory->handicapPlayer picks. All
- * but the banner slide across by slide, and the banner and arrows down by it,
- * or up when reverseVerticalSlide is set. With canShowPrompt set, the prompt
- * naming that player is typed once each time f_IsHandicapPromptShown is
- * cleared.
- *
- * The original keeps the vertical slide, offsetY, in a stack slot, and reloads
- * it to add the column's top, 150, just before the arrows' loop. Here that
- * comes of holding the column's top in a local, arrowTop, set before the
- * loop, and adding offsetY to it in each rectangle, with the arrow's own
- * offset added to their sum: loop.c hoists the sum out of the loop by
- * itself, and global-alloc then leaves offsetY without a register. With the
- * sum written before the loop, offsetY gets one and the frame is 8 bytes
- * smaller.
- *
- * The label's pick sits two loops deep, as a do-while (0) macro inside
- * another would put it. flow weights a reference by its loop depth, and a
- * loop that runs once still counts, so columnIndex's three references there
- * weigh 4 each where they weighed 2, which makes 21 where it had 15. That
- * lifts its priority in global-alloc from 1424 to 2658, past the 2229 to
- * 2291 of the five values that the strips' loop steps. So columnIndex is
- * placed before them and takes $t2, as in the original, and they take $t3
- * to $t7. One loop makes 18 references and a priority of 2278, just short.
- *
- * Measured against the match, in words differing (and how many in shape):
- *
- *   The label's pick in no loop, or in plain braces         42 (0)
- *   The label's pick in one loop                            32 (0)
- *   The label's test alone in one loop                      42 (0)
- *   The loops around the label's texture load as well       90 (58)
- *   The computer's label in the else of a != test           216 (64)
- *   The players' counter zeroed after the arrow's offsets   171 (13), frame +8
- *   arrowY zeroed before arrowX                             2 (0)
- *   arrowY zeroed at its declaration                        157 (13), frame +8
- *   The arrows' top as (offsetY + arrowTop) + arrowY        4 (0)
- *   The same sum with no parentheses                        198 (18), frame +8
- *   The arrows' top summed before their loop                171 (17), frame +8
- *   The same in two statements (the old draft)              135 (17), frame +8
- *   No arrowTop, the column's top in each rectangle         198 (18), frame +8
- *   The left arrow's texels summed as the others' are       67 (17)
- *   The other arrows' texels through ImageTexelsAt          67 (15)
- *   textureLeft as an s32                                   34 (12)
- *   textureLeft's value written in the rectangle            24 (10)
- *   The arrows counted by columnIndex                       68 (0)
- *   The arrows counted by a variable of their own           78 (0)
- *   The banner's strips counted by one of their own         18 (0)
- *   The banner strip's top in a local set at the loop's top 12 (0)
- *   No pipe sync before the banner strip's rectangle        30 (12)
- *   offsetY added last in the banner strip's edges          165 (21), frame +8
- *   The columns' loop testing < g_ChosenPlayerCount         75 (9), frame -8
- *   labelSlide set before the columns' loop                 4 (4)
- *   labelSlide set at the top of the loop's body            2 (2)
- *   The label's offset written into both edges              19 (3)
- *   numberOffsetX set before columnLeft                     2 (2)
- *   numberOffsetX set before the numbers' loop              4 (4)
- *   The number's left edge written in the call              10 (4)
- *   The numbers counted by columnIndex                      136 (0)
- *   The numbers counted by playerIndex                      204 (8)
- *   Without unusedStack                                     362 (0), frame +48
- *
- * Three loops around the label's pick match as well, as do two around its
- * test alone, the pick as a conditional expression in the two, the players'
- * counter zeroed at its declaration or with the arrow's offsets after it in
- * the loop's header, arrowTop added before offsetY, and a local for the
- * banner strip's top set after the sync
- */
 void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8 canShowPrompt) {
     Gfx *gfx = *displayListHead;
     s32 labelSlide;
@@ -1500,7 +1228,6 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
     }
 
     gSPLookAt(gfx++, &f_HandicapGolfersLookAts[g_DrawBufferIndex]);
-    /* The counter is zeroed before the arrow's offsets to match */
     playerIndex = 0;
     arrowX = 0;
     arrowY = 0;
@@ -1572,7 +1299,6 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
             G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
         );
 
-        /* DrawCharacter draws through g_DisplayListHead */
         g_DisplayListHead = gfx;
         StopLoaderThread();
         DrawCharacter(playerIndex);
@@ -1695,7 +1421,6 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
             gDPPipeSync(gfx++);
         }
 
-        /* Both loops are needed to match, as the header comment explains */
         do {
             do {
                 labelIndex = columnIndex;
@@ -1753,7 +1478,6 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StatsGreenArrows)));
-    /* The slide is added in each rectangle to match */
     arrowTop = HANDICAP_COLUMN_TOP;
     for (i = 0; i != MENU_ARROW_COUNT; i++) {
         if (i == MENU_ARROW_LEFT) {
@@ -1830,7 +1554,6 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
                 HANDICAP_ARROW_LEFT_X;
         }
 
-        /* The left arrow starts at the right edge of its mirrored image */
         textureLeft = (i == MENU_ARROW_LEFT) ? TexelCoordinate(GREEN_ARROW_SIZE) : 0;
         gSPScisTextureRectangle(
             gfx++,
@@ -1868,7 +1591,6 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
     if ((f_IsHandicapPromptShown == FALSE) & (canShowPrompt == TRUE)) {
         SetTextSlotValue(memory->handicapPlayer + 1, 0, 0);
 
-        /* The prompt names the player in the player's own color */
         if (memory->handicapPlayer == 0) {
             SetTextPaletteColor(255, 127, 127, 0);
         }
@@ -1903,7 +1625,6 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
     *displayListHead = gfx;
 }
 
-/* Draws a bet's name centered on centerX */
 void DrawBetLabel(Gfx **displayListHead, s32 centerX, s32 top, u8 labelIndex) {
     Gfx *gfx = *displayListHead;
 
@@ -1947,15 +1668,11 @@ void DrawBetLabel(Gfx **displayListHead, s32 centerX, s32 top, u8 labelIndex) {
     *displayListHead = gfx;
 }
 
-/*
- * Starts the brick wall's rows on slide once the last slide has ended, then
- * draws them; returns whether the rows have yet to line up
- */
 s32 SlideBrickWall(Gfx **displayListHead, u8 slide) {
     Gfx *gfx = *displayListHead;
     s32 index;
     s32 rowIndex;
-    s32 offset; /* The slide's first target, then the first row's offset */
+    s32 offset;
     s32 first;
 
     if ((slide != STATS_SLIDE_CURRENT && slide < STATS_SLIDE_COUNT) == FALSE) {
@@ -2014,8 +1731,6 @@ s32 SlideBrickWall(Gfx **displayListHead, u8 slide) {
     return index != STATS_SLIDE_ROW_COUNT;
 }
 
-/* Moves each brick wall row whose delay has run out a step along slide, and
- * draws the rows */
 void DrawBrickWallRows(Gfx **displayListHead, u8 slide) {
     Gfx *gfx = *displayListHead;
     s32 rowIndex;
@@ -2104,13 +1819,6 @@ void DrawBrickWallRows(Gfx **displayListHead, u8 slide) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the animated page arrows either side of the course select screen
- *
- * Clipped to the screen as DrawCenteredPageArrows' arrows are, though both
- * arrows lie inside it: the scissored rectangle's tests of the left edge leave
- * the original's unread QuarterPixels(left) and its reload slots behind.
- */
 void DrawPageArrows(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 arrowIndex;
@@ -2132,7 +1840,6 @@ void DrawPageArrows(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     for (arrowIndex = 0; arrowIndex != PAGE_ARROW_COUNT; arrowIndex++) {
         if (arrowIndex == PAGE_ARROW_RIGHT) {
-            /* The right arrow is the left one's image, mirrored */
             gDPLoadTextureTile_4b(
                 gfx++,
                 TextureAddress(
@@ -2179,11 +1886,6 @@ void DrawPageArrows(Gfx **displayListHead) {
             left = PAGE_ARROW_LEFT_X;
         }
 
-        /*
-         * Computed before the rectangle, as in DrawCenteredPageArrows, to match:
-         * computing it in the rectangle's arguments gives 12 words differing, 4 in
-         * shape
-         */
         textureColumn = MirroredArrowColumn(arrowIndex);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(
@@ -2204,10 +1906,6 @@ void DrawPageArrows(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the animated page arrows gap apart about the screen's middle, centered
- * on centerY
- */
 void DrawCenteredPageArrows(Gfx **displayListHead, s32 gap, s32 centerY) {
     Gfx *gfx = *displayListHead;
     s32 arrowIndex;
@@ -2229,7 +1927,6 @@ void DrawCenteredPageArrows(Gfx **displayListHead, s32 gap, s32 centerY) {
     gDPPipeSync(gfx++);
     for (arrowIndex = 0; arrowIndex != PAGE_ARROW_COUNT; arrowIndex++) {
         if (arrowIndex == PAGE_ARROW_RIGHT) {
-            /* The right arrow is the left one's image, mirrored */
             gDPLoadTextureTile_4b(
                 gfx++,
                 TextureAddress(
@@ -2277,10 +1974,6 @@ void DrawCenteredPageArrows(Gfx **displayListHead, s32 gap, s32 centerY) {
         }
 
         gDPPipeSync(gfx++);
-        /*
-         * Computed into a local, which keeps its register, to match: computing it
-         * in the rectangle's arguments gives 5 words differing, 3 in shape
-         */
         textureColumn = MirroredArrowColumn(arrowIndex);
         gSPScisTextureRectangle(
             gfx++,
@@ -2300,7 +1993,6 @@ void DrawCenteredPageArrows(Gfx **displayListHead, s32 gap, s32 centerY) {
     *displayListHead = gfx;
 }
 
-/* Draws the page arrows spacing apart at y, turned; nothing calls it */
 void DrawTurnedPageArrows(Gfx **displayListHead, s32 spacing, s32 y) {
     Gfx *gfx = *displayListHead;
     s32 arrowIndex;
@@ -2398,7 +2090,6 @@ void DrawTurnedPageArrows(Gfx **displayListHead, s32 spacing, s32 y) {
     *displayListHead = gfx;
 }
 
-/* Draws the blinking green up and down arrows about centerY */
 void DrawUpDownArrows(Gfx **displayListHead, s32 centerY) {
     Gfx *gfx = *displayListHead;
     s32 left = 0;
@@ -2464,7 +2155,6 @@ void DrawUpDownArrows(Gfx **displayListHead, s32 centerY) {
     *displayListHead = gfx;
 }
 
-/* Reads every course's icon into the Best Shots screen's buffers */
 void LoadBestShotsCourseIcons(void **buffers) {
     EncodedAsset asset;
     s16 imageIndex;
@@ -2502,9 +2192,6 @@ void LoadScoreLabelBuffer(void *buffer, s16 bufferKind) {
     }
 }
 
-/* Returns s32 rather than s8: the callers cast the result to s16, and an s8
- * result would make GCC first extend it from 8 bits, which the original does
- * not */
 s32 FindNextBestShotCell(s8 column, s8 row, u8 direction);
 
 void UpdateBestShots(void) {
@@ -2618,12 +2305,6 @@ void UpdateBestShots(void) {
     }
 }
 
-/*
- * DrawBestShots draws the records page: a shaded panel, the image in
- * f_BestShotsNamePlate in strips below it, and a row of up to five ranked faces
- * for each label of f_RecordLabels. The chosen record also shows its course's
- * image and name.
- */
 #define RECORDS_PANEL_LEFT 24
 #define RECORDS_PANEL_TOP 48
 #define RECORDS_PANEL_RIGHT 302
@@ -2656,38 +2337,6 @@ void UpdateBestShots(void) {
 #define NO_RECORDS_Y 192
 #define MESSAGE_NO_RECORDS 0x16E
 
-/*
- * The original works out the chosen cell's address twice, once to test that
- * it holds a record and again for the drawing the test guards, though the
- * row and column are read from the menu memory once. An s8 cast on each index
- * of the test gives that: the cast sign-extends a copy that cse takes for a
- * different value, so it shares nothing between the two addresses, and
- * combine then drops the extension as the index is sign-extended already.
- * Measured against the match, in words differing (and how many in shape):
- *
- *   No casts                                             53 (13)
- *   The casts in the icon's test only                    17 (7)
- *   The casts in the name's test only                    36 (6)
- *   The row's casts only                                 64 (4)
- *   The column's casts only                              46 (10)
- *   u8 casts                                             16 (4)
- *   The casts in the tests and the drawing both          65 (17)
- *   s8 locals, with no casts                             65 (17)
- *   The tests through an inline with s32 parameters      53 (13)
- *   An inline with s8 parameters at every lookup         69 (19)
- *   An inline with s8 parameters returning the test      24 (8)
- *   One pair of locals for the icon and the name         16 (0)
- *   The name's row shared with the icon's                18 (0)
- *   The name's column shared with the icon's             24 (0)
- *   The cursor's test through the icon's locals          10 (2)
- *   The faces' loop counting rows with a row variable    30 (0)
- *   The labels' loop counting with a variable of its own 64 (0)
- *   The labels' loop testing < STATS_GRID_ROW_COUNT      10 (4)
- *
- * s16 casts match as well, as do the casts in the drawing's lookups instead of
- * the tests, the tests through an inline with s8 parameters, and the column
- * read before the row
- */
 void DrawBestShots(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s16 index = 0;
@@ -2814,10 +2463,6 @@ void DrawBestShots(Gfx **displayListHead) {
     iconRow = memory->bestShotRow;
     iconColumn = memory->bestShotColumn;
 
-    /*
-     * The casts are needed to match: cse can't tell the test's cell from
-     * the one the drawing reads, so the drawing works its address out again
-     */
     if (f_BestShotRecords[(s8)iconRow][(s8)iconColumn] != STATS_CELL_EMPTY) {
         gDPLoadTLUT_pal256(
             gfx++,
@@ -2883,7 +2528,6 @@ void DrawBestShots(Gfx **displayListHead) {
     nameRow = memory->bestShotRow;
     nameColumn = memory->bestShotColumn;
 
-    /* Cast to match, as the icon's test is */
     if (f_BestShotRecords[(s8)nameRow][(s8)nameColumn] != STATS_CELL_EMPTY) {
         sprintf(
             g_PrintBuffer,
@@ -2929,10 +2573,6 @@ void DrawBestShots(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Reads the save data from SRAM and lays the recorded best shots out in a grid,
- * a row for each score kind, keeping the cursor on a shot where it can
- */
 void ReadBestShots(void) {
     SaveData *save = GetSaveData();
     s32 kindRecords[STATS_GRID_ROW_COUNT][STATS_KIND_LIST_SIZE];
@@ -2992,11 +2632,6 @@ void ReadBestShots(void) {
         }
     }
 
-    /*
-     * Setting the column twice is needed to match: copying the row into it only
-     * after the call gives 2 words differing; only before it, or setting it to
-     * 0, 22; the chained store alone 20; and calling first 111
-     */
     row = column = BEST_SHOT_ROW_BIRDIE;
     memory = GetMenuMemory();
     column = row;
@@ -3012,11 +2647,6 @@ void ReadBestShots(void) {
         }
     }
 
-    /*
-     * The record index is reused for the saved row, to match: a savedRow
-     * variable, or switching on the row directly, gives 12 words differing, none
-     * in shape
-     */
     recordIndex = memory->bestShotRow;
     switch (recordIndex) {
         case BEST_SHOT_ROW_BIRDIE:
@@ -3086,10 +2716,6 @@ void ReadBestShots(void) {
     }
 }
 
-/*
- * Returns the column or row of the next shot from (column, row) in direction,
- * wrapping, or -1 if that line holds no shot
- */
 s32 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
     s32 stepCount;
     s32 stepIndex;
@@ -3132,7 +2758,6 @@ s32 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
         return -1;
     }
 
-    /* Other directions step no cells, and so returned above */
     if (direction == STATS_DIRECTION_LEFT || direction == STATS_DIRECTION_RIGHT) {
         return column;
     }
@@ -3143,14 +2768,12 @@ s32 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
     return UNSET_RESULT;
 }
 
-/* Returns the ranked record under the Best Shots cursor */
 s16 GetChosenBestShot(void) {
     MenuMemory *memory = GetMenuMemory();
 
     return f_BestShotRecords[memory->bestShotRow][memory->bestShotColumn];
 }
 
-/* Draws one of the Japanese score labels at (left, top); nothing calls it */
 void DrawScoreLabel(Gfx **displayListHead, s32 left, s32 top, s32 labelIndex) {
     Gfx *gfx = *displayListHead;
     u8 *image;
@@ -3179,8 +2802,6 @@ void DrawScoreLabel(Gfx **displayListHead, s32 left, s32 top, s32 labelIndex) {
     width = image[IMAGE_WIDTH_LOW_BYTE];
     height = image[IMAGE_HEIGHT_LOW_BYTE];
 
-    /* The original passes the palette's first byte, not its address, so the
-     * colors come from low memory */
     gDPLoadTLUT_pal16(gfx++, 0, image[IMAGE_HEADER_SIZE] & ~7);
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(
@@ -3214,9 +2835,6 @@ void DrawScoreLabel(Gfx **displayListHead, s32 left, s32 top, s32 labelIndex) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the color-cycling cursor on the chosen Best Shots cell
- */
 void DrawBestShotsCursor(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
@@ -3312,39 +2930,6 @@ void DrawBestShotsCursor(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Reads every character's face, then the palette of each best shot's character
- * in the grid, clamped to the known ones
- *
- * Each arm of the record test stores the cell's palette address itself, with
- * the cell's index written out, which is what matches: the two index sums are
- * what makes GCC step the index in a register of its own, and the two
- * addresses what makes it keep the palettes' base outside the loop. Measured
- * against it, in words differing (and how many of them in shape):
- *
- *   One store after the arms                             122 (12)
- *   One store before the test                            103 (17)
- *   One store after the arms from a cell stepped in the
- *   loop's header                                        44 (4)
- *   The same cell with a store in each arm               17 (9)
- *   A cell local set before the test, a store in each    51 (7)
- *   A cell local set in each arm                         41 (9)
- *   The store first in both arms                         31 (15)
- *   The store first in the record's arm only             25 (11)
- *   The store first in the empty arm only                16 (10)
- *   The store between the reads and the clamps           11 (7)
- *   The character's upper clamp as a conditional         11 (9)
- *   The palette's upper clamp as a conditional           19 (5)
- *   Both upper clamps as conditionals                    25 (9)
- *   The palette clamped before the character             16 (0)
- *   Each upper clamp before its lower one                17 (7)
- *   The empty arm zeroing the palette first              4 (0)
- *   The test as == with the arms swapped                 9 (9)
- *   Both zeroed before the test, with no else            121 (9)
- *
- * The lower clamps as conditionals and the palette read before the character
- * match as well
- */
 void LoadBestShotFaces(void) {
     EncodedAsset asset;
     AssetFile file;
@@ -3398,10 +2983,6 @@ void LoadBestShotFaces(void) {
     }
 }
 
-/*
- * Draws a character's face from texels and a palette at (left, top), darkened
- * or with the character's name on it as drawMode asks
- */
 void DrawCharacterFace(
     Gfx **displayListHead,
     void *texels,

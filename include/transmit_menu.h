@@ -3,8 +3,6 @@
 
 #include <ultra64.h>
 
-/* The transmit menu, which exchanges data with a Game Boy */
-
 void LoadTransmitMenu(void);
 void FreeTransmitMenu(void);
 void UpdateTransmitMenu(void);

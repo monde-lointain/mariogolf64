@@ -5,8 +5,6 @@
 
 #include "controller.h"
 
-/* The pause screens' save menu and Controls screen */
-
 void DrawControlsScreen(Gfx **displayListHead);
 void DrawGameSaveMenu(Gfx **displayListHead);
 void DrawReplaySaveMenu(Gfx **displayListHead);

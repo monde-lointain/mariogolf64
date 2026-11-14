@@ -5,19 +5,8 @@
 
 #include "language.h"
 
-/*
- * The game divides spare memory into a few heaps, numbered from 0, each a
- * list of blocks taken from regions of memory added to it.
- */
-
 #define HEAP_BILLBOARD 1
 
-/*
- * The memory the game gives the general pool, from the end of the overlays'
- * regions. The original builds the start as a constant, which a symbol's
- * address does not compile to; other builds take it from the link, which
- * packs the regions.
- */
 #ifdef __IS_KMC__
 #    define MAIN_REGION_START 0x8025D800
 #else

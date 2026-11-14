@@ -3,11 +3,6 @@
 
 #include <ultra64.h>
 
-/*
- * Bits of the readout mode. The readout prints the lengths of the CPU, RSP
- * and RDP bars, as of this frame, at their maximum or on average; the free
- * memory can replace the CPU line.
- */
 #define METER_READOUT_CURRENT (1 << 0)
 #define METER_READOUT_MAXIMUM (1 << 1)
 #define METER_READOUT_AVERAGE (1 << 2)

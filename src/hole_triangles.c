@@ -1,7 +1,3 @@
-/*
- * Draws the hole triangles, making the shaded ones see-through, and builds and
- * draws Ring Shot's rings, which are kept among them.
- */
 #include "hole_triangles.h"
 
 #include <ultra64.h>
@@ -25,15 +21,11 @@
 #include "shot_camera.h"
 #include "work_area.h"
 
-/* Named like the file-local data it stands in for */
-/* NOLINTNEXTLINE(readability-identifier-naming) */
 #define f_HoleTriangles (g_WorkArea.hole.triangles)
 
-/* The size and texture scale of the blended texture on the triangles */
 #define BLENDED_TEXTURE_SIZE 32
 #define TEXTURE_COORDINATE_SCALE 4
 
-/* A shaded triangle's edge shorter than this, along x and z, is not drawn */
 #define MIN_SHADED_EDGE_LENGTH 0.01f
 #define SHADED_ALPHA_SCALE 128.0f
 #define SHADED_ALPHA_BASE 128.0f
@@ -42,7 +34,6 @@
 #define SHADED_FOG_MIN 700
 #define SHADED_FOG_MAX 1000
 
-/* Each ring is a square tube bent into a circle of sections */
 #define RING_SECTION_COUNT 8
 #define RING_SIDE_COUNT 4
 #define RING_VERTEX_COUNT (RING_SECTION_COUNT * RING_SIDE_COUNT)
@@ -52,33 +43,23 @@
 #define RING_NORMAL_SCALE 127.0f
 #define RING_VERTEX_ALPHA 0x80
 
-/* The index of the vertex on SIDE of SECTION, which wraps around the ring */
 #define RingVertex(section, side) \
     ((((section) & (RING_SECTION_COUNT - 1)) * RING_SIDE_COUNT) + (side))
 
-/* A ring's corners give its center, its facing and, in the third's x, its scale
- */
 #define RING_SCALE_ONE 1024.0f
 
-/*
- * A ring triangle's corners, by axis and then by corner. The words around
- * them are never used; they keep the original's stack layout.
- */
 typedef struct RingCorners {
-    /* 0x00 */ s32 unusedBeforeCoordinates;
-    /* 0x04 */ s16 coordinates[3][HOLE_TRIANGLE_VERTEX_COUNT];
-    /* 0x16 */ s16 unusedAfterCoordinates[(0x2C - 0x16) / 2];
-} RingCorners; /* size = 0x2C */
+      s32 unusedBeforeCoordinates;
+      s16 coordinates[3][HOLE_TRIANGLE_VERTEX_COUNT];
+      s16 unusedAfterCoordinates[(0x2C - 0x16) / 2];
+} RingCorners;
 
-/* Degrees that the rings spin by each frame */
 #define RING_SPIN_SPEED 2.0
 
 #define RING_FADE_STEP 16
-/* In sections */
 #define RING_SPARKLE_SPACING 4
-#define RING_SPARKLE_TURN ((f32)M_PI / 64) /* Radians each frame */
+#define RING_SPARKLE_TURN ((f32)M_PI / 64)
 
-/* The rings' colors, apart from under PAUSE_SCREEN_FREE_LOOK */
 #define RING_RED 0xFF
 #define RING_GREEN 0xF0
 #define RING_BLUE 0x40
@@ -87,12 +68,10 @@ typedef struct RingCorners {
 #define RING_MODE_FOUR_BLUE 0x00
 
 static s8 f_DimsTranslucentTriangles = FALSE;
-/* Read by no routine */
 static s32 f_UnusedWordAfterDimmingFlag UNUSED = 0;
 static Boolean f_HasTestRing = FALSE;
 static s32 f_TextureScroll = 0;
 static Degrees f_RingAngle = 0.0f;
-/* Read by no routine */
 static s32 f_UnusedWordAfterRingAngle UNUSED = 0;
 static Lights1 f_RingLights = gdSPDefLights1(0x7F, 0x7F, 0x7F, 0xFF, 0xFF, 0xFF, -73, 73, 73);
 static Mtx f_RingSpinMatrices[DRAW_BUFFER_COUNT];
@@ -103,17 +82,10 @@ static s32 BuildRingMatrices(void);
 
 FILE_STATIC Mtx f_RingMatrices[RING_COUNT];
 
-/* Makes the shaded triangles more see-through for the next frame */
 void DimNextTranslucentTriangles(void) {
     f_DimsTranslucentTriangles = TRUE;
 }
 
-/*
- * Draws the hole's triangles other than the rings.
- *
- * The normalized edge's magnitude keeps its if, as the original negates it
- * in a branch; through fabsf 316 words differ (38 in shape).
- */
 void DrawHoleTriangles(
     Gfx **displayListHead,
     CameraMatrices *matrices UNUSED,
@@ -347,30 +319,6 @@ void DrawHoleTriangles(
     *displayListHead = gfx;
 }
 
-/*
- * Draws the current player's rings; one past RING_STATE_SHOWN fades out while
- * sparkles circle it
- *
- * The sparkle loop has its own section counter, sparkleSection, and the next
- * side is masked to RING_SIDE_COUNT - 1 with &, as the original masks it:
- * the two together took the draft from 65 words differing (19 in shape)
- * to 16 (8). The mask alone gave 364 (14), since it shortens the outer
- * loop so that loop.c hoists one more display list command (0xDC08060A)
- * out of it; the counter alone changed nothing.
- *
- * Each pipe sync and the RDP state command after it goes through
- * AppendSyncedRdpState, which declares the command's pointer first, as
- * DrawHoleTriangles does. That puts the pointers of the pipe sync before
- * gDPSetTextureLUT and of gDPSetTextureLUT in the original's stack slots,
- * 0x144 and 0x13C, which follow the order the pointers are declared in;
- * it took the draft from 16 words differing (8 in shape) to 8 (8).
- *
- * The ring's matrix is indexed by ringIndex. loop.c strength-reduces that
- * index's address into a pointer of its own, which it starts after the
- * values it hoists out of the loop, as the original does. The draft
- * stepped a matrix pointer beside ringIndex, set before them, and 8 words
- * differed.
- */
 void DrawRings(Gfx **displayListHead, CameraMatrices *matrices UNUSED, Camera *camera UNUSED) {
     Gfx *gfx = *displayListHead;
     f32 transform[4][4];
@@ -585,7 +533,6 @@ void DrawRings(Gfx **displayListHead, CameraMatrices *matrices UNUSED, Camera *c
     *displayListHead = gfx;
 }
 
-/* Builds the ring's vertices, with the first side of each section inside */
 static void BuildRingVertices(void) {
     s32 index;
     Vtx *vertex;
@@ -619,7 +566,6 @@ static void BuildRingVertices(void) {
     }
 }
 
-/* Puts a ring at a fixed place in the first triangle */
 static void AddTestRing(void) {
     f_HoleTriangles[0].kind = HOLE_TRIANGLE_KIND_RING;
     f_HoleTriangles[0].vertices[0].v.ob[AXIS_X] = 0x800;
@@ -634,11 +580,6 @@ static void AddTestRing(void) {
     InitRings();
 }
 
-/*
- * Builds a matrix for each ring triangle, which places the ring at its
- * first corner, turns it to face along its second and scales it by its
- * third's x. Returns the number of rings.
- */
 static s32 BuildRingMatrices(void) {
     f32 rotation[4][4];
     f32 transform[4][4];
@@ -674,7 +615,6 @@ static s32 BuildRingMatrices(void) {
             triangle->ignoredCenter[2] = (corners.coordinates[2][0] + corners.coordinates[2][1] +
                                              corners.coordinates[2][2]) /
                 3;
-            /* Never read; the stores match */
             up[0] = up[2] = 0.0f;
             up[1] = -1.0f;
             guAlignF(
@@ -706,7 +646,6 @@ static s32 BuildRingMatrices(void) {
     return ringCount;
 }
 
-/* Builds the rings and shows as many of each player's as the hole has */
 void InitRings(void) {
     s32 ringCount;
     s32 playerIndex;

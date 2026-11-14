@@ -1,7 +1,3 @@
-/*
- * The window that opens over the menus, and the Club Tournament screen with its
- * code entry.
- */
 #include "tournament_menu.h"
 
 #include <ultra64.h>
@@ -29,26 +25,18 @@
 #include "sound.h"
 #include "text.h"
 
-/* The CODE ENTRY label and the row of key boxes beside it */
 #define ASSET_CODE_ENTRY_BAR 0x93E
-/* The keys' glyphs: 0 to 9, A to Z, a back arrow and OK, 16 by 16 each */
 #define ASSET_CODE_ENTRY_GLYPHS 0x942
 
-/* The intensity image of f_WideCloudImage that DrawUnusedWideCloud draws, in
- * two strips */
 #define TOURNAMENT_BANNER_WIDTH 256
 #define TOURNAMENT_BANNER_STRIP_HEIGHT 32
 #define TOURNAMENT_BANNER_STRIP_COUNT 2
 
-/* LoadClubCourseIcon reads only the first ten of g_TournamentIconAssets' 12 */
 #define CLUB_COURSE_ICON_LIMIT 10
 
-/* The pictures and palettes of f_MenuWindowPaletteFiles */
 #define MENU_WINDOW_PICTURE_COUNT 15
 #define MENU_WINDOW_PALETTE_COUNT 4
 
-/* DrawCodePanels stretches the menu banner of f_NamePlateImage into the two
- * panels behind the code screen */
 #define CODE_UPPER_PANEL_LEFT 28
 #define CODE_UPPER_PANEL_TOP 56
 #define CODE_UPPER_PANEL_WIDTH 264
@@ -57,19 +45,11 @@
 #define CODE_LOWER_PANEL_TOP 160
 #define CODE_LOWER_PANEL_WIDTH 280
 #define CODE_LOWER_PANEL_STRIP_HEIGHT 20
-/* The "CODE ENTRY" bar of f_CodeEntryBarImage that DrawCodeEntryBar draws, in
- * 8-row strips
- */
 #define CODE_ENTRY_BAR_WIDTH 256
 #define CODE_ENTRY_BAR_STRIP_HEIGHT 8
 #define CODE_ENTRY_BAR_STRIP_COUNT 4
 #define CODE_ENTRY_BAR_LEFT 32
 #define CODE_ENTRY_BAR_TOP 140
-/*
- * DrawCodeHand points at the chosen key with the 24x24 hand of
- * ASSET_POINTING_HAND in f_PointingHandImage, which sways a pixel to the right
- * each frame and back
- */
 #define CODE_HAND_SIZE 24
 #define CODE_HAND_FIRST_X 16
 #define CODE_HAND_FIRST_Y 56
@@ -79,22 +59,16 @@
 #define CODE_HAND_REACH 4
 #define CODE_HAND_MOVING_RIGHT 0
 #define CODE_HAND_MOVING_LEFT 1
-/* The codes that enter club tournaments: how many there are, and their length
- */
 #define CLUB_TOURNAMENT_CODE_COUNT 36
 #define CLUB_TOURNAMENT_CODE_LENGTH 8
 
-/* What the club tournament code prompt shows */
 enum ClubCodeState {
     CLUB_CODE_STATE_ENTERING,
     CLUB_CODE_STATE_INCORRECT
 };
 
-/* "Please enter a code.", which "The code entered is incorrect." follows */
 #define MESSAGE_ENTER_CODE 0x165
 
-/* The keyboard that the club tournament code is typed on, and its keys that are
- * not characters */
 #define CODE_KEYBOARD_ROW_COUNT 4
 #define CODE_KEYBOARD_COLUMN_COUNT 10
 #define CODE_KEYBOARD_END_ROW 3
@@ -104,61 +78,44 @@ enum ClubCodeState {
 #define CODE_KEY_BLANK 0xFD
 #define CODE_KEY_BACK 0xFE
 #define CODE_KEY_END 0xFF
-/*
- * DrawCodeKeys draws each key's 16x16 glyph from ASSET_CODE_ENTRY_GLYPHS in
- * f_CodeGlyphsImage, tinting the chosen one yellow
- */
 #define CODE_GLYPH_SIZE 16
 #define CODE_GLYPH_FIRST_X 40
 #define CODE_GLYPH_FIRST_Y 62
 #define CODE_GLYPH_NONE (-1)
 
-/* What UpdateClubTournament is doing, in f_ClubTournamentPhase */
 enum ClubCodePhase {
     CLUB_CODE_PHASE_TYPING,
     CLUB_CODE_PHASE_DETAILS,
     CLUB_CODE_PHASE_INCORRECT
 };
 
-/* A tournament code's first byte: the tournament's name, and whether Nintendo
- * holds it */
 #define CLUB_CODE_NAME_MASK 0x7F
 #define CLUB_CODE_NINTENDO_SHIFT 7
 #define CLUB_TOURNAMENT_NAME_COUNT 124
 
-/* Where UpdateClubTournament prints the code when it can be edited */
 #define CODE_DEBUG_TEXT_COLUMN 2
 #define CODE_DEBUG_TEXT_FIRST_ROW 3
 
-/* What PressCodeKey reports after a key is pressed */
 enum CodeKeyResult {
     CODE_KEY_RESULT_TOO_SHORT = -1,
     CODE_KEY_RESULT_TYPING,
     CODE_KEY_RESULT_DONE
 };
 
-/* Where the entered code is drawn, and the value of its characters not yet
- * entered */
 #define CLUB_CODE_FIRST_X 97
 #define CLUB_CODE_Y 150
 #define CLUB_CODE_CHAR_WIDTH 24
 #define CLUB_CODE_NO_CHAR 0xFF
 
-/* DrawCodeCursor marks the next character to type with a shrunken menu cursor
- */
 #define CODE_CURSOR_FIRST_X (-42)
 #define CODE_CURSOR_Y (-50.0f)
 #define CODE_CURSOR_SCALE 0.6f
 
-/* Where the prompt's two messages are drawn */
 #define CLUB_CODE_PROMPT_X 56
 #define CLUB_CODE_INCORRECT_X 24
 #define CLUB_CODE_MESSAGE_Y 180
 
-/* The first club tournament's name; g_ClubTournamentNameIndex picks the
- * tournament */
 #define MESSAGE_FIRST_CLUB_TOURNAMENT_NAME 0x16F
-/* The club tournament's details window and the text in it */
 #define CLUB_WINDOW_WIDTH 280
 #define CLUB_WINDOW_HEIGHT 180
 #define CLUB_WINDOW_CENTER_X 160
@@ -175,7 +132,6 @@ enum CodeKeyResult {
 #define CLUB_COURSE_SLOT 4
 #define CLUB_MODE_SLOT 5
 #define CLUB_TEXT_SLOT_COUNT 11
-/* The window's choice in f_ClubWindowChoice, which left and right toggle */
 #define CLUB_CHOICE_YES 0
 #define CLUB_CHOICE_NO 1
 
@@ -183,20 +139,14 @@ static void *f_WideCloudImage = NULL;
 static void *f_YesNoButtons = NULL;
 static void *f_NintendoBadge = NULL;
 static void *f_ClubCourseIcon = NULL;
-/* The buffer that holds the image the window shows */
 static void *f_MenuWindowImage = NULL;
 static void *f_MenuWindowPalette = NULL;
-/* A MENU_WINDOW_* value */
 static s32 f_MenuWindowState = MENU_WINDOW_OPENING;
-/* How far the window has opened across and down, from 0 to 1 */
 static f32 f_MenuWindowScaleX = 0.0f;
 static f32 f_MenuWindowScaleY = 0.0f;
-/* Read by no routine */
 static s32 f_UnusedWordsAfterWindowScale[2] UNUSED = {0, 0};
-/* How far the chosen Yes or No button has grown, and a YES_NO_PULSE_* value */
 static s32 f_YesNoPulse = 0;
 static s32 f_YesNoPulseDirection = 0;
-/* The images that the window can show */
 static AssetId f_MenuWindowImageAssets[MENU_WINDOW_PICTURE_COUNT] = {
     0x07C0,
     0x0750,
@@ -214,7 +164,6 @@ static AssetId f_MenuWindowImageAssets[MENU_WINDOW_PICTURE_COUNT] = {
     0x0988,
     0x0958,
 };
-/* Each window picture's palette files, by picture and color */
 static s16 f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT][MENU_WINDOW_PALETTE_COUNT] = {
     {0x07B8, 0x07B9, 0x07BA, 0x07BB},
     {0x0748, 0x0749, 0x074A, 0x074B},
@@ -232,53 +181,36 @@ static s16 f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT][MENU_WINDOW_PALET
     {0x0980, 0x0981, 0x0982, 0x0983},
     {0x0957, 0x0957, 0x0957, 0x0957},
 };
-/* Read by no routine */
 static s32 f_UnusedWordAfterPaletteFiles UNUSED = 0;
-/* Whether the Club Tournament screen was entered since TakeClubTournamentEntry
- * last asked */
 static u8 f_IsClubTournamentEntered = 0;
-/* The code entry's images, which LoadCodeEntryBuffer reads */
 static void *f_NamePlateImage = NULL;
 static void *f_CodeEntryBarImage = NULL;
 static void *f_CodeGlyphsImage = NULL;
 static void *f_PointingHandImage = NULL;
 static void *f_CodeCursorBox = NULL;
-/* Read by no routine */
 static s32 f_UnusedWordAfterCursorBox UNUSED = 0;
-/* The pointing hand's CODE_HAND_* motion, how far it has reached, and the
- * frames until its next step */
 static s32 f_CodeHandMotion = 0;
 static s32 f_CodeHandReach = 0;
 static s32 f_CodeHandStepTimer = 0;
-/* The characters of f_EnteredCode entered so far */
 static s32 f_EnteredCodeLength = 0;
-/* A CLUB_CODE_STATE_* value */
 static s32 f_ClubCodeState = CLUB_CODE_STATE_ENTERING;
-/* A CLUB_CODE_PHASE_* value */
 static s32 f_ClubTournamentPhase = CLUB_CODE_PHASE_TYPING;
-/* The club tournament name that the entered password picks */
 static s32 f_DecodedNameIndex = 0;
-/* Set to twice f_CodeHandReach, and read by no routine */
 static s32 f_UnusedDoubledHandReach = 0;
-/* Cleared by ResetCodeEntry, and read by no routine */
 static s32 f_UnusedCodeEntryWord = 0;
-/* A CLUB_CHOICE_* value */
 static u8 f_ClubWindowChoice = CLUB_CHOICE_YES;
-/* The keyboard's keys */
 static u8 f_CodeKeys[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT] = {
     {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'},
     {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'},
     {'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'},
     {'U', 'V', 'W', 'X', 'Y', 'Z', CODE_KEY_BLANK, CODE_KEY_BLANK, CODE_KEY_BACK, CODE_KEY_END},
 };
-/* Each key's glyph */
 static s8 f_CodeKeyGlyphs[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT] = {
     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
     {10, 11, 12, 13, 14, 15, 16, 17, 18, 19},
     {20, 21, 22, 23, 24, 25, 26, 27, 28, 29},
     {30, 31, 32, 33, 34, 35, CODE_GLYPH_NONE, CODE_GLYPH_NONE, 36, 37},
 };
-/* The code entered so far */
 static u8 f_EnteredCode[CLUB_TOURNAMENT_CODE_LENGTH] = {
     CLUB_CODE_NO_CHAR,
     CLUB_CODE_NO_CHAR,
@@ -289,7 +221,6 @@ static u8 f_EnteredCode[CLUB_TOURNAMENT_CODE_LENGTH] = {
     CLUB_CODE_NO_CHAR,
     CLUB_CODE_NO_CHAR,
 };
-/* The codes, each padded with CLUB_CODE_NO_CHAR */
 static u8 f_ClubTournamentCodes[CLUB_TOURNAMENT_CODE_COUNT][CLUB_TOURNAMENT_CODE_LENGTH] = {
     {'0', '0', '0', '0', '0', '0', '0', '0'},
     {'K', 'O', 'D', 'E', 'R', 'A', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR},
@@ -328,7 +259,6 @@ static u8 f_ClubTournamentCodes[CLUB_TOURNAMENT_CODE_COUNT][CLUB_TOURNAMENT_CODE
     {'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y'},
     {'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z'},
 };
-/* Read by no routine; f_MenuCharacterChoices' first 14 values */
 static s32 f_TournamentCharacterChoices[14] UNUSED = {
     CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_CHARLIE,
@@ -345,18 +275,14 @@ static s32 f_TournamentCharacterChoices[14] UNUSED = {
     CHARACTER_CHOICE_BOWSER,
     CHARACTER_CHOICE_METAL_MARIO,
 };
-/* The tournament code byte being edited */
 static s32 f_EditedCodeByteIndex = 0;
-/* The code cursor's corners, whose colors DrawCodeCursor cycles */
 static Vtx f_CodeCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-48, 0, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
 };
-/* Read by no routine */
 static s32 f_UnusedWordsAfterCursorVertices[2] UNUSED = {0, 0};
-/* The angle, in radians, of each corner's color cycle */
 static f32 f_CodeCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {0.0f, 2.0f, 4.0f, 6.0f};
 
 void DrawClubWindow(
@@ -378,12 +304,10 @@ void DrawCodeCursor(Gfx **displayListHead);
 s32 PressCodeKey(void);
 s32 DeleteCodeCharacter(void);
 
-/* The camera and placement that DrawCodeCursor draws the cursor with */
 static Mtx f_CodeCursorProjection;
 static Mtx f_CodeCursorTranslation;
 static Mtx f_CodeCursorRotation;
 
-/* Read by no routine */
 static u8 f_UnusedBufferBeforeCursorScale[0x80] UNUSED;
 
 static Mtx f_CodeCursorScale;
@@ -478,12 +402,8 @@ void LoadTournamentBuffer(void *buffer, s16 bufferKind) {
     ResetMenuWindow();
 }
 
-/* Read by no routine */
 const s32 f_UnusedConstantWords[2] = {0, 0};
 
-/*
- * Reads the icon of the club tournament's course into the window's course image
- */
 void LoadClubCourseIcon(s32 imageIndex) {
     EncodedAsset asset;
 
@@ -514,10 +434,6 @@ void LoadMenuWindowImage(s32 imageIndex) {
     ReadEncodedAsset(f_MenuWindowImage, &asset);
 }
 
-/*
- * Reads the palette of the window's picture, a row of f_MenuWindowPaletteFiles,
- * in the color that column picks
- */
 void LoadMenuWindowPalette(s32 row, s32 column) {
     AssetFile file;
 
@@ -541,16 +457,11 @@ void LoadMenuWindowPalette(s32 row, s32 column) {
     ReadAssetFile(f_MenuWindowPalette, (s16)GetAssetFileSize(&file), &file);
 }
 
-/*
- * Fetches the save data and the menu memory but drops both; no routine calls it
- */
 void GetSaveDataAndMenuMemory(void) {
     GetSaveData();
     GetMenuMemory();
 }
 
-/* DrawYesNoWindow draws a cloud window with Yes and No buttons, the chosen one
- * pulsing */
 #define MENU_WINDOW_SCALE_STEP 0.4f
 #define MENU_WINDOW_CLOSED_SCALE 0.1f
 #define MENU_WINDOW_STRIP_COUNT 2
@@ -559,11 +470,8 @@ void GetSaveDataAndMenuMemory(void) {
 #define YES_NO_BUTTON_COUNT 2
 #define YES_NO_BUTTON_WIDTH 72
 #define YES_NO_BUTTON_HEIGHT 24
-/* The size the buttons are drawn at, smaller than their images */
 #define YES_NO_BUTTON_SHOWN_WIDTH 48.0f
 #define YES_NO_BUTTON_SHOWN_HEIGHT 16.0f
-/* How far the buttons sit from the window's center across and from its bottom
- */
 #define YES_NO_BUTTON_OFFSET 30.0f
 #define YES_NO_PULSE_STEP 2
 #define YES_NO_PULSE_LIMIT 16
@@ -579,56 +487,6 @@ void GetSaveDataAndMenuMemory(void) {
 #define OK_TEXT_ALPHA 255
 #define NO_OK_TEXT (-1)
 
-/*
- * Draws the window growing as it opens and shrinking as it closes, by
- * f_MenuWindowScaleX and f_MenuWindowScaleY, with each size held to 1 or more,
- * and the OK text above the buttons once it is open, unless okTextShown is
- * NO_OK_TEXT.
- *
- * Each cloud strip's edges are worked out from the window's center in the call,
- * the bottom as the top plus halfHeight. The original works out centerY -
- * halfHeight before the loop, onto the stack, and the left and right edges in
- * it. loop.c moves an invariant out of a loop when its threshold times the
- * invariant's lifetime reaches the loop's count of insns, and takes 3 from the
- * threshold for each one moved. The threshold is 58 once the strip height's
- * constant is moved, and with the top's subtraction in it the loop has 59
- * insns: the left edge, with a lifetime of 1, stays, and the top, with a
- * lifetime of 2, is moved. With the top worked out before the loop, 58 insns
- * are left, so the left edge is moved, onto the stack as well, in a frame 8
- * bytes larger.
- *
- * Measured against the match, as words differing and how many of them in shape:
- *   The top in a windowTop local set before the loop          140 (16)
- *   The same, set in the for's first clause                   140 (14)
- *   The same, set as the loop's first statement               4 (2)
- *   The same, set before the call after a windowLeft local    138 (14)
- *   windowLeft and windowRight locals set before the call     166 (22)
- *   The bottom as centerY + (index * halfHeight)              75 (7)
- *   The bottom's strip offset and halfHeight grouped          45 (21)
- *   The bottom's offset as (index + 1) * halfHeight           54 (24)
- *   The top as centerY + (index * halfHeight) - halfHeight    76 (4)
- *   The strip offset first in both, before centerY            11 (5)
- *   The old draft: the top set in the for's first clause, the
- *   bottom as the offset, halfHeight and the top, and the
- *   button's half height held by an if                        34 (20)
- *   The button's half height held by an if                    60 (34)
- *   Every half held by an if                                  121 (55)
- *   A half held as (half > 0) ? half : 1                      64 (8)
- *   halfHeight held before halfWidth                          8 (0)
- *   halfHeight set after buttonHalfWidth                      4 (4)
- *   The float sizes held before the halves                    41 (41)
- *   index as an s32                                           247 (75)
- *   pulse and growth both cleared before the test             7 (3)
- *   Both cleared in the else                                  4 (0)
- *   growth as half of pulse after the test                    75 (19)
- *   The shrinking pulse's test under an else                  21 (7)
- *   f_MenuWindowState tested in place of IsMenuWindowOpen     12 (6)
- *
- * Also matching: the top in a windowTop local set just before the call, alone
- * or before a windowLeft local; a windowLeft local alone; the strip's top in a
- * local of its own, set in one statement; a half held as (half < 1) ? 1 : half;
- * and buttonX as a conditional expression.
- */
 void DrawYesNoWindow(
     Gfx **displayListHead,
     s32 width,
@@ -792,7 +650,6 @@ void DrawYesNoWindow(
         }
 
         buttonY = centerY + windowHalfHeight - (s32)(f_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
-        /* growth is cleared before the test and pulse in its else, to match */
         growth = 0;
         if (index == chosenButton) {
             pulse = f_YesNoPulse;
@@ -851,12 +708,6 @@ void DrawYesNoWindow(
     *displayListHead = gfx;
 }
 
-/*
- * DrawClubWindow adds to that window the Nintendo badge of f_NintendoBadge near
- * its top, the course image of f_ClubCourseIcon at its lower left and the
- * picture of f_MenuWindowImage, colored by the palette in f_MenuWindowPalette,
- * at its lower right
- */
 #define NINTENDO_BADGE_WIDTH 144
 #define NINTENDO_BADGE_STRIP_HEIGHT 10
 #define NINTENDO_BADGE_STRIP_COUNT 2
@@ -865,48 +716,9 @@ void DrawYesNoWindow(
 #define COURSE_IMAGE_STRIP_HEIGHT 32
 #define COURSE_IMAGE_STRIP_COUNT 2
 #define WINDOW_PICTURE_SIZE 32
-/* How far the course image and picture sit in from the window's sides and up
- * from its bottom */
 #define WINDOW_IMAGE_OFFSET_X 40.0f
 #define WINDOW_IMAGE_OFFSET_Y 50.0f
 
-/*
- * Draws the club tournament's details window: the cloud window, its Yes and No
- * buttons with the chosen one pulsing, the Nintendo badge for a Nintendo
- * tournament, the course image, the picture and the OK text once the window is
- * open. The window grows and shrinks as DrawYesNoWindow's does.
- *
- * The badge's strips are placed from badgeX, a copy of centerX made before
- * their loop. The original loads centerX from the stack into $s4 there and
- * keeps it over the loop, where the cloud's loop loads it for each strip: with
- * centerX itself in the badge's loop, centerX takes a saved register for the
- * whole function and buttonHalfWidth goes to the stack. The cloud strips' edges
- * are worked out in the call as DrawYesNoWindow's are, for the reason given
- * there.
- *
- * Measured against the match, as words differing and how many of them in shape:
- *   centerX in place of badgeX                                314 (64)
- *   badgeX set in the badge's loop                            314 (64)
- *   The cloud's top in a windowTop local set in the for's
- *   first clause                                              140 (12)
- *   The cloud strip's bottom as centerY + (index *
- *   halfHeight)                                               55 (7)
- *   The window's half width kept in badgeTop until the
- *   badge's top is set                                        30 (0)
- *   No windowLeft, its sum written in courseX's               60 (36)
- *   windowLeft set after courseTop                            60 (36)
- *   courseX set before courseTop                              78 (52)
- *   No pipe sync before the badge's rectangle                 59 (17)
- *   The old draft: no badgeX, the cloud's top set in the
- *   for's first clause, and the window's half width kept in
- *   badgeTop                                                  166 (26)
- *
- * Also matching: badgeX set after badgeTop, or before the badge's palette is
- * loaded; badgeX or halfWidth declared anywhere among the locals; the window's
- * half width kept in badgeX until the badge's loop; the cloud's top in a
- * windowTop local set just before the call; and a windowRight local for
- * pictureX.
- */
 void DrawClubWindow(
     Gfx **displayListHead,
     s32 width,
@@ -1128,7 +940,6 @@ void DrawClubWindow(
         }
 
         buttonY = centerY + windowHalfHeight - (s32)(f_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
-        /* As in DrawYesNoWindow, to match */
         growth = 0;
         if (index == chosenButton) {
             pulse = f_YesNoPulse;
@@ -1180,7 +991,6 @@ void DrawClubWindow(
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         LoadLargePalette(&gfx, ImageBody(f_NintendoBadge));
-        /* A copy of centerX for the badge's loop, to match */
         badgeX = centerX;
         badgeTop =
             (s32)(centerY - windowHalfHeight + (s32)(f_MenuWindowScaleY * NINTENDO_BADGE_OFFSET)) -
@@ -1258,7 +1068,6 @@ void DrawClubWindow(
     }
 
     pictureX = centerX + (windowWidth * 0.5f) - (s32)(f_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
-    /* The original adds the scale here where it multiplies everywhere else */
     pictureY = centerY + windowHalfHeight - (s32)(f_MenuWindowScaleY + WINDOW_IMAGE_OFFSET_Y);
 
     LoadLargePalette(&gfx, f_MenuWindowPalette);
@@ -1309,11 +1118,6 @@ void DrawClubWindow(
     *displayListHead = gfx;
 }
 
-/*
- * Stretches the wide cloud image, in two strips, around a center; no routine
- * calls it.
- */
-/* The original never stores the list's end back through displayListHead */
 void DrawUnusedWideCloud(
     Gfx **displayListHead,
     s32 centerX,
@@ -1325,10 +1129,6 @@ void DrawUnusedWideCloud(
 ) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
-    /*
-     * One variable for both, to match: passing G_TF_BILERP directly, using
-     * halfWidth directly, or both, gives 28 words differing, 6 in shape
-     */
     s32 filterOrHalfWidth;
     s32 stripTop = centerY - stripHeight;
 
@@ -1411,10 +1211,6 @@ void LoadCodeEntryBuffer(void *buffer, s32 bufferKind) {
     }
 }
 
-/*
- * Empties the entered code and puts the keyboard, the hand and the prompt back
- * to their start
- */
 void ResetCodeEntry(void) {
     MenuMemory *memory = GetMenuMemory();
     s32 charIndex;
@@ -1440,15 +1236,6 @@ void ResetCodeEntry(void) {
 
 void UpdateClubWindow(void);
 
-/*
- * Each cursor move reads the coordinates into row and column, stepping one,
- * before it tests the key there. Set in all four moves, row and column aren't
- * set once, so the scheduler doesn't hurry their sign extensions ahead of the
- * stepped coordinate's store; the store then follows them, as in the
- * original, and local-alloc keeps the coordinate, its shift and its extension
- * in separate registers. Stepping the coordinate inside the key's index gave
- * 64 words differing, 18 in shape.
- */
 void UpdateClubTournament(void) {
     MenuMemory *memory = GetMenuMemory();
     s32 index;
@@ -1486,7 +1273,6 @@ void UpdateClubTournament(void) {
         return;
     }
 
-    /* The second controller edits the tournament code digit by digit */
     if (IsGameFlagSet(GAME_FLAG_EDIT_TOURNAMENT_CODE)) {
         if (g_MenuControllerData[1].button & L_JPAD) {
             f_EditedCodeByteIndex =
@@ -1497,8 +1283,6 @@ void UpdateClubTournament(void) {
             f_EditedCodeByteIndex = (f_EditedCodeByteIndex + 1) % TOURNAMENT_CODE_SIZE;
         }
 
-        /* The original's unconditional steps cancel out, so a held direction
-         * changes the digit every frame */
         if (g_MenuControllerData[1].button & U_JPAD) {
             g_TournamentCode[f_EditedCodeByteIndex]++;
         }
@@ -1576,8 +1360,6 @@ void UpdateClubTournament(void) {
     else if (g_MenuRepeatButtons & B_BUTTON) {
         PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
 
-        /* B first deletes the code's characters, and leaves only once the code is
-         * empty */
         if (DeleteCodeCharacter()) {
             StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
             g_MenuScreen = MENU_SCREEN_MAIN;
@@ -1652,10 +1434,6 @@ void UpdateClubTournament(void) {
 
 s32 IsClubCharacterChoosable(void);
 
-/*
- * Runs the club tournament's details window: left and right pick Yes or No, A
- * on Yes enters the tournament and A on No or B goes back to the code
- */
 void UpdateClubWindow(void) {
     Boolean isHudAnimationDone;
     s32 index;
@@ -1749,7 +1527,6 @@ void UpdateClubWindow(void) {
                 g_GameState.playerCount = 1;
                 buttons = g_ControllerStates[0].buttons | g_ControllerStates[1].buttons |
                     g_ControllerStates[2].buttons | g_ControllerStates[3].buttons;
-                /* The held C buttons pick the player's colors */
                 if (buttons & L_CBUTTONS) {
                     g_Players[0].paletteIndex = LEFT_C_PALETTE;
                 }
@@ -1822,15 +1599,11 @@ void UpdateClubWindow(void) {
         }
     }
     else if ((pressedButtons & L_JPAD) || ((u16)pressedButtons & R_JPAD)) {
-        /* The cast above stops the compiler from merging the two tests, which the
-         * original keeps apart */
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         f_ClubWindowChoice ^= 1;
     }
 }
 
-/* Writes the club tournament's number as an ordinal, as in "21st", centered
- * on x */
 void DrawClubNumber(Gfx **displayListHead, s32 x, s32 top, s32 number) {
     Gfx *gfx = *displayListHead;
     u8 *image = GetMenuImageBuffer();
@@ -1850,7 +1623,6 @@ void DrawClubNumber(Gfx **displayListHead, s32 x, s32 top, s32 number) {
         width += PLACE_GLYPH_SPACING;
     }
 
-    /* x moves to the left edge itself; a local for it doesn't match */
     x -= (PLACE_GLYPH_SIZE / 2) + (width / 2);
     width = 0;
     for (digit = g_PrintBuffer; *digit != '\0'; digit++, width += PLACE_GLYPH_SPACING) {
@@ -1967,7 +1739,6 @@ void DrawClubTournament(Gfx **displayListHead) {
             windowStyle = (GetClubTournamentCharacter() != -1) ?
                 CLUB_WINDOW_STYLE_PICTURE | CLUB_WINDOW_STYLE_NINTENDO :
                 CLUB_WINDOW_STYLE_NINTENDO;
-            /* The held C buttons pick which of the tournament's pictures shows */
             if (windowStyle == (CLUB_WINDOW_STYLE_PICTURE | CLUB_WINDOW_STYLE_NINTENDO) &&
                 GetWipeKind() == WIPE_NONE) {
                 buttons = g_ControllerStates[0].buttons | g_ControllerStates[1].buttons |
@@ -2090,9 +1861,6 @@ void DrawClubTournament(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the CODE ENTRY label and the row of boxes that the code is entered in
- */
 void DrawCodeEntryBar(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -2148,7 +1916,6 @@ void DrawCodeEntryBar(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Stretches the menu banner into the panels behind the keyboard and prompt */
 void DrawCodePanels(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -2220,7 +1987,6 @@ void DrawCodePanels(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Draws the hand that points at the chosen key, swaying it from side to side */
 void DrawCodeHand(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
@@ -2297,7 +2063,6 @@ void DrawCodeHand(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Draws the keyboard's keys */
 void DrawCodeKeys(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
@@ -2324,8 +2089,6 @@ void DrawCodeKeys(Gfx **displayListHead) {
                 gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                 gDPSetPrimColor(gfx++, 0, 0, 255, 255, 0, OPAQUE_ALPHA);
 
-                /* Both branches set these the same; the chosen key may once have been
-                 * drawn larger */
                 grow = 0;
                 size = CODE_GLYPH_SIZE;
             }
@@ -2378,7 +2141,6 @@ void DrawCodeKeys(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Writes the code's characters entered so far in their boxes */
 void DrawEnteredCode(Gfx **displayListHead) {
     s32 charIndex;
     Gfx *gfx = *displayListHead;
@@ -2405,16 +2167,8 @@ void DrawEnteredCode(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Types the chosen key's character into the code, or deletes one or ends the
- * code, and returns a CodeKeyResult.
- */
 s32 PressCodeKey(void) {
     MenuMemory *memory = GetMenuMemory();
-    /*
-     * Widened to match: an s8 column, or the field read in place, gives 26
-     * words differing, 2 in shape
-     */
     s32 column = memory->codeKeyColumn;
     s32 result = CODE_KEY_RESULT_TYPING;
     u8 key = f_CodeKeys[memory->codeKeyRow][column];
@@ -2462,9 +2216,6 @@ s32 PressCodeKey(void) {
     return result;
 }
 
-/*
- * Deletes the code's last character, and returns TRUE when it was already empty
- */
 s32 DeleteCodeCharacter(void) {
     Boolean isEmpty = TRUE;
 
@@ -2485,7 +2236,6 @@ s32 DeleteCodeCharacter(void) {
     return isEmpty;
 }
 
-/* Writes the prompt below the code, asking for it or saying it is incorrect */
 void DrawCodePrompt(Gfx **displayListHead) {
     s32 x = 0;
     Gfx *gfx = *displayListHead;
@@ -2531,10 +2281,6 @@ void DrawCodePrompt(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Returns which of f_ClubTournamentCodes's codes was entered, or -1 after
- * marking the code incorrect; no routine calls it
- */
 s32 FindEnteredCodeIndex(void) {
     s32 foundIndex = -1;
     s32 codeIndex;
@@ -2564,10 +2310,6 @@ s32 FindEnteredCodeIndex(void) {
     return foundIndex;
 }
 
-/*
- * Draws the color-cycling cursor on the club tournament code's character
- * being entered, the last one once the code is full
- */
 void DrawCodeCursor(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 vertexIndex;
@@ -2667,20 +2409,14 @@ void DrawCodeCursor(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Returns whether the club tournament lets the player choose a character */
 s32 IsClubCharacterChoosable(void) {
     return g_ClubTournamentRules.characterIndex == -1;
 }
 
-/*
- * Returns the character that the club tournament's rules set, or -1 when the
- * player chooses one
- */
 s32 GetClubTournamentCharacter(void) {
     return g_ClubTournamentRules.characterIndex;
 }
 
-/* Returns, then clears, whether the Club Tournament screen was entered */
 s32 TakeClubTournamentEntry(void) {
     if (f_IsClubTournamentEntered) {
         f_IsClubTournamentEntered = FALSE;
@@ -2690,6 +2426,5 @@ s32 TakeClubTournamentEntry(void) {
     return FALSE;
 }
 
-/* Does nothing; no routine calls it */
 void DoNothingInTournamentMenu(void) {
 }

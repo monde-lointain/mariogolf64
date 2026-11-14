@@ -3,9 +3,6 @@
 
 #include <ultra64.h>
 
-/* The table of the characters' abilities, in ovl_01/character_table.c */
-
-/* The buffers that LoadCharacterTableBuffer keeps, by its caller's kind */
 enum TableBuffer {
     TABLE_BUFFER_CURSOR = 1,
     TABLE_BUFFER_UNREAD,

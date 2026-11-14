@@ -1,8 +1,3 @@
-/*
- * The small effects of play: drops, tears, divots and their marks, ripples,
- * sparkles, spreading circles and rising clumps. The rain, the Rumble Paks'
- * rumbles and the birdie badge count are here too.
- */
 #include "effects.h"
 
 #include <nusys.h>
@@ -38,109 +33,83 @@
 #include "text.h"
 #include "turn.h"
 
-/* Effects spawned around a point are offset by up to half this on each axis, in
- * course units */
 #define POINT_SPREAD 3072
-/* Sparkles start falling at this many world units a frame */
 #define SPARKLE_FALL_SPEED (2.62f * COURSE_TO_WORLD_SCALE)
 #define DROP_HEADING_COUNT 32
-/* Horizontal speeds, in course units a frame */
 #define DROP_SLOWEST_SPEED 200
 #define DROP_SPEED_STEP 20
-/* World units a frame; the faster a drop flies out, the faster it rises */
 #define DROP_SLOWEST_RISE_SPEED (2700 * COURSE_TO_WORLD_SCALE)
 #define DEBRIS_SPEED_STEP 0x600
-/* Effects are drawn only where they project to a depth below this */
 #define EFFECT_NEAREST_DEPTH (-3.0f)
 #define DIVOT_IMAGE_SIZE 32
 #define DIVOT_FRAME_SIZE (DIVOT_IMAGE_SIZE * DIVOT_IMAGE_SIZE / 2)
-/* Ripples and spreading circles are drawn in this light gray */
 #define CIRCLE_GRAY 230
 #define RUMBLE_FREQUENCY 0x100
 #define RUMBLE_FRAME_COUNT 10
-/* New raindrops and splashes are placed in steps of this many course units
- * around the center */
 #define RAIN_SPREAD_STEP 0x600
 #define RAIN_FALL_SPEED 60.0f
-/* How far the rain drifts sideways per unit of fall, for each whole unit of
- * wind speed */
 #define RAIN_DRIFT_PER_WIND_SPEED 0.1f
 
 #define RAINDROP_COUNT 48
 #define RAINDROP_FALLING (-1)
 
-/* Raindrop flags bits */
 #define RAINDROP_OFF_SCREEN (1 << 0)
-/* The head has reached the ground too */
 #define RAINDROP_HEAD_GROUNDED (1 << 4)
 #define RAIN_SPLASH_COUNT 32
 
 struct Raindrop {
-    /* 0x00 */ Vec3 head;
-    /* 0x0C */ Vec3 tail;
-    /* 0x18 */ f32 groundHeight; /* Under the drop; UpdateRain refreshes one drop
-                                    each frame */
-    /* 0x1C */ f32 tailScale; /* The tail's projected scale */
-    /* 0x20 */ s16 headScreenX; /* In quarter pixels */
-    /* 0x22 */ s16 headScreenY;
-    /* 0x24 */ s16 tailScreenX;
-    /* 0x26 */ s16 tailScreenY;
-    /* 0x28 */ s16 tailDepth;
-    /* 0x2A */ u16 flags; /* RAINDROP_* bits */
-    /* 0x2C */ s8 landedFrameCount; /* RAINDROP_FALLING until the drop reaches the ground */
-    /* 0x2D */ u8 splashColumn; /* The column of f_RainSplashImage frames it lands with */
-}; /* size = 0x30 */
+      Vec3 head;
+      Vec3 tail;
+      f32 groundHeight;
+      f32 tailScale;
+      s16 headScreenX;
+      s16 headScreenY;
+      s16 tailScreenX;
+      s16 tailScreenY;
+      s16 tailDepth;
+      u16 flags;
+      s8 landedFrameCount;
+      u8 splashColumn;
+};
 
 struct RainSplash {
-    /* 0x00 */ Vec3 position;
-    /* Set to 1 as the rain starts; nothing reads it */
-    /* 0x0C */ f32 ignoredStartValue;
-    /* 0x10 */ u8 unusedAfterStartValue[6];
-    /* 0x16 */ s8 frameCount;
-    /* Cleared as the rain starts; nothing reads it */
-    /* 0x17 */ s8 ignoredFrameValue;
-    /* 0x18 */ u8 column; /* The column of f_RainSplashImage frames it shows */
-}; /* size = 0x1C */
+      Vec3 position;
+      f32 ignoredStartValue;
+      u8 unusedAfterStartValue[6];
+      s8 frameCount;
+      s8 ignoredFrameValue;
+      u8 column;
+};
 
 enum EffectKind {
     EFFECT_KIND_NONE = -1,
-    /*
-     * The debris a shot throws up, in the ground's color, from SpawnHighDebris
-     * and SpawnLowDebris: puffs from bunkers and bare ground, drawn lightened, of
-     * which SpawnImpactEffects' landing puffs are high ones too; pieces of the
-     * rough, drawn with an alpha threshold; and low pieces of grass, from
-     * fairways, semi-rough and the tee.
-     */
     EFFECT_KIND_HIGH_PUFF,
     EFFECT_KIND_LOW_PUFF,
     EFFECT_KIND_LOW_GRASS,
     EFFECT_KIND_HIGH_ROUGH,
     EFFECT_KIND_LOW_ROUGH,
-    EFFECT_KIND_DROP, /* Drawn with f_DropImage */
-    EFFECT_KIND_DIVOT, /* Drawn with f_DivotImage */
-    EFFECT_KIND_DIVOT_MARK, /* Drawn with f_DivotImage's last frame */
+    EFFECT_KIND_DROP,
+    EFFECT_KIND_DIVOT,
+    EFFECT_KIND_DIVOT_MARK,
     EFFECT_KIND_SPARKLE,
     EFFECT_KIND_RIPPLE = 0xC,
-    /* A dark speckled puff, drawn with f_SpeckleImage */
     EFFECT_KIND_SMOKE_PUFF = 0xE,
-    EFFECT_KIND_SPREADING_CIRCLE = 0x13, /* Drawn with f_ArcImage */
-    EFFECT_KIND_RISING_CLUMP = 0x10, /* Drawn with f_ClumpImage */
+    EFFECT_KIND_SPREADING_CIRCLE = 0x13,
+    EFFECT_KIND_RISING_CLUMP = 0x10,
     EFFECT_KIND_TEAR = 0x14
 };
 
-/* The debris that the ball's lie gives, chosen by its surface kind */
 enum DebrisKind {
     DEBRIS_KIND_NONE,
     DEBRIS_KIND_TEE_UP,
-    DEBRIS_KIND_GRASS, /* Fairway, tee ground and semi-rough */
-    DEBRIS_KIND_DUST, /* Bunker and bare ground */
+    DEBRIS_KIND_GRASS,
+    DEBRIS_KIND_DUST,
     DEBRIS_KIND_ROUGH,
-    DEBRIS_KIND_BURIED = 6 /* Bunker lies with the ball sunk in the sand */
+    DEBRIS_KIND_BURIED = 6
 };
 
 static Mtx f_RainModelViewMatrix;
 
-/* Each holds an image asset: a header, then texels */
 static u8 *f_RippleImage;
 static u8 *f_ArcImage;
 static u8 *f_DropImage;
@@ -168,24 +137,14 @@ FILE_STATIC Mtx f_EffectMatrices[EFFECT_COUNT];
 FILE_STATIC Mtx f_DropMatrices[DRAW_BUFFER_COUNT];
 FILE_STATIC Mtx f_DivotMarkMatrix;
 FILE_STATIC ShotDebris f_ShotDebris;
-/*
- * Every spawn sets it through a float, as the original converts the ground
- * height to a float and back. Without the (f32), 8 words differ in each of
- * SpawnSpreadingCircle, SpawnTear and SpawnSparkleNearPoint, all in shape; an
- * f32 local matches as well. Declaring it f32, without the casts, doesn't.
- */
 FILE_STATIC s32 f_SpawnGroundHeight;
 FILE_STATIC u8 *f_RainSplashImage;
 FILE_STATIC Raindrop *f_Raindrops;
 FILE_STATIC RainSplash *f_RainSplashes;
-/* The x and z that the rain falls around, RAIN_CENTER_DISTANCE ahead of the
- * camera */
 FILE_STATIC s32 f_RainCenter[2];
-/* How far the wind blows the rain sideways for each unit it falls */
 FILE_STATIC f32 f_RainDriftX;
 FILE_STATIC f32 f_RainDriftZ;
-FILE_STATIC Vec3 f_RainVelocity; /* Per frame */
-/* The raindrop whose ground height UpdateRain refreshes next */
+FILE_STATIC Vec3 f_RainVelocity;
 FILE_STATIC s32 f_GroundCheckDropIndex;
 
 static s32 f_DebrisKind = 0;
@@ -225,8 +184,8 @@ static Vtx f_RainStreakVertices[] = {
     {{{48, -1, -100}, 0, {0, 0}, {0x90, 0xA0, 0xA0, 0x5F}}},
     {{{48, 0, -100}, 0, {0, 0}, {0x90, 0xA0, 0xA0, 0x5F}}},
 };
-static s32 f_Weather = WEATHER_NONE; /* A WEATHER_* value */
-static Vec3 f_LastRainEye = {0.0f, 0.0f, 0.0f}; /* The camera's eye on UpdateRain's last frame */
+static s32 f_Weather = WEATHER_NONE;
+static Vec3 f_LastRainEye = {0.0f, 0.0f, 0.0f};
 static s32 f_ShownBadgeCount = 0;
 static Boolean f_IsBadgeCountShown = FALSE;
 static s32 f_BadgeCountFrame = 0;
@@ -234,11 +193,9 @@ void StartRain(void);
 
 #define RIPPLE_IMAGE_ASSET 0x6B0
 #define DROP_IMAGE_ASSET 0x6B2
-/* Blades of grass */
 #define GRASS_IMAGE_ASSET 0x6B6
 #define CLOUD_IMAGE_ASSET 0x6B5
 #define CLUMP_IMAGE_ASSET 0x6B8
-/* A flying divot, then the mark it leaves */
 #define DIVOT_IMAGE_ASSET 0x6C0
 #define PLUME_IMAGE_ASSET 0x6C1
 #define SPLASH_IMAGE_ASSET 0x6C2
@@ -247,7 +204,6 @@ void StartRain(void);
 #define ARC_IMAGE_ASSET 0x8EC
 #define DROPLET_IMAGE_ASSET 0x93B
 
-/* Frees the images that LoadEffectImages loaded */
 void FreeEffectImages(void) {
     if (f_AreEffectImagesLoaded) {
         FreeMemory(&f_RippleImage);
@@ -266,7 +222,6 @@ void FreeEffectImages(void) {
     }
 }
 
-/* Loads the effects' images; the debris image starts as a copy of the cloud */
 void LoadEffectImages(void) {
     EncodedAsset asset;
 
@@ -300,10 +255,6 @@ void LoadEffectImages(void) {
     }
 }
 
-/*
- * Reloads five of the effect images, clears the effects, and loads the debris
- * image that the ball's lie calls for.
- */
 void PrepareShotEffects(BallSimulation *simulation) {
     EncodedAsset asset;
     s32 index;
@@ -320,11 +271,6 @@ void PrepareShotEffects(BallSimulation *simulation) {
     OpenEncodedAsset(DIVOT_IMAGE_ASSET, &asset);
     ReadEncodedAsset(f_DivotImage, &asset);
 
-    /*
-     * Clearing the effects here instead of calling ClearEffects is there to
-     * match: the call gives 11 words differing (11 in shape), clearing each
-     * kind without the effect pointer 16 (6), and testing with < 15 (3)
-     */
     for (index = 0; index != EFFECT_COUNT; index++) {
         effect = &f_Effects[index];
         effect->kind = EFFECT_KIND_NONE;
@@ -378,27 +324,18 @@ void PrepareShotEffects(BallSimulation *simulation) {
     ResetShotEffects();
 }
 
-/* Frees every effect */
 void ClearEffects(void) {
     s32 index;
     Effect *effect;
 
-    /*
-     * Testing index with != and naming the effect are there to match: with <
-     * 15 words differ (3 in shape), clearing each kind without the pointer 16
-     * (6), and both 17 (7)
-     */
     for (index = 0; index != EFFECT_COUNT; index++) {
         effect = &f_Effects[index];
         effect->kind = EFFECT_KIND_NONE;
     }
 }
 
-/* World units above the point that a spreading circle starts */
 #define SPREADING_CIRCLE_RISE 1.5f
 
-/* Starts a circle spreading from a character's point; Bowser's bogey reaction
- * spawns them */
 void SpawnSpreadingCircle(u32 slotIndex, s32 pointId) {
     Vec3 translation;
     Vec3 rotation;
@@ -448,19 +385,11 @@ void SpawnSpreadingCircle(u32 slotIndex, s32 pointId) {
     }
 }
 
-/* Tears are offset by a fifth as much as other effects around a point */
 #define TEAR_OFFSET_SCALE (COURSE_TO_WORLD_SCALE / 5)
-/* Tears fly out at between 0.4 and 1.4 times this many course units a frame */
 #define TEAR_SPEED_RANGE 1536
-/* Tears from this point start on an odd frame, which draws them mirrored */
 #define TEAR_MIRRORED_POINT 3
 
-/*
- * Throws a tear from a character's point toward heading, and up; Baby
- * Mario's bogey reaction throws them from points 3 and 4
- */
 void SpawnTear(u32 slotIndex, s32 pointId, Radians heading) {
-    /* They pad the frame to match; without any one of them 52 words differ */
     Vec3 translation UNUSED;
     Vec3 rotation UNUSED;
     Vec3 scale UNUSED;
@@ -483,7 +412,6 @@ void SpawnTear(u32 slotIndex, s32 pointId, Radians heading) {
                     (((guRandom() % POINT_SPREAD) - (POINT_SPREAD / 2)) * TEAR_OFFSET_SCALE);
                 effect->position[AXIS_Z] = point[AXIS_Z] +
                     (((guRandom() % POINT_SPREAD) - (POINT_SPREAD / 2)) * TEAR_OFFSET_SCALE);
-                /* Overwritten at once; the original has it */
                 effect->velocity[AXIS_X] = 0;
                 effect->velocity[AXIS_Y] = SPARKLE_FALL_SPEED;
                 effect->velocity[AXIS_X] = cosf(heading) *
@@ -517,9 +445,7 @@ void SpawnTear(u32 slotIndex, s32 pointId, Radians heading) {
     }
 }
 
-/* Starts a sparkle near a character's point; eagle reactions spawn them */
 void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId) {
-    /* They pad the frame to match; without any one of them 32 words differ */
     Vec3 translation UNUSED;
     Vec3 rotation UNUSED;
     Vec3 scale UNUSED;
@@ -558,7 +484,6 @@ void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId) {
     }
 }
 
-/* Starts a ripple spreading at position */
 void SpawnRipple(CoursePoint position) {
     Vec3 translation;
     Vec3 rotation;
@@ -601,10 +526,6 @@ void SpawnRipple(CoursePoint position) {
     }
 }
 
-/*
- * Launches a drop up and out from a point, in one of DROP_HEADING_COUNT
- * headings across a quarter turn.
- */
 void LaunchDrop(CoursePoint point) {
     Vec3 translation;
     Vec3 scale;
@@ -614,7 +535,6 @@ void LaunchDrop(CoursePoint point) {
     Effect *effect;
     s32 random;
 
-    /* Of the horizontal speed above the slowest */
     s32 speedOffset;
     f32 speed;
     Radians heading;
@@ -656,7 +576,6 @@ void LaunchDrop(CoursePoint point) {
     }
 }
 
-/* Starts a sparkle at position; passed rings spawn them */
 void SpawnSparkle(CoursePoint position) {
     s32 index;
     Effect *effect;
@@ -682,19 +601,14 @@ void SpawnSparkle(CoursePoint position) {
     }
 }
 
-/*
- * Unreferenced. Spawns a smoke puff at a character's model point, rising
- * slowly as it grows and fades
- */
 void SpawnCharacterSmokePuff(u32 slotIndex, s32 pointId) {
-    /* They pad the frame to match; without any one of them 16 words differ */
     Vec3 translation UNUSED;
     Vec3 rotation UNUSED;
     Vec3 scale UNUSED;
     Mat4 matrix UNUSED;
     Vec3 point;
     s32 index;
-    s16 riseScale; /* Always 1; the original has it */
+    s16 riseScale;
     Effect *effect;
 
     if (GetCharacterPointPosition(slotIndex, pointId, point) == 0) {
@@ -723,11 +637,6 @@ void SpawnCharacterSmokePuff(u32 slotIndex, s32 pointId) {
 
 #define IMPACT_PUFF_COUNT 3
 
-/*
- * Spawns effects at the ball's position by the surface kind under the ball:
- * rising puffs of the ground's color on fairway lies and semi-rough, larger and
- * faster ones on bunker lies and bare ground, or a ripple on water.
- */
 void SpawnImpactEffects(BallSimulation *simulation) {
     Vec3 translation;
     Vec3 rotation;
@@ -811,7 +720,6 @@ void SpawnImpactEffects(BallSimulation *simulation) {
 
             break;
         case SURFACE_KIND_WATER_HAZARD:
-            /* The original spawns the ripple here instead of calling SpawnRipple */
             for (index = 0; index != EFFECT_COUNT; index++) {
                 effect = &f_Effects[index];
                 if (effect->kind == EFFECT_KIND_NONE) {
@@ -848,24 +756,14 @@ void SpawnImpactEffects(BallSimulation *simulation) {
             }
 
             break;
-        /*
-         * The empty case is there to match: without it, or with a default, 2
-         * words differ, none in shape
-         */
         case SURFACE_KIND_DEEP_ROUGH:
             break;
     }
 }
 
 #define RISING_CLUMP_COUNT 3
-/* In course units; course y points down */
 #define RISING_CLUMP_HEIGHT 15360.0f
 
-/*
- * Starts RISING_CLUMP_COUNT clumps rising from above the ball, each faster than
- * the last, that grow as they fade. The callers pass a point, but the ball's
- * position is used instead.
- */
 void SpawnRisingClumps(CoursePoint unusedPoint UNUSED) {
     s32 index;
     s32 spawnCount;
@@ -913,18 +811,8 @@ void SpawnRisingClumps(CoursePoint unusedPoint UNUSED) {
 #define DIVOT_MARK_SMALLEST_SCALE 0.5f
 #define DIVOT_MARK_LARGEST_SCALE 1.0f
 
-/*
- * A random number from 0 to below limit, or 0 when limit is 0. It is a macro,
- * as an inline function compiles differently from the original.
- */
 #define RandomBelow(limit) ((limit) == 0 ? 0 : guRandom() % (limit))
 
-/*
- * Throws up the debris of a shot struck from point: a drop for a teed-up
- * ball, a divot and its mark for an iron or wedge from grass, and the low
- * and high debris that the debris kind gives. The amount of debris grows
- * with -sin(pitch). The nested spawners share the count and index.
- */
 void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSpeed) {
     Vec3 translation;
     Vec3 rotation;
@@ -951,7 +839,6 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
     f32 speed;
     Radians heading;
 
-    /* Spawns up to debrisCount slow-rising, slow-fading pieces of debris */
     s32 SpawnLowDebris(s32 slotCount, s32 debrisCount, s32 kind) {
         Effect *effect;
         s32 speed;
@@ -970,10 +857,6 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
                 effect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
                 effect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
 
-                /*
-                 * Reading launchSpeed here, though both branches below overwrite it,
-                 * is there to match: without it 22 words differ, 22 in shape
-                 */
                 speed = launchSpeed;
                 if (kind == EFFECT_KIND_LOW_GRASS) {
                     speed = (RandomBelow(spawnedCount * 2) + DEBRIS_SLOWEST_STEP_COUNT) *
@@ -1007,7 +890,6 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
         return slotCount;
     }
 
-    /* Spawns up to debrisCount faster-rising, faster-fading pieces of debris */
     s32 SpawnHighDebris(s32 slotCount, s32 debrisCount, s32 kind) {
         Effect *effect;
         s32 speed;
@@ -1016,7 +898,6 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
         for (index = 0; index < EFFECT_COUNT; index++) {
             effect = &f_Effects[index];
 
-            /* The original has it */
             guRandom();
             if (spawnedCount == debrisCount) {
                 break;
@@ -1095,11 +976,6 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
         debrisAmount = DEBRIS_AMOUNT_MOST;
     }
 
-    /*
-     * Clearing the effects here instead of calling ClearEffects is there to
-     * match: the call gives 28 words differing (18 in shape), clearing each
-     * kind without the effect pointer 7 (3), and testing with < 16 (6)
-     */
     for (index = 0; index != EFFECT_COUNT; index++) {
         clearedEffect = &f_Effects[index];
         clearedEffect->kind = EFFECT_KIND_NONE;
@@ -1191,7 +1067,6 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
         }
     }
 
-    /* The divot flies out on the mirror image of the drop's heading */
     spawnedCount = 0;
     for (index = nextIndex; index < EFFECT_COUNT; index++) {
         divotEffect = &f_Effects[index];
@@ -1230,7 +1105,6 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
         }
     }
 
-    /* The mark stays at point, turned by yaw */
     spawnedCount = 0;
     for (index = nextIndex; index < EFFECT_COUNT; index++) {
         divotMarkEffect = &f_Effects[index];
@@ -1291,29 +1165,19 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
     }
 }
 
-/* How far the wind pushes an effect a frame, in world units, for each whole
- * unit of wind speed */
 #define EFFECT_PUSH_PER_WIND_SPEED 0.005f
-/* Positive y velocities fall, in world units a frame each frame */
 #define EFFECT_FALL_ACCELERATION (26.2f * COURSE_TO_WORLD_SCALE)
 #define RISING_CLUMP_FALL_ACCELERATION (2 * EFFECT_FALL_ACCELERATION)
 #define OTHER_EFFECT_FALL_ACCELERATION (8 * EFFECT_FALL_ACCELERATION)
 #define TEAR_FALL_ACCELERATION 0.23027343f
-/* The share of its velocity that an effect keeps each frame */
 #define RISING_CLUMP_VELOCITY_KEPT 0.95f
 #define LIGHT_EFFECT_VELOCITY_KEPT 0.97f
 #define HIGH_DEBRIS_VELOCITY_KEPT 0.8f
 #define OTHER_EFFECT_VELOCITY_KEPT 0.95f
-/* Smoke puffs feel this share of the wind */
 #define SMOKE_WIND_SHARE 0.1f
-/* Effects past the ground height fade this many times as fast */
 #define PAST_GROUND_FADE_SCALE 4.0f
-/* Effects spin about x and z by SPIN_PER_SPEED for each unit their fall speed
- * is below this */
 #define SPIN_FALL_SPEED 100.0f
 #define SPIN_PER_SPEED (M_PI * 0.001f)
-/* Kinds 0 and 3 (high debris) and most other kinds pick frame 0, 1 or 2 by
- * their fall speed */
 #define HIGH_DEBRIS_FAST_RISE_SPEED (-1.5f)
 #define HIGH_DEBRIS_SLOW_RISE_SPEED (-0.15f)
 #define OTHER_EFFECT_FAST_RISE_SPEED (-1.5f)
@@ -1322,36 +1186,21 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
 #define TEAR_LAST_FRAME 40
 #define SPARKLE_LAST_FRAME 20
 #define CYCLING_FRAME_COUNT 3
-/* Drops and divots past the ground height are held this many course units past
- * it */
 #define GROUNDED_EFFECT_DEPTH 15.36f
 
-/* It is a macro, as an inline function compiles differently from the original
- */
 #define IsPastSpawnGround(effect) \
     ((f32)f_SpawnGroundHeight < (effect)->position[AXIS_Y] * WORLD_TO_COURSE_SCALE)
-/* Whether an effect kind fades faster past the spawn ground height */
 #define IsFadedPastGround(kind) \
     ((kind) != EFFECT_KIND_RIPPLE && \
         (kind) != EFFECT_KIND_SPREADING_CIRCLE && \
         (kind) != EFFECT_KIND_SPARKLE && \
         (kind) != EFFECT_KIND_TEAR)
-/*
- * Whether fading or shrinking away removes an effect kind, which it does not
- * for divot marks, drops, divots or tears
- */
 #define IsRemovedWhenFaded(kind) \
     ((kind) != EFFECT_KIND_DIVOT_MARK && \
         (kind) != EFFECT_KIND_DROP && \
         (kind) != EFFECT_KIND_DIVOT && \
         (kind) != EFFECT_KIND_TEAR)
 
-/*
- * Moves, fades, spins and animates every effect for a frame, and removes those
- * that are done. The wind pushes rising clumps, kind 0xE effects and kinds 0
- * and 3. Most effects past the spawn ground height fade faster. It also
- * rebuilds the transform matrices of ripples, spreading circles and drops.
- */
 void UpdateEffects(void) {
     Mat4 matrix;
     Vec3 scale;
@@ -1387,8 +1236,6 @@ void UpdateEffects(void) {
             effect->position[AXIS_Y] += effect->velocity[AXIS_Y];
             effect->position[AXIS_Z] += effect->velocity[AXIS_Z];
 
-            /* Accelerating every axis before keeping a share of each is there to
-             * match */
             if (effect->kind == EFFECT_KIND_RISING_CLUMP) {
                 effect->velocity[AXIS_X] += windPushX;
                 effect->velocity[AXIS_Y] += RISING_CLUMP_FALL_ACCELERATION;
@@ -1411,7 +1258,7 @@ void UpdateEffects(void) {
             }
             else if (effect->kind == EFFECT_KIND_SMOKE_PUFF) {
                 effect->velocity[AXIS_X] += windPushX * SMOKE_WIND_SHARE;
-                effect->velocity[AXIS_Y] += 0.0f; /* The original has it */
+                effect->velocity[AXIS_Y] += 0.0f;
                 effect->velocity[AXIS_Z] += windPushZ * SMOKE_WIND_SHARE;
                 effect->velocity[AXIS_X] *= LIGHT_EFFECT_VELOCITY_KEPT;
                 effect->velocity[AXIS_Y] *= LIGHT_EFFECT_VELOCITY_KEPT;
@@ -1428,10 +1275,6 @@ void UpdateEffects(void) {
             }
             else if (effect->kind == EFFECT_KIND_RIPPLE ||
                 effect->kind == EFFECT_KIND_SPREADING_CIRCLE) {
-                /*
-                 * The empty branch is there to match: the else's test inverted, as
-                 * an && chain or negated, gives 8 words differing, 8 in shape
-                 */
             }
             else {
                 effect->velocity[AXIS_Y] += OTHER_EFFECT_FALL_ACCELERATION;
@@ -1494,7 +1337,7 @@ void UpdateEffects(void) {
                     effect->frame = 1;
                 }
 
-                effect->frame = 0; /* Overwrites the frame picked above; the original has it */
+                effect->frame = 0;
             }
 
             if (IsPastSpawnGround(effect) &&
@@ -1559,7 +1402,6 @@ void UpdateEffects(void) {
 
 #define RIPPLE_IMAGE_SIZE 64
 #define ARC_IMAGE_SIZE 64
-/* Effects are drawn only where their texels' alpha is above these */
 #define DIVOT_MARK_ALPHA_THRESHOLD 0x1E
 #define BILLBOARD_ALPHA_THRESHOLD 0x1F
 #define SPARKLE_ALPHA_THRESHOLD 0x3F
@@ -1569,11 +1411,6 @@ void UpdateEffects(void) {
 
 void DrawBillboardEffect(Gfx **displayListHead, Effect *effect, u16 color);
 
-/*
- * Draws every effect, a kind at a time: divot marks, ripples, spreading
- * circles, drops and divots with their shadows, then the billboards. It sets
- * the render state between the loops.
- */
 void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 index;
@@ -1749,12 +1586,6 @@ void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead) {
         }
     }
 
-    /*
-     * Setting color before each group's commands (after one for sparkles) is
-     * there to match: setting it just before each loop gives 4 words
-     * differing (4 in shape), the sparkles' before their first command 2 (2),
-     * and the tints passed as constants 43
-     */
     color = RISING_CLUMP_TINT;
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
@@ -1868,11 +1699,6 @@ void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_DropletImage)));
-    /*
-     * Reusing the sparkles' color for the tears is there to match: setting it
-     * again gives 1 word differing (1 in shape), and the constant in the call
-     * 10 (2)
-     */
     for (index = 0; index != EFFECT_COUNT; index++) {
         effect = &f_Effects[index];
         if (effect->kind == EFFECT_KIND_TEAR) {
@@ -1891,8 +1717,6 @@ void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* The rectangles step across this many texels; the smaller images are shifted
- * down to fit */
 #define BILLBOARD_IMAGE_SIZE 64
 #define BILLBOARD_FRAME_SIZE (BILLBOARD_IMAGE_SIZE * BILLBOARD_IMAGE_SIZE)
 #define STAR_FRAME_SIZE (BILLBOARD_IMAGE_SIZE * BILLBOARD_IMAGE_SIZE / 2)
@@ -1904,20 +1728,9 @@ void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead) {
 #define DROPLET_FRAME_SIZE (DROPLET_IMAGE_SIZE * DROPLET_IMAGE_SIZE / 2)
 #define TEAR_SECOND_FRAME_START 6
 #define TEAR_THIRD_FRAME_START 20
-/*
- * 1 << this is BILLBOARD_IMAGE_SIZE texels in s10.5, which the droplet's tile,
- * shifted down by 2 and mirrored every 16 texels, draws flipped. Shifting
- * instead of multiplying is there to match: the frame's parity times
- * TexelCoordinate(BILLBOARD_IMAGE_SIZE), or a ternary, gives 5 words
- * differing, 3 in shape.
- */
 #define TEAR_MIRROR_S_SHIFT 11
 #define PUFF_LIGHTENING 0x40
 
-/*
- * Draws an effect as a screen-aligned rectangle with its image's frame, tinted
- * by color (RGBA 5551) and faded by its alpha. Kinds 0 and 1 are lightened.
- */
 void DrawBillboardEffect(Gfx **displayListHead, Effect *effect, u16 color) {
     Gfx *gfx = *displayListHead;
     ScreenPoint center;
@@ -1937,11 +1750,6 @@ void DrawBillboardEffect(Gfx **displayListHead, Effect *effect, u16 color) {
         ) < EFFECT_NEAREST_DEPTH) {
         halfSize = center.scaleX * effect->scale;
 
-        /*
-         * Returning early here is there to match: testing alpha and the size in
-         * one && chain gives 10 words differing (10 in shape), and the size
-         * first 92 (30)
-         */
         if (effect->alpha == 0.0f) {
             *displayListHead = gfx;
             return;
@@ -1953,7 +1761,6 @@ void DrawBillboardEffect(Gfx **displayListHead, Effect *effect, u16 color) {
             gDPSetPrimDepth(gfx++, center.depth, 0);
             gDPPipeSync(gfx++);
 
-            /* Texels per pixel, in s5.10 fixed point */
             textureStep = TexelRunStep((BILLBOARD_IMAGE_SIZE / 2), halfSize);
             if (effect->kind == EFFECT_KIND_RISING_CLUMP) {
                 gDPLoadTextureBlock(
@@ -2091,7 +1898,6 @@ void DrawBillboardEffect(Gfx **displayListHead, Effect *effect, u16 color) {
             gDPSetPrimColor(gfx++, 0, 0, red, green, blue, effect->alpha);
             gDPPipeSync(gfx++);
 
-            /* Odd frames of a tear draw the droplet mirrored */
             if (effect->kind == EFFECT_KIND_TEAR) {
                 gSPScisTextureRectangle(
                     gfx++,
@@ -2128,11 +1934,9 @@ void DrawBillboardEffect(Gfx **displayListHead, Effect *effect, u16 color) {
     *displayListHead = gfx;
 }
 
-/* Shadows are drawn only between these depths from ProjectPoint */
 #define SHADOW_FARTHEST_DEPTH (-60.0f)
 #define SHADOW_ALPHA 63
 
-/* Draws a dot of shadow on the spawn ground height, under an effect */
 void DrawEffectShadow(Gfx **displayListHead, Effect *effect) {
     Gfx *gfx = *displayListHead;
     ScreenPoint shadow;
@@ -2144,10 +1948,6 @@ void DrawEffectShadow(Gfx **displayListHead, Effect *effect) {
         effect->position[AXIS_Z],
         &shadow
     );
-    /*
-     * Nesting the tests is there to match: one && chain gives 11 words
-     * differing (11 in shape), and with the tests swapped 25 (11)
-     */
     if (depth < EFFECT_NEAREST_DEPTH) {
         if (depth > SHADOW_FARTHEST_DEPTH) {
             gDPPipeSync(gfx++);
@@ -2178,7 +1978,6 @@ void DrawEffectShadow(Gfx **displayListHead, Effect *effect) {
 #define DROP_IMAGE_SIZE 16
 #define DROP_GRAY 239
 
-/* Draws the drop that LaunchDrop placed, turned to face the camera */
 void DrawDrop(Gfx **displayListHead, CameraMatrices *matrices, Effect *unusedEffect UNUSED) {
     Gfx *gfx = *displayListHead;
 
@@ -2192,7 +1991,6 @@ void DrawDrop(Gfx **displayListHead, CameraMatrices *matrices, Effect *unusedEff
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
 
-    /* The masks of 6 are wider than the image; the original has them */
     gDPLoadTextureBlock_4b(
         gfx++,
         TextureAddress(ImageBody(f_DropImage)),
@@ -2225,13 +2023,9 @@ void DrawDrop(Gfx **displayListHead, CameraMatrices *matrices, Effect *unusedEff
     *displayListHead = gfx;
 }
 
-/* The spin is cut into this many steps, each drawn with the frame in
- * f_PingPongFrameIndices */
 #define DIVOT_SPIN_STEP_COUNT 12
 #define DIVOT_DEPTH_BIAS 0.75f
 
-/* Draws a flying divot as a screen-aligned rectangle, with the frame for its
- * spin angle */
 void DrawDivot(Gfx **displayListHead, Effect *effect) {
     Gfx *gfx = *displayListHead;
     ScreenPoint center;
@@ -2259,10 +2053,8 @@ void DrawDivot(Gfx **displayListHead, Effect *effect) {
         ) < EFFECT_NEAREST_DEPTH) {
         halfSize = center.scaleX * effect->scale;
         if (halfSize > 0) {
-            /* Texels per pixel, in s5.10 fixed point */
             textureStep = TexelRunStep((DIVOT_IMAGE_SIZE / 2), halfSize);
 
-            /* Half a step on, so that each frame is centered on its step */
             angle = effect->tilt + (M_PI / DIVOT_SPIN_STEP_COUNT);
             if (angle > FULL_TURN_RADIANS) {
                 angle -= FULL_TURN_RADIANS;
@@ -2315,7 +2107,6 @@ void DrawDivot(Gfx **displayListHead, Effect *effect) {
 
 #define DIVOT_MARK_FRAME 4
 
-/* Draws the divot's mark where SpawnShotDebris placed it, flat on the ground */
 void DrawDivotMark(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
@@ -2352,7 +2143,6 @@ void DrawDivotMark(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Draws a ripple at its matrix, faded by its alpha */
 void DrawRipple(Gfx **displayListHead, Effect *effect) {
     Gfx *gfx = *displayListHead;
 
@@ -2371,7 +2161,6 @@ void DrawRipple(Gfx **displayListHead, Effect *effect) {
     *displayListHead = gfx;
 }
 
-/* Draws a spreading circle at its matrix, faded by its alpha */
 void DrawSpreadingCircle(Gfx **displayListHead, Effect *effect) {
     Gfx *gfx = *displayListHead;
 
@@ -2390,8 +2179,6 @@ void DrawSpreadingCircle(Gfx **displayListHead, Effect *effect) {
     *displayListHead = gfx;
 }
 
-/* Rumbles the player's controller briefly if it has a Rumble Pak, unless a
- * replay is playing */
 void StartPlayerRumble(Player *player) {
     if (player->controllerIndex < MAXCONTROLLERS && g_GameState.replayKind == REPLAY_KIND_NONE) {
         switch (nuContRmbCheck(g_PlayerControllerPorts[player->controllerIndex])) {
@@ -2402,10 +2189,6 @@ void StartPlayerRumble(Player *player) {
                     RUMBLE_FRAME_COUNT
                 );
                 break;
-            /*
-             * The empty cases are there to match: without them, with one, or with
-             * a default 8 words differ, 6 in shape
-             */
             case PFS_ERR_NOPACK:
             case PFS_ERR_CONTRFAIL:
                 break;
@@ -2413,8 +2196,6 @@ void StartPlayerRumble(Player *player) {
     }
 }
 
-/* The same as StartPlayerRumble; the ball simulation calls it when the ball
- * passes a ring */
 void StartRingPassRumble(Player *player) {
     if (player->controllerIndex < MAXCONTROLLERS && g_GameState.replayKind == REPLAY_KIND_NONE) {
         switch (nuContRmbCheck(g_PlayerControllerPorts[player->controllerIndex])) {
@@ -2425,10 +2206,6 @@ void StartRingPassRumble(Player *player) {
                     RUMBLE_FRAME_COUNT
                 );
                 break;
-            /*
-             * The empty cases are there to match: without them, with one, or with
-             * a default 8 words differ, 6 in shape
-             */
             case PFS_ERR_NOPACK:
             case PFS_ERR_CONTRFAIL:
                 break;
@@ -2438,7 +2215,6 @@ void StartRingPassRumble(Player *player) {
 
 #define RAIN_SPLASH_IMAGE_ASSET 0x6BC
 
-/* Sets the weather, and for rain loads its image and sets up its buffers */
 void StartWeather(s32 weather) {
     EncodedAsset asset;
 
@@ -2453,7 +2229,6 @@ void StartWeather(s32 weather) {
     f_Weather = weather;
 }
 
-/* Frees what StartWeather loaded and stops the rain's sound */
 void EndWeather(void) {
     if (f_Weather == WEATHER_RAIN) {
         FreeMemory(&f_RainSplashImage);
@@ -2468,8 +2243,6 @@ void EndWeather(void) {
 #define RAIN_CENTER_DISTANCE 150.0f
 #define RAIN_SPLASH_SPREAD_STEP_COUNT 500
 
-/* Centers the rain RAIN_CENTER_DISTANCE ahead of the camera, in the direction
- * it looks */
 void PlaceRainCenter(void) {
     s32 viewX;
     s32 viewZ;
@@ -2478,10 +2251,6 @@ void PlaceRainCenter(void) {
     viewX = g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
     viewZ = g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
 
-    /*
-     * Holding the view's length in scale is there to match: a length local
-     * gives 6 words differing, none in shape
-     */
     scale = sqrtf((viewX * viewX) + (viewZ * viewZ));
     f_RainCenter[0] = viewX;
     f_RainCenter[1] = viewZ;
@@ -2498,24 +2267,16 @@ void PlaceRainCenter(void) {
 }
 
 #define RAIN_SPREAD_STEP_COUNT 200
-/* Course units above the drop's lowest start, which is RAIN_TOP_BELOW_EYE below
- * the camera */
 #define RAINDROP_LOWEST_RISE 0x1A400
 #define RAIN_TOP_BELOW_EYE 15.0f
 #define RAINDROP_LENGTH 90.0f
 
-/*
- * Places a raindrop at a random spot above the area around the rain's center,
- * moved back along the rain's path by as far as it drifts while falling to just
- * below the camera.
- */
 void ResetRaindrop(Raindrop *drop) {
     f32 fallFrameCount;
 
     drop->head[AXIS_X] = (((rand() % RAIN_SPREAD_STEP_COUNT) - (RAIN_SPREAD_STEP_COUNT / 2)) *
                              RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE) +
         f_RainCenter[0];
-    /* Course y points down */
     drop->head[AXIS_Y] =
         (-RAINDROP_LOWEST_RISE - (rand() % RAIN_SPREAD_STEP_COUNT * RAIN_SPREAD_STEP)) *
         COURSE_TO_WORLD_SCALE;
@@ -2536,7 +2297,6 @@ void ResetRaindrop(Raindrop *drop) {
     drop->tailScale = 1.0f;
 }
 
-/* Moves a splash to a random spot on the ground around the rain's center */
 void ResetRainSplash(RainSplash *splash) {
     splash->position[AXIS_X] =
         (((rand() % RAIN_SPLASH_SPREAD_STEP_COUNT) - (RAIN_SPLASH_SPREAD_STEP_COUNT / 2)) *
@@ -2554,7 +2314,6 @@ void ResetRainSplash(RainSplash *splash) {
     splash->column = 0;
 }
 
-/* Sets the rain's path from the wind, and places every raindrop and splash */
 void StartRain(void) {
     f32 direction;
     f32 speed;
@@ -2584,18 +2343,10 @@ void StartRain(void) {
 
 #define RAIN_SOUND_STEADY_VOLUME 80.0f
 #define RAIN_SOUND_FADE_STEP 0.5f
-/* A camera that moves farther than this across the ground in a frame takes the
- * rain with it */
 #define RAIN_CAMERA_JUMP_DISTANCE 15.0f
 #define RAINDROP_LANDED_FRAME_COUNT 8
 #define RAIN_SPLASH_FRAME_COUNT 8
 
-/*
- * Moves the rain on while it rains: fades the rain sound down, follows the wind
- * and the camera, restarts each splash after RAIN_SPLASH_FRAME_COUNT frames,
- * and drops each raindrop until it reaches the ground, then restarts it
- * RAINDROP_LANDED_FRAME_COUNT frames later.
- */
 void UpdateRain(void) {
     Vec3 cameraShift = {0.0f, 0.0f, 0.0f};
     f32 direction;
@@ -2634,10 +2385,6 @@ void UpdateRain(void) {
         f_LastRainEye[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
         f_LastRainEye[AXIS_Z] = g_Cameras[0].view.eye[AXIS_Z];
 
-        /*
-         * Indexing the drop each time is there to match: reading it through drop
-         * gives 168 words differing, 14 in shape
-         */
         f_Raindrops[f_GroundCheckDropIndex].groundHeight =
             GetGroundHeight(
                 f_Raindrops[f_GroundCheckDropIndex].head[AXIS_X] * WORLD_TO_COURSE_SCALE,
@@ -2698,50 +2445,34 @@ void UpdateRain(void) {
     }
 }
 
-/* ProjectPoint depths that rain is drawn at, nearest first */
 #define RAINDROP_NEAREST_DEPTH (-15.0f)
 #define RAIN_SPLASH_NEAREST_DEPTH (-7.5f)
-/* How far a streak's second edge is offset from its first, in quarter pixels */
 #define RAINDROP_WIDTH 5.0f
 #define RAIN_ALPHA_THRESHOLD 1
 #define RAIN_SPLASH_IMAGE_WIDTH 32
 #define RAIN_SPLASH_IMAGE_HEIGHT 64
-/* The splash image holds columns of square frames */
 #define RAIN_SPLASH_FRAME_SIZE 16
-/* Shifts a frame index to its texture coordinate, in 10.5 fixed point */
 #define RAIN_SPLASH_FRAME_SHIFT 9
-/* Each splash frame shows for this many frames */
 #define RAIN_SPLASH_FRAME_DURATION 2
 #define RAIN_SPLASH_GRAY 0xBF
 #define RAIN_SPLASH_ALPHA 0x9F
-/* Splash half sizes, in quarter pixels for each unit of projected scale */
 #define RAIN_SPLASH_HALF_SIZE_PER_SCALE 8.0f
 #define LANDED_DROP_SMALLEST_HALF_SIZE 4.0f
 #define RAIN_SPLASH_SMALLEST_HALF_SIZE 1.0f
 #define RAIN_SPLASH_LARGEST_HALF_SIZE 16
 
-/*
- * Updates the rain and draws it while it rains, unless the main camera is in
- * mode 2 or 8. Falling drops are drawn as streaks between their projected head
- * and tail, and landed drops and splashes as frames of f_RainSplashImage.
- */
 void DrawRain(Gfx **displayListHead, CameraMatrices *matrices) {
     ScreenPoint point;
     ScreenPoint splashPoint;
     Gfx *gfx = *displayListHead;
     s32 index;
 
-    /*
-     * Separate variables for each loop are there to match: drop for the
-     * streaks gives 40 words differing, for the landed drops 26, and for both
-     * 66, none in shape
-     */
     Raindrop *drop;
     Raindrop *streak;
     Raindrop *landedDrop;
     RainSplash *splash;
-    f32 lengthX; /* Then the streak's widening along y */
-    f32 lengthY; /* Then the streak's widening along x */
+    f32 lengthX;
+    f32 lengthY;
     f32 widthScale;
     s32 halfSize;
     s32 splashSize;
@@ -2751,10 +2482,6 @@ void DrawRain(Gfx **displayListHead, CameraMatrices *matrices) {
     if (g_HoleSetup.conditions.isRaining == TRUE &&
         f_Weather == WEATHER_RAIN
 
-        /*
-         * Comparing with FALSE is there to match: ! gives 8 words differing,
-         * 8 in shape
-         */
         && IsCloseUpCameraMode(g_Cameras[0].mode) == FALSE) {
         UpdateRain();
         for (index = 0; index != f_RaindropCount; index++) {
@@ -2764,11 +2491,6 @@ void DrawRain(Gfx **displayListHead, CameraMatrices *matrices) {
                 drop->tailScreenX = point.x * QUARTER_PIXELS_PER_PIXEL;
                 drop->tailScreenY = point.y * QUARTER_PIXELS_PER_PIXEL;
 
-                /*
-                 * Storing the depth before the flags is there to match: the flags
-                 * first give 10 words differing (8 in shape), and after the scale 15
-                 * (7)
-                 */
                 drop->tailDepth = point.depth;
                 drop->flags &= ~RAINDROP_OFF_SCREEN;
                 drop->tailScale = point.scaleX;
@@ -2822,15 +2544,10 @@ void DrawRain(Gfx **displayListHead, CameraMatrices *matrices) {
         for (index = 0; index != f_RaindropCount; index++) {
             streak = &f_Raindrops[index];
 
-            /* On screen, with the head still falling */
             if (streak->flags == 0) {
                 lengthX = streak->headScreenX - streak->tailScreenX;
                 lengthY = streak->headScreenY - streak->tailScreenY;
                 if (lengthX == 0.0f && lengthY == 0.0f) {
-                    /*
-                     * The empty branch is there to match: the else's test inverted, as
-                     * an || chain or negated, gives 8 words differing, 8 in shape
-                     */
                 }
                 else {
                     widthScale = RAINDROP_WIDTH / sqrtf((lengthX * lengthX) + (lengthY * lengthY));
@@ -2838,11 +2555,6 @@ void DrawRain(Gfx **displayListHead, CameraMatrices *matrices) {
                     gDPSetPrimDepth(gfx++, streak->tailDepth, 0);
                     gDPPipeSync(gfx++);
 
-                    /*
-                     * Scaling the lengths in place is there to match: widening locals,
-                     * or the products in the vertex words, give 34 words differing,
-                     * none in shape
-                     */
                     lengthY *= widthScale;
                     lengthX *= widthScale;
                     gSPModifyVertex(
@@ -3009,10 +2721,6 @@ void DrawRain(Gfx **displayListHead, CameraMatrices *matrices) {
     }
 }
 
-/*
- * Starts showing the birdie badge count, which DrawBirdieBadgeCount draws. Its
- * spinning badge and digit images borrow the cloud and clump images' memory.
- */
 void ShowBirdieBadgeCount(s32 badgeCount) {
     EncodedAsset asset;
 
@@ -3037,17 +2745,11 @@ void ShowBirdieBadgeCount(s32 badgeCount) {
 #define BADGE_COUNT_ADD_FRAME 15
 #define BADGE_COUNT_SOUND 0x6B
 #define BADGE_COUNT_SOUND_VOLUME 100
-/* The badge drops in from above its resting place, then rises off the top */
 #define BADGE_SLIDE_PER_FRAME 4
 #define BADGE_DROP_START_OFFSET (-24)
 #define BADGE_RISEN_OFFSET (-100)
 #define COUNT_GLYPHS_HEIGHT 256
 
-/*
- * Drops the spinning badge and its count in at the top right, adds the new
- * badge to the count, then lifts them out of view. ShowBirdieBadgeCount loaded
- * their images in place of the cloud and clump images.
- */
 void DrawBirdieBadgeCount(Gfx **displayListHead) {
     Gfx *gfx;
     s32 spinFrame;

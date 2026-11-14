@@ -1,8 +1,3 @@
-/*
- * The round's HUD: loading its images and the scenery's, the shot panel, the
- * wind, the landing reaction, the green's grid, the ball's trail and the hole
- * intro's images.
- */
 #include "round_hud.h"
 
 #include <math.h>
@@ -65,24 +60,17 @@
 #include "text.h"
 #include "turn.h"
 
-/* f_SceneryState values */
 enum SceneryState {
     SCENERY_UNLOADED,
-    SCENERY_BILLBOARDS_READY, /* The billboard heap is set up */
-    /* The images of the hole's scenery are loaded too */
+    SCENERY_BILLBOARDS_READY,
     SCENERY_LOADED
 };
 
-/* Bytes of the billboard manager's heap */
 #define BILLBOARD_HEAP_SIZE 0x7118
 
-/* Bytes of each buffer the scenery images come with */
 #define SCENERY_BUFFER_A_SIZE 0x128
-/* Bytes of the buffer that StartShotPanel loads the lie's image into */
 #define LIE_IMAGE_SIZE 0x1208
 
-/* Images of the round's scenery, effects and HUD, named after their asset ids
- * until their users are decompiled */
 #define ASSET_PIN_FLAG_IMAGES 0x541
 #define ASSET_WIND_ICON_IMAGE 0x5A4
 #define ASSET_LEADER_LINE_IMAGE 0x972
@@ -103,7 +91,6 @@ enum SceneryState {
 #define ASSET_ROUND_IMAGE_723 0x723
 #define ASSET_DISTANCE_SIGN_IMAGE 0x724
 
-/* The image of the hole's par, one per par from 3 to 5 */
 #define ASSET_PAR_THREE_IMAGE 0x565
 #define ASSET_PAR_FOUR_IMAGE 0x566
 #define ASSET_PAR_FIVE_IMAGE 0x567
@@ -111,18 +98,11 @@ enum SceneryState {
 #define HOLE_IMAGE_WIDTH 48
 #define HOLE_IMAGE_HEIGHT 42
 
-/*
- * The hole's flag, which shows the hole image, is a grid of vertices. pin.c
- * draws it at the cup and DrawHoleImageModel draws it on the screen. Its
- * front and back sides each have one grid per matrix buffer; the back's
- * texture runs the other way.
- */
 #define HOLE_FLAG_COLUMN_COUNT 6
 #define HOLE_FLAG_ROW_COUNT 5
 #define HOLE_FLAG_VERTEX_COUNT (HOLE_FLAG_COLUMN_COUNT * HOLE_FLAG_ROW_COUNT)
 #define HOLE_FLAG_SIDE_COUNT 2
 #define HOLE_FLAG_CELL_SIZE 160
-/* In s10.5 texture coordinates */
 #define HOLE_FLAG_TEXEL_COLUMN_STEP 0x266
 #define HOLE_FLAG_TEXEL_ROW_STEP 0x2A0
 #define HOLE_FLAG_BACK_TEXEL_START 0xC00
@@ -131,7 +111,6 @@ enum SceneryState {
     f_HoleFlagVertices[0][g_MatrixBufferIndex][((row) * HOLE_FLAG_COLUMN_COUNT) + (column)]
 #define HOLE_FLAG_SHADE(row, column) f_HoleFlagShades[((row) * HOLE_FLAG_COLUMN_COUNT) + (column)]
 
-/* The flag can be skewed by HOLE_FLAG_SKEW per column, but it is zero */
 #define HOLE_FLAG_SKEW 0.0f
 #define HOLE_FLAG_ROW_SKEW_SCALE 5.0f
 #define HOLE_FLAG_MIN_WIND_SPEED 1.5f
@@ -152,49 +131,29 @@ enum SceneryState {
 #define HOLE_FLAG_FIRST_PULLED_COLUMN 2
 #define HOLE_FLAG_DEPTH_PER_PULL 4
 
-/* The near and far planes of the screen's orthographic projection */
 #define SCREEN_ORTHO_NEAR 1.0f
 #define SCREEN_ORTHO_FAR 1000.0f
-/* g_ScreenEffectProjection's view */
 #define SCREEN_EFFECT_FIELD_OF_VIEW 45.0f
 #define SCREEN_EFFECT_NEAR_PLANE 10.0f
 #define SCREEN_EFFECT_FAR_PLANE 8000.0f
-/* The view of f_UnusedNarrowProjection, which nothing reads */
 #define NARROW_FIELD_OF_VIEW 10.0f
 #define NARROW_FAR_PLANE 30000.0f
 
-/*
- * A solid arrow: a triangular head on a rectangular shaft, from -160 to 160
- * along y, with a face at each z of +-40, and a larger outline around it.
- * The body's texture runs along y, a texel row every
- * ARROW_UNITS_PER_TEXEL_ROW units.
- */
 #define ARROW_COUNT 2
 #define ARROW_VERTEX_COUNT 14
 #define ARROW_UNITS_PER_TEXEL_ROW 10
-/* The texel row at y = 0 */
 #define ARROW_CENTER_TEXEL_ROW 16
-/* Texture coordinates are in s10.5 fixed point */
 #define TEXEL_COORDINATE_SHIFT 5
 
 typedef struct ArrowShape {
-    /* 0x000 */ Vtx body[ARROW_VERTEX_COUNT];
-    /* 0x0E0 */ Vtx outline[ARROW_VERTEX_COUNT];
-} ArrowShape; /* size = 0x1C0 */
+      Vtx body[ARROW_VERTEX_COUNT];
+      Vtx outline[ARROW_VERTEX_COUNT];
+} ArrowShape;
 
-/*
- * The marker of the current shot's offset, with the positions it had in the
- * previous frames for its trail. The offset is clamped to a circle, in shot
- * units; the marker moves a pixel every SHOT_OFFSET_UNITS_PER_PIXEL units.
- */
 #define SHOT_OFFSET_MARKER_COUNT 5
 #define SHOT_OFFSET_MAX_RADIUS 56.0f
 #define SHOT_OFFSET_UNITS_PER_PIXEL 4
 
-/*
- * The marker is an animated 16x16 image, drawn at an offset from the shot
- * panel. Its asset holds the frames of the animation, then a still frame.
- */
 #define SHOT_OFFSET_MARKER_SIZE 16
 #define SHOT_OFFSET_MARKER_FRAME_COUNT 11
 #define SHOT_OFFSET_MARKER_FRAME_SIZE (SHOT_OFFSET_MARKER_SIZE * SHOT_OFFSET_MARKER_SIZE / 2)
@@ -202,16 +161,13 @@ typedef struct ArrowShape {
 #define SHOT_OFFSET_MARKER_X 264
 #define SHOT_OFFSET_MARKER_Y 174
 
-/* The images that a hole's intro shows for the bets and the match standing */
 #define ASSET_LONGEST_DRIVE_IMAGE 0x554
 #define ASSET_NEAREST_PIN_IMAGE 0x555
 #define ASSET_DORMIE_IMAGE 0x8FC
 #define ASSET_SUDDEN_DEATH_IMAGE 0x8FF
 
-/* Which of the hole intro's images are loaded */
 #define HOLE_INTRO_CONTEST_IMAGE_LOADED (1 << 0)
 #define HOLE_INTRO_MATCH_IMAGE_LOADED (1 << 1)
-/* The contest image is 256x64 and the match standing image 160x40, centered */
 #define CONTEST_IMAGE_WIDTH 256
 #define CONTEST_IMAGE_STRIP_HEIGHT 8
 #define CONTEST_IMAGE_STRIP_COUNT 8
@@ -223,30 +179,16 @@ typedef struct ArrowShape {
 #define MATCH_IMAGE_X ((SCREEN_WIDTH - MATCH_IMAGE_WIDTH) / 2)
 #define MATCH_IMAGE_Y 140
 
-/* How many of the ball's recent positions its trail is drawn through */
 #define BALL_TRAIL_LENGTH 128
 
-/*
- * The scrolling of the wind arrow's texture, a step for every
- * WIND_SPEED_PER_ARROW_SCROLL_STEP of wind; its texture repeats every
- * ARROW_TEXTURE_PERIOD of texture coordinate.
- */
 #define WIND_SPEED_PER_ARROW_SCROLL_STEP 0x2000
 #define ARROW_TEXTURE_PERIOD 0x2000
 #define ARROW_TEXTURE_COORDINATE_LIMIT 0x4000
 
-/* A debugging option that lets the second controller nudge the HUD vertically
- */
 #define GAME_FLAG_ADJUST_HUD_OFFSET 0x6E
 #define HUD_OFFSET_CONTROLLER 1
 
-/*
- * A debug screen for trying out text colors: controller 2 picks a channel
- * of the primitive or environment color and changes it, and moves and
- * shades the sample text
- */
 #define COLOR_TEST_CONTROLLER 1
-/* The primitive and environment colors */
 #define COLOR_TEST_COLOR_COUNT 2
 #define COLOR_TEST_CHANNEL_COUNT 3
 #define COLOR_TEST_PRIM 0
@@ -254,22 +196,16 @@ typedef struct ArrowShape {
 #define COLOR_TEST_STEP 4
 #define COLOR_TEST_TEXT_COLUMN 20
 #define COLOR_TEST_TEXT_ROW 5
-/* Columns from one channel's value to the next */
 #define COLOR_TEST_COLUMN_WIDTH 5
-/* "Sample" in half-width katakana, then "ABCDEFG" */
 extern const char f_ColorTestSampleText[];
-/* Printed over a cursor to erase it */
 extern const char f_BlankText[];
 
 #define HUD_OFFSET_TEXT_COLUMN 20
 #define HUD_OFFSET_TEXT_ROW 6
 
-/* How long the shot camera waits after the ball lands, in frames */
 #define LANDING_WAIT_FRAME_COUNT 40
 #define LANDING_WAIT_LONG_FRAME_COUNT 60
 
-/* The inset view that shows where the ball landed, and the one Toad's movie
- * plays in */
 #define LANDING_INSET_CENTER_X 160
 #define LANDING_INSET_CENTER_Y 160
 #define LANDING_INSET_WIDTH 64
@@ -277,32 +213,22 @@ extern const char f_BlankText[];
 #define MOVIE_INSET_CENTER_X 160
 #define MOVIE_INSET_CENTER_Y 128
 #define MOVIE_INSET_SIZE 128
-/* InsetView's ignored codes */
 #define LANDING_INSET_SOURCE_CODE 77
 #define LANDING_INSET_SIZE_CODE 77
 #define MOVIE_INSET_SIZE_CODE 101
 
-/* The text of the landing reaction, in two glyph groups */
 enum LandingGlyphGroup {
     LANDING_GLYPH_GROUP_FIRST,
     LANDING_GLYPH_GROUP_SECOND
 };
 
-/* The reaction stops counting its frames here */
 #define LANDING_REACTION_FRAME_COUNT 30
 #define LANDING_NAME_GLYPH_Y 8
 #define LANDING_DISTANCE_GLYPH_Y (-8)
 #define LANDING_NAME_Y 96
 #define LANDING_DISTANCE_Y 112
 #define HUNDREDTHS_PER_UNIT 100
-/*
- * Whether the shot panel shows distances off the green in meters, which its
- * text can draw. This version shows yards, but DrawRoundHud's meter formats
- * stay in its strings, each between the feet and yards formats of the same
- * choice, as a branch on a constant leaves them.
- */
 #define SHOWS_METERS FALSE
-/* The translucent black panel behind the text spins half a turn as it grows */
 #define LANDING_PANEL_ALPHA 159
 #define LANDING_PANEL_START_DEGREES 180.0f
 #define LANDING_PANEL_DEGREES_PER_FRAME 18.0f
@@ -316,32 +242,22 @@ enum LandingGlyphGroup {
 
 #define RING_TEXTURE_OUTER_RADIUS 62
 
-/* The HUD keeps this far in from the edges of the screen */
 #define HUD_MARGIN 8
 
-/* The black bars that grow over the top and bottom of the HUD's area */
 #define LETTERBOX_GROWTH_STEP 2
 #define LETTERBOX_MAX_HEIGHT 16
 
-/* Where the hole image sits in front of the perspective camera, at a tenth of
- * its size */
 #define HOLE_IMAGE_MODEL_X (-240.0f)
 #define HOLE_IMAGE_MODEL_Y 180.0f
 #define HOLE_IMAGE_MODEL_Z (-500.0f)
 #define HOLE_IMAGE_MODEL_SCALE 0.1f
 
-/*
- * StartShotEffect's long shot effect, which DrawShotEffect draws, plays a
- * sound. For the Wario and Game Boy ball 7 contact styles it is instead the
- * spark trail, with a different, louder sound.
- */
 #define SHOT_EFFECT_TIME_OFF (-1.0f)
 #define LONG_SHOT_SOUND_CHANNEL 14
 #define LONG_SHOT_SOUND_VOLUME 0x40
 #define SPARK_TRAIL_SOUND_VOLUME 0x60
 #define LONG_SHOT_SOUND_REVERB 30
 
-/* The distance font's unit and point glyphs, after its digits */
 #define DISTANCE_METERS_S 80
 #define DISTANCE_YARDS_S 88
 #define DISTANCE_FEET_S 96
@@ -363,19 +279,11 @@ FILE_STATIC Mtx f_UnusedNarrowProjection;
 
 #define ANIMATED_ICON_LABEL_COUNT 3
 
-/*
- * The wind indicator is a model in module 9, lit by f_WindArrowLights. It
- * sits in front of the camera, tilted to its pitch and turned to the wind.
- */
 #define WIND_INDICATOR_DEPTH (-300.0f)
 #define WIND_INDICATOR_TILT 0.3f
 #define WIND_INDICATOR_SCALE (-0.07f)
 #define WIND_INDICATOR_FACING_DEGREES 180.0
 
-/*
- * The wind speed display's icon pulses around these half sizes, and is wider
- * for two-digit speeds. Its texture is WIND_ICON_TEXTURE_WIDTH by HEIGHT.
- */
 #define WIND_ICON_PULSE_STEP (M_PI / 18)
 #define WIND_SPEED_TO_METERS_SCALE 3600
 #define WIND_SPEED_TO_METERS_DIVISOR 104857600
@@ -397,11 +305,8 @@ FILE_STATIC Mtx f_UnusedNarrowProjection;
 #define WIND_WIDE_TEXT_SHIFT_X 6.0f
 #define WIND_ARROWS_OFFSET_X 52.0f
 #define WIND_ARROWS_OFFSET_Y 56.0f
-/* Arrows either side of the wind speed; they sit closer when there is no wind
- */
 #define WIND_ARROWS_WIDE_GAP 56
 #define WIND_ARROWS_NARROW_GAP 44
-/* The wind speed font has ten digits and then a wider 'm' */
 #define WIND_FONT_WIDTH 144
 #define WIND_FONT_HEIGHT 14
 #define WIND_DIGIT_WIDTH 12
@@ -421,9 +326,7 @@ FILE_STATIC Mtx f_UnusedNarrowProjection;
 
 void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y);
 
-/* Heights in meters or feet nearer zero than this */
 #define LEVEL_HEIGHT 0.01f
-/* On the tee ground, the shot panel sits this much higher */
 #define TEE_GROUND_PANEL_OFFSET_Y (-3)
 #define SHOT_PANEL_START_OFFSET_X 64
 
@@ -435,24 +338,16 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y);
 #define COURSE_NAME_Y 32
 #define HOLE_NUMBER_Y 48
 
-/* The asset loaded into an image's buffer, before any is */
 #define NO_IMAGE_ASSET (-1)
-/* f_LandingReactionFrame before the first landing reaction */
 #define NO_LANDING_REACTION_FRAME (-1)
-/* The HUD sits this far above its layout until the debug option moves it */
 #define INITIAL_HUD_OFFSET_Y (-2)
-/* The green grid's alpha while it shows */
 #define GREEN_GRID_ALPHA 0x7F
-/* The long shot effect's vertex groups, and the spark trail's frames */
 #define LONG_SHOT_GROUP_COUNT 4
 #define SPARK_TRAIL_FRAME_COUNT 6
-/* The icon cycles through ANIMATED_ICON_FRAME_COUNT images, a new one every few
- * frames */
 #define ANIMATED_ICON_FRAME_COUNT 8
 
 static void *f_SceneryBillboardHeap = NULL;
 static s32 f_ClubNameImageIndex = 0;
-/* Cleared by InitRoundHud, and read by no routine */
 static s32 f_UnusedHudInitWord = 0;
 AssetId g_CharacterImageAssets[CHARACTER_COUNT] = {
     0x7BC,
@@ -496,7 +391,6 @@ s16 g_CharacterPaletteAssets[CHARACTER_COUNT] = {
 };
 static s32 f_ShotPanelOffsetY = 0;
 s32 g_ShotPanelOffsetX = 0;
-/* The first asset of each course record's hole images, one per hole */
 static AssetId f_HoleImageAssets[COURSE_RECORD_COUNT] =
     {0x420, 0x432, 0x444, 0x468, 0x456, 0x47A, 0x48C, 0x49E, 0x8F0};
 s32 g_MatrixBufferIndex = 0;
@@ -586,10 +480,6 @@ static Vtx f_LieIconVertices[2 * QUAD_VERTEX_COUNT] = {
     {{{24, -24, 0}, 0, {0xBFF, 0x5FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{24, 0, 0}, 0, {0xBFF, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-/*
- * Read by no routine. Two display lists of the same triangles, over vertices
- * 0 to 13 and then 14 to 27, where an ArrowShape has its body and its outline
- */
 static Gfx f_UnusedArrowTriangles[] UNUSED = {
     gsSP2Triangles(10, 13, 12, 0, 10, 12, 11, 0),
     gsSP2Triangles(3, 1, 8, 0, 3, 8, 10, 0),
@@ -614,15 +504,10 @@ static Gfx f_UnusedArrowTriangles[] UNUSED = {
     gsSP2Triangles(14, 15, 16, 0, 21, 23, 22, 0),
     gsSPEndDisplayList(),
 };
-/* The image asset of the club's head that the HUD shows, loaded into
- * f_ClubHeadImage */
 static s32 f_ClubHeadImageAsset = NO_IMAGE_ASSET;
-/* The image asset of the lie that the HUD shows, loaded into f_LieImage */
 static s32 f_LieImageAsset = NO_IMAGE_ASSET;
 static s32 f_SceneryState = SCENERY_UNLOADED;
-/* Set while the overlay of the course selection is loaded for the hole */
 static Boolean f_IsCourseSelectLoaded = FALSE;
-/* Read by no routine */
 static Gfx f_UnusedNoOpDisplayList[] UNUSED = {
     gsDPNoOp(),
     gsSPEndDisplayList(),
@@ -639,23 +524,19 @@ static Vtx f_LandingPanelVertices[4] = {
     {{{72, 20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 static s32 f_GreenGridAlpha = GREEN_GRID_ALPHA;
-/* The quad that each segment of the ball trail, and of the green grid, moves
- * into place on the screen */
 static Vtx f_BallTrailVertices[4] = {
     {{{0, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}},
     {{{0, -1, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}},
     {{{48, -1, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}},
     {{{48, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}},
 };
-/* Read by no routine */
 static s32 f_UnusedWordBeforeGridScroll UNUSED = 0;
 static f32 f_GreenGridScroll = 0.0f;
-static s32 f_BallTrailHead = 0; /* The latest position */
+static s32 f_BallTrailHead = 0;
 BallTrailState g_BallTrailState = BALL_TRAIL_OFF;
 static Radians f_WindIconPulseAngle = 0.0f;
 static Lights1 f_WindArrowLights = gdSPDefLights1(0x80, 0x80, 0x80, 0xFF, 0xFF, 0xFF, 80, -80, 73);
 static s32 f_HudOffsetY = INITIAL_HUD_OFFSET_Y;
-/* The name image of each club slot */
 static AssetId f_ClubNameAssets[CLUB_SET_SIZE] = {
     0x4F1,
     0x4F2,
@@ -690,7 +571,6 @@ static Vtx f_SparkTrailVertices[16] = {
     {{{0, -32, 0}, 0, {0, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},
     {{{0, 32, 0}, 0, {0xC00, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},
 };
-/* Four groups of eight vertices, each three pairs of triangles */
 static Vtx f_LongShotVertices[LONG_SHOT_GROUP_COUNT * 8] = {
     {{{-3, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
     {{{-2, -32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0x60}}},
@@ -731,10 +611,7 @@ static s32 f_SparkTrailFrameAssets[SPARK_TRAIL_FRAME_COUNT] =
     {0x6A7, 0x6A8, 0x6A9, 0x6AA, 0x6AB, 0x6AC};
 static s32 f_SparkTrailFrame = 1;
 static s32 f_SparkTrailFrameTimer = 0;
-/* The two frame buffers in g_SharedEffectImages, each loaded in turn and both
- * drawn */
 static s32 f_SparkTrailBufferIndex = 0;
-/* Read by no routine */
 static s32 f_UnusedWordAfterSparkTrailIndex UNUSED = 0;
 static f32 f_HoleFlagWavePhase = 0.0f;
 static s32 f_ShotOffsetMarkerFrame = 0;
@@ -742,7 +619,6 @@ static u32 f_AnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT] =
     {0x648, 0x649, 0x64A, 0x64B, 0x64C, 0x64B, 0x64A, 0x649};
 static s32 f_AnimatedIconFrameTime = 0;
 static s32 f_AnimatedIconFrame = 0;
-/* Read by no routine */
 static s32 f_UnusedIconFrameOrder[4] UNUSED = {0, 1, 2, 1};
 static s32 f_AnimatedIconImageIndex = 0;
 static f32 f_AnimatedIconX = 0.0f;
@@ -756,14 +632,11 @@ static s32 f_TestTextY = SCREEN_HEIGHT / 2;
 static s32 f_TestChannelIndex = 0;
 static s32 f_TestColorIndex = 0;
 static Boolean f_IsTestGradientShown = FALSE;
-/* Read by no routine */
 static s32 f_UnusedWordAfterTestGradient UNUSED = 0;
-/* The HUD's letterbox height, which DrawLetterbox grows each frame */
 static s32 f_LetterboxHeight = 0;
 static s32 f_PinFlagTime = 0;
 static s32 f_RingFrame = 0;
 static s32 f_RingFrameTime = 0;
-/* Read by no routine */
 static Gfx f_UnusedEmptyHudDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
 };
@@ -772,22 +645,15 @@ static u16 f_WhiteDistancePalette[] = {
 };
 static s32 f_LoadedHoleIntroImages = 0;
 
-/*
- * The grid drawn over the ground around a shot's target, as
- * GREEN_GRID_COLUMN_COUNT columns of points that run along the aim. Each point
- * is tinted by how far it is above or below the target, and the grid's lines
- * scroll towards the target while it shows.
- */
 #define GREEN_GRID_COLUMN_COUNT 8
 #define GREEN_GRID_MAX_ROW_COUNT 32
 #define GREEN_GRID_POINT_COUNT (GREEN_GRID_MAX_ROW_COUNT * GREEN_GRID_COLUMN_COUNT)
 
-/* A point of the ball's trail on the screen, in quarter pixels */
 typedef struct TrailPoint {
-    /* 0x00 */ s32 x;
-    /* 0x04 */ s32 y;
-    /* 0x08 */ s32 depth;
-} TrailPoint; /* size = 0x0C */
+      s32 x;
+      s32 y;
+      s32 depth;
+} TrailPoint;
 
 static Mtx f_LandingPanelMatrices[MATRIX_BUFFER_COUNT];
 static Mtx f_GreenGridMatrix;
@@ -803,15 +669,10 @@ static Vec3 f_ShotEffectRotation;
 static s32 f_ShotOffsetMarkerTexelOffset;
 static void *f_LieImage;
 
-/* Read by no routine */
 static u8 f_UnusedBytesBeforeClubHead[4] UNUSED;
 
 static void *f_ClubHeadImage;
-/* The selected club's name image, loaded into each buffer in turn as
- * f_ClubNameImageIndex alternates */
 static void *f_ClubNameImages[2];
-/* The images of the animated icon's labels and of the icon; see
- * DrawAnimatedIcon */
 static void *f_AnimatedIconLabelImages[ANIMATED_ICON_LABEL_COUNT];
 static void *f_AnimatedIconImages[2];
 static void *f_DistanceFont;
@@ -820,7 +681,6 @@ static void *f_RingImages;
 static void *f_RestLabelImage;
 static void *f_FlatLabelImage;
 static void *f_DownLabelImage;
-/* Loaded and freed with the HUD's images, but never drawn */
 static void *f_UnusedRoundImage;
 static void *f_UpLabelImage;
 static void *f_ParImage;
@@ -828,20 +688,16 @@ static void *f_ShotOffsetMarkerImage;
 static void *f_WindIconImage;
 static s32 f_ShotOffsetMarkerXs[SHOT_OFFSET_MARKER_COUNT];
 static s32 f_ShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT];
-/* Cleared by InitRoundHud as it sets the scissor, and read by no routine */
 static s32 f_UnusedHudScissorWord;
 static void *f_HoleImage;
 static Vtx f_HoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT][HOLE_FLAG_VERTEX_COUNT];
-/* s8 because WaveHoleFlag loads them as signed bytes when it spreads them */
 static s8 f_HoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
 static s32 f_GreenGridHeights[GREEN_GRID_POINT_COUNT];
 static TrailPoint f_BallTrailPoints[BALL_TRAIL_LENGTH];
-/* The ball's recent world positions, which its trail is drawn through */
 static f32 f_BallTrail[BALL_TRAIL_LENGTH][3];
 static void *f_HoleContestImage;
 static void *f_MatchStandingImage;
 
-/* Sets up what the hole's drawing needs before its first frame */
 void PrepareHoleDisplay(void) {
     s32 i;
 
@@ -861,11 +717,6 @@ void PrepareHoleDisplay(void) {
     InitSkyColors();
 }
 
-/*
- * The vertices of the hole flag's grid at index grid of all its sides'
- * buffers. The original indexes the first side's buffers past their end; the
- * modern build splits the index into a side and a buffer.
- */
 #ifdef AVOID_UB
 #    define HoleFlagGridVertices(grid) \
         (f_HoleFlagVertices[(grid) / MATRIX_BUFFER_COUNT][(grid) % MATRIX_BUFFER_COUNT])
@@ -873,17 +724,8 @@ void PrepareHoleDisplay(void) {
 #    define HoleFlagGridVertices(grid) (f_HoleFlagVertices[0][grid])
 #endif
 
-/*
- * Lays out the wind flag and builds the projections the HUD draws with
- */
 void InitRoundHud(void) {
     s32 grid;
-    /*
-     * Also the back grids' rows and the shades' index, to match: a backRow for
-     * the back grids gives 20 words differing, and counting the shades with
-     * column 48, with a vertexIndex of their own 50 and with grid 88, all in
-     * registers only
-     */
     s32 row;
     s32 column;
 
@@ -965,7 +807,6 @@ void InitRoundHud(void) {
     g_InsetView.step = 0;
 }
 
-/* Loads the face of a player's character in the colors of the given palette */
 void LoadPlayerFace(s32 playerIndex, CharacterId character, s32 paletteIndex) {
     EncodedAsset asset;
     AssetFile file;
@@ -976,8 +817,6 @@ void LoadPlayerFace(s32 playerIndex, CharacterId character, s32 paletteIndex) {
     ReadAssetFile(g_PlayerFacePalettes[playerIndex], GetAssetFileSize(&file), &file);
 }
 
-/* Frees the previous hole's mode images and loads the scenery images if they
- * are not loaded */
 void EndHoleIntro(void) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
         if (f_IsCourseSelectLoaded == TRUE) {
@@ -1000,7 +839,6 @@ void EndHoleIntro(void) {
     }
 }
 
-/* Starts the hole's weather and loads the images of the hole and its par */
 void StartHoleIntro(void) {
     EncodedAsset asset;
 
@@ -1051,7 +889,6 @@ void StartHoleIntro(void) {
     }
 }
 
-/* Loads the images the round's scenery, effects and HUD are drawn with */
 void LoadSceneryImages(void) {
     EncodedAsset asset;
 
@@ -1112,7 +949,6 @@ void LoadSceneryImages(void) {
     LoadFireworks(GetCourseRecordIndex());
 }
 
-/* Frees what LoadSceneryImages loaded */
 void FreeSceneryImages(void) {
     if (f_SceneryState == SCENERY_LOADED) {
         f_SceneryState = SCENERY_BILLBOARDS_READY;
@@ -1149,9 +985,7 @@ void FreeSceneryImages(void) {
     }
 }
 
-/* Sets up the billboard manager's heap, once per round */
 void InitScenery(void) {
-    /* Left from code that loaded assets here; without it 8 words differ */
     EncodedAsset unusedAsset UNUSED;
 
     if (f_SceneryState == SCENERY_UNLOADED) {
@@ -1161,7 +995,6 @@ void InitScenery(void) {
     }
 }
 
-/* Frees everything the round's scenery holds, when its overlay is unloaded */
 void FreeScenery(void) {
     if (f_SceneryState != SCENERY_UNLOADED) {
         DestroyBillboardManager();
@@ -1174,12 +1007,7 @@ void FreeScenery(void) {
     }
 }
 
-/*
- * Updates the shot panel for a new shot: the ball's height above the cup and
- * distance from it, the lie's image, and the scores that the game mode shows.
- */
 void StartShotPanel(void) {
-    /* Pads the frame to match; without it 25 words differ */
     u8 unusedStack[0x20] UNUSED;
     EncodedAsset asset;
     s32 height;
@@ -1210,7 +1038,6 @@ void StartShotPanel(void) {
         g_RoundHud.ballHeightMetersDirection = HEIGHT_BELOW;
     }
 
-    /* The direction in feet is taken from the height in meters */
     if (g_RoundHud.ballHeightFeet < LEVEL_HEIGHT && g_RoundHud.ballHeightFeet > -LEVEL_HEIGHT) {
         g_RoundHud.ballHeightFeetDirection = HEIGHT_LEVEL;
     }
@@ -1281,11 +1108,6 @@ void StartShotPanel(void) {
     LoadContactImages(&g_Players[g_RoundHud.shooterIndex]);
 }
 
-/*
- * Allocates and loads what the HUD draws for the whole round. The buffers of
- * the hole and par images are sized by the first of them, and later holes
- * read theirs into the same buffers.
- */
 void LoadRoundHud(void) {
     AssetFile file;
     EncodedAsset asset;
@@ -1337,23 +1159,19 @@ void LoadRoundHud(void) {
     ClearEffects();
 }
 
-/* Frees what the round HUD loaded for the round */
 void FreeRoundHudTextures(void) {
     FreePinTextures();
 }
 
-/* The inset view's frame is a 16x3 I4 texture, wrapped along its lines */
 #define INSET_FRAME_TEXTURE_WIDTH 16
 #define INSET_FRAME_TEXTURE_HEIGHT 3
 #define INSET_FRAME_SIDE_TEXTURE_HEIGHT 1
 #define INSET_FRAME_TEXTURE_MASK 1
-/* Where in the texture's first row the frame's sides start */
 #define INSET_FRAME_SIDE_TEXEL 5
 #define INSET_FRAME_SIDE_HALF_WIDTH 2
 #define INSET_FRAME_BORDER_OUTSIDE 1
 #define INSET_FRAME_BORDER_INSIDE 2
 
-/* Draws the frame around the inset view */
 void DrawInsetViewFrame(void) {
     SetUpTextDrawing(&g_DisplayListHead);
     gDPPipeSync(g_DisplayListHead++);
@@ -1491,7 +1309,6 @@ void DrawInsetViewFrame(void) {
     gDPPipeSync(g_DisplayListHead++);
 }
 
-/* Scrolls the wind arrow's texture along it, faster in stronger wind */
 void ScrollWindArrow(void) {
     s32 step = g_HoleSetup.conditions.windSpeed / WIND_SPEED_PER_ARROW_SCROLL_STEP;
     s32 i;
@@ -1508,11 +1325,6 @@ void ScrollWindArrow(void) {
     }
 }
 
-/*
- * Starts the reaction to where the ball landed, or clears it away with
- * LANDING_REACTION_NONE. Out of bounds, Toad's movie plays in the inset view
- * in place of a reaction; elsewhere the inset view shows the ball.
- */
 void StartLandingReaction(s32 reaction) {
     s32 previousReaction;
 
@@ -1570,13 +1382,6 @@ void StartLandingReaction(s32 reaction) {
     }
 }
 
-/*
- * Draws the landing reaction: a panel with the name of the surface the ball
- * landed on and, for LANDING_REACTION_REST, how far it rests from the cup.
- * The panel spins and grows into place over its first frames, while the text
- * is drawn as glyph groups in its perspective; after that the text is drawn
- * flat.
- */
 void DrawLandingReaction(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     Vec3 scale;
@@ -1608,12 +1413,7 @@ void DrawLandingReaction(Gfx **displayListHead) {
                 g_TurnBallSimulation.position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
                 g_TurnBallSimulation.position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
             );
-            /* Mini golf and the green measure in feet */
             if (g_GameState.isMiniGolf || surface->kind == SURFACE_KIND_GREEN) {
-                /*
-                 * One per branch, so each is allocated within its block, to match: one
-                 * declared at the top gives 22 words differing, none in shape
-                 */
                 s32 hundredths = distance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
 
                 sprintf(
@@ -1687,7 +1487,6 @@ void DrawLandingReaction(Gfx **displayListHead) {
         translation[AXIS_Z] = LANDING_PANEL_Z;
         BuildTransformMatrix(matrix, rotation, translation, scale);
 
-        /* Spins the panel around a point away from its center */
         guTranslateF(offset, LANDING_PANEL_PIVOT_X, LANDING_PANEL_PIVOT_Y, 0.0f);
         guMtxCatF(offset, matrix, matrix);
         ConvertMatrixToFixed(matrix, &f_LandingPanelMatrices[g_MatrixBufferIndex]);
@@ -1723,10 +1522,6 @@ void DrawLandingReaction(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Returns white tinted toward red by a positive warmth, or toward blue by a
- * negative one, as an RGBA color with the given alpha. Nothing calls it.
- */
 u32 GetWarmthTint(s32 warmth, s32 alpha) {
     s32 red;
     s32 green;
@@ -1751,15 +1546,10 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
     return RgbaColor(red, green, blue, alpha & 0xFF);
 }
 
-/* For the longest putt */
 #define GREEN_GRID_SHORT_ROW_COUNT 8
 #define GREEN_GRID_LANDING_ROW_COUNT 16
-/* With GREEN_GRID_MAX_ROW_COUNT rows, only every other row is sampled, up to
- * here */
 #define GREEN_GRID_FIRST_FULL_ROW 30
 #define GREEN_GRID_MAX_PUTT_DISTANCE 30
-/* Shots shorter than this show the grid at the ball, longer ones at the landing
- * point */
 #define GREEN_GRID_LANDING_DISTANCE 61
 #define GREEN_GRID_PUTT_ROW_SHIFT 2.2f
 #define GREEN_GRID_LANDING_ROW_SHIFT 12.0f
@@ -1778,36 +1568,19 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
 #define GREEN_GRID_FADE_STEP 8
 #define GREEN_GRID_FADE_END_ALPHA 0x48
 #define GAME_FLAG_HIDE_GREEN_GRID 0x79
-/* g_RoundHud.greenGridState values */
 #define GREEN_GRID_HIDDEN 0
-/* Samples the ground and scrolls */
 #define GREEN_GRID_SHOWN 1
 #define GREEN_GRID_FADING 2
 
 typedef struct GridScreenPoint {
-    /* 0x00 */ s32 x; /* In quarter pixels */
-    /* 0x04 */ s32 y;
-    /* 0x08 */ Boolean isVisible;
-    /* 0x0C */ s32 depth;
-} GridScreenPoint; /* size = 0x10 */
+      s32 x;
+      s32 y;
+      Boolean isVisible;
+      s32 depth;
+} GridScreenPoint;
 
-/*
- * The index of the grid's point at a row and column, in a function that holds
- * the grid's width in columnCount.
- *
- * DrawGreenGrid writes the index out at each use, to match: with a local
- * holding it, 8 words differ from the original's in the pass that samples the
- * ground, 4 in the one that projects the points and 40 in the lines across
- * the aim; with a row's start stepped beside the row, 8 in the sampling pass
- * and 16 in the projecting one. The lines along the aim match either way.
- */
 #define GridPointIndex(row, column) (((row) * columnCount) + (column))
 
-/*
- * Sets red, green and blue for a point of the grid from its slope. White
- * lines warm towards red where the ground rises and cool towards blue where
- * it falls; black lines turn red or blue.
- */
 #define SetGreenGridTint(slope) \
     if (g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_WHITE) { \
         if ((slope) == 0) { \
@@ -1844,18 +1617,10 @@ typedef struct GridScreenPoint {
         } \
     }
 
-/*
- * Draws the grid over the ground around the current shot's target, which is
- * the ball for putts and short shots and the landing point for longer ones.
- * The grid's rows cross the aim and scroll towards the target while the grid
- * shows; a fading grid keeps the heights it last sampled. Each line is a run
- * of screen-space quads between neighboring points, tinted by their slopes.
- */
 void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 points[GREEN_GRID_POINT_COUNT][3];
     GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
     s32 slopes[GREEN_GRID_POINT_COUNT];
-    /* Nothing uses them, but the original's frame has the room for them */
     f32 unusedPoints[GREEN_GRID_POINT_COUNT][3] UNUSED;
     CoursePoint center;
     ScreenPoint projected;
@@ -1869,12 +1634,6 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     s32 maxPuttDistance;
     s32 row;
     s32 column;
-    /*
-     * The row and column in both the lines across the aim and the lines along
-     * it, to match: with a row of their own for the lines along the aim, 56
-     * words differ from the original's; with a column of their own, 14; and
-     * with the earlier passes' row and column in both, 96.
-     */
     s32 drawnRow;
     s32 drawnColumn;
     s32 rowPosition;
@@ -1899,10 +1658,6 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 dy;
     f32 scale;
 
-    /*
-     * The original sets the column count only before the grid's loops, so
-     * the landing spacing and the centering read it unset
-     */
 #ifdef AVOID_UB
     columnCount = GREEN_GRID_COLUMN_COUNT;
 #endif
@@ -1914,25 +1669,6 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     }
 
     club = GetSelectedClub();
-    /*
-     * A 64-bit copy that nothing reads, taken inside two tests, to match, as
-     * in DrawWindSpeed: the original's code has a basic block's end between
-     * the club's call and the heading's read, and no branch there. The copy's
-     * libcall block lasts until flow, so the tests last until the jump pass
-     * after reload, and local-alloc sees their label: the club, living across
-     * it, is left to global-alloc and gets $s1 ahead of the shot's distance.
-     * Two jumps reach the label, so the path that cse follows from the
-     * function's start ends there as well, and the 1 that the cup view's test
-     * loads isn't kept in a saved register for the ground query marker, which
-     * the original loads a 1 of its own for. With one test, or two joined by
-     * &&, which compile to one jump, cse skips around the block.
-     *
-     * What the original tested is a guess: the display list in the inner
-     * test, or as the outer one, or the cup view inside, match alike. Without
-     * the copy 89 words differ from the original's; with one test, or the
-     * two joined by &&, 49; with a 32-bit copy 89; and with an empty do-while
-     * (0) in the tests' place 83.
-     */
     if (club != NULL) {
         if (gfx != NULL) {
             unusedClub = (u32)club;
@@ -1993,11 +1729,6 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     centering = 0.5f - (columnCount * 0.5f);
     originX = (forwardX * shift) + (sideX * centering);
     originZ = (forwardZ * shift) + (sideZ * centering);
-    /*
-     * forwardX and forwardZ hold the row's step from here, to match: with
-     * variables of the step's own, 161 words differ from the original's; with
-     * one for x alone, 76; and with one for z alone, 66
-     */
     forwardX = -cosf(yaw) * rowSpacing;
     forwardZ = -sinf(yaw) * rowSpacing;
     if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
@@ -2063,7 +1794,6 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
         }
     }
 
-    /* Fills in the rows that were skipped from their neighbors */
     if (rowCount == GREEN_GRID_MAX_ROW_COUNT) {
         for (row = 1; row != rowCount - 1; row += 2) {
             for (column = 0; column != columnCount; column++) {
@@ -2164,12 +1894,8 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     }
 
     if (g_RoundHud.greenGridState != GREEN_GRID_HIDDEN) {
-        /* The lines across the aim, one quad between each pair of points in a row
-         */
         for (drawnRow = 0; drawnRow != rowCount;) {
             for (drawnColumn = 0; drawnColumn != columnCount; drawnColumn++) {
-                /* The tint has variables of each pass's own, to match: with one set
-                 * for both passes, 142 words differ from the original's */
                 s32 red;
                 s32 green;
                 s32 blue;
@@ -2320,8 +2046,6 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
             }
         }
 
-        /* The lines along the aim, one quad between each pair of points in a column
-         */
         for (drawnColumn = 0; drawnColumn != columnCount; drawnColumn++) {
             for (drawnRow = 0; drawnRow != rowCount - 1; drawnRow++) {
                 s32 red;
@@ -2329,9 +2053,6 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                 s32 blue;
                 s32 point = GridPointIndex(drawnRow, drawnColumn);
 
-                /* The next row's point is reached as a row's points on from this
-                 * one, to match: indexed by the next row, 108 words differ from the
-                 * original's */
                 if (screenPoints[point].isVisible != TRUE ||
                     screenPoints[point + columnCount].isVisible != TRUE) {
                     continue;
@@ -2430,7 +2151,6 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     *displayListHead = gfx;
 }
 
-/* Gathers the whole ball trail at the ball, so it starts out empty */
 void ResetBallTrail(void) {
     s32 i;
 
@@ -2442,27 +2162,16 @@ void ResetBallTrail(void) {
     }
 }
 
-/* The trail is drawn this far below the ball's center, scaled like the pin */
 #define BALL_TRAIL_DROP 0.27f
-/* And this many depth steps nearer the camera, scaled like the pin */
 #define BALL_TRAIL_DEPTH_BIAS 7
-/* The depth of a trail point that is behind the camera */
 #define BALL_TRAIL_HIDDEN (-1)
-/* Half the trail's width, in quarter pixels */
 #define BALL_TRAIL_HALF_WIDTH 4.0f
-/* The trail is white; its newest segment has this alpha, fading by one every
- * few segments */
 #define BALL_TRAIL_COLOR 0xFFFFFF00
 #define BALL_TRAIL_ALPHA 64
 #define BALL_TRAIL_SEGMENTS_PER_FADE 4
 #define BallTrailSegmentColor(segment) \
     ((BALL_TRAIL_ALPHA - ((segment) / BALL_TRAIL_SEGMENTS_PER_FADE)) | BALL_TRAIL_COLOR)
 
-/*
- * Draws the ball's trail through its recent positions as screen-space quads
- * that fade out with age. While g_BallTrailState is BALL_TRAIL_RECORDING it
- * also adds the ball's current position.
- */
 void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
     Gfx *gfx = *displayListHead;
     ScreenPoint point;
@@ -2489,7 +2198,6 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
         }
 
         if (g_IsCupViewShown != TRUE) {
-            /* Projects the trail from its newest position back */
             index = f_BallTrailHead;
             for (i = 0; i != BALL_TRAIL_LENGTH; i++, index--) {
                 if (index == -1) {
@@ -2515,10 +2223,6 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
             guMtxIdent(&f_BallTrailMatrix);
             gDPPipeSync(gfx++);
             gDPPipeSync(gfx++);
-            /*
-             * Through a pointer of its own, to match: gfx++ in the macro gives 8
-             * words differing, none in shape
-             */
             cycleTypeCommand = gfx++;
             gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
             gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
@@ -2552,18 +2256,11 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
                     deltaX = f_BallTrailPoints[i].x - f_BallTrailPoints[i + 1].x;
                     deltaY = f_BallTrailPoints[i].y - f_BallTrailPoints[i + 1].y;
 
-                    /*
-                     * The empty branch for a segment of no length is there to match:
-                     * testing for a nonzero delta with ||, or negating the test, gives 11
-                     * words differing, all in shape; | doesn't match either
-                     */
                     if (deltaX == 0.0f && deltaY == 0.0f) {
                     }
                     else {
                         scale =
                             BALL_TRAIL_HALF_WIDTH / sqrtf((deltaX * deltaX) + (deltaY * deltaY));
-                        /* The delta, scaled to the trail's half width and turned a
-                         * quarter, offsets the segment's corners */
                         deltaX *= scale;
                         deltaY *= scale;
                         gDPPipeSync(gfx++);
@@ -2629,10 +2326,6 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
     }
 }
 
-/*
- * Draws the wind's icon, which pulses in size, and the wind's speed in
- * meters below it. Both lean away from the given point along the viewed wind.
- */
 void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     Gfx *gfx = *displayListHead;
     s32 halfWidthRounded;
@@ -2651,8 +2344,6 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     s32 roundedCenterX;
     s32 roundedCenterY;
 
-    /* Draws text of digits, spaces and 'm' from the wind speed font, with its top
-     * left at the given point */
     void DrawWindSpeedText(s32 textX, s32 textY, char *text) {
         s32 offsetX;
         s32 glyphS;
@@ -2688,30 +2379,10 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     }
 
     windSpeed = g_HoleSetup.conditions.windSpeed;
-    /*
-     * A 64-bit copy that nothing reads, taken when there is wind, to match:
-     * the original's code has a basic block's end between the wind speed's
-     * read and its conversion, and no branch there. KMC GCC widens to 64 bits
-     * in a libcall block, which the dead code removal after cse leaves alone
-     * and flow deletes, so the test, now around nothing, lasts until the jump
-     * pass after reload. sched1 and local-alloc still see its label: the
-     * conversion's block is scheduled by itself, with the divisor's
-     * reciprocal first and in $v1, and the wind speed, living across the
-     * label, is left to global-alloc and gets $a0.
-     *
-     * Without the test 99 words differ, 31 in shape, with the frame 8 bytes
-     * smaller. A 32-bit or f64 copy, or the 64-bit product, isn't a libcall
-     * block and gives 41 (31), as with no test. An empty do-while (0) in the
-     * test's place, whose loop notes local-alloc doesn't see, gives 16 (2),
-     * and the conversion IN_OWN_BLOCK 109 (31). The scaling before the test
-     * gives 18 (4), and the wind speed kept in speed 100 (24).
-     */
     if (windSpeed != 0) {
         unusedWindSpeed = windSpeed;
     }
 
-    /* The pulse is stepped after the conversion, to match: before it 4 words
-     * differ, 4 in shape, and before the test 18 (18) */
     speed = (windSpeed * WIND_SPEED_TO_METERS_SCALE) / WIND_SPEED_TO_METERS_DIVISOR;
     f_WindIconPulseAngle += WIND_ICON_PULSE_STEP;
     if (speed >= WIND_SPEED_TWO_DIGITS) {
@@ -2727,13 +2398,9 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     dsdx = TexelRunStep(WIND_ICON_TEXTURE_WIDTH / 2, halfWidth);
     dtdy = TexelRunStep(WIND_ICON_TEXTURE_HEIGHT / 2, halfHeight);
 
-    /* Moves the texture by the rounding, in 10.5 fixed point, from half a texel
-     * in */
     textureS = HALF_TEXEL - ((halfWidthRounded - halfWidth) * HALF_TEXEL);
     textureT = HALF_TEXEL - ((halfHeightRounded - halfHeight) * HALF_TEXEL);
 
-    /* The centers are kept positive by WIND_POSITIVE_BIAS, so rounding by
-     * truncation works */
     if (speed >= WIND_SPEED_TWO_DIGITS) {
         centerX = (-sinf(g_SkyState.viewedWindAngles[0]) * WIND_WIDE_LEAN_X) + (x + WIND_OFFSET_X) +
             WIND_POSITIVE_BIAS;
@@ -2885,16 +2552,10 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the wind indicator at the given point. DrawWindSpeed's part is drawn
- * after the model while the viewed wind angle is between a quarter and three
- * quarters of a turn, and before it otherwise.
- */
 void DrawWindIndicator(Gfx **displayListHead, f32 x, f32 y) {
     Vec3 viewDirection;
     Vec3 rotation;
     Vec3 translation;
-    /* Pads the frame to match; without it 72 words differ */
     Vec3 unusedScale UNUSED;
     Mat4 matrix;
     Mat4 transform;
@@ -2960,8 +2621,6 @@ void DrawWindIndicator(Gfx **displayListHead, f32 x, f32 y) {
     *displayListHead = gfx;
 }
 
-/* Lets the second controller's C buttons nudge the HUD up and down, and prints
- * the offset */
 void AdjustHudOffset(void) {
     if (IsGameFlagSet(GAME_FLAG_ADJUST_HUD_OFFSET)) {
         if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & U_CBUTTONS) {
@@ -2977,49 +2636,31 @@ void AdjustHudOffset(void) {
     }
 }
 
-/* Where the shot panel's wind indicator sits, unless the shot is on the green,
- * where the wind doesn't count */
 #define SHOT_PANEL_WIND_INDICATOR_X 100.0f
 #define SHOT_PANEL_WIND_INDICATOR_Y 76.0f
-/*
- * Whether the shot panel shows the wind indicator: while there is wind and
- * the indicator isn't hidden, off the green and outside the cup view
- */
 #define IsWindIndicatorDrawn() \
     (g_HoleSetup.conditions.windSpeed != 0 && \
         g_RoundHud.isWindIndicatorShown && \
         GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN && \
         !g_IsCupViewShown)
-/* The arrows beside a pause menu panel; they take screen coordinates, while the
- * panels sit in the centered view */
 #define PAUSE_PANEL_ARROWS_GAP 64
-/* The shot panel's icons, in the centered orthographic view and in front of the
- * camera */
 #define CLUB_HEAD_ICON_X (-128.0f)
 #define CLUB_HEAD_ICON_Y (-76.0f)
 #define LIE_ICON_X 112
 #define LIE_ICON_Y (-70.0f)
 #define SHOT_PANEL_ICON_Z (-300.0f)
-/* The icons tilt by half of their angle */
 #define SHOT_PANEL_ICON_TILT 0.5f
 #define SHOT_PANEL_ICON_DIM 191
 #define CLUB_HEAD_IMAGE_SIZE 32
-/* The lie image is two halves, each its own texture on its own quad */
 #define LIE_IMAGE_WIDTH 48
 #define LIE_IMAGE_HALF_HEIGHT 24
 #define LIE_IMAGE_HALF_SIZE (LIE_IMAGE_WIDTH * LIE_IMAGE_HALF_HEIGHT * 2)
 
-/*
- * Draws the shot panel's wind indicator, club head and lie, or the wind
- * and lie panels beside the pause menu while it sets them
- */
 void DrawShotPanelIcons(Gfx **displayListHead, CameraView *view UNUSED) {
     Vec3 rotation;
     Vec3 translation;
-    /* Pads the frame to match; without it 222 words differ */
     Vec3 unusedScale UNUSED;
     Mat4 matrix;
-    /* Pads the frame to match; without it 218 words differ */
     s32 unused[18] UNUSED;
     Gfx *gfx;
     Club *club;
@@ -3250,11 +2891,6 @@ void DrawShotPanelIcons(Gfx **displayListHead, CameraView *view UNUSED) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the flag grid with the hole image on it. With isBackDrawn, it then
- * draws the back too, by changing the grid's texture coordinates to the
- * back's and mirroring its shades around HOLE_FLAG_START_SHADE.
- */
 void DrawHoleFlag(Boolean isBackDrawn) {
     s32 row;
     s32 column;
@@ -3331,8 +2967,6 @@ void DrawHoleFlag(Boolean isBackDrawn) {
         vertex = f_HoleFlagVertices[0][g_MatrixBufferIndex];
         for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
             for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, vertexIndex++, vertex++) {
-                /* These texture coordinates are after the gSPTexture scale, which
-                 * halves them */
                 gSPModifyVertex(
                     g_DisplayListHead++,
                     vertexIndex,
@@ -3376,7 +3010,6 @@ void DrawHoleFlag(Boolean isBackDrawn) {
     }
 }
 
-/* Draws the hole image as a model in the perspective of the screen effects */
 void DrawHoleImageModel(void) {
     Vec3 translation;
     Vec3 scale;
@@ -3418,8 +3051,6 @@ void DrawHoleImageModel(void) {
     gDPPipeSync(g_DisplayListHead++);
 }
 
-/* Starts one of the effects over a shot in flight, or stops it with
- * SHOT_EFFECT_NONE */
 void StartShotEffect(s32 effect) {
     s32 contactStyle;
 
@@ -3454,14 +3085,11 @@ void StartShotEffect(s32 effect) {
     f_ShotEffectTime = 0.0f;
 }
 
-/* The effect grows and shrinks over half a turn of its time */
 #define SHOT_EFFECT_TIME_STEP 0.2f
 #define SHOT_EFFECT_SCALE 0.5f
 #define SHOT_EFFECT_SPIN_START 0.7f
 #define SHOT_EFFECT_SPIN_RATE 0.5f
 #define SHOT_EFFECT_Z (-100.0f)
-/* The spark trail of the Wario and Game Boy ball 7 contact styles: six frames
- * of a lightning bolt, tinted purple or a random color, that flicker round */
 #define SPARK_TRAIL_SCALE 0.4f
 #define SPARK_TRAIL_FRAME_TICKS 4
 #define SPARK_TRAIL_FRAMES_OFFSET 0x970
@@ -3471,8 +3099,6 @@ void StartShotEffect(s32 effect) {
 #define SPARK_TRAIL_ALPHA 191
 #define SPARK_TRAIL_QUAD_COUNT 2
 
-/* Draws the effect that StartShotEffect started at the ball, until its time
- * runs out */
 void DrawShotEffect(Gfx **displayListHead) {
     Mat4 matrix;
     ScreenPoint point;
@@ -3734,17 +3360,6 @@ void DrawShotEffect(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Waves the hole's flag in the wind. A shade swings down the flagstick side
- * of the flag and spreads across it, faster the stronger the wind. Each
- * vertex then bulges out of the flag by its shade, and the columns draw in to
- * make up for the bulges.
- *
- * factor and otherFactor hold several unrelated factors in turn, as in the
- * original; separate variables change the registers. calmOwnShare is worked
- * out ahead of its use because doing so puts the zero for the skew factors
- * in factor's register first, as the original does.
- */
 void WaveHoleFlag(void) {
     s32 row;
     s32 column;
@@ -3781,8 +3396,6 @@ void WaveHoleFlag(void) {
         windSpeed = HOLE_FLAG_MIN_WIND_SPEED;
     }
 
-    /* factor is how much of its neighbor's shade a vertex takes; otherFactor is
-     * how much of its own it keeps */
     if (windSpeed < 1.0f) {
         factor = HOLE_FLAG_CALM_SPREAD;
         otherFactor = calmOwnShare;
@@ -3799,8 +3412,6 @@ void WaveHoleFlag(void) {
 
     for (column = HOLE_FLAG_COLUMN_COUNT - 1; column != 0; column--) {
         for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
-            /* Indexing the left neighbor as HOLE_FLAG_SHADE(row, column - 1) changes
-             * the code */
             shade = (f_HoleFlagShades[(row * HOLE_FLAG_COLUMN_COUNT) + column - 1] * factor) +
                 (HOLE_FLAG_SHADE(row, column) * otherFactor);
             HOLE_FLAG_SHADE(row, column) = shade;
@@ -3818,7 +3429,6 @@ void WaveHoleFlag(void) {
         f_HoleFlagWavePhase += FULL_TURN_RADIANS;
     }
 
-    /* factor is the swing's amplitude here */
     factor = windSpeed + (rand() % HOLE_FLAG_SWING_JITTER_RANGE);
     shade = (s32)(sinf(f_HoleFlagWavePhase) * factor) + HOLE_FLAG_START_SHADE;
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
@@ -3841,7 +3451,6 @@ void WaveHoleFlag(void) {
         }
     }
 
-    /* Bulges are deeper toward the flag's free edge and its top */
     factor = (windSpeed * HOLE_FLAG_BULGE_PER_SPEED) + HOLE_FLAG_MIN_BULGE;
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
         for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
@@ -3867,7 +3476,6 @@ void WaveHoleFlag(void) {
     }
 }
 
-/* Moves the shot offset marker and its trail back to the center */
 void ResetShotOffsetMarker(void) {
     s32 i;
 
@@ -3877,11 +3485,6 @@ void ResetShotOffsetMarker(void) {
     }
 }
 
-/*
- * Moves the shot offset marker to the given offset. The test is inverted, so
- * the length is only measured when it is zero and the offset is never
- * clamped to SHOT_OFFSET_MAX_RADIUS.
- */
 void SetShotOffsetMarker(s32 x, s32 y) {
     f32 length;
     f32 scale;
@@ -3903,10 +3506,6 @@ void SetShotOffsetMarker(s32 x, s32 y) {
     f_ShotOffsetMarkerYs[0] = -y / SHOT_OFFSET_UNITS_PER_PIXEL;
 }
 
-/*
- * Draws the shot offset marker, animated while HUD_FLAG_ANIMATE_OFFSET_MARKER
- * is set
- */
 void DrawShotOffsetMarker(void) {
     gDPPipeSync(g_DisplayListHead++);
     gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(f_ShotOffsetMarkerImage)));
@@ -3956,34 +3555,24 @@ void DrawShotOffsetMarker(void) {
     );
 }
 
-/* A new image of the icon every ANIMATED_ICON_FRAME_LENGTH frames */
 #define ANIMATED_ICON_FRAME_LENGTH 4
 #define ANIMATED_ICON_SIZE 32
-/* The icon eases a fifth of the way toward its place each frame */
 #define ANIMATED_ICON_X 96.0f
 #define ANIMATED_ICON_Y 24.0f
 #define ANIMATED_ICON_EASING 0.2f
 #define ANIMATED_ICON_LABEL_WIDTH 64
 #define ANIMATED_ICON_LABEL_HEIGHT 16
 #define ANIMATED_ICON_LABEL_OFFSET_X 24
-/* The labels' images, which read "JUMP", "MODE" and "CUP" */
 #define ANIMATED_ICON_LABEL_JUMP 0
 #define ANIMATED_ICON_LABEL_MODE 1
 #define ANIMATED_ICON_LABEL_CUP 2
 
-/*
- * Draws an animated icon of Lakitu filming that eases into place, with a label
- * beside it that depends on g_LetterboxState: "MODE" while the camera moves,
- * "JUMP" looking down the range and "CUP" otherwise. Each new frame of the icon
- * is read into the same image.
- */
 void DrawAnimatedIcon(Gfx **displayListHead, s32 letterboxHeight) {
     Gfx *gfx = *displayListHead;
     EncodedAsset asset;
     s32 label;
 
     if (f_SceneryState == SCENERY_LOADED) {
-        /* On the letterbox's first frame the icon starts again from the corner */
         if (letterboxHeight == LETTERBOX_GROWTH_STEP) {
             f_AnimatedIconX = 0.0f;
             f_AnimatedIconY = 0.0f;
@@ -4086,10 +3675,6 @@ void DrawAnimatedIcon(Gfx **displayListHead, s32 letterboxHeight) {
     }
 }
 
-/*
- * Draws black bars at the top and bottom of the HUD's area, growing them each
- * frame up to LETTERBOX_MAX_HEIGHT. Returns their new height.
- */
 s32 DrawLetterbox(Gfx **gfxP, s32 height) {
     Gfx *gfx = *gfxP;
 
@@ -4143,10 +3728,6 @@ s32 DrawLetterbox(Gfx **gfxP, s32 height) {
     return height;
 }
 
-/*
- * Draws a distance such as "12.5m" with the loaded distance glyphs, from its
- * top left corner. Spaces are skipped without advancing.
- */
 void DrawDistanceText(Gfx **gfxP, s32 x, s32 y, char *text) {
     s32 width;
     s32 glyphS;
@@ -4199,7 +3780,6 @@ void DrawDistanceText(Gfx **gfxP, s32 x, s32 y, char *text) {
 const char f_ColorTestSampleText[] = "ｻﾝﾌﾟﾙABCDEFG";
 const char f_BlankText[] = " ";
 
-/* Draws the color test screen and handles its controls */
 void DrawColorTest(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
@@ -4222,7 +3802,6 @@ void DrawColorTest(Gfx **displayListHead) {
     );
     gDPPipeSync(gfx++);
 
-    /* The casts read only the low halves, as the target does */
     DrawCenteredLargeText(&gfx, f_TestTextX, f_TestTextY, f_ColorTestSampleText);
     gDPPipeSync(gfx++);
     PrintDebugText(
@@ -4310,13 +3889,7 @@ void DrawColorTest(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* The shot panel slides in from the left by this much a frame */
 #define SHOT_PANEL_SLIDE_STEP 4
-/*
- * The scoreboard shows each player's face and strokes, their score in the game
- * mode and their contest distances, in rows down the right of the screen. It
- * moves right as the letterbox grows, and left to make room for handicaps.
- */
 #define SCOREBOARD_X 246
 #define SCOREBOARD_Y 68
 #define SCOREBOARD_ROW_HEIGHT 26
@@ -4329,18 +3902,13 @@ void DrawColorTest(Gfx **displayListHead) {
 #define HANDICAP_X 42
 #define DRIVE_DISTANCE_X 16
 #define PIN_DISTANCE_X 8
-/* The face of the player whose turn it is sits up and to the left of the others
- */
 #define FACE_WIDTH 32
 #define FACE_HEIGHT 24
 #define FACE_INSET_X 4
 #define FACE_INSET_Y 4
 #define SMALL_FACE_WIDTH 24
 #define SMALL_FACE_HEIGHT 16
-/* The others are shrunk to two-thirds, a texel and a half to a pixel */
 #define SMALL_FACE_STEP (TEXEL_STEP_ONE * 3 / 2)
-/* The pin flag beside the distance to the cup waves through four frames side by
- * side */
 #define PIN_FLAG_TIME_COUNT 16
 #define PIN_FLAG_FRAME_LENGTH 4
 #define PIN_FLAG_IMAGE_SIZE 32
@@ -4349,15 +3917,12 @@ void DrawColorTest(Gfx **displayListHead) {
 #define PIN_FLAG_Y 72
 #define PIN_FLAG_WIDTH 8
 #define PIN_FLAG_HEIGHT 16
-/* Where the labels "REST", by the distance to the cup, and "UP", "DOWN" or
- * "FLAT", by the height, sit */
 #define SHOT_PANEL_LABEL_X 34
 #define SHOT_PANEL_LABEL_WIDTH 32
 #define SHOT_PANEL_LABEL_HEIGHT 12
 #define REST_LABEL_Y 68
 #define HEIGHT_LABEL_Y 80
 #define SHOT_PANEL_DISTANCE_X 64
-/* In Ring Shot, a spinning ring beside the count of rings still to pass */
 #define RING_FRAME_COUNT 3
 #define RING_FRAME_LENGTH 6
 #define RING_IMAGE_SIZE 32
@@ -4371,8 +3936,6 @@ void DrawColorTest(Gfx **displayListHead) {
 #define HOLE_YARDAGE_Y 56
 #define PAR_IMAGE_X 24
 #define PAR_IMAGE_Y 56
-/* The club panel, which module 25 updates, and the selected club's name below
- * it */
 #define CLUB_PANEL_X 14
 #define CLUB_PANEL_Y 150
 #define CLUB_PANEL_WIDTH 48
@@ -4386,7 +3949,6 @@ void DrawColorTest(Gfx **displayListHead) {
 #define LIE_PERCENT_X 240
 #define POWER_SHOT_COUNT_X 36
 #define POWER_SHOT_COUNT_Y 176
-/* How far the ball has gone from where the shot was played */
 #define SHOT_LENGTH_X 132
 #define SHOT_LENGTH_Y 200
 #define PANEL_STOPWATCH_X 32
@@ -4395,13 +3957,9 @@ void DrawColorTest(Gfx **displayListHead) {
 #define MIRROR_TEXTURE_SIZE_LOG2 5
 #define MIRROR_TEXTURE_X 32
 #define MIRROR_TEXTURE_Y 122
-/* A debugging aid that shows the texture the mirror effects draw */
 #define GAME_FLAG_SHOW_MIRROR_TEXTURE 0x70
-/* The shadowed font draws "ft" for this character */
 #define SHADOWED_FEET_GLYPH '['
 
-/* Loads one of the shot panel's labels, which DrawRoundHud does in each branch
- * that picks one */
 #define LoadShotPanelLabel(image) \
     { \
         gDPLoadTLUT_pal16( \
@@ -4425,19 +3983,11 @@ void DrawColorTest(Gfx **displayListHead) {
         ); \
     }
 
-/*
- * Draws the round's HUD over the course: the letterbox, the players' faces
- * and scores, the shot panel's labels, distances and club, and the debugging
- * aids that game flags turn on
- */
 void DrawRoundHud(CameraView *view) {
-    /* Pads the frame to match; without it 126 words differ */
     s32 unused[2] UNUSED;
     s32 percentRange[2];
     Club *club;
     s32 scoreboardX;
-    /* Declared after scoreboardX so that its spill slot follows; declared
-     * first, 40 words differ */
     Boolean hasHandicap;
     s32 i;
     s32 ringCount;
@@ -4466,7 +4016,6 @@ void DrawRoundHud(CameraView *view) {
     gDPSetColorDither(g_DisplayListHead++, G_CD_MAGICSQ);
     f_LetterboxHeight = DrawLetterbox(&g_DisplayListHead, f_LetterboxHeight);
 
-    /* The faces move out of the letterbox's way */
     scoreboardX =
         (f_LetterboxHeight * SCOREBOARD_LETTERBOX_SHIFT) + SCOREBOARD_X + g_ShotPanelOffsetX;
     for (i = 0; i != g_GameState.playerCount; i++) {
@@ -4533,7 +4082,6 @@ void DrawRoundHud(CameraView *view) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            /* The face of the player whose turn it is shows full size and bright */
             if (i == g_CurrentShot.playerIndex) {
                 gDPPipeSync(g_DisplayListHead++);
                 gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
@@ -4661,8 +4209,6 @@ void DrawRoundHud(CameraView *view) {
         );
         gDPPipeSync(g_DisplayListHead++);
 
-        /* A putt's height is labeled by its height in meters, which the feet are
-         * measured from */
         if ((club->surfaceMask & CLUB_SURFACE_GREEN) ?
                 g_RoundHud.ballHeightMetersDirection == HEIGHT_LEVEL :
                 g_RoundHud.ballHeightYardsDirection == HEIGHT_LEVEL) {
@@ -4763,7 +4309,6 @@ void DrawRoundHud(CameraView *view) {
     }
 
     if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
-        /* The shot panel's distances are white, rather than the font's yellow */
         gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(f_WhiteDistancePalette));
         ringCount = 0;
         if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
@@ -5267,8 +4812,6 @@ void DrawRoundHud(CameraView *view) {
         DrawShotEffectsHud(&g_DisplayListHead);
     }
 
-    /* A debugging aid: B changes the first player's character, and A plays the
-     * contest winner's movie */
     if (IsGameFlagSet(GAME_FLAG_ADJUST_HUD_OFFSET)) {
         if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & B_BUTTON) {
             g_Players[0].characterIndex = (g_Players[0].characterIndex + 1) % CHARACTER_COUNT;
@@ -5283,8 +4826,6 @@ void DrawRoundHud(CameraView *view) {
     AdjustHudOffset();
 }
 
-/* Loads the images that the hole's intro shows for its contest bet and the
- * match standing */
 void LoadHoleIntroImages(void) {
     EncodedAsset asset;
     s32 standing;
@@ -5321,7 +4862,6 @@ void LoadHoleIntroImages(void) {
     }
 }
 
-/* Frees the images that LoadHoleIntroImages loaded */
 void FreeHoleIntroImages(void) {
     if (f_LoadedHoleIntroImages & HOLE_INTRO_CONTEST_IMAGE_LOADED) {
         FreeMemory(&f_HoleContestImage);
@@ -5334,10 +4874,6 @@ void FreeHoleIntroImages(void) {
     f_LoadedHoleIntroImages = 0;
 }
 
-/*
- * Draws the images that LoadHoleIntroImages loaded, a strip at a time, while
- * the hole's intro text is shown. Ring shot draws its own intro instead.
- */
 void DrawHoleIntroImages(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 strip;
@@ -5455,10 +4991,6 @@ void DrawHoleIntroImages(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the course's name and the hole's number, or in the timed modes a
- * stopwatch, before the hole starts.
- */
 void DrawHoleIntroText(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 hundredths;
@@ -5533,7 +5065,6 @@ void DrawHoleIntroText(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Switches to the other matrix buffer, which the RSP is not reading */
 void SwapMatrixBuffers(void) {
     g_MatrixBufferIndex ^= 1;
 }

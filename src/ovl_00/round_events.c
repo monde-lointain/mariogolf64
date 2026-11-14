@@ -1,8 +1,3 @@
-/*
- * What the round shows between shots: the banners, the flip messages, the
- * movies such as Lakitu's countdown, the contact effects and the Fly Guy that
- * warns of a strong wind.
- */
 #include "round_events.h"
 
 #include <math.h>
@@ -40,54 +35,35 @@
 #include "transfer_pak.h"
 #include "turn.h"
 
-/* The buffer that a movie's images, or the wind Fly Guy's, are read into */
 #define MOVIE_BUFFER_SIZE 0x6270
-/* The movie frame after which the hole intro goes on */
 #define MOVIE_CUE_FRAME 12
 
 #define FLY_GUY_IMAGE_ASSET 0x6CF
-/* With its header; the wind streak follows it */
 #define FLY_GUY_IMAGE_SIZE 0x808
 
-/* Where the contact effect's images go in g_SharedEffectImages, and their
- * assets */
 #define CONTACT_IMAGE_OFFSET 0x970
 #define CONTACT_SECOND_IMAGE_OFFSET 0x1578
-/* A fireball */
 #define MARIO_CONTACT_IMAGE_ASSET 0x6BE
 #define MARIO_CONTACT_IMAGE_WIDTH 32
 #define MARIO_CONTACT_IMAGE_HEIGHT 32
-/* Half of a streak of flame, which the mirrored wrap completes */
 #define BOWSER_CONTACT_IMAGE_ASSET 0x6AE
 #define BOWSER_CONTACT_IMAGE_WIDTH 16
 #define BOWSER_CONTACT_IMAGE_HEIGHT 100
-/* The spark trail's first two lightning bolts */
 #define WARIO_CONTACT_IMAGE_ASSET 0x6A7
 #define WARIO_CONTACT_SECOND_IMAGE_ASSET 0x6A8
-/* Both bolts' images */
 #define WARIO_CONTACT_IMAGE_WIDTH 48
 #define WARIO_CONTACT_IMAGE_HEIGHT 128
-/* A row of spectrum colors */
 #define RAINBOW_CONTACT_IMAGE_ASSET 0x6A6
 #define RAINBOW_CONTACT_IMAGE_WIDTH 64
 #define RAINBOW_CONTACT_IMAGE_HEIGHT 8
-/* The plain and putt styles draw images that the shot effects load at the
- * start of g_SharedEffectImages */
 #define PLAIN_CONTACT_IMAGE_WIDTH 32
 #define PLAIN_CONTACT_IMAGE_HEIGHT 100
 #define PUTT_CONTACT_IMAGE_WIDTH 16
 #define PUTT_CONTACT_IMAGE_HEIGHT 100
 
-/* A banner's letters, each an image drawn on its own square */
 #define BANNER_MAX_LETTERS 11
-/* f_ActiveBannerLetters has room for one letter fewer: the eleventh of banner
- * 17, the only banner that long, would fall on f_ContactMatrices */
 #define BANNER_LETTER_SLOT_COUNT 10
 
-/*
- * The caption and a copy of it slide in from either side until they meet
- * at the center. The caption flashes, then grows and fades away.
- */
 #define CAPTION_MEET_DRAW 25
 #define CAPTION_FLASH_END_DRAW 37
 #define CAPTION_GROW_DRAW 44
@@ -105,76 +81,60 @@
 #define CAPTION_SOUND_VOLUME 63
 
 typedef struct Banner {
-    /* 0x0 */ s16 unusedBeforeImageAsset;
-    /* 0x2 */ AssetId imageAsset;
-    /* 0x4 */ s8 letterCount;
-    /* 0x5 */ u8 letterWidth;
-    /* 0x6 */ u8 letterHeight;
-    /* 0x7 */ s8 animation; /* A BANNER_ANIMATION_* value */
-} Banner; /* size = 0x8 */
+      s16 unusedBeforeImageAsset;
+      AssetId imageAsset;
+      s8 letterCount;
+      u8 letterWidth;
+      u8 letterHeight;
+      s8 animation;
+} Banner;
 
-/* Where a letter of the shown banner is, and its matrix in each matrix buffer
- */
 typedef struct BannerLetter {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 scale;
-    /* Cleared by StartBanner and DrawBanner, and read by nothing */
-    /* 0x0C */ s32 unusedLetterValue;
-    /* 0x10 */ Mtx matrices[2];
-} BannerLetter; /* size = 0x90 */
+      f32 x;
+      f32 y;
+      f32 scale;
+      s32 unusedLetterValue;
+      Mtx matrices[2];
+} BannerLetter;
 
-/*
- * A banner's left edge (BANNER_LAYOUT_LEFT), then where each letter sits from
- * it (BANNER_LAYOUT_FIRST_LETTER onwards)
- */
 enum BannerLayoutMode {
     BANNER_LAYOUT_LEFT,
     BANNER_LAYOUT_FIRST_LETTER
 };
 
-/* How a banner comes in */
 enum BannerAnimation {
-    /* Shrinks onto the screen while fading in, then leaves */
     BANNER_ANIMATION_ZOOM,
-    /* Grows while turning once */
     BANNER_ANIMATION_SPIN,
-    /* Slides in from the right and wobbles, then leaves */
     BANNER_ANIMATION_SLIDE,
-    /* Like BANNER_ANIMATION_ZOOM, but larger and stays */
     BANNER_ANIMATION_ZOOM_STAY
 };
 
 typedef s16 BannerLayout[BANNER_LAYOUT_FIRST_LETTER + BANNER_MAX_LETTERS];
 
 typedef struct LakituFlight {
-    /* 0x0 */ f32 x;
-    /* 0x4 */ f32 y;
-    /* 0x8 */ f32 scale;
+      f32 x;
+      f32 y;
+      f32 scale;
 } LakituFlight;
 
 typedef struct LakituVelocity {
-    /* 0x0 */ f32 x;
-    /* 0x4 */ f32 y;
+      f32 x;
+      f32 y;
 } LakituVelocity;
 
-/* ShowFlipMessage's arguments, besides a message to flip in */
 #define FLIP_MESSAGE_RESET (-2)
 #define FLIP_MESSAGE_LEAVE (-1)
 #define FLIP_MESSAGE_FRAME_NONE (-1)
-/* ShowFlipMessage sets f_IsFlipMessageLeaving before it is read */
 #define INITIAL_IS_FLIP_MESSAGE_LEAVING (-1)
 #define FLIP_MESSAGE_GLYPH_GROUP 0
 #define FLIP_MESSAGE_TEXT_SLOT 0
 #define FLIP_MESSAGE_X 160
 #define FLIP_MESSAGE_Y 114
-/* How far the board reaches past the message on each side */
 #define FLIP_MESSAGE_BOARD_MARGIN_X 6
 #define FLIP_MESSAGE_BOARD_MARGIN_Y 14
 #define FLIP_MESSAGE_OPEN_FRAME 10
 #define BANNER_FRAME_NONE (-1)
 #define CONTACT_MATRIX_COUNT 81
-/* A movie image starts with its size, then its palette, then its CI8 pixels */
 #define MOVIE_IMAGE_PALETTE_OFFSET 8
 #define MOVIE_IMAGE_PIXELS_OFFSET 0x208
 #define MOVIE_IMAGE_STRIP_HEIGHT 6
@@ -182,41 +142,32 @@ typedef struct LakituVelocity {
 #define SHRINKING_IMAGE_SOUND_CHANNEL 13
 #define SHRINKING_IMAGE_SOUND_VOLUME 63
 #define SHRINKING_IMAGE_DRAW_COUNT 90
-/* The image shrinks from double size over the quarter turn's 8 frames */
 #define SHRINKING_IMAGE_TURN_PER_FRAME (M_PI / 16)
 #define SHRINKING_IMAGE_CENTER_X 160
 #define SHRINKING_IMAGE_CENTER_Y 104
 #define SHRINKING_IMAGE_STRIPS_ABOVE_CENTER 4
-/* The effect sits a little below the ball's center */
 #define CONTACT_DROP_PER_PIN_SCALE 0.3f
 #define CONTACT_STYLE_SOUND_CHANNEL 15
 #define CONTACT_PUTT_Y (-2)
-/* The banner that shows "+N", which BANNER_STROKES_OVER_PAR + N starts */
 #define BANNER_OVER_PAR_NUMBER (BANNER_STROKES_OVER_PAR + 1)
 #define BANNER_LETTER_SPACING 32
 #define BANNER_Z (-300.0f)
-/* The board starts face down and turns this far each frame until it faces the
- * camera */
 #define FLIP_MESSAGE_DEGREES_PER_FRAME 18.0f
 #define FLIP_MESSAGE_START_DEGREES 180.0f
 #define FLIP_MESSAGE_GROWTH_PER_FRAME 0.1f
-/* The board hinges on its left edge */
 #define FLIP_MESSAGE_BOARD_Y 20.0f
 #define FLIP_MESSAGE_BOARD_Z (-300.0f)
 #define FLIP_MESSAGE_BOARD_ALPHA 159
 
-/* Each letter image follows the images' header and palette */
 #define BANNER_LETTER_IMAGES_OFFSET 0x208
 #define BANNER_LETTER_IMAGE_SIZE 0x800
 #define BANNER_LETTER_IMAGE_WIDTH 32
 #define BANNER_LETTER_IMAGE_HEIGHT 64
-/* The number banner's first image is "+", and its digit images follow */
 #define BANNER_PLUS_IMAGE 0
 #define BANNER_FIRST_DIGIT_IMAGE 1
 
 #define MOVIE_DRAW_COUNT_MAX 1000
 
-/* Each movie frame read into f_MovieBuffer, after its palette */
 #define MOVIE_PALETTE_OFFSET 0x4208
 #define MOVIE_FRAME_OFFSET 0x4408
 #define ASSET_TOAD_MOVIE_PALETTE 0x92C
@@ -230,7 +181,6 @@ typedef struct LakituVelocity {
 #define TOAD_STRIP_SIZE (TOAD_WIDTH * TOAD_STRIP_HEIGHT)
 #define TOAD_X 104
 #define TOAD_Y 86
-/* The flag swishes as it swings to each side */
 #define TOAD_SWING_LEFT_FRAME 8
 #define TOAD_SWING_RIGHT_FRAME 2
 #define FLAG_SWISH_SOUND_CHANNEL 15
@@ -239,7 +189,6 @@ typedef struct LakituVelocity {
 #define FLAG_SWISH_PITCH 12.0f
 #define OUT_OF_BOUNDS_SOUND_DRAW 16
 #define OUT_OF_BOUNDS_SOUND_CHANNEL 13
-/* Toad draws in the inset view, kept off its frame */
 #define INSET_VIEW_CAMERA 1
 #define INSET_FRAME_WIDTH 2
 #define INSET_FRAME_HEIGHT 1
@@ -248,12 +197,9 @@ typedef struct LakituVelocity {
 #define LAKITU_START_X 384.0f
 #define LAKITU_START_Y (-64.0f)
 #define LAKITU_START_SCALE 0.7f
-/* Lakitu flies in to its hover point over LAKITU_ARRIVE_DRAW draws */
 #define LAKITU_HOVER_X 192.0f
 #define LAKITU_HOVER_Y 96.0f
 #define LAKITU_ARRIVE_DRAW 30
-/* Then it counts down on its starting light until LAKITU_LEAVE_DRAW, and flies
- * off to the left */
 #define LAKITU_LEAVE_DRAW 120
 #define LAKITU_TICKS_PER_FRAME 8
 #define LAKITU_LAST_FRAME 12
@@ -289,7 +235,6 @@ typedef struct LakituVelocity {
 #define MOVIE_SOUND_REVERB 10
 
 #define MONTY_MOLE_FRAME_COUNT 17
-/* Each frame is drawn in strips, as a frame is too big to load at once */
 #define MONTY_MOLE_WIDTH 108
 #define MONTY_MOLE_STRIP_HEIGHT 18
 #define MONTY_MOLE_STRIP_COUNT 4
@@ -300,29 +245,19 @@ typedef struct LakituVelocity {
 #define GOOMBA_FRAME_COUNT 11
 #define GOOMBA_WIDTH 80
 #define GOOMBA_STRIP_HEIGHT 25
-/* The last strip holds what is left of the 73 rows */
 #define GOOMBA_LAST_STRIP_HEIGHT 23
 #define GOOMBA_STRIP_COUNT 3
 #define GOOMBA_STRIP_SIZE (GOOMBA_WIDTH * GOOMBA_STRIP_HEIGHT)
 #define GOOMBA_X 120
 #define GOOMBA_Y 62
-/* The controller whose buttons play movies under
- * GAME_FLAG_TEST_AIM_TILT_AND_MOVIES */
 #define MOVIE_TEST_CONTROLLER 1
 
-/* The Fly Guy and its streak are drawn on screen; a point's x and y are in
- * screen pixels */
-/* Frames since the banner started, or BANNER_FRAME_NONE */
 static s32 f_BannerFrame = BANNER_FRAME_NONE;
 static s32 f_CurrentBanner = BANNER_NONE;
-/* The number that BANNER_STROKES_OVER_PAR's banner shows after its "+" */
 static s32 f_BannerNumber = 0;
-/* The "+" and the number's digits */
 static s32 f_BannerNumberLetterCount = 0;
-/* The banner whose images are in f_MovieBuffer */
 static s32 f_LoadedBanner = BANNER_NONE;
 static Boolean f_IsMovieBufferAllocated = FALSE;
-/* Read by no routine */
 static s32 f_UnusedWordAfterMovieBufferFlag UNUSED = -1;
 static Vtx f_BannerLetterVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -331,39 +266,22 @@ static Vtx f_BannerLetterVertices[QUAD_VERTEX_COUNT] = {
     {{{32, 32, 0}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 static Banner f_Banners[] = {
-    /* BANNER_NICE_SHOT */
     {0, 0x542, 10, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SLIDE},
-    /* BANNER_NICE_ON */
     {0, 0x544, 8, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SPIN},
-    /* BANNER_NICE_APPROACH */
     {0, 0x543, 9, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SPIN},
-    /* BANNER_NICE_TOUCH */
     {0, 0x545, 9, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SPIN},
-    /* BANNER_CHIP_IN */
     {0, 0x546, 8, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SPIN},
-    /* BANNER_PIN_SHOT */
     {0, 0x547, 9, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SPIN},
-    /* BANNER_FLAG_SHOT */
     {0, 0x548, 9, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SPIN},
-    /* BANNER_EXCELLENT */
     {0, 0x54B, 9, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SPIN},
-    /* BANNER_GREAT */
     {0, 0x54C, 7, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SPIN},
-    /* BANNER_FINISH */
     {0, 0x54A, 6, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SLIDE},
-    /* BANNER_COMPLETE */
     {0, 0x549, 8, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SLIDE},
-    /* BANNER_HOLE_IN_ONE */
     {0, 0x551, 10, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SLIDE},
-    /* BANNER_ALBATROSS */
     {0, 0x552, 9, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SLIDE},
-    /* BANNER_EAGLE */
     {0, 0x550, 6, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SLIDE},
-    /* BANNER_BIRDIE */
     {0, 0x54E, 7, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SLIDE},
-    /* BANNER_PAR */
     {0, 0x54D, 5, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SLIDE},
-    /* BANNER_BOGEY */
     {
         0,
         0x54F,
@@ -372,7 +290,6 @@ static Banner f_Banners[] = {
         BANNER_LETTER_IMAGE_HEIGHT,
         BANNER_ANIMATION_ZOOM_STAY,
     },
-    /* BANNER_OVER_PAR_NUMBER */
     {
         0,
         0x553,
@@ -383,46 +300,27 @@ static Banner f_Banners[] = {
     },
 };
 static BannerLayout f_BannerLayouts[] = {
-    /* BANNER_NICE_SHOT */
     {-144, 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 0},
-    /* BANNER_NICE_ON */
     {-128, 0, 32, 64, 96, 128, 160, 192, 224, 0, 0, 0},
-    /* BANNER_NICE_APPROACH */
     {-144, 0, 32, 64, 96, 128, 160, 192, 224, 256, 0, 0},
-    /* BANNER_NICE_TOUCH */
     {-132, 0, 32, 64, 96, 128, 160, 192, 224, 256, 0, 0},
-    /* BANNER_CHIP_IN */
     {-128, 0, 32, 64, 96, 128, 160, 192, 224, 0, 0, 0},
-    /* BANNER_PIN_SHOT */
     {-128, 0, 32, 64, 96, 128, 160, 192, 224, 256, 0, 0},
-    /* BANNER_FLAG_SHOT */
     {-136, 0, 32, 64, 96, 128, 160, 192, 224, 256, 0, 0},
-    /* BANNER_EXCELLENT */
     {-144, 0, 32, 64, 96, 128, 160, 192, 224, 256, 0, 0},
-    /* BANNER_GREAT */
     {-96, 0, 32, 64, 96, 128, 160, 192, 0, 0, 0, 0},
-    /* BANNER_FINISH */
     {-88, 0, 32, 64, 96, 128, 160, 0, 0, 0, 0, 0},
-    /* BANNER_COMPLETE */
     {-120, 0, 32, 64, 96, 128, 160, 192, 224, 0, 0, 0},
-    /* BANNER_HOLE_IN_ONE */
     {-148, 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 0},
-    /* BANNER_ALBATROSS */
     {-132, 0, 32, 64, 96, 128, 160, 192, 224, 256, 0, 0},
-    /* BANNER_EAGLE */
     {-88, 0, 32, 64, 96, 128, 160, 0, 0, 0, 0, 0},
-    /* BANNER_BIRDIE */
     {-104, 0, 32, 64, 96, 128, 160, 192, 0, 0, 0, 0},
-    /* BANNER_PAR */
     {-64, 0, 32, 64, 96, 128, 160, 0, 0, 0, 0, 0},
-    /* BANNER_BOGEY */
     {-96, 0, 32, 64, 96, 128, 160, 0, 0, 0, 0, 0},
-    /* BANNER_OVER_PAR_NUMBER */
     {-105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
 static s32 f_TestBanner = 0;
 static Boolean f_IsFlipMessageLeaving = INITIAL_IS_FLIP_MESSAGE_LEAVING;
-/* FLIP_MESSAGE_FRAME_NONE while no message is shown */
 static s32 f_FlipMessageFrame = FLIP_MESSAGE_FRAME_NONE;
 static MessageId f_FlipMessageId = 0;
 static s32 f_FlipMessageHalfWidth = 0;
@@ -433,13 +331,9 @@ static Vtx f_FlipMessageBoardVertices[QUAD_VERTEX_COUNT] = {
     {{{72, -12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{72, 12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-/* Counts the frames that DrawMovie has drawn, up to MOVIE_DRAW_COUNT_MAX */
 static s32 f_MovieDrawCount = 0;
-/* Counts up to MOVIE_TICKS_PER_FRAME between the frames of a Monty Mole movie
- */
 static s32 f_MovieTick = 0;
 static s32 f_CurrentMovie = MOVIE_NONE;
-/* Which of a two-buffer movie's frame buffers to read into next */
 static s32 f_MovieBackBuffer = 0;
 static s32 f_MovieFrame = 0;
 static AssetId f_ToadMovieFrameAssets[] =
@@ -485,7 +379,6 @@ static Gfx f_MovieImageSetupDisplayList[] = {
     gsDPPipeSync(),
     gsDPSetTextureLUT(G_TT_RGBA16),
     gsSPEndDisplayList(),
-    /* Commands after the end, which no display list reaches */
     gsDPPipeSync(),
     gsDPSetAlphaDither(G_AD_DISABLE),
     gsDPPipeSync(),
@@ -505,7 +398,6 @@ static Vtx f_ReadyGoVertices[12] = {
     {{{-76, -32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{76, -32, 0}, 0, {0, 0x800}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-/* Sets the render state for drawing a movie's paletted strips */
 static Gfx f_MovieSetupDisplayList[] = {
     gsDPPipeSync(),
     gsDPPipeSync(),
@@ -534,7 +426,6 @@ static Vtx f_ContactSpinVertices[QUAD_VERTEX_COUNT] = {
     {{{15, -15, 0}, 0, {0x7FF, 0x7FF}, {0xFF, 0x7F, 0x00, 0xFF}}},
     {{{15, 25, 0}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
 };
-/* The contact effect's quad spans from vertex 0 to vertex 1 */
 static Vtx f_ContactVertices[2] = {
     {{{-12, 0, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
     {{{12, 0, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
@@ -542,38 +433,19 @@ static Vtx f_ContactVertices[2] = {
 s32 g_ContactEffect = CONTACT_EFFECT_NONE;
 static Boolean f_IsContactEffectFading = FALSE;
 static s32 f_ContactStyle = 0;
-/* RSP's vertex buffer holds this many segments; the rest of the ribbon reloads
- * them back and forth */
 #define CONTACT_RIBBON_FIRST_SEGMENTS 16
 #define CONTACT_RIBBON_RELOAD_SEGMENTS 15
 #define CONTACT_RIBBON_RELOAD_PASSES 2
-/*
- * The first segment of one of a pass's two runs. Each pass reloads the buffer
- * from its end back to its start, then forward again, each run keeping the
- * vertex pair that the last one ended on. The terms are summed one by one, as
- * multiplying (pass * 2) + run out of one product changes the code.
- */
 #define ContactRunStart(pass, run) \
     (CONTACT_RIBBON_FIRST_SEGMENTS + ((run) * CONTACT_RIBBON_RELOAD_SEGMENTS) + \
         ((pass) * 2 * CONTACT_RIBBON_RELOAD_SEGMENTS))
 #define CONTACT_RIBBON_SEGMENT_COUNT ContactRunStart(CONTACT_RIBBON_RELOAD_PASSES, 0)
-/* The T step from one segment to the next that runs the ribbon through texels
- * of the image's height */
 #define ContactStepT(texels) (TexelCoordinate(texels) / CONTACT_RIBBON_SEGMENT_COUNT)
-/*
- * In S10.5, the S of the quad's far side, and the step in T from one of the
- * ribbon's segments to the next
- */
 static s32 f_ContactTextureS = 0;
 static s32 f_ContactTextureT = 0;
-/* Read by no routine */
 static Mtx f_UnusedRoundEventsIdentity UNUSED = IDENTITY_MTX;
 static s32 f_ContactTrailHead = 0;
 static Degrees f_ContactSpinAngle = 0.0f;
-/*
- * StepAlongPath flies the Fly Guy through the first
- * WIND_FLY_GUY_PATH_POINT_COUNT points; the last two are read by no routine
- */
 static PathPoint f_WindFlyGuyPath[] = {
     {-128.0f, 214.0f, 0.0f},
     {1e+02f, 215.0f, 0.0f},
@@ -595,14 +467,10 @@ static PathPoint f_WindFlyGuyPath[] = {
     {3.6e+02f, 175.0f, 0.0f},
     {3.8e+02f, 1.7e+02f, 0.0f},
 };
-/* Where the Fly Guy stays while its streak fades */
 static PathPoint f_WindFlyGuyExit = {3.8e+02f, 1.7e+02f, 0.0f};
 static s32 f_WindFlyGuyFrame = FLY_GUY_HIDDEN;
 static s32 f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
-/* Read by no routine */
 static s32 f_UnusedWordAfterFlyGuyAsset UNUSED = 0;
-/* The contact matrix that the streak starts from; the streak's matrices form a
- * ring behind it */
 static s32 f_WindStreakHead = 0;
 
 static Mtx f_FlipMessageMatrices[MATRIX_BUFFER_COUNT];
@@ -611,10 +479,8 @@ static Mtx f_ContactRibbonMatrices[DRAW_BUFFER_COUNT];
 static Mtx f_ContactSpinMatrices[MATRIX_BUFFER_COUNT];
 static PathPoint f_WindFlyGuyLastPosition;
 static Mtx f_BannerMatrices[MATRIX_BUFFER_COUNT];
-/* Read by no routine */
 static u8 f_UnusedBufferAfterBannerMatrices[0xD0] UNUSED;
 
-/* Not static: the original left these to the linker's common block */
 BannerLetter f_ActiveBannerLetters[BANNER_LETTER_SLOT_COUNT];
 u8 *f_MovieBuffer;
 Mtx f_ContactMatrices[CONTACT_MATRIX_COUNT];
@@ -631,7 +497,6 @@ void DrawLakituMovie(Gfx **displayListHead);
 void DrawToadMovie(Gfx **displayListHead);
 
 void AllocMovieBuffer(void) {
-    /* Pads the frame to match; without it 12 words differ */
     EncodedAsset unused UNUSED;
 
     f_CurrentBanner = BANNER_NONE;
@@ -682,7 +547,6 @@ void StartBanner(s32 banner) {
 
         f_LoadedBanner = f_CurrentBanner;
 
-        /* The "+" and the digits */
         if (f_BannerNumber < 10) {
             f_BannerNumberLetterCount = 2;
         }
@@ -740,7 +604,6 @@ void StartBanner(s32 banner) {
     }
 }
 
-/* Draws the number banner's "+" and digits */
 void DrawNumberBanner(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 i;
@@ -784,8 +647,6 @@ void DrawNumberBanner(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Draws the shown banner's letters, each placed within the whole banner's
- * matrix */
 void DrawBannerLetters(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 i;
@@ -824,15 +685,12 @@ void DrawBannerLetters(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Left with nothing between taking and storing the display list head in the
- * original; called after a letter banner is drawn */
 void DrawLetterBannerExtras(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
     *displayListHead = gfx;
 }
 
-/* The debug flag that lets the D-Pad pick a banner and start it */
 #define GAME_FLAG_TEST_BANNERS 0x6D
 #define TEST_BANNER_LAST 37
 
@@ -842,7 +700,6 @@ void DrawLetterBannerExtras(Gfx **displayListHead) {
 #define BANNER_SOUND_CHANNEL 13
 #define BANNER_SOUND_VOLUME 63
 #define BANNER_Y 64.0f
-/* The zooming banners start large and shrink by this each frame */
 #define BANNER_ZOOM_FRAMES 20
 #define BANNER_ZOOM_PER_FRAME 0.3f
 #define BANNER_ZOOM_SMALLEST 1.2f
@@ -850,18 +707,14 @@ void DrawLetterBannerExtras(Gfx **displayListHead) {
 #define BANNER_SPIN_GROWTH_PER_FRAME 0.1f
 #define BANNER_SLIDE_FRAMES 10
 #define BANNER_SLIDE_PER_FRAME 36.0f
-/* The sliding banner wobbles over these frames, less and less */
 #define BANNER_WOBBLE_FRAMES 20
 #define BANNER_WOBBLE_DEPTH 0.4f
 #define BANNER_WOBBLE_DEPTH_LOSS 0.05f
 #define BANNER_WOBBLE_SMALLEST_DEPTH 0.1f
 #define BANNER_WOBBLE_TURN_PER_FRAME (M_PI / 10)
-/* The banner's shading shows through less as it fades in */
 #define BANNER_MAX_ALPHA 255
 #define BANNER_BLEND_ALPHA 1
 
-/* Animates the shown banner and draws it, its letters each on their own square
- */
 void DrawBanner(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     Vec3 translation;
@@ -877,10 +730,6 @@ void DrawBanner(Gfx **displayListHead) {
 
     angle = 0.0f;
 #ifdef AVOID_UB
-    /*
-     * Only the zooms read it, and they set it, but the animation is reread
-     * from the global after calls that could change it
-     */
     alpha = BANNER_MAX_ALPHA;
 #endif
     if (IsGameFlagSet(GAME_FLAG_TEST_BANNERS)) {
@@ -990,7 +839,6 @@ void DrawBanner(Gfx **displayListHead) {
                 letterScale = 1.0f;
             }
 
-            /* Keeps the banner's left edge in place while it stretches */
             slide += f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_LEFT] * (1.0f - letterScale);
             rotation[AXIS_X] = 0;
             rotation[AXIS_Y] = 0;
@@ -1158,11 +1006,6 @@ void DrawBanner(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Flips a message in on a board in the middle of the screen, sized to fit it.
- * FLIP_MESSAGE_LEAVE flips the board back out, and FLIP_MESSAGE_RESET takes it
- * away at once.
- */
 void ShowFlipMessage(MessageId messageId) {
     s32 halfSize;
     s32 halfWidth;
@@ -1209,8 +1052,6 @@ void ShowFlipMessage(MessageId messageId) {
     );
 }
 
-/* Turns the flip message board a frame further in or out, then draws it and its
- * text */
 void DrawFlipMessage(Gfx **displayListHead) {
     Vec3 scale;
     Vec3 translation;
@@ -1313,7 +1154,6 @@ void StartMovie(s32 movie) {
     f_MovieTick = 0;
     f_MovieBackBuffer = 0;
 
-    /* The first frame is loaded here */
     f_MovieFrame = 1;
     switch (movie) {
         case MOVIE_NONE:
@@ -1459,19 +1299,14 @@ void DrawMovie(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Where the contest winner's palette, face and plaque are kept, after the movie
- * image */
 #define WINNER_PALETTE_OFFSET 0x2788
 #define WINNER_FACE_OFFSET 0x2988
 #define WINNER_PLAQUE_OFFSET 0x2D88
 #define WINNER_FACE_SIZE 32
 #define WINNER_PLAQUE_SIZE 48
-/* The plaque shows this much more than the face on each side */
 #define WINNER_PLAQUE_MARGIN 8
 #define WINNER_CENTER_X 160
 #define WINNER_CENTER_Y 128
-/* The face and plaque grow to this many steps of WINNER_GROWTH_STEP pixels,
- * then shrink back */
 #define WINNER_MAX_GROWTH 4
 #define WINNER_GROWTH_STEP 5
 #define WINNER_SHRINK_FRAME 31
@@ -1493,20 +1328,13 @@ void DrawMovie(Gfx **displayListHead) {
 #define CONTEST_IMAGE_CENTER_X 160
 #define CONTEST_IMAGE_CENTER_Y 80
 #define CONTEST_IMAGE_STRIPS_ABOVE_CENTER 4
-/* The winner cheers as the caption meets */
 #define CONTEST_CHEER_DRAW 26
-/* The face appears and vanishes over these frames, counted from
- * CONTEST_MEET_DRAW */
 #define WINNER_FIRST_FRAME 1
 #define WINNER_LAST_FRAME 32
 #define WINNER_SOUND_VOLUME 63
 #define WINNER_SOUND_REVERB 30
-/* The face's later frames, which g_CharacterImageAssets lists after its first
- */
 #define WINNER_BLINK_FRAME 8
 
-/* Reads the contest winner's face, the given frame after their first, into
- * the movie buffer */
 #define LoadWinnerFace(asset, frameIndex) \
     { \
         OpenEncodedAsset( \
@@ -1516,9 +1344,6 @@ void DrawMovie(Gfx **displayListHead) {
         ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, (asset)); \
     }
 
-/*
- * The caption of a longest drive or nearest pin contest, then its winner's face
- */
 void DrawContestWinnerMovie(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     EncodedAsset asset;
@@ -1775,11 +1600,6 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         step = TexelRunStep((WINNER_FACE_SIZE / 2), growth);
-        /*
-         * Reuses width for the face's left edge, as the original seems to: the
-         * extra use raises width's global-alloc priority above the strips' right
-         * edge, so that width gets $s7 there as in the original.
-         */
         width = QuarterPixels(WINNER_CENTER_X - growth);
         DrawTextureRect(
             &gfx,
@@ -1799,7 +1619,6 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* The record distance shows under the caption once it has met at the center */
 #define DRIVE_RECORD_DISTANCE_DRAW 26
 #define DRIVE_RECORD_DISTANCE_END_DRAW 45
 #define DRIVE_RECORD_DISTANCE_X 136
@@ -1807,10 +1626,6 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
 #define DRIVE_RECORD_DISTANCE_ENV_COLOR 0xFF600000
 #define DRIVE_RECORD_DISTANCE_PRIM_COLOR 0xFFFF0000
 
-/*
- * The drive record caption slides in from either side with a copy of it, then
- * grows and flashes before it closes, with the record distance beneath it
- */
 void DrawDriveRecord(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     u32 width;
@@ -1975,11 +1790,6 @@ void DrawDriveRecord(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * A putt's caption, such as a birdie or a sink to win, slides in from either
- * side with a copy of it, then flashes and grows before it closes, as the
- * drive record's does
- */
 void DrawPuttCaption(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     u32 width;
@@ -2124,11 +1934,6 @@ void DrawPuttCaption(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * "Ready" flips over to face the camera and away again, then "Go" flips in,
- * grows and fades. Each word is a textured quad, drawn in strips whose
- * texture coordinates are patched into the shared vertices.
- */
 #define READY_GO_SOUND_VOLUME 63
 #define READY_GO_SOUND_REVERB 30
 #define READY_SOUND_DRAW 1
@@ -2213,10 +2018,6 @@ void DrawReadyGoMovie(Gfx **displayListHead) {
             alpha = 0;
         }
 
-        /*
-         * The chained assignment is there to match: three separate stores, in
-         * either order, give 19 words differing, 9 in shape
-         */
         rotation[AXIS_X] = rotation[AXIS_Y] = rotation[AXIS_Z] = 0.0f;
         scale[AXIS_Z] = (GO_GROWTH_PER_FRAME * (f_MovieDrawCount - GO_GROW_DRAW)) + 1.0f;
         scale[AXIS_X] = scale[AXIS_Y] = scale[AXIS_Z];
@@ -2390,85 +2191,6 @@ void DrawReadyGoMovie(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Unused: draws the movie image in f_MovieBuffer, shrinking it from double size
- * to its own size.
- *
- * The original copies the image's width from $s6 to $s1 before the sound, and
- * halves the copy for the horizontal texel step. A plain copy doesn't last:
- * once loop.c has moved the step's shifts ahead of the loop, the second cse
- * pass reads width in them and the copy is dropped. Narrowed to 16 bits and
- * widened again, the copy is two insns that cse can't follow back to width.
- * combine, which knows the top half of a width read as two bytes is clear, then
- * makes of the two a plain move, and as it works within a block, the shift
- * ahead of the loop is left an arithmetic one. A cast or a mask is a single
- * insn, which combine has nothing to join to, and stays an andi. A u16 halved
- * in the loop has its widening moved out with the shift, and combine joins
- * those as an srl.
- *
- * left and texelStep are worked out ahead of DrawTextureRect's call for the
- * order loop.c meets the loop's invariants in. It moves one out while its
- * threshold, times the invariant's savings and lifetime, reaches the loop's
- * insn count. The threshold starts at 61, as the loop has calls, and drops by 3
- * for each register moved; the strip loop has 52 insns. LoadTextureBlock's
- * strip height of 6 is moved at 61, the center's 160 and left at 58 and 55, and
- * the texel step's two shifts at 52 and 49. That leaves 46 for stripHeight * 4
- * and for the right edge's sum, each used once, in the next insn, so both stay
- * in the loop as in the original. With the step written in the call its shifts
- * come after the edges: stripHeight * 4 is met at 52 and moved out, to a tenth
- * register kept across the calls, and stripCount goes to the stack. With left's
- * difference written in the call, the shifts are moved first and the two pairs
- * swap places ahead of the loop.
- *
- * The 6 is moved out as well, but the nine saved registers go to width,
- * stripCount, halfWidth, stripHeight, i, left, the shifted half width, and the
- * two registers loop.c steps for the strip's offset and for bottom. With no
- * register it is loaded again where it is used, by reload, into $t2. A loop of
- * 62 insns would keep stripHeight * 4 in without the two locals, but keeps the
- * 6 in too, in $v0.
- *
- * The strip's address is taken from i * width, which loop.c reduces to a
- * register stepped by width, leaving the product with the strip's height in the
- * loop as the original has it. bottom, as in DrawPuttCaption, is reduced to a
- * register stepped by stripHeight from the center.
- *
- * Measured against the match, as words differing and how many of them in shape:
- *   The old draft                                             54 (24)
- *   texelWidth copied from width as it is, or the step taken
- *   from width                                                6 (2)
- *   texelWidth set to (u16)width or to width & 0xFFFF         2 (2)
- *   A u16 texelWidth set to width, with no narrowWidth        2 (2)
- *   narrowWidth as an s16                                     4 (2)
- *   texelWidth as a u32                                       12 (10)
- *   The copy made before stripCount is worked out             14 (10)
- *   The copy made after the sound                             8 (6)
- *   narrowWidth set before the sound and texelWidth after it  4 (4)
- *   texelWidth read again from the image through a (u16) cast 9 (3)
- *   halfWidth worked out from texelWidth                      2 (0)
- *   No left, its difference written in the call               4 (4)
- *   texelStep worked out before left                          4 (4)
- *   The center in a centerX set in the loop, in place of left 4 (4)
- *   No texelStep, the step written in the call, with or
- *   without left                                              118 (26)
- *   The right edge in a local as well                         90 (26)
- *   The vertical step in a local worked out before texelStep  107 (27)
- *   left and texelStep worked out before LoadTextureBlock     165 (67)
- *   The same before the loop                                  170 (66)
- *   The strip's address from an offset stepped by width       31 (7)
- *   bottom as the center plus (i - 4) * stripHeight, used as
- *   the strip's top                                           87 (19)
- *   The rectangle's bottom as bottom less 3 strips            110 (28)
- *   The loop's test as <                                      79 (3)
- *   Neither local, and a slide clamped at the loop's start as
- *   DrawPuttCaption's is, never read                          4 (2)
- *
- * Also matching: narrowWidth and texelWidth set in one chained assignment; the
- * right edge's sum with halfWidth first; left as quarter pixels; bottom worked
- * out before left, or between left and texelStep; the strip's top in a local of
- * its own, taken from bottom; the vertical step in a local worked out after
- * texelStep; texelStep as the shifted half width alone, divided in the call;
- * the image's height in a local; and the new locals declared after i.
- */
 void DrawShrinkingMovieImage(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 width;
@@ -2486,7 +2208,6 @@ void DrawShrinkingMovieImage(Gfx **displayListHead) {
     stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
     width = ReadImageWidth(f_MovieBuffer);
     stripCount = ReadImageHeight(f_MovieBuffer) / stripHeight;
-    /* Narrowed to 16 bits and widened again, to match */
     narrowWidth = width;
     texelWidth = narrowWidth;
     if (f_MovieDrawCount == SHRINKING_IMAGE_SOUND_DRAW) {
@@ -2548,7 +2269,6 @@ void DrawShrinkingMovieImage(Gfx **displayListHead) {
                     G_TX_NOLOD,
                     G_TX_NOLOD
                 );
-                /* Both worked out ahead of the call, to match */
                 left = SHRINKING_IMAGE_CENTER_X - halfWidth;
                 texelStep = TexelRunStep((texelWidth >> 1), halfWidth);
                 bottom = SHRINKING_IMAGE_CENTER_Y + (i * stripHeight);
@@ -2574,11 +2294,9 @@ void DrawShrinkingMovieImage(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* A Monty Mole pops out of the green */
 void DrawMontyMoleMovie(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     EncodedAsset asset;
-    /* Pads the frame to match; without it 84 words differ */
     s32 unused[4] UNUSED;
     s32 i;
 
@@ -2645,11 +2363,9 @@ void DrawMontyMoleMovie(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* A Goomba hops out of the green */
 void DrawGoombaMovie(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     EncodedAsset asset;
-    /* Pads the frame to match; without it 88 words differ */
     s32 unused[4] UNUSED;
     s32 i;
     s32 height;
@@ -2724,10 +2440,6 @@ void DrawGoombaMovie(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Lakitu flies in, counts down to the start on its starting light, then flies
- * off
- */
 void DrawLakituMovie(Gfx **displayListHead) {
     EncodedAsset asset;
     Gfx *gfx = *displayListHead;
@@ -2807,10 +2519,6 @@ void DrawLakituMovie(Gfx **displayListHead) {
         stepT = TexelRunStep(LAKITU_STRIP_HEIGHT, halfHeight);
         roundedHalfWidth = halfWidth + 0.5f;
 
-        /*
-         * Start half a texel in, less the rounding, so that the image stays
-         * centered as it scales
-         */
         startS = 16.0f - (((f32)roundedHalfWidth - halfWidth) * 16.0f);
         gDPLoadTextureTile(
             gfx++,
@@ -2856,7 +2564,6 @@ void DrawLakituMovie(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Toad waves the out of bounds flag in the inset view */
 void DrawToadMovie(Gfx **displayListHead) {
     EncodedAsset asset;
     Gfx *gfx = *displayListHead;
@@ -2977,8 +2684,6 @@ Boolean IsContactEffectShown(void) {
     return g_ContactEffect != CONTACT_EFFECT_NONE;
 }
 
-/* Returns the CONTACT_STYLE_* of the player's character, or for a Game Boy one,
- * of its ball */
 s32 GetContactStyle(Player *player) {
     GameBoyCharacter *gameBoyCharacter;
     s8 character = player->characterIndex;
@@ -3032,16 +2737,11 @@ s32 GetContactStyle(Player *player) {
     return CONTACT_STYLE_PLAIN;
 }
 
-/* Sets the contact quad's corners halfWidth either side of its center */
 static inline void SetContactHalfWidth(s16 halfWidth) {
     f_ContactVertices[0].v.ob[AXIS_X] = -halfWidth;
     f_ContactVertices[1].v.ob[AXIS_X] = halfWidth;
 }
 
-/*
- * Places a contact effect at the ball and sizes it for its style;
- * CONTACT_EFFECT_NONE removes it and CONTACT_EFFECT_FADE fades it out
- */
 void StartContactEffect(s32 effect) {
     s32 i;
 
@@ -3081,8 +2781,6 @@ void StartContactEffect(s32 effect) {
     }
 
     if (effect != CONTACT_EFFECT_NONE && IsShownContactEffect(effect)) {
-        /* Each style sets its quad's half width, its texture's far corner and its
-         * sound */
         if (f_ContactStyle == CONTACT_STYLE_POWER_IRON) {
             SetContactHalfWidth(20);
             f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
@@ -3117,14 +2815,12 @@ void StartContactEffect(s32 effect) {
         }
         else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
             SetContactHalfWidth(20);
-            /* Bowser's image and its mirror across, and twice along the ribbon */
             f_ContactTextureS = TexelCoordinate(2 * BOWSER_CONTACT_IMAGE_WIDTH) - 1;
             f_ContactTextureT = ContactStepT(2 * BOWSER_CONTACT_IMAGE_HEIGHT);
             PlaySound(SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
         }
         else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
             SetContactHalfWidth(160);
-            /* The plain style's, as no ribbon is drawn for Mario */
             f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
             f_ContactTextureT = ContactStepT(PLAIN_CONTACT_IMAGE_HEIGHT);
             PlaySound(SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
@@ -3144,7 +2840,6 @@ void StartContactEffect(s32 effect) {
     }
 }
 
-/* Reads the images of the player's contact effect */
 void LoadContactImages(Player *player) {
     EncodedAsset asset;
 
@@ -3171,12 +2866,9 @@ void LoadContactImages(Player *player) {
     }
 }
 
-/* g_ContactEffect counts the frames since contact, faster while fading, up to
- * here */
 #define CONTACT_AGE_MAX 255
 #define CONTACT_FADE_STEP 4
 #define CONTACT_MIN_ALPHA 4
-/* Also Mario's, which fades from the start */
 #define CONTACT_WARIO_ALPHA 200
 #define CONTACT_WARIO_HOLD_AGE 8
 #define CONTACT_WARIO_FADE_PER_AGE 30
@@ -3185,8 +2877,6 @@ void LoadContactImages(Player *player) {
 #define CONTACT_SHARED_ALPHA 96
 #define CONTACT_SHARED_FADE_PER_AGE 2.0f
 #define CONTACT_HOLD_AGE 100
-/* f_ContactMatrices is a ring of the ball's positions, newest at
- * f_ContactTrailHead */
 #define CONTACT_TRAIL_LENGTH 80
 #define CONTACT_RIBBON_SCALE 0.1f
 #define CONTACT_PALETTE_SIZE 0x200
@@ -3197,8 +2887,6 @@ void LoadContactImages(Player *player) {
 #define CONTACT_SPIN_SCALE_PER_ALPHA (1.0f / 512)
 #define CONTACT_SPIN_ALPHA 230
 
-/* Draws the ribbon segment between two of the ball's positions, as vertex pair
- * firstVertex */
 #define DrawContactSegment(segment, firstVertex) \
     { \
         s32 slot = (f_ContactTrailHead + (segment)) % CONTACT_TRAIL_LENGTH; \
@@ -3239,7 +2927,6 @@ void LoadContactImages(Player *player) {
         ); \
     }
 
-/* The shot style draws only the first segments */
 #define DrawContactRibbon() \
     { \
         for (i = 0; i != CONTACT_RIBBON_FIRST_SEGMENTS; i++) { \
@@ -3264,10 +2951,6 @@ void LoadContactImages(Player *player) {
         } \
     }
 
-/*
- * Draws the contact effect as a ribbon through the ball's last positions, and
- * Mario's as a spinning image, while it fades
- */
 void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
     Mat4 scale;
     Mat4 antiBillboard;
@@ -3351,7 +3034,6 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
     }
 
     if (alpha > 0) {
-        /* The ribbon starts where the ball was hit, then follows it */
         if (g_ContactEffect == 1) {
             f_ContactTrailHead = 0;
             for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
@@ -3430,7 +3112,6 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
             gDPSetPrimColor(gfx++, 0, 0, 191, 191, 255, alpha);
         }
 
-        /* Bowser's image and the rainbow have their own colors */
         if (f_ContactStyle == CONTACT_STYLE_BOWSER || f_ContactStyle == CONTACT_STYLE_RAINBOW) {
             gDPSetCombineLERP(
                 gfx++,
@@ -3620,8 +3301,6 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
         }
 
         if (f_ContactStyle == CONTACT_STYLE_MARIO) {
-            /* The chained assignment is there to match: three statements, in either
-             * order, give 501 differing words, 81 in shape */
             translation[AXIS_X] = translation[AXIS_Y] = translation[AXIS_Z] = 0.0f;
             f_ContactSpinAngle += CONTACT_SPIN_DEGREES_PER_FRAME;
             rotation[AXIS_X] = 0.0f;
@@ -3695,8 +3374,6 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
             gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
         }
 
-        /* The ring of matrices turns back one so the newest position takes the slot
-         * before */
         f_ContactTrailHead--;
         if (f_ContactTrailHead < 0) {
             f_ContactTrailHead = CONTACT_TRAIL_LENGTH - 1;
@@ -3708,8 +3385,6 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
     *displayListHead = gfx;
 }
 
-/* Shows the Fly Guy that warns of a strong wind, or hides it given
- * FLY_GUY_HIDDEN */
 void ShowWindFlyGuy(s32 show) {
     EncodedAsset asset;
 
@@ -3734,8 +3409,6 @@ void ShowWindFlyGuy(s32 show) {
 #define WIND_FLY_GUY_PATH_POINT_COUNT 17
 #define WIND_FLY_GUY_PATH_PACE PathPace(1, 2)
 #define WIND_FLY_GUY_FRAME_COUNT 14
-/* f_WindFlyGuyFrame while the Fly Guy flies its path; after it, the frame
- * counts up as the streak fades */
 #define WIND_FLY_GUY_STARTING 0
 #define WIND_FLY_GUY_FLYING 1
 #define WIND_FLY_GUY_ARRIVED 2
@@ -3744,16 +3417,11 @@ void ShowWindFlyGuy(s32 show) {
 #define WIND_STREAK_FADE_STEP 10
 #define WIND_STREAK_HALF_WIDTH 10
 #define WIND_STREAK_LENGTH 80
-/* The streak's quads, drawn as two runs since only 32 vertices fit in the
- * vertex cache */
 #define WIND_STREAK_FIRST_RUN 16
 #define WIND_STREAK_SECOND_RUN_END 31
 #define WIND_STREAK_QUADS_PER_RUN 15
-/* The first vertex slot of the last quad of a run */
 #define WIND_STREAK_LAST_SLOT ((WIND_STREAK_QUADS_PER_RUN - 1) * 2)
-/* The far side of the streak texture, in S10.5 */
 #define WIND_STREAK_TEXTURE_S 0x5FF
-/* Each quad steps the streak texture by 8 texels */
 #define WIND_STREAK_TEXTURE_T_SHIFT 8
 #define WIND_STREAK_IMAGE_WIDTH 48
 #define WIND_STREAK_IMAGE_HEIGHT 128
@@ -3764,10 +3432,6 @@ void ShowWindFlyGuy(s32 show) {
 #define WIND_FLY_GUY_SOUND_CHANNEL 10
 #define WIND_FLY_GUY_SOUND_VOLUME 63
 
-/*
- * The Fly Guy that warns of a strong wind, flying across the screen and
- * trailing a streak of wind
- */
 void DrawWindFlyGuy(Gfx **displayListHead) {
     EncodedAsset asset;
     PathPoint position;
@@ -3926,8 +3590,6 @@ void DrawWindFlyGuy(Gfx **displayListHead) {
         );
     }
 
-    /* The second run reuses the vertex slots backwards from the last vertex of
-     * the first */
     for (i = WIND_STREAK_FIRST_RUN; i != WIND_STREAK_SECOND_RUN_END; i++) {
         slotsBack = (i - WIND_STREAK_FIRST_RUN) * 2;
         streakSlot = (f_WindStreakHead + i) % WIND_STREAK_LENGTH;

@@ -1,8 +1,3 @@
-/*
- * The game's entry, mainproc, which sets up the framebuffers and runs the
- * heartbeat loop. The file also keeps the game flags, reads the controllers and
- * prepares for a reset.
- */
 #include "main.h"
 
 #include <PR/libmus.h>
@@ -36,38 +31,28 @@
 #include "transfer_pak.h"
 #include "work_area.h"
 
-/* The audio interface's sample rate, in Hz */
 #define AUDIO_FREQUENCY 32000
 
-/* Frame buffers that the game swaps between */
 #define FRAMEBUFFER_COUNT 3
 
-/* The bytes of one frame buffer's 16-bit texels */
 #define FRAMEBUFFER_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(u16))
 
-/* The frame buffers fill the end of the base RDRAM, in order */
 #define FramebufferAddress(index) \
     ((u16 *)(BASE_RDRAM_END - ((FRAMEBUFFER_COUNT - (index)) * FRAMEBUFFER_SIZE)))
 
-/* Character slots that get a buffer in g_WorkArea */
 enum CharacterSlotRole {
     CHARACTER_SLOT_PARTNER = 1,
     CHARACTER_SLOT_CADDIE,
     CHARACTER_SLOT_GOLFER
 };
 
-/* Iterations of the busy loop between two reports of RunHeartbeatLoop */
 #define HEARTBEAT_LOOP_COUNT 100000000
 
-/* Values of g_MainLoopState */
 enum MainLoopState {
     MAIN_LOOP_START,
     MAIN_LOOP_RUNNING = -1
 };
 
-/* Values of f_DebugHaltState. Holding HALT_BUTTONS on the first controller
-   while halting is allowed halts the game and hands the console over to
-   the development debugger. */
 enum HaltState {
     HALT_STATE_DISALLOWED,
     HALT_STATE_ALLOWED,
@@ -76,30 +61,20 @@ enum HaltState {
 
 #define HALT_BUTTONS (A_BUTTON | B_BUTTON | L_TRIG | R_TRIG)
 
-/* Graphics tasks that may wait for the RDP before a frame is skipped,
-   depending on g_FramePacingMode */
 #define PENDING_TASK_MAX 2
 #define PENDING_TASK_MAX_RELAXED 4
 
-/* Retraces between two updates of g_FramesPerSecond */
 #define RETRACES_PER_SECOND 60
 
-/* The stick reads as a direction once it is pushed past
-   STICK_PRESS_THRESHOLD, and keeps doing so until it falls back below
-   STICK_RELEASE_THRESHOLD */
 #define STICK_PRESS_THRESHOLD 56
 #define STICK_RELEASE_THRESHOLD 20
 
-/* Stick readings this close to the center count as 0 */
 #define STICK_DEAD_ZONE 16
 
-/* The largest stick magnitude in menu readings */
 #define MENU_STICK_MAX 64
 
-/* The largest stick magnitude in a ControllerState, after the dead zone */
 #define STATE_STICK_MAX 44
 
-/* A ControllerState counts the stick as pressing a direction past this */
 #define STATE_STICK_DIRECTION_MIN 30
 
 s8 g_IsDebugEnabled = FALSE;
@@ -108,7 +83,6 @@ static volatile u8 f_DebugHaltState = HALT_STATE_DISALLOWED;
 Boolean g_HasThreeFrameBuffers = FALSE;
 s32 g_FramesPerSecond = 0;
 
-/* Read by no routine */
 static u8 f_UnusedBytesAfterFramesPerSecond[4] UNUSED = {0};
 
 static u16 *f_Framebuffers[FRAMEBUFFER_COUNT] = {
@@ -123,7 +97,6 @@ volatile s32 g_FrameCount = 0;
 static Boolean f_IsOddRetrace = FALSE;
 
 void HandleGfxRetrace(s32 pendingTaskCount);
-/* The development debugger's entry, outside the game's code */
 void EnterDevelopmentDebugger(s32 argument);
 
 s32 g_HasOwnControllers;
@@ -141,14 +114,10 @@ ControllerState g_TurnController;
 
 FILE_STATIC volatile s32 g_MainLoopState;
 FILE_STATIC u8 f_GameFlagBits[GAME_FLAG_BYTE_COUNT];
-/* The first flag in each byte is its top bit */
 #define GameFlagByte(flag) (f_GameFlagBits[(flag) / GAME_FLAGS_PER_BYTE])
 #define GameFlagMask(flag) (0x80 >> ((flag) % GAME_FLAGS_PER_BYTE))
-/* Every bit but the flag's, as the high byte's ones shift in above it */
 #define GameFlagClearMask(flag) (0xFF7F >> ((flag) % GAME_FLAGS_PER_BYTE))
-/* The menus' readings from the last frame */
 FILE_STATIC NUContData g_PreviousMenuControllerData[MAXCONTROLLERS];
-/* One bit for each port with a controller plugged in, from bit 0 */
 FILE_STATIC u8 g_ConnectedControllerBits;
 
 void ReportFailedAssertion(const char *expression UNUSED, const char *fileName, s32 lineNumber) {
@@ -160,7 +129,6 @@ void guNormalize(f32 *x, f32 *y, f32 *z) {
     f32 yValue = *y;
     f32 zValue = *z;
 
-    /* The squared length, and then the inverse of the length */
     f32 length = (xValue * xValue) + (yValue * yValue) + (zValue * zValue);
 
     if (length < 0.0f) {
@@ -244,10 +212,6 @@ void PrepareForReset(void) {
     __libmus_output_muted = TRUE;
 }
 
-/* Clears the exception enables of the floating-point control and status
-   register, so that float errors give IEEE results instead of trapping.
-   The first mask clears bits 8 to 12 and 28 to 31, the second the enables
-   in bits 7 to 11, and nothing is set again. */
 void DisableFloatExceptions(void) {
     __asm__ volatile("cfc1 $4, $31\n"
                      "nop\n"
@@ -306,8 +270,6 @@ void mainproc(void *arg UNUSED) {
             g_PlayerControllerPorts[g_ControllerCount++] = portIndex;
         }
 
-        /* This clears the size of the whole array at each state, which
-           runs past the end of the array for every port but the first */
 #ifdef AVOID_UB
         memset(&g_ControllerStates[portIndex], 0, sizeof(g_ControllerStates[0]));
 #else
@@ -362,9 +324,6 @@ s32 GetStickDirection(s32 stick, s32 previousDirection, u32 pressThreshold, u32 
             stick = previousDirection;
         }
 
-        /* A jump to the shared return, to match: returning the direction here,
-         * or as a ternary, or leaving early on each failed test gives 6 words
-         * differing, 4 in shape, and a direction local 12, 8 in shape */
         if (stick != 0) {
             goto HAS_DIRECTION;
         }
@@ -377,8 +336,6 @@ HAS_DIRECTION:
     return (stick >> 31) | 1;
 }
 
-/* PREVIOUSMENUPAD is unused; the caller has already saved the last reading
- * there */
 void UpdateMenuController(NUContData *pad, NUContData *previousMenuPad UNUSED, s32 portIndex) {
     s32 ApplyStickDeadZone(s32 stick) {
         s32 magnitude = Abs(stick);
@@ -618,7 +575,6 @@ void HandleGfxRetrace(s32 pendingTaskCount) {
             }
         }
         else {
-            /* Skip this frame and try again on the next retrace */
             f_IsOddRetrace ^= 1;
         }
     }

@@ -8,51 +8,25 @@
 #include "language.h"
 #include "player.h"
 
-/*
- * The course select's layout, which the menus keep in the top byte of
- * g_MapCamera's mode. Reading it as a byte of the field rather than of the
- * whole camera lets the compiler move the read past display list words, as
- * the original does.
- */
 #define COURSE_SELECT_LAYOUT (*(u8 *)&g_MapCamera.mode)
 
 enum CourseSelectLayout {
-    /* Each course's birdie badge count and tournament trophies; also set on
-     * leaving the course select */
     COURSE_SELECT_LAYOUT_AWARDS,
-    /* The holes choice, and the bet settings on C-up */
     COURSE_SELECT_LAYOUT_HOLES,
-    /* Neither, for modes without bets or a holes choice */
     COURSE_SELECT_LAYOUT_PLAIN
 };
 
-/*
- * The parts of the menu backdrop that DrawLargeBannerBackdropLayers and
- * DrawMenuBackdropLayers draw. The screens also pass MENU_LAYER_IGNORED, which
- * neither tests, so it draws nothing.
- */
 #define MENU_LAYER_SCENERY (1 << 0)
 #define MENU_LAYER_IGNORED (1 << 1)
 #define MENU_LAYER_BOARD (1 << 2)
 #define MENU_LAYER_BANNER (1 << 3)
 #define MENU_LAYER_LARGE_BANNER (1 << 4)
-/* DrawMenuBackdropLayers reads g_MenuScreen for it but draws nothing on any
- * screen */
 #define MENU_LAYER_PER_SCREEN (1 << 5)
 #define MENU_LAYER_TALL_NARROW_BOARD (1 << 7)
-/* Just the scenery and the banner, behind the screens that draw their own
- * panel or model where the others have a board */
 #define PLAIN_BACKDROP_LAYERS (MENU_LAYER_SCENERY | MENU_LAYER_IGNORED | MENU_LAYER_BANNER)
 
-/* A screen's lit labels, or other images in their place, read alternately
- * into each */
 extern void *g_MenuLabelImages[2];
-/* How many pixels wider and taller than its size the chosen label is drawn */
 extern s16 g_ChosenLabelGrowth;
-/*
- * Whether DrawGame draws the loaded hole in the menus' inset view once the
- * loader has finished. UpdateMenus clears it, and nothing sets it.
- */
 extern s32 g_IsHoleShownInMenuInset;
 
 enum LabelGrowthDirection {
@@ -62,20 +36,15 @@ enum LabelGrowthDirection {
 
 typedef u8 LabelGrowthDirection;
 
-/* Whether the chosen label is growing or shrinking */
 extern LabelGrowthDirection g_ChosenLabelGrowthDirection;
 
 extern void *g_NamePlateImage;
-/* The player count chosen on the title screen, which the saved games, the
- * menus and the club tournament set to 1 */
 extern s32 g_ChosenPlayerCount;
 
-/* The phases of the handicap screen's update, which g_BetPagesPhase holds */
 #define MENU_PHASE_START 0
 #define MENU_PHASE_CHOOSING 5
 #define MENU_PHASE_CANCELED 6
 #define MENU_PHASE_CONFIRMED 7
-/* The bet settings screen's phases in g_BetPagesPhase */
 #define BET_PHASE_OPENING 1
 #define BET_PHASE_CHOOSING 2
 #define BET_PHASE_CANCELED 3
@@ -85,18 +54,11 @@ extern u8 g_BetPagesWallSlide;
 extern s32 g_AnimatedIconFrameIndex;
 extern u8 g_AnimatedIconBufferIndex;
 extern s8 g_AnimatedIconFrameTime;
-/* Updates until each character fidgets, or FIDGETING while it does */
 extern s32 g_MenuFidgetDelays[MAX_PLAYER_COUNT];
 extern s32 g_CourseBannersSlide;
-/* The handicap of a place that no player takes */
 #define ABSENT_PLAYER_HANDICAP (-1)
-/*
- * Each player's handicap on the handicap screen, or ABSENT_PLAYER_HANDICAP for
- * no player
- */
 extern s16 g_ChosenHandicaps[MAX_PLAYER_COUNT];
 
-/* What the course select names the courses by */
 enum CourseSelectKind {
     COURSE_SELECT_KIND_NONE,
     COURSE_SELECT_KIND_COURSES,
@@ -104,22 +66,13 @@ enum CourseSelectKind {
 };
 
 typedef u8 CourseSelectKind;
-/* Whether the course select names the courses or the tournaments */
 extern CourseSelectKind g_CourseSelectKind;
-/* Whether the running wipe is the one opening onto the menu */
 extern u8 g_IsMenuWipeOpening;
-/* Whether the wipe opens onto the menu, as the Ring Shot records see it */
 extern u8 g_IsRingShotWipeOpening;
-/* Whether the chosen hole has started loading behind the menu */
 extern Boolean g_IsChosenHoleLoadStarted;
 extern s32 g_ChoosingPlayerIndex;
-/* Each character's name, coded, in CharacterChoice order */
 extern char g_MenuCharacterNames[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH];
 
-/*
- * The menu banners, 256 color images such as asset 0x521, drawn in strips
- * that fit the texture memory
- */
 #define MENU_BANNER_WIDTH 200
 #define MENU_BANNER_STRIP_HEIGHT 10
 #define MENU_BANNER_STRIP_COUNT 3

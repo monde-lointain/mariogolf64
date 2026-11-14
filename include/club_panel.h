@@ -5,7 +5,6 @@
 
 #include "language.h"
 
-/* The panel image buffer that is shown */
 extern u8 *g_ClubPanelImage;
 
 void UpdateClubPanelDebugValue(void);

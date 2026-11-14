@@ -1,8 +1,3 @@
-/*
- * Boxes of flat color that open and close over a few frames. A box is queued
- * for each frame it shows, and drawing empties the queue. The debug scene menu
- * draws its box with them.
- */
 #include "animated_box.h"
 
 #include <ultra64.h>
@@ -11,7 +6,6 @@
 #include "game.h"
 #include "screen.h"
 
-/* Frames that opening and closing each take */
 #define BOX_ANIMATION_FRAME_COUNT 4
 
 static s32 f_QueuedBoxCount = 0;
@@ -65,7 +59,6 @@ static void DrawAnimatedBox(Gfx **gfxHead, AnimatedBox *box) {
     }
 
     gDPSetPrimColor(gfx++, 0, 0, box->red, box->green, box->blue, box->alpha);
-    /* The boxes are flat color, so any texel step will do */
     gSPTextureRectangle(
         gfx++,
         QuarterPixels(left),
@@ -81,8 +74,6 @@ static void DrawAnimatedBox(Gfx **gfxHead, AnimatedBox *box) {
     *gfxHead = gfx;
 }
 
-/* DrawAnimatedBoxes empties the queue, so a box is queued again for each draw;
- * nothing checks the capacity */
 void QueueAnimatedBox(AnimatedBox *box) {
     f_QueuedBoxes[f_QueuedBoxCount] = box;
     f_QueuedBoxCount++;

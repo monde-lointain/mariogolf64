@@ -5,7 +5,6 @@
 
 #include "geometry.h"
 
-/* SetTriangleNormal's targets */
 enum NormalPlacement {
     NORMAL_ON_FIRST,
     NORMAL_ON_SECOND,
@@ -13,22 +12,20 @@ enum NormalPlacement {
     NORMAL_ON_ALL
 };
 
-/* A vertex normal's largest component */
 #define NORMAL_LENGTH 127.0f
 
 typedef struct ScreenPoint {
-    /* 0x00 */ s32 x;
-    /* 0x04 */ s32 y;
-    /* 0x08 */ s32 depth;
-    /* 0x0C */ f32 scaleX;
-    /* 0x10 */ f32 scaleY;
-    /* 0x14 */ f32 depthStep;
-} ScreenPoint; /* size = 0x18 */
+      s32 x;
+      s32 y;
+      s32 depth;
+      f32 scaleX;
+      f32 scaleY;
+      f32 depthStep;
+} ScreenPoint;
 
 void SetCpuProjection(Mtx *projection, Mtx *viewing, Vp *viewport);
 void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp *viewport);
 
-/* What GetSphereVisibility returns for a sphere it can't see */
 enum SphereVisibility {
     SPHERE_BEHIND_CAMERA,
     SPHERE_PAST_SIDE,

@@ -7,57 +7,44 @@
 #include "course.h"
 #include "language.h"
 
-/*
- * The courses' statistics over every round played, and the figures
- * that the menus show from them
- */
-
-/* Indices of CourseStats.hasPlace */
 #define THIRD_PLACE_INDEX 0
 #define SECOND_PLACE_INDEX 1
 #define FIRST_PLACE_INDEX 2
 #define TOURNAMENT_PLACE_COUNT 3
 
-/* A course's statistics over every round played on it */
 typedef struct CourseStats {
-    /* 0x00 */ s32 roundCount;
-    /* 0x04 */ s32 bestScore; /* The lowest net score to par over a round */
-    /* 0x08 */ s32 strokeTotal;
-    /* 0x0C */ s32 longestDrive;
-    /* 0x10 */ s32 averageDrive;
-    /* 0x14 */ s32 averagedDriveCount;
-    /* 0x18 */ s32 measuredDriveTotal; /* The sum of RoundStats.measuredDriveCount */
-    /* 0x1C */ s32 puttTotal;
-    /* 0x20 */ s32 parOrBetterCount; /* Holes played in par or fewer strokes */
-    /* 0x24 */ s32 parOnCount; /* Holes whose green was reached with two strokes to spare */
-    /* 0x28 */ s32 sandSaveCount; /* The sum of RoundStats.sandSaveCount */
-    /* 0x2C */ s32 missedSandSaveCount; /* The sum of RoundStats.missedSandSaveCount */
-    /* In a tournament on the course */
-    /* 0x30 */ Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
-    /* 0x3C */ s16 characterBestScores[CHARACTER_COUNT]; /* bestScore, by character */
-    /* 0x60 */ u8 hasCharacterBestScore[CHARACTER_COUNT];
-    /* 0x72 */ u8 unusedAfterBestScores[0x74 - 0x72];
-} CourseStats; /* size = 0x74 */
+      s32 roundCount;
+      s32 bestScore;
+      s32 strokeTotal;
+      s32 longestDrive;
+      s32 averageDrive;
+      s32 averagedDriveCount;
+      s32 measuredDriveTotal;
+      s32 puttTotal;
+      s32 parOrBetterCount;
+      s32 parOnCount;
+      s32 sandSaveCount;
+      s32 missedSandSaveCount;
+      Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
+      s16 characterBestScores[CHARACTER_COUNT];
+      u8 hasCharacterBestScore[CHARACTER_COUNT];
+      u8 unusedAfterBestScores[0x74 - 0x72];
+} CourseStats;
 
-/*
- * The statistics that the menus show, worked out from CourseStats: for
- * each course, then for all of them
- */
 typedef struct CourseStatFigures {
-    /* 0x00 */ f32 roundCount;
-    /* 0x04 */ f32 bestScore;
-    /* 0x08 */ f32 averageScore;
-    /* 0x0C */ f32 bestDrive;
-    /* 0x10 */ f32 averageDrive;
-    /* Only ever cleared, for a course with no rounds */
-    /* 0x14 */ f32 unusedDriveFigure;
-    /* 0x18 */ f32 fairwayPercent;
-    /* 0x1C */ f32 averagePutts;
-    /* 0x20 */ f32 parSavePercent;
-    /* 0x24 */ f32 parOnPercent;
-    /* 0x28 */ f32 sandSavePercent;
-    /* 0x2C */ Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
-} CourseStatFigures; /* size = 0x38 */
+      f32 roundCount;
+      f32 bestScore;
+      f32 averageScore;
+      f32 bestDrive;
+      f32 averageDrive;
+      f32 unusedDriveFigure;
+      f32 fairwayPercent;
+      f32 averagePutts;
+      f32 parSavePercent;
+      f32 parOnPercent;
+      f32 sandSavePercent;
+      Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
+} CourseStatFigures;
 
 extern CourseStatFigures g_CourseStatFigures[COURSE_COUNT + 1];
 

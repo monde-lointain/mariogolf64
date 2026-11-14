@@ -1,8 +1,3 @@
-/*
- * The game's frame: updating the current scene and drawing it, with the screen
- * effects, the dynamic textures and the inset view, and loading and unloading
- * the overlays' modules.
- */
 #include "game.h"
 
 #include <nusys.h>
@@ -65,19 +60,8 @@
 #include "transmit_menu.h"
 #include "work_area.h"
 
-/* Cleared while the loader thread loads a hole; set once it is done or
- * stopped. Declared here with its definition's volatile qualifier, rather than
- * through hole_loader.h, whose KMC declaration lacks it, as DrawGame's loads
- * match the original better that way. */
 extern volatile Boolean g_HasLoaderFinished;
 
-/* The computer golfer's planning thread copies the current shot while the
- * round's code, run from the retrace callback, changes it. current_shot.c
- * defines it volatile, but on KMC current_shot.h declares it plain,
- * so it is declared again here with the qualifier. That keeps the load of its
- * player index in BuildHorizonDynamicTextures, whose value is never used, as
- * the original has it; flow deletes a dead load that isn't volatile. On
- * modern, current_shot.h declares it volatile already. */
 #ifdef __IS_KMC__
 extern volatile CurrentShot g_CurrentShot;
 #endif
@@ -85,17 +69,13 @@ extern volatile CurrentShot g_CurrentShot;
 #define INSET_VIEW_SOUND_VOLUME 0x3F
 #define INSET_VIEW_SOUND_REVERB 0x1E
 
-/* The audio test plays three sounds at once on these channels */
 #define AUDIO_TEST_FIRST_CHANNEL 3
 #define AUDIO_TEST_SECOND_CHANNEL 4
 #define AUDIO_TEST_THIRD_CHANNEL 11
 #define AUDIO_TEST_VOLUME 0x60
 
-/* Steps that the inset view takes to open or close fully */
 #define INSET_VIEW_STEP_COUNT 8
 
-/* Where SetInsetViewRect puts the inset view, which opens out from its
- * center */
 typedef struct InsetViewRect {
     s32 centerX;
     s32 centerY;
@@ -103,7 +83,6 @@ typedef struct InsetViewRect {
     s32 height;
 } InsetViewRect;
 
-/* Values of f_FadeColor */
 enum FadeColor {
     FADE_COLOR_NONE,
     FADE_COLOR_WHITE,
@@ -113,12 +92,10 @@ enum FadeColor {
 
 #define FADE_NOISE_GRAY 0xBF
 
-/* Values a debug menu edits; nothing reads them */
 #define DEBUG_MENU_VALUE_COUNT 3
 #define DEBUG_MENU_VALUE_MAX 128
 #define DEBUG_MENU_VALUE_START 127
 
-/* A viewport over the whole screen, in the RSP's quarter pixels */
 #define FULL_SCREEN_VIEWPORT \
     { \
         { \
@@ -127,7 +104,6 @@ enum FadeColor {
         } \
     }
 
-/* A viewport over the screen's bottom-right quarter */
 #define QUARTER_SCREEN_VIEWPORT \
     { \
         { \
@@ -136,22 +112,17 @@ enum FadeColor {
         } \
     }
 
-/* Palette loads that each read from an address inside the list itself */
 #define LOAD_LIST_PALETTE(list, index) gsDPLoadTLUT_pal256(&(list)[index])
 
 s8 g_FramePacingMode = PACING_MODE_NORMAL;
 static s32 f_FadeAlpha = 0;
 s32 g_TitleScreenEntrance = TITLE_ENTRANCE_NONE;
 s32 g_ScreenEffect = SCREEN_EFFECT_NONE;
-/* The effect's length in frames; the tiled image counts it down */
 static s32 f_ScreenEffectFrameCount = 0;
-/* Holds a frame for the saved-frame effect, past the general pool */
 static u16 *f_SavedFrameBuffer = (u16 *)MAIN_REGION_END;
-/* Set when the effects stop, never read */
 static s32 f_UnreadEffectSetting = 0;
-static Radians f_SpinAngle = 0.0f; /* In radians */
+static Radians f_SpinAngle = 0.0f;
 
-/* Read by no routine */
 static Gfx f_UnreadPaletteLoads[] = {
     LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 0),
     LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 1),
@@ -172,7 +143,6 @@ static Gfx f_UnreadPaletteLoads[] = {
     gsSPEndDisplayList(),
 };
 
-/* The sources of g_FlameTexture */
 static u8 f_NoiseTexture[] = {
 #include "assets/game/noise_texture.i8.inc.c"
 };
@@ -181,21 +151,15 @@ static u16 f_FlameGradientTexture[] = {
 };
 
 s32 g_HorizonRow = 0;
-/* How far BuildHorizonDynamicTextures has scrolled its textures */
 static s32 f_HorizonTextureScroll = 0;
-/* How far BuildDynamicTextures has scrolled its textures */
 static s32 f_DynamicTextureScroll = 0;
-/* When DrawGame last started, in microseconds */
 static u32 f_DrawStartTime = 0;
-/* When the last graphics task started, in microseconds */
 static u32 f_GfxTaskStartTime = 0;
-/* When UpdateGame last started and finished, in microseconds */
 static u32 f_UpdateStartTime = 0;
 static u32 f_UpdateEndTime = 0;
-static f32 f_MapFieldOfView = 60.0f; /* In degrees */
+static f32 f_MapFieldOfView = 60.0f;
 static s8 f_NeedsIdentityMatrix = TRUE;
 static s32 f_FadeColor = FADE_COLOR_WHITE;
-/* The frame CopyPreviousFrame copies, and the one shown last */
 static u16 *f_CopySourceFrame = NULL;
 static u16 *f_PreviousFrame = NULL;
 static s32 f_DebugMenuValues[DEBUG_MENU_VALUE_COUNT] = {
@@ -206,11 +170,9 @@ static s32 f_DebugMenuValues[DEBUG_MENU_VALUE_COUNT] = {
 static s32 f_DebugMenuValueIndex = 0;
 static Boolean f_HasUnloadedSceneModule = FALSE;
 static Boolean f_HasUnloadedSubModule = FALSE;
-/* The inset view's rectangle when fully open, in screen pixels */
 static InsetViewRect f_InsetViewRect = {0, 0, 0, 0};
 s32 g_DrawBufferIndex = 0;
 
-/* Read by no routine */
 static Gfx f_UnreadEmptyList[] UNUSED = {
     gsSPEndDisplayList(),
 };
@@ -224,38 +186,21 @@ Vp g_Viewports[VIEWPORT_COUNT] = {
     QUARTER_SCREEN_VIEWPORT,
 };
 
-/* Resets the model view before each view's menu backdrop and scene */
 static Mtx f_IdentityMatrix;
 
-/*
- * The spin effect's mesh and its rotation, one per draw buffer. Each draw
- * buffer's vertices start one vertex after the other's, so most are shared,
- * and f_SpinVertices runs on over f_SpinMatrices, so a frame's vertex updates
- * overwrite parts of the matrices.
- */
 static Vtx f_SpinVertices[1];
 static Mtx f_SpinMatrices[DRAW_BUFFER_COUNT];
 
-/* Read by no routine */
 static u8 f_UnusedBytesAfterSpinMatrices[16] UNUSED;
 
-/* How the saved-frame effect splits the screen into strips, in rows */
 #define SAVED_FRAME_STRIP_HEIGHT 6
 #define SAVED_FRAME_STRIP_COUNT 38
 #define SAVED_FRAME_LAST_STRIP_HEIGHT 2
 
-/*
- * The spin effect's mesh holds two vertices per row, loaded in batches of
- * up to SPIN_BATCH_VERTEX_COUNT
- */
 #define SPIN_BATCH_COUNT 3
 #define SPIN_BATCH_VERTEX_COUNT 32
 #define SPIN_LAST_BATCH_VERTEX_COUNT 18
 #define SPIN_LAST_BATCH_STRIP_COUNT 8
-/*
- * The mesh's model is scaled down by SPIN_MESH_SCALE, so it spans the screen
- * inside its border at SPIN_MESH_DISTANCE from the camera
- */
 #define SPIN_MESH_ROW_COUNT 42
 #define SPIN_MESH_HALF_WIDTH (((SCREEN_WIDTH / 2) - SCREEN_BORDER) * 10)
 #define SPIN_MESH_SCALE 0.1f
@@ -265,53 +210,31 @@ static u8 f_UnusedBytesAfterSpinMatrices[16] UNUSED;
 
 #define RESET_FADE_ALPHA 0x40
 
-/*
- * Over the fly-over's last frames the fade rises, and the scene spins away
- * if no fade color is set; once the fly-over has ended, the fade lifts
- */
 #define FLYOVER_FADE_FRAME_COUNT 15
 #define FLYOVER_FADE_START_FRAME (HOLE_FLYOVER_FRAME_COUNT - FLYOVER_FADE_FRAME_COUNT)
 #define FLYOVER_FADE_ALPHA_STEP 16
 #define FLYOVER_FADE_LIFT_ALPHA_STEP 32
 #define FLYOVER_SPIN_FRAME_COUNT 30
-/* How long the screen test's effects last, from the second controller */
 #define SCREEN_TEST_SPIN_FRAME_COUNT 16
 #define SCREEN_TEST_FRAME_COUNT 64
 
-/* The scenes are still known only by number */
-
-/*
- * In SCENE_GROUND_CAMERA, the C buttons move the map camera, the stick turns
- * and raises it, and it looks ahead along the ground
- */
 #define MAP_CAMERA_STEP 10.0f
 #define MAP_CAMERA_HEIGHT 120.0f
 #define MAP_CAMERA_LIFT_PER_STICK 32
 #define MAP_CAMERA_TURN_PER_STICK 1024.0
 #define MAP_CAMERA_LOOK_DISTANCE 1000.0f
 
-/* GetGroundHeight's units per world unit */
 #define GROUND_UNITS_PER_UNIT 1024
 
-/*
- * SCENE_MENU opens a larger, square inset view, in more steps and without
- * sounds. Each step adds this many pixels to its sides.
- */
 #define LARGE_INSET_VIEW_STEP_COUNT 32
 #define LARGE_INSET_VIEW_GROWTH_PER_STEP 4
 #define LARGE_INSET_VIEW_CENTER_X 160
 #define LARGE_INSET_VIEW_CENTER_Y 140
 
-/* Where the debug menu draws its values, in text cells */
 #define DEBUG_MENU_COLUMN 34
 #define DEBUG_MENU_CURSOR_COLUMN 33
 #define DEBUG_MENU_ROW 3
 
-/*
- * BuildDynamicTextures shrinks a strip of the frame into g_MirrorTexture
- * by copying blocks of MIRROR_BLOCK_WIDTH pixels, spaced out across it,
- * from every MIRROR_ROW_SPACING-th row
- */
 #define MIRROR_BLOCK_COUNT 4
 #define MIRROR_BLOCK_WIDTH (DYNAMIC_TEXTURE_SIZE / MIRROR_BLOCK_COUNT)
 #define MIRROR_SOURCE_LEFT 34
@@ -319,39 +242,28 @@ static u8 f_UnusedBytesAfterSpinMatrices[16] UNUSED;
 #define MIRROR_BLOCK_SPACING 76
 #define MIRROR_ROW_SPACING 3
 
-/* How strongly each layer covers what is under it */
 #define MIRROR_TINT_ALPHA 0xC8
 #define MIRROR_NOISE_ALPHA 0x9F
 #define FLAME_NOISE_ALPHA 0x30
 #define BLENDED_TEXTURE_ALPHA 0x7F
 
-/*
- * BuildHorizonDynamicTextures copies every HORIZON_ROW_SPACING-th row of
- * a strip of the frame that starts HORIZON_STRIP_RISE rows above the
- * horizon and ends at HORIZON_STRIP_BOTTOM
- */
 #define HORIZON_STRIP_RISE 70
 #define HORIZON_FIRST_ROW 8
 #define HORIZON_ROW_SPACING 7
 #define HORIZON_STRIP_BOTTOM 224
 
-/* The window of the saved image that the tiled-image effect repeats */
 #define TILED_IMAGE_LEFT 64
 #define TILED_IMAGE_RIGHT 191
 #define TILED_IMAGE_TOP 104
 #define TILED_IMAGE_STRIP_HEIGHT 16
 #define TILED_IMAGE_STRIP_COUNT 6
-/* Wraps s every 2^7 = 128 texels, the window's width */
 #define TILED_IMAGE_MASK_S 7
 
-/* How the tiled-image effect lays the window out on the screen */
 #define TILED_IMAGE_STRIP_SCREEN_HEIGHT 13
 #define TILED_IMAGE_COPY_COUNT 4
 #define TILED_IMAGE_COPY_SPACING 72
-/* Texels per pixel, s5.10: about 1.23 */
 #define TILED_IMAGE_SCALE 0x04EC
 
-/* Turns gamma correction off and gamma dithering and the dither filter on */
 #define VI_FEATURES (OS_VI_GAMMA_OFF | OS_VI_GAMMA_DITHER_ON | OS_VI_DITHER_FILTER_ON)
 
 CameraMatrices f_CameraMatrices[2 * 2];
@@ -370,15 +282,9 @@ Mtx g_ScreenEffectProjection;
 Mtx g_ScreenOrthoMatrix;
 
 FILE_STATIC s32 g_PerspectiveNormalization;
-/*
- * Set up by StartGame; no code in the main segment draws with it. A view
- * alone rather than a Camera: nothing reaches the four bytes before it, and
- * libc's errno follows it where a Camera's mode would be.
- */
 FILE_STATIC CameraView g_SpareCameraView;
 FILE_STATIC Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH];
 
-/* Where StartGame places the spare view and the inset camera's view */
 #define SPARE_VIEW_LEFT 128
 #define SPARE_VIEW_TOP 64
 #define SPARE_VIEW_WIDTH (SCREEN_WIDTH / 2)
@@ -490,10 +396,6 @@ void SetScreenEffect(s32 effect, s32 frameCount) {
     }
 }
 
-/*
- * Draws a 128 by 96 window of the image saved in the depth buffer, shrunk
- * and repeated across the screen, for a number of frames
- */
 void DrawTiledImageEffect(Gfx **displayListHead, CameraView *view) {
     Gfx *gfx = *displayListHead;
     s32 stripTop;
@@ -525,7 +427,6 @@ void DrawTiledImageEffect(Gfx **displayListHead, CameraView *view) {
     texelPairOffset = TILED_IMAGE_TOP * SCREEN_WIDTH / 2;
     for (stripTop = 0; stripTop != TILED_IMAGE_STRIP_COUNT * TILED_IMAGE_STRIP_SCREEN_HEIGHT;
         stripTop += TILED_IMAGE_STRIP_SCREEN_HEIGHT) {
-        /* Each 32-bit step of texelPairOffset covers two 16-bit texels */
         gDPLoadTextureTile(
             gfx++,
             TextureAddress((u32 *)g_DepthBuffer + texelPairOffset),
@@ -568,10 +469,6 @@ void DrawTiledImageEffect(Gfx **displayListHead, CameraView *view) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the frame saved in the depth buffer on the spin effect's mesh: one
- * strip of the frame between each pair of rows of vertices
- */
 void DrawSpinMesh(Gfx **displayListHead) {
     Boolean isTileSetUp = FALSE;
     Gfx *gfx = *displayListHead;
@@ -661,7 +558,6 @@ void DrawSpinMesh(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            /* The original tests again here; the build depends on it */
             isLastStrip = IsLastSpinStrip(batchIndex, stripIndex);
             stripHeight = isLastStrip ? SAVED_FRAME_LAST_STRIP_HEIGHT : SAVED_FRAME_STRIP_HEIGHT;
             gSPModifyVertex(
@@ -714,10 +610,6 @@ void DrawSpinMesh(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Copies the frame kept in f_SavedFrameBuffer to the screen, through the
- * depth buffer's memory, a strip at a time in copy mode
- */
 void DrawSavedFrameEffect(Gfx **displayListHead, CameraView *view UNUSED) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -844,10 +736,6 @@ void DrawSavedFrameEffect(Gfx **displayListHead, CameraView *view UNUSED) {
     *displayListHead = gfx;
 }
 
-/*
- * Turns the frame saved in the depth buffer about the vertical axis, a half
- * turn over f_ScreenEffectFrameCount frames, then shows the scene again
- */
 void DrawSpinEffect(Gfx **displayListHead, CameraView *view) {
     Mat4 transform;
     Vec3 translation;
@@ -873,7 +761,6 @@ void DrawSpinEffect(Gfx **displayListHead, CameraView *view) {
     angleStep = M_PI / f_ScreenEffectFrameCount;
     f_SpinAngle += angleStep;
 
-    /* Skips the half turn in which the frame's back would face the camera */
     if (f_SpinAngle > M_PI / 2 && f_SpinAngle < angleStep + (M_PI / 2)) {
         f_SpinAngle += M_PI;
     }
@@ -931,7 +818,6 @@ void DrawEmptyEffect(Gfx **displayListHead UNUSED, CameraView *view UNUSED) {
 }
 
 void DrawScreenEffect(CameraMatrices *matrices, CameraView *view) {
-    /* The spin effect pushes a modelview matrix and changes the projection */
     if (g_ScreenEffect == SCREEN_EFFECT_SPIN) {
         DrawSpinEffect(&g_DisplayListHead, view);
         gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
@@ -947,7 +833,6 @@ void DrawScreenEffect(CameraMatrices *matrices, CameraView *view) {
     else if (g_ScreenEffect == SCREEN_EFFECT_EMPTY) {
         DrawEmptyEffect(&g_DisplayListHead, view);
 
-        /* Pops although DrawEmptyEffect pushed nothing, as if it once spun too */
         gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
         gSPMatrix(
             g_DisplayListHead++,
@@ -960,11 +845,6 @@ void DrawScreenEffect(CameraMatrices *matrices, CameraView *view) {
     }
 }
 
-/*
- * Draws the dynamic textures, filling g_MirrorTexture from a strip of the
- * frame above the horizon. Only SCENE_PLAY_ROUND and SCENE_MENU
- * use it.
- */
 void BuildHorizonDynamicTextures(Gfx **displayListHead) {
     s32 stripTop;
     s32 sourceTop;
@@ -976,7 +856,6 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
     s32 rowIndex;
     s32 blockIndex;
 
-    /* Keeps the strip's rows on the screen */
     void FitStripToScreen(void) {
         if (stripTop < 0) {
             sourceTop = 0;
@@ -1012,10 +891,6 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
         rowCount = DYNAMIC_TEXTURE_SIZE;
     }
     else {
-        /* The value read here is never used, but the original loads it, as
-         * g_CurrentShot's volatile declaration makes it. A plain read without
-         * that gives 7 words differing, 5 in shape, and no read or an empty if
-         * 11 (7) */
         if (mode == GAME_STATE_TAKING_TURNS) {
             mode = g_CurrentShot.playerIndex;
         }
@@ -1328,10 +1203,6 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the dynamic textures from a fixed strip of the frame. Restores
- * the frame as the color image when done.
- */
 void BuildDynamicTextures(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     u32 frame = osVirtualToPhysical(nuGfxCfb_ptr);
@@ -1639,15 +1510,9 @@ void BuildDynamicTextures(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* How DrawGame draws a frame, chosen by scene */
-/* A module's screen, with the course in the inset view */
 enum DrawMode {
     DRAW_MODE_INSET_SCREEN,
     DRAW_MODE_COURSE,
-    /*
-     * DRAW_MODE_UNUSED_CLEAR and DRAW_MODE_OPENING are never chosen. The first
-     * only clears the screen, as DRAW_MODE_CONFIRM_WAIT does.
-     */
     DRAW_MODE_UNUSED_CLEAR,
     DRAW_MODE_MAP_PERSPECTIVE,
     DRAW_MODE_MAP_ISOMETRIC,
@@ -1663,13 +1528,11 @@ enum DrawMode {
     DRAW_MODE_BLANK
 };
 
-/* The map cameras' views, in world units */
 #define MAP_NEAR_CLIP 10.0f
 #define MAP_FAR_CLIP 8000.0f
 #define MAP_ORTHO_HALF_WIDTH 160.0f
 #define MAP_ORTHO_HALF_HEIGHT 120.0f
 #define MAP_ORTHO_FAR_CLIP 20000.0f
-/* How far the isometric and top-down maps push the scene into their view */
 #define MAP_ORTHO_PLACEMENT_DEPTH 1000.0f
 #define MAP_ISOMETRIC_OFFSET_X 5000.0f
 #define MAP_ISOMETRIC_OFFSET_Y 4000.0f
@@ -1677,22 +1540,17 @@ enum DrawMode {
 #define MAP_TOP_DOWN_TILT 50.0f
 #define MAP_MINIATURE_SCALE 0.07f
 
-/* The course camera's clip planes, in world units */
 #define COURSE_NEAR_CLIP 10.0f
-/* A double, so that DrawGame's upper clamp compares in double precision */
 #define COURSE_FAR_CLIP 32000.0
 #define CLOSE_UP_NEAR_CLIP 200.0f
 #define SHORT_FAR_CLIP 500.0f
 
-/* Vertices that the course drawers may add to a frame */
 #define VERTEX_BUFFER_LENGTH 512
 #define EXPANSION_VERTEX_BUFFER_LENGTH 5000
 #define WORK_AREA_VERTEX_OFFSET 0x6A920
 
 #define GFX_TASK_FLAGS (NU_SC_TASK_DP_WAIT | NU_SC_SWAPBUFFER)
 
-/* With the Expansion Pak, the vertex buffers of the frames, one for each draw
- * buffer, at a fixed place in its memory */
 extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
 extern s32 _mus_cpu_last;
 extern s32 _mus_cpu_worst;
@@ -1710,94 +1568,6 @@ s32 __MusIntMemRemaining(void);
         (view).scissorY + (view).scissorHeight \
     )
 
-/*
- * Returns the frame count, which the caller ignores
- *
- * The views are counted by viewIndex alone, and each camera is read as
- * g_Cameras[viewIndex]. Only the menu inset's hole keeps its view's address
- * in a variable, insetView, set in that arm. The loop pass takes the first
- * view's address out of the loop and makes insetView that address plus
- * viewIndex times a camera's size, which it reduces to a register stepped
- * by the size ($s4), beside the one it steps for the cameras' byte offset
- * ($s5). It zeroes the offset before it sets the pointer, as the original
- * does. The hoisted address gets no register of its own, so each other
- * &g_Cameras[viewIndex].view rebuilds it in $t1 and adds the offset, as in
- * the original. A camera pointer stepped in the loop's header ends up as
- * the same two registers, but set in the other order before the loop.
- *
- * The inset's backdrop takes the inset camera's view by its index, as the
- * course's inset view does, and the two calls share a tail that loads the
- * address as a constant.
- *
- * The isometric map's eye is worked out inside guLookAt's arguments. The
- * matrices pointer is then reloaded from the stack before the eye's
- * subtractions, as in the original; with the eye set in statements before
- * the call, it is reloaded after them.
- *
- * The far plane is clamped between the short far plane and the course's,
- * then set to the course's anyway, so both clamps are dead. The upper
- * clamp keeps the lower clamp's move, as the original does, whose bc1tl
- * branches to the very next instruction with the move in its delay slot:
- * flow deletes the upper clamp's move as dead but keeps its branch, which
- * still reads the clamped value, and jump2 then deletes the empty branch
- * with its compare.
- *
- * COURSE_FAR_CLIP is a double, unlike the other planes, so the upper
- * clamp compares in double precision. As a float, the clamped value takes
- * $f0 rather than the $f6 that the original gives it and the course's far
- * plane. The target keeps no trace of the upper clamp's bound: other
- * bounds, such as 0.0f or 1000.0f, match as well.
- *
- * Measured against the match, as words differing and how many of them in
- * shape:
- *
- *   The inset's view read as g_Cameras[viewIndex].view at each
- *     use, with no variable                                    478 (106)
- *   The inset's view read through courseView                   390 (54),
- *                                                              frame -8
- *   A camera pointer set in the inset's arm, for insetView     129 (33)
- *   insetView set at the loop's top                            356 (66)
- *   insetView set after matrices                               346 (58)
- *   The inset's field of view read through insetView           19 (9)
- *   The inset's scissor read through insetView                 154 (6)
- *   The inset's scissor read from g_Cameras[viewIndex].view    118 (6)
- *   The inset's backdrop given insetView, or
- *     &g_Cameras[viewIndex].view                               341 (51)
- *   The inset's pin given insetView                            93 (11),
- *                                                              frame -8
- *   The inset's pin given the inset camera's view by its index 3 (3)
- *   The course's pin given courseView                          216 (0)
- *   The course's view read as g_Cameras[viewIndex].view at
- *     each use, with no variable                               427 (83)
- *   A camera pointer stepped in the loop's header, the inset's
- *     view read through it or insetView set from it            81 (21)
- *   The same, with the pins' views through it as well          32 (14)
- *   The same, with the inset's backdrop through it too         27 (7)
- *   The same, with the eye set in statements (the old draft)   31 (9)
- *   insetView set from a camera pointer set at the loop's top  356 (66)
- *   The eye set in statements before guLookAt                  4 (2)
- *   The eye's x alone set in the arguments                     56 (16)
- *   The eye's y alone set in the arguments                     8 (6)
- *   The eye's x and y set in the arguments                     12 (6)
- *   The eye's z, or its y and z, set in the arguments          4 (2)
- *   The eye set in statements before the buffers are cleared   88 (22)
- *   Without the upper clamp, or without the lower              10 (8)
- *   Without either clamp                                       26 (18)
- *   The clamps joined by else                                  272 (12)
- *   The upper clamp first                                      13 (13)
- *   COURSE_FAR_CLIP as a float                                 12 (4)
- *   Without LoadProjection's unusedMatrix                      16 (0), and
- *                                                              16 (0),
- *                                                              frame +64,
- *                                                              there
- *   The view loop testing != 2                                 4 (4)
- *
- * Also matching: insetView set anywhere in its arm before guLookAtF, or
- * at the top of the inset screen's case; insetView declared in its arm
- * with its value, or after courseView; and the eye set in statements
- * after a variable is set to the viewing matrix's address, for guLookAt's
- * first argument.
- */
 s32 DrawGame(void) {
     Boolean usesFloatMatrices;
     CameraMatrices *matrices;
@@ -1805,7 +1575,7 @@ s32 DrawGame(void) {
     u16 insetPerspNorm;
     u16 perspNorm;
     Boolean drawsScene;
-    s32 terrainStyle; /* A TERRAIN_STYLE_* value */
+    s32 terrainStyle;
     u32 drawMode;
     s32 viewIndex;
     s32 playerIndex;
@@ -1828,11 +1598,9 @@ s32 DrawGame(void) {
     f32 *target;
     u16 *trigger;
 
-    /* Loads the projection of the camera being drawn */
     void LoadProjection(void) {
         Mat4 projection;
         Mat4 translation;
-        /* Pads the frame to match */
         Mat4 unusedMatrix UNUSED;
 
         if (usesFloatMatrices) {
@@ -2042,7 +1810,6 @@ s32 DrawGame(void) {
                     ClearBuffers(BUFFER_CLEAR_BY_LINE);
                 }
 
-                /* The eye is set in the arguments, to match */
                 guLookAt(
                     &matrices->viewing,
                     eyeX = g_MapCamera.view.eye[0] - MAP_ISOMETRIC_OFFSET_X,
@@ -2141,11 +1908,6 @@ s32 DrawGame(void) {
                     FillScreen();
                 }
 
-                /*
-                 * The look-at is set within the call, to match: setting it before
-                 * the call gives 59 words differing (21 in shape) against 41, or 63
-                 * set in z, y, x order
-                 */
                 guLookAt(
                     &matrices->viewing,
                     g_MapCamera.view.eye[0],
@@ -2275,7 +2037,6 @@ s32 DrawGame(void) {
                     );
                     ConvertMatrixToFixed(matrices->perspectiveF, &matrices->perspective);
                     guTranslate(&matrices->placement, 0.0f, 0.0f, 0.0f);
-                    /* Only this arm keeps its view's address in a variable, to match */
                     insetView = &g_Cameras[viewIndex].view;
                     guLookAtF(
                         matrices->viewingF,
@@ -2344,7 +2105,6 @@ s32 DrawGame(void) {
                             nearZ = -CLOSE_UP_NEAR_CLIP;
                         }
 
-                        /* Both clamps are dead: the far plane is always the course's */
                         if (farClip < SHORT_FAR_CLIP) {
                             farClip = SHORT_FAR_CLIP;
                         }
@@ -2513,8 +2273,6 @@ s32 DrawGame(void) {
 
                             LoadProjection();
 
-                            /* Keeps the main view out of the inset view, which clears it
-                             * again */
                             if (g_Cameras[INSET_CAMERA].view.drawFlags == CAMERA_DRAW_SCENE) {
                                 gDPPipeSync(g_DisplayListHead++);
                                 gDPSetRenderMode(g_DisplayListHead++, G_RM_NOOP, G_RM_NOOP2);
@@ -3112,7 +2870,6 @@ s32 DrawGame(void) {
             g_FramePacingMode = (g_FramePacingMode + 1) % PACING_MODE_COUNT;
         }
 
-        /* Reads the second controller's last state for the third's */
         if (g_IsDebugEnabled &&
             (g_ControllerData[2].button & START_BUTTON) &&
             !(g_PreviousControllerData[1].button & START_BUTTON)) {
@@ -3160,10 +2917,6 @@ s32 DrawGame(void) {
     return g_FrameCount;
 }
 
-/*
- * Copies the frame shown last onto the frame being drawn, so a frame can be
- * built over the previous one without redrawing the scene
- */
 void CopyPreviousFrame(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -3249,10 +3002,6 @@ void CopyPreviousFrame(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Darkens the last frame while the reset button is held. Each frame lays a
- * translucent dark blue over the one before, so the screen fades out.
- */
 void DrawResetFade(void) {
     Gfx *gfx;
     Gfx *displayList;
@@ -3261,7 +3010,6 @@ void DrawResetFade(void) {
     gfx = g_DisplayLists[g_DrawBufferIndex];
     displayList = gfx;
 
-    /* The original builds the frame in a loop that runs once */
     for (passIndex = 0; passIndex != 1; passIndex++) {
         AppendRcpInit(g_DrawBufferIndex, &gfx);
         AppendBufferClear(BUFFER_CLEAR_DEPTH_ONLY, &gfx);
@@ -3320,10 +3068,6 @@ void DrawResetFade(void) {
     g_DrawBufferIndex ^= 1;
 }
 
-/*
- * Runs the parts of a frame's update that depend on the scene, then fits
- * the inset view's viewport to its window
- */
 void UpdateGame(void) {
     s32 *animation;
     u16 *windDirection;
@@ -3562,7 +3306,6 @@ Boolean IsSubModuleLoaded(void) {
     return g_SubModuleState == SUB_MODULE_LOADED;
 }
 
-/* The game modes are still known only by number */
 void RequestSubModule(void) {
     g_SubModuleState = SUB_MODULE_SWAP_PENDING;
     switch (g_GameState.gameMode) {
@@ -3591,7 +3334,6 @@ void SetInsetViewRect(s32 centerX, s32 centerY, s32 width, s32 height) {
     f_InsetViewRect.centerY = centerY;
 }
 
-/* Grows or shrinks the inset view's window by a step and centers it */
 void UpdateInsetView(void) {
     s32 *animation = &g_InsetView.animation;
 

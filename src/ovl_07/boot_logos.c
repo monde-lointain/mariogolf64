@@ -1,9 +1,3 @@
-/*
- * The logos that the game starts with, and that the title screen, the staff
- * roll and the confirm wait go back to: the Nintendo 64 logo, then Nintendo's,
- * then Camelot's. The first two fade in and out through the primitive alpha;
- * Camelot's only fades in.
- */
 #include "boot_logos.h"
 
 #include <ultra64.h>
@@ -27,7 +21,6 @@
 #include "text.h"
 #include "transfer_pak.h"
 
-/* f_BootLogoStage values */
 enum BootLogo {
     BOOT_LOGO_N64,
     BOOT_LOGO_NINTENDO,
@@ -36,32 +29,22 @@ enum BootLogo {
     BOOT_LOGO_LEAVING_CAMELOT
 };
 
-/* The frames that the first two logos stay for */
 #define LOGO_FRAME_COUNT 40
-/* A logo fades in over this many frames... */
 #define FADE_IN_FRAME_COUNT 8
 #define FADE_IN_ALPHA_STEP 32
-/* ...and fades out after this frame */
 #define FADE_OUT_FIRST_FRAME 24
 #define FADE_OUT_ALPHA_STEP 16
 
 #define FadeInAlpha(frame) ((frame) * FADE_IN_ALPHA_STEP)
 #define FadeOutAlpha(frame) (255 - (((frame) - FADE_OUT_FIRST_FRAME) * FADE_OUT_ALPHA_STEP))
 
-/* The Nintendo logo's sound plays on this frame, on this channel */
 #define NINTENDO_SOUND_FRAME 3
 #define NINTENDO_SOUND_CHANNEL 15
-/* The Camelot logo's frame count stops rising at this */
 #define CAMELOT_FRAME_LIMIT 60
-/* With g_IsDebugEnabled set, A skips the Camelot logo before this frame */
 #define CAMELOT_SKIP_FRAME_LIMIT 9
-/* The Camelot logo leaves from this frame, once g_HasLoaderFinished is set */
 #define CAMELOT_LEAVE_FRAME 26
-/* The count given to StartScreenFadeOut; the stage ends once HasScreenFadeEnded
- * sees it below 2 */
 #define LEAVING_COUNTDOWN 16
 
-/* 192 by 42 four-bit texels, read as 96-byte rows */
 #define CAMELOT_LOGO_WIDTH 192
 #define CAMELOT_LOGO_STRIP_HEIGHT 21
 #define CAMELOT_LOGO_STRIP_COUNT 2
@@ -69,12 +52,11 @@ enum BootLogo {
 #define CAMELOT_LOGO_TOP 98
 
 typedef struct CamelotLogo {
-    /* 0x00 */ ImageHeader header;
-    /* 0x08 */ u16 palette[16];
-    /* 0x28 */ u8 texels[0x11E8];
-} CamelotLogo; /* size = 0x1210 */
+      ImageHeader header;
+      u16 palette[16];
+      u8 texels[0x11E8];
+} CamelotLogo;
 
-/* 188 by 48 eight-bit intensities */
 #define NINTENDO_LOGO_WIDTH 188
 #define NINTENDO_LOGO_STRIP_HEIGHT 16
 #define NINTENDO_LOGO_STRIP_COUNT 3
@@ -82,11 +64,10 @@ typedef struct CamelotLogo {
 #define NINTENDO_LOGO_TOP 96
 
 typedef struct NintendoLogo {
-    /* 0x0 */ ImageHeader header;
-    /* 0x8 */ u8 texels[0x2348];
-} NintendoLogo; /* size = 0x2350 */
+      ImageHeader header;
+      u8 texels[0x2348];
+} NintendoLogo;
 
-/* 128 by 112 RGBA16 texels */
 #define N64_LOGO_WIDTH 128
 #define N64_LOGO_STRIP_HEIGHT 8
 #define N64_LOGO_STRIP_COUNT 14
@@ -94,24 +75,19 @@ typedef struct NintendoLogo {
 #define N64_LOGO_TOP 64
 
 typedef struct N64Logo {
-    /* 0x0 */ ImageHeader header;
-    /* 0x8 */ u16 texels[0x7008 / 2];
-} N64Logo; /* size = 0x7010 */
+      ImageHeader header;
+      u16 texels[0x7008 / 2];
+} N64Logo;
 
-/* The asset IDs of the logos */
 #define CAMELOT_LOGO_ASSET 0x702
 #define NINTENDO_LOGO_ASSET 0x6F6
 #define N64_LOGO_ASSET 0x97F
 
-/* The frames since the stage began */
 static s32 f_BootLogoFrame = 0;
 static s32 f_BootLogoStage = BOOT_LOGO_N64;
-/* Never read or written */
 static s32 f_BootLogoUnusedWord UNUSED = 0;
-/* Whether SetUpTitleHole has reset g_GameState during the Camelot logo */
 static Boolean f_HasResetGameState = FALSE;
 
-/* Read by no routine */
 static u8 f_UnusedBufferBeforeCamelotLogo[0x20] UNUSED;
 static CamelotLogo f_CamelotLogo;
 static NintendoLogo f_NintendoLogo;
@@ -146,7 +122,6 @@ void LoadBootLogos(void) {
     g_Cameras[0].view.fieldOfView = 45.0f;
 }
 
-/* Swaps this module for the next scene's and clears the image slots */
 void LeaveBootLogos(void) {
     g_TitleScreenEntrance = TITLE_ENTRANCE_FROM_BOOT_LOGOS;
     if (HasGameBoyPak() && IsBootTransmitPending()) {
@@ -180,11 +155,6 @@ void LeaveBootLogos(void) {
     SetTextSlot(CLEARED_TEXT_X, CLEARED_TEXT_Y, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 5, 0, 0, 0, 0, 0);
 }
 
-/*
- * With g_IsDebugEnabled set, A or Start on any controller ends the Nintendo
- * logo early, and so does A on the first one during the Camelot logo's first
- * frames
- */
 void UpdateBootLogos(void) {
     s32 pressedButtons;
     s32 controllerIndex;
@@ -266,9 +236,6 @@ void UpdateBootLogos(void) {
     }
 }
 
-/*
- * Draws the boot logo being shown, strip by strip, faded by its frame.
- */
 void DrawBootLogos(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -298,11 +265,6 @@ void DrawBootLogos(Gfx **displayListHead) {
         case BOOT_LOGO_N64:
             gDPPipeSync(gfx++);
             gDPSetTextureLUT(gfx++, G_TT_NONE);
-            /*
-             * Each fade's alpha is set before its color command, to match: clamped
-             * in the command, the N64 logo's fade-in is clamped after the command's
-             * first word is stored, where the original clamps it first
-             */
             if (f_BootLogoFrame > FADE_OUT_FIRST_FRAME) {
                 s32 fadeOutAlpha = MAX(FadeOutAlpha(f_BootLogoFrame), 0);
 

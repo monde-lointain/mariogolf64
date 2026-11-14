@@ -1,8 +1,3 @@
-/*
- * Each player's turn: the aim camera and the aim controls, setting up and
- * taking the shot, the shot preview, Course Points, records of holes and Ring
- * Shot, picking the next player, and the round's debug tools.
- */
 #include "turn.h"
 
 #include <framebuffer_count.h>
@@ -78,64 +73,42 @@
 #define IMPACT_POINT_SOUND_REVERB 20
 #define IMPACT_POINT_SOUND_PAN 230
 
-/* The buttons that hold the impact point mode */
 #define IMPACT_POINT_BUTTONS (Z_TRIG | L_TRIG)
 
-/* Course units to tenths of a meter, as METERS_PER_UNIT * 10 */
 #define DECIMETERS_PER_UNIT (1.0f / 1536)
-/* Sixty meters */
 #define NEAR_CUP_MAX_DECIMETERS 600.0f
 
-/* The most of one kind of notable shot that a player's count holds */
 #define SHOT_KIND_MAX_COUNT 0xFF
 #define MAX_RING_SHOT_CLEAR_COUNT 99
 
 #define HOLE_OUT_CALL_CHANNEL 3
-/* How far the control pad tilts the stick, as GetTurnStickX and GetTurnStickY
- * read it */
 #define DPAD_STICK_TILT 40
-/* The aim camera stays inside the course's ground, in course units */
 #define AIM_CAMERA_MAX_X 4347904.0f
 #define AIM_CAMERA_MAX_Z 8542208.0f
-/* How far above the ground under the ball the aim camera looks, in world units
- */
 #define AIM_LOOK_AT_RISE 17.25f
-/* The bounds that KeepAimCameraOnCourse keeps the aim camera within */
 #define AIM_CAMERA_MIN_COORD (-0x25800)
 #define AIM_CAMERA_COURSE_MAX_X 0x425800
 #define AIM_CAMERA_COURSE_MAX_Z 0x825800
 #define AIM_CAMERA_MINI_GOLF_MAX_X 0x109600
 #define AIM_CAMERA_MINI_GOLF_MAX_Z 0x104B00
-/* How far the C buttons push the aim camera on, once it has been pulled in */
 #define AIM_CAMERA_PUSH_STEP 0x25800
 #define AIM_CAMERA_MINI_GOLF_PUSH_STEP 0xB400
-/* Where AimDownRange puts the aim camera, on the green and elsewhere */
 #define DOWN_RANGE_GREEN_OFFSET (-0x10E00)
 #define DOWN_RANGE_DISTANCE (-0x2D000)
 #define DOWN_RANGE_HEIGHT (-0x12C00)
-/* How far beyond the camera the down-range look-at point lies */
 #define DOWN_RANGE_LOOK_AHEAD 0x280000
-/* Where the aim camera eases to, in course units */
 #define AIM_CAMERA_PUTT_DISTANCE (-0x1800C)
-/* Back from where the shot lands */
 #define AIM_CAMERA_APPROACH_BACKOFF 0x4B000
-/* Short of the shot's full distance */
 #define AIM_CAMERA_SHOT_BACKOFF_YARDS 50
 #define AIM_CAMERA_PUTT_HEIGHT (-0xB400)
 #define AIM_CAMERA_APPROACH_HEIGHT (-0x12C00)
 #define AIM_CAMERA_SHOT_HEIGHT (-0x25800)
-/* The aim camera moves this fraction of the way each frame, up to the most */
 #define AIM_CAMERA_EASE_FRACTION 0.3f
 #define AIM_CAMERA_MAX_EASE_STEP (10 * UNITS_PER_YARD)
-/* The free-look camera starts behind the ball, and C-left and C-right turn it
- */
 #define FREE_LOOK_START_DISTANCE (-0x12C00)
 #define FREE_LOOK_TURN_STEP 200
-/* A shorter pulse than the shots' rumble in effects.c */
 #define TURN_RUMBLE_FREQUENCY 0x100
 #define TURN_RUMBLE_FRAME_COUNT 8
-/* Every AMBIENT_SOUND_INTERVAL frames, one of the course's ambient sounds may
- * play */
 #define AMBIENT_SOUND_INTERVAL 240
 #define AMBIENT_SOUND_CHOICES 7
 #define NO_AMBIENT_SOUND (-1)
@@ -143,70 +116,43 @@
 #define AMBIENT_SOUND_VOLUME 0x5F
 #define AMBIENT_SOUND_REVERB 15
 #define SOUND_PAN_RANGE 255
-/* The most shots that each kind of replay record keeps */
 #define HOLE_RECORD_MAX_STROKES 5
 #define RING_SHOT_RECORD_MAX_STROKES 6
 #define IMPACT_SOUND_VOLUME 0x64
-/* The order in which players' lies come up, from the first: the tee, then off
- * the green (1) and on it (0), which comparing the lie's surface kind with
- * SURFACE_KIND_GREEN gives */
 #define LIE_PRIORITY_TEE 2
-/* Under GAME_FLAG_FEWEST_STROKES_FIRST, a priority that falls with each stroke
- */
 #define STROKE_PRIORITY_BASE 200
-/* The stick turns the aim by half its tilt, times a quarter (a sixth for
- * g_AltHeading) of it */
 #define AIM_STICK_SPEED_DIVISOR 4
 #define ALT_HEADING_STICK_SPEED_DIVISOR 6
-/* The D-pad's turn speeds up over this many frames */
 #define AIM_DPAD_MAX_FRAMES 60
 #define AIM_DPAD_SPEED_DIVISOR 6
 #define AIM_DPAD_BASE_SPEED 3
-/* The shot preview's step count, which a debug flag lets the D-pad tune */
 #define SHOT_PREVIEW_MIN_STEPS 2
 #define SHOT_PREVIEW_MAX_STEPS 20
 #define SHOT_PREVIEW_SCROLL_STEP 8
 #define INITIAL_SHOT_PREVIEW_STEP_COUNT 10
 #define AIM_CAMERA_DEBUG_TILT_SCALE 30.0f
-/* The pause screen's camera circles the ball at this distance, and rises this
- * far above it */
 #define PAUSE_CAMERA_RADIUS 1536000.0f
 #define PAUSE_CAMERA_RISE 4608000.0f
-/* In mini golf, it circles the middle of the course instead */
 #define MINI_GOLF_CENTER_X 543488.0f
 #define MINI_GOLF_CENTER_Z 533888.0f
 #define MINI_GOLF_PAUSE_CAMERA_RADIUS 15360.0f
 #define MINI_GOLF_PAUSE_CAMERA_RISE 890880.0f
 #define MINI_GOLF_PAUSE_CAMERA_DISTANCE 0x1A400
-/* The aim camera keeps above the lowest ground of this many points behind it */
 #define AIM_GROUND_PROBE_COUNT 4
 #define AIM_GROUND_PROBE_STEP 0x12C00
-/* Without an impact point, the camera drops lower and rises less with its
- * height */
 #define NO_IMPACT_POINT_DROP 5683.2f
 #define NO_IMPACT_POINT_HEIGHT_SCALE 0.4f
-/* The camera rises at most the square of its distance in thousands, over this
- */
 #define AIM_CAMERA_RISE_DIVISOR 4
-/* On the green, the camera looks this far past the ball and this far above the
- * ground */
 #define GREEN_LOOK_AHEAD 0x4B000
 #define GREEN_LOOK_RISE 0x1200
 #define GREEN_LOOK_HEIGHT_SCALE 0.7f
-/* Off the green, the camera tilts down by the yards the club falls short of
- * this */
 #define AIM_TILT_FULL_DISTANCE 300
 #define AIM_TILT_PER_YARD 0.005f
-/* Looking back from the far side, the camera looks this far up from the ball */
 #define LOOK_BACK_RISE 0x3C00
 #define LOOK_BACK_HEIGHT_SCALE 0.5f
 #define SHOT_CAMERA_FIELD_OF_VIEW 45.0f
-/* A replay turns the aim at once, rather than easing it round */
-/* A hole given up outside a match counts as this many times its par */
 #define GIVE_UP_PAR_MULTIPLE 3
 #define GAME_FLAG_SNAP_REPLAY_AIM 0xF
-/* A replay eases the aim by this much plus a 128th of what is left, until this
- * close */
 #define REPLAY_AIM_MIN_STEP 0x80
 #define REPLAY_AIM_STEP_DIVISOR 128
 #define REPLAY_AIM_SETTLE_FRAMES 6
@@ -216,13 +162,9 @@
 #define AIM_CAMERA_LOWER_BUTTONS (D_CBUTTONS | L_CBUTTONS)
 #define AIM_CAMERA_SOUND_VOLUME 0x50
 #define LOOK_SOUND_VOLUME 0x3F
-/* Frames that the impact point stays shown after Z or L is let go */
 #define IMPACT_POINT_LINGER_FRAMES 3
-/* Looking back from past the ball starts this far beyond the cup, and this high
- */
 #define LOOK_BACK_EXTRA_DISTANCE 53760.0f
 #define LOOK_BACK_START_HEIGHT (-0x1E00)
-/* The aim camera's height and distance limits; heights are negative upwards */
 #define GREEN_AIM_CAMERA_MIN_HEIGHT (-0x2A00)
 #define AIM_CAMERA_MIN_HEIGHT (-0x3C00)
 #define AIM_CAMERA_MAX_HEIGHT (-0x96000)
@@ -231,199 +173,110 @@
 #define AIM_CAMERA_MIN_DISTANCE (-0xBB800)
 #define AIM_CAMERA_MAX_DISTANCE 0x8CA000
 #define AIM_VIEW_TOGGLE_COUNT 2
-/* Half the putt preview line's width, in screen pixels */
 #define PUTT_PREVIEW_HALF_WIDTH 10.0f
-/* Hides the shot preview */
 #define GAME_FLAG_HIDE_SHOT_PREVIEW 0x4B
-/* Lets the D-pad change how far the shot preview reaches */
 #define GAME_FLAG_TUNE_SHOT_PREVIEW 0x71
-/* PickStartingClub settles for clubs with at least this lie rating */
 #define STARTING_CLUB_MIN_LIE_RATING 2
-/* Aims every shot straight down the driving range */
 #define GAME_FLAG_AIM_DOWN_RANGE 0x24
-/* Only hole-outs in fewer strokes than this enter the records */
 #define MAX_RECORDED_STROKE_COUNT 4
-/* The most strokes a player's count shows */
 #define STROKE_COUNT_MAX 99
-/* Outside training, a player who reaches this many times the hole's par
- * is out of the hole */
 #define STROKE_LIMIT_PER_PAR 3
-/* Speed golf adds this to a player stopped by the stroke limit */
 #define STROKE_LIMIT_PENALTY_MINUTES 10
-/* Where the aim camera starts, in course units */
 #define AIM_CAMERA_START_DISTANCE (-0xF000)
 #define AIM_CAMERA_START_HEIGHT (-0x4E00)
-/* The stick moves the aim camera's height by this much for every AIM_STICK_STEP
- * of tilt */
 #define AIM_CAMERA_HEIGHT_STEP 0x600
 #define AIM_STICK_STEP 16
 #define AIM_STICK_DEAD_ZONE 8
-/* The stick moves the aim camera's distance for every AIM_DISTANCE_STICK_STEP
- * of tilt */
 #define AIM_DISTANCE_STICK_STEP 4
 #define AIM_CAMERA_DISTANCE_STEP 0xF00
 #define AIM_CAMERA_PUTT_DISTANCE_STEP 0x180
-/* How far the C buttons move the aim camera each frame */
 #define AIM_CAMERA_BUTTON_DISTANCE_STEP 42670.0810546875
 #define AIM_CAMERA_BUTTON_HEIGHT_STEP 28446.720703125
 #define AIM_CAMERA_BUTTON_PUTT_STEP 4267.00810546875
-/* The last gauge frames at which power, and impact, can be set */
 #define LAST_POWER_GAUGE_FRAME (GAUGE_IMPACT_FRAME - 1)
 #define LAST_IMPACT_GAUGE_FRAME (GAUGE_IMPACT_FRAME + 9)
-/* How far either side of the impact mark the impact counts */
 #define MAX_IMPACT_TIMING 6
-/*
- * The swing animation starts once fewer gauge frames are left before this one
- * than its event frame, f_StateEventFrame
- */
 #define SWING_TIMING_GAUGE_FRAME 71
-/*
- * A shot that the player isn't taking tilts the stick toward its offset over
- * STICK_TILT_FRAME_COUNT frames, then holds it for the last
- * STICK_HOLD_FRAME_COUNT frames before impact
- */
 #define STICK_TILT_FRAME_COUNT 10
 #define STICK_HOLD_FRAME_COUNT 10
-/* While putting, the crane's steps are this times a count that grows with the
- * putt's length */
 #define AIM_CAMERA_PUTT_STEP_UNIT 426.700810546875
-/* The counts for each putt mode, when craning and when moving along the line */
 #define SHORT_PUTT_CRANE_STEP_COUNT 10
 #define MIDDLE_PUTT_CRANE_STEP_COUNT 13
 #define LONG_PUTT_CRANE_STEP_COUNT 15
 #define SHORT_PUTT_DOLLY_STEP_COUNT 10
 #define MIDDLE_PUTT_DOLLY_STEP_COUNT 15
 #define LONG_PUTT_DOLLY_STEP_COUNT 20
-/* The crane swings the camera forward only while it is below this height, and
- * back only above the other */
 #define AIM_CAMERA_CRANE_FORWARD_HEIGHT (-0x5A00)
 #define AIM_CAMERA_CRANE_BACK_HEIGHT (-0x96000)
-/* Shots count towards Course Points on their first flights only */
 #define MAX_COUNTED_FLIGHT_COUNT 2
-/* How UpdateTurns polls the computer golfer's plan: at most this many
- * times as the aim is prepared, then this many times a frame of aiming */
 #define PLAN_PREPARING_POLL_COUNT 100
 #define PLAN_AIMING_POLL_COUNT 400
-/* The time budget of each poll while the aim is prepared, and of the
- * first frame of aiming; the budget then grows by a factor each frame,
- * up to the most */
 #define PLAN_PREPARING_TIME_BUDGET 10
 #define PLAN_START_TIME_BUDGET 30
 #define PLAN_TIME_BUDGET_GROWTH 1.05f
 #define PLAN_MAX_TIME_BUDGET 0x800
-/* Replaced by PLAN_START_TIME_BUDGET before it is read */
 #define INITIAL_PLAN_TIME_BUDGET 10
-/* A prepared shot waits this many frames of aiming before it is played */
 #define PREPARED_SHOT_MIN_AIM_FRAMES 30
-/* The latest frame of a skipped swing animation at which its impact comes */
 #define SKIPPED_SWING_IMPACT_FRAME 15
-/* The f_SwingCount of a shot's first replay */
 #define FIRST_REPLAY_SWING_COUNT 2
-/* Whether the swing is a replay of the shot, which leaves the stopwatches */
 #define IsReplayingShot() (f_SwingCount >= FIRST_REPLAY_SWING_COUNT)
-/* A replay can itself be replayed in flight from this frame of its swing */
 #define REPLAY_MIN_SWING_FRAMES 40
 
-/* Frames from the start of a swing, through the flight that follows it */
-/* A wood's swing trail starts this many frames before the impact */
 #define WOOD_SWING_TRAIL_LEAD_FRAMES 3
-/* With GAME_FLAG_FAST_FLIGHT, the ball is launched by this frame */
 #define FAST_FLIGHT_LAUNCH_FRAME 4
-/* The swing trail fades this many frames after the impact */
 #define SWING_TRAIL_FADE_DELAY 10
-/* The golfer's random texture animations, which the swing stops, start again
- * at this frame */
 #define RANDOM_TEXTURE_RESUME_FRAME 30
-/* With Z or L held, a rolling ball takes up to this many more steps a frame,
- * outside mini golf and until it rolls toward the cup on the green */
 #define MAX_ROLL_SKIP_STEPS 4
-/* In the debug mode, with fast flight or Z or L held, the ball takes this
- * many more steps a frame */
 #define FAST_FLIGHT_EXTRA_STEPS 3
 
-/* A reaction lasts this many frames past its animation, whose end calls
- * StartBanner(-1) */
 #define REACTION_HOLD_FRAMES 10
-/* How long a reaction lasts with GAME_FLAG_FAST_AUTOPLAY set */
 #define SHORT_REACTION_FRAMES 15
-/* How long a reaction lasts in sudden death */
 #define SUDDEN_DEATH_REACTION_FRAMES 160
-/* The frames at which PLAYER_STATE_SHOWING_OUT_PLAYER calls
- * ShowFlipMessage(-1), and ends */
 #define OUT_PLAYER_FLIP_FRAME 80
 #define OUT_PLAYER_SHOWN_FRAMES 90
-/*
- * A putt's power, scaled to a short putt's by about how many times a short
- * putt's reach the long and middle putts have, picks its swing: the middle
- * putt's from MIDDLE_PUTT_SWING_POWER, the short putt's below it, slowed
- * below SLOW_PUTT_SWING_POWER for PUTT_SLOWDOWN_LEAD_FRAMES before the impact
- */
 #define LONG_PUTT_REACH_SCALE 6
 #define MIDDLE_PUTT_REACH_SCALE 3
 #define MIDDLE_PUTT_SWING_POWER (MAX_LAUNCH_POWER / 2)
 #define SLOW_PUTT_SWING_POWER (MAX_LAUNCH_POWER / 4)
 #define PUTT_SLOWDOWN_LEAD_FRAMES 3
 
-/* The song's tempo while aiming, a step below NORMAL_SONG_TEMPO; on the green,
- * f_GreenSongTempo rises from it by GREEN_SONG_TEMPO_STEP each frame */
 #define AIMING_SONG_TEMPO 0x7F
 #define GREEN_SONG_TEMPO_STEP 0.04f
 #define MAX_GREEN_SONG_TEMPO 155.0f
-/* While aiming, the golfer's alpha swings by AIMING_ALPHA_SWING about
- * AIMING_MEAN_ALPHA, at AIMING_ALPHA_RATE radians a frame of the stopwatch */
 #define AIMING_ALPHA_RATE 0.20933335f
 #define AIMING_ALPHA_SWING 32.0f
 #define AIMING_MEAN_ALPHA 64.0f
 
-/* Where the current turn's shot comes from, as f_ShotSource records */
 enum ShotSource {
-    /* The player's controller */
     SHOT_SOURCE_PLAYER,
-    /* g_ScriptedShot: a replayed shot, or the computer golfer's finished plan */
     SHOT_SOURCE_PREPARED,
-    /* The computer golfer, which is still planning */
     SHOT_SOURCE_PLANNING
 };
 
-/* Set once the shot preview has been built */
 static Boolean f_IsShotPreviewBuilt = FALSE;
-/* Frames that a replayed shot's aim has been settled */
 static s32 f_ReplayAimSettledFrameCount = 0;
-/* A debug tilt of the aim camera, which the C buttons tune */
 static f32 f_DebugAimCameraTilt = 0.0f;
-/* Read by no routine */
 static s32 f_UnusedWordAfterAimTilt UNUSED = 0;
-/* Frames that the D-pad has turned the aim, negative to the right */
 static s32 f_AimTurnFrameCount = 0;
-/* Read by no routine */
 static s32 f_UnusedWordAfterAimTurn UNUSED = 0;
 static u32 f_PlanTimeBudget = INITIAL_PLAN_TIME_BUDGET;
-/* How many times the shot's flight has been shown; StartFlightCamera gets the
- * earlier count */
 static s32 f_ShotFlightCount = 0;
-/* A dash of the shot preview */
 static Vtx f_ShotPreviewDashVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 0, 0}, 0, {0, 0}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{1, 0, 0}, 0, {0, 0x800}, {0x00, 0x00, 0x00, 0xFF}}},
     {{{1, 0, -1}, 0, {0x800, 0x800}, {0x00, 0x00, 0xFF, 0x00}}},
     {{{-1, 0, -1}, 0, {0x800, 0}, {0xFF, 0x00, 0x00, 0x00}}},
 };
-/* How many steps the shot preview simulates */
 static s32 f_ShotPreviewStepCount = INITIAL_SHOT_PREVIEW_STEP_COUNT;
-/* How many of the shot preview's points are shown */
 static s32 f_ShownShotPreviewPointCount = INITIAL_SHOT_PREVIEW_STEP_COUNT;
-/* Whether the shot preview ran to its end */
 static s8 f_HasShotPreviewEnded = FALSE;
-/* Scrolls the shot preview's dots */
 static s32 f_ShotPreviewDotScroll = 0;
-/* The putt preview's line, placed on screen */
 static Vtx f_PuttPreviewLineVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -1, -100}, 0, {0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{48, -1, -100}, 0, {0x17C0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{48, 0, -100}, 0, {0x17C0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-/* The ambient sounds that each course may play, or NO_AMBIENT_SOUND */
 static s32 f_AmbientSounds[COURSE_RECORD_COUNT][AMBIENT_SOUND_CHOICES] = {
     {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
     {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
@@ -451,87 +304,48 @@ static s32 f_AmbientSounds[COURSE_RECORD_COUNT][AMBIENT_SOUND_CHOICES] = {
     {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
     {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
 };
-/* Frames since the last ambient sound */
 static s32 f_AmbientSoundIdleFrameCount = 0;
-/* No routine sets it; while it is set, the next turn replays the player's
- * saved shot */
 static s8 f_ShouldReplaySavedShot = FALSE;
-/* Read by no routine; three objects, as an array is laid out differently */
 static s8 f_UnusedFirstByteAfterReplayFlag UNUSED = 0;
 static s8 f_UnusedSecondByteAfterReplayFlag UNUSED = 0;
 static s8 f_UnusedThirdByteAfterReplayFlag UNUSED = 0;
-/* The debug guts test's state, character and motion */
 static s8 f_HasGutsTestRun = FALSE;
 static s8 f_GutsTestCharacter = 0;
 static s8 f_GutsTestMotion = 0;
 static s8 f_ShouldUpdateReaction = FALSE;
-/* The swings since aiming: the shot's, then one for each replay of it */
 static s32 f_SwingCount = 0;
-/* Whether B was held for a replay of the shot */
 static Boolean f_IsReplayRequested = FALSE;
-/* The f_StateFrameCounts count at which the state acts: a swing's impact, or
- * a reaction's end */
 static s32 f_StateEventFrame = 0;
-/* Whether the swing animation has started while the impact is set */
 static Boolean f_IsSwingAnimationStarted = FALSE;
-/* How many frames before the impact a short putt's swing slows to
- * f_PuttSwingSpeed, or 0 */
 static s32 f_PuttSlowdownLead = 0;
-/* The frames by which the slowed swing puts off the impact */
 static s32 f_ImpactDelay = 0;
-/* Read by no routine */
 static s32 f_UnusedWordAfterImpactDelay UNUSED = 0;
-/* The angles of FrameBallAndShot's camera */
 static Radians f_DebugFramingYaw = 0.0f;
 static Radians f_DebugFramingPitch = 0.0f;
-/* Read by no routine */
 static s32 f_UnusedWordAfterFramingAngles UNUSED = 0;
 
 void PlaceShotCamera(void);
 void TurnAim(s32 turnsAltHeading);
 
-static Mtx f_PuttPreviewIdentity; /* An identity matrix for the putt preview */
-/*
- * The launch of the shot being taken, which the shot preview and the ball
- * simulation start from. impactTiming is how far from the meter's impact mark
- * the swing was stopped, and clubIndex and shotMode are also the club slot and
- * shot mode that the golfer was last posed with.
- */
+static Mtx f_PuttPreviewIdentity;
 static ShotLaunch f_ShotLaunch;
-/* Each player's frames since the start of a state or step of one */
 static s32 f_StateFrameCounts[MAX_PLAYER_COUNT];
-/* The speed of a short putt's slowed swing animation */
 static f32 f_PuttSwingSpeed;
-/* The song's tempo while aiming on the green, which rises the longer the
- * player aims */
 static f32 f_GreenSongTempo;
-/* The course and hole that the debug ball placing last ran on; read by no
- * routine */
 static s32 f_UnusedDebugCourseIndex;
 static s32 f_UnusedDebugHoleIndex;
-/* The frames that replays after the first skip of the swing animation, found on
- * the second, so that the impact comes at most SKIPPED_SWING_IMPACT_FRAME
- * frames in */
 static s32 f_SkippedSwingFrames;
-static s32 f_ShotSource; /* A SHOT_SOURCE_* value */
-static s32 f_TurnTimerStart; /* Nothing reads it */
-/* The shot preview's matrices, by draw buffer */
+static s32 f_ShotSource;
+static s32 f_TurnTimerStart;
 static Mtx f_ShotPreviewMatrices[DRAW_BUFFER_COUNT][SHOT_PREVIEW_MAX_STEPS];
-/* The shot preview's points */
 static f32 f_ShotPreviewPoints[SHOT_PREVIEW_MAX_STEPS][AXIS_COUNT];
 
-/* Not static: the original left it to the linker's common block */
 s32 f_AimFrameCount;
 
-/* Lets the Rumble Paks run again after nuContRmbForceStop */
 void EndRumbleForceStop(void) {
     nuSiSendMesg(NU_CONT_RMB_FORCESTOPEND_MSG, NULL);
 }
 
-/*
- * Pulls the aim camera in along the heading, as far as it takes to keep it
- * within the course. Once it has moved, a held C button pushes it on by a step.
- */
 void KeepAimCameraOnCourse(void) {
     Vec3 eye;
     s32 oldDistance = g_CurrentShot.aimCameraDistance;
@@ -607,73 +421,6 @@ void KeepAimCameraOnCourse(void) {
     }
 }
 
-/*
- * Places the camera for the shot being set up: circling the ball on the pause
- * screen, behind the ball while aiming, or looking back at it from past the
- * ball.
- *
- * Behind the ball, KeepAimCameraOnCourse is called in a block of its own. The
- * original keeps g_CurrentShot's address in $s0 from the heading's read and
- * reads aimCameraDistance through it for point's x and z, but reads the
- * ball's position by its addresses. cse's first pass stops at the block's
- * end and forgets the heading's register there: past it the distance's
- * address gets a register of its own, and the ball's coordinates are read as
- * offsets from that one. The second pass doesn't stop. It finds that the
- * distance's address is g_CurrentShot's register plus 0x34 and reads the
- * distance so, and it folds the ball's offsets back into addresses. Without
- * the block, the first pass makes every read an offset from g_CurrentShot's
- * register, the second folds them all into addresses, and the register is
- * left with the heading's read alone.
- *
- * The camera's greatest rise above the ball is built up in maxRise: the
- * distance in thousands, then its square, then that over the divisor. The
- * original keeps all three in $v1. With the distance in thousands in a local
- * of its own, it and its square trade $v0 and $v1.
- *
- * On the green, the look-at's height is worked out after its x and z; down
- * range, the tilt in world units has a local of its own, set just before the
- * look-at's height. On the mini golf course, point is set in axis order.
- * Looking back at the ball, the look-at's height comes from the center's,
- * which the original reloads from the stack.
- *
- * Measured against the match, as words differing and how many of them in
- * shape:
- *
- *   KeepAimCameraOnCourse outside a block, or in plain braces 11 (3)
- *   The first point's x in a block, in place of the call      7 (5)
- *   The first point's x and z in one, in place of the call    25 (9)
- *   The call before the heading is set, in a block or not     14 (6)
- *   The first point's distance read through a pointer         14 (4)
- *   The distance in thousands in a local, rise, with maxRise
- *   set to its square over the divisor                        23 (3)
- *   The same without the block (the old draft)                34 (6)
- *   rise squared into maxRise, and maxRise divided in place   16 (0)
- *   rise squared in place, and divided into maxRise           23 (3)
- *   maxRise squared and divided in one statement              7 (3)
- *   maxRise's square shifted right, not divided               7 (7)
- *   maxRise as an f32                                         36 (22)
- *   maxRise as an s16                                         29 (7)
- *   maxRise as a u32                                          74 (32)
- *   The ball's height added to maxRise before the clamp       4 (0)
- *   The probes' loop testing < the count                      23 (9)
- *   The eye's x and z stored before the first ground is read  45 (19)
- *   On the green, the look-at's height before its z           35 (31)
- *   The tilt scaled inside the look-at height's expression    13 (11)
- *   The tilt in world units set before the look-at's x        21 (9)
- *   Down range, point's y not set to the eye's                21 (1)
- *   On the mini golf course, point's z set before its y       8 (0)
- *   Looking back, the look-at's height from the ball's        3 (1)
- *   Looking back, without the middle's stores                 55 (37)
- *   Looking back, without point's first y                     10 (10)
- *   The current player's address taken with &                 4 (0)
- *
- * Also matching: the heading's statement in the block in place of the call,
- * or with it, or in a block of its own as well; the look-back's call in a
- * block too; maxRise's steps spelled maxRise = maxRise * maxRise and maxRise
- * = maxRise / AIM_CAMERA_RISE_DIVISOR; maxRise declared first in its branch,
- * or in the function; and the probe's offset written out at each use, with
- * no local.
- */
 void PlaceShotCamera(void) {
     Vec3 point;
     CoursePoint center;
@@ -748,11 +495,9 @@ void PlaceShotCamera(void) {
         s32 offset;
         s32 maxRise;
         f32 tilt;
-        /* The tilt in world units */
         f32 worldTilt;
 
         heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
-        /* In a block of its own, to match */
         IN_OWN_BLOCK(KeepAimCameraOnCourse());
         point[AXIS_X] =
             (cosf(heading) * g_CurrentShot.aimCameraDistance) + g_CurrentShot.ballPosition[AXIS_X];
@@ -798,7 +543,6 @@ void PlaceShotCamera(void) {
             point[AXIS_Y] = lowestGround + g_CurrentShot.aimCameraHeight;
         }
 
-        /* Built up in place, to match */
         maxRise = g_CurrentShot.aimCameraDistance / 1000;
         maxRise *= maxRise;
         maxRise /= AIM_CAMERA_RISE_DIVISOR;
@@ -846,12 +590,6 @@ void PlaceShotCamera(void) {
     else {
         KeepAimCameraOnCourse();
 
-        /*
-         * The middle of the ball and the cup, at the cup's height, is worked out,
-         * but the ball is used. Setting the components in turn keeps flow from
-         * deleting the middle's stores, which it does when each store directly
-         * follows another to the same component.
-         */
         heading = ((u16)g_AltHeading * BINARY_ANGLE_TO_RADIANS) + M_PI;
         center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] +
             ((g_HoleSetup.cupPosition[AXIS_X] - g_CurrentShot.ballPosition[AXIS_X]) * 0.5f);
@@ -885,11 +623,6 @@ void PlaceShotCamera(void) {
     OnShotCameraPlaced();
 }
 
-/*
- * Backs the aim camera up behind the ball, and points it down the shot's
- * heading. The clamped point that it first works out goes unused, as does the
- * ground height.
- */
 void AimDownRange(void) {
     Vec3 lookAt;
     Radians heading;
@@ -936,7 +669,6 @@ void AimDownRange(void) {
         (g_CurrentShot.aimCameraHeight * COURSE_TO_WORLD_SCALE);
 }
 
-/* Places the aim camera on the aim line, looking at the ball */
 void PlaceAimCamera(void) {
     Vec3 eye;
     f32 scale;
@@ -965,10 +697,6 @@ void PlaceAimCamera(void) {
         eye[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
     }
 
-    /*
-     * Holding the scale in a variable, and taking the camera's address for the
-     * first store, both keep the original's register choices and load order
-     */
     scale = COURSE_TO_WORLD_SCALE;
     (&g_Cameras[0])->view.lookAt[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
     g_Cameras[0].view.lookAt[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
@@ -987,8 +715,6 @@ void PlaceAimCamera(void) {
     g_Cameras[0].view.lookAt[AXIS_Z] *= scale;
 }
 
-/* Switches from the pause menu to the free-look camera, facing along the aim
- * line */
 void StartFreeLook(void) {
     g_CurrentShot.aimCameraDistance = FREE_LOOK_START_DISTANCE;
     g_LetterboxState = LETTERBOX_STATE_MOVING_CAMERA;
@@ -1031,7 +757,6 @@ void UpdateImpactPointMode(void) {
 }
 
 void ResetAimCamera(void) {
-    /* Pads the frame to match; without it 8 words differ */
     s32 unused[4] UNUSED;
 
     g_CurrentShot.aimCameraDistance = AIM_CAMERA_START_DISTANCE;
@@ -1041,10 +766,6 @@ void ResetAimCamera(void) {
     PlaceAimCamera();
 }
 
-/*
- * Eases the aim camera towards the place that suits the shot, and stops once it
- * is close.
- */
 void EaseAimCamera(void) {
     s32 targetDistance;
     s32 targetHeight;
@@ -1090,8 +811,6 @@ void EaseAimCamera(void) {
     }
 }
 
-/* Raises or lowers the aim camera with the C buttons, in smaller steps for a
- * putt */
 void MoveAimCameraHeightByButtons(void) {
     if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
         if (g_TurnController.buttons & D_CBUTTONS) {
@@ -1111,7 +830,6 @@ void MoveAimCameraHeightByButtons(void) {
     }
 }
 
-/* Turns the free-look camera with C-left and C-right */
 void TurnFreeLook(void) {
     if (g_TurnController.buttons & L_CBUTTONS) {
         g_FreeLookHeading -= FREE_LOOK_TURN_STEP;
@@ -1121,8 +839,6 @@ void TurnFreeLook(void) {
     }
 }
 
-/* Swings the aim camera up and back, or down and forward, with C-right and
- * C-left */
 void CraneAimCamera(void) {
     s32 stepCount;
 
@@ -1158,8 +874,6 @@ void CraneAimCamera(void) {
     }
 }
 
-/* Moves the aim camera along the aim line with the C buttons, in smaller steps
- * for a putt */
 void MoveAimCameraDistanceByButtons(void) {
     if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
         if (g_TurnController.buttons & R_CBUTTONS) {
@@ -1179,8 +893,6 @@ void MoveAimCameraDistanceByButtons(void) {
     }
 }
 
-/* Moves the aim camera along the aim line with C-up and C-down, by steps that
- * suit a putt's length */
 void MoveAimCameraDistanceByUpDown(void) {
     s32 stepCount;
 
@@ -1212,7 +924,6 @@ void MoveAimCameraDistanceByUpDown(void) {
     }
 }
 
-/* Raises or lowers the aim camera with the stick's Y */
 void MoveAimCameraHeight(void) {
     if (Abs(g_TurnController.stickY) > AIM_STICK_DEAD_ZONE) {
         g_CurrentShot.aimCameraHeight -=
@@ -1220,8 +931,6 @@ void MoveAimCameraHeight(void) {
     }
 }
 
-/* Moves the aim camera along the aim line with the stick's Y, in smaller steps
- * for a putt */
 void MoveAimCameraDistance(void) {
     if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
         if (Abs(g_TurnController.stickY) > AIM_STICK_DEAD_ZONE) {
@@ -1237,84 +946,6 @@ void MoveAimCameraDistance(void) {
     }
 }
 
-/*
- * Turns the aim with the stick, or g_AltHeading instead when asked, and the
- * shot's heading with the D-pad, faster the longer it is held. While the
- * heading holds still, the scene is drawn from a saved frame, through two
- * framebuffers.
- *
- * Each stick branch takes its turn from the heading in 32 bits: the heading
- * before the turn is copied to an s32, after the stick's half is worked out and
- * before the speed. The original sign-extends the saved heading there, from $s1
- * into $v1, and loads g_AltHeading with lh while the speed is still being
- * divided. With -= on the heading itself, the difference is narrowed to 16 bits
- * and needs no extension: the aim's turn is subtracted from $s1 as it was
- * loaded, and g_AltHeading is loaded after the speed's absolute value is taken.
- *
- * The aim's branch also stores the new heading through a pointer, from a
- * variable of its own. The original copies g_CurrentShot's address from $a2,
- * through which the heading was saved, to $a3, and stores the heading through
- * $a3 once, after both arms of the speed's test. Without the pointer the
- * heading is saved and stored by its address, with no register for it. Without
- * the variable the pointer is the address's own register, with no copy, and
- * each arm of the speed's test ends in a store of its own.
- *
- * The heading is saved as a SignedBinaryAngle, where the stick is read: the
- * original loads it with lhu into $s1 and sign-extends it at each use, for the
- * aim's turn and for the test of whether it held still.
- *
- * Each D-pad branch counts through a pointer to f_AimTurnFrameCount of its own,
- * which the original keeps in $v1.
- *
- * Measured against the match, as words differing and how many of them in shape:
- *   The aim's turn as -= on g_CurrentShot.heading, with the
- *   step multiplied by the speed under an if                  33 (5)
- *   The same, with g_AltHeading's turn as -= too (the old
- *   draft)                                                    39 (9)
- *   The aim's turn as -= of a conditional expression          29 (11)
- *   No shotHeading, newHeading stored to
- *   g_CurrentShot.heading                                     24 (12)
- *   No newHeading, the difference stored through shotHeading,
- *   or to g_CurrentShot.heading                               9 (3)
- *   oldHeading turned in place and stored                     35 (7)
- *   No oldHeading, the turn taken from heading                22 (12)
- *   oldHeading as a SignedBinaryAngle                         22 (12)
- *   oldHeading declared before step                           22 (6)
- *   oldHeading declared after speed                           22 (12)
- *   speed declared before step                                41 (15)
- *   shotHeading declared after speed                          20 (10)
- *   The step multiplied by the speed under an if, then taken
- *   from oldHeading                                           37 (5)
- *   The step as stickX >> 1                                   4 (2)
- *   An inline function for the step times the speed           33 (5)
- *   g_AltHeading's turn as -=, or taken from g_AltHeading
- *   with no oldHeading                                        6 (4)
- *   g_AltHeading's turn stored through a pointer              8 (2)
- *   g_AltHeading's oldHeading as a SignedBinaryAngle          23 (15)
- *   g_AltHeading's step multiplied by the speed under an if   7 (3)
- *   g_AltHeading's speed declared before its step             12 (12)
- *   The test as turnsAltHeading, with its branches swapped    54 (42)
- *   The saved heading as a BinaryAngle                        31 (11)
- *   The saved heading as an s32                               45 (13)
- *   stickX as an s8                                           91 (21)
- *   stickX as an s16                                          89 (23)
- *   The heading saved before the stick is read                21 (5)
- *   Both read after g_ImpactPointState's test                 26 (12)
- *   f_AimTurnFrameCount named in both D-pad branches          41 (19)
- *   f_AimTurnFrameCount named in one D-pad branch             20 (8)
- *   One pointer to f_AimTurnFrameCount for the function       40 (8)
- *
- * Also matching: newHeading declared and then set, set in an if and an else, or
- * as a conditional expression that subtracts in each arm; newHeading as a
- * SignedBinaryAngle; oldHeading read through shotHeading, or from
- * g_CurrentShot.heading; shotHeading as a pointer to g_CurrentShot; the aim's
- * step as an s16, or read from g_TurnController.stickX; either speed's absolute
- * value taken with an if; either speed tested == 0, with the arms swapped;
- * g_AltHeading's turn through a newHeading too, or with its oldHeading declared
- * before its step; the frame count copied to a local for the D-pad's turn; the
- * D-pad's speed as a conditional expression; and the shot's heading cast to s16
- * in the test of whether it held still.
- */
 void TurnAim(s32 turnsAltHeading) {
     s32 stickX = g_TurnController.stickX;
     SignedBinaryAngle heading = g_CurrentShot.heading;
@@ -1326,7 +957,6 @@ void TurnAim(s32 turnsAltHeading) {
     }
 
     if (!turnsAltHeading) {
-        /* Turned in 32 bits and stored through a pointer, to match */
         SignedBinaryAngle *shotHeading = &g_CurrentShot.heading;
         s32 step = stickX / 2;
         s32 oldHeading = heading;
@@ -1336,7 +966,6 @@ void TurnAim(s32 turnsAltHeading) {
         *shotHeading = newHeading;
     }
     else {
-        /* Turned in 32 bits as well, to match */
         s32 step = stickX / 2;
         s32 oldHeading = g_AltHeading;
         s32 speed = Abs(stickX / ALT_HEADING_STICK_SPEED_DIVISOR);
@@ -1349,7 +978,6 @@ void TurnAim(s32 turnsAltHeading) {
         f_AimTurnFrameCount = 0;
     }
     else if (dpad & L_JPAD) {
-        /* Counted through a pointer of this branch's own, to match */
         s32 *dpadFrames = &f_AimTurnFrameCount;
 
         if (*dpadFrames < 0) {
@@ -1361,7 +989,6 @@ void TurnAim(s32 turnsAltHeading) {
         }
     }
     else {
-        /* As in the left branch, to match */
         s32 *dpadFrames = &f_AimTurnFrameCount;
 
         if (*dpadFrames > 0) {
@@ -1405,12 +1032,6 @@ void TurnAim(s32 turnsAltHeading) {
     }
 }
 
-/*
- * Clamps the aim camera's height between minHeight and AIM_CAMERA_MAX_HEIGHT,
- * and its distance between minDistance and maxDistance. Each view clamps all
- * four, as in the original, whose green and other views share their tails;
- * clamping the common bounds once after the views gives 24 differing words.
- */
 #define ClampAimCamera(minHeight, minDistance, maxDistance) \
     { \
         if (g_CurrentShot.aimCameraHeight > (minHeight)) { \
@@ -1427,12 +1048,6 @@ void TurnAim(s32 turnsAltHeading) {
         } \
     }
 
-/*
- * Handles the aim's buttons for a frame: switching between looking down the
- * range, at the cup and back from past the ball, and moving the camera. A
- * replay instead turns the aim to the recorded heading, and returns TRUE once
- * it has settled there for a while.
- */
 s32 UpdateAimControls(void) {
     Vec3 toCup;
     s32 headingLeft;
@@ -1824,21 +1439,10 @@ void StartTurnTimer(void) {
     f_TurnTimerStart = osGetCount();
 }
 
-/*
- * Always FALSE, so UpdateTurns stops polling the computer golfer's plan
- * after one try. It gets a time budget after StartTurnTimer, so it
- * presumably once told whether the frame had time left for planning.
- */
 Boolean HasPlanTime(s32 timeBudget UNUSED) {
     return FALSE;
 }
 
-/*
- * Picks the club and the shot mode that the shot starts with. On a green, it is
- * the putter, in the shortest putt mode that reaches the cup. Elsewhere, it is
- * the club whose normal shot comes nearest the cup, out of those with a good
- * enough lie, and preferring those that reach.
- */
 void PickStartingClub(HoleSetup *hole) {
     s8 isUsable[CLUB_SLOT_COUNT];
     s32 clubCount;
@@ -1946,8 +1550,6 @@ void PickStartingClub(HoleSetup *hole) {
     }
 }
 
-/* Puts the simulated ball at rest on the player's ball, and shows the player's
- * passed rings again */
 void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation) {
     Player *player = &g_Players[playerIndex];
     s32 i;
@@ -1983,7 +1585,6 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation) {
     }
 }
 
-/* Counts a notable shot towards the player's Course Points */
 void CountNotableShot(s32 playerIndex, s32 shotKind) {
     u8 *count;
 
@@ -2009,19 +1610,15 @@ void CountNotableShot(s32 playerIndex, s32 shotKind) {
     }
 }
 
-/* The course points that each shot of a kind earns */
-/* A great or an excellent shot */
 #define GREAT_SHOT_POINTS 2
 #define PIN_SHOT_POINTS 4
 #define CHIP_IN_POINTS 6
 #define LONG_CHIP_IN_POINTS 8
-/* A flag shot, an eagle or a water cut */
 #define BIG_SHOT_POINTS 10
 #define ALBATROSS_POINTS 16
 #define HOLE_IN_ONE_POINTS 20
 #define MINI_GOLF_HOLE_IN_ONE_POINTS 10
 
-/* The course points that the player has earned with the shots of one kind */
 s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
     s32 count = (u8)g_Players[playerIndex].notableShotCounts[shotKind];
     s32 points;
@@ -2068,8 +1665,6 @@ s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
     return count * points;
 }
 
-/* Turns each player's counts of notable shots into points, and returns
- * everyone's total */
 s32 TallyCoursePoints(void) {
     s32 playerIndex;
     s32 shotKind;
@@ -2107,17 +1702,10 @@ void PrintCoursePoints(void) {
     }
 }
 
-/*
- * Simulates the shot as the swing stands and builds the matrices for the dashes
- * that preview its path. Until the swing sets the power, the preview shows a
- * full swing.
- */
-/* Whether the swing has yet to set the power in a player state */
 #define IsBeforePowerSet(state) \
     ((state) == PLAYER_STATE_AIMING || \
         (state) == PLAYER_STATE_SETTING_POWER || \
         (state) == PLAYER_STATE_UNUSED_AIMING)
-/* Whether the swing has yet to set the impact in a player state */
 #define IsBeforeImpactSet(state) \
     ((state) == PLAYER_STATE_AIMING || \
         (state) == PLAYER_STATE_SETTING_POWER || \
@@ -2256,42 +1844,6 @@ void BuildShotPreview(ShotLaunch *swing, s32 playerState) {
     }
 }
 
-/*
- * Draws the shot preview that BuildShotPreview built. On the pause screen it is
- * instead a straight line on screen, from the ball to the preview's last point.
- *
- * For that line the original scales dx and dy to the line's half width in
- * place, in $f6 and $f4, and that both are set twice decides the order of the
- * insns that first set them. sched.c fills a block from its end, and raises the
- * priority of an insn that gives a register its only set (birthing_insn_p).
- * Were dx and dy set once, their conversions from the integer differences would
- * be such insns and would go last before fabsf's assembly, with the stores of
- * the scaled coordinates ahead of the subtractions; each scaled end coordinate
- * would die at its subtraction and local-alloc would give the difference its
- * register. Set again by the scaling they are not, so the stores, which fabsf's
- * operand does not wait on, go last: the four scaled coordinates outlive the
- * subtractions in $a1, $v1, $a2 and $a0, and both differences take $v0.
- *
- * Measured against the match, as words differing and how many of them in shape:
- *   The offsets as the products dy * scale and dx * scale, dx
- *   and dy set once                                           60 (12)
- *   The same with the squares summed dy's first (the old
- *   draft)                                                    56 (12)
- *   dy alone scaled in place, offsetY as dx * scale           42 (2)
- *   dx alone scaled in place, offsetX as dy * scale           58 (4)
- *   The squares summed dy's first                             6 (0)
- *   dy worked out before dx                                   28 (0)
- *   fabsf(dy) tested first                                    4 (0)
- *   No scale: each scaled as itself times the half width,
- *   divided by the length                                     41 (19)
- *   The offsets as s16                                        29 (17)
- *
- * Also matching: dy scaled before dx; both scaled where the offsets are set,
- * together or each before its offset; either scaling spelled out, with scale as
- * either operand; the half width divided by a length local in each scaling; no
- * offsets, with dy and dx cast where they are added; and the four coordinates
- * scaled into locals and stored after the differences.
- */
 void DrawShotPreview(CameraMatrices *matrices) {
     ScreenPoint ball;
     ScreenPoint end;
@@ -2385,7 +1937,6 @@ void DrawShotPreview(CameraMatrices *matrices) {
         dy = end.y - ball.y;
         if (fabsf(dx) > 1.0f || fabsf(dy) > 1.0f) {
             scale = PUTT_PREVIEW_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
-            /* Both scaled in place, to match */
             dx *= scale;
             dy *= scale;
             gSPLoadGeometryMode(g_DisplayListHead++, 0);
@@ -2494,10 +2045,6 @@ void DrawShotPreview(CameraMatrices *matrices) {
     }
 }
 
-/*
- * Returns whether the player's hole-out may enter the records: a short one,
- * by one of the main characters, outside mini-golf, in a mode that keeps them
- */
 Boolean IsRecordableHoleOut(s32 playerIndex) {
     if (g_GameState.replayKind != REPLAY_KIND_NONE) {
         return FALSE;
@@ -2552,8 +2099,6 @@ Boolean IsRingShotRound(void) {
     return FALSE;
 }
 
-/* Keeps the player's last shot, and the hole and how it was played, in their
- * replay record */
 void RecordHoleOut(s32 playerIndex) {
     u32 shotIndex = g_Players[playerIndex].strokeCount - 1;
 
@@ -2580,8 +2125,6 @@ void RecordHoleOut(s32 playerIndex) {
     }
 }
 
-/* Keeps the player's last shot, and the hole and how it was played, in their
- * Ring Shot record */
 void RecordRingShotHole(s32 playerIndex) {
     u32 shotIndex = g_Players[playerIndex].strokeCount - 1;
 
@@ -2658,8 +2201,6 @@ void RecordRingShotClear(s32 playerIndex) {
     WriteSaveData();
 }
 
-/* Saves a Ring Shot hole as cleared once it is holed within par with every ring
- * passed */
 void CheckRingShotClear(s32 playerIndex) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
         g_Players[playerIndex].strokeCount <= g_HoleSetup.par &&
@@ -2669,11 +2210,6 @@ void CheckRingShotClear(s32 playerIndex) {
     }
 }
 
-/*
- * The first of the club kind's animations; shotMode is unused. The staff
- * roll overlay has its own copies of these four routines, with the same
- * names, so these are static to link beside them.
- */
 static s32 GetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode UNUSED) {
     s32 animation;
 
@@ -2698,8 +2234,6 @@ static s32 GetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode UNUSED)
     return animation;
 }
 
-/* The second of the club kind's animations, or the third for an approach shot
- */
 static s32 GetSwingAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
     s32 animation;
 
@@ -2732,12 +2266,6 @@ static void SetSwingAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
     SetCharacterAnimation(slotIndex, GetSwingAnimation(slotIndex, club, shotMode));
 }
 
-/*
- * Sets the shot up for the player whose turn it is: where the ball lies and the
- * heading. Off the tee of a par 4 or 5 the shot aims at the hole's first aim
- * point, and otherwise at the cup. A hole without that point gets the cup's
- * position for it.
- */
 void StartPlayerShot(s32 playerIndex) {
     Player *player = &g_Players[playerIndex];
     CoursePoint target;
@@ -2815,16 +2343,9 @@ void StartPlayerShot(s32 playerIndex) {
     ResetShotOffsetMarker();
 }
 
-/* Left empty in the original; called after each step of a flying ball */
 void OnBallStepped(Player *player UNUSED) {
 }
 
-/*
- * Once every player's shot has finished, picks who plays next. Players still on
- * the tee go first, then those off the green, then those on it. Among those,
- * the farthest from the cup goes first, and the earliest in the tee order
- * breaks ties.
- */
 void PickNextPlayer(void) {
     s32 i;
     s32 finishedCount;
@@ -2905,7 +2426,6 @@ void PickNextPlayer(void) {
     }
 }
 
-/* Hides the rings the ball passed, so that a new shot can pass them again */
 void ClearPassedRings(Player *player) {
     s32 i;
 
@@ -2916,8 +2436,6 @@ void ClearPassedRings(Player *player) {
     }
 }
 
-/* Now and then plays one of the course's ambient sounds, picked at random, from
- * a random side */
 void PlayAmbientSound(void) {
     s32 choice;
 
@@ -2936,16 +2454,11 @@ void PlayAmbientSound(void) {
     }
 }
 
-/* The slot to free is always the golfer's, whatever the caller passes */
 void FreeCharacterAndReactionLight(s32 slotIndex UNUSED) {
     FreeCharacterSlot(0);
     TurnOffReactionLight();
 }
 
-/*
- * Measures a tee shot for the records: the drive counts if it ends on the
- * fairway or the green, and the distance to the pin if it ends on the green.
- */
 void MeasureTeeShot(s32 playerIndex) {
     s32 distance;
     SurfaceInfo *info;
@@ -2982,8 +2495,6 @@ void MeasureTeeShot(s32 playerIndex) {
     }
 }
 
-/* Leaves the distances that the player's contests have not measured uncounted
- */
 void SkipUnmeasuredDistances(s32 playerIndex) {
     if (g_Players[playerIndex].driveDistance == UNMEASURED_DISTANCE) {
         g_Players[playerIndex].driveDistance = UNCOUNTED_DISTANCE;
@@ -2994,10 +2505,6 @@ void SkipUnmeasuredDistances(s32 playerIndex) {
     }
 }
 
-/*
- * Rumbles the player's controller briefly in a game for several players,
- * if every player has a controller of their own
- */
 void StartTurnRumble(s32 playerIndex) {
     if (g_HasOwnControllers == TRUE && g_GameState.playerCount >= 2) {
         s32 controllerIndex = g_Players[playerIndex].controllerIndex;
@@ -3012,10 +2519,6 @@ void StartTurnRumble(s32 playerIndex) {
                         TURN_RUMBLE_FRAME_COUNT
                     );
                     break;
-                /*
-                 * The empty cases are there to match: without them, with one or a
-                 * default, or with an if for the 0 case, 23 words differ, 9 in shape
-                 */
                 case PFS_ERR_NOPACK:
                     break;
                 case PFS_ERR_CONTRFAIL:
@@ -3025,10 +2528,6 @@ void StartTurnRumble(s32 playerIndex) {
     }
 }
 
-/*
- * Lets the players who are waiting make their characters call out with the
- * D-pad and the C buttons, if every player has a controller of their own
- */
 void PlayWaitingPlayersCalls(void) {
     s32 i;
     s32 controllerIndex;
@@ -3125,7 +2624,6 @@ void PlayWaitingPlayersCalls(void) {
     }
 }
 
-/* Plays the jingle for how the player finished the hole */
 void PlayHoleOutSong(s32 playerIndex) {
     s32 strokeCount = g_Players[playerIndex].strokeCount;
     s32 scoreToPar = strokeCount - g_HoleSetup.par;
@@ -3228,65 +2726,6 @@ void ShowHoleOutBanner(s32 playerIndex) {
     }
 }
 
-/*
- * UpdateTurns holds ten functions nested in it, a GNU C extension. GCC
- * passes them the parent's frame in $v0, its static chain, and they read
- * the parent's playerIndex through it.
- *
- * Its three debug blocks are written in place. The original's ball placement
- * was expanded with the constant addresses inside its memory references: GCC
- * compiles each nested function at its definition, and rest_of_compilation sets
- * cse_not_expected, which push_function_context doesn't save, so the rest of
- * UpdateTurns is expanded with it set. A separate inline helper is expanded
- * first, under its own init_function_start, which clears it, so memory_address
- * puts each constant address in a register; as a helper, the ball placement
- * kept the ball's X address in a register and CSE reached Z through it with an
- * offset, where the original loads and stores each through its own lui. Written
- * in place, the ball placement gave 90 words (48 in shape) against 146 (78) as
- * a helper.
- *
- * Many forms follow the original's code rather than the shortest C.
- * Tests that the original branches on separately are nested, not joined
- * with &&: the hole-out song's Speed Golf and Ring Shot tests, Speed
- * Golf outside, and the debug step's trigger and camera tests. The
- * letterbox test before the debug output is written "== FALSE", for
- * which the original ors both comparisons. The cup distance goes through
- * a float, as round_hud.c's does. The hole-out song switch lists its
- * modes in the order the original places their bodies, and the score
- * switch gives a bogey a case before the default so that GCC builds the
- * original's jump table. The planning tests read f_ShotSource itself
- * after each loop, and the poll counts are zeroed first in the planning
- * block. A player out of the group game has the hole's strokes and the
- * stroke count zeroed by one chained assignment.
- *
- * Where the original sets a value in a branch's delay slot, the draft
- * sets it in an arm of that branch: the holed-out reaction and notable
- * shot work out the score to par before the hole-in-one test; a Ring
- * Shot's reaction is the bogey's in an else arm; the turn's start tests
- * the shot's rest first, in one chain with the speed-golf hole intro and
- * aiming; the stroke limit sets the reaction state once, after the
- * speed-golf penalty, and the Ring Shot's par test sets it in its own
- * arm, which keeps those tails from being cross-jumped together. Where
- * the original shares code by cross-jumping, each arm has its own copy:
- * the song tempo's calls, PlaceTargetPoint in each arm of the units
- * test, and nextState set before ForceStopRumble in the Ring Shot
- * hole-out. The next state is set after the one-on-one match's handicap
- * scoring, which calls GetCourseRecordIndex with no argument, as the
- * ambient sounds' lookups do. The debug ball move holds the Z trigger
- * test in a flag, as the original shifts the bit down and masks it,
- * which GCC does only for a bit test stored as a value. The training
- * choice box's reaction test and the frame test at the end are written
- * in place, as inline helpers reload their constants and addresses for
- * each call.
- *
- * Preparing the aim, nextState is set to PLAYER_STATE_AIMING at the top
- * of the case, though the HUD test at its end always overwrites it. This
- * is the one form here with no other reason to exist: the original
- * compares f_ShotSource with nextState's $s3, which cse does only when
- * nextState already holds the 2 that the comparison needs, and without
- * the store 3 words differ.
- */
-/* Whether the stopwatches run in a player state: from aiming to the flight */
 #define IsTimedState(state) \
     ((state) == PLAYER_STATE_AIMING || \
         (state) == PLAYER_STATE_SETTING_POWER || \
@@ -3294,13 +2733,10 @@ void ShowHoleOutBanner(s32 playerIndex) {
         (state) == PLAYER_STATE_STARTING_SWING || \
         (state) == PLAYER_STATE_SWINGING || \
         (state) == PLAYER_STATE_BALL_IN_FLIGHT)
-/* Whether a pause screen lets play go on */
 #define IsPlayGoingOn(pauseScreen) \
     ((pauseScreen) == PAUSE_SCREEN_NONE || (pauseScreen) == PAUSE_SCREEN_FREE_LOOK)
-/* Whether a character is Yoshi or Donkey Kong, who share a round song */
 #define IsYoshiOrDonkeyKong(character) \
     ((character) == CHARACTER_YOSHI || (character) == CHARACTER_DONKEY_KONG)
-/* Whether four players are all Yoshi or Donkey Kong, which has its own song */
 #define IsYoshiAndDonkeyKongRound() \
     (g_GameState.playerCount == MAX_PLAYER_COUNT && \
         IsYoshiOrDonkeyKong(g_Players[0].characterIndex) && \
@@ -3308,7 +2744,6 @@ void ShowHoleOutBanner(s32 playerIndex) {
         IsYoshiOrDonkeyKong(g_Players[2].characterIndex) && \
         IsYoshiOrDonkeyKong(g_Players[3].characterIndex))
 
-/* Places the target point DISTANCE units of SCALE from the ball at ANGLE */
 #define PlaceTargetPoint(angle, distance, scale) \
     do { \
         f32 cosine = cosf(angle); \
@@ -3335,7 +2770,6 @@ void UpdateTurns(void) {
     s32 debugPlayerIndex;
     s32 groupPlayerIndex;
 
-    /* Returns whether the B button is held */
     Boolean IsBButtonHeld(void) {
         if (g_MergedController.buttons & B_BUTTON) {
             return TRUE;
@@ -3344,8 +2778,6 @@ void UpdateTurns(void) {
         return FALSE;
     }
 
-    /* The turn controller's stick X, which left and right on the control pad tilt
-     * fully */
     s32 GetTurnStickX(void) {
         s32 x = (g_TurnController.buttons & L_JPAD) ? -DPAD_STICK_TILT : 0;
 
@@ -3360,8 +2792,6 @@ void UpdateTurns(void) {
         return x;
     }
 
-    /* The turn controller's stick Y, which down and up on the control pad tilt
-     * fully */
     s32 GetTurnStickY(void) {
         s32 y = (g_TurnController.buttons & D_JPAD) ? -DPAD_STICK_TILT : 0;
 
@@ -3376,7 +2806,6 @@ void UpdateTurns(void) {
         return y;
     }
 
-    /* Makes the golfer translucent while a club for the green is held */
     void UpdateGolferTranslucency(void) {
         if ((GetClub(g_Players[playerIndex].clubs[g_CurrentShot.clubSlot])->surfaceMask &
                 CLUB_SURFACE_GREEN) &&
@@ -3388,11 +2817,6 @@ void UpdateTurns(void) {
         }
     }
 
-    /*
-     * Poses the golfer for the picked club and shot mode, when either has
-     * changed. An approach shows the swing's first frame, held; the other modes
-     * show the stance.
-     */
     void PoseGolferForShot(void) {
         s32 *lastClubSlot = &f_ShotLaunch.clubIndex;
 
@@ -3421,8 +2845,6 @@ void UpdateTurns(void) {
         }
     }
 
-    /* Advances the player's, the round's and the hole's stopwatches by a frame,
-     * up to their limit */
     void TickStopwatches(void) {
         if (!IsReplayingShot()) {
             g_Players[playerIndex].stopwatchFrameCount++;
@@ -3442,12 +2864,6 @@ void UpdateTurns(void) {
         }
     }
 
-    /*
-     * Takes the player out of the hole. In a match, a player whose opponent has
-     * holed out loses the hole by a stroke; otherwise the hole counts as
-     * GIVE_UP_PAR_MULTIPLE times its par, and an opponent still playing wins it
-     * by a stroke.
-     */
     void GiveUpHole(s32 playerIndex) {
         s32 opponentIndex;
 
@@ -3500,8 +2916,6 @@ void UpdateTurns(void) {
         }
     }
 
-    /* Shows or hides the HUD's parts, apart from the club panel and the letterbox
-     */
     void SetRoundHudPartsShown(s8 isShown) {
         g_RoundHud.isWindIndicatorShown = isShown;
         g_RoundHud.isHoleInfoShown = isShown;
@@ -3511,8 +2925,6 @@ void UpdateTurns(void) {
         g_RoundHud.isProgressShown = isShown;
     }
 
-    /* Returns whether a shot stopped this far from the impact mark rumbles, as a
-     * mishit */
     Boolean DoesImpactRumble(void) {
         return GetImpactTimingEntry(
             GetSelectedClub(),
@@ -3523,8 +2935,6 @@ void UpdateTurns(void) {
             ->rumbles;
     }
 
-    /* Plays the impact click: a mishit, a stop right on the mark, or one off it
-     */
     void PlayImpactClickSound(void) {
         if (DoesImpactRumble()) {
             PlaySound(SOUND_MENU_BLOCKED, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
@@ -3719,12 +3129,6 @@ void UpdateTurns(void) {
                         }
                         else if (g_GameState.gameMode != GAME_MODE_SPEED_GOLF) {
                             if (g_GameState.gameMode != GAME_MODE_RING_SHOT) {
-                                /*
-                                 * The tests below take this as the hole's score to par, one
-                                 * stroke more than the count. Subtracting par less one from
-                                 * the count gives 83 words differing, 45 in shape, against
-                                 * 77 and 43
-                                 */
                                 s32 scoreToPar =
                                     (g_Players[playerIndex].strokeCount + 1) - g_HoleSetup.par;
 
@@ -4044,7 +3448,6 @@ void UpdateTurns(void) {
                             break;
                         case PROMPT_RESULT_END_GAME:
                             LeaveGameSaveMenu();
-                            /* Falls through */
                         case PROMPT_RESULT_STAY_IN_SAVE_MENU:
                             g_PauseScreen = PAUSE_SCREEN_SAVE_MENU;
                             break;
@@ -4190,15 +3593,6 @@ void UpdateTurns(void) {
                     );
                     f_IsSwingAnimationStarted = FALSE;
                     if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
-                        /*
-                         * Debug flag 0x47: prints where the ball lies, and the second
-                         * controller moves it while Z is held. In its own block, which
-                         * frees the buffer's slot when the flag's test ends, so it shares
-                         * one slot with the other debug buffers, as in the original's
-                         * frame; declared in the flag's block, the frame grows from the
-                         * original's 0x118 bytes to 0x1A0 and 170 words differ (36 in
-                         * shape), and in a do-while 82 (36), against 68 (36).
-                         */
                         {
                             char text[DEBUG_TEXT_BUFFER_SIZE];
                             Boolean isMovingBall;
@@ -4552,16 +3946,6 @@ void UpdateTurns(void) {
                 if (g_IsDebugEnabled &&
                     (g_TurnController.pressedButtons & (B_BUTTON | D_CBUTTONS))) {
                     g_CurrentShot.impactGaugeFrame = g_CurrentShot.gaugeFrame;
-                    /*
-                     * B gives full power and on-mark timing, C-down on-mark timing
-                     * alone. With one store after the B test, the first CSE pass
-                     * folds the clamp's upper test below and the second its lower
-                     * test, where the original loads the timing back for both. A
-                     * store in each arm keeps a join between the stores and the
-                     * clamp until cross-jumping merges them: 77 words differ, 43 in
-                     * shape, against 91 and 57, or 101 and 59 with the one store
-                     * before the B test.
-                     */
                     if (g_TurnController.pressedButtons & B_BUTTON) {
                         f_ShotLaunch.power = MAX_LAUNCH_POWER;
                         f_ShotLaunch.impactTiming = 0;
@@ -5244,8 +4628,6 @@ void UpdateTurns(void) {
                 if (g_GameState.gameMode == GAME_MODE_TRAINING) {
                     if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) &&
                         g_Players[playerIndex].holeStatus != HOLE_STATUS_PLAYING) {
-                        /* Debug flag 0x3E: the D-pad picks a character and a reaction to
-                         * load in its place */
                         char *motionName;
                         char text[DEBUG_TEXT_BUFFER_SIZE];
 
@@ -5583,8 +4965,6 @@ void UpdateTurns(void) {
         UpdateReaction(0);
     }
 
-    /* Debug flag 0x4A: the second stick turns a camera that frames the ball and
-     * the shot */
     if (IsGameFlagSet(GAME_FLAG_FRAME_BALL_AND_SHOT)) {
         Vec3 center;
 

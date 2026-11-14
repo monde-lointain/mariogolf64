@@ -5,8 +5,6 @@
 
 #include "ball_simulation.h"
 
-/* The opening's copies of the ball simulation's routines */
-
 s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *shot);
 s32 StepOpeningBallSimulation(BallSimulation *simulation);
 s32 ToggleOpeningCharacter(u32 slotIndex, s32 character);

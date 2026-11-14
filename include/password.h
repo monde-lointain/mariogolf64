@@ -3,39 +3,29 @@
 
 #include <ultra64.h>
 
-/* The bytes a tournament password decodes to */
 #define TOURNAMENT_CODE_SIZE 3
 
-/*
- * The characters in each password, which has no terminating null. A score
- * password holds three numbers of five symbols, and five symbols of their
- * checksums.
- */
 #define TOURNAMENT_PASSWORD_LENGTH 8
 #define SCORE_PASSWORD_LENGTH 20
 
-/* What a tournament password's rules index picks */
 typedef struct TournamentRules {
-    /* 0x0 */ s8 characterIndex; /* -1 for none; it picks a portrait */
-    /* 0x1 */ s8 isSpeedGolf; /* Otherwise stroke play */
-    /* 0x2 */ s8 courseIndex;
-} TournamentRules; /* size = 0x3 */
+      s8 characterIndex;
+      s8 isSpeedGolf;
+      s8 courseIndex;
+} TournamentRules;
 
-/* What a score password records of a tournament round */
 typedef struct ScoreReport {
-    /* 0x0 */ u8 tournamentCode[TOURNAMENT_CODE_SIZE];
-    /* 0x3 */ u8 characterIndex;
-    /* 0x4 */ u16 score;
-    /* 0x8 */ u32 time;
-    /* 0xC */ u8 gameBoyLevel; /* Of the player's Game Boy character */
-} ScoreReport; /* size = 0x10 */
+      u8 tournamentCode[TOURNAMENT_CODE_SIZE];
+      u8 characterIndex;
+      u16 score;
+      u32 time;
+      u8 gameBoyLevel;
+} ScoreReport;
 
-/* It returns 0 for a valid password and -1 otherwise */
 s32 DecodeTournamentPassword(u8 *code, char *password);
 void EncodeScorePassword(ScoreReport *report, char *password);
 TournamentRules *GetTournamentRules(u8 rulesIndex);
 
-/* The rules of the club tournament whose code was entered */
 extern TournamentRules g_ClubTournamentRules;
 void CopyTournamentCode(u8 *destination);
 

@@ -1,8 +1,3 @@
-/*
- * Loads holes on the loader thread: decompressing their data, shrinking mini-
- * golf holes, choosing the wind, the rain and the scene colors, and setting up
- * the hole's state.
- */
 #include "hole_loader.h"
 
 #include <stdlib.h>
@@ -35,58 +30,41 @@
 #include "turn.h"
 #include "work_area.h"
 
-/* ChooseHoleConditions gives up on finding a set cup position after these */
 #define MAX_CUP_ATTEMPT_COUNT 120
-/* Whether the hole has both its cup and its tee set */
 #define AreCupAndTeeSet() \
     (g_HoleSetup.cupPosition[AXIS_X] != 0 && \
         g_HoleSetup.cupPosition[AXIS_Z] != 0 && \
         g_HoleSetup.teePosition[AXIS_X] != 0 && \
         g_HoleSetup.teePosition[AXIS_Z] != 0)
-/*
- * A hole's cup is drawn from (GetHoleRandom() >> CUP_DRAW_SHIFT) %
- * CUP_DRAW_COUNT; a draw below an end picks that end's cup
- */
 #define CUP_DRAW_SHIFT 3
 #define CUP_DRAW_COUNT 9
 #define CUP_DRAW_FIRST_END 3
 #define CUP_DRAW_SECOND_END 6
 #define CUP_DRAW_THIRD_END 8
 
-/* A hole rains when rand() & RAIN_DRAW_MASK is DRY_DRAW_COUNT or more */
 #define RAIN_DRAW_MASK 3
 #define DRY_DRAW_COUNT 3
 
-/* Wind speeds come in steps; lighter winds than MIN_WIND_SPEED are calm */
 #define WIND_SPEED_STEP 10000
 #define WIND_SPEED_STEP_MASK 0x3F
 #define MIN_WIND_SPEED 0x18000
 #define DRIVING_RANGE_WIND_DIRECTION 0x4000
 
-/* The light turns this far, in binary angles, from each hole to the next */
 #define LIGHT_YAW_STEP_PER_HOLE 0x5000
 #define HOLE_LIGHT_PITCH 0x3000
 
-/* A mini-golf course is a main course's hole shrunk by these, by axis */
 #define MINI_GOLF_SHRINK_X 4
 #define MINI_GOLF_SHRINK_Y 4
 #define MINI_GOLF_SHRINK_Z 8
-/* How much ShrinkMiniGolfHole raises the top corners of shaded triangles, and
- * lowers the others */
 #define MINI_GOLF_SHADED_RAISE 30.0f
 #define MINI_GOLF_SHADED_DROP 6.0f
 
-/* The loader thread waits this many frames after the ground was last drawn
- * before loading */
 #define LOADER_FRAME_DELAY 3
 
 #define LOADER_THREAD_ID 10
 #define LOADER_THREAD_PRIORITY 20
 
-/* The Koopa Park hole whose high ground is not faded */
 #define KOOPA_PARK_UNFADED_HOLE_INDEX 7
-/* Whether a course's high ground fades partway toward white; Boo Valley's
- * fades fully */
 #define IsHighGroundFadedCourse(courseRecordIndex) \
     ((courseRecordIndex) == COURSE_RECORD_TOAD_HIGHLANDS || \
         (courseRecordIndex) == COURSE_RECORD_KOOPA_PARK || \
@@ -106,59 +84,41 @@
 #define PATCHED_LZ_RAW_BUFFER_SIZE 0x840
 #define LZ_HISTORY_MASK 0xFF
 #define LZ_PATCH_KIND_LITERALS 0x8000
-/* The DMA buffers' alignment, in bytes */
 #define LZ_BUFFER_ALIGNMENT 16
 #define AlignedLzBuffer(address) \
     (((u32)(address) + LZ_BUFFER_ALIGNMENT - 1) & ~(LZ_BUFFER_ALIGNMENT - 1))
 
-/* A reference word holds a distance back into the output, then a length less
- * than the copy's */
 #define LZ_REFERENCE_LENGTH_MASK 0x1F
 #define LZ_REFERENCE_DISTANCE_SHIFT 5
 #define LZ_MIN_REFERENCE_LENGTH 2
 
-/*
- * A control word's 16 bits say whether each item is a literal or a reference.
- * They are shifted up to the top of controlBits, with LZ_CONTROL_END_BIT set
- * below them; once that bit is shifted out, the next word is read.
- * LZ_SPENT_CONTROL_BITS is that bit alone at the top, which the next shift
- * shifts out.
- */
 #define LZ_CONTROL_BIT_COUNT 16
 #define LZ_CONTROL_END_BIT 0x8000
 #define LZ_SPENT_CONTROL_BITS 0x80000000
 
-/* A patch command holds its kind or offset in its high byte and its count less
- * one in its low byte */
 #define LZ_PATCH_COUNT_MASK 0xFF
 #define LZ_PATCH_KIND_MASK 0xFF00
 #define LZ_PATCH_OFFSET_SHIFT 8
 
 typedef struct LzStream {
-    /* 0x00 */ u16 *input;
-    /* 0x04 */ u16 *outputStart;
-    /* 0x08 */ u16 *nextInput;
-    /* 0x0C */ u16 *output;
-    /* 0x10 */ u16 *inputEnd;
-    /* 0x14 */ u16 flags;
-    /* 0x18 */ u16 *window;
-    /* 0x1C */ u16 windowIndex;
-    /* 0x1E */ u16 patchCount;
-    /* 0x20 */ u16 historyIndex;
-    /* 0x24 */ u16 *history;
-} LzStream; /* size = 0x28 */
+      u16 *input;
+      u16 *outputStart;
+      u16 *nextInput;
+      u16 *output;
+      u16 *inputEnd;
+      u16 flags;
+      u16 *window;
+      u16 windowIndex;
+      u16 patchCount;
+      u16 historyIndex;
+      u16 *history;
+} LzStream;
 
-/* How ShrinkMiniGolfHole scales a course down to mini-golf size, by axis */
 extern Vec3 g_MiniGolfScale;
 extern OSPiHandle *nuPiCartHandle;
 static s32 f_HoleSeed = 0;
 static s32 f_CycledCupIndex = 0;
-/*
- * hole_loader.h declares this without volatile, as the files that only read
- * it were compiled; the loader thread waits on it, so here it is volatile
- */
 volatile Boolean g_HasLoaderFinished = TRUE;
-/* Read by no routine */
 static s32 f_UnusedWordAfterLoaderFinished UNUSED = 0;
 static OSThread f_LoaderThread;
 HolePoints g_HolePoints;
@@ -167,12 +127,6 @@ s32 g_HoleTimeHundredths[COURSE_HOLE_COUNT];
 s32 g_HoleTimeMinutes[COURSE_HOLE_COUNT];
 s32 g_HoleTimeSeconds[COURSE_HOLE_COUNT];
 
-/*
- * Decodes the compressed words from stream->input to stream->inputEnd onto
- * the end of the output. Returns the output's size in bytes once the stream
- * ends. If the chunk runs low first and more is to come, moves the words left
- * to just before stream->nextInput, saves its place and returns -1.
- */
 s32 DecodeLzChunk(LzStream *stream) {
     u16 *input;
     u16 *output;
@@ -284,11 +238,6 @@ s32 DecodeLzChunk(LzStream *stream) {
     }
 }
 
-/*
- * Like DecodeLzChunk, but the decoded words are commands that patch the data
- * already in the output buffer: a run of literal words, a copy from the same
- * or a later word of the buffer, or a copy from the words it overwrote.
- */
 s32 DecodePatchedLzChunk(LzStream *stream) {
     u16 patchCount;
     u16 *history;
@@ -308,8 +257,6 @@ s32 DecodePatchedLzChunk(LzStream *stream) {
 
     auto inline void ApplyPatchCommand(u16 command);
 
-    /* Nested, so that it reaches the patch state through the static chain as the
-     * original does */
     inline void ApplyPatchCommand(u16 command) {
         s16 offset;
         u16 value;
@@ -350,10 +297,6 @@ s32 DecodePatchedLzChunk(LzStream *stream) {
         input += LZ_HEADER_WORD_COUNT;
         output = stream->outputStart;
         history = stream->history;
-        /* The first chunk enters the decode loop past the refill, as its control
-         * bits are already set; the jump is there to match. Skipping the refill
-         * on a first-call flag gives 77 words differing, 11 in shape, and the
-         * refill written before the loop and again at its end 150, 48 in shape */
         goto DECODE;
     }
 
@@ -412,11 +355,6 @@ DECODE:
 
             reference = *input++;
 
-            /*
-             * The u16 casts are redundant, but they are needed to match: without
-             * either or both, 5 words differ (1 to 3 in shape); with no casts, a
-             * u32 reference gives 5 and a u16 one 92
-             */
             if ((u16)reference == 0) {
                 return BytesBetween(stream->outputStart, output);
             }
@@ -449,11 +387,6 @@ DECODE:
     }
 }
 
-/*
- * Decompresses the size bytes at romAddress into destination with
- * DecodeLzChunk, reading the ROM in chunks through two DMA buffers so that
- * one fills while the other is decoded. Returns the decompressed size.
- */
 s32 LoadLzData(u32 romAddress, void *destination, u32 size) {
     OSIoMesg ioMesgs[LZ_BUFFER_COUNT];
     OSMesgQueue queue;
@@ -540,7 +473,6 @@ s32 LoadLzData(u32 romAddress, void *destination, u32 size) {
     return result;
 }
 
-/* LoadLzData for data compressed for DecodePatchedLzChunk */
 s32 LoadPatchedLzData(u32 romAddress, void *destination, u32 size) {
     OSIoMesg ioMesgs[LZ_BUFFER_COUNT];
     OSMesgQueue queue;
@@ -631,7 +563,6 @@ s32 LoadPatchedLzData(u32 romAddress, void *destination, u32 size) {
     return result;
 }
 
-/* A pseudo-random number that is the same each time for a seed and a hole */
 s32 GetHoleRandom(s32 seed, s32 holeIndex) {
     void SetHoleSeed(s32 value) {
         f_HoleSeed = value;
@@ -646,7 +577,6 @@ s32 GetHoleRandom(s32 seed, s32 holeIndex) {
     return NextHoleRandom();
 }
 
-/* On a mini-golf course, scales the hole's points down with g_MiniGolfScale */
 void ShrinkMiniGolfHolePoints(void) {
     s32 axis;
     s32 index;
@@ -669,8 +599,6 @@ void ShrinkMiniGolfHolePoints(void) {
     }
 }
 
-/* Reads the current hole's asset files, then shrinks its points for mini-golf
- */
 void LoadHole(void) {
     osSyncPrintf(
         "putter%d:course%d:hole%d\n",
@@ -682,20 +610,10 @@ void LoadHole(void) {
     ShrinkMiniGolfHolePoints();
 }
 
-/*
- * Whether ShrinkMiniGolfHole raises a shaded triangle's vertex, rather
- * than drops it. An odd triangle's last two vertices are raised, and an
- * even triangle's last one. It is a macro, as an inline function compiles
- * differently from the original.
- */
 #define IsRaisedShadedVertex(index, vertexIndex) \
     ((((index) & 1) && (((vertexIndex) == 1) || ((vertexIndex) == 2))) || \
         (!((index) & 1) && ((vertexIndex) == 2)))
 
-/*
- * On a mini-golf course, scales the hole's ground, billboards and triangles
- * down with g_MiniGolfScale
- */
 void ShrinkMiniGolfHole(void) {
     Vtx_t point;
     s32 row;
@@ -780,11 +698,6 @@ void PrepareHoleScene(void) {
     ShrinkMiniGolfHole();
 }
 
-/*
- * Chooses the wind, the rain and the scene's colors for the hole about to be
- * played, then its cup from the hole's cup positions. In some scenes and modes
- * the cup comes from g_RingShotRecords or g_PlayRecords instead.
- */
 NO_RESULT ChooseHoleConditions(void) {
     s32 cupIndex;
     s32 attemptCount;
@@ -811,7 +724,6 @@ NO_RESULT ChooseHoleConditions(void) {
 
     if (g_GameState.gameMode != GAME_MODE_TITLE_HOLE &&
         g_GameState.gameMode != GAME_MODE_STAFF_ROLL) {
-        /* The first hole, mini-golf and GAME_MODE_TRAINING stay dry */
         if (g_GameState.holeIndex != 0 &&
             g_GameState.gameMode != GAME_MODE_TRAINING &&
             !g_GameState.isMiniGolf) {
@@ -831,7 +743,6 @@ NO_RESULT ChooseHoleConditions(void) {
             g_HoleSetup.conditions.isRaining = FALSE;
         }
 
-        /* The first hole always has some wind */
         do {
             g_HoleSetup.conditions.windSpeed = (rand() & WIND_SPEED_STEP_MASK) * WIND_SPEED_STEP;
             if (g_HoleSetup.conditions.windSpeed < MIN_WIND_SPEED) {
@@ -906,7 +817,6 @@ NO_RESULT ChooseHoleConditions(void) {
         cupIndex = f_CycledCupIndex++ & (CUP_POSITION_COUNT - 1);
     }
     else {
-        /* The cups are drawn three, three, two and one times in nine */
         random = (u32)GetHoleRandom(g_GameState.roundSeed, g_GameState.holeIndex) >> CUP_DRAW_SHIFT;
         random %= CUP_DRAW_COUNT;
         if (random < CUP_DRAW_FIRST_END) {
@@ -923,7 +833,6 @@ NO_RESULT ChooseHoleConditions(void) {
         }
     }
 
-    /* Holes leave unused cup positions at zero, so skip to one that is set */
     for (;;) {
         g_HoleSetup.cupPosition[AXIS_X] = g_HolePoints.cupPositions[cupIndex][AXIS_X];
         g_HoleSetup.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[cupIndex][AXIS_Y];
@@ -945,10 +854,6 @@ NO_RESULT ChooseHoleConditions(void) {
     g_HoleSetup.nextCupIndex = cupIndex;
 }
 
-/*
- * Sets the cup on the ground and resets the shot and the effects; on a
- * round's first hole, also clears four per-hole tables
- */
 void InitHoleState(void) {
     s32 index;
 
@@ -984,10 +889,6 @@ void ChooseConditionsAndInitHole(void) {
     InitHoleState();
 }
 
-/*
- * The loader thread's entry: loads the current hole each time
- * g_HasLoaderFinished is cleared, then sets it
- */
 void RunLoaderThread(void) {
     s32 courseRecordIndex;
 

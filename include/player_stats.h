@@ -5,11 +5,6 @@
 
 #include "compiler.h"
 
-/* The bet settings, the handicaps and the best shots, in ovl_01/player_stats.c
- */
-
-/* The buffers that LoadPlayerStatsBuffer fills, and the assets it reads into
- * them */
 enum PlayerStatsBuffer {
     PLAYER_STATS_BUFFER_BET_ICONS = 1,
     PLAYER_STATS_BUFFER_STAKE_MARK,
@@ -26,16 +21,12 @@ enum PlayerStatsBuffer {
     PLAYER_STATS_BUFFER_DOUBLE_PAGE_ARROWS
 };
 
-/* The buffers that LoadScoreLabelBuffer keeps, by the kind its caller gives */
 enum ScoreLabelBuffer {
-    /* The menus' name plate image, kept without reading an image into it */
     SCORE_LABEL_BUFFER_NAME_PLATE = 1,
     SCORE_LABEL_BUFFER_CURSOR_BOX,
-    /* The four Japanese score labels, one after another */
     SCORE_LABEL_BUFFER_LABELS
 };
 
-/* The ways SlideBrickWall slides the stats panel's rows */
 #define STATS_SLIDE_CURRENT 0
 #define STATS_SLIDE_OUT_RIGHT 1
 #define STATS_SLIDE_OUT_LEFT 2

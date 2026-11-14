@@ -1,6 +1,3 @@
-/*
- * Loads and unloads the overlays that hold the game's modules.
- */
 #include "overlay_manager.h"
 
 #include <nusys.h>
@@ -21,14 +18,10 @@
 #include "title_screen.h"
 #include "transmit_menu.h"
 
-/* A frame long enough ago that no module conflicts with an overlay */
 #define RDP_REQUEST_FRAME_NEVER 0x80000000
 
-/* Modules whose display lists the RDP may still be reading are in use for
-   this many frames after they make a request */
 #define RDP_REQUEST_FRAMES_IN_USE 2
 
-/* Size of the RDRAM that every console has, without the Expansion Pak */
 #define BASE_RDRAM_SIZE 0x400000
 
 #define OVERLAY_ENTRY(name, moduleIds, onLoad, onUnload) \
@@ -100,7 +93,6 @@ static Overlay f_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_14, f_ModuleIdsOfOverlay16, LoadStaffRoll, UnloadStaffRoll),
 };
 
-/* The index of the overlay that holds each module, or -1 for none */
 static s8 f_OverlayIndexOfModule[MODULE_COUNT];
 
 void OnLoadOverlay2(void) {
@@ -128,10 +120,6 @@ void InitOverlayManager(void) {
         g_ModuleRdpRequestFrames[i] = RDP_REQUEST_FRAME_NEVER;
     }
 
-    /*
-     * The unsigned compare is there to match: a signed one gives 2 words
-     * differing, a u32 index 4, and != 10
-     */
     for (i = 0; (u32)i < OVERLAY_COUNT; i++) {
         moduleIds = f_Overlays[i].moduleIds;
         moduleIndex = 0;
@@ -295,7 +283,6 @@ void UnloadOverlay(s32 overlayId) {
 
         osWritebackDCacheAll();
 
-        /* Clear the code so that stale calls into it fail early */
         if (g_IsDebugEnabled && osVirtualToPhysical(overlay->vramStart) < BASE_RDRAM_SIZE) {
             bzero(overlay->vramStart, overlay->textEnd - overlay->vramStart);
             osWritebackDCache(overlay->vramStart, overlay->textEnd - overlay->vramStart);
@@ -304,7 +291,6 @@ void UnloadOverlay(s32 overlayId) {
     }
 }
 
-/* The module number is missing from the format's arguments in the original */
 s32 ReportModuleNotAlive(s32 moduleId UNUSED) {
     if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
         osSyncPrintf("Module %d not alive !!!!!!!!!!!!!!!!!!!!!!!!!!!\n");

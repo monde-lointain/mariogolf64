@@ -5,36 +5,27 @@
 
 #include "camera.h"
 
-/*
- * Billboards are flat sprites that always face the camera, such as the
- * trees around a course. Each one shows one of the billboard textures.
- */
-
 #define BILLBOARD_COUNT 128
 #define BILLBOARD_TEXTURE_COUNT 46
-/* A billboard texture's hit mask has this many rows of this many cells */
 #define BILLBOARD_MASK_SIZE 16
 
 typedef struct Billboard {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ s8 textureIndex; /* Negative when the billboard is unused */
-    /* 0x7 */ u8 shapeIndex;
-    /* Read from a hole's billboard file and toggled by the tree editor's A
-     * button, but nothing else reads it */
-    /* 0x8 */ u8 isIgnoredEditorMark;
-    /* 0xA */ u16 isNearCourseEdge;
-    /* 0xC */ u16 width;
-    /* 0xE */ u16 height;
-} Billboard; /* size = 0x10 */
+      s16 x;
+      s16 y;
+      s16 z;
+      s8 textureIndex;
+      u8 shapeIndex;
+      u8 isIgnoredEditorMark;
+      u16 isNearCourseEdge;
+      u16 width;
+      u16 height;
+} Billboard;
 
-/* The matrices that place one billboard, rebuilt every frame */
 typedef struct BillboardTransform {
-    /* 0x00 */ s32 viewDepth;
-    /* 0x08 */ Mtx translation;
-    /* 0x48 */ Mtx scale;
-} BillboardTransform; /* size = 0x88 */
+      s32 viewDepth;
+      Mtx translation;
+      Mtx scale;
+} BillboardTransform;
 
 void DestroyBillboardManager(void);
 void InitBillboardManager(void *heapStart, s32 heapSize);

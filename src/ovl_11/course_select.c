@@ -1,9 +1,3 @@
-/*
- * Two screens for choosing where to play, which share the course image
- * that turns over to the next course. The Ring Shot select draws a
- * backdrop of planks and a star for each hole, gold once its rings are
- * cleared. The hole select draws a sign with the course's name and hole.
- */
 #include "course_select.h"
 
 #include <ultra64.h>
@@ -25,68 +19,55 @@
 #include "sound.h"
 #include "text.h"
 
-/* f_LoadedScreen values */
 enum CourseSelectState {
     COURSE_SELECT_UNLOADED,
     COURSE_SELECT_RING_SHOT,
     COURSE_SELECT_HOLES
 };
 
-/* What UpdateRingShotSelect and UpdateHoleSelect return */
 enum SelectResult {
     SELECT_IDLE,
     SELECT_MOVED,
     SELECT_BACK
 };
 
-/* f_PressedDirection values */
 #define DIRECTION_UP 1
 #define DIRECTION_DOWN 2
 #define DIRECTION_LEFT 4
 #define DIRECTION_RIGHT 8
 
-/* f_PlankMotion values */
 enum PlanksState {
     PLANKS_SHUT = -1,
     PLANKS_CLOSING,
     PLANKS_OPENING
 };
 
-/* Each four stars open one more Ring Shot course */
 #define STARS_PER_OPENED_COURSE 4
 #define StarsToOpen(courseCount) (((courseCount) - 1) * STARS_PER_OPENED_COURSE)
 
-/* The asset IDs of the images */
 #define HOLE_SIGN_ASSET 0x739
 #define PLANKS_ASSET 0x8ED
 #define COURSE_IMAGE_PALETTE_ASSET 0x876
 #define BLANK_COURSE_IMAGE_ASSET 0x834
 #define SPINNING_EMPTY_STAR_ASSET 0x5E5
 
-/* The stars spin through this many frames, each shown for STAR_FRAME_TIME
- * frames */
 #define STAR_FRAME_COUNT 15
 #define STAR_FRAME_TIME 2
-/* One star image is read while the other is drawn */
 #define STAR_BUFFER_COUNT 2
-/* The stars that are not chosen keep the image after the buffers */
 #define STILL_STAR_IMAGE STAR_BUFFER_COUNT
 #define STAR_IMAGE_COUNT (STAR_BUFFER_COUNT + 1)
 #define STAR_WIDTH 32
 #define STAR_HEIGHT 24
-/* The chosen star grows by this many pixels each way */
 #define STAR_GROWTH 16
 #define STARS_LEFT 46
 #define STAR_SPACING 38
 #define STARS_TOP 88
-/* The four star textures' tiles and palettes */
 #define TILE_SPINNING_STAR 0
 #define TILE_SPINNING_EMPTY_STAR 1
 #define TILE_STILL_STAR 2
 #define TILE_STILL_EMPTY_STAR 3
 #define STAR_TMEM_STEP 0x40
 
-/* The course image, two strips of 64 by 32 eight-bit texels */
 #define COURSE_IMAGE_WIDTH 64
 #define COURSE_IMAGE_STRIP_HEIGHT 32
 #define COURSE_IMAGE_STRIP_COUNT 2
@@ -94,74 +75,54 @@ enum PlanksState {
 #define COURSE_IMAGE_LEFT 128
 #define RING_SHOT_COURSE_IMAGE_TOP 144
 #define HOLE_COURSE_IMAGE_TOP 152
-/* The images of a course turning, in f_CourseImageAssets' order, before its
- * front */
 #define COURSE_IMAGE_FRONT 2
-/* f_CourseTurnFrames' entry for the image between two courses */
 #define COURSE_IMAGE_BLANK (-1)
 #define COURSE_TURN_FRAME_COUNT 7
-/* The turn shows the course it leaves until this entry */
 #define COURSE_TURN_MIDDLE 4
 
-/* The arrows' image, two frames of 16 by 64 four-bit texels */
 #define ARROWS_WIDTH 16
 #define ARROWS_HEIGHT 64
 #define ARROWS_FRAME_SIZE (ARROWS_WIDTH * ARROWS_HEIGHT / 2)
-/* The arrows change frame every this many frames */
 #define ARROW_FRAME_TIME 4
 #define ARROW_LEFT 152
 #define ARROW_SIZE 16
-/* The up arrow moves back this far while up repeats, and the down arrow this
- * far down */
 #define ARROW_PUSH_UP (-6)
 #define ARROW_PUSH_DOWN 6
-/* A chosen direction's arrow moves out this far */
 #define ARROW_STEP 4
-/* The tops of the up and down arrows, on the Ring Shot select and, before
- * it slides, on the hole select */
 #define RING_SHOT_UP_ARROW_TOP 132
 #define RING_SHOT_DOWN_ARROW_TOP 204
 #define HOLE_UP_ARROW_TOP 140
 #define HOLE_DOWN_ARROW_TOP 212
-/* The hole select's left and right arrows, before it slides */
 #define SIDE_ARROW_TOP 44
 #define LEFT_ARROW_LEFT 104
 #define RIGHT_ARROW_LEFT 200
 
-/* The name plate, three strips of 200 by 10 texels drawn 208 wide */
 #define NAME_PLATE_WIDTH 200
 #define NAME_PLATE_STRIP_HEIGHT 10
 #define NAME_PLATE_STRIP_COUNT 3
 #define NAME_PLATE_HALF_WIDTH 104
 #define NAME_PLATE_TEXEL_STEP 984
 
-/* The hole sign, six strips of 176 by 8 texels */
 #define HOLE_SIGN_WIDTH 176
 #define HOLE_SIGN_STRIP_HEIGHT 8
 #define HOLE_SIGN_STRIP_COUNT 6
 #define HOLE_SIGN_LEFT 72
 #define HOLE_SIGN_TOP 16
-/* The hole select slides down from this far above its place */
 #define HOLE_SELECT_SLIDE_START 64
 #define HOLE_SELECT_SLIDE_STEP 4
 
-/* The planks, 304 by 224 texels in strips 6 high, the last one 2 */
 #define PLANKS_WIDTH 304
 #define PLANK_STRIP_HEIGHT 6
 #define PLANK_STRIP_COUNT 38
 #define PLANK_LAST_STRIP_HEIGHT 2
-/* Each half of the planks slides in from its side until they meet in the middle
- */
 #define PLANKS_MIDDLE (SCREEN_WIDTH / 2)
 #define PLANKS_MIN_SLIDE SCREEN_BORDER
-/* Each group of strips trails the one above by PLANK_GROUP_LAG */
 #define PLANK_GROUP_STRIP_COUNT 7
 #define PLANK_LAST_GROUP 4
 #define PLANK_GROUP_LAG 64
 #define PLANK_SLIDE_MAX 480
 #define PLANK_SLIDE_STEP 24
 
-/* Ring Shot hole descriptions are text images from this one */
 #define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
 
 void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY);
@@ -202,8 +163,6 @@ static AssetId f_EmptyStarFrameAssets[STAR_FRAME_COUNT] = {
     0x5F2,
     0x5F3,
 };
-/* "COURSE" badges, numbered for the main courses; read in, but never drawn here
- */
 static AssetId f_CourseBadgeAssets[COURSE_INDEX_COUNT] = {
     0x733,
     0x734,
@@ -219,7 +178,6 @@ static AssetId f_CourseBadgeAssets[COURSE_INDEX_COUNT] = {
     0x738,
     0x738,
 };
-/* Each course has five images of turning, the third its front */
 static AssetId f_CourseImageAssets[COURSE_INDEX_COUNT] = {
     0x835,
     0x83A,
@@ -239,21 +197,19 @@ static s32 f_StarFrameIndex = 0;
 static u8 f_StarBufferIndex = 0;
 static s8 f_StarFrameTime = 0;
 static s32 f_CourseArrowFrameTime = 0;
-/* Never read or written */
 static s32 f_CourseSelectUnusedWord UNUSED = 0;
 static s32 f_LoadedScreen = COURSE_SELECT_UNLOADED;
 static s32 f_SlideOffset = 0;
-/* While the course image turns, it turns from f_ShownCourse to f_NextCourse */
 static CourseIndex f_ShownCourse = 0;
 static CourseIndex f_NextCourse = 0;
 static s32 f_CourseTurnIndex = 0;
-static s32 f_CourseTurnStep = 0; /* 1 or -1 through f_CourseTurnFrames, or 0 when still */
+static s32 f_CourseTurnStep = 0;
 static u8 f_PressedDirection = 0;
 static s32 f_CourseTurnFrames[COURSE_TURN_FRAME_COUNT] = {2, 3, 4, COURSE_IMAGE_BLANK, 0, 1, 2};
 static s32 f_PlankSlide = 0;
 static s32 f_PlankMotion = PLANKS_SHUT;
 
-static u8 *f_BoardImage; /* The name plate or the hole sign */
+static u8 *f_BoardImage;
 static u8 *f_CourseBadges[COURSE_INDEX_COUNT];
 static u8 *f_CourseImage;
 static u16 *f_CourseImagePalette;
@@ -263,7 +219,6 @@ static u8 *f_EmptyStarImages[STAR_IMAGE_COUNT];
 static u8 *f_PlanksImage;
 static s32 f_PressedButtons;
 static u32 f_RepeatedButtons;
-/* Read by no routine */
 static u8 f_UnusedBufferAfterRepeatedButtons[0x40] UNUSED;
 
 s32 CountOpenRingShotCourses(void) {
@@ -368,7 +323,6 @@ void LoadCourseSelect(Boolean isHoleSelect) {
     f_StarFrameTime = 0;
 }
 
-/* Reads the next image of the course image's turn, if it is turning */
 void TurnCourseImage(void) {
     EncodedAsset asset;
     s32 frame;
@@ -435,10 +389,6 @@ void FreeCourseSelect(void) {
     f_LoadedScreen = COURSE_SELECT_UNLOADED;
 }
 
-/*
- * Up and down change the course among those open, left and right the hole.
- * Returns SELECT_MOVED, SELECT_BACK for B, or SELECT_IDLE.
- */
 s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
     MenuMemory *memory = GetMenuMemory();
     s32 openCourseCount = CountOpenRingShotCourses();
@@ -505,12 +455,6 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
     return result;
 }
 
-/*
- * Up and down change the course among those open and the mini-golf
- * courses, left and right the hole. Returns SELECT_MOVED, SELECT_BACK for
- * B, or SELECT_IDLE. A leaves the selection as it stands, and its return
- * shares the end's so that it returns result rather than a constant.
- */
 s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
     s32 result = SELECT_IDLE;
     s32 openCourseCount;
@@ -620,59 +564,6 @@ void SetPlankMotion(s32 motion) {
     }
 }
 
-/*
- * Draws the planks that shut over the screen from its left and right. They are
- * drawn in strips, and each group of PLANK_GROUP_STRIP_COUNT strips slides
- * PLANK_GROUP_LAG pixels behind the group above it.
- *
- * The original divides the strip's index for its group in an arm for each of
- * the two motions, though the arms are the same. loop.c so finds the division's
- * magic number, 0x92492493, set twice in the loop, takes the second set as
- * matching the first, and weighs the two as one movable with savings of 2 and a
- * life of 2 insns. Times its threshold of 62 that is 248, over the loop's 110
- * insns, so the number is moved out of the loop, into $s7. The last jump pass
- * then merges the arms, which end alike, and drops the test between them,
- * leaving one division. Written once, the number has savings of 1 and a life of
- * 1, and 62 falls short of the loop's 101 insns: it is loaded inside the loop,
- * the saved registers shift by one and the group takes $s0 rather than $v1.
- *
- * Measured against the match, as words differing and how many of them in shape:
- *   The division written once                                 70 (16)
- *   The same with the group held in bottom (the old draft)    56 (10)
- *   The two arms with the group held in bottom                53 (5)
- *   The division in each arm of a conditional operator        70 (16)
- *   The division in an inline function called once            70 (16)
- *   The division written once after one of the strip's
- *   height, its quotient unused                               14 (0)
- *   The lag taken from the slide in each arm as well          14 (0)
- *   A switch on the motion, the whole of the slide worked out
- *   in a case for each                                        53 (13)
- *   The same with the closing case the default too            11 (9)
- *   The same with one case for both                           109 (21)
- *   The same with a default for both                          70 (16)
- *   The group as a u32                                        2 (2)
- *   The group as an s16                                       7 (3)
- *   The group as a u8                                         4 (4)
- *   The group clamped by a conditional operator               7 (3)
- *   The slide clamped to its least first                      13 (9)
- *   The motion tested as not shut, with the arms swapped      7 (7)
- *   The slide set to the middle, then worked out if not shut  6 (6)
- *   The top worked out before the pipe sync                   12 (2)
- *   The bottom worked out before the pipe sync                20 (10)
- *   Both worked out before the pipe sync                      22 (10)
- *   The bottom as the top plus the strip's height             81 (13)
- *   The bottom's border and height summed first               5 (3)
- *   The bottom written into stripHeight                       52 (2)
- *   The loop's test as <                                      4 (4)
- *
- * Also matching: the arms' test as closing, as not closing or as not opening;
- * the group's clamp in each arm as well; the whole of the slide worked out in
- * each arm, under an else if and an else or under a switch's opening case and
- * its default; an inline function for the division called in each arm; the
- * group declared in its block or before top; the bottom worked out before the
- * top; and the strip's height set by an if and an else, or tested as the last
- * strip's with the heights swapped.
- */
 void DrawPlanks(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -734,7 +625,6 @@ void DrawPlanks(Gfx **displayListHead) {
             slide = PLANKS_MIDDLE;
         }
         else {
-            /* Worked out in an arm for each motion, to match */
             if (f_PlankMotion == PLANKS_OPENING) {
                 group = stripIndex / PLANK_GROUP_STRIP_COUNT;
             }
@@ -803,18 +693,12 @@ void DrawPlanks(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the Ring Shot select: the planks, the name plate, the course image,
- * the blinking arrows when more than one course is open outside a replay, the
- * course's stars and its hole's description.
- */
 void DrawRingShotSelect(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
     s32 stripIndex;
     s16 arrowFrame;
     s32 push;
-    /* Pads the frame to match; without it 203 words differ */
     u8 unusedBuffer[0x1C] UNUSED;
 
     if (f_LoadedScreen == COURSE_SELECT_RING_SHOT) {
@@ -936,11 +820,6 @@ void DrawRingShotSelect(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         SetUpTextDrawing(&gfx);
         SetTextColor(&gfx, 255, 255, 255);
-        /*
-         * The text slot is stripIndex, which the strip loop leaves at
-         * COURSE_IMAGE_STRIP_COUNT (2): the original keeps that count in a saved
-         * register rather than loading a constant slot
-         */
         SetTextSlot(
             SCREEN_WIDTH / 2,
             42,
@@ -959,11 +838,6 @@ void DrawRingShotSelect(Gfx **displayListHead) {
     }
 }
 
-/*
- * Draws the hole select screen as it slides in: the hole sign, the course
- * image, the blinking arrows, pushed while their button repeats, and the
- * course name and hole number.
- */
 void DrawHoleSelect(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -1218,12 +1092,8 @@ void DrawHoleSelect(Gfx **displayListHead) {
     }
 }
 
-/* The top of a name plate strip, from the plate's center */
 #define NamePlateStripTop(centerY, strip) ((centerY) + ((strip) * NAME_PLATE_STRIP_HEIGHT))
 
-/*
- * Draws the course name plate in strips, centered on centerX and centerY.
- */
 void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -1267,31 +1137,12 @@ void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY) {
     *displayListHead = gfx;
 }
 
-/*
- * Spins the chosen hole's star; the position is unused, the stars are
- * always in one place
- *
- * The spinning star's and the spinning empty star's images go through
- * one variable, which the original keeps in $fp for both; separate
- * locals spill and give the texture loads' constants callee-saved
- * registers, growing the frame (219 words differing, 129 in shape).
- *
- * Each star's left and top edges are set once its size is chosen, and
- * its edges written from them as DrawMenuRingShotStars writes its own.
- * The top, the same for every star, is still set on each pass: the
- * original loads the 88 into a register there and adds the bottom edge's
- * height to the half growth before adding the top. With STARS_TOP
- * written in the edges, fold-const joins it with the height, and the
- * closest form, a variable for the height's half, left 21 words
- * differing, 5 in shape.
- */
 void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UNUSED) {
     EncodedAsset asset;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     Gfx *gfx = *displayListHead;
 
-    /* Unused */
     f32 hexagon[6][2] UNUSED = {
         {0.0f, -1.0f},
         {0.89f, -0.45f},
@@ -1307,8 +1158,6 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
     s32 top;
     s32 tile;
     s32 course;
-    /* The spinning star's image and then the spinning empty star's, in one
-     * variable as the original keeps both in $fp */
     u8 *spinningImage = f_StarImages[f_StarBufferIndex];
 
     LoadSmallPalette(&gfx, TILE_SPINNING_STAR, ImageBody(spinningImage));

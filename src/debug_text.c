@@ -1,9 +1,3 @@
-/*
- * Debug text is kept in a character grid that is drawn over each frame.
- * Characters with the high bit set are drawn highlighted. A ring buffer of
- * lines, the log, can be copied into the grid. Messages are also drawn
- * straight into the framebuffers; the fault handler prints with them.
- */
 #include "debug_text.h"
 
 #include <ultra64.h>
@@ -20,21 +14,17 @@
 #define TEXT_COLUMN_COUNT 40
 #define TEXT_ROW_COUNT 30
 #define LOG_LINE_COUNT 120
-/* The log is shown above this many rows at the bottom of the grid */
 #define LOG_BOTTOM_MARGIN 3
-/* How many of the log's last lines are shown */
 #define LOG_SHOWN_LINE_COUNT 10
 
 #define GLYPH_SIZE 8
 #define GLYPHS_PER_FONT_ROW 32
 #define FIRST_GLYPH ' '
 #define LAST_GLYPH 'z'
-/* The font is 4 bits per pixel, so each u16 holds 4 pixels */
 #define PIXELS_PER_FONT_WORD 4
 #define FONT_ROW_WORD_COUNT (GLYPHS_PER_FONT_ROW * GLYPH_SIZE / PIXELS_PER_FONT_WORD)
 #define FONT_WIDTH 256
 #define FONT_HEIGHT 24
-/* The pixel value that is drawn as ink in messages */
 #define FONT_INK 0xF
 
 #define HIGHLIGHT_BIT 0x80
@@ -46,10 +36,6 @@
 
 #define HEX_DIGIT_COUNT 8
 
-/*
- * Its 0x1800 bytes are twice the font's 4-bit texels, and the second half
- * is zero
- */
 static u16 f_DebugFont[FONT_WIDTH * FONT_HEIGHT / 2] = {
 #include "assets/debug_text/debug_font.ia4.inc.c"
 };
@@ -100,10 +86,6 @@ void SetUpDebugTextDrawing(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the glyphs of text into a 4-bit texture one glyph tall and length
- * glyphs wide.
- */
 void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
     s32 index;
     s32 rowFontIndex;
@@ -113,18 +95,9 @@ void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
     s32 fontIndex;
     s32 textureIndex;
     s32 character;
-    /*
-     * The glyph's first word in the font, copied to fontIndex to match:
-     * computing fontIndex directly gives 14 words differing, 2 in shape
-     */
     s32 glyphFontIndex;
 
     for (index = 0; index < length; index++, text++) {
-        /*
-         * Signed to match; either way a byte past 0x7F is drawn as FIRST_GLYPH.
-         * Reading it unsigned, by cast or as the plain char, gives 2 words
-         * differing, both in shape.
-         */
         character = (s8)*text;
         if (character == '\0') {
             break;
@@ -159,7 +132,6 @@ void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
     }
 }
 
-/* Puts text in the grid and draws it into the framebuffers at once */
 void PrintMessage(s8 *text, u32 column, u32 row) {
     PutDebugText(text, column, row);
     while (*text != '\0') {
@@ -169,10 +141,6 @@ void PrintMessage(s8 *text, u32 column, u32 row) {
     }
 }
 
-/*
- * Draws a character of the debug font straight into both framebuffers, at a
- * column and row of the message grid, and turns the screen back on.
- */
 void DrawMessageCharacter(s8 character, u32 column, u32 row) {
     u16 *currentFramebuffer = (u16 *)(osVirtualToPhysical(osViGetCurrentFramebuffer()) + K1BASE);
     u16 *nextFramebuffer = (u16 *)(osVirtualToPhysical(osViGetNextFramebuffer()) + K1BASE);
@@ -182,7 +150,6 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
     s32 pixelIndex;
     u16 color;
 
-    /* The main loop shows this framebuffer from now on */
     g_MessageFramebuffer = currentFramebuffer;
     if (character < FIRST_GLYPH) {
         character = FIRST_GLYPH;
@@ -285,7 +252,6 @@ void DrawDebugText(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Highlights the next text put in the grid */
 void SetDebugTextHighlight(Boolean isHighlighted) {
     if (isHighlighted) {
         f_DebugTextHighlight = HIGHLIGHT_BIT;
@@ -322,8 +288,6 @@ void PrintDebugText(const char *text, s32 column, s32 row) {
     }
 }
 
-/* Prints value in hex, right-aligned so its last digit is 7 columns right of
- * column */
 void PrintDebugHex(u32 value, s32 column, s32 row) {
     char digits[HEX_DIGIT_COUNT + 1];
     char *digit = &digits[HEX_DIGIT_COUNT];
@@ -347,7 +311,6 @@ void PrintDebugHex(u32 value, s32 column, s32 row) {
     PrintDebugText(digit, column, row);
 }
 
-/* Prints all 8 hex digits of value */
 void PrintDebugPaddedHex(u32 value, s32 column, s32 row) {
     char digits[HEX_DIGIT_COUNT + 1];
     char *digit = &digits[HEX_DIGIT_COUNT];
@@ -399,15 +362,9 @@ void AddToDebugLog(char *text) {
     }
 }
 
-/* Copies the last lines of the log into the grid */
 void ShowDebugLog(void) {
     s32 textIndex = ARRAY_COUNT(f_DebugText) -
         ((f_DebugLogShownLineCount + LOG_BOTTOM_MARGIN) * TEXT_COLUMN_COUNT);
-    /*
-     * The line is reused for the cursor's line, to match: a cursorLine local,
-     * or the division written into logIndex, gives 30 words differing, 2 in
-     * shape
-     */
     s32 line = f_DebugLogCursor / TEXT_COLUMN_COUNT;
     s32 logIndex =
         (((line - f_DebugLogShownLineCount) * TEXT_COLUMN_COUNT) + ARRAY_COUNT(f_DebugLog)) %

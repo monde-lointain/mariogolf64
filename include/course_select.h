@@ -5,8 +5,6 @@
 
 #include "language.h"
 
-/* The Ring Shot select and the hole select */
-
 Boolean ArePlanksOpen(void);
 void DrawHoleSelect(Gfx **displayListHead);
 void DrawRingShotSelect(Gfx **displayListHead);

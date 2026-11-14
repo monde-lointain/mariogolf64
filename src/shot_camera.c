@@ -1,8 +1,3 @@
-/*
- * The cameras of a hole: the flyover, and the flight camera that follows the
- * shot with the sounds and reactions that go with it. The file also measures
- * the ground's slope around the ball and builds the noise textures.
- */
 #include "shot_camera.h"
 
 #include <math.h>
@@ -46,103 +41,64 @@
 #include "text.h"
 #include "turn.h"
 
-/* Random yaws are masked to this, in steps of a 32768th of a turn */
 #define RANDOM_YAW_MASK 0x7FFF
 #define RANDOM_YAW_TO_RADIANS (M_PI / 16384)
 
-/*
- * The stages of the shot that UpdateFlightCamera moves f_FlightPhase through,
- * each giving ChooseFlightCameraKind its own choice of camera kinds. Shots
- * from the green skip EARLY_CLIMB, FALL and NEARING_CONTACT, and the simple
- * camera goes from CLIMB to NEARING_CONTACT at the highest step.
- */
 enum FlightPhase {
     FLIGHT_PHASE_NONE,
     FLIGHT_PHASE_LAUNCH,
-    FLIGHT_PHASE_EARLY_CLIMB, /* From the tenth step to the fifteenth */
+    FLIGHT_PHASE_EARLY_CLIMB,
     FLIGHT_PHASE_CLIMB,
-    FLIGHT_PHASE_FALL, /* Past the path's highest step */
-    FLIGHT_PHASE_NEARING_CONTACT, /* Forty steps before the first step flag */
-    FLIGHT_PHASE_CONTACT, /* From the first step flag, or step 40 from the green
-                           */
-    FLIGHT_PHASE_END /* The last ten steps */
+    FLIGHT_PHASE_FALL,
+    FLIGHT_PHASE_NEARING_CONTACT,
+    FLIGHT_PHASE_CONTACT,
+    FLIGHT_PHASE_END
 };
 
-/* An enum FlightPhase value */
 typedef s32 FlightPhase;
 
-/* The flight camera kinds, which f_FlightCameraKind holds */
 enum FlightCameraKind {
-    /* None yet, as set when the flight camera starts and ends */
     FLIGHT_CAMERA_NONE = -1,
-    /*
-     * The camera left as it was, which ChooseFlightCameraKind picks when no
-     * other kind applies; it loses to any kind picked later
-     */
     FLIGHT_CAMERA_UNCHANGED,
-    /* FLIGHT_CAMERA_UNUSED_* kinds are never picked */
     FLIGHT_CAMERA_UNUSED_A,
-    /* Beside the tee, looking at it */
     FLIGHT_CAMERA_BESIDE_TEE,
-    /* The aim camera, placed by PlaceAimCamera */
     FLIGHT_CAMERA_AIM_VIEW,
-    /* Picked by the B button in debug builds */
     FLIGHT_CAMERA_BESIDE_GOLFER,
-    /* Picked by the A button in debug builds */
     FLIGHT_CAMERA_CIRCLING_BALL,
     FLIGHT_CAMERA_TRAILING_BALL,
-    /* At an early step of the path */
     FLIGHT_CAMERA_NEAR_LAUNCH,
     FLIGHT_CAMERA_CHASING_BALL,
-    /* At a step of the path behind the ball */
     FLIGHT_CAMERA_FOLLOWING_PATH,
     FLIGHT_CAMERA_SIDE_OF_FLIGHT,
     FLIGHT_CAMERA_BEHIND_START,
-    /* Placed by PlaceCameraAroundShotEnd */
     FLIGHT_CAMERA_AROUND_END,
-    /* Beyond the ball on the line from the cup, looking at the ball and the cup
-     */
     FLIGHT_CAMERA_FACING_CUP,
     FLIGHT_CAMERA_UNUSED_B,
     FLIGHT_CAMERA_UNUSED_C,
-    /* These two only turn the camera toward the ball */
     FLIGHT_CAMERA_UNUSED_D,
     FLIGHT_CAMERA_UNUSED_E,
-    /* Frames the path's extreme points on x and z */
     FLIGHT_CAMERA_FRAMING_PATH,
-    /* Frames the cup and the ball; it keeps the putter's contact from calling
-     * StartContactEffect */
     FLIGHT_CAMERA_FRAMING_CUP,
-    /* Looks along the path at f_BillboardHitStep */
     FLIGHT_CAMERA_BILLBOARD_HIT
 };
 
-/* An enum FlightCameraKind value */
 typedef s32 FlightCameraKind;
 
-/*
- * Whether a holed shot is a chip-in: from off the green, after the first
- * stroke and without hitting the flag
- */
 #define IsChipIn() \
     (!g_SimulatedShot.startsOnGreen && \
         g_Players[g_CurrentShot.playerIndex].strokeCount > 1 && \
         g_SimulatedShot.flagHitStep == NO_STEP)
-/* Whether the pin is hit at the step, is about to be, or the monkey shows */
 #define IsPinHitViewed(step) \
     ((g_SimulatedShot.pathFlags[step] & STEP_FLAG_PIN_HIT) || \
         IsMonkeyShown() || \
         f_IsPinHitComing == TRUE)
 
-/* Bits of f_ComingFlightEvents */
 #define FLIGHT_EVENT_BILLBOARD_HIT (1 << 0)
 #define FLIGHT_EVENT_CUP_PASS (1 << 1)
 #define SHORT_SHOT_MAX_LENGTH 0xBB7FF
 #define CAMERA_CHANGE_HOLD_COUNT 20
 #define NOISE_GRID_MASK (NOISE_GRID_SIZE - 1)
 
-/* It is a macro, as an inline function compiles differently from the original
- */
 #define IsBallLanding() \
     (g_SimulatedShot.stepCount < g_BallFlightStep + LANDING_STEP_COUNT && \
         (f32)f_ShotEndPosition[AXIS_X] < (f32)(f_FlightBallPosition[AXIS_X] + LANDING_RADIUS) && \
@@ -152,63 +108,39 @@ typedef s32 FlightCameraKind;
 
 u8 *g_NoiseTexels;
 
-/* The grid that DisplaceNoiseSquare builds */
 FILE_STATIC s16 (*f_NoiseGrid)[NOISE_GRID_SIZE];
-/* The step of the simulated path that the ball's flight has reached */
 FILE_STATIC s32 g_BallFlightStep;
-/* Two grids of NOISE_GRID_SIZE x NOISE_GRID_SIZE heights, which the noise
- * texture blends */
 FILE_STATIC s16 f_NoiseGrids[NOISE_GRID_COUNT][NOISE_GRID_SIZE][NOISE_GRID_SIZE];
 
-/* Frames waited since the ball's path ended */
 static s32 f_LandingWaitFrame = 0;
-/* StartFlightCamera's count of the flights before this one */
 static s32 f_EarlierFlightCount = 0;
-/* Set as the camera kind changes, for PlaceFlightCamera to set it up */
 static Boolean f_IsCameraKindNew = FALSE;
 static FlightCameraKind f_FlightCameraKind = 0;
-/* Set as f_FlightPhase changes, and cleared as a camera kind is chosen */
 static Boolean f_HasFlightPhaseChanged = FALSE;
 static s32 f_BallCupDistance = 0;
 static s32 f_BallCupGroundDistance = 0;
 static s32 f_LandingCupDistance = 0;
-/* How far the simulated shot goes, at least MIN_SHOT_LENGTH */
 static s32 f_ShotLength = 0;
-/* How far the shot starts from the cup */
 static s32 f_StartCupDistance = 0;
-/* Whether a billboard is hit in the first SCANNED_STEP_COUNT steps */
 static Boolean f_HitsBillboardEarly = FALSE;
-/* The first step of the path with STEP_FLAG_BILLBOARD_HIT set, or NO_STEP */
 static s32 f_BillboardHitStep = 0;
-/* Counted down from a billboard hit's discovery, but read by no routine */
 static s32 f_BillboardHitCountdown = 0;
 static Radians f_CameraYaw = 0.0f;
-/* FLIGHT_EVENT_* bits for what the path comes to ahead of the ball */
 static s32 f_ComingFlightEvents = 0;
-/* A random angle about the ball for the trailing view */
 static Radians f_TrailViewAngle = 0.0f;
 static s32 f_CupViewHoldCount = 0;
 static s32 f_FlightCameraFlags = 0;
-/* Read by no routine */
 static u8 f_UnusedBytesAfterFlightFlags[8] UNUSED = {0};
 static s8 f_PendingResultSound = 0;
-/* Frames left before ChooseFlightCameraKind may change the camera again */
 static s32 f_CameraChangeHoldCount = 0;
-/* Read by no routine: 1 for a shot from the green, 3 for one into water */
 static s32 f_UnusedFlightStartKind = 0;
-/* Whether the HUD shows during the flight, chosen at random after the first */
 static Boolean f_IsFlightHudShown = FALSE;
-/* Set from five steps ahead of a pin hit until the hit */
 static Boolean f_IsPinHitComing = FALSE;
-/* A random yaw about the cup for the close cup view and the monkey drop */
 static Radians f_CupViewYaw = 0.0f;
 static s32 f_EndReaction = 0;
-/* How many frames the flight camera waits after the ball's path ends */
 static s32 f_LandingWaitFrameCount = 0;
-/* Whether the ground around the ball and the lie are level */
 static Boolean f_IsBallGroundLevel = TRUE;
 s32 g_HoleFlyoverFrame = 0;
-/* Cleared while the cup view hides the characters from the main camera */
 Boolean g_AreCharactersDrawn = TRUE;
 Boolean g_IsCupViewShown = FALSE;
 static s32 f_NextCameraPickIndex = 0;
@@ -217,17 +149,13 @@ static s32 f_SideViewCount = 0;
 static Boolean f_IsApexViewFar = FALSE;
 static Boolean f_IsTrailViewClose = FALSE;
 static Radians f_CircleAngle = 0.0f;
-/* Read by no routine */
 static u8 f_UnusedBytesAfterCircleAngle[8] UNUSED = {0};
-/* The displacement scale at each midpoint displacement level */
 static s16 f_NoiseRoughness[] = {0x80, 0x60, 0x40, 0x20, 8, 4, 4, 2};
 static s16 f_NoiseGridIndex = 0;
 static s32 f_NoiseBlendStep = 0;
 static s8 f_IsNoiseResetPending = TRUE;
 static s8 f_NoiseRow = 0;
 
-/* menu.c returns an s8, but the original calls it without truncating, as if
- * undeclared */
 #ifdef AVOID_UB
 s8 IsSimpleCameraChosen(void);
 #else
@@ -236,69 +164,37 @@ s32 IsSimpleCameraChosen();
 void ChooseFlightCameraKind(void);
 void PlaceFlightCamera(s32 step);
 
-/* Unused; the original has it */
 static const char f_UnusedFloatFormat[] = "            %f";
 
-/* The values 0 to CAMERA_PICK_COUNT - 1, shuffled; NextCameraPick deals them in
- * turn */
 #define CAMERA_PICK_COUNT 10
-/* How many swaps a shuffle makes */
 #define CAMERA_PICK_SWAP_COUNT 5
 #define NO_CAMERA_PICK (-1)
 
-/* The field of view, in degrees, of the main camera between shots */
 #define DEFAULT_FIELD_OF_VIEW 45.0f
 
-/*
- * The sound channels of the flight's sounds, which fade over
- * SOUND_FADE_FRAME_COUNT: the sounds of the ball's landing, on the green, the
- * fairway or in trouble, and the sounds of its going in the cup, by score
- */
 #define FLIGHT_SOUND_CHANNEL_LANDING 0xB
 #define FLIGHT_SOUND_CHANNEL_CUP_IN 0xF
 #define SOUND_FADE_FRAME_COUNT 120
 
-/* Values of f_PendingResultSound, which plays when f_LandingWaitFrame reaches
- * RESULT_SOUND_STAGE */
 enum ResultSound {
     RESULT_SOUND_NONE,
-    /* Plays SOUND_GOOD_SHOT, after an excellent shot, a near approach or a
-     * chip-in */
     RESULT_SOUND_GOOD_SHOT,
-    /*
-     * Plays SOUND_THREE_STARS, after a flag shot, a pin shot, an albatross or
-     * better, or a long chip-in
-     */
     RESULT_SOUND_SUPERB_SHOT,
     RESULT_SOUND_STAGE = 15
 };
 
-/* The flyover's field of view, in degrees, and the inset view's rectangle */
 #define FLYOVER_FIELD_OF_VIEW 80.0f
 #define FLYOVER_INSET_CENTER_X 160
 #define FLYOVER_INSET_CENTER_Y 112
 #define FLYOVER_INSET_SIZE 128
-/* InsetView's ignored codes */
 #define FLYOVER_INSET_SOURCE_CODE 100
 #define FLYOVER_INSET_SIZE_CODE 101
-/*
- * The text slots that the hole's introduction blanks. The menus leave a
- * prompt in the first and a choice in the second, and the round's coin flip
- * and banners use them too.
- */
 #define PROMPT_TEXT_SLOT 0
 #define CHOICE_TEXT_SLOT 1
 
-/* How far the camera must be from where it eases to before it moves, and how
- * far it goes */
 #define CAMERA_EASE_DEAD_ZONE 1.0f
 #define CAMERA_EASE_FRACTION 0.2f
 
-/*
- * The ring of BuildRingTexels' texture, by distance in texels from its
- * corner: clear inside RING_INNER_RADIUS, brightening to RING_PEAK_RADIUS,
- * then fading to clear at RING_OUTER_RADIUS
- */
 #define RING_INNER_RADIUS 5
 #define RING_PEAK_RADIUS 55
 #define RING_OUTER_RADIUS 62
@@ -307,68 +203,38 @@ enum ResultSound {
 #define RING_PEAK_INTENSITY 255
 #define RING_FALL_PER_TEXEL 36
 
-/* RateShotLength's ratings */
 #define SHOT_LENGTH_UNRATED 0
 #define SHOT_LENGTH_FULL 1
 #define SHOT_LENGTH_SHORT 2
 
-/* The fractions of the selected shot distance a full and a short shot go beyond
- */
 #define FULL_SHOT_FRACTION 0.8f
 #define SHORT_SHOT_FRACTION 0.6f
-/* Whether the shot goes beyond a fraction of the distance selected for it */
 #define IsShotBeyond(fraction) \
     (GetSelectedShotDistance() * (fraction) < f_ShotLength * YARDS_PER_UNIT)
-/* Whether a stroke count on the hole is an albatross or better */
 #define IsAlbatrossOrBetter(strokes) (g_HoleSetup.par + SCORE_TO_PAR_ALBATROSS >= (strokes))
 
-/*
- * The flyover's frames: it swings around the cup by a half turn every
- * FLYOVER_HALF_TURN_FRAME_COUNT frames up to a full turn, opens the inset view
- * and closes it again, and ends on HOLE_FLYOVER_FRAME_COUNT
- */
 #define FLYOVER_HALF_TURN_FRAME_COUNT 90
 #define FLYOVER_MAX_HALF_TURNS 2.0f
 #define FLYOVER_INSET_OPEN_FRAME 94
 #define FLYOVER_INSET_CLOSE_FRAME 162
-/* How the flyover's distance from the cup, and height above it, follow the
- * hole's radius */
 #define FLYOVER_RADIUS_APPROACH 15.0f
 #define FLYOVER_DISTANCE_SCALE 1536.0f
 #define FLYOVER_HEIGHT_APPROACH 200.0f
 #define FLYOVER_HEIGHT_SCALE 1.5f
-/* The inset camera looks at a point below the cup from this far and this much
- * higher */
 #define FLYOVER_INSET_LOOK_AT_DROP 15360.0f
 #define FLYOVER_INSET_DISTANCE 184320.0f
 #define FLYOVER_INSET_EYE_RISE 75.0f
 
 #define STRONG_WIND_SPEED 6
 
-/* How far below the ball the look-at point settles, in world units */
 #define LOOK_AT_DROP 19.650002f
-/* The fractions of the way to the ball that the look-at point eases each frame
- */
 #define LOOK_AT_EASE_FRACTION 0.2f
 #define LOOK_AT_HEIGHT_EASE_FRACTION 0.5f
-/*
- * The ball is landing once it is within LANDING_STEP_COUNT steps of the end of
- * the simulated path and within LANDING_RADIUS of its end on both x and z
- */
 #define LANDING_STEP_COUNT 10
 #define LANDING_RADIUS 0x1E00
 
-/*
- * Set for a shot's first flight and for half of its replays. With it, a ball
- * passing close by the cup opens the cup view; without it, a shot from the
- * green may instead be framed on the cup from its launch.
- */
 #define FLIGHT_CAMERA_FLAG_CUP_VIEW_ALLOWED (1 << 1)
 
-/*
- * How near IsCupPassPoint's points are to the cup, how far below it they
- * may be, and how near the cup the landing is
- */
 #define CUP_PASS_RADIUS 0x1E00
 #define CUP_PASS_MAX_DEPTH 0x1A400
 #define CUP_PASS_MAX_LANDING_DISTANCE 0x4B000
@@ -381,32 +247,21 @@ static Radians f_ShotFlightYaw;
 static Radians f_BillboardHitYaw;
 static Radians f_EndYawFromCup;
 static Radians f_StartYawFromCup;
-/* Whether the shot's flight has been shown before, so that the HUD may hide */
 static s32 f_IsLaterFlight;
 static Vec3 f_CameraPosition;
 static Vec3 f_LookAtPoint;
 static s32 f_GreenSoundCount;
 static Boolean f_IsLandingSoundPlayed;
-/* Cleared by StartFlightCamera, and read by no routine */
 static s32 f_UnusedClearedFlightWord;
 static s8 f_PassedPathFlags;
 static SurfaceInfo *f_EndSurfaceInfo;
-/* How far the flight camera has followed the shot */
 static FlightPhase f_FlightPhase;
 
-/* How far the golfer stands along the shot's yaw from the ball */
 #define STANCE_AIM_OFFSET (-921.60004f)
 #define STANCE_SLOPE_PASS_COUNT 2
 
-/*
- * Places a golfer at the current shot's ball, its club's ball distance away a
- * quarter turn from the shot's yaw, and tilts it to the slope of the ground
- * there. The golfer stands on the other side, mirrored, when player->isLefty is
- * set. Each pass measures the slope again at the point the last slope gives.
- */
 void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
     Vec3 groundPoint;
-    /* Pads the frame to match; without it 56 words differ */
     Mat4 unusedMatrices[2] UNUSED;
     Player *player;
     SignedBinaryAngle aimYaw;
@@ -428,7 +283,6 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
 
     groundPoint[AXIS_X] =
         (cosf(angle) * distance) + (sinf(angle) * STANCE_AIM_OFFSET) + player->ballPosition[AXIS_X];
-    /* The offset's sign on z differs from the loop's; the original has it */
     groundPoint[AXIS_Z] =
         (sinf(angle) * distance) + (cosf(angle) * STANCE_AIM_OFFSET) + player->ballPosition[AXIS_Z];
     groundPoint[AXIS_Y] = GetGroundHeight(groundPoint[AXIS_X], groundPoint[AXIS_Z]);
@@ -465,11 +319,6 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
 #define AIM_SLOPE_STEP 6144.0f
 #define AIM_SLOPE_MAX_RISE 0x1800
 
-/*
- * Returns the binary angle of the ground's slope from the ball to a point
- * CROSS_SLOPE_DISTANCE away, a quarter turn from the shot's yaw. The point is
- * on the other side when player->isLefty is set, and the slope is then negated.
- */
 SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot) {
     SurfaceInfo *surfaceInfo;
     s32 sampleDistance;
@@ -522,14 +371,9 @@ SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot) {
     return atan2(rise, sampleDistance) * RADIANS_TO_BINARY_ANGLE;
 }
 
-/*
- * Returns the binary angle of the ground's slope along the shot's yaw, between
- * points half an AIM_SLOPE_STEP ahead of the ball and an AIM_SLOPE_STEP behind
- * it.
- */
 SignedBinaryAngle GetAimSlopeAngle(Player *player, ShotLaunch *shot) {
     Radians angle;
-    f32 step[2]; /* On x, then z */
+    f32 step[2];
     s32 aheadHeight;
     s32 behindHeight;
 
@@ -563,11 +407,8 @@ SignedBinaryAngle GetAimSlopeAngle(Player *player, ShotLaunch *shot) {
     return atan2(aheadHeight - behindHeight, AIM_SLOPE_STEP * 1.5) * RADIANS_TO_BINARY_ANGLE;
 }
 
-/* Unreferenced; the original has it, and its zero is in the ROM */
 static const f64 f_UnusedZero = 0.0;
 
-/* The surface under the player's ball. Its one caller passes the shot as the
- * slope angles' routines take it, though the shot is not read. */
 SurfaceInfo *GetBallSurfaceInfo(Player *player, ShotLaunch *shot UNUSED) {
     return GetSurfaceInfoAt(player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
 }
@@ -576,12 +417,6 @@ Boolean IsDebugBButtonView(void) {
     return f_FlightCameraKind == FLIGHT_CAMERA_BESIDE_GOLFER;
 }
 
-/*
- * Deals the next camera pick, shuffling them again after the last. When
- * isDealing is false, it shuffles them and returns NO_CAMERA_PICK.
- *
- * SwapCameraPicks is a nested function, a GNU C extension.
- */
 s32 NextCameraPick(Boolean isDealing) {
     s32 index;
     s32 pick;
@@ -597,9 +432,6 @@ s32 NextCameraPick(Boolean isDealing) {
     if (!isDealing) {
         f_NextCameraPickIndex = 0;
 
-        /*
-         * The != tests are there to match: < gives 24 words differing, 14 in shape
-         */
         for (index = 0; index != CAMERA_PICK_COUNT; index++) {
             f_CameraPicks[index] = index;
         }
@@ -619,11 +451,6 @@ s32 NextCameraPick(Boolean isDealing) {
     return pick;
 }
 
-/*
- * Ends the flight camera: it restores the main camera's field of view, stops
- * drawing the inset view, fades the flight's sounds, and counts a water cut for
- * a ball that has finished its path.
- */
 void EndFlightCamera(void) {
     g_AreCharactersDrawn = TRUE;
     g_IsCupViewShown = FALSE;
@@ -650,29 +477,16 @@ void EndFlightCamera(void) {
 Boolean IsCupPassPoint(s32 cupDistance, s32 height);
 s32 RandomBelow(s32 limit);
 
-/* The shortest shot length that the cameras work with */
 #define MIN_SHOT_LENGTH 0x7800
-/* The path steps searched for cup passes and for path flags */
 #define SCANNED_STEP_COUNT 30
-/* f_BillboardHitCountdown's start for a hit found early, or found ahead */
 #define EARLY_BILLBOARD_HIT_COUNTDOWN 40
 #define AHEAD_BILLBOARD_HIT_COUNTDOWN 70
-/* The ground is probed at five points, 45 degrees apart, around the ball */
 #define GROUND_PROBE_COUNT 5
 #define GROUND_PROBE_ANGLE_STEP (M_PI / 4)
 #define GROUND_PROBE_DISTANCE 30720.0f
 #define GROUND_PROBE_MAX_RISE 4608.0f
-/* The lie counts as level while it tilts by less than this either way */
 #define LEVEL_LIE_TILT_DEGREES 10
 
-/*
- * Starts the flight camera for the simulated shot. It resets the flight state,
- * records the shot's start and end points and their yaws from the cup, looks
- * for cup passes and flagged steps at the start of the path, and probes the
- * ground on one side of the ball. Then it picks the first camera kind and moves
- * the main camera to it. earlierFlightCount is ovl_00's count of the earlier
- * calls; on the first, the camera picks are shuffled again.
- */
 void StartFlightCamera(s32 earlierFlightCount) {
     CoursePoint probe;
     s32 i;
@@ -692,10 +506,6 @@ void StartFlightCamera(s32 earlierFlightCount) {
     StartBanner(BANNER_NONE);
     f_FlightCameraFlags = 0;
 
-    /*
-     * The separate tests are there to match: one || test gives 3 words differing,
-     * 3 in shape
-     */
     if (earlierFlightCount == 0) {
         f_FlightCameraFlags |= FLIGHT_CAMERA_FLAG_CUP_VIEW_ALLOWED;
     }
@@ -711,10 +521,6 @@ void StartFlightCamera(s32 earlierFlightCount) {
     g_InsetView.step = 0;
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
 
-    /*
-     * The nested ifs are there to match: one && chain gives 10 words differing, 4
-     * in shape
-     */
     if (!g_SimulatedShot.startsOnGreen) {
         if (earlierFlightCount != 0 && g_ContactEffect == CONTACT_EFFECT_NONE) {
             g_RoundHud.isBallTrailShown = TRUE;
@@ -767,8 +573,6 @@ void StartFlightCamera(s32 earlierFlightCount) {
         g_RoundHud.isProgressShown = f_IsFlightHudShown;
     }
 
-    /* Converting through f32, and writing the start point first, are there to
-     * match */
     f_ShotStartPosition[AXIS_X] = (f32)g_SimulatedShot.startPosition[AXIS_X];
     f_ShotStartPosition[AXIS_Y] = (f32)g_SimulatedShot.startPosition[AXIS_Y];
     f_ShotStartPosition[AXIS_Z] = (f32)g_SimulatedShot.startPosition[AXIS_Z];
@@ -806,10 +610,6 @@ void StartFlightCamera(s32 earlierFlightCount) {
     );
     f_ComingFlightEvents = 0;
 
-    /*
-     * The != tests are there to match: < in the first loop gives 34 words
-     * differing (6 in shape), and in both 50 (10)
-     */
     for (i = 0; i != SCANNED_STEP_COUNT; i++) {
         if (i < g_SimulatedShot.stepCount &&
             IsCupPassPoint(
@@ -887,16 +687,11 @@ void StartFlightCamera(s32 earlierFlightCount) {
     g_Cameras[0].view.lookAt[AXIS_Z] = f_LookAtPoint[AXIS_Z];
 }
 
-/* The clubs in slots below it get CONTACT_EFFECT_POWER_IRON on some power shots
- */
 #define LEADING_CLUB_SLOT_COUNT 6
 
-/* These are macros, as inline functions compile differently from the original
- */
 #define IsPerfectPowerShot() \
     (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER && g_SimulatedShot.isPerfectSwing)
 
-/* Plays the sound of the simulated shot's club meeting the ball */
 void PlayContactSound(void) {
     Club *club;
     SurfaceInfo *surfaceInfo;
@@ -954,7 +749,6 @@ void PlayContactSound(void) {
     }
 }
 
-/* A random value from 0 to limit - 1, or 0 if limit is 0 */
 s32 RandomBelow(s32 limit) {
     if (limit == 0) {
         limit = 1;
@@ -963,10 +757,6 @@ s32 RandomBelow(s32 limit) {
     return (guRandom() >> 2) % limit;
 }
 
-/*
- * Whether a point of the ball's path passes close by the cup, for a shot
- * that lands near it. Distances are in course units.
- */
 Boolean IsCupPassPoint(s32 cupDistance, s32 height) {
     if (cupDistance < CUP_PASS_RADIUS &&
         height > g_HoleSetup.cupPosition[AXIS_Y] - CUP_PASS_MAX_DEPTH &&
@@ -978,8 +768,6 @@ Boolean IsCupPassPoint(s32 cupDistance, s32 height) {
     return FALSE;
 }
 
-/* It is a macro, as an inline function compiles differently from the original
- */
 #define IsShotLengthRated(endKind) \
     ((endKind) != SURFACE_KIND_WATER_HAZARD && \
         f_StartCupDistance >= f_LandingCupDistance && \
@@ -988,11 +776,6 @@ Boolean IsCupPassPoint(s32 cupDistance, s32 height) {
         !g_SimulatedShot.isFirstBounceOut && \
         g_SimulatedShot.shot.shotMode != SHOT_MODE_APPROACH)
 
-/*
- * Rates how far the simulated shot goes, in yards, against the distance
- * selected for it. Shots that end out of play or in water, approach shots and
- * some others go unrated.
- */
 s32 RateShotLength(void) {
     s32 endKind;
 
@@ -1022,11 +805,8 @@ s32 GetEndReaction(void) {
     return f_EndReaction;
 }
 
-/* The channel of the calls on a shot and of the other sounds on its result */
 #define FLIGHT_SOUND_CHANNEL_CALLS 3
-/* The channel of the sounds f_PendingResultSound queues */
 #define FLIGHT_SOUND_CHANNEL_RESULT 0xE
-/* The volumes of the cup-in sounds below a hole in one, by score */
 #define EAGLE_CUP_IN_VOLUME 0x50
 #define BIRDIE_CUP_IN_VOLUME 0x60
 #define ALBATROSS_CUP_IN_VOLUME 0x64
@@ -1034,26 +814,19 @@ s32 GetEndReaction(void) {
 #define FAIRWAY_SOUND_VOLUME 0x3F
 #define FULL_SHOT_REVERB 0x14
 
-/* The steps of the flight at which PlayFlightSounds plays some sounds */
 #define RUMBLE_REACTION_STEP 10
 #define FULL_SHOT_REACTION_STEP 14
 #define SHOT_RESULT_STEP 20
-/* Most sounds wait for the flight to pass its first steps */
 #define EARLY_STEP_COUNT 10
-/* The green landing sounds play this many steps after the ball lands */
 #define GREEN_SOUND_DELAY_STEP_COUNT 2
 
-/* Whether the ball hit the ground the given number of steps back */
 #define HasHitGroundBefore(step, stepsBack) \
     (g_SimulatedShot.pathFlags[(step) - (stepsBack)] & STEP_FLAG_GROUND_HIT)
-/* Sounds that play this many steps before the end of the flight */
 #define LANDING_SOUND_STEP_COUNT 3
 #define CHIP_IN_CALL_STEP_COUNT 10
 #define FLAG_SHOT_CALL_STEP_COUNT 15
-/* f_IsPinHitComing is set this many steps before a pin hit */
 #define PIN_HIT_LOOKAHEAD_STEP_COUNT 5
 
-/* Distances that PlayFlightSounds tests, in course units */
 #define CLOSE_LANDING_DISTANCE 0x3C00
 #define NEAR_LANDING_DISTANCE 0x5A00
 #define GREEN_SOUND_MAX_DISTANCE 0x7800
@@ -1061,8 +834,6 @@ s32 GetEndReaction(void) {
 #define LONG_PUTT_SOUND_MIN_DISTANCE 0x4B000
 #define LONG_LANDING_MIN_DISTANCE (60.0f * UNITS_PER_YARD)
 
-/* Queues a character sound of the given kind for each player but the one who
- * shot */
 static inline void QueueOnlookerSounds(s32 kind) {
     s32 i;
 
@@ -1079,44 +850,27 @@ static inline void QueueOnlookerSounds(s32 kind) {
     }
 }
 
-/* Whether the shot counts as an approach: in that mode, or with the putter */
 #define IsApproachShot() \
     (g_SimulatedShot.shot.shotMode == SHOT_MODE_APPROACH || g_SimulatedShot.usesPutter)
 
-/*
- * Whether a putt earns the Nice Touch call: from far, stopping close, with no
- * lip-out or pin hit passed, and before par
- */
 #define IsNiceTouchPutt() \
     (f_LandingCupDistance < CLOSE_LANDING_DISTANCE && \
         f_StartCupDistance > NICE_TOUCH_MIN_DISTANCE && \
         !(f_PassedPathFlags & (STEP_FLAG_LIPPED_OUT | STEP_FLAG_PIN_HIT)) && \
         g_HoleSetup.par > g_Players[g_CurrentShot.playerIndex].strokeCount)
 
-/* Whether the shot reaches the green from off it, without the putter */
 #define IsShotOntoGreen() \
     (!g_SimulatedShot.usesPutter && \
         !g_SimulatedShot.startsOnGreen && \
         g_SimulatedShot.endsOnGreen && \
         f_EndSurfaceInfo->kind == SURFACE_KIND_GREEN)
 
-/*
- * Plays the sounds and the other players' reactions that go with the ball's
- * flight: after a full shot, on landing in trouble and, at the end of the
- * flight, by the shooter's stroke count against par. step is
- * g_BallFlightStep, which the caller clamps to the recorded path.
- */
 void PlayFlightSounds(s32 step) {
     s32 shownRingCount;
     s32 scoreToPar;
     s32 i;
     SurfaceInfo *info;
     Player *player;
-    /*
-     * The pointers are there to match: reading the green sound count
-     * directly gives 11 words differing (3 in shape), either landing sound
-     * flag 8 (2), and all three 27 (7)
-     */
     s32 *greenSoundCount;
     s32 *isPlayed;
     s32 *isStillPlayed;
@@ -1152,7 +906,6 @@ void PlayFlightSounds(s32 step) {
     }
 
     if (step == RUMBLE_REACTION_STEP && g_SimulatedShot.impactRumbles) {
-        /* Plays the sound again for each player; the original has it */
         for (i = 0; i != g_GameState.playerCount; i++) {
             PlaySound(SOUND_RUMBLING_MISHIT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
             if (i != g_CurrentShot.playerIndex) {
@@ -1173,8 +926,6 @@ void PlayFlightSounds(s32 step) {
             !shownRingCount &&
             HasHitGroundBefore(step, GREEN_SOUND_DELAY_STEP_COUNT) &&
             IsShotOntoGreen()) {
-            /* The second arm is never taken: the first takes every stroke count
-             * that it would */
             if (g_HoleSetup.par > g_Players[g_CurrentShot.playerIndex].strokeCount + 1) {
                 (*greenSoundCount)++;
                 PlaySound(SOUND_UNDER_PAR_CHANCE, FLIGHT_SOUND_CHANNEL_LANDING, GREEN_SOUND_VOLUME);
@@ -1402,7 +1153,6 @@ void PlayFlightSounds(s32 step) {
     }
 }
 
-/* Eases the look-at point toward the ball, unless it is landing. */
 void EaseLookAtFlyingBall(void) {
     f32 offsetX;
     f32 offsetY;
@@ -1423,10 +1173,6 @@ void EaseLookAtFlyingBall(void) {
     }
 }
 
-/*
- * Eases the look-at point toward a point drop below the ball, unless it is
- * landing.
- */
 void EaseLookAtBelowBall(f32 drop) {
     f32 offsetX;
     f32 offsetY;
@@ -1447,10 +1193,6 @@ void EaseLookAtBelowBall(f32 drop) {
     }
 }
 
-/*
- * Eases the look-at point toward the ball.
- * It ignores yaw, which PlaceFlightCamera passes.
- */
 void EaseLookAtPoint(Radians yaw UNUSED) {
     f32 offsetX;
     f32 offsetY;
@@ -1469,23 +1211,12 @@ void EaseLookAtPoint(Radians yaw UNUSED) {
     f_LookAtPoint[AXIS_Z] += offsetZ * LOOK_AT_EASE_FRACTION;
 }
 
-/* Puts the look-at point on the ball */
 void SnapLookAtPoint(void) {
     f_LookAtPoint[AXIS_X] = f_FlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
     f_LookAtPoint[AXIS_Y] = f_FlightBallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     f_LookAtPoint[AXIS_Z] = f_FlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
 }
 
-/*
- * Moves the camera's axis coordinate a fraction of the way along offset, unless
- * it is already within the dead zone. It is a do-while (0) statement macro, as
- * the original's code needs a loop around the first axis's test; the macro
- * gives every axis one, and the other two compile the same either way. Written
- * out without the loop, the tests leave 3 words differing, all in shape, as
- * with a local for each axis's offset; working the offset out inside the macro
- * too gives 3, a loop over the axes 66 (54 in shape), fabs 66 and the
- * comparison spelled as two tests 27.
- */
 #define EaseCameraCoordinate(axis, offset) \
     do { \
         if (fabsf(offset) > CAMERA_EASE_DEAD_ZONE) { \
@@ -1494,8 +1225,6 @@ void SnapLookAtPoint(void) {
     } \
     while (0)
 
-/* Eases each of the camera's coordinates toward target's, unless it is already
- * close */
 void EaseCameraPosition(Vec3 target) {
     f32 offset;
 
@@ -1507,11 +1236,6 @@ void EaseCameraPosition(Vec3 target) {
     EaseCameraCoordinate(AXIS_Z, offset);
 }
 
-/*
- * PlaceCameraAroundShotEnd's ranges: PUTT_* for a shot from the green,
- * SIMPLE_CAMERA_* when the simple flight camera is chosen in the options and
- * DEFAULT_* otherwise
- */
 #define PUTT_HEIGHT_SPREAD_FRACTION 0.2
 #define DISTANCE_SPREAD_FRACTION 0.2f
 #define DEFAULT_HEIGHT_SPREAD_FRACTION 0.1f
@@ -1531,20 +1255,9 @@ void EaseCameraPosition(Vec3 target) {
 #define SIMPLE_CAMERA_MAX_HEIGHT 153600.0f
 #define MIN_RISE_ABOVE_SHOT_END 0x7800
 
-/*
- * Places the camera at a random yaw around the shot's end, a random distance
- * away and a random height above the ground there, then snaps the look-at
- * point. The ground point is kept at least MIN_RISE_ABOVE_SHOT_END above the
- * shot's end. Course y points down, so heights are subtracted.
- */
 void PlaceCameraAroundShotEnd(void) {
     CoursePoint point;
     f32 height;
-    /*
-     * Holding the scale in yawScale is there to match: the constant in its
-     * place, on either side, gives 2 words differing (2 in shape), and an f32
-     * local 25
-     */
     f64 yawScale;
     f32 distance;
     Radians yaw;
@@ -1640,7 +1353,6 @@ void PlaceCameraAroundShotEnd(void) {
     SnapLookAtPoint();
 }
 
-/* Resets the cameras for the start of a hole, and plays the game mode's song */
 void StartHoleCamerasAndSong(void) {
     SetMenuBackdrop(MENU_BACKDROP_NONE);
     g_RoundHud.isHoleIntroTextShown = TRUE;
@@ -1716,7 +1428,6 @@ void StartHoleCamerasAndSong(void) {
     }
 }
 
-/* Starts the flyover of the hole, with the inset view on the cup */
 void StartHoleFlyover(void) {
     g_HoleFlyoverFrame = 0;
     g_RoundHud.isHoleIntroTextShown = FALSE;
@@ -1743,8 +1454,6 @@ void ClearHoleIntroText(void) {
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, CHOICE_TEXT_SLOT, 0, 0, 0, 0, 0);
 }
 
-/* Ends the hole flyover; the screen fades back, and a strong wind brings the
- * Fly Guy that warns of it */
 void EndHoleFlyover(void) {
     g_HoleFlyoverFrame = HOLE_FLYOVER_ENDED;
     g_InsetView.animation = INSET_VIEW_STILL;
@@ -1758,11 +1467,6 @@ void EndHoleFlyover(void) {
     }
 }
 
-/*
- * Moves the flyover's cameras on by a frame. The main camera swings around
- * the cup from the tee's side as it closes in; the inset camera circles the
- * cup twice as fast. It returns whether the flyover has reached its end.
- */
 s32 StepHoleFlyover(void) {
     Vec3 offset;
     f32 halfTurns;
@@ -1812,10 +1516,6 @@ s32 StepHoleFlyover(void) {
     yaw = atan2(offset[AXIS_X], offset[AXIS_Z]) + (halfTurns * M_PI);
     holeRadius = GetHoleRadius(GetCourseRecordIndex(), GetHoleRecordIndex());
 
-    /*
-     * Storing the sine before computing distance is there to match: multiplying
-     * it by distance afterwards gives 22 words differing, 6 in shape
-     */
     offset[AXIS_X] = sinf(yaw);
     distance = ((holeRadius - (approach * FLYOVER_RADIUS_APPROACH)) + (holeRadius * widening)) *
         FLYOVER_DISTANCE_SCALE;
@@ -1845,8 +1545,6 @@ s32 StepHoleFlyover(void) {
     return ++g_HoleFlyoverFrame == HOLE_FLYOVER_FRAME_COUNT;
 }
 
-/* Turns the camera's yaw to face the look-at point, unless the camera is over
- * it */
 void AimCameraYaw(void) {
     f32 offsetX;
     f32 offsetZ;
@@ -1858,10 +1556,7 @@ void AimCameraYaw(void) {
     }
 }
 
-/* PlaceFlightCamera's distances are in course units unless they say otherwise;
- * y points down */
 #define CUP_FRAMING_PITCH (-0.14f)
-/* Above the cup, of both framed spheres */
 #define CUP_FRAMING_RISE 0xC00
 #define CUP_FRAMING_RADIUS 3.0f
 #define CUP_FRAMING_DEPTH_OFFSET (-1.5f)
@@ -1870,10 +1565,8 @@ void AimCameraYaw(void) {
 #define PATH_FRAMING_DEPTH_OFFSET (-150.0f)
 #define LAUNCH_VIEW_STEP 11
 #define LAUNCH_VIEW_MIN_RISE 0x6600
-/* In world units */
 #define CHASE_DISTANCE 15.0f
 #define CHASE_FIELD_OF_VIEW 80.0f
-/* How many path steps behind the ball the camera follows */
 #define FOLLOW_STEP_COUNT 10
 #define FOLLOW_RISE 0x3C00
 #define FOLLOW_FIELD_OF_VIEW 80.0f
@@ -1890,7 +1583,6 @@ void AimCameraYaw(void) {
 #define BEHIND_VIEW_SIDE_SPREAD_FRACTION 0.2
 #define BEHIND_VIEW_SIDE_DISTANCE 23040.0f
 #define BEHIND_VIEW_RISE 23040.0f
-/* In world units */
 #define BEHIND_LOOK_AT_RISE 4.5f
 #define BEHIND_LOOK_AT_EASED_RISE 4608.0f
 #define APEX_VIEW_NEAR_HALF_DISTANCE 1536.0f
@@ -1925,8 +1617,6 @@ void AimCameraYaw(void) {
 #define FACING_CUP_EASE_FRACTION 0.1f
 #define BILLBOARD_HIT_VIEW_DISTANCE 460800.0f
 #define BILLBOARD_HIT_VIEW_RISE 0x4B000
-/* While f_EarlierFlightCount is below this, the circle starts at angle 0 rather
- * than at a side */
 #define CIRCLE_START_FLIGHT_COUNT 2
 #define CIRCLE_ANGLE_STEP DegreesToRadians(2)
 #define CIRCLE_DISTANCE 30720.0f
@@ -1939,24 +1629,11 @@ void AimCameraYaw(void) {
 #define BESIDE_GOLFER_STEP 1536.0f
 #define BESIDE_GOLFER_RISE 1536.0f
 #define BESIDE_GOLFER_MIN_RISE 7680.0f
-/* In world units */
 #define BESIDE_GOLFER_CLEARANCE 22.5f
 #define BESIDE_GOLFER_LOOK_AT_RISE 12288.0f
 #define BESIDE_GOLFER_FLIGHT_FIELD_OF_VIEW 80.0f
 #define MAX_EYE_DEPTH_BELOW_GROUND 0x21C0000
 
-/*
- * Places the flight camera's eye and look-at point for f_FlightCameraKind at a
- * step of the ball's flight, then keeps the eye above the ground and over the
- * course. The kinds that test f_IsCameraKindNew do their setup once when it is
- * set, then clear it. FLIGHT_CAMERA_BEHIND_START keeps its distance, and
- * FLIGHT_CAMERA_BESIDE_GOLFER its yaw and distance, in variables of their own,
- * as the original allocates them apart from the shared ones; sharing any one of
- * them gives 36 to 52 words differing. FLIGHT_CAMERA_CIRCLING_BALL sets the
- * field of view after the look-at point, where before it gives 32 words, none
- * in shape; FLIGHT_CAMERA_FACING_CUP's eases write each difference out at both
- * its uses, where a local for it gives 30 words, 2 in shape.
- */
 void PlaceFlightCamera(s32 step) {
     Vec3 point;
     f32 extraRise;
@@ -2060,12 +1737,8 @@ void PlaceFlightCamera(s32 step) {
 
             break;
         case FLIGHT_CAMERA_CHASING_BALL: {
-            /* Its own, as the original keeps it in a temporary register rather
-             * than distance's saved one; sharing distance gives 184 differing
-             * words, 8 in shape */
             f32 scale;
 
-            /* Back along the path, level with the ball */
             position[AXIS_X] =
                 g_SimulatedShot.path[step - 1][AXIS_X] - (f32)f_FlightBallPosition[AXIS_X];
             position[AXIS_Y] = 0.0f;
@@ -2131,9 +1804,6 @@ void PlaceFlightCamera(s32 step) {
             break;
         case FLIGHT_CAMERA_BEHIND_START:
             if (f_IsCameraKindNew == TRUE) {
-                /* Its own, as the original allocates these within the branch;
-                 * sharing the function-wide sideYaw and sideDistance gives 42
-                 * words differing, 2 in shape */
                 Radians sideYaw;
                 f32 behindDistance;
                 f32 sideDistance;
@@ -2178,12 +1848,10 @@ void PlaceFlightCamera(s32 step) {
                 f_IsCameraKindNew = FALSE;
                 f_SideViewCount++;
                 if (f_SideViewCount & 1) {
-                    /* Beside the path's highest point */
                     sideYaw = f_ShotFlightYaw - (M_PI / 2) +
                         ((f32)(rand() & RANDOM_YAW_MASK) * RANDOM_YAW_TO_RADIANS);
                     f_IsApexViewFar ^= TRUE;
                     if (f_IsApexViewFar == FALSE) {
-                        /* RandomBelow(1) is always 0; the original has it */
                         point[AXIS_X] =
                             g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_Y]][AXIS_X] +
                             (2.0f * (sinf(sideYaw) * APEX_VIEW_NEAR_HALF_DISTANCE));
@@ -2214,7 +1882,6 @@ void PlaceFlightCamera(s32 step) {
                 else {
                     f32 sideDistance;
 
-                    /* Off to the side of the flight, ahead of the start */
                     sideDistance = f_ShotLength * SIDE_VIEW_LENGTH_FRACTION;
                     distance = f_ShotLength * SIDE_VIEW_AHEAD_FRACTION;
 
@@ -2236,11 +1903,6 @@ void PlaceFlightCamera(s32 step) {
                         (sinf(sideYaw) * sideDistance);
                     point[AXIS_Z] = f_ShotStartPosition[AXIS_Z] - (cosf(yaw) * distance) -
                         (cosf(sideYaw) * sideDistance);
-                    /*
-                     * Computing extraRise before GetGroundHeight is there to match: after
-                     * it gives 123 words differing (21 in shape), and in the branch 127
-                     * (15), against the draft's 98 (4)
-                     */
                     extraRise = f_ShotLength * SIDE_VIEW_RISE_FRACTION;
                     point[AXIS_Y] = GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
                     if (!g_SimulatedShot.startsOnGreen) {
@@ -2307,14 +1969,8 @@ void PlaceFlightCamera(s32 step) {
                 sideDistance = TRAIL_CLOSE_DISTANCE;
             }
 
-            /* Unused; the original has it */
             rand();
 
-            /*
-             * Converting step through easeFraction is there to match: multiplying
-             * step itself, with or without a cast, gives 104 words differing (4 in
-             * shape) against the draft's 98 (4)
-             */
             easeFraction = step;
             easeFraction = TRAIL_EASE_START_PERCENT - (TRAIL_EASE_PERCENT_STEP * easeFraction);
             if (easeFraction < 0.0f) {
@@ -2475,9 +2131,6 @@ void PlaceFlightCamera(s32 step) {
             break;
         case FLIGHT_CAMERA_BESIDE_GOLFER:
             if (f_IsCameraKindNew == TRUE) {
-                /* Their own, as the original allocates them apart from yaw and
-                 * distance; sharing yaw gives 48 words differing and sharing
-                 * distance 52, none in shape */
                 Radians besideYaw;
                 f32 besideDistance;
 
@@ -2492,9 +2145,6 @@ void PlaceFlightCamera(s32 step) {
                 }
 
                 for (index = BESIDE_GOLFER_FIRST_STEP; index < BESIDE_GOLFER_STEP_LIMIT; index++) {
-                    /* Setting besideDistance inside the x term is there to match: a
-                     * statement of its own before it gives 7 differing words, 5 in
-                     * shape, and the product written in both terms 6 (6) */
                     f_CameraPosition[AXIS_X] =
                         (cosf(besideYaw) * (besideDistance = index * BESIDE_GOLFER_STEP)) +
                         g_CurrentShot.ballPosition[AXIS_X];
@@ -2603,50 +2253,16 @@ void PlaceFlightCamera(s32 step) {
 #define NEAR_CUP_DISTANCE 0x1E00
 #define CUP_LANDING_MIN_DISTANCE 0x1201
 #define CUP_LANDING_MAX_DISTANCE 0x4AFFF
-/* Whether a shot from the green starts in the range that the camera framing
- * the cup is chosen for */
 #define IsCupLandingDistance(distance) \
     ((distance) >= CUP_LANDING_MIN_DISTANCE && (distance) <= CUP_LANDING_MAX_DISTANCE)
-/* Whether the simulated shot ends in the cup or within NEAR_CUP_DISTANCE */
 #define IsEndingNearCup() (g_SimulatedShot.endsInCup || f_LandingCupDistance < NEAR_CUP_DISTANCE)
 #define DEBUG_CAMERA_CONTROLLER 1
 
-/* It is a macro, as an inline function compiles differently from the original
- */
 #define IsTroubleSurface(info) \
     (IsBunkerKind((info)->kind) || \
         (info)->kind == SURFACE_KIND_WATER_HAZARD || \
         (info)->kind == SURFACE_KIND_OUT_OF_BOUNDS)
 
-/*
- * Picks a flight camera kind for the value of f_FlightPhase, and switches to it
- * if it is greater than the current kind. The picks depend on the simulated
- * shot, save option 3 and chance. A switch ends StartHudAnimation's effect and
- * may start another one. In debug builds, the second controller's B and A
- * buttons pick FLIGHT_CAMERA_BESIDE_GOLFER and FLIGHT_CAMERA_CIRCLING_BALL.
- *
- * FLIGHT_PHASE_NEARING_CONTACT picks FLIGHT_CAMERA_AROUND_END in every arm of
- * its tests, and the form of those tests is what the original's code and frame
- * show:
- *
- * - The last two arms store the same kind, so jump.c turns them into a
- *   store-flag sequence, which combine then folds to the constant. The folded
- *   test leaves no code, but each of its temporaries keeps a (use) insn and with
- *   it an 8-byte stack slot: the original's frame holds 56 unused bytes, which
- *   is the seven temporaries of two equality tests of one value joined by ||.
- *   Which kinds the test names can't be recovered; these are the two that the
- *   cases before it test. One comparison leaves 24 to 40 bytes.
- * - With that arm folded to a plain store, the following-path test is an if/else
- *   of two equal stores once reload is done. jump.c then moves the else's store
- *   ahead of the test, where it is too late for another store-flag, and reorg
- *   takes it for the trouble-surface test's delay slot and sends every test
- *   straight to the end.
- *
- * Joining the first two tests with || gives 7 words differing. Storing the kind
- * once before that joined test, with an array to pad the frame, differs only in
- * the trouble-surface branch's target, which then goes through the store that
- * the cases share.
- */
 void ChooseFlightCameraKind(void) {
     s32 animation;
     s32 kind;
@@ -2824,10 +2440,6 @@ void ChooseFlightCameraKind(void) {
                     }
                 }
                 else if (f_FlightCameraKind != FLIGHT_CAMERA_TRAILING_BALL) {
-                    /*
-                     * The nested ifs and the separate cases are there to match: one &&
-                     * test gives 18 words differing, and shared cases 10
-                     */
                     if (f_FlightCameraKind != FLIGHT_CAMERA_FOLLOWING_PATH) {
                         if (f_FlightCameraKind != FLIGHT_CAMERA_SIDE_OF_FLIGHT) {
                             switch (RandomBelow(5)) {
@@ -2851,10 +2463,6 @@ void ChooseFlightCameraKind(void) {
                     f_HasFlightPhaseChanged = TRUE;
                 }
                 else if (f_FlightCameraKind == FLIGHT_CAMERA_TRAILING_BALL) {
-                    /*
-                     * The empty branches are there to match: one && test of the other
-                     * kinds gives 14 words differing
-                     */
                 }
                 else if (f_FlightCameraKind == FLIGHT_CAMERA_FOLLOWING_PATH) {
                 }
@@ -2900,10 +2508,6 @@ void ChooseFlightCameraKind(void) {
                 break;
             case FLIGHT_PHASE_END:
                 if (IsTroubleSurface(f_EndSurfaceInfo) || g_SimulatedShot.endsInCup) {
-                    /*
-                     * The empty branch is there to match: the inverted test gives 8
-                     * words differing
-                     */
                 }
                 else {
                     if (f_CameraChangeHoldCount != 0 || g_SimulatedShot.stepCount < 21) {
@@ -2961,9 +2565,6 @@ void ChooseFlightCameraKind(void) {
                 f_HasFlightPhaseChanged = TRUE;
                 break;
             case FLIGHT_PHASE_CONTACT:
-                /*
-                 * The empty case is there to match: without it 15 words differ
-                 */
                 break;
         }
     }
@@ -3010,42 +2611,30 @@ void ChooseFlightCameraKind(void) {
 
 #define CUP_PASS_LOOKAHEAD_STEP_COUNT 30
 #define PATH_FLAG_LOOKAHEAD_STEP_COUNT 60
-/* The billboard hit view starts no sooner, and lasts this far past the hit */
 #define BILLBOARD_HIT_VIEW_MIN_STEP 60
 #define BILLBOARD_HIT_VIEW_STEP_COUNT 10
-/* Past the billboard hit view, a ball this far from the end is viewed there */
 #define END_VIEW_MIN_DISTANCE 0x25800
-/* Fewer steps left than this leave no time for a new camera kind */
 #define CAMERA_CHOICE_MIN_STEP_COUNT 40
-/* The steps at which the launch phase, and the early climb, end */
 #define LAUNCH_END_STEP 10
 #define EARLY_CLIMB_END_STEP 15
-/* A shot from the green climbs until this step */
 #define GREEN_CLIMB_END_STEP 40
-/* The fall nears contact once a step flag is this many steps ahead */
 #define CONTACT_LOOKAHEAD_STEP_COUNT 40
-/* The end phase covers the path's last steps */
 #define END_PHASE_STEP_COUNT 10
 
-/* Whether the ball has passed the billboard hit and its view */
 #define IsPastBillboardHitView(step) \
     (f_BillboardHitStep != NO_STEP && f_BillboardHitStep + BILLBOARD_HIT_VIEW_STEP_COUNT < (step))
-/* Whether the flying ball is still far from where the shot ends */
 #define IsFarFromShotEnd() \
     ((s32)IntLength3D( \
          f_FlightBallPosition[AXIS_X] - f_ShotEndPosition[AXIS_X], \
          f_FlightBallPosition[AXIS_Y] - f_ShotEndPosition[AXIS_Y], \
          f_FlightBallPosition[AXIS_Z] - f_ShotEndPosition[AXIS_Z] \
      ) > END_VIEW_MIN_DISTANCE)
-/* Whether a new camera kind would be seen long enough, or the end is shown */
 #define HasTimeForNewCamera() \
     (g_BallFlightStep + CAMERA_CHOICE_MIN_STEP_COUNT < g_SimulatedShot.stepCount || \
         f_FlightPhase == FLIGHT_PHASE_END)
-/* Whether neither the cup view nor a coming event holds the camera */
 #define IsFlightCameraFree() (!g_IsCupViewShown && f_ComingFlightEvents == 0)
 #define VERY_LONG_SHOT_MIN_LENGTH 0x2A3000
 #define BALL_SOUND_MIN_SHOT_LENGTH 0x25800
-/* Shot length per step of volume */
 #define BALL_SOUND_VOLUME_LENGTH 0x7800
 #define BALL_SOUND_MIN_VOLUME 10
 #define BALL_SOUND_MAX_VOLUME 64
@@ -3063,16 +2652,8 @@ void ChooseFlightCameraKind(void) {
 #define INSET_VIEW_SIDE_OFFSET 0x3C00
 #define INSET_VIEW_HEIGHT 0x7800
 #define INSET_FIELD_OF_VIEW 30.0f
-/* Keeps the eye from sitting straight above the point it looks at */
 #define LOOK_AT_NUDGE 0.1f
 
-/*
- * Updates the flight camera, the inset view and the ball's sounds for one frame
- * of the ball's flight, and advances g_BallFlightStep when isAdvancing is 1.
- * Once the flight has ended, it counts the landing wait and returns TRUE when
- * it is over. The START button clears g_RoundHud.isWindIndicatorShown through
- * g_RoundHud.isProgressShown and g_RoundHud.isShotLengthShown.
- */
 s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     f32 point[3];
     s32 step;
@@ -3235,18 +2816,10 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
 
                 break;
             case FLIGHT_PHASE_NEARING_CONTACT:
-                /*
-                 * The empty case is there to match: without it 66 words differ, 32 in
-                 * shape
-                 */
                 break;
         }
     }
 
-    /*
-     * Holding both look-ahead steps in aheadStep is there to match: a flagStep
-     * local for the second gives 8 words differing, none in shape
-     */
     aheadStep = step + CUP_PASS_LOOKAHEAD_STEP_COUNT;
     if (aheadStep <= g_SimulatedShot.stepCount &&
         IsCupPassPoint(
@@ -3377,8 +2950,6 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
             StartFastBallAfterimage();
         }
 
-        /* pathFlags is an s8, so testing 0x100 tests its sign; the original has it
-         */
         if ((g_SimulatedShot.pathFlags[step] & 0x100) ||
             (g_SimulatedShot.pathFlags[step] & STEP_FLAG_LIPPED_OUT)) {
             StartContactEffect(CONTACT_EFFECT_NONE);
@@ -3518,8 +3089,6 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
         PlayContactSound();
     }
 
-    /* Reading f_LandingWaitFrame and g_BallFlightStep through locals is there to
-     * match */
     waitFrame = f_LandingWaitFrame;
     if (isAdvancing == TRUE) {
         flightStep = &g_BallFlightStep;
@@ -3551,10 +3120,6 @@ void SetLandingWaitFrameCount(s32 frameCount) {
 
 #define VIEW_SIDE_DISTANCE 153600.0f
 
-/*
- * Finds the points VIEW_SIDE_DISTANCE from center on x and z, a quarter turn
- * either way from the main camera's yaw.
- */
 void GetViewSidePoints(
     CoursePoint center,
     CoursePoint plusQuarterPoint,
@@ -3585,7 +3150,6 @@ void GetViewSidePoints(
         (s32)(cosf(minusQuarterAngle) * VIEW_SIDE_DISTANCE) + center[AXIS_Z];
 }
 
-/* Left empty in the original, as are the two routines after it */
 void OnShotCameraPlaced(void) {
 }
 
@@ -3604,40 +3168,6 @@ void SecondUnusedCameraStub(void) {
 #define SPOT_SOFT_DISC_RADIUS 15
 #define SPOT_SOFT_FALL_PER_TEXEL 12
 
-/*
- * Builds the top-left quarter of a spot, as SPOT_QUARTER_SIZE x
- * SPOT_QUARTER_SIZE I8 texels. A soft spot is a disc that fades out toward its
- * edge. Otherwise it is a disc, a dark gap and a ring that brightens outward.
- *
- * The original takes the soft spot's root in one register and copies it to
- * distance in another, which radius and the fall then read. A test between
- * the root and the copy leaves that behind when it guards a store to distance
- * that the copy overwrites. What the original's test was can't be recovered;
- * a zero squared distance is the one a root would want.
- *
- * - Flow deletes the guarded store as dead, but the branch around it lasts
- *   until the final jump pass, which deletes it and its test as a branch to
- *   the next instruction. Until then its label parts the root from the copy,
- *   so neither combine nor local allocation gives the two one register.
- * - With the label before the copy, cse can't make the root's instruction
- *   set distance itself (cse.c, cse_insn, "Special handling for (set REG0
- *   REG1)"). With distance set ahead of the label, cse keeps reading distance
- *   after the copy rather than the root (cse.c, make_regs_eqv). A guarded
- *   store to intensity or radius gives 3 words (1 in shape), as does no test
- *   or the test before the root.
- *
- * A test of column, width or texels matches as well, as does storing the
- * root or another value under it. Testing row gives 28 words and isSoft 72,
- * none in shape, with other registers throughout; testing root against 0.0f,
- * or a float squaredDistance, gives 1 word, a zero loaded ahead of the
- * loops. An if and else storing 0.0f and the root gives 6 words (4 in
- * shape), and the root in both arms 10 (4). Setting distance from sqrtf and
- * to 0.0f under the test after it gives 6 (4).
- *
- * The first loop has to take its root straight into radius: written as the
- * second's is, 9 words differ (1 in shape), and through distance alone 6,
- * none in shape.
- */
 void BuildSpotTexels(u8 *texels, Boolean isSoft) {
     s32 row;
     s32 column;
@@ -3686,8 +3216,6 @@ void BuildSpotTexels(u8 *texels, Boolean isSoft) {
                 squaredDistance =
                     ((row - height) * (row - height)) + ((column - width) * (column - width));
                 root = sqrtf(squaredDistance);
-                /* Changes nothing, as distance is set again below, but the test
-                 * is needed to match, as the header comment explains */
                 if (squaredDistance == 0) {
                     distance = 0.0f;
                 }
@@ -3711,11 +3239,6 @@ void BuildSpotTexels(u8 *texels, Boolean isSoft) {
     }
 }
 
-/*
- * Fills a width by height texture with a quarter of a ring around its far
- * corner. The outer radius is unused: the ring always ends at
- * RING_OUTER_RADIUS.
- */
 void BuildRingTexels(u8 *texels, s32 width, s32 height, s32 outerRadius UNUSED) {
     s32 row;
     s32 column;
@@ -3765,12 +3288,6 @@ static inline s32 RandomNoiseDisplacement(void) {
     return (rand() & NOISE_DISPLACEMENT_MASK) - NOISE_DISPLACEMENT_BIAS;
 }
 
-/*
- * Midpoint displacement: sets each unset midpoint of the square of side
- * NOISE_GRID_SIZE >> level at column, row to the average of its corners plus
- * a random displacement, then does the same for the square's quarters.
- * A zero point is unset, so a displacement that gives zero is drawn again.
- */
 void DisplaceNoiseSquare(s32 level, s32 column, s32 row) {
     u16 size;
     u16 half;
@@ -3842,18 +3359,7 @@ static inline void SelectNoiseGrid(s16 gridIndex) {
     f_NoiseGrid = f_NoiseGrids[gridIndex];
 }
 
-/*
- * Draws one row of the noise texture as a blend of the two noise grids. After
- * every row has been drawn, it moves the blend a step toward the other grid.
- * Once the blend has gone fully over, it rebuilds the faded-out grid and swaps
- * the grids, so the new one fades in.
- */
 void StepNoiseTexture(void) {
-    /*
-     * index counts the grids, then the texels. Sharing it is there to match: an
-     * s16 texel local gives 28 words differing (none in shape), and an s32 one 45
-     * (9)
-     */
     s16 index;
     s16 row;
     s16 column;
@@ -3881,8 +3387,6 @@ void StepNoiseTexture(void) {
             f_NoiseGrid[NOISE_GRID_SIZE / 2][NOISE_GRID_SIZE / 2] = NOISE_CENTER_SEED;
             DisplaceNoiseSquare(0, 0, 0);
 
-            /* Seeds the same grid again, leaving the other one unseeded; the original
-             * has it */
             f_NoiseGrid[0][0] = NOISE_CORNER_SEED;
             f_NoiseGrid[NOISE_GRID_SIZE / 2][NOISE_GRID_SIZE / 2] = NOISE_CENTER_SEED;
             SelectNoiseGrid(f_NoiseGridIndex ^ 1);
@@ -3928,7 +3432,6 @@ void StepNoiseTexture(void) {
     }
 }
 
-/* Resets the noise grids and draws every row of the noise texture */
 void BuildNoiseTexture(void) {
     s32 row;
 

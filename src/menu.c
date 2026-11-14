@@ -1,8 +1,3 @@
-/*
- * The save data and what is kept in it: reading and writing the save, the
- * records and best times, what is unlocked, the Club Tournaments and the round
- * statistics. It also loads the menus' resources.
- */
 #include "menu.h"
 
 #include <framebuffer_count.h>
@@ -40,44 +35,29 @@
 #include "sram.h"
 #include "transfer_pak.h"
 
-/* Keeps the save data on the development host instead of in SRAM */
 #define GAME_FLAG_SAVE_TO_HOST 0x53
 
-/* The SRAM check buffer is read and written by DMA, so it starts on a cache
- * line */
 #define DMA_ALIGNMENT 0x10
 
-/* A brick wall, 152 by 117 */
 #define BRICK_WALL_IMAGE_ASSET 0x721
-/* A trophy, the first of the animated icons, which their buffers fit */
 #define TROPHY_ICON_IMAGE_ASSET 0x623
-/* The badges for bets and the front nine, back nine and 18 holes */
 #define HOLE_BADGES_IMAGE_ASSET 0x65D
-/* A speech bubble, 160 by 48, which the wide spare buffer starts with */
 #define SPEECH_BUBBLE_IMAGE_ASSET 0x6F7
-/* The R COM and L LEFTY button icons */
 #define COM_LEFTY_ICONS_IMAGE_ASSET 0x709
 
 #define DmaAlignedAddress(address) (((u32)(address) + DMA_ALIGNMENT - 1) & ~(DMA_ALIGNMENT - 1))
 
-/* The records that unlock two of the characters */
 #define DONKEY_KONG_STAR_COUNT 30
 #define MAPLE_BADGE_COUNT 50
 
-/* Each Ring Shot course after the first opens after this many more stars */
 #define STARS_PER_RING_SHOT_COURSE 4
 
-/* Where an imported character goes in the character grid. Holding column and
- * row as s32s loads them with lw where the original has lh, so the zero
- * halves before them stay separate fields that nothing reads. */
 typedef struct ImportedCharacterCell {
-    /* 0x0 */ s16 unusedBeforeColumn;
-    /* 0x2 */ s16 column;
-    /* 0x4 */ s16 unusedBeforeRow;
-    /* 0x6 */ s16 row;
-} ImportedCharacterCell; /* size = 0x8 */
-
-/* Mirrors of the save data's options */
+      s16 unusedBeforeColumn;
+      s16 column;
+      s16 unusedBeforeRow;
+      s16 row;
+} ImportedCharacterCell;
 
 s16 g_LastMenuPlayerCountChoice;
 GameState g_BackedUpGameState;
@@ -136,19 +116,13 @@ void *g_TrophyPalettes[TROPHY_PALETTE_COUNT];
 
 FILE_STATIC SaveData g_SaveData;
 
-/* f_SlotCells lists slots in id order up to this count */
 #define MARKABLE_CHARACTER_COUNT 10
-/* The entries of f_RecordCharacters whose records BuildCharacterGrid checks */
 #define RECORD_CHARACTER_COUNT 13
 
-/* The retail game keeps no save data on the development host */
 #define NO_HOST_FILE_NAME g_EmptyString
-/* The debug imports' names set this bit on each lowercase letter */
 #define LOWERCASE_LETTER_BIT 0x80
 #define MARK_LOWERCASE(letter) ((letter) | LOWERCASE_LETTER_BIT)
-/* Each copy of the save data takes this much SRAM, its check following it */
 #define SAVE_COPY_SRAM_SIZE 0x4000
-/* SRAM is mapped into the cartridge's second domain */
 #define SAVE_COPY_LOCATION(sramOffset) \
     {NO_HOST_FILE_NAME, \
         NO_HOST_FILE_NAME, \
@@ -157,11 +131,10 @@ FILE_STATIC SaveData g_SaveData;
 
 void PlaceImportedCharacters(void);
 
-/* A cell of the character grid */
 typedef struct GridCell {
-    /* 0x0 */ s16 column;
-    /* 0x2 */ s16 row;
-} GridCell; /* size = 0x4 */
+      s16 column;
+      s16 row;
+} GridCell;
 
 s32 ReadSaveCopies(SaveData *save, u8 isInSram);
 s32 WriteSaveCopies(SaveData *save, u8 isInSram);
@@ -174,11 +147,9 @@ s8 g_ChoosingControllerIndices[MAX_PLAYER_COUNT] =
 u8 g_SoundOptionBits = 0;
 s32 g_MenuRepeatButtons = 0;
 s32 g_MenuPressedButtons = 0;
-/* Read by no routine */
 static s32 f_UnusedWordAfterPressedButtons UNUSED = 0;
 s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT] =
     {NO_IMPORTED_COLUMN, NO_IMPORTED_COLUMN, NO_IMPORTED_COLUMN, NO_IMPORTED_COLUMN};
-/* The menus' label images, of which LoadMenuResources reads the first two */
 static AssetId f_MenuLabelAssets[] =
     {0x0523, 0x0524, 0x0525, 0x0526, 0x0527, 0x0528, 0x0529, 0x052A, 0x052B, 0x052C};
 AssetId g_MenuScreenImageAssets[MENU_SCREEN_COUNT] = {
@@ -240,7 +211,6 @@ AssetId g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD * MINI_GOLF_DISC_
 s16 g_MiniGolfDiscFiles[] = {0x0876, 0x0876, 0x0876, 0x0876, 0x0876, 0x0876};
 TrophySize g_TrophySizes[COURSE_COUNT] =
     {{40, 48}, {40, 51}, {40, 51}, {32, 64}, {48, 42}, {36, 51}};
-/* Read by no routine */
 static u8 f_UnusedBytesAfterTrophySizes[12] UNUSED = {0};
 AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH] = {
     {
@@ -963,7 +933,6 @@ static AssetId f_ToadImageAssets[] = {
     0x071B,
     0x071C,
 };
-/* Read by no routine */
 static s32 f_UnusedToadAssetIds[] UNUSED =
     {0x00000710, 0x00000711, 0x00000712, 0x00000713, 0x00000714, 0x00000715};
 s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
@@ -1024,7 +993,6 @@ static s16 f_EveryCharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_
         EMPTY_GRID_SLOT,
     },
 };
-/* The CharacterId in each slot of f_EveryCharacterGrid */
 static s16 f_RecordGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
     {
         CHARACTER_PLUM,
@@ -1054,7 +1022,6 @@ static s16 f_RecordGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] =
         EMPTY_GRID_SLOT,
     },
 };
-/* The CharacterChoice of each CharacterId */
 static s16 f_RecordCharacters[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_CHARLIE,
@@ -1075,10 +1042,6 @@ static s16 f_RecordCharacters[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_AZALEA,
     CHARACTER_CHOICE_JOE,
 };
-/*
- * The grid's first columns, whose characters a game of two or more players
- * offers without their being unlocked
- */
 #define MULTIPLAYER_GRID_COLUMN_COUNT 5
 static s16 f_StartingCharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
     {
@@ -1171,15 +1134,12 @@ s32 g_CourseNamePrimColors[] = {
     0xEF470300,
     0xEF470300,
 };
-/* The course points needed in total to open each course */
 static s32 f_CoursePointsNeeded[COURSE_COUNT] = {0, 50, 300, 1000, 2300, 4500};
-/* The imported characters that debug flag 0x54 adds */
 static s16 f_DebugImportedCharacters[IMPORTED_CHARACTER_COUNT] =
     {CHARACTER_KID, CHARACTER_SHERRY, CHARACTER_AZALEA, CHARACTER_JOE};
 static s16 f_DebugImportedDistances[IMPORTED_CHARACTER_COUNT] = {500, 400, 300, 200};
 static s16 f_DebugImportedSpins[IMPORTED_CHARACTER_COUNT] = {40, 30, 20, 10};
 static s16 f_DebugImportedSideSpins[IMPORTED_CHARACTER_COUNT] = {0, 50, -50, 10};
-/* Spelled with the top bit set on each lowercase letter */
 static char f_DebugImportedNames[IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] = {
     {'K', MARK_LOWERCASE('i'), MARK_LOWERCASE('d')},
     {
@@ -1204,32 +1164,22 @@ static ImportedCharacterCell f_ImportedCharacterCells[IMPORTED_CHARACTER_COUNT] 
     {{0, 0, 0, 2}, {0, 1, 0, 2}, {0, 2, 0, 2}, {0, 3, 0, 2}};
 static s16 f_CharacterSlots[] = {0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 0};
 s32 g_MenuCourseCount = 6;
-/* Cleared by ResetMenuChoices and each menu entry routine, but read by none */
 static s8 f_UnreadMenuEntryByte = 0;
 u8 g_AreBetPagesBlocked = 0;
-/* Read by no routine */
 static s32 f_UnusedWordsAfterBetPagesBlocked[2] UNUSED = {0};
 static SaveCopyLocation f_SaveCopyLocations[SAVE_COPY_COUNT] = {
     SAVE_COPY_LOCATION(0),
     SAVE_COPY_LOCATION(SAVE_COPY_SRAM_SIZE),
 };
-/* Read by no routine */
 static s32 f_UnusedWordsAfterSaveCopyLocations[4] UNUSED = {0};
 
-/* The byte sizes of buffers that hold one of several images in turn: the
- * labels and image slots, a trophy frame and a course's trophy image */
 #define MENU_LABEL_BUFFER_SIZE 0x70A8
 #define TROPHY_FRAME_BUFFER_SIZE 0xFA0
 #define COURSE_TROPHY_BUFFER_SIZE 0x125C
 
-/*
- * Allocates and reads the menu's assets, then reads the save. Overlay 3
- * calls this as it loads.
- */
 void LoadMenuResources(void) {
     EncodedAsset asset;
     AssetFile file;
-    /* The original frame has room for this; without it 44 words differ */
     s32 unused[4] UNUSED;
     SaveData *save;
     s32 index;
@@ -1369,7 +1319,6 @@ void LoadMenuResources(void) {
     TransferSaveData(save, FALSE);
 }
 
-/* Frees what LoadMenuResources allocated, as overlay 3 unloads */
 void FreeMenuResources(void) {
     s32 index;
 
@@ -1431,7 +1380,6 @@ SaveData *GetSaveData(void) {
     return &g_SaveData;
 }
 
-/* Returns what the menus keep between visits, for its callers to share */
 MenuMemory *GetMenuMemory(void) {
     return &g_MenuMemory;
 }
@@ -1477,22 +1425,14 @@ s32 GetCoursePointsNeeded(CourseIndex courseIndex) {
     return f_CoursePointsNeeded[courseIndex];
 }
 
-/* GetRecordPriority's ranks of Best Shot records */
 #define BIRDIE_PRIORITY 50
 #define BONUS_BIRDIE_PRIORITY 60
 #define EAGLE_PRIORITY 60
 #define BONUS_EAGLE_PRIORITY 70
 #define SHORT_HOLE_EAGLE_BONUS 10
 #define HOLE_IN_ONE_PRIORITY 90
-/* The highest */
 #define ALBATROSS_PRIORITY 100
 
-/*
- * Ranks a Best Shot record for keeping: rarer scores rank higher, as do
- * birdies and eagles with SCORE_KIND_UNUSED_BONUS set and eagles on holes
- * under par 5. A hole in one on a par 4 or 5 ranks as an albatross. A record
- * not worth keeping, or a par, ranks 0.
- */
 s32 GetRecordPriority(PlayRecord *record) {
     s32 priority;
     s32 bits;
@@ -1504,12 +1444,6 @@ s32 GetRecordPriority(PlayRecord *record) {
     kind = bits & SCORE_KIND_MASK;
     priority = 0;
     par = record->hole.par;
-    /*
-     * Kept in a variable, which the original's register choices need: the
-     * constant in its place swaps registers in 16 words, as do also initializing
-     * priority in its declaration, declaring bits, kind, par and priority in
-     * that order, clearing priority first or switching on the masked bits
-     */
     maxPriority = ALBATROSS_PRIORITY;
     if (bits & SCORE_KIND_RECORDED) {
         switch (kind) {
@@ -1537,7 +1471,6 @@ s32 GetRecordPriority(PlayRecord *record) {
                     break;
                 }
 
-                /* fallthrough */
             case SCORE_KIND_ALBATROSS:
                 priority = maxPriority;
                 break;
@@ -1547,8 +1480,6 @@ s32 GetRecordPriority(PlayRecord *record) {
     return priority;
 }
 
-/* Fills order with the indices of values from the largest value down, keeping
- * ties in order */
 void SortIndicesDescending(s32 *values, s32 *order, s32 count) {
     s32 sortedValues[count];
     s32 index;
@@ -1586,13 +1517,11 @@ void SortIndicesDescending(s32 *values, s32 *order, s32 count) {
     }
 }
 
-/* Keeps a Ring Shot hole's record in a save slot, writing the save at once */
 void SaveRingShotRecord(s32 recordIndex, RingShotRecord *record) {
     g_SaveData.ringShotRecords[recordIndex] = *record;
     TransferSaveData(GetSaveData(), TRUE);
 }
 
-/* The save keeps the highest-priority records of each kind, this many each */
 #define RANKED_GROUP_LENGTH 5
 
 void InsertRankedRecord(PlayRecord *record) {
@@ -1611,14 +1540,9 @@ void InsertRankedRecord(PlayRecord *record) {
     if ((s8)record->scoreKind & SCORE_KIND_RECORDED) {
         records = g_SaveData.rankedRecords;
         newPriority = GetRecordPriority(record);
-        lowestPriority = 0x40000000; /* Above any priority */
+        lowestPriority = 0x40000000;
         lowestIndex = 0;
 
-        /*
-         * Every case sets the length, which the original needs to match: setting
-         * it once after the switch gives 113 words differing (1 in shape), once
-         * before it 71 (7), and using RANKED_GROUP_LENGTH in the loops 219 (31)
-         */
         switch (record->scoreKind & SCORE_KIND_MASK) {
             case SCORE_KIND_BIRDIE:
                 firstIndex = 0 * RANKED_GROUP_LENGTH;
@@ -1652,10 +1576,6 @@ void InsertRankedRecord(PlayRecord *record) {
         }
 
         if (newPriority >= lowestPriority) {
-            /*
-             * Rank the group with its lowest entry dropped into slots 1 on,
-             * put the new record in slot 0, then rank all of them again
-             */
             osSyncPrintf("2");
             priorities[lowestIndex] = 0;
             SortIndicesDescending(priorities, order, groupLength);
@@ -1694,8 +1614,6 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
     Boolean hasIllegalState;
     s32 index;
 
-    /* A mode with no save slot has room for no players, so saving one with any
-     * players reports too many */
     playerCount = 0;
     switch (g_GameState.gameMode) {
         case GAME_MODE_STROKE:
@@ -1797,7 +1715,7 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
     Boolean hasIllegalState;
     s32 index;
 
-    playerCount = MAX_PLAYER_COUNT; /* The limit, until the count is known */
+    playerCount = MAX_PLAYER_COUNT;
     players = g_SaveData.savedPlayers[slotIndex];
     game = &g_SaveData.savedGames[slotIndex];
     if (!isContinuing) {
@@ -1877,11 +1795,6 @@ void RecordDisplayListLength(u32 commandCount) {
     }
 }
 
-/*
- * Puts a Speed Golf round's time on its course's best times, if it is fast
- * enough, with its golfer's character and color and its net score to par,
- * which orders equal times, and saves
- */
 void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar, CharacterId character, s32 palette) {
     SaveData *save;
     s32 count;
@@ -1889,8 +1802,6 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar, CharacterId chara
     s32 runIndex;
     s32 scanIndex;
     s32 otherIndex;
-    /* The original frame has room for this; without it 64 words differ, none in
-     * shape */
     s32 unused[4] UNUSED;
 
     save = GetSaveData();
@@ -1917,10 +1828,6 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar, CharacterId chara
                 count += save->records.bestTimes[courseIndex][index] > 0;
             }
 
-            /*
-             * Both sorts copy the smaller entry over the larger one instead
-             * of swapping them, so the larger one is lost.
-             */
             for (index = 0; index != count; index++) {
                 for (scanIndex = index + 1; scanIndex != count; scanIndex++) {
                     if (save->records.bestTimes[courseIndex][index] >
@@ -2040,8 +1947,6 @@ Boolean IsDonkeyKongUnlocked(void) {
     return starCount >= DONKEY_KONG_STAR_COUNT;
 }
 
-/* The Ring Shot course that opens at exactly the stars earned so far, or 0 for
- * none */
 s32 GetRingShotCourseOpenedAtStarCount(void) {
     SaveData *save;
     s32 starCount;
@@ -2109,15 +2014,6 @@ Boolean IsMetalMarioUnlocked(void) {
     return badgeCount == COURSE_COUNT * COURSE_HOLE_COUNT;
 }
 
-/*
- * Fills the character grid from the save: with every character under
- * GAME_FLAG_ALL_CHARACTERS, or else the starting ones, the first five columns
- * for more than one player, those whose matchup records show a win, the
- * unlocked ones and the imported ones, whose faces load too unless
- * skipsImportedFaces is set. playerCount is reused below as a record count and
- * a character id, to match: a winCount variable gives 50 words differing (none
- * in shape), and a character variable 4 (0).
- */
 void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     EncodedAsset asset;
     AssetFile file;
@@ -2125,10 +2021,6 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     s32 row;
     s32 column;
     s32 index;
-    /*
-     * Also holds a grid entry at the end, to match: a gridEntry variable gives 4
-     * words differing, none in shape
-     */
     s32 recordIndex;
 
     save = GetSaveData();
@@ -2222,18 +2114,9 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     }
 }
 
-/*
- * Puts the characters brought over from the Game Boy Color game, or the debug
- * set under GAME_FLAG_ALL_CHARACTERS, in their grid cells with their names
- * and first clubs
- */
 void PlaceImportedCharacters(void) {
     s16 index;
     s16 byteIndex;
-    /*
-     * Also the byte index of the first loops, to match: clearing the names with
-     * byteIndex gives 43 words differing, 3 in shape
-     */
     s16 count;
     char *name;
     u8 letter;
@@ -2313,10 +2196,6 @@ void PlaceImportedCharacters(void) {
     }
 }
 
-/*
- * Rebuilds the character grid and returns whether a character has a place
- * on it (a GridSearchResult), which it lacks while it is locked
- */
 s32 FindCharacterOnGrid(CharacterId character) {
     s32 slot;
     s32 row;
@@ -2337,8 +2216,6 @@ s32 FindCharacterOnGrid(CharacterId character) {
     return g_CharacterGrid[row][column] < 0 ? CHARACTER_OFF_GRID : CHARACTER_ON_GRID;
 }
 
-/* Marks saved games whose settings or players are out of range as no longer
- * valid */
 void InvalidateBrokenSavedGames(void) {
     SaveData *save;
     Boolean isInvalid[SAVED_GAME_COUNT];
@@ -2389,7 +2266,6 @@ void InvalidateBrokenSavedGames(void) {
 
         for (entryIndex = 0; entryIndex != sub->playerCount; entryIndex++) {
             player = &save->savedPlayers[index][entryIndex];
-            /* The unsigned tests also catch negative indices */
             if ((u8)player->characterIndex >= CHARACTER_COUNT) {
                 isInvalid[index] = TRUE;
             }
@@ -2407,17 +2283,12 @@ void InvalidateBrokenSavedGames(void) {
     }
 }
 
-/*
- * Takes the recorded mark off Ring Shot records whose score, character,
- * palette, course or hole is out of range.
- */
 void InvalidateBrokenRingShotRecords(void) {
     SaveData *save;
     Boolean isInvalid[RING_SHOT_RECORD_COUNT];
     s32 recordIndex;
     s32 kind;
     s32 scoreKind;
-    /* The original frame has room for this; without it 8 words differ */
     s32 unused[2] UNUSED;
 
     save = GetSaveData();
@@ -2430,24 +2301,13 @@ void InvalidateBrokenRingShotRecords(void) {
 
         scoreKind = record->scoreKind;
         kind = scoreKind;
-        /*
-         * Masked in place, so that the test reads the loaded kind and the bounds
-         * read its copy, to match: testing scoreKind & SCORE_KIND_RECORDED gives 5
-         * words differing, 1 in shape
-         */
         scoreKind &= SCORE_KIND_RECORDED;
         if (scoreKind != 0) {
-            /*
-             * Masking within the test keeps GCC from merging the two bounds into
-             * one unsigned test, to match: masking before the test gives 4 words
-             * differing, 4 in shape
-             */
             if ((kind &= SCORE_KIND_MASK) >= SCORE_KIND_COUNT || kind < 0) {
                 isInvalid[recordIndex] = TRUE;
             }
         }
 
-        /* The unsigned tests also catch negative indices */
         if ((u8)record->characterIndex >= CHARACTER_COUNT) {
             isInvalid[recordIndex] = TRUE;
         }
@@ -2465,8 +2325,6 @@ void InvalidateBrokenRingShotRecords(void) {
         }
     }
 
-    /* Toggling rather than clearing sets the flag on records that fail with it
-     * clear */
     for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
         RingShotRecord *record = &save->ringShotRecords[recordIndex];
 
@@ -2476,7 +2334,6 @@ void InvalidateBrokenRingShotRecords(void) {
     }
 }
 
-/* Keeps the hole and course being played in the menu memory */
 void RememberPlayedHole(void) {
     MenuMemory *memory;
 
@@ -2509,9 +2366,6 @@ Boolean IsNintendoClubTournament(void) {
     return g_IsNintendoClubTournament != 0;
 }
 
-/* The club tournament messages: the first of the tournament names and of the
- * course names, the stroke play and speed golf modes, and the two mini golf
- * course titles */
 #define FIRST_TOURNAMENT_NAME_MESSAGE 0x16F
 #define FIRST_COURSE_NAME_MESSAGE 0x1EB
 #define STROKE_PLAY_MESSAGE 0x9E
@@ -2593,7 +2447,6 @@ s32 GetClubTournamentCourseTitleMessage(void) {
     return value;
 }
 
-/* Empties the slots of the characters imported from the Game Boy Color game */
 void ClearImportedCharacters(void) {
     s32 index;
     s32 byteIndex;
@@ -2628,7 +2481,7 @@ void ComputeRoundStatistics(void) {
     f32 driveYardSum;
     s32 driveCountSum;
     f32 zero;
-    f32 emptyCount; /* Only ever zero */
+    f32 emptyCount;
     f32 holeCount;
 
     saved = GetSaveData()->records.courseStats;
@@ -2650,7 +2503,6 @@ void ComputeRoundStatistics(void) {
             g_CourseStatFigures[courseIndex].hasPlace[FIRST_PLACE_INDEX] = FALSE;
         }
         else {
-            /* unusedDriveFigure is left as it was */
             reciprocal = 1.0f / entry->roundCount;
             g_CourseStatFigures[courseIndex].bestScore = entry->bestScore;
             g_CourseStatFigures[courseIndex].averageScore = entry->strokeTotal * reciprocal;
@@ -2682,10 +2534,6 @@ void ComputeRoundStatistics(void) {
         }
     }
 
-    /*
-     * Zeroed this early to match: zeroing it after the flag, or in the loop's
-     * for, gives 2 words differing
-     */
     courseIndex = 0;
     hasPlayedCourse = FALSE;
     g_CourseStatFigures[COURSE_COUNT].roundCount = 0.0f;
@@ -2705,7 +2553,7 @@ void ComputeRoundStatistics(void) {
     g_CourseStatFigures[COURSE_COUNT].bestDrive = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].bestScore = g_CourseStatFigures[0].bestScore;
     g_CourseStatFigures[COURSE_COUNT].bestDrive = g_CourseStatFigures[0].bestDrive;
-    zero = g_CourseStatFigures[COURSE_COUNT].roundCount; /* Read back after being zeroed */
+    zero = g_CourseStatFigures[COURSE_COUNT].roundCount;
     for (; courseIndex != COURSE_COUNT; courseIndex++) {
         if (zero < g_CourseStatFigures[courseIndex].roundCount) {
             if (!hasPlayedCourse) {
@@ -2783,10 +2631,6 @@ void ComputeRoundStatistics(void) {
     }
 }
 
-/*
- * Clears every menu choice made so far, so that the menu starts again from
- * the title, as when the debug scene menu picks the menu
- */
 void ResetMenuChoices(void) {
     s8 index;
 
@@ -2822,10 +2666,6 @@ void ResetMenuChoices(void) {
     f_UnreadMenuEntryByte = 0;
 }
 
-/*
- * Clears the hole-load and menu wipe flags and sets the Ring Shot one, without
- * picking a screen; no routine calls it
- */
 void ResetMenuEntryFlags(void) {
     g_IsChosenHoleLoadStarted = FALSE;
     g_IsRingShotWipeOpening = TRUE;
@@ -2833,10 +2673,6 @@ void ResetMenuEntryFlags(void) {
     f_UnreadMenuEntryByte = 0;
 }
 
-/*
- * Enters the menu at the course select, setting its kind and the bet set for
- * the mode just played
- */
 void EnterMenuAtCourseSelect(void) {
     switch (g_GameState.gameMode) {
         case GAME_MODE_TOURNAMENT:
@@ -2889,8 +2725,6 @@ void EnterMenuAtCourseSelect(void) {
     g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
 }
 
-/* Enters the menu at the title with every choice, import and controller
- * assignment cleared */
 void EnterMenuAtTitle(void) {
     ResetMenuChoices();
     g_IsRingShotWipeOpening = TRUE;
@@ -2908,7 +2742,6 @@ void EnterMenuAtTitle(void) {
     g_MenuScreen = MENU_SCREEN_TITLE;
 }
 
-/* Enters the menu at the Ring Shot exit; no routine calls it */
 void EnterMenuAtRingShotExit(void) {
     g_IsRingShotWipeOpening = TRUE;
     g_IsMenuWipeOpening = TRUE;
@@ -2917,7 +2750,6 @@ void EnterMenuAtRingShotExit(void) {
     g_MenuScreen = MENU_SCREEN_RING_SHOT_EXIT;
 }
 
-/* Enters the menu at the mode select, as quitting a round does */
 void EnterMenuAtModeSelect(void) {
     g_IsRingShotWipeOpening = TRUE;
     g_IsMenuWipeOpening = TRUE;
@@ -2926,7 +2758,6 @@ void EnterMenuAtModeSelect(void) {
     g_MenuScreen = MENU_SCREEN_MODE_SELECT;
 }
 
-/* Enters the menu at the blank screen, which waits for A to go to the title */
 void EnterMenuAtBlankScreen(void) {
     g_IsRingShotWipeOpening = TRUE;
     g_IsMenuWipeOpening = TRUE;
@@ -2935,7 +2766,6 @@ void EnterMenuAtBlankScreen(void) {
     g_MenuScreen = MENU_SCREEN_BLANK;
 }
 
-/* Enters the menu at the Ring Shot records, as leaving Ring Shot does */
 void EnterMenuAtRingShotRecords(void) {
     g_IsRingShotWipeOpening = TRUE;
     g_IsMenuWipeOpening = TRUE;
@@ -2944,7 +2774,6 @@ void EnterMenuAtRingShotRecords(void) {
     g_MenuScreen = MENU_SCREEN_RING_SHOT_RECORDS;
 }
 
-/* Enters the menu at the Best Shots, ending the replay that it started */
 void EnterMenuAtBestShots(void) {
     g_IsChosenHoleLoadStarted = FALSE;
     g_IsRingShotWipeOpening = TRUE;
@@ -2955,17 +2784,14 @@ void EnterMenuAtBestShots(void) {
     g_MenuScreen = MENU_SCREEN_BEST_SHOTS;
 }
 
-/* Returns whether the music is turned off in the options */
 s8 IsMusicOffChosen(void) {
     return GetSaveData()->options[SAVE_OPTION_MUSIC_OFF];
 }
 
-/* Returns whether mono sound is chosen in the options */
 s8 IsMonoChosen(void) {
     return GetSaveData()->options[SAVE_OPTION_MONO];
 }
 
-/* Returns whether the simple flight camera is chosen in the options */
 s8 IsSimpleCameraChosen(void) {
     return GetSaveData()->options[SAVE_OPTION_SIMPLE_CAMERA];
 }
@@ -2974,8 +2800,6 @@ void WriteSaveData(void) {
     TransferSaveData(GetSaveData(), TRUE);
 }
 
-/* Copies the options between the save data and g_MenuMemory's option bits, in
- * the direction of the transfer */
 void SyncSaveOptions(SaveData *save, Boolean isWrite, s32 readResult) {
     u8 *bits;
     s8 *options;
@@ -3035,8 +2859,6 @@ void TransferSaveData(SaveData *save, u8 isWrite) {
         SyncSaveOptions(save, FALSE, readResult);
     }
     else {
-        /* readResult is never set on this path, but SyncSaveOptions ignores it when
-         * writing */
 #ifdef AVOID_UB
         readResult = SAVE_READ_FAILED;
 #endif
@@ -3045,9 +2867,7 @@ void TransferSaveData(SaveData *save, u8 isWrite) {
     }
 }
 
-/* Reads the first intact copy; if neither is, the save data starts over */
 s32 ReadSaveCopies(SaveData *save, u8 isInSram) {
-    /* Only takes up stack; without it 52 words differ */
     u8 unusedBuffer[0x90] UNUSED;
     u8 checkBuffer[0x40];
     SaveCheck *check;

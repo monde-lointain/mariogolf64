@@ -3,8 +3,6 @@
 
 #include <ultra64.h>
 
-/* The boot logos */
-
 void LoadBootLogos(void);
 void UpdateBootLogos(void);
 

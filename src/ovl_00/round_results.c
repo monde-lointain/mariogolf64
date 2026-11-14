@@ -1,8 +1,3 @@
-/*
- * The round overlay. It begins with the results that slide in when a
- * round ends: the players' portraits and scores, the course points the
- * round earned and the notices of what those points unlocked.
- */
 #include "round_results.h"
 
 #include <ultra64.h>
@@ -41,129 +36,90 @@
 #include "text.h"
 #include "tournament.h"
 #include "transfer_pak.h"
-/* OpenRoundResults's request that frees the results */
 #define CLOSE_ROUND_RESULTS (-1)
 
-/* f_ResultsState values */
 enum ResultsState {
     RESULTS_SLIDING_IN,
     RESULTS_SHOWN,
-    RESULTS_CLOSING /* Saves and frees them */
+    RESULTS_CLOSING
 };
 
-/* f_BannerKind values: what the results banner shows */
 enum BannerKind {
-    BANNER_KIND_NONE, /* Set with BANNER_HIDDEN as the results load */
+    BANNER_KIND_NONE,
     BANNER_KIND_TOURNAMENT_PLACE,
-    /* BANNER_KIND_UNUSED_* kinds are never set */
     BANNER_KIND_UNUSED_A,
     BANNER_KIND_POINTS,
     BANNER_KIND_UNUSED_B,
-    /* Would show MESSAGE_UNUSED_BANNER */
     BANNER_KIND_UNUSED_MESSAGE
 };
 
-/* f_BannerState values */
 enum BannerState {
-    BANNER_UNSET = -1, /* Until the results first load */
+    BANNER_UNSET = -1,
     BANNER_SLIDING_IN,
     BANNER_SHOWN,
     BANNER_HIDDEN = 3,
     BANNER_SLIDING_OUT
 };
 
-/* LoadUnlockNotice's unlocks */
 enum UnlockNotice {
     UNLOCK_NOTICE_DONKEY_KONG,
     UNLOCK_NOTICE_MAPLE,
     UNLOCK_NOTICE_METAL_MARIO,
-    UNLOCK_NOTICE_COURSES /* The first of the courses' unlocks */
+    UNLOCK_NOTICE_COURSES
 };
 
-/* f_UnlockNoticeKind values */
 enum UnlockNoticeKind {
     UNLOCK_NOTICE_KIND_NONE,
     UNLOCK_NOTICE_KIND_COURSE,
     UNLOCK_NOTICE_KIND_CHARACTER
 };
 
-/* f_TallySpeed normally, and while A is held */
 #define NORMAL_TALLY_SPEED 1
 #define FAST_TALLY_SPEED 10
-/* At the normal speed, the tally ticks on every fourth call */
 #define TALLY_SOUND_INTERVAL_MASK 3
-/* The points that the debug point flags add */
 #define SMALL_DEBUG_POINTS_BONUS 500
 #define LARGE_DEBUG_POINTS_BONUS 9999
-/* Where the debug unlock choice prints the chosen character */
 #define DEBUG_UNLOCK_CHOICE_COLUMN 25
 #define DEBUG_UNLOCK_CHOICE_ROW 5
 #define CONFIRM_SOUND_CHANNEL 15
 #define CONFIRM_SOUND_VOLUME 100
 
-/*
- * The faces a results portrait plays through: the pleased one, the character's
- * faces 1 to 4, is given to winners, to the player shown a score password, and
- * to every player when a course opens; the beaten one, faces 5 to 8, to players
- * ranked below another.
- */
 enum PortraitAnimation {
     PORTRAIT_ANIMATION_PLEASED = 1,
     PORTRAIT_ANIMATION_BEATEN = 4
 };
 
-/*
- * The course notice drops in on a half sine swing, NOTICE_SWING_STEP an
- * update, and is done NOTICE_DONE_FRAME frames after it starts
- */
 #define NOTICE_SWING_HEIGHT 160.0f
-/* Nearly a quarter turn back, so that the swing starts at its full height */
 #define NOTICE_SWING_START_ANGLE (-1.57f)
 #define NOTICE_SWING_STEP (M_PI / 9)
 #define NOTICE_SWING_FRAMES 46
 #define NOTICE_DONE_FRAME 51
 
-/*
- * The character notice's portrait changes face every few frames after
- * a pause, then lifts away, faster and faster, until it is off screen
- */
 #define NOTICE_FACE_DELAY 10
-/* Every fourth frame */
 #define NOTICE_FACE_INTERVAL_MASK 3
 #define NOTICE_LAST_FACE 3
 #define NOTICE_LIFT_DELAY 50
 #define NOTICE_LIFT_START_SPEED 8
-/*
- * Until the lift passes this, it rises NOTICE_LIFT_START_SPEED a frame; after,
- * it grows each frame by this fraction of itself
- */
 #define NOTICE_LIFT_START_LIMIT (-2)
 #define NOTICE_LIFT_GROWTH_NUMERATOR 2
 #define NOTICE_LIFT_GROWTH_DENOMINATOR 3
 #define NOTICE_LIFT_EXIT (-200)
 
-/* The places image's 32x32 icons, after its 256-color palette */
 #define PLACE_ICON_SIZE 32
 
-/* The labels image's 16-color strips. Each is stored wider than drawn. */
 #define RESULTS_LABEL_WIDTH 72
 #define RESULTS_LABEL_STORED_WIDTH 80
 #define RESULTS_LABEL_HEIGHT 18
 
 #define PORTRAIT_SIZE 32
-/* The portrait's mirrored wrap masks its S at its width, 1 << 5 */
 #define PORTRAIT_SIZE_LOG2 5
 
-/* Course points are clamped there rather than overflow */
 #define MAX_COURSE_POINTS S32_MAX
 
-/* The places of f_TournamentPrizes's columns after the trophy winners' */
 #define TROPHY_PLACE_COUNT 3
 #define PRIZE_TOP_TEN 10
 #define PRIZE_TOP_TWENTY 20
 
-/* The columns of f_TournamentPrizes: a prize for each trophy place, then one
- * for each wider bracket of places */
 enum PrizeBracket {
     PRIZE_BRACKET_FIRST,
     PRIZE_BRACKET_SECOND,
@@ -174,31 +130,24 @@ enum PrizeBracket {
     PRIZE_BRACKET_COUNT
 };
 
-/* The results' images. g_GameState.isClubTournament swaps in another set. */
 #define RESULTS_BACKDROP_ASSET 0x6A0
 #define CLUB_TOURNAMENT_BACKDROP_ASSET 0x947
 #define FINAL_RESULTS_TITLE_ASSET 0x69F
 #define COURSE_NOTICE_TITLE_ASSET 0x55F
 #define CHARACTER_NOTICE_TITLE_ASSET 0x560
-/* A 72 by 64 white glow fading to yellow, loaded but never drawn */
 #define RESULTS_GLOW_IMAGE_ASSET 0x72C
 #define RESULTS_GLOW_PALETTE_ASSET 0x72D
 #define MATCH_WIN_BANNER_ASSET 0x6A2
 #define MATCH_LOSE_BANNER_ASSET 0x6A3
-/* The words UP, DOWN and EVEN, stacked, for match play standings */
 #define MATCH_STANDING_WORDS_ASSET 0x8FE
-/* The digits 0 to 9, stacked */
 #define TOURNAMENT_PLACE_DIGITS_ASSET 0x6A1
 
-/* Makes DrawRank draw the rank as a place: 1st, 2nd and so on */
 #define RANK_AS_PLACE 0x1000
 #define NOTICE_TITLE_STRIP_HEIGHT 8
 #define NOTICE_SHINE_SIZE 64
 #define NOTICE_SHINE_STEP 18
 #define NOTICE_SHINE_START 16
 #define NOTICE_SHINE_END 40
-/* The title's depth, and the shine's behind it, so that the shine only lights
- * the title's letters */
 #define NOTICE_TITLE_DEPTH 0x3FFF
 #define NOTICE_SHINE_DEPTH 0x4027
 #define NOTICE_SWING_SOUND_CHANNEL 13
@@ -216,11 +165,6 @@ enum PrizeBracket {
 #define RESULTS_TEXT_ALPHA 255
 #define LARGE_DIGIT_WIDTH 16
 #define LARGE_DIGITS_HEIGHT 256
-/*
- * The Course Points footer: the points total, then the text of the points
- * left to the next course, or else the notice that every course is open,
- * whose row differs by screen
- */
 #define POINTS_TOTAL_X 29
 #define POINTS_TOTAL_Y 201
 #define POINTS_TO_NEXT_COURSE_X 64
@@ -229,29 +173,23 @@ enum PrizeBracket {
 #define SOLO_ALL_COURSES_OPEN_Y 192
 #define PLAYERS_ALL_COURSES_OPEN_Y 200
 #define MATCH_ALL_COURSES_OPEN_Y 204
-/* The minutes wrap here, since the time shows two digits */
 #define SHOWN_MINUTES_LIMIT 99
 #define RESULTS_LABEL_BETS 4
 #define RESULTS_HEADING_Y 54
-/* Bet totals of four digits all shift left, so that the column stays centered
- */
 #define FOUR_DIGIT_BET_SHIFT (-16)
 #define FOUR_DIGIT_BET_MIN 999
 #define FOUR_DIGIT_BET_MAX 9999
 extern const char f_NumberFormat[];
 extern const char f_PlaceNumberFormat[];
 
-/* f_PlayerRanks of a match's players */
 #define MATCH_RANK_WON 100
 #define MATCH_RANK_LOST 101
 
-/* The digit font draws '#' as a plus-minus sign, for an even score */
 extern const char f_EvenScoreFormat[];
 extern const char f_ScoreFormat[];
 extern const char f_PointsFormat[];
 extern const char f_TimeFormat[];
 extern const char f_TimeLabel[];
-/* Computer players earn no Course Points, which shows as a dash */
 extern const char f_NoPointsText[];
 
 void FreeRoundResults(void);
@@ -262,50 +200,34 @@ s32 ShowScorePassword(ControllerState *controller);
 s32 UpdateCoursePointsResults(ControllerState *controller);
 s32 UpdateMatchResults(ControllerState *controller);
 
-/* The score password shows as two lines of equal length */
 #define SCORE_PASSWORD_LINE_LENGTH (SCORE_PASSWORD_LENGTH / 2)
 
-/* The images of the trophy a course's tournament gives its top three */
 typedef struct TrophyAssets {
-    /* 0x0 */ s32 palette; /* For first place; second and third follow */
-    /* 0x4 */ s32 image;
-    /* 0x8 */ s32 frameCount; /* Of image, as the trophy turns */
-} TrophyAssets; /* size = 0xC */
+      s32 palette;
+      s32 image;
+      s32 frameCount;
+} TrophyAssets;
 
-/*
- * The course points a round earned: earned counts down as the results add
- * them to the save, and shown keeps the total for the banner
- */
 typedef struct CoursePointsTally {
     s32 earned;
     s32 shown;
-} CoursePointsTally; /* size = 0x8 */
+} CoursePointsTally;
 
-/* Each course's trophy image's sizes, indexed by these */
 #define TROPHY_WIDTH 0
-/* TROPHY_PART_COUNT of them */
 #define TROPHY_PART_HEIGHTS 1
 #define TROPHY_SHINE_HEIGHT 3
 #define TROPHY_SIZE_COUNT 4
 
-/* "StrokeSpeedGolfMini-Golf", which only an unread pointer points to */
 extern const char f_UnusedModeNamesText[];
 
 static Boolean f_AreResultsLoaded = FALSE;
 static s32 f_ResultsState = RESULTS_SLIDING_IN;
-/* The step within the results' state, from each mode's *_STEP_* values */
 static s32 f_ResultsStep = 0;
-/* Frames the results have run, which some steps reset to time a wait */
 static s32 f_ResultsStepTime = 0;
 static s32 f_ResultsSlide = SCREEN_WIDTH;
 static s32 f_ResultsTop = 0;
 static s32 f_TallySpeed = NORMAL_TALLY_SPEED;
-/* The pressing hand shows while the results wait for A */
 static Boolean f_IsAwaitingConfirm = FALSE;
-/*
- * Each course's tournament prizes, in course points: first to third
- * place, then up to PRIZE_TOP_TEN, PRIZE_TOP_TWENTY and the rest
- */
 static s32 f_TournamentPrizes[COURSE_COUNT][PRIZE_BRACKET_COUNT] = {
     {50, 25, 12, 8, 5, 3},
     {200, 100, 50, 20, 10, 6},
@@ -332,7 +254,6 @@ static s32 f_BannerX = SCREEN_WIDTH;
 static s32 f_BannerY = 0;
 static s32 f_CourseNoticeAssets[] = {0x96C, 0x96D, 0x96E, 0x96F, 0x970};
 static s32 f_TallySoundCount = 0;
-/* Read by no routine */
 static s32 f_UnusedPingPongFrames[6] UNUSED = {0, 1, 2, 3, 2, 1};
 static s32 f_TrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT] = {
     {40, 24, 24, 38},
@@ -345,9 +266,7 @@ static s32 f_TrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT] = {
 static s32 f_TrophyShineFrame = 0;
 static s32 f_TrophyFrame = 0;
 static CharacterId f_DebugUnlockCharacter = 0;
-/* Read by no routine */
 static const char *f_UnusedModeNamesPointers[2] UNUSED = {NULL, f_UnusedModeNamesText};
-/* The text color of each text slot, from slot 1 */
 static u8 f_TextSlotColors[][3] = {
     {0xFF, 0xFF, 0xFF},
     {0x7F, 0xBF, 0xFF},
@@ -355,12 +274,9 @@ static u8 f_TextSlotColors[][3] = {
     {0x7F, 0xFF, 0x4B},
     {0xFF, 0x7F, 0x9F},
 };
-/* Counts up through the pressing hand's frames, HAND_FRAME_DRAWS draws to a
- * frame */
 static s32 f_HandFrame = 0;
 static Radians f_TitleBobAngle = 0.0f;
 
-/* Read by no routine */
 static u8 f_UnusedBufferBeforeBackdrop[0x10] UNUSED;
 static u8 *f_ResultsBackdropImage;
 static u8 *f_FinalResultsTitleImage;
@@ -373,13 +289,10 @@ static u8 *f_ResultsCloudImage;
 static u8 *f_ResultsLabelsImage;
 static u8 *f_ResultsLargeDigitsImage;
 static u8 *f_ResultsPlacesImage;
-/* In a match, the LOSE banner that DrawRank draws for a rank past RANK_BANNER;
- * in a tournament, the digits it draws a place from the 4th with */
 static u8 *f_SecondBannerImage;
 static u8 *f_NameplateImage;
 static u8 *f_NoticeTitleImage;
 static u8 *f_ResultsShineImage;
-/* An image and palette that are loaded and freed, but never drawn */
 static u8 *f_UnusedResultsImage;
 static u8 *f_UnusedResultsPalette;
 static u8 *f_TrophyImage;
@@ -395,16 +308,13 @@ static CharacterId f_PortraitCharacterIndex;
 static s32 f_NoticeStage;
 static s32 f_NoticeFrameCount;
 static s32 f_NoticeSwing;
-/* Moves the course notice down; only ever set to 0 */
 static s32 f_CourseNoticeShift;
 static Radians f_NoticeAngle;
 static Boolean f_IsNoticeHeld;
 static s32 f_NoticeTime;
 static s32 f_NoticeFaceIndex;
 static s32 f_NoticeLift;
-/* Moves the character notice down; only ever set to 0 */
 static s32 f_CharacterNoticeShift;
-/* The score password of a round of a tournament entered by password */
 static char f_ScorePassword[SCORE_PASSWORD_LENGTH];
 static s32 f_PlayerResults[MAX_PLAYER_COUNT];
 static s32 f_PlayerPoints[MAX_PLAYER_COUNT];
@@ -417,7 +327,6 @@ static s32 f_PortraitAnimations[MAX_PLAYER_COUNT];
 static s32 f_PortraitFrames[MAX_PLAYER_COUNT];
 static s32 f_PortraitTimers[MAX_PLAYER_COUNT];
 
-/* The course points that open the courses up to courseIndex, together */
 s32 SumCoursePointsNeeded(CourseIndex courseIndex) {
     s32 total = 0;
     s32 i;
@@ -429,8 +338,6 @@ s32 SumCoursePointsNeeded(CourseIndex courseIndex) {
     return total;
 }
 
-/* Loads the results and slides them in, or with CLOSE_ROUND_RESULTS frees them
- */
 void OpenRoundResults(s32 request) {
     if (request == CLOSE_ROUND_RESULTS) {
         FreeRoundResults();
@@ -442,11 +349,6 @@ void OpenRoundResults(s32 request) {
     f_ResultsState = RESULTS_SLIDING_IN;
 }
 
-/*
- * Adds to the save the average points of the players that have them,
- * scaled by the course's rate, counting them with index. A macro, since the
- * original repeats it for each mode.
- */
 #define AddRoundPoints(save, index) \
     { \
         s32 counted_; \
@@ -481,55 +383,6 @@ void OpenRoundResults(s32 request) {
         } \
     }
 
-/*
- * Loads the results screen's images and each player's portrait, works out the
- * players' results and ranks for the game mode, adds the round's course points
- * to the save and starts the results' song. It does nothing if the results are
- * already loaded.
- *
- * The club tournament's results loop sits in a block of its own, as a macro's
- * do-while would make it, to match. The original keeps k in $s2 and the loop's
- * stepped result address in $s1. flow weights a reference by its loop depth,
- * and a loop that runs once still counts, so the block lifts the address's 7
- * references to 11 over a live length of 12, priority 27500 in global-alloc,
- * where k has 59 over 121, priority 24380: the address takes $s1 first.
- * Without the block, or with plain braces, the address's priority is 11666 and
- * k's 22314, so k takes $s1 and 54 words differ, none in shape. A block inside
- * the loop, around its statement, gives the same 54. In the block, counting
- * the results with i, with j or with a counter of their own gives 159, 191 or
- * 175 words, 7 in shape. With the stroke results' loop in a block as well, the
- * function still matches.
- *
- * k also counts the tally, the tournament's standings and the skins' totals
- * and ranks. None of the other choices of counter differs in shape: counting
- * the Game Boy experience loop or the stroke results with k gives 70 words;
- * the bet loop, the portrait loop or both with k 62, 60 or 68; the tally with
- * a counter of its own 90, all three tallies with i or j 158 or 128, and any
- * one of them 110 or 58; the tournament's standings or the skins' totals with
- * i 110, and the skins' ranks 112.
- *
- * The match game reads the last hole into holeEnd before clearing the results,
- * as the matched scorecard_drawing.c reads its countEnd, and the original loads
- * it in GetFirstHoleIndex's delay slot; testing g_GameState.holeIndex in the
- * loop gives 17 words (3 in shape). Its clear is written as
- * f_PlayerResults[0] = f_PlayerResults[1] = 0, which stores the second result
- * first, as the original does; two statements in that order give 10 words (8
- * in shape), and in the other order 6 (6). The tournament's cap adds the prize
- * before the earned points, as the subtraction before it does; the other
- * order in its test gives 8 words (2 in shape), and in its sum as well 10 (2).
- *
- * The original keeps the earned points' address in $a1 across the tally and
- * builds it again in $a0 after GetCourseRecordIndex, the address forms GCC
- * gives a struct's fields; as two separate s32s they are addressed through $at
- * each time, and 93 words differ, 25 in shape.
- *
- * The tournament's open course count is stored first, as the original does, and
- * the ranks are counted in f_PlayerRanks itself. The tournament finds the
- * player's standing through a pointer to the standing it tests. AddRoundPoints
- * passes g_GameState.courseIndex to GetCourseRecordIndex, which ignores it, as
- * the original loads it into $a0 before both calls; play.c passes the same
- * field where it opens the scorecard.
- */
 void LoadRoundResults(void) {
     EncodedAsset asset;
     AssetFile file;
@@ -665,7 +518,6 @@ void LoadRoundResults(void) {
     }
 
     if (g_GameState.isClubTournament) {
-        /* In a block of its own to match, as the header comment explains */
         IN_OWN_BLOCK(for (k = 0; k != g_GameState.playerCount; k++) {
             f_PlayerResults[k] = GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), k);
         });
@@ -848,11 +700,6 @@ void LoadRoundResults(void) {
     }
 }
 
-/*
- * Loads the notice of what the round unlocked: one of the characters for
- * UNLOCK_NOTICE_* below UNLOCK_NOTICE_COURSES, or else the course from
- * UNLOCK_NOTICE_COURSES on.
- */
 void LoadUnlockNotice(s32 unlock) {
     EncodedAsset asset;
     AssetFile file;
@@ -929,8 +776,6 @@ void FreeUnlockNotice(void) {
     f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
 }
 
-/* Swings the course in, or raises the character's face; returns whether the
- * notice is done */
 s32 UpdateUnlockNotice(void) {
     EncodedAsset asset;
 
@@ -1071,7 +916,6 @@ void StartPortraitAnimation(s32 animation, s32 playerIndex) {
     f_PortraitTimers[playerIndex] = 0;
 }
 
-/* Ticks as the points count up, on every fourth call at the normal speed */
 void PlayTallySound(void) {
     f_TallySoundCount++;
     if (f_TallySpeed != NORMAL_TALLY_SPEED || !(f_TallySoundCount & TALLY_SOUND_INTERVAL_MASK)) {
@@ -1079,7 +923,6 @@ void PlayTallySound(void) {
     }
 }
 
-/* Draws value right-aligned in four of the 8 by 12 digits of f_DigitsImage */
 void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 value) {
     Gfx *gfx = *displayListHead;
     u8 *c;
@@ -1127,7 +970,6 @@ void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 value) {
 
 #define PLACE_NUMBER_X_OFFSET (-12)
 
-/* Loads glyph from f_PlaceDigitsImage and draws it at x, y */
 #define DrawPlaceGlyph(gfx, x, y, glyph) \
     { \
         gDPLoadTextureTile( \
@@ -1163,7 +1005,6 @@ void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 value) {
         ); \
     }
 
-/* Draws place, as in "21st", centered on x */
 void DrawPlaceNumber(Gfx **displayListHead, s32 x, s32 y, s32 place) {
     Gfx *gfx = *displayListHead;
     char *c;
@@ -1253,15 +1094,10 @@ void DrawPlaceIcon(Gfx **displayListHead, s32 x, s32 y, s32 place) {
     *displayListHead = gfx;
 }
 
-/* Ranks from this one draw a banner instead */
 #define RANK_BANNER 100
 #define RANK_BANNER_WIDTH 96
 #define RANK_BANNER_STRIP_HEIGHT 16
 #define RANK_BANNER_STRIP_COUNT 3
-/*
- * DrawRank's ranks count from 0 for the 1st place. From the 4th, it draws
- * the place as digits and a suffix icon: st, nd, rd or th.
- */
 #define RANK_FOURTH 3
 #define RANK_TWENTY_FIRST 20
 #define RANK_TWENTY_FOURTH 23
@@ -1269,17 +1105,11 @@ void DrawPlaceIcon(Gfx **displayListHead, s32 x, s32 y, s32 place) {
 #define PLACE_DIGIT_SPACING 20
 #define PLACE_DIGIT_X 4
 #define PLACE_DIGIT_Y 10
-/* Two-digit places start further left, from the 10th */
 #define RANK_TENTH 9
 #define PLACE_TWO_DIGIT_SHIFT 16
-/* The suffix icons follow the 1st to 4th place icons in the image */
 #define PLACE_SUFFIX_ICON_FIRST 4
 #define RANK_BANNER_X_OFFSET (-12)
 
-/*
- * Draws the place icon for a rank. With RANK_AS_PLACE, places past 3rd
- * are written as digits followed by a suffix.
- */
 void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
     Gfx *gfx = *displayListHead;
     s32 suffix;
@@ -1501,10 +1331,6 @@ void DrawResultsLabel(Gfx **displayListHead, s32 x, s32 y, s32 label) {
     *displayListHead = gfx;
 }
 
-/*
- * isMirrored starts the texture a width in (S10.5 texels), where its
- * mirrored wrap flips it
- */
 void DrawPlayerPortrait(Gfx **displayListHead, s32 x, s32 y, s32 playerIndex, Boolean isMirrored) {
     Gfx *gfx = *displayListHead;
 
@@ -1564,7 +1390,6 @@ void StartResultsNotice(s32 kind) {
 const char f_NumberFormat[] = "%4d";
 const char f_PlaceNumberFormat[] = "%d";
 
-/* Swings the notice in, then counts the course it opened */
 void UpdateCourseResultsNotice(void) {
     SaveData *save = GetSaveData();
 
@@ -1599,8 +1424,6 @@ void UpdateCourseResultsNotice(void) {
     }
 }
 
-/* The course image is two strips of 64x32 that shrink from twice their size to
- * full size as the notice swings */
 #define NOTICE_COURSE_STRIP_WIDTH 64
 #define NOTICE_COURSE_STRIP_HEIGHT 32
 #define NOTICE_COURSE_STRIP_COUNT 2
@@ -1611,10 +1434,8 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_TITLE_STRIP_COUNT 8
 #define NOTICE_TITLE_LEFT 80
 #define NOTICE_TITLE_TOP 56
-/* The top of the title's strip I, lifted by LIFT */
 #define TitleStripTop(lift, i) ((lift) + NOTICE_TITLE_TOP + ((i) * NOTICE_TITLE_STRIP_HEIGHT))
 #define NOTICE_TITLE_LIFT 96.0f
-/* Wider than the shine texture, so that it sweeps across the title */
 #define NOTICE_SHINE_DSDX TexelRunStep(NOTICE_SHINE_SIZE, NOTICE_TITLE_STRIP_WIDTH)
 #define NOTICE_PAN_START 3
 #define NOTICE_PAN_END 60
@@ -1623,10 +1444,6 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_CHEER_SOUND_CHANNEL 3
 #define NOTICE_SOUND_PAN_RIGHT 255
 
-/*
- * The notice that a course has opened: its picture and title swing in, then a
- * shine sweeps the title
- */
 void DrawCourseResultsNotice(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 size;
@@ -1647,8 +1464,6 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_POINT);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 
-    /* Once the swing settles the picture is drawn at full size, where point
-     * sampling is sharper */
     if (f_NoticeAngle == M_PI) {
         gDPPipeSync(gfx++);
         gDPSetTextureFilter(gfx++, G_TF_POINT);
@@ -1730,7 +1545,6 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
         );
     }
 
-    /* The title again, into the depth buffer alone */
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
     gDPSetPrimDepth(gfx++, NOTICE_TITLE_DEPTH, 0);
@@ -1760,11 +1574,6 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        /*
-         * The top is written out and the bottom's offset kept in a local, unlike
-         * the colored title's, to match: writing the bottom out too gives 35
-         * words differing, 5 in shape
-         */
         stripBottomOffset = f_CourseNoticeShift + NOTICE_TITLE_STRIP_HEIGHT;
         DrawTextureRect(
             &gfx,
@@ -1845,7 +1654,6 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
         PlaySound(SOUND_COURSE_NOTICE_CHEER, NOTICE_CHEER_SOUND_CHANNEL, SOUND_FULL_SCALE);
     }
 
-    /* The swing sound follows the notice across the screen */
     if (f_NoticeFrameCount >= NOTICE_PAN_START && f_NoticeFrameCount < NOTICE_PAN_END) {
         pan = (f_NoticeSwing + NOTICE_COURSE_CENTER_X) * NOTICE_PAN_RANGE / NOTICE_COURSE_CENTER_X;
         if (pan < 0) {
@@ -1887,7 +1695,6 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Changes the beaten character's face, then lifts the notice away */
 void UpdateCharacterResultsNotice(void) {
     EncodedAsset asset;
 
@@ -1923,8 +1730,6 @@ void UpdateCharacterResultsNotice(void) {
     }
 }
 
-/* The character notice pops open past its full size, then settles at
- * sin(NOTICE_POP_SETTLE_ANGLE) */
 #define NOTICE_POP_FRAMES 10
 #define NOTICE_POP_STEP 0.15f
 #define NOTICE_POP_SETTLE_ANGLE (3 * M_PI / 4)
@@ -1939,8 +1744,6 @@ void UpdateCharacterResultsNotice(void) {
 #define NOTICE_CHARACTER_TITLE_POP_WIDTH 108.0f
 #define NOTICE_CHARACTER_TITLE_POP_HEIGHT 12.0f
 #define NOTICE_CHARACTER_TITLE_STRIP_COUNT 7
-/* The top of a title strip, while the strips are height tall. It isn't kept
- * in a variable, which would change the loops' code. */
 #define CharacterTitleStripTop(strip, height) \
     (NOTICE_CHARACTER_TITLE_TOP - ((height) * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2) + \
         ((strip) * (height)))
@@ -1952,10 +1755,6 @@ void UpdateCharacterResultsNotice(void) {
 #define NOTICE_CHARACTER_VOICE_FRAME 14
 #define NOTICE_CHARACTER_VOICE_SLOT 1
 
-/*
- * The notice that a character has been beaten: their nameplate, face and title
- * pop open, then a shine sweeps the title
- */
 void DrawCharacterResultsNotice(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     Radians angle;
@@ -2080,7 +1879,6 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            /* This pass mirrors the slide, unlike the depth pass and the shine */
             liftFromCenter = f_NoticeLift - NOTICE_CENTER_X;
             DrawTextureRect(
                 &gfx,
@@ -2096,8 +1894,6 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
             );
         }
 
-        /* The title again, into the depth buffer alone, so that the shine behind it
-         * only lights the letters */
         gDPPipeSync(gfx++);
         gDPSetDepthSource(gfx++, G_ZS_PRIM);
         gDPSetPrimDepth(gfx++, NOTICE_TITLE_DEPTH, 0);
@@ -2264,7 +2060,6 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Returns TRUE once the results have been saved and freed */
 s32 UpdateRoundResults(ControllerState *controller) {
     Boolean isDone;
 
@@ -2332,17 +2127,13 @@ void SetResultsBanner(s32 state, s32 kind) {
     }
 }
 
-/* The trophy is drawn in two parts, as each must fit in texture memory */
 #define TROPHY_PART_COUNT 2
 
-/* Off the screen's left */
 #define BANNER_GONE_X (-SCREEN_WIDTH)
 #define BANNER_SLIDE_OUT_SPEED 4
 
-/* Plus the place */
 #define MESSAGE_TROPHY_PRIZE 0x3C
 #define MESSAGE_PLACE_PRIZE 0x40
-/* Plus the place */
 #define MESSAGE_TROPHY_PLACE 0x40
 #define MESSAGE_UNUSED_BANNER 0x48
 #define MESSAGE_PLACE 0x49
@@ -2358,7 +2149,6 @@ void SetResultsBanner(s32 state, s32 kind) {
 #define BANNER_TEXT_X 168
 #define BANNER_TEXT_Y 140
 
-/* The places that the ordinal suffixes differ for */
 #define PLACE_TWENTY_FIRST 21
 #define PLACE_TWENTY_SECOND 22
 #define PLACE_TWENTY_THIRD 23
@@ -2371,13 +2161,11 @@ void SetResultsBanner(s32 state, s32 kind) {
 #define BANNER_CLOUD_LEFT 24
 #define BANNER_CLOUD_RIGHT 296
 #define BANNER_CLOUD_TOP 112
-/* The points banner is taller, its clouds stretched */
 #define TALL_BANNER_CLOUD_TOP 104
 #define TALL_BANNER_CLOUD_HEIGHT 40
 #define BANNER_CLOUD_DSDX 0x3C3
 #define TALL_BANNER_CLOUD_DTDY 0x333
 
-/* The trophy turns, a frame each TROPHY_FRAME_TICKS, as the shine sweeps it */
 #define TROPHY_SHINE_CYCLE 256
 #define TROPHY_FRAME_TICKS 3
 #define TROPHY_CENTER_X 48
@@ -2392,23 +2180,6 @@ void SetResultsBanner(s32 state, s32 kind) {
 #define TROPHY_SHINE_SPEED 16
 #define TROPHY_SHINE_DSDX 0x800
 
-/*
- * Draws the banner of a round's result, and the trophy above a top three
- * tournament place
- *
- * The trophy's frame advances in two arms, one for the fast tally and one on
- * the shine's tick, which cross-jumping merges into one copy, as the
- * original has it. Each arm reads course twice, which lifts its global-alloc
- * priority above the trophy loops' row values (342 and 340), so it takes $s6
- * as in the original. Joining the two tests with ||, course's priority is
- * 266 and it gets $fp: 32 words differ, none in shape. Against the joined
- * test, assigning course later or before the kind test, narrower or
- * unsigned types, reading frameCount through g_GameState, regrouping the
- * trophy heights and other forms of the frame's wrap gave 32 to 74 words; a
- * struct for each course's trophy sizes 52, and a helper for the two
- * identical trophy-part loops 207 taking the course, or 295 taking its
- * sizes' address.
- */
 void DrawResultsBanner(Gfx **displayListHead) {
     Gfx *gfx;
     s32 i;
@@ -2737,7 +2508,6 @@ void DrawResultsBanner(Gfx **displayListHead) {
                 top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
             }
 
-            /* The trophy again, into the depth buffer alone */
             gDPPipeSync(gfx++);
             gDPSetDepthSource(gfx++, G_ZS_PRIM);
             gDPSetPrimDepth(gfx++, NOTICE_TITLE_DEPTH, 0);
@@ -2869,7 +2639,6 @@ void DrawResultsBanner(Gfx **displayListHead) {
 
             if (f_TrophyShineFrame >= TROPHY_SHINE_START) {
                 if (f_TrophyShineFrame < TROPHY_SHINE_CYCLE) {
-                    /* The trophy's height, its two parts stacked */
                     trophyHeight = f_TrophySizes[course][TROPHY_PART_HEIGHTS] +
                         f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
                     DrawTextureRect(
@@ -2905,7 +2674,6 @@ void DrawResultsBanner(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* f_ResultsStep values while UpdateTournamentResults runs */
 enum TournamentStep {
     TOURNAMENT_STEP_START,
     TOURNAMENT_STEP_SLIDING_IN_PRIZE,
@@ -2924,10 +2692,6 @@ enum TournamentStep {
 #define NEW_BEST_SCORE_SOUND_CHANNEL 3
 #define WIN_SOUND_PAN 32
 
-/*
- * Counts the tournament prize, then the earned course points, into the save,
- * showing a notice when they open a course, then returns TRUE once A is pressed
- */
 s32 UpdateTournamentResults(ControllerState *controller) {
     EncodedAsset asset;
     CourseStats *record;
@@ -2996,10 +2760,6 @@ s32 UpdateTournamentResults(ControllerState *controller) {
                         f_TallySpeed = FAST_TALLY_SPEED;
                     }
                     {
-                        /*
-                         * Through a pointer, to match: naming f_PrizePoints directly
-                         * gives 117 words differing, 7 in shape
-                         */
                         s32 *points = &f_PrizePoints;
 
                         *points -= f_TallySpeed;
@@ -3017,8 +2777,6 @@ s32 UpdateTournamentResults(ControllerState *controller) {
                             break;
                         }
 
-                        /* Stop on the points that open the next course, so that its notice
-                         * shows */
                         overshoot = f_PointsToNextCourse + *points + f_CoursePointsTally.earned;
                         if (overshoot < 0) {
                             *points -= overshoot;
@@ -3043,7 +2801,6 @@ s32 UpdateTournamentResults(ControllerState *controller) {
                         f_ResultsStep = TOURNAMENT_STEP_SLIDE_OUT_PRIZE;
                     }
 
-                    /* A debugging shortcut to the course notice */
                     if ((controller->pressedButtons & B_BUTTON) && g_IsDebugEnabled) {
                         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
                     }
@@ -3133,7 +2890,6 @@ s32 UpdateTournamentResults(ControllerState *controller) {
     return FALSE;
 }
 
-/* The steps of ShowScorePassword, in f_ResultsStep */
 enum ScorePasswordStep {
     SCORE_PASSWORD_STEP_START,
     SCORE_PASSWORD_STEP_SHOWN,
@@ -3141,11 +2897,8 @@ enum ScorePasswordStep {
     SCORE_PASSWORD_STEP_DONE
 };
 
-/* Shows the round's score password until the player says they have it. Returns
- * TRUE then. */
 s32 ShowScorePassword(ControllerState *controller) {
     ScoreReport report;
-    /* Pads the frame to match; without it 16 words differ */
     s32 unused[2] UNUSED;
 
     GetSaveData();
@@ -3191,7 +2944,6 @@ s32 ShowScorePassword(ControllerState *controller) {
     return FALSE;
 }
 
-/* f_ResultsStep values while UpdateCoursePointsResults runs */
 enum PointsStep {
     POINTS_STEP_SHOWN,
     POINTS_STEP_SLIDING_IN_TALLY,
@@ -3202,49 +2954,6 @@ enum PointsStep {
     POINTS_STEP_START_TALLY
 };
 
-/*
- * Counts the earned course points into the save, showing a notice when they
- * open a course, then returns TRUE once A is pressed
- *
- * When starting the tally, the original reads the player count for the
- * portrait loop's entry test through the address of g_GameState.gameMode,
- * kept in $a0, though nothing else uses that address. A test of the game mode
- * that changes nothing leaves that behind, and the do-while (0) before the
- * loop is one. What the original's test was for can't be recovered. Without
- * it the count is read from its own address, and 5 words differ, 1 in shape.
- * Each part of it is needed:
- *
- * - The first store to j is dead, but only flow finds that out, so the
- *   branch around it lasts until the final jump pass. That pass deletes it as
- *   a branch to the next instruction, with the loads of the mode and the
- *   constant that feed it (jump.c, delete_computation), but not the address,
- *   which the count's read uses by then. Until then the mode and the constant
- *   hold $v1 and $v0, so global allocation gives the address $a0. A test
- *   against GAME_MODE_STROKE, which needs no constant loaded, or against both
- *   GAME_MODE_SKINS_MATCH and GAME_MODE_CLUB_SLOTS, which folds into one range
- *   test, leaves the address in $v1: 6 words differ, none in shape.
- * - The loop's end note ends the first cse pass's block but not the second's
- *   (cse.c, cse_end_of_basic_block), so only the second pass finds the mode's
- *   address in a register at the entry test and rewrites the count's as that
- *   register plus 4 (cse.c, use_related_value). Where the first pass does the
- *   rewriting, the second folds the sum back into the count's own address:
- *   in plain braces the same statements give the 5 words.
- * - The second store keeps the branch's label inside the loop. Without it, or
- *   with it after the loop, jump points the branch past the loop's end note
- *   and the first pass follows it there: the 5 words again.
- *
- * Each of the other 12 modes after GAME_MODE_STROKE matches too, as do a !=
- * test, a switch with the one case, stores of the player count, stores to
- * overshoot, stores to i with the loop's own left out, and a for (;;) loop
- * ending in a break. Storing 1 or 0 in an if and else, equal values in both
- * stores, or a conditional expression's value all give the 5 words. Setting
- * a pointer to &g_GameState.gameMode in both arms of the if before the loop
- * and reading the count as its second word, with no test, gives 6 words,
- * none in shape: the address stays in $v0.
- *
- * Ending the loops on < rather than != gives 37 words (5 in shape) for i's
- * loop, 67 (5) for j's and 70 (10) for both.
- */
 s32 UpdateCoursePointsResults(ControllerState *controller) {
     EncodedAsset asset;
     s32 i;
@@ -3294,10 +3003,6 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
                         f_ResultsStep = POINTS_STEP_WAITING;
                     }
 
-                    /*
-                     * Changes nothing, but leaves the game mode's address behind
-                     * for the loop's entry test, as the header comment explains
-                     */
                     do {
                         if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH) {
                             j = 1;
@@ -3339,8 +3044,6 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
                         f_CoursePointsTally.earned = 0;
                     }
                     else {
-                        /* Stop on the points that open the next course, so that its
-                         * notice shows */
                         overshoot = f_PointsToNextCourse + f_CoursePointsTally.earned;
                         if (overshoot < 0) {
                             f_CoursePointsTally.earned -= overshoot;
@@ -3386,7 +3089,6 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
     return FALSE;
 }
 
-/* f_ResultsStep values while UpdateMatchResults runs */
 enum MatchStep {
     MATCH_STEP_SHOWN,
     MATCH_STEP_SLIDING_IN_TALLY,
@@ -3402,10 +3104,6 @@ enum MatchStep {
 };
 
 #define CHARACTER_NOTICE_WAIT_FRAMES 8
-/*
- * Whether beating a character in Get Character unlocks them: other feats
- * unlock the rest
- */
 #define IsUnlockedByBeating(character) \
     ((character) != CHARACTER_PLUM && \
         (character) != CHARACTER_CHARLIE && \
@@ -3415,11 +3113,6 @@ enum MatchStep {
         (character) != CHARACTER_DONKEY_KONG && \
         (character) < CHARACTER_METAL_MARIO)
 
-/*
- * Counts the earned course points into the save, then in Get Character
- * records the match and unlocks a beaten opponent, returning TRUE once
- * A is pressed
- */
 s32 UpdateMatchResults(ControllerState *controller) {
     EncodedAsset asset;
     s32 i;
@@ -3501,8 +3194,6 @@ s32 UpdateMatchResults(ControllerState *controller) {
                         f_CoursePointsTally.earned = 0;
                     }
                     else {
-                        /* Stop on the points that open the next course, so that its
-                         * notice shows */
                         overshoot = f_PointsToNextCourse + f_CoursePointsTally.earned;
                         if (overshoot < 0) {
                             f_CoursePointsTally.earned -= overshoot;
@@ -3534,7 +3225,6 @@ s32 UpdateMatchResults(ControllerState *controller) {
                     f_ResultsStep = MATCH_STEP_WAITING;
                     f_ResultsStepTime = 0;
                     if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-                        /* Beating a still locked opponent unlocks them */
                         if (f_PlayerRanks[0] == MATCH_RANK_WON &&
                             FindCharacterOnGrid(g_Players[1].characterIndex) ==
                                 CHARACTER_OFF_GRID &&
@@ -3572,8 +3262,6 @@ s32 UpdateMatchResults(ControllerState *controller) {
                 case MATCH_STEP_WAITING:
                     f_IsAwaitingConfirm = TRUE;
 
-                    /* A debugging aid: up and down choose a character, and B shows its
-                     * notice */
                     if (IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
                         if ((g_ControllerStates[0].repeatedButtons & U_JPAD) &&
                             f_DebugUnlockCharacter > 0) {
@@ -3630,7 +3318,6 @@ s32 UpdateMatchResults(ControllerState *controller) {
     return FALSE;
 }
 
-/* Where the tournament results draw their parts */
 #define TOURNAMENT_PLACE_X 40
 #define TOURNAMENT_PORTRAIT_X 100
 #define TOURNAMENT_ICON_Y 80
@@ -3641,8 +3328,6 @@ s32 UpdateMatchResults(ControllerState *controller) {
 #define TOURNAMENT_POINTS_X 232
 #define TOURNAMENT_NUMBER_Y 88
 
-/* The tournament results: place, portrait, score, Course Points and the points
- * to the next course */
 void DrawTournamentResults(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
@@ -3757,10 +3442,6 @@ const char f_TimeLabel[] = "Time";
 #define RESULTS_HEADING_ENV_COLOR 0xFFFF0000
 #define RESULTS_HEADING_PRIM_COLOR 0x30FF0000
 
-/*
- * Where the Speed Golf results draw their parts: the time and the strokes
- * each sit under a heading
- */
 #define SPEED_GOLF_PORTRAIT_X 40
 #define SPEED_GOLF_PORTRAIT_Y 88
 #define SPEED_GOLF_SCORE_LABEL_X 82
@@ -3775,8 +3456,6 @@ const char f_TimeLabel[] = "Time";
 #define SPEED_GOLF_POINTS_X 228
 #define SPEED_GOLF_POINTS_Y 88
 
-/* The Speed Golf results: portrait, time, strokes, Course Points and the points
- * to the next course */
 void DrawSpeedGolfResults(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 seconds;
@@ -3923,10 +3602,6 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
 #define RESULTS_ROW_HEIGHT 32
 #define RESULTS_ICON_ROW_Y 68
 #define RESULTS_TEXT_ROW_Y 80
-/*
- * The players' results columns. With bets, places and a bet totals column
- * squeeze the others left; without them, ranks lead the rows.
- */
 #define BETTING_RESULTS_SCORE_LABEL_X 88
 #define BETTING_RESULTS_BETS_LABEL_X 192
 #define BETTING_RESULTS_POINTS_LABEL_X 248
@@ -3942,8 +3617,6 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
 #define PLAIN_RESULTS_SCORE_X 152
 #define PLAIN_RESULTS_POINTS_X 232
 
-/* The results of several players: place, portrait, score, any bet totals and
- * Course Points */
 void DrawPlayersResults(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 betShift = FOUR_DIGIT_BET_SHIFT;
@@ -4165,11 +3838,6 @@ void DrawPlayersResults(Gfx **displayListHead) {
 
 const char f_NoPointsText[] = "  -";
 
-/*
- * Where the match results draw their parts, a row of MATCH_ROW_HEIGHT for
- * each player. With bets, the columns sit further left to make room for the
- * bet totals. Without them, the points step down a shorter row.
- */
 #define MATCH_ROW_HEIGHT 72
 #define MATCH_HEADING_Y 62
 #define MATCH_RANK_Y 48
@@ -4191,27 +3859,19 @@ const char f_NoPointsText[] = "  -";
 #define PLAIN_MATCH_STANDING_X 96
 #define PLAIN_MATCH_POINTS_X 218
 #define PLAIN_MATCH_POINTS_ROW_HEIGHT 64
-/* Hole counts from this one take two digits */
 #define MIN_TWO_DIGIT_HOLE_COUNT 10
-/* The standing words are 48x48, holding UP, DOWN and EVEN in rows of 16 */
 #define STANDING_WORDS_SIZE 48
 #define STANDING_WORD_WIDTH 48
 #define STANDING_WORD_HEIGHT 16
 #define STANDING_WORD_UP_ROW 0
 #define STANDING_WORD_DOWN_ROW 16
 #define STANDING_WORD_EVEN_ROW 32
-/* Shifts the hole count and its word left, so that the pair stays centered */
 #define STANDING_ONE_DIGIT_UP_SHIFT (-8)
 #define STANDING_ONE_DIGIT_DOWN_SHIFT (-20)
 #define STANDING_TWO_DIGIT_DOWN_SHIFT (-12)
 
-/*
- * The match play results of two players: place, portrait, holes up or down,
- * any bets and Course Points.
- */
 void DrawMatchResults(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    /* Pads the frame to match; without it 110 words differ */
     s32 unused[4] UNUSED;
     s32 standingShift[MATCH_PLAYER_COUNT];
     s32 betShift = FOUR_DIGIT_BET_SHIFT;
@@ -4410,7 +4070,6 @@ void DrawMatchResults(Gfx **displayListHead) {
     );
     for (i = 0; i != g_GameState.playerCount; i++) {
         if (f_HasBets) {
-            /* An even match draws only the word */
             if (f_PlayerResults[0] != 0) {
                 holeCount = f_PlayerResults[i];
                 if (holeCount < 0) {
@@ -4525,7 +4184,6 @@ const char f_UnusedModeNamesText[] = "StrokeSpeedGolfMini-Golf";
 #define NINTENDO_BADGE_STRIP_WIDTH 144
 #define NINTENDO_BADGE_STRIP_HEIGHT 10
 #define NINTENDO_BADGE_STRIP_COUNT 2
-/* Without the badge the details move up into its place and spread out */
 #define CLUB_TOURNAMENT_DETAILS_TOP 74
 #define CLUB_TOURNAMENT_LINE_HEIGHT 16
 #define CLUB_TOURNAMENT_UNBADGED_DETAILS_TOP 58
@@ -4534,7 +4192,6 @@ const char f_UnusedModeNamesText[] = "StrokeSpeedGolfMini-Golf";
 #define CLUB_TOURNAMENT_COURSE_SLOT 4
 #define CLUB_TOURNAMENT_MODE_SLOT 5
 #define CLUB_TOURNAMENT_TEXT_FLAGS (TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER)
-/* Where the club tournament results draw their parts */
 #define CLUB_TOURNAMENT_COURSE_X 28
 #define CLUB_TOURNAMENT_COURSE_Y 104
 #define CLUB_TOURNAMENT_PORTRAIT_X 96
@@ -4545,13 +4202,11 @@ const char f_UnusedModeNamesText[] = "StrokeSpeedGolfMini-Golf";
 #define CLUB_TOURNAMENT_DETAILS_X 160
 #define CLUB_TOURNAMENT_LABEL_X 144
 #define CLUB_TOURNAMENT_VALUE_X 192
-/* The text lines sit this far below their line's top */
 #define CLUB_TOURNAMENT_TEXT_DROP 8
 #define SCORE_PASSWORD_X 116
 #define SCORE_PASSWORD_FIRST_Y 182
 #define SCORE_PASSWORD_SECOND_Y 200
 
-/* The club tournament details' lines, from the tournament's number down */
 enum ClubTournamentLine {
     CLUB_TOURNAMENT_LINE_NUMBER,
     CLUB_TOURNAMENT_LINE_NAME,
@@ -4561,21 +4216,15 @@ enum ClubTournamentLine {
     CLUB_TOURNAMENT_LINE_TIME
 };
 
-/* The top of a club tournament details' text line */
 #define ClubTournamentTextY(detailsTop, lineHeight, line) \
     (f_ResultsTop + (detailsTop) + ((lineHeight) * (line)) + CLUB_TOURNAMENT_TEXT_DROP)
 
-/* DrawLargeTextWithShadow ignores this flag */
 #define CLUB_TOURNAMENT_LABEL_FLAGS 4
 #define CLUB_TOURNAMENT_LABEL_ENV_COLOR 0xFF5B0000
 #define CLUB_TOURNAMENT_LABEL_PRIM_COLOR 0xFFFF0000
 #define SCORE_PASSWORD_ENV_COLOR 0x00FF0000
 #define SCORE_PASSWORD_PRIM_COLOR 0xFFFF0000
 
-/*
- * The results of a club tournament: its course, number, name and mode, the
- * score and the password to send in.
- */
 void DrawClubTournamentResults(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 width;
@@ -4842,21 +4491,16 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
 #define BACKDROP_STRIP_WIDTH 288
 #define BACKDROP_STRIP_HEIGHT 5
 #define BACKDROP_STRIP_COUNT 40
-/* The club tournament backdrop is taller, so it starts higher */
 #define CLUB_TOURNAMENT_BACKDROP_Y 8
 #define CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT 7
 #define CLUB_TOURNAMENT_BACKDROP_STRIP_COUNT 32
-/* The pressing hand waits in the card's lower right corner */
 #define HAND_X 272
 #define HAND_Y 192
 #define HAND_SIZE 24
-/* The pressing hand shows each of its frames for this many draws */
 #define HAND_FRAME_DRAWS 3
 #define HAND_FRAME_COUNT 3
 #define FINAL_RESULTS_TITLE_WIDTH 200
 #define FINAL_RESULTS_TITLE_STRIP_HEIGHT 8
-/* Each strip loads a row more than it shows so that filtering has a row below
- * it */
 #define FINAL_RESULTS_TITLE_LOADED_HEIGHT 10
 #define FINAL_RESULTS_TITLE_LAST_STRIP_HEIGHT 6
 #define FINAL_RESULTS_TITLE_STRIP_COUNT 4
@@ -4864,26 +4508,13 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
 #define FINAL_RESULTS_TITLE_Y 20.0f
 #define FINAL_RESULTS_TITLE_BOB 5.0f
 #define FINAL_RESULTS_TITLE_BOB_STEP (M_PI / 18)
-/* A texture coordinate of this many units steps one texel */
 #define TEXEL_UNITS 32
 #define SUBTEXEL_STEPS 16.0f
-/* The portrait animations load their faces only every fourth draw */
 #define PORTRAIT_FRAME_DRAWS_MASK 3
 #define PORTRAIT_ANIMATION_FRAME_COUNT 5
 #define PORTRAIT_ANIMATION_REST 0
 #define NO_PORTRAIT_FRAME (-1)
 
-/*
- * The results card, its game mode's results, the bobbing title and the players'
- * portraits.
- *
- * The title's sub-texel offsets are both worked out before either is
- * doubled, and the rectangle adds the texel row to the doubled T offset:
- * converting and doubling each offset in one statement, or doubling the S
- * offset before converting the T one, gives 42 words differing, and adding
- * the row before the rectangle 4, where the original doubles the T offset in
- * a call's delay slot.
- */
 void DrawRoundResults(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     f32 titleX;
@@ -5060,10 +4691,6 @@ void DrawRoundResults(Gfx **displayListHead) {
         f_TitleBobAngle += FINAL_RESULTS_TITLE_BOB_STEP;
         LoadLargePalette(&gfx, ImageBody(f_FinalResultsTitleImage));
         for (i = 0; i != FINAL_RESULTS_TITLE_STRIP_COUNT; i++) {
-            /*
-             * Setting the usual height first and the last strip's in an if, or
-             * testing for not the last strip, gives 10 words differing, 6 in shape
-             */
             if (i == FINAL_RESULTS_TITLE_STRIP_COUNT - 1) {
                 stripHeight = FINAL_RESULTS_TITLE_LAST_STRIP_HEIGHT;
             }

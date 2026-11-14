@@ -5,9 +5,6 @@
 
 #include "controller.h"
 
-/* The results that slide in when a round ends, and the notices of what
- * the round unlocked */
-
 void DrawResultsNotice(Gfx **displayListHead);
 void DrawRoundResults(Gfx **displayListHead);
 void FreeUnlockNotice(void);

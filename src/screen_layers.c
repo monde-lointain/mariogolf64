@@ -1,7 +1,3 @@
-/*
- * What is drawn over the whole screen: the wipes, the fades, the yes-or-no
- * prompts and the Half Turn picture.
- */
 #include "screen_layers.h"
 
 #include <ultra64.h>
@@ -20,7 +16,6 @@
 #include "sound.h"
 #include "text.h"
 
-/* The wipe's shapes are 64 by 64 intensity masks */
 #define DEFAULT_WIPE_SHAPE 0x63F
 #define WIPE_SHAPE_COUNT 14
 #define WIPE_CLOSE_START_PROGRESS 12.0f
@@ -28,17 +23,12 @@
 #define WIPE_SOUND_CHANNEL 2
 #define WIPE_SOUND_VOLUME 0x28
 #define WIPE_SOUND_REVERB 0x14
-/* The shape grows by this many pixels with each step of progress */
 #define WIPE_SHAPE_GROWTH 38.0f
 #define WIPE_SHAPE_TEXELS 64
-/* The progress at which the shape's texels start at the square's corner */
 #define WIPE_ALIGNED_PROGRESS 8.0f
-/* Opening wipes fade out over their last steps */
 #define WIPE_FADE_START_PROGRESS 10.0f
 #define WIPE_FADE_ALPHA_STEP 25.4f
-/* A shape smaller than this, in pixels, is drawn as a covered screen */
 #define WIPE_SMALLEST_SHAPE 2
-/* The square that the shape is stretched over, centered on the screen */
 #define WIPE_SQUARE_SIZE 304
 #define WIPE_SQUARE_LEFT SCREEN_BORDER
 #define WIPE_SQUARE_TOP ((SCREEN_HEIGHT / 2) - (WIPE_SQUARE_SIZE / 2))
@@ -48,34 +38,22 @@
 #define HALF_TURN_WIDTH 304
 #define HALF_TURN_CENTER_COLUMN (HALF_TURN_PAIRS_PER_ROW / 2)
 #define HALF_TURN_CENTER_ROW 112
-/* Circles marked per frame */
 #define HALF_TURN_SHOW_STEPS 8
 #define HALF_TURN_HIDE_STEPS 12
 #define HALF_TURN_SHOW_SOUND_RADIUS 96
 #define HALF_TURN_HIDE_SOUND_RADIUS 48
-/* Frames after the picture is fully shown before it can be dismissed */
 #define HALF_TURN_WAIT_FRAMES 150
 #define HALF_TURN_DEBUG_COLUMN 20
 #define HALF_TURN_DEBUG_ROW 5
-/* The picture is loaded six rows at a time; the last strip has two */
 #define HALF_TURN_STRIP_COUNT 38
 #define HALF_TURN_STRIP_ROWS 6
 #define HALF_TURN_LAST_STRIP_ROWS 2
-/* RGBA16 texels are two bytes */
 #define HALF_TURN_STRIP_SIZE (HALF_TURN_WIDTH * HALF_TURN_STRIP_ROWS * 2)
-/* The Half Turn picture is RGBA16, so each u32 holds a pair of texels */
 #define HALF_TURN_PAIRS_PER_ROW 152
 #define HALF_TURN_ALPHA_BITS 0x10001
 #define HALF_TURN_LAST_COLUMN_OFFSET 75
 #define HALF_TURN_LAST_ROW_OFFSET 111
 #define HALF_TURN_PAIR(column, row) texelPairs[((row) * HALF_TURN_PAIRS_PER_ROW) + (column)]
-/*
- * Marks the eight octants' points two rows deep, then steps the circle.
- * The offsets are clamped to keep the points on the picture. This and
- * MarkOctantPoints are plain blocks: as do { } while (0), each gives GCC's
- * loop pass another loop: with one radiusOffset for both octant pairs, 370
- * to 396 words differed, against 108 with plain blocks.
- */
 #define MarkCirclePoints(operation) \
     { \
         radiusColumnOffset = radius; \
@@ -103,11 +81,6 @@
         } \
         step++; \
     }
-/*
- * operation is the rest of an assignment, such as |= HALF_TURN_ALPHA_BITS,
- * which parentheses would break.
- */
-/* NOLINTBEGIN(bugprone-macro-parentheses) */
 #define MarkOctantPoints(column, row, operation) \
     { \
         HALF_TURN_PAIR(centerColumn + (column), centerRow + (row)) operation; \
@@ -119,17 +92,14 @@
         HALF_TURN_PAIR(centerColumn - (column), centerRow + (row) + 1) operation; \
         HALF_TURN_PAIR(centerColumn - (column), centerRow - (row) + 1) operation; \
     }
-/* NOLINTEND(bugprone-macro-parentheses) */
 
 enum HalfTurnState {
     HALF_TURN_STATE_SHOWING,
-    /* Still shown HALF_TURN_WAIT_FRAMES after the reveal finished */
     HALF_TURN_STATE_EXPIRED,
     HALF_TURN_STATE_LEAVING,
     HALF_TURN_STATE_DONE
 };
 
-/* The fade's opacity runs over this many steps */
 #define FADE_ALPHA_RANGE 256
 
 #define PROMPT_STATE_CLOSED (-1)
@@ -140,14 +110,12 @@ enum HalfTurnState {
 #define PROMPT_STATE_CLOSED_AFTER_CHOICE 4
 #define PROMPT_CHOICE_YES 0
 #define PROMPT_CHOICE_NO 1
-/* The results of answers that overwrite a save; they get the save's sound */
 #define SAVING_RESULT_COUNT (PROMPT_RESULT_SAVE_REPLAY + 1)
 #define PROMPT_TEXT_X 160
 #define PROMPT_TEXT_Y 108
 #define PROMPT_TEXT_SLOT 0
 #define SAVE_SOUND_CHANNEL 15
 #define PROMPT_GROWTH_FRAMES 4
-/* The cloud is 256 by 64; each half is stretched over cloudHeight */
 #define PROMPT_CLOUD_WIDTH 256
 #define PROMPT_CLOUD_HALF_TEXELS 32
 #define PROMPT_CLOUD_HALF_WIDTH 136
@@ -155,18 +123,15 @@ enum HalfTurnState {
 #define PROMPT_CLOUD_SMALLEST_HEIGHT 48
 #define PROMPT_CENTER_X (SCREEN_WIDTH / 2)
 #define PROMPT_CLOUD_MIDDLE_Y 116
-/* Yes and No are 72 by 24 images, one after the other */
 #define CHOICE_IMAGE_WIDTH 72
 #define CHOICE_IMAGE_HEIGHT 24
 #define YES_TEXELS_OFFSET LARGE_PALETTED_TEXELS_OFFSET
 #define NO_TEXELS_OFFSET (YES_TEXELS_OFFSET + (CHOICE_IMAGE_WIDTH * CHOICE_IMAGE_HEIGHT))
 #define YES_CENTER_X 128
 #define NO_CENTER_X 192
-/* Below the cloud's middle by a quarter of its height more than this */
 #define CHOICES_MIDDLE_Y 134
 #define CHOICE_HALF_WIDTH 24
 #define CHOICE_HALF_HEIGHT 8
-/* The chosen answer is drawn larger, and its size swings by these */
 #define CHOSEN_HALF_WIDTH 32.0f
 #define CHOSEN_HALF_HEIGHT 12.0f
 #define CHOSEN_WIDTH_BOB 6.0f
@@ -174,12 +139,11 @@ enum HalfTurnState {
 #define CHOICE_BOB_STEP_DEGREES 20
 #define PROMPT_SOUND_VOLUME 0x64
 
-/* A yes-or-no question; the choices index results */
 typedef struct Prompt {
-    /* 0x0 */ MessageId messageId;
-    /* 0x4 */ s32 defaultChoice;
-    /* 0x8 */ s32 results[2];
-} Prompt; /* size = 0x10 */
+      MessageId messageId;
+      s32 defaultChoice;
+      s32 results[2];
+} Prompt;
 
 ScreenFadeColor g_ScreenFadeColor;
 
@@ -200,7 +164,6 @@ static s32 f_HalfTurnState = HALF_TURN_STATE_SHOWING;
 static s32 f_HalfTurnTimer = 9;
 static f32 f_WipeProgress = 0.0f;
 static s32 f_WipeKind = WIPE_NONE;
-/* LoadWipeShape's shape for each course index */
 static s32 f_WipeShapeIds[WIPE_SHAPE_COUNT] = {
     0x643,
     0x645,
@@ -217,35 +180,21 @@ static s32 f_WipeShapeIds[WIPE_SHAPE_COUNT] = {
     DEFAULT_WIPE_SHAPE,
     0x640,
 };
-/* Read by no routine */
 static s32 f_UnusedWordAfterWipeShapeIds UNUSED = 0x63E;
 s32 g_ScreenFadeDuration = 0;
 s32 g_ScreenFadeFramesLeft = 0;
 s32 g_ScreenFadeKind = FADE_NONE;
-/* OpenPrompt's prompts: a message, the choice it starts on, and each choice's
- * result */
 static Prompt f_Prompts[] = {
-    /* PROMPT_OVERWRITE_GAME */
     {0x2D, PROMPT_CHOICE_NO, {PROMPT_RESULT_SAVE_GAME, PROMPT_RESULT_STAY_IN_SAVE_MENU}},
-    /* PROMPT_END_GAME */
     {0x2E, PROMPT_CHOICE_NO, {PROMPT_RESULT_END_GAME, PROMPT_RESULT_STAY_IN_SAVE_MENU}},
-    /* PROMPT_OVERWRITE_REPLAY */
     {0x2D, PROMPT_CHOICE_NO, {PROMPT_RESULT_SAVE_REPLAY, PROMPT_RESULT_STAY_IN_SAVE_MENU}},
-    /* PROMPT_GIVE_UP */
     {0x2F, PROMPT_CHOICE_NO, {PROMPT_RESULT_GIVE_UP_HOLE, PROMPT_RESULT_RESUME}},
-    /* PROMPT_QUIT_GAME */
     {0x30, PROMPT_CHOICE_NO, {PROMPT_RESULT_QUIT_GAME, PROMPT_RESULT_RESUME}},
-    /* PROMPT_SKIP_REPLAY */
     {0x31, PROMPT_CHOICE_NO, {PROMPT_RESULT_SKIP_REPLAY, PROMPT_RESULT_STAY_IN_SAVE_MENU}},
-    /* PROMPT_BRING_MORE_CHARACTERS */
     {0x32, PROMPT_CHOICE_YES, {PROMPT_RESULT_BRING_MORE, PROMPT_RESULT_BRING_NO_MORE}},
-    /* PROMPT_QUIT_BROUGHT_OVER_GAME */
     {0x33, PROMPT_CHOICE_NO, {PROMPT_RESULT_QUIT_GAME, PROMPT_RESULT_RESUME}},
-    /* PROMPT_QUIT_CLUB_TOURNAMENT */
     {0x34, PROMPT_CHOICE_NO, {PROMPT_RESULT_QUIT_GAME, PROMPT_RESULT_RESUME}},
-    /* PROMPT_SCORE_PASSWORD */
     {0x35, PROMPT_CHOICE_NO, {PROMPT_RESULT_YES, PROMPT_RESULT_NO}},
-    /* PROMPT_OVERWRITE_RECORDS */
     {0x36, PROMPT_CHOICE_NO, {PROMPT_RESULT_YES, PROMPT_RESULT_NO}},
 };
 static s32 f_PromptIndex = 0;
@@ -258,10 +207,6 @@ static void *f_WipeShapeImage;
 static void *f_PromptCloudImage;
 static void *f_YesNoImage;
 
-/*
- * Draws a texture rectangle between pipe syncs, cut where it reaches past
- * the screen's top or left
- */
 void DrawTextureRect(
     Gfx **displayListHead,
     s32 xl,
@@ -329,11 +274,6 @@ void LoadNibbleTextureBlock(
     *displayListHead = gfx;
 }
 
-/*
- * gDPLoadTextureBlock, but with the texel size given twice: as the constant
- * whose loading parameters are used, and as the value set in the render
- * tile
- */
 #define LoadTextureBlockWithLoadSize( \
     pkt, \
     timg, \
@@ -459,7 +399,6 @@ void LoadTextureBlock(
     *displayListHead = gfx;
 }
 
-/* Loads the default wipe shape and stops any fade */
 void InitScreenLayers(void) {
     EncodedAsset asset;
 
@@ -483,10 +422,6 @@ s32 GetWipeKind(void) {
     return f_WipeKind;
 }
 
-/*
- * While the Half Turn picture is shown, it stands in for the wipe: the
- * wipe reads as open once the picture has finished, which hides it
- */
 s32 GetWipeProgress(void) {
     if (!f_IsHalfTurnShown) {
         return f_WipeProgress;
@@ -502,7 +437,6 @@ s32 GetWipeProgress(void) {
     }
 }
 
-/* While the Half Turn picture is shown, an opening wipe ends it instead */
 void StartWipe(s32 kind) {
     if (f_IsHalfTurnShown == TRUE) {
         if (kind == WIPE_OPENING || kind == WIPE_OPENING_FAST) {
@@ -538,10 +472,6 @@ void StartWipe(s32 kind) {
     }
 }
 
-/*
- * Advances the wipe and draws it: a black screen seen through the wipe's
- * shape, which grows as the wipe opens and shrinks as it closes
- */
 void DrawWipe(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 shapeSize;
@@ -670,7 +600,6 @@ void StopScreenFade(void) {
     g_ScreenFadeKind = FADE_NONE;
 }
 
-/* This is true from the fade's last frame on */
 Boolean HasScreenFadeEnded(void) {
     return g_ScreenFadeFramesLeft < 2;
 }
@@ -693,24 +622,6 @@ void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount) {
     g_ScreenFadeColor.blue = blue;
 }
 
-/*
- * Covers the screen with the fade's color, at the opacity it has reached.
- *
- * The color's channels are members of one object, passed straight to the
- * macro, to match. The scheduler takes a member's read to depend on the display
- * list's stores before it (true_dependence, both being in structures), so the
- * primitive color's first word isn't ready to place until the reads are. That
- * leaves sched1, working from the block's end, a cycle between green's read
- * and red's with only the constants' halves ready, and it places the or of
- * the rectangle step's low half there: the original loads the step from its
- * stack slot after red's read, sets bit 0x400 after blue's and stores it back.
- *
- * Three separate globals aren't taken to depend on the stores: passed straight
- * 308 words differ (56 in shape), through u8 locals 10 (8), through s32
- * locals 36 (12). An array of three words matches as well. The members
- * through u8 locals give 56 (36), through s32 locals 90 (46). With blue alone
- * outside the object it still matches, with green 6 (6), with red 308 (50).
- */
 void DrawScreenFade(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 alpha;
@@ -807,11 +718,6 @@ void OpenPrompt(s32 prompt) {
     }
 }
 
-/*
- * Takes the player's answer to the open prompt. It returns the result of
- * the chosen answer once the prompt has closed, and NO_PROMPT_RESULT
- * until then.
- */
 s32 UpdatePrompt(ControllerState *controller) {
     Prompt *prompt = &f_Prompts[f_PromptIndex];
 
@@ -879,27 +785,6 @@ s32 UpdatePrompt(ControllerState *controller) {
     return NO_PROMPT_RESULT;
 }
 
-/*
- * Draws the open prompt: a cloud that grows in and shrinks away, with Yes
- * and No under its message once it has opened. The chosen answer bobs.
- *
- * The cloud's edges come from a bottom local, the middle moved down by
- * half the cloud's height; written into the rectangle, 15 words differ,
- * 5 in shape. The choices' edges add halfHeight and a quarter of the
- * cloud to CHOICES_MIDDLE_Y in that order, as the quarter first folds
- * the top into middle - (halfHeight - constant) (20 words, 2 in shape).
- * Each half's texels are addressed from the header by half rather than
- * through a stepped offset, which leaves the offset's register to the
- * loop's start as the original does (26 words, 4 in shape, with a
- * stepped offset).
- *
- * The chosen answer's halfHeight starts at its rest size and adds the
- * bob in a statement of its own. That is the one form with no other
- * reason to exist: the extra reference ranks halfHeight ahead of
- * halfWidth in global-alloc, and in one statement, as halfWidth is, the
- * two swap registers (84 words). The pad in the choices' block is a last
- * resort as well; without it the frame is 8 bytes smaller (36 words).
- */
 void DrawPrompt(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     Prompt *prompt = &f_Prompts[f_PromptIndex];
@@ -948,8 +833,6 @@ void DrawPrompt(Gfx **displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
 
-    /* The cloud image's top and bottom halves are drawn above and below its
-     * middle */
     half = 0;
     do {
         if (f_PromptState == PROMPT_STATE_CHOOSING) {
@@ -996,7 +879,6 @@ void DrawPrompt(Gfx **displayListHead) {
     while (half != 2);
 
     if (f_PromptState == PROMPT_STATE_CHOOSING) {
-        /* Pads the frame to match; without it 36 words differ */
         s32 unused[2] UNUSED;
 
         f_ChoiceBobAngle += DegreesToRadians(CHOICE_BOB_STEP_DEGREES);
@@ -1108,21 +990,6 @@ void HideHalfTurn(void) {
 
 void MarkHalfTurnCircle(u32 *texelPairs, s32 centerColumn, s32 centerRow, s32 radius);
 
-/*
- * Changes the alpha bits of the Half Turn picture's texels on a circle
- * around the given texel pair, using the midpoint circle algorithm. Each
- * point covers two texels across and two rows down. While the picture is
- * showing the bits are cleared, which reveals the texels; otherwise they
- * are set, which hides them again.
- *
- * The radius's offset has a variable for each octant pair, as a column
- * offset in the first and a row offset in the second, and the second pair
- * sets it before stepOffset. With one radiusOffset for both pairs, the
- * loop-invariant alpha mask took $t0 ahead of it and 108 words differed;
- * the split alone gives 104 and the order alone 264. Subtracting error's step
- * as (step * 2) + 1 keeps the loop pass from making it an induction variable,
- * which error - 1 - (step * 2) lets it do.
- */
 void MarkHalfTurnCircle(u32 *texelPairs, s32 centerColumn, s32 centerRow, s32 radius) {
     s32 step = 0;
     s32 error = radius;
@@ -1142,11 +1009,9 @@ void MarkHalfTurnCircle(u32 *texelPairs, s32 centerColumn, s32 centerRow, s32 ra
     }
 }
 
-/* Whether A is pressed to dismiss the picture once its time is up */
 #define IsDismissPressed(controller) \
     (f_HalfTurnTimer < 0 && ((controller)->pressedButtons & A_BUTTON))
 
-/* The picture can be dismissed with A once its time is up */
 Boolean IsHalfTurnDismissed(ControllerState *controller) {
     if (f_IsHalfTurnShown &&
         f_HalfTurnState == HALF_TURN_STATE_SHOWING &&
@@ -1157,12 +1022,6 @@ Boolean IsHalfTurnDismissed(ControllerState *controller) {
     return TRUE;
 }
 
-/*
- * Draws the Half Turn picture in strips. While it is showing, a shrinking
- * circle reveals it from the edges inwards; once it has been dismissed, a
- * growing circle hides it again from the middle outwards, and then the
- * picture is freed.
- */
 void DrawHalfTurn(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 i;
@@ -1230,11 +1089,6 @@ void DrawHalfTurn(Gfx **displayListHead) {
         else {
             f_HalfTurnState = HALF_TURN_STATE_DONE;
 
-            /*
-             * Any nonzero value makes HideHalfTurn free the picture; the state's
-             * value is there to match: storing TRUE gives 3 words differing (1 in
-             * shape), and leaving the store out 4 (2)
-             */
             f_IsHalfTurnShown = HALF_TURN_STATE_LEAVING;
             HideHalfTurn();
             return;
@@ -1252,8 +1106,6 @@ void DrawHalfTurn(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
 
-    /* The texels' alpha is inverted, so texels whose alpha bit is clear are drawn
-     */
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);

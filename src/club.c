@@ -1,8 +1,3 @@
-/*
- * The clubs: their reach and power in each shot mode, generating a set's
- * parameters from its stats, how well each plays from each surface, and
- * choosing the club and the shot mode with the controller.
- */
 #include "club.h"
 
 #include <math.h>
@@ -29,57 +24,38 @@
 #include "surface.h"
 #include "transfer_pak.h"
 
-/* The direction GenerateClub measures each test shot's landing against */
 #define STRAIGHT_ANGLE 0x1000
 
-/* A power shot reaches this much further than a normal one */
 #define POWER_SHOT_SCALE 1.1f
-/* The reach of an approach shot, in yards */
 #define APPROACH_SHOT_DISTANCE 60
-/* The reach of each putt mode with a club usable on the green, in feet */
 #define LONG_PUTT_DISTANCE 200
 #define MIDDLE_PUTT_DISTANCE 100
 #define SHORT_PUTT_DISTANCE 30
 
-/* Tries for GenerateClub and GetPuttPower to bring a test shot within 1% of its
- * target */
 #define GENERATION_TOLERANCE 0.01f
 #define MAX_CLUB_TRY_COUNT 128
 #define MAX_PUTT_TRY_COUNT 64
-/* A test shot is stopped after this many steps */
 #define MAX_TEST_SHOT_STEP_COUNT 900
 
-/* The stock club sets, whose parameters are in f_ClubParameters */
 #define STOCK_CLUB_SET_COUNT 14
-/* The sets after the stock ones are generated, with GenerateClubSet */
 
-/* f_PutterPowers has a power for each 1/30 of each shot mode's reach */
 #define PUTT_STEP_COUNT 30
-/* A generated putt is aimed this many world units past its target */
 #define PUTT_OVERSHOOT 0x600
-/* The initial power estimate is truncated before dividing. */
 #define PUTT_POWER_ESTIMATE_SCALE 130.048f
 #define PUTT_POWER_ESTIMATE_DIVISOR 3
 #define PUTT_TEST_SURFACE 4
 
-/* The size of WriteClubParameters' text */
 #define CLUB_SOURCE_SIZE 0x8000
 #define CLUB_SOURCE_LINE_SIZE 256
 
 #define CLUB_ASSERT_LINE 543
 
-/* Frames between the steps StepToClubChoice takes */
 #define CLUB_CHOICE_STEP_DELAY 3
 
 #define CLUB_SOUND_CHANNEL 0xF
 
-/*
- * Lie ratings, as one digit for each club type from the 1W to the SW; the
- * putter is not rated. Several surface kinds share each group's ratings.
- */
 #define LIE_RATING_LENGTH CLUB_TYPE_PUTTER
 
-/* A stock club, whose power and deflection GenerateClub fills in */
 #define CLUB_ENTRY( \
     type, \
     name, \
@@ -109,7 +85,6 @@
         ASSET_DRIVER_HEAD_IMAGE + (type), \
         0}
 
-/* GetPuttPower's putter powers, by shot mode and fraction of its reach */
 /* clang-format off */
 static s32 f_PutterPowers[SHOT_MODE_COUNT][PUTT_STEP_COUNT] = {
     {
@@ -130,7 +105,6 @@ static s32 f_PutterPowers[SHOT_MODE_COUNT][PUTT_STEP_COUNT] = {
 };
 /* clang-format on */
 Club g_Clubs[CLUB_COUNT] = {
-    /* Set 0 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -313,7 +287,6 @@ Club g_Clubs[CLUB_COUNT] = {
         150,
         0
     ),
-    /* Set 1 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -496,7 +469,6 @@ Club g_Clubs[CLUB_COUNT] = {
         150,
         0
     ),
-    /* Set 2 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -679,7 +651,6 @@ Club g_Clubs[CLUB_COUNT] = {
         70,
         0
     ),
-    /* Set 3 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -862,7 +833,6 @@ Club g_Clubs[CLUB_COUNT] = {
         120,
         0
     ),
-    /* Set 4 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -1045,7 +1015,6 @@ Club g_Clubs[CLUB_COUNT] = {
         100,
         0
     ),
-    /* Set 5 */
     CLUB_ENTRY(CLUB_TYPE_DRIVER, "1W", CLUB_KIND_WOOD, DRIVER_SURFACES, 90, 212, -14, 1, 9, 120, 0),
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
@@ -1216,7 +1185,6 @@ Club g_Clubs[CLUB_COUNT] = {
         120,
         0
     ),
-    /* Set 6 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -1399,7 +1367,6 @@ Club g_Clubs[CLUB_COUNT] = {
         100,
         0
     ),
-    /* Set 7 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -1582,7 +1549,6 @@ Club g_Clubs[CLUB_COUNT] = {
         80,
         0
     ),
-    /* Set 8 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -1765,7 +1731,6 @@ Club g_Clubs[CLUB_COUNT] = {
         80,
         0
     ),
-    /* Set 9 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -1948,7 +1913,6 @@ Club g_Clubs[CLUB_COUNT] = {
         50,
         0
     ),
-    /* Set 10 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -2131,7 +2095,6 @@ Club g_Clubs[CLUB_COUNT] = {
         100,
         0
     ),
-    /* Set 11 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -2314,7 +2277,6 @@ Club g_Clubs[CLUB_COUNT] = {
         50,
         0
     ),
-    /* Set 12 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -2497,7 +2459,6 @@ Club g_Clubs[CLUB_COUNT] = {
         50,
         0
     ),
-    /* Set 13 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -2680,7 +2641,6 @@ Club g_Clubs[CLUB_COUNT] = {
         50,
         0
     ),
-    /* Set 14 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -2863,7 +2823,6 @@ Club g_Clubs[CLUB_COUNT] = {
         110,
         0
     ),
-    /* Set 15 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -3046,7 +3005,6 @@ Club g_Clubs[CLUB_COUNT] = {
         110,
         0
     ),
-    /* Set 16 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -3229,7 +3187,6 @@ Club g_Clubs[CLUB_COUNT] = {
         100,
         0
     ),
-    /* Set 17 */
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
@@ -3413,7 +3370,6 @@ Club g_Clubs[CLUB_COUNT] = {
         0
     ),
 };
-/* GetClub returns this for an index past the last club */
 static Club f_NoClub = {
     80,
     "0000",
@@ -3433,26 +3389,16 @@ static Club f_NoClub = {
 };
 static ShotLaunch f_ClubTestShot =
     {STRAIGHT_ANGLE, NO_CLUB, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
-/*
- * A generated club's lieRatingPercent, by its set's lieRatingLevel
- * from -MAX_LIE_RATING_LEVEL to MAX_LIE_RATING_LEVEL; other levels give
- * DEFAULT_LIE_RATING_PERCENT
- */
 #define MAX_LIE_RATING_LEVEL 4
 #define DEFAULT_LIE_RATING_PERCENT 100
 static u8 f_LieRatingPercents[(MAX_LIE_RATING_LEVEL * 2) + 1] =
     {30, 50, 70, 80, 100, 115, 120, 145, 170};
-/* Each stock club set's curve, from -4, the strongest fade, to 4 */
 static s8 f_StockCurves[CLUB_SET_COUNT] =
     {0, -1, 0, 1, -2, 0, 2, -3, 2, 3, 0, -3, 3, 3, 0, 0, 0, 0};
 static ShotLaunch f_PutterTestShot =
     {STRAIGHT_ANGLE, NO_CLUB, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 static s32 f_ClubChoiceDelay = CLUB_CHOICE_STEP_DELAY;
 
-/*
- * Each set's clubs' parameters for each shot mode. WriteClubParameters
- * writes generated parameters as source with this table's layout.
- */
 static const ClubParameters f_ClubParameters[CLUB_COUNT] = {
     {{91273, 81148, 20488}, {10, 10, 15}},
     {{80352, 71517, 20154}, {11, 10, 13}},
@@ -3712,12 +3658,9 @@ const ClubParameters *GetClubParameters(s32 clubIndex) {
     return &f_ClubParameters[clubIndex];
 }
 
-/* Has no callers */
 void DoNothingWithClubs(void) {
 }
 
-/* Returns the club's reach in the shot mode: in feet for a club usable on the
- * green, or else in yards */
 s32 GetShotDistance(Club *club, u32 shotMode) {
     s32 distance = 0;
 
@@ -3751,7 +3694,6 @@ s32 GetShotDistance(Club *club, u32 shotMode) {
     return distance;
 }
 
-/* Returns the club's reach in the shot mode, in world units */
 s32 GetShotWorldDistance(Club *club, ShotMode shotMode) {
     s32 distance = GetShotDistance(club, shotMode);
 
@@ -3765,11 +3707,6 @@ s32 GetShotWorldDistance(Club *club, ShotMode shotMode) {
     return distance;
 }
 
-/*
- * Builds the source of f_ClubParameters and f_PutterPowers from the clubs,
- * then hands WriteHostFile the name clubpara.c and the text's size.
- * AppendText is a nested function, a GNU C extension.
- */
 void WriteClubParameters(void) {
     char line[CLUB_SOURCE_LINE_SIZE];
     char *cursor;
@@ -3852,12 +3789,6 @@ void WriteClubParameters(void) {
     FreeMemory(&source);
 }
 
-/*
- * Test-fires the club in each shot mode until its power carries it the
- * mode's reach, closing in by interpolating between the shortest and longest
- * results, then sets the deflection from where the last test shot landed.
- * InterpolatePower is a nested function, a GNU C extension.
- */
 void GenerateClub(s32 clubIndex) {
     BallSimulation simulation;
     Club *club;
@@ -3881,8 +3812,6 @@ void GenerateClub(s32 clubIndex) {
     for (shotMode = 0; shotMode < SHOT_MODE_COUNT; shotMode++) {
         f_ClubTestShot.shotMode = shotMode;
 
-        /* The target distance is in yards until it is scaled below; the reuse
-         * matches */
         targetDistance = GetShotDistance(club, shotMode);
         osSyncPrintf(
             "Generation Club%d PowerMode%d TargetDist %d\n",
@@ -3941,10 +3870,6 @@ void GenerateClub(s32 clubIndex) {
                     club->power[shotMode] = longPower * 3 / 4;
                 }
                 else {
-                    /* error holds the fraction too, which keeps local-alloc from
-                     * tying fabsf's operand to its result; only a set in these arms
-                     * does it. A fraction local at either scope, an initialized or
-                     * zeroed error, a magnitude local or f32 casts leave the tie */
                     error =
                         (f32)(targetDistance - shortDistance) / (f32)(longDistance - shortDistance);
                     club->power[shotMode] = InterpolatePower(shortPower, longPower, error);
@@ -3979,27 +3904,20 @@ void GenerateClub(s32 clubIndex) {
     g_ClubTestMode = CLUB_TEST_NONE;
 }
 
-/* GenerateClubSet's limits on a club's stats; distances are in yards */
 #define MAX_CLUB_DISTANCE 400
 #define FLATTEST_CLUB_PITCH (-7)
 #define STEEPEST_CLUB_PITCH (-45)
 #define MAX_CLUB_SIDE_SPIN 100
 #define MAX_CLUB_CURVE 4
-/* Each point of a set's mishitResistance takes MISHIT_SCALE_PER_RESISTANCE
- * from BASE_MISHIT_SCALE */
 #define BASE_MISHIT_SCALE 110
 #define MISHIT_SCALE_PER_RESISTANCE 9
 #define MIN_MISHIT_SCALE 70
 #define MAX_MISHIT_SCALE 145
 
-/* Builds the set's clubs from a Game Boy character's stats, then generates
- * their parameters */
 void GenerateClubSet(s32 setIndex, GameBoyCharacter *character) {
     s32 type;
     Club *club;
 
-    /* A Game Boy character has no putter stats, so the putter's are read from
-     * the character's last 2 bytes and the next character's first 4 */
     for (type = 0; type < CLUB_SET_SIZE; type++) {
         club = GetClub((setIndex * CLUB_SET_SIZE) + type);
         club->distance = character->clubs[type].distance;
@@ -4062,12 +3980,6 @@ void GenerateClubSet(s32 setIndex, GameBoyCharacter *character) {
     }
 }
 
-/*
- * Fills in the stock sets' parameters from f_ClubParameters; with
- * GAME_FLAG_GENERATE_CLUBS set, generates every club's instead and passes
- * the results to WriteClubParameters. GetStockCurve is a nested function, a
- * GNU C extension.
- */
 void InitClubs(void) {
     s32 clubIndex;
     ClubParameters *parameters;
@@ -4087,8 +3999,6 @@ void InitClubs(void) {
         for (clubIndex = 0; clubIndex < STOCK_CLUB_SET_COUNT * CLUB_SET_SIZE; clubIndex++) {
             club = &g_Clubs[clubIndex];
 
-            /* Casting away const matches: GCC moves loads through const pointers
-             * ahead of stores */
             parameters = (ClubParameters *)GetClubParameters(clubIndex);
             club->power[0] = parameters->power[0];
             club->power[1] = parameters->power[1];
@@ -4108,57 +4018,6 @@ void InitClubs(void) {
     }
 }
 
-/*
- * Returns the putter power for a putt of the fraction, out of
- * MAX_LAUNCH_POWER, of the shot mode's reach. With GAME_FLAG_GENERATE_CLUBS
- * set, it is found by test-firing the first set's putter instead.
- * InterpolatePuttPower is a nested function, a GNU C extension.
- *
- * The test-firing keeps the mode in a variable of its own, testShotMode, to
- * match: the original copies shotMode from $s0 into $fp as the flag's test
- * branches, reads the table with $s0 and test-fires with $fp. The search is
- * GenerateClub's, where the mode is a local that counts the modes, which may
- * be how the original came by the copy. Without it 23 words differ, 3 in
- * shape. Where the copy is made before GetShotDistance, and whether the test
- * shot's mode is set from it, set with it in one statement or read back into
- * it, changes nothing; made after GetShotDistance it gives 102 words (24 in
- * shape), and made at its declaration GCC ties it to the parameter again, for
- * the same 23 (3). Neither can it get the copy from an inline function's
- * parameter: GCC won't inline a function that holds a nested one, so the
- * test-firing can't move into a helper, and with the table's lookup in one 16
- * words differ, 4 in shape.
- *
- * The long half's read of the putter's power sits in a block of its own, to
- * match. The original keeps the hoisted address of the putter's power for the
- * mode in $s2 and shortDistance in $s3. global-alloc places the saved values
- * by priority: targetDistance's is 4756 and shortDistance's 4500, and the
- * address, with 12 references over a live length of 85, has 4235, so without
- * the block, or with plain braces, it comes after shortDistance, the two swap
- * registers and 24 words differ, none in shape. flow weights a reference by
- * its loop depth, and a loop that runs once still counts, so the block gives
- * the address a 13th reference and a priority of 4588, between the two. It
- * lifts longPower's priority too, from 4105 to 4421, which leaves it below
- * shortDistance's. Any one of the loop's three stores of the power in a
- * block matches as well, as does a block around the read and the distance's
- * copy after it. The short half's read in a block lifts shortPower past
- * longPower instead and gives 24 words; two blocks, around both reads or
- * around the long half's read and store, take the address past
- * targetDistance for the same 24; and the first store, before the loop, in a
- * block gives 96 (30 in shape).
- *
- * The long half stores the new power once after its arms and the short half
- * in each arm. With the block, the long half storing through power in each
- * arm or straight from each arm's expression matches if the short half
- * stores once, and so does the short half storing straight from each arm;
- * both halves storing once gives 44 words, and the other four pairings,
- * among them GenerateClub's straight stores in all four arms, 24, none in
- * shape. No pairing matches without the block.
- *
- * fabsf is an abs.s in volatile inline assembly, and the error may as well
- * be taken in the test itself. With GCC's built-in fabsf 18 words differ (12
- * in shape); negating the error by an if gives 11 (7), and a ?: on the
- * integer difference 7 (3).
- */
 s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
     BallSimulation simulation;
     Club *putter;
@@ -4176,7 +4035,6 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
     s32 initialPowerNumerator;
     f32 error;
     s32 power;
-    /* The mode the putter is test-fired in: a copy of shotMode, to match */
     ShotMode testShotMode;
 
     s32 InterpolatePuttPower(s32 from, s32 to, f32 fraction) {
@@ -4234,7 +4092,6 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
         }
 
         if (distance > targetDistance) {
-            /* In a block of its own to match, as the header comment explains */
             IN_OWN_BLOCK(longPower = putter->power[testShotMode]);
             longDistance = distance;
             if (longDistance == shortDistance) {
@@ -4288,7 +4145,6 @@ Club *GetClub(u32 clubIndex) {
     return (clubIndex < CLUB_COUNT) ? &g_Clubs[clubIndex] : &f_NoClub;
 }
 
-/* Returns the club in the current player's selected slot */
 Club *GetSelectedClub(void) {
     return &g_Clubs[g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]];
 }
@@ -4301,10 +4157,6 @@ s32 GetSelectedShotWorldDistance(void) {
     return GetShotWorldDistance(GetSelectedClub(), g_CurrentShot.shotMode);
 }
 
-/*
- * Returns the surface mask bits of the clubs usable on the surface. Unless
- * distinguishesKinds is set, the green is the only kind told apart.
- */
 s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceInfo *info) {
     SurfaceKind kind = info->kind;
     s32 mask;
@@ -4385,12 +4237,6 @@ static const char f_CartWayLieRatings[LIE_RATING_LENGTH + 1] = "1112223333344";
 static const char f_CartWayApproachLieRatings[LIE_RATING_LENGTH + 1] = "2223333333444";
 static const char f_DefaultLieRatings[LIE_RATING_LENGTH + 1] = "3333333333333";
 
-/*
- * Rates how well the club plays from the surface, from 1 to MAX_LIE_RATING,
- * scaled by the club's lieRatingPercent; the putter rates 0. Each kind
- * of surface has a digit for each club type, with its own digits for an
- * approach shot.
- */
 s32 GetLieRating(Club *club, Surface surface, ShotMode shotMode) {
     const char *ratings;
     const char *approachRatings;
@@ -4477,8 +4323,6 @@ s32 GetLieRating(Club *club, Surface surface, ShotMode shotMode) {
     return rating;
 }
 
-/* Sets span[0] to 2 * rating - 1 and span[1] to rating - 1; both are 0 for the
- * putter */
 void GetLieSpan(Club *club, Surface surface, s32 *span, ShotMode shotMode) {
     s32 rating = GetLieRating(club, surface, shotMode);
 
@@ -4492,11 +4336,6 @@ void GetLieSpan(Club *club, Surface surface, s32 *span, ShotMode shotMode) {
     }
 }
 
-/*
- * Moves the selected shot mode, then the selected club, a step towards the
- * choice every few frames, with a sound for each step. Returns TRUE once the
- * choice is selected.
- */
 s32 StepToClubChoice(CurrentShot *choice) {
     Boolean hasStepped = FALSE;
     s32 slot;
@@ -4561,8 +4400,6 @@ s32 StepToClubChoice(CurrentShot *choice) {
     return !hasStepped;
 }
 
-/* With the control pad, down selects the next club in the bag usable on the
- * surface, and up the one before */
 void HandleClubInput(void) {
     s32 slot;
     u16 buttons;
@@ -4594,22 +4431,10 @@ void HandleClubInput(void) {
     }
 }
 
-/*
- * The limit is a parameter, not a constant, so that the comparison loads it
- * into a register as in the original
- */
 static inline Boolean IsFartherThan(s32 distance, s32 limit) {
     return distance > limit;
 }
 
-/*
- * B changes the shot mode. With a club usable on the green it goes from a
- * middle putt to a long putt to a short putt and back. With other clubs,
- * further than APPROACH_SHOT_DISTANCE yards from the cup, it switches between
- * normal and power, though not to power with no power shots left; closer,
- * between normal and approach. Modes that don't fit the distance are then put
- * back to normal.
- */
 void HandleShotModeInput(void) {
     Club *club = GetSelectedClub();
     s32 cupDistance = GetCupDistance(

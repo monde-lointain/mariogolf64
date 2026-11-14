@@ -1,11 +1,5 @@
-/*
- * Text: the fonts, the message table and the text slots that show messages, and
- * drawing text in each font.
- */
 #include <ultra64.h>
 
-/* Keeps text.h from declaring SetTextSlot with the int colors its callers pass
- */
 #define DEFINES_SET_TEXT_SLOT
 
 #include "address.h"
@@ -23,22 +17,17 @@
 #include "sound.h"
 #include "text.h"
 
-/* The messages and their character codes */
 typedef struct MessageEntry {
-    /* 0x00 */ u16 start; /* In codes from the first code */
-    /* 0x02 */ u16 length;
-} MessageEntry; /* size = 0x04 */
+      u16 start;
+      u16 length;
+} MessageEntry;
 
 typedef struct MessageTable {
-    /* 0x00 */ u16 size;
-    /* 0x02 */ u16 messageCount;
-    /* 0x04 */ MessageEntry messages[1]; /* messageCount of them, then the codes */
+      u16 size;
+      u16 messageCount;
+      MessageEntry messages[1];
 } MessageTable;
 
-/*
- * The table entry of message ID, by pointer arithmetic to match: indexing
- * the messages gives 4 to 14 words differing, none in shape
- */
 #define MessageEntryAt(id) (f_Messages->messages + (id))
 
 #define TEXT_ASSET_SMALL_FONT 0x4B3
@@ -46,42 +35,23 @@ typedef struct MessageTable {
 #define TEXT_ASSET_LARGE_FONT 0x4B6
 #define TEXT_ASSET_ICONS 0x4B0
 #define TEXT_ASSET_SHADOWED_FONT 0x4B2
-/*
- * Gradients for shading text, one intensity per row of a large glyph:
- * one is brightest across the middle, the other fades from the top down
- */
 #define TEXT_ASSET_BANDED_GRADIENT 0x4B8
 #define TEXT_ASSET_FADING_GRADIENT 0x4B9
 #define GRADIENT_WIDTH 16
 #define GRADIENT_HEIGHT 12
-/* The gradient repeats every 16 rows */
 #define GRADIENT_HEIGHT_MASK 4
-/* Where in texture memory the gradient goes, past the glyphs */
 #define GRADIENT_TMEM_ADDRESS 0x100
-/*
- * A glyph file's header holds the glyph count at 2 and each glyph's size
- * at 4; a message file's holds the file's size at 0. Both are big-endian.
- */
 #define FILE_HEADER_SIZE 8
 #define GLYPH_COUNT_OFFSET 2
 #define GLYPH_SIZE_OFFSET 4
 #define MESSAGE_FILE_SIZE_OFFSET 0
-/* Reads the big-endian halfword at offset in a file header */
 #define ReadHeaderHalfword(header, offset) (((header)[offset] << 8) | (header)[(offset) + 1])
 
-/* Character codes */
 enum MessageCode {
-    /* The first that draws a glyph of the glyph file */
     MESSAGE_CODE_GLYPH = 0x100,
-    /* The first that controls the text instead of drawing a glyph */
     MESSAGE_CODE_CONTROL = 0x8000,
-    /* The codes up to MESSAGE_CODE_R_BUTTON draw an icon of TEXT_ASSET_ICONS */
     MESSAGE_CODE_A_BUTTON = MESSAGE_CODE_CONTROL,
     MESSAGE_CODE_B_BUTTON,
-    /*
-     * The five codes from here all draw the Z button. Only the last appears in
-     * the message file, in message 58's list of buttons.
-     */
     MESSAGE_CODE_UNUSED_Z_BUTTON_A,
     MESSAGE_CODE_UNUSED_Z_BUTTON_B,
     MESSAGE_CODE_UNUSED_Z_BUTTON_C,
@@ -91,23 +61,18 @@ enum MessageCode {
     MESSAGE_CODE_C_DOWN,
     MESSAGE_CODE_C_LEFT,
     MESSAGE_CODE_C_RIGHT,
-    /* Drawn as nothing, and in no message */
     MESSAGE_CODE_UNUSED_BLANK,
     MESSAGE_CODE_START_BUTTON,
     MESSAGE_CODE_L_BUTTON,
     MESSAGE_CODE_R_BUTTON,
     MESSAGE_CODE_NAME,
-    /* Then one for each of the slot's values */
     MESSAGE_CODE_VALUE = 0x8014,
-    /* The current player's score, as the game mode counts it */
     MESSAGE_CODE_SCORE = 0x8018,
     MESSAGE_CODE_LINE_BREAK,
-    /* Then one for each of g_TextPalette's colors */
     MESSAGE_CODE_PALETTE_COLOR = 0x8022,
     MESSAGE_CODE_SLOT_COLOR = 0x8026
 };
 
-/* The icons of TEXT_ASSET_ICONS, in their order in the image */
 enum TextIcon {
     TEXT_ICON_A_BUTTON,
     TEXT_ICON_B_BUTTON,
@@ -121,66 +86,41 @@ enum TextIcon {
     TEXT_ICON_C_RIGHT
 };
 
-/*
- * Marks drawn over the character before them take no room. In JIS X 0201,
- * 0xDE and 0xDF are the kana voicing marks.
- */
 #define CHARACTER_CODE_MARK_FIRST 0xDE
 #define CHARACTER_CODE_MARK_COUNT 2
 #define CHARACTER_CODE_OTHER_MARK_FIRST 0x9E
-/* The pixels between lines, over the font size */
 #define LINE_SPACING 6
-/* The gap between the lines of a slot drawn in the medium font */
 #define MEDIUM_SLOT_LINE_SPACING 4
-/* How far left of and above the next glyph a slot's medium font marks go */
 #define SLOT_MARK_BACKSPACE 6
 #define SLOT_MARK_RISE 4
 #define MESSAGE_LINE_COUNT 3
-/* The width of an icon, in pixels; icons are square */
 #define ICON_WIDTH 12
-/* Glyphs of the glyph file are 8-bit I images */
 #define MESSAGE_GLYPH_WIDTH 16
 #define MESSAGE_GLYPH_HEIGHT 12
-/* With TEXT_FLAG_WIDE_SPACING, the large font advances by this rather than its
- * size */
 #define WIDE_LARGE_FONT_ADVANCE 14
 #define TYPING_SOUND_CHANNEL 2
 #define TYPING_SOUND_VOLUME 64
-/* Codes shown between sounds */
 #define TYPING_SOUND_INTERVAL 3
 #define ICON_TEXEL_COUNT (ICON_WIDTH * ICON_WIDTH)
-/* Given as the icon of a code that has none */
 #define NO_ICON (-1)
-/* The fonts' images have 16 glyphs to a row, and a glyph is loaded 16 texels
- * wide */
 #define FONT_GLYPHS_PER_ROW 16
 #define GLYPH_TILE_WIDTH 16
 
-/* How far the shadowed font advances for a glyph, and for a full stop */
 #define SHADOWED_GLYPH_WIDTH 8
 #define SHADOWED_POINT_WIDTH 2
-/* How far a full stop of the shadowed font is drawn back over the glyph before
- * it */
 #define SHADOWED_POINT_INSET 3
 #define CONDENSED_GLYPH_WIDTH 7
-/*
- * The shadowed font's glyphs are 8 pixels square, 31 to a row of its
- * image, from the space on
- */
 #define SHADOWED_GLYPH_SIZE 8
 #define SHADOWED_GLYPHS_PER_ROW 31
 #define SHADOWED_GLYPH_FIRST ' '
-/* Its last row has narrower glyphs, from the apostrophe on */
 #define NARROW_GLYPH_ROW 3
 #define NARROW_GLYPH_FIRST '\''
 #define NARROW_GLYPH_SIZE 7
 #define NARROW_GLYPH_WIDTH 6
 
-/* How far a text shadow is drawn from its text, and how much darker */
 #define SHADOW_OFFSET 1
 #define SHADOW_DIMMING_SHIFT 2
 
-/* Where the glyph and message files are in the ROM */
 extern u8 g_GlyphFileRomStart[];
 extern u8 g_MessageFileRomStart[];
 static void *f_SmallFontImage;
@@ -192,62 +132,48 @@ static MessageTable *f_Messages;
 static void *f_TextIconImage;
 
 #define NO_GLYPH_GROUP (-1)
-/* The texel row where a large glyph's bottom part starts */
 #define LARGE_GLYPH_PART_ROW 7
-/*
- * How far a glyph sprite of a mark is moved back over the glyph before it,
- * and up, in each font. Sprites are placed with y rising up the screen.
- */
 #define LARGE_MARK_BACKSPACE 6.0f
 #define LARGE_MARK_RISE 8.0f
 #define MEDIUM_MARK_BACKSPACE 8.0f
 #define MEDIUM_MARK_RISE 7.0f
 #define SMALL_MARK_RISE 8.0f
-/* PlaceMessageGlyphGroup moves marks back as in the large font, but less far up
- */
 #define MESSAGE_MARK_RISE 4.0f
-/* How far back and up the text drawing routines draw a mark, where y points
- * down */
 #define LARGE_TEXT_MARK_BACKSPACE 6
 #define LARGE_TEXT_MARK_RISE 4
 #define MEDIUM_TEXT_MARK_BACKSPACE 8
 #define MEDIUM_TEXT_MARK_RISE 7
 #define SMALL_TEXT_MARK_BACKSPACE 6
 #define SMALL_TEXT_MARK_RISE 6
-/* How far a full stop is drawn back, and how far it advances */
 #define LARGE_POINT_INSET 6
 #define LARGE_POINT_WIDTH 3
 #define MEDIUM_POINT_INSET 5
 #define MEDIUM_POINT_WIDTH 2
-/* The small font draws this character code with the glyph at another code */
 #define SMALL_FONT_MOVED_CODE 0xB0
 #define SMALL_FONT_MOVED_GLYPH 0x70
 
-/* A byte holds this many character codes */
 #define CHAR_CODE_COUNT 256
 
-/* The width of each character of the large font, by character code */
 /* clang-format off */
 static u8 f_LargeFontWidths[CHAR_CODE_COUNT] = {
-    /* 0x00 */ 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-    /* 0x10 */ 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,  6, 12,  6, 12,
-    /* 0x20 */  5,  6,  7, 10,  8, 12, 10,  6,  6,  6, 12, 10,  6, 10,  6, 12,
-    /* 0x30 */  8,  6,  8,  7,  8,  7,  7,  9,  7,  7,  6,  6,  7, 10,  7,  7,
-    /* 0x40 */ 12, 11, 10,  8,  9,  8,  6, 10,  9,  4,  9,  7,  7, 12, 10, 12,
-    /* 0x50 */  9, 11,  9,  7,  9, 11, 12, 12, 10,  9, 12, 12, 12, 12, 12, 12,
-    /* 0x60 */ 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-    /* 0x70 */ 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-    /* 0x80 */ 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-    /* 0x90 */ 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-    /* 0xA0 */ 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-    /* 0xB0 */ 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-    /* 0xC0 */ 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-    /* 0xD0 */ 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-    /* 0xE0 */  0,  9,  7,  7,  9,  9,  8,  8,  8,  4,  5,  8,  4,  8,  8,  8,
-    /* 0xF0 */  6,  9,  6,  6,  6,  9,  9, 12,  9, 10,  7,  0,  0,  0,  0,  0,
+      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,  6, 12,  6, 12,
+       5,  6,  7, 10,  8, 12, 10,  6,  6,  6, 12, 10,  6, 10,  6, 12,
+       8,  6,  8,  7,  8,  7,  7,  9,  7,  7,  6,  6,  7, 10,  7,  7,
+      12, 11, 10,  8,  9,  8,  6, 10,  9,  4,  9,  7,  7, 12, 10, 12,
+       9, 11,  9,  7,  9, 11, 12, 12, 10,  9, 12, 12, 12, 12, 12, 12,
+      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+       0,  9,  7,  7,  9,  9,  8,  8,  8,  4,  5,  8,  4,  8,  8,  8,
+       6,  9,  6,  6,  6,  9,  9, 12,  9, 10,  7,  0,  0,  0,  0,  0,
 };
 /* clang-format on */
-/* The quads glyph sprites are drawn with, centered on the sprite */
 static Vtx f_LargeGlyphVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 6, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -6, 0}, 0, {0, 0x2FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -272,7 +198,6 @@ static Vtx f_MediumGlyphVertices[QUAD_VERTEX_COUNT] = {
     {{{10, -5, 0}, 0, {0x27F, 0x27F}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{10, 5, 0}, 0, {0x27F, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-/* The fourth vertex is 6 above the middle, though the others are 4 from it */
 static Vtx f_SmallGlyphVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 4, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -4, 0}, 0, {0, 0x1FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -287,13 +212,11 @@ s32 GetTextLength(READ_ONLY char *text);
 char g_PrintBuffer[PRINT_BUFFER_SIZE];
 void *g_ShadowedFontImage;
 
-/* The index of the first character code in the message table, in halfwords */
 FILE_STATIC s32 g_MessageCodesStart;
 FILE_STATIC TextSlot g_TextSlots[TEXT_SLOT_COUNT];
 FILE_STATIC u8 g_TextPalette[TEXT_PALETTE_COLOR_COUNT][3];
 FILE_STATIC char g_TextName[TEXT_NAME_SIZE];
 FILE_STATIC GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
-/* How many glyphs each group has */
 FILE_STATIC u8 g_GlyphGroupSizes[GLYPH_GROUP_COUNT];
 
 const char g_TextStringFormat[] = "%s";
@@ -305,7 +228,6 @@ const char g_SkinsScoreFormat[] = "%dP";
 const char g_ParScoreEvenText[] = "#0";
 const char g_ParScoreFormat[] = "%+d";
 
-/* Where a character's glyph is in the shadowed font's image, in pixels */
 static inline s16 GetShadowedGlyphLeft(s32 code) {
     return (code - SHADOWED_GLYPH_FIRST) % SHADOWED_GLYPHS_PER_ROW * SHADOWED_GLYPH_SIZE;
 }
@@ -314,10 +236,6 @@ static inline s16 GetShadowedGlyphTop(s32 code) {
     return (code - SHADOWED_GLYPH_FIRST) / SHADOWED_GLYPHS_PER_ROW * SHADOWED_GLYPH_SIZE;
 }
 
-/*
- * Loads the fonts, the icons and the message table, and clears the text
- * slots.
- */
 void LoadTextAssets(void) {
     EncodedAsset asset;
     u8 *header;
@@ -350,14 +268,11 @@ void LoadTextAssets(void) {
     f_Messages = AllocMemory(size);
     nuPiReadRom((u32)g_MessageFileRomStart, f_Messages, size);
 
-    /* The halfwords of the table's header and its entries come first */
     g_MessageCodesStart = (f_Messages->messageCount * 2) + 2;
     ClearTextSlots();
     ClearGlyphSprites();
 }
 
-/* Frees what LoadTextAssets loaded, except the two images at
- * f_TextGradientImages */
 void FreeTextAssets(void) {
     FreeMemory(&g_ShadowedFontImage);
     FreeMemory(&f_SmallFontImage);
@@ -368,10 +283,6 @@ void FreeTextAssets(void) {
     FreeMemory(&f_Messages);
 }
 
-/*
- * Sets up the RDP to draw translucent text in the primitive color, with
- * the glyphs' alpha scaled by the primitive alpha
- */
 void SetUpTextDrawing(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
@@ -437,7 +348,6 @@ void SetTextSlotValue(s32 value, s32 slot, s32 valueIndex) {
     g_TextSlots[slot].values[valueIndex] = value;
 }
 
-/* Sets the name that MESSAGE_CODE_NAME shows, as character codes */
 void SetTextName(char *name) {
     s32 i;
     char character;
@@ -457,10 +367,6 @@ void SetTextName(char *name) {
     g_TextName[TEXT_NAME_SIZE - 1] = '\0';
 }
 
-/*
- * Shows a message in a slot at x and y, or around them when it is
- * centered. A new message starts unrevealed.
- */
 void SetTextSlot(
     s32 x,
     s32 y,
@@ -486,11 +392,6 @@ void SetTextSlot(
             MeasureMessage(messageId, FONT_SIZE_LARGE, &width, &height, slot);
         }
 
-        /*
-         * The pointer, used only for the message comparison, is there to match:
-         * comparing through g_TextSlots[slot] gives 6 words differing (4 in
-         * shape), and writing every field through the pointer 75 (33)
-         */
         textSlot = &g_TextSlots[slot];
         halfWidth = width / 2;
         halfHeight = height / 2;
@@ -510,10 +411,6 @@ void SetTextSlot(
     g_TextSlots[slot].messageId = messageId;
 }
 
-/*
- * Draws the message of every text slot that has one, in the slot's color,
- * in the medium font or the font of the slot's size
- */
 void DrawTextSlots(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 slot;
@@ -543,7 +440,6 @@ void DrawTextSlots(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Shows the whole of a slot's message at once */
 void RevealTextSlot(s32 slot) {
     g_TextSlots[slot].shownCount = 0xFF;
 }
@@ -554,10 +450,6 @@ Boolean IsTextSlotRevealed(s32 slot) {
     return !(textSlot->shownCount < MessageEntryAt(textSlot->messageId)->length);
 }
 
-/*
- * Draws a slot's message in the large font, with its glyphs, icons,
- * colors, the name, the slot's values and the player's score
- */
 void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
     Gfx *gfx = *displayListHead;
     TextSlot *textSlot = &g_TextSlots[slot];
@@ -1079,10 +971,6 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws a slot's message in the medium font, with its icons, the name, the
- * slot's values and the player's score written into it
- */
 void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
     Gfx *gfx = *displayListHead;
     TextSlot *textSlot = &g_TextSlots[slot];
@@ -1516,12 +1404,6 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
     *displayListHead = gfx;
 }
 
-/*
- * Sets up the RDP to draw text shaded between the primitive color, where
- * the gradient is dark, and the environment color, where it is bright.
- * The glyphs' alpha comes from the first texel and the gradient, chosen by
- * the low bit of gradient, is loaded as the second.
- */
 void SetUpGradientTextDrawing(Gfx **displayListHead, s32 gradient) {
     Gfx *gfx = *displayListHead;
 
@@ -1584,10 +1466,6 @@ void SetUpGradientTextDrawing(Gfx **displayListHead, s32 gradient) {
     *displayListHead = gfx;
 }
 
-/*
- * Measures a string of character codes, at the font size. Only the large
- * font can be proportional. The two loops differ in form to match.
- */
 s32 MeasureText(READ_ONLY char *text, s32 fontSize, TextFlags flags) {
     s32 width = 0;
     s32 code;
@@ -1651,10 +1529,6 @@ s32 MeasureText(READ_ONLY char *text, s32 fontSize, TextFlags flags) {
     return width;
 }
 
-/*
- * Measures a message as a slot would show it: its widest line and the
- * height of its line breaks.
- */
 void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, s32 slot) {
     s32 lineWidths[MESSAGE_LINE_COUNT] = {0, 0, 0};
     s32 i;
@@ -1750,11 +1624,6 @@ s32 GetTextLength(READ_ONLY char *text) {
     return length;
 }
 
-/*
- * Draws text in the large font, each glyph advancing by the font size but
- * a full stop, which is drawn back and advances less. A mark is drawn over
- * the glyph before it.
- */
 void DrawFixedWidthLargeText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
     s32 code;
@@ -1881,10 +1750,6 @@ void DrawFixedWidthLargeText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char
     *displayListHead = gfx;
 }
 
-/*
- * Draws text in the large font, each glyph advancing by its own width. A
- * mark is drawn over the glyph before it.
- */
 void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
     s32 code;
@@ -2007,11 +1872,6 @@ void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws text in the medium font, each glyph advancing by the font size
- * but a full stop, which is drawn back and advances less. A mark is drawn
- * over the glyph before it.
- */
 void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
     s32 character;
@@ -2130,10 +1990,6 @@ void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws text in the small font, each glyph advancing by the font size. A
- * mark is drawn over the glyph before it.
- */
 void DrawSmallText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
     s32 character;
@@ -2251,7 +2107,6 @@ void DrawSmallText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     *displayListHead = gfx;
 }
 
-/* Draws text in the large font, centered on x */
 void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
 
@@ -2264,7 +2119,6 @@ void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *
     *displayListHead = gfx;
 }
 
-/* Draws text in the medium font, centered on x */
 void DrawCenteredMediumText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
 
@@ -2277,7 +2131,6 @@ void DrawCenteredMediumText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char 
     *displayListHead = gfx;
 }
 
-/* Draws text in the small font, centered on x */
 void DrawCenteredSmallText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
 
@@ -2290,10 +2143,6 @@ void DrawCenteredSmallText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *
     *displayListHead = gfx;
 }
 
-/*
- * Draws nothing. Its callers pass it a display list, a position and text,
- * as they would to the other text drawing routines.
- */
 void DrawTextStub(
     Gfx **displayListHead UNUSED,
     s16 x UNUSED,
@@ -2302,10 +2151,6 @@ void DrawTextStub(
 ) {
 }
 
-/*
- * Sets up the RDP to draw shadowed text, modulating the font's intensity
- * by the primitive color, and loads the shadowed font image
- */
 void BeginShadowedText(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
@@ -2346,7 +2191,6 @@ void BeginShadowedText(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Sets the color, fully opaque, of the text drawn after it */
 void SetTextColor(Gfx **displayListHead, u8 red, u8 green, u8 blue) {
     Gfx *gfx = *displayListHead;
 
@@ -2356,10 +2200,6 @@ void SetTextColor(Gfx **displayListHead, u8 red, u8 green, u8 blue) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws text in the shadowed font, which BeginShadowedText loads. A full
- * stop is drawn narrower, over the end of the glyph before it.
- */
 void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
     s32 code;
@@ -2401,15 +2241,9 @@ void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text)
     *displayListHead = gfx;
 }
 
-/* Draws text in the shadowed font, centered on x */
 void DrawCenteredShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
 
-    /*
-     * The copy of x and the s16 are there to match: summing a width from 0
-     * instead gives 12 words differing (6 to 8 in shape), a right edge
-     * without the copy 14 to 20, and an s32 right edge 20
-     */
     s32 left = x;
     s16 right = x;
     s32 i;
@@ -2427,10 +2261,6 @@ void DrawCenteredShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY cha
     *displayListHead = gfx;
 }
 
-/*
- * Draws text centered on x in the narrow glyphs of the shadowed font's last
- * row, which start at the apostrophe
- */
 void DrawCenteredNarrowText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
     s32 length;
@@ -2466,7 +2296,6 @@ void DrawCenteredNarrowText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char 
     *displayListHead = gfx;
 }
 
-/* Draws text in the shadowed font with its glyphs closer together */
 void DrawCondensedShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
     s32 code;
@@ -2497,7 +2326,6 @@ void DrawCondensedShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY ch
     *displayListHead = gfx;
 }
 
-/* Frees every glyph sprite */
 void ClearGlyphSprites(void) {
     s32 i;
 
@@ -2506,12 +2334,6 @@ void ClearGlyphSprites(void) {
     }
 }
 
-/*
- * Places the glyphs of text as sprites of a group, replacing the group's
- * old sprites, or only frees them if the font size is NO_FONT_SIZE. Marks
- * are placed over the glyph before them. Without GLYPH_FLAG_LEFT_ALIGNED
- * the text is centered on x.
- */
 void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, READ_ONLY char *text) {
     s32 i;
     s32 halfWidth;
@@ -2606,12 +2428,6 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
     }
 }
 
-/*
- * Places the glyphs and icons of a message as sprites of a group, centered
- * on x and y, replacing the group's old sprites. Every glyph advances by
- * its width in the large font. Returns half the message's width in the
- * high halfword and half its height in the low one.
- */
 s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId messageId) {
     s32 width;
     s32 height;
@@ -2705,19 +2521,8 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
     return PackHalfSize(width, height);
 }
 
-/*
- * Packs texel coordinates into a vertex's texture coordinates. It is a
- * macro, as an inline function compiles differently from the original, and
- * it joins the halves with | where TexcoordWord adds them, which also
- * compiles differently.
- */
 #define PackTextureCoords(s, t) ((TexelCoordinate(s) << 16) | TexelCoordinate(t))
 
-/*
- * Draws the sprites of a group of glyphs. The fonts are four-bit images
- * with 16 glyphs to a row, loaded a glyph at a time as eight-bit texels;
- * icons are eight-bit images that share one palette.
- */
 void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
     Gfx *gfx = *displayListHead;
     s32 i;
@@ -2731,10 +2536,6 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
     s32 top;
     s32 bottom;
 
-    /*
-     * A code that is neither a glyph nor an icon keeps the last sprite's
-     * texture coordinates, which the original leaves unset before the first
-     */
 #ifdef AVOID_UB
     s = 0;
     t = 0;
@@ -3001,10 +2802,6 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
     *displayListHead = gfx;
 }
 
-/*
- * Sets up the RDP to draw translucent text in the primitive color, with
- * perspective-correct textures
- */
 void SetUpPerspectiveTextDrawing(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
@@ -3050,8 +2847,6 @@ void SetUpPerspectiveTextDrawing(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* Where a character's glyph is in the digit font's image, in pixels from the
- * top */
 s32 GetDigitGlyphTop(char code) {
     switch (code) {
         case ':':
@@ -3071,22 +2866,13 @@ s32 GetDigitGlyphTop(char code) {
     }
 }
 
-/* Unused; it is there to match */
 const s32 g_UnusedTextData[2] = {0, 0};
 
-/* Draws text in the digit font */
 void DrawDigitText(Gfx **displayListHead, s32 x, s32 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
     s32 index;
 
     gDPPipeSync(gfx++);
-    /*
-     * The original ends at g_PrintBuffer's terminator rather than text's. Most
-     * callers pass g_PrintBuffer, but DrawBirdieBadgeCount passes "*" while
-     * g_PrintBuffer still holds the last frame's count, so the original draws
-     * a glyph for the terminator after the star, and from a three-digit count
-     * on reads past the literal.
-     */
 #ifdef AVOID_UB
     for (index = 0; text[index] != '\0'; index++) {
 #else
@@ -3111,11 +2897,6 @@ void DrawDigitText(Gfx **displayListHead, s32 x, s32 y, READ_ONLY char *text) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws text in the large font over a shadow a quarter as bright, one pixel
- * down and to the right. The colors are packed as RGBA, but the alpha is
- * ignored.
- */
 void DrawLargeTextWithShadow(
     Gfx **displayListHead,
     s32 x,

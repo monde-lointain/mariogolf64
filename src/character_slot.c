@@ -1,8 +1,3 @@
-/*
- * The slots that hold the loaded characters: their alpha and highlights, their
- * joint matrices, freeing them once no display list uses them, and the
- * positions of points on their models.
- */
 #include "character_slot.h"
 
 #include <ultra64.h>
@@ -17,17 +12,14 @@
 #include "main.h"
 #include "math_util.h"
 
-/* How many frames a drawn slot stays busy */
 #define BUSY_FRAME_COUNT 2
 
-/* Like G_RM_AA_ZB_XLU_SURF, but also updating the depth buffer */
 #define CHARACTER_RENDER_MODE_TRANSLUCENT \
     (AA_EN | Z_CMP | Z_UPD | IM_RD | CLR_ON_CVG | CVG_DST_WRAP | ZMODE_XLU | FORCE_BL | G_RM_PASS)
 #define CHARACTER_RENDER_MODE_TRANSLUCENT2 \
     (AA_EN | Z_CMP | Z_UPD | IM_RD | CLR_ON_CVG | CVG_DST_WRAP | ZMODE_XLU | FORCE_BL | \
         GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA))
 
-/* The sides, in texels, of the hilite textures */
 #define HILITE_TEXTURE_SIZE 32
 #define HILITE_SECOND_TILE 1
 
@@ -36,9 +28,7 @@
 #define ModelDisplayListChoices(model) \
     ((u32 *)(model)->segmentAddresses[CHARACTER_MODEL_DISPLAY_LIST_CHOICES])
 
-/* osMapTLB's physical address for a page left unmapped */
 #define NO_PHYSICAL_PAGE (-1)
-/* osMapTLB's address space id for a global mapping */
 #define NO_TLB_ASID (-1)
 
 #define MODEL_TO_WORLD_SCALE 0.01f
@@ -49,12 +39,9 @@ s32 g_CurrentAnimationEndFrame;
 f32 g_CurrentAnimationFrame;
 Mtx *g_CurrentJointMatrices;
 
-/* The slot's first rotation is taken away from this roll */
 static LookAt f_HiliteLookAts[DRAW_BUFFER_COUNT];
 static Hilite f_Hilites[DRAW_BUFFER_COUNT];
 
-/* Sets the characters' alpha, drawing them translucent below 0xFF, and their
- * combiner for the weather */
 void SetCharacterAlpha(s32 alpha) {
     Gfx *gfx;
     s32 i;
@@ -130,10 +117,6 @@ void SetCharacterAlpha(s32 alpha) {
     }
 }
 
-/*
- * Points the characters' highlights at the scene light, as seen from the main
- * camera. The matrices are unused.
- */
 void SetCharacterHilite(CameraMatrices *matrices UNUSED) {
     f32 lookAtMatrix[4][4];
     f32 lightDirection[3];
@@ -186,13 +169,6 @@ void SetCharacterHilite(CameraMatrices *matrices UNUSED) {
     gSPEndDisplayList(gfx++);
 }
 
-/*
- * Maps pageCount pages from virtualAddress to physicalAddress, starting at TLB
- * entry firstTlbIndex. The pages are SMALLEST_PAGE_SIZE << pageMode bytes; odd
- * page modes map each page as two TLB pages of half that size. Returns the next
- * free TLB entry, or -1 if the addresses aren't page-aligned or the mode is
- * invalid.
- */
 s32 SetMultiTlb(
     s32 firstTlbIndex,
     s32 pageMode,
@@ -216,7 +192,6 @@ s32 SetMultiTlb(
             pageSize >>= 1;
             pageCount *= 2;
 
-            /* fallthrough */
         case 0:
             pageMask = OS_PM_4K;
             break;
@@ -224,7 +199,6 @@ s32 SetMultiTlb(
             pageSize >>= 1;
             pageCount *= 2;
 
-            /* fallthrough */
         case 2:
             pageMask = OS_PM_16K;
             break;
@@ -232,7 +206,6 @@ s32 SetMultiTlb(
             pageSize >>= 1;
             pageCount *= 2;
 
-            /* fallthrough */
         case 4:
             pageMask = OS_PM_64K;
             break;
@@ -240,7 +213,6 @@ s32 SetMultiTlb(
             pageSize >>= 1;
             pageCount *= 2;
 
-            /* fallthrough */
         case 6:
             pageMask = OS_PM_256K;
             break;
@@ -249,8 +221,6 @@ s32 SetMultiTlb(
             return -1;
     }
 
-    /* A TLB entry maps an even and odd page pair, so a lone odd page goes first
-     */
     if (virtualAddress & pageSize) {
         osUnmapTLB(tlbIndex);
         osMapTLB(
@@ -295,7 +265,6 @@ s32 SetMultiTlb(
     return tlbIndex;
 }
 
-/* A character model's file in ROM, whose bounds the linker script defines */
 #define DeclareModelFile(name) \
     extern u8 character_models_##name##_ROM_START[], character_models_##name##_ROM_END[]
 #define ModelRomBounds(name) \
@@ -3923,8 +3892,6 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
     },
 };
 
-/* Chosen instead of g_CharacterModels for a model kind of
- * CHARACTER_MODEL_KIND_COUNT or more */
 const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         ModelRomBounds(opening_mario),
@@ -4360,14 +4327,7 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     },
 };
 
-/*
- * Builds the slot's joint matrices for g_CurrentAnimationFrame into
- * g_CurrentJointMatrices. Each joint's translation, rotation and scale is
- * interpolated between the keys around the frame, or held at the nearest key
- * outside them or past g_CurrentAnimationEndFrame.
- */
 void AnimateCharacterJoints(u32 slotIndex) {
-    /* Nothing uses them, but the original's frame has the room for them */
     f32 unusedMatrices[3][4][4] UNUSED;
     f32 translationMatrix[4][4];
     f32 jointMatrix[4][4];
@@ -4492,12 +4452,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
                 rotation[3] = joint->rotations[joint->rotationSpan.index][3] * QUATERNION_SCALE;
             }
             else {
-                /* Its own, as the original allocates it within the branch */
                 f32 rotationProgress;
-                /*
-                 * A variable of its own to match: with rotationProgress scaled in
-                 * place, 35 words differ from the original's (27 in shape)
-                 */
                 f32 coveredAngle;
 
                 spanIndex = joint->rotationSpan.index;
@@ -4512,12 +4467,6 @@ void AnimateCharacterJoints(u32 slotIndex) {
                         joint->rotations[nextSpanIndex][3]);
                 rotationProgress = (g_CurrentAnimationFrame - joint->rotationSpan.startFrame) /
                     (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
-                /*
-                 * Nearly equal rotations are blended linearly, where the sines below
-                 * would be near zero. progress holds the next span's weight from
-                 * here to match: with a variable of its own, 20 words differ from
-                 * the original's
-                 */
                 if (1.0 - dot < SLERP_THRESHOLD) {
                     progress = rotationProgress;
                     spanWeight = 1.0 - progress;
@@ -4612,8 +4561,6 @@ NO_RESULT FreeCharacterSlot(u32 slotIndex) {
     }
 }
 
-/* A slot stays busy for two frames after it was last drawn, while the display
- * list may still use it */
 Boolean IsCharacterSlotBusy(u32 slotIndex) {
     Boolean isBusy;
 
@@ -4642,7 +4589,6 @@ Boolean IsAnyCharacterSlotBusy(void) {
     return FALSE;
 }
 
-/* Returns the slot, or NULL if it is out of range or empty */
 CharacterSlot *GetUsedCharacterSlot(u32 slotIndex) {
     if (slotIndex < CHARACTER_SLOT_COUNT &&
         g_CharacterSlots[slotIndex].modelIndex != NO_CHARACTER_MODEL) {
@@ -4660,11 +4606,6 @@ void FreeAllCharacterSlots(void) {
     }
 }
 
-/*
- * Points the model's chosen display list at one of its display list choices.
- * The slot's model buffer must already be mapped. Returns 0, or -1 if the slot
- * is empty or the model has no such choice.
- */
 s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
     CharacterSlot *slot;
     s32 i;
@@ -4696,7 +4637,6 @@ s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
     return -1;
 }
 
-/* Returns the club's CLUB_KIND, or -1 if the slot is empty */
 ClubKind GetCharacterClubKind(u32 slotIndex, s32 clubIndex) {
     CharacterSlot *slot;
     s32 kind;
@@ -4727,11 +4667,6 @@ ClubKind GetCharacterClubKind(u32 slotIndex, s32 clubIndex) {
     return kind;
 }
 
-/*
- * Finds the point's position on the model, before the slot's own transform.
- * Returns 0, or 1 if the model has no such point, or -1 if the slot is empty.
- * Leaves the position zero if not found.
- */
 s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *position) {
     Mtx pointMatrix;
     Mtx offsetMatrix;
@@ -4782,18 +4717,10 @@ s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *position) {
             return 0;
         }
 
-        /*
-         * The chained assignment is there to match: three separate stores, in
-         * either order, in both places give 17 words differing, 13 in shape
-         */
         position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
         return 1;
     }
 
-    /*
-     * The chained assignment is there to match: three separate stores, in
-     * either order, in both places give 17 words differing, 13 in shape
-     */
     position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
     return -1;
 }
@@ -4819,7 +4746,6 @@ void GetCharacterSlotMatrix(CharacterSlot *slot, Mat4 matrix) {
     guMtxCatF(transform, translation, matrix);
 }
 
-/* Like GetCharacterPointModelPosition, but in the world */
 s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position) {
     Mat4 matrix;
     f32 modelPosition[3];
@@ -4827,10 +4753,6 @@ s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position) {
 
     result = GetCharacterPointModelPosition(slotIndex, pointId, modelPosition);
     if (result < 0) {
-        /*
-         * The chained assignment is there to match: three separate stores, in
-         * either order, give 8 words differing, all in shape
-         */
         position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
     }
     else {
@@ -4849,7 +4771,6 @@ s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position) {
     return result;
 }
 
-/* The model position of the point the character's shadow lies under */
 void GetCharacterShadowPoint(u32 slotIndex, f32 *position) {
     GetCharacterPointModelPosition(slotIndex, CHARACTER_POINT_SHADOW, position);
 }

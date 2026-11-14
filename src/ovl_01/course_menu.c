@@ -1,7 +1,3 @@
-/*
- * The clubhouse's course statistics: a wheel of the open courses that turns
- * from one to the next, and the chosen course's panel of statistics.
- */
 #include "course_menu.h"
 
 #include <ultra64.h>
@@ -28,24 +24,15 @@
 #include "sound.h"
 #include "text.h"
 
-/* A gold coin with a star, reading HOLE IN ONE */
 #define ASSET_HOLE_IN_ONE_BADGE 0x8EA
-/* Orange 1 to 6, then up and down arrows; the course stats draw only the
- * arrows */
 #define ASSET_DIGITS_AND_ARROWS 0x5A5
 
-/* The images of g_CourseIconAssets that the course menu reads */
 #define COURSE_MENU_IMAGE_COUNT 7
 
-/* DrawCourseBanner squeezes the banner's strips under the course menu's title,
- * with the course's name on it */
 #define COURSE_BANNER_TOP 110
 #define COURSE_BANNER_STRIP_SPACING 8
 #define COURSE_NAME_Y 116
 
-/* The course's statistics: the panel behind them, and the rows of it that show
- */
-/* How far UpdateCourseStats turns the course wheel each move, and how fast */
 #define STATS_TURN 90
 #define STATS_SPIN_SPEED 18
 
@@ -58,7 +45,6 @@
 #define STATS_LABEL_X 30
 #define STATS_FIRST_Y 154
 #define STATS_LINE_HEIGHT 16
-/* The statistics in the order the panel lists them */
 #define STAT_ROUND_COUNT 0
 #define STAT_BEST_SCORE 1
 #define STAT_AVERAGE_SCORE 2
@@ -69,16 +55,12 @@
 #define STAT_PAR_SAVE_PERCENT 7
 #define STAT_PAR_ON_PERCENT 8
 #define STAT_SAND_SAVE_PERCENT 9
-/* Where DrawStatFigure draws the figures; shorter best scores move right to
- * line up */
 #define STATS_ROUND_COUNT_X 96
 #define STATS_VALUE_X 112
 #define STATS_TWO_DIGIT_X 128
 #define STATS_ONE_DIGIT_X 144
 #define STATS_UNIT_X 178
 #define STATS_UNIT_OFFSET_Y 4
-/* The 16x16 CI4 glyphs of ASSET_LARGE_DIGITS in f_MenuGlyphs; two of them spell
- * "OFF" */
 #define MENU_GLYPH_SIZE 16
 #define MENU_GLYPH_IMAGE_SIZE (MENU_GLYPH_SIZE * MENU_GLYPH_SIZE / 2)
 #define MENU_GLYPH_TIMES 0
@@ -90,17 +72,13 @@
 #define OFF_FIRST_GLYPH 16
 #define OFF_GLYPH_COUNT 2
 #define MENU_GLYPH_POINT 18
-/* The largest number written in one decimal digit, and in two */
 #define MAX_ONE_DIGIT_NUMBER (DECIMAL_BASE - 1)
 #define MAX_TWO_DIGIT_NUMBER ((DECIMAL_BASE * DECIMAL_BASE) - 1)
-/* Whether a signed number's magnitude takes one digit, and two */
 #define IsOneDigitNumber(n) ((n) >= -MAX_ONE_DIGIT_NUMBER && (n) <= MAX_ONE_DIGIT_NUMBER)
 #define IsTwoDigitNumber(n) \
     (((n) >= DECIMAL_BASE && (n) <= MAX_TWO_DIGIT_NUMBER) || \
         ((n) >= -MAX_TWO_DIGIT_NUMBER && (n) <= -DECIMAL_BASE))
 
-/* The arrows beside the statistics that show there are more rows above or below
- */
 #define STATS_FIRST_ARROW_IMAGE 16
 #define STATS_ARROW_WIDTH 16
 #define STATS_ARROW_HEIGHT 9
@@ -109,29 +87,20 @@
 #define STATS_UP_ARROW_TOP 144
 #define STATS_DOWN_ARROW_TOP 216
 
-/* The blinking arrows that DrawBlinkingSideArrows draws either side of a box,
- * from the third image on */
 #define SIDE_ARROW_COUNT 2
 #define SIDE_ARROW_RIGHT 0
 #define SIDE_ARROW_LEFT 1
 #define SIDE_ARROW_FIRST_IMAGE MENU_ARROW_RIGHT
 #define SIDE_ARROW_BLINK_FRAME_COUNT 4
 
-/* The birdie badge icon of f_CourseStatsBadge and the count beside it */
 #define BADGE_ICON_X 222
 #define BADGE_ICON_Y 144
 #define BADGE_COUNT_X 250
 #define BADGE_COUNT_Y 146
 #define BADGE_COUNT_DIGIT_WIDTH 16
 
-/* DrawCourseTrophies draws the course's tournament trophies, spinning, or on
- * the totals page the course points */
 #define TROPHY_SPACING 24
 #define TROPHY_SHIFT_LEFT 20
-/*
- * How far right of its course's position the place's trophy is. The spacing is
- * unsigned and 16 bits wide, as the original's sum is
- */
 #define TrophyOffset(place) ((u16)((place) * TROPHY_SPACING) - TROPHY_SHIFT_LEFT)
 #define TROPHY_FRAME_DELAY 4
 #define POINTS_NEEDED_X 192
@@ -143,10 +112,6 @@
 
 typedef struct TrophyPosition {
     s32 x;
-    /*
-     * Unsigned: the original drops the rectangle's clamp of a negative top
-     * edge where it works out the texture's t coordinate
-     */
     u32 y;
 } TrophyPosition;
 
@@ -159,21 +124,13 @@ void DrawFourDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 
 void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 value);
 void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 field);
 
-/* The STAT_* shown on the panel's top row, which Up and Down scroll */
 static s16 f_FirstShownStat = 0;
-/* The trophy's frame of g_TrophyFrameAssets, stepped when its timer reaches
- * TROPHY_FRAME_DELAY */
 static s16 f_StatsTrophyFrame = 0;
-/* Which of f_StatsTrophyBuffers holds the trophy frame shown */
 static s16 f_ShownStatsTrophyBufferIndex = 0;
-/* Counts the trophy's draws since its frame last stepped */
 static s16 f_StatsTrophyFrameTimer = 0;
-/* The blink frame and timer of the arrows beside the course wheel */
 static s32 f_StatsArrowFrame = 0;
 static s32 f_StatsArrowTimer = 0;
-/* Read by no routine */
 static s32 f_UnreadStatsWord UNUSED = 0;
-/* The panel's label for each STAT_* */
 static const char *f_StatLabels[STATS_COUNT] = {
     "Round",
     "Best Score",
@@ -186,41 +143,28 @@ static const char *f_StatLabels[STATS_COUNT] = {
     "Par Ons",
     "Sand Saves",
 };
-/* DrawCourseStats adds a tenth to it on every draw, but no routine reads it */
 static f32 f_UnreadStatsDrawTime = 0.0f;
-/* Read by no routine */
 static char f_UnreadStatsTexts[3][10] UNUSED = {"EXP", "ｺｰｽｹﾞｯﾄ", "純ﾞ"};
-/* Where each course's first trophy sits, before its shift for the place */
 static TrophyPosition f_StatsTrophyPositions[COURSE_COUNT] =
     {{230, 177}, {230, 177}, {230, 177}, {236, 165}, {226, 184}, {236, 175}};
 
-/* The camera's matrices that the course wheel's points are projected with */
 static Mat4 f_WheelProjection;
 static Mat4 f_WheelView;
-/* The spinning badge, read after the hole-in-one badge over the same pointer */
 static void *f_CourseStatsBadge;
-/* The course stats' TROPHY_FRAME_BUFFER_COUNT buffers for the trophy frame */
 static void **f_StatsTrophyBuffers;
-/* LoadCourseTrophyImages keeps these for COURSE_BUFFER_SECOND and
- * COURSE_BUFFER_LAST, but no routine reads them */
 static void **f_UnreadSecondTrophyBuffers;
 static void **f_UnreadLastTrophyBuffers;
-/* The wheel's icons of each course and the totals, from LoadCourseStatsIcons */
 static void **f_CourseStatsIcons;
-/* The images that LoadCourseMenuBuffer reads, by their assets */
 static void *f_CourseStatsNamePlate;
 static void *f_CourseStatsDigitsAndArrows;
 static void *f_MenuGlyphs;
 static void *f_CourseStatsGreenArrows;
 
-/* Read by no routine; 2 objects, as one would be aligned past its start */
 static u8 f_UnreadStatsBytes[0x4] UNUSED;
 static u8 f_UnreadStatsBlock[0x188] UNUSED;
 
-/* Reads every course's icon into the course stats' buffers */
 void LoadCourseStatsIcons(void **buffers) {
     EncodedAsset asset;
-    /* Pads the frame to match; without it 24 words differ */
     s32 unused[4] UNUSED;
     s16 imageIndex;
 
@@ -231,10 +175,6 @@ void LoadCourseStatsIcons(void **buffers) {
     }
 }
 
-/*
- * Keeps the buffers as the kind's set, then reads the chosen course's first
- * trophy image into both of them and the trophy's three place palettes
- */
 void LoadCourseTrophyImages(void **buffers, s32 requestedKind) {
     EncodedAsset asset;
     AssetFile file;
@@ -279,7 +219,6 @@ void LoadCourseMenuBuffer(void *buffer, s16 bufferKind) {
     EncodedAsset asset;
 
     switch (bufferKind) {
-        /* The course menu keeps no buffer of kind 1 */
         case COURSE_MENU_BUFFER_UNUSED:
             break;
         case COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE:
@@ -445,7 +384,6 @@ void UpdateCourseStats(void) {
 
             memory->statsSpin -= direction * step;
 
-            /* Stop on reaching the course rather than turning past it */
             if ((memory->statsSpin < 0 ? -1 : 1) != direction) {
                 memory->statsSpin = 0;
             }
@@ -461,25 +399,16 @@ void DrawStatsPanel(Gfx **displayListHead);
 
 void DrawStatsScrollArrows(Gfx **displayListHead);
 
-/* DrawCourseStats turns a totals image on the wheel of menu.h after the open
- * courses' images */
 #define COURSE_TOTALS_IMAGE COURSE_COUNT
 
-/*
- * Draws the course stats menu: the open courses' images and the totals image
- * on a turning wheel, nearest last, then the arrows, the chosen course's
- * banner, its stats panel, badge count and trophies.
- */
 void DrawCourseStats(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     u16 perspNorm;
     f32 iconX[WHEEL_SLOT_LIMIT];
     f32 iconY[WHEEL_SLOT_LIMIT];
     f32 iconScale[WHEEL_SLOT_LIMIT];
-    /* Pads the frame to match; without it 180 words differ */
     s32 unusedSlots[WHEEL_SLOT_LIMIT] UNUSED;
     s32 drawOrder[WHEEL_SLOT_LIMIT];
-    /* Pads the frame to match; without it 170 words differ */
     s32 unused[2] UNUSED;
     MenuMemory *memory = GetMenuMemory();
     s32 courseCount;
@@ -562,7 +491,6 @@ void DrawCourseStats(Gfx **displayListHead) {
         drawOrder[sortIndex] = sortIndex;
     }
 
-    /* Draw the farthest images first, so the nearer ones cover them */
     for (sortIndex = 1; sortIndex != courseCount + 1; sortIndex++) {
         key = drawOrder[sortIndex];
         for (index = sortIndex - 1; index >= 0 && iconY[drawOrder[index]] > iconY[key]; index--) {
@@ -644,11 +572,6 @@ void DrawCourseStats(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the name plate banner squeezed under the screen's title, with the
- * course's number and its tournament's name, or with the course's own name if
- * useCourseNames is set. The totals, after the last course, get no number.
- */
 void DrawCourseBanner(Gfx **displayListHead, u8 useCourseNames, s32 courseIndex) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -732,15 +655,9 @@ void DrawCourseBanner(Gfx **displayListHead, u8 useCourseNames, s32 courseIndex)
     *displayListHead = gfx;
 }
 
-/* Writes a label or the totals' name as it is */
 const char f_StatsStringFormat[] = "%s";
-/* Writes a course's number before its name */
 const char f_NumberedCourseFormat[] = "%d:%s";
 
-/*
- * Draws the dimmed panel of the course's statistics, with the label and figure
- * of each shown row
- */
 void DrawStatsPanel(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 row = 0;
@@ -789,11 +706,6 @@ void DrawStatsPanel(Gfx **displayListHead) {
 void DrawPercentMark(Gfx **displayListHead, s16 x, s16 y);
 void DrawYardMark(Gfx **displayListHead, s16 x, s16 y);
 
-/*
- * Draws the statistic's figure for the chosen course, or for all courses on the
- * totals, on the panel's row, with its unit; nothing shows before any round has
- * been played
- */
 void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory;
@@ -808,7 +720,6 @@ void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row) {
         courseIndex = memory->statsCourse;
     }
     else {
-        /* The figures for all the courses together */
         courseIndex = COURSE_COUNT;
     }
 
@@ -958,10 +869,8 @@ void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row) {
     *displayListHead = gfx;
 }
 
-/* Writes the unit mark after a figure */
 const char f_UnitMarkFormat[] = "%c";
 
-/* Draws the green Y that marks a figure in yards */
 void DrawYardMark(Gfx **displayListHead, s16 x, s16 y) {
     Gfx *gfx = *displayListHead;
 
@@ -974,7 +883,6 @@ void DrawYardMark(Gfx **displayListHead, s16 x, s16 y) {
     *displayListHead = gfx;
 }
 
-/* Draws the pink percent sign after a percentage */
 void DrawPercentMark(Gfx **displayListHead, s16 x, s16 y) {
     Gfx *gfx = *displayListHead;
 
@@ -987,24 +895,13 @@ void DrawPercentMark(Gfx **displayListHead, s16 x, s16 y) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the spinning badge and how many of the course's holes, or of every
- * course's on the totals, have a birdie badge.
- */
 void DrawStatsBadgeCount(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s16 badgeCount;
-    /*
-     * A hole, then a course, then where the count moves to, to match: a
-     * separate holeIndex for the open course's holes, or an s16 countShift for
-     * the shift, gives 60 words differing (2 in shape), a courseIndex 64 (2),
-     * and an s32 countShift 72 (4)
-     */
     s16 index;
     s16 holeIndex;
-    /* The stats page after the open courses' pages shows every course */
     s32 totalsPage = GetOpenCourseCount();
 
     if (memory->statsCourse != totalsPage) {
@@ -1026,7 +923,6 @@ void DrawStatsBadgeCount(Gfx **displayListHead) {
         }
     }
 
-    /* Centers the count by its number of digits */
     if (badgeCount < 10) {
         index = BADGE_COUNT_DIGIT_WIDTH;
     }
@@ -1061,79 +957,6 @@ void DrawStatsBadgeCount(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the arrows beside the panel that show there are more statistics above
- * or below.
- *
- * The rectangle is drawn with gSPScisTextureRectangle, which clamps each edge
- * at zero and, for a left or top edge off the screen, moves the texel
- * coordinate on by the edge times its step. All that is left of that in the
- * code is a shift of the top by 2 whose result nothing reads, left from the
- * test of the top's sign, and 16 bytes of the frame. combine, knowing the top
- * is 144 or 216, drops the bottom edge's clamp and the top's texel offset, and
- * where it can't place the note for the death of each one's register it leaves
- * a use of it. With nothing else reading them they get no hard register, and
- * reload gives each a stack slot of 8 bytes that nothing reads. The frame's
- * other five slots are displayListHead's, the arrow count's, the first arrow's
- * and the lone down arrow's test's, which the code reads at 0x4 to 0x1C, and
- * one for the texture table mode's word, which reload takes out of $s2 and
- * never reads back. With gSPTextureRectangle the frame is 16 bytes smaller,
- * which the old draft made up with an unused array.
- *
- * The top is an s16, as the count, the first arrow and the index are. As an
- * s32, the top's two shifts for the rectangle's words trade places and
- * registers.
- *
- * The rows below are tested where the down arrow is counted and again for the
- * first arrow, and cse joins the two: the original keeps the test's result in
- * $a1 and copies it under a branch on the count. Kept in a flag, the copy is
- * made without a branch. The lone down arrow's test in the loop tests the count
- * again, though firstArrow is only set for a count of one: loop.c moves the
- * test out as (arrowCount == 1) & firstArrow, the original's xori, sltiu and
- * and, kept at 0x1C($sp).
- *
- * Measured against the match, as words differing and how many of them in shape:
- *   The old draft: gSPTextureRectangle, an s32 top and 16
- *   unused bytes                                              71 (11)
- *   gSPTextureRectangle, with no unused bytes                 96 (14)
- *   gSPTextureRectangle, with the unused bytes                72 (14)
- *   The unused bytes as well as gSPScisTextureRectangle       56 (0)
- *   top as an s32                                             8 (4)
- *   top as a u8                                               24 (4)
- *   top as a u32                                              55 (11)
- *   top as an s8                                              116 (30)
- *   The bottom edge as the top's quarter pixels plus the
- *   height's                                                  51 (3)
- *   The rows below tested once, in an s16 flag                113 (45)
- *   The same in an s32 flag                                   117 (47)
- *   The rows above in an s16 flag as well                     113 (45)
- *   The down arrow counted by adding its test                 18 (8)
- *   The first arrow as a conditional expression on the count  113 (45)
- *   The first arrow cleared, then set under the count's test  20 (8)
- *   The first arrow with the rows' test ahead of the count's  113 (57)
- *   firstArrow as an s32                                      28 (10)
- *   firstArrow as a u16                                       3 (3)
- *   arrowCount as an s32                                      65 (29)
- *   arrowCount as a u16                                       2 (2)
- *   arrowIndex as an s32                                      23 (7)
- *   arrowIndex as a u16                                       9 (9)
- *   The lone down arrow tested by firstArrow alone            146 (16)
- *   The same tested with firstArrow ahead of the count        10 (0)
- *   The top in one conditional expression, a down arrow's for
- *   a later arrow or a lone down arrow                        17 (15)
- *   The lone down arrow tested first, and the index in its
- *   else                                                      17 (13)
- *   The top chosen by the arrow's image, firstArrow +
- *   arrowIndex                                                191 (37)
- *   The arrow's image as arrowIndex + firstArrow              19 (1)
- *   The arrow's image offset as a product for each            41 (15)
- *   The loop's test as <                                      283 (37)
- *
- * Also matching: top as a u16; the top chosen by an if and an else, or set to
- * the up arrow's and then to the down arrow's under the index's test; the index
- * tested as zero with the tops swapped; arrowCount cleared and counted up under
- * a test for each arrow; and top declared before arrowIndex.
- */
 void DrawStatsScrollArrows(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s16 arrowCount = f_FirstShownStat > 0;
@@ -1158,7 +981,6 @@ void DrawStatsScrollArrows(Gfx **displayListHead) {
         gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_CourseStatsDigitsAndArrows)));
         for (arrowIndex = 0; arrowIndex != arrowCount; arrowIndex++) {
             top = (arrowIndex != 0) ? STATS_DOWN_ARROW_TOP : STATS_UP_ARROW_TOP;
-            /* A lone down arrow. The count is tested again, to match. */
             if (arrowCount == 1 && firstArrow) {
                 top = STATS_DOWN_ARROW_TOP;
             }
@@ -1201,20 +1023,6 @@ void DrawStatsScrollArrows(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the course's spinning trophy in the color of each place won in its
- * tournament, stepping the spin's images, or on the totals the points needed to
- * open the next course.
- *
- * Each edge works out TrophyOffset anew, and that is there to match: the
- * rectangle's command casts its edges to s16, so GCC adds the shift left in 16
- * bits, as 0xFFEC in a register, and the scheduler puts the offset's
- * instructions among the first edge's, where they lengthen the life of the
- * left position's register and so decide which registers the edges get. With
- * the spacing in a u16 local, 48 words differ in those registers alone, and
- * with the whole offset in a local, 29 to 51. Without the cast to u16 the shift
- * left is added as -20 to each edge: 27 words differ.
- */
 void DrawCourseTrophies(Gfx **displayListHead) {
     EncodedAsset asset;
     Gfx *gfx = *displayListHead;
@@ -1351,17 +1159,14 @@ void DrawCourseTrophies(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-/* The smallest number of each length */
 #define TWO_DIGIT_FIRST DECIMAL_BASE
 #define THREE_DIGIT_FIRST (TWO_DIGIT_FIRST * DECIMAL_BASE)
 #define FOUR_DIGIT_FIRST (THREE_DIGIT_FIRST * DECIMAL_BASE)
-/* The largest number of each length */
 #define ONE_DIGIT_MAX (TWO_DIGIT_FIRST - 1)
 #define TWO_DIGIT_MAX (THREE_DIGIT_FIRST - 1)
 #define THREE_DIGIT_MAX (FOUR_DIGIT_FIRST - 1)
 #define FOUR_DIGIT_MAX (FOUR_DIGIT_FIRST * DECIMAL_BASE - 1)
 
-/* DrawMenuNumber's sixth argument: the field it right-aligns the number in */
 enum NumberField {
     NUMBER_FIELD_TWO_NARROW,
     NUMBER_FIELD_ONE,
@@ -1371,8 +1176,6 @@ enum NumberField {
     NUMBER_FIELD_NONE
 };
 
-/* Draws a number right-aligned in a two-digit field, with narrower spacing,
- * clamped to the digits it holds */
 void DrawNarrowTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark) {
     Gfx *gfx = *displayListHead;
 
@@ -1388,8 +1191,6 @@ void DrawNarrowTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value
     *displayListHead = gfx;
 }
 
-/* Draws a number right-aligned in a one-digit field, clamped to the
- * digits it holds */
 void DrawOneDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark) {
     Gfx *gfx = *displayListHead;
 
@@ -1405,8 +1206,6 @@ void DrawOneDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 m
     *displayListHead = gfx;
 }
 
-/* Draws a number right-aligned in a two-digit field, clamped to the
- * digits it holds */
 void DrawTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark) {
     Gfx *gfx = *displayListHead;
 
@@ -1422,8 +1221,6 @@ void DrawTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 m
     *displayListHead = gfx;
 }
 
-/* Draws a number right-aligned in a three-digit field, clamped to the
- * digits it holds */
 void DrawThreeDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark) {
     Gfx *gfx = *displayListHead;
 
@@ -1439,8 +1236,6 @@ void DrawThreeDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8
     *displayListHead = gfx;
 }
 
-/* Draws a number right-aligned in a four-digit field, clamped to the
- * digits it holds */
 void DrawFourDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark) {
     Gfx *gfx = *displayListHead;
 
@@ -1456,7 +1251,6 @@ void DrawFourDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 
     *displayListHead = gfx;
 }
 
-/* Draws a number without right-aligning it in a field */
 void DrawUnalignedMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark) {
     Gfx *gfx = *displayListHead;
 
@@ -1468,20 +1262,13 @@ void DrawUnalignedMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 
 #define MENU_NUMBER_DIGIT_LIMIT 4
 #define MENU_NUMBER_LIMIT FOUR_DIGIT_MAX
 
-/*
- * Draws a number of up to four digits with the glyphs of ASSET_LARGE_DIGITS,
- * marked as the mark argument says and right-aligned in a field. The field's
- * shift depends only on the field, so a number two or three digits long in a
- * wider field moves as far right as a one-digit one. Numbers past four digits
- * draw nothing.
- */
 void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 field) {
     Gfx *gfx = *displayListHead;
     s16 digits[MENU_NUMBER_DIGIT_LIMIT];
     s16 digitCount = 0;
     s32 shift;
     s16 spacing;
-    s16 index; /* The mark's glyph, then the digit being drawn */
+    s16 index;
 
     if (value > MENU_NUMBER_LIMIT) {
         return;
@@ -1719,22 +1506,13 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 
     *displayListHead = gfx;
 }
 
-/* DrawDecimalMenuNumber writes a figure to one decimal place, its whole part
- * lined up on the right */
 #define DECIMAL_WHOLE_LIMIT 999
 #define DECIMAL_DIGIT_LIMIT 6
 #define HUNDREDTHS_PER_UNIT 100.0f
-/* The point is drawn half a glyph back, over the right half of the last whole
- * digit */
 #define DECIMAL_POINT_OFFSET (MENU_GLYPH_SIZE / 2)
 
-/* Writes a decimal figure's whole part */
 const char f_DecimalWholeFormat[] = "%d";
 
-/*
- * Draws value to one decimal place in the large digits, its whole part
- * right-aligned in three digits from x
- */
 void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 value) {
     Gfx *gfx = *displayListHead;
     s32 whole = value;
@@ -1742,7 +1520,6 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 value) {
     s32 fraction;
     s32 digitIndex;
     u8 digit;
-    /* Pads the frame to match; without it 112 words differ */
     s32 unused[4] UNUSED;
 
     if (whole > DECIMAL_WHOLE_LIMIT) {
@@ -1755,7 +1532,6 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 value) {
 
     fraction = (value - whole) * HUNDREDTHS_PER_UNIT;
 
-    /* Round the hundredths to tenths */
     if (fraction % DECIMAL_BASE >= DECIMAL_BASE / 2) {
         fraction += DECIMAL_BASE;
     }
@@ -1897,11 +1673,9 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 value) {
     *displayListHead = gfx;
 }
 
-/* Nothing reads these */
 const char f_UnreadFirstEmptyText[] = "";
 const char f_UnreadSecondEmptyText[] = "";
 
-/* Draws the MENU_SIGN_* sign's glyph with its top-left corner at (x, y) */
 void DrawMenuSign(Gfx **displayListHead, s32 x, s32 y, u8 sign) {
     Gfx *gfx = *displayListHead;
     s32 glyphIndex = MENU_GLYPH_TIMES;
@@ -1957,7 +1731,6 @@ void DrawMenuSign(Gfx **displayListHead, s32 x, s32 y, u8 sign) {
     *displayListHead = gfx;
 }
 
-/* Draws "OFF" in the large digits' two glyphs for it; nothing calls this */
 void DrawOffLabel(Gfx **displayListHead, s32 x, s32 y) {
     Gfx *gfx = *displayListHead;
     s32 glyphIndex;
@@ -2007,16 +1780,6 @@ void DrawOffLabel(Gfx **displayListHead, s32 x, s32 y) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the green left and right arrows either side of a width centered on a
- * point, switching their blink frame every SIDE_ARROW_BLINK_FRAME_COUNT calls
- *
- * frameOffset is worked out before the palette load; after it, 264 words
- * differ. The arrow's image offset is added to frameOffset before the
- * image's address; added to the address in turn, 4 words differ, and with
- * frameOffset first, 2. Setting top at its declaration, not just before the
- * rectangle, gives 134 words, 38 in shape.
- */
 void DrawBlinkingSideArrows(
     Gfx **displayListHead,
     void *image,
@@ -2090,11 +1853,6 @@ void DrawBlinkingSideArrows(
     *displayListHead = gfx;
 }
 
-/*
- * Draws one of the four side arrow images, in either blink state, centered on
- * a point. The header size is held in a local, as the matching code needs:
- * with the constant, GCC folds the texels' offset differently.
- */
 void DrawGreenArrow(
     Gfx **displayListHead,
     void *image,

@@ -9,136 +9,94 @@
 #include "math_util.h"
 #include "player.h"
 
-/* The effects over a shot in flight that StartShotEffect starts */
 enum ShotEffect {
     SHOT_EFFECT_NONE = -1,
     SHOT_EFFECT_LONG_SHOT,
-    SHOT_EFFECT_MAX_POWER /* Started by a maximum power impact */
+    SHOT_EFFECT_MAX_POWER
 };
 
-/* The landing reactions that StartLandingReaction starts */
 enum LandingReaction {
     LANDING_REACTION_NONE = -1,
-    /* Shows the surface and how far the ball rests from the cup */
     LANDING_REACTION_REST = 1,
-    /* Shows only the surface's name, in the water or off the course */
     LANDING_REACTION_SURFACE_ONLY
 };
 
-/* RoundHud.ballHeight*Direction values */
 enum HeightComparison {
     HEIGHT_ABOVE,
     HEIGHT_BELOW,
     HEIGHT_LEVEL
 };
 
-/* RoundHud.scorecardPage while the scorecard is closed */
 #define NO_SCORECARD_PAGE (-1)
 
-/* RoundHud.flags, which UpdateTurns sets for each step of a shot */
-/* Read by no routine; set while aiming */
 #define HUD_FLAG_AIMING 0x1
-/* Lights the club head icon fully, otherwise it is dimmed */
 #define HUD_FLAG_LIGHT_CLUB_HEAD 0x2
-/*
- * Read by no routine; set while aiming without an impact point to show: on the
- * green, for shots with SHOT_FLAG_NO_IMPACT_POINT, and in the letterbox views,
- * where free look also turns the impact point off
- */
 #define HUD_FLAG_NO_IMPACT_POINT 0x4
-/* Animates the shot offset marker */
 #define HUD_FLAG_ANIMATE_OFFSET_MARKER 0x8
-/* Read by no routine; set while the power is set */
 #define HUD_FLAG_SETTING_POWER 0x10
-/* Read by no routine; set while the impact is set */
 #define HUD_FLAG_SETTING_IMPACT 0x20
-/* Set in free look, so the course shows through */
 #define HUD_FLAG_TRANSLUCENT_GAUGE 0x40
-/* Read by no routine; set as the swing starts */
 #define HUD_FLAG_SWINGING 0x80
 
-/* The HUD's state for a round, which FreeScenery clears */
 typedef struct RoundHud {
-    /* 0x00 */ s8 scorecardPage; /* The scorecard page that is shown */
-    /* Only ever cleared, as the scorecard closes */
-    /* 0x01 */ s8 unusedScorecardValue;
-    /* Only ever cleared, as the scorecard opens at a hole's end */
-    /* 0x02 */ s8 unusedHoleEndValue;
-    /* Only ever cleared, as the scorecard closes */
-    /* 0x03 */ s8 otherUnusedScorecardValue;
-    /* 0x04 */ u8 unusedBeforeLetterbox;
-    /* 0x05 */ s8 isLetterboxShown; /* DrawLetterbox draws its bars only while
-                                       this is set */
-    /* Cleared as a pause screen closes, while the HUD's other parts show again;
-     * nothing reads it */
-    /* 0x06 */ s8 isIgnoredPausePartShown;
-    /* 0x07 */ s8 isWindIndicatorShown;
-    /* 0x08 */ s8 isHoleInfoShown; /* The hole's model, yardage and par */
-    /* 0x09 */ s8 isLieIconShown;
-    /* 0x0A */ s8 isClubHeadIconShown;
-    /* 0x0B */ s8 isUnreadItemShown; /* Set with the others; read by none */
-    /* 0x0C */ s8 isClubPanelShown;
-    /* 0x0D */ s8 isProgressShown; /* The scoreboard, the distance left to
-                                      the cup, the ring count and the
-                                      stopwatch */
-    /* 0x0E */ u8 unusedBeforeDistanceSign;
-    /* 0x0F */ s8 isDistanceSignShown; /* At g_CurrentShot.targetPoint */
-    /* 0x10 */ s8 greenGridState; /* Whether the grid over the ground shows; B
-                                     toggles it while aiming */
-    /* 0x11 */ u8 unusedAfterGreenGrid;
-    /* 0x12 */ s8 isPinFlagShown;
-    /* 0x13 */ s8 isShotLengthShown; /* How far the ball has flown */
-    /* 0x14 */ u8 unusedBeforeHoleIntro[2];
-    /* 0x16 */ s8 isHoleIntroTextShown; /* Whether the course's name and the hole's number
-                                           show before the flyover */
-    /* 0x17 */ s8 isBallTrailShown;
-    /*
-     * The height of the ball above the cup, in yards, meters and feet, and for
-     * each whether the ball is above, below or level with it
-     */
-    /* 0x18 */ s8 ballHeightYardsDirection;
-    /* 0x19 */ s8 ballHeightMetersDirection;
-    /* 0x1A */ s8 ballHeightFeetDirection;
-    /* 0x1B */ u8 unusedAfterBallHeights;
-    /* 0x1C */ s32 ballHeightYards;
-    /* 0x20 */ f32 ballHeightMeters;
-    /* 0x24 */ f32 ballHeightFeet;
-    /* 0x28 */ s32 cupDistance;
-    /* 0x2C */ s32 stopwatchFrameCount; /* The Speed Golf stopwatch of the player
-                                           taking a turn */
-    /* 0x30 */ u8 unusedBeforeSkins[0x78 - 0x30];
-    /* 0x78 */ s16 skinsTotals[MAX_PLAYER_COUNT]; /* The skins each player has won, as
-                                                     TallySkins counts them */
-    /* 0x80 */ BinaryAngle clubHeadTilt; /* The icons tilt by half */
-    /* 0x82 */ BinaryAngle lieTilt; /* The slope under the ball */
-    /* Set as the turn starts, with the HUD's other parts; nothing reads it */
-    /* 0x84 */ u8 isIgnoredTurnPartShown;
-    /* Whether the chosen club can putt; nothing reads it */
-    /* 0x85 */ u8 isPuttingClubChosen;
-    /* 0x86 */ u8 unusedAfterClubChoice;
-    /* 0x87 */ s8 shooterIndex; /* Of the player whose turn it is */
-    /* 0x88 */ u8 flags; /* HUD_FLAG_* bits */
-    /* 0x89 */ u8 areLieArrowsShown; /* While the pause menu sets the lie */
-    /* 0x8A */ u8 areWindSpeedArrowsShown;
-    /* 0x8B */ u8 areWindDirectionArrowsShown;
-} RoundHud; /* size = 0x8C */
+      s8 scorecardPage;
+      s8 unusedScorecardValue;
+      s8 unusedHoleEndValue;
+      s8 otherUnusedScorecardValue;
+      u8 unusedBeforeLetterbox;
+      s8 isLetterboxShown;
+      s8 isIgnoredPausePartShown;
+      s8 isWindIndicatorShown;
+      s8 isHoleInfoShown;
+      s8 isLieIconShown;
+      s8 isClubHeadIconShown;
+      s8 isUnreadItemShown;
+      s8 isClubPanelShown;
+      s8 isProgressShown;
+      u8 unusedBeforeDistanceSign;
+      s8 isDistanceSignShown;
+      s8 greenGridState;
+      u8 unusedAfterGreenGrid;
+      s8 isPinFlagShown;
+      s8 isShotLengthShown;
+      u8 unusedBeforeHoleIntro[2];
+      s8 isHoleIntroTextShown;
+      s8 isBallTrailShown;
+      s8 ballHeightYardsDirection;
+      s8 ballHeightMetersDirection;
+      s8 ballHeightFeetDirection;
+      u8 unusedAfterBallHeights;
+      s32 ballHeightYards;
+      f32 ballHeightMeters;
+      f32 ballHeightFeet;
+      s32 cupDistance;
+      s32 stopwatchFrameCount;
+      u8 unusedBeforeSkins[0x78 - 0x30];
+      s16 skinsTotals[MAX_PLAYER_COUNT];
+      BinaryAngle clubHeadTilt;
+      BinaryAngle lieTilt;
+      u8 isIgnoredTurnPartShown;
+      u8 isPuttingClubChosen;
+      u8 unusedAfterClubChoice;
+      s8 shooterIndex;
+      u8 flags;
+      u8 areLieArrowsShown;
+      u8 areWindSpeedArrowsShown;
+      u8 areWindDirectionArrowsShown;
+} RoundHud;
 
 extern RoundHud g_RoundHud;
 #define MATRIX_BUFFER_COUNT 2
-/* Which of the MATRIX_BUFFER_COUNT matrix buffers this frame fills */
 extern s32 g_MatrixBufferIndex;
-/* How far the shot panel still has to slide in, down to 0 */
 extern s32 g_ShotPanelOffsetX;
 
-/* What DrawBallTrail does with the ball's trail each frame */
 enum BallTrailStateValue {
-    BALL_TRAIL_OFF, /* Not drawn */
-    BALL_TRAIL_RECORDING, /* Drawn, adding the ball's position; never set */
-    BALL_TRAIL_HELD /* Drawn as it is */
+    BALL_TRAIL_OFF,
+    BALL_TRAIL_RECORDING,
+    BALL_TRAIL_HELD
 };
 
 typedef s32 BallTrailState;
-/* The ball trail's state */
 extern BallTrailState g_BallTrailState;
 
 void PrepareHoleDisplay(void);
@@ -166,19 +124,12 @@ void SwapMatrixBuffers(void);
 void ResetBallTrail(void);
 void ScrollWindArrow(void);
 void AdjustHudOffset(void);
-/* An I8 texture of a ring, that marks where the ball will land and draws the
- * lens flare */
 #define RING_TEXTURE_SIZE 64
 extern u8 *g_RingTexels;
-/* The 16 by 8 tags "1P" to "4P", "1C" to "4C" and "Com", over one palette */
 extern void *g_PlayerTagImages;
-/* The line from a player's tag to their ball */
 extern void *g_LeaderLineImage;
-/* The wooden sign behind the shot's distance */
 extern void *g_DistanceSignImage;
-/* The frames of the flag that marks the pin */
 extern void *g_PinFlagImages;
-/* The I8 dash that shot previews are drawn with, this many texels on a side */
 #define SHOT_PREVIEW_IMAGE_SIZE 32
 extern void *g_ShotPreviewDashImage;
 

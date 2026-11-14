@@ -3,13 +3,6 @@
 
 #include <ultra64.h>
 
-/* The numbers and signs that the menus draw, defined in course_menu.c */
-
-/*
- * How DrawMenuNumber marks a number: with nothing, a cross before it, its
- * sign (a plus tinted red, a minus tinted green, or plus-minus for zero),
- * or a red or green tint
- */
 enum MenuNumberStyle {
     MENU_NUMBER_PLAIN,
     MENU_NUMBER_TIMES,
@@ -18,7 +11,6 @@ enum MenuNumberStyle {
     MENU_NUMBER_GREEN_TINT
 };
 
-/* The signs that DrawMenuSign draws */
 enum MenuSign {
     MENU_SIGN_DASH,
     MENU_SIGN_TIMES,

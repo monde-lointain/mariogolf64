@@ -3,8 +3,6 @@
 
 #include <ultra64.h>
 
-/* Indexes into the surface table. Names with UNKNN share another's kind or
- * name. */
 enum Surface {
     SURFACE_OUT_OF_BOUNDS,
     SURFACE_FAIRWAY,
@@ -21,7 +19,6 @@ enum Surface {
     SURFACE_DEEP_ROUGH,
     SURFACE_NO_DROP_GROUND,
     SURFACE_WASTE_AREA,
-    /* A rock whose name is blank, with a lie as good as the green edge's */
     SURFACE_UNNAMED_ROCK,
     SURFACE_BUNKER_FAIR_LIE,
     SURFACE_BUNKER_POOR_LIE,
@@ -31,40 +28,24 @@ enum Surface {
     SURFACE_ROUGH_POOR_LIE,
     SURFACE_OUT_OF_COURSE,
     SURFACE_TEE_UP,
-    /* The surfaces a mini-golf course has in place of the green, fairway and cart
-     * way */
     SURFACE_MINI_GOLF_GREEN,
     SURFACE_MINI_GOLF_FAIRWAY,
     SURFACE_MINI_GOLF_CART_WAY,
-    /* Surfaces past the last are looked up as the first */
     SURFACE_COUNT
 };
 
-/* An enum Surface value; fields kept narrower say so in comments */
 typedef s32 Surface;
 
-/*
- * Kinds that group the surfaces; several surfaces share one. A surface's
- * plain kind is its best lie; its FAIR_LIE and POOR_LIE kinds get lower lie
- * ratings, and their lie images show the ball sitting worse. Kinds named
- * UNKNN share their surface's name with another kind.
- */
 enum SurfaceKind {
     SURFACE_KIND_FAIRWAY,
-    SURFACE_KIND_FAIRWAY_FAIR_LIE, /* In a tuft of grass */
-    SURFACE_KIND_FAIRWAY_POOR_LIE, /* In a divot */
+    SURFACE_KIND_FAIRWAY_FAIR_LIE,
+    SURFACE_KIND_FAIRWAY_POOR_LIE,
     SURFACE_KIND_ROUGH,
-    SURFACE_KIND_ROUGH_POOR_LIE, /* Deeper in the grass */
-    /* No surface has it, but the code treats it as rough */
+    SURFACE_KIND_ROUGH_POOR_LIE,
     SURFACE_KIND_ROUGH_UNUSED_LIE,
     SURFACE_KIND_BUNKER,
-    SURFACE_KIND_BUNKER_FAIR_LIE, /* Half buried */
-    SURFACE_KIND_BUNKER_POOR_LIE, /* Mostly buried */
-    /*
-     * The kind of SURFACE_BUNKER_UNUSED_LIE, which no decompiled code gives a
-     * ball. Its surface is BUNKER_POOR_LIE's with a 40 wrong-club penalty, not
-     * 30. Has BUNKER_POOR_LIE's image, but the default ratings and clubs
-     */
+    SURFACE_KIND_BUNKER_FAIR_LIE,
+    SURFACE_KIND_BUNKER_POOR_LIE,
     SURFACE_KIND_BUNKER_UNUSED_LIE,
     SURFACE_KIND_WATER_HAZARD,
     SURFACE_KIND_GREEN,
@@ -82,58 +63,39 @@ enum SurfaceKind {
     SURFACE_KIND_WASTE_AREA
 };
 
-/* An enum SurfaceKind value */
 typedef s32 SurfaceKind;
 
-/*
- * Whether a ball on a surface kind is out of bounds, which costs a stroke.
- * These are macros, as an inline function compiles differently from the
- * original in computer_golfer.c.
- */
 #define IsOutOfBoundsKind(kind) \
     ((kind) == SURFACE_KIND_OUT_OF_BOUNDS || (kind) == SURFACE_KIND_OUT_OF_COURSE)
-/* Whether a ball on a surface kind is lost: in water or out of bounds */
 #define IsLostBallKind(kind) \
     ((kind) == SURFACE_KIND_WATER_HAZARD || \
         (kind) == SURFACE_KIND_OUT_OF_BOUNDS || \
         (kind) == SURFACE_KIND_OUT_OF_COURSE)
-/* Whether a surface kind is a fairway, at any of its lies */
 #define IsFairwayKind(kind) \
     ((kind) == SURFACE_KIND_FAIRWAY || \
         (kind) == SURFACE_KIND_FAIRWAY_FAIR_LIE || \
         (kind) == SURFACE_KIND_FAIRWAY_POOR_LIE)
-/*
- * Whether a surface kind is a bunker with a bunker's ratings, at any of its
- * lies. BUNKER_UNUSED_LIE is left out, having the default ratings.
- */
 #define IsBunkerKind(kind) \
     ((kind) == SURFACE_KIND_BUNKER || \
         (kind) == SURFACE_KIND_BUNKER_FAIR_LIE || \
         (kind) == SURFACE_KIND_BUNKER_POOR_LIE)
 
-/* How far a ball resting on a surface sinks into it, as it is drawn */
 #define SINK_DEPTH_NONE 0
 #define SINK_DEPTH_HALF 1
 #define SINK_DEPTH_BURIED 2
 
 typedef struct SurfaceInfo {
-    /* 0x00 */ SurfaceKind kind;
-    /* 0x04 */ char *name; /* As the lie is shown */
-    /* 0x08 */ s8 minPercent;
-    /* 0x09 */ s8 maxPercent;
-    /* 0x0A */ s8 wrongClubPenalty; /* Taken off both percents for a club not
-                                       meant for the surface */
-    /* In thousandths: the share of a rolling ball's speed kept each frame, and
-       how much a landing ball bounces */
-    /* 0x0C */ s16 rollSpeedKept;
-    /* 0x0E */ s16 bounciness;
-    /* 0x10 */ s32 lieImageAsset; /* The HUD's picture of the lie */
-    /* 0x14 */ s32 sinkDepth; /* A SINK_DEPTH_* value */
-    /* A group of like surfaces, which nothing reads: 0 fairway, 1 rough or bare
-     * ground, 2 bunker, 3 water, 4 cart way, 5 deep rough or waste area, 6
-     * green, 7 out of bounds, 8 tee and 9 rock */
-    /* 0x18 */ s32 ignoredSurfaceGroup;
-} SurfaceInfo; /* size = 0x1C */
+      SurfaceKind kind;
+      char *name;
+      s8 minPercent;
+      s8 maxPercent;
+      s8 wrongClubPenalty;
+      s16 rollSpeedKept;
+      s16 bounciness;
+      s32 lieImageAsset;
+      s32 sinkDepth;
+      s32 ignoredSurfaceGroup;
+} SurfaceInfo;
 
 SurfaceInfo *GetSurfaceInfo(Surface surface);
 SurfaceInfo *GetSurfaceInfoAt(s32 x, s32 z);

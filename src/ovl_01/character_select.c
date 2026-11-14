@@ -1,9 +1,3 @@
-/*
- * The character select screen, which Get Character's opponent select and the
- * Club Tournament's character select draw as well. Each player moves a cursor
- * over the character grid, and the chosen character's shot curve shows as a
- * meter.
- */
 #include "character_select.h"
 
 #include <stdlib.h>
@@ -33,10 +27,8 @@
 #include "text.h"
 #include "transfer_pak.h"
 
-/* MoveGridCursor lets the cursor stop on slots below this only when asked to */
 #define CHOOSABLE_MARK_LIMIT (-20)
 
-/* The directions MoveGridCursor moves a player's cursor through the grid */
 enum GridMove {
     GRID_MOVE_UP = 1,
     GRID_MOVE_DOWN,
@@ -44,8 +36,6 @@ enum GridMove {
     GRID_MOVE_RIGHT
 };
 
-/* The diagonals of any controller's stick that GetStickDiagonal reports, each
- * once per hold of four frames */
 #define STICK_DIAGONAL_NONE 0
 #define STICK_DIAGONAL_UP_LEFT 1
 #define STICK_DIAGONAL_UP_RIGHT 2
@@ -54,16 +44,10 @@ enum GridMove {
 #define STICK_DIAGONAL_THRESHOLD 20
 #define STICK_HOLD_FRAME_COUNT 4
 
-/* The bytes of the first of the two images that LoadCharacterFaces reads
- * into the menu's buffer */
 #define CHARACTER_SELECT_FIRST_IMAGE_SIZE 0x628
-/* The trajectory labels Straight, Draw and Fade, and the labels L: and Drive:
- */
 #define TRAJECTORY_LABELS_IMAGE_ASSET 0x979
 #define STAT_LABELS_IMAGE_ASSET 0x978
 
-/* DrawCharacterBoard draws f_CharacterBoard in strips, then the right half of
- * the second image */
 #define BOARD_WIDTH 288
 #define BOARD_STRIP_HEIGHT 11
 #define BOARD_STRIP_COUNT 16
@@ -75,11 +59,6 @@ enum GridMove {
 #define LABEL_LEFT 200
 #define LABEL_TOP 200
 
-/*
- * DrawCurveMeter shows a character's shot curve as a meter of the 8x8
- * cells of asset 0x8EE, filled from the middle one toward the draw or the
- * fade, beside the 64x8 label of asset 0x979 that names it
- */
 #define CURVE_METER_CENTER 4
 #define CURVE_METER_CELL_SIZE 8
 #define CURVE_METER_LEFT 204
@@ -92,7 +71,6 @@ enum GridMove {
 #define CURVE_LABEL_STRAIGHT 0
 #define CURVE_LABEL_DRAW 1
 #define CURVE_LABEL_FADE 2
-/* g_ComLeftyIcons, asset 0x0709, holds the "R: COM" icon above "L: LEFTY" */
 #define BUTTON_ICON_WIDTH 32
 #define BUTTON_ICON_HEIGHT 24
 #define BUTTON_ICON_TOP 20
@@ -100,7 +78,6 @@ enum GridMove {
 #define LEFTY_ICON_LEFT 18
 #define LEFTY_ICON_OFFSET (BUTTON_ICON_WIDTH * BUTTON_ICON_HEIGHT / 2)
 
-/* What DrawCharacterSelect writes below the board */
 #define MESSAGE_CHOOSE_PLAYER_CHARACTER 0x12
 #define MESSAGE_CHOOSE_CHARACTER 0x14
 #define MESSAGE_FIRST_CHARACTER_NAME 0xA9
@@ -111,21 +88,16 @@ enum GridMove {
 #define DRIVE_DISTANCE_X 246
 #define DRIVE_DISTANCE_Y 200
 
-/* The buffer kinds that f_SelectBufferAssets has an image for, from 0 */
 #define CHARACTER_SELECT_IMAGE_KIND_COUNT (CHARACTER_SELECT_BUFFER_CURVE_CELLS + 1)
 
-/* Where the character cursor's translation is measured from, so that it is
- * placed by its corner */
 #define CHARACTER_CURSOR_ORIGIN_X 140
 #define CHARACTER_CURSOR_ORIGIN_Y 96
-/* Moves the cursor by half a pixel so that its edges sit on pixel centers */
 #define HALF_PIXEL 0.5f
 
-/* A player tag's offset from the corner of its cursor's grid cell */
 typedef struct TagOffset {
-    /* 0x0 */ s8 x;
-    /* 0x1 */ s8 y;
-} TagOffset; /* size = 0x2 */
+      s8 x;
+      s8 y;
+} TagOffset;
 
 void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer);
 void DrawCharacterBoard(Gfx **displayListHead);
@@ -134,35 +106,21 @@ void DrawComIcon(Gfx **displayListHead, s32 unused);
 void DrawLeftyIcon(Gfx **displayListHead, s32 unused);
 void DrawCurveMeter(Gfx **displayListHead, s32 clubSet);
 
-/* Whether DrawCharacterSelect has set the choosing player's prompt */
 static u8 f_IsPromptShown = FALSE;
-/* LoadCharacterSelectBuffer clears it, but no routine reads it */
 static u8 f_UnreadBufferFlag = FALSE;
-/* Read by no routine */
 static u8 f_UnreadSelectByte UNUSED = 0;
-/* Cleared once every player has chosen, but read by no routine */
 static u8 f_UnreadSelectDoneByte = 0;
-/* The animation frame of the face under the choosing player's cursor */
 static s8 f_FaceFrame = 0;
-/* Flipped whenever the grid face changes, but read by no routine */
 static u8 f_UnreadFaceToggle = 0;
-/* The draws that f_FaceFrame has been shown for */
 static s8 f_FaceFrameTimer = 0;
-/* Whether R, or Z or L, is held, which shows the COM or LEFTY icon */
 static s8 f_IsComButtonHeld = FALSE;
 static s8 f_IsLeftyButtonHeld = FALSE;
-/* The CButtonPalette that the grid face previews while a C button is held */
 static s8 f_PreviewedPalette = NO_PALETTE;
-/* Read by no routine */
 static s32 f_UnreadSelectWords[4] UNUSED = {-1, -1, -1, -1};
-/* The Game Boy row's slots, which HideGameBoyCharacters saves here and
- * UpdateCharacterSelect puts back */
 static s32 f_SavedGameBoySlots[GAME_BOY_CHARACTER_COUNT] =
     {EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT};
-/* The AssetId that LoadCharacterSelectBuffer reads for each buffer kind */
 static s32 f_SelectBufferAssets[CHARACTER_SELECT_IMAGE_KIND_COUNT] =
     {0x08E8, 0x05E3, 0x08EF, 0x050F, 0x0521, 0x06EF, 0x05FF, 0x0600, 0x08EE};
-/* The CharacterId of each CharacterChoice */
 static CharacterId f_ChoiceCharacters[CHARACTER_COUNT] = {
     CHARACTER_PLUM,
     CHARACTER_CHARLIE,
@@ -183,61 +141,38 @@ static CharacterId f_ChoiceCharacters[CHARACTER_COUNT] = {
     CHARACTER_AZALEA,
     CHARACTER_JOE,
 };
-/* Read by no routine */
 static u8 f_UnreadSelectBytes[8] UNUSED = {0x71, 0x76, 0x81, 0x6C, 0x9D, 0x00, 0x00, 0x00};
-/* GetStickDiagonal's count of unchanged readings on each axis */
 static s32 f_StickXHoldTimer = 0;
 static s32 f_StickYHoldTimer = 0;
-/* Read by no routine */
 static char f_UnreadCurveNames[3][10] UNUSED = {"Straight", "Draw", "Fade"};
-/* The cell of the face DrawGridFaces last read, read by no routine */
 static s16 f_UnreadFaceColumn = 0;
 static s16 f_UnreadFaceRow = 0;
-/* Read by no routine */
 static s16 f_UnreadSelectHalfword UNUSED = 0;
-/* Each player's tag offset from their cursor's grid cell, as x and y */
 static TagOffset f_PlayerTagOffsets[MAX_PLAYER_COUNT] = {{0, 0}, {16, 0}, {0, 24}, {16, 24}};
-/* The tags' x when lined up, by the player count less one */
 static s32 f_LinedUpTagLefts[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] =
     {{102, -26, -26, -26}, {22, 182, -26, -26}, {38, 102, 166, 230}, {6, 70, 134, 198}};
-/*
- * Read by no routine: an order of 0 to 15, the last 16 values of
- * player_stats.c's f_UnusedCharacterOrder
- */
 static s16 f_UnreadSelectOrder[16] UNUSED = {1, 4, 5, 6, 3, 2, 7, 9, 12, 10, 13, 15, 14, 11, 8, 0};
-/* The grid cursor's corners, whose colors DrawCharacterGridCursor cycles */
 static Vtx f_GridCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-24, 24, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-24, -24, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{24, -24, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{24, 24, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
 };
-/* Read by no routine */
 static s32 f_UnreadSelectPair[2] UNUSED = {0, 0};
-/* The angle, in radians, of each corner's color cycle */
 static f32 f_GridCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {0.0f, 2.0f, 4.0f, 6.0f};
-/* Read by no routine */
 static s32 f_UnreadSelectQuad[4] UNUSED = {0, 0, 0, 0};
 
-/* The camera and placements that DrawCharacterGridCursor draws with */
 static Mtx f_GridCursorProjection;
 static Mtx f_GridCursorTranslations[DRAW_BUFFER_COUNT];
 static Mtx f_GridCursorRotations[DRAW_BUFFER_COUNT];
 static Mtx f_GridCursorScales[DRAW_BUFFER_COUNT];
 
-/* Read by no routine */
 static u8 f_UnreadSelectPad[0x8] UNUSED;
 
 static void *f_CharacterBoard;
 
-/* Read by no routine */
 static u8 f_UnreadSelectGap[0x4] UNUSED;
 
-/*
- * Image buffers that LoadCharacterSelectBuffer keeps, as are f_CharacterBoard
- * and f_CurveMeterCells. No routine reads the f_Unread ones, and no caller
- * passes the kinds of the controller icons or the color bars.
- */
 static void *f_PlayerTags;
 static void *f_GridCursorBox;
 static void *f_UnreadNamePlate;
@@ -245,17 +180,11 @@ static void *f_UnreadControllerIcons;
 static void *f_UnreadColorBars;
 static void *f_CurveMeterCells;
 
-/* Read by no routine */
 static u8 f_UnreadSelectBlock[0x208] UNUSED;
 
-/* Not static: the original left these to the linker's common block */
 s32 f_PreviousStickX;
 s32 f_PreviousStickY;
 
-/*
- * Empties the Game Boy row of the character grid for the opponent select,
- * saving its slots to put back afterward
- */
 void HideGameBoyCharacters(void) {
     s32 firstSlot = g_CharacterGrid[GAME_BOY_CHARACTER_ROW][0];
     s32 secondSlot = g_CharacterGrid[GAME_BOY_CHARACTER_ROW][1];
@@ -272,11 +201,6 @@ void HideGameBoyCharacters(void) {
     f_SavedGameBoySlots[3] = fourthSlot;
 }
 
-/*
- * Moves the player's grid cursor a step in the GRID_MOVE_* direction, wrapping
- * at the edges and skipping slots that can't be chosen, and reads the face of
- * the character it leaves. Returns -1 if it couldn't move, otherwise 0.
- */
 s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
@@ -288,7 +212,6 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     u16 slot;
     u16 character;
     void *faceImage;
-    /* Pads the frame to match; without it 36 words differ */
     s32 unused[2] UNUSED;
 
     do {
@@ -342,10 +265,6 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
         }
 
         if ((s16)character >= FIRST_IMPORTED_CHARACTER) {
-            /*
-             * Set in each branch to match: setting slot before the test gives 48
-             * words differing, 6 in shape
-             */
             slot = character;
             character = g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].character;
         }
@@ -369,11 +288,6 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     return -(column == oldColumn && row == oldRow);
 }
 
-/*
- * Moves the player's grid cursor a step in the STICK_DIAGONAL_*
- * direction, then sideways only if that slot can't be chosen, as
- * MoveGridCursor does. Returns -1 if it couldn't move, otherwise 0.
- */
 s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
@@ -386,7 +300,6 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
     u16 slot;
     u16 character;
     void *faceImage;
-    /* Pads the frame to match; without it 36 words differ */
     s32 unused[2] UNUSED;
 
     while (TRUE) {
@@ -441,8 +354,6 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
             break;
         }
 
-        /* After a blocked diagonal, try moving sideways only from where the cursor
-         * started */
         if (retryCount == 0) {
             column = oldColumn;
             row = oldRow;
@@ -463,10 +374,6 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
         }
 
         if ((s16)character >= FIRST_IMPORTED_CHARACTER) {
-            /*
-             * Set in each branch to match: setting slot before the test gives 42
-             * words differing, 6 in shape
-             */
             slot = character;
             character = g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].character;
         }
@@ -494,11 +401,6 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
     return 0;
 }
 
-/*
- * Returns the STICK_DIAGONAL_* direction of the controllers' sticks combined,
- * counting only the bits of each axis that its previous reading lacked, so
- * that a held stick isn't reported every frame.
- */
 s32 GetStickDiagonal(void) {
     s32 stickX;
     s32 stickY;
@@ -508,11 +410,6 @@ s32 GetStickDiagonal(void) {
     anyStick = g_ControllerStates[3].stickX |
         (g_ControllerStates[2].stickX |
             (g_ControllerStates[0].stickX | g_ControllerStates[1].stickX));
-    /*
-     * The newly pushed directions, in two statements to match: in one, either
-     * as (previous ^ any) & any or as any & ~previous, 20 words differ (none
-     * and 2 in shape), and as any & ~previous for both axes 44 (4)
-     */
     stickX = f_PreviousStickX ^ anyStick;
     stickX &= anyStick;
     if (f_PreviousStickX == stickX) {
@@ -529,10 +426,6 @@ s32 GetStickDiagonal(void) {
     anyStick = g_ControllerStates[3].stickY |
         (g_ControllerStates[2].stickY |
             (g_ControllerStates[0].stickY | g_ControllerStates[1].stickY));
-    /*
-     * In two statements to match, as for x: in one, 24 words differ, none in
-     * shape
-     */
     stickY = f_PreviousStickY ^ anyStick;
     stickY &= anyStick;
     if (f_PreviousStickY == stickY) {
@@ -565,60 +458,16 @@ s32 GetStickDiagonal(void) {
     return STICK_DIAGONAL_NONE;
 }
 
-/* The text slots that the character select writes, the prompt's first */
 #define CHARACTER_SELECT_TEXT_SLOT_COUNT 4
 #define PROMPT_TEXT_SLOT 0
 
 #define Z_OR_L_BUTTONS (Z_TRIG | L_TRIG)
 
-/* Where pressing up blanks a line of debug text */
 #define BLANKED_DEBUG_TEXT_COLUMN 15
 #define BLANKED_DEBUG_TEXT_ROW 10
 
-/* R leaves a player without a controller only among this many players */
 #define MIN_PLAYER_COUNT_WITHOUT_CONTROLLER 2
 
-/*
- * Runs the character select for the players from firstPlayerIndex up to
- * playerCount, one at a time: the D-Pad moves the current player's cursor, A
- * chooses the character with the palette of a held C button, and B goes back
- * a player or leaves the screen. Holding R as A is pressed leaves the player
- * without a controller. Holding a C button previews its palette in
- * f_PreviewedPalette, and holding R, or Z or L, sets f_IsComButtonHeld or
- * f_IsLeftyButtonHeld. Once a club tournament's choice is made, the closing
- * wipe ends the menus and g_GameState.roundSeed, which RankTournament takes,
- * gets the tournament code.
- */
-
-/*
- * The undo with B falls through to the routine's last return, and the
- * palette, COM and lefty buttons are handled in its else, with the lefty
- * flag set in an if and its else. The original sets the return value at
- * that shared return: an undo with its own return 0 has sched put the
- * return value's set ahead of the undo's last stores, so $v0 is live there
- * and NO_PALETTE goes to $v1, giving 4 words differing, none in shape. With
- * the else, the lefty test returning at once in its if gives the same code;
- * setting the flag in an if and its else with the undo's own return kept
- * gives 4 words.
- *
- * Each cursor move returns at once when the move fails, before clearing the
- * text slots; clearing them inside an if on the move's success, with one
- * return after it, gives 6 words, 4 in shape. Testing for the other sound
- * first gives 6 words, 2 in shape, while the test written != 0 or as % 2
- * changes nothing; a switch with case 0 first gives 13 words (5 in shape),
- * case 1 first 8 (4), and choosing the sound with ?: in one call 17 (13).
- *
- * The grid marks of a player whose choice is undone are read into
- * character, as the original keeps them in character's register; in
- * gridMark, 130 words differ, and for either of the two undos alone 6. It
- * reads canChooseMarked as a byte throughout, hence the casts; declared u8
- * instead, 12 words differ, 8 in shape, and without the casts 29 (15).
- * Clearing the same-character count before the preview loops, not in their
- * initializers, gives 16 words. Declaring the button as an s16 gives 53
- * words, 3 in shape, and as a u32 or s32 18; the original loads it with
- * lhu, so it is unsigned. An imported character's character may be read
- * before or after marking it chosen.
- */
 s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
@@ -628,19 +477,11 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
     s32 index;
     s32 otherIndex;
     s16 sameCharacterCount;
-    /* The cursor's grid mark, then the character it is; also an undone choice's
-     * grid mark */
     s32 character;
     s16 gridMark;
     s32 controllerIndex;
     u16 button;
     s32 palette;
-    /*
-     * The cursor's column, a u16 like the row, as the original sign-extends
-     * it to 16 bits at each use: with an s8 column, also used for the chosen
-     * character, 46 words differ, but the register oracle's best is 24 words
-     * against 10 with this one
-     */
     u16 column;
     s8 chosenColumn;
     u16 row;
@@ -899,7 +740,6 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
         character = f_ChoiceCharacters[character];
         if (character >= FIRST_IMPORTED_CHARACTER) {
-            /* Only one player may choose each imported character */
             if (g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen == TRUE) {
                 PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
                 f_IsPromptShown = FALSE;
@@ -920,9 +760,6 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             }
         }
 
-        /* The first controller to have pressed A takes the player, unless R
-         * leaves the player without one; the last player only when another player
-         * has one */
         for (controllerIndex = 0; controllerIndex != g_ControllerCount; controllerIndex++) {
             button = g_MenuControllerData[controllerIndex].button;
             if (button & A_BUTTON) {
@@ -1004,8 +841,6 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             palette = UP_C_PALETTE;
         }
 
-        /* A palette that an earlier player of the same character wears gives way
-         * to the first one that none of them does */
         for (index = 0, sameCharacterCount = 0; index != playerIndex; index++) {
             if (g_Players[index].characterIndex == g_Players[playerIndex].characterIndex) {
                 sameCharacterPlayers[sameCharacterCount] = index;
@@ -1041,7 +876,6 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             }
         }
 
-        /* Put back the first frame of the chosen face */
         column = memory->characterColumns[playerIndex];
         row = memory->characterRows[playerIndex];
         playerIndex++;
@@ -1056,11 +890,6 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
                 faceCharacter = slot;
             }
             else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
-                /*
-                 * Set in each branch to match: setting slot before the tests, here
-                 * and in the other face load, gives 94 words differing (20 in shape)
-                 * against the draft's 10 (4)
-                 */
                 slot = faceCharacter;
                 faceCharacter = g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].character;
             }
@@ -1228,7 +1057,6 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             f_FaceFrame = 0;
             f_UnreadFaceToggle = 0;
             f_FaceFrameTimer = 0;
-            /* Bring back the Game Boy characters that HideGameBoyCharacters hid */
             if ((u8)canChooseMarked == TRUE) {
                 g_CharacterGrid[GAME_BOY_CHARACTER_ROW][0] = f_SavedGameBoySlots[0];
                 g_CharacterGrid[GAME_BOY_CHARACTER_ROW][1] = f_SavedGameBoySlots[1];
@@ -1266,7 +1094,6 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             f_IsPromptShown = FALSE;
         }
 
-        /* Put back the first frame of the face the cursor left */
         gridMark = g_CharacterGrid[(s16)row][(s16)column];
         faceCharacter = g_CharacterGrid[(s16)row][(s16)column];
         if (gridMark < CHOOSABLE_MARK_LIMIT) {
@@ -1274,11 +1101,6 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             faceCharacter = slot;
         }
         else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
-            /*
-             * Set in each branch to match: setting slot before the tests, here
-             * and in the other face load, gives 94 words differing (20 in shape)
-             * against the draft's 10 (4)
-             */
             slot = faceCharacter;
             faceCharacter = g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].character;
         }
@@ -1349,7 +1171,6 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
                 }
             }
 
-            /* The preview gives way as the A button's palette does */
             for (index = 0, sameCharacterCount = 0; index != playerIndex; index++) {
                 if (g_Players[index].characterIndex == character) {
                     sameCharacterPlayers[sameCharacterCount] = index;
@@ -1389,7 +1210,6 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             f_PreviewedPalette = NO_PALETTE;
         }
 
-        /* Set only where A with R would leave the player without a controller */
         if (((g_ControllerStates[3].buttons |
                  (g_ControllerStates[2].buttons |
                      (g_ControllerStates[0].buttons | g_ControllerStates[1].buttons))) &
@@ -1472,10 +1292,6 @@ void LoadCharacterSelectBuffer(void *buffer, s16 bufferKind) {
     f_UnreadBufferFlag = FALSE;
 }
 
-/*
- * Puts the second player's grid cursor on the last marked slot of the choice
- * rows, the one that holds the rival.
- */
 void PlaceRivalCursor(void) {
     MenuMemory *memory = GetMenuMemory();
     s32 row;
@@ -1491,10 +1307,6 @@ void PlaceRivalCursor(void) {
     }
 }
 
-/*
- * Reads the drive shapes' names and the "L:" and "Drive:" labels into the
- * menu's image buffer, then each slot's first face frame and its palette.
- */
 void LoadCharacterFaces(void) {
     EncodedAsset asset;
     AssetFile file;
@@ -1535,15 +1347,10 @@ void LoadCharacterFaces(void) {
     }
 }
 
-/* A byte's address as an integer, for adding a player number to */
 static inline s32 ByteAddress(s8 *byte) {
     return (s32)byte;
 }
 
-/*
- * The menu memory fields are read through ByteAddress because the original
- * adds the player number before the field offset
- */
 void DrawCharacterSelect(Gfx **displayListHead, u8 isSinglePlayer) {
     Gfx *gfx = *displayListHead;
     s32 playerNumber;
@@ -1640,7 +1447,6 @@ void DrawCharacterSelect(Gfx **displayListHead, u8 isSinglePlayer) {
         else {
             SetTextSlotValue(g_ChoosingPlayerIndex + 1, 0, 0);
 
-            /* The prompt names the player in the player's own color */
             if (g_ChoosingPlayerIndex == 0) {
                 SetTextPaletteColor(255, 127, 127, 0);
             }
@@ -1680,43 +1486,13 @@ void DrawCharacterSelect(Gfx **displayListHead, u8 isSinglePlayer) {
 
 s32 GetUnusedPalette(s32 choiceIndex);
 
-/* DrawGridFaces draws each grid cell's 32 by 32 face, its row and column 40
- * pixels apart */
 #define FACE_SIZE 32
 #define FACE_SPACING 40
 #define FACE_GRID_LEFT 24
 #define FACE_GRID_TOP 56
-/* Grid marks below this are characters still to be won, drawn as dark shapes in
- * single player */
 #define HIDDEN_MARK_LIMIT (-10)
-/* The faces' animation steps a frame every four draws, through eight frames */
 #define FACE_FRAME_DURATION 4
 
-/*
- * Draws each grid cell's face, with characters still to be won as dark shapes
- * in single player, and every few draws steps the current player's face to its
- * next frame.
- *
- * Four things in it are written to match, and each needs the other three:
- * - The loops step row and column at the end of their bodies, each step in a
- *   block of its own. GCC counts a register's uses once more for each loop
- *   they are in, so the blocks' loop notes raise row's and column's places in
- *   the order registers are handed out. Stepping row in the loop's header, or
- *   at the body's end outside a block, spills it to a frame 8 bytes larger
- *   (116 words differ, 34 in shape). Stepping column in the header gives 22
- *   words (16 in shape); at the body's end outside a block, it swaps
- *   registers with the display list pointer's copy (28 words).
- * - The dark shapes' arm ends in an empty block. Its loop notes sit just
- *   ahead of the label where the arms join, which GCC takes for a loop's top,
- *   so it predicts the mark test's branch there as taken and fills its delay
- *   slot with column's step from the join rather than with the arm's first
- *   instruction. Without it 3 words differ, 1 in shape.
- * - The grid slot's read isn't in a block of its own, which gives 92 words
- *   (2 in shape).
- * - The frame's asset is opened in each arm of the flag test. Choosing the
- *   table in the arms for one call gives 95 words (15 in shape) and a frame 8
- *   bytes smaller.
- */
 void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
     EncodedAsset asset;
     AssetFile file;
@@ -1814,7 +1590,6 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
                     TEXEL_STEP_ONE
                 );
                 gDPPipeSync(gfx++);
-                /* Empty, for the notes it leaves ahead of the arms' join */
                 IN_OWN_BLOCK(;);
             }
             IN_OWN_BLOCK(column++);
@@ -1883,14 +1658,11 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
     *displayListHead = gfx;
 }
 
-/* The first palette that no earlier player with the same character uses, so
- * that players who choose one character still look different */
 s32 GetUnusedPalette(s32 choiceIndex) {
     s32 freePalette = 0;
     s32 playerIndex = 0;
     s32 sameCount = 0;
     CharacterId character = f_ChoiceCharacters[choiceIndex];
-    /* Pads the frame to match; without it 8 words differ */
     s32 unused[4] UNUSED;
     s32 samePlayers[MAX_PLAYER_COUNT];
     s32 sameIndex;
@@ -1902,8 +1674,6 @@ s32 GetUnusedPalette(s32 choiceIndex) {
     }
 
     if (sameCount != 0) {
-        /* The palette search reuses playerIndex, which the original does to keep
-         * the first loop's index and count in their registers */
         for (playerIndex = 0; playerIndex != CHARACTER_PALETTE_COUNT; playerIndex++) {
             for (sameIndex = 0; sameIndex != sameCount; sameIndex++) {
                 if (g_Players[samePlayers[sameIndex]].paletteIndex == playerIndex) {
@@ -1923,7 +1693,6 @@ s32 GetUnusedPalette(s32 choiceIndex) {
     return 0;
 }
 
-/* Draws the wooden board of character cells, then its "Drive:" label */
 void DrawCharacterBoard(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -1966,10 +1735,6 @@ void DrawCharacterBoard(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
     }
 
-    /*
-     * Offset in a second statement, to match: adding the offset to the call's
-     * result gives 6 words differing, 2 in shape
-     */
     labelImage = GetMenuImageBuffer();
     labelImage += CHARACTER_SELECT_FIRST_IMAGE_SIZE;
     LoadSmallPalette(&gfx, 0, ImageBody(labelImage));
@@ -2004,22 +1769,12 @@ void DrawCharacterBoard(Gfx **displayListHead) {
 
 void DrawCharacterGridCursor(Gfx **displayListHead, s32 x, s32 y);
 
-/* How DrawPlayerTags places the tags. Nothing passes PLAYER_TAG_LINED_UP. */
 #define PLAYER_TAG_LINED_UP 0
-/* The second tag then reads "Com" */
 #define PLAYER_TAG_SINGLE_PLAYER 2
-/* The player tag images: 1P to 4P, then 1C to 4C, then Com */
 #define PLAYER_TAG_FIRST_PLAYER 0
 #define PLAYER_TAG_FIRST_COMPUTER 4
 #define PLAYER_TAG_COM 8
-/* Bytes, as 16 by 8 nibbles */
 #define PLAYER_TAG_IMAGE_SIZE 64
-/*
- * The texels of the tag playerIndex tags past firstTag, as the tags sit side
- * by side in one image. The two offsets are scaled apart, to match: scaling
- * their sum gives 14 words differing (10 in shape) in DrawPlayerTags' draft,
- * against 2 (2).
- */
 #define PlayerTagTexels(firstTag, playerIndex) \
     (TextureAddress(ImageTexelsAt( \
         f_PlayerTags, \
@@ -2029,25 +1784,19 @@ void DrawCharacterGridCursor(Gfx **displayListHead, s32 x, s32 y);
 #define PLAYER_TAG_HEIGHT 8
 #define PLAYER_TAG_SHIFT_LEFT 4
 #define PLAYER_TAG_TOP 56
-/* Lined-up tags alternate between two heights */
 #define PLAYER_TAG_RAISE (-14)
-/* The character grid's cells on screen */
 #define GRID_CELL_SIZE 40
 #define GRID_LEFT 28
 #define GRID_TOP 48
 #define GRID_CURSOR_SHIFT_LEFT 8
 
-/*
- * Draws each player's tag on the cell where that player's cursor sits, then the
- * grid cursor of the player choosing.
- */
 void DrawPlayerTags(Gfx **displayListHead, u8 tagMode) {
     MenuMemory *memory = GetMenuMemory();
     s16 tagCount = g_ChoosingPlayerIndex + 1;
     Gfx *gfx = *displayListHead;
     s8 playerIndex;
     s16 left;
-    s16 shiftX; /* Both layouts leave it at 0 */
+    s16 shiftX;
     s16 top;
     s16 cursorLeft;
     s16 cursorTop;
@@ -2162,7 +1911,6 @@ void DrawPlayerTags(Gfx **displayListHead, u8 tagMode) {
         gDPPipeSync(gfx++);
     }
 
-    /* playerIndex now picks whose cursor to draw */
     playerIndex = 0;
     if (g_MenuScreen != MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT) {
         playerIndex = g_ChoosingPlayerIndex;
@@ -2178,11 +1926,6 @@ void DrawPlayerTags(Gfx **displayListHead, u8 tagMode) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the menu cursor at (x, y), its vertex colors cycling a little further
- * each frame. The screen position goes in locals before the call because the
- * original loads the 96 for its y after g_DrawBufferIndex.
- */
 void DrawCharacterGridCursor(Gfx **displayListHead, s32 x, s32 y) {
     Gfx *gfx = *displayListHead;
     s32 vertexIndex;
@@ -2276,8 +2019,6 @@ void DrawCharacterGridCursor(Gfx **displayListHead, s32 x, s32 y) {
     *displayListHead = gfx;
 }
 
-/* Draws the "R: COM" icon, shown while R is held outside single player. Its
- * caller passes a second argument that it ignores. */
 void DrawComIcon(Gfx **displayListHead, s32 unused UNUSED) {
     Gfx *gfx = *displayListHead;
 
@@ -2328,8 +2069,6 @@ void DrawComIcon(Gfx **displayListHead, s32 unused UNUSED) {
     *displayListHead = gfx;
 }
 
-/* Draws the "L: LEFTY" icon, shown while Z or L is held. Its caller passes a
- * second argument that it ignores. */
 void DrawLeftyIcon(Gfx **displayListHead, s32 unused UNUSED) {
     Gfx *gfx = *displayListHead;
 
@@ -2380,10 +2119,6 @@ void DrawLeftyIcon(Gfx **displayListHead, s32 unused UNUSED) {
     *displayListHead = gfx;
 }
 
-/*
- * Draws the shot curve of the club set's driver as a meter filled from its
- * middle toward the draw or the fade, beside the label that names the curve.
- */
 void DrawCurveMeter(Gfx **displayListHead, s32 clubSet) {
     Gfx *gfx = *displayListHead;
     s32 curve = g_Clubs[clubSet * CLUB_SET_SIZE].curve;

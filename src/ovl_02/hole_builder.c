@@ -1,8 +1,3 @@
-/*
- * Builds a hole from its files: reading the map and its terrain codes, painting
- * the ground tiles, shaping and shading the ground, building its display lists,
- * and placing the billboards and their shadows.
- */
 #include "hole_builder.h"
 
 #include <ultra64.h>
@@ -31,27 +26,17 @@
 #include "text.h"
 #include "work_area.h"
 
-/* A ground tile's vertices start at its column and row shifted by this */
 #define TILE_ORIGIN_SHIFT 9
-/* Where texture coordinates start at a tile's origin */
 #define TILE_TEXTURE_ORIGIN 0x100
-/* How much mini golf vertices are scaled along x and z for their textures */
 #define MINI_GOLF_TEXTURE_SCALE_X 4
 #define MINI_GOLF_TEXTURE_SCALE_Z 8
-/* Grid vertices lie on tile corners and halfway between them */
 #define TILE_SPAN (1 << TILE_ORIGIN_SHIFT)
 #define HALF_TILE_SPAN (TILE_SPAN / 2)
-/* The span of the given number of quarter tiles */
 #define QuarterTileSpans(count) ((count) * (TILE_SPAN / 4))
 #define GRID_ROW_VERTEX_COUNT ((GROUND_TILE_COLUMN_COUNT * 2) + 1)
 #define GRID_VERTEX_COUNT (GRID_ROW_VERTEX_COUNT * ((GROUND_TILE_ROW_COUNT * 2) + 1))
-/* Grid texture coordinates: four per unit, starting one texel in */
 #define GRID_TEXTURE_SCALE 4
 #define GRID_TEXTURE_BORDER TexelCoordinate(1)
-/*
- * Vertex flags in the hole's vertex file: a VertexEncoding for each
- * coordinate, and whether x or z repeats the last vertex's
- */
 #define VERTEX_FLAG_X_ENCODING 0x3
 #define VERTEX_FLAG_Y_ENCODING 0xC
 #define VERTEX_FLAG_Y_ENCODING_SHIFT 2
@@ -60,11 +45,6 @@
 #define VERTEX_FLAG_SAME_X 0x40
 #define VERTEX_FLAG_SAME_Z 0x80
 
-/*
- * How a coordinate is stored in the vertex file: as two bytes, or as one byte
- * taken whole, or scaled up by a fine or a coarse shift. A one-byte
- * coordinate is read into the high byte and shifted down.
- */
 enum VertexEncoding {
     VERTEX_ENCODING_TWO_BYTES,
     VERTEX_ENCODING_BYTE,
@@ -76,21 +56,16 @@ enum VertexEncoding {
 #define VERTEX_COARSE_HORIZONTAL_SHIFT 6
 #define VERTEX_FINE_HEIGHT_SHIFT 1
 #define VERTEX_COARSE_HEIGHT_SHIFT 2
-/* Flags that end a list of vertices */
 #define VERTEX_LIST_END 9
-/* The size cleared billboards are given */
 #define CLEARED_BILLBOARD_WIDTH 64
 #define CLEARED_BILLBOARD_HEIGHT 256
-/* Where the build buffer starts */
 #define BUILD_BUFFER_START ((u8 *)0x80315000)
 
-/* The hole files that OpenHoleAsset opens, in the order of their asset ids */
 #define HOLE_ASSET_VERTICES 1
 #define HOLE_ASSET_MIDPOINTS 2
 #define HOLE_ASSET_TREES 3
 #define HOLE_ASSET_TRIANGLES 4
 #define HOLE_ASSET_ATTRIBUTES 5
-/* The asset ids of the hole behind the title screen */
 #define TITLE_HOLE_VERTICES_ASSET 0x3F0
 #define TITLE_HOLE_MIDPOINTS_ASSET 0x3F1
 #define TITLE_HOLE_TREES_ASSET 0x3F2
@@ -98,59 +73,35 @@ enum VertexEncoding {
 #define TITLE_HOLE_POINTS_ASSET 0x3F4
 #define TITLE_HOLE_TRIANGLES_ASSET 0x3F5
 #define TITLE_HOLE_ATTRIBUTES_ASSET 0x3F6
-/* The paint logic of the last mini-golf course; later courses use it too */
 #define LAST_MINI_GOLF_PAINT_LOGIC PAINT_LOGIC_PEACHS_CASTLE_THIRD
 
-/* The words a block of packed codes fills */
 #define TERRAIN_CODE_BLOCK_WORD_COUNT (TERRAIN_CODE_BLOCK_SIZE / 4)
-/* The size of the host file paths that BuildHole and SaveHoleFiles use */
 #define HOST_PATH_SIZE 0x80
-/* The sizes of the hole files that SaveHoleFiles writes */
 #define HOLE_VERTICES_FILE_SIZE 0x2520
 #define HOLE_MIDPOINTS_FILE_SIZE 0x8000
 #define HOLE_TREES_FILE_SIZE 0x800
 #define HOLE_SETUP_FILE_SIZE sizeof(HoleSetup)
 #define HOLE_POINTS_FILE_SIZE 0x120
 #define HOLE_TRIANGLES_FILE_SIZE 0x3C00
-/* The size of the attributes unpacked into the build buffer */
 #define ATTRIBUTE_BUFFER_SIZE 0x20000
-/* Where hole files are read to */
 #define HOLE_FILE_BUFFER ((u8 *)0x8030F800)
 
 #define TEXEL_RED_MASK 0xF800
 #define TEXEL_GREEN_MASK 0x7C0
 #define TEXEL_BLUE_MASK 0x3E
 #define TEXEL_ALPHA_MASK 1
-/* The texels in a tile's border: one before its texels and three after */
 #define TILE_BORDER_BEFORE 1
-/*
- * The paint routines give terrain nearer than this many cells to other
- * terrain a border's color
- */
 #define TERRAIN_BORDER_DISTANCE 2
-/*
- * The paint patterns' sizes in texels, each a power of two: greens are
- * checkered, fairways striped with stripes offset by half their width, and
- * the mini golf greens checkered in wide, deep checks
- */
 #define GREEN_CHECK_SIZE 2
 #define FAIRWAY_STRIPE_WIDTH 4
 #define FAIRWAY_STRIPE_OFFSET (FAIRWAY_STRIPE_WIDTH / 2)
 #define MINI_GOLF_CHECK_WIDTH 4
 #define MINI_GOLF_CHECK_DEPTH 8
-/*
- * Whether a green cell lies within one cell of other terrain. It is a macro,
- * as an inline function compiles differently from the original.
- */
 #define IsGreenEdge(code, nearestCode, nearestDistance) \
     ((code) == TERRAIN_CODE_GREEN && \
         (code) != (nearestCode) && \
         (nearestDistance) < TERRAIN_BORDER_DISTANCE)
 
-/*
- * Indices of f_PaintLogics. They follow GameState.courseIndex's numbering,
- * which BuildHole uses as the paint logic of a mini-golf course.
- */
 enum PaintLogicIndex {
     PAINT_LOGIC_TOAD_HIGHLANDS,
     PAINT_LOGIC_KOOPA_PARK,
@@ -167,95 +118,54 @@ enum PaintLogicIndex {
     PAINT_LOGIC_DRIVING_RANGE
 };
 
-/*
- * Paints a map texel of a code, given the nearest other code and its
- * distance. It returns the color, shifted by PAINTED_COLOR_SHIFT, with the
- * terrain code it painted.
- */
 typedef s32 (*PaintRoutine)(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
 
 #define PAINTED_COLOR_SHIFT 16
 
-/* How a course paints its ground tiles from their terrain codes */
 typedef struct PaintLogic {
-    /*
-     * For each code, how far to search for another code: 0 paints without
-     * searching, and a negative span uses the code's painting at the origin
-     */
-    /* 0x00 */ s8 searchSpans[TERRAIN_CODE_COUNT];
-    /* 0x10 */ PaintRoutine paint;
-} PaintLogic; /* size = 0x14 */
+      s8 searchSpans[TERRAIN_CODE_COUNT];
+      PaintRoutine paint;
+} PaintLogic;
 
-/* The number of offsets PaintGroundTiles searches, and their largest span */
 #define PAINT_OFFSET_COUNT 100
 #define PAINT_OFFSET_SPAN 5
 
-/* The largest span ListOffsetsByDistance handles */
 #define MAX_OFFSET_SPAN GROUND_POINT_ROW_COUNT
-/* Marks an offset that ListOffsetsByDistance has already listed */
 #define LISTED_DISTANCE 0xFFFF
-/* Farther than any distance ListOffsetsByDistance computes */
 #define BEYOND_ALL_DISTANCES 0x10000
 
-/* A color that lights or shades the ground */
 typedef struct GroundLightColor {
-    /* 0x0 */ u16 red;
-    /* 0x2 */ u16 green;
-    /* 0x4 */ u16 blue;
-} GroundLightColor; /* size = 0x6 */
+      u16 red;
+      u16 green;
+      u16 blue;
+} GroundLightColor;
 
-/*
- * While a hole is built, each ground tile holds a map image of
- * GROUND_TILE_TEXEL_SPAN rows of that many texels, with no border
- */
 #define MAP_COLUMN_COUNT (GROUND_TILE_COLUMN_COUNT * GROUND_TILE_TEXEL_SPAN)
 #define MAP_ROW_COUNT (GROUND_TILE_ROW_COUNT * GROUND_TILE_TEXEL_SPAN)
-/* The map rows that DrawBandHeights fills at a time */
 #define HEIGHT_BAND_ROW_COUNT 32
-/* Marks a map texel that no triangle has drawn a height on */
 #define NO_HEIGHT (-0x8000)
 #define NO_HEIGHT_PAIR 0x80008000
-/* Ground positions are in units of 1/HEIGHT_ROW_SPAN map texel */
 #define HEIGHT_ROW_SPAN_SHIFT 4
 #define HEIGHT_ROW_SPAN (1 << HEIGHT_ROW_SPAN_SHIFT)
 #define HEIGHT_FRACTION_BITS 12
-/* Scales a step per ground unit to a step per map row in HEIGHT_FRACTION_BITS
- * fixed point */
 #define HEIGHT_ROW_STEP_SCALE 65536.0f
-/*
- * DrawHeightRow steps a height across a row's texels in this many fraction
- * bits; f_HeightStepScales holds TEXEL_HEIGHT_ONE / n for the counts below
- * HEIGHT_STEP_SCALE_COUNT
- */
 #define TEXEL_HEIGHT_FRACTION_BITS 16
 #define TEXEL_HEIGHT_ONE 65536.0f
 #define HEIGHT_STEP_SCALE_COUNT 32
-/* The band's heights are filled with NO_HEIGHT four at a time, as doubles */
 #define HEIGHTS_PER_FILL 4
-/* DrawBandHeights spins this many times after each band; the original has it */
 #define BAND_DELAY_LOOP_COUNT 0x2000
 
-/* The points of a tile's grid, edges included, that MeasureGroundTiles averages
- */
 #define GROUND_TILE_AVERAGED_POINT_COUNT \
     ((GROUND_TILE_POINT_SPAN + 1) * (GROUND_TILE_POINT_SPAN + 1))
-/* A tile's lowest and highest heights start past any point's */
 #define UNMEASURED_LOWEST_HEIGHT 0x40000000
 #define UNMEASURED_HIGHEST_HEIGHT (-0x40000000)
 #define MIN_GROUND_TILE_HEIGHT_RANGE 32
 #define FLAT_GROUND_TILE_HEIGHT_RANGE 30
-/* Splits a map column or row into a tile and a texel within it */
 #define MAP_TILE_SHIFT 5
 #define MAP_TILE_MASK (GROUND_TILE_TEXEL_SPAN - 1)
 
-/* A ground tile has 5 by 5 points: its grid vertices and midpoints */
 #define TILE_POINT_SPAN 5
 
-/*
- * The vertex cache slots of a ground tile's points, by each point's row and
- * column: the corners, the inner midpoints, the edge midpoints in pairs, then
- * those loaded one at a time
- */
 enum TileVertexSlot {
     TILE_SLOT_ROW0_COLUMN0,
     TILE_SLOT_ROW0_COLUMN4,
@@ -284,35 +194,27 @@ enum TileVertexSlot {
     TILE_SLOT_ROW4_COLUMN2
 };
 
-/* A ground tile's texture is its bordered 16-bit texels */
 #define GROUND_TEXTURE_LOAD_SIZE ((GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH) - 1)
 #define GROUND_TEXTURE_LINE_SIZE (((GROUND_TILE_TEXEL_ROW_LENGTH * G_IM_SIZ_16b_BYTES) + 7) >> 3)
 #define GROUND_TEXTURE_DXT CALC_DXT(GROUND_TILE_TEXEL_ROW_LENGTH, G_IM_SIZ_16b_BYTES)
 
-/* The work-area buffers that the ground tiles' display lists and vertices are
- * built in */
 #define GROUND_DISPLAY_LIST_START ((Gfx *)&g_WorkArea.bytes[0x6E920])
 #define GROUND_DISPLAY_LIST_END ((Gfx *)&g_WorkArea.bytes[0x77D20])
 #define GROUND_VERTEX_START ((Vtx *)&g_WorkArea.bytes[0x77F20])
 #define GROUND_VERTEX_END ((Vtx *)&g_WorkArea.bytes[0x82720])
 
-/* The asset ids of a hole's files */
 typedef struct HoleAssetIds {
-    /* 0x0 */ u16 vertices;
-    /* 0x2 */ u16 midpoints;
-    /* 0x4 */ u16 trees;
-    /* 0x6 */ u16 setup; /* Read into g_HoleSetup */
-    /* 0x8 */ u16 points;
-    /* 0xA */ u16 triangles;
-    /* 0xC */ u16 attributes;
-} HoleAssetIds; /* size = 0xE */
+      u16 vertices;
+      u16 midpoints;
+      u16 trees;
+      u16 setup;
+      u16 points;
+      u16 triangles;
+      u16 attributes;
+} HoleAssetIds;
 
-/* A hole's files are seven assets in a row */
 #define HOLE_ASSET_IDS(first) \
     {(first), (first) + 1, (first) + 2, (first) + 3, (first) + 4, (first) + 5, (first) + 6}
-
-/* g_GameState.isMiniGolf under a symbol of its own, which BuildHole needs to
- * match */
 
 s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
 s32 PaintShyGuyDesert(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
@@ -324,16 +226,8 @@ s32 PaintThirdMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32
 s32 PaintDrivingRange(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
 
 static u32 f_PaintSeed = 0;
-/*
- * The paint routines take their random bits from the seed's high half, since
- * a linear congruential generator's low bits repeat in short cycles
- */
 #define PAINT_RANDOM_SHIFT 16
 
-/*
- * The paint logics, which enum PaintLogicIndex indexes. The mini-golf ones
- * repeat, one per course of each record.
- */
 static PaintLogic f_PaintLogics[] = {
     {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintMainCourse},
     {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintMainCourse},
@@ -350,9 +244,7 @@ static PaintLogic f_PaintLogics[] = {
     {{0, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintDrivingRange},
 };
 static Boolean f_IsCodeMapCleaned = FALSE;
-/* Indexed by course record, then by hole */
 static HoleAssetIds f_HoleAssetIds[COURSE_RECORD_COUNT][COURSE_HOLE_COUNT] = {
-    /* COURSE_RECORD_TOAD_HIGHLANDS */
     {
         HOLE_ASSET_IDS(0x0FC),
         HOLE_ASSET_IDS(0x150),
@@ -373,7 +265,6 @@ static HoleAssetIds f_HoleAssetIds[COURSE_RECORD_COUNT][COURSE_HOLE_COUNT] = {
         HOLE_ASSET_IDS(0x16C),
         HOLE_ASSET_IDS(0x173),
     },
-    /* COURSE_RECORD_KOOPA_PARK */
     {
         HOLE_ASSET_IDS(0x000),
         HOLE_ASSET_IDS(0x12D),
@@ -394,7 +285,6 @@ static HoleAssetIds f_HoleAssetIds[COURSE_RECORD_COUNT][COURSE_HOLE_COUNT] = {
         HOLE_ASSET_IDS(0x070),
         HOLE_ASSET_IDS(0x077),
     },
-    /* COURSE_RECORD_SHY_GUY_DESERT */
     {
         HOLE_ASSET_IDS(0x196),
         HOLE_ASSET_IDS(0x1B2),
@@ -415,7 +305,6 @@ static HoleAssetIds f_HoleAssetIds[COURSE_RECORD_COUNT][COURSE_HOLE_COUNT] = {
         HOLE_ASSET_IDS(0x1DC),
         HOLE_ASSET_IDS(0x17A),
     },
-    /* COURSE_RECORD_YOSHIS_ISLAND */
     {
         HOLE_ASSET_IDS(0x1F8),
         HOLE_ASSET_IDS(0x1FF),
@@ -436,7 +325,6 @@ static HoleAssetIds f_HoleAssetIds[COURSE_RECORD_COUNT][COURSE_HOLE_COUNT] = {
         HOLE_ASSET_IDS(0x268),
         HOLE_ASSET_IDS(0x26F),
     },
-    /* COURSE_RECORD_BOO_VALLEY */
     {
         HOLE_ASSET_IDS(0x07E),
         HOLE_ASSET_IDS(0x085),
@@ -457,7 +345,6 @@ static HoleAssetIds f_HoleAssetIds[COURSE_RECORD_COUNT][COURSE_HOLE_COUNT] = {
         HOLE_ASSET_IDS(0x0EE),
         HOLE_ASSET_IDS(0x0F5),
     },
-    /* COURSE_RECORD_MARIOS_STAR */
     {
         HOLE_ASSET_IDS(0x284),
         HOLE_ASSET_IDS(0x2E6),
@@ -478,7 +365,6 @@ static HoleAssetIds f_HoleAssetIds[COURSE_RECORD_COUNT][COURSE_HOLE_COUNT] = {
         HOLE_ASSET_IDS(0x2D1),
         HOLE_ASSET_IDS(0x2ED),
     },
-    /* COURSE_RECORD_LUIGIS_GARDEN */
     {
         HOLE_ASSET_IDS(0x2F4),
         HOLE_ASSET_IDS(0x2FB),
@@ -499,7 +385,6 @@ static HoleAssetIds f_HoleAssetIds[COURSE_RECORD_COUNT][COURSE_HOLE_COUNT] = {
         HOLE_ASSET_IDS(0x364),
         HOLE_ASSET_IDS(0x36B),
     },
-    /* COURSE_RECORD_PEACHS_CASTLE */
     {
         HOLE_ASSET_IDS(0x372),
         HOLE_ASSET_IDS(0x379),
@@ -520,7 +405,6 @@ static HoleAssetIds f_HoleAssetIds[COURSE_RECORD_COUNT][COURSE_HOLE_COUNT] = {
         HOLE_ASSET_IDS(0x3E2),
         HOLE_ASSET_IDS(0x3E9),
     },
-    /* COURSE_RECORD_DRIVING_RANGE */
     {
         HOLE_ASSET_IDS(0x8F5),
         {0},
@@ -543,11 +427,6 @@ static HoleAssetIds f_HoleAssetIds[COURSE_RECORD_COUNT][COURSE_HOLE_COUNT] = {
     },
 };
 Vec3 g_MiniGolfScale = {1.0f, 1.0f, 1.0f};
-/*
- * The paint logic of each host hole, by course and hole numbers from 1. The
- * entries are enum PaintLogicIndex values, left as numbers because the hole
- * editor's flags step them to the next logic.
- */
 static s32 f_HolePaintLogics[HOLE_FILE_COURSE_COUNT][COURSE_HOLE_COUNT] = {
     {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
@@ -559,11 +438,8 @@ static s32 f_HolePaintLogics[HOLE_FILE_COURSE_COUNT][COURSE_HOLE_COUNT] = {
     {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
-/* Read by no routine */
 static s32 f_UnusedWordAfterPaintLogics UNUSED = 0;
-/* The billboard textures that cast no shadow, ending at a negative index */
 static s8 f_ShadowlessTextures[] = {0x14, 0x15, 0x16, -1};
-/* Read by no routine */
 static s32 f_UnusedWordsAfterShadowlessTextures[] UNUSED = {0, 0, 0};
 static s8 f_TileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN] = {
     {
@@ -602,9 +478,7 @@ static s8 f_TileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN] = {
         TILE_SLOT_ROW4_COLUMN4,
     },
 };
-/* Read by no routine */
 static s32 f_UnusedWordAfterTileVertexSlots UNUSED = 0;
-/* There is no step for a count of 0 */
 static f32 f_HeightStepScales[HEIGHT_STEP_SCALE_COUNT] = {
     0.0f,
     TEXEL_HEIGHT_ONE / 1,
@@ -647,29 +521,19 @@ void ShadeGroundTiles(void);
 void CastBillboardShadows(void);
 void MoveRingsToEnd(void);
 
-/*
- * The objects before the loader thread's stack are defined in order, as the
- * stack is global; see ORDERED_BSS. KMC aligns the statics it allocates
- * more strictly than the others, so the ordered ones state the original's
- * alignment where it differs.
- */
-/* A PAINT_LOGIC_* value */
 static s32 f_PaintLogic ORDERED_BSS = 0;
 
-/* Read by no routine */
 static u8 f_UnusedBytesBeforeReadCursor[12] ORDERED_BSS UNUSED = {0};
 
 static u8 *f_ReadCursor ORDERED_BSS = NULL;
 static AssetFile f_HoleAsset ORDERED_BSS __attribute__((aligned(8))) = {0};
 
-/* Read by no routine */
 static u8 f_UnusedBytesAfterHoleAsset[8] ORDERED_BSS UNUSED = {0};
 u8 g_LoaderThreadStack[LOADER_THREAD_STACK_SIZE] ORDERED_BSS __attribute__((aligned(8))) = {0};
 
 static u8 *f_BuildBuffer;
 static u8 *f_BuildCursor;
 
-/* Copies bytes from the read cursor and advances it past them */
 static inline void ReadFileBytes(void *destination, s32 size) {
     u8 *byte = destination;
     u8 *source = f_ReadCursor;
@@ -682,16 +546,10 @@ static inline void ReadFileBytes(void *destination, s32 size) {
     f_ReadCursor = end;
 }
 
-/* Seeds the random numbers that paint logic draws */
 void SetPaintSeed(u32 seed) {
     f_PaintSeed = seed;
 }
 
-/*
- * Fills offsets with up to maxCount column and row offsets less than span
- * from the origin, nearest first, and returns how many it wrote. Distances
- * are in units of 1/OFFSET_DISTANCE_SCALE.
- */
 s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
     f32 squares[MAX_OFFSET_SPAN + 1];
     u16 distances[span * span * 2];
@@ -707,14 +565,6 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
     squares[0] = 0.0f;
     row = 0;
     while (row < span) {
-        /* The block of their own gives the row counter its register; without it,
-         * or with plain braces, 20 words differ, none in shape. A for loop storing
-         * squares[row + 1] gives 29, and one counting from 1 to span 35 to 39.
-         * Without it, row and the distance loop's stepped squares pointer swap
-         * $t0 and $t1; flow.c weights each reference by its loop depth, which
-         * the block's loop notes raise. Every declaration order of row and
-         * column gives the 20, the sum's operands swapped 22, a do-while loop
-         * 37, and counting with column, i, count or nearestRow 26 to 72 */
         IN_OWN_BLOCK(
             row++; squares[row] = (f32)(row * row) * (OFFSET_DISTANCE_SCALE * OFFSET_DISTANCE_SCALE)
         );
@@ -786,19 +636,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
     return count;
 }
 
-/*
- * Fills heights, a band of HEIGHT_BAND_ROW_COUNT map rows by MAP_COLUMN_COUNT
- * columns, with the ground's heights, by drawing the two triangles of each
- * ground grid square that covers the band. Where triangles overlap, it averages
- * their heights. A band at or past GROUND_TILE_ROW_COUNT is left untouched.
- */
 void DrawBandHeights(s16 *heights, s32 band) {
-    /*
-     * corners[4] is where the corners are swapped; it is there to match, as the
-     * original stores each swapped pointer in the frame slot after corners[3],
-     * 0x20($sp). A Vtx* of its own, declared before or after corners, is also
-     * stored in the frame, but the frame is 8 bytes smaller.
-     */
     Vtx *corners[5];
     s32 cachedSpan;
     f32 cachedReciprocal;
@@ -806,7 +644,6 @@ void DrawBandHeights(s16 *heights, s32 band) {
     s32 column;
     f64 fill;
 
-    /* DrawTriangleHeights is a nested function, a GNU C extension. */
     void DrawTriangleHeights(void) {
         f32 longSlopeX;
         f32 longSlopeHeight;
@@ -814,16 +651,6 @@ void DrawBandHeights(s16 *heights, s32 band) {
         s32 span;
         s32 lowerSpan;
 
-        /*
-         * Draws the heights of one row of the triangle, from (x, height) on
-         * its long edge to (toX, toHeight) on its short edge, into the map
-         * row that holds rowZ. All five are in ground units.
-         *
-         * DrawHeightRow is a nested function, a GNU C extension. It rescales
-         * x and height in place, x to a map column and height to a fixed-point
-         * texel height, to match: the original's schedule of the caller's
-         * shifts needs both parameters assigned more than once.
-         */
         inline void
         DrawHeightRow(s32 x, s32 height, s32 toX, s32 toHeight, s32 rowZ) {
             s32 width;
@@ -1011,7 +838,6 @@ void DrawBandHeights(s16 *heights, s32 band) {
                 corners[2] = GetGroundPoint(column, row + 1);
                 corners[3] = GetGroundPoint(column + 1, row + 1);
 
-                /* The second triangle has the far corner in place of the first */
                 corners[0] = corners[3];
                 if (corners[1]->v.ob[AXIS_Z] < corners[0]->v.ob[AXIS_Z]) {
                     corners[4] = corners[0];
@@ -1040,7 +866,6 @@ void DrawBandHeights(s16 *heights, s32 band) {
     }
 }
 
-/* Empties every terrain code cell and frees the packed code blocks */
 void ResetTerrainCodeCells(void) {
     s32 row;
     s32 column;
@@ -1049,23 +874,12 @@ void ResetTerrainCodeCells(void) {
     g_TerrainCodeBlockCount = 0;
     for (row = 0; row < TERRAIN_CODE_CELL_ROW_COUNT; row++) {
         for (column = TERRAIN_CODE_CELL_COLUMN_COUNT - 1; column >= 0; column--) {
-            /*
-             * Addressed by byte offset to match: indexing the cells gives 23 words
-             * differing, 7 in shape
-             */
             cellOffset = (row * TERRAIN_CODE_CELL_ROW_SIZE) + (column * TERRAIN_CODE_CELL_SIZE);
             *(s16 *)AddressPast(g_TerrainCodeCells, cellOffset) = -1;
         }
     }
 }
 
-/*
- * The paint logic of Toad Highlands, Koopa Park and Mario's Star. It returns
- * a cell's color in the upper half and its painted terrain code in the
- * lower: fairway near other terrain is painted as semi-rough, fairway and
- * greens are striped, rough away from fairway and TERRAIN_CODE_NO_DROP_GROUND
- * are mottled with random colors, and greens are edged as green edge.
- */
 s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
     s32 paintedCode;
@@ -1171,33 +985,12 @@ s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-/*
- * A paint logic like PaintMainCourse with pale rough, out-of-bounds ground
- * painted 0xBEEF, and TERRAIN_CODE_NO_DROP_GROUND painted as
- * cart way away from more of it. Neither the paint-logic table nor any code
- * refers to it.
- *
- * To match, the cart way's color where the other terrain isn't one cell away
- * is the gray mottled by a random value that is always 0, written as the
- * sibling logics mottle their no-drop ground: the original zeroes $t0, which
- * nothing reads, in the delay slot of the range test, and stores the same
- * gray in each of the two arms.
- */
 s32 PaintPaleRoughCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
     s32 paintedCode;
     s32 random;
     s32 fairwayRandom;
 
-    /* To match, no seed is drawn for the cart way's mottle. The zero isn't
-     * carried past the switch's jump, so the mottle's two reads last until
-     * combine, which knows the value of a register that is set once and folds
-     * the color. It leaves a use of the register in the arm, so the zero
-     * keeps a register, and with three references counted that register is
-     * allocated ahead of z's and is $t0. With one read, local-alloc replaces
-     * a register set once and read once by its constant and drops the set: 9
-     * words differ (5 in shape). Set in the cart-way arm instead, the zero is
-     * folded away at once: 18 (10). */
     random = 0;
 
     switch (code) {
@@ -1232,7 +1025,6 @@ s32 PaintPaleRoughCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, 
             break;
         case TERRAIN_CODE_ROUGH:
             if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
-                /* The random value is unused */
                 f_PaintSeed = NextRandomSeed(f_PaintSeed);
                 color = Rgba16(27, 30, 27, 1);
                 paintedCode = TERRAIN_CODE_ROUGH;
@@ -1254,16 +1046,6 @@ s32 PaintPaleRoughCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, 
                 color = Rgba16(0, 0, 31, 0);
             }
             else {
-                /* Both colors are the same gray, which the original stores in
-                 * each arm: the mottle is folded after cse, so only the jump
-                 * pass is left to see that the arms are the same, and it moves
-                 * the second arm's store ahead of the test without dropping
-                 * the first's. With the plain gray in both arms and no zero,
-                 * the test goes and a stack frame comes: 18 words differ (10
-                 * in shape). With the mottle in the first arm, 3 (1); with the
-                 * test reversed or as a conditional expression, 3 (3); with
-                 * the mottle stored before the test, or the code set in each
-                 * arm, 5 (3) */
                 if (nearestDistance == 1) {
                     color = Rgba16(18, 18, 18, 1);
                 }
@@ -1318,11 +1100,6 @@ s32 PaintPaleRoughCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, 
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-/*
- * The paint logic of Shy Guy Desert: like PaintMainCourse with other
- * colors, except that deep rough is painted as waste area and rough away
- * from fairway is mottled with other random colors
- */
 s32 PaintShyGuyDesert(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
     s32 paintedCode;
@@ -1428,8 +1205,6 @@ s32 PaintShyGuyDesert(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-/* The paint logic of Boo Valley: PaintMainCourse with other bunker and
- * out-of-bounds colors */
 s32 PaintBooValley(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
     s32 paintedCode;
@@ -1535,7 +1310,6 @@ s32 PaintBooValley(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z)
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-/* The paint logic of Yoshi's Island: PaintMainCourse with other colors */
 s32 PaintYoshisIsland(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
     s32 paintedCode;
@@ -1641,11 +1415,6 @@ s32 PaintYoshisIsland(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-/*
- * PaintMainCourse with PaintFirstMiniGolfCourse's mottling of
- * TERRAIN_CODE_NO_DROP_GROUND. Neither the paint-logic table nor any code
- * refers to it.
- */
 s32 PaintUnlistedCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
     s32 paintedCode;
@@ -1751,13 +1520,6 @@ s32 PaintUnlistedCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-/*
- * The paint logic of the first course of each mini-golf set. It returns a
- * cell's color in the upper half and its painted terrain code in the
- * lower: greens are striped and edged, TERRAIN_CODE_NO_DROP_GROUND is mottled
- * with random colors, and anything other than out of bounds is painted white as
- * out of bounds.
- */
 s32 PaintFirstMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
     s32 paintedCode;
@@ -1808,11 +1570,6 @@ s32 PaintFirstMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-/*
- * The paint logic of the second course of each mini-golf set: like
- * PaintFirstMiniGolfCourse with other colors, except that greens are painted
- * as fairway
- */
 s32 PaintSecondMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
     s32 paintedCode;
@@ -1863,11 +1620,6 @@ s32 PaintSecondMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s3
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-/*
- * The paint logic of the third course of each mini-golf set: like
- * PaintFirstMiniGolfCourse with other colors, except that greens are painted
- * as cart way and other terrain is painted red
- */
 s32 PaintThirdMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
     s32 paintedCode;
@@ -1912,12 +1664,6 @@ s32 PaintThirdMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-/*
- * The paint logic of the driving range. It returns a cell's color in the
- * upper half and its painted terrain code in the lower: fairway and greens
- * are striped, rough away from fairway and TERRAIN_CODE_NO_DROP_GROUND are
- * mottled with random colors, and greens are edged as green edge.
- */
 s32 PaintDrivingRange(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
     s32 paintedCode;
@@ -2006,15 +1752,6 @@ s32 PaintDrivingRange(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-/*
- * Returns the map texel at a column and row of the whole hole's map, adding the
- * base, the texel's offset and the tile's in that order as the original does.
- * The callers have ruled out negative rows and columns, so dividing the row, as
- * the column is, finds the same tile as shifting it. Shifting the row gives 36
- * words differing (6 in shape) in EncodeCodeMap and 40 (6) in LoadCodeMap, also
- * with a tileColumn local; adding the offsets before the base gives 2 (0) in
- * each, and the tile's offset before the texel's 14 (0) and 6 (0).
- */
 static inline u16 *GetMapTexel(s32 column, s32 row) {
     s32 tileOffset = ((column / GROUND_TILE_TEXEL_SPAN) +
                          ((row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)) *
@@ -2025,14 +1762,7 @@ static inline u16 *GetMapTexel(s32 column, s32 row) {
     return (u16 *)((u8 *)g_WorkArea.hole.tiles + texelOffset + tileOffset);
 }
 
-/* Returns the map texel at a column and row, or 0 off the map */
 static inline u16 ReadMapTexel(s32 column, s32 row) {
-    /*
-     * The separate tests are there to match: one || test gives 43 words differing
-     * (15 in shape) in EncodeCodeMap, 63 (15) in SaveHoleFiles and 59 (15) in
-     * CleanCodeMap, and one && test for being on the map 51 (17), 103 (17) and
-     * 67 (17)
-     */
     if (column < 0) {
         return 0;
     }
@@ -2052,10 +1782,6 @@ static inline u16 ReadMapTexel(s32 column, s32 row) {
     return *GetMapTexel(column, row);
 }
 
-/*
- * Encodes the map's texels as terrain codes, a byte each, in the hole file
- * buffer.
- */
 void EncodeCodeMap(void) {
     s32 column;
     s32 row;
@@ -2070,12 +1796,7 @@ void EncodeCodeMap(void) {
     }
 }
 
-/* Sets the map texel at a column and row, unless it is off the map */
 static inline void WriteMapTexel(s32 column, s32 row, u16 color) {
-    /*
-     * The separate tests are there to match: one || test gives 43 words differing
-     * (15 in shape) in LoadCodeMap, and one && test for being on the map 49 (13)
-     */
     if (column < 0) {
         return;
     }
@@ -2095,10 +1816,6 @@ static inline void WriteMapTexel(s32 column, s32 row, u16 color) {
     *GetMapTexel(column, row) = color;
 }
 
-/*
- * Clears the map, reads a code map from the host and paints the map's texels
- * with the colors of its terrain codes.
- */
 void LoadCodeMap(char *path) {
     u32 size;
     s32 tileIndex;
@@ -2130,47 +1847,30 @@ void LoadCodeMap(char *path) {
     }
 }
 
-/* Repaints the ground tiles from the code map saved before the last clean-up */
 void LoadBackupCodeMap(void) {
     LoadCodeMap("c:/golf64/attr.tmp");
 }
 
-/* Repaints the ground tiles from the tool's code map */
 void LoadToolCodeMap(void) {
     LoadCodeMap("tool/golf64.att");
     f_IsCodeMapCleaned = FALSE;
 }
 
-/* The index in the code map of the code at a column and row */
 #define CodeIndex(column, row) (((row) * MAP_COLUMN_COUNT) + (column))
 
-/*
- * The index in the code map of the code a step away from a column and row.
- * The row's step is taken before the row's codes are counted and the
- * column's after the column is added, to match.
- */
 #define NeighborCodeIndex(column, row, columnStep, rowStep) \
     ((((row) + (rowStep)) * MAP_COLUMN_COUNT) + (column) + (columnStep))
 
-/* Returns the code at an index of the code map, pointing the build cursor at it */
 static inline u8 GetCode(s32 index) {
     f_BuildCursor = &f_BuildBuffer[index];
     return *f_BuildCursor;
 }
 
-/* Sets the code at an index of the code map, pointing the build cursor at it */
 static inline void SetCode(s32 index, u8 code) {
     f_BuildCursor = &f_BuildBuffer[index];
     *f_BuildCursor = code;
 }
 
-/*
- * Fills the code at a column and row of the code map with its neighbors'
- * code, if they are equal and it differs. The neighbors are a step away
- * each side. The code before is read twice, and the code after again to
- * fill with. The index and the code before are kept in the caller's
- * variables, and the block is no loop that runs once, to match.
- */
 #define FillCodeGap(index, previous, column, row, columnStep, rowStep) \
     { \
         s32 code; \
@@ -2195,98 +1895,6 @@ static inline void SetCode(s32 index, u8 code) {
         } \
     }
 
-/*
- * Encodes the map as EncodeCodeMap does, then runs the clean-up passes, each
- * filling the codes that differ from two equal neighbors, along the row and
- * then down the column. There are no passes, so it only encodes the map.
- *
- * The original keeps the index of the code it is at in one register, $a0,
- * through the encoding and the passes alike, setting it ahead of each read and
- * each store and adding it to the buffer's address. So the index is one
- * variable of the function's, set in a statement of its own each time. Along
- * the row the code before's index is the cell's less one, and the cell's is
- * copied to $t0 for the fill; up the column it is the column added to the row
- * above's offset, which loop.c steps beside the row. A neighbor's index is
- * written to give both: the row's step is taken before the row is scaled, and
- * the column's is added after the column. With the column's step added to the
- * column first, or the steps added to the cell's index, the sums are grouped
- * another way; with no index, loop.c steps the cell's beside the column; and
- * set in GetCode's argument, the index is copied for the fill up the column as
- * well.
- *
- * The code before the cell is kept in one variable for both directions. A
- * variable that lives in one block gets its register from local-alloc, the
- * lowest one free; one read in more than a block is left to the global
- * allocator, which takes them in order of priority, the references weighted by
- * loop depth, times their logarithm, over the length of the life
- * (allocno_compare in global.c). The original has the code after's address in
- * $a1, the code before in $a2 and the buffer's address in $a3. In a variable of
- * the gap's own, the code before lives within the test's block and takes $a1
- * ahead of the address, which lasts into the fill. Shared by the two directions
- * it waits for the global allocator, where the address comes first, with 20
- * references over 11 instructions, and the code before, with 16 over 18, ties
- * with the buffer's address, with 24 over 27, and goes ahead of it for its
- * lower register number. A loop that runs once around the fill counts it a
- * level deeper: the buffer's address then has 25 references and goes ahead of
- * the code before, so FillCodeGap's block is a plain one.
- *
- * The code before is read twice for the test, and the code after again for the
- * fill, as the original reads them. The encoding sets its cursor from the same
- * index, as the original has it in $a0 there too; with the sum written where
- * the buffer is indexed, it takes $v1.
- *
- * Measured against the match, as words differing and how many of them in shape:
- *   The old draft: GetCode and SetCode given the column and
- *   row, with no index, and FillCodeGap an inline function    88 (12)
- *   The code before in a variable of FillCodeGap's own        26 (0)
- *   The code before as a u8                                   26 (0)
- *   The code before as an s16 or a u16                        4 (0)
- *   The cell's code shared by the two directions as well      60 (0)
- *   The cell's code shared in place of the code before        52 (0)
- *   The code before's second read shared as well              26 (0)
- *   FillCodeGap's block as a loop that runs once              7 (7)
- *   The fill alone in a loop that runs once                   34 (0)
- *   The test as previous != code                              4 (0)
- *   The test as next == previousAgain                         46 (0)
- *   The neighbors compared ahead of the cell                  96 (8)
- *   The second comparison in an if inside the first's         68 (18)
- *   The code before read once                                 90 (8)
- *   The gap filled from the code after's first read           112 (4)
- *   The code before read ahead of the cell's                  68 (6)
- *   The code after read ahead of the code before's second
- *   read                                                      94 (8)
- *   The code after read ahead of both reads of the code
- *   before                                                    90 (12)
- *   The code before's first read taken into previousAgain and
- *   its second into previous                                  66 (0)
- *   The index set in GetCode's argument                       7 (5)
- *   The index in a variable of FillCodeGap's own              4 (0)
- *   The encoding's cursor set with no index                   4 (0)
- *   The encoding's code stored by SetCode                     144 (12)
- *   No index, each sum written in GetCode's or SetCode's
- *   argument                                                  137 (35)
- *   A neighbor's index with the column's step added to the
- *   column first, or as CodeIndex of the stepped column and
- *   row                                                       42 (18)
- *   A neighbor's index with the column and its step ahead of
- *   the row's offset                                          42 (18)
- *   A neighbor's index as the cell's plus the steps           60 (24)
- *   CodeIndex with the column ahead of the row's offset       8 (0)
- *   The encoding's loops' tests as !=                         25 (9)
- *   The passes' loops' tests as !=                            8 (8)
- *   The passes' count tested as > 0                           4 (4)
- *   ReadMapTexel's tests as one ||                            59 (15)
- *   ReadMapTexel's tests as one && for being on the map       67 (17)
- *
- * Also matching: the code before declared for the function, or as a u32; the
- * code after shared by the two directions as well; the gap's other codes as u8
- * or u32; the two comparisons anded with &; the fill kept in an s32, or read
- * back through the build cursor with no local; GetCode adding the index to the
- * buffer, returning an s32, or as a macro; SetCode as a macro; the column's
- * test or the row's with its halves the other way round; the column's as one
- * unsigned comparison; the encoding's index written as a neighbor's with no
- * steps; index as a u32, or declared first; and passCount declared last.
- */
 void CleanCodeMap(void) {
     s32 passCount = 0;
     s32 column;
@@ -2297,7 +1905,6 @@ void CleanCodeMap(void) {
     f_BuildBuffer = f_BuildCursor;
     for (row = 0; row < MAP_ROW_COUNT; row++) {
         for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-            /* Kept in the index the passes use, to match */
             index = CodeIndex(column, row);
             f_BuildCursor = &f_BuildBuffer[index];
             *f_BuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
@@ -2307,7 +1914,6 @@ void CleanCodeMap(void) {
     for (; passCount != 0; passCount--) {
         for (row = 0; row < MAP_ROW_COUNT; row++) {
             for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-                /* The code before the cell's, in one variable for both directions, to match */
                 s32 previous;
 
                 if (column > 0 && column < MAP_COLUMN_COUNT - 1) {
@@ -2322,74 +1928,30 @@ void CleanCodeMap(void) {
     }
 }
 
-/* Does nothing */
 void FinishCodeMapCleanup(void) {
 }
 
-/* The byte offset of a map texel's terrain code cell */
 static inline s32 GetCellOffset(u32 column, u32 row) {
     return ((column / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_SIZE) +
         ((row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_ROW_SIZE);
 }
 
-/* The cell at a byte offset from GetCellOffset */
 #define CellAt(cellOffset) (*(s16 *)AddressPast(g_TerrainCodeCells, (cellOffset)))
 
-/* The offset of a map texel's code in its cell's block of packed codes */
 static inline s32 GetBlockCodeOffset(u32 column, u32 row) {
     return ((column % TERRAIN_CODE_CELL_SPAN) / 2) +
         ((row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2));
 }
 
-/* The offset of a map texel's code in the packed codes */
 static inline s32 GetPackedCodeOffset(s32 block, u32 column, u32 row) {
     return GetBlockCodeOffset(column, row) + (block * TERRAIN_CODE_BLOCK_SIZE);
 }
 
-/*
- * The offset of a map texel's code in the packed codes of its cell, given
- * the cell's block marker
- */
 static inline s32 GetCellCodeOffset(s32 cell, u32 column, u32 row) {
     return GetBlockCodeOffset(column, row) +
         ((cell & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
 }
 
-/*
- * Sets a map texel's code in a block of packed codes, two to a byte, with
- * the even column's code in the high bits. The words that differ are
- * PaintGroundTiles', which this is part of.
- *
- * The odd column's offset within the block is worked out in a block of its
- * own, and the code block's offset added after it, to match. The original
- * keeps the byte's offset in $v0 and the byte in $v1 here. The store's basic
- * block has three quantities: the offset, the code block's shift and the
- * byte. With three, local-alloc's block_alloc orders them by hand, comparing
- * quantities 0 and 1, then 1 and 2, then 0 and 1 again whatever the first
- * two steps swapped, so the offset is placed first, and takes $v0, unless
- * the shift outranks it and the byte outranks the shift. They rank by
- * floor_log2(refs) * refs / life, and flow counts each reference once and
- * once more for every loop around it. Inside the three loops the offset's 9
- * references count 36 over a life of 16, which is 112500, the shift's 2
- * count 8 over 2, 120000, and the byte's 6 count 24 over 6, 160000, so the
- * byte is placed first and takes $v0, with the offset in $v1. The even
- * columns' stores hold them that way, so jump2 merges the end of this store
- * with theirs: 26 words differ, 6 in shape. The block's loop notes end
- * before the code block's shift and bring the offset's count to 41, 128125,
- * above the shift.
- *
- * Only the column's half in the block, with the row's part and the code
- * block's added after it, matches too (39). The whole offset in the block
- * gives 26 (6) again, as the shift's count rises with it to 10, 150000,
- * above the offset's 43, 134375. Indexing in place with GetPackedCodeOffset,
- * or the same statements without the block, gives 26 (6).
- *
- * The even column's code is shifted into a local before the byte is read, to
- * match: the original shifts it between the load and the mask. Shifted in
- * the store's expression, here 105 words differ (13 in shape), in the cell's
- * store below 142 (14), and in both 131 (1). Working the offset out as the
- * odd column's is gives 7 (3) with both stores done so.
- */
 static inline void SetPackedTerrainCode(s32 block, u32 column, u32 row, s32 code) {
     if (column & 1) {
         s32 offset;
@@ -2409,11 +1971,6 @@ static inline void SetPackedTerrainCode(s32 block, u32 column, u32 row, s32 code
     }
 }
 
-/*
- * Stores a map texel's terrain code in its cell, giving the cell a block of
- * packed codes once it holds more than one. Once the blocks run out, cells
- * keep their first code.
- */
 static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
     s32 cellOffset = GetCellOffset(column, row);
     s32 cell = CellAt(cellOffset);
@@ -2431,7 +1988,6 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
     }
     else if (cell >= 0) {
         if (g_TerrainCodeBlockCount < TERRAIN_CODE_BLOCK_COUNT) {
-            /* Repeats the cell's code in every half byte of a word */
             fill = (cell << TERRAIN_CODE_BITS) | cell;
             block = g_TerrainCodeBlockCount++;
             fill |= fill << BITS_PER_BYTE;
@@ -2441,27 +1997,11 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
                 *word++ = fill;
             }
 
-            /*
-             * The original works the offset out again; storing through
-             * cellOffset gives PaintGroundTiles 125 words differing, 15 in
-             * shape
-             */
             CellAt(GetCellOffset(column, row)) = block | TERRAIN_CODE_CELL_BLOCK;
             SetPackedTerrainCode(block, column, row, code);
         }
     }
     else {
-        /*
-         * The stores are written out to match, as the original masks the
-         * cell's marker after each column's test: calling
-         * SetPackedTerrainCode with the masked marker gives PaintGroundTiles
-         * 52 words differing, 4 in shape, GetPackedCodeOffset with it in the
-         * even column's store 51 (3), and the byte's offset worked out once,
-         * into i, 147 (19). The odd column's store matches with or without
-         * SetPackedTerrainCode's block: the mask and the shift make a
-         * quantity of two registers that ranks level with the byte, 160000,
-         * so local-alloc places the offset first either way.
-         */
         if (column & 1) {
             g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] =
                 (g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] &
@@ -2479,18 +2019,6 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
     }
 }
 
-/*
- * Paints the map's texels from the code map with the course's paint logic, sets
- * each terrain code's color, and stores the painted terrain codes in their
- * cells.
- *
- * The texel loop steps column in its header, with texelIndex, to match: when
- * the code blocks run out the original leaves SetCellTerrainCode with a
- * branch-likely that steps texelIndex in its delay slot. Stepped at the end
- * of the body, plainly or in a block of its own, 3 words differ, all in
- * shape. The stores in SetPackedTerrainCode and SetCellTerrainCode are
- * written to match too, as their comments say.
- */
 void PaintGroundTiles(void) {
     GridOffset offsets[PAINT_OFFSET_COUNT];
     u32 codePaintings[TERRAIN_CODE_COUNT];
@@ -2509,7 +2037,6 @@ void PaintGroundTiles(void) {
     s32 code;
     s32 nearestCode;
     s32 nearestDistance;
-    /* The nearest distance in the offsets' units, which the search stops at */
     s32 searchDistance;
     u32 painting;
 
@@ -2522,11 +2049,6 @@ void PaintGroundTiles(void) {
     nextCode = f_BuildCursor;
     searchSpans = f_PaintLogics[f_PaintLogic].searchSpans;
 
-    /*
-     * row is there to match: counting with column or an s32 codeIndex of its
-     * own gives 16 words differing, with texelIndex 40, none in shape, and
-     * with code 194, 10 in shape
-     */
     for (row = 0; row < TERRAIN_CODE_COUNT; row++) {
         codePaintings[row] = paint(row, row, 0, 0, 0);
         g_TerrainCodeColors[codePaintings[row] & TERRAIN_CODE_MASK] =
@@ -2548,13 +2070,6 @@ void PaintGroundTiles(void) {
                     if (nearestDistance < 0) {
                         painting = codePaintings[code];
 
-                        /*
-                         * The goto is there to match: testing for a fixed painting first
-                         * in an if-else, and searching and painting in its else, gives 6
-                         * words differing, all in shape; testing for no search first
-                         * gives 111 (31), and keeping the nesting with the paint call in
-                         * both arms 111 (29)
-                         */
                         goto PAINTED;
                     }
 
@@ -2591,12 +2106,7 @@ PAINTED:
     f_BuildCursor = f_BuildBuffer;
 }
 
-/*
- * Cleans up the terrain code map and repaints the ground tiles from it,
- * or, if that was done last, restores the code map from before
- */
 void ToggleCodeMapCleanup(void) {
-    /* Unused; it is there to match; without it 8 words differ */
     u8 unused[0x640] UNUSED;
 
     if (!f_IsCodeMapCleaned) {
@@ -2612,12 +2122,6 @@ void ToggleCodeMapCleanup(void) {
     }
 }
 
-/*
- * Sets each ground tile's center to the average of its ground points and its
- * height range to the spread of their heights, at least
- * MIN_GROUND_TILE_HEIGHT_RANGE, or FLAT_GROUND_TILE_HEIGHT_RANGE for a flat
- * tile. It returns the tile count as a float, which no caller uses.
- */
 f32 MeasureGroundTiles(void) {
     s32 tileRow;
     s32 tileColumn;
@@ -2679,10 +2183,6 @@ f32 MeasureGroundTiles(void) {
     return tileIndex;
 }
 
-/*
- * Scales the hole's ground points, tile centers, billboards, tee and cup
- * with g_MiniGolfScale
- */
 void ScaleMiniGolfHole(void) {
     Vtx_t point;
     s32 row;
@@ -2720,11 +2220,6 @@ void ScaleMiniGolfHole(void) {
     g_HoleSetup.cupPosition[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
 }
 
-/*
- * Returns the paint logic (a PAINT_LOGIC_* value) that a course record's
- * terrain is painted with. BuildHole picks the mini-golf courses' logics
- * itself, so the mini-golf records' cases take their logics' numbers.
- */
 s32 GetCoursePaintLogic(CourseRecordIndex course) {
     switch (course) {
         case COURSE_RECORD_TOAD_HIGHLANDS:
@@ -2757,25 +2252,15 @@ void ReadGridVertices(void);
 void ReadHoleTriangles(void);
 void ReadTileMidpoints(void);
 
-/* Does nothing; the course and hole are not read */
 void FinishHolePoints(CourseRecordIndex course UNUSED, s32 hole UNUSED) {
 }
 
-/*
- * Builds a hole: reads its files, either from its assets or, with
- * GAME_FLAG_READ_HOST_HOLE, from the host, then measures and paints its
- * ground tiles and places its billboards
- */
 void BuildHole(s32 course, s32 hole) {
     AssetFile asset;
     char path[HOST_PATH_SIZE];
     u32 size;
     s32 pointsSize;
 
-    /*
-     * The repeated case is there to match: testing both courses with ||
-     * gives 9 words differing (7 in shape), and a switch 10
-     */
     if (course == COURSE_RECORD_SHY_GUY_DESERT) {
         FillGroundNoise(GROUND_NOISE_RANGE, LIGHT_GROUND_NOISE_BASE);
     }
@@ -2811,7 +2296,6 @@ void BuildHole(s32 course, s32 hole) {
     osSyncPrintf("PaintLogic%d\n", f_PaintLogic);
     if (!IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
         if (IsGameFlagSet(GAME_FLAG_NEXT_COURSE_FIRST_HOLE) && hole == 0) {
-            /* One past the course's last hole, so the next course's first hole */
             hole = COURSE_HOLE_COUNT;
         }
 
@@ -2889,10 +2373,6 @@ void BuildHole(s32 course, s32 hole) {
     osSyncPrintf("Ok!\n");
 }
 
-/*
- * Writes a hole's files to the host, the attributes as the map's terrain
- * codes, a byte each. A cleaned code map is first restored from its backup.
- */
 void SaveHoleFiles(s32 course, s32 hole) {
     char path[HOST_PATH_SIZE];
     s32 column;
@@ -2930,20 +2410,11 @@ void SaveHoleFiles(s32 course, s32 hole) {
     }
 }
 
-/*
- * MoveRingsToEnd's debug text cells: its start and end notices share one, and
- * each move it logs goes to a row before the text's buffer, so PutDebugText
- * drops it
- */
 #define RING_MOVE_NOTICE_COLUMN 19
 #define RING_MOVE_NOTICE_ROW 19
 #define RING_MOVE_LOG_COLUMN 4
 #define RING_MOVE_LOG_ROW (-141)
 
-/*
- * Moves the rings, from the first triangle that is one, to the last
- * triangle slots
- */
 void MoveRingsToEnd(void) {
     s32 i;
     s32 slot;
@@ -2970,7 +2441,6 @@ void ClearHoleTriangles(void);
 void ClearTileBorders(void);
 void ResetBuildBuffer(void);
 
-/* Clears everything a hole is built into */
 void ClearHoleBuild(void) {
     ClearHolePoints();
     ClearTileBorders();
@@ -2980,10 +2450,6 @@ void ClearHoleBuild(void) {
     ResetBuildBuffer();
 }
 
-/*
- * Clears the hole's points and, unless g_GameState.isRoundContinued is set,
- * its cup and tee
- */
 void ClearHolePoints(void) {
     s32 i;
 
@@ -3010,28 +2476,17 @@ void ClearHolePoints(void) {
         g_HolePoints.aimPoints[i][AXIS_Y] = 0;
         g_HolePoints.aimPoints[i][AXIS_Z] = 0;
 
-        /*
-         * The dereference is there to match: indexing AXIS_X gives 7 words
-         * differing, 5 in shape
-         */
         *g_HolePoints.routePoints[i] = 0;
         g_HolePoints.routePoints[i][AXIS_Z] = 0;
     }
 }
 
-/* Points the build buffer and its cursor at the start of the file area */
 void ResetBuildBuffer(void) {
     f_BuildCursor = BUILD_BUFFER_START;
     f_BuildBuffer = f_BuildCursor;
-    /*
-     * Rewinds the cursor to the buffer, as the file routines do after a read;
-     * the original makes all three stores, and any two of them, chained or
-     * not, give 4 words differing, 2 in shape
-     */
     f_BuildCursor = f_BuildBuffer;
 }
 
-/* Marks every billboard unused */
 void ClearBillboards(void) {
     s32 i;
 
@@ -3047,12 +2502,10 @@ void ClearBillboards(void) {
     }
 }
 
-/* Clears the hole's triangles */
 void ClearHoleTriangles(void) {
     bzero(g_WorkArea.hole.triangles, sizeof(g_WorkArea.hole.triangles));
 }
 
-/* Clears each ground tile's last texel and mirrored cells */
 void ClearTileBorders(void) {
     s32 i;
 
@@ -3063,10 +2516,6 @@ void ClearTileBorders(void) {
     }
 }
 
-/*
- * Lays the grid vertices out in rows, each row of corners followed by the
- * points between them, with texture coordinates from their positions
- */
 void InitGridVertices(void) {
     s16 x;
     s16 z;
@@ -3099,12 +2548,7 @@ void InitGridVertices(void) {
     }
 }
 
-/*
- * Places each ground tile's midpoints at fixed quarter and half steps
- * across the tile, with texture coordinates from their positions
- */
 void InitTileMidpoints(void) {
-    /* Each midpoint's x and z offsets from its tile's origin */
     s16 offsets[TILE_MIDPOINT_COUNT][2];
     s16 x;
     s16 z;
@@ -3169,17 +2613,8 @@ void InitTileMidpoints(void) {
     }
 }
 
-/*
- * Spreads a packed byte's two nibbles to the low nibbles of an attribute's two
- * bytes
- */
 #define UnpackAttribute(packed) ((((packed) & 0xF0) << 4) | ((packed) & 0xF))
 
-/*
- * Unpacks runs of attributes from the hole file into the build buffer, each
- * a count and a byte whose two nibbles go to the two bytes of an attribute,
- * then clears the rest of the buffer. Nothing calls it.
- */
 void ReadAttributeRuns(void) {
     s16 count;
     u8 packed;
@@ -3219,7 +2654,6 @@ void ReadAttributeRuns(void) {
     f_BuildCursor = f_BuildBuffer;
 }
 
-/* Reads the billboards from the hole's tree file */
 void ReadBillboards(void) {
     u8 count;
     u8 i;
@@ -3243,10 +2677,7 @@ void ReadBillboards(void) {
     }
 }
 
-/* Reads the hole triangles' kinds and corner positions from the hole's triangle
- * file */
 void ReadHoleTriangles(void) {
-    /* Unused; it is there to match; without it 18 words differ */
     u8 unused[0x10] UNUSED;
     u8 count;
     s8 kind;
@@ -3255,7 +2686,6 @@ void ReadHoleTriangles(void) {
 
     ReadFileBytes(&count, sizeof(count));
     for (i = 0; i < count; i++) {
-        /* It tests the count, not the index, on every triangle */
         if (count >= HOLE_TRIANGLE_COUNT) {
             osSyncPrintf("ER3\n");
             return;
@@ -3270,7 +2700,6 @@ void ReadHoleTriangles(void) {
     }
 }
 
-/* Reads each ground tile's mirrored cells from the file */
 void ReadTileMirroredCells(void) {
     s32 i;
 
@@ -3283,10 +2712,6 @@ void ReadVertexX(s16 *coord, s32 flags);
 void ReadVertexY(s16 *coord, s32 flags);
 void ReadVertexZ(s16 *coord, s32 flags);
 
-/*
- * Reads the grid vertices from the hole's vertex file. A vertex flagged
- * with the same x or z as the one before keeps the one already there.
- */
 void ReadGridVertices(void) {
     s8 flags;
     s16 x;
@@ -3323,8 +2748,6 @@ void ReadGridVertices(void) {
     }
 }
 
-/* Reads the midpoints of the ground tiles from the hole's vertex file, like
- * ReadGridVertices */
 void ReadTileMidpoints(void) {
     s8 flags;
     s16 x;
@@ -3365,10 +2788,6 @@ void ReadTileMidpoints(void) {
     }
 }
 
-/*
- * Reads a vertex's x coordinate, whose encoding the flags select: two
- * bytes, or one byte scaled up by one of three shifts
- */
 void ReadVertexX(s16 *coord, s32 flags) {
     *coord = 0;
     switch (flags & VERTEX_FLAG_X_ENCODING) {
@@ -3390,17 +2809,8 @@ void ReadVertexX(s16 *coord, s32 flags) {
     }
 }
 
-/*
- * Reads a vertex's y coordinate, whose encoding the flags select: two
- * bytes, or one byte scaled up by one of three shifts
- */
 void ReadVertexY(s16 *coord, s32 flags) {
     *coord = 0;
-    /*
-     * The u8 cast is there to match: without it 2 words differ, 2 in shape;
-     * shifting before masking gives 4, a u32 cast 7, and a u8 flags parameter
-     * 16 in each reader
-     */
     switch ((u8)(flags & VERTEX_FLAG_Y_ENCODING) >> VERTEX_FLAG_Y_ENCODING_SHIFT) {
         case VERTEX_ENCODING_BYTE:
             ReadFileBytes(coord, 1);
@@ -3420,17 +2830,8 @@ void ReadVertexY(s16 *coord, s32 flags) {
     }
 }
 
-/*
- * Reads a vertex's z coordinate, whose encoding the flags select: two
- * bytes, or one byte scaled up by one of three shifts
- */
 void ReadVertexZ(s16 *coord, s32 flags) {
     *coord = 0;
-    /*
-     * The u8 cast is there to match: without it 2 words differ, 2 in shape;
-     * shifting before masking gives 4, a u32 cast 7, and a u8 flags parameter
-     * 16 in each reader
-     */
     switch ((u8)(flags & VERTEX_FLAG_Z_ENCODING) >> VERTEX_FLAG_Z_ENCODING_SHIFT) {
         case VERTEX_ENCODING_BYTE:
             ReadFileBytes(coord, 1);
@@ -3450,10 +2851,6 @@ void ReadVertexZ(s16 *coord, s32 flags) {
     }
 }
 
-/*
- * Opens one of a hole's files and reads it to the hole file buffer, or
- * unpacks the attributes into the build buffer
- */
 void OpenHoleAsset(CourseRecordIndex course, s32 hole, s8 kind) {
     f_ReadCursor = HOLE_FILE_BUFFER;
     switch (kind) {
@@ -3509,36 +2906,23 @@ void OpenHoleAsset(CourseRecordIndex course, s32 hole, s8 kind) {
     ReadAssetFile(f_ReadCursor, GetAssetFileSize(&f_HoleAsset), &f_HoleAsset);
 }
 
-/* An RGBA 5551 texel's channels */
 #define TEXEL_RED_SHIFT 11
 #define TEXEL_GREEN_SHIFT 6
 #define TEXEL_BLUE_SHIFT 1
 #define TEXEL_CHANNEL_MAX 31
 
-/* A billboard's position is in units of 1/BILLBOARD_UNITS_PER_TEXEL map texel
- */
 #define BILLBOARD_UNITS_PER_TEXEL 16
-/* The map texels around a billboard's base that its shadow can fall on */
 #define SHADOW_ROWS_BEFORE 16
 #define SHADOW_ROWS_AFTER 25
 #define SHADOW_COLUMN_REACH 25
-/* How far toward the light the point that a billboard is viewed toward is */
 #define SHADOW_LIGHT_DISTANCE 1000.0f
-/* The hit mask's solidities, sampled at BILLBOARD_MASK_SIZE + 1 points a side
- */
 #define SOLIDITY_ROW_SHIFT 5
 #define SOLIDITY_ROW_LENGTH (1 << SOLIDITY_ROW_SHIFT)
-/* How much of a texel's brightness is kept in a shadow, in percent */
 #define LIT_PERCENT_FULL 100
 #define LIT_PERCENT_AT_BASE 50.0f
 #define SHADOW_NEARNESS_LIMIT 1.5f
 #define SHADOW_NEARNESS_MIN 0.1f
 #define SHADOW_SOLIDITY_SCALE 4.0f
-/*
- * A texel's brightness is its red * 4 + green * 8 + blue * 2, less
- * SHADOW_BRIGHTNESS_FLOOR. Each masked channel is shifted from its place in
- * the texel to its weight; blue's place already weighs it 2.
- */
 #define RED_BRIGHTNESS_SHIFT (RGBA16_RED_SHIFT - 2)
 #define GREEN_BRIGHTNESS_SHIFT (RGBA16_GREEN_SHIFT - 3)
 #define SHADOW_BRIGHTNESS_FLOOR 60
@@ -3557,28 +2941,6 @@ static inline u16 *GetShadowedTexel(u32 column, u32 row) {
     return (u16 *)((u8 *)g_WorkArea.hole.tiles + texelOffset + tileOffset);
 }
 
-/*
- * Darkens the map texels in the billboards' shadows. Each texel near a
- * billboard is put in the view from the billboard's base toward the light.
- * Where that falls within the billboard's width and height, the texel is
- * darkened by the hit mask's solidity there, less with its distance along the
- * light, and within a diamond around the base, more toward the base. Dark
- * texels are kept, and bright ones are darkened the most. A row with no texel
- * within the width ends the shadow once one has started. Billboards with a
- * texture in f_ShadowlessTextures cast no shadow.
- *
- * GetShadowedTexel adds byte offsets to the tiles, as GetMapTexel does,
- * and the brightness drops its floor in a statement of its own. With
- * these, where indexing the texel and subtracting the floor in the sum
- * gave 53 words, 13 in shape, 37 words differ, 11 in shape.
- *
- * The rest is the bodies of one statement, which have no braces. Each
- * braced block leaves a deleted note in the RTL, and loop.c measures a
- * hoisted constant's life in notes as well as insns. With braces, the
- * row loop is long enough that the constant 100, already moved out of
- * the column and row loops, also leaves the billboard loop; the original
- * sets it before each row. Hence the clang-format markers.
- */
 /* clang-format off */
 void CastBillboardShadows(void) {
     Mat4 lightView;
@@ -3801,11 +3163,6 @@ void CastBillboardShadows(void) {
 }
 /* clang-format on */
 
-/*
- * Sets the ground's light and shade colors for the scene's color index,
- * interpolating between those of the key indexes around it.
- * InterpolateChannel is a nested function, a GNU C extension.
- */
 void GetGroundLightColors(GroundLightColor *light, GroundLightColor *shade) {
     GroundLightColor keyLights[2];
     GroundLightColor keyShades[2];
@@ -3884,57 +3241,29 @@ void GetGroundLightColors(GroundLightColor *light, GroundLightColor *shade) {
     shade->blue = InterpolateChannel(keyShades[0].blue, keyShades[1].blue, fraction);
 }
 
-/* The two bands of height rows that ShadeGroundTiles shades from, in the hole
- * file buffer */
 #define HEIGHT_RING_ROW_COUNT (HEIGHT_BAND_ROW_COUNT * 2)
 #define HEIGHT_RING_ROW_MASK (HEIGHT_RING_ROW_COUNT - 1)
-/* A band is drawn while shading the rows half a band before it */
 #define HEIGHT_BAND_LEAD (HEIGHT_BAND_ROW_COUNT / 2)
-/* The slopes along the light's yaw that the ground is lit for */
 #define LIGHT_SLOPE_MIN (-32)
 #define LIGHT_SLOPE_MAX 31
 #define LIGHT_SLOPE_COUNT (LIGHT_SLOPE_MAX - LIGHT_SLOPE_MIN + 1)
-/* Lighting scales, in LIGHT_SCALE_FRACTION_BITS fixed point */
 #define LIGHT_SCALE_FRACTION_BITS 11
 #define LIGHT_SCALE_ONE (1 << LIGHT_SCALE_FRACTION_BITS)
 #define LIGHT_SCALE_SLOPE_STEP 0x30
 #define LIGHT_SCALE_MIN 0x500
 #define LIGHT_SCALE_MAX 0xC00
-/* How far apart, in map texels, the heights that give a slope are, along the
- * light's yaw */
 #define LIGHT_OFFSET_LENGTH 4.5f
-/* The light's color is in fractions of full brightness of this many bits */
 #define LIGHT_COLOR_FRACTION_BITS 5
-/* How much a unit of height fades the ground toward white */
 #define HEIGHT_FADE_SCALE 0.008f
 #define HEIGHT_FADE_LIMIT 0.25f
 #define HEIGHT_FADE_FULL 1.0f
 
-/* The light's color for each slope, a channel per word */
 #define SLOPE_LIGHT_RED 0
 #define SLOPE_LIGHT_GREEN 1
 #define SLOPE_LIGHT_BLUE 2
 #define SLOPE_LIGHT_WORD_COUNT 4
 
-/*
- * Lights the ground tiles' map texels by the slope of the ground along the
- * light's yaw, from the heights that DrawBandHeights draws a band at a time.
- * Texels at heights below 0 are only lit. When GAME_FLAG_FADE_HIGH_GROUND is
- * set, the others also fade toward white with height: up to HEIGHT_FADE_LIMIT,
- * fully when GAME_FLAG_FADE_HIGH_GROUND_FULLY is set, or not at all when
- * GAME_FLAG_NO_HIGH_GROUND_FADE is set.
- *
- * Neither offset height row has a variable: the original indexes heightRows
- * for each, at the edge tiles and the inner ones alike, and loop hoists the
- * indexing, which computes the leading row after column is set and keeps a
- * second copy of the trailing one. Holding the rows in trailingHeights and
- * leadingHeights gave 132 words differing, 14 in shape. The faded color is
- * built in color, a full word like the lit one, before it becomes the texel's;
- * built in the halfword texelColor itself, combine puts the alpha before the
- * channels in the last or, and 2 words differ.
- */
 void ShadeGroundTiles(void) {
-    /* Pads the frame to match; without it 182 words differ */
     s32 unused[20] UNUSED;
     GroundLightColor light = {24, 22, 16};
     GroundLightColor shade;
@@ -4001,7 +3330,6 @@ void ShadeGroundTiles(void) {
     shade.blue <<= TEXEL_BLUE_SHIFT;
     pitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
 
-    /* The light's pitch is unused */
     cosf(pitch);
     sinf(pitch);
     for (lightSlope = LIGHT_SLOPE_MIN; lightSlope <= LIGHT_SLOPE_MAX; lightSlope++) {
@@ -4049,7 +3377,6 @@ void ShadeGroundTiles(void) {
                              [(column / GROUND_TILE_TEXEL_SPAN) +
                                  ((row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)]
                          .texels[0][(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN];
-            /* The offset heights can be off the map only in the edge tiles */
             isMapEdge = column == 0 || column == MAP_COLUMN_COUNT - GROUND_TILE_TEXEL_SPAN;
             if (!isMapEdge) {
                 trailing = &heightRows[(row - lightRowOffset) & HEIGHT_RING_ROW_MASK]
@@ -4064,7 +3391,6 @@ void ShadeGroundTiles(void) {
                     trailingColumn = column - lightColumnOffset;
                     leadingColumn = column + lightColumnOffset;
 
-                    /* Only one of the columns is clamped */
                     if (trailingColumn < 0) {
                         trailingColumn = 0;
                     }
@@ -4163,15 +3489,8 @@ void ShadeGroundTiles(void) {
 
                     shaded.alpha = texelColor & TEXEL_ALPHA_MASK;
 
-                    /* The height test is always true here; the original has it */
                     if (*heights >= 0 && isHighGroundFaded) {
                         fade = *heights * HEIGHT_FADE_SCALE;
-                        /*
-                         * Each limited branch clamps the fade itself, to match: clamping
-                         * once, after a test that leaves the disabled fade out, gives 160
-                         * differing words (30 in shape) against 132 (14), and giving the
-                         * disabled fade a zero limit 138 (20)
-                         */
                         if (isFadeUnlimited) {
                             fadeLimit = HEIGHT_FADE_FULL;
                             if (fade >= fadeLimit) {
@@ -4236,7 +3555,6 @@ void ShadeGroundTiles(void) {
     }
 }
 
-/* Shades the ground tiles, then darkens them under the billboards' shadows */
 void ShadeGround(s32 shadeVariant UNUSED) {
     ShadeGroundTiles();
     osSyncPrintf("TR");
@@ -4247,11 +3565,6 @@ void ShadeGround(s32 shadeVariant UNUSED) {
 #define TILE_BORDER_END (GROUND_TILE_TEXEL_ROW_LENGTH - TILE_BORDER_BEFORE)
 #define BORDERED_TILE_TEXEL_COUNT (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH)
 
-/*
- * The texel at texelColumn and texelRow in the tile at tileColumn and
- * tileRow, in either layout. Texels past a tile's last ones are in the next
- * tile; past the map's edges they repeat the edge texels.
- */
 static inline u16 ReadTileTexel(s32 tileColumn, s32 tileRow, s32 texelColumn, s32 texelRow) {
     s32 tileIndex;
     u16 *texel;
@@ -4282,38 +3595,14 @@ static inline u16 ReadTileTexel(s32 tileColumn, s32 tileRow, s32 texelColumn, s3
     texelColumn = (texelColumn + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
     texelRow = (texelRow + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
 
-    /*
-     * Each layout reads its texel itself, to match. Each arm then ends in its
-     * own load, which cross-jumping merges once the function is inlined, and
-     * the caller's block after the arms holds only single-cycle instructions,
-     * which the scheduler leaves in the source's order. With one read after the
-     * arms the load is in that block: its latency raises the priority of the
-     * store of the texel, and the scheduler puts the column's step ahead of the
-     * load, 12 words differing (4 in shape).
-     */
     if (g_WorkArea.hole.tiles[tileIndex]
             .texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0) {
-        /*
-         * Moved to the tile in a statement of its own, to match: the original
-         * adds the tile's offset last, as the second operand. In one sum
-         * fold-const takes the first texel's address, a constant, into the
-         * innermost sum and the tile's offset comes out as the last
-         * addition's first operand; the twelve groupings of one sum give 4
-         * words differing (none in shape), 8 (none) or 10 (2)
-         */
         texel = &g_WorkArea.hole.tiles[0].texels[TILE_BORDER_BEFORE][TILE_BORDER_BEFORE] +
             ((texelRow * GROUND_TILE_TEXEL_ROW_LENGTH) + texelColumn);
         texel = (u16 *)AddressPast(texel, tileIndex * sizeof(GroundTile));
         return *texel;
     }
     else {
-        /*
-         * One sum here: fold-const takes the first tile's texels, a constant,
-         * into the innermost sum with the tile's offset, as the original has
-         * them. Moved to the tile in a second statement, as above, gives 16
-         * (4); the tile's offset grouped with the first tile's texels in the
-         * source, 16 (4), and with the texel's offset, 8 (none)
-         */
         texel = (u16 *)((u8 *)g_WorkArea.hole.tiles[0].texels +
             (((texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn) * sizeof(u16)) +
             (tileIndex * sizeof(GroundTile)));
@@ -4321,10 +3610,6 @@ static inline u16 ReadTileTexel(s32 tileColumn, s32 tileRow, s32 texelColumn, s3
     }
 }
 
-/*
- * Switches the ground tiles between their two texel layouts: 32 texels a
- * row, or inside a border of their neighbors' texels.
- */
 void ToggleGroundTileBorders(void) {
     u16 texels[GROUND_TILE_TEXEL_ROW_COUNT][GROUND_TILE_TEXEL_ROW_LENGTH];
     s32 tileColumn;
@@ -4399,7 +3684,6 @@ void ToggleGroundTileBorders(void) {
                         texelColumn,
                         texelRow
                     );
-                    /* Skips the texels already copied */
                     if ((u32)texelRow < GROUND_TILE_TEXEL_SPAN &&
                         texelColumn == -TILE_BORDER_BEFORE) {
                         texel += GROUND_TILE_TEXEL_SPAN + 1;
@@ -4414,12 +3698,6 @@ void ToggleGroundTileBorders(void) {
 
             texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0xFFFF;
 
-            /*
-             * The source is set before the destination and its end kept in a
-             * variable, to match: the destination set first gives 4 words
-             * differing (2 in shape), and the end worked out in the loop's test
-             * 16 (none)
-             */
             source = (f64 *)texels;
             sourceEnd = (f64 *)&texels[GROUND_TILE_TEXEL_ROW_COUNT];
             destination =
@@ -4436,10 +3714,6 @@ void ToggleGroundTileBorders(void) {
     }
 }
 
-/*
- * Gives the vertices from start up to end texture coordinates on the
- * mini golf ground tile at column and row
- */
 void SetMiniGolfTileTextureCoords(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
     Vtx_t *vertex;
     s32 coord;
@@ -4451,20 +3725,11 @@ void SetMiniGolfTileTextureCoords(s32 column, s32 row, Vtx_t *start, Vtx_t *end)
             TILE_TEXTURE_ORIGIN;
         vertex->tc[TEXTURE_AXIS_S] = coord;
 
-        /*
-         * coord holds the row offset here, to match: an offset local of its own
-         * gives 8 words differing, 2 in shape, and the coordinate in one
-         * statement 6, 2 in shape
-         */
         coord = (vertex->ob[AXIS_Z] * MINI_GOLF_TEXTURE_SCALE_Z) - (row << TILE_ORIGIN_SHIFT);
         vertex->tc[TEXTURE_AXIS_T] = TexelCoordinate(coord) + TILE_TEXTURE_ORIGIN;
     }
 }
 
-/*
- * Gives the vertices from start up to end texture coordinates on the
- * ground tile at column and row
- */
 void SetTileTextureCoords(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
     Vtx_t *vertex;
     s32 coord;
@@ -4479,20 +3744,11 @@ void SetTileTextureCoords(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
             TILE_TEXTURE_ORIGIN;
         vertex->tc[TEXTURE_AXIS_S] = coord;
 
-        /*
-         * coord holds the row offset here, to match: an offset local of its own
-         * gives 8 words differing, 2 in shape, and the coordinate in one
-         * statement 6, 2 in shape
-         */
         coord = vertex->ob[AXIS_Z] - (row << TILE_ORIGIN_SHIFT);
         vertex->tc[TEXTURE_AXIS_T] = TexelCoordinate(coord) + TILE_TEXTURE_ORIGIN;
     }
 }
 
-/*
- * Copies count vertices; copying them as f64s is there to match: copying the
- * structs gives 177 words differing in BuildGroundTileDisplayList, 93 in shape
- */
 static inline void CopyVertices(Vtx *destination, Vtx *source, s32 count) {
     s32 i;
 
@@ -4502,18 +3758,9 @@ static inline void CopyVertices(Vtx *destination, Vtx *source, s32 count) {
     }
 }
 
-/* The address of a vertex through a vertex segment */
 #define SegmentedVertex(segment, vertex) ((u8 *)(vertex) + ((segment) << 24))
 
-/*
- * Builds the display list and vertices of the ground tile at column and
- * row, at the cursors, and moves the cursors past them
- */
 void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfxCursor, Vtx **vertexCursor) {
-    /*
-     * Sets midpoint halfway between from and to, as SetVertexMidpoint does.
-     * SetTileVertexMidpoint is a nested function, a GNU C extension.
-     */
     void SetTileVertexMidpoint(Vtx_t * from, Vtx_t * to, Vtx_t * midpoint) {
         midpoint->ob[AXIS_X] = (from->ob[AXIS_X] + to->ob[AXIS_X]) / 2;
         midpoint->ob[AXIS_Y] = (from->ob[AXIS_Y] + to->ob[AXIS_Y]) / 2;
@@ -4580,17 +3827,14 @@ void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfxCursor, Vtx **vert
         6,
         3
     );
-    /* 33.5 by 32.5 texels, in 10.2 fixed point */
     gDPSetTileSize(gfx++, 1, 0, 0, 0x86, 0x82);
     coarseOffsets = g_CoarseVertexOffsets[tileIndex];
 
-    /* The corners */
     CopyVertices(vertex, TileGridVertex(column, row, 0, 0), 2);
     CopyVertices(&vertex[2], TileGridVertex(column, row + 1, 0, 0), 2);
     gSPVertex(gfx++, vertex, QUAD_VERTEX_COUNT, TILE_SLOT_ROW0_COLUMN0);
     vertex += QUAD_VERTEX_COUNT;
 
-    /* The midpoints inside the tile, then those on its edges */
     gSPVertex(
         gfx++,
         &midpoints[TILE_FIRST_INNER_MIDPOINT],
@@ -4680,7 +3924,6 @@ void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfxCursor, Vtx **vert
         &vertex++->v
     );
 
-    /* The grid vertices at the middles of the edges and at the center */
     CopyVertices(vertex, TileGridVertex(column, row, 1, 0), 1);
     gSPVertex(gfx++, SegmentedVertex(5, vertex), 1, TILE_SLOT_ROW0_COLUMN2);
     vertex++;
@@ -4748,10 +3991,6 @@ void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfxCursor, Vtx **vert
     *vertexCursor = vertex;
 }
 
-/*
- * Builds every ground tile's display list and vertices in the work area,
- * reporting an error if either overflows its buffer
- */
 void BuildGroundDisplayLists(void) {
     Gfx *gfx;
     Vtx *vertices;

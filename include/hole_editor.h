@@ -5,8 +5,6 @@
 
 #include "camera.h"
 
-/* The hole editor's scenes, which edit a hole over its map */
-
 void CaptureFrame(void);
 void CaptureMapImage(void);
 void DrawHoleEditorGround(CameraMatrices *matrices, s32 terrainStyle);

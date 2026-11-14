@@ -9,36 +9,25 @@
 
 #define GAME_BOY_CHARACTER_COUNT 4
 #define GAME_BOY_CHARACTER_NAME_LENGTH 12
-/* The most experience a Game Boy character can hold */
 #define MAX_GAME_BOY_EXPERIENCE 9999
 
-/* A slot's status when it holds a character */
 #define GAME_BOY_CHARACTER_STATUS_PRESENT 1
-/* A cartridge character's status once it has been brought over */
 #define GAME_BOY_CHARACTER_STATUS_BROUGHT_OVER 2
 
-/* The name at the start of a Game Boy save, with its terminator */
 #define SAVE_NAME_SIZE 11
-/* The bytes after it, which IsCharacterFromSave also compares */
 #define SAVE_KEY_SIZE 5
 
-/* The golfers of the Game Boy Color version, whose faces the transmit menu
- * shows */
 #define GAME_BOY_GOLFER_COUNT 4
 
-/* A Game Boy character has stats for every club but the putter */
 #define GAME_BOY_CLUB_COUNT 13
 
-/* A club's stats, from which GenerateClubSet builds the club */
 typedef struct GameBoyClubStats {
-    /* 0x0 */ u16 distance; /* In yards */
-    /* 0x2 */ BinaryAngle pitch;
-    /* 0x4 */ s8 ignoredStat; /* Read by nothing; its meaning is unknown */
-    /* 0x5 */ s8 sideSpin;
-} GameBoyClubStats; /* size = 0x6 */
+      u16 distance;
+      BinaryAngle pitch;
+      s8 ignoredStat;
+      s8 sideSpin;
+} GameBoyClubStats;
 
-/* Game Boy balls 1 to 4 copy a character's contact effect, and 5 to 7 have
- * their own */
 enum GameBoyBallType {
     GAME_BOY_BALL_TYPE_PLAIN,
     GAME_BOY_BALL_TYPE_MARIO,
@@ -50,128 +39,103 @@ enum GameBoyBallType {
     GAME_BOY_BALL_TYPE_7
 };
 
-/* A character from the Game Boy Color version's save, read through the Transfer
- * Pak */
 typedef struct GameBoyCharacter {
-    /* 0x00 */ u8 status;
-    /* 0x01 */ char name[GAME_BOY_CHARACTER_NAME_LENGTH];
-    /* 0x0D */ u8 saveName[SAVE_NAME_SIZE]; /* As the Game Boy save spells it */
-    /* 0x18 */ u8 unusedAfterSaveName;
-    /* 0x19 */ u8 character;
-    /* 0x1A */ u8 isLefty; /* Plays left-handed, as the Game Boy save says */
-    /* 0x1B */ u8 level;
-    /* 0x1C */ s8 clubPitch; /* In degrees, added to each club's */
-    /* 0x1D */ s8 shotCurve; /* Positive for a draw, negative for a fade, 0 for straight */
-    /* 0x1E */ s8 lieRatingLevel; /* Picks the clubs' lieRatingPercent */
-    /* 0x1F */ s8 mishitResistance; /* Lowers the clubs' mishitScale */
-    /* 0x20 */ s8 ballType; /* A GameBoyBallType */
-    /* Three bytes of the Game Boy save that nothing reads; their meaning is
-     * unknown */
-    /* 0x24 */ s32 ignoredValue;
-    /* 0x28 */ s32 experience;
-    /* 0x2C */ s16 driveDistance; /* Shown beside "Drive:" */
-    /* The save's bytes from 0xB, which with saveName tell whether a save's
-     * character was brought over */
-    /* 0x2E */ u8 saveKey[SAVE_KEY_SIZE];
-    /* 0x34 */ s32 companyCode; /* Its cartridge header's, or -1 */
-    /* 0x38 */ s32 saveIndex; /* Its save on the cartridge, or -1 */
-    /* 0x3C */ GameBoyClubStats clubs[GAME_BOY_CLUB_COUNT];
-} GameBoyCharacter; /* size = 0x8C */
+      u8 status;
+      char name[GAME_BOY_CHARACTER_NAME_LENGTH];
+      u8 saveName[SAVE_NAME_SIZE];
+      u8 unusedAfterSaveName;
+      u8 character;
+      u8 isLefty;
+      u8 level;
+      s8 clubPitch;
+      s8 shotCurve;
+      s8 lieRatingLevel;
+      s8 mishitResistance;
+      s8 ballType;
+      s32 ignoredValue;
+      s32 experience;
+      s16 driveDistance;
+      u8 saveKey[SAVE_KEY_SIZE];
+      s32 companyCode;
+      s32 saveIndex;
+      GameBoyClubStats clubs[GAME_BOY_CLUB_COUNT];
+} GameBoyCharacter;
 
 extern GameBoyCharacter g_GameBoyCharacters[GAME_BOY_CHARACTER_COUNT];
-/* Set once a Game Boy character has been brought over */
 extern Boolean g_HasBroughtOverCharacter;
 
-/* Where the Game Boy transfer was opened from */
 enum TransferMode {
     TRANSFER_MODE_AT_BOOT,
     TRANSFER_MODE_FROM_MENU
 };
 
-/* What the transmit menu shows */
 enum TransmitScreen {
     TRANSMIT_SCREEN_OPTIONS,
     TRANSMIT_SCREEN_UNUSED,
     TRANSMIT_SCREEN_BRING_CHARACTERS,
     TRANSMIT_SCREEN_SEND_STATUS,
     TRANSMIT_SCREEN_SEND_EXPERIENCE,
-    /*
-     * Leaving closes a wipe, then swaps in the title screen, or the main menu
-     * at its title when B left the options with a Rumble Pak missing; B with
-     * every Rumble Pak in, like the options' main menu row, leaves for the title
-     * screen.
-     */
     TRANSMIT_SCREEN_LEAVING_FOR_TITLE,
     TRANSMIT_SCREEN_LEAVING_FOR_MENU,
     TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT
 };
 
-/* Each controller's Game Boy cartridge holds up to three saved games */
 #define CARTRIDGE_SAVE_COUNT 3
 #define CARTRIDGE_CHARACTER_COUNT (MAXCONTROLLERS * CARTRIDGE_SAVE_COUNT)
 
-/* The Game Boy cartridge header, from cartridge address 0x100 */
-
-/* Random bytes written to each cartridge's RAM to tell the cartridges apart */
 #define CARTRIDGE_TAG_SIZE 16
 
-/* What the Game Boy transfer keeps while its overlay is loaded and between
- * visits */
 typedef struct GameBoyTransfer {
-    /* 0x000 */ void *courseSceneImage;
-    /* 0x004 */ void *pointerImage;
-    /* 0x008 */ void *arrowsImage;
-    /* 0x00C */ void *facePalettes[GAME_BOY_CHARACTER_COUNT];
-    /* 0x01C */ void *faceImages[GAME_BOY_CHARACTER_COUNT];
-    /* 0x02C */ void *titleImage;
-    /* 0x030 */ void *woodPanelImage;
-    /* 0x034 */ void *controllerIconsImage;
-    /* 0x038 */ void *cursorBoxImage;
-    /* 0x03C */ void *curveSegmentsImage;
-    /* 0x040 */ void *pressingHandImage;
-    /* 0x044 */ void *statBarsImage;
-    /* 0x048 */ void *statLabelsImage;
-    /* 0x04C */ void *noticeCloudImage;
-    /* 0x050 */ void *accessingImage;
-    /* 0x054 */ void *shotTypesImage;
-    /* 0x058 */ Boolean hasGameBoyPak;
-    /* 0x05C */ s32 screen; /* TRANSMIT_SCREEN_* */
-    /* 0x060 */ s32 transferMode;
-    /* 0x064 */ s32 optionIndex;
-    /* 0x068 */ s32 characterCount; /* Of g_GameBoyCharacters */
-    /* 0x06C */ NUContPakFile pakFile;
-    /* 0x07C */ OSGbpakId cartridgeHeader;
-    /* 0x0CC */ GameBoyCharacter cartridgeCharacters[CARTRIDGE_CHARACTER_COUNT];
-    /* 0x75C */ s32 sourceIndices[GAME_BOY_CHARACTER_COUNT];
-    /* 0x76C */ s32 listingStates[CARTRIDGE_CHARACTER_COUNT]; /* LISTING_* */
-    /* 0x79C */ s32 listedCharacterCount;
-    /* Each controller's cartridge is opened, then its saves read, a step each */
-    /* 0x7A0 */ s32 readStep;
-    /* 0x7A4 */ s32 transferResult;
-    /* 0x7A8 */ s32 screenStep;
-    /* 0x7AC */ s32 bringingFrame;
-    /* 0x7B0 */ s32 listedCharacterIndex;
-    /* 0x7B4 */ s32 characterIndex; /* Into g_GameBoyCharacters */
-    /* 0x7B8 */ s32 firstShownListedIndex; /* The list scrolls to show it first */
-    /* The Mario Golf cartridges opened, and which other results some pak gave */
-    /* 0x7BC */ s32 openedCartridgeCount;
-    /* 0x7C0 */ Boolean hasMissingCartridge;
-    /* 0x7C4 */ Boolean hasOtherPak;
-    /* 0x7C8 */ Boolean hasMissingPak;
-    /* 0x7CC */ Boolean hasWrongCartridge;
-    /* 0x7D0 */ Boolean hasUninitializedCartridge;
-    /* Set when a cartridge read fails with PFS_ERR_CONTRFAIL; nothing reads
-     * or clears it */
-    /* 0x7D4 */ Boolean hasIgnoredControllerFailure;
-    /* 0x7D8 */ s8 listedCharacters[CARTRIDGE_CHARACTER_COUNT]; /* Present ones, then -1 */
-    /* 0x7E4 */ s32 chosenCartridgeIndex; /* Into taggedControllers */
-    /* 0x7E8 */ s32 taggedCartridgeCount;
-    /* 0x7EC */ s32 taggedControllers[MAXCONTROLLERS];
-    /* 0x7FC */ u8 cartridgeTags[MAXCONTROLLERS][CARTRIDGE_TAG_SIZE];
-    /* 0x83C */ Boolean isCanceled;
-    /* 0x840 */ s32 pressingHandPosition; /* 0 hides the hand */
-    /* 0x844 */ Boolean isAccessing;
-} GameBoyTransfer; /* size = 0x848 */
+      void *courseSceneImage;
+      void *pointerImage;
+      void *arrowsImage;
+      void *facePalettes[GAME_BOY_CHARACTER_COUNT];
+      void *faceImages[GAME_BOY_CHARACTER_COUNT];
+      void *titleImage;
+      void *woodPanelImage;
+      void *controllerIconsImage;
+      void *cursorBoxImage;
+      void *curveSegmentsImage;
+      void *pressingHandImage;
+      void *statBarsImage;
+      void *statLabelsImage;
+      void *noticeCloudImage;
+      void *accessingImage;
+      void *shotTypesImage;
+      Boolean hasGameBoyPak;
+      s32 screen;
+      s32 transferMode;
+      s32 optionIndex;
+      s32 characterCount;
+      NUContPakFile pakFile;
+      OSGbpakId cartridgeHeader;
+      GameBoyCharacter cartridgeCharacters[CARTRIDGE_CHARACTER_COUNT];
+      s32 sourceIndices[GAME_BOY_CHARACTER_COUNT];
+      s32 listingStates[CARTRIDGE_CHARACTER_COUNT];
+      s32 listedCharacterCount;
+      s32 readStep;
+      s32 transferResult;
+      s32 screenStep;
+      s32 bringingFrame;
+      s32 listedCharacterIndex;
+      s32 characterIndex;
+      s32 firstShownListedIndex;
+      s32 openedCartridgeCount;
+      Boolean hasMissingCartridge;
+      Boolean hasOtherPak;
+      Boolean hasMissingPak;
+      Boolean hasWrongCartridge;
+      Boolean hasUninitializedCartridge;
+      Boolean hasIgnoredControllerFailure;
+      s8 listedCharacters[CARTRIDGE_CHARACTER_COUNT];
+      s32 chosenCartridgeIndex;
+      s32 taggedCartridgeCount;
+      s32 taggedControllers[MAXCONTROLLERS];
+      u8 cartridgeTags[MAXCONTROLLERS][CARTRIDGE_TAG_SIZE];
+      Boolean isCanceled;
+      s32 pressingHandPosition;
+      Boolean isAccessing;
+} GameBoyTransfer;
 
 extern GameBoyTransfer g_GameBoyTransfer;
 

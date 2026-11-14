@@ -6,17 +6,14 @@
 #include "course.h"
 #include "language.h"
 
-/* GetMatchStanding's results, from the first player's side */
 enum MatchStanding {
-    MATCH_STANDING_DECIDED = -1, /* The lead is more than the holes left */
+    MATCH_STANDING_DECIDED = -1,
     MATCH_STANDING_OPEN,
-    /* The player leads by the holes left */
     MATCH_STANDING_PLAYER_DORMIE,
     MATCH_STANDING_OPPONENT_DORMIE,
-    MATCH_STANDING_DECIDING_HOLE /* Whoever wins the next hole wins */
+    MATCH_STANDING_DECIDING_HOLE
 };
 
-/* The side that GetMatchWinner and GetMatchHoleResult return */
 enum MatchSide {
     MATCH_SIDE_NONE,
     MATCH_SIDE_PLAYER,
@@ -24,21 +21,18 @@ enum MatchSide {
     MATCH_HOLE_HALVED
 };
 
-/* GetGroupHoleResult's results */
 enum GroupHoleResult {
     GROUP_HOLE_OPEN,
     GROUP_HOLE_WON,
     GROUP_HOLE_NO_WINNER
 };
 
-/* The marks GetGroupHoleResult gives each player */
 enum GroupPlayerMark {
     GROUP_PLAYER_CONTENDING,
     GROUP_PLAYER_WINNER,
     GROUP_PLAYER_OUT
 };
 
-/* A hole's strokes against its par */
 enum ScoreToPar {
     SCORE_TO_PAR_ALBATROSS = -3,
     SCORE_TO_PAR_EAGLE,
@@ -49,10 +43,8 @@ enum ScoreToPar {
     SCORE_TO_PAR_TRIPLE_BOGEY
 };
 
-/* Whether a score to par lies from best to worst, both included */
 #define IsScoreToParWithin(score, best, worst) ((score) >= (best) && (score) <= (worst))
 
-/* What GetHolingOutStakes says the player's next stroke would do if holed */
 enum HolingOutStakes {
     HOLING_OUT_WINS_HOLE,
     HOLING_OUT_TIES,

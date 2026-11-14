@@ -3,8 +3,6 @@
 
 #include <ultra64.h>
 
-/* The arrows that the menu screens draw beside their choices */
-
 void DrawBlinkingSideArrows(
     Gfx **displayListHead,
     void *image,

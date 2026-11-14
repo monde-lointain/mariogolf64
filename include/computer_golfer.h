@@ -5,7 +5,6 @@
 
 #include "current_shot.h"
 
-/* GetPlannedShot's result while the plan is unfinished */
 #define PLANNED_SHOT_UNFINISHED (-1)
 
 void StartShotPlan(void);

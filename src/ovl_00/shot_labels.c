@@ -1,10 +1,3 @@
-/*
- * Draws what helps aim the shot: the players' tags, the sign over the target,
- * the flag over the pin and the shot preview. Each player's tag, "1P" or "1C"
- * and so on, is drawn beside their ball with a line joining the two. It sits
- * off one of the ball's corners, and moves to another corner when it would
- * cover a tag drawn before it.
- */
 #include "shot_labels.h"
 
 #include <ultra64.h>
@@ -31,74 +24,56 @@
 #include "surface.h"
 #include "turn.h"
 
-/* The players whose balls are tagged */
 enum ShotLabels {
     SHOT_LABELS_NONE = -1,
-    /* From the overhead camera, every player's ball */
     SHOT_LABELS_OVERHEAD,
-    /* While a player takes their shot, the other balls in play */
     SHOT_LABELS_OTHER_BALLS
 };
 
-/* The corners of the ball that a tag sits off, clockwise from the lower right
- */
 #define NO_CORNER (-1)
 #define CORNER_LOWER_RIGHT 0
 #define CORNER_LOWER_LEFT 1
 #define CORNER_UPPER_LEFT 2
 #define CORNER_UPPER_RIGHT 3
 #define CORNER_COUNT 4
-/* Only the upper corners are used while a shot is taken, keeping the tags clear
- * of the golfer */
 #define UPPER_CORNER_COUNT 2
 
 #define TAG_WIDTH 16
 #define TAG_HEIGHT 8
-/* Whether a tag at tagX and tagY would overlap a spot with a tag's size */
 #define IsTagOverlapping(spot, tagX, tagY) \
     ((tagX) > (spot).x - TAG_WIDTH && \
         (tagX) < (spot).x + TAG_WIDTH && \
         (tagY) > (spot).y - TAG_HEIGHT && \
         (tagY) < (spot).y + TAG_HEIGHT)
-/* In bytes, at four bits a texel */
 #define TAG_IMAGE_SIZE (TAG_WIDTH * TAG_HEIGHT / 2)
-/* Balls this far off the screen are not tagged */
 #define TAG_SCREEN_MARGIN 64
-/* The tags of the computer's players follow the four "1P" to "4P" */
 #define COMPUTER_TAG_OFFSET 4
 #define TAG_ALPHA 255
 #define TAG_SHADOW_ALPHA 79
-/* The line from a tag spans this far beside it */
 #define LEADER_LINE_NEAR_X 6
 #define LEADER_LINE_FAR_X 22
 #define LEADER_LINE_NEAR_Y 4
 #define LEADER_LINE_FAR_Y 12
 
 typedef struct ShotLabel {
-    /* 0x0 */ s32 x;
-    /* 0x4 */ s32 y;
-    /* 0x8 */ s32 depth;
-    /* 0xC */ s32 corner; /* NO_CORNER when the tag is hidden */
-} ShotLabel; /* size = 0x10 */
+      s32 x;
+      s32 y;
+      s32 depth;
+      s32 corner;
+} ShotLabel;
 
-/* The sign shows the shot's distance, with the target's height below it */
 #define SIGN_WIDTH 40
 #define SIGN_HEIGHT 24
-/* Above the post */
 #define SIGN_BOARD_HEIGHT 18
 #define SIGN_DISTANCE_TEXT_Y 15
-/* The distance is printed after the height, in the same buffer */
 #define DISTANCE_TEXT_OFFSET 10
 #define SIGN_HEIGHT_TEXT_Y 23
 #define OUT_OF_BOUNDS_TEXT_Y 31
-/* The sign fades from where ProjectPoint returns these */
 #define SIGN_FADE_START_DEPTH (-2000)
 #define SIGN_FADE_END_DEPTH (-149)
 #define SIGN_MIN_ALPHA 64
 #define SIGN_FADE_ALPHA_RANGE (255 - SIGN_MIN_ALPHA)
 #define SIGN_FADE_DEPTH_RANGE 1850
-/* The height difference shown, in yards, and the most of it that tints the text
- */
 #define MAX_HEIGHT_YARDS 99
 #define MAX_TINT_YARDS 25
 #define TINT_PER_YARD 10
@@ -107,7 +82,6 @@ typedef struct ShotLabel {
 #define OUT_OF_BOUNDS_GREEN_SWING 45
 #define OUT_OF_BOUNDS_PULSE_STEP (M_PI / 6)
 
-/* The pin flag's frames are 8 by 16, four to an image */
 #define PIN_FLAG_IMAGE_WIDTH 32
 #define PIN_FLAG_IMAGE_HEIGHT 16
 #define PIN_FLAG_IMAGE_SIZE (PIN_FLAG_IMAGE_WIDTH * PIN_FLAG_IMAGE_HEIGHT / 2)
@@ -115,17 +89,13 @@ typedef struct ShotLabel {
 #define PIN_FLAG_LEFT 3
 #define PIN_FLAG_RIGHT 5
 #define PIN_FLAG_WAVE_MASK 15
-/* Per frame */
 #define PIN_FLAG_WAVE_TICKS 4
 #define PIN_FLAG_WAVE_HALF 8
-/* Off the green, the flag sits at this height over the cup */
 #define PIN_FLAG_TOP_Y 40
 #define PIN_FLAG_DROP 0xB400
-/* The images that the flag uses */
 #define PIN_FLAG_GREEN_IMAGE 0
 #define PIN_FLAG_IMAGE 1
 #define PIN_FLAG_HIDDEN 2
-/* From the green the flag fades out, and is gone by PIN_FLAG_HIDE_FRAME */
 #define PIN_FLAG_FADE_FRAME 114
 #define PIN_FLAG_HIDE_FRAME 120
 #define PIN_FLAG_FADE_STEP 32
@@ -135,44 +105,30 @@ enum SpotState {
     SPOT_SHOWN
 };
 
-/* Where a point is on the screen */
 typedef struct ScreenSpot {
-    /* 0x0 */ s32 x;
-    /* 0x4 */ s32 y;
-    /* A SPOT_* value: SPOT_HIDDEN behind the camera, else SPOT_SHOWN */
-    /* 0x8 */ s32 state;
-} ScreenSpot; /* size = 0xC */
+      s32 x;
+      s32 y;
+      s32 state;
+} ScreenSpot;
 
 static u8 f_PlayerTagColors[MAX_PLAYER_COUNT][3] =
     {{0xDC, 0x00, 0x00}, {0x00, 0x00, 0xDC}, {0xF0, 0x7F, 0x00}, {0x00, 0x7F, 0x00}};
 static ShotLabel f_ShotLabels[MAX_PLAYER_COUNT] =
     {{0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}};
 static s32 f_ShotLabelPlayers = SHOT_LABELS_NONE;
-/* Where a tag's center sits from the ball at each corner */
 static s8 f_TagOffsetsX[CORNER_COUNT] = {22, -22, -22, 22};
 static s8 f_TagOffsetsY[CORNER_COUNT] = {12, 12, -12, -12};
 static Radians f_OutOfBoundsPulseAngle = 0.0f;
 static s32 f_PinFlagWaveFrame = 0;
 
-/* Read by no routine */
-/* Not static: the original left it to the linker's common block */
 u8 g_UnusedBytesAfterFlagWaveFrame[4];
 
-/*
- * Without a prototype, as the calls pass x and y as they are rather than as
- * s16s. Including text.h would bring in its prototype.
- */
 void DrawCenteredShadowedText();
 extern void *g_ShadowedFontImage;
 extern char g_PrintBuffer[];
 #define SHADOWED_FONT_IMAGE_WIDTH 256
 #define SHADOWED_FONT_IMAGE_HEIGHT 32
 
-/*
- * Draws the tags of the players' balls, moving each to a corner that is clear
- * of the others. DrawLeaderLine and DrawPlayerTag are nested functions, a GNU
- * C extension.
- */
 void DrawShotLabels(Gfx **displayListHead) {
     ScreenPoint point;
     ScreenSpot cup;
@@ -184,7 +140,6 @@ void DrawShotLabels(Gfx **displayListHead) {
     s32 i;
     s32 j;
 
-    /* Draws the line from a tag at x and y to its ball, which lies off corner */
     void DrawLeaderLine(s32 x, s32 y, s32 corner) {
         gDPPipeSync(gfx++);
         switch (corner) {
@@ -249,7 +204,6 @@ void DrawShotLabels(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
     }
 
-    /* Draws tag number tag centered on x and y */
     void DrawPlayerTag(s32 x, s32 y, s32 corner UNUSED, s32 tag) {
         gDPPipeSync(gfx++);
         gDPLoadTextureBlock_4b(
@@ -303,7 +257,6 @@ void DrawShotLabels(Gfx **displayListHead) {
 
     f_ShotLabelPlayers = players;
     if (players != SHOT_LABELS_NONE) {
-        /* This projects the cup with its x for all three coordinates */
         if (ProjectPoint(
                 g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
                 g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
@@ -363,16 +316,6 @@ void DrawShotLabels(Gfx **displayListHead) {
             f_ShotLabels[i].x = point.x + f_TagOffsetsX[f_ShotLabels[i].corner];
             f_ShotLabels[i].y = point.y + f_TagOffsetsY[f_ShotLabels[i].corner];
             f_ShotLabels[i].depth = point.depth;
-            /*
-             * Each search, with a flag of its own, tries corners until one is clear,
-             * placing the tag there and leaving for the shared corner store, or until
-             * it runs out, leaving the tag where it was. To match: ending endless
-             * loops with a break and a test of the tries gives 12 words differing,
-             * all in shape; placing the tag after the label instead 205, 29 in shape;
-             * storing the corner in each search and breaking out 176, 82 in shape;
-             * and testing the flag after the searches, which needs one flag for both,
-             * 144 to 318. One flag for both searches gives 26 words, none in shape.
-             */
             tries = 0;
             if (players == SHOT_LABELS_OVERHEAD) {
                 do {
@@ -412,8 +355,6 @@ void DrawShotLabels(Gfx **displayListHead) {
                             point.x + f_TagOffsetsX[corner],
                             point.y + f_TagOffsetsY[corner]
                         )) {
-                        /* The tag would cover the cup, so it goes to the other upper corner
-                         */
                         if (corner == CORNER_UPPER_LEFT) {
                             f_ShotLabels[i].corner = CORNER_UPPER_RIGHT;
                         }
@@ -526,7 +467,6 @@ NEXT:;
             }
         }
 
-        /* Then translucent over what covers them, so that they show through */
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
         gDPPipeSync(gfx++);
@@ -623,11 +563,6 @@ NEXT:;
     *displayListHead = gfx;
 }
 
-/*
- * Draws what helps aim the shot: the players' tags, the sign over the target
- * with the shot's distance and the target's height, the flag over the pin,
- * then the shot preview.
- */
 void DrawAimGuides(CameraMatrices *matrices) {
     ScreenPoint point;
     Vec3 position;
@@ -681,7 +616,6 @@ void DrawAimGuides(CameraMatrices *matrices) {
                 tintYards = -MAX_TINT_YARDS;
             }
 
-            /* The sign fades with distance, except on PAUSE_SCREEN_FREE_LOOK */
             if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
                 alpha = OPAQUE_ALPHA;
             }
@@ -750,7 +684,6 @@ void DrawAimGuides(CameraMatrices *matrices) {
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
-            /* The post is drawn opaque */
             gDPPipeSync(g_DisplayListHead++);
             gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
             gDPPipeSync(g_DisplayListHead++);
@@ -804,7 +737,6 @@ void DrawAimGuides(CameraMatrices *matrices) {
                 );
             }
 
-            /* Uphill is tinted red and downhill blue */
             gDPPipeSync(g_DisplayListHead++);
             if (tintYards > 0) {
                 gDPPipeSync(g_DisplayListHead++);
@@ -872,7 +804,6 @@ void DrawAimGuides(CameraMatrices *matrices) {
                 );
             }
 
-            /* Then translucent, so that the text shows through what covers it */
             gDPPipeSync(g_DisplayListHead++);
             gDPSetRenderMode(g_DisplayListHead++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
             gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
@@ -1054,7 +985,6 @@ void DrawAimGuides(CameraMatrices *matrices) {
                     );
                     gDPPipeSync(g_DisplayListHead++);
 
-                    /* The flag bobs down and back up as it waves */
                     f_PinFlagWaveFrame = (f_PinFlagWaveFrame + 1) & PIN_FLAG_WAVE_MASK;
                     if (f_PinFlagWaveFrame > PIN_FLAG_WAVE_HALF) {
                         point.y -= (f_PinFlagWaveFrame - PIN_FLAG_WAVE_HALF) / PIN_FLAG_WAVE_TICKS;

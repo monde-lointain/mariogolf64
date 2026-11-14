@@ -6,8 +6,6 @@
 #include "camera.h"
 #include "language.h"
 
-/* The opening, the attract mode that plays a hole by itself */
-
 void LoadOpening(void);
 void FreeOpening(void);
 void UpdateOpening(void);

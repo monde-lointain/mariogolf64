@@ -6,8 +6,6 @@
 
 #include "sound.h"
 
-/* The music player, and the songs and sound banks it loads */
-
 void InitMusic(musConfig *config);
 void LoadSampleBank(u8 *pointerBankRom, u32 pointerBankSize, u8 *waveBankRom);
 void LoadSong(u32 romAddress, u32 size);

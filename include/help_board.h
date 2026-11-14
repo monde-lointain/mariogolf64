@@ -3,7 +3,6 @@
 
 #include <ultra64.h>
 
-/* LoadHelpBoardImage's images */
 enum HelpBoardImage {
     HELP_BOARD_IMAGE_HAND = 1,
     HELP_BOARD_IMAGE_ARROWS,
