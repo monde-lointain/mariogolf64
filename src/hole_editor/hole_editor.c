@@ -3576,7 +3576,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
     s32 half;
     Vtx *vertices;
     u32 start;
-    u8 current;
+    u8 currentSnapSet;
     s32 firstTileS;
     s32 visibility;
     s32 detail;
@@ -3852,7 +3852,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
         }
     }
 
-    current = 0;
+    currentSnapSet = 0;
     vertices = g_VertexListHead;
     gfx = f_EditorGroundDisplayLists[g_DrawBufferIndex];
     start = osGetCount();
@@ -4178,61 +4178,65 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                         g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
                         if (IsGameFlagSet(GAME_FLAG_HOLE_LOADED)) {
                             if ((half * GROUND_TILE_GROUP_SIZE) + groupTile != 0) {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] =
+                                snapsEdge[currentSnapSet][TILE_EDGE_COUNT + TILE_EDGE_LEFT] =
                                     IsCoarse(tileIndex - 1);
-                                snapsEdge[current][TILE_EDGE_LEFT] = IsNotFine(tileIndex - 1);
+                                snapsEdge[currentSnapSet][TILE_EDGE_LEFT] =
+                                    IsNotFine(tileIndex - 1);
                             }
                             else {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] = FALSE;
-                                snapsEdge[current][TILE_EDGE_LEFT] = FALSE;
+                                snapsEdge[currentSnapSet][TILE_EDGE_COUNT + TILE_EDGE_LEFT] = FALSE;
+                                snapsEdge[currentSnapSet][TILE_EDGE_LEFT] = FALSE;
                             }
 
                             if (row != 0) {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] =
+                                snapsEdge[currentSnapSet][TILE_EDGE_COUNT + TILE_EDGE_TOP] =
                                     IsCoarse(tileIndex - GROUND_TILE_COLUMN_COUNT);
-                                snapsEdge[current][TILE_EDGE_TOP] =
+                                snapsEdge[currentSnapSet][TILE_EDGE_TOP] =
                                     IsNotFine(tileIndex - GROUND_TILE_COLUMN_COUNT);
                             }
                             else {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] = FALSE;
-                                snapsEdge[current][TILE_EDGE_TOP] = FALSE;
+                                snapsEdge[currentSnapSet][TILE_EDGE_COUNT + TILE_EDGE_TOP] = FALSE;
+                                snapsEdge[currentSnapSet][TILE_EDGE_TOP] = FALSE;
                             }
 
                             if (row != GROUND_TILE_ROW_COUNT - 1) {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] =
+                                snapsEdge[currentSnapSet][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] =
                                     IsCoarse(tileIndex + GROUND_TILE_COLUMN_COUNT);
-                                snapsEdge[current][TILE_EDGE_BOTTOM] =
+                                snapsEdge[currentSnapSet][TILE_EDGE_BOTTOM] =
                                     IsNotFine(tileIndex + GROUND_TILE_COLUMN_COUNT);
                             }
                             else {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] = FALSE;
-                                snapsEdge[current][TILE_EDGE_BOTTOM] = FALSE;
+                                snapsEdge[currentSnapSet][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] =
+                                    FALSE;
+                                snapsEdge[currentSnapSet][TILE_EDGE_BOTTOM] = FALSE;
                             }
 
                             if ((half * GROUND_TILE_GROUP_SIZE) + groupTile !=
                                 GROUND_TILE_COLUMN_COUNT - 1) {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] =
+                                snapsEdge[currentSnapSet][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] =
                                     IsCoarse(tileIndex + 1);
-                                snapsEdge[current][TILE_EDGE_RIGHT] = IsNotFine(tileIndex + 1);
+                                snapsEdge[currentSnapSet][TILE_EDGE_RIGHT] =
+                                    IsNotFine(tileIndex + 1);
                             }
                             else {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] = FALSE;
-                                snapsEdge[current][TILE_EDGE_RIGHT] = FALSE;
+                                snapsEdge[currentSnapSet][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] =
+                                    FALSE;
+                                snapsEdge[currentSnapSet][TILE_EDGE_RIGHT] = FALSE;
                             }
                             for (edgeSegment = 0; edgeSegment < TILE_VERTEX_SEGMENT_COUNT;
                                 edgeSegment++) {
-                                if (snapsEdge[current][edgeSegment] ||
-                                    snapsEdge[current ^ 1][edgeSegment]) {
+                                if (snapsEdge[currentSnapSet][edgeSegment] ||
+                                    snapsEdge[currentSnapSet ^ 1][edgeSegment]) {
                                     s32 offset;
 
-                                    offset = snapsEdge[current][edgeSegment] ?
+                                    offset = snapsEdge[currentSnapSet][edgeSegment] ?
                                         g_CoarseVertexOffsets[tileIndex][edgeSegment] :
                                         0;
                                     gSPSegment(gfx++, edgeSegment + 1, offset);
                                 }
                             }
 
-                            current ^= 1;
+                            currentSnapSet ^= 1;
                             gSPDisplayList(gfx++, g_GroundTileDisplayLists[tileIndex]);
                             tileIndex++;
                             continue;
