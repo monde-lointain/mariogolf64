@@ -1,15 +1,15 @@
-#include "shot_simulation.h"
+#include "shot/shot_simulation.h"
 
 #include <ultra64.h>
 
-#include "ball_simulation.h"
-#include "club.h"
 #include "course/surface.h"
-#include "current_shot.h"
 #include "debug_text.h"
 #include "game_state.h"
 #include "math/geometry.h"
 #include "player.h"
+#include "shot/ball_simulation.h"
+#include "shot/club.h"
+#include "shot/current_shot.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 

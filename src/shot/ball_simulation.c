@@ -1,4 +1,4 @@
-#include "ball_simulation.h"
+#include "shot/ball_simulation.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -7,9 +7,7 @@
 #define WIDENS_AIM_SLOPE_ANGLE
 
 #include "audio/sound.h"
-#include "ball_physics.h"
 #include "camera/shot_camera.h"
-#include "club.h"
 #include "course/collision.h"
 #include "course/course_space.h"
 #include "course/hole_creatures.h"
@@ -22,10 +20,12 @@
 #include "game_state.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "particle_effects.h"
 #include "player.h"
 #include "scene.h"
-#include "shot_effects.h"
+#include "shot/ball_physics.h"
+#include "shot/club.h"
+#include "shot/particle_effects.h"
+#include "shot/shot_effects.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "turn.h"

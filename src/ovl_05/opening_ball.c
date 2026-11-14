@@ -4,11 +4,8 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-#include "ball_physics.h"
-#include "ball_simulation.h"
 #include "characters/character_model.h"
 #include "characters/reaction.h"
-#include "club.h"
 #include "course/collision.h"
 #include "course/course_space.h"
 #include "course/hole_setup.h"
@@ -20,9 +17,12 @@
 #include "game_state.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "particle_effects.h"
 #include "player.h"
-#include "shot_effects.h"
+#include "shot/ball_physics.h"
+#include "shot/ball_simulation.h"
+#include "shot/club.h"
+#include "shot/particle_effects.h"
+#include "shot/shot_effects.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

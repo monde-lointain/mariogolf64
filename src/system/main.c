@@ -5,10 +5,8 @@
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "ball_simulation.h"
 #include "characters/character.h"
 #include "characters/character_model.h"
-#include "club.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
 #include "course/hole_loader.h"
@@ -22,6 +20,8 @@
 #include "save.h"
 #include "scene.h"
 #include "screen/screen.h"
+#include "shot/ball_simulation.h"
+#include "shot/club.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

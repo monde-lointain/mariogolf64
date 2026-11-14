@@ -3,12 +3,12 @@
 
 #include <ultra64.h>
 
-#include "ball_simulation.h"
 #include "camera/camera.h"
-#include "current_shot.h"
 #include "math/math_util.h"
 #include "play_record.h"
 #include "player.h"
+#include "shot/ball_simulation.h"
+#include "shot/current_shot.h"
 #include "system/c_language.h"
 
 #define SHOT_FLAG_ON_GREEN 1

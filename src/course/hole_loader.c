@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-#include "ball_simulation.h"
 #include "camera/shot_camera.h"
 #include "characters/character_model.h"
 #include "course/billboard.h"
@@ -15,7 +14,6 @@
 #include "course/hole_triangles.h"
 #include "course/terrain.h"
 #include "course/work_area.h"
-#include "current_shot.h"
 #include "game_flags.h"
 #include "game_state.h"
 #include "math/geometry.h"
@@ -25,6 +23,8 @@
 #include "round_hud.h"
 #include "scene.h"
 #include "scoring.h"
+#include "shot/ball_simulation.h"
+#include "shot/current_shot.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/main.h"

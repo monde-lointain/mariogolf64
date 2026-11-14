@@ -4,12 +4,12 @@
 #include <ultra64.h>
 
 #include "characters/character.h"
-#include "club.h"
 #include "course/course.h"
 #include "course/hole_setup.h"
 #include "math/math_util.h"
 #include "player.h"
 #include "scene.h"
+#include "shot/club.h"
 #include "system/c_language.h"
 
 typedef struct RecordedShot {

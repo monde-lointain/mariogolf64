@@ -1,4 +1,4 @@
-#include "shot_effects.h"
+#include "shot/shot_effects.h"
 
 #include <ultra64.h>
 
@@ -8,18 +8,18 @@
 #include "characters/character_model.h"
 #include "course/course_space.h"
 #include "course/hole_creatures.h"
-#include "current_shot.h"
 #include "game.h"
-#include "golf_balls.h"
 #include "math/curve.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "movie.h"
-#include "particle_effects.h"
 #include "round_events.h"
 #include "round_hud.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
+#include "shot/current_shot.h"
+#include "shot/golf_balls.h"
+#include "shot/particle_effects.h"
 #include "system/asset.h"
 #include "system/compiler.h"
 #include "system/heap.h"

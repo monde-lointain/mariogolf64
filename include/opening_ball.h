@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "ball_simulation.h"
+#include "shot/ball_simulation.h"
 #include "system/c_language.h"
 
 enum OpeningModel {

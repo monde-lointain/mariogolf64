@@ -85,11 +85,11 @@ segments:
       - [0x4CE0, c, system/main]
       - [0x5A40, c, game]
       - [0xDCE0, c, screen/rcp_init]
-      - [0xE260, c, ball_simulation]
+      - [0xE260, c, shot/ball_simulation]
       - [0x142B0, c, course/collision]
       - [0x193D0, c, course/pin]
       - [0x1B4A0, c, course/terrain]
-      - [0x1EEF0, c, club]
+      - [0x1EEF0, c, shot/club]
       - [0x207E0, c, camera/shot_camera]
       - [0x28590, c, debug_text]
       - [0x29170, c, system/heap]
@@ -123,7 +123,7 @@ segments:
       - [0x51900, c, camera/camera_framing]
       - [0x526B0, c, math/curve]
       - [0x52FF0, c, fireworks]
-      - [0x53D10, c, particle_effects]
+      - [0x53D10, c, shot/particle_effects]
       - [0x5B620, c, round_hud]
       - [0x68500, c, screen/sky_and_hud_animations]
       - [0x70E10, c, characters/reaction]
@@ -362,11 +362,11 @@ segments:
       - [0x91BC0, .data, system/main]
       - [0x91C00, .data, game]
       - [0x92BF0, .data, screen/rcp_init]
-      - [0x92C50, .data, ball_simulation]
+      - [0x92C50, .data, shot/ball_simulation]
       - [0x931B0, .data, course/collision]
       - [0x95B00, .data, course/pin]
       - [0x95DB0, .data, course/terrain]
-      - [0x964F0, .data, club]
+      - [0x964F0, .data, shot/club]
       - [0x99A20, .data, camera/shot_camera]
       - [0x99AE0, .data, debug_text]
       - [0x9B2F0, .data, performance_meter]
@@ -391,7 +391,7 @@ segments:
       - [0x9F790, .data, text/text]
       - [0x9F9D0, .data, math/curve]
       - [0x9FA60, .data, fireworks]
-      - [0xA06B0, .data, particle_effects]
+      - [0xA06B0, .data, shot/particle_effects]
       - [0xA0870, .data, round_hud]
       - [0xA12E0, .data, screen/sky_and_hud_animations]
       - [0xA27A0, .data, characters/reaction]
@@ -450,11 +450,11 @@ segments:
       - [0xA54D0, .rodata, course/billboard]
       - [0xA5584, .rodata, system/main]
       - [0xA5600, .rodata, game]
-      - [0xA5760, .rodata, ball_simulation]
+      - [0xA5760, .rodata, shot/ball_simulation]
       - [0xA5B10, .rodata, course/collision]
       - [0xA5CE0, .rodata, course/pin]
       - [0xA5D30, .rodata, course/terrain]
-      - [0xA5FD0, .rodata, club]
+      - [0xA5FD0, .rodata, shot/club]
       - [0xA7B60, .rodata, camera/shot_camera]
       - [0xA7E90, .rodata, system/heap]
       - [0xA7F08, .rodata, performance_meter]
@@ -481,7 +481,7 @@ segments:
       - [0xAC988, .rodata, text/text]
       - [0xACC50, .rodata, camera/camera_framing]
       - [0xACD00, .rodata, fireworks]
-      - [0xACD10, .rodata, particle_effects]
+      - [0xACD10, .rodata, shot/particle_effects]
       - [0xACEA0, .rodata, round_hud]
       - [0xAD0E0, .rodata, screen/sky_and_hud_animations]
       - [0xAD280, .rodata, characters/reaction]
@@ -540,7 +540,7 @@ segments:
       - { type: .bss, vram: 0x800E1C30, name: text/text }
       - { type: .bss, vram: 0x800E1C50, name: camera/camera_framing }
       - { type: .bss, vram: 0x800E1D20, name: math/curve }
-      - { type: .bss, vram: 0x800E1D60, name: particle_effects }
+      - { type: .bss, vram: 0x800E1D60, name: shot/particle_effects }
       - { type: .bss, vram: 0x800E1DD0, name: round_hud }
       - { type: .bss, vram: 0x800E3980, name: screen/sky_and_hud_animations }
       - { type: .bss, vram: 0x800E4C50, name: characters/reaction }
@@ -564,7 +564,7 @@ segments:
       - { type: .bss, vram: 0x800FBC30, name: ../lib/ultralib/src/io/motor }
       # Modules whose objects are all in main's common block. In the matching
       # build main_bss.c defines those objects, so these take no space here.
-      - { type: .bss, vram: 0x800FBD30, name: current_shot }
+      - { type: .bss, vram: 0x800FBD30, name: shot/current_shot }
       - { type: .bss, vram: 0x800FBD30, name: course/work_area }
       - { type: .bss, vram: 0x800FBD30, name: ../lib/libkmc/src/errno }
       - { type: .bss, vram: 0x800FBD30, name: ../lib/ultralib/src/debug/kdebugserver }
@@ -583,50 +583,50 @@ segments:
     subsegments:
       - [0xADD30, hasm, ovl_00/padding]
       - [0xADD40, c, ovl_00/round_results]
-      - [0xB68F0, c, ovl_00/golf_balls]
+      - [0xB68F0, c, shot/golf_balls]
       - [0xBBD00, c, ovl_00/turn]
       - [0xC69F0, c, course/hole_creatures]
       - [0xC7A40, c, ovl_00/round_events]
-      - [0xCFE10, c, ovl_00/shot_effects]
+      - [0xCFE10, c, shot/shot_effects]
       - [0xD1FC0, c, ovl_00/pause_menu]
-      - [0xD4330, c, ovl_00/shot_labels]
+      - [0xD4330, c, shot/shot_labels]
       - [0xD71D0, c, ovl_00/hole_intro]
-      - [0xD7850, c, ovl_00/club_panel]
+      - [0xD7850, c, shot/club_panel]
       - [0xD8F70, .data, ovl_00/round_results]
-      - [0xD9160, .data, ovl_00/golf_balls]
+      - [0xD9160, .data, shot/golf_balls]
       - [0xDD140, .data, ovl_00/turn]
       - [0xDD320, .data, course/hole_creatures]
       - [0xDD410, .data, ovl_00/round_events]
-      - [0xDDB60, .data, ovl_00/shot_effects]
+      - [0xDDB60, .data, shot/shot_effects]
       - [0xDDC20, .data, ovl_00/pause_menu]
-      - [0xDDDB0, .data, ovl_00/shot_labels]
+      - [0xDDDB0, .data, shot/shot_labels]
       - [0xDDE10, .data, ovl_00/hole_intro]
-      - [0xDDE20, .data, ovl_00/club_panel]
+      - [0xDDE20, .data, shot/club_panel]
       - [0xDDF10, .rodata, ovl_00/round_results]
-      - [0xDE190, .rodata, ovl_00/golf_balls]
+      - [0xDE190, .rodata, shot/golf_balls]
       - [0xDE1F0, .rodata, ovl_00/turn]
       - [0xDE570, .rodata, course/hole_creatures]
       - [0xDE590, .rodata, ovl_00/round_events]
-      - [0xDE710, .rodata, ovl_00/shot_effects]
+      - [0xDE710, .rodata, shot/shot_effects]
       - [0xDE740, .rodata, ovl_00/pause_menu]
-      - [0xDE900, .rodata, ovl_00/shot_labels]
+      - [0xDE900, .rodata, shot/shot_labels]
       - [0xDE940, .rodata, ovl_00/hole_intro]
-      - [0xDE990, .rodata, ovl_00/club_panel]
+      - [0xDE990, .rodata, shot/club_panel]
       - { start: 0xDE9B0, type: .bss, vram: 0x802256B0, name: ovl_00/round_results }
-      - { type: .bss, vram: 0x80225810, name: ovl_00/golf_balls }
+      - { type: .bss, vram: 0x80225810, name: shot/golf_balls }
       - { type: .bss, vram: 0x80227110, name: ovl_00/turn }
       - { type: .bss, vram: 0x80227C90, name: course/hole_creatures }
       - { type: .bss, vram: 0x80227CA0, name: ovl_00/round_events }
-      - { type: .bss, vram: 0x80228000, name: ovl_00/shot_effects }
+      - { type: .bss, vram: 0x80228000, name: shot/shot_effects }
       - { type: .bss, vram: 0x8022B530, name: ovl_00/pause_menu }
-      - { type: .bss, vram: 0x8022B540, name: ovl_00/club_panel }
+      - { type: .bss, vram: 0x8022B540, name: shot/club_panel }
       - { type: .bss, vram: 0x8022B5C0, name: ovl_00/turn, linker_section: COMMON .scommon }
       - { type: .bss, vram: 0x8022B5D0, name: course/hole_creatures, linker_section: COMMON .scommon }
       - { type: .bss, vram: 0x8022BC60, name: ovl_00/round_events, linker_section: COMMON .scommon }
-      - { type: .bss, vram: 0x8022D660, name: ovl_00/shot_effects, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022D660, name: shot/shot_effects, linker_section: COMMON .scommon }
       - { type: .bss, vram: 0x8022D678, name: ovl_00/pause_menu, linker_section: COMMON .scommon }
-      - { type: .bss, vram: 0x8022D68C, name: ovl_00/shot_labels, linker_section: COMMON .scommon }
-      - { type: .bss, vram: 0x8022D690, name: ovl_00/club_panel, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022D68C, name: shot/shot_labels, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022D690, name: shot/club_panel, linker_section: COMMON .scommon }
 
   - name: ovl_01
     type: code
@@ -722,10 +722,10 @@ segments:
     symbol_name_format: $VRAM_$SEG
     bss_contains_common: True
     subsegments:
-      - [0x136BA0, c, ovl_04/shot_simulation]
-      - [0x137090, .rodata, ovl_04/shot_simulation]
+      - [0x136BA0, c, shot/shot_simulation]
+      - [0x137090, .rodata, shot/shot_simulation]
       - [0x1370AC, pad]
-      - { start: 0x1370B0, type: .bss, vram: 0x8024DD10, name: ovl_04/shot_simulation }
+      - { start: 0x1370B0, type: .bss, vram: 0x8024DD10, name: shot/shot_simulation }
 
   - name: ovl_05
     type: code

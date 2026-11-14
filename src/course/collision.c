@@ -3,7 +3,6 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "ball_simulation.h"
 #include "course/billboard.h"
 #include "course/course_space.h"
 #include "course/hole_setup.h"
@@ -15,6 +14,7 @@
 #include "game_flags.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
+#include "shot/ball_simulation.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/main.h"

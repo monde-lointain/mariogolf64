@@ -5,11 +5,11 @@
 #include "course/course.h"
 #include "course_stats.h"
 #include "game_state.h"
-#include "particle_effects.h"
 #include "round_stats.h"
 #include "save.h"
 #include "scene.h"
 #include "scoring.h"
+#include "shot/particle_effects.h"
 #include "system/c_language.h"
 #include "tournament.h"
 

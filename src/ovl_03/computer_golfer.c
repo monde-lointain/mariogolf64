@@ -4,10 +4,8 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-#include "ball_simulation.h"
 #include "bets.h"
 #include "characters/character.h"
-#include "club.h"
 #include "course/collision.h"
 #include "course/course.h"
 #include "course/course_space.h"
@@ -16,7 +14,6 @@
 #include "course/hole_setup.h"
 #include "course/surface.h"
 #include "course/terrain.h"
-#include "current_shot.h"
 #include "debug_text.h"
 #include "game_flags.h"
 #include "game_state.h"
@@ -26,6 +23,9 @@
 #include "player.h"
 #include "save.h"
 #include "scene.h"
+#include "shot/ball_simulation.h"
+#include "shot/club.h"
+#include "shot/current_shot.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 

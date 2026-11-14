@@ -1,4 +1,4 @@
-#include "shot_labels.h"
+#include "shot/shot_labels.h"
 
 #include <ultra64.h>
 
@@ -7,11 +7,9 @@
 #include "camera/camera.h"
 #include "camera/shot_camera.h"
 #include "camera/view_projection.h"
-#include "club.h"
 #include "course/course_space.h"
 #include "course/hole_setup.h"
 #include "course/surface.h"
-#include "current_shot.h"
 #include "game.h"
 #include "game_state.h"
 #include "math/geometry.h"
@@ -21,6 +19,8 @@
 #include "round_hud.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
+#include "shot/club.h"
+#include "shot/current_shot.h"
 #include "system/asset.h"
 #include "system/compiler.h"
 #include "system/memory_address.h"

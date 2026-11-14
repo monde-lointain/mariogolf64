@@ -4,8 +4,8 @@
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "ball_simulation.h"
 #include "course/course_space.h"
+#include "shot/ball_simulation.h"
 
 #define ROLL_SOUND_CHANNEL 8
 #define RING_SOUND_CHANNEL 14

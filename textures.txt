@@ -7,5 +7,5 @@
 0x9C110 ia4    64  8 assets/performance_meter/digit_texture.ia4.png
 0xA0DF8 i4     16  3 assets/round_hud/inset_frame_texture.i4.png
 0xA12B8 rgba16 16  1 assets/round_hud/white_distance_palette.rgba16.png
-0xD9168 rgba16 48 42 assets/ovl_00/golf_balls/boo_mouth_texture.rgba16.png
-0xDA130 rgba16 48 42 assets/ovl_00/golf_balls/boo_eye_texture.rgba16.png
+0xD9168 rgba16 48 42 assets/shot/golf_balls/boo_mouth_texture.rgba16.png
+0xDA130 rgba16 48 42 assets/shot/golf_balls/boo_eye_texture.rgba16.png

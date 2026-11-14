@@ -1,10 +1,8 @@
-#include "club_panel.h"
+#include "shot/club_panel.h"
 
 #include <ultra64.h>
 
-#include "club.h"
 #include "controllers/controller.h"
-#include "current_shot.h"
 #include "debug_text.h"
 #include "game_flags.h"
 #include "game_state.h"
@@ -16,6 +14,8 @@
 #include "scene.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
+#include "shot/club.h"
+#include "shot/current_shot.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

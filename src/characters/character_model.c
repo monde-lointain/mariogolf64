@@ -3,12 +3,12 @@
 #include <ultra64.h>
 
 #include "camera/camera.h"
-#include "club.h"
 #include "course/hole_setup.h"
 #include "game.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "screen/display_list.h"
+#include "shot/club.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/main.h"

@@ -3,9 +3,9 @@
 
 #include <ultra64.h>
 
-#include "ball_simulation.h"
 #include "camera/camera.h"
 #include "player.h"
+#include "shot/ball_simulation.h"
 
 extern BallSimulation g_TurnBallSimulation;
 

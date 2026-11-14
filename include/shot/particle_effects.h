@@ -3,13 +3,13 @@
 
 #include <ultra64.h>
 
-#include "ball_simulation.h"
 #include "camera/camera.h"
-#include "club.h"
 #include "course/course_space.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "player.h"
+#include "shot/ball_simulation.h"
+#include "shot/club.h"
 #include "system/compiler.h"
 
 enum Weather {

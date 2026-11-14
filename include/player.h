@@ -5,10 +5,10 @@
 
 #include "bets.h"
 #include "characters/character.h"
-#include "club.h"
 #include "course/course.h"
 #include "course/course_space.h"
 #include "course/surface.h"
+#include "shot/club.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 

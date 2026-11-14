@@ -5,7 +5,6 @@
 
 #include "audio/sound.h"
 #include "characters/character.h"
-#include "club.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
 #include "course/course.h"
@@ -21,6 +20,7 @@
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
+#include "shot/club.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "current_shot.h"
+#include "shot/current_shot.h"
 
 #define PLANNED_SHOT_UNFINISHED (-1)
 

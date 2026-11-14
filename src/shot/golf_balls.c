@@ -1,8 +1,7 @@
-#include "golf_balls.h"
+#include "shot/golf_balls.h"
 
 #include <ultra64.h>
 
-#include "ball_simulation.h"
 #include "camera/camera.h"
 #include "camera/shot_camera.h"
 #include "camera/view_projection.h"
@@ -21,6 +20,7 @@
 #include "player.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
+#include "shot/ball_simulation.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
@@ -86,11 +86,11 @@ typedef struct BallAfterimage {
 
 static Gfx f_UnusedListBeforeBooMouth[] UNUSED = {gsSPEndDisplayList()};
 static u16 f_BooMouthTexture[] = {
-#include "assets/ovl_00/golf_balls/boo_mouth_texture.rgba16.inc.c"
+#include "assets/shot/golf_balls/boo_mouth_texture.rgba16.inc.c"
 };
 static Gfx f_UnusedListAfterBooMouth[] UNUSED = {gsSPEndDisplayList()};
 static u16 f_BooEyeTexture[] = {
-#include "assets/ovl_00/golf_balls/boo_eye_texture.rgba16.inc.c"
+#include "assets/shot/golf_balls/boo_eye_texture.rgba16.inc.c"
 };
 static Vtx f_BooEyeVertices[] = {
     {{{-146, 40, -96}, 0, {0xD80, 0x940}, {0xB9, 0x25, 0x62, 0xFF}}},

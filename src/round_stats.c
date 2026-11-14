@@ -3,7 +3,6 @@
 #include <ultra64.h>
 
 #include "bets.h"
-#include "club.h"
 #include "course/course.h"
 #include "course/hole_setup.h"
 #include "course_stats.h"
@@ -16,6 +15,7 @@
 #include "scene.h"
 #include "scorecard.h"
 #include "scoring.h"
+#include "shot/club.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "text/text.h"

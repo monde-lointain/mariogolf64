@@ -1,22 +1,19 @@
-#include "particle_effects.h"
+#include "shot/particle_effects.h"
 
 #include <nusys.h>
 #include <stdlib.h>
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "ball_simulation.h"
 #include "camera/camera.h"
 #include "camera/view_projection.h"
 #include "characters/character_model.h"
-#include "club.h"
 #include "controllers/controller.h"
 #include "course/course_space.h"
 #include "course/hole_conditions.h"
 #include "course/hole_setup.h"
 #include "course/surface.h"
 #include "course/terrain.h"
-#include "current_shot.h"
 #include "game.h"
 #include "game_state.h"
 #include "math/geometry.h"
@@ -25,7 +22,10 @@
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
-#include "shot_effects.h"
+#include "shot/ball_simulation.h"
+#include "shot/club.h"
+#include "shot/current_shot.h"
+#include "shot/shot_effects.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

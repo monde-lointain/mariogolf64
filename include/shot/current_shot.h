@@ -3,10 +3,10 @@
 
 #include <ultra64.h>
 
-#include "club.h"
 #include "course/course_space.h"
 #include "course/surface.h"
 #include "math/math_util.h"
+#include "shot/club.h"
 
 typedef struct CurrentShot {
     SignedBinaryAngle heading;

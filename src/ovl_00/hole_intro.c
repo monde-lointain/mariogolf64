@@ -5,13 +5,13 @@
 #include "audio/sound.h"
 #include "camera/camera.h"
 #include "course/course_space.h"
-#include "current_shot.h"
 #include "debug_text.h"
 #include "game_state.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "movie.h"
 #include "scoring.h"
+#include "shot/current_shot.h"
 #include "text/text.h"
 
 #define INTRO_CAMERA_START_DISTANCE (-768000.0f)

@@ -3,11 +3,11 @@
 
 #include <ultra64.h>
 
-#include "ball_simulation.h"
 #include "course/surface.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "player.h"
+#include "shot/ball_simulation.h"
 #include "system/c_language.h"
 
 enum ShotLengthRating {
