@@ -1171,8 +1171,8 @@ void UpdateSendExperience(void) {
     }
 }
 
-s32 HaveAllRumblePaks(void) {
-    s32 haveAll = TRUE;
+Boolean HaveAllRumblePaks(void) {
+    Boolean haveAll = TRUE;
     s32 index;
 
     for (index = 0; index != g_ControllerCount; index++) {

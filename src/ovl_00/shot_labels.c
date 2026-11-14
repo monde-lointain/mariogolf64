@@ -321,7 +321,7 @@ void DrawShotLabels(Gfx **displayListHead) {
             f_ShotLabels[playerIndex].depth = point.depth;
             if (labelMode == SHOT_LABELS_OVERHEAD) {
                 for (cornerOffset = 0; cornerOffset != CORNER_COUNT; cornerOffset++) {
-                    s32 overlaps = FALSE;
+                    Boolean overlaps = FALSE;
 
                     corner = (f_ShotLabels[playerIndex].corner + cornerOffset) % CORNER_COUNT;
                     for (earlierIndex = 0; earlierIndex != playerIndex; earlierIndex++) {
@@ -345,7 +345,7 @@ void DrawShotLabels(Gfx **displayListHead) {
             }
             else {
                 for (cornerOffset = 0; cornerOffset != UPPER_CORNER_COUNT; cornerOffset++) {
-                    s32 overlaps = FALSE;
+                    Boolean overlaps = FALSE;
 
                     corner =
                         ((f_ShotLabels[playerIndex].corner + cornerOffset) % UPPER_CORNER_COUNT) +

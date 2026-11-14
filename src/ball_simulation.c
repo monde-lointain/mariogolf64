@@ -188,12 +188,12 @@ s32 StepBallSimulation(BallSimulation *simulation) {
     s32 stepFlags = 0;
     s32 substep;
     s32 substepCount = 1;
-    s32 printsDebugText = FALSE;
+    Boolean printsDebugText = FALSE;
     s32 startX;
     s32 startY;
     s32 startZ;
     s32 contact;
-    s32 hitsHoleTriangle;
+    Boolean hitsHoleTriangle;
     Boolean isNearCup;
     s32 rollSpeed;
     Boolean isSteep;

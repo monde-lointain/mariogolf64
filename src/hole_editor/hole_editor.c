@@ -747,7 +747,7 @@ void UpdateGroundPointEditor(void) {
     Vtx_t points[POINT_MOVE_COUNT + 1];
     char text[DEBUG_TEXT_BUFFER_SIZE];
     Vtx_t unusedPoint UNUSED;
-    s32 madeDeadTriangle;
+    Boolean madeDeadTriangle;
 
     madeDeadTriangle = FALSE;
     if (g_MenuControllerData[EDITOR_CONTROLLER].button & R_JPAD) {
@@ -3585,7 +3585,7 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
 
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT];
-    s32 keepsCombineMode;
+    Boolean keepsCombineMode;
     EditorCombineMode combineMode;
     Gfx *gfx;
     s32 half;

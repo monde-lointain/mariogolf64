@@ -773,16 +773,16 @@ Boolean HasWonFinalChallenge(void) {
 #define MINI_GOLF_ORBIT_HEIGHT (-300.0f)
 
 void UpdatePlay(void) {
-    s32 repeat;
-    s32 again;
-    s32 anyHuman;
+    Boolean repeats;
+    Boolean again;
+    Boolean hasHuman;
     s32 playerSlot;
     s32 playerIndex;
     SelectResult result;
-    s32 clearHud;
+    Boolean clearsHud;
     HoleEndStep nextStep;
 
-    repeat = FALSE;
+    repeats = FALSE;
     f_PlayFrameCount++;
     if (g_Players[0].controllerIndex < MAXCONTROLLERS) {
         g_TurnController = g_ControllerStates[g_Players[0].controllerIndex];
@@ -795,7 +795,7 @@ void UpdatePlay(void) {
         g_TurnController.pressedButtons = 0;
     }
 
-    anyHuman = FALSE;
+    hasHuman = FALSE;
     g_MergedController.buttons = 0;
     g_MergedController.heldButtons = 0;
     g_MergedController.pressedButtons = 0;
@@ -810,24 +810,24 @@ void UpdatePlay(void) {
                 g_ControllerStates[g_Players[playerIndex].controllerIndex].pressedButtons;
             g_MergedController.repeatedButtons |=
                 g_ControllerStates[g_Players[playerIndex].controllerIndex].repeatedButtons;
-            anyHuman = TRUE;
+            hasHuman = TRUE;
         }
     }
 
-    if (!anyHuman) {
+    if (!hasHuman) {
         g_MergedController.buttons = g_ControllerStates[0].buttons;
         g_MergedController.heldButtons = g_ControllerStates[0].heldButtons;
         g_MergedController.pressedButtons = g_ControllerStates[0].pressedButtons;
         g_MergedController.repeatedButtons = g_ControllerStates[0].repeatedButtons;
     }
 
-    again = repeat;
+    again = repeats;
     do {
         if (again) {
             osSyncPrintf("noexit\n");
         }
 
-        repeat = FALSE;
+        repeats = FALSE;
         switch (g_GameState.step) {
             case GAME_STATE_START:
                 g_GameState.step = GAME_STATE_LOAD_HOLE;
@@ -883,7 +883,7 @@ void UpdatePlay(void) {
                             }
 
                             g_GameState.step = GAME_STATE_LOAD_HOLE;
-                            repeat = TRUE;
+                            repeats = TRUE;
                         }
                     }
                     else if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
@@ -898,7 +898,7 @@ void UpdatePlay(void) {
                             SetMenuBackdrop(MENU_BACKDROP_STILL);
                             SetPlankMotion(FALSE);
                             g_GameState.step = GAME_STATE_LOAD_HOLE;
-                            repeat = TRUE;
+                            repeats = TRUE;
                         }
                     }
                 }
@@ -919,7 +919,7 @@ void UpdatePlay(void) {
                                 StartWipe(WIPE_CLOSING);
                                 LoadWipeShape(g_GameState.courseIndex);
                                 g_GameState.step = GAME_STATE_LOAD_HOLE;
-                                repeat = TRUE;
+                                repeats = TRUE;
                                 break;
                             case SELECT_BACK:
                                 SetMenuBackdrop(MENU_BACKDROP_STILL);
@@ -951,7 +951,7 @@ void UpdatePlay(void) {
                                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                                 SetPlankMotion(FALSE);
                                 g_GameState.step = GAME_STATE_LOAD_HOLE;
-                                repeat = TRUE;
+                                repeats = TRUE;
                                 LoadWipeShape(g_GameState.courseIndex);
                                 break;
                             case SELECT_BACK:
@@ -1204,7 +1204,7 @@ void UpdatePlay(void) {
                 break;
             case GAME_STATE_HOLE_END:
                 f_PlayStateFrameCount++;
-                clearHud = TRUE;
+                clearsHud = TRUE;
                 switch (f_HoleEndStep) {
                     case HOLE_END_STEP_START:
                         f_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
@@ -1238,7 +1238,7 @@ void UpdatePlay(void) {
                             }
 
                             StartWipe(WIPE_CLOSING);
-                            clearHud = FALSE;
+                            clearsHud = FALSE;
                             f_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
                             SetMenuBackdrop(MENU_BACKDROP_STILL);
                         }
@@ -1280,10 +1280,10 @@ void UpdatePlay(void) {
 DIM_BACKDROP:
 
                                 SetMenuBackdrop(MENU_BACKDROP_DIMMING);
-                                clearHud = FALSE;
+                                clearsHud = FALSE;
                             }
                             else {
-                                clearHud = FALSE;
+                                clearsHud = FALSE;
                                 if (f_PlayExit == PLAY_EXIT_QUIT) {
                                     f_HoleEndStep = HOLE_END_STEP_QUIT;
                                 }
@@ -1334,7 +1334,7 @@ DIM_BACKDROP:
                         }
                         else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
                             f_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
-                            clearHud = FALSE;
+                            clearsHud = FALSE;
                             SetMenuBackdrop(MENU_BACKDROP_STILL);
                             StartWipe(WIPE_CLOSING);
                         }
@@ -1380,7 +1380,7 @@ DIM_BACKDROP:
                             }
                         }
 
-                        if (clearHud) {
+                        if (clearsHud) {
                             g_RoundHud.isWindIndicatorShown = FALSE;
                             g_RoundHud.isHoleInfoShown = FALSE;
                             g_RoundHud.isLieIconShown = FALSE;
@@ -1722,7 +1722,7 @@ DIM_BACKDROP:
                 break;
         }
 
-        again = repeat;
+        again = repeats;
     }
     while (again);
 }
