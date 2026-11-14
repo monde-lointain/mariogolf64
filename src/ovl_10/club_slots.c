@@ -214,7 +214,7 @@ static Radians f_StartAngle = 0.0f;
 static s32 f_ClubSlotsUnusedWord UNUSED = 0;
 static s32 f_ShineTime = 0;
 static Radians f_LogoBobAngle = 0.0f;
-static f32 f_LogoBob = 0.0f;
+static f32 f_LogoBobOffset = 0.0f;
 static s32 f_LogoUnusedWord = 0;
 
 static Mtx f_ReelMatrices[REEL_COUNT][DRAW_BUFFER_COUNT];
@@ -1140,18 +1140,18 @@ void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scal
     if (f_IsShowingResult == FALSE) {
         if (starCount == LAST_REEL) {
             f_LogoBobAngle += LOGO_BOB_STEP;
-            f_LogoBob = sinf(f_LogoBobAngle) * LOGO_BOB_HEIGHT;
+            f_LogoBobOffset = sinf(f_LogoBobAngle) * LOGO_BOB_HEIGHT;
         }
         else {
             f_LogoBobAngle += LOGO_BOB_STEP;
-            f_LogoBob = sinf(f_LogoBobAngle) * LOGO_BOB_HEIGHT;
+            f_LogoBobOffset = sinf(f_LogoBobAngle) * LOGO_BOB_HEIGHT;
             f_LogoUnusedWord = 0;
         }
     }
     else {
         f_LogoUnusedWord = 0;
         f_LogoBobAngle = 0.0f;
-        f_LogoBob = 0.0f;
+        f_LogoBobOffset = 0.0f;
     }
 
     width = scale * LOGO_WIDTH;
@@ -1222,10 +1222,10 @@ void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scal
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels((s32)(centerX - halfWidth)),
-            QuarterPixels((s32)((centerY - halfHeight) + (index * stripHeight) + f_LogoBob)),
+            QuarterPixels((s32)((centerY - halfHeight) + (index * stripHeight) + f_LogoBobOffset)),
             QuarterPixels((s32)(centerX + halfWidth)),
             QuarterPixels((s32)((centerY - halfHeight) + (index * stripHeight) + stripHeight +
-                f_LogoBob)),
+                f_LogoBobOffset)),
             G_TX_RENDERTILE,
             0,
             0,
@@ -1268,10 +1268,10 @@ void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scal
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels((s32)(centerX - halfWidth)),
-            QuarterPixels((s32)((centerY - halfHeight) + (index * stripHeight) + f_LogoBob)),
+            QuarterPixels((s32)((centerY - halfHeight) + (index * stripHeight) + f_LogoBobOffset)),
             QuarterPixels((s32)(centerX + halfWidth)),
             QuarterPixels((s32)((centerY - halfHeight) + (index * stripHeight) + stripHeight +
-                f_LogoBob)),
+                f_LogoBobOffset)),
             G_TX_RENDERTILE,
             0,
             0,
@@ -1331,9 +1331,9 @@ void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scal
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels((s32)(centerX - shineHalfWidth)),
-            QuarterPixels((s32)((centerY - shineHalfHeight) + f_LogoBob)),
+            QuarterPixels((s32)((centerY - shineHalfHeight) + f_LogoBobOffset)),
             QuarterPixels((s32)(centerX + shineHalfWidth)),
-            QuarterPixels((s32)(centerY + shineHalfHeight + f_LogoBob)),
+            QuarterPixels((s32)(centerY + shineHalfHeight + f_LogoBobOffset)),
             G_TX_RENDERTILE,
             TexelCoordinate(SHINE_SIZE - ((shineTime + 1 - SHINE_START_TIME) * SHINE_SPEED)),
             0,
