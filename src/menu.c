@@ -1433,28 +1433,28 @@ s32 GetCoursePointsNeeded(CourseIndex courseIndex) {
 
 s32 GetRecordPriority(PlayRecord *record) {
     s32 priority;
-    s32 bits;
+    s32 flaggedScoreKind;
     s32 par;
     s32 kind;
     s32 priorityMax;
 
-    bits = record->scoreKind;
-    kind = bits & SCORE_KIND_MASK;
+    flaggedScoreKind = record->scoreKind;
+    kind = flaggedScoreKind & SCORE_KIND_MASK;
     priority = 0;
     par = record->hole.par;
     priorityMax = ALBATROSS_PRIORITY;
-    if (bits & SCORE_KIND_RECORDED) {
+    if (flaggedScoreKind & SCORE_KIND_RECORDED) {
         switch (kind) {
             case SCORE_KIND_BIRDIE:
                 priority = BIRDIE_PRIORITY;
-                if (bits & SCORE_KIND_UNUSED_BONUS) {
+                if (flaggedScoreKind & SCORE_KIND_UNUSED_BONUS) {
                     priority = BONUS_BIRDIE_PRIORITY;
                 }
 
                 break;
             case SCORE_KIND_EAGLE:
                 priority = EAGLE_PRIORITY;
-                if (bits & SCORE_KIND_UNUSED_BONUS) {
+                if (flaggedScoreKind & SCORE_KIND_UNUSED_BONUS) {
                     priority = BONUS_EAGLE_PRIORITY;
                 }
 
@@ -2811,25 +2811,25 @@ void WriteSaveData(void) {
 }
 
 void SyncSaveOptions(SaveData *save, Boolean isWrite, s32 readResult) {
-    u8 *bits;
+    u8 *optionBits;
     s8 *options;
 
     options = save->options;
     if (!isWrite) {
-        bits = &g_MenuMemory.optionBits;
-        *bits = 0;
+        optionBits = &g_MenuMemory.optionBits;
+        *optionBits = 0;
         if (readResult > 0) {
             if (options[SAVE_OPTION_MUSIC_OFF]) {
-                *bits = OPTION_BIT_MUSIC_OFF;
+                *optionBits = OPTION_BIT_MUSIC_OFF;
             }
 
             if (options[SAVE_OPTION_MONO]) {
-                *bits |= OPTION_BIT_MONO;
-                g_SoundOptionBits = *bits;
+                *optionBits |= OPTION_BIT_MONO;
+                g_SoundOptionBits = *optionBits;
             }
 
             if (options[SAVE_OPTION_SIMPLE_CAMERA]) {
-                *bits |= OPTION_BIT_SIMPLE_CAMERA;
+                *optionBits |= OPTION_BIT_SIMPLE_CAMERA;
             }
         }
     }
