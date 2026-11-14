@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
-#include "geometry.h"
-#include "math_util.h"
+#include "math/geometry.h"
+#include "math/math_util.h"
 
 void GetFramedView(Vec3 eye, Vec3 lookAt);
 void ClearFramedSpheres(void);

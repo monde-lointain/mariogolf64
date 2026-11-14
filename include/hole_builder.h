@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "course.h"
-#include "geometry.h"
+#include "math/geometry.h"
 
 #define HOLE_FILE_COURSE_COUNT 9
 

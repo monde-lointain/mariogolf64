@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "controllers/controller.h"
-#include "geometry.h"
+#include "math/geometry.h"
 #include "system/c_language.h"
 
 enum SaveMenuList {

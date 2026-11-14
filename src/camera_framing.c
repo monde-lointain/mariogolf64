@@ -5,8 +5,8 @@
 
 #include "camera.h"
 #include "controllers/controller.h"
-#include "geometry.h"
-#include "math_util.h"
+#include "math/geometry.h"
+#include "math/math_util.h"
 #include "system/compiler.h"
 
 #define FRAMED_SPHERE_CAPACITY 8

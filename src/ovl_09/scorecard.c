@@ -12,7 +12,7 @@
 #include "game_flags.h"
 #include "game_state.h"
 #include "hole_loader.h"
-#include "math_util.h"
+#include "math/math_util.h"
 #include "play.h"
 #include "player.h"
 #include "reaction.h"

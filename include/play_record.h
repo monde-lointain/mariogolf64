@@ -7,7 +7,7 @@
 #include "club.h"
 #include "course.h"
 #include "hole_setup.h"
-#include "math_util.h"
+#include "math/math_util.h"
 #include "player.h"
 #include "scene.h"
 #include "system/c_language.h"

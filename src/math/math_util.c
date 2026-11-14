@@ -1,4 +1,4 @@
-#include "math_util.h"
+#include "math/math_util.h"
 
 #include <math.h>
 #include <ultra64.h>

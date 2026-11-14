@@ -1,8 +1,8 @@
-#include "curve.h"
+#include "math/curve.h"
 
 #include <ultra64.h>
 
-#include "geometry.h"
+#include "math/geometry.h"
 #include "system/compiler.h"
 
 #define SPLINE_SEGMENT_COUNT 10

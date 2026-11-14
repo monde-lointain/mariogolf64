@@ -5,7 +5,7 @@
 
 #include "bets.h"
 #include "course.h"
-#include "math_util.h"
+#include "math/math_util.h"
 #include "player.h"
 #include "round_stats.h"
 #include "system/asset.h"

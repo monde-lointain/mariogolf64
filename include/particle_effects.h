@@ -7,8 +7,8 @@
 #include "camera.h"
 #include "club.h"
 #include "course_space.h"
-#include "geometry.h"
-#include "math_util.h"
+#include "math/geometry.h"
+#include "math/math_util.h"
 #include "player.h"
 #include "system/compiler.h"
 

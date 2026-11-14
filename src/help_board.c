@@ -7,7 +7,7 @@
 #include "display_list.h"
 #include "hole_loader.h"
 #include "main_menu.h"
-#include "math_util.h"
+#include "math/math_util.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "screen.h"

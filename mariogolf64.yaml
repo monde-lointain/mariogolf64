@@ -101,7 +101,7 @@ segments:
       - [0x2D5C0, c, scoring]
       - [0x2E3E0, c, character_model]
       - [0x2FD00, c, character]
-      - [0x34FA0, c, math_library]
+      - [0x34FA0, c, math/math_library]
       - [0x35980, c, menu]
       - [0x396C0, c, system/crash_screen]
       - [0x3A010, c, music]
@@ -109,10 +109,10 @@ segments:
       - [0x40180, c, view_projection]
       - [0x414A0, c, hole_triangles]
       - [0x42E60, c, character_sound]
-      - [0x42F00, c, matrix_conversion]
+      - [0x42F00, c, math/matrix_conversion]
       - [0x43140, c, tournament]
       - [0x43810, c, hole_loader]
-      - [0x45400, c, math_util]
+      - [0x45400, c, math/math_util]
       - [0x456C0, c, screen_layers]
       - [0x48150, c, round_stats]
       - [0x49E90, c, scene_colors]
@@ -121,7 +121,7 @@ segments:
       - [0x4C3D0, c, awards]
       - [0x4C770, c, text]
       - [0x51900, c, camera_framing]
-      - [0x526B0, c, curve]
+      - [0x526B0, c, math/curve]
       - [0x52FF0, c, fireworks]
       - [0x53D10, c, particle_effects]
       - [0x5B620, c, round_hud]
@@ -382,14 +382,14 @@ segments:
       - [0x9E530, .data, character_sound]
       - [0x9EA00, .data, tournament]
       - [0x9F3A0, .data, hole_loader]
-      - [0x9F3B0, .data, math_util]
+      - [0x9F3B0, .data, math/math_util]
       - [0x9F3C0, .data, screen_layers]
       - [0x9F530, .data, round_stats]
       - [0x9F560, .data, scene_colors]
       - [0x9F6D0, .data, controllers/controller_paks]
       - [0x9F6E0, .data, help_board]
       - [0x9F790, .data, text]
-      - [0x9F9D0, .data, curve]
+      - [0x9F9D0, .data, math/curve]
       - [0x9FA60, .data, fireworks]
       - [0xA06B0, .data, particle_effects]
       - [0xA0870, .data, round_hud]
@@ -463,7 +463,7 @@ segments:
       - [0xA8030, .rodata, course]
       - [0xA8050, .rodata, character_model]
       - [0xAB8A0, .rodata, character]
-      - [0xABC50, .rodata, math_library]
+      - [0xABC50, .rodata, math/math_library]
       - [0xABCF0, .rodata, menu]
       - [0xABEC0, .rodata, system/crash_screen]
       - [0xAC5F4, .rodata, music]
@@ -471,7 +471,7 @@ segments:
       - [0xAC760, .rodata, hole_triangles]
       - [0xAC770, .rodata, tournament]
       - [0xAC780, .rodata, hole_loader]
-      - [0xAC810, .rodata, math_util]
+      - [0xAC810, .rodata, math/math_util]
       - [0xAC840, .rodata, screen_layers]
       - [0xAC850, .rodata, round_stats]
       - [0xAC890, .rodata, scene_colors]
@@ -539,7 +539,7 @@ segments:
       - { type: .bss, vram: 0x800E1C20, name: help_board }
       - { type: .bss, vram: 0x800E1C30, name: text }
       - { type: .bss, vram: 0x800E1C50, name: camera_framing }
-      - { type: .bss, vram: 0x800E1D20, name: curve }
+      - { type: .bss, vram: 0x800E1D20, name: math/curve }
       - { type: .bss, vram: 0x800E1D60, name: particle_effects }
       - { type: .bss, vram: 0x800E1DD0, name: round_hud }
       - { type: .bss, vram: 0x800E3980, name: sky_and_hud_animations }

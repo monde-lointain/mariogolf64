@@ -6,7 +6,7 @@
 #include "ball_simulation.h"
 #include "camera.h"
 #include "current_shot.h"
-#include "math_util.h"
+#include "math/math_util.h"
 #include "play_record.h"
 #include "player.h"
 #include "system/c_language.h"

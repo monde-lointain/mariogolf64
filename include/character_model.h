@@ -8,8 +8,8 @@
 #include "club.h"
 #include "course_space.h"
 #include "display_list.h"
-#include "geometry.h"
-#include "math_util.h"
+#include "math/geometry.h"
+#include "math/math_util.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 

@@ -5,8 +5,8 @@
 
 #include "club.h"
 #include "course_space.h"
-#include "geometry.h"
-#include "math_util.h"
+#include "math/geometry.h"
+#include "math/math_util.h"
 #include "surface.h"
 #include "system/c_language.h"
 #include "system/frame_time.h"

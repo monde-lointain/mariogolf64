@@ -5,8 +5,8 @@
 
 #include "controllers/controller.h"
 #include "debug_text.h"
-#include "geometry.h"
-#include "math_util.h"
+#include "math/geometry.h"
+#include "math/math_util.h"
 #include "sound.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

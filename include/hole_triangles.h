@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "camera.h"
-#include "geometry.h"
+#include "math/geometry.h"
 
 #define HOLE_TRIANGLE_COUNT 160
 

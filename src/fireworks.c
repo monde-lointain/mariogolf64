@@ -3,8 +3,8 @@
 #include <ultra64.h>
 
 #include "display_list.h"
-#include "geometry.h"
-#include "math_util.h"
+#include "math/geometry.h"
+#include "math/math_util.h"
 #include "round_hud.h"
 #include "screen.h"
 #include "sound.h"

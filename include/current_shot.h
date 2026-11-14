@@ -5,7 +5,7 @@
 
 #include "club.h"
 #include "course_space.h"
-#include "math_util.h"
+#include "math/math_util.h"
 #include "surface.h"
 
 typedef struct CurrentShot {

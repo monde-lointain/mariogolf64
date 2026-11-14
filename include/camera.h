@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
-#include "geometry.h"
-#include "math_util.h"
+#include "math/geometry.h"
+#include "math/math_util.h"
 #include "system/c_language.h"
 
 enum CameraMode {

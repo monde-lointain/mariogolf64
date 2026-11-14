@@ -10,7 +10,7 @@
 #include "course.h"
 #include "display_list.h"
 #include "game_state.h"
-#include "math_util.h"
+#include "math/math_util.h"
 #include "menu.h"
 #include "pause_menu.h"
 #include "play.h"

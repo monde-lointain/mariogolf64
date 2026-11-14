@@ -16,7 +16,7 @@
 #include "game_state.h"
 #include "hole_setup.h"
 #include "main_menu.h"
-#include "math_util.h"
+#include "math/math_util.h"
 #include "menu_memory.h"
 #include "password.h"
 #include "play_record.h"

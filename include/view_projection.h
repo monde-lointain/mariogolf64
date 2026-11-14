@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "geometry.h"
+#include "math/geometry.h"
 
 enum NormalPlacement {
     NORMAL_ON_FIRST,

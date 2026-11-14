@@ -5,7 +5,7 @@
 
 #include "character.h"
 #include "course_space.h"
-#include "geometry.h"
+#include "math/geometry.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 

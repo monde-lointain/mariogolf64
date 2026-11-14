@@ -5,7 +5,7 @@
 
 #include "camera.h"
 #include "display_list.h"
-#include "math_util.h"
+#include "math/math_util.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 

@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "geometry.h"
+#include "math/geometry.h"
 
 typedef s32 CoursePoint[AXIS_COUNT];
 

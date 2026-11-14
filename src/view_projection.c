@@ -2,8 +2,8 @@
 
 #include <ultra64.h>
 
-#include "geometry.h"
-#include "math_util.h"
+#include "math/geometry.h"
+#include "math/math_util.h"
 #include "screen.h"
 #include "system/compiler.h"
 

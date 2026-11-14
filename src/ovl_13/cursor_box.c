@@ -4,8 +4,8 @@
 
 #include "display_list.h"
 #include "game.h"
-#include "geometry.h"
-#include "math_util.h"
+#include "math/geometry.h"
+#include "math/math_util.h"
 #include "screen.h"
 #include "system/asset.h"
 #include "system/compiler.h"

@@ -9,7 +9,7 @@
 #include "display_list.h"
 #include "game_flags.h"
 #include "game_state.h"
-#include "math_util.h"
+#include "math/math_util.h"
 #include "menu.h"
 #include "play.h"
 #include "player.h"

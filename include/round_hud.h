@@ -5,7 +5,7 @@
 
 #include "camera.h"
 #include "character.h"
-#include "math_util.h"
+#include "math/math_util.h"
 #include "player.h"
 #include "system/asset.h"
 #include "system/c_language.h"

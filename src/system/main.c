@@ -14,7 +14,7 @@
 #include "game.h"
 #include "game_flags.h"
 #include "hole_loader.h"
-#include "math_util.h"
+#include "math/math_util.h"
 #include "play.h"
 #include "save.h"
 #include "scene.h"

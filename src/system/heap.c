@@ -2,7 +2,7 @@
 
 #include <ultra64.h>
 
-#include "math_util.h"
+#include "math/math_util.h"
 #include "system/c_language.h"
 #include "system/memory_address.h"
 
