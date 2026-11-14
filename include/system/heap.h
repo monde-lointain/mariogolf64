@@ -36,8 +36,8 @@ typedef s32 HeapIndex;
 
 void AddHeapRegion(HeapIndex heapIndex, void *start, void *end);
 void ResetHeap(HeapIndex heapIndex);
-s32 GetHeapFreeSize(HeapIndex heapIndex);
-s32 GetHeapLargestFreeSize(HeapIndex heapIndex);
+u32 GetHeapFreeSize(HeapIndex heapIndex);
+u32 GetHeapLargestFreeSize(HeapIndex heapIndex);
 void *AllocFromHeap(HeapIndex heapIndex, u32 size);
 void FreeFromHeap(HeapIndex heapIndex, void *pointerToBlock);
 

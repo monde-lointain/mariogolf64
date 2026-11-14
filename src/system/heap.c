@@ -98,11 +98,11 @@ void ResetHeap(HeapIndex heapIndex) {
     f_Heaps[heapIndex].largestFreeSize = UNMEASURED_SIZE;
 }
 
-s32 GetHeapFreeSize(HeapIndex heapIndex) {
+u32 GetHeapFreeSize(HeapIndex heapIndex) {
     return f_Heaps[heapIndex].freeSize;
 }
 
-s32 GetHeapLargestFreeSize(HeapIndex heapIndex) {
+u32 GetHeapLargestFreeSize(HeapIndex heapIndex) {
     return f_Heaps[heapIndex].largestFreeSize;
 }
 
