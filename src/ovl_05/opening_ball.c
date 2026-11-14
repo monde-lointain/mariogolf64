@@ -332,7 +332,9 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
     s32 startZ;
     s32 previousVelocityX;
     s32 previousVelocityZ;
-    s32 contact;
+    // A ground hit stores the hit finders' TRUE, which equals
+    // STEP_FLAG_GROUND_HIT.
+    StepFlags contact;
     StepFlags stepFlags = 0;
     Boolean printsDebugText;
     s32 substep;
@@ -425,7 +427,7 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                 contact = 0;
             }
             else {
-                s32 found;
+                Boolean found;
 
                 if (IsStrokeOrTrialLaunch(simulation->purpose) &&
                     FindRingHit(

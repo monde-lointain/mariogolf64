@@ -192,7 +192,9 @@ StepFlags StepBallSimulation(BallSimulation *simulation) {
     s32 startX;
     s32 startY;
     s32 startZ;
-    s32 contact;
+    // A ground hit stores the hit finders' TRUE, which equals
+    // STEP_FLAG_GROUND_HIT.
+    StepFlags contact;
     Boolean hitsHoleTriangle;
     Boolean isNearCup;
     s32 rollSpeed;
@@ -342,7 +344,7 @@ StepFlags StepBallSimulation(BallSimulation *simulation) {
             }
             else {
                 s32 endY;
-                s32 found;
+                Boolean found;
 
                 if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
                     IsStrokeOrTrialLaunch(simulation->purpose) &&
