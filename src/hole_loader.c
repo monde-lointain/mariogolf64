@@ -701,7 +701,7 @@ void PrepareHoleScene(void) {
 NO_RESULT ChooseHoleConditions(void) {
     s32 cupIndex;
     s32 attemptCount;
-    u32 random;
+    u32 cupDraw;
     s32 courseRecordIndex;
 
     g_TurnBallSimulation.playerIndex = -1;
@@ -817,15 +817,16 @@ NO_RESULT ChooseHoleConditions(void) {
         cupIndex = f_CycledCupIndex++ & (CUP_POSITION_COUNT - 1);
     }
     else {
-        random = (u32)GetHoleRandom(g_GameState.roundSeed, g_GameState.holeIndex) >> CUP_DRAW_SHIFT;
-        random %= CUP_DRAW_COUNT;
-        if (random < CUP_DRAW_FIRST_END) {
+        cupDraw =
+            (u32)GetHoleRandom(g_GameState.roundSeed, g_GameState.holeIndex) >> CUP_DRAW_SHIFT;
+        cupDraw %= CUP_DRAW_COUNT;
+        if (cupDraw < CUP_DRAW_FIRST_END) {
             cupIndex = 0;
         }
-        else if (random < CUP_DRAW_SECOND_END) {
+        else if (cupDraw < CUP_DRAW_SECOND_END) {
             cupIndex = 1;
         }
-        else if (random < CUP_DRAW_THIRD_END) {
+        else if (cupDraw < CUP_DRAW_THIRD_END) {
             cupIndex = 2;
         }
         else {
