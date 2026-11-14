@@ -549,9 +549,6 @@ s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode sh
     return distance;
 }
 
-static const char f_AssertionExpression[] = "EX";
-static const char f_FileName[] = "c:/usgolf64/polychara/pcsub.c";
-
 void WriteBallDistances(void) {
     char line[BALL_DISTANCE_LINE_SIZE];
     char *cursor;
@@ -581,7 +578,11 @@ void WriteBallDistances(void) {
     cursor = source;
     end = source + BALL_DISTANCE_SOURCE_SIZE;
     if (source == NULL) {
-        ReportFailedAssertion(f_AssertionExpression, f_FileName, BALL_DISTANCE_SOURCE_ASSERT_LINE);
+        ReportFailedAssertion(
+            "EX",
+            "c:/usgolf64/polychara/pcsub.c",
+            BALL_DISTANCE_SOURCE_ASSERT_LINE
+        );
     }
 
     sprintf(
@@ -873,7 +874,7 @@ NO_RESULT PlayTextureAnimation(u32 slotIndex, s32 index) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (index >= TEXTURE_ANIMATION_COUNT) {
-        ReportFailedAssertion(f_AssertionExpression, f_FileName, TEXTURE_ANIMATION_ASSERT_LINE);
+        ReportFailedAssertion("EX", "c:/usgolf64/polychara/pcsub.c", TEXTURE_ANIMATION_ASSERT_LINE);
     }
 
     if (slot != NULL) {

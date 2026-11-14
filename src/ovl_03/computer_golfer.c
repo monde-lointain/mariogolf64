@@ -143,8 +143,6 @@ enum PlanStage {
 
 typedef s8 PlanStage;
 
-static const char f_SimulationFaultText[];
-
 static GolferTraits f_GolferTraits[CHARACTER_COUNT] = {
     {0, 0, 0, 6, 0, WIND_PLAY_STRONG_WINDS, 0, {0, 2, 2, 2, 2, 2}, 10},
     {2, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 2, 2, 2, 2, 2}, 8},
@@ -2022,8 +2020,6 @@ ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
 
 #define POWER_TO_GAUGE_FRAME_SCALE (GAUGE_FULL_FRAME / 256.0f)
 
-static const char f_SimulationFaultText[] = "AI Sim Fault!";
-
 #define LIP_OUT_EVALUATION 0x10
 #define POOR_LANDING_EVALUATION 0x8000
 #define BLOCKED_CUP_EVALUATION 0x80000
@@ -2127,7 +2123,7 @@ s32 StepTrialShot(void) {
             if (f_TrialStepCount >= STEP_COUNT_MAX) {
                 SetDebugTextHighlight(TRUE);
                 PrintDebugText(
-                    f_SimulationFaultText,
+                    "AI Sim Fault!",
                     SIMULATION_FAULT_TEXT_COLUMN,
                     SIMULATION_FAULT_TEXT_ROW
                 );
@@ -2793,7 +2789,7 @@ Boolean IsTrialShotSafe(void) {
         if (f_TrialStepCount >= STEP_COUNT_MAX) {
             SetDebugTextHighlight(TRUE);
             PrintDebugText(
-                f_SimulationFaultText,
+                "AI Sim Fault!",
                 SIMULATION_FAULT_TEXT_COLUMN,
                 SIMULATION_FAULT_TEXT_ROW
             );

@@ -887,8 +887,6 @@ static inline s8 GetBillboardMaskCell(s32 textureIndex, s32 row, s32 column) {
                            [(row * BILLBOARD_MASK_SIZE) | column];
 }
 
-const char g_PathDebugBlankText[] = "          ";
-
 Boolean FindMiniGolfGroundHit(
     BallSimulation *simulation,
     s32 startX,
@@ -936,7 +934,7 @@ Boolean FindMiniGolfGroundHit(
         PrintDebugPaddedHex(endX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 3);
         PrintDebugPaddedHex(endY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 4);
         PrintDebugPaddedHex(endZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 5);
-        PrintDebugText(g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
+        PrintDebugText("          ", PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
     }
 
     if (IsOffMiniGolfGround(startX, startZ) || IsOffMiniGolfGround(endX, endZ)) {
@@ -1191,7 +1189,7 @@ Boolean FindGroundHit(
         PrintDebugPaddedHex(endX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 3);
         PrintDebugPaddedHex(endY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 4);
         PrintDebugPaddedHex(endZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 5);
-        PrintDebugText(g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
+        PrintDebugText("          ", PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
     }
 
     if (IsOffGround(startX, startZ) || IsOffGround(endX, endZ)) {
@@ -1936,7 +1934,7 @@ Boolean FindHoleTriangleHit(
         PrintDebugPaddedHex(endX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 3);
         PrintDebugPaddedHex(endY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 4);
         PrintDebugPaddedHex(endZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 5);
-        PrintDebugText(g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
+        PrintDebugText("          ", PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
     }
 
     if (endY + PATH_MOST_RISE < startY) {
@@ -2153,7 +2151,7 @@ Boolean FindWallHit(
         PrintDebugPaddedHex(endX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 3);
         PrintDebugPaddedHex(endY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 4);
         PrintDebugPaddedHex(endZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 5);
-        PrintDebugText(g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
+        PrintDebugText("          ", PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
     }
 
     if (IsOffGround(startX, startZ)) {
@@ -2931,7 +2929,7 @@ s32 FindRingHit(
         PrintDebugPaddedHex(endX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 3);
         PrintDebugPaddedHex(endY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 4);
         PrintDebugPaddedHex(endZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 5);
-        PrintDebugText(g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
+        PrintDebugText("          ", PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
     }
 
     if (IsOffGroundSigned(startX, startZ)) {
