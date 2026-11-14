@@ -1093,7 +1093,8 @@ static s32 f_ModeSelectControllerIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MA
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
 };
 static s32 f_UnusedModeIconValues[11] UNUSED = {110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
-static s32 f_ModeSelectLabelOffsets[MODE_ICON_COUNT] = {85, 85, 41, 60, 55, 60, 75, 66, 59, 0, 61};
+static s32 f_ModeSelectModeLabelOffsets[MODE_ICON_COUNT] =
+    {85, 85, 41, 60, 55, 60, 75, 66, 59, 0, 61};
 static f32 f_CharacterPitch = 0.0f;
 static f32 f_CharacterYaw = 0.0f;
 static f32 f_RivalSpinYaw = 0.0f;
@@ -5818,9 +5819,9 @@ void DrawModeSelect(Gfx **displayListHead) {
     labelX = (g_ChosenPlayerCount == 1) ? SINGLE_PLAYER_MODE_LABEL_X : MODE_LABEL_X;
     gSPScisTextureRectangle(
         gfx++,
-        QuarterPixels(labelX - f_ModeSelectLabelOffsets[labelIndex]),
+        QuarterPixels(labelX - f_ModeSelectModeLabelOffsets[labelIndex]),
         QuarterPixels(MODE_LABEL_TOP),
-        QuarterPixels(labelX - f_ModeSelectLabelOffsets[labelIndex] + MODE_LABEL_WIDTH),
+        QuarterPixels(labelX - f_ModeSelectModeLabelOffsets[labelIndex] + MODE_LABEL_WIDTH),
         QuarterPixels(MODE_LABEL_TOP + MODE_LABEL_HEIGHT),
         G_TX_RENDERTILE,
         0,

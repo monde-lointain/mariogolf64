@@ -220,7 +220,8 @@ static s32 f_UnusedSaveMenuIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX][2] 
 static s32 f_UnusedSaveMenuModeIconValues[11] UNUSED =
     {110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
 static char f_UnusedHoleLabel[] UNUSED = "Hole";
-static s32 f_GameModeLabelOffsets[MODE_ICON_COUNT] = {85, 85, 41, 60, 55, 60, 75, 66, 59, 0, 61};
+static s32 f_SavedGameModeLabelOffsets[MODE_ICON_COUNT] =
+    {85, 85, 41, 60, 55, 60, 75, 66, 59, 0, 61};
 static f32 f_SavedGolferAngles[3] = {0.0f, 0.0f, 0.0f};
 static s32 f_UnusedWordAfterSavedGolferAngles UNUSED = 0;
 static Vec3 f_SavedGolferPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX] = {
@@ -249,7 +250,7 @@ static Vec3 f_SavedGolferPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX] = {
         {106.0f, -52.0f, -1000.0f},
     },
 };
-static s32 f_ControllerIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX][2] = {
+static s32 f_SavedGameControllerIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX][2] = {
     {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
     {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
@@ -2348,9 +2349,9 @@ void DrawSavedGames(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(
             gfx++,
-            QuarterPixels(labelX - f_GameModeLabelOffsets[iconIndex]),
+            QuarterPixels(labelX - f_SavedGameModeLabelOffsets[iconIndex]),
             QuarterPixels(MODE_LABEL_TOP),
-            QuarterPixels(labelX - f_GameModeLabelOffsets[iconIndex] + MODE_LABEL_WIDTH),
+            QuarterPixels(labelX - f_SavedGameModeLabelOffsets[iconIndex] + MODE_LABEL_WIDTH),
             QuarterPixels(MODE_LABEL_TOP + MODE_LABEL_HEIGHT),
             G_TX_RENDERTILE,
             0,
@@ -2779,8 +2780,8 @@ void DrawPlayerControllers(Gfx **displayListHead) {
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
     for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
         if (f_SavedPlayerControllers[playerIndex] != NO_CONTROLLER) {
-            position[AXIS_X] = f_ControllerIconPositions[playerCount - 1][playerIndex][0];
-            position[AXIS_Y] = f_ControllerIconPositions[playerCount - 1][playerIndex][1];
+            position[AXIS_X] = f_SavedGameControllerIconPositions[playerCount - 1][playerIndex][0];
+            position[AXIS_Y] = f_SavedGameControllerIconPositions[playerCount - 1][playerIndex][1];
             controllerIndex = f_SavedPlayerControllers[playerIndex];
             if (controllerIndex != COMPUTER_CONTROLLER) {
                 gDPLoadTextureBlock(
@@ -2821,8 +2822,8 @@ void DrawPlayerControllers(Gfx **displayListHead) {
     image = f_PlayerLabels;
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
     for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
-        position[AXIS_X] = f_ControllerIconPositions[playerCount - 1][playerIndex][0];
-        position[AXIS_Y] = f_ControllerIconPositions[playerCount - 1][playerIndex][1];
+        position[AXIS_X] = f_SavedGameControllerIconPositions[playerCount - 1][playerIndex][0];
+        position[AXIS_Y] = f_SavedGameControllerIconPositions[playerCount - 1][playerIndex][1];
         if (f_SavedPlayerControllers[playerIndex] == COMPUTER_CONTROLLER) {
             if (save->savedGames[memory->savedGameIndex].state.gameMode ==
                 GAME_MODE_GET_CHARACTER) {
