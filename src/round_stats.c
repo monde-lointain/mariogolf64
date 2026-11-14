@@ -56,7 +56,7 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
     }
 
     for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
-        score += g_Players[playerIndex].holes[hole].strokes - course->holes[hole].par +
+        score += g_Players[playerIndex].holes[hole].strokeCount - course->holes[hole].par +
             GetHandicapOffset(g_GameState.courseIndex, hole, g_Players[playerIndex].handicap);
     }
 
@@ -88,9 +88,9 @@ void TallySkins(s32 endHole) {
     for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
         winner = NO_SKINS_WINNER;
         for (player = 0; player != g_GameState.playerCount; player++) {
-            if (g_Players[player].holes[hole].strokes != 0) {
+            if (g_Players[player].holes[hole].strokeCount != 0) {
                 winner = player;
-                g_Players[player].holes[hole].strokes = skins;
+                g_Players[player].holes[hole].strokeCount = skins;
             }
         }
 
@@ -363,7 +363,7 @@ void RecordCourseRound(void) {
 
     total = 0;
     for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-        total += g_Players[0].holes[hole].strokes;
+        total += g_Players[0].holes[hole].strokeCount;
     }
 
     total += record->strokeTotal;
@@ -415,8 +415,8 @@ void RecordCourseRound(void) {
 
     total = 0;
     for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-        if (g_Players[0].holes[hole].putts != UNCOUNTED_PUTTS) {
-            total += g_Players[0].holes[hole].putts;
+        if (g_Players[0].holes[hole].puttCount != UNCOUNTED_PUTTS) {
+            total += g_Players[0].holes[hole].puttCount;
         }
     }
 
@@ -432,7 +432,7 @@ void RecordCourseRound(void) {
     record->puttTotal = total;
 
     for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-        if (g_Players[0].holes[hole].strokes <= course->holes[hole].par) {
+        if (g_Players[0].holes[hole].strokeCount <= course->holes[hole].par) {
             if (record->parOrBetterCount < RECORD_TOTAL_LIMIT) {
                 record->parOrBetterCount++;
             }
@@ -445,7 +445,7 @@ void RecordCourseRound(void) {
     }
 
     for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-        shotsToGreen = g_Players[0].holes[hole].strokes - g_Players[0].holes[hole].putts;
+        shotsToGreen = g_Players[0].holes[hole].strokeCount - g_Players[0].holes[hole].puttCount;
         if (course->holes[hole].par - shotsToGreen >= PAR_ON_SPARE_STROKES) {
             if (record->parOnCount < RECORD_TOTAL_LIMIT) {
                 record->parOnCount++;
@@ -566,7 +566,7 @@ void SettleHoleBets(void) {
         for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             totals[playerIndex] = 0;
             for (j = startHole; j != endHole; j++) {
-                totals[playerIndex] += g_Players[playerIndex].holes[j].strokes +
+                totals[playerIndex] += g_Players[playerIndex].holes[j].strokeCount +
                     GetHandicapOffset(GetCourseRecordIndex(), j, g_Players[playerIndex].handicap);
             }
         }
@@ -660,12 +660,14 @@ void SettleHoleBets(void) {
             case GAME_MODE_CLUB_SLOTS:
                 count = 0;
                 for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-                    count += g_Players[playerIndex].holes[g_GameState.holeIndex - 1].strokes == 0;
+                    count +=
+                        g_Players[playerIndex].holes[g_GameState.holeIndex - 1].strokeCount == 0;
                 }
 
                 if (count != g_GameState.playerCount) {
                     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-                        if (g_Players[playerIndex].holes[g_GameState.holeIndex - 1].strokes != 0) {
+                        if (g_Players[playerIndex].holes[g_GameState.holeIndex - 1].strokeCount !=
+                            0) {
                             g_BetTallies[playerIndex][bet] +=
                                 g_HolePot * (g_GameState.playerCount - 1);
                         }
@@ -682,14 +684,14 @@ void SettleHoleBets(void) {
 
                 break;
             case GAME_MODE_MATCH_GAME:
-                if (g_Players[0].holes[g_GameState.holeIndex - 1].strokes <
-                    g_Players[1].holes[g_GameState.holeIndex - 1].strokes) {
+                if (g_Players[0].holes[g_GameState.holeIndex - 1].strokeCount <
+                    g_Players[1].holes[g_GameState.holeIndex - 1].strokeCount) {
                     g_BetTallies[0][bet] += g_HolePot;
                     g_BetTallies[1][bet] -= g_HolePot;
                     g_HolePot = g_GameState.betRates[bet];
                 }
-                else if (g_Players[1].holes[g_GameState.holeIndex - 1].strokes <
-                    g_Players[0].holes[g_GameState.holeIndex - 1].strokes) {
+                else if (g_Players[1].holes[g_GameState.holeIndex - 1].strokeCount <
+                    g_Players[0].holes[g_GameState.holeIndex - 1].strokeCount) {
                     g_BetTallies[0][bet] -= g_HolePot;
                     g_BetTallies[1][bet] += g_HolePot;
                     g_HolePot = g_GameState.betRates[bet];

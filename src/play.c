@@ -310,8 +310,8 @@ void SetUpPlayers(void) {
         }
 
         for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
-            g_Players[0].holes[hole].strokes = 0;
-            g_Players[0].holes[hole].putts = UNCOUNTED_PUTTS;
+            g_Players[0].holes[hole].strokeCount = 0;
+            g_Players[0].holes[hole].puttCount = UNCOUNTED_PUTTS;
         }
 
         g_Players[0].powerShotCount = POWER_SHOTS_UNLIMITED;
@@ -339,8 +339,8 @@ void SetUpPlayers(void) {
             g_Players[playerIndex].teeOrder = 0;
             g_Players[playerIndex].gridColor = GetSaveData()->options[SAVE_OPTION_GRID_COLOR];
             for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
-                g_Players[playerIndex].holes[hole].strokes = 0;
-                g_Players[playerIndex].holes[hole].putts = UNCOUNTED_PUTTS;
+                g_Players[playerIndex].holes[hole].strokeCount = 0;
+                g_Players[playerIndex].holes[hole].puttCount = UNCOUNTED_PUTTS;
             }
 
             for (slot = SHOT_KIND_COUNT - 1; slot >= 0; slot--) {
@@ -1177,17 +1177,18 @@ void UpdatePlay(void) {
                         if (GetGroupHoleResult(results) != TRUE) {
                             for (playerSlot = 0; playerSlot < g_GameState.playerCount;
                                 playerSlot++) {
-                                g_Players[playerSlot].holes[g_GameState.holeIndex].strokes = 0;
+                                g_Players[playerSlot].holes[g_GameState.holeIndex].strokeCount = 0;
                             }
                         }
                         else {
                             for (playerSlot = 0; playerSlot < g_GameState.playerCount;
                                 playerSlot++) {
                                 if (results[playerSlot] != TRUE) {
-                                    g_Players[playerSlot].holes[g_GameState.holeIndex].strokes = 0;
+                                    g_Players[playerSlot].holes[g_GameState.holeIndex].strokeCount =
+                                        0;
                                 }
                                 else {
-                                    g_Players[playerSlot].holes[g_GameState.holeIndex].strokes =
+                                    g_Players[playerSlot].holes[g_GameState.holeIndex].strokeCount =
                                         TRUE;
                                 }
                             }

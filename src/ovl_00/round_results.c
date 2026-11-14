@@ -547,11 +547,12 @@ void LoadRoundResults(void) {
                 holeEnd = g_GameState.holeIndex;
                 f_PlayerResults[0] = f_PlayerResults[1] = 0;
                 for (i = GetFirstHoleIndex(); i != holeEnd; i++) {
-                    if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
+                    if (g_Players[0].holes[i].strokeCount < g_Players[1].holes[i].strokeCount) {
                         f_PlayerResults[0]++;
                         f_PlayerResults[1]--;
                     }
-                    else if (g_Players[1].holes[i].strokes < g_Players[0].holes[i].strokes) {
+                    else if (g_Players[1].holes[i].strokeCount <
+                        g_Players[0].holes[i].strokeCount) {
                         f_PlayerResults[0]--;
                         f_PlayerResults[1]++;
                     }

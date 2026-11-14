@@ -345,13 +345,13 @@ void DrawMatchResult(Gfx **displayListHead) {
     ownHole = holeIndex;
     x = MATCH_RESULT_LEFT;
     for (playerIndex = 0; playerIndex != MATCH_PLAYER_COUNT; playerIndex++) {
-        if (g_Players[playerIndex].holes[ownHole].strokes ==
-            g_Players[playerIndex ^ 1].holes[holeIndex].strokes) {
+        if (g_Players[playerIndex].holes[ownHole].strokeCount ==
+            g_Players[playerIndex ^ 1].holes[holeIndex].strokeCount) {
             SetTextColor(&gfx, 0xFF, 0xFF, 0);
             DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char *)f_DrawText);
         }
-        else if (g_Players[playerIndex].holes[ownHole].strokes <
-            g_Players[playerIndex ^ 1].holes[holeIndex].strokes) {
+        else if (g_Players[playerIndex].holes[ownHole].strokeCount <
+            g_Players[playerIndex ^ 1].holes[holeIndex].strokeCount) {
             SetTextColor(&gfx, 0xFF, 0x7F, 0x7F);
             DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char *)f_WinText);
         }
@@ -668,13 +668,13 @@ void DrawMatchPage(Gfx **displayListHead) {
     wins[1] = 0;
     wins[0] = 0;
     for (i = GetFirstHoleIndex(); i != countEnd; i++) {
-        if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
+        if (g_Players[0].holes[i].strokeCount < g_Players[1].holes[i].strokeCount) {
             wins[0]++;
         }
-        else if (g_Players[1].holes[i].strokes < g_Players[0].holes[i].strokes) {
+        else if (g_Players[1].holes[i].strokeCount < g_Players[0].holes[i].strokeCount) {
             wins[1]++;
         }
-        else if (g_Players[0].holes[i].strokes == g_Players[1].holes[i].strokes) {
+        else if (g_Players[0].holes[i].strokeCount == g_Players[1].holes[i].strokeCount) {
             winsNeeded--;
             halvedCount++;
         }
@@ -738,13 +738,13 @@ void DrawMatchPage(Gfx **displayListHead) {
         points[0] = 0;
         points[1] = 0;
         for (i = GetFirstHoleIndex(); i != g_Scorecard.skinsCarryover.fromLastHole; i++) {
-            if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
+            if (g_Players[0].holes[i].strokeCount < g_Players[1].holes[i].strokeCount) {
                 points[0] += 2;
             }
-            else if (g_Players[1].holes[i].strokes < g_Players[0].holes[i].strokes) {
+            else if (g_Players[1].holes[i].strokeCount < g_Players[0].holes[i].strokeCount) {
                 points[1] += 2;
             }
-            else if (g_Players[0].holes[i].strokes == g_Players[1].holes[i].strokes) {
+            else if (g_Players[0].holes[i].strokeCount == g_Players[1].holes[i].strokeCount) {
                 points[0]++;
                 points[1]++;
             }
@@ -1007,7 +1007,7 @@ void DrawMatchPage(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
-        if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
+        if (g_Players[0].holes[holeIndex].strokeCount < g_Players[1].holes[holeIndex].strokeCount) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels((wins[0] * TILE_SPACING) + TILE_LEFT + g_Scorecard.x),
@@ -1023,7 +1023,8 @@ void DrawMatchPage(Gfx **displayListHead) {
                 TEXEL_STEP_ONE
             );
         }
-        else if (g_Players[1].holes[holeIndex].strokes < g_Players[0].holes[holeIndex].strokes) {
+        else if (g_Players[1].holes[holeIndex].strokeCount <
+            g_Players[0].holes[holeIndex].strokeCount) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels((wins[1] * TILE_SPACING) + TILE_LEFT + g_Scorecard.x),
@@ -1059,7 +1060,7 @@ void DrawMatchPage(Gfx **displayListHead) {
         );
         arrowRise = g_Scorecard.skinsCarryover.onLastHole;
         holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
-        if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
+        if (g_Players[0].holes[holeIndex].strokeCount < g_Players[1].holes[holeIndex].strokeCount) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels((wins[0] * TILE_SPACING) + ARROW_LEFT + g_Scorecard.x),
@@ -1073,7 +1074,8 @@ void DrawMatchPage(Gfx **displayListHead) {
                 TEXEL_STEP_ONE
             );
         }
-        else if (g_Players[1].holes[holeIndex].strokes < g_Players[0].holes[holeIndex].strokes) {
+        else if (g_Players[1].holes[holeIndex].strokeCount <
+            g_Players[0].holes[holeIndex].strokeCount) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels((wins[1] * TILE_SPACING) + ARROW_LEFT + g_Scorecard.x),
@@ -1181,7 +1183,7 @@ void DrawSkinsPage(Gfx **displayListHead) {
 
     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
         if (g_Scorecard.holeWinnerIndex >= 0 &&
-            g_Players[playerIndex].holes[holeIndex].strokes != 0) {
+            g_Players[playerIndex].holes[holeIndex].strokeCount != 0) {
             f_WinColorAngle += WIN_COLOR_STEP;
             red = (u8)((s32)(sinf(f_WinColorAngle) * WIN_COLOR_SWING) + WIN_COLOR_MIDPOINT);
             green =
@@ -3710,10 +3712,11 @@ void DrawScoresPage(Gfx **displayListHead) {
 
             SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
             for (j = firstHole; j != shownHoleCount; j++) {
-                if (g_Players[i].holes[j].strokes == g_Players[i ^ 1].holes[j].strokes) {
+                if (g_Players[i].holes[j].strokeCount == g_Players[i ^ 1].holes[j].strokeCount) {
                     g_PrintBuffer[0] = NO_SCORE_CODE;
                 }
-                else if (g_Players[i].holes[j].strokes < g_Players[i ^ 1].holes[j].strokes) {
+                else if (g_Players[i].holes[j].strokeCount <
+                    g_Players[i ^ 1].holes[j].strokeCount) {
                     g_PrintBuffer[0] = HOLE_WON_CODE;
                     standing++;
                 }
@@ -3772,7 +3775,7 @@ void DrawScoresPage(Gfx **displayListHead) {
             g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
             SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
             for (j = firstHole; j != shownHoleCount; j++) {
-                if (g_Players[i].holes[j].strokes == 0) {
+                if (g_Players[i].holes[j].strokeCount == 0) {
                     sprintf(g_PrintBuffer, "%c", NO_SCORE_CODE);
                     if (j < HOLES_PER_NINE) {
                         DrawShadowedText(
@@ -3792,7 +3795,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     }
                 }
                 else {
-                    sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[j].strokes);
+                    sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[j].strokeCount);
                     if (j < HOLES_PER_NINE) {
                         DrawShadowedText(
                             &gfx,
@@ -3810,7 +3813,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                         );
                     }
 
-                    standing += g_Players[i].holes[j].strokes;
+                    standing += g_Players[i].holes[j].strokeCount;
                 }
             }
 
@@ -3835,12 +3838,12 @@ void DrawScoresPage(Gfx **displayListHead) {
         else {
             shownHoleCount += g_Players[i].holeStatus != HOLE_STATUS_PLAYING;
             for (j = firstHole; j != shownHoleCount; j++) {
-                standing = g_Players[i].holes[j].strokes - course->holes[j].par;
+                standing = g_Players[i].holes[j].strokeCount - course->holes[j].par;
                 if (j < HOLES_PER_NINE) {
-                    frontTotal += g_Players[i].holes[j].strokes;
+                    frontTotal += g_Players[i].holes[j].strokeCount;
                 }
                 else {
-                    backTotal += g_Players[i].holes[j].strokes;
+                    backTotal += g_Players[i].holes[j].strokeCount;
                 }
 
                 if ((standing < -2 && course->holes[j].par == PAR_FIVE) ||
@@ -3881,7 +3884,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     }
                 }
 
-                sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[j].strokes);
+                sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[j].strokeCount);
                 if (j < HOLES_PER_NINE) {
                     DrawCondensedShadowedText(
                         &gfx,
@@ -3901,7 +3904,7 @@ void DrawScoresPage(Gfx **displayListHead) {
 
                 overTop = PUTTS_TOP;
                 if (isPuttsShown) {
-                    if (g_Players[i].holes[j].putts == UNCOUNTED_PUTTS) {
+                    if (g_Players[i].holes[j].puttCount == UNCOUNTED_PUTTS) {
                         sprintf(g_PrintBuffer, "%c", NO_SCORE_CODE);
                         overTop += PLAYER_ROW_SPACING;
                         if (j < HOLES_PER_NINE) {
@@ -3922,7 +3925,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                         }
                     }
                     else {
-                        sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[j].putts);
+                        sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[j].puttCount);
                         if (j < HOLES_PER_NINE) {
                             overTop += PLAYER_ROW_SPACING;
                             DrawCenteredNarrowText(

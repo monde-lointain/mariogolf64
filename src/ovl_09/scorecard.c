@@ -463,11 +463,12 @@ void StartScorecardTally(s32 layout) {
         case SCORECARD_LAYOUT_MATCH:
             holeIndex = g_Scorecard.content.holeIndex - 1;
             if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-                if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
+                if (g_Players[0].holes[holeIndex].strokeCount <
+                    g_Players[1].holes[holeIndex].strokeCount) {
                     song = SONG_HOLE_WON;
                 }
-                else if (g_Players[1].holes[holeIndex].strokes <
-                    g_Players[0].holes[holeIndex].strokes) {
+                else if (g_Players[1].holes[holeIndex].strokeCount <
+                    g_Players[0].holes[holeIndex].strokeCount) {
                     song = SONG_HOLE_LOST;
                 }
                 else {
@@ -476,8 +477,8 @@ void StartScorecardTally(s32 layout) {
             }
             else {
                 song = SONG_HOLE_WON;
-                if (g_Players[0].holes[holeIndex].strokes ==
-                    g_Players[1].holes[holeIndex].strokes) {
+                if (g_Players[0].holes[holeIndex].strokeCount ==
+                    g_Players[1].holes[holeIndex].strokeCount) {
 HALVED:
 
                     song = SONG_HOLE_HALVED;
@@ -485,11 +486,12 @@ HALVED:
             }
 
             PlaySong(song, 0);
-            if (g_Players[0].holes[holeIndex].strokes == g_Players[1].holes[holeIndex].strokes) {
+            if (g_Players[0].holes[holeIndex].strokeCount ==
+                g_Players[1].holes[holeIndex].strokeCount) {
                 g_Scorecard.holeWinnerIndex = HOLE_WINNER_HALVED;
             }
-            else if (g_Players[0].holes[holeIndex].strokes <
-                g_Players[1].holes[holeIndex].strokes) {
+            else if (g_Players[0].holes[holeIndex].strokeCount <
+                g_Players[1].holes[holeIndex].strokeCount) {
                 g_Scorecard.holeWinnerIndex = 0;
             }
             else {
@@ -503,7 +505,7 @@ HALVED:
         case SCORECARD_LAYOUT_SKINS:
             g_Scorecard.holeWinnerIndex = HOLE_WINNER_HALVED;
             for (i = 0; i != g_GameState.playerCount; i++) {
-                if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokes != 0) {
+                if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokeCount != 0) {
                     g_Scorecard.holeWinnerIndex = i;
                 }
             }
@@ -621,7 +623,7 @@ HALVED:
             for (i = 0; i != g_GameState.playerCount; i++) {
                 CourseRecord *course = &g_CourseRecords[GetCourseRecordIndex()];
 
-                if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokes -
+                if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokeCount -
                         course->holes[g_Scorecard.content.holeIndex - 1].par +
                         GetHandicapOffset(
                             g_GameState.courseIndex,
@@ -639,13 +641,13 @@ HALVED:
             break;
         case GAME_MODE_MATCH_GAME:
         case GAME_MODE_GET_CHARACTER:
-            if (g_Players[0].holes[g_Scorecard.content.holeIndex - 1].strokes <
-                g_Players[1].holes[g_Scorecard.content.holeIndex - 1].strokes) {
+            if (g_Players[0].holes[g_Scorecard.content.holeIndex - 1].strokeCount <
+                g_Players[1].holes[g_Scorecard.content.holeIndex - 1].strokeCount) {
                 g_Scorecard.content.faceImageOffsets[0] = 0;
                 g_Scorecard.content.faceImageOffsets[1] = BEHIND_FACE_IMAGE_OFFSET;
             }
-            else if (g_Players[1].holes[g_Scorecard.content.holeIndex - 1].strokes <
-                g_Players[0].holes[g_Scorecard.content.holeIndex - 1].strokes) {
+            else if (g_Players[1].holes[g_Scorecard.content.holeIndex - 1].strokeCount <
+                g_Players[0].holes[g_Scorecard.content.holeIndex - 1].strokeCount) {
                 g_Scorecard.content.faceImageOffsets[0] = BEHIND_FACE_IMAGE_OFFSET;
                 g_Scorecard.content.faceImageOffsets[1] = 0;
             }
@@ -660,8 +662,8 @@ HALVED:
             for (i = 0; i != g_GameState.playerCount; i++) {
                 g_Scorecard.content.faceImageOffsets[i] = 0;
                 for (j = 0; j != g_GameState.playerCount; j++) {
-                    if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokes <
-                        g_Players[j].holes[g_Scorecard.content.holeIndex - 1].strokes) {
+                    if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokeCount <
+                        g_Players[j].holes[g_Scorecard.content.holeIndex - 1].strokeCount) {
                         g_Scorecard.content.faceImageOffsets[i] = BEHIND_FACE_IMAGE_OFFSET;
                     }
                 }
@@ -749,10 +751,10 @@ void SetScorecardLayout(s32 layout) {
             holesWon[0] = 0;
             holesWon[1] = 0;
             for (i = GetFirstHoleIndex(); i != g_Scorecard.content.holeIndex; i++) {
-                if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
+                if (g_Players[0].holes[i].strokeCount < g_Players[1].holes[i].strokeCount) {
                     holesWon[0]++;
                 }
-                else if (g_Players[1].holes[i].strokes < g_Players[0].holes[i].strokes) {
+                else if (g_Players[1].holes[i].strokeCount < g_Players[0].holes[i].strokeCount) {
                     holesWon[1]++;
                 }
             }
@@ -1436,11 +1438,12 @@ s32 LoadResultCharacters(void) {
     LoadCharacter(1, g_Players[1].characterIndex + CHARACTER_COUNT, g_Players[1].paletteIndex);
     song = SONG_MATCH_RESULT;
     if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-        song = g_Players[0].holes[holeIndex].strokes;
-        if (song < g_Players[1].holes[holeIndex].strokes) {
+        song = g_Players[0].holes[holeIndex].strokeCount;
+        if (song < g_Players[1].holes[holeIndex].strokeCount) {
             song = SONG_HOLE_WON;
         }
-        else if (g_Players[1].holes[holeIndex].strokes < g_Players[0].holes[holeIndex].strokes) {
+        else if (g_Players[1].holes[holeIndex].strokeCount <
+            g_Players[0].holes[holeIndex].strokeCount) {
             song = SONG_HOLE_LOST;
         }
         else {
@@ -1449,11 +1452,12 @@ s32 LoadResultCharacters(void) {
     }
 
     PlaySong(song, 0);
-    if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
+    if (g_Players[0].holes[holeIndex].strokeCount < g_Players[1].holes[holeIndex].strokeCount) {
         SetCharacterAnimation(0, REACTION_ANIMATION_BIRDIE);
         SetCharacterAnimation(1, REACTION_ANIMATION_BOGEY);
     }
-    else if (g_Players[1].holes[holeIndex].strokes < g_Players[0].holes[holeIndex].strokes) {
+    else if (g_Players[1].holes[holeIndex].strokeCount <
+        g_Players[0].holes[holeIndex].strokeCount) {
         SetCharacterAnimation(0, REACTION_ANIMATION_BOGEY);
         SetCharacterAnimation(1, REACTION_ANIMATION_BIRDIE);
     }

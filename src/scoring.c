@@ -85,12 +85,12 @@ s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
 
     holesAfterCurrent = holesAfterCurrent - g_GameState.holeIndex - 1;
     for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex; holeIndex++) {
-        if (g_Players[playerIndex].holes[holeIndex].strokes <
-            g_Players[opponentIndex].holes[holeIndex].strokes) {
+        if (g_Players[playerIndex].holes[holeIndex].strokeCount <
+            g_Players[opponentIndex].holes[holeIndex].strokeCount) {
             lead++;
         }
-        else if (g_Players[opponentIndex].holes[holeIndex].strokes <
-            g_Players[playerIndex].holes[holeIndex].strokes) {
+        else if (g_Players[opponentIndex].holes[holeIndex].strokeCount <
+            g_Players[playerIndex].holes[holeIndex].strokeCount) {
             lead--;
         }
     }
@@ -126,13 +126,13 @@ s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
     lead = 0;
     if (g_GameState.isSuddenDeath) {
         for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex; holeIndex++) {
-            playerScore = g_Players[playerIndex].holes[holeIndex].strokes +
+            playerScore = g_Players[playerIndex].holes[holeIndex].strokeCount +
                 GetHandicapOffset(
                     g_GameState.courseIndex,
                     holeIndex,
                     g_Players[playerIndex].handicap
                 );
-            opponentScore = g_Players[opponentIndex].holes[holeIndex].strokes +
+            opponentScore = g_Players[opponentIndex].holes[holeIndex].strokeCount +
                 GetHandicapOffset(
                     g_GameState.courseIndex,
                     holeIndex,
@@ -152,9 +152,9 @@ s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
 
     holesAfterCurrent = endHoleIndex - g_GameState.holeIndex - 1;
     for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex; holeIndex++) {
-        playerScore = g_Players[playerIndex].holes[holeIndex].strokes +
+        playerScore = g_Players[playerIndex].holes[holeIndex].strokeCount +
             GetHandicapOffset(g_GameState.courseIndex, holeIndex, g_Players[playerIndex].handicap);
-        opponentScore = g_Players[opponentIndex].holes[holeIndex].strokes +
+        opponentScore = g_Players[opponentIndex].holes[holeIndex].strokeCount +
             GetHandicapOffset(
                 g_GameState.courseIndex,
                 holeIndex,

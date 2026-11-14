@@ -2871,13 +2871,15 @@ void UpdateTurns(void) {
         if (g_GameState.replayKind == REPLAY_KIND_NONE &&
             IsOneOnOneMatchMode(g_GameState.gameMode) &&
             g_Players[playerIndex ^ 1].holeStatus == HOLE_STATUS_HOLED_OUT) {
-            g_Players[playerIndex].holes[g_GameState.holeIndex % COURSE_HOLE_COUNT].strokes =
+            g_Players[playerIndex].holes[g_GameState.holeIndex % COURSE_HOLE_COUNT].strokeCount =
                 g_Players[playerIndex ^ 1]
                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                    .strokes +
+                    .strokeCount +
                 1;
             g_Players[playerIndex].strokeCount =
-                g_Players[playerIndex].holes[g_GameState.holeIndex % COURSE_HOLE_COUNT].strokes -
+                g_Players[playerIndex]
+                    .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                    .strokeCount -
                 GetHandicapOffset(
                     g_GameState.courseIndex,
                     g_GameState.holeIndex,
@@ -2887,7 +2889,7 @@ void UpdateTurns(void) {
         }
         else {
             g_Players[playerIndex].strokeCount = g_HoleSetup.par * GIVE_UP_PAR_MULTIPLE;
-            g_Players[playerIndex].holes[g_GameState.holeIndex % COURSE_HOLE_COUNT].strokes =
+            g_Players[playerIndex].holes[g_GameState.holeIndex % COURSE_HOLE_COUNT].strokeCount =
                 g_HoleSetup.par * GIVE_UP_PAR_MULTIPLE;
             g_Players[playerIndex].holeStatus = HOLE_STATUS_OUT;
         }
@@ -2898,15 +2900,16 @@ void UpdateTurns(void) {
             if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
                 opponentIndex = playerIndex ^ 1;
                 g_Players[opponentIndex].holeStatus = HOLE_STATUS_HOLED_OUT;
-                g_Players[opponentIndex].holes[g_GameState.holeIndex % COURSE_HOLE_COUNT].strokes =
-                    g_Players[playerIndex]
-                        .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                        .strokes -
+                g_Players[opponentIndex]
+                    .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                    .strokeCount = g_Players[playerIndex]
+                                       .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                                       .strokeCount -
                     1;
                 g_Players[opponentIndex].strokeCount =
                     g_Players[opponentIndex]
                         .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                        .strokes -
+                        .strokeCount -
                     GetHandicapOffset(
                         g_GameState.courseIndex,
                         g_GameState.holeIndex,
@@ -4340,14 +4343,14 @@ void UpdateTurns(void) {
                         g_Players[playerIndex].holeStatus = HOLE_STATUS_HOLED_OUT;
                         g_Players[playerIndex]
                             .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                            .strokes = g_Players[playerIndex].strokeCount;
+                            .strokeCount = g_Players[playerIndex].strokeCount;
                         if (g_GameState.replayKind == REPLAY_KIND_NONE &&
                             (IsOneOnOneMatchMode(g_GameState.gameMode) ||
                                 (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                                     g_GameState.gameMode == GAME_MODE_CLUB_SLOTS))) {
                             g_Players[playerIndex]
                                 .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                                .strokes += GetHandicapOffset(
+                                .strokeCount += GetHandicapOffset(
                                 GetCourseRecordIndex(),
                                 g_GameState.holeIndex,
                                 g_Players[playerIndex].handicap
@@ -4357,7 +4360,7 @@ void UpdateTurns(void) {
                         nextState = PLAYER_STATE_STARTING_REACTION;
                         g_Players[playerIndex]
                             .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                            .putts = g_Players[playerIndex].puttCount;
+                            .puttCount = g_Players[playerIndex].puttCount;
                         FreeCharacterAndReactionLight(0);
                     }
                     else {
@@ -4410,7 +4413,7 @@ void UpdateTurns(void) {
                                 g_HoleSetup.par * STROKE_LIMIT_PER_PAR) {
                                 g_Players[playerIndex]
                                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                                    .strokes = 0;
+                                    .strokeCount = 0;
                                 g_Players[playerIndex].holeStatus = HOLE_STATUS_OUT;
                             }
 
@@ -4420,7 +4423,7 @@ void UpdateTurns(void) {
                                 g_Players[playerIndex].strokeCount =
                                     g_Players[playerIndex]
                                         .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                                        .strokes = 0;
+                                        .strokeCount = 0;
                                 nextState = PLAYER_STATE_STARTING_REACTION;
                             }
                             else {
@@ -4433,7 +4436,7 @@ void UpdateTurns(void) {
                             g_HoleSetup.par * STROKE_LIMIT_PER_PAR) {
                             g_Players[playerIndex]
                                 .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                                .strokes = g_HoleSetup.par * STROKE_LIMIT_PER_PAR;
+                                .strokeCount = g_HoleSetup.par * STROKE_LIMIT_PER_PAR;
                             g_Players[playerIndex].holeStatus = HOLE_STATUS_OUT;
                             if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
                                 g_Players[playerIndex].stopwatchFrameCount +=
@@ -4822,14 +4825,15 @@ void UpdateTurns(void) {
                             if (result == MATCH_SIDE_PLAYER) {
                                 g_Players[playerIndex ^ 1]
                                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                                    .strokes = g_Players[playerIndex]
-                                                   .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                                                   .strokes +
+                                    .strokeCount =
+                                    g_Players[playerIndex]
+                                        .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                                        .strokeCount +
                                     1;
                                 g_Players[playerIndex ^ 1].strokeCount =
                                     g_Players[playerIndex ^ 1]
                                         .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                                        .strokes -
+                                        .strokeCount -
                                     GetHandicapOffset(
                                         GetCourseRecordIndex(),
                                         g_GameState.holeIndex,
@@ -4840,14 +4844,15 @@ void UpdateTurns(void) {
                             else if (result == MATCH_SIDE_OPPONENT) {
                                 g_Players[playerIndex ^ 1]
                                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                                    .strokes = g_Players[playerIndex]
-                                                   .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                                                   .strokes -
+                                    .strokeCount =
+                                    g_Players[playerIndex]
+                                        .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                                        .strokeCount -
                                     1;
                                 g_Players[playerIndex ^ 1].strokeCount =
                                     g_Players[playerIndex ^ 1]
                                         .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                                        .strokes -
+                                        .strokeCount -
                                     GetHandicapOffset(
                                         GetCourseRecordIndex(),
                                         g_GameState.holeIndex,
@@ -4858,13 +4863,14 @@ void UpdateTurns(void) {
                                 g_Players[playerIndex ^ 1].holeStatus == HOLE_STATUS_PLAYING) {
                                 g_Players[playerIndex ^ 1]
                                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                                    .strokes = g_Players[playerIndex]
-                                                   .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                                                   .strokes;
+                                    .strokeCount =
+                                    g_Players[playerIndex]
+                                        .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                                        .strokeCount;
                                 g_Players[playerIndex ^ 1].strokeCount =
                                     g_Players[playerIndex ^ 1]
                                         .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                                        .strokes -
+                                        .strokeCount -
                                     GetHandicapOffset(
                                         GetCourseRecordIndex(),
                                         g_GameState.holeIndex,

@@ -27,8 +27,8 @@ extern u16 *g_PlayerFacePalettes[PLAYER_COUNT_MAX];
 #define UNCOUNTED_PUTTS (-1)
 
 typedef struct PlayerHole {
-    s8 strokes;
-    s8 putts;
+    s8 strokeCount;
+    s8 puttCount;
 } PlayerHole;
 
 #define PLAYER_NAME_SIZE 12

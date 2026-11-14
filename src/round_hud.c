@@ -1084,12 +1084,12 @@ void StartShotPanel(void) {
             case GAME_MODE_GET_CHARACTER:
                 g_RoundHud.skinsTotals[0] = 0;
                 for (holeIndex = 0; holeIndex != g_GameState.holeIndex; holeIndex++) {
-                    if (g_Players[0].holes[holeIndex].strokes <
-                        g_Players[1].holes[holeIndex].strokes) {
+                    if (g_Players[0].holes[holeIndex].strokeCount <
+                        g_Players[1].holes[holeIndex].strokeCount) {
                         g_RoundHud.skinsTotals[0]--;
                     }
-                    else if (g_Players[1].holes[holeIndex].strokes <
-                        g_Players[0].holes[holeIndex].strokes) {
+                    else if (g_Players[1].holes[holeIndex].strokeCount <
+                        g_Players[0].holes[holeIndex].strokeCount) {
                         g_RoundHud.skinsTotals[0]++;
                     }
                 }

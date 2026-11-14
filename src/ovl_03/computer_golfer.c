@@ -1030,7 +1030,7 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
     }
 
     for (hole = 0; hole < g_GameState.holeIndex; hole++) {
-        strokes = g_Players[playerIndex].holes[hole].strokes;
+        strokes = g_Players[playerIndex].holes[hole].strokeCount;
         par = g_CourseRecords[g_GameState.courseIndex].holes[hole].par;
         if ((par * 2) + 1 < strokes) {
             strokes = par - 1;
@@ -1319,7 +1319,8 @@ s32 ChooseHoleStrokeTarget(void) {
 
             for (index = 0; index < COURSE_HOLE_COUNT; index++) {
                 if (holes[index] >= HOLES_PER_NINE && holes[index] < g_GameState.holeIndex) {
-                    targetLeftToPar += g_Players[f_Shot.playerIndex].holes[holes[index]].strokes -
+                    targetLeftToPar +=
+                        g_Players[f_Shot.playerIndex].holes[holes[index]].strokeCount -
                         g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
                 }
             }
