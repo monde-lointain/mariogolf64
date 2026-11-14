@@ -53,12 +53,12 @@ float fabsf(float x) {
 
 float acosf(float x) {
     float z;
-    float p;
-    float q;
-    float r;
-    float w;
-    float s;
-    float c;
+    float numerator;
+    float denominator;
+    float ratio;
+    float correction;
+    float sqrtZ;
+    float sqrtLow;
     float sqrtHigh;
     s32 word;
     s32 magnitude;
@@ -83,46 +83,49 @@ float acosf(float x) {
         }
 
         z = x * x;
-        p = z *
+        numerator = z *
             (f_AsinP0 +
                 (z *
                     (f_AsinP1 +
                         (z * (f_AsinP2 + (z * (f_AsinP3 + (z * (f_AsinP4 + (z * f_AsinP5))))))))));
-        q = f_One + (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
-        r = p / q;
-        return f_HalfPiHigh - (x - (f_HalfPiLow - (x * r)));
+        denominator =
+            f_One + (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
+        ratio = numerator / denominator;
+        return f_HalfPiHigh - (x - (f_HalfPiLow - (x * ratio)));
     }
     else if (word < 0) {
         z = (f_One + x) * 0.5f;
-        p = z *
+        numerator = z *
             (f_AsinP0 +
                 (z *
                     (f_AsinP1 +
                         (z * (f_AsinP2 + (z * (f_AsinP3 + (z * (f_AsinP4 + (z * f_AsinP5))))))))));
-        q = f_One + (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
-        s = sqrtf(z);
-        r = p / q;
-        w = (r * s) - f_HalfPiLow;
-        return f_Pi - (2.0f * (s + w));
+        denominator =
+            f_One + (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
+        sqrtZ = sqrtf(z);
+        ratio = numerator / denominator;
+        correction = (ratio * sqrtZ) - f_HalfPiLow;
+        return f_Pi - (2.0f * (sqrtZ + correction));
     }
     else {
         s32 sqrtHighWord;
 
         z = (f_One - x) * 0.5f;
-        s = sqrtf(z);
-        sqrtHigh = s;
+        sqrtZ = sqrtf(z);
+        sqrtHigh = sqrtZ;
         GET_FLOAT_WORD(sqrtHighWord, sqrtHigh);
         SET_FLOAT_WORD(sqrtHigh, sqrtHighWord & 0xFFFFF000);
-        c = (z - (sqrtHigh * sqrtHigh)) / (s + sqrtHigh);
-        p = z *
+        sqrtLow = (z - (sqrtHigh * sqrtHigh)) / (sqrtZ + sqrtHigh);
+        numerator = z *
             (f_AsinP0 +
                 (z *
                     (f_AsinP1 +
                         (z * (f_AsinP2 + (z * (f_AsinP3 + (z * (f_AsinP4 + (z * f_AsinP5))))))))));
-        q = f_One + (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
-        r = p / q;
-        w = (r * s) + c;
-        return 2.0f * (sqrtHigh + w);
+        denominator =
+            f_One + (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
+        ratio = numerator / denominator;
+        correction = (ratio * sqrtZ) + sqrtLow;
+        return 2.0f * (sqrtHigh + correction);
     }
 }
 
@@ -133,7 +136,7 @@ static const float f_HalfPi = 1.5707963705e+00f;
 static const float f_PiLow = 1.5099578832e-07f;
 
 float atan2f(float y, float x) {
-    float z;
+    float angle;
     s32 exponentDifference;
     s32 quadrant;
     s32 xWord;
@@ -204,29 +207,29 @@ float atan2f(float y, float x) {
 
     exponentDifference = (yMagnitude - xMagnitude) >> 23;
     if (exponentDifference > 60) {
-        z = f_HalfPi + (0.5f * f_PiLow);
+        angle = f_HalfPi + (0.5f * f_PiLow);
     }
     else if (xWord < 0 && exponentDifference < -60) {
-        z = 0.0f;
+        angle = 0.0f;
     }
     else {
-        z = atanf(fabsf(y / x));
+        angle = atanf(fabsf(y / x));
     }
 
     switch (quadrant) {
         case 0:
-            return z;
+            return angle;
         case 1: {
-            u32 zWord;
+            u32 angleWord;
 
-            GET_FLOAT_WORD(zWord, z);
-            SET_FLOAT_WORD(z, zWord ^ SIGN_MASK);
+            GET_FLOAT_WORD(angleWord, angle);
+            SET_FLOAT_WORD(angle, angleWord ^ SIGN_MASK);
         }
-            return z;
+            return angle;
         case 2:
-            return f_Pi - (z - f_PiLow);
+            return f_Pi - (angle - f_PiLow);
         default:
-            return (z - f_PiLow) - f_Pi;
+            return (angle - f_PiLow) - f_Pi;
     }
 }
 
@@ -258,10 +261,11 @@ static const float f_AtanTerms[] = {
 static const float f_Huge = 1.0e30f;
 
 float atanf(float x) {
-    float w;
+    float xFourth;
     float oddSum;
     float evenSum;
-    float z;
+    float xSquared;
+    float angle;
     s32 magnitude;
     s32 word;
     s32 reductionIndex;
@@ -314,28 +318,31 @@ float atanf(float x) {
         }
     }
 
-    z = x * x;
-    w = z * z;
-    oddSum = z *
+    xSquared = x * x;
+    xFourth = xSquared * xSquared;
+    oddSum = xSquared *
         (f_AtanTerms[0] +
-            (w *
+            (xFourth *
                 (f_AtanTerms[2] +
-                    (w *
+                    (xFourth *
                         (f_AtanTerms[4] +
-                            (w *
+                            (xFourth *
                                 (f_AtanTerms[6] +
-                                    (w * (f_AtanTerms[8] + (w * f_AtanTerms[10]))))))))));
-    evenSum = w *
+                                    (xFourth *
+                                        (f_AtanTerms[8] + (xFourth * f_AtanTerms[10]))))))))));
+    evenSum = xFourth *
         (f_AtanTerms[1] +
-            (w *
+            (xFourth *
                 (f_AtanTerms[3] +
-                    (w * (f_AtanTerms[5] + (w * (f_AtanTerms[7] + (w * f_AtanTerms[9]))))))));
+                    (xFourth *
+                        (f_AtanTerms[5] +
+                            (xFourth * (f_AtanTerms[7] + (xFourth * f_AtanTerms[9]))))))));
     if (reductionIndex < 0) {
         return x - (x * (oddSum + evenSum));
     }
     else {
-        z = f_AtanHigh[reductionIndex] -
+        angle = f_AtanHigh[reductionIndex] -
             (((x * (oddSum + evenSum)) - f_AtanLow[reductionIndex]) - x);
-        return (word < 0) ? -z : z;
+        return (word < 0) ? -angle : angle;
     }
 }
