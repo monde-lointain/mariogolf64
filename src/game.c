@@ -81,6 +81,9 @@
 #define SCREEN_TEST_FADE_STEP 8
 
 #define INSET_VIEW_STEP_COUNT 8
+// The sounds play one step into each animation.
+#define INSET_VIEW_OPEN_SOUND_STEP 1
+#define INSET_VIEW_CLOSE_SOUND_STEP (INSET_VIEW_STEP_COUNT - 1)
 
 typedef struct InsetViewRectangle {
     s32 centerX;
@@ -3380,7 +3383,7 @@ void UpdateInsetView(void) {
     InsetViewState *animation = &g_InsetView.animation;
 
     if (*animation == INSET_VIEW_OPENING) {
-        if (g_InsetView.step == 1) {
+        if (g_InsetView.step == INSET_VIEW_OPEN_SOUND_STEP) {
             PlaySoundWithEffects(
                 SOUND_PROMPT_OPEN,
                 g_NextSoundChannel,
@@ -3398,7 +3401,7 @@ void UpdateInsetView(void) {
         }
     }
     else if (*animation == INSET_VIEW_CLOSING) {
-        if (g_InsetView.step == INSET_VIEW_STEP_COUNT - 1) {
+        if (g_InsetView.step == INSET_VIEW_CLOSE_SOUND_STEP) {
             PlaySoundWithEffects(
                 SOUND_PROMPT_CLOSE,
                 g_NextSoundChannel,
