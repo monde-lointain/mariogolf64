@@ -4401,7 +4401,7 @@ s32 StepToClubChoice(CurrentShot *targetShot) {
     return !hasStepped;
 }
 
-void HandleClubInput(void) {
+void UpdateClubControls(void) {
     s32 clubSlot;
     u16 buttons;
 
@@ -4436,7 +4436,7 @@ static inline Boolean IsFartherThan(s32 distance, s32 limit) {
     return distance > limit;
 }
 
-void HandleShotModeInput(void) {
+void UpdateShotModeControls(void) {
     Club *club = GetSelectedClub();
     s32 cupDistance = GetCupDistance(
                           g_CurrentShot.ballPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],

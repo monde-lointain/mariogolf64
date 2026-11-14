@@ -3483,8 +3483,8 @@ void UpdateTurns(void) {
                         else {
                             SetRoundHudPartsShown(1);
                         }
-                        HandleClubInput();
-                        HandleShotModeInput();
+                        UpdateClubControls();
+                        UpdateShotModeControls();
                         PoseGolferForShot();
                         f_ShotLaunch.shotMode = g_CurrentShot.shotMode;
                         UpdateAimControls();
@@ -3576,10 +3576,10 @@ void UpdateTurns(void) {
                     }
                     else {
                         if (g_ImpactPointState == IMPACT_POINT_OFF) {
-                            HandleClubInput();
+                            UpdateClubControls();
                         }
 
-                        HandleShotModeInput();
+                        UpdateShotModeControls();
                     }
 
                     PoseGolferForShot();
