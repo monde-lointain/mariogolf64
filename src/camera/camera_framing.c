@@ -1,3 +1,8 @@
+/*
+ * Places the first camera so that its view takes in a set of spheres, looking
+ * from a given direction.
+ */
+
 #include "camera/camera_framing.h"
 
 #include <math.h>
@@ -9,15 +14,21 @@
 #include "math/math_util.h"
 #include "system/compiler.h"
 
+// How many spheres f_FramedSphereCenters has room for
 #define FRAMED_SPHERE_CAPACITY 8
 
+// A pitch whose cosine is closer to zero than this is turned further
 #define STEEP_PITCH_COSINE 0.1f
 
+// The pi of these angles' conversions, rounded to six places
 #define FRAMING_PI 3.141593f
 #define FramingDegreesToRadians(degrees) ((degrees) * (FRAMING_PI / 180))
 
+// The starting x and y bounds
 #define FAR_EXTENT 30000.0f
 
+// The room kept between the eye and the nearest sphere along z. It is also the
+// starting z bounds and how far along z the look-at point lies from the eye.
 #define Z_MARGIN 10.0f
 
 static Vec3 f_FramedSphereCenters[FRAMED_SPHERE_CAPACITY];
@@ -43,6 +54,7 @@ void ClearFramedSpheres(void) {
     f_FramedSphereCount = 0;
 }
 
+// Adds a sphere for FrameSpheres to keep in view; extra spheres are ignored
 void AddFramedSphere(Vec3 center, f32 radius) {
     if (f_FramedSphereCount < FRAMED_SPHERE_CAPACITY) {
         f_FramedSphereCenters[f_FramedSphereCount][AXIS_X] = center[AXIS_X];
@@ -62,6 +74,7 @@ void AddFramedSphere(Vec3 center, f32 radius) {
     }
 }
 
+// Sets the direction, in radians, from which FrameSpheres looks
 void SetFramingAngles(Radians pitch, Radians yaw) {
     Mat4 pitchRotation;
     Mat4 yawRotation;
@@ -90,6 +103,8 @@ void TransformPoint(Mat4 matrix, Vec3 point, Vec3 transformed) {
         (matrix[0][2] * x) + (matrix[1][2] * y) + (matrix[2][2] * z) + matrix[3][2];
 }
 
+// Places the eye and look-at point so that the first camera's field of view
+// takes in every framed sphere, looking from the framing angles
 void FrameSpheres(f32 depthOffset) {
     Vec3 point;
     Mat4 rotation;
@@ -127,6 +142,10 @@ void FrameSpheres(f32 depthOffset) {
     f32 margin;
     s32 sphereIndex;
 
+    // The margin is a variable to match: the original loads it anew at each use,
+    // as the compiler does for a constant it keeps in a variable that gets no
+    // register. With the look-at distance a constant of its own, 20 words
+    // differ from the original's (2 in shape).
     margin = Z_MARGIN;
     yMin = FAR_EXTENT;
     xMin = yMin;
@@ -201,6 +220,9 @@ void FrameSpheres(f32 depthOffset) {
         osSyncPrintf("xd %f yd %f xzd %f yzd %f\n", eyeX, eyeY, horizontalEyeZ, verticalEyeZ);
     }
     eyeZ = horizontalEyeZ;
+    // Negated, as GCC keeps the negation of a floating-point comparison
+    // rather than inverting it: with verticalEyeZ > horizontalEyeZ, 4 words differ
+    // from the original's, all in shape
     if (!(verticalEyeZ <= horizontalEyeZ)) {
         eyeZ = verticalEyeZ;
     }
@@ -241,6 +263,10 @@ void FrameSpheres(f32 depthOffset) {
         }
     }
 
+    // The eye backs away until the nearest sphere is the margin in front of it.
+    // Its new depth has a variable of its own until the edges are worked out, to
+    // match: with the margin added to eyeZ itself, 236 words differ from the
+    // original's (30 in shape).
     clearEyeZ = margin - zMin + eyeZ;
     right = (clearEyeZ - horizontalEyeZ) * tan(FramingDegreesToRadians(rightAngle));
     left = (clearEyeZ - horizontalEyeZ) * tan(FramingDegreesToRadians(leftAngle));

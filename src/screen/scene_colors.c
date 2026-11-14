@@ -1,3 +1,8 @@
+/*
+ * Derives the shaded quads' colors from the scene's colors, and draws the
+ * plane of two blended texture layers.
+ */
+
 #include "screen/scene_colors.h"
 
 #include <ultra64.h>
@@ -12,6 +17,8 @@
 #include "system/compiler.h"
 #include "system/memory_address.h"
 
+// Each half of f_ShadedVertices is two quads; the second takes the derived
+// color
 #define SHADED_QUAD_START QUAD_VERTEX_COUNT
 
 #define PLANE_TILE_SIZE 16
@@ -49,6 +56,8 @@ static Vtx f_ShadedVertices[2][2 * QUAD_VERTEX_COUNT] = {
 Boolean g_UnreadDebugSwitch = FALSE;
 static s32 f_PlaneTextureScroll = 0;
 static s32 f_UnusedWordsAfterPlaneScroll[2] UNUSED = {0};
+// Set by DeriveSceneColors and read by no routine: two words that it clears,
+// the third of the sky colors dimmed, and the first two blended
 static s32 f_UnusedFirstClearedWord;
 static s32 f_UnusedSecondClearedWord;
 static u8 f_UnusedDimmedRed;
@@ -58,6 +67,8 @@ static u8 f_UnusedBlendedRed;
 static u8 f_UnusedBlendedGreen;
 static u8 f_UnusedBlendedBlue;
 
+// Sets the shaded quads of f_ShadedVertices and two unread colors from
+// the colors of the g_SkyColors entry that g_HoleSetup.conditions selects
 void DeriveSceneColors(void) {
     SkyColors *colors;
     s32 vertexOffset;
@@ -66,6 +77,8 @@ void DeriveSceneColors(void) {
     f_UnusedFirstClearedWord = 0;
     f_UnusedSecondClearedWord = 0;
 
+    // This steps through the table a course of colors at a time, unlike
+    // BlendSkyColors
     colors = g_SkyColors
         [(g_HoleSetup.conditions.isRaining * 3) + g_HoleSetup.conditions.sceneColorIndex];
     for (vertexOffset = 0; vertexOffset != QUAD_VERTEX_COUNT; vertexOffset++) {
@@ -91,6 +104,8 @@ void DeriveSceneColors(void) {
 void DoNothing(void) {
 }
 
+// Draws the flat strip of f_TexturePlaneVertices with the two blended
+// texture layers, moving the second layer on by a quarter texel each call
 void DrawTexturePlane(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 

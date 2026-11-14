@@ -1,3 +1,8 @@
+/*
+ * The player's progress in the save: wins against the characters, birdie
+ * badges and tournament places
+ */
+
 #ifndef AWARDS_H
 #define AWARDS_H
 

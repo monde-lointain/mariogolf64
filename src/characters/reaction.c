@@ -1,3 +1,9 @@
+/*
+ * After a hole, the golfer reacts to the score with an animation. These
+ * routines frame the golfer for it, cue its sounds, and pick a flat spot
+ * for it to play on.
+ */
+
 #include "characters/reaction.h"
 
 #include <math.h>
@@ -24,35 +30,52 @@
 #include "system/c_language.h"
 #include "system/compiler.h"
 
+// Reaction sounds take turns on the channels from the first up to the last
 #define FIRST_REACTION_CHANNEL 4
 #define LAST_REACTION_CHANNEL 7
 #define NO_REACTION_SOUND (-1)
 
+// The camera keeps this many course units above the ground
 #define CAMERA_GROUND_CLEARANCE 0x1E00
 
+// ConsiderReactionSpot samples the ground on rings around the spot
 #define SPOT_RING_COUNT 4
 #define SPOT_RING_SPACING 15360.0f
 #define SPOT_SAMPLES_PER_RING 16
+// A sixteenth of a turn
 #define SPOT_SAMPLE_ANGLE 0.3926991f
+// A spot this near a billboard's edge, in course units, counts as rough
 #define SPOT_BILLBOARD_CLEARANCE 0x12C00
 #define NEAR_BILLBOARD_ROUGHNESS 0x465000
+// A new spot replaces the last only if it is less than half as rough, and
+// the last is rougher than this
 #define SPOT_SMOOTH_ENOUGH_ROUGHNESS 0xB400
 
+// The framings look at this point of the character
 #define REACTION_FOCUS_POINT 1
+// The camera closes in from the start distance to the end one over the frames
 #define REACTION_START_DISTANCE 76800.0f
 #define REACTION_END_DISTANCE 30720.0f
 #define REACTION_ZOOM_RATE 0.025f
 #define REACTION_EASE_RATE 0.1f
+// Kid's camera turns this far a frame, a sixty-fourth of a turn
 #define KID_TURN_STEP 0.049087387f
+// Sherry's eagle effects run for this many frames from this one
 #define SHERRY_EFFECT_START_FRAME 15
 #define SHERRY_EFFECT_FRAME_COUNT 37
+// Baby Mario's camera keeps higher above the ground, and his bogey effects
+// start at this frame
 #define BABY_MARIO_GROUND_CLEARANCE 0x2400
 #define BABY_MARIO_EFFECT_START_FRAME 44
 #define WARIO_EFFECT_START_FRAME 20
 #define MARIO_EFFECT_START_FRAME 10
+// The length of a light direction, the largest an s8 holds
 #define LIGHT_DIRECTION_LENGTH 127.0f
+// The eye is this much below the focus, where heights grow downward
 #define REACTION_EYE_DROP 1.5f
 
+// The framings' own distances, in course units, and rates. The camera of
+// most closes in from FAR_REACTION_START_DISTANCE.
 #define FAR_REACTION_START_DISTANCE 107520.0f
 #define MARIO_END_DISTANCE 38400.0f
 #define WARIO_START_DISTANCE 92160.0f
@@ -65,9 +88,12 @@
 #define DONKEY_KONG_EASE_RATE 0.08f
 #define KID_EASE_RATE 0.3f
 
+// The framings' own heights, in world units, where heights grow downward:
+// a rise is subtracted and a drop added. An eye's rise is over the focus.
 #define MARIO_EAGLE_FOCUS_RISE 4.5f
 #define MARIO_EYE_RISE 1.5f
 #define MARIO_PAR_EYE_RISE 7.5f
+// Wario's focus is his shadow's point, raised to his body
 #define WARIO_FOCUS_ABOVE_SHADOW 15.0f
 #define WARIO_BIRDIE_FOCUS_DROP 1.5f
 #define WARIO_EYE_RISE 4.5f
@@ -78,6 +104,8 @@
 #define AZALEA_EYE_RISE 7.5f
 #define PEACH_FOCUS_DROP 4.5f
 
+// How far the low views of IsReactionViewLow raise what the camera looks at
+// and drop the eye, by default and for some characters
 #define LOW_VIEW_LOOK_AT_RISE 4.5f
 #define LOW_VIEW_EYE_DROP 4.5f
 #define LOW_VIEW_SHORT_EYE_DROP 3.0f
@@ -86,26 +114,37 @@
 #define BOWSER_EAGLE_LOW_VIEW_EYE_DROP 9.0f
 #define BOWSER_LOW_VIEW_SHIFT 3.0f
 
+// Most reaction effects start from this character point
 #define REACTION_EFFECT_POINT 3
+// Yoshi's eagle sparkles on every third frame
 #define YOSHI_SPARKLE_INTERVAL 3
+// Each frame, Sherry sparkles at one point of each of two runs of points,
+// which start at these
 #define SHERRY_SPARKLE_RUN_LENGTH 3
 #define SHERRY_FIRST_SPARKLE_POINT 3
 #define SHERRY_SECOND_SPARKLE_POINT 6
+// Baby Mario's tears fall from these points, to either side, on alternate
+// frames
 #define EVEN_FRAME_TEAR_POINT 3
 #define ODD_FRAME_TEAR_POINT 4
+// A circle spreads, with its sound, at these frames of Bowser's bogey
 #define BOWSER_FIRST_CIRCLE_FRAME 10
 #define BOWSER_SECOND_CIRCLE_FRAME 24
 #define BOWSER_THIRD_CIRCLE_FRAME 33
 
+// PlaceAtReactionSpot stands the character this far from the spot
 #define SPOT_PLACE_DISTANCE 13824.0f
 #define PITCH_REFINEMENT_COUNT 2
 
+// Where UpdateReaction prints the frame number
 #define REACTION_FRAME_COLUMN 3
 #define REACTION_FRAME_ROW 4
 
+// Frames since the reaction began
 static s32 f_ReactionFrame = 0;
-static s32 f_UnusedReactionWord UNUSED = 0;
+static s32 f_UnusedReactionWord UNUSED = 0; // Unused; it is there to match
 
+// The third light is set by the framing routines that light the golfer
 static Lights3 f_ReactionLights = gdSPDefLights3(
     0x60,
     0x60,
@@ -150,15 +189,23 @@ static u8 f_UnusedBufferAfterSpotRoughness[32] UNUSED;
 
 static Boolean8 f_HasReactionSpot;
 
+// Whether the reaction views drop the eye and raise what they look at.
+// It is a macro, as an inline function compiles differently from the
+// original.
 #define IsReactionViewLow() \
     (IsGameFlagSet(GAME_FLAG_LOW_REACTION_VIEWS) || \
         ((g_Scene != SCENE_STAFF_ROLL) && (g_GameState.isSuddenDeath == TRUE)))
 
+// Whether a spot this rough should become the reaction spot: it does when
+// there is none yet, or when it is less than half as rough as one that is
+// not smooth enough. It is a macro, as an inline function compiles
+// differently from the original.
 #define IsBetterReactionSpot(roughness) \
     (!f_HasReactionSpot || \
         (((roughness) * 2 < f_ReactionSpotRoughness) && \
             (f_ReactionSpotRoughness > SPOT_SMOOTH_ENOUGH_ROUGHNESS)))
 
+// Blends from one value to another by the weight, limited to 0 to 1
 f32 BlendClamped(f32 from, f32 to, f32 weight) {
     if (weight < 0.0f) {
         weight = 0.0f;
@@ -171,6 +218,9 @@ f32 BlendClamped(f32 from, f32 to, f32 weight) {
     return (from * (1.0f - weight)) + (to * weight);
 }
 
+// Moves the eye and look-at points the rate of the way from where they were
+// last eased to toward where they are asked to be, for the parts easedParts
+// names. The first call for a part starts it where it is asked to be.
 void EaseReactionView(f32 *eye, f32 *lookAt, f32 rate, s32 easedParts) {
     if (easedParts & EASE_EYE) {
         if (!f_EasedView.isEyeEased) {
@@ -205,6 +255,8 @@ void EaseReactionView(f32 *eye, f32 *lookAt, f32 rate, s32 easedParts) {
     }
 }
 
+// Sets the character's two lights and the reaction's third light, if one is
+// on. It returns whether it set them.
 Boolean AddReactionLight(Gfx **displayListHead, Lights2 *lights) {
     Gfx *gfx = *displayListHead;
 
@@ -220,6 +272,7 @@ Boolean AddReactionLight(Gfx **displayListHead, Lights2 *lights) {
     return FALSE;
 }
 
+// Starts the character's reaction in the slot with the animation
 void StartReaction(u32 slotIndex, CharacterIndex characterIndex, ReactionAnimation animation) {
     f_ReactionCharacter = characterIndex;
     f_HasReactionLight = FALSE;
@@ -234,6 +287,7 @@ void TurnOffReactionLight(void) {
     f_HasReactionLight = FALSE;
 }
 
+// Plays the sound if this is the frame after the given one
 void CueReactionSound(s32 frame, SoundId soundId) {
     if (soundId != NO_REACTION_SOUND && f_ReactionFrame - 1 == frame) {
         PlaySound(soundId, f_ReactionChannel, SOUND_FULL_SCALE);
@@ -244,6 +298,7 @@ void CueReactionSound(s32 frame, SoundId soundId) {
     }
 }
 
+// Cues the sounds of the reaction, by character and animation
 NO_RESULT PlayReactionSounds(void) {
     if (g_Scene == SCENE_STAFF_ROLL) {
         return;
@@ -581,6 +636,8 @@ NO_RESULT PlayReactionSounds(void) {
     }
 }
 
+// Keeps the point CAMERA_GROUND_CLEARANCE above the ground, where heights grow
+// downward
 void KeepAboveGround(f32 *point) {
     f32 highestHeight = (GetGroundHeight(
                              point[AXIS_X] * WORLD_TO_COURSE_SCALE,
@@ -593,10 +650,13 @@ void KeepAboveGround(f32 *point) {
     }
 }
 
+// Frames Mario from farther away and, late in the eagle animation, lights
+// him in yellow along the line from his focus point to his third point
 void FrameMarioReaction(u32 slotIndex, CameraView *view) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     f32 distance;
     f32 focus[AXIS_COUNT];
+    // Pads the frame to match; without it 66 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 lightDirection[AXIS_COUNT];
     f32 lightOrigin[AXIS_COUNT];
@@ -680,10 +740,13 @@ void FrameMarioReaction(u32 slotIndex, CameraView *view) {
     }
 }
 
+// Frames Wario from a point above where his shadow lies, with distances
+// that depend on the animation and an effect late in the eagle animation
 void FrameWarioReaction(u32 slotIndex, CameraView *view) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     f32 distance;
     f32 focus[AXIS_COUNT];
+    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -757,6 +820,8 @@ void FrameWarioReaction(u32 slotIndex, CameraView *view) {
     }
 }
 
+// Frames Baby Mario level with him, closing in slowly, with effects on
+// alternate sides late in the bogey animation
 void FrameBabyMarioReaction(u32 slotIndex, CameraView *view) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     f32 distance = BlendClamped(
@@ -765,6 +830,7 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * BABY_MARIO_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
+    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 eastward;
     f32 southward;
@@ -816,6 +882,8 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView *view) {
     }
 }
 
+// Frames Yoshi from farther away, with an effect every third frame of the eagle
+// animation
 void FrameYoshiReaction(u32 slotIndex, CameraView *view) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     f32 distance = BlendClamped(
@@ -824,6 +892,7 @@ void FrameYoshiReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
+    // Pads the frame to match; without it 28 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -871,6 +940,8 @@ void FrameYoshiReaction(u32 slotIndex, CameraView *view) {
     }
 }
 
+// Frames Bowser from farther away, with effects at three frames of the bogey
+// animation.
 void FrameBowserReaction(u32 slotIndex, CameraView *view) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     f32 distance = BlendClamped(
@@ -879,6 +950,7 @@ void FrameBowserReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
+    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -918,6 +990,7 @@ void FrameBowserReaction(u32 slotIndex, CameraView *view) {
             KeepAboveGround(view->eye);
             EaseReactionView(view->eye, view->lookAt, 1.0f, EASE_EYE | EASE_LOOK_AT);
 
+        // fallthrough
         default:
             view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
             KeepAboveGround(view->eye);
@@ -937,6 +1010,7 @@ void FrameBowserReaction(u32 slotIndex, CameraView *view) {
     }
 }
 
+// Frames Azalea from farther away and from above
 void FrameAzaleaReaction(u32 slotIndex, CameraView *view) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     f32 distance = BlendClamped(
@@ -945,6 +1019,7 @@ void FrameAzaleaReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
+    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -975,6 +1050,7 @@ void FrameAzaleaReaction(u32 slotIndex, CameraView *view) {
     }
 }
 
+// Frames Donkey Kong, easing the camera more slowly
 void FrameDonkeyKongReaction(u32 slotIndex, CameraView *view) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     f32 distance = BlendClamped(
@@ -983,6 +1059,7 @@ void FrameDonkeyKongReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
+    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -1012,6 +1089,7 @@ void FrameDonkeyKongReaction(u32 slotIndex, CameraView *view) {
     }
 }
 
+// Frames the reaction of a character with no framing of its own
 void FrameReaction(u32 slotIndex, CameraView *view) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     f32 distance = BlendClamped(
@@ -1020,6 +1098,7 @@ void FrameReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
+    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -1049,6 +1128,7 @@ void FrameReaction(u32 slotIndex, CameraView *view) {
     }
 }
 
+// Frames Peach, looking lower except after a bogey
 void FramePeachReaction(u32 slotIndex, CameraView *view) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     f32 distance = BlendClamped(
@@ -1057,6 +1137,7 @@ void FramePeachReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
+    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -1090,6 +1171,7 @@ void FramePeachReaction(u32 slotIndex, CameraView *view) {
     }
 }
 
+// Frames Sherry, with effects at her points through the eagle animation
 void FrameSherryReaction(u32 slotIndex, CameraView *view) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     f32 distance = BlendClamped(
@@ -1098,6 +1180,7 @@ void FrameSherryReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
+    // Pads the frame to match; without it 36 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -1139,6 +1222,7 @@ void FrameSherryReaction(u32 slotIndex, CameraView *view) {
     }
 }
 
+// Frames Kid, swinging the camera round to the front as the animation ends
 void FrameKidReaction(u32 slotIndex, CameraView *view) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     f32 distance = BlendClamped(
@@ -1147,6 +1231,7 @@ void FrameKidReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
+    // Pads the frame to match; without it 36 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 turn = (f_ReactionFrame - f_ReactionFrameCount) * KID_TURN_STEP;
     f32 highestHeight;
@@ -1187,6 +1272,8 @@ void FrameKidReaction(u32 slotIndex, CameraView *view) {
     }
 }
 
+// Advances the reaction in the slot by a frame, and frames it with the
+// first camera
 NO_RESULT UpdateReaction(u32 slotIndex) {
     char text[DEBUG_TEXT_BUFFER_SIZE];
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
@@ -1248,10 +1335,16 @@ NO_RESULT UpdateReaction(u32 slotIndex) {
     }
 }
 
+// Forgets the reaction spot, so that the next spot considered is taken
 void ClearReactionSpot(void) {
     f_HasReactionSpot = FALSE;
 }
 
+// Takes the point as the reaction spot if there is none, or if the ground
+// around it is less than half as rough as around the spot and the spot is
+// rough. Roughness adds up the height differences to the point from rings
+// of samples around it, the nearer rings counting more, and is high near a
+// billboard.
 NO_RESULT ConsiderReactionSpot(CoursePoint point) {
     s32 roughness;
     s32 ringNumber;
@@ -1313,9 +1406,13 @@ void GetReactionSpot(CoursePoint point) {
     point[AXIS_Z] = f_ReactionSpot[AXIS_Z];
 }
 
+// Stands a character on the ground SPOT_PLACE_DISTANCE from the reaction
+// spot, a quarter turn from the shot's aim, facing back along the aim. Its
+// pitch is refined twice so the slope matches the ground there.
 void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
     f32 ahead[AXIS_COUNT];
     CoursePoint spot;
+    // Pads the frame to match; without it 48 words differ
     u8 unusedBuffer[0x80] UNUSED;
     Radians heading;
     Radians pitch;
@@ -1360,6 +1457,7 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
     rotation[AXIS_Y] = ((-g_CurrentShot.heading) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
 }
 
+// Whether the eased eye sits at height zero
 Boolean IsEasedEyeHeightZero(void) {
     Boolean isZero;
 

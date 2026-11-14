@@ -1,3 +1,7 @@
+/*
+ * The boot logos
+ */
+
 #ifndef BOOT_LOGOS_H
 #define BOOT_LOGOS_H
 

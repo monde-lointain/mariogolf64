@@ -1,3 +1,7 @@
+/*
+ * Bounds of the ROM segments, which the linker script defines
+ */
+
 #ifndef SEGMENT_SYMBOLS_H
 #define SEGMENT_SYMBOLS_H
 

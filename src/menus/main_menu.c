@@ -1,3 +1,16 @@
+/*
+ * The menus' update, which loads each screen and runs it, and their drawing,
+ * which hands each screen to its draw routine. It holds the title scene of the
+ * menus, the main menu, the clubhouse, the options, the course select and the
+ * mini-golf course select, and the wipes that leave the menus.
+ *
+ * It also draws most of the menu screens: the main menu, the clubhouse, the
+ * options, the help and birdie badge screens, and screens 5, 6, 8, 18, 20, 22,
+ * 23 and 26, as well as the menus' labels, the chosen mode's icon, the
+ * players' characters and the waving Toad, a debug character viewer and a
+ * debug caddy select.
+ */
+
 #include "menus/main_menu.h"
 
 #include <PR/libmus.h>
@@ -5,6 +18,8 @@
 #include <string.h>
 #include <ultra64.h>
 
+// This file's calls of the option queries and of GetChosenBestShot use their
+// whole return register; see save.h and player_stats.h
 #define WIDENS_CHOSEN_OPTIONS
 #define WIDENS_CHOSEN_BEST_SHOT
 
@@ -62,8 +77,10 @@
 #include "system/overlay_manager.h"
 #include "text/text.h"
 
+// The most modes the mode select offers for a player count
 #define MODE_CHOICE_LIMIT 12
 
+// The choices of both main menus; the one without Transmit stops at its options
 #define MAIN_CHOICE_CLUBHOUSE 0
 #define MAIN_CHOICE_HELP 1
 #define MAIN_CHOICE_OPTIONS 2
@@ -72,6 +89,9 @@
 #define MAIN_CHOICE_FULL_OPTIONS 3
 #define MAIN_CHOICE_COUNT 4
 
+// The clubhouse's rows, and the rooms that f_ClubhouseRooms gives each of them.
+// The rooms index ASSET_CLUBHOUSE_LABELS, whose labels read Tournament, Best
+// Shots, Ring Shot, a blank for the birdie badges, VS. Records and Speed Golf.
 #define CLUBHOUSE_CHOICE_COUNT 5
 
 enum ClubhouseRoom {
@@ -86,6 +106,8 @@ enum ClubhouseRoom {
 typedef s32 ClubhouseRoom;
 typedef s16 ClubhouseRoom16;
 
+// The options screen's choices; GAME_FLAG_OPTIONS_SOUND_TEST adds the sound
+// test's
 #define OPTIONS_CHOICE_MUSIC 0
 #define OPTIONS_CHOICE_MONO 1
 #define OPTIONS_CHOICE_CAMERA 2
@@ -100,51 +122,79 @@ typedef s16 ClubhouseRoom16;
 #define OPTIONS_CHOICE_SOUND_FREQUENCY 10
 #define OPTIONS_SOUND_TEST_CHOICE_COUNT 21
 
+// The menu image buffer holds the options screen's Mario at its start, then
+// two frames of four 16 by 16 arrows, then Mario's shadow
 #define OPTIONS_ARROWS_OFFSET 0x3408
 #define OPTIONS_SHADOW_OFFSET 0x3830
+// Where the options' lit values follow their lit labels in g_MenuLabelImages
 #define OPTION_VALUES_OFFSET 0x3228
 
+// Where the course select's images follow the sky in g_MenuCourseSceneryAsset
 #define COURSE_SELECT_WATER_OFFSET 0x1E88
 #define COURSE_SELECT_LAYER_OFFSET 0x2E90
 
+// The sound test's song and sound file names, which it prints
 #define SOUND_TEST_SONG_NAME_LENGTH 12
 #define SOUND_TEST_SOUND_NAME_LENGTH 24
 
+// The debug caddy select's two caddies
 #define CADDY_COUNT 2
 
+// The mini-golf course select's records, of three courses each
 #define MINI_GOLF_RECORD_COUNT 2
 
+// The chosen label grows two pixels a frame until it passes the limit, then
+// shrinks until it passes 0
 #define CHOSEN_LABEL_GROWTH_LIMIT 6
 #define CHOSEN_LABEL_GROWTH_STEP 2
 
+// The title screen's labels, 128 by 20 each, plain in g_ImageSlots and lit in
+// g_MenuLabelImages
 #define TITLE_LABEL_COUNT 7
 #define TITLE_LABEL_WIDTH 128
 #define TITLE_LABEL_HEIGHT 20
+// The bytes in one row of a label's texels, which are 4 bits each
 #define TITLE_LABEL_ROW_SIZE (TITLE_LABEL_WIDTH / 2)
 #define TITLE_LABEL_IMAGE_SIZE (TITLE_LABEL_ROW_SIZE * TITLE_LABEL_HEIGHT)
+// The most stars DrawSpinningStars draws, and how far it enlarges the chosen
+// hole's
 #define STAR_COUNT_MAX 6
 #define CHOSEN_STAR_GROWTH 8
+// DrawMenuCharacters places the characters by a layout, chosen by their count,
+// of five slots
 #define MENU_CHARACTER_LAYOUT_COUNT 4
 #define SOLO_CHARACTER_LAYOUT 0
 #define MENU_CHARACTER_SLOT_COUNT 5
+// Their models' scales: a player alone stands largest, beside the rival or not,
+// and of three or four the two at the back stand slightly smaller
 #define MENU_CHARACTER_SOLO_SCALE 5.0f
 #define MENU_RIVAL_SCALE 4.0f
 #define MENU_CHARACTER_PAIR_SCALE 4.0f
 #define MENU_CHARACTER_FRONT_SCALE 3.5f
 #define MENU_CHARACTER_BACK_SCALE 3.4f
 #define MENU_CHARACTER_DEFAULT_SCALE 4.0f
+// The course select's water plane's vertices
 #define WATER_VERTEX_COUNT 5
+// The holes badges of g_HoleBadgeImages, 24 by 24 CI4 each
 #define HOLES_BADGE_BET 0
 #define HOLES_BADGE_COUNT 4
 #define HOLES_BADGE_SIZE 24
 #define HOLES_BADGE_IMAGE_SIZE ((HOLES_BADGE_SIZE * HOLES_BADGE_SIZE) / 2)
+// Places for the clubhouse's rows, three more than it shows
 #define CLUBHOUSE_ROW_PLACE_COUNT 8
 
+// The viewer's animation until the player picks another
 #define VIEWER_STARTING_ANIMATION 13
+// What f_ViewerLoadedCharacter holds before the viewer shows a character, so
+// that no character matches it
 #define NO_VIEWER_CHARACTER (-1)
+// A club mask with a bit set for every slot
 #define ALL_CLUB_SLOTS ((1 << CLUB_SLOT_COUNT) - 1)
+// The size of the image buffer that GetMenuImageBuffer returns
 #define MENU_IMAGE_BUFFER_SIZE 0x80A0
 
+// Divides a turn among the player count's modes, keeping it whole should a
+// count be zero
 #define AmountPerMode(amount) \
     (f_ModeCounts[g_ChosenPlayerCount - 1] != 0 ? \
             (amount) / f_ModeCounts[g_ChosenPlayerCount - 1] : \
@@ -155,34 +205,50 @@ typedef struct ImageCorner {
     s16 y;
 } ImageCorner;
 
+// The wind and light of the hole that loads behind the menus
 #define CHOSEN_HOLE_WIND_SPEED_MASK 0x3F
 #define CHOSEN_HOLE_WIND_SPEED_STEP 6000
 #define CHOSEN_HOLE_LIGHT_PITCH 0x1000
 #define CHOSEN_HOLE_LIGHT_YAW 0x2000
 
+// The title screen's rows, which UpdateMenuTitleScreen moves between
 #define TITLE_CHOICE_NEW_GAME 0
 #define TITLE_CHOICE_SAVED_GAMES 1
 #define TITLE_CHOICE_MENUS 2
 #define TITLE_CHOICE_COUNT 3
+// Holding these as A is pressed on the menus row shows the Transmit choice in
+// the main menu
 #define TRANSMIT_BUTTONS (A_BUTTON | L_TRIG | R_TRIG)
 #define TRANSMIT_OTHER_BUTTONS (A_BUTTON | Z_TRIG | R_TRIG)
 #define TRANSMIT_SOUND_CHANNEL 14
+// The wipe that leaves for the Transmit scene from the saved games row
 #define TRANSMIT_WIPE_SHAPE 12
 
+// How the menus' bobbing items move: the phase step per frame, and the height
+// in pixels
 #define MENU_BOB_PHASE_STEP 0.13f
 #define MENU_BOB_HEIGHT 5.0f
 
+// Where DrawMenuBanner and DrawNamePlateBanner draw the banners of
+// g_MenuTitleImages and g_NamePlateImage
 #define MENU_BANNER_TOP 18
 #define UNUSED_BANNER_TOP 16
 
+// DrawSmallNamePlate squeezes g_NamePlateImage to this width at a given
+// position; nothing calls it
 #define SMALL_BANNER_WIDTH 96
 
+// DrawLargeMenuBanner stretches g_NamePlateImage; its strips overlap, as they
+// are taller than their spacing
 #define LARGE_BANNER_LEFT 26
 #define LARGE_BANNER_TOP 174
 #define LARGE_BANNER_WIDTH 270
 #define LARGE_BANNER_STRIP_HEIGHT 20
 #define LARGE_BANNER_STRIP_SPACING 16
 
+// DrawNarrowMenuBoard reads g_MenuBoardImages's buffer as a 160 texel wide
+// image, though menu.c loads the 256 texel wide board into it; its strips
+// overlap, as each samples its rows at 8/9 of a texel
 #define NARROW_BOARD_WIDTH 160
 #define NARROW_BOARD_STRIP_HEIGHT 8
 #define NARROW_BOARD_STRIP_COUNT 20
@@ -194,18 +260,29 @@ typedef struct ImageCorner {
 
 #define COURSE_SCENE_SECOND_ROW_START TexelCoordinate(1)
 
+// The power shots a round gives each player
 #define NINE_HOLE_POWER_SHOT_COUNT 3
 #define EIGHTEEN_HOLE_POWER_SHOT_COUNT 6
 
+// The choices of the list that UpdateUnusedList runs, which no menu screen
+// dispatches to
 #define UNUSED_LIST_CHOICE_COUNT 21
 
+// The mini-golf course select. A record's three courses lie on a disc that
+// turns from one to the next through MINI_GOLF_TURN_FRAME_COUNT frames.
+// Changing record slides the screen across instead.
 #define MINI_GOLF_TURN_FRAME_DURATION 2
+// f_MiniGolfDiscTurn values
 #define MINI_GOLF_TURN_NONE 0
 #define MINI_GOLF_TURN_TO_PREVIOUS 1
 #define MINI_GOLF_TURN_TO_NEXT 2
 #define MINI_GOLF_RECORD_SLIDE 45
 #define MINI_GOLF_RECORD_SLIDE_STEP 9
 
+// The course select. Its wheel shows the open courses and the next one
+// still shut, and turns from one to the next; the chosen course's trophy
+// frame is read into the one of g_TrophyFrameBuffers not shown, and its
+// place palettes into g_TrophyPalettes.
 #define COURSE_SELECT_TURN 90
 #define COURSE_SELECT_SPIN_SPEED 18
 #define COURSE_SELECT_TEXT_SLOT_COUNT 4
@@ -240,42 +317,73 @@ void DrawNarrowMenuBoard(Gfx **displayListHead);
 void DrawLargeMenuBanner(Gfx **displayListHead);
 void DrawMenuTitleScreen(Gfx **displayListHead);
 
+// Not static: the original left these to the linker's common block
+// Frames until each menu character fidgets, or FIDGETING while it does
 s32 g_MenuFidgetDelays[PLAYER_COUNT_MAX];
+// How far the course select's banners slide as the bet pages come and go
 s32 g_CourseBannersSlide;
 
+// Defined after the routines whose strings come before theirs
 extern const char f_PeachsCastleName[];
 extern const char f_LuigisGardenName[];
 
 static Gfx f_UnusedEmptyDisplayList[] UNUSED = {gsSPEndDisplayList()};
 Boolean g_IsHoleShownInMenuInset = FALSE;
+// The characters that the animation viewer cycles through and whose taken
+// marks a new game clears; nothing changes it
 static s32 f_MenuCharacterCount = CHARACTER_COUNT;
 static u8 f_UnusedBytesAfterCharacterCount[8] UNUSED =
     {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+// The row that UpdateUnusedList is on
 static s32 f_UnusedListChoice = 0;
+// The hole selection that a hole-choice mode starts with; never changed
 static s32 f_StartingHoleSelection = 0;
 static s32 f_UnusedWordAfterHoleSelection UNUSED = 0;
+// The animation that the animation viewer plays, which left and right step
 static AnimationId f_ViewerAnimation = VIEWER_STARTING_ANIMATION;
+// Whether START has given the viewer's controls to posing the model and
+// stepping its animation
 static Boolean f_IsViewerAdjusting = FALSE;
+// Whether the chosen character's animation plays before the choice is made
 static Boolean f_IsChosenAnimationPlaying = FALSE;
+// Each player count's mode count
 static s32 f_ModeCounts[PLAYER_COUNT_MAX] = {7, 5, 4, 4};
+// Read by no routine; the mode counts of f_UnusedModeChoiceIcons
 static s32 f_UnusedModeCounts[4] UNUSED = {3, 5, 4, 4};
+// Each player's clubs, a bit per slot
 static u16 f_PlayerClubMasks[PLAYER_COUNT_MAX] =
     {ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS};
 static s32 f_UnusedFlags[10] UNUSED = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
+// Which of g_TrophyFrameBuffers shows the chosen course's trophy
 static u8 f_ShownTrophyBufferIndex = 0;
+// The model kind that the animation viewer loads, which L cycles
 static s8 f_ViewerModelKind = 0;
+// How far the bet settings and handicap pages have slid in
 static s32 f_BetSlideOffset = 0;
 UBetPagesPhase8 g_BetPagesPhase = MENU_PHASE_START;
 u8 g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
+// Cleared with the spinning star's state; no routine reads it
 static s16 f_UnusedSpinningStarCounter = 0;
+// Which of g_MenuTitleImages is shown; a new screen's title is read into the
+// other
 static s16 f_MenuTitleImageIndex = 0;
+// Which of g_MenuLabelImages is shown; a new screen's lit labels, or other
+// images in their place, are read into the other
 static s16 f_MenuLabelImageIndex = 0;
+// Which of g_ImageSlots' first two is shown; a new screen's plain labels, or
+// other images in their place, are read into the other
 static s16 f_ImageSlotIndex = 0;
+// Which of g_MenuBoardImages is shown; a new screen's board, or other images
+// in its place, are read into the other
 static s16 f_MenuBoardImageIndex = 0;
+// Whether the animation viewer must reload its character for a new kind
 static UBoolean8 f_IsViewerModelKindChanged = FALSE;
+// Whether the options screen's erase window is up
 static UBoolean8 f_IsEraseWindowUp = FALSE;
+// The bobbing of the menus' items: the offset that it gives, and its phase
 static f32 f_MenuBobOffset = 0.0f;
 static f32 f_MenuBobPhase = 0.0f;
+// The sound test's sound, song and settings
 static SoundId f_SoundTestSound = 0;
 static SongId f_SoundTestSong = 0;
 static s32 f_SoundTestSoundReverb = 0;
@@ -283,6 +391,7 @@ static s32 f_SoundTestSongReverb = 0;
 static f32 f_SoundTestSoundFrequency = 0.0f;
 static f32 f_SoundTestSongFrequency = 0.0f;
 static s32 f_SoundTestSongTempo = NORMAL_SONG_TEMPO;
+// The mode that each of the mode select's choices picks, by player count
 static u8 f_ModeChoiceIcons[PLAYER_COUNT_MAX][MODE_CHOICE_LIMIT] = {
     {
         MODE_ICON_TOURNAMENT,
@@ -303,8 +412,11 @@ static u8 f_ModeChoiceIcons[PLAYER_COUNT_MAX][MODE_CHOICE_LIMIT] = {
     {MODE_ICON_STROKE, MODE_ICON_SKINS_MATCH, MODE_ICON_CLUB_SLOTS, MODE_ICON_MINI_GOLF},
     {MODE_ICON_STROKE, MODE_ICON_SKINS_MATCH, MODE_ICON_CLUB_SLOTS, MODE_ICON_MINI_GOLF},
 };
+// Read by no routine; modes like f_ModeChoiceIcons', as many as
+// f_UnusedModeCounts counts
 static u8 f_UnusedModeChoiceIcons[4][12] UNUSED =
     {{2, 8, 3}, {2, 6, 7, 10, 5}, {2, 7, 10, 5}, {2, 7, 10, 5}};
+// The room that each clubhouse row opens
 static ClubhouseRoom16 f_ClubhouseRooms[CLUBHOUSE_CHOICE_COUNT] = {
     CLUBHOUSE_ROOM_COURSE_STATS,
     CLUBHOUSE_ROOM_CHARACTER_TABLE,
@@ -312,7 +424,9 @@ static ClubhouseRoom16 f_ClubhouseRooms[CLUBHOUSE_CHOICE_COUNT] = {
     CLUBHOUSE_ROOM_RING_SHOT,
     CLUBHOUSE_ROOM_BEST_SHOTS,
 };
+// Read by no routine; the one room that f_ClubhouseRooms leaves out
 static ClubhouseRoom16 f_UnusedBirdieBadgesRoom UNUSED = CLUBHOUSE_ROOM_BIRDIE_BADGES;
+// The plain-text menu's names; DrawMenuTitleScreen prints the first three
 static const char *f_PlainMenuNames[] =
     {"1P GAME", "2P GAME", "3P GAME", "4P GAME", "CONTINUE", "HOUISE"};
 static const char *f_UnusedModeNames[] UNUSED = {
@@ -329,25 +443,27 @@ static const char *f_UnusedModeNames[] UNUSED = {
     "9HOLE MODE  ",
     "CLUB HANDI",
 };
+// Each character's name, with LOWERCASE_CODE_OFFSET added to its lowercase
+// letters
 char g_MenuCharacterNames[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] = {
-    "P\xEC\xF5\xED",
-    "C\xE8\xE1\xF2\xEC\xE9\xE5",
-    "P\xE5\xE1\xE3\xE8",
-    "B\xE1\xE2\xF9 \xED\xE1\xF2\xE9\xEF",
-    "L\xF5\xE9\xE7\xE9",
-    "Y\xEF\xF3\xE8\xE9",
-    "S\xEF\xEE\xEE\xF9",
-    "W\xE1\xF2\xE9\xEF",
-    "H\xE1\xF2\xF2\xF9",
-    "M\xE1\xF2\xE9\xEF",
-    "M\xE1\xF0\xEC\xE5",
-    "DK",
-    "B\xEF\xF7\xF3\xE5\xF2",
-    "M\xE5\xF4\xE1\xEC \xED\xE1\xF2\xE9\xEF",
-    "K\xE9\xE4",
-    "S\xE8\xE5\xF2\xF2\xF9",
-    "A\xFA\xE1\xEC\xE5\xE1",
-    "J\xEF\xE5",
+    "P\xEC\xF5\xED", // Plum
+    "C\xE8\xE1\xF2\xEC\xE9\xE5", // Charlie
+    "P\xE5\xE1\xE3\xE8", // Peach
+    "B\xE1\xE2\xF9 \xED\xE1\xF2\xE9\xEF", // Baby mario
+    "L\xF5\xE9\xE7\xE9", // Luigi
+    "Y\xEF\xF3\xE8\xE9", // Yoshi
+    "S\xEF\xEE\xEE\xF9", // Sonny
+    "W\xE1\xF2\xE9\xEF", // Wario
+    "H\xE1\xF2\xF2\xF9", // Harry
+    "M\xE1\xF2\xE9\xEF", // Mario
+    "M\xE1\xF0\xEC\xE5", // Maple
+    "DK", // DK
+    "B\xEF\xF7\xF3\xE5\xF2", // Bowser
+    "M\xE5\xF4\xE1\xEC \xED\xE1\xF2\xE9\xEF", // Metal mario
+    "K\xE9\xE4", // Kid
+    "S\xE8\xE5\xF2\xF2\xF9", // Sherry
+    "A\xFA\xE1\xEC\xE5\xE1", // Azalea
+    "J\xEF\xE5", // Joe
 };
 static const char *f_UnusedOptionNames[] UNUSED = {
     "TOURNAMENT",
@@ -366,6 +482,7 @@ static const char *f_UnusedGameBoyNames[] UNUSED = {"GB 00 ", "GB 01 ", "GB 02 "
 static const char *f_UnusedSideSpinNames[] UNUSED = {"STRAIGHT", "DRAW", "FADE"};
 static const char *f_UnusedBetNames[] UNUSED =
     {"DRIVE CON", "NEAR PIN", "STROKE", "SKINS", "NASSO", "LASVEGAS"};
+// Read by no routine
 static const char *f_TestCourseNames[] UNUSED = {
     "TEST COURSE1",
     "TEST COURSE2",
@@ -378,6 +495,7 @@ static const char *f_TestCourseNames[] UNUSED = {
     "TEST COURSE9",
     "TEST COURSE10",
 };
+// The caddies' names
 static const char *f_CaddyNames[CADDY_COUNT] = {"MARIO", "PEACH"};
 static const char *f_UnusedClubNames[] UNUSED =
     {"1W", "3W", "4W", "2I", "3I", "4I", "5I", "6I", "7I", "8I", "9I", "PW", "SW", "PT"};
@@ -1004,6 +1122,7 @@ static Vtx f_UnusedQuadVertices[8] UNUSED = {
     {{{32, -32, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{32, 0, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
+// A gold star with eyes spinning, which also marks a hole's Ring Shot star
 static WideAssetId f_StarFrameAssets[STAR_FRAME_COUNT] = {
     0x05BE,
     0x05BF,
@@ -1021,6 +1140,7 @@ static WideAssetId f_StarFrameAssets[STAR_FRAME_COUNT] = {
     0x05CB,
     0x05CC,
 };
+// A silver star without eyes spinning, for a hole without its Ring Shot star
 static WideAssetId f_MenuEmptyStarFrameAssets[STAR_FRAME_COUNT] = {
     0x05E5,
     0x05E6,
@@ -1038,21 +1158,32 @@ static WideAssetId f_MenuEmptyStarFrameAssets[STAR_FRAME_COUNT] = {
     0x05F2,
     0x05F3,
 };
+// The menus' animated icons, such as the mode icons and the Ring Shot stars,
+// read each frame into the buffer not shown, then swap
 s32 g_AnimatedIconFrame = 0;
 u8 g_AnimatedIconBufferIndex = 0;
 s8 g_AnimatedIconFrameTime = 0;
 static s32 f_SpinningIconFrame = 0;
+// Which of g_MenuArrowSizedImages's buffers holds the star frame shown
 static u8 f_SpinningStarBufferIndex = 0;
 static s8 f_SpinningIconFrameTime = 0;
+// Which of g_MenuSpareImages the waving Toad shows; only ever 0
 static u8 f_WavingToadImageIndex = 0;
 static s32 f_UnusedWordAfterToadImage UNUSED = 0;
+// The mini-golf disc's frame
 static s32 f_MiniGolfDiscFrame = MINI_GOLF_FACING_FRAME;
+// The frames for which the mini-golf disc has shown its turn frame
 static s32 f_MiniGolfDiscFrameTime = 0;
+// Which way the mini-golf disc turns
 static u8 f_MiniGolfDiscTurn = MINI_GOLF_TURN_NONE;
+// Which of g_MenuIconImages' buffer pairs the mini-golf disc shows
 static u8 f_MiniGolfDiscBufferIndex = 0;
+// The menus' camera orbit's updates
 static s32 f_CameraOrbitUpdateCount = 0;
+// Each player's sound pan, by the player count
 static u8 f_PlayerSoundPans[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX] =
     {{127, 0, 0, 0}, {15, 240, 0, 0}, {15, 127, 240, 0}, {15, 85, 170, 240}};
+// The CharacterChoice of each CharacterId
 static s32 f_CharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_CHARLIE,
@@ -1074,9 +1205,13 @@ static s32 f_CharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_JOE,
 };
 static s32 f_UnusedWordAfterCharacterChoices UNUSED = 0;
+// The top-left corner of each of the title screen's labels
 static ScreenCorner f_TitleLabelCorners[TITLE_LABEL_COUNT] =
     {{110, 86}, {40, 114}, {90, 114}, {147, 114}, {217, 114}, {96, 142}, {96, 170}};
+// The mode board's bob phase
 static f32 f_ModeBoardBobPhase = 0.0f;
+// Where the mode select puts each player's controller icon and label, by the
+// player count. save_menu.c has a copy, f_ControllerIconPositions.
 static s32 f_ModeSelectControllerIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX]
                                               [PLANE_AXIS_COUNT] = {
                                                   {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
@@ -1085,10 +1220,15 @@ static s32 f_ModeSelectControllerIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MA
                                                   {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
 };
 static s32 f_UnusedModeIconValues[11] UNUSED = {110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
+// How far left of the label's place each row of the modes' label image is
+// drawn. save_menu.c has a copy, f_GameModeLabelOffsets.
 static s32 f_ModeSelectModeLabelOffsets[MODE_ICON_COUNT] =
     {85, 85, 41, 60, 55, 60, 75, 66, 59, 0, 61};
+// The menu characters' angles, in degrees. The pitch is never changed; the yaw is the rival's spin
+// for the rival and 0 for the others.
 static Degrees f_CharacterPitch = 0.0f;
 static Degrees f_CharacterYaw = 0.0f;
+// The rival's angle, which turns while two characters show
 static Degrees f_RivalSpinYaw = 0.0f;
 static s32 f_UnusedWordsAfterRivalSpin[2] UNUSED = {0, 0};
 static Vec3 f_MenuCharacterPositions[MENU_CHARACTER_LAYOUT_COUNT][MENU_CHARACTER_SLOT_COUNT] = {
@@ -1121,24 +1261,39 @@ static Vec3 f_MenuCharacterPositions[MENU_CHARACTER_LAYOUT_COUNT][MENU_CHARACTER
         {0.0f, 0.0f, 0.0f},
     },
 };
+// The character for each grid mark
 static s32 f_MarkedCharacters[CHARACTER_COUNT] =
     {0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
+// The character that the animation viewer last loaded
 static CharacterIndex f_ViewerLoadedCharacter = NO_VIEWER_CHARACTER;
+// Whether the animation viewer must reload its character for an animation
 static Boolean f_IsViewerAnimationChanged = FALSE;
+// The animation viewer's turn of the character, in degrees, from the stick
 static Degrees f_ViewerPitch = 0.0f;
 static Degrees f_ViewerYaw = 0.0f;
+// Added to VIEWER_BASE_SCALE; A and B step it
 static f32 f_ViewerScaleOffset = 0.0f;
+// The character slot that the animation viewer draws; nothing changes it
 static u32 f_ViewerCharacterSlot = 0;
+// Added to VIEWER_BASE_OFFSET; the C buttons step them
 static f32 f_ViewerOffsetX = 0.0f;
 static f32 f_ViewerOffsetY = 0.0f;
+// The front course's bob phase
 static f32 f_FrontCourseBobPhase = 0.0f;
+// Read by no routine; an order of the six courses
 static s16 f_UnusedCourseOrder[6] UNUSED = {0, 3, 4, 1, 5, 2};
+// Read by no routine; katakana for "Bet", "Out: holes 1-9", "In: holes 10-18"
+// and "1 round: 18 holes"
 static char f_UnusedHolesChoiceNames[4][20] UNUSED =
     {"ﾍﾞｯﾄ", "ｱｳﾄ : 1-9ﾎｰﾙﾌﾟﾚｲ", "ｲﾝ : 10-18ﾎｰﾙﾌﾟﾚｲ", "1ﾗｳﾝﾄﾞ : 18ﾎｰﾙﾌﾟﾚｲ"};
+// The top-left corner of each holes badge
 static ImageCorner f_HolesBadgeCorners[HOLES_BADGE_COUNT] =
     {{252, 134}, {230, 150}, {274, 150}, {252, 162}};
+// Read by no routine; a corner for each course, the values of
+// f_TrophyCorners[course][0][1]
 static ImageCorner f_UnusedTrophyCorners[6] UNUSED =
     {{24, 173}, {23, 173}, {23, 173}, {29, 161}, {19, 181}, {29, 171}};
+// Each course's trophies' corners, by the number of trophies
 static ImageCorner f_TrophyCorners[COURSE_COUNT][TOURNAMENT_PLACE_COUNT][TOURNAMENT_PLACE_COUNT] = {
     {
         {{24, 169}, {24, 173}, {24, 173}},
@@ -1171,14 +1326,20 @@ static ImageCorner f_TrophyCorners[COURSE_COUNT][TOURNAMENT_PLACE_COUNT][TOURNAM
         {{21, 167}, {37, 167}, {29, 171}},
     },
 };
+// Read by no routine; katakana for "Course get"
 static char f_UnusedCourseGetText[16] UNUSED = "ｺｰｽｹﾞｯﾄ純ﾞ";
 /* clang-format off */
+// Read by no routine; "あと" ("remaining") in the game's text code, whose
+// hiragana are the half-width katakana's codes less 0x40
 static u8 f_UnusedRemainingText[16] UNUSED = {
     0x71, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 /* clang-format on */
+// The Bet badge's color phase
 static f32 f_BetBadgeColorPhase = 0.0f;
+// The chosen mini-golf image's center Y
 static f32 f_MiniGolfChoiceCenterY = 0.0f;
+// The course select's water surface
 static Vtx f_WaterVertices[WATER_VERTEX_COUNT] = {
     {{{-800, 64, -1024}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-800, -128, 0}, 0, {0, 25600}, {0x7F, 0x7F, 0x7F, 0xFF}}},
@@ -1186,17 +1347,24 @@ static Vtx f_WaterVertices[WATER_VERTEX_COUNT] = {
     {{{800, -128, 0}, 0, {32736, 25600}, {0x7F, 0x7F, 0x7F, 0xFF}}},
     {{{800, 64, -1024}, 0, {32736, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
+// How far the course select's water has scrolled; its two layers move apart
 static s32 f_WaterScroll = 0;
+// Read by no routine; the values of f_UnusedHolesChoiceNames
 static char f_UnusedHolesChoiceNamesCopy[4][20] UNUSED =
     {"ﾍﾞｯﾄ", "ｱｳﾄ : 1-9ﾎｰﾙﾌﾟﾚｲ", "ｲﾝ : 10-18ﾎｰﾙﾌﾟﾚｲ", "1ﾗｳﾝﾄﾞ : 18ﾎｰﾙﾌﾟﾚｲ"};
+// The records' names
 static const char *f_MiniGolfRecordNames[MINI_GOLF_RECORD_COUNT] = {
     f_LuigisGardenName,
     f_PeachsCastleName,
 };
+// The top-left corner of each of the main menu's labels
 static ScreenCorner f_MainChoiceLabelCorners[MAIN_CHOICE_COUNT] =
     {{96, 84}, {96, 114}, {96, 144}, {96, 174}};
+// The top-left corner of each of the main menu's labels without Transmit, which
+// skips the CODE ENTRY label
 static ScreenCorner f_ShortMainChoiceLabelCorners[MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT] =
     {{96, 84}, {96, 124}, {96, 164}};
+// The top-left corner of each of the clubhouse's room labels
 static ScreenCorner f_ClubhouseLabelCorners[CLUBHOUSE_ROW_PLACE_COUNT] =
     {{76, 80}, {76, 102}, {76, 124}, {76, 146}, {76, 168}, {76, 190}, {76, 212}, {76, 234}};
 static s32 f_UnusedLabelPositions[10][2] UNUSED = {
@@ -1212,6 +1380,8 @@ static s32 f_UnusedLabelPositions[10][2] UNUSED = {
     {90, 182},
 };
 /* clang-format off */
+// Read by no routine; "データをすべてけしていいですか?" ("Erase all the
+// data?"), "はい" ("Yes") and "いいえ" ("No") in the game's text code
 static u8 f_UnusedEraseAllDataPrompt[3][20] UNUSED = {
     {
         0xC3, 0xDE, 0xB0, 0xC0, 0x66, 0x7D, 0x8D, 0xDE, 0x83, 0x79,
@@ -1228,24 +1398,33 @@ static u8 f_UnusedEraseAllDataPrompt[3][20] UNUSED = {
 };
 /* clang-format on */
 static s32 f_UnusedWordBeforeArrowTimer UNUSED = 0;
+// Steps the options' arrows' animation
 static s32 f_OptionsArrowTimer = 0;
 
 static u8 f_UnusedBufferBeforeMatrices[0x1D0] UNUSED;
+// The mode select's camera, which the CPU's projection also takes, and its
+// reflection lighting
 static Mat4 f_ModeSelectProjection;
 static Mat4 f_ModeSelectView;
 static LookAt f_ModeSelectLookAts[DRAW_BUFFER_COUNT];
+// Each menu character's model matrix, and the projection they share
 static Mtx f_MenuCharacterTransforms[PLAYER_COUNT_MAX][DRAW_BUFFER_COUNT];
 static Mtx f_MenuCharacterProjection;
 static f32 f_MenuCharacterScales[PLAYER_COUNT_MAX];
+// The animation viewer's model matrix and projection
 static Mtx f_ViewerTransforms[DRAW_BUFFER_COUNT];
 static Mtx f_ViewerProjection;
 static u8 f_UnusedBufferBeforeWater[0x180] UNUSED;
+// The course select's water's matrices
 static Mtx f_WaterTranslation;
 static Mtx f_WaterProjection;
+// The course select's camera, for the CPU's projection
 static Mat4 f_CourseSelectProjection;
 static Mat4 f_CourseSelectView;
+// How far the bet settings and handicap pages have slid in or out
 static s32 f_BetSettingsSlide;
 static s32 f_HandicapsSlide;
+// An image buffer of the menu overlay
 static u8 f_MenuImageBuffer[MENU_IMAGE_BUFFER_SIZE];
 
 void *GetMenuImageBuffer(void) {
@@ -1262,7 +1441,6 @@ void StartLoadingChosenHole(void) {
             FreeCharacterSlot(slotIndex);
         }
     }
-
     g_IsChosenHoleLoadStarted = TRUE;
     if (g_MenuScreen == MENU_SCREEN_RING_SHOT_EXIT ||
         g_MenuScreen == MENU_SCREEN_RING_SHOT_RECORDS) {
@@ -1313,26 +1491,42 @@ s32 GetChosenCourseIndex(void) {
     return g_MenuMemory.courseChoice;
 }
 
+// The inset camera circles above the middle of the tee and the cup, a turn
+// every 256 updates, while the menus show
 #define ORBIT_ANGLE_PER_UPDATE 0x100
 #define ORBIT_RADIUS 3000.0f
 #define ORBIT_EYE_OFFSET_Y (-3000.0f)
+// Halves the sum of two course positions, and turns it into world units
 #define MIDPOINT_TO_WORLD_SCALE (0.5f / WORLD_TO_COURSE_SCALE)
 
+// The labels' images, lit and dimmed, that each screen reads as it opens
+// Players, One to Four, ... Transmit
 #define ASSET_TITLE_LABELS 0x52B
 #define ASSET_TITLE_LABELS_DIM 0x52C
+// Status, How to Play, Code Entry, Options
 #define ASSET_MAIN_LABELS 0x523
 #define ASSET_MAIN_LABELS_DIM 0x524
+// Tournament, ... Speed Golf
 #define ASSET_CLUBHOUSE_LABELS 0x525
 #define ASSET_CLUBHOUSE_LABELS_DIM 0x526
+// Music, ... Erase Data
 #define ASSET_OPTIONS_LABELS 0x529
 #define ASSET_OPTIONS_LABELS_DIM 0x52A
+// On, ... Simple, in green
 #define ASSET_OPTION_VALUES 0x97C
+// The other images that the screens read
+// A wooden board, 160 by 160
 #define ASSET_SQUARE_BOARD 0x591
 #define ASSET_OPTIONS_MARIO 0x97D
 #define ASSET_OPTIONS_SHADOW 0x97E
 #define ASSET_SKY 0x51F
 #define ASSET_WATER 0x4D8
 
+// The menus' update: gathers every controller's buttons, starts loading the
+// chosen hole behind screens 6 and 23, circles the inset camera, and runs the
+// current screen. When the screen changes, reads the images that the new one
+// draws. The exit screen saves and starts play, swapping to the play module
+// unless GAME_FLAG_STAY_IN_MENUS is set.
 void UpdateMenus(void) {
     AssetFile file;
     Vec3 center;
@@ -2092,6 +2286,9 @@ void UpdateMenus(void) {
     }
 }
 
+// Sets g_HasOwnControllers unless two players share a controller, as rumble
+// and the waiting players' calls need one each, and gives each player a sound
+// pan for the player count.
 void CheckControllersAndSetPans(void) {
     s32 playerIndex;
     s32 otherIndex;
@@ -2109,14 +2306,19 @@ void CheckControllersAndSetPans(void) {
     }
 
     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+        // Taking the player's address first makes the loop step a pointer
+        // through g_Players, as the original does
         (&g_Players[playerIndex])->soundPan =
             f_PlayerSoundPans[g_GameState.playerCount - 1][playerIndex];
     }
 }
 
+// Left empty in the original; called after LoadMenuResources when a hole
+// is loaded from the menu
 void OnMenuResourcesLoaded(void) {
 }
 
+// Whether a game mode plays the holes chosen on the menu
 #define IsHoleChoiceMode(mode) \
     ((mode) == GAME_MODE_STROKE || \
         (mode) == GAME_MODE_MATCH_GAME || \
@@ -2124,6 +2326,9 @@ void OnMenuResourcesLoaded(void) {
         (mode) == GAME_MODE_SKINS_MATCH || \
         (mode) == GAME_MODE_CLUB_SLOTS)
 
+// Fills g_GameState and g_Players from the menus' choices as the menus exit:
+// a chosen replay's record, or the course, holes, bets, handicaps, characters,
+// controllers and clubs of a new game.
 void SetUpChosenGame(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
@@ -2180,6 +2385,8 @@ void SetUpChosenGame(void) {
         }
 
         if (IsHoleChoiceMode(g_GameState.gameMode)) {
+            // Through a pointer, as the original keeps the address in a register for
+            // every store
             holeSelection = &g_GameState.holeSelection;
             *holeSelection = f_StartingHoleSelection;
             if (COURSE_SELECT_LAYOUT == COURSE_SELECT_LAYOUT_HOLES) {
@@ -2423,6 +2630,8 @@ void UpdateMenuTitleScreen(void) {
         return;
     }
 
+    // titleChoice is moved through the array's bytes, which keeps its address in
+    // a register as the original does
     if (g_MenuRepeatButtons & U_JPAD) {
         g_MenuMemory.titleChoice--;
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -2460,6 +2669,8 @@ void UpdateMenuTitleScreen(void) {
     }
 }
 
+// Puts the viewer's cursor on the first character not taken. Nothing calls
+// it.
 void ResetViewerCharacter(void) {
     g_MenuMemory.viewerCharacter = 0;
     while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
@@ -2470,6 +2681,11 @@ void ResetViewerCharacter(void) {
     }
 }
 
+// UpdateViewerCharacter moves the character cursor past the characters marked
+// as taken, and plays the voice of the one chosen. It returns -1 when B leaves,
+// 1 once the chosen character's animation ends while g_ChoosingPlayerIndex
+// equals playerNumber, and 0 otherwise. Nothing reads unusedSetting, which the
+// one caller passes as 1.
 s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
     if (f_IsViewerAdjusting != FALSE) {
         while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
@@ -2597,16 +2813,22 @@ void UpdateAnimationViewer(void) {
     }
 }
 
+// The mode select's wheel, turned like the course select's
 #define MODE_SELECT_TURN 90
 #define MODE_SELECT_SPIN_SPEED 18
 
+// The chosen mode's message, below the wheel
 #define MODE_TEXT_X 40
 #define MODE_TEXT_Y 188
 #define MODE_TEXT_SLOT 0
+// Followed by one per mode icon
 #define MESSAGE_FIRST_MODE 4
 #define MESSAGE_SOLO_STROKE 0x39
 #define MESSAGE_MODE_NEEDS_CONTROLLERS 0x4A
 
+// The mode icons are double-buffered like the course select's images: the
+// chosen mode's first icon frame is read into the buffer not shown, and then
+// the buffers swap.
 #define LoadChosenModeIcon() \
     { \
         g_AnimatedIconFrame = 0; \
@@ -2620,6 +2842,10 @@ void UpdateAnimationViewer(void) {
         g_AnimatedIconBufferIndex ^= 1; \
     }
 
+// Updates the mode select, the wheel of the modes that the chosen player count
+// can play. A starts the chosen mode, or first stops the wheel on it while it
+// still turns; B goes back to the character select, undoing the last player's
+// character.
 void UpdateModeSelect(void) {
     EncodedAsset asset;
     Boolean isDone = IsHudAnimationDone();
@@ -2689,6 +2915,7 @@ void UpdateModeSelect(void) {
                     g_ChosenHandicaps[i] = 0;
                 }
 
+                // The last setting is left as it was
                 for (i = 0; i != BET_STAKE_SLOT_COUNT - 1; i++) {
                     g_GameState.betRates[i] = UNSET_BET_RATE;
                 }
@@ -2757,6 +2984,7 @@ void UpdateModeSelect(void) {
                 ApplyBetPreset(BET_PRESET_NONE);
                 break;
             case MODE_ICON_MINI_GOLF:
+                // Mini golf needs every player on a controller
                 for (i = 0; i != g_ChosenPlayerCount; i++) {
                     if (g_PlayerControllerIndices[i] == NO_CONTROLLER_INDEX) {
                         break;
@@ -2832,6 +3060,7 @@ void UpdateModeSelect(void) {
                 ApplyBetPreset(BET_PRESET_NONE);
                 break;
             case MODE_ICON_CLUB_SLOTS:
+                // The club slots need every player on a controller too
                 for (i = 0; i != g_ChosenPlayerCount; i++) {
                     if (g_PlayerControllerIndices[i] == NO_CONTROLLER_INDEX) {
                         break;
@@ -2857,6 +3086,7 @@ void UpdateModeSelect(void) {
 
         g_GameState.holeSelection = HOLE_SELECTION_ALL;
 
+        // Training's hole is already loading
         if (g_MenuScreen != MENU_SCREEN_TRAINING_EXIT) {
             StopLoaderThread();
         }
@@ -2867,6 +3097,7 @@ void UpdateModeSelect(void) {
     }
 
     if (g_MenuPressedButtons & B_BUTTON) {
+        // The previous player's character, freed for the others
         CharacterIndex characterIndex;
         s32 row;
         s32 column;
@@ -2950,6 +3181,7 @@ void UpdateModeSelect(void) {
 
         g_MenuMemory.modeSpin -= direction * step;
 
+        // Stop on reaching the mode rather than turning past it
         if ((g_MenuMemory.modeSpin < 0 ? -1 : 1) != direction) {
             g_MenuMemory.modeSpin = 0;
         }
@@ -3016,6 +3248,7 @@ void UpdateCourseSelect(void) {
     EncodedAsset asset;
     AssetFile file;
 
+    // The open courses, and then those on the wheel
     s32 courseCount = GetOpenCourseCount();
     s32 openCourseCount;
     Boolean isDone;
@@ -3028,6 +3261,7 @@ void UpdateCourseSelect(void) {
         return;
     }
 
+    // The brick wall that C-up slides out has finished
     if (g_BetPagesPhase == BET_PHASE_CHOOSING) {
         PlaySong(SONG_CONTROLS, 0);
         g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
@@ -3224,6 +3458,7 @@ void UpdateCourseSelect(void) {
 
         g_MenuMemory.courseSpin -= direction * step;
 
+        // Stop on reaching the course rather than turning past it
         if ((g_MenuMemory.courseSpin < 0 ? -1 : 1) != direction) {
             g_MenuMemory.courseSpin = 0;
         }
@@ -3241,6 +3476,9 @@ void UpdateCourseSelect(void) {
     }
 }
 
+// Handles the mini golf course select's input: turning the course disc,
+// opening the bet pages and choosing the holes to play. It also slides the
+// course record into place.
 void UpdateMiniGolfCourseSelect(void) {
     EncodedAsset asset;
     Boolean isDone;
@@ -3383,6 +3621,7 @@ void UpdateMiniGolfCourseSelect(void) {
         return;
     }
 
+    // The brick wall that C-up slides out has finished
     if (g_BetPagesPhase == BET_PHASE_CHOOSING) {
         PlaySong(SONG_CONTROLS, 0);
         g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
@@ -3505,15 +3744,21 @@ void UpdateMiniGolfCourseSelect(void) {
     if (Abs(g_MenuMemory.miniGolfRecordSlide) != 0) {
         direction = g_MenuMemory.miniGolfRecordSlide >= 0 ? 1 : -1;
         step = MINI_GOLF_RECORD_SLIDE_STEP;
+        // A variable rather than a constant, to match: testing the slide's sign
+        // as 1 or -1 itself, either way round, gives 8 words differing, 2 to 4
+        // in shape, and setting the variable before the direction 8, none
         positiveSign = 1;
         g_MenuMemory.miniGolfRecordSlide -= direction * step;
 
+        // Stop on reaching the record rather than sliding past it
         if ((g_MenuMemory.miniGolfRecordSlide >= 0 ? positiveSign : -positiveSign) != direction) {
             g_MenuMemory.miniGolfRecordSlide = 0;
         }
     }
 }
 
+// A screen that no menu screen dispatches to: A leaves the menu to continue
+// the saved game of Stroke, and B goes back to the title
 void UpdateUnusedStrokeStart(void) {
     if (IsHudAnimationDone() == TRUE) {
         if (g_MenuPressedButtons & A_BUTTON) {
@@ -3720,6 +3965,8 @@ void UpdateClubhouse(void) {
     }
 }
 
+// A screen that no menu screen dispatches to: once the HUD animation is done,
+// B goes back to the main menu
 void UpdateUnusedBackToMain(void) {
     if (IsHudAnimationDone() == TRUE && (g_MenuPressedButtons & B_BUTTON)) {
         PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -3729,9 +3976,11 @@ void UpdateUnusedBackToMain(void) {
 
 #define OPTIONS_TEXT_SLOT_COUNT 11
 #define ERASE_DECLINED_SOUND_CHANNEL 13
+// MenuMemory.eraseChoice values, which left and right toggle
 #define ERASE_CHOICE_YES 0
 #define ERASE_CHOICE_NO 1
 #define ERASE_CHOICE_COUNT 2
+// The sound test's limits; C left and right step its numbers by ten
 #define SOUND_TEST_COARSE_STEP 10
 #define SOUND_TEST_LAST_SOUND 0x214
 #define SOUND_TEST_REVERB_MAX 0x7F
@@ -3740,6 +3989,12 @@ void UpdateUnusedBackToMain(void) {
 #define SOUND_TEST_FREQUENCY_COARSE_STEP 1.0f
 #define SOUND_TEST_FREQUENCY_LIMIT 12.0f
 
+// Handles the options screen's buttons. Up and down choose an option, left
+// and right toggle it, and B saves the options and returns to the main menu.
+// A on the erase choice opens a yes or no window, which erases the save data
+// on yes. With game flag 0x55 set, the choices go on to a sound test whose
+// song, sound and their settings left, right and the C buttons change and A
+// plays.
 void UpdateOptionsScreen(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
@@ -4217,6 +4472,8 @@ void LeaveMenuWithCourseWipe(void) {
     }
 }
 
+// Runs a list that no menu screen dispatches to: up and down move its choice,
+// A leaves the menu for a Ring Shot replay and B goes back to the main menu
 void UpdateUnusedList(void) {
     GetSaveData();
     if (g_MenuPressedButtons & A_BUTTON) {
@@ -4264,6 +4521,7 @@ void UpdateBirdieBadges(void) {
     }
 }
 
+// Waits for A to go from the blank screen to the title
 void UpdateBlankScreen(void) {
     if (g_MenuPressedButtons & A_BUTTON) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -4392,6 +4650,8 @@ void DrawMenuScreen(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// On screens 6, 20 and 22 the backdrop shows only its first strips, clamped,
+// and the last strip's rows repeat its bottom row down to this row
 #define CLAMPED_COURSE_SCENE_STRIP_COUNT 4
 #define CLAMPED_COURSE_SCENE_LAST_TOP \
     (COURSE_SCENE_TOP + \
@@ -4399,18 +4659,28 @@ void DrawMenuScreen(Gfx **displayListHead) {
             COURSE_SCENE_SCALE))
 #define CLAMPED_COURSE_SCENE_BOTTOM 162
 
+// The 256 texel wide board in g_MenuBoardImages's buffer, each strip of rows
+// stretched to the strips' spacing
 #define BOARD_WIDTH 256
 #define BOARD_STRIP_HEIGHT 8
 #define BOARD_STRIP_COUNT 20
 #define BOARD_STRIP_SPACING 9
 #define BOARD_LEFT 32
 #define BOARD_TOP 44
+// MENU_LAYER_TALL_NARROW_BOARD reads the buffer as NARROW_BOARD_WIDTH texels
+// wide
 #define TALL_NARROW_BOARD_LEFT 16
 
+// On some screens (IsBannerBobScreen) the banner bobs with the menu's items;
+// the game adds the first and takes the second, so it sits 4 to 14 rows lower
 #define BANNER_BOB_LOWERING 13.0f
 #define BANNER_BOB_RAISING 4.0f
+// DrawMenuBackdropLayers adds the banner's top in two parts, one before the
+// bob offset and one after it. Only their sum of MENU_BANNER_TOP is known:
+// any two parts other than 0 give the same code, and this split is a guess.
 #define BOBBING_BANNER_TOP 8
 #define BOBBING_BANNER_DROP (MENU_BANNER_TOP - BOBBING_BANNER_TOP)
+// Whether the banner bobs on a menu screen
 #define IsBannerBobScreen(screen) \
     ((screen) == MENU_SCREEN_TITLE || \
         (screen) == MENU_SCREEN_OPTIONS || \
@@ -4418,6 +4688,70 @@ void DrawMenuScreen(Gfx **displayListHead) {
         (screen) == MENU_SCREEN_MAIN_WITHOUT_TRANSMIT || \
         (screen) == MENU_SCREEN_CLUBHOUSE)
 
+// Draws the chosen layers of the menu's backdrop: the course backdrop, the
+// board and the banner
+//
+// The banner's strips count with stripIndex, as the board's do, and work out
+// their texels' offset in one expression. Each edge of a strip is one sum in
+// its command: a part of the banner's top, the strip's own top as the counter
+// times the strip's height, the bob offset, and the rest of the banner's top.
+// loop.c then steps the product from 0 in a register of its own and leaves
+// the bob offset to be added to it for each edge, as the original does. With
+// the banner's top as one constant the edges' adds come out another way, and
+// most such forms keep one more value in a saved register through the whole
+// function. Any two parts other than 0 give the same code, so only their sum
+// is known (BOBBING_BANNER_TOP).
+//
+// The per-screen layer's switch has a case that ends the display list and
+// returns, as the code after the switch does. jump2 finds the case's code
+// the same as the tail, cross-jumps the two and deletes the branch, which
+// leaves the original's dead read of g_MenuScreen and its test in place. The
+// case is the one form here with no other reason to exist, and which screen
+// it names is unknown: any but MENU_SCREEN_TITLE gives the same code.
+//
+// The clamped scenery counts its loaded rows in a variable, as its comment
+// explains.
+//
+// Measured against the match, in words differing (and how many in shape):
+//
+//   The banner's strips counted by a variable of their own  618 (420)
+//   The texels' offset through a local of counter times width 4 (4)
+//   The banner's top whole, before the product              598 (426)
+//   The banner's top whole, after the bob offset            275 (37)
+//   Both parts before the bob offset                        598 (426)
+//   Both parts after the bob offset                         275 (37)
+//   The top after the bob offset, the two in parentheses    285 (39)
+//   The bob offset first in each edge                       626 (424)
+//   The bottom's strip height after the bob offset, or last 648 (424)
+//   The bottom's product as the counter plus 1, times height 20 (10)
+//   A local for the first part plus the product               8 (2)
+//   A local for the product                                  37 (1)
+//   A local for the bob offset plus the product              34 (4)
+//   A local stepped by the height from 0 for the product    594 (426)
+//   bobOffset as an s16                                      68 (16)
+//   bobOffset as an s8                                       56 (18)
+//   bobOffset as a u16                                       85 (31)
+//   bobOffset zeroed before its test, with no else            3 (3)
+//   The bob offset's two constants as one                     6 (4)
+//   The banner's image read at each use, with no local      135 (39), frame -8
+//   MENU_SCREEN_TITLE as the returning case's screen          7 (5)
+//   A default that returns, in place of the case              7 (5)
+//   A case that breaks, an empty default or if, a (void) read 8 (6)
+//   No read of g_MenuScreen at all                            8 (6)
+//   A case and a default that sync and break, an else too     4 (2)
+//   The clamped scenery's loaded rows as the constant       811 (431), frame +8
+//   The rows' count set where it is declared                219 (29)
+//   The first strip's load counting its rows with it too    811 (431), frame +8
+//   The plain scenery's bottom edge from stripTop             3 (3)
+//   Without the unused GetMenuMemory call                   397 (3), frame +16
+//
+// Also matching: the bottom's strip height after the product; the product
+// before the first part in both edges; the bob offset as a conditional
+// expression; an if on one screen that returns, a case of two screens, or a
+// case, a default and an else that each sync and store the list's head; the
+// clamped scenery's texels as a sum, or the plain scenery's through
+// LargeImageTexelsAt; loadedRowCount declared before stripIndex, image before
+// bobOffset, or stripTop before shownRowCount.
 void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -4427,6 +4761,7 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
     u8 *image;
     s32 loadedRowCount;
 
+    // The menu memory goes unused
     GetMenuMemory();
 
     gDPPipeSync(gfx++);
@@ -4481,6 +4816,10 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
                 }
                 else {
                     gDPPipeSync(gfx++);
+                    // The loaded rows are counted in a variable here, to match: the
+                    // constant gives 811 words differing (431 in shape), setting the
+                    // count where it is declared 219 (29), and counting the rows in the
+                    // first strip's load too 811 (431)
                     loadedRowCount = COURSE_SCENE_STRIP_ROW_COUNT + COURSE_SCENE_SEAM_ROW_COUNT;
                     gDPLoadTextureBlock(
                         gfx++,
@@ -4543,10 +4882,13 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
         }
         else {
             for (stripIndex = 0; stripIndex != COURSE_SCENE_STRIP_COUNT; stripIndex++) {
+                // The image ends in a strip of one row
                 shownRowCount =
                     (stripIndex != COURSE_SCENE_STRIP_COUNT - 1) ? COURSE_SCENE_STRIP_ROW_COUNT : 1;
 
                 if (stripIndex == 0) {
+                    // The first strip has no row above it, so it shows its first row
+                    // too
                     gDPLoadTextureBlock(
                         gfx++,
                         TextureAddress(LargeImageTexels(g_MenuCourseSceneImage)),
@@ -4763,6 +5105,8 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
             );
             gDPPipeSync(gfx++);
 
+            // The banner's top goes in two parts around the bob offset, to
+            // match
             gSPScisTextureRectangle(
                 gfx++,
                 QuarterPixels(MENU_BANNER_LEFT),
@@ -4785,6 +5129,9 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
         }
     }
 
+    // The game reads g_MenuScreen for this layer but draws nothing. The case
+    // ends the list as the code below does, which keeps the read: see the
+    // header comment
     if (layers & MENU_LAYER_PER_SCREEN) {
         switch (g_MenuScreen) {
             case MENU_SCREEN_COURSE_SELECT:
@@ -4798,6 +5145,10 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
     *displayListHead = gfx;
 }
 
+// Draws the chosen layers of the backdrop from their own routines, unlike
+// DrawMenuBackdropLayers: the scenery, the narrow board, the large banner,
+// which only the mode select and the saved games ask for, and the banner,
+// which does not bob
 void DrawLargeBannerBackdropLayers(Gfx **displayListHead, s32 layers) {
     Gfx *gfx = *displayListHead;
 
@@ -4838,9 +5189,11 @@ void DrawMenuCourseScene(Gfx **displayListHead) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(g_MenuCourseSceneImage)));
     for (stripIndex = 0; stripIndex != COURSE_SCENE_STRIP_COUNT; stripIndex++) {
+        // The image ends in a strip of one row
         shownRowCount =
             (stripIndex != COURSE_SCENE_STRIP_COUNT - 1) ? COURSE_SCENE_STRIP_ROW_COUNT : 1;
         if (stripIndex == 0) {
+            // The first strip has no row above it, so it shows its first row too
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(LargeImageTexels(g_MenuCourseSceneImage)),
@@ -4974,6 +5327,7 @@ void DrawNarrowMenuBoard(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Nothing in the menu calls this; menu.c loads its image, ASSET_NAME_PLATE
 void DrawNamePlateBanner(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -5021,6 +5375,8 @@ void DrawNamePlateBanner(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Draws g_NamePlateImage squeezed to SMALL_BANNER_WIDTH, its top left at
+// (left, top)
 void DrawSmallNamePlate(Gfx **displayListHead, s32 left, s32 top) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -5068,6 +5424,8 @@ void DrawSmallNamePlate(Gfx **displayListHead, s32 left, s32 top) {
     *displayListHead = gfx;
 }
 
+// Draws the large banner, for DrawLargeBannerBackdropLayers's
+// MENU_LAYER_LARGE_BANNER
 void DrawLargeMenuBanner(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -5160,11 +5518,18 @@ void DrawMenuBanner(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// NEW GAME comes first, then the player counts, then the saved games and the
+// menus
 #define TITLE_LABEL_NEW_GAME 0
 #define TITLE_LABEL_FIRST_PLAYER_COUNT 1
 #define TITLE_LABEL_FIRST_OTHER_CHOICE 4
 #define TITLE_LABEL_SAVED_GAMES 5
+// While g_HasBroughtOverCharacter is set the saved games' row leads to
+// Transmit, and this label takes its place
 #define TITLE_LABEL_TRANSMIT 7
+// A plain-text menu under the board: "MAIN MENU", "1P GAME" to "3P GAME" and
+// the sizes of the save's ranked records, its ring shot records and the whole
+// save
 #define PLAIN_MENU_HEADING_X 64
 #define PLAIN_MENU_HEADING_Y 32
 #define PLAIN_MENU_NAME_COUNT 3
@@ -5173,16 +5538,94 @@ void DrawMenuBanner(Gfx **displayListHead) {
 #define PLAIN_MENU_NAME_SPACING 8
 #define PLAIN_MENU_FIGURES_X 32
 #define PLAIN_MENU_FIGURES_Y 100
+// The scenery, the board and both banners, behind the title, the main menus,
+// the clubhouse and screen 8
 #define BOARD_BACKDROP_LAYERS \
     (MENU_LAYER_COURSE_SCENE | MENU_LAYER_BOARD | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER | \
         MENU_LAYER_PER_SCREEN)
 
+// Whether a title label is New Game's or the chosen player count's while New
+// Game is the chosen choice. A label is the chosen one if it is either of
+// these, or else the chosen choice's own.
 #define IsChosenNewGameLabel(labelIndex) \
     ((g_MenuMemory.titleChoice == TITLE_CHOICE_NEW_GAME && \
          (labelIndex) == TITLE_LABEL_NEW_GAME) || \
         (g_MenuMemory.titleChoice == TITLE_CHOICE_NEW_GAME && \
             (labelIndex) == g_MenuMemory.playerCountChoice + TITLE_LABEL_FIRST_PLAYER_COUNT))
 
+// Draws the title screen: a plain-text menu under the board, the backdrop, the
+// labels that aren't chosen, and then the chosen ones lit, growing and
+// shrinking, all but New Game's.
+//
+// In the lit labels' loop the original steps a register by 5 beside the label
+// table's pointers and shifts it left by 8 for the label's offset into the
+// texels: loop.c has taken the first half of the product with the image's size
+// of 0x500, the index times 5, for an induction variable of its own. It steps
+// one when the variable's lifetime, times its benefit and a threshold, reaches
+// the loop's insn count. Written as labelIndex * TITLE_LABEL_IMAGE_SIZE the
+// index times 5 lasts one insn, up to its shift, and is worth 252 against the
+// lit loop's 268 insns, so it is worked out afresh on each pass, and the title
+// choice's pointer moves from $s0 to $t7 with it. The unlit loop has 195 insns,
+// and steps it either way.
+//
+// Counted in rows first, the offset is the row times TITLE_LABEL_ROW_SIZE,
+// which is expanded as a shift left by 6 with a note that it equals that
+// product. The first cse pass joins the row's shift by 2 to it, so the offset
+// is shifted by 8 from the index times 5 and nothing reads the row any more.
+// But the note now names the row's register, and as the pass counts a note's
+// registers as used when it deletes dead insns, the row's shift is left in. At
+// loop.c's turn the index times 5 is read twice, its lifetime is 2, it is worth
+// 504 and is stepped; flow deletes the row's shift afterwards. With the row
+// shifted left by 6 in the source there is no note, the row's insn is deleted
+// after cse, and the index times 5 lasts one insn again.
+//
+// The original's loops don't test the chosen choice's own label alike: the
+// unlit loop has bnel $v0, $s2 and the lit loop bnel $s2, $v0, where $s2 is
+// labelIndex. So that term is written out in each loop, the label's index last
+// in the first and first in the second, and IsChosenNewGameLabel holds the two
+// terms they share.
+//
+// Measured against the match, as words differing and how many of them in shape:
+//   The old draft: each loop's offset as labelIndex *
+//   TITLE_LABEL_IMAGE_SIZE, and one test for both             62 (10)
+//   The lit labels' offset alone as that product              62 (10)
+//   That product from an inline function                      62 (10)
+//   That product in a statement expression                    8 (6)
+//   The same as labelIndex * TITLE_LABEL_HEIGHT *
+//   TITLE_LABEL_ROW_SIZE, with no row                         62 (10)
+//   The lit labels' row shifted left by 6                     62 (10)
+//   The lit labels' offset counted in blocks of 256 bytes
+//   first, 5 to a label                                       62 (10)
+//   The same counted first in a row's bytes, and multiplied
+//   by the height                                             4 (0)
+//   The lit labels' row as an s16                             16 (8)
+//   The lit labels' row as a u8                               13 (5)
+//   The lit labels' offset worked out before Transmit's test,
+//   and set again under it                                    4 (4)
+//   The lit labels' row worked out before Transmit's test     61 (11)
+//   Transmit's row set under the test, and the offset taken
+//   from the row after it                                     65 (11)
+//   The label's index swapped for Transmit's under the test,
+//   and multiplied after it                                   63 (15)
+//   labelOffset as a u16                                      25 (17)
+//   labelOffset as an s16                                     27 (19)
+//   The lit loop's test with the label's index last, as in
+//   the unlit loop's                                          2 (0)
+//   The unlit loop's test with the label's index first, as in
+//   the lit loop's                                            2 (0)
+//   The lit loop's test with the choice tested as not New
+//   Game before its label is compared                         8 (4)
+//   New Game's choice tested once for its two labels          30 (14)
+//   growth as an s32                                          124 (14)
+//   The loops' tests as <                                     8 (8)
+//
+// Also matching: the unlit labels' offset as the one product, or its row
+// shifted left by 6; row declared once for the function, or declared in its
+// block and set after; row or labelOffset as a u32; either product with its
+// operands the other way round; the row kept in labelOffset and multiplied
+// there; the row counted in pairs of rows and multiplied by the width; and the
+// lit labels' row from a statement expression or an inline function, multiplied
+// by the row's size where it is called.
 void DrawMenuTitleScreen(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 labelIndex;
@@ -5227,6 +5670,7 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
             labelOffset = TITLE_LABEL_TRANSMIT * TITLE_LABEL_IMAGE_SIZE;
         }
         else {
+            // Counted in rows first, as for the lit labels
             s32 row = labelIndex * TITLE_LABEL_HEIGHT;
 
             labelOffset = row * TITLE_LABEL_ROW_SIZE;
@@ -5268,6 +5712,7 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
         TextureAddress(ImagePalette(g_MenuLabelImages[f_MenuLabelImageIndex]))
     );
     for (labelIndex = 0; labelIndex != TITLE_LABEL_COUNT; labelIndex++) {
+        // The chosen choice's label is compared the other way round here, to match
         if (IsChosenNewGameLabel(labelIndex) ||
             (labelIndex == g_MenuMemory.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE &&
                 g_MenuMemory.titleChoice != TITLE_CHOICE_NEW_GAME)) {
@@ -5275,6 +5720,7 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
                 labelOffset = TITLE_LABEL_TRANSMIT * TITLE_LABEL_IMAGE_SIZE;
             }
             else {
+                // Counted in rows first, to match
                 s32 row = labelIndex * TITLE_LABEL_HEIGHT;
 
                 labelOffset = row * TITLE_LABEL_ROW_SIZE;
@@ -5296,6 +5742,7 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
             );
             gDPPipeSync(gfx++);
 
+            // NEW GAME stays still
             growth = 0;
             if (labelIndex != TITLE_LABEL_NEW_GAME) {
                 growth = g_ChosenLabelGrowth;
@@ -5340,51 +5787,81 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
 
 const char f_UnusedEmptyString[] = "";
 
+// The drawing of most of the menu screens: the main menu, the clubhouse, the
+// options, the help and birdie badge screens, and screens 5, 6, 8, 18, 20, 22,
+// 23 and 26, and the menus' labels, the chosen mode's icon, the players'
+// characters, the waving Toad, the debug character viewer and the debug caddy
+// select
+
+// The STATUS, HOW TO PLAY, CODE ENTRY and OPTIONS labels, 128 by 20 each, plain
+// in g_ImageSlots and lit in g_MenuLabelImages
 #define MAIN_CHOICE_LABEL_WIDTH 128
 #define MAIN_CHOICE_LABEL_HEIGHT 20
 #define MAIN_CHOICE_LABEL_IMAGE_SIZE (MAIN_CHOICE_LABEL_WIDTH * MAIN_CHOICE_LABEL_HEIGHT / 2)
 
+// The 24x24 icon that DrawSpinningBadge animates, such as the birdie badge;
+// each frame shows for two calls
+// DrawScaledModeIcon draws the chosen mode's icon, 64x64 CI8, in two strips
 #define SPINNING_ICON_FRAME_DURATION 2
+// Where DrawModeIcon draws the mode icon, unscaled
 #define MODE_ICON_LEFT 168
 #define MODE_ICON_TOP 96
 
+// DrawMenuCharacters draws the players' characters, and in Get Character the
+// rival as a spinning silhouette
 #define NO_RIVAL (-1)
 #define RIVAL_SLOT 1
+// A lone player and the rival they can win
 #define PLAYER_AND_RIVAL_COUNT 2
+// Whether a character to win was found, as NO_RIVAL is negative
 #define IsRivalFound(rival) ((rival) >= 0)
+// Whether SLOT holds the rival, standing beside a lone player
 #define IsRivalSlot(characterCount, rival, slot) \
     ((((characterCount) == PLAYER_AND_RIVAL_COUNT) & IsRivalFound(rival)) && ((slot) == RIVAL_SLOT))
 #define RIVAL_SPIN_STEP 10.0f
 
+// DrawWavingToad draws a frame of the waving Toad (assets 0x710 onward), 48x51
+// CI8, in two strips
 #define TOAD_WIDTH 48
 #define TOAD_STRIP_HEIGHT 30
 #define TOAD_LAST_STRIP_HEIGHT 21
 #define TOAD_STRIP_COUNT 2
 
+// Where the debug caddy select draws its title and names
 #define CADDY_SELECT_TITLE_X 64
 #define CADDY_SELECT_TITLE_Y 32
 #define CADDY_SELECT_NAME_X 96
 #define CADDY_SELECT_FIRST_Y 64
 #define CADDY_SELECT_LINE_HEIGHT 8
 
+// The mode select's boards turn on a circle like the saved games' boards,
+// wider for a single player; the chosen one shows its animated mode icon once
+// it stops turning
 #define MODE_SELECT_BACKDROP_LAYERS \
     (MENU_LAYER_COURSE_SCENE | MENU_LAYER_IGNORED | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER)
 #define MODE_SELECT_LIGHT_YAW 0
 #define MODE_SELECT_LIGHT_PITCH 0x3000
 #define SINGLE_PLAYER_MODE_BOARD_RADIUS_X 64.0f
+// The strips of g_NamePlateImage below the boards, drawn wider for a single
+// player
 #define MODE_BANNER_TOP 152
 #define MODE_BANNER_LEFT 80
 #define MODE_BANNER_SHOWN_WIDTH 160
 #define SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH 180
 #define MODE_ARROW_GAP 64
 #define MODE_ARROW_Y 124
+// A single player's Tournament shows the birdie badges won, and Ring Shot the
+// stars won, centered by the count's number of digits
 #define WON_COUNT_ICON_X 224
 #define WON_COUNT_ICON_Y 64
 #define WON_COUNT_X 250
 #define WON_COUNT_Y 72
+// The won counts from which a count takes two digits, and three
 #define TWO_DIGIT_WON_COUNT_MIN 10
 #define THREE_DIGIT_WON_COUNT_MIN 100
 
+// The course select's water plane, f_WaterVertices, blends the water image and
+// the scrolling layer, which scroll different ways, and is fogged white
 #define WATER_PLANE_DISTANCE 300.0f
 #define WATER_FIELD_OF_VIEW 45.0f
 #define WATER_PERSPECTIVE_SCALE 4.0f
@@ -5397,11 +5874,16 @@ const char f_UnusedEmptyString[] = "";
 #define WATER_LAYER_TMEM 0x100
 #define WATER_LAYER_TILE 1
 #define WATER_TILE_SPAN 64
+// The course select's wheel is seen from closer than the other wheels
 #define COURSE_SELECT_EYE_HEIGHT 50.0f
 #define COURSE_SELECT_EYE_DISTANCE 60.0f
+// The front course's image bobs, a step of its phase per update, and the
+// chosen one updates the depth buffer at a fixed depth
 #define FRONT_COURSE_BOB_PHASE_STEP 0.1f
 #define FRONT_COURSE_BOB_HEIGHT 8.0f
 #define CHOSEN_COURSE_DEPTH 0x7FFF
+// The course after the last open one is grayed out, with a panel over it
+// typing the points it needs
 #define LOCKED_COURSE_SHADE 96
 #define LOCKED_PANEL_LEFT 108
 #define LOCKED_PANEL_TOP 100
@@ -5410,17 +5892,24 @@ const char f_UnusedEmptyString[] = "";
 #define LOCKED_COURSE_TEXT_X 111
 #define LOCKED_COURSE_TEXT_Y 116
 #define MESSAGE_POINTS_TO_UNLOCK 0xC2
+// The course's birdie badge icon and count, centered by its number of digits
 #define COURSE_BADGE_ICON_X 226
 #define COURSE_BADGE_ICON_Y 200
 #define COURSE_BADGE_COUNT_X 252
 #define COURSE_BADGE_COUNT_Y 208
+// The chosen holes badge is lit, and the Bet badge cycles its color unless
+// g_AreBetPagesBlocked is set
 #define UNCHOSEN_HOLES_BADGE_SHADE 127
 #define BET_BADGE_COLOR_STEP (M_PI / 18)
 #define BET_BADGE_COLOR_MIDPOINT 127
 #define BET_BADGE_COLOR_SWING 127.0f
 #define BET_BADGE_ENV_DIVISOR 4
+// DrawMenuBackdropLayers's layers drawn behind the course select, and in front
+// of it and of the handicap and bet settings screens
 #define COURSE_SELECT_BACK_LAYERS MENU_LAYER_COURSE_SCENE
 #define COURSE_SELECT_FRONT_LAYERS (MENU_LAYER_IGNORED | MENU_LAYER_BANNER)
+// The handicap and bet settings screens slide their pages this far, a step per
+// update
 #define BET_SLIDE_STEP 32
 #define BET_SLIDE_DISTANCE 512
 
@@ -5435,12 +5924,36 @@ void DrawSpinningStars(
     u8 enlargesChosenHole
 );
 
+// Draws the mode select of screens 5, 23 and 26: the characters, the modes'
+// boards turning on their circle, the chosen mode's label, each player's
+// controller icon and label, and for a single player the birdie badges or
+// stars won.
+//
+// The original adds a zero to each board's truncated left edge and to its
+// strips' right edges (addu $v0, $zero, $v0, and ori $a1, $a1, 0 for the
+// chosen board), which no other function in the game does. Reload gives that
+// for a variable set once to zero that gets no register, and combine turns
+// the chosen board's add into an or, so those edges add wheelShiftX; without
+// it 93 words differ, 9 in shape.
+//
+// One variable, i, counts the draw-order sort's passes and the icon strips',
+// banner strips' and players' loops, and holds the chosen mode and the won
+// count's shift between them, as the original keeps all of them in $s1; the
+// register oracle lined the loops' counter up with that register.
+// Otherwise the original's code reads plainly: the loops end on bne tests,
+// the boards' loop loads g_MenuMemory's choice and spin directly on each
+// pass, the bob is added to the chosen board's top last,
+// areCharactersDrawn is a u8, which the original masks with andi 0xff
+// before testing it, and a board's turns, which go negative, and the angle
+// step are s32s, which the original multiplies without masking.
 void DrawModeSelect(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     u16 perspectiveNormalization;
+    // Sized like the course wheel's
     f32 boardX[WHEEL_SLOT_LIMIT];
     f32 boardY[WHEEL_SLOT_LIMIT];
     f32 boardScale[WHEEL_SLOT_LIMIT];
+    // Pads the frame to match; without it 604 words differ
     s32 unusedSlots[WHEEL_SLOT_LIMIT] UNUSED;
     s32 drawOrder[WHEEL_SLOT_LIMIT];
     s32 position[PLANE_AXIS_COUNT];
@@ -5454,15 +5967,25 @@ void DrawModeSelect(Gfx **displayListHead) {
     s32 angleStep;
     Radians angle;
     f32 circleX;
+    // The slot of the board drawn
     s32 drawnIndex;
     s32 halfSize;
     s32 texelStep;
     f32 bobOffset;
+    // The boards' sideways offset; the wheel never shifts, so it stays zero
     s32 wheelShiftX = 0;
     UBoolean8 areCharactersDrawn;
     s32 labelIndex;
     s32 labelX;
     ImageAsset *image;
+    // Counts the sort's passes and the icon, banner strip and player loops, and
+    // holds the chosen mode and then the won count's shift, to match: the
+    // original keeps all of them in $s1. A local for the shift, declared
+    // anywhere or in each won count's block, gives 122 words differing (none
+    // in shape), as without the shift i outranks index for $s0; a local for
+    // the chosen mode gives 22 (6), and reading it where it's used 32 (24).
+    // Of the 63 ways of giving some of the six roles variables of their own,
+    // none matches without forcing registers.
     s32 i;
     CourseIndex courseIndex;
     s32 holeIndex;
@@ -5510,6 +6033,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     modeCount = f_ModeCounts[g_ChosenPlayerCount - 1];
     for (index = 0; index != modeCount; index++) {
         ScreenPoint point;
+        // The board's turns from the chosen one
         s32 turns;
 
         if (g_ChosenPlayerCount == 1) {
@@ -5543,6 +6067,7 @@ void DrawModeSelect(Gfx **displayListHead) {
         drawOrder[i] = i;
     }
 
+    // Draw the farthest boards first, so the nearer ones cover them
     for (i = 1; i != modeCount; i++) {
         key = drawOrder[i];
         for (index = i - 1; (index >= 0) && (boardY[drawOrder[index]] > boardY[key]); index--) {
@@ -5562,6 +6087,7 @@ void DrawModeSelect(Gfx **displayListHead) {
         drawnIndex = drawOrder[index];
         halfSize = boardScale[drawnIndex] * CAROUSEL_BOARD_HALF_SIZE;
         texelStep = (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
+        // The loop stops before modeCount, so no board bobs
         if (index == modeCount) {
             bobOffset = sinf(f_ModeBoardBobPhase) * CAROUSEL_BOB_HEIGHT;
         }
@@ -5601,6 +6127,7 @@ void DrawModeSelect(Gfx **displayListHead) {
         }
         else {
             if (g_MenuMemory.modeChoice == drawnIndex) {
+                // The characters go behind the chosen board, and change the state
                 if (!areCharactersDrawn) {
                     DrawMenuCharacters(&gfx);
                     gDPPipeSync(gfx++);
@@ -5969,6 +6496,7 @@ void DrawModeSelect(Gfx **displayListHead) {
             i = DIGIT_GLYPH_SIZE;
         }
 
+        // This tests the badge count, which is zero here, for the star count
         if ((starCount >= TWO_DIGIT_WON_COUNT_MIN) && (badgeCount < THREE_DIGIT_WON_COUNT_MIN)) {
             i = 0;
         }
@@ -5986,6 +6514,8 @@ void DrawModeSelect(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Draws the chosen mode's icon at its own size in a fixed place, and steps its
+// animation on. Nothing calls it.
 void DrawModeIcon(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     EncodedAsset asset;
@@ -6066,6 +6596,9 @@ void DrawModeIcon(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Draws the chosen mode's icon from (left, top), its two strips each halfSize
+// high and twice that wide at the texel step scale, so that the mode select can
+// grow the chosen board's icon, and steps its animation on.
 void DrawScaledModeIcon(Gfx **displayListHead, s32 left, s32 top, s32 halfSize, s32 scale) {
     Gfx *gfx = *displayListHead;
     EncodedAsset asset;
@@ -6131,6 +6664,9 @@ void DrawScaledModeIcon(Gfx **displayListHead, s32 left, s32 top, s32 halfSize, 
     *displayListHead = gfx;
 }
 
+// Draws the chosen characters on the menu, fidgeting now and then. A lone
+// player who can win a character stands beside that rival, drawn as a
+// spinning silhouette.
 void DrawMenuCharacters(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 rival = NO_RIVAL;
@@ -6146,6 +6682,7 @@ void DrawMenuCharacters(Gfx **displayListHead) {
     Vec3 translation;
     Vec3 rotation;
     Vec3 scale;
+    // Pads the frame to match; without it 72 words differ
     s32 unused[12] UNUSED;
     Mat4 transform;
 
@@ -6293,6 +6830,10 @@ void DrawMenuCharacters(Gfx **displayListHead) {
     }
 }
 
+// A debug character viewer. START hides the board and turns on the controls:
+// the stick turns the character, the C buttons move it, A and B scale it, left
+// and right pick an animation, R plays it, Z with the C buttons steps through
+// it and L changes the character's kind.
 #define VIEWER_NAME_X 32
 #define VIEWER_NAME_Y 192
 #define VIEWER_PLAYER_NUMBER_X 144
@@ -6308,9 +6849,12 @@ void DrawMenuCharacters(Gfx **displayListHead) {
 #define VIEWER_STICK_DEAD_ZONE 20
 #define VIEWER_STICK_DIVISOR 4
 #define VIEWER_SCALE_STEP 0.05f
+// With Z held, the left and right C buttons step the animation a frame either
+// way, and up and down play it fast either way
 #define VIEWER_STEP_SPEED 1.0f
 #define VIEWER_FAST_SPEED 4.0f
 #define VIEWER_LAST_ANIMATION 34
+// From this animation on, the character's second model plays it
 #define VIEWER_FIRST_SECOND_MODEL_ANIMATION 12
 #define VIEWER_SECOND_MODEL_OFFSET 18
 #define VIEWER_KIND_COUNT 5
@@ -6594,14 +7138,44 @@ void DrawAnimationViewer(Gfx **displayListHead) {
     gfx = *displayListHead;
 }
 
+// Draws the course select, or the bet settings and the handicaps' columns as
+// the two screens slide between them. The course select draws the water
+// plane, then the wheel of the open courses and the next one, or of the
+// mini-golf disc's images, the front one bobbing. With
+// COURSE_SELECT_LAYOUT_HOLES it draws the holes badges, and with
+// COURSE_SELECT_LAYOUT_AWARDS the course's birdie badge count and tournament
+// trophies. Then SlideBrickWall slides the stats panel's rows the way
+// g_BetPagesWallSlide picks; when that is 3 or 4, the chosen hole starts
+// loading once they stop.
+// The choice is copied into chosenSlot before each icon's mini golf test, to
+// match: the original reads it there and keeps it in $a3 until its test.
+// Testing choice itself, 5 words differ, all in shape, as GCC reloads it from
+// the stack; no natural form found needs the copy. A static inline helper
+// would make one, as GCC copies each argument of a parameter that isn't
+// const, but it copies the slot too: copies of both give 11 words, and a
+// helper drawing the whole icon gives 540 words, 172 in shape.
+//
+// The mini golf disc's centre is set in two arms, when the disc stops
+// spinning and when it has none yet, which cross-jumping merges into one
+// copy; joined with ||, 89 words differ, 5 in shape, and the texels and the
+// address of the local arrays swap registers.
+//
+// The course icons' palette is set before their texels, each read from the
+// table, as the mini golf discs' is. Setting the texels first and the palette
+// from them gave 24 words differing, 6 in shape, against 89 and 5 with the
+// joined test. Earlier, clearing the place count in the place loop's
+// initializer took 51 words differing to 49, and reading the slot in its own
+// block gave 40 words, 10 in shape.
 void DrawCourseSelect(Gfx **displayListHead) {
     Gfx *gfx;
     u16 perspectiveNormalization;
     u16 wheelPerspNorm;
+    // Pads the frame to match; without it 738 words differ
     u8 unusedStackBeforeIcons[0x10] UNUSED;
     f32 iconX[COURSE_COUNT];
     f32 iconY[COURSE_COUNT];
     f32 iconScale[COURSE_COUNT];
+    // Pads the frame to match; without it 706 words differ
     u8 unusedStackAfterIcons[0x18] UNUSED;
     s32 drawOrder[COURSE_COUNT];
     s16 places[TOURNAMENT_PLACE_COUNT];
@@ -6613,6 +7187,8 @@ void DrawCourseSelect(Gfx **displayListHead) {
     s32 texelsOffset;
     s32 angleStep;
     s32 index;
+    // Counts the sort's passes, the strips, the holes (then holds the badge
+    // count's shift), the badges, the places and the trophies
     s32 otherIndex;
     s32 key;
     s32 drawnIndex;
@@ -6855,6 +7431,8 @@ void DrawCourseSelect(Gfx **displayListHead) {
             chosenIndex = choice;
             if (g_GameState.isMiniGolf == TRUE) {
                 palette = g_MiniGolfDiscImages[drawnIndex];
+                // Indexed as one row, to match: indexed by the buffer and the slot,
+                // 5 words differ, 1 in shape
                 texels =
                     MENU_ICON_IMAGE_PAIRS[0]
                                          [(f_MiniGolfDiscBufferIndex * MINI_GOLF_DISC_IMAGE_COUNT) +
@@ -6955,6 +7533,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
                 }
             }
 
+            // Centers the count by its number of digits
             if (badgeCount < TWO_DIGIT_WON_COUNT_MIN) {
                 otherIndex = DIGIT_GLYPH_SIZE;
             }
@@ -7166,6 +7745,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
                 }
             }
 
+            // Centers the count by its number of digits
             if (badgeCount < TWO_DIGIT_WON_COUNT_MIN) {
                 otherIndex = DIGIT_GLYPH_SIZE;
             }
@@ -7246,6 +7826,10 @@ void DrawCourseSelect(Gfx **displayListHead) {
             gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         }
 
+        // The wall stays still at other slides. An empty case for
+        // STATS_SLIDE_CURRENT compiles to the same tests but moves registers
+        // elsewhere (17 words, all in shape), and default for the slides out
+        // tests the tree differently (6, all in shape)
         switch (g_BetPagesWallSlide) {
             case STATS_SLIDE_OUT_RIGHT:
             case STATS_SLIDE_OUT_LEFT:
@@ -7400,6 +7984,10 @@ void DrawCourseSelect(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// DrawCourseSelectBanners draws the course select's banners of
+// g_NamePlateImage: one behind the course's name, and while the holes can be
+// chosen, a wider one below it behind the choice made, which squeezes the
+// first.
 #define COURSE_NAME_BANNER_LEFT 67
 #define COURSE_NAME_BANNER_TOP 168
 #define COURSE_NAME_BANNER_WIDTH 190
@@ -7410,6 +7998,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
 #define HOLES_BANNER_STRIP_HEIGHT 11
 #define COURSE_NAME_Y 176
 #define HOLES_CHOICE_Y 202
+// A HOLES_CHOICE_* value plus this is the message that explains it
 #define MESSAGE_HOLES_CHOICE_BASE 0xC3
 #define HOLES_CHOICE_TEXT_SLOT 1
 
@@ -7417,11 +8006,17 @@ void DrawCourseSelectBanners(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 slide = g_CourseBannersSlide;
 
+    // Also the course's index into the name colors, to match: a courseIndex gives
+    // 34 words differing, none in shape
     s32 stripIndex;
+    // Also whether a full course is chosen, to match: an isFullCourse variable,
+    // or testing g_GameState.isMiniGolf directly, gives 5 words differing, 3 in
+    // shape, in the strip loop above; with a courseIndex too, 37 (3)
     s32 stripTop;
     s32 squeeze;
     CourseSelectLayout layout;
 
+    // The banners slide back in as the handicaps are confirmed
     if (g_BetPagesPhase == MENU_PHASE_CONFIRMED) {
         slide = -slide;
     }
@@ -7812,6 +8407,8 @@ void DrawMainMenuWithoutTransmit(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// The clubhouse's room labels, 192 by 20 each, plain in g_ImageSlots and lit in
+// g_MenuLabelImages
 #define ROOM_LABEL_WIDTH 192
 #define ROOM_LABEL_HEIGHT 20
 #define ROOM_LABEL_IMAGE_SIZE (ROOM_LABEL_WIDTH * ROOM_LABEL_HEIGHT / 2)
@@ -7917,6 +8514,7 @@ void DrawClubhouse(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// A screen that no menu screen dispatches to, with only the board backdrop
 void DrawUnusedBoardScreen(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
@@ -7927,10 +8525,12 @@ void DrawUnusedBoardScreen(Gfx **displayListHead) {
 const char f_PeachsCastleName[] = "Peach's Castle";
 const char f_LuigisGardenName[] = "Luigi's Garden";
 
+// The options draw the narrow board in place of the board
 #define OPTIONS_BACKDROP_LAYERS \
     (MENU_LAYER_COURSE_SCENE | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER | \
         MENU_LAYER_PER_SCREEN | MENU_LAYER_TALL_NARROW_BOARD)
 
+// The options screen's Mario and his shadow, in the menu image buffer
 #define MARIO_WIDTH 100
 #define MARIO_HEIGHT 128
 #define MARIO_STRIP_HEIGHT 16
@@ -7943,8 +8543,13 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 #define MARIO_SHADOW_TOP 168
 #define MARIO_SHADOW_ALPHA 159
 
+// Each option's row is this far below the last
 #define OPTION_ROW_SPACING 30
 
+// The toggled options' values sit on banners of g_NamePlateImage, squeezed to
+// 120 columns and 8 rows a strip. Their strips are placed from row 62 and drawn
+// 20 rows lower. The chosen one's moves 2 columns left above a shadow 3 rows
+// lower.
 #define VALUE_BANNER_LEFT 136
 #define VALUE_BANNER_WIDTH 120
 #define VALUE_BANNER_ROW_TOP 62
@@ -7954,11 +8559,15 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 #define BANNER_SHADOW_DROP 3
 #define BANNER_SHADOW_COLOR 31
 
+// A value banner strip's top in the given option's row
 #define ValueStripTop(toggleIndex, firstRowStripTop) \
     (((toggleIndex) * OPTION_ROW_SPACING) + (firstRowStripTop))
 #define BANNER_SHADOW_ALPHA 159
 #define DIMMED_COLOR 191
 
+// The options' labels, plain in g_ImageSlots and lit in g_MenuLabelImages. Each
+// label is followed in its image by the option's two values, so the labels lie
+// 60 rows apart; the lit values come from their own image
 #define OPTION_LABEL_WIDTH 128
 #define OPTION_LABEL_HEIGHT 20
 #define OPTION_LABEL_IMAGE_SIZE (OPTION_LABEL_WIDTH * OPTION_LABEL_HEIGHT / 2)
@@ -7968,6 +8577,7 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 #define OPTION_VALUE_LEFT 142
 #define OPTION_TOGGLE_COUNT OPTIONS_CHOICE_ERASE_SAVE_DATA
 
+// The arrows either side of the chosen toggle switch frames every 5 updates
 #define ARROW_FRAME_DURATION 5
 #define ARROW_TIMER_PERIOD (GREEN_ARROW_FRAME_COUNT * ARROW_FRAME_DURATION)
 #define LEFT_ARROW_LEFT 125
@@ -7977,6 +8587,7 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 #define ARROW_SHADOW_OFFSET_Y 3
 #define ARROW_PASS_COUNT 2
 
+// The sound test's lines, a song column and a sound column
 #define SONG_TEST_X 32
 #define SOUND_TEST_X 168
 #define TEST_NUMBER_Y 152
@@ -7986,8 +8597,10 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 #define TEST_REVERB_Y 176
 #define TEST_PITCH_Y 184
 #define TEST_TEMPO_Y 192
+// The chosen line is yellow
 #define CHOSEN_TEXT_BLUE 0
 
+// The erase window, and its question in text slot 10
 #define ERASE_WINDOW_WIDTH 240
 #define ERASE_WINDOW_HEIGHT 160
 #define ERASE_WINDOW_CENTER_X (SCREEN_WIDTH / 2)
@@ -8003,12 +8616,32 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 #define ERASE_MESSAGE_PALETTE_GREEN 127
 #define ERASE_MESSAGE_PALETTE_BLUE 127
 
+// Draws the options screen: Mario and his shadow, each option's label, the
+// toggles' values on their banners with arrows beside the chosen one, the
+// sound test's lines when game flag 0x55 is set, and the erase window while it
+// is up.
+//
+// Mario's strips, the value banners' strips, the options' rows and the
+// arrows' passes are all counted with loopIndex. Counting Mario's strips
+// with a counter of their own gives 132 words differing, the banners' strips
+// 32, and every loop its own counter 58, none in shape; the toggles counted
+// with loopIndex in place of the banners' strips give 26.
+//
+// Each value banner strip's top is written out at each use, through
+// ValueStripTop, from the strip's top in the first option's row, which is
+// worked out before the toggle test. Working that out at each use instead
+// gives 136 words, 24 in shape, and at the top of the strip loop 6, none in
+// shape; as an s16 it gives 33 (7), and as a u8 85 (11). The original
+// doesn't mask the strip's top to a byte. A stripTop local set at the start
+// of the chosen banner's branch gives 2 words, 2 in shape, and 3 as a u8;
+// set before the toggle test for both branches, 125 (21).
 void DrawOptionsScreen(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
     ImageAsset *marioImage = GetMenuImageBuffer();
     u8 *arrows = AddressPast(GetMenuImageBuffer(), OPTIONS_ARROWS_OFFSET);
     u8 *shadow = GetMenuImageBuffer();
+    // Counts Mario's strips, the banners' strips, the rows, the arrows' passes
     s32 loopIndex;
     s32 toggleIndex;
     s32 firstRowStripTop;
@@ -8348,6 +8981,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
         )
     );
     for (loopIndex = 0; loopIndex != OPTION_TOGGLE_COUNT; loopIndex++) {
+        // Each toggle has two values, the second shown while its bit is set
         valueOffset = loopIndex * 2 * OPTION_LABEL_IMAGE_SIZE;
         switch (loopIndex) {
             case OPTIONS_CHOICE_MUSIC:
@@ -8426,6 +9060,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
+        // The first pass draws the arrows' shadows
         for (loopIndex = 0; loopIndex != ARROW_PASS_COUNT; loopIndex++) {
             shiftX = 0;
             if (loopIndex == 0) {
@@ -8505,6 +9140,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
         }
 
         if (f_SoundTestSong == NO_SONG) {
+            // The original passes the song, though STOP prints no number
             sprintf(g_PrintBuffer, "BGM TEST : STOP", f_SoundTestSong);
             DrawShadowedText(&gfx, SONG_TEST_X, TEST_NUMBER_Y, g_PrintBuffer);
         }
@@ -8667,14 +9303,19 @@ void DrawCaddySelect(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// The blank screen draws nothing over the menu's cleared frame
 void DrawBlankScreen(Gfx **displayListHead UNUSED) {
 }
 
+// Left empty in the original, and nothing calls it
 void UnusedMenuStub(void) {
 }
 
+// Draws the current frame of a spinning badge's image at (x, y), and turns it
+// on through the frames that the spinning stars count too.
 void DrawSpinningBadge(Gfx **displayListHead, ImageAsset *image, s32 x, s32 y) {
     Gfx *gfx = *displayListHead;
+    // Pads the frame to match; without it 72 words differ
     s32 unused[8] UNUSED;
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -8724,6 +9365,9 @@ void DrawSpinningBadge(Gfx **displayListHead, ImageAsset *image, s32 x, s32 y) {
     *displayListHead = gfx;
 }
 
+// A row of starCount spinning stars, from one to MAX_STAR_COUNT, the chosen
+// hole's one larger when enlargesChosenHole. Every second draw it shows the
+// next frame and starts reading the one after into the other buffer.
 void DrawSpinningStars(
     Gfx **displayListHead,
     s32 left,
@@ -8806,6 +9450,9 @@ void DrawSpinningStars(
     *displayListHead = gfx;
 }
 
+// DrawMenuRingShotStars draws the course's Ring Shot holes as stars on a
+// hexagon around a center, gold where the hole's star was won and silver where
+// not, with the chosen hole larger. Nothing calls it.
 #define RING_SHOT_STAR_RADIUS 56
 #define RING_SHOT_STAR_WIDTH 32
 #define RING_SHOT_STAR_HEIGHT 24
@@ -8813,6 +9460,7 @@ void DrawSpinningStars(
 #define RING_SHOT_STAR_FRAME_DURATION 2
 #define GOLD_STAR_PALETTE 0
 #define SILVER_STAR_PALETTE 1
+// The silver star's texels follow the gold star's in texture memory
 #define SILVER_STAR_TMEM 128
 #define SILVER_STAR_TILE 1
 
@@ -8887,6 +9535,7 @@ void DrawMenuRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY) {
         left += centerX - (RING_SHOT_STAR_WIDTH / 2);
         top += centerY - (RING_SHOT_STAR_HEIGHT / 2);
 
+        // A hole without its star draws from the silver star's tile
         tile = save->records.hasRingShotStar[g_MenuMemory.courseIndex][holeIndex] == FALSE;
         gSPScisTextureRectangle(
             gfx++,
@@ -8925,6 +9574,7 @@ void DrawWavingToad(Gfx **displayListHead, s32 left, s32 top) {
     Gfx *gfx = *displayListHead;
     s16 stripIndex;
     s32 rowCount;
+    // Pads the frame to match; without it 70 words differ
     s32 unused[8] UNUSED;
 
     gDPPipeSync(gfx++);

@@ -1,3 +1,10 @@
+/*
+ * MODULE_CONFIRM_WAIT, which UpdateGame runs in SCENE_CONFIRM_WAIT. On A or
+ * Start it swaps itself for the boot logos' module and enters their scene.
+ * Its draw routine, RewriteWord, draws nothing. No code found enters
+ * SCENE_CONFIRM_WAIT.
+ */
+
 #include "menus/confirm_wait.h"
 
 #include <ultra64.h>
@@ -12,6 +19,9 @@
 
 static u8 f_UnusedConfirmWaitBytes[0x10] UNUSED;
 
+// On A or Start, clears the image in slot 0 and swaps this overlay's module
+// for the boot logos' to enter their scene. UpdateGame calls whatever sits
+// at this address in SCENE_CONFIRM_WAIT.
 void WaitForConfirmButton(void) {
     if (g_ControllerStates[0].pressedButtons & (A_BUTTON | START_BUTTON)) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);

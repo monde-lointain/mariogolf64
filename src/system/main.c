@@ -1,3 +1,9 @@
+/*
+ * The game's main thread, mainproc, which starts every system and then runs
+ * the game from the graphics retrace callback. The file also keeps the debug
+ * game flags, reads the controllers and prepares for a reset.
+ */
+
 #include "system/main.h"
 
 #include <PR/libmus.h>
@@ -31,26 +37,36 @@
 #include "system/overlay_manager.h"
 #include "system/segment_symbols.h"
 
+// The audio interface's sample rate, in Hz
 #define AUDIO_FREQUENCY 32000
 
+// Frame buffers that the game swaps between
 #define FRAMEBUFFER_COUNT 3
 
+// The bytes of one frame buffer's 16-bit texels
 #define FRAMEBUFFER_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(u16))
 
+// The frame buffers fill the end of the base RDRAM, in order
 #define FramebufferAddress(index) \
     ((u16 *)(BASE_RDRAM_END - ((FRAMEBUFFER_COUNT - (index)) * FRAMEBUFFER_SIZE)))
+
+// The first flag in each byte is its top bit
 #define GameFlagByte(flag) (f_GameFlagBits[(flag) / GAME_FLAGS_PER_BYTE])
 #define GameFlagMask(flag) (0x80 >> ((flag) % GAME_FLAGS_PER_BYTE))
+// Every bit but the flag's, as the high byte's ones shift in above it
 #define GameFlagClearMask(flag) (0xFF7F >> ((flag) % GAME_FLAGS_PER_BYTE))
 
+// Character slots that get a buffer in g_WorkArea
 enum CharacterSlotRole {
     CHARACTER_SLOT_PARTNER = 1,
     CHARACTER_SLOT_CADDIE,
     CHARACTER_SLOT_GOLFER
 };
 
+// Iterations of the busy loop between two reports of RunHeartbeatLoop
 #define HEARTBEAT_LOOP_COUNT 100000000
 
+// Values of g_MainLoopState
 enum MainLoopState {
     MAIN_LOOP_START,
     MAIN_LOOP_RUNNING = -1
@@ -58,6 +74,9 @@ enum MainLoopState {
 
 typedef s32 MainLoopState;
 
+// Values of f_DebugHaltState. Holding HALT_BUTTONS on the first controller
+// while halting is allowed halts the game and hands the console over to
+// the development debugger.
 enum HaltState {
     HALT_STATE_DISALLOWED,
     HALT_STATE_ALLOWED,
@@ -68,21 +87,33 @@ typedef u8 HaltState;
 
 #define HALT_BUTTONS (A_BUTTON | B_BUTTON | L_TRIG | R_TRIG)
 
+// Graphics tasks that may wait for the RDP before a frame is skipped,
+// depending on g_FramePacingMode
 #define PENDING_TASK_MAX 2
 #define PENDING_TASK_MAX_RELAXED 4
 
+// Retraces between two updates of g_FramesPerSecond
 #define RETRACES_PER_SECOND 60
 
+// The stick reads as a direction once it is pushed past
+// STICK_PRESS_THRESHOLD, and keeps doing so until it falls back below
+// STICK_RELEASE_THRESHOLD
 #define STICK_PRESS_THRESHOLD 56
 #define STICK_RELEASE_THRESHOLD 20
 
+// Stick readings this close to the center count as 0
 #define STICK_DEAD_ZONE 16
 
+// The largest stick magnitude in menu readings
 #define MENU_STICK_MAX 64
 
+// The largest stick magnitude in a ControllerState, after the dead zone
 #define STATE_STICK_MAX 44
 
+// A ControllerState counts the stick as pressing a direction past this
 #define STATE_STICK_DIRECTION_MIN 30
+
+// The original's variables are defined in the order of its data and bss
 
 Boolean8 g_IsDebugEnabled = FALSE;
 Boolean g_HasExpansionPak = FALSE;
@@ -90,6 +121,7 @@ static volatile HaltState f_DebugHaltState = HALT_STATE_DISALLOWED;
 Boolean g_HasThreeFrameBuffers = FALSE;
 s32 g_FramesPerSecond = 0;
 
+// The original reserves these bytes, but nothing reads them
 static u8 f_UnusedBytesAfterFramesPerSecond[4] UNUSED = {0};
 
 static u16 *f_Framebuffers[FRAMEBUFFER_COUNT] = {
@@ -104,6 +136,7 @@ volatile s32 g_FrameCount = 0;
 static Boolean f_IsOddRetrace = FALSE;
 
 void HandleGfxRetrace(s32 pendingTaskCount);
+// The development debugger's entry, outside the game's code
 void EnterDevelopmentDebugger(s32 argument);
 
 Boolean g_HasOwnControllers;
@@ -121,18 +154,23 @@ ControllerState g_TurnController;
 
 FILE_STATIC volatile MainLoopState g_MainLoopState;
 FILE_STATIC u8 f_GameFlagBits[GAME_FLAG_BYTE_COUNT];
+// The menus' readings from the last frame
 FILE_STATIC NUContData g_PreviousMenuControllerData[MAXCONTROLLERS];
+// One bit for each port with a controller plugged in, from bit 0
 FILE_STATIC u8 g_ConnectedControllerBits;
 
+// Reports a failed assertion to the host, and carries on
 void ReportFailedAssertion(const char *expression UNUSED, const char *fileName, s32 lineNumber) {
     osSyncPrintf("Assertion Fault : File %s Line %d\n", fileName, lineNumber);
 }
 
+// The game's own version of libultra's guNormalize, which scales the vector
+// to a length of 1
 void guNormalize(f32 *x, f32 *y, f32 *z) {
     f32 xValue = *x;
     f32 yValue = *y;
     f32 zValue = *z;
-
+    // The squared length, and then the inverse of the length
     f32 length = (xValue * xValue) + (yValue * yValue) + (zValue * zValue);
 
     if (length < 0.0f) {
@@ -153,6 +191,7 @@ void InitFramebuffers(void) {
     nuGfxSetCfb(f_Framebuffers, FRAMEBUFFER_COUNT);
 }
 
+// The debug game flags. A flag out of range reads as clear and doesn't change.
 Boolean IsGameFlagSet(u32 flag) {
     if (flag < GAME_FLAG_COUNT) {
         if (GameFlagByte(flag) & GameFlagMask(flag)) {
@@ -191,6 +230,8 @@ void ClearAllGameFlags(void) {
     }
 }
 
+// A thread body that reports to the host, now and then, that it still runs.
+// Nothing starts it.
 void RunHeartbeatLoop(void) {
     s32 iteration;
 
@@ -202,6 +243,7 @@ void RunHeartbeatLoop(void) {
     }
 }
 
+// Divides the start of g_WorkArea among the character slots
 void AssignCharacterBuffers(void) {
     s32 bufferSize = GetCharacterBufferSize();
 
@@ -211,11 +253,16 @@ void AssignCharacterBuffers(void) {
     osSyncPrintf("GMemLeft=%x\n", WORK_AREA_SIZE - (bufferSize * 3));
 }
 
+// Stops the rumble and mutes the music once the reset button is pressed
 void PrepareForReset(void) {
     StopAllRumble();
     __libmus_output_muted = TRUE;
 }
 
+// Clears the exception enables of the floating-point control and status
+// register, so that float errors give IEEE results instead of trapping.
+// The first mask clears bits 8 to 12 and 28 to 31, the second the enables
+// in bits 7 to 11, and nothing is set again.
 void DisableFloatExceptions(void) {
     __asm__ volatile("cfc1 $4, $31\n"
                      "nop\n"
@@ -233,17 +280,22 @@ void DisableFloatExceptions(void) {
         : "$4", "$5");
 }
 
+// Starts every system, then hands the game to HandleGfxRetrace and waits,
+// showing any message that g_MessageFramebuffer holds
 void mainproc(void *arg UNUSED) {
     u32 buildDateSize;
     s32 portIndex;
 
     osAiSetFrequency(AUDIO_FREQUENCY);
+    // Clear all memory past the main segment's bss: the overlays, the heaps
+    // and the framebuffers
     bzero(main_BSS_END, BytesBetween(main_BSS_END, BASE_RDRAM_END));
     osWritebackDCacheAll();
     DisableFloatExceptions();
     RunBootHook();
     osSyncPrintf("MainEntry\n");
 
+    // Read the build date, cut to fit g_RomBuildDate
     buildDateSize = build_date_ROM_END - build_date_ROM_START;
     if (buildDateSize >= BUILD_DATE_LENGTH_MAX) {
         buildDateSize = BUILD_DATE_LENGTH_MAX;
@@ -267,6 +319,7 @@ void mainproc(void *arg UNUSED) {
     osSyncPrintf("E-InitSRAM\n");
     InitFramebuffers();
 
+    // Give the connected controllers to the players in port order
     g_ConnectedControllerBits = nuContInit();
     g_ControllerCount = 0;
     for (portIndex = 0; portIndex < MAXCONTROLLERS; portIndex++) {
@@ -277,6 +330,8 @@ void mainproc(void *arg UNUSED) {
 #ifdef AVOID_UB
         memset(&g_ControllerStates[portIndex], 0, sizeof(g_ControllerStates[0]));
 #else
+        // This clears the size of the whole array at each state, which runs
+        // past the end of the array for every port but the first
         memset(&g_ControllerStates[portIndex], 0, sizeof(g_ControllerStates));
 #endif
     }
@@ -302,6 +357,7 @@ void mainproc(void *arg UNUSED) {
             nuGfxFuncSet((NUGfxFunc)HandleGfxRetrace);
             nuPreNMIFuncSet(PrepareForReset);
         }
+
         while (g_MainLoopState == MAIN_LOOP_RUNNING) {
             if (g_MessageFramebuffer != NULL) {
                 osViSwapBuffer(g_MessageFramebuffer);
@@ -316,6 +372,9 @@ void mainproc(void *arg UNUSED) {
     }
 }
 
+// The direction that a stick axis reads: 1, -1 or 0. Past releaseThreshold
+// the axis keeps the previous direction, and only past pressThreshold does it
+// take a new one.
 s32 GetStickDirection(s32 stick, s32 previousDirection, u32 pressThreshold, u32 releaseThreshold) {
     u32 magnitude = stick;
 
@@ -328,6 +387,9 @@ s32 GetStickDirection(s32 stick, s32 previousDirection, u32 pressThreshold, u32 
             stick = previousDirection;
         }
 
+        // A jump to the shared return, to match: returning the direction here,
+        // or as a ternary, or leaving early on each failed test gives 6 words
+        // differing, 4 in shape, and a direction local 12, 8 in shape
         if (stick != 0) {
             goto HAS_DIRECTION;
         }
@@ -336,10 +398,13 @@ s32 GetStickDirection(s32 stick, s32 previousDirection, u32 pressThreshold, u32 
     return 0;
 
 HAS_DIRECTION:
-
     return (stick >> 31) | 1;
 }
 
+// Reads the menus' view of a controller: the stick with a dead zone, the
+// stick's directions added to the control pad, and buttons held down repeated
+// at intervals. previousMenuControllerData is unused; the caller has already
+// saved the last reading there.
 void UpdateMenuController(
     NUContData *controllerData,
     NUContData *previousMenuControllerData UNUSED,
@@ -394,6 +459,8 @@ void UpdateMenuController(
 
     menuControllerData->trigger = controllerData->trigger;
 
+    // While the buttons stay the same, report them only when the delay runs
+    // out, which is shorter after the first time
     if (menuControllerData->button == g_MenuRepeatStates[portIndex].previousButtons) {
         g_MenuRepeatStates[portIndex].previousButtons = menuControllerData->button;
         if (repeatDelay > BUTTON_REPEAT_DELAY_FIRST) {
@@ -416,6 +483,8 @@ void UpdateMenuController(
     g_MenuRepeatStates[portIndex].repeatDelay = repeatDelay;
 }
 
+// Reads the game's view of a controller, as UpdateMenuController does but
+// with a narrower stick range and the pressed and held buttons as well
 void UpdateControllerState(NUContData *controllerData, ControllerState *controller) {
     s32 repeatDelay = controller->repeatDelay;
 
@@ -423,6 +492,8 @@ void UpdateControllerState(NUContData *controllerData, ControllerState *controll
     controller->stickX = controllerData->stick_x;
     controller->stickY = controllerData->stick_y;
 
+    // Take the dead zone off each axis, and count a stick pushed far enough
+    // as the control pad's direction
     if (controller->stickX < 0) {
         controller->stickX += STICK_DEAD_ZONE;
         if (controller->stickX > 0) {
@@ -485,6 +556,8 @@ void UpdateControllerState(NUContData *controllerData, ControllerState *controll
         }
     }
 
+    // The buttons pressed since the last reading, and those held down repeated
+    // as UpdateMenuController repeats them
     controller->pressedButtons =
         controllerData->button & (controller->previousButtons ^ controllerData->button);
     controller->repeatedButtons = controller->buttons;
@@ -511,6 +584,7 @@ void UpdateControllerState(NUContData *controllerData, ControllerState *controll
     controller->buttons = controllerData->button;
 }
 
+// Reads every connected controller, keeping the last reading of each
 void ReadControllers(void) {
     s32 playerIndex = 0;
     s32 portIndex = 0;
@@ -537,7 +611,11 @@ void ReadControllers(void) {
     }
 }
 
+// Runs a frame of the game on every other retrace, unless the RDP is too far
+// behind. The second controller can pause the game and step it a frame at a
+// time.
 void HandleGfxRetrace(s32 pendingTaskCount) {
+    // Once the reset button is pressed, only fade the screen out
     if (nuScPreNMIFlag & NU_SC_PRENMI_GET) {
         f_IsOddRetrace ^= TRUE;
         if (!f_IsOddRetrace) {
@@ -584,10 +662,12 @@ void HandleGfxRetrace(s32 pendingTaskCount) {
             }
         }
         else {
+            // Skip this frame and try again on the next retrace
             f_IsOddRetrace ^= TRUE;
         }
     }
 
+    // Measure the frame rate once a second
     if (++f_RetraceCount >= RETRACES_PER_SECOND) {
         g_FramesPerSecond = f_FramesThisSecond;
         f_RetraceCount = 0;

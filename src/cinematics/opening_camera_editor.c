@@ -1,3 +1,8 @@
+/*
+ * The camera editor that moves the opening's camera: its eye and look-at point
+ * move, turn, tilt and zoom at set speeds.
+ */
+
 #include "cinematics/opening_camera_editor.h"
 
 #include <math.h>
@@ -14,27 +19,34 @@
 #include "text/text.h"
 
 #define SNAPSHOT_COUNT 32
+// A snapshot holds the look-at point first, unlike CameraEditor.points
 #define SNAPSHOT_LOOK_AT 0
 #define SNAPSHOT_EYE 1
 #define SNAPSHOT_POINT_COUNT 2
 
+// What the first controller's stick and C buttons change
 enum EditorChoice {
-    EDITOR_CHOICE_SLIDE,
-    EDITOR_CHOICE_TARGET,
-    EDITOR_CHOICE_POSITION,
-    EDITOR_CHOICE_FIELD_OF_VIEW,
+    EDITOR_CHOICE_SLIDE, // Both points
+    EDITOR_CHOICE_TARGET, // The look-at point
+    EDITOR_CHOICE_POSITION, // The eye
+    EDITOR_CHOICE_FIELD_OF_VIEW, // And the look-at marker's size
     EDITOR_CHOICE_COUNT
 };
 
 typedef s32 EditorChoice;
 
 static Boolean f_IsSnapshotSaved[SNAPSHOT_COUNT] = {0};
+// The editor's menu choice, an EditorChoice
 static EditorChoice f_EditorChoice = EDITOR_CHOICE_SLIDE;
 static s32 f_SnapshotIndex = 0;
+// Whether the second controller moves the eye rather than the look-at point
 static Boolean f_IsSecondControllerOnEye = FALSE;
 
+// Not static: the original left it to the linker's common block
 Vec3 f_CameraSnapshots[SNAPSHOT_COUNT][SNAPSHOT_POINT_COUNT];
 
+// Starts the editor with its eye at (0, -100, 100) looking at the origin, and
+// its moves stopped
 void ResetCameraEditor(void) {
     s32 pointIndex;
 
@@ -53,6 +65,7 @@ void ResetCameraEditor(void) {
         g_CameraEditor.pointVelocities[pointIndex][AXIS_Y] = 0.0f;
         g_CameraEditor.pointVelocities[pointIndex][AXIS_Z] = 0.0f;
 
+        // The game clears these twice
         g_CameraEditor.pointVelocities[pointIndex][AXIS_X] = 0.0f;
         g_CameraEditor.pointVelocities[pointIndex][AXIS_Y] = 0.0f;
         g_CameraEditor.pointVelocities[pointIndex][AXIS_Z] = 0.0f;
@@ -76,6 +89,7 @@ void ResetCameraEditor(void) {
     g_LookAtMarkerScale = 1.0f;
 }
 
+// Puts the camera's eye and look-at point at the given positions
 void PlaceEditorCamera(f32 eyeX, f32 eyeY, f32 eyeZ, f32 lookAtX, f32 lookAtY, f32 lookAtZ) {
     g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X] = eyeX;
     g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y] = eyeY;
@@ -86,26 +100,33 @@ void PlaceEditorCamera(f32 eyeX, f32 eyeY, f32 eyeZ, f32 lookAtX, f32 lookAtY, f
     MeasureEditorCamera();
 }
 
+// Sets the top speed and acceleration of point index's moves. Nothing calls
+// it
 void SetEditorPointSpeeds(s32 pointIndex, f32 topSpeed, f32 acceleration) {
     g_CameraEditor.pointTopSpeeds[pointIndex] = topSpeed;
     g_CameraEditor.pointAccelerations[pointIndex] = acceleration;
 }
 
+// Sets the top speed and acceleration of turns. Nothing calls it
 void SetEditorTurnSpeeds(s32 unusedPointIndex UNUSED, f32 topSpeed, f32 acceleration) {
     g_CameraEditor.turnTopSpeed = topSpeed;
     g_CameraEditor.turnAcceleration = acceleration;
 }
 
+// Sets the top speed and acceleration of tilts. Nothing calls it
 void SetEditorTiltSpeeds(s32 unusedPointIndex UNUSED, f32 topSpeed, f32 acceleration) {
     g_CameraEditor.tiltTopSpeed = topSpeed;
     g_CameraEditor.tiltAcceleration = acceleration;
 }
 
+// Sets the top speed and acceleration of zooms. Nothing calls it
 void SetEditorZoomSpeeds(s32 unusedPointIndex UNUSED, f32 topSpeed, f32 acceleration) {
     g_CameraEditor.zoomTopSpeed = topSpeed;
     g_CameraEditor.zoomAcceleration = acceleration;
 }
 
+// Works out the camera's heading, pitch and distance from its eye and look-at
+// point
 void MeasureEditorCamera(void) {
     f32 offsetX;
     f32 offsetY;
@@ -143,10 +164,15 @@ void MeasureEditorCamera(void) {
     );
 }
 
+// Within these, a move, turn, tilt or zoom has arrived
 #define EDITOR_ARRIVAL_DISTANCE 0.1f
 #define EDITOR_ARRIVAL_ANGLE 0.001f
+// A timed move speeds up over this share of its frames and brakes over the
+// same share of its distance
 #define EDITOR_EASE_SHARE 4
 
+// Starts moving point index to (x, y, z) over frameCount frames, or snaps it
+// there when it is close
 void MoveEditorPoint(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
     f32 distance;
     s32 easeFrameCount;
@@ -197,6 +223,9 @@ void MoveEditorPoint(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
     g_CameraEditor.targets[pointIndex][AXIS_Y] = y;
     g_CameraEditor.targets[pointIndex][AXIS_Z] = z;
 
+    // The arguments become the offsets, and x the larger of the ground ones.
+    // The magnitudes come from fabs in double precision, which GCC narrows to
+    // abs.s: fabsf gives 28 differing words, and fabs without the casts 18
     x -= g_CameraEditor.points[pointIndex][AXIS_X];
     y -= g_CameraEditor.points[pointIndex][AXIS_Y];
     z -= g_CameraEditor.points[pointIndex][AXIS_Z];
@@ -211,6 +240,8 @@ void MoveEditorPoint(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
     }
 }
 
+// Moves point index to (x, y, z) over frameCount frames, carrying the other
+// point with it so that the camera keeps its direction and distance
 void MoveEditorCamera(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
     if (!(g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_CARRYING)) {
         g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_CARRYING;
@@ -231,6 +262,9 @@ void MoveEditorCamera(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
     MoveEditorPoint(pointIndex, x, y, z, frameCount);
 }
 
+// Starts turning the camera's heading by angle over frameCount frames, with
+// the other point swinging around point index, or turns it at once when angle
+// is tiny
 void TurnEditorCamera(s32 pointIndex, Radians angle, s32 frameCount) {
     s32 easeFrameCount;
     f32 speed;
@@ -266,6 +300,9 @@ void TurnEditorCamera(s32 pointIndex, Radians angle, s32 frameCount) {
     }
 }
 
+// Starts tilting the camera's pitch by angle over frameCount frames, with the
+// other point swinging around point index, or tilts it at once when angle is
+// tiny
 void TiltEditorCamera(s32 pointIndex, Radians angle, s32 frameCount) {
     s32 easeFrameCount;
     f32 speed;
@@ -301,6 +338,8 @@ void TiltEditorCamera(s32 pointIndex, Radians angle, s32 frameCount) {
     }
 }
 
+// Starts moving the other point to distance from point index over frameCount
+// frames, or moves it at once when it is close
 void ZoomEditorCamera(s32 pointIndex, f32 distance, s32 frameCount) {
     s32 easeFrameCount;
     f32 change;
@@ -317,6 +356,8 @@ void ZoomEditorCamera(s32 pointIndex, f32 distance, s32 frameCount) {
         g_CameraEditor.zoomTopSpeed = change / (frameCount - easeFrameCount);
         speed = g_CameraEditor.zoomTopSpeed;
         g_CameraEditor.zoomAcceleration = speed / (easeFrameCount + 1);
+        // The braking distance in double precision, to match; a float quarter or
+        // a division by 4 gives 9 differing words
         g_CameraEditor.zoomBrakingDistance = fabsf(change) * (1.0 / EDITOR_EASE_SHARE);
     }
 
@@ -338,9 +379,11 @@ void ZoomEditorCamera(s32 pointIndex, f32 distance, s32 frameCount) {
     }
 }
 
+// Unreferenced; left by debug output that ZoomEditorCamera no longer has
 static const char f_UnusedIntegerFormat[] = "%d  ";
 static const char f_UnusedFloatFormat[] = "%f";
 
+// Returns whether both points have stopped moving
 Boolean AreEditorMovesDone(void) {
     if (g_CameraEditor.flags[EDITOR_POINT_EYE] == 0 &&
         g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] == 0) {
@@ -350,6 +393,7 @@ Boolean AreEditorMovesDone(void) {
     return FALSE;
 }
 
+// Returns whether neither point has any of the EDITOR_FLAG_* bits in mask
 Boolean AreEditorFlagsClear(s32 mask) {
     if (!(g_CameraEditor.flags[EDITOR_POINT_EYE] & mask) &&
         !(g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] & mask)) {
@@ -359,6 +403,7 @@ Boolean AreEditorFlagsClear(s32 mask) {
     return FALSE;
 }
 
+// Stops the editor's moves and puts its speeds back to their starting values
 void StopEditorMoves(void) {
     s32 pointIndex;
 
@@ -370,6 +415,7 @@ void StopEditorMoves(void) {
         g_CameraEditor.pointVelocities[pointIndex][AXIS_Y] = 0.0f;
         g_CameraEditor.pointVelocities[pointIndex][AXIS_Z] = 0.0f;
 
+        // The game clears these twice
         g_CameraEditor.pointVelocities[pointIndex][AXIS_X] = 0.0f;
         g_CameraEditor.pointVelocities[pointIndex][AXIS_Y] = 0.0f;
         g_CameraEditor.pointVelocities[pointIndex][AXIS_Z] = 0.0f;
@@ -392,10 +438,15 @@ void StopEditorMoves(void) {
     MeasureEditorCamera();
 }
 
+// The share of the acceleration that braking takes off the top speed each
+// update
 #define EDITOR_BRAKING_RATE 0.63979524f
+// The pitch stays within this of level, in radians
 #define EDITOR_PITCH_LIMIT 1.5f
+// The closest a zoom brings the eye to the look-at point
 #define EDITOR_DISTANCE_MIN 1.0f
 
+// Braking lowers a top speed no further than the acceleration
 #define KeepTopSpeed(topSpeed, acceleration) \
     do { \
         if (fabsf(topSpeed) < fabsf(acceleration)) { \
@@ -404,8 +455,99 @@ void StopEditorMoves(void) {
     } \
     while (FALSE)
 
+// Moves the camera on by an update: the point being moved, or carried with the
+// other, speeds up, brakes near its target and stops on reaching it, and then
+// the zoom, the turn and the tilt around the pivot point do the same. The point
+// that moves around the pivot is then placed from the heading, pitch and
+// distance.
+//
+// The zoom works in the points' variables: the distance before it is kept in z,
+// its target in offsetZ, and the length of what is left after its step in
+// distance. A variable is one register to GCC's allocator, and the original
+// keeps a point's offsetZ and the zoom's target both in $f18, and takes both
+// square roots into $f12. With a variable of its own the zoom's target takes
+// $f6, as offsetZ then does, and the three loads of the point's target move up
+// to $f18, $f16 and $f10 from $f16, $f10 and $f6. Tested where it is taken, the
+// zoom's square root is left in $f0.
+//
+// The turn and the tilt read what is left of them from the editor at each use:
+// the original copies its first read to another register in the delay slot of
+// the test against zero, and takes the magnitude for the braking test from the
+// first. Read once into a local, there is no copy. Each is done if a step would
+// leave more to go than there is, and takes the step if not, in the two arms of
+// one test: the original sets isDone in the delay slot of that test's branch
+// and clears it among the step's stores. Set once ahead of the test, its 1 is
+// loaded before what is left is read. The turn's arrival is tested after both
+// arms, for a turn that isn't done, as the original tests isDone ahead of it.
+//
+// The eight flag tests before the pivot is let go each clear isDone, which
+// jump.c turns into the original's chain of ands with each test negated; in one
+// expression, fold merges them into two mask tests. They come inside the test
+// for a leader, as the original branches on hasLeader ahead of them. The
+// zoom's, the turn's and the tilt's speed tests read the speed first, as the
+// original loads it ahead of the top speed. The pitch's cosine has a variable
+// of its own in each of the two blocks that work out the direction.
+//
+// Measured against the match, as words differing and how many of them in shape:
+//   The old draft                                             71 (27)
+//   The zoom's target in a variable of its own, declared
+//   anywhere                                                  36 (0)
+//   The zoom's target in offsetX                              26 (0)
+//   The zoom's target in offsetY                              20 (0)
+//   The zoom's target in scale                                80 (0)
+//   The zoom's target in x or y                               36 (0)
+//   The zoom's target read before the distance                4 (0)
+//   The zoom's square root tested where it is taken, or kept
+//   in scale, offsetX or a variable of its own                4 (0)
+//   The distance before the zoom read where it is used        70 (4)
+//   The same in a variable of its own                         70 (0)
+//   The same in distance or x                                 68 (0)
+//   The same in y                                             64 (0)
+//   What is left of the zoom kept in offsetX                  14 (0)
+//   The zoom's end tested with no isDone                      14 (8)
+//   The zoom's isDone set to the comparison                   8 (8)
+//   The length of what is left of the zoom taken with fabsf   18 (10)
+//   The zoom's distance set from offsetZ when it is done      4 (4)
+//   What is left of the turn, or of the tilt, read once into
+//   a local                                                   7 (3)
+//   Both read once into locals                                14 (6)
+//   The turn's step under the negated test, and isDone set in
+//   its else                                                  2 (2)
+//   The turn's arrival tested in the step's arm               15 (11)
+//   isDone set ahead of the turn's test, or the tilt's, with
+//   no else                                                   12 (10)
+//   The old draft's turn: isDone set at its start, and the
+//   arrival tested in the step                                17 (21)
+//   The old draft's tilt: isDone set at its start             4 (4)
+//   Both of those                                             21 (25)
+//   The pitch's cosine in one variable for both blocks        142 (0)
+//   The velocity's length in a speed variable of its own      12 (0)
+//   The velocity kept in the offsets' variables               36 (0)
+//   The offsets' squares summed x, z, y                       22 (0)
+//   The velocity's squares summed x, z, y                     16 (0)
+//   An arrived point's target copied x, z, y                  14 (0)
+//   x's arrival test with its offset taken into offsetX       10 (4)
+//   The eight flag tests as one expression with &&            51 (33)
+//   The same with &                                           169 (25)
+//   The pivot let go under hasLeader && isDone, after the
+//   flag tests                                                9 (3)
+//   The zoom's speed test, or the turn's, with the top speed
+//   first                                                     10 (0)
+//   The points' loop's test as <                              21 (9)
+//   hasMoved declared after index                             4 (0)
+//
+// Also matching: the zoom's test as distance >= gap; its isDone cleared after
+// the square root; zoomLeft declared for the function, or its difference
+// squared in place; the turn's arrival under an if of its own inside isDone's;
+// the tilt's step under the negated test, with isDone set in its else; the
+// pitch's cosine kept in x, in either block or both, or set after its
+// declaration; the velocity's variables declared for the function; the point's
+// top speed test with the velocity's length first; KeepTopSpeed as a plain
+// block or a bare if; and x, offsetZ, distance, gap or isDone declared
+// elsewhere.
 void UpdateCameraEditor(void) {
     Boolean hasMoved = FALSE;
+    // Whether a point carries the other, and later whether one is a pivot
     Boolean hasLeader = FALSE;
     s32 pointIndex;
     Boolean isDone;
@@ -502,6 +644,7 @@ void UpdateCameraEditor(void) {
         y += g_CameraEditor.pointVelocities[pointIndex][AXIS_Y];
         z += g_CameraEditor.pointVelocities[pointIndex][AXIS_Z];
 
+        // The move ends on reaching the target along its axis, or passing it
         isDone = FALSE;
         switch (g_CameraEditor.moveAxes[pointIndex]) {
             case EDITOR_MOVE_AXIS_X:
@@ -516,6 +659,7 @@ void UpdateCameraEditor(void) {
 
                 break;
             case EDITOR_MOVE_AXIS_Y:
+                // The game takes the passing test with x rather than y
                 if (fabsf(y - g_CameraEditor.targets[pointIndex][AXIS_Y]) <
                         EDITOR_ARRIVAL_DISTANCE ||
                     (g_CameraEditor.points[pointIndex][AXIS_Y] -
@@ -569,6 +713,7 @@ void UpdateCameraEditor(void) {
         }
     }
 
+    // The carried point keeps its place from the leader
     if (hasLeader) {
         f32 pitchCosine = cosf(g_CameraEditor.pitch);
 
@@ -593,6 +738,7 @@ void UpdateCameraEditor(void) {
             g_CameraEditor.points[pointIndex][AXIS_Z] + (z * g_CameraEditor.distance);
     }
 
+    // From here index is the point that moves around the pivot
     if (g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_PIVOT) {
         pointIndex = EDITOR_POINT_LOOK_AT;
         hasLeader = TRUE;
@@ -606,8 +752,13 @@ void UpdateCameraEditor(void) {
     if (g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_ZOOMING) {
         f32 zoomLeft;
 
+        // Kept in the points' variables, to match: the distance before the zoom
+        // in z, its target in offsetZ, and further on the length of what is
+        // left in distance
         z = g_CameraEditor.distance;
         offsetZ = g_CameraEditor.zoomTarget;
+// In the original, gap is unset when there is no braking distance; this
+// stops the zoom once a step brings it no closer
 #ifdef AVOID_UB
         gap = fabsf(offsetZ - z);
 #endif
@@ -672,6 +823,7 @@ void UpdateCameraEditor(void) {
             }
         }
 
+        // A step that would leave more to turn ends it. isDone is set in each arm, to match.
         if (fabsf(g_CameraEditor.turnLeft) <
             fabsf(g_CameraEditor.turnLeft - g_CameraEditor.turnSpeed)) {
             isDone = TRUE;
@@ -716,6 +868,7 @@ void UpdateCameraEditor(void) {
             }
         }
 
+        // As for the turn, to match
         if (fabsf(g_CameraEditor.tiltLeft) <
             fabsf(g_CameraEditor.tiltLeft - g_CameraEditor.tiltSpeed)) {
             isDone = TRUE;
@@ -747,6 +900,7 @@ void UpdateCameraEditor(void) {
     }
 
     if (hasLeader) {
+        // The pivot is let go once nothing turns, tilts, zooms or carries
         isDone = TRUE;
         if (g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_TURNING) {
             isDone = FALSE;
@@ -810,23 +964,28 @@ void UpdateCameraEditor(void) {
     MeasureEditorCamera();
 }
 
+// The snapshots are shown as two rows of this many
 #define SNAPSHOT_ROW_LENGTH 16
 
+// Where EditOpeningCamera prints, in debug text cells
 #define EDITOR_MENU_COLUMN 4
 #define EDITOR_MENU_TITLE_ROW 2
 #define EDITOR_MENU_FIRST_ROW 4
 #define CAMERA_PANEL_COLUMN 24
 #define CAMERA_PANEL_LABEL_COLUMN 26
 #define CAMERA_PANEL_TITLE_ROW 6
+// The values follow each label, one to a row
 #define LOOK_AT_LABEL_ROW 7
 #define EYE_LABEL_ROW 11
 #define ANGLE_LABEL_ROW 15
 #define DISTANCE_LABEL_ROW 18
 #define FIELD_OF_VIEW_LABEL_ROW 20
 #define SNAPSHOT_COLUMN 19
+// Each row of snapshots has the cursor's row under it
 #define FIRST_SNAPSHOT_ROW 2
 #define SECOND_SNAPSHOT_ROW 4
 
+// The first controller's stick slides slowly unless Z is held
 #define SLOW_SLIDE_SCALE 0.2f
 #define SLOW_HEIGHT_STEP 0.5f
 #define FAST_HEIGHT_STEP 10.0f
@@ -838,13 +997,16 @@ void UpdateCameraEditor(void) {
 #define FAST_MARKER_SCALE_STEP 0.5f
 #define MARKER_SCALE_MIN 0.05f
 #define MARKER_SCALE_MAX 10.0f
+// R moves the eye away from the look-at point, L toward it
 #define ZOOM_OUT_SCALE 1.1f
 #define ZOOM_IN_SCALE 0.9f
 #define ZOOM_OUT_DISTANCE_MAX 5000.0f
 #define ZOOM_IN_DISTANCE_MIN 1.0f
+// The second controller's steps, larger while Start is held
 #define SLOW_POINT_STEP 1.0f
 #define FAST_POINT_STEP 20.0f
 
+// Moves the eye along its line to the look-at point, scaling their distance
 #define ZoomEditorEye(scale) \
     { \
         g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X] = \
@@ -864,6 +1026,8 @@ void UpdateCameraEditor(void) {
             g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z]; \
     }
 
+// Steps one coordinate of a point while the second controller holds a
+// button; step is += or -=
 #define StepEditorCoordinate(button, point, axis, step) \
     { \
         if (g_ControllerStates[SECOND_EDITOR_CONTROLLER].buttons & (button)) { \
@@ -876,6 +1040,8 @@ void UpdateCameraEditor(void) {
         } \
     }
 
+// The control pad moves a point across the ground and the C buttons up and
+// down
 #define StepEditorPoint(point) \
     { \
         StepEditorCoordinate(R_JPAD, point, 0, +=); \
@@ -886,6 +1052,10 @@ void UpdateCameraEditor(void) {
         StepEditorCoordinate(D_CBUTTONS, point, 1, +=); \
     }
 
+// The opening's camera editor screen. The first controller slides or moves
+// the camera's points, zooms, and keeps snapshots of the camera; the second
+// moves one point in steps and writes or reads the snapshots as host files.
+// The camera's points and angles are shown as it goes.
 void EditOpeningCamera(void) {
     Vec3 offset;
     u32 fileSize;
@@ -951,6 +1121,7 @@ void EditOpeningCamera(void) {
     sprintf(g_PrintBuffer, "  %f", g_CameraEditor.fieldOfView);
     PrintDebugText(g_PrintBuffer, CAMERA_PANEL_COLUMN, FIELD_OF_VIEW_LABEL_ROW + 1);
 
+    // The stick moves across the ground as seen along the heading
     offset[AXIS_X] = 0.0f;
     offset[AXIS_Y] = 0.0f;
     offset[AXIS_Z] = 0.0f;
@@ -1127,6 +1298,7 @@ void EditOpeningCamera(void) {
         }
     }
 
+    // R zooms out, and L or Z with R zooms in
     if ((g_ControllerStates[EDITOR_CONTROLLER].buttons & (Z_TRIG | R_TRIG)) == R_TRIG) {
         if (g_CameraEditor.distance < ZOOM_OUT_DISTANCE_MAX) {
             ZoomEditorEye(ZOOM_OUT_SCALE);
@@ -1140,6 +1312,7 @@ void EditOpeningCamera(void) {
         }
     }
 
+    // A star for each snapshot, highlighted once saved
     for (i = 0; i != SNAPSHOT_COUNT; i++) {
         if (i < SNAPSHOT_ROW_LENGTH) {
             if (f_IsSnapshotSaved[i]) {
@@ -1175,6 +1348,7 @@ void EditOpeningCamera(void) {
         );
     }
 
+    // The control pad chooses a snapshot while the stick is at rest
     if ((g_ControllerStates[EDITOR_CONTROLLER].repeatedButtons & R_JPAD) &&
         *(u16 *)&g_ControllerStates[EDITOR_CONTROLLER].stickX == 0) {
         PlaySound(SOUND_LOOK_DOWN_RANGE, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
@@ -1193,6 +1367,8 @@ void EditOpeningCamera(void) {
         }
     }
 
+    // A saves the camera, B loads it, and B with Start deletes the snapshot.
+    // A saves over a snapshot only while Start is held.
     if (g_ControllerStates[EDITOR_CONTROLLER].pressedButtons & A_BUTTON) {
         if (f_IsSnapshotSaved[f_SnapshotIndex] &&
             !(g_ControllerStates[EDITOR_CONTROLLER].buttons & START_BUTTON)) {
@@ -1249,6 +1425,8 @@ void EditOpeningCamera(void) {
         }
     }
 
+    // On the second controller, with Z and Start held, L writes the snapshots
+    // and R reads them
     if ((g_ControllerStates[SECOND_EDITOR_CONTROLLER].buttons & (Z_TRIG | START_BUTTON)) ==
             (Z_TRIG | START_BUTTON) &&
         (g_ControllerStates[SECOND_EDITOR_CONTROLLER].pressedButtons & L_TRIG)) {
@@ -1267,6 +1445,8 @@ void EditOpeningCamera(void) {
         ReadHostFile(g_PrintBuffer, &fileSize);
     }
 
+    // C left or right switches the point the second controller moves, marked
+    // by ? beside its values
     if ((g_ControllerStates[SECOND_EDITOR_CONTROLLER].pressedButtons & R_CBUTTONS) ||
         (g_ControllerStates[SECOND_EDITOR_CONTROLLER].pressedButtons & L_CBUTTONS)) {
         f_IsSecondControllerOnEye ^= TRUE;
@@ -1297,6 +1477,7 @@ void EditOpeningCamera(void) {
     }
 }
 
+// Moves the whole camera by offset
 void ShiftEditorCamera(Vec3 offset) {
     g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] += offset[AXIS_X];
     g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y] += offset[AXIS_Y];
@@ -1306,4 +1487,5 @@ void ShiftEditorCamera(Vec3 offset) {
     g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z] += offset[AXIS_Z];
 }
 
+// Nothing refers to this
 const char f_UnusedCameraEditorEmptyText[] = "";

@@ -1,3 +1,8 @@
+/*
+ * The fireworks that the turn starts in sudden death. Each one bursts from a
+ * random point into the outline of a character, picked by the course.
+ */
+
 #include "round/fireworks.h"
 
 #include <ultra64.h>
@@ -15,29 +20,46 @@
 #include "system/heap.h"
 #include "system/memory_address.h"
 
+// How many of them LoadFireworks sets up
 #define FIREWORK_COUNT 1
 
+// f_FireworkState's values: loaded while the fireworks' memory is allocated,
+// and freed after FreeFireworks, below which HaveFireworksStayedFreed counts
+// its calls down
 #define FIREWORKS_LOADED 1
 #define FIREWORKS_FREED 0
+// The calls of HaveFireworksStayedFreed that return FALSE before TRUE
 #define STAYED_FREED_CALL_COUNT 2
 
+// Frames of a firework's timer at which it plays a sound and launches
 #define FIREWORK_SOUND_FRAME 160
 #define FIREWORK_LAUNCH_FRAME 220
+// The fireworks' sounds play on this channel
 #define FIREWORK_SOUND_CHANNEL 8
+// Frames from StartFireworks to the first launch
 #define FIREWORK_START_DELAY 70
+// Frames between loaded fireworks' sounds; the first sounds at once
 #define FIREWORK_SOUND_STAGGER 50
+// The value written to a firework's ignoredLaunchValue
 #define IGNORED_LAUNCH_VALUE 0xFF
 
+// Below this life, a particle's life runs out five times as fast
 #define PARTICLE_FADE_LIFE 128
 #define PARTICLE_FADE_EXTRA_LIFE_LOSS 4
 
+// A shape's cells with this value become particles
 #define SHAPE_PARTICLE_CELL 0
 
+// A particle's velocity keeps this much each frame, then gravity pulls it
 #define PARTICLE_DRAG 0.94f
 #define PARTICLE_GRAVITY 0.0005f
+// A particle that has stopped points up, as if moving at this speed
 #define STOPPED_PARTICLE_DIRECTION_Y 0.1f
 #define STOPPED_PARTICLE_SPEED 0.5f
 
+// After a launch, each particle's trail stretches from nothing to four times
+// its speed over TRAIL_STRETCH_FRAMES, shrinks back at the same rate, and from
+// TRAIL_REGROW_FRAME grows again from TRAIL_MIN_LENGTH, whatever the speed.
 #define TRAIL_STRETCH_FRAMES 8
 #define TRAIL_STRETCH_PER_FRAME 0.5f
 #define TRAIL_STRETCH_MAX 4.0f
@@ -45,19 +67,25 @@
 #define TRAIL_REGROWTH_PER_FRAME 0.04f
 #define TRAIL_LENGTH_MIN 1.0f
 
+// Each particle's triangle's scale and its depth in the orthographic view
 #define PARTICLE_SCALE 0.1f
 #define PARTICLE_DEPTH (-100.0f)
 
+// The fireworks' color cycles through hues: each channel swings around the
+// middle of its range, green and blue a fixed phase, in radians, ahead of red
 #define HUE_STEP_DEGREES 3
 #define COLOR_MIDDLE 127
 #define COLOR_SWING 64.0f
 #define GREEN_HUE_PHASE 2.0f
 #define BLUE_HUE_PHASE 4.0f
 
+// From FADE_START_FRAME after a launch, the fireworks fade, flickering
+// brighter on odd frames
 #define FADE_START_FRAME 40
 #define FADE_ALPHA_PER_FRAME 8
 #define FLICKER_ALPHA 0x18
 
+// Launch positions and velocities are in the fireworks' local coordinates.
 #define FIREWORK_LAUNCH_WIDTH 32
 #define FIREWORK_LAUNCH_HEIGHT 64.0f
 #define FIREWORK_LAUNCH_HEIGHT_JITTER 4
@@ -68,10 +96,14 @@
 #define PARTICLE_LIFE_MIN 192
 #define PARTICLE_LIFE_JITTER 128
 
+// A random per-axis velocity offset.
 #define RandomParticleVelocityJitter() \
     (((guRandom() % PARTICLE_VELOCITY_JITTER_STEPS) - (PARTICLE_VELOCITY_JITTER_STEPS / 2)) * \
         PARTICLE_VELOCITY_JITTER_STEP)
 
+// An image whose zero cells each become a particle of a firework. It begins
+// with an ImageHeader whose format is 4, one byte a cell, read here a byte at
+// a time: only the low bytes of the width and height are read.
 struct FireworkShape {
     u16 format;
     u8 widthHighByte;
@@ -79,7 +111,7 @@ struct FireworkShape {
     u8 heightHighByte;
     u8 height;
     u16 unusedAfterHeight;
-    u8 cells[TRAILING_ARRAY_LENGTH];
+    u8 cells[TRAILING_ARRAY_LENGTH]; // width * height, by rows
 };
 
 struct FireworkParticle {
@@ -89,7 +121,7 @@ struct FireworkParticle {
     f32 velocityX;
     f32 velocityY;
     u8 unusedAfterVelocity[4];
-    s16 life;
+    s16 life; // Drawn while above 0
 };
 
 static s32 f_FireworkCount = 0;
@@ -99,6 +131,8 @@ static Vtx f_FireworkParticleVertices[TRIANGLE_VERTEX_COUNT] = {
     {{{-10, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xBF}}},
     {{{10, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xBF}}},
 };
+// The shapes, by course record index: outlines of Toad, a Koopa Troopa, a Shy
+// Guy, Yoshi, a Boo, Wario, Mario and Peach
 static AssetId f_FireworkShapeAssetIds[8] =
     {0x95F, 0x960, 0x961, 0x962, 0x963, 0x964, 0x965, 0x966};
 static f32 f_FireworkHue = 0.0f;
@@ -107,6 +141,7 @@ static u8 f_UnusedBufferAfterFireworkHue[0xC04] UNUSED = {0};
 FILE_STATIC FireworkShape *f_FireworkShape;
 FILE_STATIC Firework f_Fireworks[FIREWORK_CAPACITY];
 
+// Makes the first firework launch in FIREWORK_START_DELAY frames
 void StartFireworks(void) {
     f_Fireworks[0].timer = FIREWORK_LAUNCH_FRAME - FIREWORK_START_DELAY;
     f_Fireworks[0].isActive = TRUE;
@@ -116,6 +151,8 @@ void StopFireworks(void) {
     f_Fireworks[0].isActive = FALSE;
 }
 
+// Loads the shape for the course, picked by its record index, and allocates
+// the fireworks' particles
 void LoadFireworks(s32 courseRecordIndex) {
     EncodedAsset asset;
     s32 index;
@@ -176,6 +213,8 @@ void FreeFireworks(void) {
     f_FireworkState = FIREWORKS_FREED;
 }
 
+// Unless the fireworks are loaded, counts a call and returns TRUE from the
+// third call after FreeFireworks on. Nothing calls it.
 Boolean HaveFireworksStayedFreed(void) {
     if (f_FireworkState > FIREWORKS_FREED) {
         return FALSE;
@@ -185,10 +224,14 @@ Boolean HaveFireworksStayedFreed(void) {
     return f_FireworkState < FIREWORKS_FREED - STAYED_FREED_CALL_COUNT;
 }
 
+// The random part of a firework's launch height, 0 to 3. A function rather
+// than inline code to match: LaunchFirework's draft gives 50 differing words
+// with it, 69 with guRandom() % 4 written in place, and 68 with & 3.
 static inline s32 RandomLaunchHeightJitter(void) {
     return guRandom() % FIREWORK_LAUNCH_HEIGHT_JITTER;
 }
 
+// Sends every particle of the firework out from one random point
 void LaunchFirework(Firework *firework, s32 fireworkIndex UNUSED) {
     s32 particleIndex;
     f32 originX;
@@ -208,6 +251,10 @@ void LaunchFirework(Firework *firework, s32 fireworkIndex UNUSED) {
     originY = heightJitter + FIREWORK_LAUNCH_HEIGHT;
     for (row = 0; row != height; row++) {
         for (column = 0; column != width; column++) {
+            // Through the cells' address, not by indexing them: GCC builds the
+            // index as an array reference instead, and 92 words differ. The cell's
+            // index is added as a whole; adding the column and the row's offset
+            // one at a time, 10 words differ
             if (*(firework->shape->cells + (column + (row * width))) == SHAPE_PARTICLE_CELL) {
                 firework->particles[particleIndex].x = originX;
                 firework->particles[particleIndex].y = originY;
@@ -225,11 +272,18 @@ void LaunchFirework(Firework *firework, s32 fireworkIndex UNUSED) {
     }
 }
 
+// Moves the active fireworks' particles and draws each as a triangle along its
+// path
 void UpdateAndDrawFireworks(Gfx **displayListHead) {
     Gfx *gfx;
+    // The original frame has room for this; without it 136 words differ
     s32 unused[12] UNUSED;
     Mat4 transform;
+    // The original frame has room for this too; without it 100 words differ
     s32 unusedAfter[6] UNUSED;
+    // One index for the fireworks and the particles, to match: a particleIndex
+    // for the particles gives 34 words differing, and for the updated particles
+    // alone 62, none in shape
     s32 i;
     s32 index;
     FireworkParticle *particle;
@@ -237,6 +291,8 @@ void UpdateAndDrawFireworks(Gfx **displayListHead) {
     f32 directionX;
     f32 directionY;
     f32 inverseSpeed;
+    // The particle's speed, until it scales into its trail's length, to match:
+    // a separate speed variable gives 30 words differing, none in shape
     f32 length;
     f32 tailScale;
     s32 timer;
@@ -376,6 +432,7 @@ void UpdateAndDrawFireworks(Gfx **displayListHead) {
     );
     f_FireworkHue += DegreesToRadians(HUE_STEP_DEGREES);
 
+    // index is f_FireworkCount here, so every firework shares one color
     red = (s32)(sinf(f_FireworkHue + index) * COLOR_SWING) + COLOR_MIDDLE;
     green = (s32)(sinf(f_FireworkHue + GREEN_HUE_PHASE + index) * COLOR_SWING) + COLOR_MIDDLE;
     blue = (s32)(sinf(f_FireworkHue + BLUE_HUE_PHASE + index) * COLOR_SWING) + COLOR_MIDDLE;

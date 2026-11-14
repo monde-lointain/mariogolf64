@@ -1,10 +1,16 @@
+/*
+ * The pause screens kept in this overlay: the save menu, which lists either
+ * the three saved games or the five replay records beside each one's
+ * mode icon, and the Controls screen, a picture of the controller.
+ */
+
 #include "round/save_menu.h"
 
 #include <framebuffer_count.h>
 #include <ultra64.h>
 
+// This file calls MeasureText without its flags; see text.h
 #define OMITS_MEASURE_TEXT_FLAGS
-
 #include "audio/sound.h"
 #include "characters/character.h"
 #include "controllers/controller.h"
@@ -31,58 +37,79 @@
 #include "text/text.h"
 #include "text/text_format.h"
 
+// f_MenuState values
 enum SaveMenuState {
-    SAVE_MENU_STATE_OPENING,
+    SAVE_MENU_STATE_OPENING, // The rows slide in
     SAVE_MENU_STATE_CHOOSING,
-    SAVE_MENU_STATE_BACKING_OUT,
+    SAVE_MENU_STATE_BACKING_OUT, // The rows slide out
     SAVE_MENU_STATE_BACKED_OUT,
-    SAVE_MENU_STATE_SAVED,
+    SAVE_MENU_STATE_SAVED, // Waits before leaving
+    // The rows slide out, and the menu closes
     SAVE_MENU_STATE_LEAVING
 };
 
 typedef s32 SaveMenuState;
 
+// The frames that each frame of the chosen icon shows for
 #define ICON_FRAME_PERIOD 5
 
+// The game modes that f_ModeIcons covers
 #define GAME_MODE_ICON_COUNT 12
 #define MODE_NAME_COUNT 7
 
+// Asset ids of the Controls screen's picture
 #define ASSET_CONTROLS_PICTURE 0x92A
 #define ASSET_MINI_GOLF_CONTROLS_PICTURE 0x96A
 #define CONTROLS_PICTURE_WIDTH 288
 #define CONTROLS_PICTURE_LEFT ((SCREEN_WIDTH - CONTROLS_PICTURE_WIDTH) / 2)
+// The picture is loaded into texture memory a few rows at a time
 #define CONTROLS_STRIP_HEIGHT 7
 #define CONTROLS_STRIP_COUNT 32
 
 #define MENU_SOUND_REVERB 0x14
 
+// The frames that a slide takes, and the frame of its sound
 #define SLIDE_FRAMES 14
 #define SLIDE_SOUND_FRAME 3
+// Rows slide out slowly until past this, then speed up
 #define SLIDE_OUT_START_OFFSET (-1)
 #define SLIDE_OUT_START_STEP 4
 
+// A character image for each player of each saved game, or for each replay
+// record
 #define FACE_IMAGE_COUNT (SAVED_GAME_COUNT * PLAYER_COUNT_MAX)
+// Albatross, Hole in One, Eagle, Birdie, Par and Chip In
 #define REPLAY_LABEL_COUNT 6
 
+// How loud the song plays behind the saved games
 #define SAVE_MENU_SONG_VOLUME 0x60
 
 #define ASSET_SAVE_MENU_TITLE_IMAGE 0x6A5
+// Where SetTextSlot is told to put the cleared messages
 #define MESSAGE_CENTER_X (SCREEN_WIDTH / 2)
 #define MESSAGE_CENTER_Y 114
+// Given this as its text, SetTextSlot clears the slot
 #define NO_TEXT (-1)
 
+// The rows below the saved games and the replay records
 #define END_GAME_ROW SAVED_GAME_COUNT
 #define SKIP_REPLAY_ROW RING_SHOT_RECORD_COUNT
 #define SLIDE_ROW_COUNT 4
+// The frames that the menu waits after saving before it slides out
 #define SAVED_WAIT_FRAMES 15
 
+// The game menu's rows: the saved games, then End Game
 #define GAME_ROW_COUNT (SAVED_GAME_COUNT + 1)
 #define FIRST_GAME_ROW_TOP 50
 #define GAME_ROW_SPACING 47
 #define GAME_PANEL_STRIP_HEIGHT 15
+// The panels' middles, less their rows' offsets; each panel reaches half
+// its height above and below its middle
 #define GAME_PANEL_MIDDLE 72
 #define END_GAME_PANEL_MIDDLE 64
 #define END_GAME_PANEL_STRIP_HEIGHT 9
+// The title image is drawn in strips that each overlap the next by two
+// rows, as it sways in a figure eight around its resting place
 #define TITLE_IMAGE_WIDTH 160
 #define TITLE_STRIP_COUNT 3
 #define TITLE_STRIP_HEIGHT 10
@@ -93,8 +120,10 @@ typedef s32 SaveMenuState;
 #define TITLE_SWAY_LEFT 10.0f
 #define TITLE_SWAY_TOP 18.0f
 #define TITLE_SWAY_DISTANCE 5.0f
+// Texture coordinates have five fraction bits, so a texel is 32
 #define TEXEL_COORDINATE_ONE 32
 #define SWAY_DEGREES_PER_FRAME 10
+// The mode icons are drawn at half size, in two halves
 #define MODE_ICON_SIZE 64
 #define MODE_ICON_PART_HEIGHT 32
 #define MODE_ICON_PART_COUNT 2
@@ -112,14 +141,17 @@ typedef s32 SaveMenuState;
 #define EMPTY_GAME_TEXT_TOP 64
 #define END_GAME_TEXT_LEFT 116
 #define END_GAME_TEXT_TOP 199
+// The cursor's frame pulses between these alphas
 #define CURSOR_ALPHA_MIDDLE 127
 #define CURSOR_ALPHA_SWING 64.0f
+// Each mini-golf course record has three courses
 #define MINI_GOLF_GREEN 0
 #define MINI_GOLF_SLOW 1
 #define MINI_GOLF_FAST 2
 #define LUIGIS_GARDEN_COURSE_INDEX MINI_GOLF_COURSE_INDEX
 #define PEACHS_CASTLE_COURSE_INDEX (MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD)
 
+// Indices of f_ModeNames
 enum ModeName {
     MODE_NAME_TOURNAMENT,
     MODE_NAME_GET_CHARACTER,
@@ -130,9 +162,11 @@ enum ModeName {
     MODE_NAME_MINI_GOLF
 };
 
+// The replay menu's rows: the records, then Hole Out
 #define REPLAY_ROW_COUNT (RING_SHOT_RECORD_COUNT + 1)
 #define FIRST_REPLAY_ROW_TOP 36
 #define REPLAY_ROW_SPACING 34
+// The panel image is stretched over each row a strip at a time
 #define NAME_PLATE_STRIP_SIZE (NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT)
 #define WIDE_PANEL_LEFT 24
 #define WIDE_PANEL_WIDTH 272
@@ -140,6 +174,7 @@ enum ModeName {
 #define NARROW_PANEL_LEFT 80
 #define NARROW_PANEL_WIDTH 160
 #define HOLE_OUT_PANEL_STRIP_HEIGHT 8
+// The panels are centered on the screen; the cursor frames them
 #define WIDE_PANEL_HALF_WIDTH (WIDE_PANEL_WIDTH / 2)
 #define NARROW_PANEL_HALF_WIDTH (NARROW_PANEL_WIDTH / 2)
 #define RECORD_PANEL_HEIGHT (RECORD_PANEL_STRIP_HEIGHT * NAME_PLATE_STRIP_COUNT)
@@ -152,9 +187,11 @@ enum ModeName {
 #define TITLE_TEXT_TOP 18
 #define TITLE_BOB_HEIGHT 4.0f
 #define TITLE_BOB_DEGREES_PER_FRAME 10
+// The rows' shades; the chosen one is brighter
 #define CHOSEN_PANEL_SHADE 0xEF
 #define OTHER_PANEL_SHADE 0xBF
 #define CURSOR_FRAME_THICKNESS 2
+// The course numbers image's digits, then where its word COURSE starts in it
 #define COURSE_DIGIT_COUNT 6
 #define COURSE_WORD_TEXEL_LEFT (COURSE_DIGIT_COUNT * COURSE_DIGIT_WIDTH)
 #define COURSE_WORD_LEFT 64
@@ -168,8 +205,10 @@ enum ModeName {
 #define EMPTY_TEXT_TOP 47
 #define HOLE_OUT_TEXT_LEFT 128
 #define HOLE_OUT_TEXT_TOP 212
+// The text slots of SetTextSlot that the records' hole texts use
 #define FIRST_RECORD_TEXT_SLOT 2
 
+// Indices of f_ReplayLabelImages
 enum ReplayLabel {
     NO_REPLAY_LABEL = -1,
     REPLAY_LABEL_ALBATROSS,
@@ -181,6 +220,8 @@ enum ReplayLabel {
 
 typedef s32 ReplayLabel;
 
+// The MODE_ICON_* index by GameState.gameMode; modes that the menu never names
+// hold 0 or 3
 static s8 f_ModeIcons[GAME_MODE_ICON_COUNT] = {
     MODE_ICON_STROKE,
     0,
@@ -200,6 +241,7 @@ static Boolean f_IsControlsShown = FALSE;
 static s32 f_CursorIndex = 0;
 static s32 f_StateFrameCount = 0;
 static SaveMenuState f_MenuState = SAVE_MENU_STATE_OPENING;
+// Indexed in the order of DrawGameSaveMenu's cases
 static char *f_ModeNames[MODE_NAME_COUNT] = {
     "Tournament",
     "Get Character",
@@ -234,6 +276,7 @@ static ImageAsset *f_CourseNumbersImage;
 static ImageAsset *f_SaveMenuTitleImage;
 static s32 f_IconFrames[SAVED_GAME_COUNT];
 
+// Returns the MODE_ICON_* index of a saved game's mode, or NO_MODE_ICON
 s32 GetModeIconIndex(GameState *state) {
     s32 iconIndex;
 
@@ -269,6 +312,35 @@ s32 GetModeIconIndex(GameState *state) {
     return iconIndex;
 }
 
+// Opens the save menu on the saved games (SAVE_MENU_GAMES) or the replay
+// records (SAVE_MENU_REPLAYS), loading its images and putting the cursor on
+// the first free slot.
+//
+// Each mode icon's two images are read in both arms of the icon test, and GCC
+// merges the arms' identical tails, as the original does. The original steps
+// $s1 over each slot's second image, sets the first image's $s2 from it as
+// $s1 - 4, and holds the default frames' address in $s6, which it loads before
+// both. The second image is stored through a pointer the loop steps, to match:
+// loop.c moves the first image's address out of the loop, and cse2 rewrites
+// it as the pointer's less 4. The default frames are read through a pointer
+// set before that one, to match: the scheduler keeps the order of the loads
+// before the loop, and loop.c would put the frames' address, read directly,
+// after the pointer's.
+//
+// With the frames read directly, or their pointer declared after the image's,
+// 4 words differ, 0 in shape, the two addresses' loads swapped; with the
+// frames' pointer set with the function's locals, 4 (4). A pointer to the
+// whole table matches if only the default frames are read through it, and
+// gives 10 words (6) if the icon's frames are too. Stepping the image's
+// pointer at the end of the loop's body, setting it in the loop's initializer,
+// and setting it as f_ModeIconImages[0] + 1 all match; stepping it after slot
+// gives 4 words (0). Setting it in each pass, as &f_ModeIconImages[slot][1],
+// gives 5 words (1): loop.c loads its first address into a temporary and
+// copies that into the pointer's register. Naming both images directly gives
+// 46 words (2), as loop.c combines the two stores into one register; writing
+// the first image through the pointer, as second[-1], 4 (2); a stepped pointer
+// for each image 10 (0); and one stepped pointer to the slot's pair of images
+// 12 (2).
 void OpenSaveMenu(SaveMenuList kind) {
     EncodedAsset encodedAsset;
     AssetFile file;
@@ -353,7 +425,6 @@ void OpenSaveMenu(SaveMenuList kind) {
                     &encodedAsset
                 );
             }
-
             second += 2;
         }
     }
@@ -540,10 +611,14 @@ void CloseSaveMenu(void) {
     );
 }
 
+// Steps slot's mode icon to its next frame
 static inline s32 NextIconFrame(s32 slot) {
     return ++f_IconFrames[slot];
 }
 
+// Every few frames, or at once when told to, shows the next frame of the
+// chosen saved game's mode icon and the first frame of the others. Each
+// icon has two images, read into in turn.
 void AnimateModeIcons(Boolean isImmediate) {
     EncodedAsset encodedAsset;
     SaveData *save;
@@ -602,11 +677,17 @@ void AnimateModeIcons(Boolean isImmediate) {
     }
 }
 
+// Draws the saved games: each row's panel, mode icon, golfers, mode,
+// course and hole, the End Game row, the swaying title and the cursor's
+// pulsing frame, all slid by f_SlideOffsets.
 void DrawGameSaveMenu(Gfx **displayListHead) {
     Gfx *gfx;
     SaveData *save;
     s32 row;
 
+    // Counts rows, icon halves or golfers. Sharing one variable is there to
+    // match: a variable of its own for the rows gives 411 words differing (3 in
+    // shape), for the icon halves 12 (0), and for the golfers 54 (0)
     s32 index;
     s32 strip;
     s32 stripHeight;
@@ -624,6 +705,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
     if (f_MenuKind == SAVE_MENU_GAMES) {
         AnimateModeIcons(FALSE);
 
+        // The panels, stretched from the panel image a strip at a time
         gDPPipeSync(gfx++);
         gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
         gDPPipeSync(gfx++);
@@ -638,6 +720,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
 
+        // The wave's height is never used
         sinf(f_PanelWaveAngle);
         f_PanelWaveAngle += DegreesToRadians(SWAY_DEGREES_PER_FRAME);
         LoadLargePalette(&gfx, ImagePalette(f_NamePlateImage));
@@ -755,6 +838,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
             );
         }
 
+        // The title, swaying to a fraction of a pixel
         titleLeftExact = (cosf(f_TitleSwayAngle * 0.5f) * TITLE_SWAY_DISTANCE) + TITLE_SWAY_LEFT;
         titleTopExact = (sinf(f_TitleSwayAngle) * TITLE_SWAY_DISTANCE) + TITLE_SWAY_TOP;
         titleLeft = HalfTowardZero(titleLeftExact);
@@ -767,6 +851,8 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
         LoadLargePalette(&gfx, ImagePalette(f_SaveMenuTitleImage));
         imageLeft = TITLE_IMAGE_LEFT;
 
+        // The strips are counted with row. Reusing it is there to match: counting
+        // them with strip gives 114 words differing, none in shape
         for (row = 0; row != TITLE_STRIP_COUNT; row++) {
             drawnHeight = TITLE_STRIP_DRAWN_HEIGHT;
             if (row == TITLE_STRIP_COUNT - 1) {
@@ -808,6 +894,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
 
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
 
+        // Each saved game's mode icon, from the image not being loaded into
         for (row = 0; row != SAVED_GAME_COUNT; row++) {
             LoadLargePalette(&gfx, ImagePalette(f_ModeIconImages[row][f_IconImageIndex ^ 1]));
             if (save->savedGames[row].isValid) {
@@ -875,6 +962,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
             }
         }
 
+        // Each saved game's golfers, side by side about GOLFERS_LEFT
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         for (row = 0; row != SAVED_GAME_COUNT; row++) {
@@ -942,6 +1030,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
             }
         }
 
+        // The cursor's frame around the chosen row, pulsing
         {
             s32 rowHeights[GAME_ROW_COUNT] = {42, 42, 42, 25};
             s32 rowHalfWidths[GAME_ROW_COUNT] = {
@@ -1047,6 +1136,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
             );
         }
 
+        // Each saved game's mode, course and hole, or that the slot is empty
         SetUpGradientTextDrawing(&gfx, 0);
         for (row = 0; row != SAVED_GAME_COUNT; row++) {
             gDPPipeSync(gfx++);
@@ -1163,6 +1253,8 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
 #ifdef AVOID_UB
                 MeasureText(g_PrintBuffer, FONT_SIZE_LARGE, MEASURE_TEXT_FIXED_WIDTH);
 #else
+                // MeasureText reads its missing flags from whatever the register
+                // holds. Its width is thrown away, so the call does nothing.
                 MeasureText(g_PrintBuffer, FONT_SIZE_LARGE);
 #endif
                 DrawLargeTextWithShadow(
@@ -1218,6 +1310,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
     }
 }
 
+// Saves the current game in the chosen slot and loads its players' images
 void SaveGameToSlot(void) {
     EncodedAsset encodedAsset;
     AssetFile file;
@@ -1269,6 +1362,8 @@ void LeaveGameSaveMenu(void) {
     f_MenuState = SAVE_MENU_STATE_LEAVING;
 }
 
+// Stores the current replay in the chosen record and loads its character's
+// images
 void SaveReplayToSlot(void) {
     EncodedAsset encodedAsset;
     AssetFile file;
@@ -1303,6 +1398,8 @@ void LeaveReplaySaveMenu(void) {
     f_MenuState = SAVE_MENU_STATE_LEAVING;
 }
 
+// Slides the saved games in and out and lets the player choose one to save over
+// or end the game
 void UpdateGameSaveMenu(ControllerState *controller) {
     SaveData *save;
     s32 row;
@@ -1468,6 +1565,8 @@ void UpdateGameSaveMenu(ControllerState *controller) {
     }
 }
 
+// Slides the replay records in and out and lets the player choose one to
+// store the replay in. It returns a REPLAY_MENU_* value.
 ReplayMenuState UpdateReplaySaveMenu(ControllerState *controller) {
     SaveData *save;
     s32 row;
@@ -1499,6 +1598,8 @@ ReplayMenuState UpdateReplaySaveMenu(ControllerState *controller) {
 
             if (controller->pressedButtons & A_BUTTON) {
                 if (f_CursorIndex >= 0 && f_CursorIndex < RING_SHOT_RECORD_COUNT) {
+                    // The pointer arithmetic is there to match: indexing the records
+                    // gives 2 words differing, none in shape
                     if ((save->ringShotRecords + f_CursorIndex)->scoreKind & SCORE_KIND_RECORDED) {
                         g_PauseScreen = PAUSE_SCREEN_PROMPT;
                         OpenPrompt(PROMPT_OVERWRITE_REPLAY);
@@ -1567,6 +1668,9 @@ ReplayMenuState UpdateReplaySaveMenu(ControllerState *controller) {
     return REPLAY_MENU_OPEN;
 }
 
+// Draws the replay records: each row's panel, course number, label,
+// golfer and hole text, the Hole Out row, the cursor's frame and the
+// bobbing Save Menu title, all slid by f_SlideOffsets.
 void DrawReplaySaveMenu(Gfx **displayListHead) {
     ReplayLabel rowLabels[REPLAY_ROW_COUNT];
     s32 rowOffsets[REPLAY_ROW_COUNT];
@@ -1574,6 +1678,9 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
     SaveData *save;
     s32 row;
 
+    // Counts strips or records. Sharing one variable is there to match: a
+    // variable of its own for the strips, or for the records, gives 174 words
+    // differing, none in shape
     s32 index;
     s32 stripHeight;
     s32 titleBob;
@@ -1587,6 +1694,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
     save = GetSaveData();
     gfx = *displayListHead;
 
+    // Rows slide in pairs, the first of each pair from the left
     for (row = 0; row != REPLAY_ROW_COUNT; row++) {
         slideOffset = f_SlideOffsets[row / 2];
         rowOffsets[row] = slideOffset;
@@ -1598,6 +1706,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
     if (f_MenuKind == SAVE_MENU_REPLAYS) {
         SetUpTextDrawing(&gfx);
 
+        // The panels, stretched from the panel image a strip at a time
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -1715,6 +1824,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             );
         }
 
+        // Each record's "COURSE" and course number
         LoadSmallPalette(&gfx, 0, ImagePalette(f_CourseNumbersImage));
         gDPLoadTextureTile_4b(
             gfx++,
@@ -1809,6 +1919,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             }
         }
 
+        // Each record's label
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
         for (index = 0; index != RING_SHOT_RECORD_COUNT; index++) {
             if (rowLabels[index] != NO_REPLAY_LABEL) {
@@ -1862,6 +1973,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             }
         }
 
+        // Each record's golfer
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_NONE);
         for (index = 0; index != RING_SHOT_RECORD_COUNT; index++) {
@@ -1918,6 +2030,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             }
         }
 
+        // The cursor's frame around the chosen row
         {
             s32 rowHeights[REPLAY_ROW_COUNT] = {
                 RECORD_PANEL_HEIGHT,
@@ -2013,6 +2126,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             );
         }
 
+        // The title's panel, bobbing up and down
         titleBob = sinf(f_ReplayTitleBobAngle) * TITLE_BOB_HEIGHT;
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
@@ -2023,6 +2137,8 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
         f_ReplayTitleBobAngle += DegreesToRadians(TITLE_BOB_DEGREES_PER_FRAME);
         LoadLargePalette(&gfx, ImagePalette(f_NamePlateImage));
         for (index = 0; index != NAME_PLATE_STRIP_COUNT; index++) {
+            // The strips' tops step by the constant: stepping them by stripHeight
+            // gives 76 words differing, 6 in shape
             stripHeight = TITLE_PANEL_STRIP_HEIGHT;
             LoadTextureBlock(
                 &gfx,
@@ -2056,6 +2172,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             );
         }
 
+        // Each record's hole text, or that the row is empty
         SetUpGradientTextDrawing(&gfx, 0);
         for (index = 0; index != RING_SHOT_RECORD_COUNT; index++) {
             RingShotRecord *record;
@@ -2083,6 +2200,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, OPAQUE_ALPHA);
                 gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, OPAQUE_ALPHA);
 
+                // The saved-game message is printed but never drawn
                 sprintf(g_PrintBuffer, "%s", f_NoSavedGameText);
                 DrawCenteredLargeText(
                     &gfx,
@@ -2165,6 +2283,7 @@ void CloseControlsScreen(void) {
     PlaySong(f_ResumedSongId, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
 }
 
+// Draws the Controls picture in strips, slid down by f_SlideOffsets[0]
 void DrawControlsScreen(Gfx **displayListHead) {
     Gfx *gfx;
     s32 strip;
@@ -2204,6 +2323,7 @@ void DrawControlsScreen(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
+            // How far above the screen top the first strip's top and bottom edges sit
             topRaise = f_SlideOffsets[0] - SCREEN_BORDER;
             bottomRaise = f_SlideOffsets[0] - (SCREEN_BORDER + CONTROLS_STRIP_HEIGHT);
             DrawTextureRectangle(

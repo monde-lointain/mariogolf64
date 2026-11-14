@@ -1,3 +1,11 @@
+/*
+ * The hole editor's scenes, which edit a hole's ground cells, points, heights,
+ * triangles, rings and billboards over its map. They also load and save holes
+ * and write captures of the frame to the host.
+ */
+
+// This file calls SetGroundPointHeightAndShade without a prototype, which
+// loses BLENDED_POINT_SHADE; see terrain.h
 #define CALLS_GROUND_POINT_SETTER_UNPROTOTYPED
 
 #include "debug/hole_editor.h"
@@ -39,49 +47,71 @@
 #include "system/memory_address.h"
 #include "text/text.h"
 
+// The points along a tile's edge, its corners included
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)
 #define SEGMENT_POINT_COUNT 3
 #define SEGMENT_START 0
 #define SEGMENT_MIDPOINT 1
 #define SEGMENT_END 2
+// UpdateTriangleSlopes goes over the ground in two halves of 8 by 16 blocks
 #define SLOPE_HALF_COUNT 2
 #define SLOPE_BLOCK_COLUMN_COUNT 8
 #define SLOPE_BLOCK_ROW_COUNT 16
+// The triangles' starting corners; every corner is overwritten before it is
+// read
 #define START_TRIANGLE_SIZE 256
 #define SLOPE_SHADE_OFFSET 0x40
 #define SLOPE_SHADE_MAX 0xFF
 
+// ShapeGroundFromCodes's ground shaping searches this many nearest offsets
 #define SHAPE_OFFSET_COUNT 1600
 #define SHAPE_OFFSET_SPAN 20
 #define HOLE_EDITOR_SHAPE_ASSERT_LINE 2191
 #define GREEN_NOISE_MASK 3
 #define GROUND_NOISE_MASK 0xF
+// A point's y changes by this per course unit between its code and the green's
+// middle
 #define HEIGHT_PER_COURSE_UNIT (-0.00000390625f)
+// Bunker codes with no other code nearer than this get BUNKER_INNER_OFFSET
+// added to y
 #define BUNKER_INNER_DISTANCE 2
 #define BUNKER_INNER_OFFSET 45
+// Rough codes take ROUGH_EDGE_OFFSET off y, or more with no other code nearer
+// than this
 #define ROUGH_INNER_DISTANCE 19
 #define ROUGH_EDGE_OFFSET 22
 #define ROUGH_INNER_OFFSET 120
 #define ROUGH_INNER_NOISE_MASK 0x1F
 #define SHAPED_POINT_SHADE 0xFF
+// Trees go in rough this many code cells from its edge, at least TREE_SPACING
+// units apart
 #define TREE_DISTANCE_MIN 8
 #define TREE_DISTANCE_MAX 10
 #define TREE_SPACING 0x100
 #define TREE_TEXTURE_INDEX 2
+// PlaceBillboards sets isNearCourseEdge and y again
 #define TREE_NEAR_EDGE 0x100
 #define TREE_WIDTH 0x80
 #define TREE_HEIGHT 0x100
 
+// BlendGroundAroundPoint blends heights over distances of this many units per
+// falloff step
 #define BLEND_DISTANCE_SCALE 512.0f
 #define BLENDED_POINT_SHADE 0xFF
 
+// HasDeadTriangleNearPoint rejects cell triangles whose cross product is below
+// this
 #define CELL_CROSS_PRODUCT_MIN 16
 
+// SlopeOutOfBoundsGround's out-of-bounds slope searches this many nearest
+// offsets
 #define SLOPE_OFFSET_COUNT 400
 #define SLOPE_OFFSET_SPAN 10
+// The distances, in grid steps, where the slope starts and turns to noise
 #define SLOPE_START_DISTANCE 5
 #define SLOPE_NOISE_DISTANCE 6
 #define SLOPE_EXTRA_NOISE_DISTANCE 12
+// The slope's line meets zero at this distance
 #define SLOPE_BASE_DISTANCE 2
 #define SLOPE_DROP_PER_DISTANCE (30.0f / OFFSET_DISTANCE_SCALE)
 #define SLOPE_NOISE_MASK 0x3FFF
@@ -89,15 +119,22 @@
 #define SLOPE_FAR_DROP 60.0f
 #define SLOPE_EXTRA_DROP 15.0f
 
+// UpdateHeightEditor's ground height editor
+// Edited points are lit fully
 #define EDITED_POINT_SHADE 0xFF
 #define HEIGHT_STEP 4
+// C-left sets the last height plus or minus up to 0x20
 #define COARSE_NOISE_MASK 0x3F
 #define COARSE_NOISE_OFFSET 0x20
+// A moves the point's height by up to 0x40 either way
 #define ROUGH_NOISE_MASK 0x7F
 #define ROUGH_NOISE_OFFSET 0x40
+// B moves it HEIGHT_STEP down or up
 #define STEP_NOISE_BIT (HEIGHT_STEP * 2)
+// The second editor pad's B lowers it by 0 or 0x10
 #define DIP_NOISE_BIT 0x10
 
+// What a frame did, kept in f_LastHeightEditKind
 enum HeightEdit {
     HEIGHT_EDIT_NONE,
     HEIGHT_EDIT_POINT,
@@ -106,6 +143,7 @@ enum HeightEdit {
 
 typedef s32 HeightEdit;
 
+// The cursor's moves, in eighths of a turn from the camera's heading
 enum CursorDirection {
     CURSOR_DIRECTION_NONE,
     CURSOR_DIRECTION_RIGHT = 2,
@@ -119,21 +157,26 @@ enum CursorDirection {
 };
 
 typedef s32 CursorDirection;
-
 #define BINARY_ANGLE_EIGHTH_TURN (BINARY_ANGLE_TURN / 8)
+// BINARY_ANGLE_TO_RADIANS with pi as 3.1416, in double precision
 #define EDITOR_ANGLE_TO_RADIANS (3.1416 / 32768)
+// Truncated, a step moves the cursor one point along each axis it leans to
 #define CURSOR_STEP_LENGTH 1.5
 #define EDITOR_ZOOM_MAX 4.0f
+// The stick turns the camera in steps of 16 of its units
 #define STICK_STEP_SIZE 16
 #define HEADING_STICK_SPEED 0x100
 #define PITCH_STICK_SPEED (1.0f / 180)
 #define EDITOR_PITCH_MIN (-80 * 3.1416 / 180)
 #define EDITOR_CAMERA_DISTANCE 2000.0
+// The cameras start an eighth of a turn down and around
 #define EDITOR_CAMERA_START_ANGLE (3.1416f / 4)
 #define METERS_PER_HEIGHT_UNIT (1.0f / 15)
 #define HEIGHT_TEXT_COLUMN 25
 #define HEIGHT_TEXT_ROW 3
 
+// UpdateTriangleEditor's triangle editor
+// What a frame did, kept in f_LastTriangleEditKind
 enum TriangleEdit {
     TRIANGLE_EDIT_NONE,
     TRIANGLE_EDIT_MOVE,
@@ -143,14 +186,20 @@ enum TriangleEdit {
 
 typedef s32 TriangleEdit;
 
+// The last RING_COUNT triangles hold the rings, which UpdateRingEditor
+// edits
 #define FIRST_RING_TRIANGLE (HOLE_TRIANGLE_COUNT - RING_COUNT)
+// A step moves the corner this far at zoom 1
 #define CORNER_STEP_SCALE 10.0f
 #define SAVED_CORNER_COUNT 10
 #define TRIANGLE_TEXT_COLUMN 10
 #define EDIT_KIND_TEXT_ROW 10
 #define CORNER_HEIGHT_TEXT_ROW 11
 
+// UpdateRingEditor's ring editor; its corners hold a ring's position,
+// direction and scale
 #define RING_DIRECTION_CORNER 1
+// In the corner's x, 1024 for the ring's own size
 #define RING_SCALE_CORNER 2
 #define RING_SCALE_STEP 16
 #define RING_SCALE_MIN 16
@@ -159,37 +208,47 @@ typedef s32 TriangleEdit;
 #define RING_TEXT_COLUMN 19
 #define RING_TEXT_ROW 4
 
+// UpdateWallEditor's wall editor
 #define WALL_TRIANGLE_COUNT 2
+// Corners 0 and 1; the others follow them
 #define WALL_BOTTOM_CORNER_COUNT 2
 #define WALL_TOP_CORNER 2
 #define WALL_HEIGHT 24.0f
+// How far a dropped wall reaches below the ground
 #define WALL_SINK_DEPTH (12 << WORLD_TO_COURSE_SHIFT)
+// Also the ball's flagstick hit
 #define WALL_LIMIT_SOUND 0xE
 #define WALL_LIMIT_SOUND_CHANNEL 11
 #define WALL_TEXT_COLUMN 5
 #define WALL_TEXT_ROW 3
 
+// UpdateTreeEditor's tree editor
 #define TREE_TEXT_COLUMN 19
 #define TREE_KIND_LABEL_ROW 24
 #define TREE_KIND_TEXT_ROW 25
 #define TREE_INDEX_LABEL_ROW 26
 #define TREE_INDEX_TEXT_ROW 27
 #define TREE_SIZE_MAX 0x800
+// A billboard from 1 to these limits in x and z is taken
 #define TREE_X_LIMIT 0x1000
 #define TREE_Z_LIMIT 0x2000
+// Whether a billboard is free, outside the limits that taken ones are in
 #define IsFreeBillboard(billboard) \
     ((billboard).x <= 0 || \
         (billboard).x >= TREE_X_LIMIT || \
         (billboard).z <= 0 || \
         (billboard).z >= TREE_Z_LIMIT)
+// Along x
 #define COPIED_TREE_OFFSET 0x100
 
+// WriteHexDumpFile's hex dump
 #define HEX_DUMP_BUFFER_SIZE 0x40000
 #define HEX_DUMP_TEXT_SIZE 0x100
 #define HEX_DUMP_LINE_WORDS 4
 #define HEX_DUMP_LINE_BYTES (HEX_DUMP_LINE_WORDS * (s32)sizeof(u32))
 #define HOLE_EDITOR_HEX_DUMP_ASSERT_LINE 3027
 
+// UpdateHoleFileMenu's steps, in f_HoleFileStep
 enum HoleFileStep {
     HOLE_FILE_STEP_ACTION,
     HOLE_FILE_STEP_COURSE,
@@ -198,7 +257,7 @@ enum HoleFileStep {
 };
 
 typedef s32 HoleFileStep;
-
+// The prompt shows highlighted while this bit of its frame count is set
 #define HOLE_FILE_BLINK_BIT 4
 #define HOLE_FILE_ARROW_COLUMN 7
 #define HOLE_FILE_LABEL_COLUMN 10
@@ -210,9 +269,12 @@ typedef s32 HoleFileStep;
 #define HOLE_FILE_HOLE_ROW 16
 #define HOLE_FILE_PROMPT_ROW 18
 
+// The ground cells, between neighboring ground points
 #define CELL_COLUMN_COUNT (GROUND_POINT_COLUMN_COUNT - 1)
 #define CELL_ROW_COUNT (GROUND_POINT_ROW_COUNT - 1)
 
+// UpdateGroundPointEditor's ground point editor
+// One for each C-button
 #define POINT_MOVE_COUNT 4
 #define POINT_MOVE_STEP 0x10
 #define POINT_TEXTURE_STEP 0x40
@@ -228,6 +290,7 @@ typedef s32 HoleFileStep;
 #define POINT_HEIGHT_TEXT_ROW 8
 #define DEAD_TRIANGLE_TEXT_ROW 9
 
+// UpdateHolePointEditor's hole point editor
 #define HOLE_POINT_MODE_UNSET (-1)
 #define HOLE_POINT_MODE_PIN_TEE 0
 #define HOLE_POINT_MODE_AIM 1
@@ -242,24 +305,34 @@ typedef s32 HoleFileStep;
 #define HOLE_POINT_TEXT_COLUMN 9
 #define HOLE_POINT_MODE_TEXT_ROW 6
 #define HOLE_POINT_INDEX_TEXT_ROW 7
+// How SCENE_CELL_EDITOR's cursor zooms the map camera each frame R or L is held
 #define CURSOR_ZOOM_IN_FACTOR 1.1f
 #define CURSOR_ZOOM_OUT_FACTOR 0.9f
 #define CURSOR_ZOOM_MAX 10.0f
 #define CURSOR_ZOOM_MIN 0.1f
 
+// ShouldMirrorCell gathers the terrain codes of cells at least this far from a
+// diagonal
 #define DIAGONAL_DISTANCE_MIN 3.0f
+// The sides of the two diagonals that ShouldMirrorCell gathers codes for
 #define DIAGONAL_SIDE_COUNT 4
+// How many different codes each side keeps
 #define SIDE_CODE_COUNT 2
+// Whether a diagonal side has gathered two different terrain codes
 #define HasTwoSideCodes(codes) ((codes)[SIDE_CODE_COUNT - 1] != TERRAIN_CODE_NONE)
 #define HOLE_EDITOR_DIAGONAL_ASSERT_LINE 2046
+// The vertex units in a terrain code column or row
 #define VERTEX_UNITS_PER_CODE 16
 
+// The screen captures, 24-bit BMPs; the corner capture covers the frame's
+// top-left corner
 #define CAPTURE_HEADER_SIZE 54
 #define CORNER_CAPTURE_WIDTH 64
 #define CORNER_CAPTURE_HEIGHT 128
 #define CAPTURE_BYTES_PER_PIXEL 3
 #define CORNER_CAPTURE_SIZE \
     (CAPTURE_HEADER_SIZE + (CORNER_CAPTURE_WIDTH * CORNER_CAPTURE_HEIGHT * CAPTURE_BYTES_PER_PIXEL))
+// A BMP header's fields are little-endian
 #define LITTLE_ENDIAN_16(value) ((value) & 0xFF), (((value) >> 8) & 0xFF)
 #define LITTLE_ENDIAN_32(value) LITTLE_ENDIAN_16(value), LITTLE_ENDIAN_16((value) >> 16)
 #define BMP_INFO_HEADER_SIZE 40
@@ -285,46 +358,67 @@ typedef s32 HoleFileStep;
         LITTLE_ENDIAN_32(CAPTURE_PIXELS_PER_METER_Y), \
         LITTLE_ENDIAN_32(0), \
         LITTLE_ENDIAN_32(0)}
+// The map capture covers every ground tile's texels, inside their borders
 #define MAP_CAPTURE_WIDTH (GROUND_TILE_COLUMN_COUNT * GROUND_TILE_TEXEL_SPAN)
 #define MAP_CAPTURE_HEIGHT (GROUND_TILE_ROW_COUNT * GROUND_TILE_TEXEL_SPAN)
 #define MAP_CAPTURE_SIZE \
     (CAPTURE_HEADER_SIZE + (MAP_CAPTURE_WIDTH * MAP_CAPTURE_HEIGHT * CAPTURE_BYTES_PER_PIXEL))
 #define GROUND_TILE_TEXEL_BORDER 1
 #define CAPTURE_FILE_NAME_SIZE 0x80
+// The size of a whole-screen capture
 #define SCREEN_CAPTURE_SIZE \
     (CAPTURE_HEADER_SIZE + (SCREEN_WIDTH * SCREEN_HEIGHT * CAPTURE_BYTES_PER_PIXEL))
+// Adds to a cached KSEG0 address to read the same memory uncached through KSEG1
 #define KSEG1_OFFSET 0x20000000
+// The same memory read uncached, to see what the RDP wrote
 #define UncachedAddress(address) AddressPast((address), KSEG1_OFFSET)
 
+// A plain if leaves GCC to invert the condition, which the game's code does not
 #define AssertInEditor(condition, lineNumber) \
     ((condition) ? (void)0 : ReportFailedAssertion("EX", "c:/usgolf64/hiedit.c", lineNumber))
 
+// DrawTargetPole's pole: two crossed quads, one in the x-y plane and
+// one in the z-y plane
 #define POLE_QUAD_COUNT 2
 
+// FillWaveTexels's 32x32 IA8 wave pattern
 #define WAVE_TEXTURE_WIDTH 32
 #define WAVE_TEXTURE_HEIGHT 32
+// A texel step's angle, pi/16, times the texel steps between samples
 #define WAVE_ANGLE_STEP 0.19635
 #define WAVE_TEXEL_STEP 4
 #define WAVE_AMPLITUDE 256.0
+// Cubing the amplitude-256 wave gives 24 bits; the top four are the level
 #define WAVE_LEVEL_SHIFT 20
 #define WAVE_LEVEL_MIN 1
 #define WAVE_LEVEL_MAX 15
 #define IA8_ALPHA_SHIFT 4
 
+// DrawHoleEditorGround's display list, one for each draw buffer
 #define EDITOR_GROUND_LIST_LENGTH 15000
 
+// An I8 texture as large as DrawGround's noise, all white
 #define WHITE_TEXTURE_SIZE 32
+// Every bit set, so each texel is white
 #define WHITE_TEXEL (-1)
 
+// Where the wave texture goes in TMEM, past a tile's texels
 #define WAVE_TMEM 0x180
+// A half's wave tile starts at its first triangle's scroll over this
 #define WAVE_SCROLL_DIVISOR 32
 #define WAVE_TILE_SPAN 0x40
 
+// The maps' blend colors' alphas, and that of a tile's second pass
 #define MAP_BLEND_ALPHA 0xFE
 #define SECOND_PASS_BLEND_ALPHA 0xF7
 
+// A fine tile is 4 by 4 cells of two triangles each, drawn in blocks of 2 by
+// 2 cells. When the editor builds a tile, 17 of its 5 by 5 points go in the
+// vertex list and 8 come from its midpoints, and f_FineTilePointSlots gives
+// each point's vertex cache slot.
 #define FINE_TILE_CELL_SPAN 4
 #define FINE_TILE_BLOCK_SPAN 2
+// How many cell columns one of the ground's halves is wide
 #define GROUND_HALF_CELL_COLUMNS (GROUND_TILE_GROUP_SIZE * FINE_TILE_CELL_SPAN)
 #define FINE_TILE_POINT_SPAN (FINE_TILE_CELL_SPAN + 1)
 #define TILE_TRIANGLE_COUNT (FINE_TILE_CELL_SPAN * FINE_TILE_CELL_SPAN * 2)
@@ -356,19 +450,26 @@ enum TileVertexSlot {
 #define TILE_INNER_MIDPOINT_CACHE_SLOT TILE_VERTEX_ROW0_COLUMN4
 #define TILE_LAST_COLUMN_CACHE_SLOT (TILE_INNER_MIDPOINT_CACHE_SLOT + TILE_INNER_MIDPOINT_COUNT)
 
+// A borderless tile's texture starts a texel into its place in the tile size
+// coordinates, and ends as far past the start of the next tile's place.
 #define BORDERLESS_TILE_FIRST_COORDINATE 4
+// GAME_FLAG_TEST_GROUND_TEXTURE's fixed tile, 34 texels square
 #define TEST_TILE_SIZE 0x88
 
+// A mirrored cell's points have their S reflected about a line, in the
+// halved texture coordinates that its vertex changes write
 #define MIRROR_S_OFFSET 0x100
 #define MIRROR_S_SCALE 16
 #define MIRRORED_TEST_S 0x2100
 #define MIRRORED_TEST_FIRST_S 0x88
 #define MIRRORED_TEST_LAST_S 0x8A
 
+// The maps' cell and triangle shades
 #define SHADED_TRIANGLE_LEVEL 0x96
 #define CELL_LEVEL 0xDC
 #define MIRRORED_CELL_LEVEL 0xA0
 
+// SetEditorCombineMode's pass of a tile drawn once or twice
 enum TilePass {
     TILE_PASS_ONLY,
     TILE_PASS_FIRST,
@@ -377,6 +478,8 @@ enum TilePass {
 
 typedef s32 TilePass;
 
+// What SetEditorCombineMode blends over a tile; g_ShowsGroundWaves picks
+// the noise or waves
 enum GroundOverlay {
     GROUND_OVERLAY_NOISE,
     GROUND_OVERLAY_WAVES,
@@ -385,6 +488,7 @@ enum GroundOverlay {
 
 typedef s32 GroundOverlay;
 
+// The combiner mode that DrawHoleEditorGround last set
 enum EditorCombineMode {
     EDITOR_COMBINE_NONE = -1,
     EDITOR_COMBINE_WAVES_ONLY,
@@ -399,12 +503,16 @@ enum EditorCombineMode {
 
 typedef s32 EditorCombineMode;
 
+// Whether ToggleGroundTileBorders has given a tile its bordered layout
 #define HasTileBorders(tileIndex) \
     (g_WorkArea.hole.tiles[tileIndex] \
             .texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0)
 
+// Whether a fine tile's neighbor makes it snap the vertices of their shared
+// edge; unlike DrawGround's test, a hidden neighbor counts
 #define IsNotFine(tileIndex) (g_WorkArea.hole.tiles[tileIndex].detail < GROUND_DETAIL_FINE)
 
+// Loads the wave texture where DrawGround loads its noise texture
 #define LoadWaveTexture() \
     gDPLoadMultiBlock( \
         gfx++, \
@@ -424,6 +532,7 @@ typedef s32 EditorCombineMode;
         15 \
     )
 
+// Loads the white texture where DrawGround loads its noise texture
 #define LoadWhiteNoiseTexture(shiftS, shiftT) \
     gDPLoadMultiBlock( \
         gfx++, \
@@ -443,6 +552,9 @@ typedef s32 EditorCombineMode;
         shiftT \
     )
 
+// Loads a tile's texture in either layout. A bordered tile picks its combiner
+// mode for the pass, and its second pass reuses the loaded texels. The tile is
+// the groupColumn-th from the one whose S starts at firstS.
 #define LoadEditorTileTexture(tileIndex, firstS, groupColumn, row, pass, overlay) \
     { \
         if (HasTileBorders(tileIndex)) { \
@@ -539,6 +651,8 @@ typedef s32 EditorCombineMode;
         } \
     }
 
+// Loads a row's odd vertices as midpoints of its even ones, so that they line
+// up with a coarse row
 #define LoadEditorAveragedRow(row, slot) \
     { \
         Vtx *even = (row); \
@@ -551,6 +665,9 @@ typedef s32 EditorCombineMode;
         vertices += 4; \
     }
 
+// Each point of a tile's EDGE_POINT_COUNT by EDGE_POINT_COUNT grid's slot among
+// the tile's midpoints. Entries from GRID_VERTEX_SLOT_FLAG up are its grid
+// vertices, which have no midpoint slot.
 static u8 f_TileMidpointSlots[EDGE_POINT_COUNT][EDGE_POINT_COUNT] = {
     {GridVertexSlot(0), 0, GridVertexSlot(4), 1, GridVertexSlot(8)},
     {2, 8, 9, 10, 3},
@@ -558,14 +675,21 @@ static u8 f_TileMidpointSlots[EDGE_POINT_COUNT][EDGE_POINT_COUNT] = {
     {4, 13, 14, 15, 5},
     {GridVertexSlot(2), 6, GridVertexSlot(6), 7, GridVertexSlot(10)},
 };
-static s32 f_HolePointCursor[PLANE_AXIS_COUNT] = {0, 0};
+// UpdateHolePointEditor's cursor
+static s32 f_HolePointCursor[PLANE_AXIS_COUNT] = {0, 0}; // x, z
 static s32 f_UnusedHolePointValue UNUSED = -1;
+// The cell that SCENE_CELL_EDITOR's cursor is on
 static s32 f_CellCursorColumn = 0;
 static s32 f_CellCursorRow = 0;
+// The ground point that SCENE_POINT_EDITOR's cursor is on, starting at
+// SCENE_CELL_EDITOR's cell
 static s32 f_PointCursorColumn = 0;
 static s32 f_PointCursorRow = 0;
+// UpdateGroundPointEditor keeps these between POINT_EDITOR_SETTING_MIN and
+// POINT_EDITOR_SETTING_MAX, and nothing else uses them
 static s32 f_PointEditorFirstSetting = 0;
 static s32 f_PointEditorSecondSetting = 0;
+// UpdateHolePointEditor's state
 static Radians f_HolePointCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 static Radians f_HolePointCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedHolePointAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
@@ -575,7 +699,9 @@ static s32 f_PinTeeIndex = 0;
 static s32 f_AimPointIndex = 0;
 static s32 f_RoutePointIndex = 0;
 
+// UpdateTriangleEditor's state
 static Radians f_TriangleCameraPitch = -EDITOR_CAMERA_START_ANGLE;
+// Converted from f_TriangleCameraYawAngle
 static Radians f_TriangleCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedTriangleAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static WideBinaryAngle f_TriangleCameraYawAngle = 0;
@@ -584,74 +710,91 @@ static s32 f_EditedCornerIndex = 0;
 static s32 f_SavedCornerIndex = 0;
 static TriangleEdit f_LastTriangleEditKind = TRIANGLE_EDIT_NONE;
 
+// UpdateRingEditor's state
 static Radians f_RingCameraPitch = -EDITOR_CAMERA_START_ANGLE;
+// Converted from f_RingCameraYawAngle
 static Radians f_RingCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedRingAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static WideBinaryAngle f_RingCameraYawAngle = 0;
 static s32 f_RingTriangleIndex = 0x9D;
-static s32 f_RingCornerIndex = 0;
+static s32 f_RingCornerIndex = 0; // Always 0
 static s32 f_UnusedRingIndex UNUSED = 0;
 static TriangleEdit f_LastRingEditKind = TRIANGLE_EDIT_NONE;
 
+// UpdateWallEditor's state
 static Radians f_WallCameraPitch = -EDITOR_CAMERA_START_ANGLE;
+// Converted from f_WallCameraYawAngle
 static Radians f_WallCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedWallAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static WideBinaryAngle f_WallCameraYawAngle = 0;
 static s32 f_FirstWallTriangle = 0x19;
-static s32 f_WallTriangleIndex = 0x19;
+static s32 f_WallTriangleIndex = 0x19; // The first of the wall's two triangles
 static s32 f_WallCornerIndex = 0;
 static s32 f_SavedWallCornerIndex = 0;
 static TriangleEdit f_LastWallEditKind = TRIANGLE_EDIT_NONE;
 
 void ToggleCellMirroring(s32 column, s32 row);
 
+// A ground triangle's slope, from UpdateTriangleSlopes
 typedef struct TriangleSlope {
-    s16 waveS;
+    s16 waveS; // The wave texture's scroll, which moves by the normal each frame
     s16 waveT;
-    s16 normalX;
+    s16 normalX; // Twice the normal's x, of a normal 256 long
     s16 normalZ;
-    u8 shade;
+    u8 shade; // 0 when flat, from SLOPE_SHADE_OFFSET up for slopes
 } TriangleSlope;
 
+// The size of the buffer that GetEditorBuffer returns
 #define EDITOR_BUFFER_SIZE 0x40000
 
+// The editor's bss, in the original's address order: KMC allocates a file's
+// uninitialized statics in the order they are defined.
 static CoursePoint f_SavedCorners[SAVED_CORNER_COUNT];
 static CoursePoint f_UnusedSavedCorners[SAVED_CORNER_COUNT] UNUSED;
 static CoursePoint f_SavedWallCorners[SAVED_CORNER_COUNT];
+// Places DrawTargetPole's pole at the map camera's target
 static Mtx f_PoleMatrix;
 static s32 f_UnusedEditorWords[2] UNUSED;
 static u8 f_WhiteNoiseTexels[WHITE_TEXTURE_SIZE * WHITE_TEXTURE_SIZE];
 static TriangleSlope f_TriangleSlopes[CELL_COLUMN_COUNT * CELL_ROW_COUNT * 2];
 static Gfx f_EditorGroundDisplayLists[DRAW_BUFFER_COUNT][EDITOR_GROUND_LIST_LENGTH];
+// Reached only through GetEditorBuffer, which nothing calls
 static u8 f_EditorBuffer[EDITOR_BUFFER_SIZE];
+// FillWaveTexels's wave pattern
 static u8 f_WaveTexels[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
 
+// UpdateHeightEditor's state
 static s32 f_HeightCursorColumn = 0;
 static s32 f_HeightCursorRow = 0;
 static s32 f_UnusedHeightSettings[] UNUSED = {6, 0};
 static Radians f_HeightCameraPitch = -EDITOR_CAMERA_START_ANGLE;
+// Converted from f_HeightCameraYawAngle
 static Radians f_HeightCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedHeightAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static WideBinaryAngle f_HeightCameraYawAngle = 0;
-static s32 f_LastSetHeight = 0;
-static Boolean f_ShowsGroundWaves = TRUE;
-static s32 f_CLeftPickedHeight = 0;
+static s32 f_LastSetHeight = 0; // The height C-up or C-down last set
+static Boolean f_ShowsGroundWaves = TRUE; // Copied to g_ShowsGroundWaves
+static s32 f_CLeftPickedHeight = 0; // Heights picked up by the second editor pad
 static s32 f_CUpPickedHeight = 0;
+
 static HeightEdit f_LastHeightEditKind = HEIGHT_EDIT_NONE;
 
+// UpdateHoleFileMenu's menu
 static s32 f_UnusedHoleFileSetting UNUSED = 1;
 static Boolean f_IsSavingHoleFiles = FALSE;
 static HoleFileStep f_HoleFileStep = HOLE_FILE_STEP_ACTION;
-static s32 f_HoleFileHoleNumber = 1;
-static s32 f_HoleFileCourseNumber = 1;
+static s32 f_HoleFileHoleNumber = 1; // From 1
+static s32 f_HoleFileCourseNumber = 1; // From 1
 static s32 f_HoleFilePromptFrames = 0;
 
+// UpdateTreeEditor's state
 static Radians f_TreeCameraPitch = -EDITOR_CAMERA_START_ANGLE;
+// Converted from f_TreeCameraYawAngle
 static Radians f_TreeCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedTreeAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static WideBinaryAngle f_TreeCameraYawAngle = 0;
 static s32 f_EditedTreeIndex = 0;
-static s32 f_LastTreeEditKind = 0;
+static s32 f_LastTreeEditKind = 0; // A TRIANGLE_EDIT_*; nothing reads it
 
 static s32 f_EditorClipRatio = 1;
 static s32 f_UnusedClipRatioValue UNUSED = 0;
@@ -665,6 +808,8 @@ static s8 f_FineTilePointSlots[FINE_TILE_POINT_SPAN][FINE_TILE_POINT_SPAN] = {
 static s32 f_EditorGroundTimingRow = 0;
 
 static s32 f_MapCaptureCount = 0;
+// The map's header gives its own width and height but a screen capture's
+// sizes
 static u8 f_MapCaptureHeader[CAPTURE_HEADER_SIZE] = BMP_HEADER(
     SCREEN_CAPTURE_SIZE,
     MAP_CAPTURE_WIDTH,
@@ -703,6 +848,10 @@ void *GetEditorBuffer(void) {
     return f_EditorBuffer;
 }
 
+// Runs SCENE_CELL_EDITOR's cell cursor: the D-pad moves it over the ground
+// cells, R and L zoom the map camera, A toggles the cell's bit and Z hands the
+// cell to SCENE_POINT_EDITOR. The map camera's eye stays over the cell's
+// middle.
 void UpdateCellEditor(void) {
     Vtx *corner;
     Vtx *oppositeCorner;
@@ -772,9 +921,15 @@ void UpdateCellEditor(void) {
 
 Boolean HasDeadTriangleNearPoint(s32 column, s32 row);
 
+// SCENE_POINT_EDITOR's ground point editor. The control pad moves the cursor
+// over the ground points, and the C-buttons move the point and its texture
+// coordinates within its tile; a point on a tile's edge stays on that edge. A
+// move that would make a dead triangle is undone. R and L zoom the map camera,
+// and Z hands the point back to SCENE_CELL_EDITOR.
 void UpdateGroundPointEditor(void) {
-    Vtx_t points[POINT_MOVE_COUNT + 1];
+    Vtx_t points[POINT_MOVE_COUNT + 1]; // Each move saves its point into the next move's slot
     char text[DEBUG_TEXT_BUFFER_SIZE];
+    // The game's frame has room for another point; without it 16 words differ
     Vtx_t unusedPoint UNUSED;
     Boolean madeDeadTriangle;
 
@@ -811,6 +966,7 @@ void UpdateGroundPointEditor(void) {
         f_PointCursorRow = CELL_ROW_COUNT - 1;
     }
 
+    // B held moves only the texture
     if (!(g_MenuControllerData[EDITOR_CONTROLLER].button & B_BUTTON)) {
         if ((g_MenuControllerData[EDITOR_CONTROLLER].button & D_CBUTTONS) &&
             (f_PointCursorRow & TILE_POINT_MASK)) {
@@ -1006,6 +1162,11 @@ void UpdateGroundPointEditor(void) {
     PrintDebugText(text, POINT_TEXT_COLUMN, DEAD_TRIANGLE_TEXT_ROW);
 }
 
+// Edits the hole's points over the map: the pins and tees, the "Meson" points
+// and the computer golfer's route. The C-buttons pick the list and the point,
+// the stick and control pad move the cursor, and A places the point on the
+// ground under the cursor (B places the tee). The first pin and tee also become
+// the hole's own.
 void UpdateHolePointEditor(void) {
     char text[DEBUG_TEXT_BUFFER_SIZE];
     s32 stepX;
@@ -1145,6 +1306,7 @@ void UpdateHolePointEditor(void) {
             }
         }
 
+        // The second pad's B clears the point
         if (g_MenuControllerData[OPTION_CONTROLLER].button & B_BUTTON) {
             g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] = 0;
             g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Y] = 0;
@@ -1180,6 +1342,7 @@ void UpdateHolePointEditor(void) {
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
+        // Start jumps to the tee
         if (g_MenuControllerData[EDITOR_CONTROLLER].button & START_BUTTON) {
             f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
@@ -1213,6 +1376,7 @@ void UpdateHolePointEditor(void) {
             );
         }
 
+        // The second pad's B clears the point
         if (g_MenuControllerData[OPTION_CONTROLLER].button & B_BUTTON) {
             g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X] = 0;
             g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Y] = 0;
@@ -1271,6 +1435,7 @@ void UpdateHolePointEditor(void) {
             );
         }
 
+        // The second pad's B clears the point
         if (g_MenuControllerData[OPTION_CONTROLLER].button & B_BUTTON) {
             g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] = 0;
             g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Y] = 0;
@@ -1307,6 +1472,7 @@ void UpdateHolePointEditor(void) {
         PrintDebugHex(f_RoutePointIndex, HOLE_POINT_TEXT_COLUMN, HOLE_POINT_INDEX_TEXT_ROW);
     }
 
+    // Z held turns the camera instead of moving the cursor
     if (!(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG)) {
         if (*(u16 *)&g_MenuControllerData[EDITOR_CONTROLLER].stick_x != 0) {
             stepX = (-cos(HEADING_RADIANS) * g_MenuControllerData[EDITOR_CONTROLLER].stick_y) -
@@ -1400,17 +1566,26 @@ void UpdateHolePointEditor(void) {
 
 void UpdateTriangleSlopes(void);
 
+// Scene SCENE_TRIANGLES's editor for the hole triangles. On the editor pad,
+// the C-buttons move the picked triangle across the ground, relative to the
+// camera's heading, and B picks its next corner. With Z held only that
+// corner moves. The option pad's
+// C-down and C-up move it along y, A saves the corner in a ring of
+// positions and B restores the last one saved. Right and left on the
+// control pad pick the triangle, and up and down change its kind. R
+// zooms in, L or Z with R zooms out, and Z with the stick orbits the
+// camera around the corner.
 void UpdateTriangleEditor(void) {
-    Mat4 unusedMatrices[2] UNUSED;
+    Mat4 unusedMatrices[2] UNUSED; // The game's frame has room for two matrices
     f32 stepRight;
     f32 stepUp;
     f32 stepY;
     f32 stepX;
     f32 stepZ;
-    f32 moveY;
+    f32 moveY; // The scaled y step; stepY itself would compile differently
     TriangleEdit editKind;
     s32 corner;
-    f64 cameraDistance;
+    f64 cameraDistance; // As a literal, GCC would fold it into the angles before the zoom
     Vtx_t *lookAtVertex;
 
     editKind = TRIANGLE_EDIT_NONE;
@@ -1458,6 +1633,8 @@ void UpdateTriangleEditor(void) {
             (sin((u16)f_TriangleCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
         stepZ = (-sin((u16)f_TriangleCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) +
             (cos((u16)f_TriangleCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
+        // Scaled in two steps; in one expression GCC would multiply 10 by the zoom
+        // first
         {
             f32 scaledX = stepX * CORNER_STEP_SCALE;
             f32 scaledY = stepY * CORNER_STEP_SCALE;
@@ -1579,6 +1756,7 @@ void UpdateTriangleEditor(void) {
     }
 
     f_TriangleCameraYaw = f_TriangleCameraYawAngle * EDITOR_ANGLE_TO_RADIANS;
+    // The first frame without an edit rebuilds the slopes
     if ((f_LastTriangleEditKind != TRIANGLE_EDIT_NONE) & (editKind == TRIANGLE_EDIT_NONE)) {
         UpdateTriangleSlopes();
     }
@@ -1601,6 +1779,14 @@ void UpdateTriangleEditor(void) {
         g_MapCamera.view.lookAt[AXIS_Y];
 }
 
+// Scene SCENE_RINGS's editor for the rings of Ring Shot, which are kept in
+// the last RING_COUNT hole triangles. On the editor pad, the C-buttons move
+// the ring across the ground, relative to the camera's heading, or with Z
+// held C-up and C-down scale it. A turns the triangle into a ring facing
+// along the camera's view. The option pad's C-down and C-up move it along
+// y, and the second editor pad's B clears the triangle. Right and left on
+// the control pad pick the ring. R zooms in, L or Z with R zooms out, and
+// Z with the stick orbits the camera around the ring.
 void UpdateRingEditor(void) {
     Vec3 direction;
     f32 stepRight;
@@ -1608,10 +1794,10 @@ void UpdateRingEditor(void) {
     f32 stepY;
     f32 stepX;
     f32 stepZ;
-    f32 moveY;
+    f32 moveY; // The scaled y step; stepY itself would compile differently
     TriangleEdit editKind;
     s32 corner;
-    f64 cameraDistance;
+    f64 cameraDistance; // As a literal, GCC would fold it into the angles before the zoom
     Vtx_t *lookAtVertex;
 
     editKind = TRIANGLE_EDIT_NONE;
@@ -1681,6 +1867,8 @@ void UpdateRingEditor(void) {
             (sin((u16)f_RingCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
         stepZ = (-sin((u16)f_RingCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) +
             (cos((u16)f_RingCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
+        // Scaled in two steps; in one expression GCC would multiply 10 by the zoom
+        // first
         {
             f32 scaledX = stepX * CORNER_STEP_SCALE;
             f32 scaledY = stepY * CORNER_STEP_SCALE;
@@ -1744,6 +1932,7 @@ void UpdateRingEditor(void) {
     }
 
     if (g_ControllerData[SECOND_EDITOR_CONTROLLER].button & B_BUTTON) {
+        // Clears every field
         g_WorkArea.hole.triangles[f_RingTriangleIndex].kind = HOLE_TRIANGLE_KIND_FLAT;
         g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[0].v.ob[AXIS_X] = 0;
         g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[0].v.ob[AXIS_Y] = 0;
@@ -1821,6 +2010,7 @@ void UpdateRingEditor(void) {
 
     f_RingCameraYaw = f_RingCameraYawAngle * EDITOR_ANGLE_TO_RADIANS;
 
+    // The first frame without an edit rebuilds the slopes
     if ((f_LastRingEditKind != TRIANGLE_EDIT_NONE) & (editKind == TRIANGLE_EDIT_NONE)) {
         UpdateTriangleSlopes();
     }
@@ -1842,21 +2032,29 @@ void UpdateRingEditor(void) {
         g_MapCamera.view.lookAt[AXIS_Y];
 }
 
+// Scene SCENE_WALLS's editor for walls, each a pair of shaded hole triangles
+// from f_FirstWallTriangle up to the rings. The editor pad's C-buttons move
+// the wall along x and z, the option pad's C-down and C-up along y, and the
+// option pad's C-left drops it onto the ground. Z limits an edit to the
+// corner that the editor pad's B picks. The option pad's A saves that corner
+// and its B restores the last saved one. Right and left on the control pad
+// pick the wall. R zooms in, L or Z with R zooms out, and Z with the stick
+// orbits the camera around the corner.
 void UpdateWallEditor(void) {
     char text[DEBUG_TEXT_BUFFER_SIZE];
     Vtx_t *corners[TRIANGLE_VERTEX_COUNT];
     Vtx_t *nextCorners[TRIANGLE_VERTEX_COUNT];
-    Mat4 unusedMatrices[2] UNUSED;
+    Mat4 unusedMatrices[2] UNUSED; // The game's frame has room for two matrices
     f32 stepRight;
     f32 stepUp;
     f32 stepY;
     f32 stepX;
     f32 stepZ;
-    f32 moveY;
+    f32 moveY; // The scaled y step; stepY itself would compile differently
     TriangleEdit editKind;
     Boolean isDropping;
     s32 corner;
-    f64 cameraDistance;
+    f64 cameraDistance; // As a literal, GCC would fold it into the angles before the zoom
     Vtx_t *lookAtVertex;
 
     editKind = TRIANGLE_EDIT_NONE;
@@ -1907,12 +2105,16 @@ void UpdateWallEditor(void) {
     sprintf(text, "EditNo%d   ", f_WallTriangleIndex);
     PrintDebugText(text, WALL_TEXT_COLUMN, WALL_TEXT_ROW);
     if ((editKind == TRIANGLE_EDIT_MOVE) | (isDropping == TRUE)) {
+        // Left over from the triangle editor, though walls move along the world
+        // axes: both turned steps are overwritten
         stepZ = stepUp;
         stepX = (-cos((u16)f_WallCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) -
             (sin((u16)f_WallCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
         stepX = (-sin((u16)f_WallCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) +
             (cos((u16)f_WallCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
 
+        // Scaled in two steps; in one expression GCC would multiply 10 by the zoom
+        // first
         {
             f32 scaledX = stepRight * CORNER_STEP_SCALE;
             f32 scaledY = stepY * CORNER_STEP_SCALE;
@@ -1960,6 +2162,8 @@ void UpdateWallEditor(void) {
                 &g_WorkArea.hole.triangles[f_WallTriangleIndex + 1].vertices[corner].v;
         }
 
+        // The first triangle's top corner stands over its first corner; the second
+        // fills in the rest
         corners[WALL_TOP_CORNER]->ob[AXIS_X] = corners[0]->ob[AXIS_X];
         corners[WALL_TOP_CORNER]->ob[AXIS_Z] = corners[0]->ob[AXIS_Z];
         corners[WALL_TOP_CORNER]->ob[AXIS_Y] = corners[0]->ob[AXIS_Y] + WALL_HEIGHT;
@@ -2022,6 +2226,7 @@ void UpdateWallEditor(void) {
         PlaySound(WALL_LIMIT_SOUND, WALL_LIMIT_SOUND_CHANNEL, SOUND_FULL_SCALE);
     }
 
+    // Both of the wall's triangles are kept shaded
     g_WorkArea.hole.triangles[f_WallTriangleIndex].kind = HOLE_TRIANGLE_KIND_SHADED;
     g_WorkArea.hole.triangles[f_WallTriangleIndex + 1].kind = HOLE_TRIANGLE_KIND_SHADED;
     if ((g_MenuControllerData[EDITOR_CONTROLLER].button & U_JPAD) &&
@@ -2029,6 +2234,7 @@ void UpdateWallEditor(void) {
             g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         editKind = TRIANGLE_EDIT_KIND;
 
+        // Never true; the triangle editor's kind cycling without the step
         if (g_WorkArea.hole.triangles[f_WallTriangleIndex].kind >= HOLE_TRIANGLE_KIND_COUNT) {
             g_WorkArea.hole.triangles[f_WallTriangleIndex].kind = HOLE_TRIANGLE_KIND_FLAT;
         }
@@ -2075,6 +2281,7 @@ void UpdateWallEditor(void) {
 
     f_WallCameraYaw = f_WallCameraYawAngle * EDITOR_ANGLE_TO_RADIANS;
 
+    // The first frame without an edit rebuilds the slopes
     if ((f_LastWallEditKind != TRIANGLE_EDIT_NONE) & (editKind == TRIANGLE_EDIT_NONE)) {
         UpdateTriangleSlopes();
     }
@@ -2096,8 +2303,14 @@ void UpdateWallEditor(void) {
         g_MapCamera.view.lookAt[AXIS_Y];
 }
 
+// Sets the billboards and the hole's points back on the ground, and
+// copies the first cup and tee positions to g_HoleSetup. The billboards'
+// first height comes from their x and z unscaled. The translation each
+// billboard builds goes unused, and PlaceBillboards places them all again
+// for each one.
 void PutObjectsOnGround(void) {
     Mat4 translation;
+    // The game's frame has room for a second matrix; without it 28 words differ
     Mat4 unusedMatrix UNUSED;
     s32 height;
     s32 i;
@@ -2154,6 +2367,10 @@ void PutObjectsOnGround(void) {
     }
 }
 
+// Slopes the out-of-bounds ground: each out-of-bounds ground point moves
+// along y by how far it is from the nearest point with another code, with
+// noise from SLOPE_NOISE_DISTANCE on. The height editor's option pad calls
+// it with C-down.
 void SlopeOutOfBoundsGround(void) {
     Vtx_t point;
     GridOffset *offsets;
@@ -2195,6 +2412,7 @@ void SlopeOutOfBoundsGround(void) {
 
             point = groundPoint->v;
 
+            // Never true, as the search stops at SLOPE_NOISE_DISTANCE
             if (offsets[offsetIndex].distance / OFFSET_DISTANCE_SCALE >=
                 SLOPE_EXTRA_NOISE_DISTANCE) {
                 point.ob[AXIS_Y] +=
@@ -2219,6 +2437,16 @@ void SlopeOutOfBoundsGround(void) {
     FreeMemory(&offsets);
 }
 
+// Runs the ground height editor. On the editor pads, the D-pad moves a
+// cursor over the ground points, relative to the camera's heading, Z with
+// the stick turns the camera, and R and L zoom it. On the first pad, C-up
+// and C-down lower and raise the point (with Z, every point), C-right
+// repeats the last height and C-left adds noise to it, and A and B add
+// noise to the point. On the second pad, C-left and C-up pick up two
+// heights and C-right and C-down move the point by their difference. The
+// option pad toggles f_ShowsGroundWaves and calls PutObjectsOnGround and
+// SlopeOutOfBoundsGround. After a frame of edits, the next frame without one
+// rebuilds the slopes.
 void UpdateHeightEditor(void) {
     char text[DEBUG_TEXT_BUFFER_SIZE];
     s32 baseHeight;
@@ -2226,8 +2454,9 @@ void UpdateHeightEditor(void) {
     CursorDirection direction;
     s32 columnStep;
     s32 rowStep;
-    f64 cameraDistance;
+    f64 cameraDistance; // As a literal, GCC would fold it into the angles before the zoom
 
+    // Moves every ground point's height by change
     void ChangeGroundHeight(s32 change) {
         s32 column;
         s32 row;
@@ -2594,6 +2823,12 @@ void UpdateHeightEditor(void) {
     PrintDebugText(text, HEIGHT_TEXT_COLUMN, HEIGHT_TEXT_ROW);
 }
 
+// Gathers the terrain codes on each side of the two diagonals of the rectangle from code column and
+// row (column, row) to (endColumn, endRow), keeping up to two different codes a side and skipping
+// cells within DIAGONAL_MIN_DISTANCE of the diagonal. Sides 0 and 1 are those of the diagonal
+// through offsets (0, 0) and (width, height), and sides 2 and 3 those of the one through (0,
+// height) and (width, 0). Returns whether sides 0 and 1 both have two codes while side 2 or 3 does
+// not.
 Boolean ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
     TerrainCode sideCodes[DIAGONAL_SIDE_COUNT][SIDE_CODE_COUNT];
     s32 width;
@@ -2663,12 +2898,15 @@ Boolean ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
     return FALSE;
 }
 
+// Whether a ground point is off the ground tiles
 #define IsOffGroundPoints(column, row) \
     ((column) < 0 || \
         (column) >= GROUND_TILE_COLUMN_COUNT * GROUND_TILE_POINT_SPAN || \
         (row) >= GROUND_TILE_ROW_COUNT * GROUND_TILE_POINT_SPAN || \
         (row) < 0)
 
+// Toggles whether one cell of the ground is drawn mirrored. The cells are
+// GROUND_TILE_POINT_SPAN a side in each tile.
 void ToggleCellMirroring(s32 column, s32 row) {
     s32 tileIndex;
     s32 cellBits;
@@ -2686,6 +2924,8 @@ void ToggleCellMirroring(s32 column, s32 row) {
                    (column & (GROUND_TILE_POINT_SPAN - 1))));
 }
 
+// Sets the x and s of a column of points between grid vertices (column, row)
+// and (column + 1, row)
 void InterpolateColumnPoints(Vtx *vertices, s32 column, s32 row, s32 weight) {
     Vtx *ends[2];
     s32 firstWeight;
@@ -2706,6 +2946,8 @@ void InterpolateColumnPoints(Vtx *vertices, s32 column, s32 row, s32 weight) {
     }
 }
 
+// Sets the z and t of a row of points between grid vertices (column, row) and
+// (column, row + 1)
 void InterpolateRowPoints(Vtx *vertices, s32 column, s32 row, s32 weight) {
     Vtx *ends[2];
     s32 firstWeight;
@@ -2726,6 +2968,12 @@ void InterpolateRowPoints(Vtx *vertices, s32 column, s32 row, s32 weight) {
     }
 }
 
+// Shapes the ground from the terrain codes and plants trees. Each ground
+// point's y follows its distance from the middle of the green, with
+// noise; bunker and rough points move further, more so far inside them.
+// The tile midpoints are then put back on the lines between their
+// neighbors, and trees go in the rough TREE_MIN_DISTANCE to
+// TREE_MAX_DISTANCE code cells from its edge. Nothing calls it.
 void ShapeGroundFromCodes(void) {
     Vtx *segmentPoints[SEGMENT_POINT_COUNT];
     s32 treePositions[BILLBOARD_COUNT][PLANE_AXIS_COUNT];
@@ -2836,6 +3084,7 @@ void ShapeGroundFromCodes(void) {
         }
     }
 
+    // row and column count tiles here
     for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
         for (column = 0; column < GROUND_TILE_COLUMN_COUNT; column++) {
             tileIndex = (row * GROUND_TILE_COLUMN_COUNT) + column;
@@ -2930,6 +3179,10 @@ void ShapeGroundFromCodes(void) {
                         treePositions[treeCount][GROUND_AXIS_Z] = z;
                         treeCount++;
 
+                        // The limit is checked at the end of each block, to match: one
+                        // check here alone gives 178 words differing, 28 in shape, the
+                        // limit in the row and column loops' conditions 193, 37 in
+                        // shape, and every check but this one 121, 1 in shape
                         if (treeCount == BILLBOARD_COUNT) {
                             goto PLANTED;
                         }
@@ -2952,7 +3205,6 @@ void ShapeGroundFromCodes(void) {
     }
 
 PLANTED:
-
     for (billboardIndex = 0; billboardIndex < treeCount; billboardIndex++) {
         g_Billboards[billboardIndex].y =
             (GetGroundHeight(
@@ -2977,6 +3229,8 @@ PLANTED:
     FreeMemory(&offsets);
 }
 
+// Sets whether each cell of each ground tile is drawn mirrored, to
+// ShouldMirrorCell of the codes between the cell's opposite corners
 void ChooseMirroredCells(void) {
     s32 tileRow;
     s32 tileColumn;
@@ -3015,6 +3269,9 @@ void ChooseMirroredCells(void) {
     }
 }
 
+// Returns -1 if either triangle of any of the four ground cells around a
+// ground point has a cross product below MIN_CELL_CROSS_PRODUCT, so is
+// too thin or turned over, or 0 if none does
 Boolean HasDeadTriangleNearPoint(s32 column, s32 row) {
     Vtx *corners[4];
     s32 rowOffset;
@@ -3052,6 +3309,9 @@ Boolean HasDeadTriangleNearPoint(s32 column, s32 row) {
     return 0;
 }
 
+// Runs SCENE_HOLE_FILES's menu, which loads a hole with BuildHole or saves the
+// one in memory with SaveHoleFiles. The D-pad picks the action, then the
+// course and the hole; A goes on to the next step and B goes back.
 void UpdateHoleFileMenu(void) {
     char courseText[DEBUG_TEXT_BUFFER_SIZE];
     char holeText[DEBUG_TEXT_BUFFER_SIZE];
@@ -3173,13 +3433,20 @@ void UpdateHoleFileMenu(void) {
     }
 }
 
+// Scene SCENE_TREES's editor for the billboards that stand for a hole's
+// trees. The editor pad's C-up and C-down change the edited tree's height,
+// C-right and C-left its width, A toggles isIgnoredEditorMark, up and down on
+// the control pad its texture, and the stick moves it. Right and left on the
+// control pad pick the tree, and B copies it. R zooms in, L or Z with R zooms
+// out, and Z with the stick orbits the camera around the tree.
 void UpdateTreeEditor(void) {
     Mat4 translation;
+    // The game's frame has room for a second matrix; without it 28 words differ
     Mat4 unusedMatrix UNUSED;
     TriangleEdit editKind;
     s32 billboardIndex;
     s32 height;
-    f64 cameraDistance;
+    f64 cameraDistance; // As a literal, GCC would fold it into the angles before the zoom
 
     PrintDebugText("KIND", TREE_TEXT_COLUMN, TREE_KIND_LABEL_ROW);
     PrintDebugText("        ", TREE_TEXT_COLUMN, TREE_KIND_TEXT_ROW);
@@ -3281,6 +3548,7 @@ void UpdateTreeEditor(void) {
         g_Billboards[f_EditedTreeIndex].textureIndex = BILLBOARD_TEXTURE_COUNT - 1;
     }
 
+    // B copies the tree into the first free billboard and edits the copy
     billboardIndex = 0;
     if (g_MenuControllerData[EDITOR_CONTROLLER].button & B_BUTTON) {
         for (; billboardIndex < BILLBOARD_COUNT; billboardIndex++) {
@@ -3298,6 +3566,7 @@ void UpdateTreeEditor(void) {
         }
     }
 
+    // The u16 holds stick_x and stick_y
     if (!(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) &&
         *(u16 *)&g_MenuControllerData[EDITOR_CONTROLLER].stick_x != 0) {
         s32 moveX = (-cos((u16)f_TreeCameraYawAngle * BINARY_ANGLE_TO_RADIANS) *
@@ -3314,6 +3583,7 @@ void UpdateTreeEditor(void) {
         g_Billboards[f_EditedTreeIndex].z += moveZ;
     }
 
+    // The translation goes unused; PlaceBillboards places every tree again
     if (editKind != TRIANGLE_EDIT_NONE) {
         height = GetGroundHeight(
                      g_Billboards[f_EditedTreeIndex].x << WORLD_TO_COURSE_SHIFT,
@@ -3330,6 +3600,7 @@ void UpdateTreeEditor(void) {
         PlaceBillboards();
     }
     else {
+        // Blinks the tree, as drawing skips billboards near the course edge
         g_Billboards[f_EditedTreeIndex].isNearCourseEdge =
             !g_Billboards[f_EditedTreeIndex].isNearCourseEdge;
     }
@@ -3381,6 +3652,9 @@ void UpdateTreeEditor(void) {
         g_MapCamera.view.lookAt[AXIS_Y];
 }
 
+// Blends the ground points within a radius of a ground point toward its
+// height: the farther a point, the more it keeps its own height, fully
+// from BLEND_DISTANCE_SCALE / falloff away. Nothing calls it.
 void BlendGroundAroundPoint(u32 column, u32 row, s32 radius, s32 falloff) {
     Vtx *center;
     Vtx *point;
@@ -3395,6 +3669,9 @@ void BlendGroundAroundPoint(u32 column, u32 row, s32 radius, s32 falloff) {
     radiusSquared = radius * radius;
     for (rowOffset = -radius; rowOffset <= radius; rowOffset++) {
         if (row + rowOffset < GROUND_POINT_ROW_COUNT) {
+            // halfWidth holds its square until the root, to match: a
+            // halfWidthSquared local, wherever it is declared, gives 46 words
+            // differing (0 in shape)
             halfWidth = radiusSquared - (rowOffset * rowOffset);
             if (halfWidth < 0) {
                 halfWidth = 0;
@@ -3427,6 +3704,8 @@ void BlendGroundAroundPoint(u32 column, u32 row, s32 radius, s32 falloff) {
     }
 }
 
+// Fills f_TriangleSlopes from the ground. It goes over the cells in blocks
+// of 2 columns by 4 rows; each cell's two triangles take an entry each.
 void UpdateTriangleSlopes(void) {
     PlaneTriangle firstTriangle;
     PlaneTriangle secondTriangle;
@@ -3546,6 +3825,8 @@ void UpdateTriangleSlopes(void) {
     }
 }
 
+// Fills f_WaveTexels with the cube of cos(column * pi/4) * sin(row * pi/4),
+// as matching IA8 intensity and alpha levels from 1 to 15
 void FillWaveTexels(void) {
     s32 row;
     s32 column;
@@ -3572,6 +3853,8 @@ void FillWaveTexels(void) {
     }
 }
 
+// Writes a hex dump of words to the host as a text file: lines of four
+// words, each line led by its byte offset. Nothing calls it.
 void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
     char text[HEX_DUMP_TEXT_SIZE];
     char *cursor;
@@ -3581,6 +3864,7 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
     s32 wordIndex;
     u32 *lineWords;
 
+    // Copies text to the buffer, dropping what doesn't fit
     void AppendText(char *source) {
         char character;
 
@@ -3624,10 +3908,62 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
     FreeMemory(&buffer);
 }
 
+// The hole editor's copy of DrawGround, which DrawGround hands off to while
+// GAME_FLAG_READ_HOST_HOLE is set. It draws into a display list of its own,
+// which the frame's list calls. Unless GAME_FLAG_HOLE_LOADED is set, it builds
+// fine tiles from their grid vertices and midpoints itself, and when
+// g_ShowsGroundWaves is set it blends in a scrolling wave texture.
+//
+// GetMidpointVertex and SetEditorCombineMode are nested functions, a GNU C
+// extension.
+//
+// To match, with the words that differ from the original's otherwise and how
+// many of them differ in shape:
+// - GridVertex is an inline function, as in DrawGround: as a macro it gives
+//   2009 words (5 in shape) and a frame 8 bytes smaller.
+// - It keeps no tile column. The edge tests and the mirrored points work the
+//   column out from half and groupTile at each use, the points from the
+//   half's first cell column: with a tileColumn local for the edge tests,
+//   36 words (22), and with the points' column worked out as the tile's
+//   times its cells, 1584 (82).
+// - The mirrored S line is a local of the fine tiles' loop, set once per
+//   tile from firstTileS.
+// - Each snapped edge's segment offset goes through a local, as in
+//   DrawGround: with a gSPSegment in each arm of the test, 1613 words (21).
+// - half, vertices, start and current are declared in that order, with
+//   firstTileS after them (160 words in the earlier order, and 184 with
+//   firstTileS in the half's block), topSlot beside the other slots (102 in
+//   the half's block), groupDetail in the row's block (174 with the
+//   routine's locals) and finePass last in the fine tiles' loop (150 with
+//   the routine's locals, 12 declared first in the loop).
+// - The three later pass loops each have a counter of their own: sharing one
+//   among all three gives 54 words, and between any two 36.
+// - The medium and coarse groups step their slots top, middle and bottom,
+//   then the tile index and the slope index, at the end of the tile loop's
+//   body, and rewind the slots in that order. With the medium groups' slope
+//   index first and top slot last, 24 words; with the coarse groups' steps
+//   in the loop's header and a hidden tile skipped by continue, 28 (8).
+// - A cell's mirror bit is masked out of the tile's bits in one expression:
+//   read into isMirrored and masked there, 28 words.
+// - The checkerboard parity adds groupTile to the row (4 words the other
+//   way round), and the fine tile's first vertex column adds the tile's
+//   offset to the half's first column (2 words).
+//
+// As in DrawGround, LoadEditorTileTexture adds the tile's place in its group
+// to firstTileS, since the original steps the tile's left S and its place's
+// end by 0x80 in each tile loop, and a fine tile drawn from its display list
+// steps the tile index itself and continues. The hidden groups' arm comes
+// last, after the coarse groups' >= test, as the original lays it out. Each
+// mirrored-cell block declares its own point, st, pointRow and pointColumn,
+// and under the test texture works out a point's texture coordinates before
+// setting the test tile's size. A map tile's checker color names its red and
+// blue before the color command. terrainStyle is tested at each use, as the
+// original reloads it and branches on it; a flag for it compiles to an sltu
+// that the original doesn't have.
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainStyle) {
-    UBoolean8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT];
+    UBoolean8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; // For the current and the last fine tile
     Boolean keepsCombineMode;
-    EditorCombineMode combineMode;
+    EditorCombineMode combineMode; // An EDITOR_COMBINE_*
     Gfx *gfx;
     s32 half;
     Vtx *vertices;
@@ -3662,6 +3998,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
     GroundTile *tile;
     s32 groupOffset;
 
+    // Sets a vertex halfway between two others
     void GetMidpointVertex(Vtx_t * first, Vtx_t * second, Vtx_t * midpoint) {
         midpoint->ob[AXIS_X] = (first->ob[AXIS_X] + second->ob[AXIS_X]) / 2;
         midpoint->ob[AXIS_Y] = (first->ob[AXIS_Y] + second->ob[AXIS_Y]) / 2;
@@ -3675,6 +4012,9 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
         midpoint->cn[3] = (first->cn[3] + second->cn[3]) / 2;
     }
 
+    // Picks how a tile's texture and the overlay in TMEM combine, for a pass
+    // of a tile drawn once or twice. It writes nothing when the mode is
+    // already set, or when the map's white overlay keeps its own mode.
     void SetEditorCombineMode(TilePass tilePass, GroundOverlay overlay) {
         if (!keepsCombineMode) {
             switch (tilePass) {
@@ -4137,6 +4477,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
             }
         }
 
+        // The map scenes draw every visible tile finely
         if (IsGroundEditorScene(g_Scene) &&
             IsMapTerrainStyle(terrainStyle) &&
             detail != GROUND_DETAIL_HIDDEN) {
@@ -4159,6 +4500,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
         osSyncPrintf("%f\n", g_GroundFarthestDepth);
     }
 
+    // The waves move down each triangle's slope
     if (g_ShowsGroundWaves) {
         for (slopeIndex = 0; slopeIndex < ARRAY_COUNT(f_TriangleSlopes); slopeIndex++) {
             f_TriangleSlopes[slopeIndex].waveS -= f_TriangleSlopes[slopeIndex].normalX;
@@ -4222,6 +4564,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                         ((firstTileS + (groupTile * TILE_COORDINATE_SPAN)) + MIRROR_S_OFFSET) *
                         MIRROR_S_SCALE;
 
+                    // The maps tell each tile from its neighbors by color
                     if (IsMapTerrainStyle(terrainStyle)) {
                         Boolean isOdd = (row + groupTile) & 1;
                         s32 red = isOdd * COLOR_CHANNEL_MAX;
@@ -4281,6 +4624,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                             }
                             for (edgeSegment = 0; edgeSegment < TILE_VERTEX_SEGMENT_COUNT;
                                 edgeSegment++) {
+                                // Moves a snapped edge's vertices, or moves back those snapped
+                                // for the last tile
                                 if (snapsEdge[currentSnapSet][edgeSegment] ||
                                     snapsEdge[currentSnapSet ^ 1][edgeSegment]) {
                                     s32 offset;
@@ -4298,6 +4643,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                             continue;
                         }
                         else {
+                            // Builds the tile's 5 by 5 points: its grid vertices, then the
+                            // edge midpoints, which line up with a medium neighbor
                             vertexColumn = (groupTile * 2) + HalfFirstColumn(half);
                             CopyDoublePair(
                                 (f64 *)GridVertex(vertexColumn, row * 2),
@@ -4471,6 +4818,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                                     g_ShowsGroundWaves
                                 );
 
+                                // Goes over the 4 by 4 cells in blocks of 2 by 2
                                 for (blockColumn = 0; blockColumn < FINE_TILE_CELL_SPAN;
                                     blockColumn += FINE_TILE_BLOCK_SPAN) {
                                     for (blockRow = 0; blockRow < FINE_TILE_CELL_SPAN;
@@ -4566,6 +4914,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                                                 if ((terrainStyle != TERRAIN_STYLE_TOP_DOWN_MAP &&
                                                         terrainStyle == TERRAIN_STYLE_MAP) ||
                                                     g_ShowsGroundWaves) {
+                                                    // Each cell's two triangles are lit differently
                                                     if (!g_ShowsGroundWaves) {
                                                         if (terrainStyle != TERRAIN_STYLE_NORMAL) {
                                                             gDPSetPrimColor(
@@ -4617,6 +4966,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                                                     slopeIndex++;
                                                 }
                                                 else {
+                                                    // The other maps show the cells in a
+                                                    // checkerboard, the mirrored ones darker
                                                     if (terrainStyle != TERRAIN_STYLE_NORMAL) {
                                                         if ((cellColumn ^ cellRow) & 1) {
                                                             gDPSetEnvColor(
@@ -4680,6 +5031,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                                                     slopeIndex += 2;
                                                 }
 
+                                                // Puts back the texture coordinates
                                                 if (isMirrored) {
                                                     s32 pointColumn;
                                                     s32 pointRow;
@@ -4741,6 +5093,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                         }
                     }
                     else if (g_WorkArea.hole.tiles[tileIndex].detail > GROUND_DETAIL_HIDDEN) {
+                        // A medium tile among fine ones loads only its own vertices
                         gSPVertex(
                             gfx++,
                             GridVertex(HalfFirstColumn(half) + (groupTile * 2), row * 2),
@@ -4811,6 +5164,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                 bottomSlot = spareSlot;
                 gDPPipeSync(gfx++);
 
+                // The last row's bottom vertices are still in the cache, unless it was
+                // fine or skipped
                 if (previousDetail <= GROUND_DETAIL_HIDDEN ||
                     previousDetail == GROUND_DETAIL_FINE) {
                     gSPVertex(
@@ -4973,6 +5328,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
 
             previousDetail = groupDetail;
 
+            // Skips the other half's group
             tileIndex += GROUND_TILE_GROUP_SIZE;
         }
     }
@@ -4992,6 +5348,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
     }
 }
 
+// Marks the billboards on the map, then writes the whole map image to
+// the host as x:\usgolf64\capture\tempNN.bmp
 void CaptureMapImage(void) {
     char fileName[CAPTURE_FILE_NAME_SIZE];
     u8 *capture;
@@ -5003,6 +5361,7 @@ void CaptureMapImage(void) {
         u32 column = texelIndex % MAP_CAPTURE_WIDTH;
         u32 row = texelIndex / MAP_CAPTURE_WIDTH % MAP_CAPTURE_HEIGHT;
 
+        // The game indexes the texels past the border as one run of rows
         return g_WorkArea.hole
             .tiles
                 [column / GROUND_TILE_TEXEL_SPAN +
@@ -5041,6 +5400,7 @@ void CaptureMapImage(void) {
     f_MapCaptureCount++;
 }
 
+// Writes the whole frame to the host as the next numbered capture file
 void CaptureFrame(void) {
     u16 *frame;
     u8 *capture;
@@ -5074,6 +5434,8 @@ void CaptureFrame(void) {
     f_ScreenCaptureCount++;
 }
 
+// Writes the frame's top-left corner to the host as capture file
+// captureIndex. The size written is that of a whole-screen capture.
 void CaptureFrameCorner(s32 captureIndex) {
     u16 *frame;
     u8 *capture;
@@ -5087,6 +5449,7 @@ void CaptureFrameCorner(s32 captureIndex) {
         capture[byteIndex] = f_CornerCaptureHeader[byteIndex];
     }
 
+    // BMP rows run from the bottom up, and each pixel is blue, green, red
     for (row = CORNER_CAPTURE_HEIGHT - 1; row != -1; row--) {
         for (column = 0; column != CORNER_CAPTURE_WIDTH; column++) {
             capture[byteIndex++] =
@@ -5105,6 +5468,8 @@ void CaptureFrameCorner(s32 captureIndex) {
     WriteHostFile(g_PrintBuffer, SCREEN_CAPTURE_SIZE);
 }
 
+// Draws a pole, red at the foot and blue at the top, at the map camera's
+// look-at point
 void DrawTargetPole(CameraMatrices *matrices UNUSED, Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 

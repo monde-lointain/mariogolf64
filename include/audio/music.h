@@ -1,3 +1,7 @@
+/*
+ * The music player, and the songs and sound banks it loads
+ */
+
 #ifndef MUSIC_H
 #define MUSIC_H
 

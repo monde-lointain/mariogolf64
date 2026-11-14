@@ -1,3 +1,7 @@
+/*
+ * The arrows that the menu screens draw beside their choices
+ */
+
 #ifndef MENU_ARROWS_H
 #define MENU_ARROWS_H
 

@@ -1,3 +1,8 @@
+/*
+ * The pause menu over a round, and the choice box that asks the player to
+ * pick between a few options during a turn.
+ */
+
 #include "round/pause_menu.h"
 
 #include <framebuffer_count.h>
@@ -34,8 +39,10 @@
 #include "system/overlay_manager.h"
 #include "text/text.h"
 
+// The small cloud behind a choice box
 #define ASSET_CHOICE_BOX_CLOUD_IMAGE 0x71F
 
+// Values of f_PauseMenuRequest, which the pause menu's drawing carries out
 enum PauseMenuRequest {
     PAUSE_MENU_REQUEST_FREE = -1,
     PAUSE_MENU_REQUEST_NONE,
@@ -44,33 +51,44 @@ enum PauseMenuRequest {
 
 typedef s32 PauseMenuRequest;
 
+// The pause menu's option lists, which the game mode picks
+// For a record being played back
 #define PAUSE_LAYOUT_NONE (-1)
 #define PAUSE_LAYOUT_SPEED_GOLF 0
 #define PAUSE_LAYOUT_RING_SHOT 1
 #define PAUSE_LAYOUT_TRAINING 2
 #define PAUSE_LAYOUT_TRAINING_MINI_GOLF 3
 #define PAUSE_LAYOUT_DRIVING_RANGE 4
+// Match Game, Get Character, Skins Match and Club Slots
 #define PAUSE_LAYOUT_VERSUS 5
+// Stroke, Tournament and the modes like them
 #define PAUSE_LAYOUT_STROKE 6
+// The layouts used while g_HasBroughtOverCharacter is set
 #define PAUSE_LAYOUT_BROUGHT_OVER_SPEED_GOLF 7
 #define PAUSE_LAYOUT_BROUGHT_OVER 8
+// The layouts used while g_GameState.isClubTournament is set
 #define PAUSE_LAYOUT_CLUB_TOURNAMENT_SPEED_GOLF 9
 #define PAUSE_LAYOUT_CLUB_TOURNAMENT 10
 
 #define PAUSE_MENU_SONG_VOLUME 0x60
 
+// What a pause option shows beside its label, and how the cursor points at it
 enum PauseOptionKind {
     PAUSE_OPTION_KIND_PLAIN,
+    // Shows whether it rains
     PAUSE_OPTION_KIND_WEATHER,
+    // Shows the player's grid color as black or white
     PAUSE_OPTION_KIND_GRID_COLOR,
     PAUSE_OPTION_KIND_WIND_SPEED,
     PAUSE_OPTION_KIND_WIND_DIRECTION,
     PAUSE_OPTION_KIND_LIE,
+    // Shows PAUSE_MESSAGE_FIRST_STROKE while f_IsGiveUpAllowed is clear
     PAUSE_OPTION_KIND_GIVE_UP = 7
 };
 
 typedef u16 PauseOptionKind;
 
+// Whether a pause option kind always shows a value beside its label
 #define IsValueOptionKind(kind) \
     ((kind) == PAUSE_OPTION_KIND_WEATHER || \
         (kind) == PAUSE_OPTION_KIND_GRID_COLOR || \
@@ -78,6 +96,7 @@ typedef u16 PauseOptionKind;
         (kind) == PAUSE_OPTION_KIND_WIND_DIRECTION || \
         (kind) == PAUSE_OPTION_KIND_LIE)
 
+// The texts of f_PauseValueTexts, which the weather and grid color show
 enum PauseValueText {
     PAUSE_VALUE_TEXT_CLEAR,
     PAUSE_VALUE_TEXT_RAIN,
@@ -85,11 +104,13 @@ enum PauseValueText {
     PAUSE_VALUE_TEXT_WHITE
 };
 
+// Give Up, which is grayed out while f_IsGiveUpAllowed is clear
 #define PAUSE_OPTION_GIVE_UP 2
 
 #define PAUSE_LAYOUT_OPTIONS_MAX 9
 #define MESSAGE_FIRST_PAUSE_OPTION 0x77
 
+// The pause menu's messages, counted from PAUSE_OPTION_MESSAGE_BASE
 enum PauseMessage {
     PAUSE_MESSAGE_COURSE_VIEW,
     PAUSE_MESSAGE_SCORE_CARD,
@@ -105,7 +126,9 @@ enum PauseMessage {
     PAUSE_MESSAGE_CHANGE_TERRAIN,
     PAUSE_MESSAGE_GRID_COLOR,
     PAUSE_MESSAGE_CONTROLS,
+    // "Can't give up on 1st stroke."
     PAUSE_MESSAGE_FIRST_STROKE,
+    // "Basic Controls", which no option shows
     PAUSE_MESSAGE_BASIC_CONTROLS
 };
 
@@ -113,39 +136,48 @@ typedef s32 PauseMessage;
 typedef s16 PauseMessage16;
 
 typedef struct PauseOption {
+    // Its label, a PAUSE_MESSAGE_* value
     PauseMessage16 message;
+    // A PAUSE_ACTION_* value, done when the option is chosen
     PauseAction16 action;
+    // A PAUSE_OPTION_KIND_* value
     PauseOptionKind kind;
 } PauseOption;
 
 #define CHOICE_BOX_OPTIONS_MAX 4
 #define MENU_SOUND_VOLUME 100
 
+// Values of f_ChoiceBoxState
 enum ChoiceBoxState {
     CHOICE_BOX_CLOSED = -1,
     CHOICE_BOX_CHOOSING,
-    CHOICE_BOX_CHOSEN,
+    CHOICE_BOX_CHOSEN, // Waits a frame before the box closes
     CHOICE_BOX_CLOSING
 };
 
 typedef s32 ChoiceBoxState;
 
+// The labels of f_ChoiceBoxLabels, which the choice boxes list
 enum ChoiceLabel {
+    // "Yes" and "No", which no choice box lists
     CHOICE_LABEL_YES,
     CHOICE_LABEL_NO,
     CHOICE_LABEL_CONTINUE,
     CHOICE_LABEL_MULLIGAN,
     CHOICE_LABEL_HOLE_OUT,
     CHOICE_LABEL_START_OVER,
+    // "Hole Out" again, for Ring Shot
     CHOICE_LABEL_RING_SHOT_HOLE_OUT,
     CHOICE_LABEL_RETURN_TO_MENU
 };
 
 typedef struct ChoiceBox {
     s32 optionCount;
-    s32 halfWidth;
+    s32 halfWidth; // Widened to fit the longest label
     Boolean isVertical;
+    // CHOICE_LABEL_* values
     u8 labels[CHOICE_BOX_OPTIONS_MAX];
+    // CHOICE_RESULT_* values, by label
     u8 results[CHOICE_BOX_OPTIONS_MAX];
 } ChoiceBox;
 
@@ -157,21 +189,26 @@ typedef struct ChoiceBox {
 #define CHOICE_BOX_CLOUD_HEIGHT 64
 #define CHOICE_BOX_CLOUD_PART_COUNT 1
 #define CHOICE_BOX_CLOUD_PART_SIZE 0x1000
+// The cloud's height scaled to the box's, as a 5.10 texel step
 #define CHOICE_BOX_CLOUD_DTDY 0x2C8
 #define CHOICE_LABELS_MIDDLE_Y 113
 #define CHOICE_LABEL_SPACING 16
+// The cursor bobs about this x, left of the selected label's middle
 #define CHOICE_CURSOR_X 124
 #define CHOICE_CURSOR_SWAY 8.0f
 #define COLOR_WAVE_MIDDLE 127
 #define COLOR_WAVE_AMPLITUDE 127.0f
 
+// Not static: the original left these to the linker's common block
 Vec2 g_LiePanelPosition;
 Vec2 g_WindPanelPosition;
 
+// Written once the menu is drawn and cleared by its input, but never read
 static s32 f_PauseMenuDrawnMarker = 0;
 static s32 f_PauseSelection = 0;
 
 static ChoiceBox f_ChoiceBoxes[] = {
+    // CHOICE_BOX_ID_TRAINING_SHOT
     {
         3,
         36,
@@ -179,6 +216,7 @@ static ChoiceBox f_ChoiceBoxes[] = {
         {CHOICE_LABEL_CONTINUE, CHOICE_LABEL_MULLIGAN, CHOICE_LABEL_HOLE_OUT},
         {CHOICE_RESULT_CONTINUE, CHOICE_RESULT_MULLIGAN, CHOICE_RESULT_HOLE_OUT},
     },
+    // CHOICE_BOX_ID_TRAINING_HOLE_END
     {
         3,
         42,
@@ -186,6 +224,7 @@ static ChoiceBox f_ChoiceBoxes[] = {
         {CHOICE_LABEL_CONTINUE, CHOICE_LABEL_MULLIGAN, CHOICE_LABEL_RETURN_TO_MENU},
         {CHOICE_RESULT_HOLE_OUT, CHOICE_RESULT_MULLIGAN, CHOICE_RESULT_RETURN_TO_MENU},
     },
+    // CHOICE_BOX_ID_RING_SHOT
     {
         3,
         66,
@@ -193,6 +232,7 @@ static ChoiceBox f_ChoiceBoxes[] = {
         {CHOICE_LABEL_START_OVER, CHOICE_LABEL_RING_SHOT_HOLE_OUT, CHOICE_LABEL_RETURN_TO_MENU},
         {CHOICE_RESULT_START_OVER, CHOICE_RESULT_RING_SHOT_HOLE_OUT, CHOICE_RESULT_RETURN_TO_MENU},
     },
+    // CHOICE_BOX_ID_DRIVING_RANGE
     {
         2,
         36,
@@ -230,7 +270,10 @@ static PauseOption f_PauseOptions[] = {
 
 static char *f_PauseValueTexts[] = {"Clear", "Rain", "Black", "White"};
 
+// The options of each PAUSE_LAYOUT_*, as f_PauseOptions indices. An option's
+// index is its action, so the indices are written as actions.
 static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
+    // PAUSE_LAYOUT_SPEED_GOLF
     {
         PAUSE_ACTION_FREE_LOOK,
         PAUSE_ACTION_SCORECARD,
@@ -238,6 +281,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
         PAUSE_ACTION_CONTROLS,
         PAUSE_ACTION_QUIT_GAME,
     },
+    // PAUSE_LAYOUT_RING_SHOT
     {
         PAUSE_ACTION_START_OVER,
         PAUSE_ACTION_HOLE_OUT,
@@ -246,6 +290,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
         PAUSE_ACTION_CONTROLS,
         PAUSE_ACTION_RETURN_TO_MENU,
     },
+    // PAUSE_LAYOUT_TRAINING
     {
         PAUSE_ACTION_START_OVER,
         PAUSE_ACTION_HOLE_OUT,
@@ -257,6 +302,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
         PAUSE_ACTION_CONTROLS,
         PAUSE_ACTION_RETURN_TO_MENU,
     },
+    // PAUSE_LAYOUT_TRAINING_MINI_GOLF
     {
         PAUSE_ACTION_START_OVER,
         PAUSE_ACTION_HOLE_OUT,
@@ -266,6 +312,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
         PAUSE_ACTION_CONTROLS,
         PAUSE_ACTION_RETURN_TO_MENU,
     },
+    // PAUSE_LAYOUT_DRIVING_RANGE
     {
         PAUSE_ACTION_HOLE_OUT,
         PAUSE_ACTION_FREE_LOOK,
@@ -277,6 +324,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
         PAUSE_ACTION_CONTROLS,
         PAUSE_ACTION_RETURN_TO_MENU,
     },
+    // PAUSE_LAYOUT_VERSUS
     {
         PAUSE_ACTION_FREE_LOOK,
         PAUSE_ACTION_SCORECARD,
@@ -285,6 +333,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
         PAUSE_ACTION_GIVE_UP,
         PAUSE_ACTION_SAVE_AND_QUIT,
     },
+    // PAUSE_LAYOUT_STROKE
     {
         PAUSE_ACTION_FREE_LOOK,
         PAUSE_ACTION_SCORECARD,
@@ -293,6 +342,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
         PAUSE_ACTION_GIVE_UP,
         PAUSE_ACTION_SAVE_AND_QUIT,
     },
+    // PAUSE_LAYOUT_BROUGHT_OVER_SPEED_GOLF
     {
         PAUSE_ACTION_FREE_LOOK,
         PAUSE_ACTION_SCORECARD,
@@ -300,6 +350,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
         PAUSE_ACTION_CONTROLS,
         PAUSE_ACTION_QUIT_BROUGHT_OVER_GAME,
     },
+    // PAUSE_LAYOUT_BROUGHT_OVER
     {
         PAUSE_ACTION_FREE_LOOK,
         PAUSE_ACTION_SCORECARD,
@@ -308,6 +359,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
         PAUSE_ACTION_GIVE_UP,
         PAUSE_ACTION_QUIT_BROUGHT_OVER_GAME,
     },
+    // PAUSE_LAYOUT_CLUB_TOURNAMENT_SPEED_GOLF
     {
         PAUSE_ACTION_FREE_LOOK,
         PAUSE_ACTION_SCORECARD,
@@ -315,6 +367,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
         PAUSE_ACTION_CONTROLS,
         PAUSE_ACTION_QUIT_CLUB_TOURNAMENT,
     },
+    // PAUSE_LAYOUT_CLUB_TOURNAMENT
     {
         PAUSE_ACTION_FREE_LOOK,
         PAUSE_ACTION_SCORECARD,
@@ -325,6 +378,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
     },
 };
 
+// The number of options in each PAUSE_LAYOUT_*
 static s8 f_PauseLayoutOptionCounts[] = {5, 6, 9, 7, 9, 6, 6, 5, 6, 5, 6};
 
 static s32 f_PauseLayout = PAUSE_LAYOUT_NONE;
@@ -337,14 +391,18 @@ static ChoiceBoxState f_ChoiceBoxState = CHOICE_BOX_CLOSED;
 static s32 f_UnusedWordAfterChoiceBoxState UNUSED = 0;
 static ChoiceBoxId f_ChoiceBoxId = CHOICE_BOX_ID_NONE;
 static s32 f_ChoiceBoxSelection = 0;
+// Cycles the selected label's color
 static Radians f_ChoiceGlowAngle = 0.0f;
+// Bobs the cursor from side to side
 static Radians f_ChoiceCursorAngle = 0.0f;
 
 static ImageAsset *f_PauseCursorImage;
-static ImageAsset *f_MenuCloudImage;
+static ImageAsset *f_MenuCloudImage; // The pause menu's cloud, or the choice box's
 static ImageAsset *f_PauseArrowsImage;
 static ImageAsset *f_ChoiceBoxCursorImage;
 
+// Set while the player has taken a stroke on the hole, as UpdateTurns asks
+// for the menu. Not static: the original left it to the linker's common block.
 Boolean f_IsGiveUpAllowed;
 
 void HideRoundHud(void) {
@@ -482,20 +540,26 @@ void FreePauseMenu(void) {
     SetSongVolume(SOUND_FULL_SCALE);
 }
 
+// Where the panels of the wind and of the lie slide to while their option is
+// selected
 #define PAUSE_PANEL_SHOWN_X 72.0f
 #define PAUSE_PANEL_SHOWN_Y 44.0f
 #define PAUSE_PANEL_HIDDEN_X 224.0f
 #define PAUSE_PANEL_HIDDEN_Y 184.0f
 #define PAUSE_PANEL_EASING 0.5f
 
+// The wind speed steps by about a mile an hour as the menu shows it, but
+// from calm the first step is larger, so that the shown speed starts at one.
 #define PAUSE_WIND_SPEED_STEP 0x71C7
 #define PAUSE_WIND_SPEED_FIRST_STEP 0xAAAA
+// Slower winds than this are calm
 #define PAUSE_WIND_SPEED_CALM 0x93E8
 #define PAUSE_WIND_SPEED_MAX 0x99CF0
 #define PAUSE_WIND_SPEED_RAISE_LIMIT 0x9FFFF
 #define PAUSE_WIND_TURN_PER_STICK 5
 #define PAUSE_WIND_TURN_STEP 0xF0
 
+// The lies that the lie option sets the ball in, from the tee's
 #define PAUSE_LIE_TEE_UP 0
 #define PAUSE_LIE_FAIRWAY 1
 #define PAUSE_LIE_FAIRWAY_FAIR_LIE 2
@@ -508,11 +572,16 @@ void FreePauseMenu(void) {
 #define PAUSE_LIE_BUNKER_FAIR_LIE 9
 #define PAUSE_LIE_BUNKER_POOR_LIE 10
 #define PAUSE_LIE_COUNT 11
+// The ball moves across from the tee onto the patches of the rougher lies
 #define PAUSE_ROUGH_LIES_OFFSET_X (-0x2D000)
 #define PAUSE_DEEP_ROUGH_OFFSET_X (-0x5A000)
 #define PAUSE_BUNKER_LIES_OFFSET_X 0x2D000
+// The tee holds the ball up off the ground
 #define PAUSE_TEE_UP_HEIGHT 307.2f
 
+// Takes the player's input on the pause menu. It returns the chosen option's
+// action, or PAUSE_ACTION_NONE. The weather, wind and lie options are changed
+// with the control pad's left and right.
 PauseAction UpdatePauseMenu(ControllerState *controller) {
     PauseAction action;
     PauseOptionKind kind;
@@ -583,6 +652,7 @@ PauseAction UpdatePauseMenu(ControllerState *controller) {
                         SOUND_FULL_SCALE
                     );
                 }
+            // Falls through
             case PAUSE_ACTION_HOLE_OUT:
                 PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
                 break;
@@ -827,11 +897,16 @@ PauseAction UpdatePauseMenu(ControllerState *controller) {
     return PAUSE_ACTION_NONE;
 }
 
+// The arrows image is a strip of 16 by 16 pixel tiles, two frames of four tiles
+// each. Each frame's left arrow is its last tile and its right arrow the one
+// before.
 #define PAUSE_ARROWS_TICKS_PER_FRAME 4
 #define PAUSE_ARROWS_TICK_COUNT (PAUSE_ARROWS_TICKS_PER_FRAME * 2)
 #define PAUSE_LEFT_ARROW_T TexelCoordinate(GREEN_ARROW_SIZE * 3)
 #define PAUSE_RIGHT_ARROW_T TexelCoordinate(GREEN_ARROW_SIZE * 2)
 
+// Draws a pair of flashing arrows centered on (x, y), with their centers gap
+// pixels apart
 void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap) {
     Gfx *gfx = *displayListHead;
     s32 top;
@@ -912,10 +987,15 @@ void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap) {
 #define PAUSE_LABEL_BLUE 0xFF
 #define PAUSE_CURSOR_RIGHT 80
 #define PAUSE_CURSOR_SWAY 8.0f
+// The cursor shows the tee frames instead of the glove for options with a value
 #define PAUSE_TEE_X 56
+// The tee leans the other way once the glove's sway passes this
 #define PAUSE_TEE_LEAN_SWAY 5
+// The tee frames follow the glove in the cursor image
 #define PAUSE_TEES_T TexelCoordinate(POINTING_HAND_SIZE)
 
+// Loads or frees the pause menu as RequestPauseMenu asked, then draws the menu
+// while it is loaded
 void DrawPauseMenu(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 cloudMiddle;
@@ -1223,6 +1303,8 @@ void FreeChoiceBoxImages(void) {
     FreeMemory(&f_MenuCloudImage);
 }
 
+// Opens the choice box of the given index, or closes the box with
+// CHOICE_BOX_CLOSED
 void OpenChoiceBox(ChoiceBoxId choiceBoxId) {
     f_ChoiceBoxId = choiceBoxId;
     if (choiceBoxId == CHOICE_BOX_ID_NONE) {
@@ -1238,6 +1320,8 @@ void OpenChoiceBox(ChoiceBoxId choiceBoxId) {
     }
 }
 
+// Moves the choice box's selection, and returns the chosen option's result once
+// the box closes
 ChoiceResult UpdateChoiceBox(ControllerState *controller) {
     ChoiceBox *box = &f_ChoiceBoxes[f_ChoiceBoxId];
 
@@ -1296,6 +1380,9 @@ ChoiceResult UpdateChoiceBox(ControllerState *controller) {
     return CHOICE_RESULT_NONE;
 }
 
+// Draws the open choice box: a glowing cloud sized to the widest label, the
+// labels, and for a vertical box a swaying cursor beside the chosen label,
+// half that label's width left of its sway.
 void DrawChoiceBox(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     ChoiceBox *box = &f_ChoiceBoxes[f_ChoiceBoxId];
@@ -1303,6 +1390,7 @@ void DrawChoiceBox(Gfx **displayListHead) {
     s32 red;
     s32 green;
     s32 blue;
+    // The widest label's width
     s32 textWidth;
     s32 labelWidth;
     s32 chosenWidth;

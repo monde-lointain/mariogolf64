@@ -1,3 +1,10 @@
+/*
+ * Play: setting up the players, their tee order and the clubs usable on the
+ * surface, replays of Best Shots and Ring Shot records, and UpdatePlay, which
+ * runs each hole and what comes between holes. It also sets the scene's fog and
+ * draws the ground.
+ */
+
 #include "round/play.h"
 
 #include <framebuffer_count.h>
@@ -63,16 +70,21 @@
 #include "system/overlay_manager.h"
 #include "text/text.h"
 
+// f_GroundNoiseTexels is a square of random bytes this many on a side
 #define GROUND_NOISE_SIZE 32
 
+// The power shots that each Ring Shot hole gives
 #define RING_SHOT_POWER_SHOT_COUNT 1
 
+// f_HoleEndStep, the step of the sequence between holes
 enum HoleEndStep {
     HOLE_END_STEP_START,
+    // Frees the character slot, then loads the next hole
     HOLE_END_STEP_FREE_SLOT,
     HOLE_END_STEP_SCORECARD,
     HOLE_END_STEP_WIPE_OUT,
     HOLE_END_STEP_LOAD_NEXT_HOLE,
+    // Never set: would wait for A, then show the scorecard
     HOLE_END_STEP_UNUSED_SCORECARD_WAIT,
     HOLE_END_STEP_RING_SHOT_FREE_SLOT,
     HOLE_END_STEP_RING_SHOT_RESULTS,
@@ -89,8 +101,9 @@ enum HoleEndStep {
 
 typedef s32 HoleEndStep;
 
+// f_PlayExit, the menu that play returns to once the hole ends
 enum PlayExit {
-    PLAY_EXIT_NONE,
+    PLAY_EXIT_NONE, // Plays on to the next hole
     PLAY_EXIT_COURSE_SELECT,
     PLAY_EXIT_BLANK_SCREEN,
     PLAY_EXIT_TITLE,
@@ -102,6 +115,7 @@ enum PlayExit {
 
 typedef s32 PlayExit;
 
+// f_HoleResultsKind, the results that the scorecard shows between holes
 enum HoleResultsKind {
     HOLE_RESULTS_STROKE,
     HOLE_RESULTS_MATCH,
@@ -119,6 +133,8 @@ u32 g_GroundDrawFrame;
 CurrentShot g_SavedShots[PLAYER_COUNT_MAX];
 Player g_SavedPlayers[PLAYER_COUNT_MAX];
 ShotLaunch g_LastShotLaunch;
+// DrawGround's included assembly names it, as splat calls g_WorkArea's
+// address less a row of tiles after the nearest symbol
 FILE_STATIC u8 g_UnreadPlayBuffer[0xDEC] UNUSED;
 
 FILE_STATIC u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
@@ -139,12 +155,15 @@ SignedBinaryAngle g_FreeLookHeading = 0;
 s32 g_ShotSetupFrameCount = 0;
 s32 g_ImpactPointLingerFrameCount = 0;
 ShotFlags g_ShotFlags = 0;
+// Cleared by ResetShotSetup, and read by no routine
 static s32 f_UnusedClearedPlayWord = 0;
 LetterboxState g_LetterboxState = LETTERBOX_STATE_NONE;
 ImpactPointState g_ImpactPointState = IMPACT_POINT_OFF;
 Boolean g_HasShotComeToRest = TRUE;
 Boolean8 g_IsHudTurnAwayRequested = FALSE;
 static s32 f_UnusedWordsAfterTurnAwayRequest[2] UNUSED = {0};
+// Whether the Ring Shot hole was holed out through every ring, which has the
+// hole's end show the Ring Shot results
 static Boolean8 f_IsRingShotCleared = FALSE;
 static PlayExit f_PlayExit = PLAY_EXIT_NONE;
 static HoleEndStep f_HoleEndStep = HOLE_END_STEP_START;
@@ -158,17 +177,24 @@ static s8 f_UnusedByteBeforeGroundWaves UNUSED = 0;
 Boolean8 g_ShowsGroundWaves = FALSE;
 f32 g_GroundFarthestDepth = 0.0f;
 f32 g_GroundNearDepthEighth = 0.0f;
+// The clip ratio, which the second controller's A button cycles under
+// GAME_FLAG_CYCLE_CLIP_RATIO
 static s32 f_GroundClipRatio = 1;
+// Read by no routine; holds each of 0 to 24 once
 static u8 f_UnusedShuffledIndices[25] UNUSED =
     {0, 5, 7, 10, 20, 1, 12, 13, 14, 21, 2, 15, 8, 16, 22, 3, 17, 18, 19, 23, 4, 6, 9, 11, 24};
 static s32 f_GroundTimingRow = 0;
 
 static u8 f_GroundNoiseTexels[GROUND_NOISE_SIZE * GROUND_NOISE_SIZE];
 
+// Whether play's hole intro, flyover and results move on without A, as under
+// GAME_FLAG_FAST_AUTOPLAY or GAME_FLAG_AUTOPLAY
 Boolean IsPlayAdvancingItself(void) {
     return IsGameFlagSet(GAME_FLAG_FAST_AUTOPLAY) || IsGameFlagSet(GAME_FLAG_AUTOPLAY);
 }
 
+// Clears what the last shot's setup left: the pause screen, the shot button,
+// flags and headings, the letterbox, the impact point and their frame counts
 void ResetShotSetup(void) {
     g_PauseScreen = PAUSE_SCREEN_NONE;
     g_IsAimCameraEasing = FALSE;
@@ -183,6 +209,8 @@ void ResetShotSetup(void) {
     g_ImpactPointLingerFrameCount = 0;
 }
 
+// How full the swing gauge is at the current gaugeFrame: it fills until
+// GAUGE_FULL_FRAME, then empties until the impact mark
 s32 GetGaugeFill(void) {
     s32 fill = g_CurrentShot.gaugeFrame;
 
@@ -193,6 +221,7 @@ s32 GetGaugeFill(void) {
     return fill;
 }
 
+// The launch power, out of 256, of the gauge's fill at a gauge frame
 s32 GetGaugeFramePower(s32 gaugeFrame) {
     if (gaugeFrame > GAUGE_FULL_FRAME) {
         gaugeFrame = GAUGE_IMPACT_FRAME - gaugeFrame;
@@ -205,6 +234,9 @@ s32 GetGaugeFramePower(s32 gaugeFrame) {
     return (gaugeFrame * LAUNCH_POWER_MAX) / GAUGE_FULL_FRAME;
 }
 
+// Sets each of a club set's flags in isUsable to whether the current
+// surface allows the club, and returns the set's size. The first argument
+// is not read.
 s32 MarkUsableClubs(s32 unused UNUSED, s16 *clubs, Boolean8 *isUsable) {
     ClubSlot clubSlot;
 
@@ -216,6 +248,9 @@ s32 MarkUsableClubs(s32 unused UNUSED, s16 *clubs, Boolean8 *isUsable) {
     return CLUB_SET_SIZE;
 }
 
+// The height that the aim camera keeps above at (x, z): the ground or
+// water there, or outside Mini-Golf where that is above zero, the ball's
+// height (at least zero)
 s32 GetAimCameraGround(s32 x, s32 z) {
     s32 height = GetGroundOrWaterHeight(x, z);
     s32 ballHeight;
@@ -239,6 +274,8 @@ enum FlaggedRoundKind {
     FLAGGED_ROUND_SKINS_MATCH
 };
 
+// Sets up PLAY_KIND_FLAGGED_ROUND's round on the first hole, with the mode and
+// players that the GAME_FLAG_ROUND_KIND and GAME_FLAG_EXTRA_PLAYERS bits pick
 void SetUpFlaggedRound(void) {
     switch ((IsGameFlagSet(GAME_FLAG_ROUND_KIND_HIGH_BIT) * 2) +
         IsGameFlagSet(GAME_FLAG_ROUND_KIND_LOW_BIT)) {
@@ -267,6 +304,8 @@ void SetUpFlaggedRound(void) {
             g_GameState.step = GAME_STATE_START;
             g_GameState.gameMode = GAME_MODE_MATCH_GAME;
 
+        // The original has no break here, so the default case overrides this one
+        // Falls through
         default:
             g_GameState.playerCount = 3;
             g_GameState.courseIndex = 0;
@@ -278,6 +317,7 @@ void SetUpFlaggedRound(void) {
     }
 }
 
+// Sets up PLAY_KIND_HOLE's one player on the first hole
 void SetUpOneHole(void) {
     g_GameState.courseIndex = 0;
     g_GameState.playerCount = 1;
@@ -292,10 +332,16 @@ void SetUpOneHole(void) {
     }
 }
 
+// Writes the name a player of the given index has by default
 void FormatDefaultPlayerName(s32 index, char *name) {
     sprintf(name, "MARIO%d", (int)(index + 1));
 }
 
+// Sets up the players for a round. In SCENE_PLAY_BEST_SHOT_REPLAY, in
+// GAME_MODE_RECORD_REPLAY or during a replay, only the first player
+// is set up, from the Ring Shot record or the Best Shot replay record;
+// otherwise all four get default names, their own character's clubs and
+// cleared scores.
 void SetUpPlayers(void) {
     s32 playerIndex;
     s32 holeIndex;
@@ -337,6 +383,8 @@ void SetUpPlayers(void) {
             }
         }
 
+        // The index variable is there to match: indexing player 0 directly gives
+        // 12 words differing, 6 in shape
         playerIndex = 0;
         for (slot = NOTABLE_SHOT_COUNT - 1; slot >= 0; slot--) {
             g_Players[playerIndex].notableShotCounts[slot] = 0;
@@ -412,6 +460,8 @@ void InitPlay(PlayKind kind) {
     osSyncPrintf("PlayInitComplete\n");
 }
 
+// Unless g_GameState.isRoundContinued is set, starts each player's ball on the
+// tee, with the hole's per-player state cleared
 void PlacePlayersOnTee(void) {
     s32 playerIndex;
     s32 ringIndex;
@@ -456,6 +506,8 @@ void PlacePlayersOnTee(void) {
     }
 }
 
+// Once every player has finished the hole, plays the movies for the
+// contests won on it, then waits for them to finish
 void PlayContestMovies(void) {
     s32 playerIndex;
 
@@ -494,6 +546,9 @@ void PlayContestMovies(void) {
     }
 }
 
+// Whether play can leave the hole: never while the contest movies play; in
+// Skins Match, Club Slots and the one-on-one matches, once the hole is decided
+// and every player is done or waiting; otherwise, once every player is done.
 Boolean IsHoleOver(void) {
     Boolean isDone = FALSE;
     s32 playerIndex;
@@ -503,6 +558,9 @@ Boolean IsHoleOver(void) {
     }
 
     if (g_GameState.replayKind == REPLAY_KIND_NONE) {
+        // In its own block to match: without it, or in plain braces, 6 words
+        // differ, and moving the players' done-or-waiting loop into an inline
+        // helper, in 3 forms, leaves 63-86 lines of the diff differing
         IN_OWN_BLOCK(
             if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                 g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
@@ -517,6 +575,11 @@ Boolean IsHoleOver(void) {
                     }
                 }
 
+                // Through isDone, returning in its own block, to match. The block's
+                // loop labels part the store from the return, so jump's store-flag
+                // conversion (jump.c, "Try to use a conditional move") can't make the
+                // test a set-on-equal, which the original lacks. Returning TRUE gives
+                // 5 words; returning isDone outside a block, or in plain braces, 16.
                 if (playerIndex == g_GameState.playerCount) {
                     isDone = TRUE;
                     IN_OWN_BLOCK(return isDone);
@@ -537,6 +600,10 @@ Boolean IsHoleOver(void) {
                     }
                 }
 
+                // Clearing isDone, though it is clear already, returning it, unlike
+                // the FALSE above, and setting it in its own block, to match, as
+                // above: setting it outside a block, or in plain braces, gives 12
+                // words, and returning TRUE or FALSE directly 11
                 isDone = FALSE;
                 if (playerIndex == g_GameState.playerCount) {
                     IN_OWN_BLOCK(isDone = TRUE);
@@ -561,11 +628,17 @@ Boolean IsHoleOver(void) {
     return isDone;
 }
 
+// Whether the first player tees off after the second on the next hole.
+// It is a macro, as an inline function compiles differently from the
+// original.
 #define TeesAfter(player, other) \
     (g_Players[player].strokeCount > g_Players[other].strokeCount || \
         (g_Players[player].strokeCount == g_Players[other].strokeCount && \
             g_Players[player].teeOrder > g_Players[other].teeOrder))
 
+// Sets each player's teeOrder for the next hole. In the group modes a
+// hole's winner goes first and the others move down one; otherwise the
+// players go in order of strokeCount, ties keeping their previous order.
 void SetNextTeeOrder(void) {
     s32 orders[PLAYER_COUNT_MAX];
     GroupPlayerMark results[PLAYER_COUNT_MAX];
@@ -602,11 +675,17 @@ void SetNextTeeOrder(void) {
         }
     }
 
+    // The copy loop in a block of its own is there to match; without it, or in
+    // plain braces, 38 words differ, none in shape, counting it with j 46 and
+    // with a counter of its own 60; of every choice of i or j for the five
+    // loops, alternating them from i or from j is closest, at 34
     IN_OWN_BLOCK(for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
         g_Players[playerIndex].teeOrder = orders[playerIndex];
     });
 }
 
+// Copies what the player chose for a shot of the Best Shot replay record: its
+// heading, gauge frames, shot mode, club and offsets, for the replay to repeat
 void LoadBestShotReplayInputs(s32 index) {
     g_ScriptedShot.heading = g_PlayRecords->shots[index].heading;
     g_ScriptedShot.powerGaugeFrame = g_PlayRecords->shots[index].powerGaugeFrame;
@@ -617,6 +696,7 @@ void LoadBestShotReplayInputs(s32 index) {
     g_ScriptedShot.offsetY = g_PlayRecords->shots[index].offsetY;
 }
 
+// LoadBestShotReplayInputs for a shot of the Ring Shot record
 void LoadRingShotReplayInputs(s32 index) {
     g_ScriptedShot.heading = g_RingShotRecords->shots[index].heading;
     g_ScriptedShot.powerGaugeFrame = g_RingShotRecords->shots[index].powerGaugeFrame;
@@ -627,6 +707,8 @@ void LoadRingShotReplayInputs(s32 index) {
     g_ScriptedShot.offsetY = g_RingShotRecords->shots[index].offsetY;
 }
 
+// Gives the score worth recording for a hole finished in this many strokes,
+// as SCORE_KIND_RECORDED with its ScoreKind, or 0 for none
 s32 GetRecordedScoreKind(s32 strokes) {
     ScoreToPar toPar = strokes - g_HoleSetup.par;
 
@@ -652,6 +734,7 @@ s32 GetRecordedScoreKind(s32 strokes) {
     return 0;
 }
 
+// Sets play up to replay a Best Shot record
 void LoadBestShotReplay(PlayRecord *record) {
     g_PlayRecords[0] = *record;
     g_GameState.gameMode = record->gameMode;
@@ -662,6 +745,7 @@ void LoadBestShotReplay(PlayRecord *record) {
     osSyncPrintf("SetSuperShotReplay\n");
 }
 
+// Sets play up for the Ring Shot hole of a record
 void LoadRingShotRecord(RingShotRecord *record) {
     g_RingShotRecords[0] = *record;
     g_GameState.gameMode = GAME_MODE_RING_SHOT;
@@ -671,10 +755,13 @@ void LoadRingShotRecord(RingShotRecord *record) {
     SetUpPlayers();
 }
 
+// Sets f_IsRingShotCleared, for the turn in ovl_00
 void SetRingShotCleared(Boolean8 isCleared) {
     f_IsRingShotCleared = isCleared;
 }
 
+// Ends play for the menu's title, as the pause menu's return to the menu
+// does: the game is saved or kept by mode, and the hole-end sequence quits
 void QuitPlayToTitle(void) {
     g_PauseScreen = PAUSE_SCREEN_NONE;
     SaveOrContinueGameByMode(FALSE);
@@ -684,6 +771,8 @@ void QuitPlayToTitle(void) {
     f_HoleEndStep = HOLE_END_STEP_QUIT;
 }
 
+// The number that the GAME_FLAG_FLAGGED_NUMBER_* flags spell, one for each of
+// its five bits. Nothing calls it.
 s32 GetFlaggedFiveBitNumber(void) {
     return (IsGameFlagSet(GAME_FLAG_FLAGGED_NUMBER_SIXTEENS) << 4) |
         (IsGameFlagSet(GAME_FLAG_FLAGGED_NUMBER_EIGHTS) << 3) |
@@ -692,6 +781,8 @@ s32 GetFlaggedFiveBitNumber(void) {
         IsGameFlagSet(GAME_FLAG_FLAGGED_NUMBER_ONES);
 }
 
+// Copies the game state and players to g_BackedUpGameState and
+// g_BackedUpPlayers
 void BackUpPlayState(void) {
     s32 playerIndex;
 
@@ -701,6 +792,8 @@ void BackUpPlayState(void) {
     }
 }
 
+// Whether the player has beaten Bowser in a Get Character match, or has
+// won first place in a Boo Valley or Mario's Star tournament
 Boolean HasWonFinalChallenge(void) {
     s32 firstHole;
     TournamentStanding *standing;
@@ -737,25 +830,36 @@ Boolean HasWonFinalChallenge(void) {
     return FALSE;
 }
 
+// Plus the number of the Ring Shot course that opens, its UnlockNotice
 #define UNLOCK_NOTICE_RING_SHOT_COURSE_BASE (UNLOCK_NOTICE_COURSES - 1)
 
 #define PLAYER_CHARACTER_SLOT 0
+// The hole index after the front nine
 #define TOURNAMENT_HALF_TURN_HOLE 9
 
+// How long the hole's intro waits before it moves on by itself
 #define HOLE_INTRO_FRAMES 240
 #define SHORT_HOLE_INTRO_FRAMES 90
+// How soon the debug flags that advance play move it on
 #define AUTO_ADVANCE_FRAMES 10
 #define AUTO_ADVANCE_RESULTS_FRAMES 90
 
+// Whether the round has played its last hole, once g_GameState.holeIndex has
+// moved past it
 #define HasPlayedLastHole() (g_GameState.holeIndex == GetFirstHoleIndex() + GetRoundHoleCount())
 #define IsAButtonPressed() (g_MergedController.pressedButtons & A_BUTTON)
+// Whether the Ring Shot hole has just earned the last star, which rolls the
+// staff
 #define IsStaffRollDueAfterRingShot() \
     ((HasEveryRingShotStar() && !g_HadEveryRingShotStar) || \
         IsGameFlagSet(GAME_FLAG_SHOW_STAFF_ROLL))
 
+// The debug cup picker's text position
 #define DEBUG_CUP_TEXT_COLUMN 3
 #define DEBUG_CUP_TEXT_ROW 3
 
+// The hole intro camera circles the hole at these distances
+// In binary angle units
 #define INTRO_ORBIT_ANGLE_PER_FRAME 256
 #define IntroOrbitAngle() \
     (((f_PlayStateFrameCount * INTRO_ORBIT_ANGLE_PER_FRAME) & BINARY_ANGLE_MASK) * \
@@ -767,6 +871,9 @@ Boolean HasWonFinalChallenge(void) {
 #define MINI_GOLF_ORBIT_RADIUS 600.0f
 #define MINI_GOLF_ORBIT_HEIGHT (-300.0f)
 
+// Runs play for a frame: loads each hole, shows its intro and flyover, takes
+// the turns, and steps through the scorecard, notices and menus between
+// holes until the round ends and play returns to a menu or the staff roll.
 void UpdatePlay(void) {
     Boolean repeats;
     Boolean again;
@@ -790,6 +897,7 @@ void UpdatePlay(void) {
         g_TurnController.pressedButtons = 0;
     }
 
+    // Menus between holes answer to any human player
     hasHuman = FALSE;
     g_MergedController.buttons = 0;
     g_MergedController.heldButtons = 0;
@@ -816,6 +924,7 @@ void UpdatePlay(void) {
         g_MergedController.repeatedButtons = g_ControllerStates[0].repeatedButtons;
     }
 
+    // A step that hands over to another within the same frame sets repeat
     again = repeats;
     do {
         if (again) {
@@ -826,6 +935,7 @@ void UpdatePlay(void) {
         switch (g_GameState.step) {
             case GAME_STATE_START:
                 g_GameState.step = GAME_STATE_LOAD_HOLE;
+            // Falls through
             case GAME_STATE_LOAD_HOLE:
                 StopLoaderThread();
                 StartLoaderThread();
@@ -1019,11 +1129,14 @@ void UpdatePlay(void) {
 
                 f_PlayStateFrameCount++;
 
+                // The camera circles the hole while its intro is shown
                 {
                     Vec3 lookAt;
                     Vec3 eye;
                     char text[DEBUG_TEXT_BUFFER_SIZE];
 
+                    // Debug: circles the chosen cup position instead, and moves the cup
+                    // there
                     if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
                         if (g_ControllerData[0].trigger & L_TRIG) {
                             f_DebugCupIndex--;
@@ -1125,6 +1238,7 @@ void UpdatePlay(void) {
                 break;
             case GAME_STATE_TAKING_TURNS:
                 UnloadOverlay(GetOverlayOfModule(MODULE_HOLE_BUILDER));
+            // Falls through
             case GAME_STATE_REPEATING_HOLE:
                 if (!f_IsPlayStateBackedUp) {
                     g_ContestMovieState = CONTEST_MOVIES_WAITING;
@@ -1267,13 +1381,16 @@ void UpdatePlay(void) {
                                     f_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
                                     g_SubModuleState = SUB_MODULE_SWAP_PENDING;
                                     g_PendingSubModuleId = MODULE_SAVE_MENU;
+                                    // Past the step's store, to match: setting nextStep here
+                                    // instead, before or after the module swap, gives 15 words
+                                    // differing, 3 in shape, and each branch setting
+                                    // f_HoleEndStep itself 24, 16 in shape
                                     goto DIM_BACKDROP;
                                 }
 
                                 f_HoleEndStep = nextStep;
 
 DIM_BACKDROP:
-
                                 SetMenuBackdrop(MENU_BACKDROP_DIMMING);
                                 clearsHud = FALSE;
                             }
@@ -1552,6 +1669,9 @@ DIM_BACKDROP:
                         switch (UpdatePrompt(&g_TurnController)) {
                             case PROMPT_RESULT_SKIP_REPLAY:
                                 LeaveReplaySaveMenu();
+                                // The result, 6, is HOLE_END_STEP_RING_SHOT_FREE_SLOT. Storing
+                                // it matches: storing the step's name shares the other arms'
+                                // store and is a word shorter
                                 f_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
                                 OpenPrompt(NO_PROMPT);
                                 break;
@@ -1722,6 +1842,7 @@ DIM_BACKDROP:
     while (again);
 }
 
+// Fills f_GroundNoiseTexels with random intensities from base up
 void FillGroundNoise(s32 range, s32 base) {
     s32 texelIndex = 0;
     s32 row;
@@ -1748,6 +1869,8 @@ void InitExpansionPakFeatures(void) {
     FillGroundNoise(GROUND_NOISE_RANGE, GROUND_NOISE_BASE);
 }
 
+// Sets the fog range and color from g_SceneFog, or from g_DebugFog,
+// with no fog alpha, while GAME_FLAG_SKY_EDITOR is set
 void SetSceneFog(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
@@ -1780,6 +1903,8 @@ void CopyDoublePair(f64 *from, f64 *to) {
     to[1] = from[1];
 }
 
+// Unless on a mini-golf course, marks the ground tile holding a point
+// and the tiles around it in g_IsGroundTileNearby
 void MarkNearbyGroundTiles(u32 x, u32 z) {
     u32 column;
     u32 row;
@@ -1810,8 +1935,65 @@ void ClearNearbyGroundTiles(void) {
     bzero(g_IsGroundTileNearby, sizeof(g_IsGroundTileNearby));
 }
 
+// The test ground texture repeats, mirrored, every this many units
 #define TEST_TEXTURE_TILE_SIZE 512
 
+// Gives each ground point texture coordinates from its x and z, mirrored on
+// every other tile so that the texture tiles seamlessly, under
+// GAME_FLAG_TEST_GROUND_TEXTURE.
+//
+// Each coordinate is copied to an s32, and its offset in the tile is taken
+// as a remainder before the tile's number as a quotient. GCC works the
+// remainder out as the coordinate less the quotient times the size, with the
+// quotient in the offset's own register on the way. cse then finds that the
+// tile's division is the one just done, and makes the tile a copy of that
+// quotient: the original's move of each tile number from $a0 to $v1. Read
+// straight from the point, the coordinate is a short, and the remainder is
+// taken in 16 bits and sign-extended.
+//
+// One offset and one copy serve both axes. With an offset for each, the
+// offsets take $v0 and the coordinates $a0, where the original has $a0 and
+// $a1.
+//
+// An offset of the tile's size stores the size's texel coordinate, which is
+// what the other arm would store; without the test the original's beq is
+// gone.
+//
+// Measured against the match, as words differing and how many of them in
+// shape:
+//
+//   The tile's quotient before the offset's remainder       34 (4)
+//   The coordinate read from the point in each, with or
+//   without a cast to s32                                   52 (10)
+//   The copy as an s16                                      52 (10)
+//   The copy as a u16                                       36 (28)
+//   The copy as a u32                                       26 (20)
+//   A copy for each axis, or one declared in a block
+//   around each                                             50 (4)
+//   An offset for each axis, or so declared                 44 (0)
+//   The offset as an s16                                    44 (12)
+//   The offset as a u16                                     42 (10)
+//   The offset as the coordinate less the tile times the
+//   size, after the tile                                    46 (6)
+//   The same from the point, with an offset for each axis
+//   and no copy (the old draft)                             30 (6)
+//   The quotient set in the offset and copied to the
+//   tile, then the offset as the coordinate less the
+//   tile times the size                                     34 (4)
+//   The offset as coordinate & (size - 1)                   33 (11)
+//   An inline function for the mirrored offset              54 (8)
+//   The same, taking the coordinate as an s16               52 (16)
+//   No test of the offset against the size                  36 (22)
+//   That test as ==, with its arms swapped                   8 (4)
+//   0x100 added in each arm of the test                     25 (17)
+//   The coordinates read through GetGroundPoint again       23 (17)
+//   The row loop or the column loop testing !=               4 (4)
+//
+// Also matching: the three locals declared in any order; the tile as an
+// s16, u16 or u32, one for each axis, or declared in a block; no tile at
+// all, with the quotient written in the mirror's test; that test as & 1 or
+// != 0; the offset as a u32; and the mirror or the offset's test as a
+// conditional expression.
 void RebuildGroundTextureCoordinates(void) {
     Vtx_t point;
     s32 row;
@@ -1824,6 +2006,8 @@ void RebuildGroundTextureCoordinates(void) {
     for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
         for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
             point = GetGroundPoint(column, row)->v;
+            // The remainder comes before the quotient, both taken from an s32
+            // copy, to match
             coordinate = point.ob[AXIS_X];
             offset = coordinate % TEST_TEXTURE_TILE_SIZE;
             tileIndex = coordinate / TEST_TEXTURE_TILE_SIZE;
@@ -1859,10 +2043,12 @@ void RebuildGroundTextureCoordinates(void) {
     }
 }
 
+// Whether the neighbor makes it snap the edge's midpoints
 #define IsCoarserThanFine(tileIndex) \
     (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE || \
         g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_MEDIUM)
 
+// Sets a vertex halfway between two others
 #define SetAverageVertex(midpoint, from, to) \
     { \
         (midpoint)->v.ob[AXIS_X] = ((from)->v.ob[AXIS_X] + (to)->v.ob[AXIS_X]) / 2; \
@@ -1875,6 +2061,8 @@ void RebuildGroundTextureCoordinates(void) {
             ((from)->v.tc[TEXTURE_AXIS_T] + (to)->v.tc[TEXTURE_AXIS_T]) / 2; \
     }
 
+// Loads a row's odd vertices as averages of its even ones, so that they line up
+// with a coarse row
 #define LoadAveragedRow(row, slot) \
     { \
         Vtx *even = (row); \
@@ -1886,6 +2074,8 @@ void RebuildGroundTextureCoordinates(void) {
         vertices += 4; \
     }
 
+// Loads a tile's texture, skipping its one-texel border. The tile is the
+// groupColumn-th from the one whose S starts at firstS.
 #define LoadTileTexture(tileIndex, firstS, groupColumn, row) \
     { \
         gDPLoadMultiBlock( \
@@ -1915,6 +2105,7 @@ void RebuildGroundTextureCoordinates(void) {
         ); \
     }
 
+// Loads the noise texture that DrawGround blends over the tiles
 #define LoadNoiseTexture(shiftS, shiftT) \
     gDPLoadMultiBlock( \
         gfx++, \
@@ -1934,8 +2125,46 @@ void RebuildGroundTextureCoordinates(void) {
         shiftT \
     )
 
+// Draws the ground's tiles, each at a detail that its distance picks. The
+// tiles go down two halves in rows of four, and a fine tile snaps the edge
+// vertices it shares with coarser neighbors so that no gaps open between them.
+//
+// To match, with the words that differ from the original's otherwise and how
+// many of them differ in shape:
+// - GridVertex is an inline function that returns a local, so the compiler
+//   works out a half's first column, the column after it and that column's
+//   parity once per half, and keeps each on the stack, as the original does.
+//   As a macro it gives 843 words (97 in shape) and a frame 0x48 bytes
+//   smaller, and returning the address without the local 712 (12).
+// - The half's first column is written out at each use. In a local set once
+//   per half it gives 1100 words (68) and a frame 0x10 bytes smaller.
+// - The fine tiles work out their column at each test for the ground's left
+//   and right edges: in a local, 602 words (12).
+// - The fine and the medium groups each declare their own k: one declared for
+//   the row, or with the routine's locals, gives 272 words (50).
+// - The loop over a fine tile's vertex segments has a counter of its own and
+//   sets the segment's offset into a local. Counted in j it gives 64 words
+//   and in segmentIndex 44; with the offset written as gSPSegment's argument,
+//   53 (21).
+// - vertices, start and current are declared in that order, and firstTileS
+//   with them rather than in the half's block, so their stack slots fall in
+//   the original's order: start and current first gives 46 words, and
+//   firstTileS in the half's block 52.
+// - The culling loop takes the tile's address into a local (10 words, 2 in
+//   shape, without it) and sets the hidden detail in the visibility test's
+//   else arm (6, all in shape, when set ahead of the test).
+// - A medium tile among fine ones draws its quads a row at a time, where
+//   DrawTileQuads goes down the columns: with DrawTileQuads, 16 words.
+// - That tile's vertex columns add the tile's offset to the half's first
+//   column: the other way round, 2 words.
+//
+// LoadTileTexture adds the tile's place in its group to firstTileS, the
+// half's first S, since the original steps two registers by 0x80 in each tile
+// loop: written as the tile's column times 128, loop.c can't make the shift a
+// giv. A fine tile drawn from its display list steps the tile index itself and
+// continues, as the original goes straight from there to the next tile.
 void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
-    UBoolean8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT];
+    UBoolean8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; // For the current and the last fine tile
     Gfx *gfx;
     s32 half;
     Vtx *vertices;
@@ -1967,6 +2196,8 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
     GroundTile *tiles;
     GroundTile *tile;
 
+    // SetGroundCombineMode is a nested function, a GNU C extension. It
+    // blends the noise texture over the tile texture.
     void SetGroundCombineMode(s32 unusedFirstSetting UNUSED, s32 unusedSecondSetting UNUSED) {
         gDPPipeSync(gfx++);
         gDPSetAlphaCompare(gfx++, G_AC_NONE);
@@ -2137,6 +2368,7 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
             detail = GROUND_DETAIL_HIDDEN;
         }
 
+        // The map scenes draw every visible tile finely
         if (IsGroundEditorScene(g_Scene) &&
             IsMapTerrainStyle(terrainStyle) &&
             detail != GROUND_DETAIL_HIDDEN) {
@@ -2149,6 +2381,7 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
 
         tile->detail = detail;
         if ((culledTileIndex & (GROUND_TILE_GROUP_SIZE - 1)) == GROUND_TILE_GROUP_SIZE - 1) {
+            // Coarse tiles in a group with finer ones are drawn at medium detail
             if (detailMax > GROUND_DETAIL_COARSE) {
                 for (culledOffset = 0; culledOffset < GROUND_TILE_GROUP_SIZE; culledOffset++) {
                     if (tiles[culledTileIndex - culledOffset].detail == GROUND_DETAIL_COARSE) {
@@ -2276,6 +2509,8 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
 
                             for (edgeSegment = 0; edgeSegment < TILE_VERTEX_SEGMENT_COUNT;
                                 edgeSegment++) {
+                                // Moves a snapped edge's vertices, or moves back those snapped
+                                // for the last tile
                                 if (snapsEdge[currentSnapSet][edgeSegment] ||
                                     snapsEdge[currentSnapSet ^ 1][edgeSegment]) {
                                     s32 offset;
@@ -2294,6 +2529,7 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
                         }
                     }
                     else if (g_WorkArea.hole.tiles[tileIndex].detail > GROUND_DETAIL_HIDDEN) {
+                        // A medium tile among fine ones loads only its own vertices
                         gSPVertex(
                             gfx++,
                             GridVertex(HalfFirstColumn(half) + (groupOffset * 2), row * 2),
@@ -2338,6 +2574,8 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
                         );
                         for (mediumPass = 0; mediumPass < GROUND_TILE_PASSES_MAX; mediumPass++) {
                             LoadTileTexture(tileIndex, firstTileS, groupOffset, row);
+                            // The quads go a row at a time, where DrawTileQuads goes
+                            // down the columns
                             gSP2Triangles(gfx++, 0, 2, 3, 0, 2, 5, 3, 0);
                             gSP2Triangles(gfx++, 2, 1, 5, 0, 1, 4, 5, 0);
                             gSP2Triangles(gfx++, 3, 5, 6, 0, 5, 8, 6, 0);
@@ -2360,6 +2598,8 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
                 bottomSlot = spareSlot;
                 gDPPipeSync(gfx++);
 
+                // The last row's bottom vertices are still in the cache, unless it was
+                // fine or skipped
                 if (previousDetail <= GROUND_DETAIL_HIDDEN ||
                     previousDetail == GROUND_DETAIL_FINE) {
                     gSPVertex(
@@ -2502,6 +2742,7 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
 
             previousDetail = groupDetail;
 
+            // Skips the other half's group
             tileIndex += GROUND_TILE_GROUP_SIZE;
             if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
                 osSyncPrintf("]\n");

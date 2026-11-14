@@ -1,3 +1,7 @@
+/*
+ * The staff roll
+ */
+
 #ifndef STAFF_ROLL_H
 #define STAFF_ROLL_H
 

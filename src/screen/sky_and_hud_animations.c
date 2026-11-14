@@ -1,3 +1,10 @@
+/*
+ * Draws what surrounds the course: the sky, the sun's glare and lens flare, the
+ * course's backdrop and the menus' backdrops. It also draws the HUD animations
+ * that fade, spiral, tile, turn away or slice the whole frame, and sets up the
+ * hole behind the title screen.
+ */
+
 #include "screen/sky_and_hud_animations.h"
 
 #include <framebuffer_count.h>
@@ -34,35 +41,47 @@
 #include "system/memory_address.h"
 #include "text/text.h"
 
+// The hole that plays behind the title screen: the last hole of the first
+// course, calm and lit from a fixed direction.
 #define TITLE_HOLE_INDEX 9
 #define TITLE_COURSE_INDEX 0
 #define TITLE_WIND_SPEED_STEP 6000
 #define TITLE_LIGHT_PITCH 0x1000
 #define TITLE_LIGHT_YAW 0x6000
 
-#define SUN_DEPTH_MARGIN 16.0f
+// The sun's glare grows while the sun is on the screen with nothing in front
+// of it, flaring past SUN_GLARE_FLARE_STRENGTH before settling at full
+// strength, and fades when something covers it. Only the z-buffer within
+// SUN_DEPTH_MARGIN of the screen's edges is read.
+#define SUN_DEPTH_MARGIN 16.0f // ASSET_SKY_IMAGE_0; ASSET_SKY_IMAGE_1
 #define SUN_GLARE_MARGIN 120.0f
+// Whether a point lies at least inset within each of the screen's edges
 #define IsInsetOnScreen(x, y, inset) \
     ((x) >= (inset) && \
         (x) <= SCREEN_WIDTH - (inset) && \
         (y) >= (inset) && \
         (y) <= SCREEN_HEIGHT - (inset))
+// Whether a point lies less than margin beyond each of the screen's edges
 #define IsNearScreen(x, y, margin) \
     ((x) > -(margin) && \
         (x) < SCREEN_WIDTH + (margin) && \
         (y) > -(margin) && \
         (y) < SCREEN_HEIGHT + (margin))
+// Whether a point lies on or beyond the line inset within any of the screen's
+// edges
 #define IsOnOrPastInset(x, y, inset) \
     ((x) <= (inset) || \
         (x) >= SCREEN_WIDTH - (inset) || \
         (y) <= (inset) || \
         (y) >= SCREEN_HEIGHT - (inset))
+// The z-buffer value of the sky
 #define SUN_SKY_DEPTH 0xFFFC
 #define SUN_GLARE_FADE_STEP 0.1f
 #define SUN_GLARE_GROWTH_STEP 0.3f
 #define SUN_GLARE_FLARE_STRENGTH 1.5f
 #define SUN_GLARE_FULL_STRENGTH 1.0f
 
+// The corners of the sky's fan, then its mirror's
 #define SKY_TOP_LEFT 0
 #define SKY_HORIZON_LEFT 1
 #define SKY_HORIZON_RIGHT 2
@@ -70,14 +89,26 @@
 #define SKY_TOP_CENTER 4
 #define SKY_FAN_VERTEX_COUNT 5
 #define MIRRORED_SKY_FAN SKY_FAN_VERTEX_COUNT
+// The sky's vertices, for each view and each matrix buffer
 #define SKY_VERTEX_COUNT (SKY_FAN_VERTEX_COUNT * 2)
+// f_SkyBlendStep counts to this at most
 #define SKY_BLEND_STEP_COUNT 1000
 
+// Each scene color index has a time of day for the sky's colors, and a time
+// and a percentage to blend from towards the next time. The tables are read
+// one entry past the scene color index too, for the next index's values.
 #define SKY_PERCENT_TO_STEPS (SKY_BLEND_STEP_COUNT / PERCENT_PER_WHOLE)
+// The course sky image is paletted, and InitSkyColors recolors its palette
 #define PALETTE_START (IMAGE_HEADER_SIZE / PALETTE_COLOR_SIZE)
 #define SKY_IMAGE_CHANNEL_MAX 31
+// The palette colors mix five parts of the horizon color with one of the top
+// color, shifted down to five bits
 #define SKY_IMAGE_HORIZON_PARTS 5
 #define SKY_IMAGE_DIVISOR (6 * 8)
+// The frame that the HUD animations break apart, copied two pixels to a word
+// from inside the HUD's margins. The tile animations copy it as a grid of
+// tiles, and HUD_ANIMATION_SLICE_CAPTURE copies a slice of the middle of the
+// frame each time it starts, for HUD_ANIMATION_SLICES to show.
 #define FRAME_WORDS_PER_ROW (SCREEN_WIDTH / 2)
 #define FRAME_MARGIN_ROWS 8
 #define FRAME_MARGIN_WORDS 4
@@ -93,6 +124,9 @@
 #define FRAME_SLICE_WORD_COUNT \
     ((FRAME_SLICE_BOTTOM - FRAME_SLICE_TOP) * (FRAME_SLICE_RIGHT_WORD - FRAME_SLICE_LEFT_WORD))
 
+// The slices that the slice animation copied fill the screen, a column of
+// them at a time, each drawn in strips that fit in texture memory. A new
+// slice appears every SLICE_FRAME_COUNT frames, with a sound.
 #define SLICE_ANIMATION_FRAME_COUNT 64
 #define FRAMES_PER_SLICE 8
 #define SLICE_WIDTH ((FRAME_SLICE_RIGHT_WORD - FRAME_SLICE_LEFT_WORD) * 2)
@@ -103,6 +137,7 @@
 #define SLICE_STRIP_WORD_COUNT (SLICE_STRIP_HEIGHT * SLICE_WIDTH / 2)
 #define SLICE_SOUND_CHANNEL 13
 
+// The corners of the tiles, for each of two frames
 #define TILE_GRID_ROW_COUNT 8
 #define TILE_GRID_COLUMN_COUNT 6
 #define TILE_GRID_LEFT (-152)
@@ -110,34 +145,49 @@
 #define TILE_GRID_TOP 112
 #define TILE_GRID_SPACING 64
 #define TILE_GRID_ROW_SPACING 32
+// The height of a row of the tile grid's vertices
 #define TileGridRowY(row) (TILE_GRID_TOP - ((row) * TILE_GRID_ROW_SPACING))
+// The x of a column of the tile grid's vertices, other than the last
 #define TileGridColumnX(column) (TILE_GRID_LEFT + ((column) * TILE_GRID_SPACING))
+// The x of the last column, which is narrower; columns count on from it by the spacing
 #define TileGridLastColumnX(column) \
     (TILE_GRID_RIGHT + (((column) - (TILE_GRID_COLUMN_COUNT - 1)) * TILE_GRID_SPACING))
 
+// The plain backdrop copies the last frame, inside a border, into
+// f_CapturedFrame in strips. Each strip loads two rows more than it steps,
+// and the last loads only the rows that are left.
 #define BACKDROP_BORDER 8
 #define BACKDROP_RIGHT (SCREEN_WIDTH - BACKDROP_BORDER - 1)
 #define BACKDROP_STRIP_COUNT 38
 #define BACKDROP_STRIP_STEP 6
 #define BACKDROP_STRIP_HEIGHT 8
 #define BACKDROP_LAST_STRIP_HEIGHT 2
+// Written with | because the target computes it without a branch, and + or a
+// plain ?: branches
 #define StripHeight(strip) \
     (BACKDROP_LAST_STRIP_HEIGHT | \
         ((strip) != BACKDROP_STRIP_COUNT - 1 ? \
                 BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT : \
                 0))
 #define BACKDROP_START_FADE_LEVEL 255
+// Each frame the fade level steps down until it is at most
+// BACKDROP_LAST_FADE_LEVEL
 #define BACKDROP_FADE_STEP 32
 #define BACKDROP_LAST_FADE_LEVEL 128
 
+// HUD_ANIMATION_SPIRAL cuts the frame inside the margins into a square grid.
+// Each frame, it draws as many fewer tiles as it fades.
 #define SPIRAL_GRID_SIZE 8
 #define SPIRAL_TILE_COUNT (SPIRAL_GRID_SIZE * SPIRAL_GRID_SIZE)
 #define SPIRAL_FRAME_WIDTH (SCREEN_WIDTH - (2 * FRAME_MARGIN_ROWS))
 #define SPIRAL_TILE_WIDTH (SPIRAL_FRAME_WIDTH / SPIRAL_GRID_SIZE)
 #define SPIRAL_TILE_HEIGHT ((SCREEN_HEIGHT - (2 * FRAME_MARGIN_ROWS)) / SPIRAL_GRID_SIZE)
 #define SPIRAL_FADING_TILE_COUNT 4
+// The tiles are drawn white, fading by SPIRAL_ALPHA_STEP each
 #define SPIRAL_SHADE 255
 #define SPIRAL_ALPHA_STEP (OPAQUE_ALPHA / (SPIRAL_FADING_TILE_COUNT + 1))
+// The count of tiles left drops by SPIRAL_FADING_TILE_COUNT each frame, from
+// this start that keeps the whole grid opaque for two frames
 #define SPIRAL_START_TILE_COUNT (SPIRAL_TILE_COUNT + (2 * SPIRAL_FADING_TILE_COUNT))
 
 enum SpiralDirection {
@@ -149,6 +199,8 @@ enum SpiralDirection {
 
 typedef s32 SpiralDirection;
 
+// The frame's tiles turn over and fly apart towards the camera as the
+// animation goes on. The last column is narrower than the others.
 #define FRAME_TILE_COUNT (FRAME_TILE_ROW_COUNT * FRAME_TILE_COLUMN_COUNT)
 #define FRAME_TILE_WIDTH (FRAME_TILE_WORDS * 2)
 #define FRAME_TILE_WORD_COUNT (FRAME_TILE_ROWS * FRAME_TILE_WORDS)
@@ -165,19 +217,26 @@ typedef s32 SpiralDirection;
 void CaptureHudAnimationFrame(void);
 void DrawSliceAnimation(void);
 
+// f_SkyHorizonColor's starting value in each channel
 #define SKY_HORIZON_LEVEL 63
+// The image's width is 1 << this
 #define BACKDROP_IMAGE_WIDTH_MASK 9
+// The backdrop's strips before DrawBackdrop sets them for the course, which it
+// does before reading them. The width mask is the course's, for an image twice
+// as wide.
 #define INITIAL_BACKDROP_STRIP_COUNT 4
 #define INITIAL_BACKDROP_STRIP_HEIGHT 8
 #define INITIAL_BACKDROP_IMAGE_WIDTH 256
 #define LENS_FLARE_COUNT 8
 
 typedef struct LensFlare {
-    u8 color[RGB_CHANNEL_COUNT];
-    u8 envColor[RGB_CHANNEL_COUNT];
+    u8 color[RGB_CHANNEL_COUNT]; // Where the ring texture is brightest
+    u8 envColor[RGB_CHANNEL_COUNT]; // Where it is darkest, and the texels blend between them
     s32 size;
+    // Nothing reads it. Each is about 0x10000 over a size from 8 to 64, though
+    // not always this flare's size.
     s32 ignoredScaleValue;
-    f32 position;
+    f32 position; // Along the line, 0 at the sun and 1 at its axis point
 } LensFlare;
 
 static u32 *f_CapturedFrame = (u32 *)MAIN_REGION_END;
@@ -191,7 +250,7 @@ static Boolean f_IsPrimitiveDepthSet = FALSE;
 static s8 f_SceneSkyBlendTimes[] = {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2};
 static s8 f_SceneSkyColorTimes[] = {0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3};
 static s8 f_SceneSkyBlendPercents[] = {0, 80, 0, 0, 0, 0, 0, 20, 50, 75, 100, 100};
-static f32 f_SunScreenX[SKY_VIEW_COUNT] = {0.0f, 0.0f};
+static f32 f_SunScreenX[SKY_VIEW_COUNT] = {0.0f, 0.0f}; // For each view
 static f32 f_SunScreenY[SKY_VIEW_COUNT] = {0.0f, 0.0f};
 #define MORNING_SUN 0
 #define MIDDAY_SUN 1
@@ -199,6 +258,7 @@ static f32 f_SunScreenY[SKY_VIEW_COUNT] = {0.0f, 0.0f};
 #define SUNSET_SUN 4
 #define MOON 6
 #define SUN_COUNT 7
+// The sky's suns, which g_SkyColors points to; none points to the fourth or the sixth
 static Sun f_Suns[SUN_COUNT] = {
     {
         {0, 0, 0, 0},
@@ -278,6 +338,7 @@ static Sun f_Suns[SUN_COUNT] = {
         SKY_IMAGE_KIND_TWO_TEXTURES,
     },
 };
+// By course record, then the times of day when dry, then in the rain
 SkyColors g_SkyColors[COURSE_RECORD_COUNT][SKY_WEATHER_COUNT * SKY_TIME_COUNT] = {
     {
         {
@@ -1237,6 +1298,7 @@ static s32 f_SkyHorizonColor[RGB_CHANNEL_COUNT] =
     {SKY_HORIZON_LEVEL, SKY_HORIZON_LEVEL, SKY_HORIZON_LEVEL};
 static f32 f_UnusedPlaneCornerPoints[12] UNUSED =
     {0.0f, 0.0f, 0.0f, 4096.0f, 0.0f, 0.0f, 0.0f, 0.0f, 8192.0f, 4096.0f, 0.0f, 8192.0f};
+// The fog SetSceneFog draws while GAME_FLAG_SKY_EDITOR is set
 Fog g_DebugFog = {{200, 230, 200}, 970, 1100};
 static s32 f_SkyEditorColumn = 0;
 static s32 f_SkyEditorRow = 0;
@@ -1347,6 +1409,7 @@ static Boolean f_IsFrameCapturePending = FALSE;
 static s32 f_HudAnimationFrame = 0;
 s32 g_CapturedSliceCount = 0;
 MenuBackdropState g_MenuBackdropState = MENU_BACKDROP_STATE_NONE;
+// Counted by DrawFadeAnimation, and read by no other routine
 static s32 f_UnusedFadeEndCount = 0;
 static MenuBackdrop f_MenuBackdrop = MENU_BACKDROP_STILL;
 static s32 f_BackdropFadeLevel = 0;
@@ -1369,8 +1432,10 @@ ImageAsset *g_CourseSkyImage;
 ImageAsset *g_SkyImage;
 SkyState g_SkyState;
 
+// The frame buffer of the last frame, kept for the next frame's captures
 FILE_STATIC u16 *f_LastFrameBuffer;
 
+// Sets up a single-player game of the hole behind the title screen
 void SetUpTitleHole(void) {
     memset(&g_GameState, 0, sizeof(GameState));
     g_GameState.holeIndex = TITLE_HOLE_INDEX;
@@ -1390,6 +1455,7 @@ void SetUpTitleHole(void) {
     SetFramebufferCount(DOUBLE_BUFFERING);
 }
 
+// Grows the sun's glare until it flares, then holds it at full strength
 static inline void GrowSunGlare(void) {
     if (!f_IsSunGlareSettled) {
         f_SunGlareStrength += SUN_GLARE_GROWTH_STEP;
@@ -1401,6 +1467,8 @@ static inline void GrowSunGlare(void) {
     }
 }
 
+// Grows or fades the sun's glare by whether the z-buffer shows anything in
+// front of the sun
 void UpdateSunGlare(void) {
     u16 *zBuffer;
 
@@ -1428,7 +1496,14 @@ void UpdateSunGlare(void) {
     }
 }
 
+// The lens flare is drawn while the sun is on the screen, away from its
+// edges, and the inset view isn't drawing the scene. The wider bounds that
+// are also tested can't fail after the narrower ones. The glare grows with the
+// sun's distance from the nearer side and from the top, or from the bottom
+// within GLARE_BOTTOM_ROWS of it, and nothing is drawn below MIN_VISIBLE_GLARE.
 #define LENS_FLARE_TOP_MARGIN 64.0f
+// Whether a point lies further above the screen than LENS_FLARE_TOP_MARGIN, or
+// further past its other edges than SUN_GLARE_MARGIN
 #define IsPastLensFlareMargins(x, y) \
     ((y) < -LENS_FLARE_TOP_MARGIN || \
         (y) > SCREEN_HEIGHT + SUN_GLARE_MARGIN || \
@@ -1437,12 +1512,16 @@ void UpdateSunGlare(void) {
 #define GLARE_BOTTOM_ROWS 96.0f
 #define GLARE_BASE 16.0f
 #define VISIBLE_GLARE_MIN 8.0f
+// The flares lie along the line from the sun through this point
 #define LENS_FLARE_AXIS_X (SCREEN_WIDTH / 2)
 #define LENS_FLARE_AXIS_Y 96.0f
+// A flare's half width is its size times (glare + LENS_FLARE_SIZE_BIAS) / 128
 #define LENS_FLARE_SIZE_BIAS 16.0f
 #define LENS_FLARE_SIZE_SCALE (1.0f / 128)
+// Only texels above this alpha are drawn
 #define LENS_FLARE_ALPHA_THRESHOLD 1
 
+// Draws the sun's lens flare, as rings along a line through the sun.
 void DrawLensFlare(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     SkyColors *colors =
@@ -1586,6 +1665,8 @@ void DrawLensFlare(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Moves the sky's and the fog's colors a step on from those of one time of
+// day towards those of the next
 void BlendSkyColors(void) {
     SkyColors *from;
     SkyColors *to;
@@ -1632,13 +1713,19 @@ void BlendSkyColors(void) {
         from->fogFar + ((to->fogFar - from->fogFar) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
 }
 
+// Sets the sky up for the hole's scene color index: its vertices' colors, the
+// blend between times of day that BlendSkyColors steps through, and
+// g_SkyImage and g_CourseSkyImage, recolored to match
 void InitSkyColors(void) {
     EncodedAsset asset;
+    // Pads the frame to the target's size; without it 58 words differ
     u8 unused[0x10] UNUSED;
     s32 blended[RGB_CHANNEL_COUNT];
     SkyColors *colors;
     SkyColors *from;
     SkyColors *to;
+    // One index for the vertex groups and the palette colors, to match: an
+    // index of its own for the palette gives 106 differing words
     s32 i;
     s32 channel;
     u16 color;
@@ -1668,6 +1755,9 @@ void InitSkyColors(void) {
                        [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyTimeIndex];
     to = &g_SkyColors[GetCourseRecordIndex()]
                      [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyTimeIndex + 1];
+    // Unused. Defined here, after the color lookups, since a nested function
+    // defined before them changes how GCC keeps the lookups' addresses, and only
+    // a block can hold a definition after statements.
     {
         UNUSED_FUNCTION s32 Lerp(s32 start, s32 end, f32 fraction) {
             return start * (1.0f - fraction) + end * fraction;
@@ -1780,6 +1870,7 @@ void InitSkyColors(void) {
     DeriveSceneColors();
 }
 
+// The sky editor's table, in debug text cells
 #define SKY_EDITOR_CONTROLLER 1
 #define SKY_EDITOR_TEXT_COLUMN 13
 #define SKY_EDITOR_TEXT_ROW 11
@@ -1787,11 +1878,14 @@ void InitSkyColors(void) {
 #define SKY_EDITOR_ERASE_COLUMN 14
 #define SKY_EDITOR_ERASE_ROW 5
 
+// The table's columns: the top, horizon and noise colors, the background
+// image's color, and fog
 #define SKY_EDITOR_TOP 0
 #define SKY_EDITOR_HORIZON 1
 #define SKY_EDITOR_NOISE 2
 #define SKY_EDITOR_BACKGROUND 3
 #define SKY_EDITOR_FOG 4
+// Rows past blue: the background's alpha, and the fog's near and far
 #define SKY_EDITOR_ALPHA_ROW SKY_BACKGROUND_ALPHA
 #define SKY_EDITOR_FAR_ROW 4
 #define SKY_EDITOR_LAST_COLOR_ROW 2
@@ -1802,10 +1896,14 @@ void InitSkyColors(void) {
 #define FOG_DEPTH_MAX 1200
 static SkyColors *f_EditedSkyColors;
 
+// While GAME_FLAG_SKY_EDITOR is set, lets controller 2 edit the current sky
+// colors and g_DebugFog, shows them in a table, and returns TRUE. The D-pad
+// or C buttons move the cursor, and holding A or B raises or lowers the value
+// under it.
 Boolean UpdateSkyEditor(void) {
     EncodedAsset asset;
     Boolean isImageChanged;
-    s32 index;
+    s32 index; // Counts the vertex groups, then the palette colors
     s32 channel;
     u16 color;
     s32 red;
@@ -1866,6 +1964,7 @@ Boolean UpdateSkyEditor(void) {
         f_SkyEditorRow = SKY_EDITOR_LAST_COLOR_ROW;
     }
 
+    // The rows of the fog column run past g_DebugFog.color into near and far
     if (g_ControllerStates[SKY_EDITOR_CONTROLLER].buttons & A_BUTTON) {
         switch (f_SkyEditorColumn) {
             case SKY_EDITOR_TOP:
@@ -1884,6 +1983,7 @@ Boolean UpdateSkyEditor(void) {
                 f_EditedSkyColors->backgroundColor[f_SkyEditorRow]++;
                 isImageChanged = TRUE;
                 if (f_SkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
+                    // Wraps the percent past either end
                     if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] ==
                         PERCENT_PER_WHOLE + 1) {
                         f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = 0;
@@ -2133,6 +2233,7 @@ Boolean UpdateSkyEditor(void) {
     return TRUE;
 }
 
+// UpdateSky's limits and scales
 #define SKY_PITCH_LIMIT 1.5f
 #define SKY_SLOPE_DISTANCE 200.0
 #define SKY_REFERENCE_FIELD_OF_VIEW 60.0f
@@ -2143,6 +2244,7 @@ Boolean UpdateSkyEditor(void) {
 #define SKY_TOP_DEPTH (-2048.0f)
 #define SKY_PITCH_TO_DEPTH (-2048.0f / 3.14f)
 #define SKY_HEIGHT_LIMIT 0x500
+// Scales how far the clipped heights push the texture
 #define SKY_CLIPPED_HEIGHT_SHIFT 5
 #define SKY_SCROLL_PER_WIND_SPEED 0.5f
 #define SKY_SCROLL_X_WRAP 8192.0f
@@ -2155,10 +2257,14 @@ Boolean UpdateSkyEditor(void) {
 #define SKY_TEXTURE_SCALE 16
 #define SKY_DEBUG_CYCLE_LENGTH 3
 
+// Points the sky of a view at its camera, and scrolls the sky's texture with
+// the wind. The first view also blends the sky's colors, unless the sky
+// editor is open.
 void UpdateSky(CameraView *view, s32 viewIndex) {
     Radians *pitches;
-    f32 pitchScale;
+    f32 pitchScale; // Narrower fields of view move the horizon further for each radian of pitch
     Vec3 direction;
+    // The original frame has room for this; without it 48 words differ
     s32 unused[8] UNUSED;
     Vtx *vertices;
     f32 slope;
@@ -2244,6 +2350,8 @@ void UpdateSky(CameraView *view, s32 viewIndex) {
         g_SkyState.scrollY += SKY_SCROLL_Y_PERIOD;
     }
 
+    // Vertices 1, 2, 6 and 7 follow the horizon level; 0, 3 and 4 follow the
+    // pitch alone
     if (g_SkyState.pitches[viewIndex] < 0.0f) {
         vertices[SKY_TOP_LEFT].v.ob[AXIS_Y] =
             (SCREEN_HEIGHT / 2) - (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
@@ -2293,6 +2401,8 @@ void UpdateSky(CameraView *view, s32 viewIndex) {
     vertices[MIRRORED_SKY_FAN + SKY_HORIZON_RIGHT].v.ob[AXIS_Y] =
         vertices[SKY_HORIZON_RIGHT].v.ob[AXIS_Y];
 
+    // Each row of texture coordinates lies at a distance along the viewed wind
+    // direction
     sine = sinf(g_SkyState.viewedWindAngles[viewIndex]);
     cosine = cosf(g_SkyState.viewedWindAngles[viewIndex]);
     distance = clippedHeight + SKY_TEXTURE_FAR_DISTANCE;
@@ -2363,14 +2473,18 @@ void UpdateSky(CameraView *view, s32 viewIndex) {
         ((s32)(cosine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
 }
 
+// Sets whether the course's drawing gives its primitives a fixed depth
 void UsePrimitiveDepth(Boolean isPrimitiveDepthSet) {
     f_IsPrimitiveDepthSet = isPrimitiveDepthSet;
 }
 
+// The sky dome is drawn this far in front of the camera
 #define SKY_DOME_DISTANCE (-300.0f)
 #define SKY_NOISE_IMAGE_SIZE 64
 #define SKY_NOISE_MASK 6
 #define SKY_DEPTH 0x7FFB
+// The sun moves SUN_TURN_WIDTH pixels across the screen as the camera turns
+// once
 #define SUN_TURN_WIDTH 1536.0f
 #define SUN_YAW_OFFSET (M_PI / 4)
 #define SUN_HORIZON_Y 112.0f
@@ -2387,10 +2501,15 @@ static u8 f_UnusedBufferAfterSkyMatrix[0x88] UNUSED;
 
 static Mtx f_TileMatrices[MATRIX_BUFFER_COUNT][FRAME_TILE_COUNT];
 
+// Draws the sky dome around the camera and, when the scene has one, the sun.
+// The sun is a textured rectangle placed from the camera's yaw against the
+// light's, and the dome's height above the horizon.
 void DrawSky(Gfx **displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED, s32 cameraIndex) {
     Gfx *gfx = *displayListHead;
     SkyColors *colors;
     Mat4 matrix;
+    // The original frame has room for this; without it 194 words differ, none
+    // in shape
     s32 unused[16] UNUSED;
     Vec3 rotation;
     Vec3 translation;
@@ -2398,6 +2517,8 @@ void DrawSky(Gfx **displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED, s
 
     UpdateSky(&g_Cameras[cameraIndex].view, cameraIndex);
 
+    // Unlike the other lookups of g_SkyColors, this steps by three times, not
+    // SKY_TIME_COUNT, in the rain
     colors = &g_SkyColors[GetCourseRecordIndex()]
                          [(g_HoleSetup.conditions.isRaining * 3) + f_SkyColorTimeIndex];
     translation[AXIS_X] = 0.0f;
@@ -2719,17 +2840,28 @@ void DrawSky(Gfx **displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED, s
     *displayListHead = gfx;
 }
 
+// The course's backdrop image, drawn behind the course in strips from the
+// horizon down
 #define COURSE_BACKDROP_STRIP_COUNT 16
 #define COURSE_BACKDROP_STRIP_HEIGHT 4
 #define BACKDROP_IMAGE_WIDTH 512
 #define BACKDROP_HORIZON_LEVEL 64.0f
 #define STAFF_ROLL_BACKDROP_RISE 32
+// How far the backdrop scrolls as the camera turns once
 #define BACKDROP_YAW_TEXELS 49152.0f
 #define BACKDROP_FIRST_CULLED_ROW (SCREEN_HEIGHT - SCREEN_BORDER + 1)
 #define BACKDROP_ABOVE_SCREEN 32
+// The scissor box's size before the shrink, and its changes per frame of it
 #define FULL_VIEW_WIDTH (SCREEN_WIDTH - (2 * SCREEN_BORDER))
 #define FULL_VIEW_HEIGHT (SCREEN_HEIGHT - (2 * SCREEN_BORDER))
 
+// Draws the sky and, below it, the course's backdrop in strips that follow the
+// camera's yaw and pitch
+//
+// Compute the center shift before the display-list writes, to match their
+// scheduling. Initialize the scaled height, center fraction and viewport
+// height in that order. Folding the center fraction into the expression,
+// or making it const, swaps $f0 and $f2 in 18 instructions.
 void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
     Gfx *gfx;
     Boolean isNibbleImage;
@@ -2750,6 +2882,7 @@ void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
     gfx = *displayListHead;
     {
         f32 scaledHeight = view->zoom * FULL_VIEW_HEIGHT;
+        // Center the backdrop in the height difference between the two views.
         f32 centerFraction = 0.5f;
         f32 viewportHeight = view->viewportCenterY - (view->scissorY * 2);
 
@@ -2796,6 +2929,7 @@ void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
         s32 imageRow;
         s32 bottom;
 
+        // The full screen copies the strips unscaled
         gDPPipeSync(gfx++);
         gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
         gDPPipeSync(gfx++);
@@ -2910,6 +3044,7 @@ void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
                 );
             }
             else {
+                // The last strip stretches to the bottom of the screen
                 gSPTextureRectangle(
                     gfx++,
                     QuarterPixels(SCREEN_BORDER),
@@ -2927,6 +3062,7 @@ void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
         }
     }
     else {
+        // A smaller view scales the strips by its zoom
         inverseZoom = 1.0f / view->zoom;
         texelStepX = inverseZoom * 1024.0f;
         texelStepY = inverseZoom * 2048.0f;
@@ -2954,6 +3090,7 @@ void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
         top = stripY + view->scissorY - centerShift;
         bottom = (f32)stripY + (f_BackdropStripHeight * zoom) + view->scissorY - centerShift;
         for (row = 0;; row++) {
+            // A skipped strip steps on to the next by itself
             if (top < view->scissorY - (f_BackdropStripHeight * view->zoom)) {
                 top = bottom;
                 bottom = bottom + (f_BackdropStripHeight * view->zoom);
@@ -3069,6 +3206,8 @@ void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
     *displayListHead = gfx;
 }
 
+// Starts one of the HUD's animations, which lasts a given number of frames, or
+// stops it with HUD_ANIMATION_NONE
 void StartHudAnimation(HudAnimation animationId) {
     if (animationId == HUD_ANIMATION_NONE) {
         f_IsFrameCapturePending = FALSE;
@@ -3119,11 +3258,15 @@ void DrawFadeAnimation(Gfx **displayListHead);
 void HandleFrameBufferSwap(void) {
 }
 
+// The fading animations draw f_CapturedFrame, which holds the frame inside
+// the border, in strips. Each strip is loaded as a block, and the tiles are
+// set up with the first.
 #define FADE_FRAME_WIDTH (SCREEN_WIDTH - (2 * BACKDROP_BORDER))
 #define FADE_STEP 12
 #define FAST_FADE_STEP 24
 #define NEGATIVE_BRIGHTNESS 127
 #define MOTION_BLUR_ALPHA 95
+// Blends nothing, but forces blending on
 #define RM_FORCED_PASS GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1) | FORCE_BL
 #define RM_FORCED_PASS2 GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
 #define FADE_COUNT_PERIOD 8
@@ -3197,11 +3340,52 @@ void HandleFrameBufferSwap(void) {
         } \
     }
 
+// Draws the HUD animations that show the whole frame: fading it out,
+// drawing it at half brightness, blurring the scene with the last frame, or
+// splitting the frame into halves that slide apart. When a fade ends,
+// the unread f_UnusedFadeEndCount counts up, wrapping at FADE_COUNT_PERIOD.
+//
+// Much of it is written to match. The counts below are of the words that
+// differ with one thing changed, and in brackets how many of those differ in
+// shape:
+//
+// - frame points to the last frame for the motion blur, set just before its
+//   loop or in the loop's header. The combiner folds that load into the
+//   loop's copy of it, but the two references it removes stay counted, so
+//   global-alloc counts frame as used 5 times over 155 instructions and
+//   places it ahead of the strips' 0xE7000000, used 9 times over 444, in
+//   $s3. Reload then needs a register, and takes the saved one whose pseudos
+//   are used least, the lowest of those level: $s3, which leaves frame in a
+//   stack slot. With a pointer of the motion blur's own, or the buffer indexed
+//   itself, frame is used 3 times and gets no register; reload takes $s4
+//   from the strips' 0x04000400, which needs a slot as well, in a frame 8
+//   bytes larger: 134 (18) and 138 (20). frame set at the start of the
+//   motion blur's branch gives 126 (8), set after the primitive color 142
+//   (8), and with the loop indexing the buffer all the same 4 (2).
+// - The strip loops index frame by strip, a count of their own that each
+//   header steps ahead of i, which puts the strip address's step and
+//   setting where the original's are. The second loop indexed by i gives
+//   2 (2), stepping i first 101 (31), counted by strip alone 60 (2), and
+//   stepping a pointer of its own 115 (29); its height from strip gives
+//   43 (5), and its rows 191 (49). The last loop stepping i first gives
+//   2 (0), indexed by i less the border 88 (28), stepping frame 151 (21),
+//   and with a row variable in place of i 46 (0). The motion blur's loop
+//   indexed by strip as well gives 2 (2).
+// - The second loop reads f_HudAnimationFramesLeft once, after loading the
+//   strip. Read at each of its three uses it gives 104 (30), and read at
+//   the start of the body 38 (24).
+// - Each loop declares its own height, an s32. One height for the three
+//   gives 130 (12); an s16 gives 4 (2) in the motion blur's loop, 98 (30)
+//   in the second and 54 (4) in the last, and the last loop's strip bottom
+//   in a local 55 (5).
 void DrawFadeAnimation(Gfx **displayListHead) {
+    // The frame drawn: the captured one, or the last one for the motion blur
     u16 *frame = (u16 *)f_CapturedFrame;
     Gfx *gfx = *displayListHead;
     Boolean isTileSet;
+    // The strip, or in the last loop its top row
     s32 i;
+    // The strip of the captured frame, stepped beside i to match
     s32 strip;
 
     if (f_HudAnimationFramesLeft > 0) {
@@ -3282,6 +3466,8 @@ void DrawFadeAnimation(Gfx **displayListHead) {
             }
             else if ((f_HudAnimation == HUD_ANIMATION_SLIDE_APART) ||
                 (f_HudAnimation == HUD_ANIMATION_SPIRAL)) {
+                // DrawHudAnimation draws HUD_ANIMATION_SPIRAL with DrawSpiralAnimation
+                // instead
                 gDPPipeSync(gfx++);
                 gDPSetRenderMode(gfx++, RM_FORCED_PASS, RM_FORCED_PASS2);
                 gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
@@ -3325,7 +3511,6 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                         TEXEL_STEP_ONE
                     );
                     gDPPipeSync(gfx++);
-
                     strip++;
                 }
 
@@ -3339,6 +3524,7 @@ void DrawFadeAnimation(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         strip = 0;
         for (i = BACKDROP_BORDER; i < SCREEN_HEIGHT - BACKDROP_BORDER; i += BACKDROP_STRIP_STEP) {
+            // Written with | for the reason StripHeight is
             s32 height = BACKDROP_LAST_STRIP_HEIGHT |
                 ((i + BACKDROP_STRIP_STEP <= SCREEN_HEIGHT - BACKDROP_BORDER) ?
                         (BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT) :
@@ -3362,7 +3548,6 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
-
             strip++;
         }
 
@@ -3381,6 +3566,10 @@ void DrawFadeAnimation(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Draws HUD_ANIMATION_SPIRAL, where the frame is cut into a grid of tiles. It
+// draws the tiles along a spiral from the top left corner inwards, and draws
+// fewer of them each frame, so the frame disappears from the center out. The
+// few tiles after the opaque ones fade, more the further in they are.
 void DrawSpiralAnimation(Gfx **displayListHead) {
     s32 tileColumn;
     s32 rightColumn;
@@ -3395,6 +3584,8 @@ void DrawSpiralAnimation(Gfx **displayListHead) {
     s32 tileIndex;
     s32 alpha;
 
+    // Steps to the next tile of the spiral, turning at each edge and moving the
+    // edge in
     void StepSpiral(void) {
         switch (direction) {
             case SPIRAL_RIGHT:
@@ -3573,6 +3764,8 @@ void DrawSpiralAnimation(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Shows a menu's backdrop in place of the course, or MENU_BACKDROP_NONE to show
+// the course again
 void SetMenuBackdrop(MenuBackdrop backdrop) {
     if (backdrop == MENU_BACKDROP_NONE) {
         g_MenuBackdropState = MENU_BACKDROP_STATE_NONE;
@@ -3589,6 +3782,7 @@ void SetMenuBackdrop(MenuBackdrop backdrop) {
     f_MenuBackdrop = backdrop;
 }
 
+// Starts the plain menu backdrop by capturing the last frame for it
 void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused UNUSED) {
     Gfx *gfx = *displayListHead;
     s32 strip;
@@ -3677,12 +3871,17 @@ void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused UNUSED) {
     *displayListHead = gfx;
 }
 
+// MENU_BACKDROP_TINTED's color
 #define BACKDROP_TINT_RED 144
 #define BACKDROP_TINT_GREEN 104
 #define BACKDROP_TINT_BLUE 32
+// MENU_BACKDROP_PATTERN's image, which scrolls diagonally by a texel a frame
 #define BACKDROP_PATTERN_SIZE 64
+// log2(BACKDROP_PATTERN_SIZE)
 #define BACKDROP_PATTERN_MASK 6
 
+// Draws the menu backdrop that SetMenuBackdrop chose, inside the backdrop's
+// border.
 void DrawMenuBackdrop(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 strip;
@@ -3842,6 +4041,7 @@ void DrawMenuBackdrop(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Draws HUD_ANIMATION_TILES, where the frame's tiles turn over and fly apart
 void DrawTileAnimation(void) {
     Vec3 rotation;
     Vec3 translation;
@@ -3942,11 +4142,22 @@ void DrawTileAnimation(void) {
     }
 }
 
+// HUD_ANIMATION_TURN_AWAY turns the whole frame away about two axes as it
+// moves away from the camera. The frame's tiles are drawn on the tile grid,
+// the upper rows from one load of its vertices and the rest from another;
+// only the upper rows have a back, drawn in their shade.
 #define TURN_AWAY_UPPER_ROW_COUNT 4
 #define TURN_AWAY_LOWER_ROW_COUNT (FRAME_TILE_ROW_COUNT - TURN_AWAY_UPPER_ROW_COUNT)
+// The last column's texture coordinates span this many texels
 #define LAST_TILE_TEXEL_WIDTH 47
+// The lower rows' texture coordinates stop a quarter texel short, in 10.5 fixed
+// point
 #define LOWER_TILE_TEXTURE_COORDINATE_INSET 8
+// The index of the tile grid vertex at a row and column
 #define GridVertex(row, column) ((column) + ((row) * TILE_GRID_COLUMN_COUNT))
+// The grid vertices at the corners of the tile at a row and column. The lower
+// ones are counted on from the upper left in the grid's row order, a row's
+// vertices further on, and not as the next row's, to match.
 #define TileUpperLeft(row, column) GridVertex(row, column)
 #define TileUpperRight(row, column) GridVertex(row, (column) + 1)
 #define TileLowerLeft(row, column) GridVertex(row, (column) + TILE_GRID_COLUMN_COUNT)
@@ -3955,6 +4166,71 @@ static Mtx f_TurnAwayMatrices[MATRIX_BUFFER_COUNT];
 
 void DrawTurnAwayAnimation(void);
 
+// Draws HUD_ANIMATION_TURN_AWAY.
+//
+// All four of a tile's corners are named from the tile's own row, the lower
+// ones a row's vertices further on in the column, so that the row's product
+// with the grid's column count is one value they share. Where it draws the
+// textured tiles the original keeps that product and the upper right's sum of
+// it and 1 in registers stepped once a row, $s3 and $s5 for the upper rows, and
+// adds the lower corners' 6 and 7 to the product inside the column loop. loop.c
+// moves the product out of the column loop for its long life, and the upper
+// right's sum with it as the product's last use; the lower corners' sums each
+// last one instruction, too short a life for it to move them out of so long a
+// loop. The backs' loop is short and all four are moved out of it.
+//
+// Named as the next row's, the lower corners have a product of their own, which
+// is moved out of the column loops as well. With each row's first vertex in a
+// local set outside the column loop, the upper right's sum stays in the loop
+// with the others.
+//
+// Measured against the match, as words differing and how many of them in shape:
+//   The lower corners as the next row's, GridVertex(row + 1,
+//   ...), in all three loops                                  158 (36)
+//   The same in the upper rows' textured loop alone           102 (20)
+//   The same in the backs' loop alone                         8 (2)
+//   The same in the lower rows' loop alone                    48 (14)
+//   The lower left alone as the next row's, in the upper
+//   rows' textured loop                                       20 (8)
+//   The same in the lower rows' loop                          19 (11)
+//   The lower right alone as the next row's, in the upper
+//   rows' textured loop                                       50 (14)
+//   The same in the backs' loop                               8 (2)
+//   The same in the lower rows' loop                          37 (9)
+//   Each row's first vertex in a local and the corners added
+//   to it, in both textured loops                             51 (17)
+//   The same in all three loops                               125 (21)
+//   The same in the upper rows' textured loop alone           77 (15)
+//   The same in the lower rows' loop alone                    50 (12)
+//   The same in both textured loops, with the vertex after it
+//   in a second local                                         22 (10)
+//   The old draft: the first vertex in a local, the lower
+//   corners as the next row's and the upper rows' lower right
+//   in a local                                                45 (11)
+//   GridVertex as an inline function                          213 (53)
+//   GridVertex with the row's product first                   24 (0)
+//   The upper right as the upper left plus 1                  99 (21)
+//   The lower right as the lower left plus 1                  111 (11)
+//   The lower left as the upper left plus a row's vertices    121 (21)
+//   The tile's width set first and overridden for the last
+//   column, in both textured loops                            34 (6)
+//   The same in the upper rows' loop alone                    24 (4)
+//   The same in the lower rows' loop alone                    10 (2)
+//   The row loops' tests as <                                 11 (11)
+//   The column loops' tests as <                              20 (12)
+//   The lower right in a local, in both textured loops        14 (4)
+//   The same in either loop alone                             6 (2)
+//   The lower left in a local, in both textured loops         14 (4)
+//   The same in either loop alone                             4 (2)
+//   The upper right in a local, in both textured loops        38 (4)
+//   The same in the upper rows' loop alone                    28 (2)
+//   The same in the lower rows' loop alone                    10 (2)
+//   The upper left in a local, in both textured loops         72 (0)
+//
+// Also matching: the backs' lower left as the next row's; the lower right's
+// offset written as 1 plus a row's vertices; the tile's width chosen by a
+// conditional operator; and the upper left in a local in either one of the
+// textured loops.
 void DrawTurnAwayAnimation(void) {
     Vec3 rotation;
     Vec3 translation;
@@ -4169,10 +4445,51 @@ void DrawTurnAwayAnimation(void) {
     }
 }
 
+// Copies the frame that a HUD animation that has just started breaks apart
+//
+// Much of it is written to match. The counts below are of the words that
+// differ with one thing changed, and in brackets how many of those differ in
+// shape:
+//
+// - i and j each count loops in several branches. global-alloc ranks a
+//   register by its references over its life, summed over every loop that
+//   uses it, and of two that rank level places the lower-numbered first. j,
+//   with 43 references over 86 instructions, ranks level with the tile
+//   copy's row offset, 15 over 18, and so is placed ahead of it and takes
+//   $a1 in every loop. With counters of their own the slice copy's words
+//   give 12, the grid's columns 64 and the tiles' columns 96; the slice
+//   copy's words counted with i give 24. The fade and negative copies'
+//   words with counters of their own give 60 (either alone 46), with j 112,
+//   and with the tile copy's wordIndex 90 (2). The tiles' rows with a
+//   counter of their own give 52; the grid's rows match with one too.
+// - The slice copy sets its row before j. Set first, j lives one instruction
+//   longer, ranks below the tile copy's row offset and takes $a2: 54 (2).
+// - The fade, negative and slice copies step the word's counter in the
+//   loop's header, after the column. Stepped ahead of the column, or where
+//   the word is stored, the fade and negative copies give 4 and the slice
+//   copy 16. The tile copy's is stepped where the word is stored; in the
+//   header after the column it gives 2.
+// - The tile copy adds the tile's start to the row and column last. Added
+//   to the column first it gives 4, and added first or second 99 (1).
+//   Worked out in the index, with no tileStart, it gives 95 (13) and a
+//   frame of 8 bytes where the original has none.
+// - Each of the grid's stores works its x out from the column and its y
+//   from the row. An x stepped in the loops' headers gives 4 (2) stepped
+//   first, 12 (4) after the column and 24 (12) last; a y set once a row
+//   gives 21 (3).
+// - The grid's vertex pointers step in the loops' headers, after the
+//   column: at the end of the body, or ahead of the column, 48 (12).
+// - The last column is a loop of one pass whose x is worked out from the
+//   column like the others', as the original adds the spacing to it: with
+//   TILE_GRID_RIGHT stored, 43 (5), and without the loop 116 (18).
+// - Each vertex's coordinates are stored in turn: the two x's, the y's and
+//   the z's in pairs give 6 (6).
 void CaptureHudAnimationFrame(void) {
     u32 *frame;
     s32 tileStart;
+    // Counts the tiles' and the grid's rows, and the fade and negative copies' words
     s32 tileRow;
+    // Counts the tiles' and the grid's columns, and the slice copy's words
     s32 tileColumn;
     s32 row;
     s32 column;
@@ -4190,6 +4507,7 @@ void CaptureHudAnimationFrame(void) {
 
         for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
             for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT; tileColumn++) {
+                // The word the tile's rows count from
                 tileStart = (tileRow * FRAME_TILE_ROWS * FRAME_WORDS_PER_ROW) +
                     (tileColumn * FRAME_TILE_WORDS);
                 for (row = FRAME_MARGIN_ROWS; row != FRAME_MARGIN_ROWS + FRAME_TILE_ROWS; row++) {
@@ -4216,6 +4534,7 @@ void CaptureHudAnimationFrame(void) {
                 nextVertex->v.ob[AXIS_Z] = 0;
             }
 
+            // The last column is narrower, ending inside the HUD's margin
             for (tileColumn = TILE_GRID_COLUMN_COUNT - 1; tileColumn != TILE_GRID_COLUMN_COUNT;
                 tileColumn++, vertex++, nextVertex++) {
                 vertex->v.ob[AXIS_X] = TileGridLastColumnX(tileColumn);
@@ -4267,6 +4586,24 @@ void CaptureHudAnimationFrame(void) {
     f_HudAnimationFrame = 1;
 }
 
+// Draws the slice animation from the captured frame, a strip at a time; each
+// strip syncs before its rectangle and after it, as the original's twelve
+// commands a strip show.
+//
+// The column's left edge is worked out once per slice, and the strip's right
+// edge, in quarter pixels, at each strip's start, as the original computes
+// both edges' rectangle words before the strip loop; with the right edge
+// worked out in the rectangle 132 words differ, with it in pixels 90, and
+// with the left edge set at each strip 97. Each strip's top is worked out
+// from the strip index, as the original copies the slice's top into a
+// register only after the column's edges.
+//
+// The slice's top is the slice row times SLICE_HEIGHT, worked out once per
+// slice: loop's strength reduction then gives the top a register of its
+// own, cleared after the slices' loop tests the slice count, among the strip
+// commands' hoisted constants, as the original's is. Keeping a running top
+// that steps by SLICE_HEIGHT gives 5 words (3 in shape), clearing it before
+// that test, and multiplying the row out in each strip's top 96.
 void DrawSliceAnimation(void) {
     s32 frame;
     s32 sliceCount;
@@ -4347,6 +4684,7 @@ void DrawSliceAnimation(void) {
     f_HudAnimationFramesLeft--;
 }
 
+// Draws the animation that StartHudAnimation started over the frame
 void DrawHudAnimation(void) {
     CaptureHudAnimationFrame();
     gDPPipeSync(g_DisplayListHead++);
@@ -4376,6 +4714,7 @@ void DrawHudAnimation(void) {
     f_LastFrameBuffer = nuGfxCfb_ptr;
 }
 
+// Lets the HUD draw over the whole screen again
 void ResetHudScissor(void) {
     g_HudScissor.left = 0;
     g_HudScissor.right = SCREEN_WIDTH;
@@ -4392,6 +4731,7 @@ void ResetHudScissor(void) {
     );
 }
 
+// Whether the animation that StartHudAnimation started has finished
 Boolean IsHudAnimationDone(void) {
     return f_HudAnimationFramesLeft <= 0;
 }

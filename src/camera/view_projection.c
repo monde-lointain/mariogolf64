@@ -1,3 +1,10 @@
+/*
+ * A copy of the camera's projection and viewing matrices kept on the CPU, so
+ * the game can work out where points land on the screen without asking the RSP.
+ * The file also builds and multiplies matrices and converts them to the RSP's
+ * fixed point.
+ */
+
 #include "camera/view_projection.h"
 
 #include <ultra64.h>
@@ -7,15 +14,19 @@
 #include "screen/screen.h"
 #include "system/compiler.h"
 
+// The screen depth of the far plane over two, in a viewport's depth units
 #define SCREEN_DEPTH_SCALE 16352.0f
+// Screen coordinates are clamped to this either side of the center
 #define SCREEN_COORDINATE_LIMIT 0x400
 
 static Mat4 f_CpuProjectionMatrix;
 static Mat4 f_CpuViewingMatrix;
+// What a unit at a view depth of one spans on the screen
 static f32 f_CpuScreenScaleX;
 static f32 f_CpuScreenScaleY;
 static s32 f_CpuViewportCenterX;
 static s32 f_CpuViewportCenterY;
+// The viewport's size over the screen's
 static f32 f_CpuViewportWidthRatio;
 static f32 f_CpuViewportHeightRatio;
 static u8 f_UnusedBufferAfterViewportRatio[0x80] UNUSED;
@@ -106,6 +117,8 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp *viewport) {
         f_CpuScreenScaleY = -1.0f;
     }
     else {
+        // Overwritten at once; the stores are kept to match, as the original
+        // makes them: without them 68 words differ, 20 in shape
         f_CpuScreenScaleX = -f_CpuViewportCenterX * f_CpuProjectionMatrix[0][0];
         f_CpuScreenScaleY = f_CpuViewportCenterY * f_CpuProjectionMatrix[1][1];
         f_CpuScreenScaleX =
@@ -115,15 +128,24 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp *viewport) {
     }
 }
 
+// Returns SPHERE_BEHIND_CAMERA if the sphere is not in front of the camera,
+// SPHERE_PAST_SIDE if it is off the left or right of the screen,
+// SPHERE_PAST_TOP_OR_BOTTOM if it is off the top or bottom, or else its view
+// depth, which is negative. The side of the sphere nearest the screen's
+// center is the one tested against each edge.
 s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
     f32 depth;
     f32 viewX;
     f32 viewY;
     f32 perspective;
+    // The screen offset of the side tested; testing the offsets directly gives
+    // 32 words differing, none in shape
     f32 screenEdge;
 
     depth = (f_CpuViewingMatrix[0][2] * x) + (f_CpuViewingMatrix[1][2] * y) +
         (f_CpuViewingMatrix[2][2] * z) + f_CpuViewingMatrix[3][2];
+    // The depth of the sphere's nearest point, taken apart to match: in one
+    // expression, 18 words differ, none in shape
     depth -= radius;
     if ((s32)depth >= 0) {
         return SPHERE_BEHIND_CAMERA;
@@ -153,6 +175,7 @@ s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
         }
     }
 
+    // The screen's y runs down, opposite the view's
     viewY = (f_CpuViewingMatrix[0][1] * x) + (f_CpuViewingMatrix[1][1] * y) +
         (f_CpuViewingMatrix[2][1] * z) + f_CpuViewingMatrix[3][1];
     if (viewY > 0.0f) {
@@ -178,6 +201,9 @@ s32 GetViewDepth(f32 x, f32 y, f32 z) {
         (f_CpuViewingMatrix[2][2] * z) + f_CpuViewingMatrix[3][2];
 }
 
+// Projects a point onto the screen, filling in its position, scale and depth.
+// Returns the view depth, which is negative when the point is in front of the
+// camera.
 s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint *point) {
     f32 viewX;
     f32 viewY;
@@ -231,6 +257,9 @@ s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint *point) {
     return viewZ;
 }
 
+// Like ProjectPoint, without the screen depth. The viewing matrix's [1][0]
+// is left out of x, unlike in y. The depth is also assigned to viewY, which
+// the matching code needs: without it, GCC allocates other registers.
 s32 ProjectPointToScreen(f32 x, f32 y, f32 z, ScreenPoint *point) {
     f32 depth;
     f32 viewX;
@@ -271,6 +300,7 @@ s32 ProjectPointToScreen(f32 x, f32 y, f32 z, ScreenPoint *point) {
     return depth;
 }
 
+// Like BuildTransformMatrix, without a scale
 void BuildRotationMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation) {
     f32 sinX = sinf(rotation[AXIS_X]);
     f32 cosX = cosf(rotation[AXIS_X]);
@@ -335,6 +365,7 @@ void MultiplyMatrices(Mat4 a, Mat4 b, Mat4 product) {
     }
 }
 
+// Mtx keeps the integer halves of all sixteen elements before the fractions
 void ConvertMatrixToFixed(Mat4 matrix, Mtx *fixedMatrix) {
     s32 *integerPart = (s32 *)fixedMatrix;
     s32 *fractionPart = integerPart + 8;
@@ -353,6 +384,7 @@ void ConvertMatrixToFixed(Mat4 matrix, Mtx *fixedMatrix) {
     }
 }
 
+// No code calls this
 void SetTriangleNormal(
     Vtx *vertices,
     s32 firstIndex,
@@ -364,6 +396,8 @@ void SetTriangleNormal(
     Vtx_tn *second = (Vtx_tn *)((secondIndex * sizeof(Vtx)) + (u32)vertices);
     Vtx_tn *third = (Vtx_tn *)((thirdIndex * sizeof(Vtx)) + (u32)vertices);
     s32 firstEdgeX = second->ob[AXIS_X] - first->ob[AXIS_X];
+    // Written to read first's coordinate first, to match: second's y less
+    // first's gives 18 words differing, none in shape
     s32 firstEdgeY = -first->ob[AXIS_Y] + second->ob[AXIS_Y];
     s32 firstEdgeZ = second->ob[AXIS_Z] - first->ob[AXIS_Z];
     s32 secondEdgeX = third->ob[AXIS_X] - second->ob[AXIS_X];

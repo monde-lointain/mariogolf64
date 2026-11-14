@@ -1,3 +1,8 @@
+/*
+ * The computer golfer, which plans its shot on a thread of its own by trying
+ * shots in the ball simulation.
+ */
+
 #include "round/computer_golfer.h"
 
 #include <math.h>
@@ -31,17 +36,20 @@
 
 enum PlanThreadState {
     PLAN_THREAD_RUNNING,
+
+    // The shot planning thread's states, in f_PlanThreadState
     PLAN_THREAD_COLLECTED,
     PLAN_THREAD_DONE
 };
 
 typedef s32 PlanThreadState;
-
 #define PLAN_THREAD_ID 11
 #define PLAN_THREAD_PRIORITY 20
 #define PLAN_THREAD_STACK_SIZE 0x6000
+// PlanShot's result while it has more to do
 #define PLAN_UNFINISHED (-1)
 
+// ChooseShotOffset's results, indices into f_ShotOffsets
 #define SHOT_OFFSET_NONE 0
 #define SHOT_OFFSET_PLUS_SMALL 1
 #define SHOT_OFFSET_PLUS_MEDIUM 2
@@ -50,17 +58,22 @@ typedef s32 PlanThreadState;
 #define SHOT_OFFSET_MINUS_MEDIUM 5
 #define SHOT_OFFSET_MINUS_LARGE 6
 #define SHOT_OFFSET_COUNT 8
+// The evaluation of a lost ball, and the one that the best starts at
 #define LOST_BALL_EVALUATION 0x10000000
 #define SORT_DESCENDING 1
+// How far below the paths the ground test starts
 #define PATH_GROUND_CLEARANCE 0x600
+// FindGreenEdgeOnLine's results
 #define GREEN_EDGE_FOUND 1
 
+// GolferTraits.strongNine values
 enum StrongNine {
     STRONG_NINE_NEITHER,
-    STRONG_NINE_FRONT,
-    STRONG_NINE_BACK
+    STRONG_NINE_FRONT, // Strokes move from the front nine to the back
+    STRONG_NINE_BACK // Strokes move from the back nine to the front
 };
 
+// GolferTraits.consistency values
 enum Consistency {
     CONSISTENCY_LOW,
     CONSISTENCY_MIDDLE,
@@ -68,10 +81,12 @@ enum Consistency {
     CONSISTENCY_COUNT
 };
 
+// GolferTraits.windPlay values
 enum WindPlay {
-    WIND_PLAY_HEAD_WINDS,
+    WIND_PLAY_HEAD_WINDS, // Offsets shots for head winds
+    // Offsets shots for the strongest winds either way
     WIND_PLAY_STRONG_WINDS,
-    WIND_PLAY_FOLLOWING_WINDS
+    WIND_PLAY_FOLLOWING_WINDS // Offsets shots for following winds
 };
 
 typedef s32 StrongNine;
@@ -81,27 +96,32 @@ typedef s8 Consistency8;
 typedef s32 WindPlay;
 typedef s8 WindPlay8;
 
+// How a character plays when the computer controls it
 typedef struct GolferTraits {
-    StrongNine8 strongNine;
-    Consistency8 consistency;
-    s8 clubBoldness;
-    s8 ignoredBoldnessValue;
-    s8 ignoredTraitLevel;
-    WindPlay8 windPlay;
-    s8 powerShotEagerness;
-    s8 courseTargetOffsets[COURSE_COUNT];
-    s8 baseTargetScore;
+    StrongNine8 strongNine; // STRONG_NINE_*
+    Consistency8 consistency; // CONSISTENCY_*: steadier golfers mishit less
+    s8 clubBoldness; // BOLD_CLUB_CHOICE or less
+    s8 ignoredBoldnessValue; // 6, or 12 when clubBoldness is above 0; nothing reads it
+    s8 ignoredTraitLevel; // 0 to 2; nothing reads it
+    WindPlay8 windPlay; // WIND_PLAY_*: which winds the golfer offsets shots for
+    s8 powerShotEagerness; // 0 to 2; only nonzero is tested
+    s8 courseTargetOffsets[COURSE_COUNT]; // Added to baseTargetScore on each course
+    s8 baseTargetScore; // Its target score to par before the course's offset
 } GolferTraits;
 
+// The GolferTraits.clubBoldness of a golfer who chooses clubs regardless of poor lies, swings
+// harder at planned shots and takes power shots readily
 #define BOLD_CLUB_CHOICE 2
 
+// The spin-like launch values that each SHOT_OFFSET_* gives a shot
 typedef struct ShotOffset {
-    s8 offsetX;
-    s8 offsetY;
+    s8 offsetX; // Becomes f_Shot.offsetX
+    s8 offsetY; // Becomes f_Shot.offsetY
 } ShotOffset;
 
 #define APPROACH_BAND_COUNT 4
 
+// The rows of f_ClubKindChances
 enum ClubChanceSet {
     CLUB_CHANCE_SET_FOLLOWING_WIND,
     CLUB_CHANCE_SET_HEAD_WIND,
@@ -110,6 +130,7 @@ enum ClubChanceSet {
 
 typedef s32 ClubChanceSet;
 
+// Woods, irons and the other clubs
 enum ClubChanceCategory {
     CLUB_CHANCE_WOOD,
     CLUB_CHANCE_IRON,
@@ -119,14 +140,18 @@ enum ClubChanceCategory {
 
 typedef s32 ClubChanceCategory;
 
+// A club's name in the table that no routine reads
 typedef struct ClubName {
     char name[4];
     ClubType clubType;
 } ClubName;
 
+// The directions from the ball, in BINARY_ANGLE_TURN / DIRECTION_SECTOR_COUNT
+// sectors
 #define DIRECTION_SECTOR_COUNT 256
 #define DIRECTION_SECTOR_SHIFT 8
 
+// The route points and the tee, as PlanRoute gathers them
 typedef struct RouteCoordinates {
     s32 x[ROUTE_POINT_COUNT + 1];
     s32 z[ROUTE_POINT_COUNT + 1];
@@ -137,31 +162,50 @@ enum PlanStage {
     PLAN_STAGE_STARTED,
     PLAN_STAGE_TARGET_CHOSEN,
     PLAN_STAGE_TRIAL_TAKEN,
-    PLAN_STAGE_UNUSED,
+    PLAN_STAGE_UNUSED, // Never set; IsTrialStage counts it
     PLAN_STAGE_LEVEL_DONE,
     PLAN_STAGE_TRIAL_RUNNING
 };
 
 typedef s8 PlanStage;
 
+// The traits of each character, in CHARACTER_* order
 static GolferTraits f_GolferTraits[CHARACTER_COUNT] = {
+    // Plum
     {0, 0, 0, 6, 0, WIND_PLAY_STRONG_WINDS, 0, {0, 2, 2, 2, 2, 2}, 10},
+    // Charlie
     {2, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 2, 2, 2, 2, 2}, 8},
+    // Maple
     {0, 0, 0, 6, 0, WIND_PLAY_STRONG_WINDS, 0, {-2, 0, 0, 2, 0, 2}, -3},
+    // Baby Mario
     {1, 1, 1, 12, 1, WIND_PLAY_FOLLOWING_WINDS, 1, {0, 2, 2, 2, 2, 2}, 4},
+    // Luigi
     {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 2, 2, 2, 2, 2}, 2},
+    // Peach
     {0, 0, 0, 6, 1, WIND_PLAY_STRONG_WINDS, 1, {0, 2, 2, 2, 2, 2}, 6},
+    // Sonny
     {2, 2, 2, 12, 2, WIND_PLAY_FOLLOWING_WINDS, 2, {0, 0, 0, 2, 2, 2}, -2},
+    // Wario
     {1, 1, 2, 12, 0, WIND_PLAY_STRONG_WINDS, 2, {-2, 0, 0, 0, 0, 2}, -4},
+    // Harry
     {2, 2, 1, 12, 1, WIND_PLAY_FOLLOWING_WINDS, 1, {-2, -2, 0, 2, 0, 0}, -6},
+    // Mario
     {0, 1, 0, 6, 2, WIND_PLAY_STRONG_WINDS, 1, {-2, -2, -2, 0, 2, 0}, -9},
+    // Yoshi
     {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 2, -2, 2, 2}, 0},
+    // Donkey Kong
     {0, 0, 1, 12, 1, WIND_PLAY_HEAD_WINDS, 2, {-2, -2, 0, 2, 2, 0}, -11},
+    // Bowser
     {0, 2, 2, 12, 2, WIND_PLAY_FOLLOWING_WINDS, 2, {-2, 2, -2, 2, -2, 0}, -12},
+    // Metal Mario
     {0, 2, 2, 12, 2, WIND_PLAY_FOLLOWING_WINDS, 2, {-2, -2, -2, 2, -2, 0}, -16},
+    // Kid
     {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 0, 0, 0, 0}, 0},
+    // Sherry
     {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 0, 0, 0, 0}, 0},
+    // Azalea
     {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 0, 0, 0, 0}, 0},
+    // Joe
     {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 0, 0, 0, 0}, 0},
 };
 static s8 f_ClubCategoryChances[CLUB_CHANCE_SET_COUNT][CLUB_CHANCE_CATEGORY_COUNT] = {
@@ -180,14 +224,20 @@ static ShotOffset f_ShotOffsets[SHOT_OFFSET_COUNT] = {
 };
 static PlanThreadState f_PlanThreadState = PLAN_THREAD_RUNNING;
 static u32 f_UnusedWordAfterThreadState UNUSED = 0xD24CC5E5;
+// Whether there is a best evaluation yet
 static Boolean f_HasBestEvaluation = FALSE;
+// The upper limits of each approach band, as shares of the cup distance that
+// lie short of the green, for each value of the golfer's consistency
 static f32 f_ApproachBandLimits[APPROACH_BAND_COUNT][CONSISTENCY_COUNT] = {
     {0.2f, 0.15f, 0.1f},
     {0.25f, 0.25f, 0.25f},
     {0.4f, 0.45f, 0.35f},
     {0.6f, 0.7f, 0.5f},
 };
+// Whether the trial ball, falling before its first bounce, hit the ground or a
+// billboard, on a later trial level with no evaluation kept yet
 static Boolean f_HasFirstFallHit = FALSE;
+// Read by no routine. The 2W and AW share the 3W's and SW's types.
 static ClubName f_UnusedPlanClubNames[] UNUSED = {
     {"1W", CLUB_TYPE_DRIVER},
     {"3W", CLUB_TYPE_THREE_WOOD},
@@ -222,59 +272,92 @@ s32 ChooseHoleStrokeTarget(void);
 
 static OSThread f_PlanThread;
 static CurrentShot f_PlannedShot;
+// The direction sectors in which no target is chosen
 static Boolean8 f_IsDirectionExcluded[DIRECTION_SECTOR_COUNT];
 static u8 f_UnusedBytesAfterExcludedSectors[8] UNUSED;
 static ShotLaunch *f_TrialLaunch;
 static ShotLaunch f_TrialLaunchValues;
+// The best evaluation so far
 static s32 f_BestEvaluation;
 static s32 f_AimChangeCount;
 static u8 f_PlanThreadStack[PLAN_THREAD_STACK_SIZE];
 static u8 f_UnusedBufferAfterPlanStack[8192] UNUSED;
+// f_HoleStrokeTarget less the hole's par
 static s32 f_HoleTargetToPar;
+// The strokes the golfer aims to take on the hole
 static s32 f_HoleStrokeTarget;
+// Whether f_TrialShot holds a copy of f_Shot yet
 static Boolean f_HasTrialShot;
+// Where the planned shot aims
 static CoursePoint f_PlanTarget;
+// PlanShot clears these, and nothing in the overlay reads them
 static s32 f_UnusedPlanStartValue;
+// The route points nearest the cup first, as PlanRoute orders them
 static s8 f_RouteOrder[ROUTE_POINT_COUNT];
 static u8 f_UnusedBytesAfterRouteOrder[4] UNUSED;
+// Whether the trial's club is one for the green
 static Boolean f_IsPutting;
+// How much worse than ideal an evaluation may be for the trial to be taken
 static s32 f_AcceptableEvaluation;
+// How many times PlanShot has changed the club or carry
 static s32 f_TrialLevel;
 static s32 f_RouteOrderCount;
 static CoursePoint f_LandingPosition;
 static RouteCoordinates f_Route;
+// Where the shot to try starts, as PlanShot sets it up
 static CurrentShot f_TrialShot;
 static Boolean8 f_IsClubUsable[CLUB_SLOT_COUNT];
+// Whether the flying trial ball has come down on the ground yet, and where it
+// first did
 static Boolean f_HasLanded;
+// The carry that the landing target is chosen for, and what the club's carry is
+// scaled by for it
 static s32 f_TargetCarry;
+// The size of the golfer's club set
 static s32 f_ClubCount;
+// The count of trials to take at the level
 static s32 f_LevelTrialCount;
+// The SHOT_OFFSET_* that PlanShot chose for the shot
 static s32 f_ShotOffset;
 static s32 f_TrialStepCount;
+// Set when the trial is good enough to take
 static Boolean f_IsTrialAccepted;
 static BallSimulation f_TrialSimulation;
+// Whether the trial ended out of bounds, off the course or in water
 static Boolean f_IsTrialLost;
+// Set when the level needs a new landing target
 static Boolean f_NeedsNewTarget;
+// The nearest that a putt has come to the target
 static s32 f_ClosestTargetDistance;
 static u8 f_UnusedBytesAfterClosestDistance[4] UNUSED;
 static f32 f_CarryScale;
+// The count of trials at this level
 static s32 f_TrialIndex;
+// Set when the trial asks PlanShot for a longer or a shorter club
 static Boolean f_NeedsLongerClub;
+// The trial's evaluation; lower is better
 static s32 f_TrialEvaluation;
 static u8 f_UnusedBytesAfterTrialEvaluation[4] UNUSED;
+// Where the trial's ball rests, or for a putt where it passes nearest the
+// target
 static CoursePoint f_TrialEndPoint;
+// PlanShot clears it too, and nothing in the overlay reads it
 static s8 f_OtherUnusedPlanStartValue;
+// The count of trials that ended with the ball lost
 static s32 f_LostTrialCount;
+// How far PlanShot has got with the shot
 static PlanStage f_PlanStage;
 static Boolean f_NeedsShorterClub;
 static u8 f_UnusedBytesAfterNeedsShorterClub[8] UNUSED;
 static CurrentShot f_Shot;
+// The traits of the golfer whose shot is planned
 #define ShotGolferTraits() (f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex])
 
 void RestartShotPlan(void) {
     f_PlanStage = PLAN_STAGE_UNSTARTED;
 }
 
+// Starts planning the shot that sets g_CurrentShot up, on its own thread
 void StartShotPlan(void) {
     void RunShotPlan(void *arg);
 
@@ -291,19 +374,21 @@ void StartShotPlan(void) {
     osStartThread(&f_PlanThread);
 }
 
+// The planning thread, which waits to be destroyed once the plan is made
 void RunShotPlan(void *arg UNUSED) {
     s32 planResult;
-
     do {
         planResult = PlanShot(&f_PlannedShot);
     }
-    while (planResult == PLAN_UNFINISHED);
 
+    while (planResult == PLAN_UNFINISHED);
     f_PlanThreadState = PLAN_THREAD_DONE;
     while (TRUE) {
     }
 }
 
+// Copies the planned shot to shot. It returns -1 while the plan is unfinished,
+// and 0 once it is made, when it ends the planning thread.
 s32 GetPlannedShot(CurrentShot *shot) {
     if (f_PlanThreadState != PLAN_THREAD_RUNNING) {
         *shot = f_PlannedShot;
@@ -326,12 +411,17 @@ Boolean IsStrokeLimitReached(void) {
     return g_Players[f_Shot.playerIndex].strokeCount >= g_HoleSetup.par + f_HoleTargetToPar - 1;
 }
 
+// Course units, of which there are 1024 to a world unit
 #define SIDE_SLOPE_DISTANCE_MIN 15360.0f
 #define SIDE_SLOPE_SAMPLE_SPACING 7680.0f
 #define SIDE_SLOPE_SAMPLE_REACH 1536.0f
 #define SIDE_SLOPE_STEP 64
 #define SIDE_SLOPE_LIMIT 512
 
+// Returns how the ground slopes across the line from the ball to the cup: the
+// count of points along the line where the ground is lower toward (-z, x) of
+// the line than the other way, less the count where it is higher, times
+// SIDE_SLOPE_STEP. It returns 0 for a cup within SIDE_SLOPE_MIN_DISTANCE.
 s32 GetSideSlope(void) {
     f32 direction[AXIS_COUNT];
     f32 distance;
@@ -359,6 +449,10 @@ s32 GetSideSlope(void) {
     reachZ = 2.0f * (direction[AXIS_X] * SIDE_SLOPE_SAMPLE_REACH);
     for (sampleIndex = 1; sampleIndex < (s32)(distance * (1.0f / SIDE_SLOPE_SAMPLE_SPACING));
         sampleIndex++) {
+        // Setting along inside the x term is there to match: setting it first
+        // gives 2 words differing (2 in shape) in either order of its product,
+        // 4 to 30 in the other operand orders of the terms, 6 with z first, and
+        // writing its product out in both terms 10 (8)
         sampleX = f_Shot.ballPosition[AXIS_X] +
             ((along = sampleIndex * SIDE_SLOPE_SAMPLE_SPACING) * direction[AXIS_X]);
         sampleZ = f_Shot.ballPosition[AXIS_Z] + (along * direction[AXIS_Z]);
@@ -384,15 +478,21 @@ s32 GetSideSlope(void) {
     return sideSlope;
 }
 
+// f_Shot.powerGaugeFrame's range, which GetPowerGaugeFrame maps 0 to 256 onto
 #define POWER_GAUGE_FRAME_MIN 3
+// The levels that PlanShot always tries, tries while the best evaluation is
+// poor, and tries at most
 #define TRIAL_LEVEL_COUNT_MIN 4
 #define POOR_TRIAL_LEVEL_COUNT 8
 #define TRIAL_LEVEL_COUNT_MAX 30
 #define POOR_EVALUATION 0x10000
+// Whether PlanShot tries another level: until MIN_TRIAL_LEVEL_COUNT, then
+// while the best evaluation is poor or there is none yet
 #define IsTrialLevelLeft() \
     (f_TrialLevel < TRIAL_LEVEL_COUNT_MIN || \
         (f_BestEvaluation > POOR_EVALUATION && f_TrialLevel < POOR_TRIAL_LEVEL_COUNT) || \
         (!f_HasBestEvaluation && f_TrialLevel < TRIAL_LEVEL_COUNT_MAX))
+// Whether a plan stage is part of a trial under way
 #define IsTrialStage(stage) \
     ((stage) == PLAN_STAGE_TRIAL_TAKEN || \
         (stage) == PLAN_STAGE_UNUSED || \
@@ -401,27 +501,45 @@ s32 GetSideSlope(void) {
 #define CARRY_SCALE_STEP 0.9f
 #define RAINY_CARRY_SCALE 0.95f
 #define RAINY_DISTANCE_SCALE 1.1f
+// A club is swapped for the next while its shortest reach is at least this and
+// fits the distance fewer times
 #define CLUB_DOWN_REACH_MIN 0x600
 #define CLUB_DOWN_REACH_COUNT 21
+// How far from the cup a golfer ahead of its target aims on purpose
 #define MISS_DISTANCE_MAX 0x25800
 #define LEVEL_MISS_DISTANCE 0x1E00
 #define MISS_STRETCH 2.5f
+// How many times PlanShot reports a deliberate miss
 #define MISS_REPORT_COUNT 40
+// The least f_Shot.powerGaugeFrame that PlanShot plans, and how much it scales
+// it up by for some golfers
 #define PLANNED_POWER_GAUGE_FRAME_MIN 2
 #define POWER_GAUGE_FRAME_BOOST 1.2f
+// The trials taken at each level, at a level that aims at the cup, and under
+// GAME_FLAG_COMPUTER_PLAYS_BEST
 #define LEVEL_TRIAL_COUNT 4
 #define CUP_LEVEL_TRIAL_COUNT 5
 #define BEST_PLAY_LEVEL_TRIAL_COUNT 20
+// A mis-hit is a roll below MISHIT_ROLL_RANGE divided by a golfer's divisor,
+// and the sign bit sets its direction
 #define MISHIT_ROLL_RANGE 250
 #define MISHIT_SIGN_BIT 0x2000
+// The divisors by the golfer's consistency, and for a shot two strokes short
+// of the hole's target, which mis-hits by a frame at most
 #define LOW_CONSISTENCY_MISHIT_DIVISOR 62
 #define MIDDLE_CONSISTENCY_MISHIT_DIVISOR 83
 #define HIGH_CONSISTENCY_MISHIT_DIVISOR 125
 #define NEAR_TARGET_MISHIT_DIVISOR 208
-
 #define TARGET_TEXT_COLUMN 3
 #define TARGET_TEXT_ROW 12
 
+// Plans the computer golfer's shot from g_CurrentShot a step at a time, and
+// returns PLAN_UNFINISHED until the plan is made. The first call chooses the
+// usable clubs, the route and the club and target. Each level then picks a
+// landing target for the club's carry and an aim and power for it, and tries
+// shots at it with StepTrialShot, changing the club or the carry when the
+// trials ask for it. Once a trial is taken or the levels run out, the best
+// trial may get a random mis-hit, and it is copied to plannedShot.
 s32 PlanShot(CurrentShot *plannedShot) {
     char text[DEBUG_TEXT_BUFFER_SIZE];
     s32 percentRange[2];
@@ -509,6 +627,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
     }
     while (IsTrialLevelLeft()) {
         if (IsTrialStage(f_PlanStage)) {
+            // A trial is under way
         }
         else if (f_NeedsNewTarget == TRUE) {
             if (f_PlanStage != PLAN_STAGE_TARGET_CHOSEN) {
@@ -558,6 +677,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
                             GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
                             percentRange
                         );
+                        // The carry per unit of f_Shot.powerGaugeFrame at the least percent
                         shortestReach = shortestReach * percentRange[0] /
                             (PERCENT_PER_WHOLE * GAUGE_FULL_FRAME);
                         if (shortestReach < CLUB_DOWN_REACH_MIN ||
@@ -653,8 +773,11 @@ s32 PlanShot(CurrentShot *plannedShot) {
                 GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
                 percentRange
             );
+            // The carry per unit of f_Shot.powerGaugeFrame at the mean percent
             reach = reach * (percentRange[1] + percentRange[0]) /
                 (2 * PERCENT_PER_WHOLE * GAUGE_FULL_FRAME);
+            // Holding f_Shot.powerGaugeFrame in distance is there to match: a
+            // powerFrame local of its own gives 26 words differing, none in shape
             distance = (rand() & 3) + (distance / reach);
             if (GetClubBoldness() >= BOLD_CLUB_CHOICE) {
                 distance = distance * POWER_GAUGE_FRAME_BOOST;
@@ -834,6 +957,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
 
             f_TrialShot.impactGaugeFrame += mishit;
 
+            // Never printed; the original has it, and its string is in the ROM
             if (FALSE) {
                 osSyncPrintf("Dahuri = %d\n", mishit);
             }
@@ -860,14 +984,22 @@ s32 GetBallCupDistance(void) {
     );
 }
 
+// The cup distance from which PlanCupDistance allows for the wind
 #define WIND_ALLOWANCE_DISTANCE_MIN 153600.0f
+// windSpeed's units in a unit of the wind's push
 #define WIND_PUSH_UNIT 0x10000
 #define WIND_SPEED_SCALE (1.0f / WIND_PUSH_UNIT)
+// The fraction of the distance that each unit of push along the line takes off
 #define WIND_FOLLOW_FRACTION 0.01f
 #define WIND_DISTANCE_RATIO_MIN 0.8f
 #define WIND_DISTANCE_RATIO_MAX 1.2f
+// The distance that each unit of the ball's height above the cup adds
 #define HEIGHT_DISTANCE_FRACTION 0.1f
 
+// Returns the distance to plan a shot to the cup for: the flat distance,
+// shortened by a following wind and lengthened by a head wind from
+// WIND_ALLOWANCE_MIN_DISTANCE out, plus a part of the ball's height above the
+// cup.
 s32 PlanCupDistance(ShotMode shotMode UNUSED) {
     s32 distance;
     f32 cupX;
@@ -896,6 +1028,8 @@ s32 PlanCupDistance(ShotMode shotMode UNUSED) {
         windFollow = (cupX * windX) + (cupZ * windZ);
         osSyncPrintf("WindFollow%f\n", windFollow);
 
+        // Turning windFollow into the distance ratio is there to match: a ratio
+        // local of its own gives 8 words differing, none in shape
         windFollow = (-windFollow * WIND_FOLLOW_FRACTION) + 1.0f;
         osSyncPrintf("WindCareRatio%f\n", windFollow);
         if (windFollow < WIND_DISTANCE_RATIO_MIN) {
@@ -916,9 +1050,16 @@ s32 PlanCupDistance(ShotMode shotMode UNUSED) {
 
 ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ);
 
+// Shots from farther than this are long shots
 #define APPROACH_RANGE (60 * UNITS_PER_YARD)
+// How much farther than the cup distance a putt is played in the rain
 #define RAINY_PUTT_DISTANCE_SCALE 1.2f
 
+// Chooses f_Shot's club and shot mode for the lie and sets target to where the
+// shot aims. From the bunker lies other than SURFACE_KIND_BUNKER it plays the
+// sand wedge; on the green it takes the last usable club that can play from the
+// green, in the weakest shot mode that reaches the cup; elsewhere it plays a
+// long shot or an approach, by the cup distance.
 void PlanClubAndTarget(CoursePoint target) {
     s32 targetX;
     s32 targetZ;
@@ -1008,8 +1149,11 @@ void PlanClubAndTarget(CoursePoint target) {
     }
 }
 
+// SortByKeys's orders
 #define SORT_ASCENDING 0
 
+// Selection sorts count keys in the given order, swapping the entries of the
+// values and otherValues arrays along with them unless they are NULL.
 void SortByKeys(s32 count, s32 *values, s32 *otherValues, s32 *keys, s32 order) {
     s32 index;
     s32 otherIndex;
@@ -1047,6 +1191,9 @@ void SortByKeys(s32 count, s32 *values, s32 *otherValues, s32 *keys, s32 order) 
     }
 }
 
+// Returns the player's strokes over par on the holes before this one,
+// counting only holes with strokes. A hole with more than twice its par plus
+// one strokes counts as one under par.
 s32 GetScoreToParSoFar(s32 playerIndex) {
     s32 strokeTotal = 0;
     s32 parTotal = 0;
@@ -1074,10 +1221,16 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
     return strokeTotal - parTotal;
 }
 
+// The par range of the course's holes
 #define LOWEST_PAR 3
 #define HIGHEST_PAR 5
+// A hole's planned strokes are lowered only from this many or more
 #define LOWEST_LOWERED_STROKES 3
 
+// Spreads strokeCount strokes, or takes -strokeCount away, one a hole at a
+// time in the order of the entries, over the holes that isSpreadHole picks,
+// until they run out or no hole can take any more. It is a macro, as
+// isSpreadHole is an expression on the caller's index.
 #define SpreadStrokes(strokes, strokeCount, isSpreadHole) \
     { \
         s32 changeCount_; \
@@ -1113,6 +1266,12 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
         } \
     }
 
+// Chooses how many strokes the golfer aims to take on this hole. It takes the
+// character's base target score to par, plus the course's adjustment to it,
+// plus a lucky bonus of 0 to 3 strokes in Get Character when its record against
+// the player's character has more losses than wins. It spreads that score over
+// the holes by par and handicap, then spreads what the score so far leaves over
+// the holes still to play.
 s32 ChooseHoleStrokeTarget(void) {
     s32 strokes[COURSE_HOLE_COUNT];
     s32 handicaps[COURSE_HOLE_COUNT];
@@ -1209,6 +1368,7 @@ s32 ChooseHoleStrokeTarget(void) {
                 holeIndices[entry] = groupHoleIndices[groupCount];
                 strokes[entry] = groupStrokes[groupCount];
 
+                // Reads handicaps rather than groupHandicaps; the original has it
                 handicaps[entry] = handicaps[groupCount];
                 groupCount++;
             }
@@ -1398,11 +1558,13 @@ s32 ChooseHoleStrokeTarget(void) {
     osSyncPrintf("\n");
     for (index = 0; index < COURSE_HOLE_COUNT; index++) {
         if (holeIndices[index] == g_GameState.holeIndex) {
+            // The comma is in the original's string
             osSyncPrintf("++ %d\n,", strokes[index]);
             return strokes[index];
         }
     }
 
+// The original reads past the holes, into the next course record's name
 #ifdef AVOID_UB
     return g_HoleSetup.par;
 #else
@@ -1411,8 +1573,13 @@ s32 ChooseHoleStrokeTarget(void) {
 }
 
 #define NO_ROUTE_POINT (-1)
+// Beyond any distance on a hole
 #define FARTHEST_DISTANCE 0x0FFFFFFF
 
+// Stores in route the indices into f_Route of the hole's route
+// points to play through, from the tee toward the cup, and returns their count.
+// Starting at the cup, it walks to the nearest point not yet visited until it
+// reaches the tee.
 s32 PlanRoute(s8 *route) {
     Boolean8 isVisited[ROUTE_POINT_COUNT + 1];
     s8 order[ROUTE_POINT_COUNT];
@@ -1459,6 +1626,7 @@ s32 PlanRoute(s8 *route) {
             }
 
             distance = IntLength2D(currentX - f_Route.x[index], currentZ - f_Route.z[index]);
+            // Unused; it is there to match
             IntLength2D(
                 f_Route.x[index] - g_HoleSetup.teePosition[AXIS_X],
                 f_Route.z[index] - g_HoleSetup.teePosition[AXIS_Z]
@@ -1483,6 +1651,8 @@ s32 PlanRoute(s8 *route) {
         }
     }
 
+    // Counting the route in index is there to match: a routeLength local gives
+    // 64 words differing, none in shape
     index = 0;
     for (orderIndex = orderCount - 1; orderIndex >= 0; orderIndex--) {
         if (order[orderIndex] != pointCount - 1) {
@@ -1493,6 +1663,8 @@ s32 PlanRoute(s8 *route) {
     return index;
 }
 
+// How good a place to land each surface kind is, from LANDING_NONE to
+// LANDING_BEST
 enum LandingRating {
     LANDING_NONE,
     LANDING_POOR = 5,
@@ -1555,15 +1727,28 @@ LandingRating GetLandingRating(SurfaceKind surfaceKind) {
 }
 
 #define END_ROUTE_POINT 0xFF
+// The landing search walks back from the cup this many yards a step
 #define TARGET_STEP_YARDS 2
+// The search takes up to reach * TARGET_STEPS_PER_UNIT +
+// EXTRA_TARGET_STEP_COUNT steps
 #define TARGET_STEPS_PER_UNIT (4 * YARDS_PER_UNIT)
 #define EXTRA_TARGET_STEP_COUNT 50.0f
 #define TARGET_SIDE_COUNT 100
 #define TARGET_SIDE_SPACING (4 * UNITS_PER_YARD)
+// The neighbors a target's lie is tested at, in TARGET_NEIGHBOR_SPACINGs
 #define TARGET_NEIGHBOR_REACH 2
 #define TARGET_NEIGHBOR_SPACING 4
+// Rolls shorter than this are not tested for ground in the way
 #define TESTED_ROLL_MIN (2 * UNITS_PER_YARD)
 
+// Chooses where a shot of distance from (x, z) lands. Walking from the cup back
+// toward the ball a step at a time, and out to either side at each step, it
+// takes the first point within reach that is outside the excluded directions,
+// lands as well as the cup, has no ground in the way of the flight or the roll
+// to the cup, and has no much worse lie around it. It aims at the ball if none
+// qualifies, and at the cup if no route point is nearer the cup than the ball.
+// Points that lie farther below the ball than they are across from it are
+// skipped.
 void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ) {
     u8 order[ROUTE_POINT_COUNT + 1];
     s32 pointX[ROUTE_POINT_COUNT + 1];
@@ -1623,6 +1808,9 @@ void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ)
             osSyncPrintf("PointList[%d] = (%d, %d)\n", index, pointX[index], pointZ[index]);
         }
 
+        // Reading the cup's position through g_HoleSetup here and below is there
+        // to match: a cupZ local read once gives 35 words differing (11 in
+        // shape), and cupX and cupZ locals 47 (19)
         pointX[pointCount] = g_HoleSetup.cupPosition[AXIS_X];
         pointZ[pointCount] = g_HoleSetup.cupPosition[AXIS_Z];
         order[pointCount] = END_ROUTE_POINT;
@@ -1680,6 +1868,8 @@ void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ)
     endRating = GetLandingRating(GetSurfaceTraitsAt(endX, endZ)->kind);
     osSyncPrintf("TALevel %d\n", endRating);
 
+    // Counting the steps in index is there to match: a step local gives 289
+    // words differing, 27 in shape
     for (index = 0; index < (reach * TARGET_STEPS_PER_UNIT) + EXTRA_TARGET_STEP_COUNT; index++) {
         along = TARGET_STEP_YARDS * (index * UNITS_PER_YARD);
         alongX = (along * cosAngle) + endX;
@@ -1801,8 +1991,11 @@ void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ)
     );
 }
 
+// The shot modes for each stroke count; all of them are SHOT_MODE_NORMAL
 #define STROKE_SHOT_MODE_COUNT 16
 
+// Plans a shot from beyond approach range: aims at the cup with the club whose
+// carry covers PlanCupDistance, in the shot mode for the player's stroke count
 void ChooseLongShot(
     s32 unused UNUSED,
     ClubType *clubType,
@@ -1810,9 +2003,14 @@ void ChooseLongShot(
     s32 *targetZ,
     ShotMode *shotMode
 ) {
+    // The original frame has room for this; without it 34 words differ, none in
+    // shape
     s32 pad[44] UNUSED;
     ShotMode shotModes[STROKE_SHOT_MODE_COUNT];
     s32 index;
+    // normalMode is there to match: the constant in its place as the argument
+    // gives 3 words differing (3 in shape), and as the stored mode or in both
+    // places 5 (3)
     ShotMode normalMode;
     s32 strokeCount;
 
@@ -1828,6 +2026,7 @@ void ChooseLongShot(
     *shotMode = shotModes[strokeCount];
 }
 
+// It is a macro, as an inline function compiles differently from the original
 #define IsOffFairway(surfaceKind) \
     ((surfaceKind) != SURFACE_KIND_FAIRWAY && \
         (surfaceKind) != SURFACE_KIND_FAIRWAY_FAIR_LIE && \
@@ -1836,6 +2035,8 @@ void ChooseLongShot(
         (surfaceKind) != SURFACE_KIND_GREEN && \
         (surfaceKind) != SURFACE_KIND_GREEN_EDGE)
 
+// Returns whether any point a yard apart on the line from from to to, from
+// from itself, lies off the fairway, semi-rough, green and green edge.
 Boolean IsLineOffFairway(CoursePoint from, CoursePoint to) {
     s32 distance;
     Radians angle;
@@ -1848,6 +2049,9 @@ Boolean IsLineOffFairway(CoursePoint from, CoursePoint to) {
     distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
     angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
     for (step = 0; step < distance * YARDS_PER_UNIT; step++) {
+        // Setting stepLength in the loop is there to match: setting it before
+        // the loop gives 7 words differing (7 in shape), and the constant in
+        // its place 26
         stepLength = UNITS_PER_YARD;
         x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
         z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
@@ -1862,6 +2066,9 @@ Boolean IsLineOffFairway(CoursePoint from, CoursePoint to) {
 
 #define GREEN_EDGE_NOT_FOUND (-1)
 
+// Steps a yard at a time along the line from from to to, and stores the
+// first point on a green edge in edge. Returns GREEN_EDGE_FOUND if it found
+// one, otherwise GREEN_EDGE_NOT_FOUND.
 s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge) {
     s32 distance;
     Radians angle;
@@ -1875,6 +2082,9 @@ s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge) {
     osSyncPrintf("StartPoint = (%d, %d)\n", from[AXIS_X], from[AXIS_Z]);
     osSyncPrintf("EndPoint = (%d, %d)\n", to[AXIS_X], to[AXIS_Z]);
     for (step = 1; step < (distance * YARDS_PER_UNIT) + 1; step++) {
+        // Setting stepLength in the loop is there to match: setting it before
+        // the loop gives 7 words differing (7 in shape), and the constant in
+        // its place 26
         stepLength = UNITS_PER_YARD;
         x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
         z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
@@ -1888,6 +2098,8 @@ s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge) {
     return GREEN_EDGE_NOT_FOUND;
 }
 
+// Returns the distance from from to the first green edge on the line to to,
+// or to to itself if the line crosses no green edge.
 s32 GetGreenEdgeDistance(CoursePoint from, CoursePoint to) {
     CoursePoint edge;
     s32 distance;
@@ -1902,6 +2114,9 @@ s32 GetGreenEdgeDistance(CoursePoint from, CoursePoint to) {
     return distance;
 }
 
+// Stores in peak the point a yard apart on the line from from to to whose
+// ground height is farthest from 0, starting with from's x and z. It sets
+// peak's height only for a point past from.
 void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
     s32 distance;
     Radians angle;
@@ -1919,6 +2134,9 @@ void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
     peak[AXIS_X] = from[AXIS_X];
     peak[AXIS_Z] = from[AXIS_Z];
     for (step = 1; step < distance * YARDS_PER_UNIT; step++) {
+        // Setting stepLength in the loop is there to match: setting it before
+        // the loop gives 26 words differing (6 in shape), and the constant in
+        // its place 46
         stepLength = UNITS_PER_YARD;
         x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
         z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
@@ -1933,6 +2151,10 @@ void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
     }
 }
 
+// Aims at the cup and returns the type of club to approach it with. The club
+// depends on how much of the line to the cup lies short of the green, where the
+// line's peak counts when it is on the green, and on the golfer's consistency.
+// A line that crosses rough or hazards takes a wedge.
 ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
     CoursePoint peak;
     s32 cupDistance;
@@ -1948,6 +2170,7 @@ ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
         g_HoleSetup.cupPosition[AXIS_X] - f_Shot.ballPosition[AXIS_X],
         g_HoleSetup.cupPosition[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]
     );
+    // Unused; it is there to match
     GetSurfaceTraits(f_Shot.surface);
     if (IsLineOffFairway(f_Shot.ballPosition, g_HoleSetup.cupPosition) == TRUE) {
         osSyncPrintf("Appr60 Return point 1\n");
@@ -2020,6 +2243,8 @@ ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
 
 #define POWER_TO_GAUGE_FRAME_SCALE (GAUGE_FULL_FRAME / 256.0f)
 
+// What the trial costs for each step on which a putt lips out; one at the
+// stroke limit costs POOR_LANDING_EVALUATION more
 #define LIP_OUT_EVALUATION 0x10
 #define POOR_LANDING_EVALUATION 0x8000
 #define BLOCKED_CUP_EVALUATION 0x80000
@@ -2039,11 +2264,55 @@ ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
 #define BEHIND_TARGET_PUTT_SLACK_SHARE 0.4f
 #define EXCLUDED_SECTOR_COUNT 9
 
+// Advances the trial of f_Shot by one step of the ball simulation, setting the
+// trial up first unless it is under way. It returns 0 while the trial is still
+// better than the best so far, and 1 once it has evaluated the trial, or
+// abandoned it, and adjusted f_Shot's power, mode or aim for the next one.
+//
+// GetPowerGaugeFrame is nested in the block that calls it, a GNU C extension,
+// as in the original: StepTrialShot passes it a stack address in $v0 as the
+// static chain, which it stores. GCC compiles a nested function at its
+// definition, and rest_of_compilation sets cse_not_expected, which isn't saved
+// across it, so the code after the definition is expanded with constant
+// addresses inside its memory references, as the original's is there, and the
+// code before it with the addresses in registers. Nested at the start of the
+// routine, 185 words differ (123 in shape); at the start of the evaluation
+// block, 148 (106); at the start of the ratio's test, 56 (32); at the start
+// of the test for too much power, 57 (33); and as a routine of its own, with
+// or without a store standing in for the static chain's, 71 (27).
+//
+// A poor landing's evaluation sits in a block of its own, as a macro's
+// do-while would make it, to match. The original loads
+// POOR_LANDING_EVALUATION into $v0 and sums it into $v1. local-alloc ranks a
+// block's quantities by floor_log2(refs) * refs / life, and outside a loop
+// the sum's 4 references over a life of 8 tie with the constant's 2 over a
+// life of 2; the tie goes to the lower quantity number, the sum's, which
+// takes $v0. flow counts a reference twice in a loop, even one that runs
+// once, and the logarithm then ranks the constant's 4 references above the
+// sum's 8, so the constant takes $v0.
+//
+// Without the block, or with plain braces, 12 words differ (4 in shape). A
+// block around the whole if, one that ends after the out-of-bounds test, and
+// one around the whole else arm from the EVALUATE label match too. One around
+// the sum alone, the out-of-bounds test alone or both tests gives 24 (6), and
+// one around the water hazard's test 12 (4). The kind read into a local
+// inside the block, before or after the sum, matches; read before the block
+// it gives 12 (6), and with only its read and the sum in the block 4 (4).
+//
+// The heading's correction ends the arm for a finished trial, and the next
+// try's aim change is the else arm, both reaching the one return: with an
+// early return in the arm instead, 21 words differ (7 in shape), and with a
+// do-while (0) around the correction 14 (4). The aim change's step as an
+// if/else subtracting or adding gives 23 (13); adding the step or its
+// negation, chosen by ?:, 15 (7); and choosing by ?: between the heading
+// minus and plus the step 23 (9).
 s32 StepTrialShot(void) {
     PlaneTriangle hit;
     f32 fraction;
     StepFlags stepFlags;
     BallState ballState;
+    // A copy of flags, to match: reading flags gives 19 words differing, 3 in
+    // shape
     StepFlags stepFlagsCopy;
     s32 velocityY;
     s32 bounceCount;
@@ -2106,6 +2375,9 @@ s32 StepTrialShot(void) {
 
     ballState = f_TrialSimulation.state;
     if (ballState != BALL_STATE_STOPPED) {
+        // A loop that runs once, so that the step's checks can break out to the
+        // end point's update; the original has no loop here, and jumping to a
+        // label instead gives 38 words differing, 20 in shape
         do {
             velocityY = f_TrialSimulation.velocity[AXIS_Y];
             bounceCount = f_TrialSimulation.bounceCount;
@@ -2204,6 +2476,11 @@ s32 StepTrialShot(void) {
                 f_TrialEvaluation = POOR_LANDING_EVALUATION;
             }
 
+            // A long putt is evaluated even if it holed out. The goto into the
+            // evaluation, to match: a flag set by an if here and tested with the
+            // holed-out one gives 14 words differing, 8 in shape; the flag
+            // assigned this test 21, 7; and this test moved into the holed-out
+            // one's 35, 17.
             if (g_Players[f_Shot.playerIndex].strokeCount + 1 <
                     g_HoleSetup.par + f_HoleTargetToPar &&
                 f_HoleTargetToPar > 0 &&
@@ -2220,7 +2497,6 @@ s32 StepTrialShot(void) {
         }
         else {
 EVALUATE:
-
             surfaceTraits = GetSurfaceTraits(f_TrialSimulation.surface);
             if (FindGroundHit(
                     f_TrialSimulation.position[AXIS_X],
@@ -2244,6 +2520,7 @@ EVALUATE:
                 GetSurfaceTraitsAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind
             );
             if (GetLandingRating(surfaceTraits->kind) < targetRating) {
+                // In a block of its own to match, as the header comment explains
                 IN_OWN_BLOCK({
                     f_TrialEvaluation += POOR_LANDING_EVALUATION;
                     if (IsOutOfBoundsKind(surfaceTraits->kind)) {
@@ -2275,6 +2552,9 @@ EVALUATE:
             par = g_HoleSetup.par;
             if (GetSurfaceTraitsAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
                 SURFACE_KIND_GREEN) {
+                // The stroke this shot would be. Counting it in strokes with ++
+                // gives 4 words differing (none in shape), and adding it in the
+                // subtraction 17 (3)
                 s32 shotStroke = strokeCount + 1;
 
                 strokesOver = shotStroke - (par + f_HoleTargetToPar);
@@ -2416,6 +2696,7 @@ EVALUATE:
                 }
             }
             else {
+                // The power gauge frame for a launch power out of 256
                 s32 GetPowerGaugeFrame(s32 amount) {
                     s32 gaugeFrame = (amount * POWER_TO_GAUGE_FRAME_SCALE) + 0.5f;
 
@@ -2501,6 +2782,7 @@ EVALUATE:
     return 1;
 }
 
+// Returns the slot of the golfer's club of type clubType, or 0 if there is none
 ClubSlot FindClubSlot(s32 unused UNUSED, ClubType clubType) {
     ClubSlot clubSlot;
 
@@ -2513,8 +2795,14 @@ ClubSlot FindClubSlot(s32 unused UNUSED, ClubType clubType) {
     return 0;
 }
 
+// What rain leaves of a shot's distance, for golfers it shortens
 #define RAINY_DISTANCE_FRACTION 0.95f
 
+// Returns the type of the shortest usable club, from the sand wedge up, whose
+// normal shot carries beyond distance from the ball's lie. A club the golfer
+// would hit from the worst lie only counts if the golfer's club boldness is
+// BOLD_CLUB_CHOICE. If no club carries that far, it returns the slot of the
+// longest club that counted, or CLUB_TYPE_SAND_WEDGE if none did.
 ClubType ChooseClubForDistance(s32 distance) {
     ClubType fallback = CLUB_TYPE_SAND_WEDGE;
     ClubType clubType;
@@ -2553,6 +2841,7 @@ ClubType ChooseClubForDistance(s32 distance) {
     return fallback;
 }
 
+// Returns how far apart two binary angles are, up to half a turn
 s32 GetAngleDifference(s32 angle, s32 otherAngle) {
     s32 difference = (s16)(angle - otherAngle);
 
@@ -2563,14 +2852,21 @@ s32 GetAngleDifference(s32 angle, s32 otherAngle) {
     return difference;
 }
 
+// How far below the ball a target must be for the largest minus offset
 #define DOWNHILL_TARGET_DROP 0xB400
+// The angle within which the wind counts as following the shot
 #define FOLLOWING_WIND_ANGLE 10000
 
+// It is a macro, as an inline function compiles differently from the original
 #define IsWindSpeedInRange(lowest, limit) \
     (g_HoleSetup.conditions.windSpeed >= (lowest) && g_HoleSetup.conditions.windSpeed < (limit))
 
 Boolean RollClubCategoryChance(ClubChanceSet chanceSet);
 
+// Chooses the offset to give the planned shot, from the lie, the golfer's
+// windPlay trait, whether the shot aims at the cup, how far below the ball
+// the target is, and the wind's speed and direction against the shot's yaw.
+// Most offsets also need RollClubKindChance to succeed.
 s32 ChooseShotOffset(void) {
     WindPlay windPlay;
     WideBinaryAngle aimYaw;
@@ -2689,10 +2985,15 @@ s32 ChooseShotOffset(void) {
 #define CLUB_TYPE_FIRST_IRON 3
 #define CLUB_TYPE_LAST_IRON 10
 
+// Whether the shot's club lies between the slots of the two club types
+// It is a macro, as an inline function compiles differently from the original
 #define IsShotClubOfTypes(firstType, lastType) \
     (f_Shot.clubSlot >= FindClubSlot(f_Shot.playerIndex, (firstType)) && \
         FindClubSlot(f_Shot.playerIndex, (lastType)) >= f_Shot.clubSlot)
 
+// Returns TRUE on the golfer's first stroke of the hole. Otherwise it returns
+// TRUE with the percent chance that row chanceSetIndex of f_ClubKindChances
+// gives for the kind of the shot's club.
 Boolean RollClubCategoryChance(ClubChanceSet chanceSet) {
     if (g_Players[f_Shot.playerIndex].strokeCount == 0) {
         return TRUE;
@@ -2717,9 +3018,13 @@ Boolean RollClubCategoryChance(ClubChanceSet chanceSet) {
     return FALSE;
 }
 
+// Tens of yards in a unit of distance
 #define TENS_OF_YARDS_PER_UNIT 0.000007119878f
+// The fraction of a line's points past which the line counts as lost
 #define LOST_LINE_FRACTION 0.5f
 
+// Returns whether more than half of the points a yard apart on the first tenth
+// of the line from from to to lie in water, out of bounds or out of the course.
 Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
     s32 distance;
     Radians angle;
@@ -2736,6 +3041,9 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
     sampleCount = 0;
     lostCount = 0;
     for (step = 1; step < distance * TENS_OF_YARDS_PER_UNIT; step++) {
+        // Setting stepLength in the loop is there to match: setting it before
+        // the loop gives 8 words differing (8 in shape), and the constant in
+        // its place 26
         stepLength = UNITS_PER_YARD;
         x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
         z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
@@ -2755,9 +3063,47 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
     return FALSE;
 }
 
+// Simulates f_TrialShot and returns TRUE if the ball comes to rest, and not out
+// of bounds, off the course or in a water hazard
+//
+// Its loop is a cut-down copy of StepTrialShot's step, and it keeps that step's
+// read of the fall speed, which nothing here uses, to match. The original holds
+// &f_TrialSimulation.velocity[AXIS_Y] in $s0 through the loop, passes
+// StepBallSimulation that address less 0x28 and reads the loop's state 0x64
+// past it, and nothing in the loop reads the fall speed itself. GCC expands
+// the read as the address into a register and a load through it; jump deletes
+// the load, whose value is unused, and leaves the address, and cse's
+// use_related_value then derives the simulation's address and the state's
+// from it. That leaves the simulation's address with one use, the call's
+// argument, and in a loop with calls loop.c substitutes such a register's
+// value into its use rather than move it out of the loop.
+//
+// Without the read 6 words differ, 4 in shape: the loop keeps the simulation's
+// own address and reads the state from its constant address. Reading the
+// bounce count as well, as StepTrialShot does, matches too, as do the read
+// after the count, the read declared in the loop's body and an empty test of
+// the fall speed. The read after the step or before the loop gives the same 6
+// words (4), and through a simulation pointer 14 (6); a read of the bounce
+// count alone, the state or another axis's speed gives 6 (0), biased by that
+// field's offset instead.
+//
+// The step limit's report is written inside the loop and the original has it
+// after the result's checks, jumping back to them: loop.c moves a block that
+// ends in a jump out of its loop to a barrier outside it, here the one that
+// ends the first FALSE report. The original's rodata has the FALSE text before
+// the TRUE one, though the TRUE report's code comes first, so the FALSE report
+// is written twice, before and after the TRUE one, and jump's cross-jumping
+// then merges the first into the last. An else arm for the TRUE report matches
+// too. Testing the out-of-bounds kinds and the water hazard in separate ifs,
+// each with its own FALSE report, gives 8 words (6 in shape); the TRUE report
+// first, with one FALSE report after it, 24 (18); a result flag tested for the
+// reports 31 (25); a FALSE report for a ball that hasn't stopped before the
+// kind's tests 44 (34); and one condition for all three tests 18 (12). The
+// outside-course test before the step limit's gives 9 (5).
 Boolean IsTrialShotSafe(void) {
     SurfaceKind surfaceKind;
     StepFlags stepFlags;
+    // Read and never used, to match
     s32 velocityY UNUSED;
 
     f_TrialLaunch->heading = f_TrialShot.heading;

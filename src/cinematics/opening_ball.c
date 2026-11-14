@@ -1,3 +1,9 @@
+/*
+ * The opening's copies of the ball simulation's routines, with which it
+ * simulates its shot, and a routine that loads one of the other characters with
+ * its birdie animation.
+ */
+
 #include "cinematics/opening_ball.h"
 
 #include <math.h>
@@ -27,45 +33,81 @@
 #include "system/c_language.h"
 #include "system/compiler.h"
 
+// LoadCharacter kinds from the kind count on load one of g_OtherCharacterModels
 #define OPENING_CHARACTER_MODEL_KIND CHARACTER_MODEL_KIND_COUNT
 
+// The clubs that the opening's golfers swing
 #define OPENING_CLUB_COUNT 2
 
+// The opening's copy of g_ClubTestMode
 static ClubTest f_OpeningClubTestMode = CLUB_TEST_NONE;
 
+// The opening's own copy of f_SurfaceInfo, which names the surfaces in
+// half-width katakana and differs from it in eight entries' values
 static SurfaceTraits f_OpeningSurfaceTraits[SURFACE_COUNT] = {
+    // SURFACE_OUT_OF_BOUNDS
     {SURFACE_KIND_OUT_OF_BOUNDS, "O.B.", 100, 100, 0, 0, 0, 0x500, SINK_DEPTH_HALF, 7},
+    // SURFACE_FAIRWAY
     {SURFACE_KIND_FAIRWAY, "ﾌｪｱｳｪｲ", 98, 100, 5, 960, 400, 0x501, SINK_DEPTH_NONE, 0},
+    // SURFACE_ROUGH
     {SURFACE_KIND_ROUGH, "ﾗﾌ", 80, 90, 30, 600, 200, 0x508, SINK_DEPTH_HALF, 1},
+    // SURFACE_BUNKER
     {SURFACE_KIND_BUNKER, "ﾊﾞﾝｶｰ", 70, 85, 30, 600, 0, 0x504, SINK_DEPTH_NONE, 2},
+    // SURFACE_GREEN
     {SURFACE_KIND_GREEN, "ｵﾝ ｸﾞﾘｰﾝ", 100, 100, 0, 972, 500, 0x50A, SINK_DEPTH_NONE, 6},
+    // SURFACE_WATER_HAZARD
     {SURFACE_KIND_WATER_HAZARD, "ｳｫｰﾀｰﾊｻﾞｰﾄﾞ", 100, 100, 0, 0, 0, 0x50C, SINK_DEPTH_BURIED, 3},
+    // SURFACE_CART_WAY
     {SURFACE_KIND_CART_WAY, "ｶｰﾄｳｪｲ", 80, 100, 10, 975, 890, 0x50B, SINK_DEPTH_NONE, 4},
+    // SURFACE_TEE_GROUND
     {SURFACE_KIND_TEE_GROUND, "ﾃｨｰｸﾞﾗｳﾝﾄﾞ", 98, 100, 10, 930, 500, 0x501, SINK_DEPTH_NONE, 8},
+    // SURFACE_ROCK
     {SURFACE_KIND_ROCK, "ﾛｯｸ", 80, 90, 30, 930, 900, 0x50D, SINK_DEPTH_NONE, 9},
+    // SURFACE_GREEN_EDGE
     {SURFACE_KIND_GREEN_EDGE, "ｸﾞﾘｰﾝ ｴｯｼﾞ", 98, 100, 10, 966, 400, 0x501, SINK_DEPTH_NONE, 0},
+    // SURFACE_SEMI_ROUGH
     {SURFACE_KIND_SEMI_ROUGH, "ｾﾐﾗﾌ", 90, 98, 30, 930, 500, 0x507, SINK_DEPTH_NONE, 0},
+    // SURFACE_BARE_GROUND
     {SURFACE_KIND_BARE_GROUND, "ﾍﾞｱｸﾞﾗｳﾝﾄﾞ", 80, 90, 30, 930, 500, 0x50C, SINK_DEPTH_NONE, 1},
+    // SURFACE_DEEP_ROUGH
     {SURFACE_KIND_DEEP_ROUGH, "ﾃﾞｨｰﾌﾟﾗﾌ", 50, 80, 30, 430, 100, 0x509, SINK_DEPTH_BURIED, 5},
+    // SURFACE_NO_DROP_GROUND
     {SURFACE_KIND_NO_DROP_GROUND, "ﾍﾞｱｸﾞﾗｳﾝﾄﾞ", 80, 90, 30, 930, 500, 0x50C, SINK_DEPTH_NONE, 1},
+    // SURFACE_WASTE_AREA
     {SURFACE_KIND_WASTE_AREA, "ｳｴｽﾄｴﾘｱ", 50, 80, 30, 430, 100, 0x8F1, SINK_DEPTH_HALF, 5},
+    // SURFACE_UNNAMED_ROCK
     {SURFACE_KIND_ROCK, "            ", 98, 100, 40, 930, 500, 0x500, SINK_DEPTH_NONE, 9},
+    // SURFACE_BUNKER_FAIR_LIE
     {SURFACE_KIND_BUNKER_FAIR_LIE, "ﾊﾞﾝｶｰ", 50, 70, 30, 600, 0, 0x505, SINK_DEPTH_HALF, 2},
+    // SURFACE_BUNKER_POOR_LIE
     {SURFACE_KIND_BUNKER_POOR_LIE, "ﾊﾞﾝｶｰ", 40, 60, 30, 600, 0, 0x506, SINK_DEPTH_HALF, 2},
+    // SURFACE_BUNKER_UNUSED_LIE
     {SURFACE_KIND_BUNKER_UNUSED_LIE, "ﾊﾞﾝｶｰ", 40, 60, 40, 600, 0, 0x506, SINK_DEPTH_HALF, 2},
+    // SURFACE_FAIRWAY_FAIR_LIE
     {SURFACE_KIND_FAIRWAY_FAIR_LIE, "ﾌｪｱｳｪｲ", 94, 98, 7, 950, 380, 0x502, SINK_DEPTH_NONE, 0},
+    // SURFACE_FAIRWAY_POOR_LIE
     {SURFACE_KIND_FAIRWAY_POOR_LIE, "ﾌｪｱｳｪｲ", 90, 94, 7, 950, 380, 0x503, SINK_DEPTH_NONE, 0},
+    // SURFACE_ROUGH_POOR_LIE
     {SURFACE_KIND_ROUGH_POOR_LIE, "ﾗﾌ", 70, 85, 30, 600, 200, 0x509, SINK_DEPTH_HALF, 5},
+    // SURFACE_OUT_OF_COURSE
     {SURFACE_KIND_OUT_OF_COURSE, "ｱｳﾄ ｵﾌﾞ ｺｰｽ", 100, 100, 0, 0, 0, 0x500, SINK_DEPTH_BURIED, 7},
+    // SURFACE_TEE_UP
     {SURFACE_KIND_TEE_UP, "TEE UP", 98, 100, 10, 930, 500, 0x500, SINK_DEPTH_NONE, 8},
+    // SURFACE_MINI_GOLF_GREEN
     {SURFACE_KIND_GREEN, "ｸﾞﾘｰﾝ", 100, 100, 0, 972, 500, 0x8F2, SINK_DEPTH_NONE, 6},
+    // SURFACE_MINI_GOLF_FAIRWAY
     {SURFACE_KIND_FAIRWAY, "ﾌﾞﾙｰ", 98, 100, 5, 960, 400, 0x8F3, SINK_DEPTH_NONE, 0},
+    // SURFACE_MINI_GOLF_CART_WAY
     {SURFACE_KIND_CART_WAY, "ﾚｯﾄﾞ", 80, 100, 10, 980, 890, 0x8F4, SINK_DEPTH_NONE, 4},
 };
 
+// The debug text row, of SPEED_TEXT_ROW_COUNT, that the next ball speed goes in
 static s32 f_OpeningSpeedTextRow = 0;
+// The opening's copies of f_EarlyImpactEffect and f_LateImpactEffect, which its
+// copy of GetImpactTimingEntry doesn't read
 static ImpactEffect f_OpeningEarlyImpactEffect UNUSED = {-90, -64, -40, -10, 100, 1};
 static ImpactEffect f_OpeningLateImpactEffect UNUSED = {-80, 64, 30, 10, -5, 1};
+// The opening's copy of f_ImpactEffects
 static ImpactEffect f_OpeningImpactEffects[LIE_RATING_MAX + 1][IMPACT_TIMING_ENTRY_COUNT] = {
     {
         {-90, -64, -40, -10, 100, 1},
@@ -147,6 +189,7 @@ static ImpactEffect f_OpeningImpactEffects[LIE_RATING_MAX + 1][IMPACT_TIMING_ENT
     },
 };
 
+// The opening's clubs: two drivers that differ only in pitch
 static Club f_OpeningClubs[OPENING_CLUB_COUNT] = {
     {
         0,
@@ -184,11 +227,17 @@ static Club f_OpeningClubs[OPENING_CLUB_COUNT] = {
     },
 };
 
+// LaunchOpeningBallSimulation counts each launch here, and nothing else reads
+// it
 static s32 f_UnusedOpeningLaunchCount = 0;
 
+// The opening's copies of the collision triangle and fraction that
+// StepBallSimulation keeps on its stack
 static PlaneTriangle f_OpeningContactTriangle;
 static f32 f_OpeningContactFraction;
 
+// Loads one of the other characters into the slot with its birdie animation, or
+// frees a busy slot first
 Boolean ToggleOpeningCharacter(u32 slotIndex, OpeningModel model) {
     if (IsCharacterSlotBusy(slotIndex)) {
         FreeCharacterSlot(slotIndex);
@@ -201,6 +250,7 @@ Boolean ToggleOpeningCharacter(u32 slotIndex, OpeningModel model) {
     return TRUE;
 }
 
+// The opening's copy of GetSurfaceInfo, which reads its own surface table
 static SurfaceTraits *GetOpeningSurfaceTraits(Surface surface) {
     if ((u32)surface >= SURFACE_COUNT) {
         surface = SURFACE_OUT_OF_BOUNDS;
@@ -209,13 +259,15 @@ static SurfaceTraits *GetOpeningSurfaceTraits(Surface surface) {
     return &f_OpeningSurfaceTraits[surface];
 }
 
+// An unused copy of ResetBallSimulations, which resets g_BallSimulations as
+// that does
 static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
     s32 index;
 
     for (index = 0; index < BALL_SIMULATION_COUNT; index++) {
         g_BallSimulations[index].position[AXIS_X] = RESET_BALL_X;
         g_BallSimulations[index].position[AXIS_Y] = RESET_BALL_Y;
-        rand();
+        rand(); // The original has it
         g_BallSimulations[index].position[AXIS_Z] = RESET_BALL_Z;
         g_BallSimulations[index].velocity[AXIS_X] = rand() & RESET_BALL_SPEED_MASK;
         g_BallSimulations[index].velocity[AXIS_Y] = RESET_BALL_VELOCITY_Y;
@@ -225,6 +277,8 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
     }
 }
 
+// Where the debug text shows the ball's state, height and speeds; the speeds
+// scroll through SPEED_TEXT_ROW_COUNT rows, blanking the row after the newest
 #define STATE_TEXT_COLUMN 2
 #define STATE_TEXT_ROW 0xF
 #define HEIGHT_TEXT_COLUMN 1
@@ -233,8 +287,19 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
 #define SPEED_TEXT_CLEAR_COLUMN 7
 #define SPEED_TEXT_ROW_COUNT 8
 #define SPEED_TEXT_FIRST_ROW 8
+// The speed display turns speeds into kilometers per hour with this: 3.6
+// kilometers per hour per meter per second over
+// SPEED_UNITS_PER_METER_PER_SECOND, written out to ten places, which rounds it
+// to the float above
 #define SPEED_TEXT_KILOMETERS_PER_HOUR_PER_SPEED_UNIT 0.0070312503f
 
+// Where the opening's copy of StepBallSimulation differs from main's: its
+// lift turns a full quarter turn; it tests only within 20 cm of the cup; a
+// ball that drops in plays the cup-in sound only below 1.75 cm a frame and
+// falling no faster than 5 km/h; its pull's direction tilts four times as
+// much; a ball crossing the cup's edge within 2 cm of its height and slower
+// than 28 cm a frame lips out; a ball in the water stops 5 m down; and its
+// cup's floor bounce is an integer division
 #define OPENING_LIFT_ANGLE_DEGREES 90.0f
 #define OPENING_CUP_SEARCH_SPAN 0xC00
 #define OPENING_CUP_IN_SOUND_SPEED_MAX 268.8f
@@ -243,14 +308,27 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
 #define OPENING_LIP_OUT_HEIGHT_MAX 307.2f
 #define OPENING_LIP_OUT_SPEED_MAX 4300.8f
 #define OPENING_WATER_STOP_DEPTH 0x12C00
+// Its cup floor halves the ball's falling speed in whole units
 #define OPENING_CUP_FLOOR_BOUNCE_DIVISOR 2
+// A billboard halves the ball's speed in whole units, and foliage speeds up
+// a rising ball. A wall puts the ball 4 cm back along its path from the hit,
+// then this share of the way there.
 #define OPENING_BILLBOARD_HIT_SPEED_DIVISOR 2
 #define OPENING_FOLIAGE_RISE_SCALE 1.2f
 #define OPENING_WALL_BACK_OFF 614.4f
 #define OPENING_WALL_HIT_STEP_SHARE 0.99f
+// A ball skips off the water only when it hits it faster than this and
+// its speed along the ground, at this ratio, is more than its impact's; a
+// bounce in the first steps keeps a quarter of its speed
 #define OPENING_SKIP_IMPACT_SPEED_MIN KilometersPerHour(10)
 #define OPENING_SKIP_SPEED_RATIO 0.5f
 #define OPENING_EARLY_BOUNCE_STEP_COUNT 3
+// Its ground landing: a ball that lands in the water this fast stops on the
+// ground below. The green's friction grows with the speed from its base; a
+// landing's spin grows from nothing at OPENING_SPINLESS_LANDING_SPEED by one
+// per OPENING_LANDING_SPIN_SPEED_RANGE of the speed into the ground. The spin
+// drifts the ball with less grip, and at most this share of its speed into
+// the ground.
 #define OPENING_WATER_STOP_IMPACT_SPEED KilometersPerHour(20)
 #define OPENING_GREEN_LANDING_FRICTION_BASE 0.5f
 #define OPENING_GREEN_LANDING_FRICTION_PER_SPEED (1.6f / KilometersPerHour(100))
@@ -258,9 +336,19 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
 #define OPENING_LANDING_SPIN_SPEED_RANGE KilometersPerHour(200)
 #define OPENING_GROUND_SPIN_DRIFT_GRIP 0.25f
 #define OPENING_SPIN_DRIFT_SHARE_MAX 0.2f
+// Its roll: only on mini golf, a ball pressing into the ground faster than
+// this, between main's two limits, loses its speed into the ground. A slow
+// ball's slope pull grows from a smaller least share than main's, at 1/327.68
+// per unit of speed.
 #define OPENING_ROLL_JUMP_SPEED KilometersPerHour(10)
 #define OPENING_SLOW_ROLL_SLOPE_SCALE_MIN 0.0625f
 #define OPENING_SLOW_ROLL_SLOPE_SCALE_PER_SPEED 0.0030517578f
+// Its flight: the lift, like the curve, is weighted by how near the air
+// speed is to the spin's, at this scale, and falls off by this much per
+// ratio away from it; it is the spin times OPENING_LIFT_SPIN_SCALE times
+// OPENING_LIFT_PER_SPIN, at most 1/OPENING_MAX_LIFT_SPEED_RATIO of the air
+// speed. The spin decays more slowly than main's, and the wind grows with
+// the height half as fast.
 #define OPENING_SPIN_SPEED_SCALE 8.0f
 #define OPENING_SPIN_MISMATCH_FALLOFF 0.8f
 #define OPENING_LIFT_SPIN_SCALE 10
@@ -269,6 +357,13 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
 #define OPENING_SPIN_DECAY 0.995f
 #define OPENING_WIND_SCALE_PER_HEIGHT (1.0f / (160 * UNITS_PER_YARD))
 
+// The opening's copy of StepBallSimulation, which moves the ball through one
+// step. Unlike main's copy it works on the simulation's integer velocity
+// rather than a float copy, plays no sounds, starts no rumble or Cheep Cheep
+// leap, and can print the ball's speed, height and collisions as debug text.
+// The sparks it starts on a stroke's pin and wall hits are called at ovl_00's
+// addresses, which lie in the opening's BSS while it is loaded. Returns the
+// STEP_FLAG_* bits for the step.
 StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
     PlaneTriangle triangle;
 
@@ -299,6 +394,8 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
         *z *= scale;
     }
 
+    // Points the lift rotation about the ball\'s spin axis, the level axis across
+    // spinHeading, turning a negative spin into a positive one the other way
     void BuildOpeningLiftRotation(void) {
         f32 axisX;
         f32 axisZ;
@@ -393,6 +490,9 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
             }
         }
 
+        // The rest of the step in an if instead of this goto gives the same code.
+        // The goto stays as in StepBallSimulation, where the same test needs it to
+        // match.
         if (simulation->state == BALL_STATE_STOPPED) {
             goto SETTLE;
         }
@@ -426,6 +526,11 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                 contact = 0;
             }
             else {
+                // Each hit test's result in turn: the putter's ground contact,
+                // the billboard's hit, then the hole triangle's. One variable
+                // holds all three to match: the original copies the first and
+                // the last out of $v0 before testing them, as it does for a
+                // variable set in several places.
                 Boolean found;
 
                 if (IsStrokeOrTrialLaunch(simulation->purpose) &&
@@ -611,6 +716,11 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                         }
                     }
 
+                    // The opening plays no flagstick sound, but the original
+                    // copies the speed out of $f0 as if for a later use. The
+                    // volume StepBallSimulation plays that sound at is such a
+                    // use, and all of it compiles away; that it is what the
+                    // original had here is a guess.
                     if (pinHit == PIN_HIT_FLAGSTICK) {
                         BallSpeed speed = GetOpeningLength2D(
                             simulation->velocity[AXIS_X],
@@ -742,6 +852,16 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                                     alignment = 0.0f;
                                 }
 
+                                // pull first holds the ball's depth into the
+                                // pull's range, and is scaled by the alignment
+                                // in a statement of its own, to match. The
+                                // original works the depth out before atan2's
+                                // call, where the scheduler puts it; written
+                                // there, the depth uses CUP_PULL_OUTER_RADIUS
+                                // too soon after the range test does for
+                                // loop.c to hoist the constant from the
+                                // substep loop, and it gets $f24 where the
+                                // original loads it at each use.
                                 angle = atan2(toCup[AXIS_Z], toCup[AXIS_X]);
                                 alignment = 1.0f - alignment;
                                 pull = CUP_PULL_OUTER_RADIUS - (f32)cupDistance;
@@ -775,6 +895,10 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                                     simulation->velocity[AXIS_Z]
                                 );
 
+                                // The speed's test is written as not at least
+                                // the limit to match: the original tests it
+                                // with c.le.s and bc1t, where < compiles to
+                                // c.lt.s and bc1f.
                                 if (!((f32)speed >= OPENING_LIP_OUT_SPEED_MAX) &&
                                     simulation->state == BALL_STATE_ROLLING) {
                                     f32 keptFraction = speed * (1.0f / LIP_OUT_FULL_SPEED);
@@ -1043,6 +1167,10 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                 simulation->surface = SURFACE_FAIRWAY;
             }
             else {
+                // In its own block for the notes that leaves: they end the
+                // first cse pass's path from GetTrianglePlane's call, so the
+                // bounce works out plane's address anew, as the original does,
+                // rather than keep it in $s0.
                 IN_OWN_BLOCK(simulation->surface = SURFACE_WATER_HAZARD);
                 if (simulation->bounceCount == 1) {
                     simulation->firstBounceSurface = simulation->surface;
@@ -1555,6 +1683,12 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                 }
             }
 
+            // Nothing reads groundGap; it is here to match. With startY still
+            // in use after the gravity's arms, the drop to the ground and the
+            // velocity get the original's $v1 and $a1 in them, and the four
+            // arms share one store, as the original's do. What the original
+            // did with startY here is unknown: other sums of it tested and
+            // set in a branch work as well, but Abs and an empty test don't.
             {
                 s32 groundGap = groundHeight - startY;
 
@@ -1577,6 +1711,12 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                     }
                 }
                 else {
+                    // The opening plays no rolling sound, but the original
+                    // copies the speed out of $v0 before testing it, as if
+                    // for a later use. A volume like the one
+                    // StepBallSimulation sets for that sound is such a use,
+                    // and all of it compiles away; that it is what the
+                    // original had here is a guess.
                     SoundVolume volume = speed * ROLL_VOLUME_PER_SPEED;
 
                     if (volume > ROLL_VOLUME_MAX) {
@@ -1598,7 +1738,6 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
         }
 
 ROLLED:
-
         if ((simulation->state == BALL_STATE_FLYING || simulation->state == BALL_STATE_ROLLING) &&
             contact == 0) {
             Vec3 relative;
@@ -1691,6 +1830,9 @@ ROLLED:
                 simulation->spinSpeed = simulation->spinSpeed * OPENING_SPIN_DECAY;
             }
 
+            // height goes on to hold the wind's scale, and windX and windZ the
+            // wind's push along each axis, to match: the original keeps each
+            // pair of values in one register.
             height = simulation->startPosition[AXIS_Y] - simulation->position[AXIS_Y];
             if (height <= 0.0f) {
                 windX = simulation->windVelocityX * LOW_WIND_SCALE;
@@ -1731,7 +1873,6 @@ ROLLED:
         }
 
 SETTLE:
-
         {
             s32 floorHeight;
 
@@ -1815,9 +1956,34 @@ SETTLE:
     return stepFlags;
 }
 
+// The opening's launch doubles the impact's and the aim's side spin, as it
+// does the club's, and a ball hit by a club that can't putt loses this share
+// of its spin from its speed
 #define OPENING_OFFSET_SIDE_SPIN_SCALE 2
 #define OPENING_LAUNCH_SPIN_SPEED_LOSS 0.2f
 
+// A cut-down copy of LaunchBallSimulation. It always takes the club test's
+// entry, picks a lie blend of 0, leaves out the slopes, rain and wind, and
+// prints the launch velocity to the debug output.
+//
+// groundHeight also holds the club's doubled side spin, to match. Doubled in
+// the sum, fold moves CLUB_SIDE_SPIN_SCALE onto sideSign, where the original
+// doubles club->sideSpin before multiplying by sideSign (4 words differ, none
+// in shape). Doubled in a variable of its own, local-alloc ties the club's
+// value, its doubling and the product into one quantity. That ties on priority
+// with shot->offsetX and comes first by number, so it takes $v1 and leaves
+// the offset $a0, where the original has them the other way round (14, none).
+// As groundHeight is also used in an earlier block, its register is left to
+// global-alloc, and the product alone ranks below the offset, which takes
+// $v1. groundHeight then gets $a0, as $v0 and $v1 are taken where the ground
+// height is.
+//
+// Doubling it where it is loaded gives 4 words (none in shape), doubling it
+// in the sum 12 (none), and multiplying it by sideSign in a third statement,
+// or writing sideSign second in the product, 2 (none). Reusing purpose gives
+// 6 (none), index 22 (2), rumbles 32 (4) and speed 56 (46). Loading and
+// doubling it before the yaw matches too, as does doubling it by adding it to
+// itself or by a shift.
 s32 LaunchOpeningBallSimulation(
     BallSimulation *simulation,
     LaunchPurpose purpose,
@@ -1893,6 +2059,8 @@ s32 LaunchOpeningBallSimulation(
             ONE_PER_PERCENT;
     }
     else {
+        // In a local, to match: scaling by the constant itself gives 19 words
+        // differing (11 in shape), against 4 (0)
         s32 percent = CLUB_TEST_SPEED_HALF_PERCENTS;
 
         speed = speed * percent / HALF_PERCENTS_PER_ONE;
@@ -1906,6 +2074,7 @@ s32 LaunchOpeningBallSimulation(
     pitch +=
         (f32)club->offsetPitch * shot->offsetY * (DEGREES_TO_RADIANS / OFFSET_Y_PER_PITCH_STEP);
     yawRadians = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;
+    // Reused to match, as the header comment explains
     groundHeight = club->sideSpin;
     groundHeight *= CLUB_SIDE_SPIN_SCALE;
     simulation->sideSpin = (((((sideSign * impactEffect->sideSpinChange) + shot->offsetX) *

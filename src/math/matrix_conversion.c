@@ -1,11 +1,23 @@
+/*
+ * The game's copy of libultra's matrix utilities, which sits among
+ * the game's code and was built at -O2 like it, where libultra is
+ * built at -O3. Unlike libultra's, guMtxF2L clamps each element to
+ * between FIXED_ELEMENT_MIN and FIXED_ELEMENT_MAX before converting
+ * it.
+ */
+
 #include <ultra64.h>
 
+// Converts between floats and the 16.16 fixed point of a Mtx
 #define FloatToFixed(value) (s32)((value) * (f32)0x10000)
 #define FixedToFloat(value) ((f32)(value) / (f32)0x10000)
 
+// The range guMtxF2L clamps elements to
 #define FIXED_ELEMENT_MIN (-32768.0f)
 #define FIXED_ELEMENT_MAX 32766.0f
 
+// Clamps the float matrix in place, then converts it into the fixed-point
+// matrix
 void guMtxF2L(f32 mf[4][4], Mtx *m) {
     s32 row;
     s32 pair;
@@ -42,6 +54,7 @@ void guMtxF2L(f32 mf[4][4], Mtx *m) {
     }
 }
 
+// Converts the fixed-point matrix into the float matrix
 void guMtxL2F(f32 mf[4][4], Mtx *m) {
     s32 row;
     s32 pair;
@@ -66,6 +79,7 @@ void guMtxL2F(f32 mf[4][4], Mtx *m) {
     }
 }
 
+// Sets the matrix to the identity
 void guMtxIdentF(f32 mf[4][4]) {
     s32 row;
     s32 column;

@@ -1,3 +1,7 @@
+/*
+ * Simulates the shot from the ball's position and records its path.
+ */
+
 #include "shot/shot_simulation.h"
 
 #include <ultra64.h>
@@ -14,8 +18,10 @@
 #include "system/compiler.h"
 
 static u8 f_UnusedBytesBeforeSimulatedShot[0x10] UNUSED;
+// Not static: the original left it to the linker's common block
 SimulatedShot g_SimulatedShot;
 
+// Simulates the shot from the ball's position and records its path
 void SimulateShot(ShotLaunch *shot) {
     BallSimulation simulationState;
     BallSimulation *simulation;
@@ -37,6 +43,9 @@ void SimulateShot(ShotLaunch *shot) {
     g_SimulatedShot.positionStepMin[AXIS_Z] = 0;
     g_SimulatedShot.flagHitStep = NO_STEP;
 
+    // The start and both bounds begin at the ball, each stored from it (start
+    // first) or chained; copying the start into the minimum and the minimum
+    // into the maximum instead gives x 29 words differing, 9 in shape
     g_SimulatedShot.positionMax[AXIS_X] = g_SimulatedShot.positionMin[AXIS_X] =
         g_SimulatedShot.startPosition[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
     g_SimulatedShot.positionMax[AXIS_Y] = g_SimulatedShot.positionMin[AXIS_Y] =

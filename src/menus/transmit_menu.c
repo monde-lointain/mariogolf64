@@ -1,3 +1,8 @@
+/*
+ * The Transmit menu, which brings characters over from Game Boy cartridges and
+ * writes status and experience to them.
+ */
+
 #include "menus/transmit_menu.h"
 
 #include <string.h>
@@ -31,14 +36,18 @@
 #include "system/overlay_manager.h"
 #include "text/text.h"
 
+// The options of each transfer mode
 #define TRANSFER_MODE_COUNT 2
 #define MODE_OPTION_COUNT 3
 
+// The rows of f_ModeOptions: Send Status in both modes, then Bring Characters
+// at boot or Send Experience from the menu, then the main menu at boot only
 #define STATUS_OPTION_ROW 0
 #define SECOND_OPTION_ROW 1
 #define MAIN_MENU_OPTION_ROW 2
-#define OPTION_ROW_FLIP 1
 
+// f_ModeOptions entries, counted from the message naming each
+#define OPTION_ROW_FLIP 1
 #define MESSAGE_FIRST_TRANSMIT_OPTION 0x13F
 
 enum TransmitOption {
@@ -51,17 +60,23 @@ enum TransmitOption {
 
 typedef s32 TransmitOption;
 
+// The hint below each option, counted the same way
 #define MESSAGE_FIRST_TRANSMIT_OPTION_HINT 0x143
 
+// screenStep values on the Bring Characters screen
 enum BringStep {
     BRING_READING,
     BRING_CHOOSING = 2,
+    // Whether to bring more characters
     BRING_BRINGING,
+    // Never set; its arm does nothing
     BRING_ASKING,
     BRING_UNUSED,
     BRING_BROUGHT = 7,
+    // The character to replace
     BRING_CHOOSING_SLOT,
     BRING_NO_CHARACTERS = 10,
+    // Asking the player to start a pak check
     BRING_CONFIRMING = 12,
     BRING_STARTING,
     BRING_SHOWING_ERROR,
@@ -69,35 +84,39 @@ enum BringStep {
 };
 
 typedef s32 BringStep;
-
 #define BRINGING_FRAME_COUNT 16
 
+// screenStep values on the Send Status screen
 enum SendStatusStep {
-    SEND_STATUS_SHOWING_ERROR,
+    SEND_STATUS_SHOWING_ERROR, // Or the canceled pak check, closing
     SEND_STATUS_CHOOSING,
     SEND_STATUS_READY = 3,
     SEND_STATUS_CHECKING,
     SEND_STATUS_SENT,
-    SEND_STATUS_ASKING = 8,
+    SEND_STATUS_ASKING = 8, // Whether to overwrite the cartridge's status
     SEND_STATUS_STARTING,
-    SEND_STATUS_CONFIRMING,
+    SEND_STATUS_CONFIRMING, // Asking the player to start a pak check
     SEND_STATUS_TAGGING,
     SEND_STATUS_WRITING
 };
 
+// screenStep values on the Send Experience screen
 enum SendExperienceStep {
     SEND_EXPERIENCE_CHOOSING,
     SEND_EXPERIENCE_SENT = 3,
     SEND_EXPERIENCE_WRITING,
+    // Never set; each would end like a failure
     SEND_EXPERIENCE_UNUSED_A,
     SEND_EXPERIENCE_UNUSED_B,
     SEND_EXPERIENCE_UNUSED_C,
     SEND_EXPERIENCE_FAILED,
     SEND_EXPERIENCE_DONE,
+    // Asking the player to start a pak check
     SEND_EXPERIENCE_CONFIRMING,
     SEND_EXPERIENCE_NOTHING_TO_SEND
 };
 
+// f_NoticeState: the notice cloud grows, shows its message, then shrinks
 enum NoticeState {
     NOTICE_HIDDEN,
     NOTICE_OPENING,
@@ -126,7 +145,6 @@ enum PakResult {
 };
 
 typedef s32 PakResult;
-
 #define MESSAGE_INSERT_TRANSFER_PAK 0x149
 #define MESSAGE_SWAP_FOR_TRANSFER_PAK 0x148
 #define MESSAGE_LOOSE_TRANSFER_PAK 0x14A
@@ -146,10 +164,11 @@ typedef s32 PakResult;
 #define MESSAGE_EXPERIENCE_SENT 0x159
 #define MESSAGE_NOT_FROM_CARTRIDGE 0x15A
 #define MESSAGE_CHOOSE_BROUGHT_CHARACTER 0x15C
+
+// The hints below the status screen
 #define MESSAGE_CHARACTER_BROUGHT 0x15D
 #define MESSAGE_CHOOSE_SWAPPED_CHARACTER 0x15E
 #define MESSAGE_NO_CHARACTERS 0x15F
-
 #define MESSAGE_CHOOSE_CARTRIDGE 0x160
 #define MESSAGE_KEEP_POWER_ON 0x161
 #define MESSAGE_SEND_STATUS 0x162
@@ -157,8 +176,10 @@ typedef s32 PakResult;
 #define HINT_TOP 186
 #define HINT_TEXT_SLOT 3
 
+// DrawCharacterStats' layout
 #define STATS_NAME_LEFT 192
 #define STATS_NAME_TOP 140
+// Of both the stat labels and the stats
 #define STATS_LEFT 188
 #define STATS_TOP 172
 #define STAT_LABELS_WIDTH 80
@@ -172,8 +193,10 @@ typedef s32 PakResult;
 #define CURVE_BAR_WIDTH 72
 #define CURVE_BAR_HEIGHT 8
 #define CURVE_SEGMENT_WIDTH 8
+// From a fade of 4 to a draw of 4
 #define CURVE_SEGMENT_COUNT 9
 
+// The rows of the shot types image
 enum ShotType {
     SHOT_TYPE_STRAIGHT,
     SHOT_TYPE_DRAW,
@@ -183,11 +206,14 @@ enum ShotType {
 
 typedef s32 ShotType;
 
+// The faces of the characters brought over, along the bottom
 #define FACES_LEFT 24
 #define FACES_TOP 136
 #define FACE_SPACING 40
 #define FACE_CURSOR_MARGIN 9
 
+// The listed cartridge characters on the Bring Characters screen, each above
+// its controller
 #define LISTED_FACES_LEFT 28
 #define LISTED_FACES_TOP 56
 #define LISTED_FACE_SPACING 46
@@ -195,6 +221,8 @@ typedef s32 ShotType;
 #define SHOWN_LISTED_COUNT 6
 #define BRING_CURSOR_MARGIN 8
 
+// The arrows beside the list when it scrolls, which show each frame for four
+// updates
 #define ARROW_FRAME_TICKS 4
 #define ARROW_CYCLE_TICKS (GREEN_ARROW_FRAME_COUNT * ARROW_FRAME_TICKS)
 #define ARROWS_TOP 92
@@ -204,16 +232,24 @@ typedef s32 ShotType;
 #define TRANSFER_PAK_ICONS_TOP 72
 #define TRANSFER_PAK_ICON_SPACING 56
 #define CONTROLLER_CURSOR_MARGIN 8
+// The pointer at the chosen cartridge on the Send Status screen
 #define POINTER_TOP 76
+// Both pointers swing out and back over half a turn of their angle
 #define POINTER_SWING_STEP DegreesToRadians(10)
 #define POINTER_SWING_DISTANCE 8.0f
+// Below each face
 #define EXPERIENCE_LEFT 20
 #define EXPERIENCE_TOP 174
+// The options, centered above the hint, with the pointer at the left of the
+// chosen one
 #define OPTIONS_CENTER_X (SCREEN_WIDTH / 2)
 #define OPTIONS_TOP 64
 #define OPTION_SPACING 18
 #define OPTION_POINTER_TOP 60
+// Between the pointer at rest and the chosen option's name
 #define OPTION_POINTER_GAP 8
+// The backdrop: the course scene at double size in strips, then the title and
+// the wood panel
 #define TITLE_LEFT 60
 #define TITLE_TOP 16
 #define TITLE_WIDTH 200
@@ -225,7 +261,10 @@ typedef s32 ShotType;
 #define WOOD_PANEL_STRIP_ROWS 7
 #define WOOD_PANEL_STRIP_COUNT 26
 
+// The notice cloud grows by one step each time it is drawn, up to this size
 #define NOTICE_FULL_SIZE 4
+// The cloud is drawn in two strips about its center, its half-size growing by a
+// step per size
 #define NOTICE_CENTER_X (SCREEN_WIDTH / 2)
 #define NOTICE_CENTER_Y 116
 #define NOTICE_WIDTH 256
@@ -237,6 +276,7 @@ typedef s32 ShotType;
 #define NOTICE_TEXT_TOP 110
 #define NOTICE_TEXT_SLOT 3
 
+// The Accessing sign, drawn in strips
 #define ACCESSING_LEFT 52
 #define ACCESSING_TOP 64
 #define ACCESSING_WIDTH 216
@@ -244,12 +284,16 @@ typedef s32 ShotType;
 #define ACCESSING_STRIP_COUNT 10
 #define ACCESSING_STRIP_SIZE (ACCESSING_WIDTH * ACCESSING_STRIP_HEIGHT)
 
+// Where the hand pressing the A button waits beside a notice
 #define NOTICE_PRESSING_HAND_LEFT 256
 #define NOTICE_PRESSING_HAND_TOP 128
 
+// Where the Game Boy cartridge's RAM appears through the Transfer Pak
 #define CARTRIDGE_RAM_ADDRESS 0xA000
 #define CARTRIDGE_RAM_SIZE 0x2000
 
+// ReadCartridgeCharacters takes a phase of steps for each controller: it opens
+// the cartridge, then reads one save a step
 #define CARTRIDGE_READ_PHASE_SIZE (CARTRIDGE_SAVE_COUNT + 1)
 #define CARTRIDGE_OPENING_STEP 0
 #define CARTRIDGE_FIRST_SAVE_STEP 1
@@ -257,18 +301,25 @@ typedef s32 ShotType;
 #define CartridgeReadPhaseStep(readStep) ((readStep) % CARTRIDGE_READ_PHASE_SIZE)
 #define LastCartridgeReadStep(controllerCount) (((controllerCount) * CARTRIDGE_READ_PHASE_SIZE) - 1)
 
+// The largest value the status sends for each figure
 #define STATUS_VALUE_MAX 999
 
+// The status rounds its figures to tenths through hundredths, rounding the
+// hundredths half up
 #define HUNDREDTHS_PER_ONE 100.0f
 #define HUNDREDTHS_PER_TENTH 10
 #define HALF_TENTH_HUNDREDTHS 5
 #define TENTHS_PER_ONE 10
 
+// The status data BuildStatusData fills for the Game Boy cartridge; its values
+// are little-endian
 #define STATUS_CLEARED_SIZE 0x400
+// Scores are sent raised by this, to keep them positive
 #define STATUS_SCORE_BIAS 54
 #define STATUS_THIRD_PLACE (1 << 0)
 #define STATUS_SECOND_PLACE (1 << 1)
 #define STATUS_FIRST_PLACE (1 << 2)
+// The computer characters sent, those before the Game Boy characters
 #define STATUS_MATCHUP_COLUMN_COUNT 14
 
 typedef struct StatusTime {
@@ -276,37 +327,42 @@ typedef struct StatusTime {
     u8 seconds;
     u8 hundredths;
     UCharacterIndex8 characterIndex;
-    u8 scoreToPar;
+    u8 scoreToPar; // Plus STATUS_SCORE_BIAS
 } StatusTime;
 
+// The status packs a course's birdie badges one bit per hole, eight holes to a
+// byte, from the top bit of the first byte
 #define BIRDIE_BADGE_BYTE_COUNT ((COURSE_HOLE_COUNT + BITS_PER_BYTE - 1) / BITS_PER_BYTE)
 #define BirdieBadgeBit(holeInByte) (1 << (BITS_PER_BYTE - 1 - (holeInByte)))
 
+// One course's figures in the status data, or every course's together
 typedef struct StatusCourse {
     u8 roundCount[2];
     u8 bestScore;
     u8 scoreAverage;
     u8 longestDrive[2];
     u8 driveAverage[2];
-    u8 fairwayPercent;
-    u8 puttAverage;
-    u8 parSavePercent;
+    u8 fairwayPercent; // As a percentage
+    u8 puttAverage; // In tenths, from PackTenths
+    u8 parSavePercent; // As percentages
     u8 parOnPercent;
     u8 sandSavePercent;
-    u8 places;
+    u8 places; // STATUS_*_PLACE bits
     u8 characterBestScores[CHARACTER_COUNT];
     StatusTime bestTimes[BEST_TIME_COUNT];
-    u8 birdieBadges[BIRDIE_BADGE_BYTE_COUNT];
+    u8 birdieBadges[BIRDIE_BADGE_BYTE_COUNT]; // See BirdieBadgeBit
 } StatusCourse;
 
+// One bit per computer character, for one of the player's characters
 typedef struct StatusMatchupBits {
     u8 wonBits[2];
     u8 wonUnsavedBits[2];
 } StatusMatchupBits;
 
+// What the player has opened and won, in the status data
 typedef struct StatusProgress {
     u8 openCourses;
-    u8 ringShotStars[RING_SHOT_COURSE_COUNT];
+    u8 ringShotStars[RING_SHOT_COURSE_COUNT]; // One bit per hole
     u8 birdieBadgeCount;
     StatusMatchupBits matchupBits[CHARACTER_COUNT];
 } StatusProgress;
@@ -317,8 +373,10 @@ typedef struct StatusData {
     StatusProgress progress;
 } StatusData;
 
+// A Game Boy save in the cartridge RAM
 #define CARTRIDGE_SAVE_SIZE 0x200
 #define SAVE_CHECKSUM_OFFSET 0x30
+// The save's 16-bit values are little-endian
 #define SAVE_HALFWORD_SIZE 2
 #define SAVE_HAS_STATUS_OFFSET 0xA0
 #define SAVE_STATUS_ADDRESS_OFFSET 0xA2
@@ -328,75 +386,94 @@ typedef struct StatusData {
 #define STATUS_DATA_SIZE 0x800
 
 #define SAVE_SIGNATURE_OFFSET 0x20
+// Records of where the save's data is: one per Game Boy character, then the
+// status's
 #define SAVE_RECORDS_OFFSET 0x40
 #define SAVE_RECORD_SIZE 0x20
 #define RECORD_ADDRESS_OFFSET 2
 #define RECORD_SIZE_OFFSET 4
 #define RECORD_CHECKSUM_OFFSET 6
+// A Game Boy character's data
 #define CHARACTER_DATA_SIZE 0x800
 #define DATA_SAVE_KEY_OFFSET 0xB
 #define DATA_CHARACTER_OFFSET 0x10
 #define DATA_IS_LEFTY_OFFSET 0x11
 #define DATA_LEVEL_OFFSET 0x12
+// A little-endian halfword
 #define DATA_DRIVE_DISTANCE_OFFSET 0x1A
 #define DATA_CLUB_PITCH_OFFSET 0x1C
 #define DATA_SHOT_CURVE_OFFSET 0x1D
 #define DATA_LIE_RATING_LEVEL_OFFSET 0x1E
 #define DATA_MISHIT_RESISTANCE_OFFSET 0x1F
+// Three little-endian bytes, copied to GameBoyCharacter.ignoredValue
 #define DATA_IGNORED_VALUE_OFFSET 0x26
 #define DATA_BALL_TYPE_OFFSET 0x3E
+// GAME_BOY_CLUB_COUNT clubs' stats, each two little-endian halfwords and
+// two bytes
 #define DATA_CLUBS_OFFSET 0x100
 #define DATA_CLUB_SIZE 6
 #define CLUB_DATA_PITCH_OFFSET 2
 #define CLUB_DATA_IGNORED_STAT_OFFSET 4
 #define CLUB_DATA_SIDE_SPIN_OFFSET 5
 #define DATA_EXPERIENCE_OFFSET 0x15C
+// The byte after the experience, which the transfer sets to
+// EXPERIENCE_ADDED_MARK whenever it writes the experience back; the Game Boy
+// version's use of it is unknown
 #define DATA_EXPERIENCE_MARK_OFFSET 0x15E
 #define EXPERIENCE_ADDED_MARK 100
+// The experience and the byte after it
 #define DATA_EXPERIENCE_WRITE_SIZE 3
 #define EXPERIENCE_MAX 0xFFFF
 
+// What was wrong with the character's cartridge, reported when it was the only
+// one found
 enum CartridgeFault {
     CARTRIDGE_FAULT_NONE,
-    CARTRIDGE_FAULT_UNINITIALIZED,
+    CARTRIDGE_FAULT_UNINITIALIZED, // Its save lacks the signature
     CARTRIDGE_FAULT_CORRUPTED
 };
 
 typedef s32 CartridgeFault;
 
+// How far ReadCartridgeCharacters has checked a save
 #define NOT_CHECKED 0
+// Its signature and checksum
 #define SAVE_CHECKED 1
+// Its character data's sum too
 #define DATA_CHECKED 2
 #define SAVE_READ_ATTEMPTS 5
 #define DATA_READ_ATTEMPTS 3
+// The first byte of a record in use
 #define RECORD_PRESENT 1
 
+// What CheckStatusCartridge found
 enum StatusCheck {
     STATUS_CHECK_NO_STATUS,
-    STATUS_CHECK_FAILED,
+    STATUS_CHECK_FAILED, // With the cause in transferResult
     STATUS_CHECK_HAS_STATUS,
-    STATUS_CHECK_READ_FAILED
+    STATUS_CHECK_READ_FAILED // With the error in transferResult
 };
 
 typedef s32 StatusCheck;
 
+// What WriteStatusToCartridge did
 enum StatusWriteResult {
     STATUS_WRITE_DONE,
-    STATUS_WRITE_PAK_ERROR,
-    STATUS_WRITE_FAILED
+    STATUS_WRITE_PAK_ERROR, // With the error in transferResult
+    STATUS_WRITE_FAILED // With the cause in transferResult
 };
 
 typedef s32 StatusWriteResult;
 
+// What WriteExperienceToCartridge did
 enum ExperienceWriteResult {
     EXPERIENCE_WRITE_DONE,
     EXPERIENCE_WRITE_NOT_FROM_CARTRIDGE,
-    EXPERIENCE_WRITE_FAILED,
-    EXPERIENCE_WRITE_PAK_ERROR
+    EXPERIENCE_WRITE_FAILED, // With the cause in transferResult
+    EXPERIENCE_WRITE_PAK_ERROR // With the error in transferResult
 };
 
 typedef s32 ExperienceWriteResult;
-
 #define ASSET_WOOD_PANEL 0x8FD
 #define ASSET_TRANSFER_PAK_ICONS 0x900
 #define TRANSFER_PAK_ICON_SIZE 32
@@ -414,17 +491,28 @@ void ClearCartridgeCharacters(void);
 void ResetSendStatus(void);
 void ResetSendExperience(void);
 PakResult TagCartridges(void);
+
+// Results of opening and accessing the Game Boy cartridges, after the notice
+// each shows
+// ReadCartridgeCharacters has more saves to read
 StatusCheck CheckStatusCartridge(s32 cartridgeIndex);
 StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex);
 ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex);
 void SetNoticeState(NoticeState state, MessageId messageId);
 NoticeState GetNoticeState(void);
-
 #define GAME_BOY_PAK_OPEN_ATTEMPTS 3
 
+// OpenGameBoyPak knows Mario Golf's cartridge by its title's start and
+// Nintendo's licensee code
 #define GAME_BOY_TITLE_CHECKED_LENGTH 14
+// The characters "01"
 #define GAME_BOY_COMPANY_CODE 0x3031
 
+// g_GameBoyTransfer.pressingHandImage under a scalar name. Reading it as
+// a scalar is there to match: GCC keeps a struct field's constant address
+// in a register when it is used twice. In DrawPressingHand, reading the
+// field gives 24 words differing (12 in shape), and copying it to a local
+// first 28 (6).
 extern ImageAsset *g_PressingHandImage;
 
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer);
@@ -434,14 +522,21 @@ PakResult OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *
 
 s32 RoundedWholePart(f32 value);
 
+// The buttons of every controller together, which any player may use on the
+// menu
 static ControllerState f_TransmitController;
 
+// Where DumpCartridgeRam prints whether each stage succeeded
 #define DUMP_STATUS_COLUMN 10
 #define DUMP_OPEN_ROW 3
 #define DUMP_READ_ROW 4
 #define DUMP_WRITE_ROW 5
 
+// Debug code that writes the cartridge RAM of controller 1's Game Boy cartridge
+// to the host
 void DumpCartridgeRam(void) {
+    // The transfer pointer is there to match: reading g_GameBoyTransfer
+    // directly gives 7 words differing, 1 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     u8 cartridgeRam[CARTRIDGE_RAM_SIZE];
 
@@ -450,6 +545,8 @@ void DumpCartridgeRam(void) {
     PrintDebugText("          ", DUMP_STATUS_COLUMN, DUMP_READ_ROW);
     PrintDebugText("          ", DUMP_STATUS_COLUMN, DUMP_WRITE_ROW);
 
+    // The original takes 0 from OpenGameBoyPakWithRetries as success, which is
+    // not PAK_RESULT_OK
     if (OpenGameBoyPakWithRetries(0, &transfer->cartridgeHeader, &transfer->pakFile) ==
         PAK_RESULT_CONNECTOR_PROBLEM) {
         PrintDebugText("GOLF OK", DUMP_STATUS_COLUMN, DUMP_OPEN_ROW);
@@ -467,6 +564,8 @@ void DumpCartridgeRam(void) {
     }
 }
 
+// Loads the menu's images, and the faces and palettes of the Game Boy golfers,
+// then starts the menu's song and stops any rumble.
 void LoadTransmitMenu(void) {
     AssetFile file;
     EncodedAsset asset;
@@ -554,6 +653,7 @@ void LoadTransmitMenu(void) {
     nuContRmbForceStop();
 }
 
+// Frees the images that the menu loaded, so the main menu has room
 void FreeTransmitMenu(void) {
     s32 index;
 
@@ -579,7 +679,13 @@ void FreeTransmitMenu(void) {
 
 void ShowTransferError(PakResult result);
 
+// Runs the Bring Characters screen. After a pak check it reads the cartridges'
+// characters, lets the player choose one and, once all four slots are full, the
+// slot to replace, then brings the character over and offers to bring more from
+// another Game Boy cartridge.
 void UpdateBringCharacters(void) {
+    // The transfer pointer is there to match: reading g_GameBoyTransfer
+    // directly gives 299 words differing, 97 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     PakResult result;
 
@@ -654,6 +760,8 @@ void UpdateBringCharacters(void) {
                     transfer->screenStep = BRING_CHOOSING;
                     transfer->isAccessing = FALSE;
                     break;
+                // The empty case is there to match: without it 11 words differ (9 in
+                // shape), and leaving the default early for it 17 (13)
                 case PAK_RESULT_STILL_READING:
                     break;
                 case PAK_RESULT_NO_CHARACTERS:
@@ -786,6 +894,7 @@ void UpdateBringCharacters(void) {
     }
 }
 
+// Opens the notice that explains a controller pak error to the player
 void ShowPakError(s32 pfsError) {
     switch (pfsError) {
         case PFS_ERR_NOPACK:
@@ -806,6 +915,8 @@ void ShowPakError(s32 pfsError) {
     }
 }
 
+// Opens the notice that explains a transfer's result, with the hand pressing
+// A beside it
 void ShowTransferError(PakResult result) {
     g_GameBoyTransfer.pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
     switch (result) {
@@ -848,7 +959,12 @@ void ShowTransferError(PakResult result) {
     }
 }
 
+// Runs the Send Status screen. After a pak check that tags the cartridges, the
+// player chooses one, and the status is written to it, after asking whether to
+// overwrite any status already there.
 void UpdateSendStatus(void) {
+    // The transfer pointer is there to match: reading g_GameBoyTransfer
+    // directly gives 285 words differing, 95 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     s32 result;
 
@@ -1027,7 +1143,12 @@ void UpdateSendStatus(void) {
     }
 }
 
+// Lets the player choose a character whose experience to send, asks them to
+// start a pak check, then writes the experience to the cartridge and shows the
+// result.
 void UpdateSendExperience(void) {
+    // The transfer pointer is there to match: reading g_GameBoyTransfer
+    // directly gives 150 words differing, 70 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
 
     switch (transfer->screenStep) {
@@ -1175,6 +1296,7 @@ void UpdateSendExperience(void) {
     }
 }
 
+// Whether every playing controller holds a Rumble Pak
 Boolean HaveAllRumblePaks(void) {
     Boolean haveAll = TRUE;
     s32 index;
@@ -1188,12 +1310,18 @@ Boolean HaveAllRumblePaks(void) {
     return haveAll;
 }
 
+// A macro rather than an inline function, which leaves a store-flag result
 #define AreAllCButtonsHeld(buttons) \
     ((((buttons) & (L_CBUTTONS | D_CBUTTONS | U_CBUTTONS)) == \
          (L_CBUTTONS | D_CBUTTONS | U_CBUTTONS)) && \
         ((buttons) & R_CBUTTONS))
 
+// Runs the options screen and hands each frame to the screen chosen there, then
+// leaves for the title screen or the main menu, asking for any missing Rumble
+// Pak first.
 void UpdateTransmitMenu(void) {
+    // The transfer pointer is there to match: reading g_GameBoyTransfer
+    // directly gives 110 words differing, 40 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     s32 controllerIndex;
 
@@ -1346,6 +1474,8 @@ void UpdateTransmitMenu(void) {
     }
 }
 
+// Fills the slot for a cartridge's save from the character data its record
+// points to
 void DecodeCartridgeCharacter(
     u8 *characterData,
     s32 cartridgeIndex,
@@ -1452,6 +1582,7 @@ void DecodeCartridgeCharacter(
     gameBoyCharacter->saveIndex = saveIndex;
 }
 
+// Would skip a save without characters, but does nothing
 void SkipCartridgeSave(
     u8 *unusedData UNUSED,
     s32 unusedCartridgeIndex UNUSED,
@@ -1461,6 +1592,8 @@ void SkipCartridgeSave(
 ) {
 }
 
+// Whether a Game Boy character came from the save that the character data
+// belongs to, by its save name and key
 Boolean IsCharacterFromSave(GameBoyCharacter *gameBoyCharacter, u8 *characterData) {
     s32 index;
 
@@ -1487,6 +1620,7 @@ Boolean IsCharacterFromSave(GameBoyCharacter *gameBoyCharacter, u8 *characterDat
     return TRUE;
 }
 
+// The menu's options, each the offset of its name from TRANSMIT_OPTION_MESSAGES
 static s32 f_ModeOptions[TRANSFER_MODE_COUNT][MODE_OPTION_COUNT] = {
     {TRANSMIT_OPTION_STATUS, TRANSMIT_OPTION_CHARACTERS, TRANSMIT_OPTION_MAIN_MENU},
     {TRANSMIT_OPTION_STATUS, TRANSMIT_OPTION_EXPERIENCE, TRANSMIT_OPTION_NONE},
@@ -1496,17 +1630,24 @@ static char f_UnusedDriveName[8] UNUSED = "Drive";
 static Radians f_StatusPointerAngle = 0.0f;
 static s32 f_CharacterArrowFrame = 0;
 static Radians f_OptionPointerAngle = 0.0f;
+// The title in the Game Boy cartridge header, then its game code
 static char f_GameBoyCartridgeTitle[16] = "MARIO GOLF\0AWXE";
+// Begins every save in the Game Boy cartridge RAM
 static char f_CartridgeSaveSignature[16] = "CAMELOT GAMEBOY";
 static NoticeState f_NoticeState = NOTICE_HIDDEN;
 static MessageId f_NoticeMessageId = 0;
 static s32 f_NoticeSize = 0;
 static s32 f_PressingHandFrame = 0;
 static s32 f_UnusedZeros[2] UNUSED = {0, 0};
+// The order in which the status data lists the player's characters
 static s32 f_StatusCharacterOrder[CHARACTER_COUNT] =
     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
 
+// Copies a listed cartridge character into a Game Boy character slot and
+// marks it brought over, remembering where it came from
 void BringOverCharacter(s32 listedIndex, s32 gameBoyCharacterIndex) {
+    // The transfer pointer is there to match: reading g_GameBoyTransfer
+    // directly gives 34 words differing, 14 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
 
     g_GameBoyCharacters[gameBoyCharacterIndex] =
@@ -1517,6 +1658,7 @@ void BringOverCharacter(s32 listedIndex, s32 gameBoyCharacterIndex) {
     transfer->sourceIndices[gameBoyCharacterIndex] = transfer->listedCharacters[listedIndex];
 }
 
+// Starts the Bring Characters screen with its cursors at the first entries
 void ResetBringCharacters(void) {
     g_GameBoyTransfer.listedCharacterIndex = 0;
     g_GameBoyTransfer.gameBoyCharacterIndex = 0;
@@ -1524,12 +1666,15 @@ void ResetBringCharacters(void) {
     g_GameBoyTransfer.isCanceled = FALSE;
 }
 
+// Starts the Send Status screen with no cartridge tagged or chosen
 void ResetSendStatus(void) {
     g_GameBoyTransfer.chosenCartridgeIndex = 0;
     g_GameBoyTransfer.taggedCartridgeCount = 0;
     g_GameBoyTransfer.isCanceled = FALSE;
 }
 
+// Starts the Send Experience screen with no cartridge tagged and the first
+// character chosen
 void ResetSendExperience(void) {
     g_GameBoyTransfer.chosenCartridgeIndex = 0;
     g_GameBoyTransfer.gameBoyCharacterIndex = 0;
@@ -1537,10 +1682,12 @@ void ResetSendExperience(void) {
     g_GameBoyTransfer.isCanceled = FALSE;
 }
 
+// Returns the checksum that a save holds, which ComputeSaveChecksum checks
 s32 GetStoredChecksum(u8 *save) {
     return save[SAVE_CHECKSUM_OFFSET] | (save[SAVE_CHECKSUM_OFFSET + 1] << BITS_PER_BYTE);
 }
 
+// Sums the save's bytes after its checksum
 s32 ComputeSaveChecksum(u8 *save) {
     s32 sum = 0;
     s32 offset;
@@ -1552,7 +1699,11 @@ s32 ComputeSaveChecksum(u8 *save) {
     return sum;
 }
 
+// Rebuilds the list of cartridge characters that can still be brought over,
+// padding the rest with -1
 void ListPresentCharacters(void) {
+    // The transfer pointer is there to match: reading g_GameBoyTransfer
+    // directly gives 39 words differing, 9 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     s32 listedCount = 0;
     s32 index;
@@ -1568,6 +1719,8 @@ void ListPresentCharacters(void) {
     }
 }
 
+// Draws the hint that tells the player what to do at the Send Status screen's
+// step
 void DrawSendStatusHint(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *gfx = *displayListHead;
     MessageId messageId = NO_MESSAGE;
@@ -1603,6 +1756,8 @@ void DrawSendStatusHint(Gfx **displayListHead, GameBoyTransfer *transfer) {
     *displayListHead = gfx;
 }
 
+// Draws a Game Boy character's name, level and drive, the name of their shot
+// type and a bar from its center out to their shot curve.
 void DrawCharacterStats(
     Gfx **displayListHead,
     GameBoyCharacter *gameBoyCharacter,
@@ -1611,6 +1766,8 @@ void DrawCharacterStats(
     Gfx *gfx = *displayListHead;
     s32 segment;
 
+    // Holding the shot type row in segmentCurve first is there to match: a
+    // shotType local gives 50 words differing, none in shape
     ShotType segmentCurve;
 
     SetUpTextDrawing(&gfx);
@@ -1755,6 +1912,9 @@ void DrawCharacterStats(
     );
     for (segment = 0, segmentCurve = -CURVE_SEGMENT_COUNT / 2; segment != CURVE_SEGMENT_COUNT;
         segment++, segmentCurve++) {
+        // Light segments from the center out to the shot curve. The continues are
+        // there to match: each pair joined with || gives 20 words differing, 8 in
+        // shape
         if (gameBoyCharacter->shotCurve < 0) {
             if (segmentCurve < gameBoyCharacter->shotCurve) {
                 continue;
@@ -1796,9 +1956,12 @@ void DrawCharacterStats(
     *displayListHead = gfx;
 }
 
+// Where DrawBringCharactersText prints the screen's step
 #define STEP_DEBUG_COLUMN 20
 #define STEP_DEBUG_ROW 2
 
+// Draws the Bring Characters screen's text: the stats of the character under
+// the cursor and the hint for the step
 void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     GameBoyCharacter *gameBoyCharacter = g_GameBoyCharacters;
     Gfx *gfx = *displayListHead;
@@ -1861,6 +2024,8 @@ void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     *displayListHead = gfx;
 }
 
+// Draws the Send Experience screen's text: each character's experience, the
+// chosen one's stats and the hint for the step
 void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *gfx = *displayListHead;
     s32 gameBoyCharacterIndex;
@@ -1871,7 +2036,6 @@ void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     for (gameBoyCharacterIndex = 0; gameBoyCharacterIndex != g_GameBoyTransfer.characterCount;
         gameBoyCharacterIndex++) {
         GameBoyCharacter *gameBoyCharacter = &g_GameBoyCharacters[gameBoyCharacterIndex];
-
         sprintf(g_PrintBuffer, "%4d", (int)gameBoyCharacter->experience);
         DrawSmallText(
             &gfx,
@@ -1912,6 +2076,10 @@ void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     *displayListHead = gfx;
 }
 
+// Draws the Send Status screen: the imported faces and the icons of the tagged
+// controllers, dimming the others once a cartridge is chosen. A swinging
+// pointer marks the cartridge while choosing and the cursor box once it is
+// chosen.
 void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *gfx = *displayListHead;
     s32 index;
@@ -1969,6 +2137,8 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
 
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     if (transfer->taggedCartridgeCount != 0) {
+        // An if-chain rather than a switch is there to match: a switch gives 8
+        // words differing, 8 in shape
         if (transfer->screenStep == SEND_STATUS_CHOOSING) {
             f_StatusPointerAngle += POINTER_SWING_STEP;
             if (f_StatusPointerAngle > M_PI) {
@@ -1979,6 +2149,8 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
             gDPPipeSync(gfx++);
             gDPSetTextureLUT(gfx++, G_TT_RGBA16);
             LoadSmallPalette(&gfx, 0, ImagePalette(transfer->pointerImage));
+            // The original loads the controller icons again, which the pointer
+            // replaces
             LoadNibbleTextureBlock(
                 &gfx,
                 ImageTexels(transfer->transferPakIconsImage),
@@ -2040,6 +2212,7 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
     *displayListHead = gfx;
 }
 
+// Draws the faces of the characters already brought over, in their slots
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *gfx = *displayListHead;
     s32 gameBoyCharacterIndex;
@@ -2088,6 +2261,7 @@ void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
     *displayListHead = gfx;
 }
 
+// Draws the options screen's faces; DrawTransmitMenu draws the options
 void DrawTransmitOptionFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *gfx = *displayListHead;
 
@@ -2095,10 +2269,15 @@ void DrawTransmitOptionFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
     *displayListHead = gfx;
 }
 
+// Whether a cartridge character is on the list: read in, or being brought over
 static inline Boolean IsListed(ListingState listing) {
     return listing == LISTING_SHOWN || listing == LISTING_BRINGING;
 }
 
+// Draws the Bring Characters screen: the faces already brought over, the
+// cartridge characters on the list with their controllers, the cursor, and the
+// arrows when the list scrolls. A character being brought over moves from the
+// list to its slot.
 void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *gfx = *displayListHead;
     s32 index;
@@ -2315,10 +2494,14 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
     *displayListHead = gfx;
 }
 
+// Draws the Send Experience screen: the faces with their cursor and the
+// cartridges' controller icons, dimming the unchosen ones once sent
 void DrawSendExperienceScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *gfx = *displayListHead;
     s32 index;
 
+    // A second counter alongside index is there to match: index in its place
+    // gives 70 words differing (4 in shape), and counting it in the for 22 (4)
     s32 slot;
 
     DrawImportedFaces(&gfx, transfer);
@@ -2385,17 +2568,25 @@ void DrawAccessingSign(Gfx **displayListHead);
 void DrawNotice(Gfx **displayListHead);
 void DrawPressingHand(Gfx **displayListHead);
 
+// Whether DrawTransmitMenu shows the transfer mode's options on a screen
 #define AreOptionsShown(screen) \
     ((screen) == TRANSMIT_SCREEN_OPTIONS || \
         (screen) == TRANSMIT_SCREEN_LEAVING_FOR_TITLE || \
         (screen) == TRANSMIT_SCREEN_LEAVING_FOR_MENU || \
         (screen) == TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT)
 
+// Draws the backdrop, the title, the current screen and the options, notice
+// and hand over it
 void DrawTransmitMenu(Gfx **displayListHead) {
+    // The drawing helpers take this pointer, and the fields are read through
+    // it too: reading them from g_GameBoyTransfer, and passing its address,
+    // gives 162 words differing, 40 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     Gfx *gfx = *displayListHead;
     s32 index;
     s32 rowCount;
+    // Apart from rowCount, which is there to match: reusing rowCount for the
+    // panel's strips gives 180 words differing, 20 in shape
     s32 panelRowCount;
     TransmitOption option;
     s32 width;
@@ -2594,6 +2785,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
             &height,
             0
         );
+        // The pointer swings in and out over half a turn of the angle
         f_OptionPointerAngle += POINTER_SWING_STEP;
         if (f_OptionPointerAngle > M_PI) {
             f_OptionPointerAngle -= M_PI;
@@ -2706,7 +2898,11 @@ void DrawTransmitMenu(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Forgets the cartridge characters read before, so that the Bring Characters
+// screen reads them again
 void ClearCartridgeCharacters(void) {
+    // The transfer pointer is there to match: reading g_GameBoyTransfer
+    // directly gives 28 words differing, 12 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     s32 controllerIndex;
     s32 save;
@@ -2727,7 +2923,26 @@ void ClearCartridgeCharacters(void) {
     }
 }
 
+// Adds the character's experience to its save on the Game Boy cartridge it came
+// from, looking through every controller's pak for it, and rewrites the save's
+// checksums.
+//
+// storedSum is masked to 16 bits beside the computed sum, to match, though
+// its two bytes can't exceed that. The mask's references raise storedSum's
+// global-alloc priority above recordOffset's, so storedSum takes $s1 first,
+// then recordOffset $s2 and saveIndex $s1, as in the original. Without it, 40
+// words differ, none in shape: recordOffset (28 references over a live
+// length of 159, priority 7044) goes first and takes $s1. Types, declaration
+// orders, while loops and building storedSum in two steps found no natural
+// form that does the same.
+//
+// The clamp repeats the sum in each arm, which gives the original's copy of
+// the sum into the stored experience's register: adding into the experience
+// and then clamping gives 9 words (1 in shape), and a ?: repeating the sum
+// 19 (7).
 ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
+    // The transfer pointer is there to match: reaching g_GameBoyTransfer
+    // directly gives 154 words differing, 66 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     u8 characterData[CHARACTER_DATA_SIZE];
     u8 save[CARTRIDGE_SAVE_SIZE];
@@ -2786,6 +3001,9 @@ ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
                 save,
                 CARTRIDGE_SAVE_SIZE
             );
+            // Each pak error powers off and continues, to match: jumping to the
+            // loop's last power off from the five read and write errors instead
+            // gives 182 words differing, 68 in shape
             if (result != PAK_ACCESS_OK) {
                 nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
                 continue;
@@ -2967,7 +3185,12 @@ ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
     return EXPERIENCE_WRITE_FAILED;
 }
 
+// Checks that the chosen cartridge is the one tagged and that its save is
+// intact, and reports whether the save already holds a status, which
+// WriteStatusToCartridge marks.
 StatusCheck CheckStatusCartridge(s32 cartridgeIndex) {
+    // The transfer pointer is there to match: reading g_GameBoyTransfer
+    // directly gives 81 words differing, 19 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     u8 save[CARTRIDGE_SAVE_SIZE];
     Boolean isSignatureWrong;
@@ -3003,7 +3226,7 @@ StatusCheck CheckStatusCartridge(s32 cartridgeIndex) {
         for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
             if (save[index] !=
                 transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]][index]) {
-                osSyncPrintf("ライトマーク違反\n");
+                osSyncPrintf("ライトマーク違反\n"); // "Write mark violation"
                 transfer->transferResult = PAK_RESULT_REMOVED_RETRYING;
                 nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
                 return STATUS_CHECK_FAILED;
@@ -3036,7 +3259,12 @@ StatusCheck CheckStatusCartridge(s32 cartridgeIndex) {
 
 void BuildStatusData(StatusData *status);
 
+// Marks the chosen cartridge's save as holding a status and writes the status
+// data where the save says, then the sums of both. It first checks that the
+// cartridge is the one tagged and that its save is intact.
 StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex) {
+    // The transfer pointer is there to match: reading g_GameBoyTransfer
+    // directly gives 80 words differing, 24 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     u8 save[CARTRIDGE_SAVE_SIZE];
     u8 statusData[STATUS_DATA_SIZE];
@@ -3063,6 +3291,7 @@ StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex) {
         for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
             if (save[index] !=
                 transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]][index]) {
+// "Write mark violation"; the original passes sum before setting it
 #ifdef AVOID_UB
                 osSyncPrintf("ライトマーク違反\n");
 #else
@@ -3157,14 +3386,20 @@ StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex) {
     return STATUS_WRITE_FAILED;
 }
 
+// Reads one save of the Game Boy cartridges per call, opening each controller's
+// pak before its saves, and lists the characters in the saves that check out.
+// Returns PAK_RESULT_STILL_READING until the last save is read, then what was
+// found.
 PakResult ReadCartridgeCharacters(void) {
+    // The transfer pointer is there to match: reading g_GameBoyTransfer
+    // directly gives 234 words differing, 64 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     u8 save[CARTRIDGE_SAVE_SIZE];
     u8 characterData[CHARACTER_DATA_SIZE];
     s32 port;
     s32 saveIndex;
     s32 recordOffset;
-    s32 checkedState;
+    s32 checkedState; // How far the save has been checked
     s32 result;
     s32 attempt;
     s32 index;
@@ -3172,6 +3407,8 @@ PakResult ReadCartridgeCharacters(void) {
     s32 storedChecksum;
     s32 dataAddress;
     s32 dataSize;
+    // Of the save, then of the character data. Sharing it is there to match: a
+    // dataSum local gives 112 words differing, 8 in shape
     s32 checksum;
     Boolean isAlreadyBrought;
     s32 gameBoyCharacterIndex;
@@ -3211,6 +3448,8 @@ PakResult ReadCartridgeCharacters(void) {
     else if (transfer->transferResult == PAK_RESULT_OK) {
         saveIndex = CartridgeReadPhaseStep(transfer->readStep) - CARTRIDGE_FIRST_SAVE_STEP;
 
+        // The original starts the offset at the cartridge address of the first
+        // record's address, which every save index replaces
         recordOffset = CARTRIDGE_RAM_ADDRESS + SAVE_RECORDS_OFFSET + RECORD_ADDRESS_OFFSET;
         checkedState = NOT_CHECKED;
         for (index = 0; index != CHARACTER_DATA_SIZE; index++) {
@@ -3256,11 +3495,16 @@ PakResult ReadCartridgeCharacters(void) {
             }
         }
 
+        // The nested tests are there to match: one && chain gives 37 words
+        // differing, 13 in shape
         if (checkedState == SAVE_CHECKED) {
             if (result == PAK_ACCESS_OK) {
                 if (save[recordOffset] == RECORD_PRESENT) {
                     checkedState = NOT_CHECKED;
 
+                    // Working out the address in storedSum first is there to match:
+                    // working it out in dataAddress gives 20 words differing, 10 in
+                    // shape
                     storedChecksum = save[recordOffset + RECORD_ADDRESS_OFFSET] +
                         (save[recordOffset + RECORD_ADDRESS_OFFSET + 1] << BITS_PER_BYTE) -
                         STATUS_ADDRESS_BIAS;
@@ -3297,6 +3541,7 @@ PakResult ReadCartridgeCharacters(void) {
                 case PAK_ACCESS_OK:
                     isAlreadyBrought = FALSE;
 
+                    // "Slot %d read successfully"
                     osSyncPrintf("スロット%d 読み込み成功しました  \n", saveIndex);
                     for (gameBoyCharacterIndex = 0;
                         gameBoyCharacterIndex != GAME_BOY_CHARACTER_COUNT;
@@ -3320,6 +3565,7 @@ PakResult ReadCartridgeCharacters(void) {
                     }
 
                     if (!isAlreadyBrought) {
+                        // transferResult is OK here, so the original never skips a save
                         if (transfer->transferResult == PAK_RESULT_NO_CHARACTERS) {
                             SkipCartridgeSave(
                                 characterData,
@@ -3374,6 +3620,9 @@ PakResult ReadCartridgeCharacters(void) {
     }
 
     if (transfer->readStep == LastCartridgeReadStep(g_ControllerCount)) {
+        // Repeating the results for one cartridge is there to match: testing
+        // only for an uninitialized one here gives 13 words differing, 7 in
+        // shape
         if (transfer->openedCartridgeCount == 1) {
             if (transfer->hasUninitializedCartridge == TRUE) {
                 return PAK_RESULT_UNINITIALIZED;
@@ -3417,6 +3666,8 @@ PakResult ReadCartridgeCharacters(void) {
     return PAK_RESULT_STILL_READING;
 }
 
+// Opens a controller's Game Boy pak, restarting the Game Boy pak manager after
+// each failed attempt, and returns the last PAK_RESULT_*
 PakResult OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *file) {
     s32 failureCount;
     PakResult result;
@@ -3433,6 +3684,8 @@ PakResult OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *
     return result;
 }
 
+// Opens the Game Boy pak on a port, powers it on if needed and reads the
+// cartridge header, then tells whether the cartridge is Mario Golf's.
 PakResult OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
     Boolean isMarioGolf = TRUE;
     s32 index;
@@ -3459,12 +3712,15 @@ PakResult OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
             if (!(pakStatus & OS_GBPAK_POWER)) {
                 switch (nuContGBPakPower(file, NU_CONT_GBPAK_POWER_ON)) {
                     case PAK_ACCESS_OK:
+                        // "3rd Power on"
                         osSyncPrintf("3rd 電源ＯＮ\n");
                         break;
                     case PFS_ERR_NOPACK:
+                        // "3rd Nothing is plugged into the given controller"
                         osSyncPrintf("3rd 指定したコントローラに何も差し込まれていません \n");
                         return PAK_RESULT_NO_PAK;
                     case PFS_ERR_CONTRFAIL:
+                        // "3rd Data transfer with the controller failed."
                         osSyncPrintf("3rd コントローラとのデータ転送の失敗です。\n");
                         return PAK_RESULT_CONNECTOR_PROBLEM;
                 }
@@ -3472,14 +3728,18 @@ PakResult OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
 
             switch (nuContGBPakReadID(file, header, &pakStatus)) {
                 case PFS_ERR_NEW_GBCART:
+                    // "4th The GB cartridge was removed and inserted."
                     osSyncPrintf("4th GBカートリッジの挿抜が行われました。\n");
+                // Falls through
                 case PAK_ACCESS_OK:
                     if (!(pakStatus & OS_GBPAK_GBCART_ON)) {
+                        // "5th No cassette is inserted in the GB pak."
                         osSyncPrintf("5th ＧＢパックにカセットが刺さってません。\n");
                         return PAK_RESULT_CARTRIDGE_REMOVED;
                     }
 
                     if (pakStatus & OS_GBPAK_GBCART_PULL) {
+                        // "The cassette was removed and inserted."
                         osSyncPrintf("カセットの抜き差しが行われました。\n");
                         return PAK_RESULT_REMOVED_RETRYING;
                     }
@@ -3502,19 +3762,25 @@ PakResult OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
 
                     return PAK_RESULT_OK;
                 case PFS_ERR_NOPACK:
+                    // "4th Nothing is plugged into the given controller"
                     osSyncPrintf("4th 指定したコントローラに何も差し込まれていません\n");
                     return PAK_RESULT_NO_PAK;
                 case PFS_ERR_DEVICE:
+                    // "4th A device other than the 64GB pak is plugged into the
+                    // controller"
                     osSyncPrintf(
                         "4th "
                         "64GBパック以外のデバイスがコントローラに差し込まれています\n"
                     );
                     return PAK_RESULT_OTHER_PAK;
                 case PFS_ERR_CONTRFAIL:
+                    // "4th Data transfer with the controller failed."
                     osSyncPrintf("4th コントローラとのデータ転送の失敗です。\n");
 
+                    // "The controller is not connected properly, or"
                     osSyncPrintf("コントローラが正しく接続されていないか、\n");
 
+                    // "the 64GB pak or controller connector may be faulty. stat = %xH"
                     osSyncPrintf(
                         "64GBパックかコントローラコネクタに異常がある可\224\134性がありま"
                         "す。stat = %xH\n",
@@ -3522,21 +3788,26 @@ PakResult OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
                     );
                     return PAK_RESULT_CONNECTOR_PROBLEM;
                 case PFS_ERR_NO_GBCART:
+                    // "4th No GB cartridge is inserted in the 64GB pak."
                     osSyncPrintf("4th 64GBパックにGBカートリッジが差し込まれていません。\n");
                     return PAK_RESULT_NO_CARTRIDGE;
             }
 
             break;
         case PFS_ERR_NOPACK:
+            // "2nd Nothing is plugged into the given controller"
             osSyncPrintf("2nd 指定したコントローラに何も差し込まれていません\n");
             return PAK_RESULT_NO_PAK;
         case PFS_ERR_DEVICE:
+            // "2nd A device other than the 64GB pak is plugged into the controller"
             osSyncPrintf("2nd 64GBパック以外のデバイスがコントローラに差し込まれています\n");
             return PAK_RESULT_OTHER_PAK;
         case PFS_ERR_CONTRFAIL:
+            // "2nd Data transfer with the controller failed."
             osSyncPrintf("2nd コントローラとのデータ転送の失敗です。\n");
             return PAK_RESULT_CONNECTOR_PROBLEM;
         case PFS_ERR_NO_GBCART:
+            // "2ndt No GB cartridge is inserted in the 64GB pak."
             osSyncPrintf("2ndt 64GBパックにGBカートリッジが差し込まれていません。\n");
             return PAK_RESULT_NO_CARTRIDGE;
     }
@@ -3544,7 +3815,12 @@ PakResult OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
     return -1;
 }
 
+// Writes a random tag to the cartridge RAM of each Game Boy cartridge and lists
+// the controllers whose cartridges took it, so that later accesses can tell
+// whether a cartridge was swapped.
 PakResult TagCartridges(void) {
+    // The transfer pointer is there to match: reading g_GameBoyTransfer
+    // directly gives 102 words differing, 22 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     OSGbpakId header;
     NUContPakFile file;
@@ -3634,6 +3910,7 @@ PakResult TagCartridges(void) {
     return PAK_RESULT_LOOSE_PAK;
 }
 
+// Opens the notice cloud with a message, or starts closing it
 void SetNoticeState(NoticeState state, MessageId messageId) {
     f_NoticeState = state;
     if (state == NOTICE_OPENING) {
@@ -3646,16 +3923,22 @@ void SetNoticeState(NoticeState state, MessageId messageId) {
     }
 }
 
+// Returns the NOTICE_* state, so the screens wait for the notice to close
 NoticeState GetNoticeState(void) {
     return f_NoticeState;
 }
 
+// Steps the notice cloud's size and draws it from its center, with its message
+// once it is full size.
 void DrawNotice(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 strip;
     s32 halfWidth;
     s32 halfHeight;
 
+    // The copy of halfHeight, and its starting value, are there to match:
+    // without the 0, or using halfHeight itself, 34 words differ, none in
+    // shape; computing the strip height in place of halfHeight gives 98
     s32 stripHeight = 0;
     s32 bottom;
 
@@ -3747,6 +4030,7 @@ void DrawNotice(Gfx **displayListHead) {
     }
 
     if (f_NoticeState == NOTICE_SHOWN) {
+        // The unused array is there to match; without it 44 words differ
         s32 unused[2] UNUSED;
 
         SetTextSlot(
@@ -3768,6 +4052,8 @@ void DrawNotice(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Draws the Accessing sign, which asks the player not to remove the Game Pak
+// while a pak is being accessed
 void DrawAccessingSign(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 strip;
@@ -3808,6 +4094,7 @@ void DrawAccessingSign(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Draws the hand that presses A beside a notice or a prompt, at its position
 void DrawPressingHand(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
@@ -3861,6 +4148,8 @@ void DrawPressingHand(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Returns value rounded to tenths, times ten, up to MAX_STATUS_VALUE and nine
+// tenths
 static inline s32 PackTenths(f32 value) {
     s32 wholePart = value;
     s32 fraction = (value - wholePart) * HUNDREDTHS_PER_ONE;
@@ -3882,11 +4171,14 @@ static inline s32 PackTenths(f32 value) {
     return (wholePart * TENTHS_PER_ONE) + fraction;
 }
 
+// Fills status with the save's course records, best times, badges and stars, in
+// the layout of the Game Boy cartridge's status data.
 void BuildStatusData(StatusData *status) {
     SaveData *save = GetSaveData();
     StatusCourse *course;
     StatusProgress *progress;
 
+    // Reading the records through save gives 211 words differing, 21 in shape
     SaveRecords *records = &save->records;
     CourseStats *courseStats;
     CourseStats *scannedStats;
@@ -3905,10 +4197,14 @@ void BuildStatusData(StatusData *status) {
         courseStats = &save->records.courseStats[courseIndex];
         course = &status->courses[courseIndex];
 
+        // Testing for zero first is there to match: without it 2 words differ, 2
+        // in shape
         if (courseStats->roundCount != 0) {
             if (courseStats->roundCount > 0) {
                 reciprocal = 1.0f / courseStats->roundCount;
 
+                // Copying the count into value is there to match: storing its bytes
+                // straight from the entry gives 11 words differing, 7 in shape
                 figure = courseStats->roundCount;
                 course->roundCount[0] = figure;
                 course->roundCount[1] = figure >> BITS_PER_BYTE;
@@ -3948,6 +4244,8 @@ void BuildStatusData(StatusData *status) {
 
                 course->places = 0;
 
+                // Setting the first bit with |= is there to match: setting places to
+                // it or to 0 in an if-else gives 22 words differing, 12 in shape
                 if (courseStats->hasPlace[THIRD_PLACE_INDEX] > 0) {
                     course->places |= STATUS_THIRD_PLACE;
                 }
@@ -3974,6 +4272,8 @@ void BuildStatusData(StatusData *status) {
 
         for (index = 0; index != BEST_TIME_COUNT; index++) {
             if (records->bestTimes[courseIndex][index] > 0) {
+                // Passing the parts through value is there to match: storing them
+                // directly gives 20 words differing, none in shape
                 figure = records->bestTimes[courseIndex][index] / FRAMES_PER_MINUTE;
                 course->bestTimes[index].minutes = figure;
                 figure =
@@ -4027,6 +4327,8 @@ void BuildStatusData(StatusData *status) {
         course->roundCount[1] = figure >> BITS_PER_BYTE;
         course->bestScore = (s32)g_CourseStatFigures[COURSE_COUNT].bestScore + STATUS_SCORE_BIAS;
         course->scoreAverage = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].scoreAverage);
+        // Holding the drives in sum, and the scores below in scores, is there to
+        // match
         roundedDrive = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].bestDrive);
         course->longestDrive[0] = roundedDrive;
         course->longestDrive[1] = roundedDrive >> BITS_PER_BYTE;
@@ -4083,6 +4385,7 @@ void BuildStatusData(StatusData *status) {
     openCourseCount = CountOpenCourses(save->coursePoints);
     progress->openCourses = 0;
     for (courseIndex = 0; courseIndex != openCourseCount; courseIndex++) {
+        // The original keeps only the last course's bit
         progress->openCourses = 1 << courseIndex;
     }
 
@@ -4105,6 +4408,10 @@ void BuildStatusData(StatusData *status) {
     }
 
     for (courseIndex = 0; courseIndex != CHARACTER_COUNT; courseIndex++) {
+        // The bits array, zeroed from its end, and courseIndex as row index are
+        // there to match: two locals for the bits give 285 words differing (21
+        // in shape), zeroing bits[0] first 2 (0), and a character loop variable
+        // 16 (0)
         row = f_StatusCharacterOrder[courseIndex];
         matchupBits[1] = 0;
         matchupBits[0] = 0;
@@ -4125,9 +4432,13 @@ void BuildStatusData(StatusData *status) {
     }
 }
 
+// The whole part of value once rounded to tenths, up to MAX_STATUS_VALUE
 s32 RoundedWholePart(f32 value) {
     s32 wholePart = value;
 
+    // The fraction in hundredths, then in tenths. Reusing one variable is there
+    // to match: a tenths local, or testing the quotient, gives 8 words
+    // differing, none in shape
     s32 fraction = (value - wholePart) * HUNDREDTHS_PER_ONE;
 
     if (fraction % HUNDREDTHS_PER_TENTH >= HALF_TENTH_HUNDREDTHS) {

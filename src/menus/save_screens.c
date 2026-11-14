@@ -1,6 +1,14 @@
+/*
+ * Two of the menus' screens: the clubhouse's Ring Shot records, which list each
+ * course's records and saved replays, and the saved games to continue, on
+ * numbered boards with each game's mode, course and players.
+ */
+
 #include <string.h>
 #include <ultra64.h>
 
+// This file passes DrawCharacterFace's draw mode unnarrowed; see
+// player_stats.h
 #define WIDENS_FACE_DRAW_MODE
 
 #include "audio/sound.h"
@@ -39,6 +47,9 @@
 #include "system/memory_address.h"
 #include "text/text.h"
 
+// The saved game's 64 by 64 course image, shrunk in two strips;
+// DrawSavedCourseImage draws one with its own palette, DrawSavedMiniGolfImage
+// one without
 #define COURSE_THUMBNAIL_WIDTH 64
 #define COURSE_THUMBNAIL_STRIP_HEIGHT 32
 #define COURSE_THUMBNAIL_STRIP_COUNT 2
@@ -46,42 +57,55 @@
 #define COURSE_THUMBNAIL_TOP 182
 #define COURSE_THUMBNAIL_SHOWN_WIDTH 52
 #define COURSE_THUMBNAIL_SHOWN_HEIGHT 18
+// The wooden boards numbered 1 to 3, one for each saved game, 64 by 64 each
 #define ASSET_FIRST_GAME_BOARD 0x82A
 #define ASSET_SECOND_GAME_BOARD 0x82B
 #define ASSET_THIRD_GAME_BOARD 0x82C
 
+// The games that ContinueModeGame continues from the save's mode tables, by the
+// save menu's slot
 enum SaveMenuGame {
     SAVE_MENU_GAME_TOURNAMENT,
     SAVE_MENU_GAME_GET_CHARACTER,
     SAVE_MENU_GAME_STROKE
 };
 
+// The slots that the save menu steps through, which hold -1 when empty
 #define SAVE_MENU_SLOT_COUNT 5
+// The saved games' course image is double buffered
 #define COURSE_IMAGE_BUFFER_COUNT 2
 
+// The course image buffers, of which the first is on screen first
 enum CourseImageBuffer {
     COURSE_IMAGE_BUFFER_FIRST,
     COURSE_IMAGE_BUFFER_SECOND
 };
 
 typedef u8 UCourseImageBuffer8;
-
 #define COURSE_IMAGE_BUFFER_FLIP 1
 
+// The saved games, in the order of their boards
 enum SavedGameBoard {
     SAVED_GAME_FIRST,
     SAVED_GAME_SECOND,
     SAVED_GAME_THIRD
 };
 
+// The images of g_CourseIconAssets that LoadRingShotCourseIcons reads, before
+// one of its own
 #define SAVE_MENU_IMAGE_COUNT 6
+// A 64x64 blue movie camera, read after the course icons
 #define ASSET_MOVIE_CAMERA_ICON 0x944
+// The 64x64 CI8 icons of f_RingShotCourseIcons, which DrawRingShotRowIcon
+// shrinks to 32x24 in two strips
 #define SAVE_ICON_WIDTH 64
 #define SAVE_ICON_STRIP_HEIGHT 32
 #define SAVE_ICON_STRIP_COUNT 2
 #define SAVE_ICON_SHOWN_WIDTH 32
 #define SAVE_ICON_SHOWN_STRIP_HEIGHT 12
 
+// The game modes that have an image of their own, in image order, then mini
+// golf's
 enum SaveMenuMode {
     NO_SAVE_MENU_MODE = -1,
     SAVE_MENU_MODE_TOURNAMENT,
@@ -90,10 +114,12 @@ enum SaveMenuMode {
     SAVE_MENU_MODE_SPEED_GOLF,
     SAVE_MENU_MODE_MATCH_GAME,
     SAVE_MENU_MODE_CLUB_SLOTS,
+    // An empty saved game's mode
     SAVE_MENU_MODE_RING_SHOT,
     SAVE_MENU_MODE_TRAINING,
     SAVE_MENU_MODE_SKINS_MATCH,
     SAVE_MENU_MODE_UNLISTED_STROKE,
+
     SAVE_MENU_MODE_MINI_GOLF,
     SAVE_MENU_MODE_COUNT
 };
@@ -103,16 +129,26 @@ typedef s8 SaveMenuMode8;
 
 void ResetSavedGameControllers(void);
 
+// What LoadSaveMenuBuffers reads for the chosen game, and the games' frame
 #define SAVE_MENU_CHOSEN_IMAGE_COUNT 2
 #define ASSET_SAVE_MENU_FRAME 0x70D
+// f_RingShotCourseNumbers holds the digits 1 to 6, 16 wide each, followed by
+// the word COURSE. DrawCourseLabel draws the word, then the course's digit
+// overlapping its end.
 #define COURSE_WORD_OFFSET_X (-5)
 #define COURSE_DIGIT_OFFSET_X 33
 
+// The Ring Shot records' text slots
 #define RING_SHOT_TEXT_SLOT_COUNT 6
+// The row after the courses, for the saved Ring Shot replays
 #define RING_SHOT_REPLAY_ROW RING_SHOT_COURSE_COUNT
+// The courses' rows and the replays'
 #define RING_SHOT_ROW_COUNT (RING_SHOT_REPLAY_ROW + 1)
+// The furthest a course's list of characters scrolls
 #define RING_SHOT_LAST_FIRST_CHARACTER 14
 
+// What f_SavedPlayerControllers holds for a player with no controller, or for
+// the computer
 #define NO_CONTROLLER (-1)
 #define COMPUTER_CONTROLLER MAXCONTROLLERS
 
@@ -128,10 +164,13 @@ void DrawCourseLabel(
 );
 void DrawRingShotRowIcon(Gfx **displayListHead, s32 imageIndex, s32 left, s32 top);
 
+// The Ring Shot records' blinking arrows' frame and its time shown
 static s32 f_RingShotArrowFrame = 0;
 static s32 f_RingShotArrowTimer = 0;
+// Cleared with the Ring Shot arrows' frame, and read by no routine
 static s32 f_UnusedRingShotArrowWord = 0;
 static s32 f_UnusedWordAfterArrowTimer UNUSED = 0;
+// The order that the Ring Shot records list the characters in
 static UCharacterIndex8 f_RingShotCharacterOrder[CHARACTER_COUNT] = {
     CHARACTER_PLUM,
     CHARACTER_CHARLIE,
@@ -152,6 +191,7 @@ static UCharacterIndex8 f_RingShotCharacterOrder[CHARACTER_COUNT] = {
     CHARACTER_AZALEA,
     CHARACTER_JOE,
 };
+// Read by no routine; words holding 0xFF, 0xFF00FF, 0xFF0000 or 0
 static s32 f_UnusedColorWords[11] UNUSED = {
     0x000000FF,
     0x00FF00FF,
@@ -165,7 +205,10 @@ static s32 f_UnusedColorWords[11] UNUSED = {
     0x00FF00FF,
     0x00FF0000,
 };
+// The angle, in radians, of the sine waves that tint the chosen replay
 static f32 f_ReplayHuePhase = 0.0f;
+// Each open course count's icon positions, of which only being nonzero, for
+// a shown icon, is read
 static s16 f_RingShotIconPositions[RING_SHOT_COURSE_COUNT][RING_SHOT_ROW_COUNT] = {
     {164, 0, 0, 0, 0, 0, 122},
     {102, 144, 0, 0, 0, 0, 186},
@@ -175,17 +218,26 @@ static s16 f_RingShotIconPositions[RING_SHOT_COURSE_COUNT][RING_SHOT_ROW_COUNT] 
     {22, 60, 102, 144, 186, 228, 268},
 };
 static s32 f_UnusedWordsAfterIconPositions[2] UNUSED = {0, 0};
+// The controller each of the chosen saved game's players takes
 static s16 f_SavedPlayerControllers[PLAYER_COUNT_MAX] =
     {NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER};
+// How many of the human players have pressed A for a controller so far
 static s16 f_AssignedHumanCount = 0;
 static s16 f_HumanPlayerCount = PLAYER_COUNT_MAX;
+// Set once A chooses a saved game, before its players take controllers
 static UBoolean8 f_IsGameChosen = FALSE;
+// Set once every human player has a controller, so A starts the game
 static UBoolean8 f_AreControllersAssigned = FALSE;
+// Which of f_CourseImageBuffers is on screen
 static UCourseImageBuffer8 f_ShownCourseBufferIndex = COURSE_IMAGE_BUFFER_FIRST;
+// Each saved game's save menu mode
 static SaveMenuMode f_SavedGameModes[SAVED_GAME_COUNT] =
     {NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE};
+// The image of each save menu mode, mini golf last, held in words though asset
+// IDs are 16 bits
 static WideAssetId f_ModeImageAssets[SAVE_MENU_MODE_COUNT] =
     {0x0623, 0x0629, 0x0599, 0x05AF, 0x0631, 0x0665, 0x05B7, 0x05DD, 0x065E, 0x0599, 0x06FC};
+// The game mode of each save menu mode that has an image
 static u32 f_SaveMenuGameModes[SAVE_MENU_MODE_MINI_GOLF] = {
     GAME_MODE_TOURNAMENT,
     GAME_MODE_GET_CHARACTER,
@@ -198,6 +250,7 @@ static u32 f_SaveMenuGameModes[SAVE_MENU_MODE_MINI_GOLF] = {
     GAME_MODE_SKINS_MATCH,
     GAME_MODE_UNLISTED_STROKE,
 };
+// The mode icon of each save menu mode, mini golf last
 static s32 f_SaveMenuModeIcons[SAVE_MENU_MODE_COUNT] = {
     MODE_ICON_TOURNAMENT,
     MODE_ICON_GET_CHARACTER,
@@ -212,6 +265,7 @@ static s32 f_SaveMenuModeIcons[SAVE_MENU_MODE_COUNT] = {
     MODE_ICON_MINI_GOLF,
 };
 static s32 f_UnusedWordsAfterModeIcons[4] UNUSED = {0, 0, 0, 0};
+// Read by no routine; the values of main_menu.c's f_MenuCharacterChoices
 static s32 f_SavedGamesCharacterChoices[CHARACTER_COUNT] UNUSED = {
     CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_CHARLIE,
@@ -232,20 +286,26 @@ static s32 f_SavedGamesCharacterChoices[CHARACTER_COUNT] UNUSED = {
     CHARACTER_CHOICE_AZALEA,
     CHARACTER_CHOICE_JOE,
 };
+// The angle, in radians, of the sine wave that bobs the saved games' boards
 static f32 f_BoardBobPhase = 0.0f;
+// Read by no routine; the values of f_ControllerIconPositions
 static s32 f_UnusedSaveMenuIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX][2] UNUSED = {
     {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
     {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
 };
+// Read by no routine; the values of main_menu.c's f_UnusedModeIconValues
 static s32 f_UnusedSaveMenuModeIconValues[11] UNUSED =
     {110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
 static char f_UnusedHoleLabel[] UNUSED = "Hole";
+// How far left of the label's place each mode icon's game mode label is drawn
 static s32 f_SavedGameModeLabelOffsets[MODE_ICON_COUNT] =
     {85, 85, 41, 60, 55, 60, 75, 66, 59, 0, 61};
+// The saved games' golfers' turn, in degrees about X and Y
 static f32 f_SavedGolferAngles[3] = {0.0f, 0.0f, 0.0f};
 static s32 f_UnusedWordAfterSavedGolferAngles UNUSED = 0;
+// Where DrawSavedGolfers stands each golfer, by the player count
 static Vec3 f_SavedGolferPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX] = {
     {
         {-84.0f, -43.0f, -1000.0f},
@@ -272,6 +332,8 @@ static Vec3 f_SavedGolferPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX] = {
         {106.0f, -52.0f, -1000.0f},
     },
 };
+// Where a saved game's screen puts each player's controller icon and label, by
+// the player count
 static s32 f_SavedGameControllerIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX]
                                              [PLANE_AXIS_COUNT] = {
                                                  {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
@@ -286,14 +348,18 @@ static ImageAsset *f_RingShotRainbowBox;
 static ImageAsset *f_RingShotCourseNumbers;
 static ImageAsset *f_RingShotGreenArrows;
 static ImageAsset **f_RingShotCourseIcons;
+// Each Ring Shot record's slot if it holds a recording, or -1
 static s16 f_RecordedReplaySlots[SAVE_MENU_SLOT_COUNT];
 
 static u8 f_UnusedBufferBeforeBoardCamera[0x3D0] UNUSED;
 
+// The camera that DrawSavedGames views the boards with
 static Mat4 f_BoardProjection;
 static Mat4 f_BoardViewing;
+// The camera and placement that DrawSavedGolfers draws each golfer with
 static Mtx f_SavedGolferTransforms[PLAYER_COUNT_MAX][DRAW_BUFFER_COUNT];
 static Mtx f_SavedGolfersProjection;
+// Each golfer's scale, which DrawSavedGolfers sets by the player count
 static f32 f_SavedGolferScales[PLAYER_COUNT_MAX];
 static LookAt f_SavedGolfersLookAts[DRAW_BUFFER_COUNT];
 static ImageAsset **f_SavedGameModeImages;
@@ -305,19 +371,26 @@ static ImageAsset *f_PlayerLabels;
 
 static u8 f_UnusedBytesAfterPlayerLabels[0x4] UNUSED;
 
+// The chosen game's course image, shown from one while the other loads
 static ImageAsset *f_CourseImageBuffers[COURSE_IMAGE_BUFFER_COUNT];
 
 static u8 f_UnusedBytesAfterCourseImages[0x4] UNUSED;
 
+// Each saved game's numbered board
 static ImageAsset *f_GameBoards[SAVED_GAME_COUNT];
+// The chosen saved game's human players, in the order they take controllers
 static s16 f_HumanPlayerIndices[PLAYER_COUNT_MAX];
+// The drawn board's mode icon size, which DrawChosenGameBoard reads
 static s32 f_ChosenModeIconScale;
 static s32 f_ChosenModeIconHalfSize;
 
+// Read by no routine; 2 objects, as one would be aligned past its start
 static u8 f_UnusedBytesAfterModeIconSize[0x4] UNUSED;
 static u8 f_UnusedBufferAfterModeIconSize[0x88] UNUSED;
 
+// Not static: the original left these to the linker's common block
 PaletteColor g_MenuCharacterPalettes[CHARACTER_COUNT][LARGE_PALETTE_COLOR_COUNT];
+// The face palette of each Ring Shot record's replay character
 PaletteColor g_ReplayFacePalettes[SAVE_MENU_SLOT_COUNT][LARGE_PALETTE_COLOR_COUNT];
 
 void LoadRingShotRecordBuffer(void *buffer, RingShotRecordBuffer bufferKind) {
@@ -348,6 +421,8 @@ void LoadRingShotRecordBuffer(void *buffer, RingShotRecordBuffer bufferKind) {
     }
 }
 
+// Reads every course's icon, then a movie camera icon, into the Ring Shot
+// records' buffers
 void LoadRingShotCourseIcons(ImageAsset **buffers) {
     EncodedAsset asset;
     s16 imageIndex;
@@ -531,6 +606,15 @@ void UpdateRingShotRecords(void) {
     }
 }
 
+// DrawRingShotRecords draws the Ring Shot records. A row of icons, one for each
+// open course and one for the saved replays, sits above a shaded panel, with
+// the blinking arrows around the chosen one. For a course the panel shows each
+// hole's number over a column of four characters from ringShotFirstCharacters
+// on, crossed out and darkened where they haven't cleared the hole, with arrows
+// where the list scrolls further. For the replays it shows each slot's
+// character face, course and a message for its course and hole, or dashes where
+// it is empty, and the chosen slot's message glows in shifting colors. Message
+// 0x1E plus the row is shown below the panel.
 #define RING_SHOT_PANEL_LEFT 24
 #define RING_SHOT_PANEL_TOP 70
 #define RING_SHOT_PANEL_RIGHT 302
@@ -542,6 +626,7 @@ void UpdateRingShotRecords(void) {
 #define RING_SHOT_STRIP_RIGHT 298
 #define RING_SHOT_STRIP_TOP 204
 #define RING_SHOT_STRIP_SPACING 8
+// Each row's icon is drawn this many times over in the same place
 #define RING_SHOT_ICON_DRAW_COUNT 3
 #define RING_SHOT_FIRST_ICON_X 22
 #define RING_SHOT_REPLAY_ICON_X 268
@@ -563,6 +648,7 @@ void UpdateRingShotRecords(void) {
 #define RING_SHOT_FACE_SPACING 26
 #define RING_SHOT_CROSS_X 52
 #define RING_SHOT_CROSS_Y 100
+// The scroll arrows are drawn in this many columns
 #define RING_SHOT_SCROLL_COLUMN_COUNT 1
 #define RING_SHOT_SCROLL_ARROW_X 36
 #define RING_SHOT_UP_ARROW_Y 100
@@ -583,21 +669,64 @@ void UpdateRingShotRecords(void) {
 #define MESSAGE_FIRST_RING_SHOT_CLEARERS 0x1E
 #define RING_SHOT_REPLAY_TEXT_X 124
 #define RING_SHOT_REPLAY_TEXT_Y 84
+// Another size that draws in the large font, as TEXT_SLOT_LARGE_FONT does
 #define RING_SHOT_REPLAY_TEXT_FONT 2
+// The chosen replay's colors run around a circle of hues, a step per update,
+// with its glow a quarter as bright
 #define REPLAY_HUE_STEP DegreesToRadians(5)
 #define REPLAY_HUE_MIDDLE 127
 #define REPLAY_HUE_SWING 127.0f
 #define REPLAY_GLOW_DIVISOR 4
 
+// Each face's drawing sits in a block of its own, as a macro's do-while would
+// make it, to match. flow weights a reference by its loop depth, and a loop
+// that runs once still counts, so the references in the block weigh 4 where
+// they weighed 3. The face's vertical offset, itemIndex times the spacing, has
+// all of its references there and listIndex only its lookup and its step,
+// which lifts the offset's priority in global-alloc to 14400 and listIndex's
+// to 14285, from 10800 and 12571. So the offset is placed first and takes
+// $s2, as in the original, and listIndex takes $s3. Without the block, or
+// with plain braces, 26 words differ, none in shape.
+//
+// A block around the whole face loop gives 58 words (8 in shape), one that
+// ends before listIndex's step 3 (1), and one around the two draws alone 35
+// (1). A block from the face's draw to listIndex's step matches too; from the
+// cross's test to the step, or around the lookup and the draw mode alone, 26
+// differ (none). The declarations of itemIndex and listIndex in the other
+// order, and listIndex set before row or in the loop's header, match as well.
+//
+// The row icon's draws are counted with index, which also counts the strips
+// and the replay slots and holds each face's draw mode; counting them with
+// column, the hole columns' counter, gives 44 words differing, and with a
+// counter of their own 46, none in shape. Giving index's other uses variables
+// of their own costs words too: a strip counter gives 108, a face mode 232
+// (38 in shape) and a slot index 50.
+//
+// Stepping listIndex in the face's lookup, as
+// f_RingShotCharacterOrder[listIndex++], gives 11 words, 5 in shape;
+// indexing the order from listIndex plus itemIndex, with listIndex fixed,
+// gives 148 (16), and from the row's first character plus itemIndex 96 (26).
+//
+// The empty slot's dashes are counted with listIndex, which the original
+// keeps in one register with the face loop's. Counting them with drop or a
+// counter of their own gives 36 words differing, with itemIndex or
+// replayCourse 42, with row or replayHole 48 and with column 68, none in
+// shape. An s8 listIndex gives 44 words, 2 in shape, and extends it as a byte
+// at each use, where the original extends a halfword; setting listIndex
+// before the slot's test gives 5 (3).
 void DrawRingShotRecords(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
+    // Counts the strips and a row icon's draws, holds each face's draw mode and
+    // counts the replay slots, as the original's shared register needs
     s16 index;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s32 openCourseCount = GetOpenRingShotCourseCount();
     s16 row;
     s16 column;
+    // Counts the faces shown in a column
     s16 itemIndex;
+    // Steps through the character order, or counts an empty slot's dashes
     s16 listIndex;
     s16 drop;
     CharacterIndex characterIndex;
@@ -689,6 +818,9 @@ void DrawRingShotRecords(Gfx **displayListHead) {
         drop = (row == memory->ringShotRow) * RING_SHOT_CHOSEN_ICON_DROP;
         if ((row < openCourseCount) || (row == RING_SHOT_REPLAY_ROW)) {
             if (f_RingShotIconPositions[openCourseCount - 1][row] != 0) {
+                // The icon loop in a block of its own, as a macro's do-while would
+                // make it, to match: without it, or with plain braces, three saved
+                // values take each other's registers and 16 words differ
                 IN_OWN_BLOCK(for (index = 0; index != RING_SHOT_ICON_DRAW_COUNT; index++) {
                     if (row == 0) {
                         DrawRingShotRowIcon(
@@ -770,6 +902,7 @@ void DrawRingShotRecords(Gfx **displayListHead) {
             row = memory->ringShotRow;
             listIndex = memory->ringShotFirstCharacters[row];
             for (itemIndex = 0; itemIndex != RING_SHOT_SHOWN_CHARACTER_COUNT; itemIndex++) {
+                // In a block of its own to match, as the header comment explains
                 IN_OWN_BLOCK({
                     characterIndex = f_RingShotCharacterOrder[listIndex];
                     index = FACE_PLAIN;
@@ -952,10 +1085,16 @@ void DrawRingShotRecords(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// The original has 8 zero bytes in its rodata that nothing in the ROM
+// references, between DrawRingShotRecords's constants and LoadSaveGameBuffer's
+// jump table. The table is aligned to 8 bytes, so they may have held less
 static const char f_UnreferencedRodata[8] = {0};
 
 Boolean IsRingShotRecorded(RingShotRecord *record);
 
+// Reads the save data from SRAM and lists the Ring Shot records that hold a
+// recording, moving the chosen replay onto the last of them if its own is
+// empty.
 void ReadRingShotReplays(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
@@ -985,6 +1124,8 @@ void ReadRingShotReplays(void) {
     }
 }
 
+// Reads every character's face and first palette, then the palette of each
+// recorded Ring Shot record's character, clamped to the known ones.
 void LoadRingShotRecordFaces(void) {
     EncodedAsset asset;
     AssetFile file;
@@ -1030,6 +1171,8 @@ void LoadRingShotRecordFaces(void) {
     }
 }
 
+// Returns the next slot after startSlot, going forward or back and wrapping,
+// that holds a replay, or -1 if none does
 s16 FindNextReplaySlot(s8 startSlot, UBoolean8 isForward) {
     s32 slot = startSlot;
     s32 step;
@@ -1068,10 +1211,12 @@ s16 FindNextReplaySlot(s8 startSlot, UBoolean8 isForward) {
     return slot;
 }
 
+// Returns the chosen replay's record, or -1 if it holds no recording
 s16 GetChosenReplaySlot(void) {
     return f_RecordedReplaySlots[GetMenuMemory()->ringShotReplaySlot];
 }
 
+// Tells whether the record holds a recording of the shots
 Boolean IsRingShotRecorded(RingShotRecord *record) {
     return (record->scoreKind & SCORE_KIND_RECORDED) != 0;
 }
@@ -1146,6 +1291,8 @@ void DrawCourseLabel(
     *displayListHead = gfx;
 }
 
+// Draws a Ring Shot records row's icon, a course's or the replays' camera, from
+// f_RingShotCourseIcons, shrunk to 32 by 24
 void DrawRingShotRowIcon(Gfx **displayListHead, s32 imageIndex, s32 left, s32 top) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -1200,6 +1347,8 @@ void DrawRingShotRowIcon(Gfx **displayListHead, s32 imageIndex, s32 left, s32 to
     *displayListHead = gfx;
 }
 
+// Returns how many Ring Shot courses are open: one more for each level of the
+// stars won
 s32 GetOpenRingShotCourseCount(void) {
     SaveData *save = GetSaveData();
     s32 starCount = 0;
@@ -1292,6 +1441,9 @@ void LoadSaveGameBuffer(void *buffer, SaveGameBuffer bufferKind) {
                 ReadEncodedAsset(f_CourseImageBuffers[COURSE_IMAGE_BUFFER_FIRST], &asset);
             }
             else {
+                // Subtracting in a second statement is needed to match: one
+                // statement, with or without a course index local, gives 16 words
+                // differing, and indexing with the difference itself 13
                 miniGolfIndex = save->savedGames[gameIndex].state.courseIndex;
                 miniGolfIndex -= MINI_GOLF_COURSE_INDEX;
                 OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset);
@@ -1324,6 +1476,9 @@ void LoadSaveGameBuffer(void *buffer, SaveGameBuffer bufferKind) {
                 ReadEncodedAsset(f_CourseImageBuffers[COURSE_IMAGE_BUFFER_SECOND], &asset);
             }
             else {
+                // Subtracting in a second statement is needed to match: one
+                // statement, with or without a course index local, gives 16 words
+                // differing, and indexing with the difference itself 13
                 miniGolfIndex = save->savedGames[gameIndex].state.courseIndex;
                 miniGolfIndex -= MINI_GOLF_COURSE_INDEX;
                 OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset);
@@ -1338,6 +1493,9 @@ void LoadSaveGameBuffer(void *buffer, SaveGameBuffer bufferKind) {
     f_ShownCourseBufferIndex = COURSE_IMAGE_BUFFER_FIRST;
 }
 
+// Reads the save data from SRAM, finds each saved game's mode image, chooses
+// the first saved game and clears its players' controllers. The records screens
+// run it too, for the save data.
 void ReadSavedGames(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
@@ -1383,6 +1541,8 @@ void ReadSavedGames(void) {
     ResetSavedGameControllers();
 }
 
+// Marks the chosen saved game's computer players as such and its other players
+// as having no controller yet, and lists those other players in order.
 void ResetSavedGameControllers(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
@@ -1400,6 +1560,8 @@ void ResetSavedGameControllers(void) {
     f_AssignedHumanCount = 0;
     gameIndex = memory->savedGameIndex;
     savedPlayers = save->savedPlayers[gameIndex];
+    // Through f_HumanPlayerCount, to match: reading the count into playerCount
+    // first gives 92 words differing, 10 in shape
     f_HumanPlayerCount = save->savedGames[gameIndex].state.playerCount;
     playerCount = f_HumanPlayerCount;
     for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
@@ -1426,6 +1588,8 @@ void ResetSavedGameControllers(void) {
     }
 }
 
+// Keeps the save menu's buffers of bufferKind and reads the saved games'
+// mode images, and the frame, or the chosen game's icons into them
 void LoadSaveMenuBuffers(ImageAsset **buffers, SaveMenuBuffer bufferKind) {
     EncodedAsset asset;
     MenuMemory *memory = GetMenuMemory();
@@ -1464,6 +1628,7 @@ void LoadSaveMenuBuffers(ImageAsset **buffers, SaveMenuBuffer bufferKind) {
     }
 }
 
+// Keeps the name plate's buffer, or reads the game mode labels into theirs
 void LoadGameModeLabelBuffer(void *buffer, GameModeLabelBuffer bufferKind) {
     EncodedAsset asset;
 
@@ -1481,10 +1646,15 @@ void LoadGameModeLabelBuffer(void *buffer, GameModeLabelBuffer bufferKind) {
 
 Outcome ContinueSavedGame(void);
 
+// The saved-games screen's text slots
 #define SAVED_GAME_TEXT_SLOT_COUNT 4
+// How many updates the boards take to turn to the next saved game
 #define SAVED_GAME_TURN_FRAMES 7
 
+// The saved game the boards show
 #define CHOSEN_GAME (save->savedGames[memory->savedGameIndex])
+// Reads the chosen saved game's mode icon, then its course image into the
+// course buffer not on screen, which then becomes the one on screen
 #define LoadChosenGameImages() \
     { \
         OpenEncodedAsset( \
@@ -1518,12 +1688,24 @@ Outcome ContinueSavedGame(void);
         } \
     }
 
+// Handles the saved-games screen's buttons. The left and right buttons turn
+// the boards to another saved game. On a game with a mode, each A press gives
+// the next human player the controller that pressed it (all of them get
+// controller 1 when only one is plugged in); once every human has one, A
+// closes the wipe to continue the game. B steps back through the players,
+// then leaves for the title screen. A press while the boards turn finishes
+// the turn instead.
 void UpdateSavedGames(void) {
     MenuMemory *memory = GetMenuMemory();
     SaveData *save = GetSaveData();
     EncodedAsset asset;
     AssetFile file;
+    // Pads the frame to match; without it 28 words differ
     u8 unusedStack[0xA0] UNUSED;
+    // One index for the text slots, players, controllers and humans, to match:
+    // a variable of its own for the text slots gives 99 words differing (9 in
+    // shape), for the players 20 (2), for the humans 44 (2), for the
+    // controllers 46 (6), and for each 110 (10)
     s32 i;
     s32 miniGolfIndex;
 
@@ -1887,6 +2069,7 @@ void UpdateSavedGames(void) {
     }
 }
 
+// Returns -1 when the chosen saved game slot holds no game, and 0 otherwise
 Boolean IsChosenGameEmpty(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
@@ -1895,6 +2078,10 @@ Boolean IsChosenGameEmpty(void) {
     return -(game->isValid == FALSE);
 }
 
+// Copies the chosen slot's game from the save's mode tables into the
+// players, their records and the game state, to resume at loading the
+// hole. It returns -1 when that game is empty or has too many players.
+// Nothing calls it.
 Outcome ContinueModeGame(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
@@ -1951,6 +2138,9 @@ Outcome ContinueModeGame(void) {
     return OUTCOME_OK;
 }
 
+// Resumes the chosen saved game with the controllers its players chose,
+// and erases it from the save unless GAME_FLAG_KEEP_SAVED_GAMES is set.
+// It returns -1 when the game can't be resumed.
 Outcome ContinueSavedGame(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
@@ -1987,18 +2177,28 @@ Outcome ContinueSavedGame(void) {
     return OUTCOME_OK;
 }
 
+// The backdrop layers that DrawLargeBannerBackdropLayers draws behind the saved
+// games
 #define SAVED_GAMES_BACKDROP_LAYERS \
     (MENU_LAYER_COURSE_SCENE | MENU_LAYER_IGNORED | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER)
 
+// The numbered boards of f_GameBoards: 64x64 CI8, in two strips
 #define GAME_BOARD_WIDTH 64
 #define GAME_BOARD_STRIP_HEIGHT 32
 #define GAME_BOARD_STRIP_COUNT 2
+// Where the mode icon sits on the board
 #define MODE_ICON_OFFSET_X 8
 #define MODE_ICON_OFFSET_Y 14
 
+// The boards stand on a circle, seen from above, that each update of
+// MenuMemory.savedGameTurn turns by a step. They are projected like the
+// course wheel, from a nearer eye.
 #define BOARD_TURN_STEP_DEGREES 15
+// The mode icons on the boards not chosen are smaller, and lower
 #define MODE_ICON_HALF_SIZE 24.0f
 #define MODE_ICON_DROP 4
+// The 200 by 10 strips of f_SavedGamesNamePlate, drawn narrower by the player
+// count
 #define SAVED_GAME_STRIP_WIDTH 200
 #define SAVED_GAME_STRIP_HEIGHT 10
 #define SAVED_GAME_STRIP_COUNT 3
@@ -2011,15 +2211,21 @@ Outcome ContinueSavedGame(void) {
 #define SAVED_GAME_ARROW_Y 124
 #define SAVED_GAME_COURSE_X 110
 #define SAVED_GAME_COURSE_Y 187
+// A tournament shows a message of each course in place of its name
 #define MESSAGE_FIRST_TOURNAMENT_NAME 0x6F
+// Mini golf courses from this one use Peach's Castle's name
 #define FIRST_PEACHS_CASTLE_MINI_GOLF_COURSE (MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD)
+// Shows the slot's first value, here the saved hole's number
 #define SAVED_GAME_HOLE_X 180
 #define SAVED_GAME_HOLE_Y 203
+// Shown while the next human player is given a controller, then once every
+// human has one
 #define CONTROLLER_PROMPT_X 70
 #define CONTINUE_PROMPT_X 54
 #define PROMPT_Y 184
 #define MESSAGE_CONTROLLER_PROMPT 0x37
 #define MESSAGE_CONTINUE_PROMPT 0x38
+// Shown when the chosen saved game is empty
 #define EMPTY_GAME_TEXT_X 100
 #define EMPTY_GAME_TEXT_Y 186
 #define MESSAGE_EMPTY_SAVED_GAME 0x26
@@ -2030,18 +2236,27 @@ void DrawPlayerControllers(Gfx **displayListHead);
 void DrawSavedCourseImage(Gfx **displayListHead);
 void DrawSavedMiniGolfImage(Gfx **displayListHead);
 
+// Draws the saved-games screen: the characters, the three numbered boards
+// turning on their circle with each game's mode icon, the chosen game's mode,
+// course and hole, and the prompt for giving out the controllers.
 void DrawSavedGames(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     u16 perspectiveNormalization;
+    // Sized like the course wheel's, of which the boards use three
     f32 boardX[COURSE_COUNT];
     f32 boardY[COURSE_COUNT];
     f32 boardScale[COURSE_COUNT];
+    // Nothing uses them, but the original's frame has the room for them
     s32 unusedSlots[COURSE_COUNT] UNUSED;
     s32 drawOrder[COURSE_COUNT];
+    // Nothing uses it, but the original's frame has the room for it
     u8 unusedStack[8] UNUSED;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
+    // The board, or its place in the draw order. Also the chosen game's hole, to
+    // match: with a variable of its own for the hole, 6 words differ, none in
+    // shape.
     s32 boardIndex;
     s32 key;
     Radians angle;
@@ -2055,6 +2270,13 @@ void DrawSavedGames(Gfx **displayListHead) {
     s32 stripLeft;
     s32 stripShownWidth;
     s32 gameIndex;
+    // Counts everything but the boards: the places in the draw order as they are
+    // sorted, the strips of each image and the text slots that the controller
+    // prompt clears. It is also the chosen game's index and then its course. The
+    // one variable does it all to match: with a variable of its own for the
+    // sorting, 44 words differ; for the boards' strips, 272; for the mode icons'
+    // strips, 178; for the name plate's strips, 28; for the chosen game's index,
+    // 10; for its course, 26; and for the text slots, 346.
     s32 index;
     s32 labelX;
     s32 iconIndex;
@@ -2107,10 +2329,20 @@ void DrawSavedGames(Gfx **displayListHead) {
 
     for (boardIndex = 0; boardIndex != SAVED_GAME_COUNT; boardIndex++) {
         ScreenPoint point;
+        // The circle's x radius is a variable to match: the original keeps it in a
+        // register through the loop, where it loads the z radius on each pass.
+        // With the constant in the product, 26 words differ (8 in shape), and the
+        // frame is 8 bytes smaller.
         f32 radiusX = CAROUSEL_RADIUS_X;
+        // The angle between boards is a variable to match: the original multiplies
+        // by a 120 that it loads on each pass, where the compiler turns a
+        // multiplication by a constant into shifts. With the constant in the
+        // product, 34 words differ (20 in shape).
         s32 boardDegrees;
 
         slotOffset = (memory->savedGameIndex - boardIndex) % SAVED_GAME_COUNT;
+        // Set after the slot offset to match: set in its declaration, or before
+        // the slot offset, 24 words differ (10 in shape)
         boardDegrees = DEGREES_PER_TURN / SAVED_GAME_COUNT;
         angle = -DegreesToRadians(
             (slotOffset * boardDegrees) + (memory->savedGameTurn * BOARD_TURN_STEP_DEGREES)
@@ -2127,6 +2359,7 @@ void DrawSavedGames(Gfx **displayListHead) {
         drawOrder[index] = index;
     }
 
+    // Draw the farthest boards first, so the nearer ones cover them
     for (index = 1; index != SAVED_GAME_COUNT; index++) {
         key = drawOrder[index];
         for (boardIndex = index - 1; boardIndex >= 0 && boardY[drawOrder[boardIndex]] > boardY[key];
@@ -2151,6 +2384,7 @@ void DrawSavedGames(Gfx **displayListHead) {
             (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / f_ChosenModeIconHalfSize;
         iconHalfSize = f_ChosenModeIconHalfSize;
         iconStep = f_ChosenModeIconScale;
+        // The loop stops before SAVED_GAME_COUNT, so no board bobs
         if (boardIndex == SAVED_GAME_COUNT) {
             bobOffset = sinf(f_BoardBobPhase) * CAROUSEL_BOB_HEIGHT;
         }
@@ -2348,6 +2582,16 @@ void DrawSavedGames(Gfx **displayListHead) {
         labelX = (playerCount == 1) ? SINGLE_PLAYER_MODE_LABEL_X : MODE_LABEL_X;
         iconIndex = f_SaveMenuModeIcons[f_SavedGameModes[index]];
         gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_GameModeLabels)));
+        // The label's texels are worked out in the command, reading the game's mode
+        // and the mode's icon from their tables again, and the label's offset is
+        // read from its table at each use, to match. The original makes these reads
+        // ahead of the stores that advance gfx, though they follow the stores in
+        // the source. The compiler only moves a table's element so: a read through
+        // a pointer could be of gfx itself, which is in memory as the drawing
+        // functions take its address, and so stays behind the stores. With the
+        // mode read through a pointer, 64 words differ (40 in shape); with the
+        // offset read through one, 68 (32); with the texels in a local, 24 (4);
+        // and with them worked out from iconIndex, 198 (90).
         gDPLoadTextureBlock_4b(
             gfx++,
             TextureAddress(
@@ -2462,6 +2706,7 @@ void DrawSavedGames(Gfx **displayListHead) {
             else {
                 SetTextSlotValue(f_HumanPlayerIndices[f_AssignedHumanCount] + 1, 0, 0);
 
+                // The prompt names the player in the player's own color
                 if (f_HumanPlayerIndices[f_AssignedHumanCount] == 0) {
                     SetTextPaletteColor(255, 127, 127, 0);
                 }
@@ -2526,6 +2771,9 @@ void DrawSavedGames(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Draws the chosen saved game's board, halfSize * 2 pixels square, at (left,
+// top) and, if the game has a mode image, the mode's icon on top, reading the
+// icon's next frame in turn
 void DrawChosenGameBoard(Gfx **displayListHead, s32 left, s32 top, s32 halfSize, s32 scale) {
     MenuMemory *memory = GetMenuMemory();
     Gfx *gfx = *displayListHead;
@@ -2635,6 +2883,10 @@ void DrawChosenGameBoard(Gfx **displayListHead, s32 left, s32 top, s32 halfSize,
     *displayListHead = gfx;
 }
 
+// Draws the golfers of the selected saved game, loading each one's model
+// once its character slot is free. A golfer stands and, when its fidget
+// timer runs out, plays the fidget animation once before waiting a random
+// while again.
 void DrawSavedGolfers(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     SaveData *save = GetSaveData();
@@ -2646,6 +2898,7 @@ void DrawSavedGolfers(Gfx **displayListHead) {
     Vec3 translation;
     Vec3 rotation;
     Vec3 scale;
+    // Pads the frame to match; without it 62 words differ
     s32 unused[12] UNUSED;
     Mat4 transform;
     Mat4 viewing;
@@ -2774,6 +3027,8 @@ void DrawSavedGolfers(Gfx **displayListHead) {
     }
 }
 
+// Draws the chosen saved game's players' controller icons, once each has
+// pressed A on one, and their player or computer labels.
 void DrawPlayerControllers(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     SaveData *save = GetSaveData();
@@ -2905,6 +3160,7 @@ void DrawPlayerControllers(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Draws the chosen saved game's course image, shrunk to a thumbnail
 void DrawSavedCourseImage(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -2955,6 +3211,7 @@ void DrawSavedCourseImage(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Draws the chosen saved mini golf game's course image with its own palette
 void DrawSavedMiniGolfImage(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;

@@ -1,3 +1,9 @@
+/*
+ * The characters' models: loading them, playing their animations and texture
+ * animations, posing, lighting, placing and drawing them. It also measures how
+ * far to the side of the ball each character stands for each club.
+ */
+
 #include "characters/character.h"
 
 #include <stdlib.h>
@@ -35,11 +41,15 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 
+// Room for a model's files and, FRAME_DATA_OFFSET in, its frame data copies
 #define CHARACTER_BUFFER_SIZE 0x23680
 #define FRAME_DATA_OFFSET 0x20000
 #define FRAME_DATA_COPY_SIZE 0x780
+// The buffer each slot is given before AssignCharacterBuffers gives it its own
 #define DEFAULT_CHARACTER_BUFFER 0x8030F800
+// SetCharacterBuffer's warning is printed this many times, so it stands out
 #define WARNING_REPEAT_COUNT 10
+// Long enough ago that IsCharacterSlotBusy finds a slot not busy
 #define LONG_AGO_FRAME (-4)
 
 static inline CharacterAnimation *ModelAnimations(const CharacterModel *model) {
@@ -57,9 +67,14 @@ static inline CharacterAnimation *ModelAnimations(const CharacterModel *model) {
 #define ModelAnimatedTextures(model) \
     ((AnimatedTexture *)(model)->segmentAddresses[CHARACTER_MODEL_TEXTURES])
 
+// Where a segment address into the frame data points in the slot's copy being
+// written. With the copy's address first, the texture routines' registers
+// swap.
 #define FrameDataAddress(slot, address) \
     (SEGMENT_OFFSET(address) + (u32)(slot)->frameData[(slot)->frameDataIndex])
 
+// Patches the slot's frame data copy being written so the triangle shows the
+// texture with the texture coordinates. Uses the locals gfx, vertex and i.
 #define SetTriangleTexture(slot, triangle, texture, sCoordinates, tCoordinates, vertexIndex) \
     { \
         gfx = (Gfx *) \
@@ -87,11 +102,18 @@ static inline CharacterAnimation *ModelAnimations(const CharacterModel *model) {
         } \
     }
 
+// The size of a Vtx
 #define VTX_SIZE 0x10
+// From AnimatedTriangle.loadTextureBlock to the gDPLoadTextureBlock
 #define LOAD_TEXTURE_BLOCK_OFFSET 0x10
+// The alignment the RDP needs of a texture's address
 #define TEXTURE_ALIGNMENT 8
+// The texture coordinate mask of an animated triangle's tiles, 64 texels each
+// way
 #define ANIMATED_TEXTURE_MASK 6
 
+// Makes a slot's model readable at CHARACTER_MODEL_ADDRESS, where its segment
+// addresses point
 #define MapModelBuffer(slot) \
     SetMultiTlb( \
         0, \
@@ -101,65 +123,88 @@ static inline CharacterAnimation *ModelAnimations(const CharacterModel *model) {
         osVirtualToPhysical((slot)->modelBuffer) \
     )
 
+// Looks up the slot in use at slotIndex into *slot, and tells whether there is
+// one. Taking the slot's address keeps it on the stack, as the texture
+// routines' originals do.
 static inline Boolean FindUsedSlot(u32 slotIndex, CharacterSlot **slot) {
     *slot = GetUsedCharacterSlot(slotIndex);
     return *slot != NULL;
 }
 
+// The models with a row of f_BallDistances are the playable characters, below
+// CHARACTER_COUNT
+// f_BallDistances columns: one per club kind, then this one
 #define BALL_DISTANCE_WOOD_APPROACH 4
 #define BALL_DISTANCE_COUNT 5
 
+// The default ball distance for each club kind
 #define WOOD_BALL_DISTANCE 0x3600
 #define IRON_BALL_DISTANCE 0x2400
 #define PUTTER_BALL_DISTANCE 0x1800
 
+// The character points whose depth gives the ball distance for each club kind
 #define WOOD_DISTANCE_POINT 3
 #define IRON_DISTANCE_POINT 4
 #define WEDGE_DISTANCE_POINT 5
 #define PUTTER_DISTANCE_POINT 6
 
+// A ball distance is this times the point's depth in world units
 #define POINT_DEPTH_TO_BALL_DISTANCE 1228.8f
 
+// The animations whose last frame WriteBallDistances measures for each club
+// kind
 #define WOOD_DISTANCE_ANIMATION 0
 #define IRON_DISTANCE_ANIMATION 3
 #define WEDGE_DISTANCE_ANIMATION 6
 #define PUTTER_DISTANCE_ANIMATION 9
+// The animation whose first frame it measures for the approach column
 #define WOOD_APPROACH_DISTANCE_ANIMATION 2
 
+// Where GetBallDistance shows the measured point position
 #define POINT_POSITION_TEXT_COLUMN 2
 #define POINT_POSITION_TEXT_ROW 13
 
 #define BALL_DISTANCE_SOURCE_SIZE 0x8000
 #define BALL_DISTANCE_LINE_SIZE 0x100
+// The display list choices that hold each kind of club
 #define WOOD_DISPLAY_LIST_CHOICE 0
 #define IRON_DISPLAY_LIST_CHOICE 1
 #define WEDGE_DISPLAY_LIST_CHOICE 2
 #define PUTTER_DISPLAY_LIST_CHOICE 3
 
+// The animation whose impact frame GetImpactEventFrame returns
 #define IMPACT_EVENT_ANIMATION_INDEX 2
 
+// How far PlaceAndViewCharacter puts the camera from the character, and how
+// far below it the view sits, in course units
 #define VIEW_DISTANCE 61440.0f
 #define VIEW_DROP 15360.0f
 
+// How a slot starts out when LoadCharacter loads it
 #define LOADED_ALPHA 0x60
 #define LOADED_RANDOM_TEXTURE_ANIMATION_DELAY 27
 
+// SetCharacterLights' dry colors near the end of the round
 #define LATE_AMBIENT_LEVEL 120
 #define LATE_LIGHT_RED 200
 #define LATE_LIGHT_GREEN 80
 #define LATE_LIGHT_BLUE 10
+// SetCharacterLights' dry colors through the rest of the round
 #define DAY_AMBIENT_RED 130
 #define DAY_AMBIENT_GREEN 130
 #define DAY_AMBIENT_BLUE 120
 #define DAY_LIGHT_RED 130
 #define DAY_LIGHT_GREEN 120
 #define DAY_LIGHT_BLUE 110
+// SetCharacterLights' colors in the rain
 #define RAIN_AMBIENT_LEVEL 100
 #define RAIN_LIGHT_RED 155
 #define RAIN_LIGHT_GREEN 120
 #define RAIN_LIGHT_BLUE 120
 #define RAIN_SECOND_LIGHT_LEVEL 150
 
+// The characters are drawn at this scale; the rotations are set up but never
+// drawn
 static Mtx f_ModelScaleMatrix;
 static Mtx f_RollMatrix;
 static Mtx f_HeadingMatrix;
@@ -169,9 +214,12 @@ static u8 f_UnusedBufferAfterHeadingMatrix[120] UNUSED;
 #define MODEL_SCALE 0.01f
 #define HALF_TURN_DEGREES 180
 #define BLEND_ALPHA 0x80
+// The models' translucent mode: like G_RM_ZB_XLU_SURF, but updating the
+// depth buffer
 #define MODEL_RENDER_MODE_TRANSLUCENT (G_RM_ZB_XLU_SURF | Z_UPD)
 #define MODEL_RENDER_MODE_TRANSLUCENT2 (G_RM_ZB_XLU_SURF2 | Z_UPD)
 
+// Each slot's matrices, for each draw buffer
 static Mtx f_ModelMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
 static Mtx f_ShadowMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
 static Mtx f_ShadowProjections[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
@@ -180,18 +228,25 @@ ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
 
 FILE_STATIC s32 g_CurrentAnimationStartFrame;
 
+// Half a side of the shadow's square, in model units
 #define SHADOW_QUAD_HALF_SIZE 1500
+// The square's texture coordinates, in s10.5, span the texture and the mirror
+// image its tile wraps to
 #define SHADOW_QUAD_TEXEL_SPAN TexelCoordinate(SHADOW_TEXTURE_SIZE * 2)
 #define SECOND_LIGHT_DIRECTION_LENGTH 64.0f
+// How far from the shadow point, in model units, the ground is sampled
 #define SHADOW_CORNER_DISTANCE 30.0f
+// CharacterSlot.shadowScale is in these units
 #define SHADOW_SCALE_UNIT 0.0001f
 #define SHADOW_DEPTH_SCALE 0.01f
 #define SHADOW_DEPTH_OFFSET 6.0f
 #define SHADOW_ALPHA 0x80
 #define SHADOW_ALPHA_THRESHOLD 0x10
+// Ground whose normal is nearer vertical than this counts as level
 #define LEVEL_GROUND_NORMAL_Y 0.999f
 #define QUARTER_TURN_DEGREES 90.0f
 
+// The segments the character display lists use
 #define MODEL_BUFFER_SEGMENT 0x02
 #define JOINT_MATRICES_SEGMENT 0x03
 #define RENDER_MODES_SEGMENT 0x04
@@ -204,22 +259,30 @@ FILE_STATIC s32 g_CurrentAnimationStartFrame;
 #define FLAME_TEXTURE_SEGMENT 0x0D
 #define BLENDED_TEXTURE_SEGMENT 0x0E
 
+// The size of a line of debug text
 #define DEBUG_LINE_SIZE 0x80
 
+// Where AnimateCharacter prints a slot's frame when
+// GAME_FLAG_SHOW_ANIMATION_FRAMES is set
 #define ANIMATION_FRAME_TEXT_COLUMN 10
 #define ANIMATION_FRAME_TEXT_FIRST_ROW 5
 
+// How many steps go by between plays of a slot's random texture animation
 #define RANDOM_TEXTURE_ANIMATION_DELAY_MIN 30
 #define RANDOM_TEXTURE_ANIMATION_DELAY_MASK 0x1F
 
+// The slot that WriteBallDistances loads each character into
 #define MEASURED_SLOT 0
+// The shot mode that WriteBallDistances measures every column with
 #define MEASURED_SHOT_MODE SHOT_MODE_NORMAL
 
+// The source lines of pcsub.c that ReportFailedAssertion reports
 #define BALL_DISTANCE_SOURCE_ASSERT_LINE 1525
 #define TEXTURE_ANIMATION_ASSERT_LINE 1956
 
 ImpactFlashState g_ImpactFlashState = IMPACT_FLASH_NONE;
 s32 g_ImpactFlashLevel = 0;
+// The render modes that f_OpaqueRenderModes branches to
 static Gfx f_SurfaceRenderMode[] = {
     gsDPPipeSync(),
     gsDPSetRenderMode(G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2),
@@ -240,6 +303,7 @@ static Gfx f_TextureEdgeRenderMode[] = {
     gsDPSetRenderMode(G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2),
     gsSPEndDisplayList(),
 };
+// The render modes that f_TranslucentRenderModes branches to, all blended
 static Gfx f_TranslucentSurfaceRenderMode[] = {
     gsDPPipeSync(),
     gsDPSetRenderMode(MODEL_RENDER_MODE_TRANSLUCENT, MODEL_RENDER_MODE_TRANSLUCENT2),
@@ -261,6 +325,8 @@ static Gfx f_TranslucentTextureEdgeRenderMode[] = {
     gsSPEndDisplayList(),
     gsSPEndDisplayList(),
 };
+// Segment branch tables to the render modes; the opaque ones, and the
+// translucent ones
 static Gfx f_OpaqueRenderModes[] = {
     gsSPBranchList(f_SurfaceRenderMode),
     gsSPBranchList(f_DecalRenderMode),
@@ -275,6 +341,8 @@ static Gfx f_TranslucentRenderModes[] = {
     gsSPBranchList(f_TranslucentBlendedRenderMode),
     gsSPEndDisplayList(),
 };
+// Segment tables that clear or set face culling; front-face culling, and
+// back-face culling
 static Gfx f_FrontCulling[] = {
     gsSPClearGeometryMode(G_CULL_FRONT),
     gsSPEndDisplayList(),
@@ -314,6 +382,8 @@ Gfx g_CharacterCombineDisplayList[2] = {
     ),
     gsSPEndDisplayList(),
 };
+// Starts like g_CharacterRenderModeDisplayList, until SetCharacterHilite
+// fills it
 Gfx g_CharacterHighlightDisplayList[3] = {
     gsDPPipeSync(),
     gsDPSetRenderMode(G_RM_PASS, G_RM_AA_ZB_OPA_SURF2),
@@ -349,18 +419,24 @@ Gfx g_CharacterEnvColorDisplayLists[ENV_COLOR_COUNT][2] = {
 };
 static s32 f_UnusedWordBeforeModelIndex UNUSED = 1;
 s32 g_CharacterModelIndex = 1;
+// The animation LoadCharacter starts
 static s32 f_StartedAnimationIndex = 0;
+// Set to the model buffer of the slot last set up or animated
 static void *f_CurrentModelBuffer = NULL;
 static Gfx f_UnusedCharacterEndDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
 };
+// For CHARACTER_LIGHTING_FIXED and CHARACTER_LIGHTING_BLACK
 static Lights2 f_FixedLights =
     gdSPDefLights2(0x6E, 0x6E, 0x6E, 0x9B, 0x78, 0x78, 0, 100, 100, 0x96, 0x96, 0x96, 120, 0, 0);
 static Lights2 f_BlackLights = gdSPDefLights2(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+// SetCharacterLights' lights, in colors for rain that never change
 static Lights2 f_RainLights[DRAW_BUFFER_COUNT] = {
     gdSPDefLights2(0x64, 0x64, 0x64, 0x9B, 0x78, 0x78, 0, -80, 80, 0x96, 0x96, 0x96, 80, -80, 0),
     gdSPDefLights2(0x64, 0x64, 0x64, 0x9B, 0x78, 0x78, 0, -80, 80, 0x96, 0x96, 0x96, 80, -80, 0),
 };
+// SetCharacterLights' lights, in dry weather colors that change near the end of
+// the round
 static Lights2 f_DryLights[DRAW_BUFFER_COUNT] = {
     gdSPDefLights2(
         0x64,
@@ -417,14 +493,21 @@ static Lights2 f_UnusedCharacterLights[DRAW_BUFFER_COUNT] UNUSED = {
         0
     ),
 };
+// The ambient and first light last drawn with, used instead during the impact
+// flash; DrawCharacterAndShadow then sets their second light to the flash level
 static Lights2 f_SavedLights[DRAW_BUFFER_COUNT] = {
     gdSPDefLights2(0x20, 0x20, 0x20, 0xFF, 0xDC, 0xDC, 0, -127, 0, 0xFF, 0xDC, 0xDC, 126, 0, 1),
     gdSPDefLights2(0x20, 0x20, 0x20, 0xFF, 0xDC, 0xDC, 0, -127, 0, 0xFF, 0xDC, 0xDC, 126, 0, 1),
 };
+// The direction of each set's second light, across the main camera's view
 static s32 f_SecondLightDirection[AXIS_COUNT] = {0, 0, 0};
+// Set until the first draw sets up the matrices
 static Boolean f_IsMatrixSetupPending = TRUE;
+// Flips between 0 and 1 on each draw
 static s32 f_DrawParity = 0;
 static s32 f_UnusedWordAfterDrawParity UNUSED = 0;
+// A square, textured with g_ShadowTexture, laid on the ground plane by
+// f_ShadowMatrices
 static Vtx f_ShadowVertices[4] = {
     {
         {
@@ -453,6 +536,10 @@ static Vtx f_ShadowVertices[4] = {
     },
 };
 
+// How far to the side of the ball each playable character stands, in course
+// units, for each club kind and then for an approach shot with a wood.
+// WriteBallDistances measures the models and writes a table like this as
+// pcdist.c.
 static const s32 f_BallDistances[CHARACTER_COUNT][BALL_DISTANCE_COUNT] = {
     {0x2BDD, 0x2070, 0x1903, 0x114D, 0x28F4},
     {0x3502, 0x2910, 0x21DD, 0x1A86, 0x2DAA},
@@ -474,6 +561,10 @@ static const s32 f_BallDistances[CHARACTER_COUNT][BALL_DISTANCE_COUNT] = {
     {0x3295, 0x2776, 0x1FD8, 0x1931, 0x2BC9},
 };
 
+// Returns how far to the side of the ball the character in the slot stands
+// for the club and shot mode. Playable characters' distances come from
+// f_BallDistances unless GAME_FLAG_GENERATE_BALL_DISTANCES is set; otherwise
+// the model is measured, with a default for the club kind if that fails.
 s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode shotMode) {
     Vec3 position;
     char text[DEBUG_LINE_SIZE];
@@ -541,6 +632,9 @@ s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode sh
     }
 
     {
+        // An unused nested function, a GNU C extension. Defined here rather than
+        // among the declarations, it leaves GetBallDistance's registers as they
+        // are in the original.
         UNUSED_FUNCTION f32 GetVectorLength(f32 x, f32 y, f32 z) {
             return sqrtf(x * x + y * y + z * z);
         }
@@ -549,6 +643,9 @@ s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode sh
     return distance;
 }
 
+// Loads each playable character, measures its ball distance in each column of
+// f_BallDistances and writes the source of that table to the host as pcdist.c.
+// AppendDistanceText is a nested function, a GNU C extension.
 void WriteBallDistances(void) {
     char line[BALL_DISTANCE_LINE_SIZE];
     char *cursor;
@@ -656,6 +753,7 @@ void WriteBallDistances(void) {
     FreeMemory(&source);
 }
 
+// Unreferenced; left by debug output that the routines below no longer have
 static const char f_UnusedFrameFormat[] = "TA %d : FRAME %d    ";
 
 void WriteBallDistancesIfEnabled(void) {
@@ -664,6 +762,8 @@ void WriteBallDistancesIfEnabled(void) {
     }
 }
 
+// Has the character in the slot hold the club, by choosing the display list for
+// its kind
 void SetCharacterClub(u32 slotIndex, ClubIndex clubIndex) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     s32 choiceIndex;
@@ -693,6 +793,9 @@ void SetCharacterClub(u32 slotIndex, ClubIndex clubIndex) {
     }
 }
 
+// Copies the kind and value of up to EVENT_ACTION_COUNT_MAX of the
+// animation's events on the frame into actions, and returns how many it
+// copied
 s32 GetAnimationEventActions(
     u32 slotIndex,
     s32 animationIndex,
@@ -722,6 +825,8 @@ s32 GetAnimationEventActions(
     return count;
 }
 
+// Returns the frame of the animation's first event of the kind, from its start,
+// or -1 if none
 s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, AnimationEventKind kind) {
     s32 frame = -1;
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
@@ -744,11 +849,20 @@ s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, AnimationEventKind
     return frame;
 }
 
+// Unreferenced
 s32 GetImpactEventFrame(u32 slotIndex) {
     return GetAnimationEventFrame(slotIndex, IMPACT_EVENT_ANIMATION_INDEX, ANIMATION_EVENT_IMPACT);
 }
 
+// Gives each of the slot's animated triangles its default texture.
+//
+// The original's frame has 0x40 bytes nothing uses below the slot, which it
+// keeps on the stack, so the slot is found through its address; without the
+// unused bytes 18 words differ, and with the slot taken from the return value
+// 68. Walking the triangles with a for loop, or clearing triangleIndex at the
+// loop, gives 27.
 void ResetTriangleTextures(u32 slotIndex) {
+    // Pads the frame to match
     u8 unused[0x40] UNUSED;
     s32 triangleIndex = 0;
     CharacterSlot *slot;
@@ -772,12 +886,24 @@ void ResetTriangleTextures(u32 slotIndex) {
     }
 }
 
+// Shows the keyed textures of the slot's playing texture animations, then
+// advances each one a frame. The arguments after the slot are unused.
+//
+// The unused bytes, the slot found through its address and the while loop
+// are as ResetTriangleTextures'. The 0x80 bytes above the slot come after
+// its address is taken; declared with unusedHead, 10 words differ, and
+// without them 20. With pointers to the state and the animation, 111 words
+// differed; reading the state's frame once into stateFrame and indexing the
+// states in the key loop made 80, indexing them in the animation loop 33,
+// storing the copy count before the test rather than in each branch 16, and
+// declaring keyIndex before key, which swaps their registers, 0.
 void AdvanceTextureAnimations(
     u32 slotIndex,
     s32 unused UNUSED,
     s32 frameLastDigit UNUSED,
     s32 frame UNUSED
 ) {
+    // Pads the frame to match, with unusedTail
     u8 unusedHead[0x40] UNUSED;
     s32 triangleIndex = 0;
     CharacterSlot *slot;
@@ -881,7 +1007,14 @@ NO_RESULT PlayTextureAnimation(u32 slotIndex, s32 index) {
     }
 }
 
+// Gives the slot's triangles that the texture animation changes their default
+// texture. Nothing calls it.
+//
+// Laid out as ResetTriangleTextures: without the unused bytes 22 words
+// differ, with the slot taken from the return value 76, and with a for loop
+// 27. Indexing the key sets in the test, rather than through keySet, gives 4.
 void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
+    // Pads the frame to match
     u8 unused[0x40] UNUSED;
     s32 triangleIndex = 0;
     CharacterSlot *slot;
@@ -917,9 +1050,12 @@ void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
 }
 
 static const char f_NotDisposedFormat[] = "Polychara slot %d not disposed yet!!!!!!!\n";
+// Unreferenced; left by debug output that LoadCharacter no longer has
 static const char f_UnusedReadRomFormat[] = "nuPiReadRom(%x, %x, %x) [bufsiz %x]\n";
 static const char f_UnusedCompleteText[] = "complete\n";
 
+// Loads the model of the character of the kind into the slot, sets up its
+// frame data copies, and starts its first animation
 void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 modelKind) {
     Boolean isPatched = FALSE;
     CharacterSlot *slot = &g_CharacterSlots[slotIndex];
@@ -940,6 +1076,7 @@ void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 modelKind) {
     }
 
     if (IsCharacterSlotBusy(slotIndex)) {
+        // Printed five times, so it stands out
         osSyncPrintf(f_NotDisposedFormat, slotIndex);
         osSyncPrintf(f_NotDisposedFormat, slotIndex);
         osSyncPrintf(f_NotDisposedFormat, slotIndex);
@@ -998,6 +1135,9 @@ void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 modelKind) {
 
         slot->frameData[0] =
             OS_PHYSICAL_TO_K0(osVirtualToPhysical((void *)slot->model->frameDataStart));
+        // Added as integers, the size first, to match: adding the size to a u8
+        // pointer, on either side, or adding the integers pointer first gives 4
+        // words differing, none in shape
         slot->frameData[1] = (void *)(frameDataSize + (u32)slot->frameData[0]);
         slot->frameData[2] = (void *)(frameDataSize + (u32)slot->frameData[1]);
         memcpy(slot->frameData[1], slot->frameData[0], frameDataSize);
@@ -1084,7 +1224,6 @@ s32 GetAnimationIndex(u32 slotIndex, AnimationId animationId) {
                 foundIndex = i;
                 break;
             }
-
             i++;
         }
     }
@@ -1092,6 +1231,9 @@ s32 GetAnimationIndex(u32 slotIndex, AnimationId animationId) {
     return foundIndex;
 }
 
+// Returns the slot's animation with the given id, or its first if it has
+// none with that id. Returns NULL if the slot is unused or its table, which
+// ends at an animation without events, is empty.
 CharacterAnimation *FindAnimation(u32 slotIndex, AnimationId animationId) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
@@ -1278,6 +1420,8 @@ s32 GetAnimationFrame(u32 slotIndex) {
     return frame;
 }
 
+// Steps the slot's animation: carries out the events of the frame, advances
+// the frame, and poses the joints into the next frame data copy
 void AnimateCharacter(u32 slotIndex) {
     AnimationEventAction actions[EVENT_ACTION_COUNT_MAX];
     char text[DEBUG_LINE_SIZE];
@@ -1387,10 +1531,15 @@ void AnimateCharacter(u32 slotIndex) {
     }
 }
 
+// Moves each joint's keyframe spans on to g_CurrentAnimationFrame as
+// AnimateCharacterJoints does, working out the joint transforms but leaving
+// them unused. Nothing calls it.
 void UpdateJointKeyframeSpans(u32 slotIndex) {
+    // Nothing uses them, but the original's frame has the room for them
     Mat4 unusedMatrices[3] UNUSED;
     Mat4 translationMatrix;
     Mat4 jointMatrix;
+    // AnimateCharacterJoints' scale matrix, which nothing fills here
     Mat4 scaleMatrix UNUSED;
     Quaternion rotation;
     JointAnimation *joint;
@@ -1515,7 +1664,10 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
                     joint->rotations[joint->rotationSpan.startKeyIndex][3] * QUATERNION_SCALE;
             }
             else {
+                // Its own, as the original allocates it within the branch
                 f32 rotationProgress;
+                // A variable of its own to match: with rotationProgress scaled in
+                // place, 35 words differ from the original's (27 in shape)
                 Radians coveredAngle;
 
                 spanIndex = joint->rotationSpan.startKeyIndex;
@@ -1530,6 +1682,10 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
                         joint->rotations[nextSpanIndex][QUATERNION_W]);
                 rotationProgress = (g_CurrentAnimationFrame - joint->rotationSpan.startFrame) /
                     (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
+                // Nearly equal rotations are blended linearly, where the sines below
+                // would be near zero. progress holds the next span's weight from
+                // here to match: with a variable of its own, 20 words differ from
+                // the original's
                 if (1.0 - dot < SLERP_THRESHOLD) {
                     progress = rotationProgress;
                     spanWeight = 1.0 - progress;
@@ -1613,6 +1769,9 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
     while (joint->translationKeyCount != END_OF_JOINT_ANIMATIONS);
 }
 
+// Steps the slot's animation as AnimateCharacter does, without the debug text,
+// but poses the joints into the frame data copy the next frame writes, without
+// moving on from it
 void AnimateCharacterInSameCopy(u32 slotIndex) {
     AnimationEventAction actions[EVENT_ACTION_COUNT_MAX];
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
@@ -1719,6 +1878,7 @@ s32 GetCharacterBufferSize(void) {
 }
 
 void SetCharacterBuffer(s32 slotIndex, u8 *buffer) {
+    // Aligned for SetMultiTlb
     u32 alignedBuffer = RoundUpTo((u32)buffer, SMALLEST_PAGE_SIZE);
     s32 warningCount;
     s32 copyIndex;
@@ -1748,6 +1908,9 @@ void ResetCharacterSlots(void) {
     }
 }
 
+// Sets the dry and rain character lights for the frame being drawn, both lit
+// along the scene's light direction. The dry colors change near the end of
+// the round.
 void SetCharacterLights(void) {
     u8 ambientColor[RGB_CHANNEL_COUNT];
     u8 lightColor[RGB_CHANNEL_COUNT];
@@ -1816,6 +1979,7 @@ void SetCharacterLights(void) {
     );
 }
 
+// Copies the ambient and first light into both of f_SavedLights
 #define SaveLights(lights) \
     { \
         f_SavedLights[0].l[0].l = (lights).l[0].l; \
@@ -1824,6 +1988,15 @@ void SetCharacterLights(void) {
         f_SavedLights[1].a.l = (lights).a.l; \
     }
 
+// Draws the character in the slot with its lights, alpha and culling
+//
+// Each weather's arm calls AddReactionLight and falls back to its own lights,
+// and jump2 merges the two arms' identical tails, as the original does. Naming
+// each lights table in place lets fold add the first light's offset to the
+// table's address before the index's, so cse shares table + 8 between
+// gSPSetLights2 and SaveLights. Choosing the table into a pointer and falling
+// back once after the test adds the offset last: 99 words differed, 15 in
+// shape, or 71 (7) with the fallback's gSPSetLights2 in a block of its own.
 void DrawCharacter(u32 slotIndex) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     Gfx *gfx = g_DisplayListHead;
@@ -1936,6 +2109,8 @@ void DrawCharacter(u32 slotIndex) {
     g_DisplayListHead = gfx;
 }
 
+// Places the character in the slot with PlaceGolferAtBall, turned to the
+// current shot's direction
 void PlaceCharacterForShot(u32 slotIndex) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
@@ -1946,6 +2121,8 @@ void PlaceCharacterForShot(u32 slotIndex) {
     }
 }
 
+// Places the character in the slot with PlaceAtReactionSpot, then points the
+// first camera at it from VIEW_DISTANCE away along its facing
 void PlaceAndViewCharacter(u32 slotIndex) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
@@ -1968,6 +2145,8 @@ void PlaceAndViewCharacter(u32 slotIndex) {
     }
 }
 
+// Stands the character in the slot on the ground at the point, facing the
+// heading, at full size
 void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
@@ -1984,9 +2163,28 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
     }
 }
 
+// Whether DrawCharacterAndShadow draws for a camera: OPENING_CAMERA, or any
+// but the inset while g_AreCharactersDrawn is set. It is a macro, as an inline
+// function compiles differently from the original.
 #define IsCharacterDrawnForCamera(cameraIndex) \
     (((cameraIndex) == OPENING_CAMERA) || (((cameraIndex) != INSET_CAMERA) && g_AreCharactersDrawn))
 
+// Returns the yaw of the impact flash's light for a character's yaw: the yaw
+// itself for a left-handed player, who stands mirrored, and its negation for
+// a right-handed one.
+//
+// To match, the negation is set first and the yaw copied over it under the
+// test, which is the original's code: it loads the yaw into $f0 before it
+// reads isLefty, negates it into $f12 in the delay slot of the branch, and
+// copies it over on the fall-through. Picked by a conditional expression,
+// here or in the call's argument, the yaw is loaded straight into $f12 and
+// negated in place, as expr.c expands such an expression in one operand when
+// one arm negates the other: 14 words of DrawCharacterAndShadow differ (6 in
+// shape). So it is with the yaw set first and negated under the opposite
+// test, and with isLefty taken as the s8 it is; an if and an else, or two
+// returns, give 53 (23). Reading isLefty here, and so after the negation,
+// gives 8 (4), and the pick in statements of the caller, which come before
+// the light's address is worked out, 33 (25).
 static inline f32 GetImpactFlashYaw(f32 yaw, Boolean isLefty) {
     f32 flashYaw;
 
@@ -1998,6 +2196,9 @@ static inline f32 GetImpactFlashYaw(f32 yaw, Boolean isLefty) {
     return flashYaw;
 }
 
+// Draws the character in the slot and its shadow, for cameraIndex's view.
+// The shadow lies on the ground plane under three points around the
+// character's shadow point.
 void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotIndex) {
     Vec3 shadowPoint;
     Vec3 corners[TRIANGLE_CORNER_COUNT];
@@ -2011,6 +2212,8 @@ void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotI
     PlaneTriangle triangle;
     TrianglePlane plane;
     Mat4 projection;
+    // The original frame has room for this; without it 204 words differ, none
+    // in shape
     Mat4 unusedMatrix UNUSED;
     Gfx *gfx;
     CharacterSlot *slot;
@@ -2160,6 +2363,7 @@ void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotI
                 shadowPoint[AXIS_Y] * COURSE_TO_WORLD_SCALE,
                 shadowPoint[AXIS_Z] * COURSE_TO_WORLD_SCALE
             );
+            // guAlignF leaves the identity matrix for a vertical direction
             if (fabsf(plane.normal[AXIS_Y]) > LEVEL_GROUND_NORMAL_Y) {
                 guRotateF(alignment, QUARTER_TURN_DEGREES, 1.0f, 0.0f, 0.0f);
             }
@@ -2179,6 +2383,7 @@ void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotI
             ConvertMatrixToFixed(shadow, &f_ShadowMatrices[slotIndex][g_DrawBufferIndex]);
         }
 
+        // Draws the shadow a little nearer the camera than the ground
         guMtxL2F(projection, &matrices->projection);
         projection[3][2] -= SHADOW_DEPTH_OFFSET;
         guMtxF2L(projection, &f_ShadowProjections[slotIndex][g_DrawBufferIndex]);

@@ -1,3 +1,7 @@
+/*
+ * The pin: the cup, the flagstick and the flag.
+ */
+
 #ifndef PIN_H
 #define PIN_H
 
@@ -5,9 +9,11 @@
 
 #include "camera/camera.h"
 #include "system/c_language.h"
-
+// In 1/1024ths of a unit
 #define FLAGSTICK_HEIGHT 0xB400
 
+// How many times its model's size the pin, the cup and the ball's trail are
+// drawn
 extern s32 g_PinVertexScale;
 extern s32 g_CupViewDepth;
 

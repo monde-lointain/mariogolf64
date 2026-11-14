@@ -1,3 +1,9 @@
+/*
+ * The scorecard: between holes it slides in over the course with the
+ * players' scores, and with each game mode's own pages, such as the
+ * tournament's leaderboard and a match's results.
+ */
+
 #include "round/scorecard.h"
 
 #include <framebuffer_count.h>
@@ -32,23 +38,31 @@
 #include "system/memory_address.h"
 #include "text/text.h"
 
+// The tallies of a match's hole happen at these frames of the TALLYING state.
+// A skins match carries a halved hole's skins over at SKINS_TALLY_TIME, or
+// from then hands a won hole's skins over one every SKINS_TALLY_INTERVAL.
 #define MATCH_RESULT_SOUND_TIME 1
 #define MATCH_RESULT_TIME 5
 #define SKINS_TALLY_TIME 20
 #define SKINS_TALLY_INTERVAL 4
 #define MATCH_RESULT_SOUND_CHANNEL 14
 
+// Frames the scorecard takes to slide in
 #define SCORECARD_OPEN_TIME 12
+// Frames before a closing scorecard is freed
 #define SCORECARD_CLOSE_TIME 10
 #define SCORECARD_SLIDE_SPEED 32
 #define SCORECARD_CLOSE_ACCELERATION 8
+// The faces step through their images once every FACE_FRAME_TIME frames
 #define FACE_FRAME_COUNT 5
 #define FACE_FRAME_DURATION 3
 
 #define SCORECARD_SLIDE_SOUND_REVERB 20
+// The opening sound pans from the right, the closing one from the left
 #define SCORECARD_OPEN_SOUND_PAN 0xDF
 #define SCORECARD_CLOSE_SOUND_PAN 0x20
 
+// Images wider than this are drawn in two strips
 #define UNSPLIT_IMAGE_WIDTH_MAX 96
 
 #define LEADERBOARD_LAST_TOP_ROW (TOURNAMENT_CONTESTANT_COUNT - LEADERBOARD_ROW_COUNT)
@@ -56,6 +70,7 @@
 #define ROW_FLIP_END_DEGREES 175
 #define ROW_FLIP_SOUND_CHANNEL 13
 
+// The face shown for a player behind
 #define BEHIND_FACE_IMAGE_OFFSET 4
 #define THREE_PAGE_COUNT 3
 
@@ -83,6 +98,7 @@ void SetScorecardState(ScorecardState state);
 #define ASSET_SPEED_GOLF_TITLE 0x685
 #define ASSET_VERSUS_BOARD_TITLE 0x686
 #define ASSET_BET_TITLE 0x687
+// Each bet's first blink frame; its second is the asset after it
 #define ASSET_LAS_VEGAS_BET_IMAGE 0x672
 #define ASSET_LONGEST_DRIVE_BET_IMAGE 0x674
 #define ASSET_MATCH_POT_BET_IMAGE 0x676
@@ -91,6 +107,7 @@ void SetScorecardState(ScorecardState state);
 #define ASSET_SKINS_BET_IMAGE 0x67C
 #define ASSET_NASSAU_BET_IMAGE 0x67E
 
+// The rows of f_PageTitleAssets
 #define PAGE_TITLES_SPEED_GOLF 0
 #define PAGE_TITLES_SOLO 1
 #define PAGE_TITLES_VERSUS 2
@@ -106,6 +123,7 @@ static AssetId f_PageTitleAssets[PAGE_TITLES_ROW_COUNT][PAGE_TITLE_COUNT] = {
     {ASSET_VERSUS_BOARD_TITLE, ASSET_SCORECARD_TITLE, ASSET_BET_TITLE},
     {ASSET_LEADERBOARD_TITLE, ASSET_SCORECARD_TITLE, ASSET_SCORECARD_TITLE},
 };
+// Each bet's two blink frames
 static AssetId f_BetImageAssets[BET_COUNT][2] = {
     {ASSET_LONGEST_DRIVE_BET_IMAGE, ASSET_LONGEST_DRIVE_BET_IMAGE + 1},
     {ASSET_NEAREST_PIN_BET_IMAGE, ASSET_NEAREST_PIN_BET_IMAGE + 1},
@@ -117,6 +135,10 @@ static AssetId f_BetImageAssets[BET_COUNT][2] = {
 };
 ResultCharactersState g_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
 
+// Opens the scorecard at the given hole: loads the images that every game
+// mode shows, the players' faces and those that the game mode's pages show,
+// and counts the pages. In a tournament it also ranks the player before and
+// after the hole to see which way their place moved.
 void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     EncodedAsset asset;
     AssetFile file;
@@ -129,6 +151,7 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     s32 imageIndex;
     s32 standingIndex;
     TournamentStanding *standing;
+    // Read before anything else, which keeps the arguments' stores after it
     void *stackPointer = GetStackPointer();
 
     g_Scorecard.content.courseIndex = courseIndex;
@@ -188,6 +211,7 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
         case GAME_MODE_UNRECORDED_STROKE:
         case GAME_MODE_RECORD_REPLAY:
         case GAME_MODE_RING_SHOT:
+            // The bets get a page of their own
             if (g_GameState.playerCount == 1) {
                 pageTitlesRow = PAGE_TITLES_SOLO;
                 if (g_Scorecard.hasBets == TRUE) {
@@ -331,6 +355,7 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
         ReadEncodedAsset(g_Scorecard.pageTitleImages[i], &asset);
     }
 
+    // Only the bets being played have images
     imageIndex = 0;
     for (i = 0; i != BET_COUNT; i++) {
         if (g_GameState.betRates[i] != UNSET_BET_RATE) {
@@ -353,9 +378,71 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     ForceStopRumble();
 }
 
+// How many bytes past the scorecard's tableImage one of its other members is
 #define BytesPastTableImage(member) \
     (MemberOffset(Scorecard, member) - MemberOffset(Scorecard, tableImage))
 
+// Closes the scorecard: frees the images that OpenScorecard loaded for the
+// game mode and clears its text slots. It stops any rumble even if the
+// scorecard was already closed.
+//
+// Each run of frees loads its first image's address and passes the others as
+// offsets from it, which is what cse makes of constant addresses. After the
+// last run, though, the original keeps tableImage's address in a register of
+// its own, and the faces' loop steps two pointers that start as that register
+// plus the arrays' offsets from tableImage. So tableImage's address is in a
+// variable, and the loop takes each array's address from it into a local. The
+// loop pass moves those two sums out of the loop and steps a pointer from
+// each. Written in the calls, the sums stay in the loop: only the counter's
+// part is stepped, and tableImage's address is added to it each time.
+//
+// cse has by then written tableImage's address as totalLabelsImage's less
+// 0x80, and its second pass would rewrite the moved sums as offsets from
+// totalLabelsImage's register too, leaving tableImage's address without a
+// register. It can't once that register has been set again. So
+// totalLabelsImage is freed through a variable, image, and image is set to
+// tableImage's address before that is freed. cse passes tableImage's own
+// register to the call, and flow deletes the store as dead. The target tells
+// only that such a store was there, not what it stored or where between
+// tableImage's address and the loop it stood.
+//
+// Measured against the match, as words differing and how many of them in
+// shape:
+//
+//     Every address written out, with no variables (the old
+//     draft)                                                  33 (3)
+//     tableImage's address in its variable, without image     33 (3)
+//     image freeing totalLabelsImage, but not set again       33 (3)
+//     image set to tableImage's address only                  33 (3)
+//     image freeing labelsImage or raisedPanelImage, in
+//     place of totalLabelsImage                               33 (3)
+//     image freeing each of the run's images                  17 (7)
+//     image set again before tableImage's address is taken    10 (6)
+//     image set to tableImage's address as a constant, and
+//     tableImage copied from it after the call                18 (0)
+//     One variable for both                                   18 (0)
+//     tableImage set where it is declared                     25 (7), frame -8
+//     tableImage set before the run                           17 (3)
+//     The arrays' addresses written in the calls              12 (0)
+//     A local for one of the arrays only                      10 (0)
+//     The arrays read as g_Scorecard's members in the calls   10 (6)
+//     The arrays' offsets taken between g_Scorecard's own
+//     addresses, with BytesBetween                            7 (3)
+//     The arrays' addresses set before the loop               48 (8)
+//     Pointers stepped in the loop's header                   50 (4)
+//     Pointers set before the loop and stepped in its body    24 (4)
+//     The palettes freed before the faces                     4 (0)
+//     The faces' loop with a counter of its own               22 (0)
+//     The faces' loop testing < the player count              33 (5), frame -8
+//
+// Also matching: image set to tableImage's address or to NULL anywhere from
+// tableImage's statement to the loop's header, with tableImage passed to the
+// call; image set to tableImage's address as a constant, and tableImage
+// copied from it before the call; tableImage set just after totalLabelsImage
+// is freed; the arrays' locals declared in the function and set in the loop,
+// set in the other order, or set to tableImage plus a count of pointers;
+// image as a void pointer or a u8 pointer; and the two variables declared in
+// the other order, or before the counters.
 void FreeScorecard(void) {
     s32 i;
     s32 imageIndex;
@@ -368,6 +455,7 @@ void FreeScorecard(void) {
         g_RoundHud.unusedScorecardValue = 0;
         g_RoundHud.otherUnusedScorecardValue = 0;
 
+        // Only the bets being played have images
         imageIndex = 0;
         for (i = 0; i != BET_COUNT; i++) {
             if (g_GameState.betRates[i] != UNSET_BET_RATE) {
@@ -414,6 +502,7 @@ void FreeScorecard(void) {
                 break;
         }
 
+        // Freed through image, which is set again below, to match
         image = &g_Scorecard.totalLabelsImage;
         FreeMemory(image);
         FreeMemory(&g_Scorecard.labelsImage);
@@ -422,9 +511,12 @@ void FreeScorecard(void) {
         FreeMemory(&g_Scorecard.scoresPanelImage);
         FreeMemory(&g_Scorecard.raisedPanelImage);
         tableImage = &g_Scorecard.tableImage;
+        // Sets image again, so that tableImage's address keeps a register, to
+        // match
         image = tableImage;
         FreeMemory(image);
         for (i = 0; i != g_GameState.playerCount; i++) {
+            // Each array is reached from tableImage's address, to match
             ImageAsset **faceImages =
                 (ImageAsset **)AddressPast(tableImage, BytesPastTableImage(faceImages));
             PaletteColor **facePalettes =
@@ -441,8 +533,13 @@ void FreeScorecard(void) {
     ForceStopRumble();
 }
 
+// A hole time of this many minutes or more shows as dashes
 #define SHOWN_MINUTE_LIMIT 60
 
+// Picks the scorecard's layout for the last hole's result with the result
+// not yet tallied: it plays the result's song, picks the hole's winner and,
+// in Speed Golf, records the hole's time. It then turns to the first page and
+// picks each player's face by how they did on the hole.
 void StartScorecardTally(s32 layout) {
     s32 ranks[PLAYER_COUNT_MAX];
     s32 scoresToPar[PLAYER_COUNT_MAX];
@@ -470,6 +567,9 @@ void StartScorecardTally(s32 layout) {
                     songId = SONG_HOLE_LOST;
                 }
                 else {
+                    // A jump to the other branch's halved song, to match: setting the
+                    // song here instead gives 16 words differing, 2 in shape, and
+                    // setting the halved song before the tests 13, 5 in shape
                     goto HALVED;
                 }
             }
@@ -478,7 +578,6 @@ void StartScorecardTally(s32 layout) {
                 if (g_Players[0].holes[holeIndex].strokeCount ==
                     g_Players[1].holes[holeIndex].strokeCount) {
 HALVED:
-
                     songId = SONG_HOLE_HALVED;
                 }
             }
@@ -533,6 +632,8 @@ HALVED:
             }
 
             if (timedHoleCount > 0) {
+                // The stopwatch runs on through the round, so the last hole's time
+                // first takes all of it
                 g_HoleTimeFrames[timedHoleCount - 1] = g_GameState.stopwatchFrameCount;
                 g_HoleTimeMinutes[timedHoleCount - 1] =
                     g_GameState.stopwatchFrameCount / FRAMES_PER_MINUTE;
@@ -548,6 +649,7 @@ HALVED:
                     g_HoleTimeHundredths[0] = -1;
                 }
 
+                // Then loses each earlier hole's time
                 for (i = 0; i < timedHoleCount - 1; i++) {
                     if (g_HoleTimeMinutes[timedHoleCount - 1] < 0 ||
                         g_HoleTimeMinutes[timedHoleCount - 1] >= SHOWN_MINUTE_LIMIT ||
@@ -609,6 +711,7 @@ HALVED:
                 scoresToPar[i] = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
             }
 
+            // The ranks go unused
             for (i = 0; i != g_GameState.playerCount; i++) {
                 ranks[i] = 0;
                 for (j = 0; j != g_GameState.playerCount; j++) {
@@ -618,6 +721,7 @@ HALVED:
                 }
             }
 
+            // A player over par on the hole, after their handicap, looks behind
             for (i = 0; i != g_GameState.playerCount; i++) {
                 CourseRecord *course = &g_CourseRecords[GetCourseRecordIndex()];
 
@@ -657,6 +761,7 @@ HALVED:
             break;
         case GAME_MODE_SKINS_MATCH:
         case GAME_MODE_CLUB_SLOTS:
+            // A player with more strokes on the hole than anybody else looks behind
             for (i = 0; i != g_GameState.playerCount; i++) {
                 g_Scorecard.content.faceImageOffsets[i] = 0;
                 for (j = 0; j != g_GameState.playerCount; j++) {
@@ -671,11 +776,14 @@ HALVED:
     }
 }
 
+// Picks the scorecard's layout for the last hole's result and sets up its
+// tally, then turns to the first page and picks each player's face.
 void SetScorecardLayout(ScorecardLayout layout) {
     s32 ranks[PLAYER_COUNT_MAX];
     s32 scoresToPar[PLAYER_COUNT_MAX];
     s32 holesWon[MATCH_PLAYER_COUNT];
     s32 skinsRanks[PLAYER_COUNT_MAX];
+    // The original frame has room for this; without it 16 words differ
     s32 unused[4] UNUSED;
     s32 i;
     s32 j;
@@ -687,6 +795,8 @@ void SetScorecardLayout(ScorecardLayout layout) {
         case SCORECARD_LAYOUT_SPEED_GOLF:
             break;
         case SCORECARD_LAYOUT_MATCH:
+            // A match's tally reuses the skins fields: two keep the hole number,
+            // and TallyScorecardSkins sets onLastHole once it counts the result.
             g_Scorecard.holeWinnerIndex = HOLE_WINNER_UNSET;
             g_Scorecard.skinsCarryover.onLastHole = 0;
             g_Scorecard.skinsCarryover.intoLastHole = g_Scorecard.content.holeIndex;
@@ -725,6 +835,7 @@ void SetScorecardLayout(ScorecardLayout layout) {
                 scoresToPar[i] = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
             }
 
+            // Each player's rank counts the players ahead of them
             for (i = 0; i != g_GameState.playerCount; i++) {
                 ranks[i] = 0;
                 for (j = 0; j != g_GameState.playerCount; j++) {
@@ -734,6 +845,7 @@ void SetScorecardLayout(ScorecardLayout layout) {
                 }
             }
 
+            // Every rank is below the player count, so this always picks 0
             for (i = 0; i != g_GameState.playerCount; i++) {
                 if (ranks[i] < g_GameState.playerCount + 1) {
                     g_Scorecard.content.faceImageOffsets[i] = 0;
@@ -773,6 +885,7 @@ void SetScorecardLayout(ScorecardLayout layout) {
             break;
         case GAME_MODE_SKINS_MATCH:
         case GAME_MODE_CLUB_SLOTS:
+            // Each player's rank counts the players with fewer skins
             for (i = 0; i != g_GameState.playerCount; i++) {
                 skinsRanks[i] = 0;
                 for (j = 0; j != g_GameState.playerCount; j++) {
@@ -782,6 +895,7 @@ void SetScorecardLayout(ScorecardLayout layout) {
                 }
             }
 
+            // Every rank is below the player count, so this always picks 0
             for (i = 0; i != g_GameState.playerCount; i++) {
                 if (skinsRanks[i] < g_GameState.playerCount + 1) {
                     g_Scorecard.content.faceImageOffsets[i] = 0;
@@ -826,6 +940,8 @@ void SetScorecardState(ScorecardState state) {
 
 Boolean TallyScorecardSkins(void);
 
+// Slides the scorecard in or out, tallies the last hole, and animates the faces
+// on it
 void AnimateScorecard(void) {
     EncodedAsset asset;
     s32 playerIndex;
@@ -887,6 +1003,7 @@ void AnimateScorecard(void) {
                 g_Scorecard.x -= slideSpeed;
             }
 
+            // The target stores the y offset back unchanged here
             g_Scorecard.y = g_Scorecard.y;
             if (g_Scorecard.stateTime == SCORECARD_CLOSE_TIME) {
                 FreeScorecard();
@@ -930,9 +1047,15 @@ void AnimateScorecard(void) {
     }
 }
 
+// Left and right on the control pad turn the pages, round from the last to the
+// first.
 void TurnScorecardPage(u16 buttons) {
     RoundHud *hud;
     s32 pageCount = g_Scorecard.pageCount;
+    // Read through a pointer, which the call loads after the sound ID; GCC
+    // copies a global argument into a register before the call's other
+    // arguments. Casts, a local for the channel, sound or pan, a masked pan
+    // or its terms swapped all load the channel first
     SoundChannel *channel = &g_NextSoundChannel;
 
     if (pageCount > 1) {
@@ -954,6 +1077,7 @@ void TurnScorecardPage(u16 buttons) {
             return;
         }
 
+        // The sound pans further right on each later page
         PlaySoundWithEffects(
             SOUND_MENU_MOVE,
             *channel,
@@ -964,6 +1088,8 @@ void TurnScorecardPage(u16 buttons) {
     }
 }
 
+// Flips the leaderboard's rows over, and scrolls it with up and down on the
+// control pad
 void ScrollLeaderboard(u16 buttons) {
     s32 row;
 
@@ -1056,6 +1182,8 @@ Boolean UpdateShownScorecard(u16 buttons) {
     return TRUE;
 }
 
+// Draws an eight-bit image at its own size. Images wider than
+// MAX_UNSPLIT_IMAGE_WIDTH are loaded and drawn as two strips, top then bottom.
 void DrawLargeImage(Gfx **displayListHead, u8 *image, s32 left, s32 top) {
     Gfx *gfx = *displayListHead;
     s32 width = ReadImageWidth(image);
@@ -1104,6 +1232,8 @@ void DrawLargeImage(Gfx **displayListHead, u8 *image, s32 left, s32 top) {
     *displayListHead = gfx;
 }
 
+// The page titles sit in a row along the scorecard's top, the page shown a
+// pixel higher
 #define PAGE_TITLE_LEFT 32
 #define PAGE_TITLE_SPACING 136
 #define THREE_PAGE_TITLE_LEFT 29
@@ -1111,6 +1241,10 @@ void DrawLargeImage(Gfx **displayListHead, u8 *image, s32 left, s32 top) {
 #define PAGE_TITLE_TOP 21
 #define UNSHOWN_PAGE_GRAY 0x7F
 
+// Draws the scorecard: its page titles, with the other pages' grayed out, and
+// the page shown, which depends on the game mode. It would draw
+// DrawMatchResult's screen instead in SCORECARD_UNUSED_MATCH_RESULT, which is
+// never set.
 void DrawScorecard(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 pageIndex;
@@ -1263,17 +1397,21 @@ void DrawScorecard(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// The table image holds strips of tabs, then the table's body. Each strip is a
+// row of tabs drawn across the table's full width.
 #define TABLE_WIDTH 288
 #define TABLE_SHOWN_WIDTH 284
 #define TABLE_LEFT 20
 #define TAB_TOP 20
 #define TAB_HEIGHT 24
 #define TAB_STRIP_COUNT 5
+// The tabs behind the front one sit lower
 #define TAB_BACK_DROP 2
 #define TABLE_BODY_TOP 44
 #define TABLE_BODY_HEIGHT 190
 #define TABLE_BODY_OFFSET \
     (LARGE_PALETTED_TEXELS_OFFSET + (TAB_STRIP_COUNT * TAB_HEIGHT * TABLE_WIDTH))
+// The rows that fit in texture memory at once
 #define TABLE_LOAD_HEIGHT 7
 #define TAB_BACK_GRAY 0xBF
 #define FIRST_OF_THREE_TAB_STRIP 0
@@ -1282,6 +1420,9 @@ void DrawScorecard(Gfx **displayListHead) {
 #define FIRST_OF_TWO_TAB_STRIP 3
 #define SECOND_OF_TWO_TAB_STRIP 4
 
+// Draws the scorecard's tabs and the table under them. The tab strips are
+// drawn back to front, the last in front at full brightness, and their order
+// depends on the page shown.
 void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 pageIndex) {
     s32 tabStrips[THREE_PAGE_COUNT];
     Gfx *gfx = *displayListHead;
@@ -1379,6 +1520,7 @@ void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 pageIndex) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     texelsOffset = TABLE_BODY_OFFSET;
     for (row = 0; row < TABLE_BODY_HEIGHT; row += TABLE_LOAD_HEIGHT) {
+        // The body's last load is its one leftover row
         loadHeight = (row + TABLE_LOAD_HEIGHT <= TABLE_BODY_HEIGHT) ? TABLE_LOAD_HEIGHT : 1;
         gDPSetTextureImage(
             gfx++,
@@ -1422,6 +1564,9 @@ void FreeResultCharacters(void) {
     g_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
 }
 
+// Starts loading the two players' characters to react to who did better on
+// the last hole, and plays the result's song. Returns FALSE while the
+// character slots are still busy.
 Boolean LoadResultCharacters(void) {
     s32 holeIndex = g_Scorecard.content.holeIndex - 1;
     SongId songId;
@@ -1436,6 +1581,7 @@ Boolean LoadResultCharacters(void) {
     LoadCharacter(1, g_Players[1].characterIndex + CHARACTER_COUNT, g_Players[1].paletteIndex);
     songId = SONG_MATCH_RESULT;
     if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+        // The original passes the strokes through song's register
         songId = g_Players[0].holes[holeIndex].strokeCount;
         if (songId < g_Players[1].holes[holeIndex].strokeCount) {
             songId = SONG_HOLE_WON;
@@ -1469,6 +1615,8 @@ Boolean LoadResultCharacters(void) {
     return TRUE;
 }
 
+// Counts the last hole's result onto the scorecard. Returns TRUE once it is
+// done.
 Boolean TallyScorecardSkins(void) {
     switch (g_Scorecard.layout) {
         case SCORECARD_LAYOUT_STROKE:

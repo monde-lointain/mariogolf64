@@ -1,3 +1,7 @@
+/*
+ * The transmit menu, which exchanges data with a Game Boy
+ */
+
 #ifndef TRANSMIT_MENU_H
 #define TRANSMIT_MENU_H
 

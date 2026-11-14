@@ -1,3 +1,17 @@
+/*
+ * The end of main's bss: every object that the original's linker allocated
+ * from main's common block, defined here in the original's address order. Only
+ * the matching build compiles it.
+ *
+ * The original main segment was one relocatable, whose commons its linker
+ * laid out in the order of a 4051-bucket symbol hash table, a layout no
+ * per-object link can reproduce from the files that use them. Defining them
+ * in .bss here, in that order, fixes their addresses whatever their names,
+ * while their types still give their sizes. Each object's own module, game or
+ * library, defines it too, as a common that binds to the definition here.
+ * Other builds place each object with its module instead.
+ */
+
 #include <PRinternal/controller.h>
 #include <PRinternal/macros.h>
 #include <PRinternal/osint.h>
@@ -53,11 +67,22 @@
 #include "system/overlay_manager.h"
 #include "text/text.h"
 
+// KMC GCC 2.7.2 leaves an uninitialized variable to the common block, and
+// honors a section attribute only on an initialized one, so each object is
+// zero-initialized into .bss
 #define BSS __attribute__((section(".bss")))
 
+// A common of the original's that no routine reads, so whose object is
+// unknown. It is named after its line, as it holds only its place.
 #define UnreadCommonName(line) UnreadCommonNameAtLine(line)
 #define UnreadCommonNameAtLine(line) f_UnreadCommon##line
 #define UNREAD_COMMON(size) static u8 UnreadCommonName(__LINE__)[(size)] UNUSED BSS = {0}
+
+// Each object keeps the alignment that the original's assembler gave it as a
+// common under --force-n64align: 8 bytes from 0x10 bytes long, unless its
+// address shows otherwise. The assembler gave those from 0x400 bytes long 16,
+// which KMC GCC can't ask for, as it aligns no object past 8. The order of
+// the definitions puts them there instead.
 
 int f_RandomState BSS = {0};
 UNREAD_COMMON(0x8);
@@ -156,6 +181,7 @@ Vec3 f_RainVelocity BSS = {0};
 NUContRmbCtl nuContRmbCtl[NU_CONT_MAXCONTROLLERS] BSS ALIGNED(8) = {{0}};
 CurrentShot g_ScriptedShot BSS ALIGNED(8) = {0};
 s32 g_MessageCodesStart BSS = {0};
+// Its address is only 4-byte aligned, so it keeps its type's alignment
 Scorecard g_Scorecard BSS = {{0}};
 char g_PrintBuffer[PRINT_BUFFER_SIZE] BSS ALIGNED(8) = {0};
 Firework f_Fireworks[FIREWORK_CAPACITY] BSS ALIGNED(8) = {{0}};
@@ -164,6 +190,7 @@ OSContPad nuContData[NU_CONT_MAXCONTROLLERS] BSS ALIGNED(8) = {{0}};
 Mtx *g_CurrentJointMatrices BSS = {0};
 ImageAsset *g_DistanceSignImage BSS = {0};
 s32 g_ControllerCount BSS = {0};
+// Its address is only 4-byte aligned, so it keeps its type's alignment
 Camera g_MapCamera BSS = {0};
 ImageAsset *g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT] BSS = {0};
 u8 __osMaxControllers BSS = {0};
@@ -228,7 +255,9 @@ ImageAsset *g_MenuLabelImages[MENU_IMAGE_BUFFER_COUNT] BSS = {0};
 ImageAsset *g_ShotPreviewDashImage BSS = {0};
 ImageAsset *g_CharacterFaceImages[CHARACTER_COUNT] BSS ALIGNED(8) = {0};
 volatile u32 nuGfxTaskSpool BSS = {0};
+// Its address is only 4-byte aligned, so it keeps its type's alignment
 u8 g_UnreadMenuBuffer[0x1218] BSS = {0};
+// Its address is only 4-byte aligned, so it keeps its type's alignment
 u8 g_UnreadPlayBuffer[0xDEC] BSS = {0};
 s32 g_ChosenCharacters[PLAYER_COUNT_MAX] BSS ALIGNED(8) = {0};
 OSTimer __osGbpakTimer BSS ALIGNED(8) = {0};

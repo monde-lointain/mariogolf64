@@ -1,3 +1,8 @@
+/*
+ * Curves: periodic splines, Hermite interpolation, and stepping along a path of
+ * points at a pace.
+ */
+
 #include "math/curve.h"
 
 #include <ultra64.h>
@@ -5,6 +10,7 @@
 #include "math/geometry.h"
 #include "system/compiler.h"
 
+// The splines have this many segments, between one more knots
 #define SPLINE_SEGMENT_COUNT 10
 
 static s32 f_PathPointIndex = 0;
@@ -18,6 +24,7 @@ static f32 f_UnusedFloatsAfterPathStep[33] UNUSED = {
 /* clang-format on */
 static f32 f_PathPosition[AXIS_COUNT];
 
+// The line the target runs along
 typedef struct PathSegment {
     Vec3 start;
     Vec3 end;
@@ -29,11 +36,22 @@ static f32 f_PathProgressStep;
 static f32 f_PathStepsPerSegment;
 static f32 f_PathCatchUp;
 
+// Starts the next StepAlongPath call at the first point of its path
 void ResetPath(void) {
     f_PathStepIndex = 0;
     f_PathPointIndex = 0;
 }
 
+// Moves position toward a target that runs along the lines between the
+// points, from the second point to the last, and returns PATH_END_REACHED
+// once it has reached the last point. Starting from the first point, the target
+// takes one step per call through each line, and the position covers
+// a fraction of its remaining distance each step, in whole units, as pace
+// sets them (see PathPace); other paces keep the last path's.
+//
+// The points are structures, as the original's must have been: GCC takes a
+// store through a plain f32 pointer, at no offset, to alias any global, and
+// would hold the loads after position's first copy back behind it.
 s32 StepAlongPath(PathPoint *points, s32 pointCount, s32 pace, PathPoint *position) {
     s32 nextPointIndex;
     f32 stepsPerSegment;
@@ -141,9 +159,13 @@ s32 StepAlongPath(PathPoint *points, s32 pointCount, s32 pace, PathPoint *positi
         f_PathPointIndex = nextPointIndex;
     }
 
+    // At most 0 here, since f_PathPointIndex is at least 1
     return 1 - f_PathPointIndex;
 }
 
+// Fills coefficients for EvaluatePeriodicSpline with the curve through
+// the knots that repeats with the period from the first knot to the
+// last
 void InitPeriodicSpline(f32 knotX[], f32 knotY[], f32 coefficients[]) {
     s32 index;
     f32 ratio;
@@ -162,10 +184,15 @@ void InitPeriodicSpline(f32 knotX[], f32 knotY[], f32 coefficients[]) {
     }
 
     diagonal[SPLINE_SEGMENT_COUNT] = 2.0f * (widths[SPLINE_SEGMENT_COUNT - 1] + widths[0]);
+    // This leaves coefficients[SPLINE_SEGMENT_COUNT] as it was, though it is read
+    // below
     for (index = 1; index != SPLINE_SEGMENT_COUNT; index++) {
         coefficients[index] = slopes[index] - slopes[index - 1];
     }
 
+    // slopes is reused from here as the column that the period adds, to match:
+    // an array of its own grows the frame, and gives 30 words differing
+    // (none in shape) declared after slopes, or 212 declared first
     slopes[1] = widths[0];
     slopes[SPLINE_SEGMENT_COUNT - 1] = widths[SPLINE_SEGMENT_COUNT - 1];
     slopes[SPLINE_SEGMENT_COUNT] = diagonal[SPLINE_SEGMENT_COUNT];
@@ -196,6 +223,7 @@ void InitPeriodicSpline(f32 knotX[], f32 knotY[], f32 coefficients[]) {
     }
 }
 
+// Returns the height at x of the spline that InitPeriodicSpline set up
 f32 EvaluatePeriodicSpline(f32 x, f32 knotX[], f32 knotY[], f32 coefficients[]) {
     s32 low;
     s32 high;
@@ -239,6 +267,10 @@ f32 EvaluatePeriodicSpline(f32 x, f32 knotX[], f32 knotY[], f32 coefficients[]) 
         knotY[low];
 }
 
+// Returns the value at position in values, between the whole numbers
+// of values' indices, by a Hermite curve whose slope at each index is
+// the difference to the next value. Each value and difference is
+// truncated to a whole number first.
 f32 InterpolateHermite(f32 values[], f32 position) {
     f32 nearValues[3];
     s32 index;
@@ -262,6 +294,7 @@ f32 InterpolateHermite(f32 values[], f32 position) {
         (startSlope * fraction) + start;
 }
 
+// Adds nothing to the display list
 void DrawNothing(Gfx **displayListHead) {
     *displayListHead = *displayListHead;
 }

@@ -1,3 +1,8 @@
+/*
+ * The pin: the cup, the flagstick, the flag that turns to the wind, and their
+ * shadow.
+ */
+
 #include "course/pin.h"
 
 #include <math.h>
@@ -25,12 +30,17 @@
 #include "system/heap.h"
 #include "system/memory_address.h"
 
+// In 1/1024ths of a unit
 #define CUP_DISTANCE_OFFSET 0x699
 
+// The shadow is a strip of rows of two vertices, running from the cup along
+// the light's yaw and narrowing row by row
 #define PIN_SHADOW_ROW_COUNT 9
 #define PIN_SHADOW_VERTEX_COUNT (PIN_SHADOW_ROW_COUNT * 2)
+// In 1/1024ths of a unit
 #define PIN_SHADOW_ROW_SPACING 8533.0f
 #define PIN_SHADOW_WIDTH_STEP 46.079998f
+// The shadow's vertices are in 1/256ths of a unit
 #define COURSE_UNITS_PER_VERTEX_UNIT 4
 
 #define ASSET_SMALL_CUP_TEXTURE 0x4C9
@@ -39,6 +49,7 @@
 #define ASSET_PIN_SHADOW_TEXTURE 0x704
 
 #define PIN_SCALE 0.1f
+// Turns the pin from facing away from the camera to facing it
 #define PIN_HEADING_OFFSET 3.14f
 
 #define PIN_SHADOW_SCALE (4.0f / 1024.0f)
@@ -52,8 +63,12 @@
 
 #define CUP_HALF_HEIGHT_MAX 5.0f
 #define CUP_HALF_HEIGHT_MIN 1.0f
+// Half the distance in front of the cup, toward the camera, of the point
+// projected as the flagstick's foot
 #define STICK_FOOT_HALF_DISTANCE 614.4f
 
+// Each part's prim depth is the cup's, moved by a height in vertex units and an
+// offset
 #define PART_DEPTH_BIAS 120
 #define CUP_DEPTH_HEIGHT 1.5f
 #define CUP_DEPTH_OFFSET 60.0
@@ -62,14 +77,18 @@
 #define FLAGSTICK_DEPTH_HEIGHT 7
 #define FLAGSTICK_DEPTH_OFFSET 40.0f
 
+// When the cup or flagstick would be drawn smaller than these screen sizes,
+// its vertices are placed in screen space instead
 #define CUP_SCREEN_RADIUS 1.7999999999999998
 #define SCREEN_CUP_SIZE_MAX 10.0f
 #define FLAGSTICK_SCREEN_RADIUS 0.6000000000000001
 #define SCREEN_FLAGSTICK_SIZE_MAX 2.0f
+// The screen-space cup's corners, in pixels from the cup's center
 #define SCREEN_CUP_LEFT (-4)
 #define SCREEN_CUP_RIGHT 5
 #define SCREEN_CUP_WALL_HEIGHT 6
 
+// Two of the cup's corners get lighter as the cup gets farther from the camera
 #define CUP_BASE_SHADE 0x5C
 #define CUP_SHADE_MIN 0x7F
 #define CUP_SHADE_MAX 0xFF
@@ -89,12 +108,18 @@
 #define LARGE_CUP_WALL_PRIM_DEPTH 0x4010
 #define LARGE_FLAGSTICK_PRIM_DEPTH 0x4027
 
+// Texture coordinates in texels, packed as s10.5
 #define SmallCupTextureCoordinates(s, t) \
     TextureCoordinateWord(TexelCoordinate(s), TexelCoordinate(t))
+// Packs screen coordinates in pixels into the quarter pixels of a vertex's
+// G_MWO_POINT_XYSCREEN word
 #define ScreenXY(x, y) \
     ScreenPointWord((x) * QUARTER_PIXELS_PER_PIXEL, (s32)((y) * QUARTER_PIXELS_PER_PIXEL))
+// Half the screen-space flagstick's width, in quarter pixels
 #define SCREEN_FLAGSTICK_HALF_WIDTH 2
+// How far above its projected foot the screen-space flagstick starts, in pixels
 #define SCREEN_FLAGSTICK_FOOT_RISE 1
+// Prim depths are kept to multiples of 4
 #define PRIM_DEPTH_MASK (~3)
 
 s32 g_CupViewDepth;
@@ -151,7 +176,9 @@ static Vtx f_PinShadowVertices[PIN_SHADOW_VERTEX_COUNT] = {
     {{{-30, 0, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x00}}},
     {{{30, 0, 0}, 0, {1024, 0}, {0x00, 0x00, 0x00, 0x00}}},
 };
+// Set by TakePinOut and cleared when the pin is next drawn
 static Boolean8 f_IsPinOut = FALSE;
+// Set by SkipNextPinDraw and cleared by the draw it skips
 static Boolean8 f_SkipsNextPinDraw = FALSE;
 static f32 f_FlagWavePhase = 0.0f;
 
@@ -164,6 +191,8 @@ static u8 *f_PinShadowTexture;
 static Mtx f_PinMatrices[CAMERA_COUNT][DRAW_BUFFER_COUNT];
 static u8 f_UnusedBufferAfterPinMatrices[0xC0] UNUSED;
 
+// Returns the length of (x, z), less CUP_DISTANCE_OFFSET but at least 0.
+// Callers pass a point's offset from the cup.
 s32 GetCupDistance(s32 x, s32 z) {
     s32 distance = IntLength2D(x, z);
 
@@ -177,6 +206,7 @@ s32 GetCupDistance(s32 x, s32 z) {
     return distance;
 }
 
+// Lays the pin's shadow vertices over the ground around the cup
 void BuildPinShadow(void) {
     s32 points[PIN_SHADOW_VERTEX_COUNT][AXIS_COUNT];
     s32 i;
@@ -212,6 +242,7 @@ void BuildPinShadow(void) {
     }
 }
 
+// Draws the pin's shadow, with its texture already loaded
 void DrawPinShadow(void) {
     s32 row;
 
@@ -271,6 +302,7 @@ void FreePinTextures(void) {
     FreeMemory(&f_PinShadowTexture);
 }
 
+// Places the pin at the cup, turned to face the main camera
 void SetPinMatrix(s32 cameraIndex) {
     Vec3 translation;
     Vec3 rotation;
@@ -296,14 +328,19 @@ void SetPinMatrix(s32 cameraIndex) {
     ConvertMatrixToFixed(matrix, &f_PinMatrices[cameraIndex][g_DrawBufferIndex]);
 }
 
+// Takes the pin out of the cup until it is next drawn
 void TakePinOut(void) {
     f_IsPinOut = TRUE;
 }
 
+// Makes the next DrawPin draw nothing
 void SkipNextPinDraw(void) {
     f_SkipsNextPinDraw = TRUE;
 }
 
+// Returns whether the pin stands in the cup. During GAME_STATE_TAKING_TURNS and
+// GAME_STATE_HOLE_END it is taken out while the shot is from the green,
+// except in mini-golf.
 Boolean IsPinInCup(void) {
     if (f_IsPinOut || f_SkipsNextPinDraw) {
         return FALSE;
@@ -320,6 +357,9 @@ Boolean IsPinInCup(void) {
     return TRUE;
 }
 
+// Draws the pin's shadow, the cup, the flagstick and the flag, which turns
+// to the wind. While the pin is out of the cup, only the cup is drawn.
+// matrices is unused; DrawGame passes it to its other scene drawers too.
 void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex) {
     ScreenPoint stickTop;
     ScreenPoint cup;

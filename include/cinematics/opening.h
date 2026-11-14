@@ -1,3 +1,7 @@
+/*
+ * The opening, the attract mode that plays a hole by itself
+ */
+
 #ifndef OPENING_H
 #define OPENING_H
 

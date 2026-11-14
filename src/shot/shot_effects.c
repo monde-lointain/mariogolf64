@@ -1,3 +1,9 @@
+/*
+ * The sparks thrown off the ball by a driven shot or a hit on the flagstick,
+ * and the trail that the club leaves through the swing. Each burst of sparks
+ * spreads from a point that stays fixed in the world.
+ */
+
 #include "shot/shot_effects.h"
 
 #include <ultra64.h>
@@ -28,13 +34,16 @@
 #define SPARK_COUNT 30
 #define SPARK_BURST_COUNT 5
 #define NO_SPARK_BURST (-1)
+// The frames a spark lives and a burst's timer starts at
 #define SPARK_LIFE 10
 #define SPARK_BURST_TIME 20
 
+// The impact flash's sparks, spread around the ball at random speeds
 #define IMPACT_SPARK_COUNT 20
 #define IMPACT_SPARK_SPACING (M_PI * (2.0f / IMPACT_SPARK_COUNT))
 #define IMPACT_SPARK_SPEED_MIN 8.0f
 #define IMPACT_SPARK_SPEED_RANGE 16
+// The flagstick's sparks, spread evenly at one speed
 #define FLAGSTICK_SPARK_COUNT 10
 #define FLAGSTICK_SPARK_SPACING (M_PI * (2.0f / FLAGSTICK_SPARK_COUNT))
 #define FLAGSTICK_SPARK_SPEED 12.0f
@@ -63,29 +72,37 @@ enum SwingTrailState {
 
 typedef s32 SwingTrailState;
 
+// The character points at the two edges of the trail
 #define SWING_TRAIL_OUTER_POINT 8
 #define SWING_TRAIL_INNER_POINT 7
+// The frames of the swing recorded, each a sample of both points
 #define SWING_TRAIL_SAMPLES 14
+// Each kind's samples, set apart though they are the same
 #define POWER_SHOT_SWING_TRAIL_SAMPLES 14
 #define NORMAL_SHOT_SWING_TRAIL_SAMPLES 14
 #define SWING_TRAIL_SAMPLES_MAX 56
 #define SWING_TRAIL_AXIS_COUNT 6
+// The path between the samples, two steps to a sample
 #define SWING_TRAIL_PATH_LENGTH (SWING_TRAIL_SAMPLES * 2)
 #define SWING_TRAIL_MATRIX_COUNT 64
 #define SWING_TRAIL_SEGMENTS 15
 #define SWING_TRAIL_FULL_ALPHA OPAQUE_ALPHA
 #define SWING_TRAIL_IMAGE_WIDTH 64
 #define SWING_TRAIL_IMAGE_HEIGHT 32
+// The S coordinate across the whole trail, in 10.5 fixed point
 #define SWING_TRAIL_TEXTURE_LENGTH 0x800
 
 #define SPARK_IMAGE_SIZE 32
 #define SPARK_DRAG 0.98f
 #define SPARK_MODEL_Z (-100.0f)
 #define SPARK_MODEL_SCALE 0.1f
+// Texture rectangles beyond these screen coordinates would overflow
 #define SPARK_SCREEN_COORDINATE_MAX 511
+// Whether a screen coordinate lies within SPARK_MAX_SCREEN_COORD of 0
 #define IsSparkCoordinateInRange(coordinate) \
     ((coordinate) >= -SPARK_SCREEN_COORDINATE_MAX && (coordinate) <= SPARK_SCREEN_COORDINATE_MAX)
 
+// Counts the frames from the last impact flash, back to 0 after 100
 static s32 f_ImpactFrameCount = 0;
 static Vtx f_SparkVertices[TRIANGLE_VERTEX_COUNT] = {
     {{{0, 160, 0}, 0, {0, 0}, {0xFF, 0x40, 0x00, 0xFF}}},
@@ -95,12 +112,14 @@ static Vtx f_SparkVertices[TRIANGLE_VERTEX_COUNT] = {
 static s32 f_UnusedWordsAfterSparkVertices[2] UNUSED = {0};
 static s32 f_SwingTrailPathLength = 0;
 static s32 f_SwingTrailSampleCount = SWING_TRAIL_SAMPLES;
+// The ring of matrices that f_SwingTrailHead turns backwards through
 static s32 f_SwingTrailHead = 0;
 static SwingTrailKind f_SwingTrailKind = SWING_TRAIL_KIND_FADE;
 static s32 f_SwingTrailPathIndex = 0;
 static s32 f_SwingTrailLength = 0;
 static SwingTrailState f_SwingTrailState = SWING_TRAIL_NONE;
 static s32 f_SwingTrailAlpha = SWING_TRAIL_FULL_ALPHA;
+// A vertex at the origin for each edge of the trail
 static Vtx f_SwingTrailVertices[2] = {
     {{{0, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x00}}},
     {{{0, 0, 0}, 0, {0, 0}, {0xC8, 0xDC, 0xC8, 0xBF}}},
@@ -109,12 +128,15 @@ static Mtx f_SwingTrailOrigin = IDENTITY_MTX;
 
 static Mtx f_SwingTrailProjections[DRAW_BUFFER_COUNT];
 static Mtx f_SparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
+// Each spark's offset from its burst's point on screen, and its speed
 static Vec2 f_SparkOffsets[SPARK_COUNT];
 static Vec2 f_SparkVelocities[SPARK_COUNT];
 static Radians f_SparkAngles[SPARK_COUNT];
+// The frames each spark has left; 0 when unused
 static u8 f_SparkLives[SPARK_COUNT];
 static SparkKind f_SparkKinds[SPARK_COUNT];
 static u8 f_SparkBursts[SPARK_COUNT];
+// Each burst's age in frames, or NO_SPARK_BURST
 static s8 f_SparkBurstAges[SPARK_BURST_COUNT];
 static u8 f_SparkBurstTimers[SPARK_BURST_COUNT];
 static CoursePoint f_SparkBurstPoints[SPARK_BURST_COUNT];
@@ -124,6 +146,7 @@ static Mtx f_SwingTrailMatrices[SWING_TRAIL_MATRIX_COUNT][2];
 static Vec3 f_SwingTrailOuterPath[SWING_TRAIL_PATH_LENGTH];
 static Vec3 f_SwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH];
 
+// Not static: the original left it to the linker's common block
 u8 g_UnusedBytesAfterInnerTrailPath[0x18];
 
 void ResetShotEffects(void) {
@@ -171,6 +194,8 @@ void StopAllSounds(void) {
     }
 }
 
+// Returns the index of a burst that was free and is now started, or
+// NO_SPARK_BURST
 s32 StartSparkBurst(void) {
     s32 startedIndex = NO_SPARK_BURST;
     s32 burstIndex;
@@ -187,6 +212,7 @@ s32 StartSparkBurst(void) {
     return startedIndex;
 }
 
+// Throws sparks off the ball as a driver strikes it, and flashes the golfer
 void StartImpactSparks(void) {
     s32 sparkCount = 0;
     s32 burstIndex;
@@ -245,9 +271,11 @@ void FreeShotEffectImages(void) {
     FreeMemory(&g_SharedEffectImages);
 }
 
+// Does nothing; the flag gives off no sparks
 void StartFlagSparks(CoursePoint point UNUSED) {
 }
 
+// Throws a ring of sparks off the flagstick at point
 void StartFlagstickSparks(CoursePoint point) {
     s32 sparkCount = 0;
     s32 burstIndex = StartSparkBurst();
@@ -279,6 +307,7 @@ void StartFlagstickSparks(CoursePoint point) {
     }
 }
 
+// The impact flash rises in a few frames and fades more slowly
 #define IMPACT_FRAME_COUNT_END 100
 #define IMPACT_FLASH_RISE_STEP 64
 #define IMPACT_FLASH_FADE_STEP 32
@@ -286,14 +315,20 @@ void StartFlagstickSparks(CoursePoint point) {
 #define SPARK_BURST_SHOWN 1
 #define SPARK_BURST_HIDDEN (-1)
 #define SPARK_BURST_AGE_MAX 127
+// A burst's sparks are sized by its distance and grow with its age
 #define SPARK_DISTANCE_SCALE 0.3f
 #define SPARK_SCALE_MAX 2.0f
 #define SPARK_AGE_GROWTH 0.0625f
 #define SPARK_START_SIZE 0.3f
 #define SPARK_IMAGE_HALF_SIZE 8.0f
+// Texels per pixel in s5.10 fixed point, for SPARK_IMAGE_SIZE / 2 texels across
+// the half size
 #define SPARK_TEXTURE_STEP_SCALE 2048.0f
 #define SPARK_NO_TEXTURE_STEP 0xFFFF
 
+// Moves the sparks and draws them at their bursts' points on screen, the
+// flagstick's as sprites and the impact's as triangles, and steps the impact
+// flash that lights the golfer
 void DrawSparks(Gfx **displayListHead) {
     Vec3 rotation;
     Vec3 translation;
@@ -540,6 +575,8 @@ void DrawSparks(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Left empty in the original, as are the two routines after it. Only the last
+// is called, by the round HUD while the shot effects module is loaded.
 void FirstUnusedShotEffectsStub(void) {
 }
 
@@ -549,6 +586,22 @@ void SecondUnusedShotEffectsStub(void) {
 void DrawShotEffectsHud(Gfx **displayListHead UNUSED) {
 }
 
+// Starts the trail of a swing of the given kind, recording the path of the
+// club through the swing's next frames, or with SWING_TRAIL_KIND_CLEAR stops it
+// at once. Any other kind lets the trail fade out quickly.
+//
+// Each kind sets its own sample count, as the samples' buffer holds up to
+// SWING_TRAIL_MAX_SAMPLES: with the count set in two branches, cse can't
+// tell its value at the sample loop's entry test, which reloads it, as the
+// original's does, and cross-jumping then merges the two stores. One store
+// of SWING_TRAIL_SAMPLES gives 23 words differing, 21 in shape, as GCC
+// knows the count and drops the test; with the state set fourth, after the
+// alpha, 6 differ (2 in shape).
+//
+// The eight trail statics from f_SwingTrailPathLength to f_SwingTrailAlpha
+// lie side by side, but as the fields of one struct they gave 40 words (14
+// in shape) against an older draft's 9, and DrawSwingTrail, which matches,
+// then differs in 155.
 void StartSwingTrail(SwingTrailKind kind) {
     f32 samples[SWING_TRAIL_AXIS_COUNT][SWING_TRAIL_SAMPLES_MAX];
     Vec3 point;
@@ -584,6 +637,7 @@ void StartSwingTrail(SwingTrailKind kind) {
             AnimateCharacterInSameCopy(0);
         }
 
+        // Rewinds the swing to where it was
         SetAnimationSpeed(0, -f_SwingTrailSampleCount);
         AnimateCharacterInSameCopy(0);
         SetAnimationSpeed(0, 1.0f);
@@ -619,6 +673,8 @@ void StartSwingTrail(SwingTrailKind kind) {
     }
 }
 
+// Advances the swing trail two steps along its path and draws it as a
+// ribbon between the club's two points, fading towards its tail.
 void DrawSwingTrail(Gfx **displayListHead, CameraMatrices *matrices) {
     Vec3 outerPoint;
     Vec3 innerPoint;
@@ -628,6 +684,8 @@ void DrawSwingTrail(Gfx **displayListHead, CameraMatrices *matrices) {
     Gfx *gfx = *displayListHead;
     s32 textureStep;
 
+    // Loads the matrices and vertices of the trail's newest segments, from
+    // first to last, and sets their alpha and texture coordinates.
     void LoadSwingTrailSegments(s32 first, s32 last, s32 increment) {
         last += increment;
         for (step = first; step != last; step += increment) {
@@ -651,6 +709,7 @@ void DrawSwingTrail(Gfx **displayListHead, CameraMatrices *matrices) {
             gSPVertex(gfx++, &f_SwingTrailVertices[1], 1, step * 2 + 1);
             gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
 
+            // Fades the segments towards the tail of the trail
             nearness = (SWING_TRAIL_SEGMENTS - segment) / 255.0f;
             fade = f_SwingTrailAlpha * nearness / SWING_TRAIL_SEGMENTS;
             alpha = fade * 191.0f;
@@ -748,6 +807,11 @@ void DrawSwingTrail(Gfx **displayListHead, CameraMatrices *matrices) {
 
         f_SwingTrailHead--;
         if (f_SwingTrailHead < 0) {
+            // Storing 1 first keeps the 1 in a register through the loop, for
+            // step == 1, to match: storing SWING_TRAIL_MATRIX_COUNT - 1 at once
+            // gives 7 words differing, all in shape, also with a for loop or a
+            // decrement within the test; adding the count gives 21, testing
+            // step > 0 3 and step != 0 7, and a two-pass for loop 15 to 17
             f_SwingTrailHead = 1;
             f_SwingTrailHead = SWING_TRAIL_MATRIX_COUNT - f_SwingTrailHead;
         }
@@ -819,6 +883,8 @@ void DrawSwingTrail(Gfx **displayListHead, CameraMatrices *matrices) {
     gDPSetEnvColor(gfx++, 0xFF, 0x7F, 0x00, OPAQUE_ALPHA);
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0x00, f_SwingTrailAlpha);
 
+    // Draws the trail a little nearer than it is, so that the club does not hide
+    // it
     guMtxL2F(projection, &matrices->projection);
     projection[3][2] -= 2.0f;
     guMtxF2L(projection, &f_SwingTrailProjections[g_DrawBufferIndex]);

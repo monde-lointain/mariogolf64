@@ -1,3 +1,9 @@
+/*
+ * Finds what the moving ball hits: the ground, the billboards, the pin, the
+ * hole triangles, the walls and the rings. It also pushes the ball out of
+ * walls, and out to the cup's edge when it comes too close.
+ */
+
 #include "course/collision.h"
 
 #include <math.h>
@@ -19,63 +25,100 @@
 #include "system/compiler.h"
 #include "system/main.h"
 
+// Each billboard texture has a hit mask: BILLBOARD_MASK_SIZE rows of
+// BILLBOARD_MASK_SIZE digits, from the billboard's top down and from its
+// middle out to its side. A digit names what a ball hits there; '0' is
+// nothing, and the digits are BillboardCell values.
 #define BILLBOARD_MASK_COUNT 41
 #define BILLBOARD_MASK_CELL_COUNT (BILLBOARD_MASK_SIZE * BILLBOARD_MASK_SIZE)
 #define BILLBOARD_MASK_INDEX_COUNT 64
+// The largest cell that a mask's digit can name
 #define BILLBOARD_CELL_LAST 15
+// The center cell counts this many times as much as each neighbor
 #define BILLBOARD_CENTER_CELL_WEIGHT 4
 
+// The fraction along a path that the hit tests return when nothing is hit: past
+// its end
 #define NO_HIT_FRACTION 1.1f
 
+// Balls nearer the cup than this, in 1/1024ths of a unit, are moved out to it
 #define CUP_EDGE_DISTANCE 614.4f
 
+// The flagstick and flag, in 1/1024ths of a unit
 #define PIN_COUNT 1
 #define FLAGSTICK_RADIUS 614.4f
 #define FLAGSTICK_RADIUS_SQUARED 377487.38f
 #define FLAG_REACH 1228.8f
 #define FLAG_BOTTOM_HEIGHT 39936.0f
+// A ball that hits the flag keeps only this speed along y, which points down
 #define FLAG_HIT_SPEED_Y (-524)
+// A ball bounces off the flagstick with between these fractions of its speed
 #define FLAGSTICK_MOST_BOUNCE 0.8f
 #define FLAGSTICK_LEAST_BOUNCE 0.2f
 
+// Course units in a whole unit
 #define WHOLE_UNIT_SIZE (1 << WORLD_TO_COURSE_SHIFT)
+// FindHoleTriangleHit's paths that rise by more than this many course units hit
+// nothing
 #define PATH_MOST_RISE 153.6f
+// A path that ends this near a triangle's plane, in course units, touches it
 #define PLANE_TOUCH_DISTANCE 15.36f
 #define NO_HOLE_TRIANGLE (-1)
+// The triangles in a ground tile: two for each cell
 #define GROUND_TILE_TRIANGLE_COUNT (GROUND_TILE_POINT_SPAN * GROUND_TILE_POINT_SPAN * 2)
+// FindMiniGolfGroundHit takes sides of a plane closer than this as a path
+// barely crossing it
 #define BARE_CROSSING_DISTANCE 786.0f
+// FindGroundHit's halvings of the search for where a path enters the next tile
 #define TILE_SEARCH_STEP_COUNT 10
+// The side length of the level triangle FindGroundHit gives for a path off the
+// ground
 #define LEVEL_TRIANGLE_SIZE 0x100
 
+// PushBallOutOfWalls' distances from a wall, in course units
 #define WALL_TOUCH_DISTANCE 460.80002f
 #define WALL_PUSH_DISTANCE 476.16f
+// PushBallOutOfWalls may leave alone a ball this many course units above the
+// ground
 #define WALL_HEIGHT_SLACK 0xC00
+// A ball this near a wall's corner is pushed along x, as it has no direction
+// from the corner
 #define CORNER_LEAST_DISTANCE 1.536f
 #define CORNER_DEFAULT_PUSH_X 0.2f
 
+// FindWallHit's distances from a wall, in course units
 #define WALL_REACH_DISTANCE 384.0f
 #define WALL_HIT_DISTANCE 399.36f
 #define WALL_END_DISTANCE 307.2f
+// Units that FindWallHit adds at each end of a wall facing x or z
 #define WALL_WIDENING 0.15f
+// How far to widen a wall along one axis, given that axis's corner
+// coordinates, the corner across the edge from the first and the edge's length
 #define WallWidening(axisCorners, farCorner, edgeLength) \
     (((axisCorners)[0] - (axisCorners)[farCorner]) * WALL_WIDENING / (edgeLength))
+// Farther than any corner, in course units
 #define FARTHEST_CORNER_DISTANCE 153600.0f
 #define CORNER_HIT_FRACTION (-0.1f)
 #define WALL_DEBUG_COLUMN 10
 #define WALL_DEBUG_ROW 10
 
+// Which sides of a triangle's edge a point is on, seen from above
 #define EDGE_SIDE_POSITIVE 1
 #define EDGE_SIDE_NEGATIVE 2
 #define EDGE_SIDE_ON (EDGE_SIDE_POSITIVE | EDGE_SIDE_NEGATIVE)
 
+// A ring's hit radius in units for each unit of its scale's x, which is 1024 at
+// full size
 #define RING_HIT_RADIUS_PER_SCALE 0.1274414f
 #define NO_RING_NUMBER (-1)
+// The fraction along a path that the plane hit tests return when nothing is hit
 #define NO_PLANE_HIT_FRACTION 2.0f
 #define PATH_DEBUG_COLUMN 2
 #define PATH_DEBUG_ROW 8
 #define PATH_DEBUG_CLEAR_COLUMN 25
 #define PATH_DEBUG_CLEAR_ROW 3
 
+// Which plane a triangle faces most, as GetTriangleFacing returns it
 enum TriangleFacing {
     TRIANGLE_FACING_NONE = -1,
     TRIANGLE_FACING_UP,
@@ -85,12 +128,20 @@ enum TriangleFacing {
 
 typedef s32 TriangleFacing;
 
+// How far a point is from a plane's front, in course units. It is a
+// macro, as an inline function compiles differently from the original.
 #define GetPlaneSide(plane, x, y, z) \
     (((plane).normal[AXIS_X] * (x)) + ((plane).normal[AXIS_Y] * (y)) + \
         ((plane).normal[AXIS_Z] * (z)) + ((plane).distance * WORLD_TO_COURSE_SCALE))
 
+// Whether all three of a triangle's corners are below the path. It is a
+// macro, as an inline function allocates registers differently from the
+// original.
 #define IsTriangleBelowPath(isFirstBelow, isSecondBelow, isThirdBelow) \
     ((isFirstBelow) && (isSecondBelow) && (isThirdBelow))
+// Whether a value is less than, or more than, every corner's, which are
+// in units. They are macros, as inline functions allocate registers
+// differently from the original.
 #define IsLessThanCorners(value, corners) \
     (((value) < (corners)[0] * WORLD_TO_COURSE_SCALE) && \
         ((value) < (corners)[1] * WORLD_TO_COURSE_SCALE) && \
@@ -100,38 +151,59 @@ typedef s32 TriangleFacing;
         ((corners)[1] * WORLD_TO_COURSE_SCALE < (value)) && \
         ((corners)[2] * WORLD_TO_COURSE_SCALE < (value)))
 
+// IsOffGround's test with signed bounds, which FindRingHit's draft comes
+// closer to matching with: IsOffGround gives 86 words differing (24 in shape)
+// against 32 (10)
 #define IsOffGroundSigned(x, z) ((x) < 0 || (x) >= GROUND_WIDTH || (z) < 0 || (z) >= GROUND_LENGTH)
 
+// Whether a point is off the ground; a negative x or z is too, as an unsigned
+// one is big
 static inline Boolean IsOffGround(s32 x, s32 z) {
     return ((u32)x >= GROUND_WIDTH) || ((u32)z >= GROUND_LENGTH);
 }
 
+// Whether a point is off the mini-golf ground, in the same way
 static inline Boolean IsOffMiniGolfGround(s32 x, s32 z) {
     return ((u32)x >= MINI_GOLF_GROUND_SIZE) || ((u32)z >= MINI_GOLF_GROUND_SIZE);
 }
 
+// Whether two values are both negative or both not. It is a macro, as
+// an inline function compiles differently from the original.
 #define HaveSameSign(first, second) \
     ((((first) >= 0) && ((second) >= 0)) || (((first) < 0) && ((second) < 0)))
 
+// Whether a path ends touching a plane or crosses it, from its ends'
+// sides of it. It is a macro, as an inline function compiles differently
+// from the original.
 #define DoesPathMeetPlane(startSide, endSide) \
     ((fabsf(endSide) < PLANE_TOUCH_DISTANCE) || \
         (((startSide) > 0.0f) & ((endSide) < 0.0f)) || \
         (((startSide) < 0.0f) & ((endSide) > 0.0f)))
 
+// Whether a path ends within reach of a wall or crosses it, from its
+// ends' sides of it. It is a macro, as an inline function compiles
+// differently from the original.
 #define DoesPathReachWall(startSide, endSide) \
     ((fabsf(endSide) < WALL_REACH_DISTANCE) || \
         (((startSide) >= 0.0f) & ((endSide) < 0.0f)) || \
         (((startSide) < 0.0f) & ((endSide) > 0.0f)))
 
+// Whether a path ends on a ring's plane or crosses it, from its ends'
+// sides of it. It is a macro, as an inline function compiles differently
+// from the original.
 #define DoesPathMeetRingPlane(startSide, endSide) \
     (((endSide) == 0.0f) || \
         (((startSide) > 0.0f) && ((endSide) < 0.0f)) || \
         (((startSide) < 0.0f) && ((endSide) > 0.0f)))
 
+// Whether, in the mini-golf ground hit test, a path barely crosses a
+// plane. It is a macro, as an inline function compiles differently from
+// the original.
 #define IsBareCrossing(simulation, startSide, endSide) \
     (((simulation)->state == BALL_STATE_ROLLING) && \
         (fabsf((f32)((startSide) - (endSide))) < BARE_CROSSING_DISTANCE))
 
+// The hit masks, and which mask each billboard texture has
 static s8 f_BillboardMasks[BILLBOARD_MASK_COUNT][BILLBOARD_MASK_CELL_COUNT] NONSTRING = {
     {
         "0000000000000000"
@@ -882,11 +954,18 @@ static u8 f_BillboardMaskIndices[BILLBOARD_MASK_INDEX_COUNT] = {
 /* clang-format on */
 static s32 f_UnusedWordsAfterBillboardMasks[4] UNUSED = {0};
 
+// The hit mask cell of a billboard texture
 static inline s8 GetBillboardMaskCell(s32 textureIndex, s32 row, s32 column) {
     return f_BillboardMasks[f_BillboardMaskIndices[textureIndex & (BILLBOARD_MASK_INDEX_COUNT - 1)]]
                            [(row * BILLBOARD_MASK_SIZE) | column];
 }
 
+// The mini-golf form of FindGroundHit, for its smaller ground, whose
+// tiles are 1 << MINI_GOLF_TILE_X_SHIFT units along x and
+// 1 << MINI_GOLF_TILE_Z_SHIFT along z. A triangle is hit only by a path
+// whose start is on its plane or on the side away from its end. A path
+// that starts on the plane, or, while the ball rolls, barely crosses
+// it, hits it at the path's end.
 Boolean FindMiniGolfGroundHit(
     BallSimulation *simulation,
     s32 startX,
@@ -915,6 +994,9 @@ Boolean FindMiniGolfGroundHit(
     s32 firstRow;
     s32 column;
     s32 triangleCount;
+    // One index for the triangles and the search steps, to match: a searchStep
+    // variable for the steps gives 84 words differing (22 in shape) against the
+    // draft's 14 (6)
     s32 i;
     s32 hitIndex;
     s32 startSide;
@@ -984,6 +1066,8 @@ Boolean FindMiniGolfGroundHit(
             }
         }
 
+        // Each cell has two triangles; those whose corners are all below the path
+        // are left out
         triangleCount = 0;
         for (row = 0; row < GROUND_TILE_POINT_SPAN; row++) {
             for (column = 0; column < GROUND_TILE_POINT_SPAN; column++) {
@@ -1105,6 +1189,7 @@ Boolean FindMiniGolfGroundHit(
             break;
         }
 
+        // Finds where the path enters a neighboring tile
         if ((tileX != endTileX) | (tileZ != endTileZ)) {
             step = (1.0f - tileFraction) * 0.5f;
             hitFraction = tileFraction + step;
@@ -1143,6 +1228,12 @@ Boolean FindMiniGolfGroundHit(
     return FALSE;
 }
 
+// Finds the nearest ground triangle that a ball moving from one point to
+// another hits, walking the ground tiles along the path from its start.
+// It sets the triangle, whose tag is HOLE_TRIANGLE_KIND_FLAT, and the
+// fraction of the way along the path, and returns whether one is hit. A
+// path that starts or ends off the ground hits a level triangle at its end
+// if it ends below the ground there, and nothing otherwise.
 Boolean FindGroundHit(
     s32 startX,
     s32 startY,
@@ -1170,6 +1261,9 @@ Boolean FindGroundHit(
     s32 firstRow;
     s32 column;
     s32 triangleCount;
+    // One index for the triangles and the search steps, to match: a searchStep
+    // variable for the steps gives 77 words differing (19 in shape) against the
+    // draft's 7 (3)
     s32 i;
     s32 hitIndex;
     s32 startSide;
@@ -1239,6 +1333,8 @@ Boolean FindGroundHit(
             }
         }
 
+        // Each cell has two triangles; those whose corners are all below the path
+        // are left out
         triangleCount = 0;
         for (row = 0; row < GROUND_TILE_POINT_SPAN; row++) {
             for (column = 0; column < GROUND_TILE_POINT_SPAN; column++) {
@@ -1358,6 +1454,7 @@ Boolean FindGroundHit(
             break;
         }
 
+        // Finds where the path enters a neighboring tile
         if ((tileX != endTileX) | (tileZ != endTileZ)) {
             step = (1.0f - tileFraction) * 0.5f;
             hitFraction = tileFraction + step;
@@ -1393,6 +1490,8 @@ Boolean FindGroundHit(
     return FALSE;
 }
 
+// Returns the cell of a billboard texture's hit mask at fractions of the
+// billboard's width out from its middle and of its height down from its top
 BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
     s32 column = across * BILLBOARD_MASK_SIZE;
     s32 row = down * BILLBOARD_MASK_SIZE;
@@ -1434,6 +1533,15 @@ BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
     return cell;
 }
 
+// Finds the nearest billboard that a ball moving from one point to another
+// hits, treating each billboard as standing across the ball's path. It
+// sets the hit mask cell there and the fraction of the way along the path,
+// which stays above 1 when nothing is hit, and returns whether something is.
+//
+// Keep declarations separate from initialization: KMC's register allocation
+// depends on declaration order, while its scheduler uses initialization
+// order to break ties. Initializing in declaration order puts fromY's stack
+// store before isHit's rather than after it, leaving two words different.
 s32 FindBillboardHit(
     s32 startX,
     s32 startY,
@@ -1566,6 +1674,8 @@ s32 FindBillboardHit(
     return isHit;
 }
 
+// Moves a ball that is nearer the cup than CUP_EDGE_DISTANCE out to that
+// distance
 void MoveBallToCupEdge(BallSimulation *simulation) {
     s32 distance = IntLength2D(
         g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X],
@@ -1594,6 +1704,64 @@ void MoveBallToCupEdge(BallSimulation *simulation) {
     }
 }
 
+// Finds whether a ball moving from one point to another hits the
+// flagstick or the flag. It sets the ball's new velocity and the fraction
+// of the way along the path, and returns which it hits as a PIN_HIT_*.
+//
+// Much of it is written to match. The counts below are of the words that
+// differ with one thing changed, and in brackets how many of those differ in
+// shape:
+// - The path's ends are copied into locals. Only toX, toZ and fromY are
+//   needed, declared in that order after i. The original keeps endZ in a
+//   slot of its own frame, where the parameter itself would be read from the
+//   caller's, where it was passed: without toZ the frame is 8 bytes smaller
+//   (113 words, 1 in shape). Without toX, it and i swap stack slots (14);
+//   without fromY the slots move and startX and startZ swap registers (98);
+//   with no copies 147 differ (1 in shape). Declared with y's between x's
+//   and z's they give 12, with z's first 16, with y's first or each end's in
+//   axis order 20, before i 26, after the deltas 44 (10) and last 52 (10).
+// - i is set in the loop's header rather than where it is declared (2), and
+//   the deltas are declared in axis order, ahead of nearestFraction and
+//   hitKind: x, z, y gives 4 (2), and those two declared first 18.
+// - The contact point's y has a variable of its own, set ahead of contactZ,
+//   and the height is taken from it after all three. The height straight
+//   from the sum gives 4 (4) before contactX and 8 (8) after contactZ,
+//   contactY after contactZ 8 (8), and the height before contactZ 4 (4).
+//   Clearing isFlagHit after the height's test gives 5 (5).
+// - The flag's test is an if inside an if: as one, with &&, 99 words differ
+//   (19 in shape) and the frame is 8 bytes larger.
+// - A path with both ends on one side of the cup continues from an else:
+//   testing for the miss first gives 4 (4). The hit fraction is set in the
+//   arms of an if/else: a conditional operator gives 7 (1), the arms swapped
+//   8 (8), and 0.0f set before an if 9 (5). startSide is worked out before
+//   endSide, which the other way round gives 44 (4).
+// - The half chord's square is kept in halfChord itself, which the arms of
+//   an if/else replace. The original works the square out in the half
+//   chord's register and takes its root in place, past a branch-likely with
+//   the radius set in its delay slot. A variable of its own for the square
+//   gives 8 (2), as an if/else or with the radius set first, a conditional
+//   operator 7 (3), and the arms swapped 4 (4).
+// - The direction's y is set with ASSIGN_FOR_VALUE, so that it is stored
+//   from a register, which cse makes the one that holds 0.0f for the half
+//   chord's test. That use, counted twice inside the loop, takes the
+//   register's count from 9 to 11, level with the register's that holds the
+//   flag's reach, and over its shorter life (476 insns against 482)
+//   global-alloc places it first: 0.0f takes $f24 and the reach $f26. As a
+//   plain statement the store is a sw of $zero and the two swap registers,
+//   32 (2).
+// - The direction's components are tested with |, for one branch, where ||
+//   gives 47 (13), and the contact offsets are ored themselves, where
+//   testing each with || gives 4 (2).
+// - The direction is scaled in axis order after it is normalized: z, x, y
+//   gives 16 (2), x, z, y 20 (2), and y scaled before normalizing 3 (3).
+// - The contact point moves along the direction on both axes, then becomes
+//   relative to the cup on both, in statements of their own and in the same
+//   variables: each axis finished in turn gives 28 (4), z made relative
+//   before x 9 (1), one statement an axis 66 (24), and the offsets in
+//   variables of their own 34.
+// - The bounce is clamped to its most whether or not the ball is flying,
+//   which with an else if gives 35 (3), and its velocity is set in axis
+//   order: y first gives 7 (5) and y last 2 (2).
 PinHit FindPinHit(
     s32 startX,
     s32 startY,
@@ -1629,6 +1797,7 @@ PinHit FindPinHit(
     s32 speed;
     f32 halfChord;
     Vec3 direction;
+    // The hit point first, then its offset from the cup, as is contactZ
     s32 contactX;
     s32 contactY;
     s32 contactZ;
@@ -1780,6 +1949,8 @@ PinHit FindPinHit(
     return hitKind;
 }
 
+// Returns which plane a triangle faces most: the one its normal's largest
+// component is across, or TRIANGLE_FACING_NONE for a triangle without area
 TriangleFacing GetTriangleFacing(
     s32 firstX,
     s32 firstY,
@@ -1843,6 +2014,8 @@ TriangleFacing GetTriangleFacing(
     return facing;
 }
 
+// An unreferenced copy of GetTrianglePlane that prints its error even without
+// debugging
 Outcome GetTrianglePlaneCopy(PlaneTriangle *triangle, TrianglePlane *plane) {
     s32 firstX;
     s32 secondX;
@@ -1858,6 +2031,10 @@ Outcome GetTrianglePlaneCopy(PlaneTriangle *triangle, TrianglePlane *plane) {
     f32 scale;
 
     secondZ = triangle->corners[AXIS_Z][2] - triangle->corners[AXIS_Z][0];
+    // Split from the subtraction to match: as one statement, cast or written
+    // with a negation, 6 to 8 words differ, none in shape. Of the 720 orders of
+    // GetTrianglePlane's six differences with it in one statement, none
+    // matches; the best leave 2 words.
     firstY = triangle->corners[AXIS_Y][1];
     firstY -= triangle->corners[AXIS_Y][0];
     secondY = triangle->corners[AXIS_Y][2] - triangle->corners[AXIS_Y][0];
@@ -1894,6 +2071,12 @@ Outcome GetTrianglePlaneCopy(PlaneTriangle *triangle, TrianglePlane *plane) {
     return OUTCOME_OK;
 }
 
+// Finds the nearest hole triangle, other than the rings and the shaded
+// triangles, that a ball moving from one point to another hits. It sets
+// a copy of the triangle's corners, holding its kind, and the fraction of
+// the way along the path, and returns whether one is hit. Paths that rise
+// by more than PATH_MOST_RISE, as course y points down, or that start or
+// end off the ground hit nothing.
 Boolean FindHoleTriangleHit(
     s32 startX,
     s32 startY,
@@ -2029,6 +2212,9 @@ Boolean FindHoleTriangleHit(
                 hitX = ((endX - startX) * hitFraction) + startX;
                 hitZ = ((endZ - startZ) * hitFraction) + startZ;
 
+                // Each cross product tells which side of an edge the hit is on,
+                // seen from above. The third repeats the first edge, so the edge
+                // from the third corner back to the first is never tested.
                 edgeCrosses[0] =
                     ((triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0]) *
                         (hitZ - (triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT))) -
@@ -2094,6 +2280,8 @@ Boolean FindHoleTriangleHit(
         hit->corners[AXIS_Z][1] = hitTriangle->vertices[1].v.ob[AXIS_Z];
         hit->corners[AXIS_Z][2] = hitTriangle->vertices[2].v.ob[AXIS_Z];
 
+        // The kind is read from the table, as the original addresses it afresh;
+        // reading it through hitTriangle gives 78 words differing, 30 in shape
         hit->tag = g_WorkArea.hole.triangles[hitIndex].kind;
         *fraction = nearestFraction;
         return TRUE;
@@ -2102,6 +2290,14 @@ Boolean FindHoleTriangleHit(
     return FALSE;
 }
 
+// Finds the nearest wall, a shaded hole triangle, that a ball moving from
+// one point to another hits. It sets the triangle, with its kind as tag,
+// and the fraction of the way along the path, and returns whether one is
+// hit. A path that comes within WALL_REACH_DISTANCE of a wall's plane
+// counts as crossing it. A wall facing x or z is tested in its own plane:
+// it is widened by WALL_WIDENING units at each end, and a path that
+// passes an end of it is moved back to where it reaches the end. A hit
+// near or below the ground counts whatever the edges say.
 Boolean FindWallHit(
     s32 startX,
     s32 startY,
@@ -2143,6 +2339,9 @@ Boolean FindWallHit(
     s32 cornerIndex;
     Boolean isDebug = IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS);
 
+    // Set between the flag query and its test, as in FindHoleTriangleHit and
+    // FindRingHit; testing the query directly, with this set first, after the
+    // debug block or before the loop, gives 8 to 13 words differing
     hitIndex = NO_HOLE_TRIANGLE;
     if (isDebug) {
         PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
@@ -2240,6 +2439,9 @@ Boolean FindWallHit(
             hitFraction = 0.0f;
         }
 
+        // Negated, to match: GCC keeps the negation of a floating-point
+        // comparison rather than inverting it, so hitFraction >=
+        // nearestFraction branches differently
         if (!(hitFraction < nearestFraction)) {
             continue;
         }
@@ -2264,6 +2466,7 @@ Boolean FindWallHit(
             );
 
             if (facing == TRIANGLE_FACING_Z) {
+                // The wall spans x and y
                 hitPointU = ((endX - startX) * hitFraction) + startX;
                 hitPointV = ((endY - startY) * hitFraction) + startY;
                 if (triangle.corners[AXIS_X][0] == triangle.corners[AXIS_X][1] &&
@@ -2414,6 +2617,8 @@ Boolean FindWallHit(
                     osSyncPrintf("Illegal Wall!!!!!!!!!\n");
                 }
 
+                // A path that starts at the wall beside a corner is taken to hit it
+                // before it starts
                 if (hitFraction == 0.0f) {
                     nearestCorner = FARTHEST_CORNER_DISTANCE;
                     for (cornerIndex = 0; cornerIndex < TRIANGLE_CORNER_COUNT; cornerIndex++) {
@@ -2454,6 +2659,7 @@ Boolean FindWallHit(
                 }
             }
             else if (facing == TRIANGLE_FACING_X) {
+                // The wall spans y and z
                 hitPointU = ((endY - startY) * hitFraction) + startY;
                 hitPointV = ((endZ - startZ) * hitFraction) + startZ;
                 if (triangle.corners[AXIS_Z][0] == triangle.corners[AXIS_Z][1] &&
@@ -2475,6 +2681,8 @@ Boolean FindWallHit(
                         nearEnd = triangle.corners[AXIS_Z][2] << WORLD_TO_COURSE_SHIFT;
                     }
 
+                    // Unlike along x, the fraction is to the wall's end itself, not past
+                    // it
                     if (endZ < startZ) {
                         wallEnd = farEnd + WALL_END_DISTANCE;
                         if (endZ <= wallEnd && wallEnd < startZ) {
@@ -2628,10 +2836,12 @@ Boolean FindWallHit(
             }
         }
         else {
+            // As for a triangle facing neither way
             hitPointU = ((endX - startX) * hitFraction) + startX;
             hitPointV = ((endZ - startZ) * hitFraction) + startZ;
         }
 
+        // A hit near or below the ground is taken whatever the edges say
         hitX = ((endX - startX) * hitFraction) + startX;
         hitY = ((endY - startY) * hitFraction) + startY;
         hitZ = ((endZ - startZ) * hitFraction) + startZ;
@@ -2644,9 +2854,13 @@ Boolean FindWallHit(
             hitIndex = triangleIndex;
         }
 
+        // The third cross product repeats the first edge, as in FindHoleTriangleHit
         edgeCrosses[0] =
             ((cornersU[1] - cornersU[0]) * (hitPointV - (cornersV[0] * WORLD_TO_COURSE_SCALE))) -
             ((cornersV[1] - cornersV[0]) * (hitPointU - (cornersU[0] * WORLD_TO_COURSE_SCALE)));
+        // k holds the sides the edges cross on from here, to match: a sides
+        // local of its own, declared anywhere, gives 559 words differing
+        // rather than 535, 85 in shape either way
         if (edgeCrosses[0] < 0) {
             cornerIndex = EDGE_SIDE_NEGATIVE;
         }
@@ -2712,6 +2926,18 @@ Boolean FindWallHit(
     return FALSE;
 }
 
+// Pushes a ball that is inside a wall, a shaded hole triangle, back out
+// to WALL_PUSH_DISTANCE from it, and repeats until no wall holds it. A
+// ball near a wall's corner is pushed straight away from the corner. With
+// checksHeight, only walls at the ball's height count, and a ball high
+// above the ground, where course y points down, is left alone. It returns
+// a value only for a ball off the ground.
+//
+// Each arm of the wall's push sets isPushed itself; set once before the
+// test, the arms keep their products and sums in other float registers and
+// 43 words differ (3 in shape). The corner push sets y between x and z,
+// which puts its store after the corner's load as in the original; set
+// first, 2 words differ (2 in shape), and set last, 4 (4).
 s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
     PlaneTriangle wall;
     TrianglePlane plane;
@@ -2796,11 +3022,14 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
             side = (plane.normal[AXIS_X] * x) + (plane.normal[AXIS_Y] * y) +
                 (plane.normal[AXIS_Z] * z) + (plane.distance * WORLD_TO_COURSE_SCALE);
             osSyncPrintf("?");
+            // The original tests whether the magnitude is less than the distance,
+            // a c.lt.s, and skips the wall when it isn't; testing >= gives 4
+            // differing words (4 in shape), fabs 11 (9) and AbsFloat 45 (9)
             if (!(fabsf(side) < WALL_TOUCH_DISTANCE)) {
                 continue;
             }
 
-            osSyncPrintf("うっ\n");
+            osSyncPrintf("うっ\n"); // "Ugh"
             for (corner = 0; corner < TRIANGLE_CORNER_COUNT; corner++) {
                 cornerDistance = Length2D(
                     (wall.corners[AXIS_X][corner] << WORLD_TO_COURSE_SHIFT) - x,
@@ -2831,6 +3060,7 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
                 break;
             }
 
+            // A ball past every corner along the wall is beside it, not in it
             if (GetTriangleFacing(
                     wall.corners[AXIS_X][0],
                     wall.corners[AXIS_Y][0],
@@ -2894,6 +3124,10 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
     return UNSET_RESULT;
 }
 
+// Finds the nearest ring that a ball moving from one point to another
+// passes through. It sets a copy of the last ring's corners, holding the
+// hit ring's index, and the fraction of the way along the path. It returns
+// 1 for a hit, 0 for none and -1 for a start or end off the ground.
 s32 FindRingHit(
     s32 startX,
     s32 startY,
@@ -2915,12 +3149,15 @@ s32 FindRingHit(
     f32 endSide;
     f32 sideChange;
     f32 hitFraction;
+    // The original frame has room for this; without it 92 words differ, 2 in
+    // shape, and 106 (10) before the hit point had locals
     s32 unused[4] UNUSED;
     s32 hitX;
     s32 hitY;
     s32 hitZ;
     Boolean isDebug = IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS);
 
+    // After the flag query, so this fills the debug branch's delay slot.
     hitRingNumber = NO_RING_NUMBER;
     if (isDebug) {
         PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
@@ -3011,6 +3248,9 @@ s32 FindRingHit(
     return 0;
 }
 
+// Returns how solid a billboard's hit mask is around a point: the cell
+// there counted BILLBOARD_CENTER_CELL_WEIGHT times, plus each of its four
+// neighbors that is not empty
 s32 GetBillboardSolidity(s32 textureIndex, f32 across, f32 down) {
     s32 column = across * BILLBOARD_MASK_SIZE;
     s32 row = down * BILLBOARD_MASK_SIZE;

@@ -1,3 +1,7 @@
+/*
+ * Waits for CPU faults and prints the faulted thread's registers.
+ */
+
 #include "system/crash_screen.h"
 
 #include <ultra64.h>
@@ -8,10 +12,12 @@
 #include "system/c_language.h"
 #include "system/compiler.h"
 
+// The message the fault event posts; nothing reads it
 #define FAULT_MESSAGE 0x10
 
 #define FAULT_SOUND_CHANNEL 11
 
+// Debug text rows and columns of the fault report
 #define FAULT_TITLE_ROW 5
 #define FAULT_PC_ROW 6
 #define FAULT_TEXT_COLUMN 0
@@ -19,8 +25,11 @@
 
 #define FAULT_THREAD_STACK_SIZE 0x2000
 
+// Prints f_FaultText at the column and row of the screen. PrintMessage takes
+// s8 text, as the original reads its characters signed.
 #define PrintFaultMessage(column, row) PrintMessage((s8 *)f_FaultText, (column), (row))
 
+// A value of a bit field of a register, and the text that describes it
 typedef struct RegisterFieldValue {
     u32 mask;
     u32 value;
@@ -28,18 +37,26 @@ typedef struct RegisterFieldValue {
 } RegisterFieldValue;
 
 static OSThread *f_FaultedThread;
+// RunFaultThread clears it, and nothing reads it
 static s32 f_UnusedFaultThreadValue;
 
+// The fault thread and its stack. No routine reads them, as the thread's
+// creation was compiled out, but the bss here holds exactly an OSThread and
+// then an 8 KB stack.
 static OSThread f_FaultThread UNUSED;
 static u8 f_FaultThreadStack[FAULT_THREAD_STACK_SIZE] UNUSED;
 
+// Never created, as its creation was compiled out with the fault thread's
 static OSMesgQueue f_FaultMessageQueue;
 
 FILE_STATIC char f_FaultText[FAULT_TEXT_SIZE];
 
+// PrintFaultContext clears it, and nothing reads it
 static s32 f_UnusedFaultContextValue = 0;
+// The debug text row of the next line of the fault report
 static s32 f_FaultTextRow = 7;
 
+// Only menu.c reads it, but the target has it first in this file's rodata
 const char g_EmptyString[] = "";
 
 OSThread *__osGetCurrFaultedThread(void);
@@ -47,6 +64,9 @@ void RunFaultThread(void *arg);
 void PrintFaultContext(OSThread *thread);
 void PrintRegisterFields(u32 registerValue, char *name, RegisterFieldValue *fields);
 
+// Does nothing. The fault thread's start-up messages are in the ROM and
+// the frame has room for the arguments of a thread creation, so the
+// original started the fault thread here in code that was compiled out.
 void RunBootHook(void) {
     if (FALSE) {
         osSyncPrintf("\n=>mp\n");
@@ -55,6 +75,8 @@ void RunBootHook(void) {
     }
 }
 
+// Waits for CPU faults and prints the context of each faulted thread.
+// Nothing starts this thread.
 void RunFaultThread(void *arg UNUSED) {
     OSMesg message;
 
@@ -72,6 +94,10 @@ void RunFaultThread(void *arg UNUSED) {
     }
 }
 
+// These tables follow the routines that use string literals before them,
+// whose strings the original has ahead of the tables' in rodata.
+
+// The fields of the cause register, ending with an empty mask
 static RegisterFieldValue f_CauseFields[] = {
     {CAUSE_BD, CAUSE_BD, "BD"},
     {CAUSE_IP8, CAUSE_IP8, "IP8"},
@@ -103,6 +129,7 @@ static RegisterFieldValue f_CauseFields[] = {
     {0, 0, ""},
 };
 
+// The fields of the status register
 static RegisterFieldValue f_StatusFields[] = {
     {SR_CU3, SR_CU3, "CU3"},
     {SR_CU2, SR_CU2, "CU2"},
@@ -137,6 +164,7 @@ static RegisterFieldValue f_StatusFields[] = {
     {0, 0, ""},
 };
 
+// The fields of the floating-point control and status register
 static RegisterFieldValue f_FloatStatusFields[] = {
     {FPCSR_FS, FPCSR_FS, "FS"},
     {FPCSR_C, FPCSR_C, "C"},
@@ -163,13 +191,31 @@ static RegisterFieldValue f_FloatStatusFields[] = {
     {0, 0, ""},
 };
 
+// Prints the fault text to the host
 void PrintFaultText(void) {
     osSyncPrintf(f_FaultText);
 }
 
+// Prints the faulted thread's registers to the host, and all but the
+// floating-point ones to the screen as debug text.
 void PrintFaultContext(OSThread *thread) {
     __OSThreadContext *context = &thread->context;
 
+    // The arms are the same, and written out to match: the compiler merges
+    // them and drops the test, but only once the registers are allocated.
+    // Until then they end context's block, so that
+    // - neither CSE pass knows context to be thread plus 0x20 where its
+    //   fields are read, so they aren't read at thread's offsets;
+    // - the scheduler can't move context's setting down to the first call;
+    // - context is left to global-alloc, which gives it $s1 after local-alloc
+    //   has given the text buffer's address $s0.
+    // With the value stored once, 294 words differ, 6 of them in shape, and
+    // stored in a block of its own 278 (4); the conditional operator gives
+    // 294 (6), and an if without the else 201 (3). Setting context after the
+    // arms, or reading the fields through thread, gives 200 (2), and setting
+    // it in each arm 6 (6). The arms after the title give 25 (9). Testing
+    // thread's id gives 4 (4); testing context, or the value itself, matches
+    // too.
     if (thread != NULL) {
         f_UnusedFaultContextValue = 0;
     }
@@ -183,11 +229,13 @@ void PrintFaultContext(OSThread *thread) {
     sprintf(f_FaultText, "epc\t\t0x%08x\n", context->pc);
     PrintFaultText();
     PrintFaultMessage(FAULT_TEXT_COLUMN, FAULT_PC_ROW);
+
     PrintRegisterFields(context->cause, "cause", f_CauseFields);
     PrintRegisterFields(context->sr, "sr", f_StatusFields);
     sprintf(f_FaultText, "badvaddr\t0x%08.8x\n\n", context->badvaddr);
     PrintFaultText();
     PrintFaultMessage(FAULT_TEXT_COLUMN, f_FaultTextRow++);
+
     sprintf(
         f_FaultText,
         "at 0x%08.8x v0 0x%08.8x v1 0x%08.8x\n",
@@ -272,6 +320,7 @@ void PrintFaultContext(OSThread *thread) {
     sprintf(f_FaultText, "s8 0x%08.8x ra 0x%08.8x\n\n", context->s8, context->ra);
     PrintFaultText();
     PrintFaultMessage(FAULT_TEXT_COLUMN, f_FaultTextRow++);
+
     PrintRegisterFields(context->fpcsr, "fpcsr", f_FloatStatusFields);
     sprintf(
         f_FaultText,
@@ -309,6 +358,7 @@ void PrintFaultContext(OSThread *thread) {
         context->fp30.f.f_even
     );
     PrintFaultText();
+
     sprintf(f_FaultText, "d0  %.15e\td2  %.15e\n", context->fp0.d, context->fp2.d);
     PrintFaultText();
     sprintf(f_FaultText, "d4  %.15e\td6  %.15e\n", context->fp4.d, context->fp6.d);
@@ -327,11 +377,14 @@ void PrintFaultContext(OSThread *thread) {
     PrintFaultText();
 }
 
+// Prints a register's value and the names of its fields' values, each
+// name also going to the screen.
 void PrintRegisterFields(u32 registerValue, char *name, RegisterFieldValue *fields) {
     Boolean isFirst = TRUE;
 
     sprintf(f_FaultText, "%s\t\t0x%08x ", name, (unsigned int)registerValue);
     PrintFaultText();
+
     sprintf(f_FaultText, "<");
     PrintFaultText();
     while (fields->mask != 0) {

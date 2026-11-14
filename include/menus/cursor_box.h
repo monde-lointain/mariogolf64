@@ -1,3 +1,7 @@
+/*
+ * The cursor box drawn around a point
+ */
+
 #ifndef CURSOR_BOX_H
 #define CURSOR_BOX_H
 

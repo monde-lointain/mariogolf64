@@ -1,3 +1,9 @@
+/*
+ * The staff roll, MODULE_STAFF_ROLL, shown in SCENE_STAFF_ROLL. It scrolls the
+ * staff text a pixel a frame, has characters from the cast swing on Yoshi's
+ * Island's seventh hole, and ends on a closing picture.
+ */
+
 #include "cinematics/staff_roll.h"
 
 #include <framebuffer_count.h>
@@ -45,27 +51,36 @@
 #include "system/overlay_manager.h"
 #include "text/text.h"
 
+// The cast leaves out one character, the one after the start ShuffleCastOrder
+// is given
 #define CAST_MEMBER_COUNT (CHARACTER_COUNT - 1)
 #define FIRST_CAST_OFFSET 2
 #define SHUFFLE_ROUND_COUNT 10
 #define SHUFFLED_MEMBER_COUNT 16
 
+// The cast's character buffers, given to the slots from FIRST_CAST_SLOT on
 #define CAST_BUFFER_COUNT 1
 #define CAST_BUFFER_CAPACITY 3
 #define FIRST_CAST_SLOT 1
 
 #define ASSET_PAINTING 0x959
 #define ASSET_STAFF_FONT 0x94C
+// Big enough for the painting and for the closing picture read over it later
 #define STAFF_ROLL_IMAGE_SIZE 0x2AC00
 #define BILLBOARD_HEAP_SIZE 0x7038
 #define ASSET_CLOSING_PICTURE 0x967
 
+// The staff text's first bytes hold its size, big-endian
 #define STAFF_TEXT_HEADER_SIZE 8
 #define STAFF_GLYPH_WIDTH 12
 #define STAFF_GLYPH_HEIGHT 12
+// The staff font is a 4-bit intensity image of 12 by 12 glyphs, 16 to a row
 #define STAFF_FONT_WIDTH (STAFF_FONT_COLUMN_COUNT * STAFF_GLYPH_WIDTH)
 #define STAFF_FONT_COLUMN_COUNT 16
+// Only characters below this are drawn
 #define STAFF_CHARACTER_LIMIT 0x100
+// These characters are drawn half a glyph to the left and 4 pixels up,
+// over the character before, and have no width
 #define FIRST_OVERLAID_CHARACTER 0xDE
 #define OVERLAID_CHARACTER_COUNT 2
 #define OVERLAID_CHARACTER_SHIFT_X (STAFF_GLYPH_WIDTH / 2)
@@ -77,13 +92,17 @@
 #define STAFF_ROLL_LIGHT_PITCH 0x1000
 #define STAFF_ROLL_LIGHT_YAW 0x5800
 
+// f_StaffRollFrame values at which UpdateStaffRoll acts
 #define STAFF_SONG_FRAME 60
 #define TIMELINE_START_FRAME 280
 #define CLOSING_PICTURE_READ_FRAME 1000
 #define STAFF_SONG_END_FRAME 3688
+// The closing song starts, and the closing picture fades in
 #define CLOSING_FRAME 3798
 #define FIRST_LEAVING_FRAME 4300
 #define STAFF_ROLL_FRAME_MAX 0xFFFF
+// The scroll also stops this many frames after the lines' heights add up to the
+// frame
 #define SCROLL_END_DELAY 376
 #define STAFF_LINE_HEIGHT 24
 #define FIRST_TOP_LINE_INDEX (-10)
@@ -92,37 +111,54 @@
 #define EARLIER_SONG_FADE_FRAMES 40
 #define STAFF_SONG_FADE_FRAMES 200
 
+// The staff text's left edge; its shadow is a pixel right of and below it
 #define STAFF_TEXT_LEFT 32
 #define STAFF_ROW_COUNT 11
 #define TEXT_SHADOW_PASS 0
 #define TEXT_PASS_COUNT 2
 
+// The fade covers only this rectangle
 #define FADE_RIGHT 312
 #define FADE_BOTTOM 160
 
+// Where DrawStaffRoll prints the closing picture's alpha and the frame
 #define ALPHA_TEXT_COLUMN 5
 #define ALPHA_TEXT_ROW 13
 #define FRAME_TEXT_COLUMN 15
 #define FRAME_TEXT_ROW 5
 
+// Where UpdateStaffRoll prints the line count
 #define LINE_COUNT_TEXT_COLUMN 5
 #define LINE_COUNT_TEXT_ROW 12
 
+// The painting and the closing picture are drawn in strips
+// IMAGE_STRIP_STEP rows apart, each IMAGE_STRIP_OVERLAP rows taller so
+// that the next strip overlaps it. The last strip is only the overlap,
+// which ends the image at the screen's bottom border.
 #define STAFF_ROLL_IMAGE_WIDTH (SCREEN_WIDTH - (2 * SCREEN_BORDER))
 #define IMAGE_STRIP_COUNT 38
 #define IMAGE_STRIP_STEP 6
 #define IMAGE_STRIP_OVERLAP 2
 #define PAINTING_SCROLL_FRAME 60
+// Rows scrolled when the painting's bottom is shown
 #define PAINTING_SCROLL_LIMIT 228
+// Alpha per frame
 #define CLOSING_FADE_RATE 2
+// Alpha per frame
 #define PAINTING_FADE_RATE 4
 #define PAINTING_FADE_IN_FRAMES 64
+// Below this an image is drawn with G_RM_CLD_SURF
 #define CLOUD_ALPHA 180
 
 #define PITCH_STEP_COUNT 10
 #define FRAMING_GROUND_CLEARANCE 0xC00
 
+// The cast's timeline; its frames count from TIMELINE_START_FRAME. Only
+// each stage's first frames are named; the later shots and reactions
+// keep literal frames in the tests below, since names would only
+// repeat the numbers.
 #define FIRST_SWING_FRAME 60
+// Also the tee's second shot
 #define VIEW_SHRINK_FRAME 150
 #define TEE_REACTIONS_FRAME 300
 #define FAIRWAY_FADE_OUT_FRAME 560
@@ -138,7 +174,10 @@
 #define PUTT_SWING_FRAME 2000
 #define PUTT_REACTIONS_FRAME 2200
 #define FINALE_FADE_OUT_FRAME 2590
+// The last of the cast takes all four shots
 #define FINALE_FRAME 2630
+// Then reacts with a par, swings from the fairway, reacts with a bogey,
+// approaches, reacts with a birdie, putts and reacts with an eagle
 #define FINALE_PAR_FRAME 2740
 #define FINALE_FAIRWAY_FRAME 2800
 #define FINALE_BOGEY_FRAME 2950
@@ -149,6 +188,7 @@
 #define LAST_FADE_OUT_FRAME 3360
 #define NEVER_FRAME 0x100000
 
+// Whether the cast's next member swings, or reacts, on a frame
 #define IsTeeShotFrame(frame) ((frame) == VIEW_SHRINK_FRAME || (frame) == 190 || (frame) == 240)
 #define IsTeeReactionFrame(frame) \
     ((frame) == TEE_REACTIONS_FRAME || (frame) == 360 || (frame) == 420 || (frame) == 480)
@@ -171,14 +211,20 @@
 #define TEE_CLUB CLUB_TYPE_DRIVER
 #define FAIRWAY_CLUB CLUB_TYPE_TWO_IRON
 #define APPROACH_CLUB CLUB_TYPE_SEVEN_IRON
+// How many frames before its ANIMATION_EVENT_IMPACT frame a swing is joined
 #define CAST_SWING_LEAD_FRAMES 15
 #define FINAL_PUTT_LEAD_FRAMES 10
+// Degrees between the framing yaws of a stage's shots, and between its
+// reactors' headings
 #define CAST_YAW_STEP 30
+// The putts are framed from three steps to the left of straight on
 #define PUTT_YAW_OFFSET 15
 #define DEGREES_TO_RADIANS_F ((f32)M_PI / 180)
 #define GOLFER_HEADING ((f32)DegreesToRadians(-30))
+// The putts are taken from this far along the x axis from the cup
 #define NEAR_CUP_DISTANCE (150 * 1024)
 
+// A random framing pitch, in 127ths of a degree; controller 2's stick tilts it
 #define RANDOM_PITCH_MASK 0x7F
 #define RANDOM_PITCH_BIAS 0x20
 #define RANDOM_PITCH_SCALE 70
@@ -191,15 +237,21 @@
 #define SHADOW_SCALE_TO_RADIUS 0.105000004f
 #define DEFAULT_FRAMED_RADIUS 15.0f
 #define CAST_EASE_RATE 0.1f
+// Camera 0's view shrinks from the whole screen to its upper right
 #define VIEW_SHRINK_FRAMES 30
+// The scissor box's size before the shrink, and its changes per frame of it
 #define UNSHRUNK_VIEW_WIDTH 303.0f
 #define UNSHRUNK_VIEW_HEIGHT 223.0f
 #define SHRINK_LEFT_STEP 5.0000005f
 #define SHRINK_TOP_STEP 0.5f
 #define SHRINK_WIDTH_STEP 5.3333335f
 #define SHRINK_HEIGHT_STEP 4.0f
+// The scissor height that gives a zoom of 2
 #define UNIT_ZOOM_HEIGHT 224
 
+// Sets frames to count clamped to 0 through limit. Its do-while is there to
+// match: as a plain block, RunStaffRollTimeline's draft goes from 254 words
+// differing, none in shape, to 262, 8 in shape.
 #define ClampFrames(frames, count, limit) \
     do { \
         (frames) = (count); \
@@ -212,6 +264,10 @@
     } \
     while (FALSE)
 
+// Sets a view's scissor box, viewport center and zoom for a frame of
+// its shrink to the screen's upper right. Its do-while is there to
+// match: as a plain block, RunStaffRollTimeline's draft goes from 254 words
+// differing, none in shape, to 322, 34 in shape.
 #define ShrinkView(view, frames) \
     do { \
         f32 progress = (frames); \
@@ -235,18 +291,26 @@ typedef struct StaffRollImage {
     u8 texels[STAFF_ROLL_IMAGE_SIZE];
 } StaffRollImage;
 
+// Read from the ROM; the 16-bit characters follow the lines
 typedef struct StaffText {
     u16 size;
     u16 lineCount;
+    // Each line's start is in characters, from the end of the lines
     TextSpan lines[TRAILING_ARRAY_LENGTH];
 } StaffText;
 
+// The text's lines run on past the one declared, and its characters follow
+// them; the characters are counted from the text's start, past the size and
+// the line count
 #define STAFF_LINE(text, index) ((text)->lines + (index))
 #define STAFF_TEXT_HEADER_CHARACTERS 2
 #define CHARACTERS_PER_STAFF_LINE ((s32)(sizeof(TextSpan) / sizeof(u16)))
+// The index, in characters from the start, of the text's first character
 #define FIRST_STAFF_CHARACTER(text) \
     (((text)->lineCount * CHARACTERS_PER_STAFF_LINE) + STAFF_TEXT_HEADER_CHARACTERS)
+// The staff text's character at the index, counted from its start
 #define STAFF_CHARACTER(text, index) (((u16 *)(text))[index])
+// Whether the character is drawn over the one before it
 #define IS_OVERLAID_CHARACTER(character) \
     ((u32)((character) - FIRST_OVERLAID_CHARACTER) < OVERLAID_CHARACTER_COUNT)
 
@@ -260,10 +324,12 @@ static s32 f_StaffRollFrame = 0;
 static Boolean f_IsLeavingStaffRoll = FALSE;
 static s32 f_TextScrollOffset = 0;
 static s32 f_TopLineIndex = 0;
+// The scene colors InitSkyColors last derived, or NO_SCENE_COLOR_INDEX
 #define NO_SCENE_COLOR_INDEX 0xFFFFFFFF
 static u32 f_ShownSceneColorIndex = NO_SCENE_COLOR_INDEX;
 static Boolean f_IsTextScrolling = TRUE;
 static s32 f_DebugRestartCount = 0;
+// Negative while fading out; zero when not fading
 static s32 f_FadeLength = 0;
 static Radians f_CastFramingYaw = 0.0f;
 static Radians f_CastFramingPitch = 0.0f;
@@ -271,8 +337,9 @@ static s32 f_CastIndex = 0;
 static Boolean f_IsReactionShown = FALSE;
 static f32 f_UnreadValue = 0.0f;
 static s32 f_ViewShrinkStartFrame = NEVER_FRAME;
-static s32 f_UnusedWord UNUSED = 0;
+static s32 f_UnusedWord UNUSED = 0; // Unused
 /* clang-format off */
+// How far right each character moves the next one
 static u8 f_StaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
       12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
       12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,  6, 12,  6, 12,
@@ -294,7 +361,7 @@ static u8 f_StaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
 /* clang-format on */
 
 static u8 f_UnusedBytesBeforeCastSlot[0x10] UNUSED;
-static s32 f_CastSlot;
+static s32 f_CastSlot; // The slot of the character shown, 0 or 1
 static CoursePoint f_NearCupPoint;
 static u8 f_UnusedBytesAfterNearCupPoint[16] UNUSED;
 static StaffRollImage f_StaffRollImage;
@@ -306,10 +373,15 @@ static EasedView f_EasedView;
 static s32 f_CastOrder[CAST_MEMBER_COUNT];
 static s32 f_FadeFramesLeft;
 
+// The kind of model the cast is loaded as, from the first player's paletteIndex
 s32 GetCastModelKind(void) {
     return g_Players[0].paletteIndex & (CHARACTER_MODEL_KIND_COUNT - 1);
 }
 
+// Fills f_CastOrder with the characters that follow start, leaving out the
+// one just after it, then shuffles all but the last unless
+// GAME_FLAG_UNSHUFFLED_CAST is set. SwapCastMembers is a nested function, a GNU
+// C extension.
 void ShuffleCastOrder(s32 start) {
     s32 member;
     s32 index;
@@ -335,11 +407,13 @@ void ShuffleCastOrder(s32 start) {
     }
 }
 
+// Fades the screen to black over frameCount frames
 void StartFadeOut(s32 frameCount) {
     f_FadeLength = -frameCount;
     f_FadeFramesLeft = frameCount;
 }
 
+// Fades the screen in from black over frameCount frames
 void StartFadeIn(s32 frameCount) {
     f_FadeLength = frameCount;
     f_FadeFramesLeft = frameCount;
@@ -349,6 +423,9 @@ void StopFade(void) {
     f_FadeLength = 0;
 }
 
+// Module 0x1F's onLoad. It reads the painting, the font and the staff
+// text, and sets up a one-player game on Yoshi's Island's seventh hole
+// for the cast to play on.
 void LoadStaffRoll(void) {
     EncodedAsset asset;
     EncodedAsset shadowAsset;
@@ -406,6 +483,7 @@ void LoadStaffRoll(void) {
     LoadEffectImages();
 }
 
+// Module 0x1F's onUnload
 void FreeStaffRoll(void) {
     s32 index;
 
@@ -428,6 +506,7 @@ void FreeStaffRoll(void) {
     FreeMemory(&g_ShadowTexture);
 }
 
+// BlendClamped again
 f32 BlendStaffRollClamped(f32 from, f32 to, f32 weight) {
     if (weight < 0.0f) {
         weight = 0.0f;
@@ -445,6 +524,7 @@ void ResetStaffRollEase(void) {
     f_EasedView.isLookAtEased = FALSE;
 }
 
+// EaseReactionView again, with its own EasedView
 void EaseStaffRollView(f32 *eye, f32 *lookAt, f32 rate, s32 easedParts) {
     if (easedParts & EASE_EYE) {
         if (!f_EasedView.isEyeEased) {
@@ -479,6 +559,7 @@ void EaseStaffRollView(f32 *eye, f32 *lookAt, f32 rate, s32 easedParts) {
     }
 }
 
+// The first of the club kind's animations; shotMode is unused
 AnimationId GetStanceAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode UNUSED) {
     AnimationId animationId;
 
@@ -503,6 +584,8 @@ AnimationId GetStanceAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shot
     return animationId;
 }
 
+// The second of the club kind's animations, or the third for an approach
+// shot; the timeline skips to just before its ANIMATION_EVENT_IMPACT frame
 AnimationId GetSwingAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode) {
     AnimationId animationId;
 
@@ -535,10 +618,16 @@ void SetSwingAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode) {
     SetCharacterAnimation(slotIndex, GetSwingAnimation(slotIndex, clubIndex, shotMode));
 }
 
+// Frames the spheres at yaw, halving the range between pitch and
+// straight down up to ten times, and ends at the last pitch tried that put
+// the eye at least FRAMING_GROUND_CLEARANCE under the ground, or straight
+// down if none did. It stops early if the first pitch does. The final
+// ground height is read, but not used.
 void BisectFramingPitch(Radians pitch, Radians yaw, f32 depthOffset) {
     Vec3 eye;
     Vec3 lookAt;
     CoursePoint point;
+    // Pads the frame to match; without it 40 words differ
     u8 unusedBuffer[0x10] UNUSED;
     Radians buriedPitch = -QUARTER_TURN_RADIANS;
     s32 step = 0;
@@ -574,6 +663,13 @@ void BisectFramingPitch(Radians pitch, Radians yaw, f32 depthOffset) {
     GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
 }
 
+// The cast's timeline, from TIMELINE_START_FRAME. In four stages, at the
+// tee, on the fairway, on the approach and on the green, four of the cast
+// take a shot, and then the same four react with a par, a bogey, a birdie
+// and an eagle respectively. The last of the cast then takes all four
+// shots. Swings are framed by the camera; reactions are framed by
+// UpdateReaction. Camera 0's view shrinks into the screen's upper right
+// over VIEW_SHRINK_FRAMES frames from VIEW_SHRINK_FRAME.
 void RunStaffRollTimeline(s32 frame) {
     CoursePoint point;
     Vec3 focus;
@@ -589,6 +685,8 @@ void RunStaffRollTimeline(s32 frame) {
             RANDOM_PITCH_SCALE * PITCH_UNIT_TO_RADIANS;
     }
 
+    // The GetAnimationEventFrame calls whose results are dropped are there to
+    // match
     f_CastFramingPitch += g_ControllerStates[PITCH_CONTROLLER].stickY * PITCH_STICK_RATE;
     SetCharacterLights();
     if (frame == 0) {
@@ -1176,6 +1274,12 @@ void RunStaffRollTimeline(s32 frame) {
         4;
 }
 
+// Runs while the loader thread has finished the hole and a controller is
+// plugged in. It plays the songs, ends the scroll, reads in the closing
+// picture, and runs the cast's timeline. Once the closing picture has
+// been up a while, A or Start goes to the boot logos. With debugging on,
+// B restarts the staff roll with the next character first, and C-Down
+// skips 100 frames.
 void UpdateStaffRoll(void) {
     EncodedAsset asset;
     s32 pressedButtons = 0;
@@ -1270,12 +1374,17 @@ void UpdateStaffRoll(void) {
     }
 }
 
+// Module 0x1F's draw. It draws the fade, the painting, the staff text
+// with its shadow, which scrolls up once the painting has faded out, and
+// the closing picture, which fades in from CLOSING_FRAME.
 void DrawStaffRoll(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 lineCount = f_StaffText->lineCount;
     s32 fadeAlpha;
     s32 closingAlpha;
     s32 pass;
+    // Counts the rows, then the strips; sharing it is there to match: a row or
+    // stripIndex variable gives 70 words differing, none in shape
     s32 index;
     s32 lineIndex;
     s32 stripHeight;
@@ -1573,6 +1682,7 @@ void DrawStaffRoll(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Gives the width of the staff text's line; every line is given no height
 void MeasureStaffLine(s32 lineIndex, s32 *width, s32 *height) {
     s32 lineWidth = 0;
     s32 index;
@@ -1592,13 +1702,14 @@ void MeasureStaffLine(s32 lineIndex, s32 *width, s32 *height) {
     *height = 0;
 }
 
+// Draws a line of the staff text from left and top, a glyph per character
 void DrawStaffLine(Gfx **displayListHead, s32 left, s32 top, s32 lineIndex) {
     Gfx *gfx = *displayListHead;
     s32 lineStart = STAFF_LINE(f_StaffText, lineIndex)->start;
     s32 length = STAFF_LINE(f_StaffText, lineIndex)->length;
     s32 firstCharacter = FIRST_STAFF_CHARACTER(f_StaffText);
-    s32 width;
-    s32 height;
+    s32 width; // Unused; it is there to match
+    s32 height; // Unused; it is there to match
     s32 index;
     s32 character;
     s32 row;
@@ -1671,6 +1782,9 @@ void DrawStaffLine(Gfx **displayListHead, s32 left, s32 top, s32 lineIndex) {
     *displayListHead = gfx;
 }
 
+// Draws the painting in strips, scrolled down it by a row a frame from
+// PAINTING_SCROLL_FRAME. It fades in at the start, and fades out once the
+// timeline starts; when it has faded out, f_IsPaintingShown is cleared.
 void DrawStaffRollPainting(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 alpha;
@@ -1816,5 +1930,6 @@ void DrawStaffRollPainting(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Unreferenced
 void DoNothingAfterStaffRoll(void) {
 }

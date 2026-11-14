@@ -1,8 +1,16 @@
+/*
+ * Sound effects, songs and the character sounds that wait for an
+ * animation, all played through libmus, with the interrupts masked around
+ * each libmus call that changes a sound.
+ */
+
 #include "audio/sound.h"
 
 #include <PR/libmus.h>
 #include <ultra64.h>
 
+// This file's calls of the option queries use their whole return register;
+// see save.h
 #define WIDENS_CHOSEN_OPTIONS
 
 #include "audio/music.h"
@@ -16,24 +24,33 @@
 #include "system/memory_address.h"
 #include "text/text.h"
 
+// A channel's or the song's handle when there is nothing to control
 #define NO_HANDLE (-1)
+// Sound IDs are below this
 #define SOUND_COUNT 0x215
+// Song IDs above this play the last song
 #define LAST_SONG_ID 50
+// The echo in libmus's list of effects
 #define ECHO_EFFECT_INDEX 5
+// libmus's master volume for songs
 #define SONG_MASTER_VOLUME 12000
 
+// The reverb of sound effects
 #define ECHO_REVERB 6
 #define DEFAULT_REVERB 2
 #define ECHOING_SOUND_COUNT 34
 
+// Character sounds, which play after a delay set for each character
 #define QUEUED_CHARACTER_SOUND_COUNT 4
 #define CHARACTER_SOUND_DELAY_MAX 60
 
+// The delay editor, on the second controller with GAME_FLAG_TIMING_DEBUG set
 #define DELAY_EDITOR_CONTROLLER 1
 #define DELAY_EDITOR_COLUMN 19
 #define DELAY_EDITOR_FIRST_ROW 5
 #define DELAY_EDITOR_KIND_ROW 4
 
+// f_PendingSongChange's states
 enum SongChangeKind {
     SONG_CHANGE_NONE,
     SONG_CHANGE_SWITCH,
@@ -41,17 +58,20 @@ enum SongChangeKind {
 };
 
 typedef s32 SongChangeKind;
+// Frames from a switch's request to the old song's stop
 #define SONG_SWITCH_DELAY 2
+// A character sound delay that has run out, its sound played
 #define PLAYED_DELAY (-1)
 
 typedef struct QueuedCharacterSound {
     CharacterIndex characterIndex;
-    s32 delay;
+    s32 delay; // Frames until it plays; negative once played
     CharacterSoundKind kind;
     SoundVolume volume;
     SoundPan pan;
 } QueuedCharacterSound;
 
+// A song change for UpdateAudio to make once its delay runs out
 typedef struct SongChange {
     SongChangeKind kind;
     SongId songId;
@@ -68,9 +88,11 @@ extern u8 g_SoundEffectBankRomEnd[];
 SoundChannel g_NextSoundChannel = 0;
 static s32 f_SongHandle = NO_HANDLE;
 static s32 f_UnusedWordAfterSongHandle UNUSED = -1;
+// Only the first handle starts as NO_HANDLE
 static s32 f_SoundHandles[SOUND_CHANNEL_COUNT] = {NO_HANDLE};
 static u32 f_SoundFadeFramesLeft[SOUND_CHANNEL_COUNT] = {0};
 static f32 f_SoundVolumes[SOUND_CHANNEL_COUNT] = {0.0f};
+// Written with the handles but never read
 static s32 f_SongHandleCopy = NO_HANDLE;
 static s32 f_SoundHandleCopies[SOUND_CHANNEL_COUNT] = {NO_HANDLE};
 static SoundId f_EchoingSoundIds[ECHOING_SOUND_COUNT] = {
@@ -109,6 +131,7 @@ static SoundId f_EchoingSoundIds[ECHOING_SOUND_COUNT] = {
     0x9C,
     0x9D,
 };
+// Frames from a character sound's request until it plays, by kind and character
 static u16 f_CharacterSoundDelays[CHARACTER_SOUND_KIND_COUNT][CHARACTER_COUNT] = {
     {4, 3, 4, 4, 4, 6, 4, 3, 4, 4, 7, 6, 6, 4, 4, 4, 1, 4},
 };
@@ -138,6 +161,7 @@ static QueuedCharacterSound f_QueuedCharacterSounds[QUEUED_CHARACTER_SOUND_COUNT
     {0, PLAYED_DELAY, 0, 0, 0},
     {0, PLAYED_DELAY, 0, 0, 0},
 };
+// The index in each character's sound table of each kind of sound
 static u8 f_CharacterSoundIndexes[CHARACTER_SOUND_KIND_COUNT] = {
     CHARACTER_SOUND_FULL_SHOT,
     CHARACTER_SOUND_EXCELLENT,
@@ -151,6 +175,7 @@ static CharacterIndex f_DelayEditorCharacter = 0;
 static CharacterSoundKind f_DelayEditorKind = CHARACTER_SOUND_KIND_FULL_SHOT;
 static SongChange f_PendingSongChange = {SONG_CHANGE_NONE, 0, 0, 0};
 static SongId f_SongId = NO_SONG;
+// A song's file in ROM, whose bounds the linker script defines
 #define DeclareSongFile(name) extern u8 songs_##name##_ROM_START[], songs_##name##_ROM_END[]
 #define SongRomBounds(name) (u32)(songs_##name##_ROM_START), (u32)(songs_##name##_ROM_END)
 
@@ -206,6 +231,8 @@ DeclareSongFile(tournament_yoshis_island);
 DeclareSongFile(staff_roll);
 DeclareSongFile(closing);
 
+// The start and end of each song in the ROM, by its enum Song value. Songs 9
+// and 28 have no value there, as no routine plays them.
 static u32 f_SongRomBounds[(LAST_SONG_ID + 1) * 2] = {
     SongRomBounds(hole_out_eagle),
     SongRomBounds(hole_out_birdie),
@@ -264,6 +291,8 @@ static u32 f_LastAudioFrame;
 
 s32 ChangeCustomEffect(s32 type);
 
+// Replaces the sound on a channel that has a handle, at its own pan and pitch,
+// and gives it its reverb: an echo for the few sounds that echo
 void PlaySound(SoundId soundId, SoundChannel channel, SoundVolume volume) {
     s32 *handle;
     s32 mask;
@@ -318,6 +347,9 @@ void PlaySound(SoundId soundId, SoundChannel channel, SoundVolume volume) {
     }
 }
 
+// Unlike PlaySound, starts the sound even on a channel without a handle.
+// The reverb goes only to the sound being stopped; the new one gets the
+// reverb PlaySound would give it.
 void PlaySoundWithEffects(
     SoundId soundId,
     SoundChannel channel,
@@ -379,6 +411,8 @@ void PlaySoundWithEffects(
     }
 }
 
+// These change the sound on a channel, if it has one, with interrupts masked
+// so that the audio thread never sees half a change
 void StopSound(SoundChannel channel) {
     s32 mask = osSetIntMask(OS_IM_NONE);
 
@@ -419,6 +453,7 @@ void SetSoundReverb(SoundChannel channel, SoundReverb reverb) {
     osSetIntMask(mask);
 }
 
+// UpdateAudio lowers the volume to nothing over the frames
 void FadeOutSound(SoundChannel channel, u32 frameCount) {
     f_SoundFadeFramesLeft[channel] = frameCount;
 }
@@ -433,6 +468,8 @@ void SetSoundTempo(SoundChannel channel, s32 tempo) {
     osSetIntMask(mask);
 }
 
+// Has the character in a slot make its sound of the kind once the delay for
+// the kind and character runs out
 void QueueCharacterSound(
     CharacterIndex characterIndex,
     s32 slot,
@@ -447,10 +484,14 @@ void QueueCharacterSound(
     f_QueuedCharacterSounds[slot].pan = pan;
 }
 
+// Has the delay editor play the character's sound of the kind after its delay
 static void PreviewCharacterSound(CharacterIndex characterIndex, CharacterSoundKind kind) {
     f_PreviewSoundDelays[characterIndex] = f_CharacterSoundDelays[kind][characterIndex];
 }
 
+// Plays the queued character sounds whose delays have run out. With
+// GAME_FLAG_TIMING_DEBUG set, the second controller instead edits the delays of
+// a kind of sound and plays the characters' sounds of it to try them.
 static void UpdateCharacterSounds(void) {
     s32 index;
 
@@ -560,6 +601,8 @@ void SetSoundFrequencyOffset(SoundChannel channel, f32 offset) {
     osSetIntMask(mask);
 }
 
+// Steps the fades, the character sounds and any song change, once per
+// audio frame
 NO_RESULT UpdateAudio(void) {
     u32 audioFrame;
     u32 fadeFramesLeft;
@@ -621,6 +664,7 @@ NO_RESULT UpdateAudio(void) {
     }
 }
 
+// Stops the song at once, fading it out over the frames
 void StopSong(s32 fadeFrameCount) {
     s32 mask = osSetIntMask(OS_IM_NONE);
 
@@ -631,12 +675,14 @@ void StopSong(s32 fadeFrameCount) {
     osSetIntMask(mask);
 }
 
+// Stops the song on UpdateAudio's next frame
 void RequestSongStop(void) {
     f_PendingSongChange.kind = SONG_CHANGE_STOP;
     f_PendingSongChange.delay = 1;
     f_SongId = NO_SONG;
 }
 
+// These change the song, if one is playing
 void SetSongVolume(SoundVolume volume) {
     s32 mask;
 
@@ -677,10 +723,13 @@ void SetSongFrequencyOffset(f32 offset) {
     }
 }
 
+// The song playing or about to play, or NO_SONG
 SongId GetSongId(void) {
     return f_SongId;
 }
 
+// Starts a song. While another song plays, or this one with
+// SONG_FLAG_RESTART, has UpdateAudio stop it and start this one instead.
 void PlaySong(SongId songId, SongFlags songFlags) {
     if (!IsGameFlagSet(GAME_FLAG_SILENCE_SONGS)) {
         if (IsMusicOffChosen() && (songFlags & SONG_FLAG_FOLLOWS_MUSIC_OPTION)) {
@@ -726,6 +775,7 @@ void PlaySong(SongId songId, SongFlags songFlags) {
     }
 }
 
+// Starts the music player and loads the banks, with no song playing
 void InitAudio(void) {
     SoundChannel channel;
 
@@ -750,6 +800,7 @@ void InitAudio(void) {
     ChangeCustomEffect(ECHO_EFFECT_INDEX);
 }
 
+// Stand-ins for libaudio's synthesizer, which libmus replaces
 void alSynNew(ALSynth *synth UNUSED, ALSynConfig *config UNUSED) {
     osSyncPrintf("alSynNew\n");
 }

@@ -1,3 +1,7 @@
+/*
+ * The club tournaments' code entry and windows, in ovl_01/tournament_menu.c
+ */
+
 #ifndef TOURNAMENT_MENU_H
 #define TOURNAMENT_MENU_H
 
@@ -6,17 +10,22 @@
 #include "characters/character.h"
 #include "system/c_language.h"
 
+// The buffers that LoadTournamentBuffer keeps, by the kind its caller gives
 enum TournamentBuffer {
     TOURNAMENT_BUFFER_WIDE_CLOUD = 1,
     TOURNAMENT_BUFFER_YES_NO,
     TOURNAMENT_BUFFER_NINTENDO_BADGE,
+    // The first of g_TournamentIconAssets
     TOURNAMENT_BUFFER_ICON,
+    // The last of f_MenuWindowImageAssets
     TOURNAMENT_BUFFER_MENU_WINDOW,
+    // The file of f_MenuWindowPaletteFiles's last row
     TOURNAMENT_BUFFER_ROW_FILE
 };
 
 typedef s16 TournamentBuffer;
 
+// The buffers that LoadCodeEntryBuffer keeps, by the kind its caller gives
 enum CodeEntryBuffer {
     CODE_ENTRY_BUFFER_NAME_PLATE = 1,
     CODE_ENTRY_BUFFER_BAR,
@@ -26,9 +35,7 @@ enum CodeEntryBuffer {
 };
 
 typedef s32 CodeEntryBuffer;
-
 void LoadTournamentBuffer(void *buffer, TournamentBuffer bufferKind);
-
 #define NO_OK_TEXT (-1)
 void DrawYesNoWindow(
     Gfx **displayListHead,

@@ -1,3 +1,9 @@
+/*
+ * Single-precision fdlibm routines: fabsf, acosf, atan2f and atanf.
+ * They work on the bits of floats, unlike KMC's libm, which the game
+ * also links and which works on doubles with CORDIC loops.
+ */
+
 #include <ultra64.h>
 
 typedef union {
@@ -5,6 +11,9 @@ typedef union {
     s32 word;
 } FloatShape;
 
+// As in fdlibm, these are do-while (0) loops, which the original needs: as
+// plain blocks, fabsf gives 2 words differing, 2 in shape, and acosf 18, 2 in
+// shape
 #define GET_FLOAT_WORD(destination, source) \
     do { \
         FloatShape shape; \
@@ -28,10 +37,13 @@ typedef union {
 
 float atanf(float x);
 
+// acos and atan2 split pi into a float and the error left over, so that
+// adding the error last keeps the result accurate to the last bit.
 static const float f_One = 1.0f;
 static const float f_Pi = 3.1415925026e+00f;
 static const float f_HalfPiHigh = 1.5707962513e+00f;
 static const float f_HalfPiLow = 7.5497894159e-08f;
+// asin(sqrt(z)) ~ sqrt(z) + sqrt(z) * P(z) / Q(z) for z <= 1/4
 static const float f_AsinP0 = 1.6666667163e-01f;
 static const float f_AsinP1 = -3.2556581497e-01f;
 static const float f_AsinP2 = 2.0121252537e-01f;
@@ -43,6 +55,7 @@ static const float f_AsinQ2 = 2.0209457874e+00f;
 static const float f_AsinQ3 = -6.8828397989e-01f;
 static const float f_AsinQ4 = 7.7038154006e-02f;
 
+// fdlibm's routines, computed in floats
 float fabsf(float x) {
     s32 word;
 
@@ -74,11 +87,12 @@ float acosf(float x) {
         }
     }
     else if (magnitude > ONE_WORD) {
+        // NaN without fast math; the game's flags fold this to 0
         return (x - x) / (x - x);
     }
 
-    if (magnitude < 0x3F000000) {
-        if (magnitude <= 0x23000000) {
+    if (magnitude < 0x3F000000) { // |x| < 0.5
+        if (magnitude <= 0x23000000) { // |x| <= 2^-57
             return f_HalfPiHigh + f_HalfPiLow;
         }
 
@@ -129,6 +143,8 @@ float acosf(float x) {
     }
 }
 
+// fdlibm adds this to results to raise the inexact exception, but the
+// compiler folds the sums, which round to the other constant alone.
 static const float f_Tiny = 1.0e-30f;
 static const float f_Zero = 0.0f;
 static const float f_QuarterPi = 7.8539818525e-01f;
@@ -156,6 +172,7 @@ float atan2f(float y, float x) {
         return atanf(y);
     }
 
+    // Bit 0 is the sign of y and bit 1 the sign of x
     quadrant = ((yWord >> 31) & 1) | ((xWord >> 30) & 2);
 
     if (yMagnitude == 0) {
@@ -233,6 +250,7 @@ float atan2f(float y, float x) {
     }
 }
 
+// atan of 0.5, 1, 1.5 and infinity, split into a float and the error left over
 static const float f_AtanHigh[] = {
     4.6364760399e-01f,
     7.8539812565e-01f,
@@ -245,6 +263,7 @@ static const float f_AtanLow[] = {
     3.4473217170e-08f,
     7.5497894159e-08f,
 };
+// atan(x) ~ x - x * (sum of f_AtanTerms[i] * x^(2i+2)) for |x| <= 7/16
 static const float f_AtanTerms[] = {
     3.3333334327e-01f,
     -2.0000000298e-01f,
@@ -272,7 +291,7 @@ float atanf(float x) {
 
     GET_FLOAT_WORD(word, x);
     magnitude = word & MAGNITUDE_MASK;
-    if (magnitude >= 0x50800000) {
+    if (magnitude >= 0x50800000) { // |x| >= 2^34
         if (magnitude > INFINITY_WORD) {
             return x + x;
         }
@@ -285,8 +304,8 @@ float atanf(float x) {
         }
     }
 
-    if (magnitude < 0x3EE00000) {
-        if (magnitude < 0x31000000) {
+    if (magnitude < 0x3EE00000) { // |x| < 7/16
+        if (magnitude < 0x31000000) { // |x| < 2^-29
             if (f_Huge + x > f_One) {
                 return x;
             }
@@ -296,8 +315,8 @@ float atanf(float x) {
     }
     else {
         x = fabsf(x);
-        if (magnitude < 0x3F980000) {
-            if (magnitude < 0x3F300000) {
+        if (magnitude < 0x3F980000) { // |x| < 19/16
+            if (magnitude < 0x3F300000) { // |x| < 11/16
                 reductionIndex = 0;
                 x = ((2.0f * x) - f_One) / (2.0f + x);
             }
@@ -307,7 +326,7 @@ float atanf(float x) {
             }
         }
         else {
-            if (magnitude < 0x401C0000) {
+            if (magnitude < 0x401C0000) { // |x| < 39/16
                 reductionIndex = 2;
                 x = (x - 1.5f) / (f_One + (1.5f * x));
             }

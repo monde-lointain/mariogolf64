@@ -1,7 +1,14 @@
+/*
+ * The clubhouse's character table, screen 15: the characters' wins against each
+ * other, and a popup of two characters' faces with their wins.
+ */
+
 #include "menus/character_table.h"
 
 #include <ultra64.h>
 
+// This file passes DrawCharacterFace's character unnarrowed; see
+// player_stats.h
 #define WIDENS_FACE_CHARACTER_INDEX
 
 #include "audio/sound.h"
@@ -21,16 +28,22 @@
 #include "system/compiler.h"
 #include "system/memory_address.h"
 
+// The table of screen 15: its columns and rows, and how many of each fit on the
+// screen
 #define TABLE_COLUMN_COUNT 14
 #define TABLE_SHOWN_COLUMN_COUNT 7
 #define TABLE_ROW_COUNT 18
 #define TABLE_SHOWN_ROW_COUNT 5
 
+// LoadCharacterTableBuffer reads this beside ASSET_CURSOR_BOX and
+// ASSET_SPINNING_STAR
 #define ASSET_TABLE_ARROWS 0x94A
 
+// DrawTableStar squeezes the star's image to fit a table cell
 #define TABLE_STAR_SHOWN_WIDTH 24
 #define TABLE_STAR_SHOWN_HEIGHT 20
 
+// The corner of the screen where the table's popup goes
 enum TablePopupCorner {
     TABLE_POPUP_TOP_LEFT,
     TABLE_POPUP_TOP_RIGHT,
@@ -41,6 +54,7 @@ enum TablePopupCorner {
 typedef s32 TablePopupCorner;
 
 #define TABLE_POPUP_CORNER_COUNT 4
+// Where the popup goes, and the cursor places that move it
 #define TABLE_POPUP_LEFT_X 68
 #define TABLE_POPUP_RIGHT_X 164
 #define TABLE_POPUP_TOP_Y 84
@@ -49,6 +63,8 @@ typedef s32 TablePopupCorner;
 #define TABLE_POPUP_RIGHT_COLUMN 3
 #define TABLE_POPUP_TOP_ROW_LIMIT 2
 #define TABLE_POPUP_BOTTOM_ROW 3
+// The popup is the menu banner shrunk to this size, with two faces and their
+// wins against each other
 #define TABLE_POPUP_WIDTH 120
 #define TABLE_POPUP_STRIP_HEIGHT 20
 #define TABLE_POPUP_ROW_FACE_X 16
@@ -58,18 +74,24 @@ typedef s32 TablePopupCorner;
 #define TABLE_POPUP_SIGN_Y 12
 #define TABLE_POPUP_WINS_Y 36
 
+// The characters that MarkShownTableCharacters shows on the table, the first
+// ones being those of the character grid
 #define TABLE_CHARACTER_HIDDEN (-1)
 #define TABLE_CHARACTER_SHOWN 1
 #define GRID_CHARACTER_COUNT 13
 #define TABLE_CELL_COUNT 17
 
+// A cell of the character grid
 typedef struct TableCell {
     s32 column;
     s32 row;
 } TableCell;
 
+// The lines between the table's cells, each from one corner to the next
 #define TABLE_LINE_COUNT 12
 
+// DrawCharacterTable draws the table over a dimmed panel, with a face beside
+// each shown row and above each column
 #define TABLE_PANEL_LEFT 24
 #define TABLE_PANEL_TOP 50
 #define TABLE_PANEL_RIGHT 302
@@ -86,6 +108,7 @@ typedef struct TableCell {
 #define TABLE_FIRST_DASH_Y 88
 #define TABLE_CURSOR_X 74
 #define TABLE_CURSOR_Y 93
+// Where the arrows that show the table goes on past the screen sit
 #define TABLE_ROW_ARROW_X 40
 #define TABLE_UP_ARROW_Y 88
 #define TABLE_DOWN_ARROW_Y 222
@@ -99,12 +122,18 @@ void DrawTableLines(Gfx **displayListHead);
 void DrawTablePopup(Gfx **displayListHead);
 void DrawTableStar(Gfx **displayListHead, s32 left, s32 top);
 
+// The popup's top-left corner on the screen, set with its corner
 static s32 f_TablePopupLeft = TABLE_POPUP_LEFT_X;
 static s32 f_TablePopupTop = TABLE_POPUP_TOP_Y;
+// The TABLE_POPUP_* corner where the table's popup is
 static TablePopupCorner f_TablePopupCorner = TABLE_POPUP_TOP_LEFT;
+// The arrows' blink frame, flipped every TABLE_ARROW_BLINK_FRAMES frames
 static s32 f_TableArrowFrame = 0;
 static s32 f_TableArrowTimer = 0;
+// Reset with the arrows' blink, but read by no routine
 static s32 f_UnreadTableArrowState = 0;
+// The character in each place of the table: the CharacterId of each
+// CharacterChoice, as character_select.c keeps its own copy
 static CharacterIndex f_ChoiceCharacters[CHARACTER_COUNT] = {
     CHARACTER_PLUM,
     CHARACTER_CHARLIE,
@@ -125,14 +154,19 @@ static CharacterIndex f_ChoiceCharacters[CHARACTER_COUNT] = {
     CHARACTER_AZALEA,
     CHARACTER_JOE,
 };
+// The table cursor's corners, whose colors DrawTableCursor cycles
 static Vtx f_TableCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-48, 0, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
 };
+// Read by no routine
 static s32 f_UnreadTablePair[2] UNUSED = {0, 0};
+// The angle, in radians, of each corner's color cycle
 static f32 f_TableCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {0.0f, 2.0f, 4.0f, 6.0f};
+// The top-left and bottom-right corners of each line between the table's
+// cells: five one-pixel rows, then seven one-pixel columns
 static ScreenCorner f_TableLineCorners[TABLE_LINE_COUNT * 2] = {
     {24, 80},
     {300, 81},
@@ -159,7 +193,9 @@ static ScreenCorner f_TableLineCorners[TABLE_LINE_COUNT * 2] = {
     {266, 52},
     {267, 228},
 };
+// Read by no routine
 static s32 f_UnreadTablePoint[2] UNUSED = {64, 84};
+// Which of the cursor's shown cells each popup corner would cover
 static UBoolean8 f_DoesTablePopupCoverCell[TABLE_POPUP_CORNER_COUNT][TABLE_SHOWN_ROW_COUNT]
                                           [TABLE_SHOWN_COLUMN_COUNT] = {
                                               {
@@ -192,20 +228,25 @@ static UBoolean8 f_DoesTablePopupCoverCell[TABLE_POPUP_CORNER_COUNT][TABLE_SHOWN
                                               },
 };
 
+// The camera and placement that DrawTableCursor draws the cursor with
 static Mtx f_TableCursorProjection;
 static Mtx f_TableCursorTranslation;
 static Mtx f_TableCursorRotation;
 
+// Read by no routine
 static u8 f_UnreadTableBytes[0x80] UNUSED;
 
 static Mtx f_TableCursorScale;
 
+// Read by no routine
 static u8 f_UnreadTableWord[0x4] UNUSED;
 
+// The images that LoadCharacterTableBuffer is given
 static ImageAsset *f_TableCursorBox;
 static ImageAsset *f_TablePopupBanner;
 static ImageAsset *f_TableArrows;
 static ImageAsset *f_TableStar;
+// Whether the table shows or darkens each place's character
 static s32 f_TableCharacterVisibility[CHARACTER_COUNT];
 
 void LoadCharacterTableBuffer(void *buffer, TableBuffer bufferKind) {
@@ -238,6 +279,7 @@ void LoadCharacterTableBuffer(void *buffer, TableBuffer bufferKind) {
             break;
     }
 
+    // The popup goes to the quarter of the screen away from the cursor
     if (memory->tableColumn < TABLE_POPUP_LEFT_COLUMN_LIMIT &&
         memory->tableRow < TABLE_POPUP_TOP_ROW_LIMIT) {
         x = TABLE_POPUP_RIGHT_X;
@@ -421,6 +463,8 @@ void DrawCharacterTable(Gfx **displayListHead) {
                 WIN_COUNT_MASK;
             rowWins = save->records.awards.matchups[rowCharacter][columnCharacter].winBits &
                 WIN_COUNT_MASK;
+            // A pairing with the flag set shows the star, and the others show who has
+            // won more
             if (save->records.awards.matchups[rowCharacter][columnCharacter].winBits &
                 WON_UNSAVED_FLAG) {
                 DrawTableStar(
@@ -518,6 +562,7 @@ void DrawCharacterTable(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Draws the color-cycling cursor at (x, y), on the chosen table cell
 void DrawTableCursor(Gfx **displayListHead, s32 x, s32 y) {
     Gfx *gfx = *displayListHead;
     s32 vertexIndex;
@@ -612,6 +657,7 @@ void DrawTableCursor(Gfx **displayListHead, s32 x, s32 y) {
     *displayListHead = gfx;
 }
 
+// Draws the white lines between the table's cells
 void DrawTableLines(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 index;
@@ -640,10 +686,82 @@ void DrawTableLines(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Draws the popup with the faces of the cursor cell's two characters and their
+// wins against each other, first moving it to the opposite corner if it would
+// cover the cursor.
+//
+// Each count's call is written once in every arm of a test that compares
+// the two counts, three arms for the row's and two for the column's, as
+// code that once told the leader's count from the other's might leave it.
+// The arms are the same, so jump2 merges them again and drops the tests,
+// but that comes after the registers are given out, and until then each
+// test and each copy of a call is one more reference to the counts. flow
+// counts 10 for rowWins and 9 for columnWins where one call each makes 5
+// and 5, and the copies lengthen their lives from 61 and 85 insns to 105
+// and 115. In global-alloc that lifts rowWins' priority from 1639 to 2857
+// and columnWins' from 1176 to 2347, around the 2727 of the face images'
+// base and above the 1886 of the column's character. So rowWins is placed
+// first and takes $s0, the base $s1, columnWins $s2 and the character $s3,
+// as in the original. With one call each the base is first, then the
+// character, and the counts take $s2 and $s3.
+//
+// A do-while (0) around a count's drawing weighs its references too, but
+// leaves its life alone: columnWins then has 1176, 1647, 2823 or 3176,
+// with 5, 7, 8 or 9 references, and never comes between the base and the
+// character.
+//
+// index serves the strip loop and both counts' offsets, to match.
+//
+// Measured against the match, in words differing (and how many in shape):
+//
+//   One call for each count (the old draft)                 48 (2)
+//   Two arms for each count                                 24 (2)
+//   Three arms for each count                               22 (0)
+//   The row's three arms, with one call for the column's    24 (0)
+//   The column's two arms, with one call for the row's      38 (2)
+//   Two arms for the row's count and three for the column's 22 (0)
+//   The row's second test as rowWins == columnWins          48 (12)
+//   The row's second test as columnWins != 0                24 (2)
+//   The row's tests as rowWins != 0 and columnWins != 0     59 (9)
+//   The column's test as columnWins != 0                    13 (7)
+//   The arms around the row's digits test as well           61 (21), frame -48
+//   The arms around the column's digits test as well        32 (10)
+//   The sign's call in two arms as well                     34 (2)
+//   The sign's call in three arms, with one for each count  58 (2)
+//   One call each, the row's count in a do-while (0)        24 (0)
+//   The same, with the column's count and the sign in one   22 (0)
+//   The same, with the row's call alone in its do-while     18 (0)
+//   One call each, each count in a do-while (0)             26 (2)
+//   The column's call in each arm of its digits test        49 (45)
+//   The row's digits test without its repeated arm          73 (11), frame +24
+//   The row's digits test as three separate ifs             153 (17), frame +16
+//   The row's digits test without its lower bounds          45 (3), frame +8
+//   The column's digits test without its lower bounds       8 (6)
+//   An offset variable apart from index for the counts      38 (0)
+//   rowWins read before columnWins                          8 (0)
+//   The column's character read before the row's            10 (2)
+//   The counts as s16                                       87 (19)
+//   The counts as u8                                        161 (65), frame +16
+//   The counts as u32                                       4 (4)
+//   The counts read through a MatchupRecord pointer         37 (17)
+//   A local for the column's index                          32 (4)
+//   The face modes as an if and an else on == hidden        10 (4)
+//   A face mode variable of its own for the column          6 (0)
+//   memory declared before save                             46 (2)
+//
+// These match as well: the row's two tests in the other order, or its
+// second spelled columnWins > rowWins; the column's test as <, ==, != or
+// >= between the counts, or as rowWins != 0; two arms for the row's count
+// with three for the column's on columnWins > rowWins and rowWins != 0;
+// the counts declared in the other order; the row's index written out in
+// place of rowIndex; the face modes as conditional expressions, as an if
+// and an else on != hidden, or as an s32.
 void DrawTablePopup(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
+    // Counts the banner strips, then holds the x of each count of wins, to
+    // match
     s32 index;
     s32 row;
     CharacterIndex rowCharacter;
@@ -764,9 +882,11 @@ void DrawTablePopup(Gfx **displayListHead) {
         index = 4;
     }
     else {
+        // The same offset again, to match
         index = 4;
     }
 
+    // Each arm draws the same number, to match
     if (rowWins > columnWins) {
         DrawUnalignedMenuNumber(
             &gfx,
@@ -808,6 +928,7 @@ void DrawTablePopup(Gfx **displayListHead) {
         index = 58;
     }
 
+    // As with the row's count, to match
     if (columnWins > rowWins) {
         DrawUnalignedMenuNumber(
             &gfx,
@@ -837,6 +958,8 @@ void DrawTablePopup(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Marks which characters the table shows: those of the character grid that
+// have been unlocked, and the others once they have won a game.
 void MarkShownTableCharacters(void) {
     SaveData *save = GetSaveData();
     TableCell cells[TABLE_CELL_COUNT] = {
@@ -884,12 +1007,14 @@ void MarkShownTableCharacters(void) {
                 (save->records.awards.matchups[row][column].winBits & WIN_COUNT_MASK) != 0;
         }
 
+        // The original stores these one entry early, over the grid's last character
         if (recordCount > 0) {
             f_TableCharacterVisibility[row - 1] = TABLE_CHARACTER_SHOWN;
         }
     }
 }
 
+// Draws the spinning star's image squeezed into the table cell at (left, top)
 void DrawTableStar(Gfx **displayListHead, s32 left, s32 top) {
     Gfx *gfx = *displayListHead;
 
@@ -926,6 +1051,7 @@ void DrawTableStar(Gfx **displayListHead, s32 left, s32 top) {
     *displayListHead = gfx;
 }
 
+// Reads every character's face and first palette for the table to draw
 void LoadTableFaces(void) {
     EncodedAsset asset;
     AssetFile file;

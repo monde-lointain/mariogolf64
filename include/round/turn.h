@@ -1,3 +1,7 @@
+/*
+ * Each player's turn, from aiming to the next player.
+ */
+
 #ifndef TURN_H
 #define TURN_H
 
@@ -7,6 +11,7 @@
 #include "round/player.h"
 #include "shot/ball_simulation.h"
 
+// The ball of the player whose turn it is, as PlaceBallAtRest sets it
 extern BallSimulation g_TurnBallSimulation;
 
 void CountNotableShot(s32 playerIndex, NotableShot notableShot);

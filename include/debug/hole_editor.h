@@ -1,3 +1,7 @@
+/*
+ * The hole editor's scenes, which edit a hole over its map
+ */
+
 #ifndef HOLE_EDITOR_H
 #define HOLE_EDITOR_H
 

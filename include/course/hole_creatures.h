@@ -1,3 +1,7 @@
+/*
+ * The Cheep Cheeps and the monkey that appear on some holes.
+ */
+
 #ifndef HOLE_CREATURES_H
 #define HOLE_CREATURES_H
 

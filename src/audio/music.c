@@ -1,3 +1,8 @@
+/*
+ * Starts the music player and its audio tasks, and loads the songs, the sound
+ * effect banks and the sample bank.
+ */
+
 #include "audio/music.h"
 
 #include <PR/libmus.h>
@@ -10,14 +15,18 @@
 #include "system/compiler.h"
 #include "system/memory_address.h"
 
+// Called with NU_SC_PRENMI_MSG on a pre-NMI, then with NU_SC_RETRACE_MSG after each audio task
 typedef void (*AudioEventCallback)(NUScMsg message, s32 resetFrame);
 
 #define SONG_BUFFER_SIZE 0xC000
 #define SOUND_EFFECT_BUFFER_SIZE 0x4000
 
+// The audio frames after a pre-NMI at which the reset handler acts
 #define RESET_FX_OFF_FRAME 20
 #define RESET_TASKS_OFF_FRAME 28
 
+// The bytes of the pointer bank LoadSampleBank prints, and the last column of
+// each row
 #define PRINTED_BANK_SIZE 64
 #define PRINTED_ROW_END 7
 
@@ -43,7 +52,9 @@ FILE_STATIC OSMesgQueue f_RetraceQueue;
 static u8 *f_SongBuffer = NULL;
 static u8 *f_SoundEffectBuffer = NULL;
 static u8 *f_PointerBank = NULL;
+// Cleared to stop sending audio tasks to the scheduler
 static UBoolean8 f_IsAudioTaskEnabled = TRUE;
+// Counts the pre-NMI and the audio tasks after it
 static u8 f_ResetFrame = 0;
 static AudioEventCallback f_AudioEventCallback = NULL;
 static musSched f_AudioScheduler = {InstallAudioScheduler, WaitForAudioFrame, RunAudioTask};
@@ -67,6 +78,7 @@ static musConfig f_DefaultMusicConfig = {
     NULL,
 };
 
+// Sets the routine called on audio events, with interrupts off while it changes
 void SetAudioEventCallback(AudioEventCallback callback) {
     u32 mask = osSetIntMask(OS_IM_NONE);
 
@@ -74,6 +86,8 @@ void SetAudioEventCallback(AudioEventCallback callback) {
     osSetIntMask(mask);
 }
 
+// Silences the audio before a reset: effects at once, then the effect type,
+// then the audio tasks
 void HandleAudioReset(NUScMsg message, s32 resetFrame) {
     switch (message) {
         case NU_SC_PRENMI_MSG:
@@ -93,6 +107,8 @@ void HandleAudioReset(NUScMsg message, s32 resetFrame) {
     }
 }
 
+// Reads the sample pointer bank into the music heap and starts the player's
+// banks with it
 void LoadSampleBank(u8 *pointerBankRom, u32 pointerBankSize, u8 *waveBankRom) {
     u32 pointerIndex;
 
@@ -109,6 +125,7 @@ void LoadSampleBank(u8 *pointerBankRom, u32 pointerBankSize, u8 *waveBankRom) {
     MusPtrBankInitialize(f_PointerBank, waveBankRom);
 }
 
+// Starts the music player, with the default configuration when given none
 void InitMusic(musConfig *config) {
     if (config == NULL) {
         config = &f_DefaultMusicConfig;
@@ -120,6 +137,8 @@ void InitMusic(musConfig *config) {
     SetAudioEventCallback(HandleAudioReset);
 }
 
+// Sets up the audio task that the player hands to the scheduler, and starts the
+// player
 void StartMusicPlayer(musConfig *config) {
     f_IsAudioTaskEnabled = TRUE;
     f_AudioTask.msgQ = &f_TaskDoneQueue;
@@ -138,12 +157,14 @@ void StartMusicPlayer(musConfig *config) {
     MusInitialize(config);
 }
 
+// Has the scheduler send its retrace and pre-NMI messages to the player
 void InstallAudioScheduler(void) {
     osCreateMesgQueue(&f_RetraceQueue, f_RetraceMessages, RETRACE_QUEUE_SIZE);
     osCreateMesgQueue(&f_TaskDoneQueue, f_TaskDoneMessages, TASK_DONE_QUEUE_SIZE);
     nuScAddClient(&f_AudioClient, &f_RetraceQueue, NU_SC_RETRACE_MSG | NU_SC_PRENMI_MSG);
 }
 
+// Waits for the next retrace, reporting any pre-NMI on the way
 void WaitForAudioFrame(void) {
     NUScMsg *message;
 
@@ -163,6 +184,7 @@ void WaitForAudioFrame(void) {
     }
 }
 
+// Has the scheduler run an audio task and waits for it
 void RunAudioTask(musTask *task) {
     if (f_IsAudioTaskEnabled == TRUE) {
         f_AudioTask.list.t.data_ptr = task->data;
@@ -179,22 +201,27 @@ void RunAudioTask(musTask *task) {
     }
 }
 
+// Takes the buffer that LoadSong reads songs into from the music heap
 void AllocSongBuffer(s32 size) {
     f_SongBuffer = __MusIntMemMalloc(size);
 }
 
+// Plays the song that LoadSong read last
 musHandle StartLoadedSong(void) {
     return MusStartSong(f_SongBuffer);
 }
 
+// Reads a song into the song buffer; the PI reads even sizes
 void LoadSong(u32 romAddress, u32 size) {
     nuPiReadRom(romAddress, f_SongBuffer, size + (size & 1));
 }
 
+// Takes the buffer that LoadSoundEffectBank reads into from the music heap
 void AllocSoundEffectBuffer(s32 size) {
     f_SoundEffectBuffer = __MusIntMemMalloc(size);
 }
 
+// Starts a sound effect with its own settings, or with these
 musHandle StartSoundEffect(SoundId soundId) {
     return MusStartEffect(soundId);
 }
@@ -209,6 +236,8 @@ musHandle StartSoundEffectWith(
     return MusStartEffect2(soundId, volume, pan, restarts, priority);
 }
 
+// Reads the sound effect bank into its buffer and hands it to the player.
+// An oversized bank is reported to the host but still read.
 void LoadSoundEffectBank(u8 *bankRom, u32 bankSize) {
     bankSize += bankSize & 1;
     if (bankSize > SOUND_EFFECT_BUFFER_SIZE) {

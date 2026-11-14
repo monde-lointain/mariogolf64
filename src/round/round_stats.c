@@ -1,3 +1,8 @@
+/*
+ * The round's statistics and the course's records of rounds, with the skins,
+ * the bets and Nassau, and the longest drive and nearest pin contests.
+ */
+
 #include "round/round_stats.h"
 
 #include <ultra64.h>
@@ -21,17 +26,23 @@
 #include "text/text.h"
 
 #define NO_SKINS_WINNER (-1)
+// The course records' totals stop here
 #define RECORD_TOTAL_LIMIT S32_MAX
+// Above any score, so the first player compared sets the best one
 #define NO_BEST_SCORE RECORD_TOTAL_LIMIT
 #define ROUND_COUNT_LIMIT 9999
+// Three under par on every hole
 #define LOWEST_SCORE_TO_PAR (-54)
+// A green reached in regulation leaves two strokes of par for putting
 #define PAR_ON_SPARE_STROKES 2
+// Every hole score is lower
 #define WORST_HOLE_SCORE 16
 #define FRONT_NINE_END 9
 #define BACK_NINE_END 18
 #define SKINS_DEBUG_COLUMN 17
 #define SKINS_DEBUG_ROW 5
 
+// Drives are compared at this scale, so those nearly as long tie
 #define DRIVE_COMPARISON_SCALE 7.119878e-05f
 
 s16 g_BetTallies[PLAYER_COUNT_MAX][BET_COUNT];
@@ -44,9 +55,14 @@ s32 g_HolePot = 0;
 static Boolean f_IsContestDecided = FALSE;
 ScorecardState g_ScorecardState = SCORECARD_CLOSED;
 
+// The player who won the hole's contest: the longest drive on a marked par
+// 5, or the shot nearest the pin on a par 3
 static s32 f_ContestWinner = NO_CONTEST_WINNER;
 static void *f_UnusedPositionRoutines[6] UNUSED = {NULL, NULL, guPosition, NULL, NULL, NULL};
 
+// Sums the player's net strokes over par from the round's first hole to
+// endHole, leaving endHole out. The current hole is put in once the
+// player is no longer HOLE_STATUS_PLAYING
 s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
     s32 score = 0;
     CourseRecord *course = &g_CourseRecords[GetCourseRecordIndex()];
@@ -65,9 +81,17 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
     return score;
 }
 
+// In the skins modes a hole's strokes are the skins that its winner took,
+// and zero for the other players. A hole with no winner carries its skins
+// over to the next. The holes from the round's first to endHole are
+// tallied, with endHole itself once no player is HOLE_STATUS_PLAYING
 void TallySkins(s32 endHole) {
     s32 playerIndex;
+    // Also the player whose total is cleared, to match: clearing the totals with
+    // player gives 6 words differing, none in shape
     s32 hole;
+    // Also whether anyone is still playing, to match: an isAnyonePlaying variable
+    // gives 12 words differing, none in shape
     s32 winner;
     s32 skins;
 
@@ -154,6 +178,7 @@ void StartBets(void) {
     g_GameState.carriedPots[CARRIED_POT_HOLE] = g_HolePot;
 }
 
+// Takes the tallies and pots back from a continued game
 void ResumeBets(void) {
     s32 playerIndex;
     s32 bet;
@@ -179,6 +204,7 @@ void SetContestWinner(s32 playerIndex) {
     f_ContestWinner = playerIndex;
 }
 
+// The longest drive wins the pot from each other player
 void SettleLongestDrive(void) {
     s32 longest;
     s32 playerIndex;
@@ -217,8 +243,10 @@ void SettleLongestDrive(void) {
     }
 }
 
+// Where the search for the nearest shot starts, beyond any measured one
 #define FARTHER_THAN_ANY_DISTANCE 0x3FFFFFFF
 
+// The shot nearest the pin wins the pot from each other player
 void SettleNearestPin(void) {
     s32 nearest;
     s32 playerIndex;
@@ -261,6 +289,8 @@ void ClearContestWinner(void) {
     f_ContestWinner = NO_CONTEST_WINNER;
 }
 
+// Settles the hole's contest once every player's distance is measured.
+// When the hole is over, the distances still unmeasured stop counting
 void UpdateContest(Boolean isHoleOver) {
     s32 holeIndex = g_GameState.holeIndex;
     s32 playerIndex;
@@ -311,8 +341,14 @@ void UpdateContest(Boolean isHoleOver) {
     }
 }
 
+// Adds the round that player 0 has just finished to the course's records
+// and saves them. Once the round count reaches ROUND_COUNT_LIMIT the totals
+// are scaled down by a round's share each time, so that the averages keep
+// moving.
 void RecordCourseRound(void) {
     CourseStats *courseStats = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
+    // Reading g_RoundStats through a pointer is there to match: reading it
+    // directly gives 45 words differing, 13 in shape
     RoundStats *stats = &g_RoundStats;
     CourseRecord *course = &g_CourseRecords[g_GameState.courseIndex];
     Boolean isAtRoundLimit;
@@ -489,11 +525,14 @@ void StartRoundStats(void) {
     g_RoundStats.measuredDriveCount = 0;
     g_RoundStats.averagedDriveCount = 0;
 
+    // The pointer arithmetic is there to match: indexing the course stats
+    // gives 18 words differing, none in shape
     g_RoundStats.longestDrive = (save->records.courseStats + g_GameState.courseIndex)->longestDrive;
     g_RoundStats.averagedDriveTotal = 0;
     g_RoundStats.isDriveAveraged = FALSE;
 }
 
+// As StartRoundStats, but keeps the total of the averaged drives
 void RestartRoundStats(void) {
     SaveData *save;
 
@@ -503,11 +542,16 @@ void RestartRoundStats(void) {
     g_RoundStats.measuredDriveCount = 0;
     g_RoundStats.averagedDriveCount = 0;
 
+    // The pointer arithmetic is there to match: indexing the course stats
+    // gives 18 words differing, none in shape
     g_RoundStats.longestDrive = (save->records.courseStats + g_GameState.courseIndex)->longestDrive;
     g_RoundStats.isDriveAveraged = FALSE;
 }
 
+// Only the first player's holes count
 void RecordHoleStats(void) {
+    // Reading g_RoundStats through a pointer is there to match: reading it
+    // directly gives 64 words differing, 26 in shape
     RoundStats *stats;
 
     GetSaveData();
@@ -534,7 +578,10 @@ void RecordHoleStats(void) {
     }
 }
 
+// Returns whether the drive is the longest yet
 s32 RecordDrive(void) {
+    // Reading g_RoundStats through a pointer is there to match: reading it
+    // directly gives 20 words differing, 14 in shape
     RoundStats *stats = &g_RoundStats;
     Club *club = GetSelectedClub();
 
@@ -549,6 +596,9 @@ s32 RecordDrive(void) {
     return g_Players[0].lastDriveDistance > stats->longestDrive;
 }
 
+// Settles the bets on the hole just played and keeps the tallies and pots
+// in the game state, for the game to be continued. SettleNassau is a
+// nested function, a GNU C extension.
 void SettleHoleBets(void) {
     s32 playerIndex;
     s32 j;
@@ -560,9 +610,13 @@ void SettleHoleBets(void) {
     s32 count;
     s32 score;
 
+    // The Las Vegas pointers are there to match: reading both entries directly
+    // gives 44 words differing (8 in shape), the rate alone 18 (4), the tally
+    // alone 26 (4), and the rate as a value 10 (2)
     s8 *lasVegasRate;
     s16 *lasVegasTally;
 
+    // The lower net score over the holes wins the bet from each other player
     void SettleNassau(s32 startHole, s32 endHole) {
         s32 totals[PLAYER_COUNT_MAX];
 
@@ -588,12 +642,17 @@ void SettleHoleBets(void) {
         }
     }
 
+    // Declared after SettleNassau to match the stack layout: declared before it,
+    // 130 words differ, none in shape
     s32 scores[PLAYER_COUNT_MAX];
+    // Pads the frame to match; without it 24 words differ
     s32 unused[8] UNUSED;
 
     if (g_GameState.betRates[BET_STROKES] > 0) {
         for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             for (j = 0; j != g_GameState.playerCount; j++) {
+                // Load the rival first without reversing the comparison, to match:
+                // testing i != j gives 6 words differing, and j != i 2, none in shape
                 s32 rivalIndex = j;
                 if (playerIndex != rivalIndex) {
                     score = g_Players[playerIndex].strokeCount +
@@ -655,12 +714,16 @@ void SettleHoleBets(void) {
             bet = BET_SKINS;
         }
         else {
+            // The store is dead, as each case that reads count sets it first, but
+            // the original has it: without it, or with it before or after the
+            // test instead, 14 words differ, 10 in shape
             count = 0;
         }
 
         switch (g_GameState.gameMode) {
             case GAME_MODE_SKINS_MATCH:
             case GAME_MODE_CLUB_SLOTS:
+                // A hole's strokes are zero for the players who did not win it
                 count = 0;
                 for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
                     count +=

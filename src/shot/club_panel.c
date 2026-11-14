@@ -1,3 +1,9 @@
+/*
+ * The panel that shows the selected club and the shot mode. Switching the
+ * shot mode animates the panel over a few frames, by loading one image per
+ * frame into whichever of two buffers is not being shown.
+ */
+
 #include "shot/club_panel.h"
 
 #include <ultra64.h>
@@ -23,10 +29,12 @@
 #include "system/memory_address.h"
 #include "text/text.h"
 
+// Shows the debug value, which the second controller's D-pad changes
 #define GAME_FLAG_CLUB_PANEL_DEBUG 0x6E
 #define DEBUG_VALUE_COLUMN 20
 #define DEBUG_VALUE_ROW 5
 
+// f_ClubPanelState values
 enum ClubPanelState {
     CLUB_PANEL_FREED = -1,
     CLUB_PANEL_LOADED = 1
@@ -34,15 +42,19 @@ enum ClubPanelState {
 
 typedef s32 ClubPanelState;
 
+// The frames of a shot mode change; the last frame shows the new mode
 #define SHOT_MODE_CHANGE_FRAME_COUNT 4
 #define SHOT_MODE_CHANGE_LAST_FRAME (SHOT_MODE_CHANGE_FRAME_COUNT - 1)
 
+// Where the two panel buffers are among g_ImageSlots's images
 #define CLUB_PANEL_BUFFER_SLOT 12
 
 #define ASSET_CLUB_PANEL_IMAGE 0x4FF
 #define SHOT_MODE_IMAGE_SIZE 0x808
 
+// The panel's images, in each shot mode
 #define ASSET_PANEL_POWER 0x56C
+// In GAME_MODE_TRAINING, with the word POWER drawn lower
 #define ASSET_PANEL_POWER_TRAINING 0x56D
 #define ASSET_PANEL_NORMAL 0x56E
 #define ASSET_PANEL_APPROACH 0x56F
@@ -50,9 +62,12 @@ typedef s32 ClubPanelState;
 #define ASSET_PANEL_PUTT_MIDDLE 0x571
 #define ASSET_PANEL_PUTT_SHORT 0x572
 
+// f_ShownShotMode, f_PanelShotMode and f_PanelIsPutter until the panel is
+// drawn: it matches no shot mode, so the first update loads the images
 #define PANEL_NOT_SHOWN 0xFF
 #define INITIAL_CLUB_PANEL_DEBUG_VALUE (-2)
 
+// The bar that shows the lie's span below the gauge
 #define SPAN_BAR_X 38.0f
 #define SPAN_BAR_Y (-103.0f)
 #define SPAN_BAR_Z (-100.0f)
@@ -60,15 +75,21 @@ typedef s32 ClubPanelState;
 #define SPAN_BAR_THICKNESS 0.1f
 #define SPAN_BAR_VERTEX_COUNT 8
 
+// The shot mode's name
 #define ASSET_SHOT_MODE_POWER 0x52F
 #define ASSET_SHOT_MODE_NORMAL 0x52D
 #define ASSET_SHOT_MODE_APPROACH 0x52E
 
+// The shot mode last shown in the name, and the one that the panel last
+// finished changing to
 static UShotMode8 f_ShownShotMode = PANEL_NOT_SHOWN;
 static UShotMode8 f_PanelShotMode = PANEL_NOT_SHOWN;
 static UBoolean8 f_PanelIsPutter = PANEL_NOT_SHOWN;
+// The frame of the shot mode change, or 0 while it is not changing
 static u8 f_ShotModeChangeFrame = 0;
+// The gauge's fill while the power is set, which then holds the chosen power
 static s32 f_ChosenPowerFill = 0;
+// Which of the two panel buffers is loaded next
 static s32 f_PanelBufferIndex = 0;
 static ClubPanelState f_ClubPanelState = CLUB_PANEL_FREED;
 static Vtx f_SpanBarVertices[SPAN_BAR_VERTEX_COUNT] = {
@@ -88,6 +109,7 @@ static Gfx f_SpanBarDisplayList[] = {
     gsSPEndDisplayList(),
 };
 static s32 f_ClubPanelDebugValue = INITIAL_CLUB_PANEL_DEBUG_VALUE;
+// The frames of each change of shot mode, by the mode and the one changed from
 static u16 f_ApproachToNormalFrames[SHOT_MODE_CHANGE_FRAME_COUNT] =
     {0x578, 0x577, 0x576, ASSET_PANEL_NORMAL};
 static u16 f_PowerToNormalFrames[SHOT_MODE_CHANGE_FRAME_COUNT] =
@@ -96,7 +118,10 @@ static u16 f_NormalToApproachFrames[SHOT_MODE_CHANGE_FRAME_COUNT] =
     {0x576, 0x577, 0x578, ASSET_PANEL_APPROACH};
 static u16 f_PowerToApproachFrames[SHOT_MODE_CHANGE_FRAME_COUNT] =
     {0x57B, 0x57A, 0x579, ASSET_PANEL_APPROACH};
+// From the normal shot mode, but shown for every change to power
 static u16 f_ToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT] = {0x575, 0x574, 0x573, ASSET_PANEL_POWER};
+// Read by no routine. f_PowerToApproachFrames reversed, then the power
+// image
 static u16 f_ApproachToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT] UNUSED =
     {0x579, 0x57A, 0x57B, ASSET_PANEL_POWER};
 static Radians f_MarkerPulseAngle = 0.0f;
@@ -104,6 +129,7 @@ static Radians f_MarkerPulseAngle = 0.0f;
 static Mtx f_SpanBarTranslation;
 static Mtx f_SpanBarScale;
 
+// Not static: the original left these to the linker's common block
 ImageAsset *f_ClubPanelImage;
 ImageAsset *f_ShotModeImage;
 
@@ -127,6 +153,7 @@ void LoadClubPanelImages(void) {
 
     f_ClubPanelImage = AllocMemory(OpenEncodedAsset(ASSET_CLUB_PANEL_IMAGE, &asset));
     ReadEncodedAsset(f_ClubPanelImage, &asset);
+    // The first shot mode's image sizes the buffers that each mode's fills
     g_ImageSlots[CLUB_PANEL_BUFFER_SLOT] = AllocMemory(OpenEncodedAsset(ASSET_PANEL_POWER, &asset));
     ReadEncodedAsset(g_ImageSlots[CLUB_PANEL_BUFFER_SLOT], &asset);
     g_ImageSlots[CLUB_PANEL_BUFFER_SLOT + 1] =
@@ -300,6 +327,9 @@ Boolean IsShotModeChangeDone(void) {
     return f_ShotModeChangeFrame == 0;
 }
 
+// The power gauge runs from GAUGE_EMPTY_X leftwards, so a fuller gauge
+// reaches further left. Its ticks are GAUGE_TICK_SPACING apart, with
+// medium ticks every GAUGE_TICKS_PER_GROUP ticks and long ones at each end.
 #define GAUGE_FULL_X 56
 #define GAUGE_LENGTH 140
 #define GAUGE_EMPTY_X (GAUGE_FULL_X + GAUGE_LENGTH)
@@ -315,26 +345,34 @@ Boolean IsShotModeChangeDone(void) {
 #define GAUGE_MEDIUM_TICK_COUNT 3
 #define GAUGE_MEDIUM_TICK_TOP 212
 #define GAUGE_MEDIUM_TICK_BOTTOM 216
+// The markers and the long ticks reach past the gauge
 #define GAUGE_MARKER_TOP 208
 #define GAUGE_MARKER_BOTTOM 220
 #define GAUGE_MARKER_WIDTH 4
+// The fill's gradient image
 #define GAUGE_FILL_IMAGE_WIDTH 64
 #define GAUGE_FILL_IMAGE_HEIGHT 16
+// The fill image spans 5 pixels for each gauge value, across the full gauge
 #define GAUGE_FILL_SPAN_PER_VALUE 5
 #define GAUGE_FILL_SPAN (GAUGE_VALUE_MAX * GAUGE_FILL_SPAN_PER_VALUE)
 #define GAUGE_TICK_IMAGE_WIDTH 16
 #define GAUGE_TICK_IMAGE_HEIGHT 12
 
+// The markers pulse at a twelfth of a turn per frame
 #define MARKER_PULSE_STEP (M_PI / 6)
 #define MARKER_PULSE_LEVEL 100.0
 
+// Draws the power gauge, its markers, and the bar for the lie's span
 void DrawClubPanel(Gfx **displayListHead) {
+    // GetLieSpan sets both; the panel shows the first
     s32 lieSpan[2];
     Gfx *gfx;
     Boolean isPutter;
     s32 fill;
     PlayerState playerState;
     s32 tick;
+    // Also the end tick and medium tick index, to match: a counter of their own
+    // for either gives 54 words differing, and for both 88
     s32 group;
     s32 emptyLeft;
 
@@ -491,7 +529,6 @@ void DrawClubPanel(Gfx **displayListHead) {
             TEXEL_STEP_ONE,
             TexelRunStep(GAUGE_TICK_IMAGE_HEIGHT, GAUGE_MEDIUM_TICK_BOTTOM - GAUGE_MEDIUM_TICK_TOP)
         );
-
         tick++;
     }
 
@@ -519,6 +556,8 @@ void DrawClubPanel(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
+    // The original branches on both tests: only the second gives 321 words
+    // differing (89 in shape), and the two as an && chain 325 (95)
     if (playerState != PLAYER_STATE_AIMING) {
         if (playerState == PLAYER_STATE_SETTING_POWER) {
             f_ChosenPowerFill = fill;

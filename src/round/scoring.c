@@ -1,3 +1,8 @@
+/*
+ * Scoring: the round's holes, handicaps and net scores, and who wins a hole of
+ * a match or of a group.
+ */
+
 #include "round/scoring.h"
 
 #include <ultra64.h>
@@ -12,6 +17,7 @@
 #include "system/c_language.h"
 
 #define DEBUG_ROUND_HOLE_COUNT 2
+// Above any score, so the first player compared sets the best one
 #define HIGHER_THAN_ANY_SCORE 0x40000000
 
 s32 GetFirstHoleIndex(void) {
@@ -38,12 +44,18 @@ Boolean IsOnDrivingRange(void) {
     return g_GameState.courseIndex == DRIVING_RANGE_COURSE_INDEX;
 }
 
+// The strokes that a handicap takes off a score on the hole: one for each
+// full 18, and one more on the holes whose handicap is within the rest.
+// GetCourseRecordIndex ignores the courseIndex passed to it and reads
+// g_GameState.courseIndex.
 s32 GetHandicapOffset(CourseIndex courseIndex, s32 holeIndex, s32 handicap) {
     return (-handicap / COURSE_HOLE_COUNT) -
         (handicap % COURSE_HOLE_COUNT >=
             g_CourseRecords[GetCourseRecordIndex(courseIndex)].holes[holeIndex].handicap);
 }
 
+// strokeCount with the current hole's handicap offset, which the matches
+// compare
 s32 GetNetScore(s32 playerIndex) {
     return g_Players[playerIndex].strokeCount +
         GetHandicapOffset(
@@ -53,6 +65,7 @@ s32 GetNetScore(s32 playerIndex) {
         );
 }
 
+// Numbers each course's holes from 1 to 18, keeping the handicaps' order
 void RenumberHoleHandicaps(void) {
     s32 handicaps[COURSE_HOLE_COUNT];
     s32 order[COURSE_HOLE_COUNT];
@@ -72,6 +85,7 @@ void RenumberHoleHandicaps(void) {
     }
 }
 
+// Compares the holes before g_GameState.holeIndex by strokes, without handicaps
 MatchStanding GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
     s32 holesAfterCurrent;
     s32 lead;
@@ -114,6 +128,8 @@ MatchStanding GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
     return MATCH_STANDING_OPEN;
 }
 
+// Compares the holes before g_GameState.holeIndex by net score. With
+// isSuddenDeath set, the first hole that either player wins decides.
 MatchSide GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
     s32 endHoleIndex;
     s32 holesAfterCurrent;
@@ -175,11 +191,18 @@ MatchSide GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
     return MATCH_SIDE_NONE;
 }
 
+// Whether the hole is halved for the side that the standing says is
+// dormie: it is when that side is done with the hole and its net score is no
+// more than one over the other side's. It is a macro, as an inline
+// function compiles differently from the original.
 #define IsHalvedForDormie(standing, dormieStanding, dormieIndex, otherIndex) \
     (((standing) == (dormieStanding)) && \
         (g_Players[dormieIndex].holeStatus != HOLE_STATUS_PLAYING) && \
         !(GetNetScore(dormieIndex) > GetNetScore(otherIndex) + 1))
 
+// Scores a player still HOLE_STATUS_PLAYING as if they need at least one more
+// stroke. When a dormie lead means a halve wins the match, the hole counts
+// as halved once the trailing player can't win it.
 MatchSide GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
     MatchStanding standing;
 
@@ -224,6 +247,9 @@ MatchSide GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
     return MATCH_SIDE_NONE;
 }
 
+// Decides the hole among all the players, marking each in playerResults
+// when it isn't NULL. Players who have holed out set the best score, and
+// those still playing are scored as if they need another stroke.
 GroupHoleResult GetGroupHoleResult(GroupPlayerMark *playerResults) {
     s8 ignoredResults[PLAYER_COUNT_MAX];
     s32 bestScore;
@@ -281,6 +307,7 @@ GroupHoleResult GetGroupHoleResult(GroupPlayerMark *playerResults) {
                 isDecided = FALSE;
             }
             else if (tieCount == 0) {
+                // Holing the next stroke would tie the lone leader
                 isDecided = FALSE;
             }
         }
@@ -308,6 +335,10 @@ GroupHoleResult GetGroupHoleResult(GroupPlayerMark *playerResults) {
     return GROUP_HOLE_WON;
 }
 
+// Compares the player's net score plus one, which holing the next stroke
+// would give, with the other players' scores. Modes 2 and 4 compare the
+// player with the one whose index differs in the lowest bit, and modes 10
+// and 11 with every player.
 s32 GetHolingOutStakes(s32 playerIndex) {
     HolingOutStakes stakes;
     s32 opponentIndex;

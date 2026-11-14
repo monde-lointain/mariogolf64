@@ -1,3 +1,8 @@
+/*
+ * The clubhouse's Best Times screen. Left and right turn it between the open
+ * courses, and it shows each course's best times with their places and holders.
+ */
+
 #include "menus/best_times.h"
 
 #include <ultra64.h>
@@ -28,17 +33,26 @@
 #include "system/memory_address.h"
 #include "text/text.h"
 
+// Each character's face, 32 by 24, one above another
 #define ASSET_CHARACTER_FACE_STRIP 0x8E9
 
+// The images of g_CourseIconAssets that LoadBestTimesCourseIcons reads
 #define BEST_TIMES_IMAGE_COUNT 6
 
+// The best times' courses turn this far in all between one course and the next,
+// and this fast
 #define BEST_TIMES_TURN 90
 #define BEST_TIMES_SPIN_SPEED 18
 
+// ASSET_PLACES holds 32 by 32 frames of the digits 1 to 4, then the
+// suffixes ST, ND, RD and TH, each drawn at 24 by 24
 #define PLACE_LABEL_SIZE 24
 #define PLACE_LABEL_SUFFIX_X 16
 #define PLACE_LABEL_LAST_PLACE 3
 
+// DrawStopwatchTime writes a best time as minutes, seconds and hundredths, two
+// digits each, from the 16 by 16 CI4 glyphs of f_StopwatchGlyphs: the digits
+// follow a first glyph, and a separator follows each group but the last
 #define TIME_GROUP_COUNT 3
 #define TIME_GROUP_DIGIT_COUNT 2
 #define HUNDREDTHS_PER_MINUTE (SECONDS_PER_MINUTE * HUNDREDTHS_PER_SECOND)
@@ -53,9 +67,13 @@
 void DrawPlaceLabel(Gfx **displayListHead, s32 left, s32 top, s32 place);
 void DrawStopwatchTime(Gfx **displayListHead, s32 left, s32 top, s32 frameCount);
 
+// The side arrows' blinking frame and its time shown; the third word is cleared
+// with them and read by no routine
 static s32 f_BestTimesArrowFrame = 0;
 static s32 f_BestTimesArrowTimer = 0;
 static s32 f_UnusedBestTimesArrowWord = 0;
+// Where each character's face is in f_CharacterFaceStrip's image, and its name
+// in g_MenuCharacterNames
 static s32 f_CharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_CHARLIE,
@@ -77,17 +95,22 @@ static s32 f_CharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_JOE,
 };
 
+// The camera that DrawBestTimes views the course wheel with
 static Mat4 f_BestTimesWheelProjection;
 static Mat4 f_BestTimesWheelView;
+// The images that the Load routines read: the course icons, the face strip,
+// the stopwatch's glyphs, the place labels and the side arrows
 static ImageAsset **f_BestTimesCourseIcons;
 static ImageAsset *f_CharacterFaceStrip;
 static ImageAsset *f_StopwatchGlyphs;
 static ImageAsset *f_PlaceLabels;
 static ImageAsset *f_BestTimesGreenArrows;
 
+// Read by no routine; 2 objects, as one would be aligned past its start
 static u8 f_UnusedBytesAfterGreenArrows[0x4] UNUSED;
 static u8 f_UnusedBufferAfterGreenArrows[0x88] UNUSED;
 
+// Reads every course's icon into the Best Times screen's buffers
 void LoadBestTimesCourseIcons(ImageAsset **buffers) {
     EncodedAsset asset;
 
@@ -100,6 +123,7 @@ void LoadBestTimesCourseIcons(ImageAsset **buffers) {
     }
 }
 
+// Reads the character face strip into buffer, for Best Shots and Ring Shot
 void LoadCharacterFaceStrip(void *buffer) {
     EncodedAsset asset;
 
@@ -185,6 +209,7 @@ void UpdateBestTimes(void) {
 
             memory->bestTimesSpin -= direction * step;
 
+            // Stop on reaching the course rather than turning past it
             if ((memory->bestTimesSpin < 0 ? -1 : 1) != direction) {
                 memory->bestTimesSpin = 0;
             }
@@ -192,6 +217,11 @@ void UpdateBestTimes(void) {
     }
 }
 
+// DrawBestTimes turns the open courses' images on the wheel of menu.h, with
+// the chosen course's name on the banner below, then lists that course's best
+// times on a shaded panel: each with its place, its bestTimeScoresToPar as a
+// signed number and its holder's face. A row of dashes stands in for each unset
+// time.
 #define BEST_TIME_PLACE_X 22
 #define BEST_TIME_FIRST_PLACE_Y 144
 #define BEST_TIME_PLACE_SPACING 27
@@ -215,12 +245,16 @@ void DrawBestTimes(Gfx **displayListHead) {
     f32 iconX[COURSE_COUNT];
     f32 iconY[COURSE_COUNT];
     f32 iconScale[COURSE_COUNT];
+    // Pads the frame to match; without it 238 words differ
     s32 unusedSlots[COURSE_COUNT] UNUSED;
     s32 drawOrder[COURSE_COUNT];
+    // Pads the frame to match; without it 228 words differ
     s32 unused[2] UNUSED;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s32 courseCount;
+    // Every loop but the dashes' counts with one of these two, as the original's
+    // registers show
     s16 index;
     s16 otherIndex;
     s32 key;
@@ -303,6 +337,7 @@ void DrawBestTimes(Gfx **displayListHead) {
         drawOrder[otherIndex] = otherIndex;
     }
 
+    // Draw the farthest images first, so the nearer ones cover them
     for (otherIndex = 1; otherIndex != courseCount; otherIndex++) {
         key = drawOrder[otherIndex];
         for (index = otherIndex - 1; index >= 0 && iconY[drawOrder[index]] > iconY[key]; index--) {
@@ -425,6 +460,9 @@ void DrawBestTimes(Gfx **displayListHead) {
             gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
             gDPPipeSync(gfx++);
             gDPSetTextureFilter(gfx++, G_TF_BILERP);
+            // Read into a local of its own to match: indexing with
+            // memory->bestTimesCourse gives 37 words differing (13 in shape), and
+            // with the bestTimesCourse read at the top 217 (27)
             holderCourse = memory->bestTimesCourse;
             characterIndex = save->records.bestTimeCharacters[holderCourse][otherIndex];
             DrawCharacterFace(
@@ -537,6 +575,9 @@ void DrawBestTimeFace(
     *displayListHead = gfx;
 }
 
+// Draws a place's label, such as 1st, at (left, top): its number and then its
+// suffix, from the places image, with the place kept within the label's range.
+// The suffixes' frames follow the digits'.
 void DrawPlaceLabel(Gfx **displayListHead, s32 left, s32 top, s32 place) {
     Gfx *gfx = *displayListHead;
 
@@ -742,6 +783,8 @@ void DrawStopwatchTime(Gfx **displayListHead, s32 left, s32 top, s32 frameCount)
     *displayListHead = gfx;
 }
 
+// Reads every character's face, and the palette of the character and color
+// that set each course's best times, or Plum's first for an unset time
 void LoadBestTimesFaces(void) {
     EncodedAsset asset;
     AssetFile file;

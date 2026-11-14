@@ -1,3 +1,8 @@
+/*
+ * Facts about the courses and their holes: where their records are kept, and
+ * which holes are par threes or are marked as par fives.
+ */
+
 #include "course/course.h"
 
 #include <ultra64.h>
@@ -7,9 +12,11 @@
 #include "system/c_language.h"
 #include "system/main.h"
 
+// The radius used for holes not listed in GetHoleRadius
 #define DEFAULT_HOLE_RADIUS 200
 #define MINI_GOLF_HOLE_RADIUS 30
 
+// A hole's record, whose yardage is the same from each of its tees
 #define HOLE_RECORD(par, handicap, yardage, flags) \
     {(par), (handicap), {(yardage), (yardage), (yardage)}, (flags)}
 
@@ -18,10 +25,11 @@ char g_TournamentNames[TOURNAMENT_NAME_COUNT][TOURNAMENT_NAME_SIZE] = {
     "Koopa Cup",
     "Shy Guy International",
     "Yoshi Championship",
-    "Boo Clasic",
+    "Boo Clasic", // Misspelled so in the game
     "Mario Open",
     "Tournament Total",
 };
+// Each course's name, then its holes in the order they are played
 CourseRecord g_CourseRecords[COURSE_RECORD_COUNT] = {
     {
         "Toad HighLands",
@@ -240,6 +248,8 @@ static RingShotHole f_RingShotHoles[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT
     {{5, 14}, {5, 10}, {5, 8}, {5, 5}, {5, 16}, {5, 15}},
 };
 
+// The one caller scales the sine and cosine of an angle by this, so it is
+// taken to be a radius
 s32 GetHoleRadius(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
     switch (courseRecordIndex) {
         case COURSE_RECORD_TOAD_HIGHLANDS:
@@ -381,6 +391,7 @@ s32 GetHoleRecordIndex(void) {
     return g_GameState.holeIndex;
 }
 
+// GetHoleRecordIndex as if outside Ring Shot
 s32 GetHoleIndexInRecord(void) {
     if (g_GameState.courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
         return 0;
@@ -389,6 +400,7 @@ s32 GetHoleIndexInRecord(void) {
     return g_GameState.holeIndex;
 }
 
+// With g_IsDebugEnabled set, the first hole counts too
 Boolean IsMarkedParFive(s32 courseRecordIndex, s32 holeIndex) {
     if (g_GameState.isMiniGolf) {
         return FALSE;

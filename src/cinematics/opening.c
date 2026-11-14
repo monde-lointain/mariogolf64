@@ -1,3 +1,10 @@
+/*
+ * The opening: its script of scenes and cues, the camera, the characters and
+ * their shots, the sounds, and what it draws over the course: the name logos,
+ * the balls, Lakitu, the impact lines, the burst, the sparks and the title
+ * logo.
+ */
+
 #include "cinematics/opening.h"
 
 #include <math.h>
@@ -43,6 +50,7 @@
 #include "system/overlay_manager.h"
 #include "text/text.h"
 
+// The size of the heap that the opening's billboards are allocated from
 #define OPENING_BILLBOARD_HEAP_SIZE 0x7038
 
 enum OpeningShotState {
@@ -53,6 +61,7 @@ enum OpeningShotState {
 
 typedef s32 OpeningShotState;
 
+// The golf ball images that the opening shows, two at a time, as f_OpeningBallAssets lists them
 enum OpeningBallImage {
     MARIO_FACE_BALL,
     DONKEY_KONG_FACE_BALL,
@@ -65,27 +74,36 @@ enum OpeningBallImage {
 typedef s32 OpeningBallImage;
 
 #define OPENING_BALL_SLOT_COUNT 2
+// A 64x64 CI8 image with its header and palette
 #define OPENING_BALL_IMAGE_SIZE 0x1208
 #define OPENING_BALL_IMAGE_WIDTH 64
+// A ball image is drawn in strips that fit in texture memory
 #define OPENING_BALL_STRIP_HEIGHT 32
 #define OPENING_BALL_STRIP_COUNT 2
 #define OPENING_BALL_STRIP_SIZE (OPENING_BALL_IMAGE_WIDTH * OPENING_BALL_STRIP_HEIGHT)
+// The scale that a slot starts at
 #define OPENING_BALL_NORMAL_SCALE 1.0f
+// A ball at this scale sits a little higher, with its shadow lower
 #define OPENING_BALL_LARGE_SCALE 3.0f
 
+// Ends the opening
 #define OPENING_SCENE_END 999
+// How far in front of the camera Lakitu's trail is drawn
 #define LAKITU_TRAIL_DEPTH 300.0f
 
+// What an opening ball slot shows
 enum OpeningBallState {
     OPENING_BALL_HIDDEN,
     OPENING_BALL_ON_GROUND,
-    OPENING_BALL_IN_AIR
+    OPENING_BALL_IN_AIR // At its own height, rather than the ground's
 };
 
 typedef s32 OpeningBallState;
 
+// The character name logos that the opening shows, two at a time
 #define OPENING_NAME_LOGO_COUNT 7
 #define OPENING_NAME_SLOT_COUNT 2
+// A 128x64 CI8 image with its header and palette
 #define OPENING_NAME_LOGO_SIZE 0x2208
 
 typedef struct OpeningNameLogo {
@@ -94,15 +112,21 @@ typedef struct OpeningNameLogo {
     s32 height;
     s32 x;
     s32 y;
-    s32 shownWidth;
+    s32 shownWidth; // As the logo unfolds and flips
     s32 shownHeight;
 } OpeningNameLogo;
 
+// The steps that a name logo's animation starts each phase at
+// Widens over 8 frames
 #define NAME_LOGO_UNFOLD 0
+// Flattens over 4 frames
 #define NAME_LOGO_FLIP_DOWN 10
+// Grows back over 4 frames
 #define NAME_LOGO_FLIP_UP 20
 #define NAME_LOGO_STILL 30
 
+// f_OpeningCue's values: the cues, each named for the characters it sets up
+// or what it does to them, then the states past them
 enum OpeningCue {
     OPENING_CUE_MARIO_TEE_SHOT,
     OPENING_CUE_PEACH_CHEER,
@@ -137,31 +161,41 @@ enum OpeningCue {
 
 typedef s32 OpeningCue;
 
+// f_LookAtEaseMode values: how EaseOpeningLookAt moves the look-at point
 enum LookAtEase {
     LOOK_AT_EASE_NONE,
-    LOOK_AT_EASE_FAST,
-    LOOK_AT_EASE_SLOW,
+    LOOK_AT_EASE_FAST, // To the shot ball, a tenth of the way a frame
+    LOOK_AT_EASE_SLOW, // To the shot ball, a hundredth of the way
+    // Near f_OpeningBallPositions[1], at a rate that grows to a tenth
     LOOK_AT_EASE_SPEEDING_UP
 };
 
 typedef s32 LookAtEase;
 
+// The sizes of Lakitu's image and his trail's, with header and palette
 #define LAKITU_IMAGE_BUFFER_SIZE 0x608
 #define LAKITU_TRAIL_IMAGE_BUFFER_SIZE 0xC08
 
 #define LAKITU_TRAIL_SEGMENT_COUNT 40
 
+// A 48x432 CI8 image of the letters, one above the next
 #define ASSET_LOGO_LETTER_IMAGES 0x945
+// 152x78 CI8
 #define ASSET_LOGO_CLUB_IMAGE 0x946
+// 24x24 CI8
 #define ASSET_LOGO_MARIO_IMAGE 0x94B
+// A 64x192 CI8 image of three golf balls
 #define ASSET_LOGO_BALL_IMAGES 0x94E
+// The sizes of those images, with their headers and palettes
 #define LOGO_LETTER_IMAGES_BUFFER_SIZE 0x5308
 #define LOGO_CLUB_IMAGE_BUFFER_SIZE 0x3058
 #define LOGO_MARIO_IMAGE_BUFFER_SIZE 0x448
 #define LOGO_BALL_IMAGES_BUFFER_SIZE 0x3208
 
+// "MARIO GOLF"
 #define LOGO_LETTER_COUNT 9
 
+// The letters of "MARIO GOLF", left to right
 enum LogoLetterIndex {
     LOGO_LETTER_M,
     LOGO_LETTER_A,
@@ -176,8 +210,10 @@ enum LogoLetterIndex {
 
 typedef s32 LogoLetterIndex;
 
+// Where a letter starts, off the screen
 #define LOGO_LETTER_HIDDEN (-1000)
 
+// Where Lakitu drops each letter, on the screen
 #define LOGO_M_DROP_X 57
 #define LOGO_A_DROP_X 81
 #define LOGO_R_DROP_X 112
@@ -187,6 +223,7 @@ typedef s32 LogoLetterIndex;
 #define LOGO_SECOND_O_DROP_X 220
 #define LOGO_L_DROP_X 242
 #define LOGO_F_DROP_X 265
+// Where each letter ends up once the logo shrinks, on the screen
 #define LOGO_M_SHRUNK_X 86
 #define LOGO_A_SHRUNK_X 104
 #define LOGO_R_SHRUNK_X 125
@@ -196,6 +233,7 @@ typedef s32 LogoLetterIndex;
 #define LOGO_SECOND_O_SHRUNK_X 204
 #define LOGO_L_SHRUNK_X 220
 #define LOGO_F_SHRUNK_X 234
+// Each letter's depth, which decides which letters overlap which
 #define LOGO_M_DEPTH 8
 #define LOGO_A_DEPTH 12
 #define LOGO_R_DEPTH 16
@@ -206,17 +244,19 @@ typedef s32 LogoLetterIndex;
 #define LOGO_L_DEPTH 40
 #define LOGO_F_DEPTH 44
 
+// What a logo letter is doing
 enum LogoLetterState {
-    LOGO_LETTER_WAITING,
-    LOGO_LETTER_FALLING,
-    LOGO_LETTER_SQUASHING,
-    LOGO_LETTER_SQUASHED,
-    LOGO_LETTER_STRETCHING,
+    LOGO_LETTER_WAITING, // For Lakitu to drop it
+    LOGO_LETTER_FALLING, // Or rising after a bounce, and growing
+    LOGO_LETTER_SQUASHING, // Flattening against the ground
+    LOGO_LETTER_SQUASHED, // Holding flat
+    LOGO_LETTER_STRETCHING, // Springing back up
     LOGO_LETTER_LANDED = 9
 };
 
 typedef s32 LogoLetterState;
 
+// f_OpeningShotDashCount's starting value, and the most it can be
 #define OPENING_SHOT_DASH_COUNT_MAX 200
 
 void DrawNameLogos(Gfx **displayListHead);
@@ -227,6 +267,8 @@ void DrawOpeningBurst(Gfx **displayListHead);
 void DrawOpeningShotBall(Gfx **displayListHead);
 void DrawOpeningSparks(Gfx **displayListHead);
 
+// The script plays most of its sounds on the next of these channels in turn,
+// so that each can overlap the last few
 #define ROTATING_SOUND_CHANNEL_COUNT 11
 
 void LoadOpeningShotBall(void);
@@ -236,10 +278,14 @@ void LoadOpeningImpactLines(void);
 void EaseOpeningLookAt(void);
 void LoadOpeningBall(OpeningBallImage image, s32 slot);
 
+// The larger of the images in f_OpeningEffectImage, the 64x64 CI8 impact
+// lines with their header and palette
 #define OPENING_EFFECT_IMAGE_SIZE 0x1208
 
+// The opening's sparks, which fan out from a point and slow down
 #define SPARK_COUNT 20
 
+// Which of a pair of sounds is playing, or none
 enum AmbientSoundChoice {
     AMBIENT_SOUND_NONE,
     AMBIENT_SOUND_FIRST,
@@ -248,19 +294,21 @@ enum AmbientSoundChoice {
 
 typedef s32 AmbientSoundChoice;
 
+// What the sparks are doing
 enum SparksState {
     SPARKS_HIDDEN,
-    SPARKS_STARTING,
+    SPARKS_STARTING, // Set elsewhere to start the sparks
     SPARKS_FLYING
 };
 
 typedef s32 SparksState;
 
+// What the title logo as a whole is doing
 enum LogoState {
     LOGO_DROPPING_LETTERS,
-    LOGO_CLUB_STARTING,
-    LOGO_CLUB_CIRCLING,
-    LOGO_CLUB_SPINNING,
+    LOGO_CLUB_STARTING, // The last letter has been dropped
+    LOGO_CLUB_CIRCLING, // Spiraling in to the letters, spinning
+    LOGO_CLUB_SPINNING, // In place, until it turns upright
     LOGO_SHINING,
     LOGO_SHRINK_STARTING,
     LOGO_SHRINKING,
@@ -269,31 +317,39 @@ enum LogoState {
 
 typedef s32 LogoState;
 
+// How the screen fade behind the logo follows the logo
 enum LogoFadeStage {
     LOGO_FADE_NONE,
-    LOGO_FADE_GRAYING,
-    LOGO_FADE_GRAY,
+    LOGO_FADE_GRAYING, // Starts as the first letter is dropped
+    LOGO_FADE_GRAY, // Until the shine starts
     LOGO_FADE_WHITENING,
-    LOGO_FADE_WHITE,
+    LOGO_FADE_WHITE, // Until the logo shrinks
     LOGO_FADE_LOGO_OUT
 };
 
 typedef s32 LogoFadeStage;
 
+// The shine's frames. Counting starts after the first, so the first shown
+// frame is never the limit.
 #define LOGO_SHINE_FIRST_FRAME 20
 #define LOGO_SHINE_FIRST_SHOWN_FRAME 4
 #define LOGO_SHINE_LAST_SHOWN_FRAME 36
 #define LOGO_SHINE_LAST_FRAME 64
 
+// The club's image is drawn in six strips
 #define LOGO_CLUB_STRIP_COUNT 6
 
+// A 64x64 CI8 image of a plain golf ball
 #define ASSET_SHOT_BALL_IMAGE 0x939
 
+// The golf balls with faces, as f_OpeningBallAssets lists them
 #define ASSET_MARIO_BALL_IMAGE 0x901
 #define ASSET_DONKEY_KONG_BALL_IMAGE 0x902
 #define ASSET_YOSHI_BALL_IMAGE 0x903
 #define ASSET_LUIGI_BALL_IMAGE 0x92B
 
+// The character name logos: 160x32 CI8 images, but for Baby Mario's, 216
+// wide, and Donkey Kong's, 256 wide
 #define ASSET_MARIO_NAME_LOGO 0x904
 #define ASSET_BABY_MARIO_NAME_LOGO 0x905
 #define ASSET_DONKEY_KONG_NAME_LOGO 0x906
@@ -302,19 +358,28 @@ typedef s32 LogoFadeStage;
 #define ASSET_PLUM_NAME_LOGO 0x90A
 #define ASSET_YOSHI_NAME_LOGO 0x90B
 
+// f_BurstFrame counts up before each frame is drawn, so it starts one early
 #define BURST_NOT_STARTED (-1)
 #define LAKITU_TRAIL_START_ALPHA 220
+// How fast the look-at point first eases, before it speeds up
 #define LOOK_AT_START_EASE_RATE 0.05f
 #define LOGO_FADE_FIRST_FRAMES_LEFT 63
 #define LOGO_CLUB_SPIN_FRAMES_MIN 40
+// Where the club starts its spiral, in pixels and degrees
 #define LOGO_CLUB_START_ORBIT_RADIUS 240.0f
 #define LOGO_CLUB_START_ORBIT_ANGLE 330.0f
 #define LOGO_CLUB_START_UNUSED_ANGLE 180.0f
+// A full turn, which the club spins back down from
 #define LOGO_CLUB_START_ANGLE 360.0f
 
+// Written but never read
 static s32 f_LastPlacedSlotIndex = 0;
+// The frames since the opening started, after which it ends itself
 static s32 f_OpeningFrameCount = 0;
+// Set once the title logo starts forming. The opening can no longer be skipped
+// after that, and it ends without the confirm sound.
 static Boolean f_HasLogoStarted = FALSE;
+// The channel for the script's next sound
 static SoundChannel f_OpeningSoundChannel = 0;
 static s32 f_LogoClubPosition[AXIS_COUNT] = {0, 2300, 32};
 static f32 f_LogoClubOrbitRadius = LOGO_CLUB_START_ORBIT_RADIUS;
@@ -330,7 +395,9 @@ static s32 f_AlternatingSoundSecondLength = 100;
 static s32 f_RepeatingSoundLength = 60;
 static s32 f_RandomSoundFirstLength = 30;
 static s32 f_RandomSoundSecondLength = 60;
+// The opening script's current scene
 static s32 f_OpeningScene = 0;
+// The frames left before the opening's current scene moves on
 static s32 f_OpeningSceneFramesLeft = 0;
 static OpeningNameLogo f_OpeningNameLogos[OPENING_NAME_LOGO_COUNT] = {
     {ASSET_MARIO_NAME_LOGO, 160, 32, 88, 208, 1, 32},
@@ -362,12 +429,17 @@ static WideAssetId f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT] = {
     ASSET_LUIGI_BALL_IMAGE,
     ASSET_SHOT_BALL_IMAGE,
 };
+// Whether Donkey Kong stands in for Yoshi, once he is unlocked
 static Boolean f_IsDonkeyKongShown = FALSE;
 static s32 f_LakituScreenPoint[PLANE_AXIS_COUNT] = {0, 230};
 static Boolean f_IsLakituFlying = FALSE;
 static s32 f_LakituTrailNewestIndex = 0;
 static s32 f_UnusedWordAfterTrailIndex UNUSED = 0;
+// Whether a slot shows the logo ball, the ball in the title logo. Only this
+// slot's flag is ever set, and setting it also has all balls projected to
+// the screen
 static UBoolean8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT] = {FALSE, FALSE};
+// The opening's shots, each starting with its yaw as a binary angle
 static ShotLaunch f_OpeningFirstShot = {-0x3400, 0, 280, 0, 40, -15, 0, SHOT_MODE_NORMAL};
 static ShotLaunch f_OpeningSecondShot =
     {-0x2000, 0, LAUNCH_POWER_MAX, 0, 0, 0, 0, SHOT_MODE_NORMAL};
@@ -376,7 +448,11 @@ static ShotLaunch f_OpeningFourthShot = {-0x2B00, 1, 400, 0, -180, -720, 0, SHOT
 static SparksState f_OpeningSparksState = SPARKS_HIDDEN;
 f32 g_LookAtMarkerScale = 1.0f;
 static Boolean f_IsLookAtMarkerShown = FALSE;
+// 1 while the opening's shot flies, which steps its simulation and lets the
+// second controller's stick move f_UnusedStickOffsetX and Y; 2, which nothing
+// sets, would step it alone; 0 otherwise
 static OpeningShotState f_OpeningShotState = OPENING_SHOT_IDLE;
+// Read by no routine; the same as f_OpeningSecondShot
 static ShotLaunch f_UnusedSecondShotCopy
     UNUSED = {-0x2000, 0, LAUNCH_POWER_MAX, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 static Vtx f_OpeningShotDashVertices[QUAD_VERTEX_COUNT] = {
@@ -385,11 +461,15 @@ static Vtx f_OpeningShotDashVertices[QUAD_VERTEX_COUNT] = {
     {{{15, 0, -1}, 0, {2048, 2048}, {0x00, 0x00, 0xFF, 0x00}}},
     {{{-15, 0, -1}, 0, {2048, 0}, {0xFF, 0x00, 0x00, 0x00}}},
 };
+// The opening's shot path is drawn as the turn's shot preview is, but
+// nothing in the opening sets f_IsOpeningShotPathShown, so it never shows
 static Boolean f_IsOpeningShotPathShown = FALSE;
 static s32 f_OpeningShotDashCount = OPENING_SHOT_DASH_COUNT_MAX;
 static s32 f_OpeningShotPathDashCount = 198;
 static Boolean8 f_IsOpeningShotPathRed = FALSE;
+// Of the dash image, in texels
 static s32 f_OpeningShotPathScroll = 0;
+// Moved by the second controller's stick, and read by no routine
 static f32 f_UnusedStickOffsetX = 0.0f;
 static f32 f_UnusedStickOffsetY = 0.0f;
 static s32 f_OpeningFrameParity = 0;
@@ -458,6 +538,7 @@ static Vtx f_LogoBallMarioVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 1, -1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
+// The logo ball's roll, from its position's change each frame
 static Boolean f_ShouldResetLogoBallRoll = TRUE;
 static s32 f_LogoBallFrame = 0;
 static Boolean f_HasProjectedLogoBallLastPosition = FALSE;
@@ -473,6 +554,7 @@ static Vtx f_ProjectedLogoBallMarioVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 1, -1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
+// The same as the logo ball's roll, kept apart for the projected logo ball
 static Boolean f_ShouldResetProjectedLogoBallRoll = TRUE;
 static s32 f_ProjectedLogoBallFrame = 0;
 static s32 f_ImpactLinesFrame = 0;
@@ -493,17 +575,23 @@ static Vtx f_ShotBallShadowVertices[QUAD_VERTEX_COUNT] = {
 static f32 f_LookAtEaseRate = LOOK_AT_START_EASE_RATE;
 static s32 f_LogoLettersAlpha = OPAQUE_ALPHA;
 static s32 f_LogoClubAlpha = OPAQUE_ALPHA;
+// Counts while the logo shines
 static s32 f_LogoShineFrame = LOGO_SHINE_FIRST_FRAME;
+// How long, at least, the club spins in place
 static s32 f_LogoClubSpinFramesLeft = LOGO_CLUB_SPIN_FRAMES_MIN;
 static LogoState f_LogoState = LOGO_DROPPING_LETTERS;
 static LogoFadeStage f_LogoFadeStage = LOGO_FADE_NONE;
 static s32 f_LogoFadeFramesLeft = LOGO_FADE_FIRST_FRAMES_LEFT;
+// Across, then up
 static Vec2 f_LogoClubScale = {1.0f, 1.0f};
+// In degrees
 static Degrees f_LogoClubAngle = LOGO_CLUB_START_ANGLE;
 static Degrees f_LogoClubOrbitAngle = LOGO_CLUB_START_ORBIT_ANGLE;
 static f32 f_UnusedFloatAfterClubOrbit UNUSED = 0.0f;
+// Its sine is never used
 static Degrees f_LogoClubUnusedAngle = LOGO_CLUB_START_UNUSED_ANGLE;
 static Degrees f_LogoClubWobbleAngle = 0.0f;
+// The top and bottom halves of a letter
 static Vtx f_LogoLetterVertices[2][QUAD_VERTEX_COUNT] = {
     {
         {{{-24, 48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -564,6 +652,7 @@ static Vtx f_OpeningSparkVertices[TRIANGLE_VERTEX_COUNT] = {
 
 static u8 f_UnusedBufferBeforeCueSlot[0x10] UNUSED;
 static s32 f_CueSlotIndex;
+// Where the shot ball was when a scene's shot hit, for its drop and clumps
 static CoursePoint f_OpeningShotImpactPoint;
 
 static u8 f_UnusedBufferBeforeMarkerMatrices[0x80] UNUSED;
@@ -580,6 +669,7 @@ static Mtx f_LogoBallMarioOffset;
 static u8 f_UnusedBufferBeforeBallRoll[16] UNUSED;
 static Mat4 f_LogoBallRoll;
 static u8 f_UnusedBytesAfterBallRoll[4] UNUSED;
+// The current projected ball's position and rectangle on the screen
 static Vec3 f_ProjectedBallPosition;
 static s32 f_ProjectedBallLeft;
 static s32 f_ProjectedBallTop;
@@ -595,6 +685,7 @@ static Mtx f_ProjectedLogoBallMarioScale;
 static Mtx f_ProjectedLogoBallMarioOffset;
 static u8 f_UnusedBufferBeforeProjectedRoll[16] UNUSED;
 static Mat4 f_ProjectedLogoBallRoll;
+// 1 when the ball's size is odd, for the pixel that halving it loses
 static s32 f_ProjectedBallExtraPixel;
 static Vec3 f_ShotBallPosition;
 static u8 f_UnusedBytesAfterShotBall[8] UNUSED;
@@ -606,8 +697,9 @@ static Mtx f_LogoClubTranslations[DRAW_BUFFER_COUNT];
 static Mtx f_LogoClubScalings[DRAW_BUFFER_COUNT];
 static Mtx f_LogoClubRotations[DRAW_BUFFER_COUNT];
 static u8 f_UnusedBytesAfterClubRotations[8] UNUSED;
+// While the logo shrinks, each frame's moves, in pixels
 static s32 f_LogoLetterSteps[LOGO_LETTER_COUNT];
-static s32 f_LogoLetterRises[2];
+static s32 f_LogoLetterRises[2]; // Up; the other letters', then the L's
 static f32 f_LogoScaleStep;
 static s32 f_LogoClubStepX;
 static s32 f_LogoClubStepY;
@@ -617,24 +709,31 @@ static Vec2 f_OpeningSparkVelocities[SPARK_COUNT];
 static f32 f_OpeningSparkScale;
 static s32 f_OpeningSparkFramesLeft;
 static Mtx f_OpeningSparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
+// The channels of two sounds that keep playing into the title screen: Donkey
+// Kong's, when he is shown, and the one the last scene starts
 static SoundChannel f_DonkeyKongSoundChannel;
 static SoundChannel f_ClosingSoundChannel;
 static u8 f_NameSlotImages[OPENING_NAME_SLOT_COUNT][OPENING_NAME_LOGO_SIZE];
 static s32 f_NameSlotLogoIndices[OPENING_NAME_SLOT_COUNT];
 static s32 f_NameSlotSteps[OPENING_NAME_SLOT_COUNT];
 static Boolean f_IsNameSlotShown[OPENING_NAME_SLOT_COUNT];
+// The impact lines' image, and later the burst's
 static u8 f_OpeningEffectImage[OPENING_EFFECT_IMAGE_SIZE];
 static u8 f_ShotBallImage[OPENING_BALL_IMAGE_SIZE];
 static u8 f_OpeningBallImages[OPENING_BALL_SLOT_COUNT][OPENING_BALL_IMAGE_SIZE];
 
 static Vec3 f_OpeningBallPositions[OPENING_BALL_SLOT_COUNT];
+// The share of its distance that the logo ball closes each frame
 static f32 f_LogoBallFollowRate;
 
+// Read by no routine; 2 objects, as one would be aligned past its start
 static u8 f_UnusedBytesAfterFollowRate[0x4] UNUSED;
 static u8 f_UnusedBufferAfterFollowRate[0x10] UNUSED;
 
 static u8 f_LogoBallImages[LOGO_BALL_IMAGES_BUFFER_SIZE];
+// A 32x32 CI8 image with its header and palette
 static u8 f_LakituImage[LAKITU_IMAGE_BUFFER_SIZE];
+// A 48x128 I4 image with its header
 static u8 f_LakituTrailImage[LAKITU_TRAIL_IMAGE_BUFFER_SIZE];
 static Mtx f_LakituTrailMatrices[LAKITU_TRAIL_SEGMENT_COUNT];
 static Vec2 f_LakituTrailStart;
@@ -644,21 +743,29 @@ static u8 f_LogoLetterImages[LOGO_LETTER_IMAGES_BUFFER_SIZE];
 static u8 f_LogoClubImage[LOGO_CLUB_IMAGE_BUFFER_SIZE];
 static ScreenPosition f_LogoLetters[LOGO_LETTER_COUNT];
 static LogoLetterState f_LogoLetterStates[LOGO_LETTER_COUNT];
-static f32 f_LogoLetterSpeeds[LOGO_LETTER_COUNT];
+static f32 f_LogoLetterSpeeds[LOGO_LETTER_COUNT]; // Down, in pixels a frame
+// Each logo letter's scale across and up
 static Vec2 f_LogoLetterScales[LOGO_LETTER_COUNT];
+// Frames left in a letter's squashing, squashed or stretching state
 static s32 f_LogoLetterSquashFrames[LOGO_LETTER_COUNT];
 static u8 f_LogoShineImage[SHINE_IMAGE_BUFFER_SIZE];
 static Vec3 f_OpeningSparksOrigin;
 static u8 f_UnusedBufferAfterSparksOrigin[12] UNUSED;
+// The buffers of character slots 1 and 2
 static u8 *f_OpeningCharacterBuffers[2];
 static u8 f_UnusedBytesAfterCharacterBuffers[4] UNUSED;
 static void *f_OpeningBillboardHeap;
 static Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT][OPENING_SHOT_DASH_COUNT_MAX];
 
+// Not static: the original left these to the linker's common block
 CameraEditor g_CameraEditor;
+// The cue that the opening's script has given for setting up its characters,
+// from 0 to OPENING_CUE_COUNT - 1, or OPENING_CUE_INVALID,
+// OPENING_CUES_FINISHED or OPENING_CUE_DONE
 OpeningCue f_OpeningCue;
 BallSimulation f_OpeningShotSimulation;
 
+// Moves f_OpeningSoundChannel on to the next of the rotating channels
 void AdvanceOpeningSoundChannel(void) {
     f_OpeningSoundChannel++;
     if (f_OpeningSoundChannel == ROTATING_SOUND_CHANNEL_COUNT) {
@@ -667,10 +774,14 @@ void AdvanceOpeningSoundChannel(void) {
 }
 
 #define LOGO_CLUB_SOUND_CHANNEL 12
+// The club sounds quieter the wider it orbits, losing this much volume per
+// pixel of radius
 #define LOGO_CLUB_SOUND_LOUDEST_VOLUME 48
 #define LOGO_CLUB_SOUND_FADE_RATE 0.2f
+// The pan moves one step for every two pixels from the screen's center
 #define LOGO_CLUB_PIXELS_PER_PAN_STEP 2
 
+// Plays the title logo's club striking while it swings round
 void PlayLogoClubSound(void) {
     if (f_IsLogoClubSwinging) {
         PlaySoundWithEffects(
@@ -685,17 +796,27 @@ void PlayLogoClubSound(void) {
     }
 }
 
+// The channel and pan of each of the opening's ambient sounds
 #define ALTERNATING_SOUND_CHANNEL 13
 #define REPEATING_SOUND_CHANNEL 14
 #define RANDOM_SOUND_CHANNEL 15
 #define ALTERNATING_SOUND_PAN 0x9D
 #define REPEATING_SOUND_PAN 0x75
 #define RANDOM_SOUND_PAN 0x61
+// How much quieter the sounds are for each unit of camera distance
 #define AMBIENT_SOUND_FADE_RATE 0.5f
+// Out of the values that rand() & AMBIENT_SOUND_CHANCE_MASK can give
 #define AMBIENT_SOUND_CHANCE_MASK 100
 #define AMBIENT_SOUND_CHANCE 80
+// The random sound picks from four choices, two of which are silence
 #define RANDOM_SOUND_CHOICE_MASK 3
 
+// Plays the opening's ambient sounds while f_AreAmbientSoundsOn is set,
+// more quietly the further the camera is from its look-at point.
+//
+// Each kind of sound has a timer. Once its timer runs out, and while the
+// camera is near enough to hear it, the sound may start again; the timer
+// then counts down for the length of the sound that started.
 void PlayOpeningAmbientSounds(void) {
     if (f_AreAmbientSoundsOn == TRUE) {
         if ((u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE) < SOUND_FULL_SCALE) {
@@ -802,7 +923,6 @@ void PlayOpeningAmbientSounds(void) {
 }
 
 void LoadOpeningLogo(void);
-
 #define FIRST_ALLOCATED_CHARACTER_SLOT 1
 #define DEPTH_BUFFER_CHARACTER_SLOT 3
 
@@ -844,6 +964,7 @@ void FreeOpening(void) {
     FreeEffectImages();
 }
 
+// The caller passes the frame parity too, which goes unused
 void DrawOpeningCharacters(
     CameraMatrices *matrices,
     Gfx **displayListHead,
@@ -858,6 +979,8 @@ void DrawOpeningCharacters(
     *displayListHead = g_DisplayListHead;
 }
 
+// Steps the opening's shot through its simulation, as BuildShotPreview does,
+// and stretches a dash between each pair of positions along its path
 void BuildOpeningShotPath(void) {
     CoursePoint start;
     Mat4 dash;
@@ -904,6 +1027,7 @@ void BuildOpeningShotPath(void) {
     }
 }
 
+// Draws the dashes that BuildOpeningShotPath placed along the shot's path
 void DrawOpeningShotPath(CameraMatrices *matrices UNUSED) {
     s32 step;
 
@@ -998,20 +1122,27 @@ void DrawOpeningShotPath(CameraMatrices *matrices UNUSED) {
     gDPPipeSync(g_DisplayListHead++);
 }
 
+// The animations the opening plays on its characters, numbered per model
 #define MARIO_TEE_SHOT_ANIMATION 0x10
 #define MARIO_CHEER_ANIMATION 0x11
 #define MARIO_WALK_ANIMATION 0x12
+// Stops beside a ball and looks down at it
 #define MARIO_REACH_BALL_ANIMATION 0x13
+// Runs off as Peach waves
 #define MARIO_RUN_ANIMATION 0x14
+// Bends to look at a ball as Peach walks up
 #define MARIO_INSPECT_BALL_ANIMATION 0x15
 #define MARIO_STAND_AT_BALL_ANIMATION 0x16
+// Turns from that ball to look up
 #define MARIO_LOOK_UP_ANIMATION 0x17
 #define MARIO_SCRATCH_HEAD_ANIMATION 0x18
+// Joins the others in the last scene
 #define MARIO_GATHER_ANIMATION 0x19
 #define PEACH_CHEER_ANIMATION 0x10
 #define PEACH_TEE_SHOT_ANIMATION 0x11
 #define PEACH_WALK_ANIMATION 0x12
 #define PEACH_WAVE_ANIMATION 0x13
+// Walks up to Mario at the ball
 #define PEACH_APPROACH_ANIMATION 0x14
 #define PEACH_INSPECT_BALL_ANIMATION 0x15
 #define PEACH_COVER_MOUTH_ANIMATION 0x16
@@ -1023,14 +1154,19 @@ void DrawOpeningShotPath(CameraMatrices *matrices UNUSED) {
 #define LUIGI_CHEER_ANIMATION 0x10
 #define LUIGI_TEE_SHOT_ANIMATION 0x11
 #define LUIGI_WALK_ANIMATION 0x12
+// Runs up looking for his ball, which went out of bounds
 #define LUIGI_SEARCH_ANIMATION 0x13
 #define LUIGI_DISMAY_ANIMATION 0x14
+// Each runs in carrying Baby Mario, who hops down
 #define YOSHI_CARRY_ANIMATION 0x10
 #define DONKEY_KONG_CARRY_ANIMATION 0x11
 #define BABY_MARIO_RIDE_YOSHI_ANIMATION 0x10
 #define BABY_MARIO_RIDE_DONKEY_KONG_ANIMATION 0x11
 #define TOAD_WAVE_FLAG_ANIMATION 0x10
 
+// Places the cue slot's character, leaving the point's height unset. It is a
+// plain block, as the gbi macros are; as a do-while (0) loop,
+// UpdateOpeningCharacters has 28 words differing, 10 in shape.
 #define PlaceCueCharacter(point, x, z, heading) \
     { \
         (point)[0] = (x); \
@@ -1038,6 +1174,13 @@ void DrawOpeningShotPath(CameraMatrices *matrices UNUSED) {
         PlaceCharacter(f_CueSlotIndex, (point), DegreesToRadians(heading)); \
     }
 
+// Sets up the opening's characters for the cue that its script has given, and
+// returns whether the cues have finished.
+//
+// OPENING_CUE_PEACH_CHEER and OPENING_CUE_LUIGI_DISMAY step on to the next
+// cue instead of being marked done, which sets up its characters on the next
+// frame. When OPENING_CUE_PEACH_CHEER places its character, though, it steps
+// from OPENING_CUE_DONE to an invalid cue.
 Boolean UpdateOpeningCharacters(void) {
     CoursePoint marioTeeShotPoint;
     CoursePoint peachCheerPoint;
@@ -1388,61 +1531,94 @@ Boolean UpdateOpeningCharacters(void) {
     return f_OpeningCue == OPENING_CUES_FINISHED;
 }
 
+// The opening's scenes. Each run of shots starts at a multiple of ten, as
+// the debug display prints them, and steps through the numbers after it.
 #define OPENING_SCENE_MARIO_DRIVE 0
 #define OPENING_SCENE_MARIO_DRIVE_CHEERS 20
+// No scene leads to this one
 #define OPENING_SCENE_UNREACHED 30
+// Follows Mario's ball as Luigi calls out
 #define OPENING_SCENE_MARIO_DRIVE_FLIGHT 40
 #define OPENING_SCENE_PEACH_DRIVE 50
+// Sets up the shot of Plum that the next scene opens on
 #define OPENING_SCENE_PLUM_CHEER 60
+// Opens on Plum cheering, then follows Peach's ball
 #define OPENING_SCENE_PEACH_DRIVE_FLIGHT 70
 #define OPENING_SCENE_PLUM_DRIVE 80
 #define OPENING_SCENE_MARIO_CLOSE_UP 90
 #define OPENING_SCENE_MARIO_CHEER 100
+// Luigi's shot and its flight into the trees
 #define OPENING_SCENE_LUIGI_DRIVE 110
 #define OPENING_SCENE_PEACH_PLUM_WALK 120
 #define OPENING_SCENE_MARIO_LUIGI_WALK 130
 #define OPENING_SCENE_MARIO_FINDS_BALL 140
+// Peach waves as Mario runs off
 #define OPENING_SCENE_PEACH_WAVE 150
+// A ball rolls in near Peach and Mario
 #define OPENING_SCENE_BALL_ROLLS_IN 160
+// Peach walks up to Mario at a ball with a face on it
 #define OPENING_SCENE_PEACH_APPROACH 170
+// They look over the ball with the face, and Mario looks up
 #define OPENING_SCENE_BALL_INSPECTION 180
+// Another ball flies in overhead
 #define OPENING_SCENE_INCOMING_BALL 190
+// That ball lands, then Yoshi or Donkey Kong runs in carrying Baby Mario
 #define OPENING_SCENE_BABY_MARIO_ARRIVAL 200
+// Mario scratches his head, then a star wipe
 #define OPENING_SCENE_MARIO_PUZZLED 210
 #define OPENING_SCENE_LUIGI_SEARCH 220
+// Luigi's ball, then Toad's out-of-bounds flag
 #define OPENING_SCENE_OUT_OF_BOUNDS 230
 #define OPENING_SCENE_TOAD_FLAG 240
+// Luigi's dismay, then everyone together as Lakitu brings the logo
 #define OPENING_SCENE_GATHERING 250
 
+// Mario shows on the logo ball from this scene on, whenever fewer than this
+// many of a scene's frames are left
 #define OPENING_SCENE_LOGO_BALL_MARIO 200
 #define LOGO_BALL_MARIO_FRAMES_LEFT 98
 
 #define LOGO_BALL_SLOT 1
 
+// The value of f_OpeningFrameCount at which the opening ends itself
 #define OPENING_FRAME_LIMIT 9000
 
+// The first channel after the rotating ones
 #define CLOSING_SOUND_CHANNEL ROTATING_SOUND_CHANNEL_COUNT
 
 void AnimateNameLogos(void);
 void LoadNameLogo(s32 logoIndex, s32 slot);
 void MoveLakitu(void);
 
+// Fades the screen to white when a button skips the rest of the opening
 #define OPENING_SCENE_SKIPPED 998
 #define SKIP_FADE_WHITE_LEVEL 0xFF
 #define SKIP_FADE_FRAME_COUNT 4
+// Any controller's A, B or Start skips; the debug build takes only the first's
+// A or Start
 #define SKIP_BUTTONS (A_BUTTON | B_BUTTON | START_BUTTON)
 #define DEBUG_SKIP_BUTTONS (A_BUTTON | START_BUTTON)
 #define OPENING_DEBUG_SKIP_CONTROLLER 0
+// In the debug build, this controller's R ends the scene's wait
 #define OPENING_SCENE_CONTROLLER 1
+// In the debug build, this controller's A starts the camera editor and B
+// leaves it
 #define OPENING_EDITOR_CONTROLLER 2
 #define UNUSED_STICK_OFFSET_SCALE 0.002f
+// The channels that the script's sounds play on. The ambient sounds' channels
+// follow, and are left playing when the opening ends
 #define SCRIPT_SOUND_CHANNEL_COUNT ALTERNATING_SOUND_CHANNEL
+// Where the debug build prints the frame count, the scene and its frames left
 #define FRAME_COUNT_TEXT_COLUMN 30
 #define FRAME_COUNT_TEXT_ROW 26
 #define SCENE_TEXT_COLUMN 4
 #define FRAMES_LEFT_TEXT_COLUMN 29
 #define SCENE_TEXT_ROW 2
 
+// Runs the opening's script: steps through its scenes, moving the camera,
+// setting up shots and cues, and playing sounds on given frames. Any button
+// skips to the end, and the debug controllers can stop the script to edit the
+// camera.
 void UpdateOpening(void) {
     Vec3 point;
     Vec3 logoBallPoint;
@@ -2226,6 +2402,7 @@ void UpdateOpening(void) {
                     f_OpeningCue = OPENING_CUE_PEACH_WAVE;
                     g_HoleSetup.conditions.lightPitch = 0x1000;
 
+                    // Stored as a signed value, as the original does
                     *(s16 *)&g_HoleSetup.conditions.lightYaw = -0x7800;
                     f_OpeningScene++;
                 }
@@ -2778,6 +2955,7 @@ void UpdateOpening(void) {
                         PlaySound(SOUND_AMBIENT_ALTERNATING_FIRST, f_OpeningSoundChannel, 0x60);
                         AdvanceOpeningSoundChannel();
 
+                    // fallthrough
                     case 50:
                         PlaySound(SOUND_AMBIENT_REPEATING, f_OpeningSoundChannel, 0x60);
                         AdvanceOpeningSoundChannel();
@@ -2989,6 +3167,7 @@ void UpdateOpening(void) {
                         );
                         AdvanceOpeningSoundChannel();
 
+                    // fallthrough
                     case 6:
                         PlaySoundWithEffects(
                             SOUND_FLAG_SWISH,
@@ -3269,7 +3448,11 @@ void UpdateOpening(void) {
     PlayOpeningAmbientSounds();
 }
 
+// Draws the camera editor's look-at marker, the characters and the opening's
+// overlays
 void DrawOpening(CameraMatrices *matrices, Gfx **displayListHead) {
+    // Unused; they give the stack frame the original's size; without any one of
+    // them 80 words differ
     Mat4 unusedMatrix UNUSED;
     Vec3 unusedPoints[4] UNUSED;
     Gfx *gfx = *displayListHead;
@@ -3323,6 +3506,9 @@ void DrawOpening(CameraMatrices *matrices, Gfx **displayListHead) {
     }
 
     DrawOpeningCharacters(matrices, &gfx, f_OpeningFrameParity);
+    // DrawOpeningShotPath draws through g_DisplayListHead, so the list goes to
+    // it through that global rather than through displayListHead. This works
+    // because DrawGame, its only caller, passes &g_DisplayListHead.
     g_DisplayListHead = gfx;
     DrawOpeningShotPath(matrices);
     gfx = g_DisplayListHead;
@@ -3338,6 +3524,7 @@ void DrawOpening(CameraMatrices *matrices, Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Loads name logo logoIndex into slot and resets the slot
 void LoadNameLogo(s32 logoIndex, s32 slot) {
     EncodedAsset asset;
 
@@ -3348,15 +3535,20 @@ void LoadNameLogo(s32 logoIndex, s32 slot) {
     f_IsNameSlotShown[slot] = FALSE;
 }
 
+// The logo shown in the name slot SLOT
 #define SLOT_LOGO f_OpeningNameLogos[f_NameSlotLogoIndices[slot]]
 #define NAME_LOGO_STRIP_COUNT 4
+// The rows that a strip of a logo's image holds, and their log2
 #define NAME_LOGO_STRIP_ROWS 8
 #define NAME_LOGO_STRIP_ROWS_SHIFT 3
 
+// Draws the shown name logos in four strips each. Until a logo flips back up,
+// its strips are drawn in reverse order with their rows mirrored, which turns
+// it upside down.
 void DrawNameLogos(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    s32 xEdges[2];
-    s32 yEdges[NAME_LOGO_STRIP_COUNT + 1];
+    s32 xEdges[2]; // Left and right
+    s32 yEdges[NAME_LOGO_STRIP_COUNT + 1]; // Top to bottom of each strip
     s32 strip;
     s32 slot;
     Gfx *cycleTypeCommand;
@@ -3367,6 +3559,7 @@ void DrawNameLogos(Gfx **displayListHead) {
         if (f_IsNameSlotShown[slot]) {
             gDPPipeSync(gfx++);
             gDPPipeSync(gfx++);
+            // The original takes the command's slot first, which orders the stack
             cycleTypeCommand = gfx++;
             gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
             gDPPipeSync(gfx++);
@@ -3492,6 +3685,8 @@ void DrawNameLogos(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+// Steps the shown name logos' animations: each unfolds, flips over, then
+// stays
 void AnimateNameLogos(void) {
     s32 slot;
 
@@ -3549,6 +3744,7 @@ void AnimateNameLogos(void) {
     }
 }
 
+// Loads ball image ballIndex into slot and resets the slot
 void LoadOpeningBall(OpeningBallImage image, s32 slot) {
     EncodedAsset asset;
 
@@ -3558,31 +3754,48 @@ void LoadOpeningBall(OpeningBallImage image, s32 slot) {
     f_OpeningBallScales[slot] = OPENING_BALL_NORMAL_SCALE;
 }
 
+// f_LogoBallImages holds three 64x64 frames of the ball rolling
 #define LOGO_BALL_FRAME_COUNT 3
 #define LOGO_BALL_FRAME_SIZE (OPENING_BALL_IMAGE_WIDTH * OPENING_BALL_IMAGE_WIDTH)
+// The logo ball shows its next frame each time it rolls further than this
 #define LOGO_BALL_FRAME_ANGLE 4.0f
+// The logo ball's starting turn, in degrees
 #define LOGO_BALL_START_ROLL (-40.0f)
 #define LOGO_BALL_START_PITCH 0.0f
 #define LOGO_BALL_START_YAW (-30.0f)
 #define LOGO_MARIO_IMAGE_SIZE 24
 
+// Every ball model is scaled by this much
 #define OPENING_BALL_MODEL_SCALE 0.7f
+// How far below the ground an in-air or large ball's shadow sits
 #define OPENING_BALL_IN_AIR_SHADOW_DROP 0.25f
 #define OPENING_BALL_LARGE_SHADOW_DROP 1.0f
 #define PROJECTED_BALL_LARGE_SHADOW_DROP 2.0f
+// How far above the ground a large ball sits
 #define OPENING_BALL_LARGE_LIFT 0.5f
+// The Mario image turns about a point this far below the logo ball
 #define LOGO_BALL_MARIO_DROP 1.5f
 #define PROJECTED_LOGO_BALL_MARIO_DROP 1.7f
 #define LOGO_BALL_MARIO_SCALE 0.55f
 #define PROJECTED_LOGO_BALL_MARIO_SCALE 0.6f
+// The Mario image's offset from the point it turns about, before scaling
 #define LOGO_BALL_MARIO_OFFSET_Y (-0.3f)
 #define PROJECTED_LOGO_BALL_MARIO_OFFSET_Y (-0.38f)
 
+// A projected ball's width on the screen, in pixels, for each step of scale
 #define PROJECTED_BALL_WIDTH_PER_SCALE 1.5f
+// So that it stays in sight, an in-air ball is at least this tall
 #define PROJECTED_BALL_HALF_SIZE_MIN 2
+// Balls this big or bigger aren't drawn
 #define PROJECTED_BALL_HALF_SIZE_LIMIT 256
+// The balls other than the logo ball are drawn this many pixels lower
 #define PROJECTED_BALL_DROP 2
 
+// Draws the balls in the opening's ball slots, each with a shadow on the
+// ground. Normally a ball is a billboard in the scene, drawn in strips. While
+// the logo ball is out, every ball is instead projected to the screen and
+// drawn as texture rectangles. The logo ball rolls with its movement, with
+// the Mario image turning on it.
 void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
     Vec3 movement;
     Mat4 turn;
@@ -3852,6 +4065,8 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                     f_LogoBallLastPosition[AXIS_X] = f_OpeningBallPositions[slot][AXIS_X];
                     f_LogoBallLastPosition[AXIS_Y] = f_OpeningBallPositions[slot][AXIS_Y];
                     f_LogoBallLastPosition[AXIS_Z] = f_OpeningBallPositions[slot][AXIS_Z];
+                    // fabs, in double precision, which GCC narrows to abs.s; fabsf
+                    // here and below gives 44 differing words
                     rollAngle = fabs(rollAngle);
                     if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
                         f_LogoBallFrame++;
@@ -3883,6 +4098,8 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                         f_OpeningBallPositions[slot][AXIS_Z]
                     );
                     gDPPipeSync(gfx++);
+                    // The original takes these two commands' slots in locals of their
+                    // own, which orders the spilled pointers' stack slots
                     cycleTypeCommand = gfx++;
                     gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
                     {
@@ -4404,6 +4621,7 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
     }
 }
 
+// A 64x64 CI8 image of yellow and green lines bursting outwards
 #define ASSET_IMPACT_LINES_IMAGE 0x908
 
 void LoadOpeningImpactLines(void) {
@@ -4413,18 +4631,28 @@ void LoadOpeningImpactLines(void) {
     ReadEncodedAsset(f_OpeningEffectImage, &asset);
 }
 
+// The impact lines' left and bottom edges on the screen, in pixels
 #define IMPACT_LINES_LEFT 206
 #define IMPACT_LINES_BOTTOM 88
+// The 64x64 image loads into texture memory in two strips
 #define IMPACT_LINES_SIZE 64
 #define IMPACT_LINES_STRIP_HEIGHT 32
 #define IMPACT_LINES_STRIP_COUNT 2
+// The lines blink off for a few frames, twice, then stop showing
 #define IMPACT_LINES_FIRST_BLINK_FRAME 3
 #define IMPACT_LINES_SECOND_BLINK_FRAME 9
 #define IMPACT_LINES_BLINK_FRAME_COUNT 3
 #define IMPACT_LINES_FRAME_COUNT 19
+// Whether a frame is outside the blink that starts on blinkFrame
 #define IsOutsideBlink(frame, blinkFrame) \
     ((frame) < (blinkFrame) || (frame) >= (blinkFrame) + IMPACT_LINES_BLINK_FRAME_COUNT)
 
+// Draws blinking impact lines around the burst for a few frames, once
+// f_AreImpactLinesShown is set.
+//
+// Each pipe sync and the RDP state command after it goes through
+// AppendSyncedRdpState, to match: the plain pairs give 16 words differing,
+// none in shape.
 void DrawOpeningImpactLines(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 frame;
@@ -4455,11 +4683,28 @@ void DrawOpeningImpactLines(Gfx **displayListHead) {
             gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_OpeningEffectImage)));
             gDPPipeSync(gfx++);
 
+            // The rows count up from the bottom, so the top strip is row 1
             for (stripIndex = 0, row = IMPACT_LINES_STRIP_COUNT - 1;
                 stripIndex != IMPACT_LINES_STRIP_COUNT;
                 stripIndex++) {
+                // Set on each pass, as the original works out the rectangle's shifted
+                // left and right edges once, outside the loop, and keeps them on the
+                // stack. Written as the constant, the edges fold into the commands,
+                // 342 words differing (32 in shape); set once, at its declaration or
+                // before the loop, 264 (32). The width in a variable set before the
+                // loop swaps the operands of one or, 2 (none)
                 left = IMPACT_LINES_LEFT;
 
+                // The original loads the bottom edge once for both of the strip's
+                // edges, and adds the strip height to the row's offset for the top.
+                // The edge is a variable here, which loop.c moves out of the loop;
+                // the constant written for each edge gives 49 (13). The bottom is
+                // set in two steps and the offset stepped so that loop.c takes
+                // neither edge for an induction variable of the row: the bottom in
+                // one statement is reduced to a counter of its own, 188 (58), and
+                // the top as the edge less the offset plus the height gives 163
+                // (61). The top in two steps as well gives 44 (12), and both edges
+                // worked out from the row without the offset 10 (none)
                 bottomEdge = IMPACT_LINES_BOTTOM;
                 offset = row * IMPACT_LINES_STRIP_HEIGHT;
                 bottom = bottomEdge;
@@ -4498,6 +4743,7 @@ void DrawOpeningImpactLines(Gfx **displayListHead) {
                 );
                 gDPPipeSync(gfx++);
 
+                // Counted down here: in the loop's increment, 2 (none)
                 row--;
             }
 
@@ -4508,6 +4754,7 @@ void DrawOpeningImpactLines(Gfx **displayListHead) {
 
 #define ASSET_LAKITU_IMAGE 0x64B
 
+// Loads Lakitu's images and gathers his trail behind him
 void LoadLakitu(void) {
     EncodedAsset asset;
     s32 pass;
@@ -4518,6 +4765,7 @@ void LoadLakitu(void) {
     OpenEncodedAsset(ASSET_STREAK_IMAGE, &asset);
     ReadEncodedAsset(f_LakituTrailImage, &asset);
 
+    // The game places the trail twice over
     for (pass = 0; pass < 2; pass++) {
         for (segmentIndex = 0; segmentIndex < LAKITU_TRAIL_SEGMENT_COUNT; segmentIndex++) {
             guTranslate(
@@ -4535,17 +4783,22 @@ void LoadLakitu(void) {
 
 #define LAKITU_IMAGE_SIZE 32
 #define LAKITU_DRAWN_SIZE 48
+// Texels a pixel when stretching Lakitu's image to its drawn size, in 5.10
 #define LAKITU_SCALE TexelRunStep(LAKITU_IMAGE_SIZE, LAKITU_DRAWN_SIZE)
+// Segments whose vertices fit in the vertex buffer at once
 #define LAKITU_TRAIL_BATCH_SEGMENT_COUNT 16
 #define LAKITU_TRAIL_DRAWN_SEGMENT_COUNT 31
 #define LAKITU_TRAIL_ROWS_PER_SEGMENT 8
+// Texture coordinates, in 10.5, of the trail's right edge and of a segment
 #define LAKITU_TRAIL_RIGHT_S (TexelCoordinate(STREAK_IMAGE_WIDTH) - 1)
 #define LakituTrailT(segment) TexelCoordinate((segment) * LAKITU_TRAIL_ROWS_PER_SEGMENT)
+// First vertex buffer slot of a segment in the second batch
 #define LakituTrailSecondBatchSlot(segment) \
     (((LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 2) * 2) - \
         (((segment) - LAKITU_TRAIL_BATCH_SEGMENT_COUNT) * 2))
 #define LAKITU_TRAIL_FADE_STEP 4
 
+// Draws Lakitu while he flies, with a fading trail of the places he has been.
 void DrawLakitu(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     Vec3 translation;
@@ -4698,6 +4951,9 @@ void DrawLakitu(Gfx **displayListHead) {
             );
         }
 
+        // The second batch fills the vertex buffer from the end, keeping the
+        // last pair of the first batch in its slots, so the same triangles join
+        // up the rest of the trail.
         for (drawnIndex = LAKITU_TRAIL_BATCH_SEGMENT_COUNT;
             drawnIndex != LAKITU_TRAIL_DRAWN_SEGMENT_COUNT;
             drawnIndex++) {
@@ -4753,13 +5009,18 @@ void DrawLakitu(Gfx **displayListHead) {
     }
 }
 
+// In degrees a frame
 #define LAKITU_TURN_STEP 12
 #define LAKITU_LAST_ANGLE 540
+// In pixels a frame, besides the loops
 #define LAKITU_DRIFT_X 8
 #define LAKITU_DRIFT_Y 2
+// The radii of Lakitu's loops, in pixels
 #define LAKITU_LOOP_RADIUS_X 20.0
 #define LAKITU_LOOP_RADIUS_Y 16.0
 
+// Flies Lakitu across the screen in loops until it has turned through 540
+// degrees
 void MoveLakitu(void) {
     Radians angle;
 
@@ -4775,6 +5036,7 @@ void MoveLakitu(void) {
     }
 }
 
+// A 32x32 CI4 image of a yellow burst
 #define ASSET_BURST_IMAGE 0x93D
 
 void LoadOpeningBurst(void) {
@@ -4784,13 +5046,26 @@ void LoadOpeningBurst(void) {
     ReadEncodedAsset(f_OpeningEffectImage, &asset);
 }
 
+// The burst's corners on the screen, in pixels
 #define BURST_LEFT 227
 #define BURST_TOP 55
 #define BURST_RIGHT 255
 #define BURST_BOTTOM 81
 #define BURST_IMAGE_SIZE 32
+// How many frames the burst shows for, once f_IsBurstShown is set
 #define BURST_FRAME_COUNT 4
 
+// Draws a yellow burst for a few frames, stretched over the burst's corners.
+//
+// The rectangle is a scissored one, as the original divides 0x8000 by the
+// width and height at run time: the clamps in gSPScisTextureRectangle read
+// the steps again, and GCC then keeps the divisions, where with
+// gSPTextureRectangle it folds them into constants and 470 words differ
+// (86 in shape). The width and height are worked out only once the burst
+// is drawn; set where they're declared, 246 words differ (60 in shape).
+// Each pipe sync and the RDP state command after it goes through
+// AppendSyncedRdpState, as in DrawHoleTriangles: plain pairs give 16 words
+// (0 in shape).
 void DrawOpeningBurst(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 left = BURST_LEFT;
@@ -4852,6 +5127,7 @@ void DrawOpeningBurst(Gfx **displayListHead) {
     }
 }
 
+// Loads the image of the ball that the opening's shot sends flying
 void LoadOpeningShotBall(void) {
     EncodedAsset asset;
 
@@ -4859,18 +5135,31 @@ void LoadOpeningShotBall(void) {
     ReadEncodedAsset(f_ShotBallImage, &asset);
 }
 
+// The ball image is drawn in strips that fit in texture memory
 #define SHOT_BALL_IMAGE_SIZE 64
 #define SHOT_BALL_STRIP_HEIGHT 32
 #define SHOT_BALL_STRIP_COUNT 2
+// A strip's rows in 10-bit fixed point, less a little so that its last
+// screen row stays within the strip
 #define SHOT_BALL_STRIP_ROWS_FIXED 0x7FA0
+// Half the ball's width on the screen, in pixels, for each step of scale
 #define SHOT_BALL_HALF_WIDTH_PER_SCALE 2
+// Half the ball's width on the screen at f_ShotBallScale, in pixels
 #define ShotBallHalfWidth() (f_ShotBallScale * SHOT_BALL_HALF_WIDTH_PER_SCALE)
+// The ball is projected this far above the look-at point
 #define SHOT_BALL_LIFT 0.1f
+// Beyond this camera distance, the ball is a fading dot
 #define SHOT_BALL_FAR_DISTANCE 400.0f
 #define SHOT_BALL_DOT_SIZE 3
+// How much alpha the dot loses for each unit of camera distance
 #define SHOT_BALL_FADE_RATE 0.04
+// The shadow's scale for each step of f_ShotBallScale
 #define SHOT_BALL_SHADOW_SCALE 0.5
 
+// Draws the opening's ball while f_ShotBallScale is set: a shadow on the
+// ground below the look-at point, then the ball image above the point in
+// strips, at f_ShotBallScale times the image's size. When the camera is far
+// away, the ball is instead a dot that fades with distance.
 void DrawOpeningShotBall(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     ScreenPoint ballPoint;
@@ -4925,6 +5214,7 @@ void DrawOpeningShotBall(Gfx **displayListHead) {
                 f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE
             );
             gDPPipeSync(gfx++);
+            // The original takes the command's slot first, which orders the stack
             renderModeCommand = gfx++;
             gDPSetRenderMode(renderModeCommand, G_RM_CLD_SURF, G_RM_CLD_SURF2);
             gDPSetCombineLERP(
@@ -5045,6 +5335,9 @@ void DrawOpeningShotBall(Gfx **displayListHead) {
                     G_TX_NOLOD
                 );
                 if (g_CameraEditor.distance > SHOT_BALL_FAR_DISTANCE) {
+                    // Kept in a local, unlike the near branch's, to match:
+                    // ShotBallHalfWidth at each use gives 33 words differing (1 in
+                    // shape), and stripHeight as the local 41 (1)
                     size = ShotBallHalfWidth();
                     left = ballPoint.x - size;
                     right = left + SHOT_BALL_DOT_SIZE;
@@ -5090,6 +5383,7 @@ void DrawOpeningShotBall(Gfx **displayListHead) {
     }
 }
 
+// Eases the camera's look-at point as f_LookAtEaseMode says
 void EaseOpeningLookAt(void) {
     switch (f_LookAtEaseMode) {
         case LOOK_AT_EASE_FAST:
@@ -5145,6 +5439,7 @@ void EaseOpeningLookAt(void) {
     }
 }
 
+// Loads the title logo's images and lines its letters up, off the screen
 void LoadOpeningLogo(void) {
     EncodedAsset asset;
     LogoLetterIndex letterIndex;
@@ -5180,19 +5475,28 @@ void LoadOpeningLogo(void) {
     ReadEncodedAsset(f_LogoShineImage, &asset);
 }
 
+// The gray the screen fades to while the letters fall
 #define LOGO_FADE_GRAY_LEVEL 128
+// The fade's frames left when graying stops, and whitening's length
 #define LOGO_FADE_WHITENING_FRAMES 24
+// About (256 - LOGO_FADE_GRAY_LEVEL) / LOGO_FADE_WHITENING_FRAMES
 #define LOGO_FADE_WHITENING_STEP 5.3333f
 #define LOGO_FADE_WHITE_LEVEL 0xFF
+// Keeps the white fade fully opaque
 #define LOGO_FADE_WHITE_DURATION 2
+// The alpha the logo loses each frame as it fades out
 #define LOGO_FADE_OUT_STEP 24
 #define LOGO_GRAYING_DURATION 64
 
+// Where the letters stop falling, on the screen; the L sits higher
 #define LOGO_LETTER_GROUND_Y 125
 #define LOGO_LETTER_L_GROUND_Y 122
+// The share of its speed a letter keeps when it bounces
 #define LOGO_LETTER_BOUNCINESS 0.2f
+// Bounces slower than this, in pixels a frame, end in landing
 #define LOGO_LETTER_BOUNCE_SPEED_MIN 1.0f
 #define LOGO_LETTER_GRAVITY 0.5f
+// How much a falling letter grows each frame, to full size
 #define LOGO_LETTER_GROWTH 0.04f
 #define LOGO_LETTER_SQUASH_FRAMES 10
 #define LOGO_LETTER_SQUASH_STEP 0.03f
@@ -5200,52 +5504,88 @@ void LoadOpeningLogo(void) {
 #define LOGO_LETTER_STRETCH_FRAMES 5
 #define LOGO_LETTER_STRETCH_STEP 0.06f
 
+// What the club spirals around, on the screen
 #define LOGO_CLUB_ORBIT_CENTER_X 165
 #define LOGO_CLUB_ORBIT_CENTER_Y 141
+// How far the club strays from its spiral, in pixels
 #define LOGO_CLUB_FIRST_WOBBLE 40.0f
 #define LOGO_CLUB_WOBBLE 100.0f
+// How far the club closes in each frame, in pixels
 #define LOGO_CLUB_ORBIT_RADIUS_STEP 4.0f
+// Each frame's turns, in degrees
 #define LOGO_CLUB_ORBIT_ANGLE_STEP 5.5f
 #define LOGO_CLUB_SPIN_STEP 23.0f
 #define LOGO_CLUB_UNUSED_ANGLE_STEP 3.0f
 #define LOGO_CLUB_WOBBLE_ANGLE_STEP 6.0f
 
+// Where the shine's image starts on the frame given
 #define LOGO_SHINE_ORIGIN_TEXEL 64
 #define LOGO_SHINE_ORIGIN_FRAME 16
+// How far the shine moves each frame, in texels
 #define LOGO_SHINE_SPEED 18
+// About 0.64 texels a pixel, in s5.10
 #define LOGO_SHINE_TEXEL_STEP 0x28F
+// Where the shine sweeps, on the screen; it runs past the right edge
 #define LOGO_SHINE_LEFT 10
 #define LOGO_SHINE_TOP 60
 #define LOGO_SHINE_RIGHT 630
 #define LOGO_SHINE_BOTTOM 120
+// The shine is drawn only over the letters: their area is first filled with
+// a near depth, the letters are redrawn with a far one, and the shine is
+// depth tested between the two.
 #define LOGO_SHINE_MASK_LEFT 8
 #define LOGO_SHINE_MASK_RIGHT 312
 #define LOGO_SHINE_MASK_DEPTH 4
 #define LOGO_SHINE_LETTER_DEPTH 40
 #define LOGO_SHINE_DEPTH 36
 
+// Each letter is drawn in a top and a bottom half
 #define LOGO_LETTER_HALF_COUNT 2
 #define LOGO_LETTER_WIDTH 48
 #define LOGO_LETTER_HALF_HEIGHT 24
+// Added to each letter's depth to give its primitive depth
 #define LOGO_LETTER_DEPTH_OFFSET 64
 #define LOGO_CLUB_WIDTH 152
 #define LOGO_CLUB_STRIP_HEIGHT 13
 #define LOGO_CLUB_DEPTH 92
+// The alpha below which the logo's texels aren't drawn
 #define LOGO_ALPHA_THRESHOLD 0x50
 #define LOGO_FADING_ALPHA_THRESHOLD 10
 
 #define LOGO_SHRINK_FRAMES 10
+// Where the logo ends up, on the screen
 #define LOGO_SHRUNK_Y 70
 #define LOGO_SHRUNK_L_Y 68
 #define LOGO_SHRUNK_SCALE 0.72f
 #define LOGO_SHRUNK_CLUB_X 160
 #define LOGO_SHRUNK_CLUB_Y 188
 
+// Where the logo is drawn, in the screen's orthographic projection
 #define LOGO_Z (-300.0f)
 
+// Drives the title logo: Lakitu drops the letters, which bounce into place,
+// the club spirals in to them, a shine sweeps across, and the logo shrinks
+// into place. Meanwhile the screen behind it fades to gray and then white.
+// The logo is only drawn when isDrawn is 1, but moves on every call.
+//
+// The fade colors are set red first, as the original stores them. Each pipe
+// sync and the RDP state command after it go through AppendSyncedRdpState,
+// which declares the command's pointer first, as DrawHoleTriangles does;
+// only the color dither's pair changes the code alone. While the logo
+// shrinks, the L letter's position and scale are stepped before the club's,
+// as a focused permuter run suggested, and the club's strips are counted
+// with j, as the letters' halves are.
+//
+// The L letter's bounce indexes the tables with i, which is LOGO_LETTER_L
+// there, as the other letters' bounce does. Indexed with LOGO_LETTER_L,
+// cse kept f_LogoLetterSquashFrames' entry's address in a register and
+// derived f_LogoLetterSpeeds' from it, where the original does the reverse:
+// 30 words differed, 6 in shape, and 5 with only the speeds indexed by i.
 void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
     Gfx *gfx = *displayListHead;
     s32 texelsOffset;
+    // Kept apart, unlike the shine pass's, to match: sharing texelsOffset gives
+    // 50 words differing (14 in shape) against the draft's 38 (6)
     s32 letterTexelsOffset;
     LogoLetterIndex logoLetter;
     LogoLetterIndex letterIndex;
@@ -5313,6 +5653,7 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
             break;
     }
 
+    // Lakitu drops each letter as he passes where it lands
     if (f_LogoLetterStates[LOGO_LETTER_M] == LOGO_LETTER_WAITING &&
         f_LakituScreenPoint[AXIS_X] > LOGO_M_DROP_X) {
         f_LogoLetters[LOGO_LETTER_M].x = LOGO_M_DROP_X;
@@ -5832,6 +6173,7 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
     if (f_LogoState == LOGO_SHRINK_STARTING) {
         f_LogoState = LOGO_SHRINKING;
 
+        // The letters' shrunk x positions
         f_LogoLetterSteps[LOGO_LETTER_M] =
             (LOGO_M_SHRUNK_X - f_LogoLetters[LOGO_LETTER_M].x) / LOGO_SHRINK_FRAMES;
         f_LogoLetterSteps[LOGO_LETTER_A] =
@@ -5884,15 +6226,25 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
     }
 }
 
+// The sparks fan out from a point and slow down over SPARK_FRAME_COUNT
+// frames
 #define SPARK_FRAME_COUNT 10
+// The spark scale is this divided by the origin's depth
 #define SPARK_SCALE_DEPTH 48.0f
+// The sparks are spread evenly around a circle, then jittered
 #define SPARK_ANGLE_STEP (M_PI * (2.0f / SPARK_COUNT))
 #define SPARK_ANGLE_JITTER_RANGE 20
+// Before scaling, a spark's speed is this plus a random amount
 #define SPARK_SPEED_MIN 10.0f
 #define SPARK_SPEED_RANGE 16
+// How much of its speed a spark keeps each frame
 #define SPARK_DRAG 0.98
+// The depth the sparks are drawn at under the screen's projection
 #define SPARK_DEPTH (-100.0f)
 
+// Draws sparks flying out from a point once f_OpeningSparksState is set to
+// SPARKS_STARTING. The point is projected to the screen, and the sparks
+// are scaled down the further away it is.
 void DrawOpeningSparks(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     ScreenPoint origin;
@@ -5938,6 +6290,8 @@ void DrawOpeningSparks(Gfx **displayListHead) {
     }
 
     if (f_OpeningSparksState == SPARKS_FLYING) {
+        // The original takes these two commands' slots in locals of their own,
+        // which orders the spilled pointers' stack slots
         syncCommand = gfx++;
         gDPPipeSync(syncCommand);
         gDPPipeSync(gfx++);

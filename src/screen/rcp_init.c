@@ -1,3 +1,7 @@
+/*
+ * Sets up the RCP, and clears the depth buffer and the frame.
+ */
+
 #include "screen/rcp_init.h"
 
 #include <nusys.h>
@@ -9,8 +13,10 @@
 #include "screen/screen.h"
 #include "system/memory_address.h"
 
+// The farthest depth the 14-bit depth buffer holds
 #define DEPTH_MAX 0x3FFF
 
+// Set up the RDP and the RSP for a frame
 static Gfx f_RdpInitList[] = {
     gsDPPipeSync(),
     gsDPSetRenderMode(G_RM_OPA_SURF, G_RM_OPA_SURF2),
@@ -26,6 +32,7 @@ static Gfx f_RspInitList[] = {
     gsSPEndDisplayList(),
 };
 
+// The red, green and blue FillScreen fills with, 8 bits each
 static s32 f_FillColor[RGB_CHANNEL_COUNT] = {0};
 
 void AppendRcpInit(s32 viewportIndex, Gfx **displayListHead) {
@@ -51,6 +58,7 @@ void SetFillColor(s32 red, s32 green, s32 blue) {
     f_FillColor[BLUE_CHANNEL] = blue;
 }
 
+// Fills the screen inside its border with the color from SetFillColor
 void FillScreen(void) {
     gDPPipeSync(g_DisplayListHead++);
     gDPSetRenderMode(g_DisplayListHead++, G_RM_NOOP, G_RM_NOOP2);
@@ -81,6 +89,7 @@ void FillScreen(void) {
     gDPPipeSync(g_DisplayListHead++);
 }
 
+// Clears the depth buffer and, depending on clearMode, the frame
 void AppendBufferClear(BufferClear clearMode, Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 line;
@@ -111,6 +120,7 @@ void AppendBufferClear(BufferClear clearMode, Gfx **displayListHead) {
         RenderTargetAddress(osVirtualToPhysical(nuGfxCfb_ptr))
     );
     if (clearMode == BUFFER_CLEAR_BY_LINE) {
+        // Stops a line short, which the screen's border hides
         for (line = 0; line < SCREEN_HEIGHT - 1; line++) {
             gDPSetFillColor(gfx++, FillColor16(0, 0, 0, 1));
             gDPFillRectangle(gfx++, 0, line, SCREEN_WIDTH - 1, line);

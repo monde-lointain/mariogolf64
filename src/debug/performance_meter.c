@@ -1,3 +1,8 @@
+/*
+ * The performance meter is the game's copy of NuSystem's nuDebTaskPerfBar1,
+ * extended with a CPU bar, statistics for every bar and a numeric readout.
+ */
+
 #include "debug/performance_meter.h"
 
 #include <nusys.h>
@@ -11,22 +16,30 @@
 #include "system/heap.h"
 #include "system/memory_address.h"
 
+// A frame of time is this wide on the meter, in the meter's own units
 #define FRAME_WIDTH 280
+// A frame at 60 Hz lasts this many microseconds
 #define FRAME_MICROSECONDS 16666
+// The meter can span this many frames after the first
 #define EXTRA_FRAME_COUNT_MAX 5
 
+// Converts an RDP counter value to microseconds, as NuSystem does
 #define RdpCountToMicroseconds(count) ((count) * 1643 / 100000)
 
 #define BAR_START_X 1
+// The meter's top edge, measured up from the bottom of the screen
 #define METER_TOP_Y 24
 
 #define READOUT_X 264
 #define READOUT_TOP_Y 2
 #define READOUT_LINE_HEIGHT 8
+// Room for the longest readout's digits and terminator
 #define READOUT_TEXT_CAPACITY 32
+// The memory meter's dark box, and its digits' left edge inside it
 #define MEMORY_BOX_LEFT 250
 #define MEMORY_BOX_RIGHT 302
 #define MEMORY_DIGITS_X (MEMORY_BOX_LEFT + 2)
+// The box's edges and its three readouts' tops, from the y the caller gives
 #define MEMORY_BOX_TOP_OFFSET (-8)
 #define MEMORY_BOX_BOTTOM_OFFSET 20
 #define FRAMEBUFFER_COUNT_OFFSET (-7)
@@ -37,6 +50,8 @@
 #define DIGIT_HEIGHT 8
 #define DIGIT_SPACING 6
 
+// A bar's quad, from its top and bottom edges, depth and the RGB of its left
+// and right ends; the bar's drawing sets its ends' x each frame
 #define BAR_QUAD(topY, bottomY, z, leftRed, leftGreen, leftBlue, rightRed, rightGreen, rightBlue) \
     {{{0, topY, z}, 0, {0, 0}, {leftRed, leftGreen, leftBlue, 0xFF}}}, \
         {{{0, topY, z}, 0, {0, 0}, {rightRed, rightGreen, rightBlue, 0xFF}}}, \
@@ -53,6 +68,8 @@
 #define RDP_PIPE_BAR_QUAD BAR_QUAD(7, 5, 0, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00)
 #define RDP_TMEM_BAR_QUAD BAR_QUAD(4, 2, 0, 0x80, 0x00, 0xFF, 0x80, 0xFF, 0x00)
 
+// The meter's background, which DrawPerformanceMeter widens to the frames
+// it spans, then a row of FRAME_WIDTH cells, one drawn for each of them
 static Vtx f_FrameVertices[] = {
     {{{0, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
     {{{1962, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
@@ -146,6 +163,7 @@ static Vtx f_RdpTmemBarVertices[] = {
     RDP_TMEM_BAR_QUAD,
     RDP_TMEM_BAR_QUAD,
 };
+// Scaled to the screen each time the meter is drawn
 static Vp f_MeterViewport = {
     {
         {SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, G_MAXZ / 2, 0},
@@ -172,16 +190,19 @@ static Gfx f_InitRcpDisplayList[] = {
     gsSPEndDisplayList(),
     gsSPEndDisplayList(),
 };
+// Draws the background; DrawPerformanceMeter draws the frame cells
 static Gfx f_FrameDisplayList[] = {
     gsSPVertex(f_FrameVertices, ARRAY_COUNT(f_FrameVertices), 0),
     gsSP2Triangles(0, 1, 2, 0, 2, 3, 0, 0),
     gsSPEndDisplayList(),
 };
+// The meter's horizontal scale, by how many frames past the first it spans
 static f32 f_FrameScales[EXTRA_FRAME_COUNT_MAX + 1] = {1.0f, 0.5f, 0.3333f, 0.25f, 0.2f, 0.16667f};
 static u32 f_MeterDisplayListIndex = 0;
 static Gfx f_UnusedMeterDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
 };
+// The digits, each DIGIT_WIDTH wide, in a 64x8 IA4 texture
 static u16 f_DigitTexture[] = {
 #include "assets/debug/performance_meter/digit_texture.ia4.inc.c"
 };
@@ -200,6 +221,7 @@ static u32 f_RdpPipeBarMaximum = 0;
 static u32 f_RdpPipeBarAverage = 0;
 static u32 f_RdpTmemBarMaximum = 0;
 static u32 f_RdpTmemBarAverage = 0;
+// Counts the digit strings drawn, modulo 1024; nothing else reads it
 static Mtx f_MeterProjectionMatrix;
 static Mtx f_MeterViewMatrix;
 static Mtx f_MeterIdentityMatrix;
@@ -208,6 +230,7 @@ static Mtx f_MeterTranslationMatrix;
 static Gfx f_MeterDisplayLists[2][512];
 static char f_ReadoutText[READOUT_TEXT_CAPACITY];
 
+// Draws text made of digits and spaces into *gfxP at the pixel x, y
 static void DrawDigits(Gfx **displayListHead, u16 x, u16 y, char *text) {
     Gfx *gfx = *displayListHead;
     char character;
@@ -257,7 +280,6 @@ static void DrawDigits(Gfx **displayListHead, u16 x, u16 y, char *text) {
                 TEXEL_STEP_ONE
             );
         }
-
         x += DIGIT_SPACING;
     }
 
@@ -265,6 +287,10 @@ static void DrawDigits(Gfx **displayListHead, u16 x, u16 y, char *text) {
     *displayListHead = gfx;
 }
 
+// Folds a bar's length into its running average, which starts at the first
+// length, and its maximum. The lengths are compared unsigned, as in the
+// original. It is a macro so that it updates the statistics by name, rather
+// than through pointers to them.
 #define KeepBarStats(average, maximum, length) \
     { \
         if ((average) == 0) { \
@@ -279,6 +305,9 @@ static void DrawDigits(Gfx **displayListHead, u16 x, u16 y, char *text) {
         } \
     }
 
+// Draws bars for the time the CPU, the audio and graphics tasks and the RDP
+// counters took, over 1 + extraFrameCount frames, and starts the display list
+// as its own graphics task. cpuStartTime and cpuEndTime are in microseconds.
 void DrawPerformanceMeter(
     u32 extraFrameCount,
     u32 y,
@@ -296,6 +325,7 @@ void DrawPerformanceMeter(
     s32 rdpBarLength;
     u32 vertexIndex;
 
+    // The readout never prints these lengths; they are kept to match
     s32 audioBarLength UNUSED;
     s32 rdpCommandBarLength UNUSED;
     s32 rdpPipeBarLength UNUSED;
@@ -305,6 +335,8 @@ void DrawPerformanceMeter(
     u32 viMode;
     u32 scale;
 
+// The original leaves scale unset in other video modes than NTSC's, and the
+// readout's lengths unset when no graphics task ran
 #ifdef AVOID_UB
     scale = 1;
     rspBarLength = 0;
@@ -320,6 +352,8 @@ void DrawPerformanceMeter(
         scale = 2;
     }
 
+    // The chained assignments are there to match: separate stores give 32 to 38
+    // words differing for the x pair, and 60 to 64 for the y pair
     f_MeterViewport.vp.vscale[0] = f_MeterViewport.vp.vtrans[0] = SCREEN_WIDTH * 2 * scale;
     f_MeterViewport.vp.vscale[1] = f_MeterViewport.vp.vtrans[1] = SCREEN_HEIGHT * 2 * scale;
     gSPViewport(gfx++, &f_MeterViewport);
@@ -332,6 +366,7 @@ void DrawPerformanceMeter(
         RenderTargetAddress(osVirtualToPhysical(nuGfxCfb_ptr))
     );
 
+    // The projection's origin is at the bottom left, so y is flipped
     translationY = (240.0 - METER_TOP_Y) - y;
     if (translationY == 0.0) {
         translationY = 0.1f;
@@ -353,6 +388,7 @@ void DrawPerformanceMeter(
     );
     guLookAt(&f_MeterViewMatrix, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
     guScale(&f_MeterScaleMatrix, f_FrameScales[extraFrameCount] * (f32)scale, (f32)scale, 1.0f);
+    // Moves the meter 20 pixels right of the screen's left edge
     guTranslate(
         &f_MeterTranslationMatrix,
         20.0 / f_FrameScales[extraFrameCount],
@@ -497,6 +533,9 @@ void DrawPerformanceMeter(
     startX = BAR_START_X;
     for (i = 0; i < nuDebTaskPerfPtr->gfxTaskCnt; i++) {
         vertexIndex = i * QUAD_VERTEX_COUNT;
+        // The RDP counters are loaded into the 64-bit taskTime before they are
+        // converted. Converting each as it is read gives 180 words differing (150
+        // in shape) for the three, or 138 (126) with the counter cast to s64.
         taskTime = nuDebTaskPerfPtr->gfxTaskTime[i].dpCnt[NU_DEB_DP_CMD_CTR];
         taskTime = RdpCountToMicroseconds(taskTime);
         barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
@@ -632,6 +671,8 @@ void DrawPerformanceMeter(
     f_MeterDisplayListIndex &= 1;
 }
 
+// Prints the framebuffer count, the free memory and the largest free block,
+// and starts the display list as its own graphics task.
 void DrawMemoryMeter(u32 y, s32 taskFlags) {
     Gfx *gfx = f_MeterDisplayLists[f_MeterDisplayListIndex];
 

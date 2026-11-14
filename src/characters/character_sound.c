@@ -1,18 +1,28 @@
+/*
+ * Plays a character's sounds from its table of sound IDs and volumes, on a
+ * channel for each character slot.
+ */
+
 #include <ultra64.h>
 
 #include "audio/sound.h"
 #include "characters/character.h"
 #include "system/compiler.h"
 
+// Each character's sounds are pairs of a sound ID and the volume it plays at
 #define CHARACTER_SOUND_VALUE_COUNT 34
+// A pair of f_CharacterSounds; every sound in it plays at full volume
 #define SOUND_AT_FULL_SCALE(soundId) (soundId), SOUND_FULL_SCALE
 
+// The volume argument that asks for the sound's own volume
 #define CHARACTER_SOUND_VOLUME (-1)
 
+// The one character whose sounds play without reverb
 #define DRY_CHARACTER CHARACTER_BABY_MARIO
 #define CHARACTER_SOUND_REVERB 0x14
 
 static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
+    // CHARACTER_PLUM
     {
         SOUND_AT_FULL_SCALE(0x1AF),
         SOUND_AT_FULL_SCALE(0x1B3),
@@ -32,6 +42,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x1B1),
         SOUND_AT_FULL_SCALE(0x1AF),
     },
+    // CHARACTER_CHARLIE
     {
         SOUND_AT_FULL_SCALE(0x0D7),
         SOUND_AT_FULL_SCALE(0x0DC),
@@ -51,6 +62,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x0DA),
         SOUND_AT_FULL_SCALE(0x0D8),
     },
+    // CHARACTER_MAPLE
     {
         SOUND_AT_FULL_SCALE(0x15E),
         SOUND_AT_FULL_SCALE(0x163),
@@ -70,6 +82,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x161),
         SOUND_AT_FULL_SCALE(0x15F),
     },
+    // CHARACTER_BABY_MARIO
     {
         SOUND_AT_FULL_SCALE(0x0BF),
         SOUND_AT_FULL_SCALE(0x0C3),
@@ -89,6 +102,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x0C1),
         SOUND_AT_FULL_SCALE(0x0C8),
     },
+    // CHARACTER_LUIGI
     {
         SOUND_AT_FULL_SCALE(0x147),
         SOUND_AT_FULL_SCALE(0x142),
@@ -108,6 +122,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x149),
         SOUND_AT_FULL_SCALE(0x147),
     },
+    // CHARACTER_PEACH
     {
         SOUND_AT_FULL_SCALE(0x197),
         SOUND_AT_FULL_SCALE(0x192),
@@ -127,6 +142,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x199),
         SOUND_AT_FULL_SCALE(0x197),
     },
+    // CHARACTER_SONNY
     {
         SOUND_AT_FULL_SCALE(0x1C7),
         SOUND_AT_FULL_SCALE(0x1BE),
@@ -146,6 +162,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x1C9),
         SOUND_AT_FULL_SCALE(0x1D3),
     },
+    // CHARACTER_WARIO
     {
         SOUND_AT_FULL_SCALE(0x1F5),
         SOUND_AT_FULL_SCALE(0x1F0),
@@ -165,6 +182,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x1F8),
         SOUND_AT_FULL_SCALE(0x1F6),
     },
+    // CHARACTER_HARRY
     {
         SOUND_AT_FULL_SCALE(0x0FB),
         SOUND_AT_FULL_SCALE(0x0F2),
@@ -184,6 +202,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x0FD),
         SOUND_AT_FULL_SCALE(0x0FB),
     },
+    // CHARACTER_MARIO
     {
         SOUND_AT_FULL_SCALE(0x177),
         SOUND_AT_FULL_SCALE(0x171),
@@ -203,6 +222,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x179),
         SOUND_AT_FULL_SCALE(0x177),
     },
+    // CHARACTER_YOSHI
     {
         SOUND_AT_FULL_SCALE(0x209),
         SOUND_AT_FULL_SCALE(0x200),
@@ -222,6 +242,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x20B),
         SOUND_AT_FULL_SCALE(0x20A),
     },
+    // CHARACTER_DONKEY_KONG
     {
         SOUND_AT_FULL_SCALE(0x0EB),
         SOUND_AT_FULL_SCALE(0x0EA),
@@ -241,6 +262,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x0E2),
         SOUND_AT_FULL_SCALE(0x0EB),
     },
+    // CHARACTER_BOWSER
     {
         SOUND_AT_FULL_SCALE(0x139),
         SOUND_AT_FULL_SCALE(0x138),
@@ -260,6 +282,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x137),
         SOUND_AT_FULL_SCALE(0x139),
     },
+    // CHARACTER_METAL_MARIO
     {
         SOUND_AT_FULL_SCALE(0x177),
         SOUND_AT_FULL_SCALE(0x171),
@@ -279,6 +302,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x179),
         SOUND_AT_FULL_SCALE(0x177),
     },
+    // CHARACTER_KID
     {
         SOUND_AT_FULL_SCALE(0x125),
         SOUND_AT_FULL_SCALE(0x124),
@@ -298,6 +322,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x128),
         SOUND_AT_FULL_SCALE(0x126),
     },
+    // CHARACTER_SHERRY
     {
         SOUND_AT_FULL_SCALE(0x1DF),
         SOUND_AT_FULL_SCALE(0x1D4),
@@ -317,6 +342,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x1E2),
         SOUND_AT_FULL_SCALE(0x1E0),
     },
+    // CHARACTER_AZALEA
     {
         SOUND_AT_FULL_SCALE(0x0A9),
         SOUND_AT_FULL_SCALE(0x0AD),
@@ -336,6 +362,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x0AC),
         SOUND_AT_FULL_SCALE(0x0AA),
     },
+    // CHARACTER_JOE
     {
         SOUND_AT_FULL_SCALE(0x111),
         SOUND_AT_FULL_SCALE(0x116),
@@ -358,6 +385,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
 };
 static s32 f_UnusedWordsAfterCharacterSounds[2] UNUSED = {0};
 
+// Plays a character's sound, where soundIndex is the sound's pair's first value
 void PlayCharacterSound(
     CharacterIndex characterIndex,
     s32 voiceSlot,

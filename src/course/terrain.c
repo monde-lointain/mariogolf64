@@ -1,3 +1,9 @@
+/*
+ * The terrain: its codes and their colors, the surface at a point, and the
+ * ground's grid vertices, tiles, triangles and heights. The debug scene menu
+ * and the flag panel are here too.
+ */
+
 #include "course/terrain.h"
 
 #include <math.h>
@@ -37,54 +43,78 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 
+// The debug scene menu lists SCENE_MENU_LENGTH scenes from text row
+// SCENE_MENU_TOP_ROW
 #define SCENE_MENU_LENGTH 16
 #define SCENE_MENU_TOP_ROW 5
+// The text columns of the menu's cursor and of its scenes' labels
 #define SCENE_MENU_CURSOR_COLUMN 10
 #define SCENE_MENU_LABEL_COLUMN 12
+// Text cells of the current scene's label and the shot's surface name
 #define SCENE_LABEL_COLUMN 2
 #define SCENE_LABEL_ROW 3
 #define SURFACE_NAME_COLUMN 2
 #define SURFACE_NAME_ROW 4
+// The light that the map overview's C-up resets to, as binary angles
 #define RESET_LIGHT_PITCH 0x3000
 #define RESET_LIGHT_YAW 0x2000
+// The scene menu's box, in screen pixels
 #define SCENE_MENU_BOX_LEFT 72
 #define SCENE_MENU_BOX_TOP 32
 #define SCENE_MENU_BOX_RIGHT 152
 #define SCENE_MENU_BOX_BOTTOM 152
 
+// The limits of SCENE_MAP_OVERVIEW's controls
 #define MAP_OVERVIEW_ADJUSTMENT_MIN 5
 #define MAP_OVERVIEW_ADJUSTMENT_MAX 0x200
 #define MAP_OVERVIEW_ADJUSTMENT_START 10
 #define MAP_OVERVIEW_SELECTION_COUNT 7
 #define MAP_OVERVIEW_CAMERA_STEP 8
 #define MAP_OVERVIEW_ADJUSTMENT_STEP 2
+// The map camera's eye moves this many units for each unit of cameraX and
+// cameraZ
 #define MAP_OVERVIEW_CAMERA_SCALE 16
+// The stick moves the camera one step for each STICK_STEP_SIZE of tilt
 #define STICK_STEP_SIZE 32
 
+// The tile column or row holding a ground point column or row
 #define PointTile(point) ((point) / GROUND_TILE_POINT_SPAN)
+// A ground point column or row's slot within its tile
 #define PointSlot(point) ((point) & (GROUND_TILE_POINT_SPAN - 1))
+// GROUND_TILE_POINT_SPAN as a shift
 #define TILE_POINT_SPAN_SHIFT 2
+// The index in g_WorkArea.hole.tiles of a tile column and row
 #define TileIndex(tileColumn, tileRow) (((tileRow) * GROUND_TILE_COLUMN_COUNT) + (tileColumn))
 
+// Whether a midpoint on a tile's first row, or first column, is also kept
+// by the tile before it. They are macros, as inline functions compile
+// differently from the original.
 #define IsSharedWithPreviousTileRow(column, row) \
     (((column) & 1) && !PointSlot(row) && (PointTile(row) > 0))
 #define IsSharedWithPreviousTileColumn(column, row) \
     (((row) & 1) && !PointSlot(column) && (PointTile(column) > 0))
 
+// What SCENE_MAP_OVERVIEW's controls change. Only the camera position is
+// read back; nothing in the ROM reads the other three.
 typedef struct MapOverviewControls {
     s32 cameraX;
     s32 cameraZ;
-    s32 selectionIndex;
-    s32 adjustment;
-    Boolean isToggled;
+    s32 selectionIndex; // A and B cycle it
+    s32 adjustment; // L and R step it
+    Boolean isToggled; // Z flips it
 } MapOverviewControls;
 
+// The flags panel's scroll and cursor
 typedef struct FlagPanel {
+    // The first flag row shown
     s32 firstRow;
     s32 column;
+    // Counted from firstRow
     s32 row;
 } FlagPanel;
 
+// The map image texel at a texel column and row; the first texel row and
+// column of each tile are its border
 #define MAP_TEXEL(column, row) \
     g_WorkArea.hole \
         .tiles \
@@ -94,24 +124,36 @@ typedef struct FlagPanel {
                [((column) & (GROUND_TILE_TEXEL_SPAN - 1)) + \
                    (((row) & (GROUND_TILE_TEXEL_SPAN - 1)) * GROUND_TILE_TEXEL_ROW_LENGTH) + 1]
 
+// Water tests probe a vertical segment from -reach to +reach; the height
+// where it hits water is at the hit's fraction of the way along
 #define WATER_PROBE_REACH 3072000
 #define MINI_GOLF_WATER_PROBE_REACH 614400
 #define WaterProbeHeight(fraction, reach) (((fraction) * (2.0f * (reach))) + -(f32)(reach))
+// Raises the water's height for the surface test, or lowers it when asked
 #define WATER_BIAS 0x266
 #define LOWERED_WATER_BIAS (-0x600)
 
+// A point within this of the ground's edges, 1 m, has no surface
 #define SURFACE_EDGE_MARGIN ((s32)UNITS_PER_METER)
+// Whether a coordinate lies within SURFACE_EDGE_MARGIN of either end of a
+// ground side; the unsigned compare catches both ends at once
 #define IsInSurfaceEdgeMargin(coordinate, sideSize) \
     ((u32)((coordinate) - SURFACE_EDGE_MARGIN) > (sideSize) - (SURFACE_EDGE_MARGIN * 2) - 1)
+// FindSurface and GetMiniGolfSurface weigh the codes of the texels nearest a
+// point
 #define NEAREST_CODE_COUNT 4
+// How strongly each terrain code claims a point near a texel's edge: greens
+// spread, and bunkers, roughs, waste areas and out of bounds give way
 #define GREEN_SURFACE_WEIGHT 1.1f
 #define ROUGH_SURFACE_WEIGHT 0.9f
 #define BUNKER_SURFACE_WEIGHT 0.7f
 #define OUT_OF_BOUNDS_SURFACE_WEIGHT 0.5f
 #define MINI_GOLF_OUT_OF_BOUNDS_SURFACE_WEIGHT 0.1f
+// Mini golf spreads the terrain code grid over its smaller ground
 #define MINI_GOLF_TEXEL_WIDTH (MINI_GOLF_GROUND_SIZE / CODE_GRID_COLUMN_COUNT)
 #define MINI_GOLF_TEXEL_LENGTH (MINI_GOLF_GROUND_SIZE / CODE_GRID_ROW_COUNT)
 
+// f_TerrainColors' entries, named for the terrain codes drawn in them
 enum TerrainColorIndex {
     TERRAIN_COLOR_FAIRWAY,
     TERRAIN_COLOR_GREEN,
@@ -120,6 +162,9 @@ enum TerrainColorIndex {
     TERRAIN_COLOR_NO_DROP_GROUND,
     TERRAIN_COLOR_OUT_OF_BOUNDS,
     TERRAIN_COLOR_CART_WAY,
+    // An olive, yellower and darker than the fairway green, that
+    // GetTerrainCodeColor never gives, but that GetColorTerrainCode reads back as
+    // fairway
     TERRAIN_COLOR_OLIVE_FAIRWAY,
     TERRAIN_COLOR_TEE_GROUND,
     TERRAIN_COLOR_ROCK,
@@ -130,6 +175,11 @@ typedef s32 TerrainColorIndex;
 
 #define TERRAIN_COLOR_COUNT 11
 
+// Each grid point's slot among its tile's midpoints, by its row and column
+// within the tile. The points with the top bit set are grid vertices, which
+// GetGridVertex returns instead.
+// A grid vertex's slot holds its grid column within the tile above its row,
+// each in the bits of SLOT_GRID_MASK
 #define SLOT_GRID_COLUMN_SHIFT 2
 #define SLOT_GRID_MASK 3
 s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT];
@@ -151,8 +201,8 @@ HoleSetup g_HoleSetup = {
 f32 g_GroundTileHeightRanges[GROUND_TILE_COUNT] = {0};
 s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT][TERRAIN_CODE_CELL_COLUMN_COUNT] = {{0}};
 s32 g_TerrainCodeBlockCount = -1;
-
 /* clang-format off */
+
 static u8 f_UnusedBytesAfterTerrainBlockCount[16] UNUSED = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 };
@@ -166,18 +216,19 @@ ModuleId g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
 ModuleId g_SubModuleId = MODULE_SCORECARD;
 ModuleId g_PendingSubModuleId = MODULE_SCORECARD;
 SubModuleState g_SubModuleState = SUB_MODULE_UNLOADED;
+// RGBA16 components
 static TerrainColor f_TerrainColors[TERRAIN_COLOR_COUNT] = {
-    {0x05, 0x19, 0x00, 1},
-    {0x05, 0x1E, 0x05, 1},
-    {0x1C, 0x1C, 0x1C, 1},
-    {0x00, 0x10, 0x00, 1},
-    {0x00, 0x00, 0x1F, 0},
-    {0x0F, 0x08, 0x00, 1},
-    {0x0F, 0x0F, 0x0F, 1},
-    {0x08, 0x16, 0x00, 1},
-    {0x1F, 0x16, 0x00, 1},
-    {0x05, 0x05, 0x05, 1},
-    {0x00, 0x1F, 0x1F, 1},
+    {0x05, 0x19, 0x00, 1}, // TERRAIN_COLOR_FAIRWAY
+    {0x05, 0x1E, 0x05, 1}, // TERRAIN_COLOR_GREEN
+    {0x1C, 0x1C, 0x1C, 1}, // TERRAIN_COLOR_BUNKER
+    {0x00, 0x10, 0x00, 1}, // TERRAIN_COLOR_ROUGH
+    {0x00, 0x00, 0x1F, 0}, // TERRAIN_COLOR_NO_DROP_GROUND
+    {0x0F, 0x08, 0x00, 1}, // TERRAIN_COLOR_OUT_OF_BOUNDS
+    {0x0F, 0x0F, 0x0F, 1}, // TERRAIN_COLOR_CART_WAY
+    {0x08, 0x16, 0x00, 1}, // TERRAIN_COLOR_OLIVE_FAIRWAY
+    {0x1F, 0x16, 0x00, 1}, // TERRAIN_COLOR_TEE_GROUND
+    {0x05, 0x05, 0x05, 1}, // TERRAIN_COLOR_ROCK
+    {0x00, 0x1F, 0x1F, 1}, // TERRAIN_COLOR_DEEP_ROUGH
 };
 static MapOverviewControls f_MapOverviewControls = {0, 0, 0, MAP_OVERVIEW_ADJUSTMENT_START, FALSE};
 
@@ -215,13 +266,21 @@ static Scene f_SceneMenuScenes[SCENE_MENU_LENGTH] = {
 };
 static Boolean f_IsFirstDebugUpdate = TRUE;
 s32 g_UnreadGroundQueryMarker = 0;
+// The order in which to search a point's cells: its own, the next, the one
+// before (3 being -1 in four), then the one across
 static s8 f_CellSearchOffsets[GROUND_TILE_POINT_SPAN] = {0, 1, 3, 2};
 
 static Scene f_SceneMenuSelection;
 
+// The flags panel shows FLAG_PANEL_ROW_COUNT rows of FLAG_PANEL_COLUMN_COUNT
+// flags
 #define FLAG_PANEL_ROW_COUNT 8
 #define FLAG_PANEL_COLUMN_COUNT 16
+// The first row of the last page, which ends at flag 0xFF
 #define FLAG_PANEL_FIRST_ROW_MAX 8
+// The panel's debug text cells: the build dates' labels and values, the
+// header of flag columns, and the flag rows, whose labels sit before the
+// flags and whose flags are spaced two cells apart
 #define BUILD_DATE_LABEL_COLUMN 3
 #define BUILD_DATE_COLUMN 8
 #define ROM_BUILD_DATE_ROW 4
@@ -231,16 +290,26 @@ static Scene f_SceneMenuSelection;
 #define FLAG_ROW_LABEL_COLUMN 3
 #define FIRST_FLAG_TEXT_COLUMN 6
 #define FLAG_TEXT_SPACING 2
+// The panel's column headers, row labels and flags are each formatted into a
+// buffer this big
 #define FLAG_PANEL_TEXT_SIZE 0x10
 
 s32 GetTerrainHeight(s32 x, s32 z);
 
+// The byte in the terrain codes that holds a code in a block of cells
 static inline s32 GetCellCodeOffset(s32 cellEntry, s32 column, s32 row) {
     return ((column & (TERRAIN_CODE_CELL_SPAN - 1)) >> 1) +
         ((row & (TERRAIN_CODE_CELL_SPAN - 1)) * (TERRAIN_CODE_CELL_SPAN / 2)) +
         ((cellEntry & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
 }
 
+// Returns the terrain code at a code column and row, clamped to the grid,
+// or -1 where there is none.
+//
+// The cell is addressed by byte offset, column first, as in
+// ResetTerrainCodeCells: the row's offset first gives 22 words differing,
+// a flat index scaled after the sum 6 (4 in shape), and indexing the cells
+// by row and column 17 to 31.
 TerrainCode GetTerrainCode(s32 column, s32 row) {
     s32 cellEntry;
     s32 cellOffset;
@@ -279,8 +348,11 @@ TerrainCode GetTerrainCode(s32 column, s32 row) {
         TERRAIN_CODE_MASK;
 }
 
+// Starts the search for the nearest color past any squared distance
+// between RGBA16 colors
 #define BEYOND_ANY_COLOR_DISTANCE 1000000
 
+// Returns the index of the terrain color nearest an RGBA16 color
 TerrainColorIndex FindNearestTerrainColor(s32 color) {
     s32 nearestDistance = BEYOND_ANY_COLOR_DISTANCE;
     TerrainColorIndex nearestIndex = TERRAIN_COLOR_FAIRWAY;
@@ -315,6 +387,7 @@ TerrainColorIndex FindNearestTerrainColor(s32 color) {
     return nearestIndex;
 }
 
+// Returns a terrain code's color as RGBA16
 s32 GetTerrainCodeColor(TerrainCode code) {
     TerrainColorIndex colorIndex = TERRAIN_COLOR_FAIRWAY;
 
@@ -356,6 +429,7 @@ s32 GetTerrainCodeColor(TerrainCode code) {
         (f_TerrainColors[colorIndex].blue << RGBA16_BLUE_SHIFT) | f_TerrainColors[colorIndex].alpha;
 }
 
+// Returns the terrain code whose color is nearest an RGBA16 color
 TerrainCode GetColorTerrainCode(s32 color) {
     switch (FindNearestTerrainColor(color)) {
         case TERRAIN_COLOR_GREEN:
@@ -382,8 +456,12 @@ TerrainCode GetColorTerrainCode(s32 color) {
     return TERRAIN_CODE_OUT_OF_BOUNDS;
 }
 
+// The wrong club's penalty leaves at least this percent of a shot
 #define SURFACE_PERCENT_MIN 5
 
+// Writes a surface's two percents for a club. A club not meant for the
+// surface loses the penalty from each, down to no less than
+// MIN_SURFACE_PERCENT.
 void GetSurfacePercentRange(SurfaceTraits *surfaceTraits, Club *club, s32 *range) {
     if (club->surfaceMask & GetSurfaceClubMask(TRUE, surfaceTraits)) {
         range[0] = surfaceTraits->percentMin;
@@ -402,9 +480,12 @@ void GetSurfacePercentRange(SurfaceTraits *surfaceTraits, Club *club, s32 *range
     }
 }
 
+// Where GetMiniGolfSurface shows its water probe's result for debugging
 #define WATER_RATIO_COLUMN 10
 #define WATER_RATIO_ROW 11
 
+// Mini-golf's GetSurface. It weighs the four nearest codes like
+// FindSurface but returns the first.
 Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     s8 surfaces[NEAREST_CODE_COUNT];
     f32 weights[NEAREST_CODE_COUNT] UNUSED;
@@ -421,6 +502,8 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     f32 weight;
     Surface surface;
 
+    // Copied, then shifted, to match: shifting in the copies gives 50 words
+    // differing, none in shape
     shiftedX = x;
     shiftedZ = z;
     shiftedX -= MINI_GOLF_TEXEL_WIDTH / 2;
@@ -459,6 +542,9 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
         }
 
         if (hit.tag == HOLE_TRIANGLE_KIND_FLAT) {
+            // Reuses i as the water height to match: a waterHeight variable,
+            // wherever it is declared, gives 4 words differing (none in shape), and
+            // comparing the height directly 37 (17)
             neighborIndex = WaterProbeHeight(fraction, MINI_GOLF_WATER_PROBE_REACH) + waterBias;
             if (neighborIndex < GetTerrainHeight(x, z)) {
                 return SURFACE_WATER_HAZARD;
@@ -544,10 +630,41 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     return surfaces[0];
 }
 
+// No jal in the ROM calls this
 f32 ConvertToFloat(s32 value) {
     return value;
 }
 
+// Returns the surface at a point: water if the water is above the ground,
+// otherwise the heaviest of the four nearest codes' surfaces.
+//
+// The original XORs the steps, each plus one, into $v1, then zeroes $v0 and
+// branches on it to the equal steps' arm before it branches on $v1 to the
+// other two. The steps' difference is first tested for being both below and
+// above 0, to match: fold makes the two tests one AND of their flags, combine
+// reduces the AND to a constant 0, and the branch on the 0's register stays,
+// ahead of the difference's own.
+//
+// With the steps compared directly 8 words differ, 8 in shape, and with the
+// difference compared with 0 alone 10 (6). The two tests in the other order
+// give 18 (4), the pair after the comparison with 0 gives 9 (3), and joined
+// to it by ?: instead of || 21 (7). Above 2 or equal to 1 for the second
+// test gives 21 (5); <= 0 for the comparison 2 (2); and the steps compared
+// directly after the pair 51 (5), with a frame 24 bytes smaller. The same
+// pair of tests on stepColumn gives 12 (0), and on distanceX matches. The
+// difference XORed without the ones, or subtracted, gives 9 (7), and as the
+// != of the steps plus one 47 (1).
+//
+// These also match: !stepDifference for the comparison; != 0 && == 0, or
+// < 0 && >= 1, for the pair; the XOR written out three times with no local;
+// the whole test as !((d >= 0 || d <= 0) && d != 0); and the pair in its own
+// if with a goto into the arm. A bit that is always clear, (d & 1) >> 1,
+// matches in such an if or before ?:, but before || gives 10 (6), as fold
+// ORs its flag with the comparison's and combine drops it. A local set to 0
+// gives 10 (6) too, since cse removes its branch. A 64-bit difference, whose
+// high word is a zeroed register with a branch of its own, gives 32 (10)
+// compared == 0 as a u64 and 33 (13) compared <= 0 as an s64, the pair in
+// $t0 and $t1; an s64 holding the == of the steps plus one gives 17 (5).
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     s8 surfaces[NEAREST_CODE_COUNT];
     f32 weights[NEAREST_CODE_COUNT];
@@ -583,6 +700,7 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     }
 
     if (FindHoleTriangleHit(x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
+        // Unused, but keeps the stack frame the same size as the original
         char unusedText[0x80] UNUSED;
 
         waterBias = WATER_BIAS;
@@ -686,6 +804,7 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     distanceX = Abs(GROUND_TEXEL_SIZE / 2 - fractionX);
     distanceZ = Abs(GROUND_TEXEL_SIZE / 2 - fractionZ);
     stepDifference = (stepColumn + 1) ^ (stepRow + 1);
+    // The difference is never both below and above 0; tested to match
     if ((stepDifference < 0 && stepDifference > 0) || stepDifference == 0) {
         weights[0] = weights[0] *
             ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
@@ -732,6 +851,7 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
         weights[2] = 0.0f;
     }
 
+    // The last code's weight has gone to another's or been dropped
     bestWeight = 0.0f;
     for (weightIndex = 0; weightIndex < NEAREST_CODE_COUNT - 1; weightIndex++) {
         if (bestWeight < weights[weightIndex]) {
@@ -751,6 +871,7 @@ SurfaceTraits *GetSurfaceTraitsAt(s32 x, s32 z) {
     return GetSurfaceTraits(GetSurface(x, z));
 }
 
+// Returns the map image's color at a point, or 0 off the course
 u16 GetMapColor(s32 x, s32 z) {
     u32 column;
     u32 row;
@@ -768,6 +889,8 @@ u16 GetMapColor(s32 x, s32 z) {
     return MAP_TEXEL(column, row) | 1;
 }
 
+// Returns the map color at a point, averaged with the color of the terrain
+// code for a surface
 s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
     u16 groundColor = GetMapColor(x, z);
     TerrainCode code = TERRAIN_CODE_NONE;
@@ -826,6 +949,8 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
         groundGreen = (groundColor >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
         surfaceColor = g_TerrainCodeColors[code];
 
+        // The original assigns the surface's blue to the ground's and never sets
+        // surfaceBlue.
         groundBlue = (surfaceColor >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK;
 #ifdef AVOID_UB
         surfaceBlue = groundBlue;
@@ -851,10 +976,12 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
     return groundColor;
 }
 
+// The height is unused
 Boolean IsInWater(s32 x, s32 y UNUSED, s32 z) {
     return GetSurface(x, z) == SURFACE_WATER_HAZARD;
 }
 
+// Sets a vertex halfway between two others
 void SetVertexMidpoint(Vtx *first, Vtx *second, Vtx *midpoint) {
     midpoint->v.ob[AXIS_X] = (first->v.ob[AXIS_X] + second->v.ob[AXIS_X]) / 2;
     midpoint->v.ob[AXIS_Y] = (first->v.ob[AXIS_Y] + second->v.ob[AXIS_Y]) / 2;
@@ -870,6 +997,8 @@ void SetVertexMidpoint(Vtx *first, Vtx *second, Vtx *midpoint) {
     midpoint->v.cn[ALPHA_CHANNEL] = (first->v.cn[ALPHA_CHANNEL] + second->v.cn[ALPHA_CHANNEL]) / 2;
 }
 
+// Sets a vertex the fraction weight / EDGE_WEIGHT_MAX of the way from one
+// vertex to another
 void BlendVertices(Vtx *first, Vtx *second, Vtx *result, s32 weight) {
     s32 firstWeight = EDGE_WEIGHT_MAX - weight;
 
@@ -900,6 +1029,8 @@ void BlendVertices(Vtx *first, Vtx *second, Vtx *result, s32 weight) {
         EDGE_WEIGHT_MAX;
 }
 
+// Returns the grid vertex at a vertex column and row, or the first one off the
+// grid
 Vtx *GetGridVertex(u32 column, u32 row) {
     Vtx *vertex;
 
@@ -919,10 +1050,15 @@ s16 GetGridVertexHeight(s32 column, s32 row) {
     return GetGridVertex(column, row)->v.ob[AXIS_Y];
 }
 
+// Grid vertices are half a tile apart, in world units
 #define GRID_VERTEX_WORLD_SHIFT ((GROUND_TILE_SHIFT - WORLD_TO_COURSE_SHIFT) - 1)
+// Texture coordinates step this many texels from one grid vertex to the next
 #define GRID_VERTEX_TEXEL_SPAN 32
+// The last row's t would be past the largest texture coordinate a vertex holds,
+// so it is clamped to that
 #define TEXTURE_COORDINATE_MAX 0x7FFF
 
+// Places a grid vertex flat on the grid at a height, with a gray shade
 void InitGridVertex(s32 column, s32 row, s32 height, u8 shade) {
     Vtx *vertex = GetGridVertex(column, row);
 
@@ -960,6 +1096,17 @@ void SetGridVertex(s32 column, s32 row, Vtx_t *point) {
     GetGridVertex(column, row)->v = *point;
 }
 
+// Returns the ground point at a point column and row: a grid vertex, or a
+// tile's midpoint.
+//
+// The midpoint is found through the tile's midpoints, as SetGroundPoint
+// finds it, and both kinds of point are returned from one place. Returning
+// the midpoint where it is found makes 38 words differ, 2 in shape: the
+// final sum is then local to its block, and local allocation ties it to the
+// tile's midpoints and gives the slot's lookup other registers. Indexing
+// g_WorkArea.hole.midpoints with the tile and the slot directly makes 26
+// differ, 8 in shape, as sched mixes the tile's offset into the slot's
+// lookup; returning the grid vertex first makes 13 differ.
 Vtx *GetGroundPoint(u32 column, u32 row) {
     u32 tileRow;
     u32 tileColumn;
@@ -999,6 +1146,8 @@ Vtx *GetGroundPoint(u32 column, u32 row) {
     return point;
 }
 
+// Copies a point into the ground point, and into every tile that keeps a
+// copy of it
 NO_RESULT SetGroundPoint(s32 column, s32 row, Vtx_t *point) {
     s32 blockIndex;
     s32 tileIndex;
@@ -1041,6 +1190,7 @@ NO_RESULT SetGroundPoint(s32 column, s32 row, Vtx_t *point) {
     }
 }
 
+// SetGroundPoint for just the height and shade
 NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
     s32 blockIndex;
     s32 tileIndex;
@@ -1056,6 +1206,8 @@ NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shad
                 point = &midpoints[f_PointSlots[PointSlot(row)][PointSlot(column)]];
                 point->v.ob[AXIS_Y] = height;
 
+                // The chained assignment is there to match: three separate stores,
+                // in either order, in all three places give 21 words differing
                 point->v.cn[RED_CHANNEL] = point->v.cn[GREEN_CHANNEL] = point->v.cn[BLUE_CHANNEL] =
                     shade;
             }
@@ -1069,6 +1221,8 @@ NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shad
                 point = &midpoints[f_PointSlots[GROUND_TILE_POINT_SPAN][PointSlot(column)]];
                 point->v.ob[AXIS_Y] = height;
 
+                // The chained assignment is there to match: three separate stores,
+                // in either order, in all three places give 21 words differing
                 point->v.cn[RED_CHANNEL] = point->v.cn[GREEN_CHANNEL] = point->v.cn[BLUE_CHANNEL] =
                     shade;
             }
@@ -1082,6 +1236,8 @@ NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shad
                 point = &midpoints[f_PointSlots[PointSlot(row)][GROUND_TILE_POINT_SPAN]];
                 point->v.ob[AXIS_Y] = height;
 
+                // The chained assignment is there to match: three separate stores,
+                // in either order, in all three places give 21 words differing
                 point->v.cn[RED_CHANNEL] = point->v.cn[GREEN_CHANNEL] = point->v.cn[BLUE_CHANNEL] =
                     shade;
             }
@@ -1106,6 +1262,7 @@ void InitTerrainTextures(void) {
         tile->detail = GROUND_DETAIL_MEDIUM;
         tile->midpointBlockIndex = -1;
         tile->extraPassCount = 0;
+        // Fills the image's first texels as if its rows were unpadded
         for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
             for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN; texelColumn++) {
                 tile->texels[0][(texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn] = 0x7C1;
@@ -1122,9 +1279,11 @@ void InitTerrainTextures(void) {
     BuildAllTileMidpoints();
 }
 
+// A tile's three by three grid vertices, by row and column
 #define TILE_CORNER_SPAN (GROUND_TILE_GRID_SPAN + 1)
 #define CORNER(row, column) corners[((row) * TILE_CORNER_SPAN) + (column)]
 
+// Sets a tile's midpoints between its grid vertices
 void BuildTileMidpoints(Vtx *midpoints, s32 tileColumn, s32 tileRow) {
     Vtx *corners[TILE_CORNER_SPAN * TILE_CORNER_SPAN];
     s32 cornerIndex = 0;
@@ -1155,6 +1314,7 @@ void BuildTileMidpoints(Vtx *midpoints, s32 tileColumn, s32 tileRow) {
     SetVertexMidpoint(CORNER(1, 2), CORNER(2, 1), &midpoints[TILE_MIDPOINT_ROW3_COLUMN3]);
 }
 
+// Gives every tile its own midpoints and center, and builds them
 void BuildAllTileMidpoints(void) {
     s32 tileIndex = 0;
     s32 tileRow;
@@ -1179,6 +1339,8 @@ void BuildAllTileMidpoints(void) {
     }
 }
 
+// Shows the build dates and a page of game flags, which the controller
+// moves through and sets or clears
 void UpdateFlagPanel(void) {
     char text[FLAG_PANEL_TEXT_SIZE];
     s32 row;
@@ -1284,6 +1446,7 @@ void UpdateFlagPanel(void) {
     }
 }
 
+// Returns the debug scene menu's label for a scene
 const char *GetDebugSceneLabel(Scene scene) {
     switch (scene) {
         case SCENE_FLAG_PANEL:
@@ -1323,6 +1486,7 @@ const char *GetDebugSceneLabel(Scene scene) {
     }
 }
 
+// Shows the debug scene menu and enters the chosen scene
 NO_RESULT UpdateDebugSceneMenu(void) {
     u32 selectedIndex;
     u32 entryIndex;
@@ -1409,8 +1573,11 @@ NO_RESULT UpdateDebugSceneMenu(void) {
     }
 }
 
+// Starts the search for each triangle's bounds past any corner coordinate
 #define BEYOND_ANY_COORDINATE 0x20000000
 
+// Sets each hole triangle's bounds and texture coordinates, then sets up the
+// rings
 void PrepareHoleTriangles(void) {
     Vtx_t *vertex;
     s32 triangleIndex;
@@ -1466,12 +1633,16 @@ void PrepareHoleTriangles(void) {
     InitRings();
 }
 
+// Tests whether BuildHole was linked above the first 4 MB of RAM. It
+// is not, so this returns FALSE and the debug scene menu never opens.
 Boolean IsOverlayInExpansionMemory(void) {
     return (u32)BuildHole > BASE_RDRAM_END - 1;
 }
 
+// A map texel's span in world units, which billboards are placed in
 #define GROUND_TEXEL_WORLD_SIZE (GROUND_TEXEL_SIZE >> WORLD_TO_COURSE_SHIFT)
 
+// Marks each billboard on the map image in red
 void MarkBillboardsOnMap(void) {
     s32 billboardIndex;
     u16 color = 0xF801;
@@ -1487,12 +1658,19 @@ void MarkBillboardsOnMap(void) {
     }
 }
 
+// Whether, with debugging on, the first controller asks for the scene
+// menu. It is a macro, as an inline function compiles differently from
+// the original.
 #define IsSceneMenuRequested() \
     (g_IsDebugEnabled && \
         (g_MenuControllerData[0].button & START_BUTTON) && \
         ((g_ControllerData[0].button & (START_BUTTON | L_TRIG)) == (START_BUTTON | L_TRIG)))
 
+// Runs the debug scene menu and the update routine of the current debug scene
 void UpdateDebugScenes(void) {
+    // A local, rather than the constant, to match: comparing the box's state
+    // with BOX_OPEN itself, either way round or in a nested test, gives 17
+    // words differing, 5 in shape
     AnimatedBoxState openState = BOX_OPEN;
     s32 stickStep;
 
@@ -1681,6 +1859,8 @@ void UpdateDebugScenes(void) {
     }
 }
 
+// Returns the point in a tile's slot: a grid vertex when the slot has
+// GRID_VERTEX_SLOT_FLAG, otherwise a midpoint
 Vtx *GetTileCellPoint(Vtx *midpoints, s32 tileColumn, s32 tileRow, s32 slot) {
     Vtx *vertex;
 
@@ -1699,13 +1879,17 @@ Vtx *GetTileCellPoint(Vtx *midpoints, s32 tileColumn, s32 tileRow, s32 slot) {
     return vertex;
 }
 
+// Returns the cross product of two points' offsets from an origin
 s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ, s32 secondX, s32 secondZ) {
     return ((firstX - originX) * (secondZ - originZ)) - ((firstZ - originZ) * (secondX - originX));
 }
 
+// Where FindGroundTriangle reports a point that is in no triangle
 #define GROUND_ERROR_COLUMN 10
 #define GROUND_ERROR_ROW 11
 
+// Finds the ground triangle under a point and copies its corners. Returns
+// 0, or -1 off the ground.
 s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle) {
     s32 baseColumn;
     s32 baseRow;
@@ -1716,6 +1900,8 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle) {
     s32 column;
     s32 row;
 
+    // Whether x and z are on the outer side of a triangle's edge from start to
+    // end
     inline Boolean IsOutsideEdge(Vtx * start, Vtx * end) {
         return (end->v.ob[AXIS_X] - start->v.ob[AXIS_X]) *
                 (z - (start->v.ob[AXIS_Z] << WORLD_TO_COURSE_SHIFT)) -
@@ -1812,14 +1998,20 @@ Boolean AreTrianglesDifferent(PlaneTriangle *first, PlaneTriangle *second) {
     return FALSE;
 }
 
+// The longest part of a normal whose squared length still fits in an s32,
+// and the factor by which a longer normal, and its distance, are shrunk
 #define NORMAL_PART_MAX 0x4000
 #define NORMAL_REDUCTION 256
 
+// Whether any of a normal's parts is longer than an integer plane's
+// normals may be. It is a macro, as an inline function compiles
+// differently from the original.
 #define IsNormalTooLong(normalX, normalY, normalZ) \
     ((Abs(normalX) > NORMAL_PART_MAX) || \
         (Abs(normalY) > NORMAL_PART_MAX) || \
         (Abs(normalZ) > NORMAL_PART_MAX))
 
+// Integer GetTrianglePlane. Returns 0, or -1 for a degenerate triangle.
 Outcome GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane) {
     s32 firstX;
     s32 secondX;
@@ -1834,6 +2026,10 @@ Outcome GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane) {
     s32 length;
 
     secondZ = triangle->corners[AXIS_Z][2] - triangle->corners[AXIS_Z][0];
+    // Split from the subtraction to match: as one statement, cast or written
+    // with a negation, 6 to 8 words differ, none in shape. Of the 720 orders of
+    // GetTrianglePlane's six differences with it in one statement, none
+    // matches; the best leave 2 words.
     firstY = triangle->corners[AXIS_Y][1];
     firstY -= triangle->corners[AXIS_Y][0];
     secondY = triangle->corners[AXIS_Y][2] - triangle->corners[AXIS_Y][0];
@@ -1891,6 +2087,10 @@ Outcome GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane) {
     f32 scale;
 
     secondZ = triangle->corners[AXIS_Z][2] - triangle->corners[AXIS_Z][0];
+    // Split from the subtraction to match: as one statement, cast or written
+    // with a negation, 6 to 8 words differ, none in shape. Of the 720 orders of
+    // GetTrianglePlane's six differences with it in one statement, none
+    // matches; the best leave 2 words.
     firstY = triangle->corners[AXIS_Y][1];
     firstY -= triangle->corners[AXIS_Y][0];
     secondY = triangle->corners[AXIS_Y][2] - triangle->corners[AXIS_Y][0];
@@ -1930,8 +2130,11 @@ Outcome GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane) {
     return OUTCOME_OK;
 }
 
+// GetTerrainHeight's height for a point in no ground triangle
 #define NO_GROUND_HEIGHT (-300)
 
+// Returns the ground's height at a point, clamped to the ground, or
+// NO_GROUND_HEIGHT where no ground triangle holds it
 s32 GetTerrainHeight(s32 x, s32 z) {
     PlaneTriangle triangle;
     s32 firstX;
@@ -1993,6 +2196,13 @@ s32 GetTerrainHeight(s32 x, s32 z) {
         return NO_GROUND_HEIGHT;
     }
 
+    // The first edge's far Y is read before the edges, to match: it is loaded
+    // two instructions before the rest. Subtracting it in place, in any of the
+    // 720 orders of the six edge subtractions, gives 2 or more words differing,
+    // none in shape; so does reading it into an s16, reading it after the
+    // second Z edge, or reaching each axis's corners through a row pointer.
+    // Reading all three Y corners first gives 4, and the first corner of each
+    // axis 50.
     firstEdgeEndY = triangle.corners[AXIS_Y][1];
     secondZ = triangle.corners[AXIS_Z][2] - triangle.corners[AXIS_Z][0];
     firstY = firstEdgeEndY - triangle.corners[AXIS_Y][0];
@@ -2019,6 +2229,7 @@ s32 GetGroundHeight(s32 x, s32 z) {
     return GetTerrainHeight(x, z);
 }
 
+// Returns the lower of the ground's height and the water's
 s32 GetGroundOrWaterHeight(s32 x, s32 z) {
     PlaneTriangle hit;
     f32 fraction;
@@ -2026,6 +2237,7 @@ s32 GetGroundOrWaterHeight(s32 x, s32 z) {
     s32 waterHeight;
 
     if (FindHoleTriangleHit(x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
+        // Unused, but keeps the stack frame the same size as the original
         char unusedText[0x80] UNUSED;
 
         waterHeight = WaterProbeHeight(fraction, WATER_PROBE_REACH);
@@ -2037,4 +2249,6 @@ s32 GetGroundOrWaterHeight(s32 x, s32 z) {
     return height;
 }
 
+// The original ends its rodata with 8 zero bytes that nothing in the ROM
+// references
 static const char f_UnreferencedRodata[8] = {0};

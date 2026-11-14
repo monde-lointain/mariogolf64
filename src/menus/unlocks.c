@@ -1,3 +1,8 @@
+/*
+ * The parts of the save that the title screen's button codes unlock, and a
+ * code of this file's own that nothing reads
+ */
+
 #include "menus/unlocks.h"
 
 #include <ultra64.h>
@@ -10,12 +15,20 @@
 #include "save/save.h"
 #include "save/sram.h"
 
+// GrantWinsStarsAndBadges gives a win, where there is none, in this many of the
+// first rows of the matchups
 #define GRANTED_WIN_ROW_COUNT 14
+// GrantRingShotProgressAndPoints records a clear of each hole for this many of
+// the first characters
 #define GRANTED_CLEAR_CHARACTER_COUNT 13
+// Enough to open every course but the last
 #define GRANTED_COURSE_POINTS 3000
 
+// UpdateUnusedButtonCode's sequence is this long
 #define UNUSED_CODE_LENGTH 13
+// Nothing has been held in that place of the sequence yet
 #define NO_BUTTONS (-1)
+// The channel of the sound for unlocking everything
 #define UNLOCK_SOUND_CHANNEL 13
 
 void GrantWinsStarsAndBadges(void);
@@ -64,9 +77,13 @@ void UnlockEverything(void) {
     TransferSaveData(save, TRUE);
 }
 
+// Ends with BuildCharacterGrid, which refills the grid from the save
 void GrantWinsStarsAndBadges(void) {
     SaveData *save = GetSaveData();
 
+    // The star and badge loops reuse these for the course and the hole, to
+    // match: a courseIndex and hole of their own, declared before or after
+    // these, give 34 words differing, none in shape
     s32 row;
     s32 column;
 
@@ -129,6 +146,9 @@ void GrantEveryTournamentPlace(void) {
     TransferSaveData(save, TRUE);
 }
 
+// No code calls this. Every frame that any button is held, the held buttons
+// are added to the sequence; once it matches f_UnusedCodeButtons, the save
+// is unlocked as by UnlockEverything.
 void UpdateUnusedButtonCode(void) {
     s32 index;
 

@@ -1,11 +1,8 @@
 .include "macro.inc"
-
 .set noat
 .set noreorder
 .set gp=64
-
 .section .text, "ax"
-
 glabel EntryPoint
     lui     $t0, %hi(main_BSS_START)
     addiu   $t0, $t0, %lo(main_BSS_START)
@@ -24,5 +21,4 @@ glabel EntryPoint
     jr      $t2
      addiu  $sp, $sp, %lo(nuMainStack + 0x2000)
 endlabel EntryPoint
-
     .fill 0x14

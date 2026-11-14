@@ -1,3 +1,8 @@
+/*
+ * The controller paks: finding Transfer Paks with Game Boy cartridges, the Game
+ * Boy characters on them, and starting and stopping the Rumble Paks.
+ */
+
 #include <nusys.h>
 #include <ultra64.h>
 
@@ -7,6 +12,8 @@
 #include "system/compiler.h"
 
 Boolean g_HasBroughtOverCharacter = FALSE;
+// Set until the boot logos, finding a Game Boy Pak, have once gone to the Game
+// Boy Pak transfer module
 static Boolean f_IsBootTransmitPending = TRUE;
 static s32 f_UnusedWordsAfterBootTransmitPending[2] UNUSED = {0};
 
@@ -15,6 +22,8 @@ GameBoyTransfer g_GameBoyTransfer;
 
 FILE_STATIC Boolean f_HasRumblePak[MAXCONTROLLERS];
 
+// Adds experience that a Game Boy character earned, up to what the Game Boy
+// Color version holds
 void AddGameBoyExperience(s32 gameBoyCharacterIndex, s32 experience) {
     g_GameBoyCharacters[gameBoyCharacterIndex].experience += experience;
     if (g_GameBoyCharacters[gameBoyCharacterIndex].experience > GAME_BOY_EXPERIENCE_MAX) {
@@ -34,7 +43,10 @@ char *GetGameBoyCharacterName(s32 gameBoyCharacterIndex) {
     return g_GameBoyCharacters[gameBoyCharacterIndex].name;
 }
 
+// Records the transfer mode; mode 0 also empties every Game Boy character slot
 void ResetGameBoyTransfer(TransferMode transferMode) {
+    // Storing the mode through a pointer is there to match: storing it to
+    // g_GameBoyTransfer directly gives 7 words differing, 1 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     s32 index;
 
@@ -66,6 +78,8 @@ Boolean IsBootTransmitPending(void) {
     return f_IsBootTransmitPending;
 }
 
+// Sets hasGameBoyPak if any controller holds a Transfer Pak with a Game Boy
+// cartridge in it
 void DetectGameBoyPaks(void) {
     NUContPakFile file;
     s32 index;
@@ -124,11 +138,14 @@ void StopAllRumble(void) {
     nuContRmbForceStop();
 }
 
+// StopAllRumble, logged
 void ForceStopRumble(void) {
     nuContRmbForceStop();
     osSyncPrintf("ReqForceStop\n");
 }
 
+// Never called; references the Game Boy Pak functions, perhaps so that they are
+// linked
 void ReferenceGameBoyPakFunctions(void) {
     nuContGBPakMgrInit();
     nuContGBPakGetStatus(NULL, NULL);

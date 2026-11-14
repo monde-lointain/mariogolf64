@@ -1,3 +1,7 @@
+/*
+ * Placing the first camera so that its view takes in a set of spheres.
+ */
+
 #ifndef CAMERA_FRAMING_H
 #define CAMERA_FRAMING_H
 

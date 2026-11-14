@@ -1,3 +1,10 @@
+/*
+ * Encodes the score passwords and decodes the tournament passwords. Passwords
+ * are strings of symbols from a 28-symbol alphabet. A symbol's character also
+ * depends on its position in the password, and the last symbols are checksums
+ * of the others.
+ */
+
 #include "menus/password.h"
 
 #include <stdlib.h>
@@ -9,23 +16,32 @@
 
 #define PASSWORD_SYMBOL_COUNT 28
 
+// Symbols that hold a number of up to three bytes, in base 28
 #define NUMBER_SYMBOL_COUNT 5
 
 #define TOURNAMENT_RULES_COUNT 192
 
+// Scores are stored with this added, so that they fit in SCORE_RANGE
 #define SCORE_PASSWORD_BIAS 56
 #define SCORE_RANGE 200
 #define TIME_RANGE 108000
 #define PASSWORD_GAME_BOY_LEVEL_LIMIT 100
+// A random number in this range pads the score's number
 #define SCORE_NOISE_RANGE 4600
 
+// Added to the score password's numbers to disguise them
 #define TIME_NUMBER_SALT 0x5B347F
 #define SCORE_NUMBER_SALT 0x3507F
 
+// Writes symbolCount symbols as characters. It fails with -1 on a symbol
+// outside the alphabet. Either variant writes each symbol's first
+// character.
 Outcome WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 variant);
 
 TournamentRules g_ClubTournamentRules;
 
+// Each symbol's characters. The first one is the one written; the others
+// are accepted because they look alike.
 static char *f_PasswordAlphabet[PASSWORD_SYMBOL_COUNT] = {
     "4",
     "6",
@@ -57,6 +73,7 @@ static char *f_PasswordAlphabet[PASSWORD_SYMBOL_COUNT] = {
     "H",
 };
 
+// XORed with the tournament password's bytes
 static u8 f_TournamentKey[] = "evi";
 
 static TournamentRules f_TournamentRules[TOURNAMENT_RULES_COUNT] = {
@@ -270,6 +287,23 @@ static u8 ReverseBits(u8 bits) {
     return reversed;
 }
 
+// The original keeps the fourth parameter live through the loop: no
+// pseudo there takes $a3, so i is in $t0 and each later value one
+// register higher, as global-alloc's find_reg skips a register that a
+// conflicting pseudo prefers, and only a copy of $a3 prefers it. Testing
+// the parameter around the store, with the same store in both arms, does
+// that: jump2 merges the arms after register allocation and then deletes
+// the test, a branch to the next instruction, leaving no trace in the
+// code. The arms reach the character through a pointer to the alphabet's
+// entry, which gives the entry's address a register of its own ($v0) as
+// the original does.
+//
+// The identical arms are the one form here with no other reason to
+// exist, kept as the last resort: without the test 34 words differ, 2 in
+// shape, and returning the parameter in place of 0, which also keeps it
+// live, copies $a3 to $v0. With the test and the entry read directly, 4
+// words differ, none in shape; the parameter's type, pointer walks,
+// symbol locals, helpers and u8 or u16 counters gave no closer form.
 Outcome WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 variant) {
     s32 symbolIndex;
     char **spellings;
@@ -292,6 +326,8 @@ Outcome WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 v
     return OUTCOME_OK;
 }
 
+// Reads symbolCount characters as symbols. It fails with -1 on a character
+// outside the alphabet.
 static Outcome ReadPasswordSymbols(u8 *symbols, char *password, s32 symbolCount) {
     s32 symbolIndex;
     s32 symbol;
@@ -369,6 +405,7 @@ Outcome DecodeTournamentPassword(u8 *code, char *password) {
 }
 
 void EncodeScorePassword(ScoreReport *report, char *password) {
+    // Pads the frame to match; without it 80 words differ
     u8 unusedBuffer[8] UNUSED;
     u8 symbols[SCORE_PASSWORD_LENGTH];
     ScoreReport clampedReport;

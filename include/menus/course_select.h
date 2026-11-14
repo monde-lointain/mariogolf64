@@ -1,3 +1,7 @@
+/*
+ * The Ring Shot select and the hole select.
+ */
+
 #ifndef COURSE_SELECT_H
 #define COURSE_SELECT_H
 
@@ -5,6 +9,7 @@
 
 #include "system/c_language.h"
 
+// What UpdateRingShotSelect and UpdateHoleSelect return
 enum SelectResult {
     SELECT_IDLE,
     SELECT_MOVED,

@@ -1,3 +1,8 @@
+/*
+ * The CPU's copy of the camera's matrices, which places points on the screen,
+ * and the matrix routines of view_projection.c.
+ */
+
 #ifndef VIEW_PROJECTION_H
 #define VIEW_PROJECTION_H
 
@@ -5,6 +10,7 @@
 
 #include "math/geometry.h"
 
+// SetTriangleNormal's targets
 enum NormalPlacement {
     NORMAL_ON_FIRST,
     NORMAL_ON_SECOND,
@@ -12,6 +18,7 @@ enum NormalPlacement {
     NORMAL_ON_ALL
 };
 
+// A vertex normal's largest component
 #define NORMAL_LENGTH 127.0f
 
 typedef struct ScreenPosition {
@@ -32,6 +39,7 @@ typedef struct ScreenPoint {
 void SetCpuProjection(Mtx *projection, Mtx *viewing, Vp *viewport);
 void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp *viewport);
 
+// What GetSphereVisibility returns for a sphere it can't see
 enum SphereVisibility {
     SPHERE_BEHIND_CAMERA,
     SPHERE_PAST_SIDE,

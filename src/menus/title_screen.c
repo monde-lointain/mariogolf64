@@ -1,3 +1,11 @@
+/*
+ * The title screen, MODULE_TITLE_SCREEN, which LeaveBootLogos can swap in.
+ * A or Start on any controller swaps in MODULE_MENU; otherwise it goes back to
+ * the logos after a while. Without a controller, it shows a screen asking
+ * for one and stays there. Button codes entered on the first controller
+ * unlock parts of the save or enable debugging.
+ */
+
 #include "menus/title_screen.h"
 
 #include <ultra64.h>
@@ -22,6 +30,7 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 
+// f_TitleStage values
 enum TitleState {
     TITLE_SHOWING,
     TITLE_SWAPPING_MODULES,
@@ -30,16 +39,24 @@ enum TitleState {
 
 typedef s32 TitleState;
 
+// After this many frames, the title screen goes back to the logos
 #define TITLE_IDLE_FRAME_COUNT 630
+// f_TitleFrame stops rising at this
 #define TITLE_FRAME_LIMIT 900
+// The count given to StartScreenFadeIn as the screen first appears
 #define TITLE_FADE_IN_FRAMES 8
+// The count given to StartScreenFadeOut; the stage ends once HasScreenFadeEnded
+// sees it below 2
 #define LEAVING_FADE_FRAMES 16
 
+// The asset IDs of the images
 #define ASSET_TITLE_IMAGE 0x6F4
 #define ASSET_NO_CONTROLLER_IMAGE 0x948
 #define ASSET_JAPANESE_LOGO 0x6F5
 #define ASSET_PRESS_START_TEXT 0x943
 
+// 304 by 224 RGBA16 texels, either the title or the screen asking for a
+// controller
 #define TITLE_IMAGE_WIDTH (SCREEN_WIDTH - (2 * SCREEN_BORDER))
 #define TITLE_IMAGE_HEIGHT (SCREEN_HEIGHT - (2 * SCREEN_BORDER))
 #define TITLE_STRIP_HEIGHT 6
@@ -51,6 +68,8 @@ typedef struct TitleImage {
     u16 texels[TITLE_IMAGE_WIDTH * TITLE_IMAGE_HEIGHT];
 } TitleImage;
 
+// マリオゴルフ64 ("Mario Golf 64"), 288 by 80 RGBA16 texels; read in, but never
+// drawn here
 #define JAPANESE_LOGO_WIDTH 288
 #define JAPANESE_LOGO_HEIGHT 80
 
@@ -59,6 +78,7 @@ typedef struct JapaneseLogo {
     u16 texels[JAPANESE_LOGO_WIDTH * JAPANESE_LOGO_HEIGHT];
 } JapaneseLogo;
 
+// "PRESS START", 120 by 12 four-bit intensities
 #define PRESS_START_WIDTH 120
 #define PRESS_START_HEIGHT 12
 #define PRESS_START_LEFT 100
@@ -69,19 +89,25 @@ typedef struct PressStartText {
     u8 texels[PRESS_START_WIDTH * PRESS_START_HEIGHT / 2];
 } PressStartText;
 
+// ButtonCode.progress once the code has been entered, after which it is ignored
 #define CODE_ENTERED (-1)
+// This entry of f_ButtonCodes is only read while the first controller holds Z,
+// L and R
 #define DEBUG_CODE_INDEX 3
 #define DEBUG_CODE_HELD_BUTTONS (Z_TRIG | L_TRIG | R_TRIG)
 
+// A sequence of buttons to press on the first controller. Any other button
+// pressed starts the sequence over.
 typedef struct ButtonCode {
-    char *sequence;
-    s32 progress;
+    char *sequence; // One letter for each button; see UpdateButtonCodes
+    s32 progress; // How many of the buttons have been pressed
     void (*onEntered)(void);
 } ButtonCode;
 
 void OnUnlockCodeEntered(void);
 void EnableDebug(void);
 
+// The frames since the title screen appeared
 static s32 f_TitleFrame = 0;
 static TitleState f_TitleStage = TITLE_SHOWING;
 static ButtonCode f_ButtonCodes[] = {
@@ -90,11 +116,14 @@ static ButtonCode f_ButtonCodes[] = {
     {"UUDUDDUDLLRLRRLR", 0, GrantEveryTournamentPlace},
     {"BBuududdudllrlrrlrBBlr", 0, EnableDebug},
 };
+// Never read or written
 static s32 f_TitleUnusedWord UNUSED = 0;
+// "PRESS START" turns from red to green and back as this goes round
 static f32 f_PressStartPhase = 0.0f;
 
 static u8 f_UnusedBufferAfterStartPhase[0x20] UNUSED;
 static TitleImage f_TitleImage;
+// Read by no routine; two objects, as one would be aligned to 16 bytes
 static u8 f_UnusedBytesAfterTitleImage[8] UNUSED;
 static u8 f_UnusedBufferAfterTitleImage[0x9800] UNUSED;
 
@@ -112,6 +141,7 @@ void EnableDebug(void) {
     g_IsDebugEnabled = TRUE;
 }
 
+// Ends the round after the hole with the staff roll. No code calls this
 void ShowStaffRollAfterHole(void) {
     SetGameFlag(GAME_FLAG_END_ROUND_AFTER_HOLE);
     SetGameFlag(GAME_FLAG_SHOW_STAFF_ROLL);
@@ -125,6 +155,9 @@ void ResetButtonCodes(void) {
     }
 }
 
+// Each letter of a sequence names a button: 'U', 'D', 'L' and 'R' those of
+// the control pad, and their lower cases the C buttons. 'A' is matched by
+// the B button, the same as 'B'; A itself starts the game.
 void UpdateButtonCodes(void) {
     u32 codeIndex;
     s32 progress;
@@ -249,10 +282,14 @@ void UnloadTitleScreen(void) {
     SetFillColor(0, 0, 0);
 }
 
+// Whether the title screen goes back to the logos: on B with debugging
+// on, or once it has idled long enough. It is a macro, as an inline
+// function compiles differently from the original.
 #define IsLeavingForLogos(pressedButtons) \
     ((((pressedButtons) & B_BUTTON) && g_IsDebugEnabled) || \
         (f_TitleFrame == TITLE_IDLE_FRAME_COUNT))
 
+// With g_IsDebugEnabled set, B also starts going back to the logos
 void UpdateTitleScreen(void) {
     s32 pressedButtons;
     s32 controllerIndex;

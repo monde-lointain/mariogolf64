@@ -1,3 +1,8 @@
+/*
+ * Math helpers: vector lengths in floats and integers, the random number
+ * generator and a CRC-16.
+ */
+
 #include "math/math_util.h"
 
 #include <math.h>
@@ -6,10 +11,14 @@
 #include "system/c_language.h"
 #include "system/compiler.h"
 
+// The integer lengths halve their components until they are below this
+// magnitude
 #define INT_LENGTH_COMPONENT_LIMIT 0x20000000
+// Whether -INT_LENGTH_COMPONENT_LIMIT <= value < INT_LENGTH_COMPONENT_LIMIT
 #define IsSmallComponent(value) \
     ((u32)(value) - INT_LENGTH_COMPONENT_LIMIT >= (u32)(-2 * INT_LENGTH_COMPONENT_LIMIT))
 
+// CRC-16/X.25: reflected CCITT polynomial, all ones in and inverted out
 #define CRC16_REFLECTED_POLYNOMIAL 0x8408
 #define CRC16_INITIAL_VALUE 0xFFFF
 
@@ -17,6 +26,8 @@ static s32 f_RandomSeed = 0;
 static f32 f_ZeroDivisor = 0.0f;
 static s32 f_UnusedWordsAfterZeroDivisor[2] UNUSED = {0};
 
+// Halves the components until they are small enough, and doubles the length
+// back
 u32 IntLength3D(s32 x, s32 y, s32 z) {
     s32 shiftCount;
 
@@ -39,6 +50,7 @@ u32 IntLength3D(s32 x, s32 y, s32 z) {
     return (u32)sqrt(((f64)x * x) + ((f64)y * y) + ((f64)z * z)) << shiftCount;
 }
 
+// The same in two dimensions
 u32 IntLength2D(s32 x, s32 y) {
     s32 shiftCount;
 
@@ -58,6 +70,7 @@ u32 IntLength2D(s32 x, s32 y) {
     return (u32)sqrt(((f64)x * x) + ((f64)y * y)) << shiftCount;
 }
 
+// The random generator that NextRandom steps
 void SetRandomSeed(s32 seed) {
     f_RandomSeed = seed;
 }
@@ -74,6 +87,7 @@ f32 Length3D(f32 x, f32 y, f32 z) {
     return sqrtf((x * x) + (y * y) + (z * z));
 }
 
+// The CRC-16 of size bytes, which it also prints to the host
 u16 ComputeCrc16(u8 *bytes, u32 size) {
     u32 crc;
     u32 bitIndex;
@@ -81,6 +95,9 @@ u16 ComputeCrc16(u8 *bytes, u32 size) {
 
     crc = CRC16_INITIAL_VALUE;
     if (size != 0) {
+        // The original adds the size to the address, size first; pointer
+        // arithmetic, as data + size, size + data, &data[size] or AddressPast,
+        // adds the address first, which leaves 2 words differing
         end = (u8 *)(size + (u32)bytes);
         do {
             crc ^= *bytes;
@@ -104,6 +121,9 @@ u16 ComputeCrc16(u8 *bytes, u32 size) {
     return crc;
 }
 
+// Prints the caller, then forces a CPU exception: truncating the infinite
+// quotient to an integer is an unimplemented operation, which the FPU cannot
+// mask
 s32 ReportDivisionError(void) {
     u32 returnAddress;
 

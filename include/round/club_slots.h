@@ -1,3 +1,7 @@
+/*
+ * Club Slots, the slot machine that fills each player's bag before play
+ */
+
 #ifndef CLUB_SLOTS_H
 #define CLUB_SLOTS_H
 

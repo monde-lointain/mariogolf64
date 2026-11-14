@@ -1,3 +1,7 @@
+/*
+ * The panel that shows the selected club and the shot mode.
+ */
+
 #ifndef CLUB_PANEL_H
 #define CLUB_PANEL_H
 
@@ -6,6 +10,7 @@
 #include "system/asset.h"
 #include "system/c_language.h"
 
+// The panel image buffer that is shown
 extern ImageAsset *g_ClubPanelImage;
 
 void UpdateClubPanelDebugValue(void);

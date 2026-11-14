@@ -1,3 +1,9 @@
+/*
+ * The billboards that stand for a hole's trees: placing them on the ground,
+ * sorting them by depth and drawing them, translucent close to the camera. The
+ * file also reads and writes files on the host.
+ */
+
 #include "course/billboard.h"
 
 #include <string.h>
@@ -23,12 +29,17 @@
 #include "system/host_file.h"
 #include "system/memory_address.h"
 
+// Textures of this type are read from the asset archive when first drawn
 #define TEXTURE_LOADED_ON_DEMAND 2
 
+// Vertices per billboard shape, of which the first four form its quad
 #define SHAPE_VERTEX_COUNT 8
 
+// f_LoadedTextureIndex while no texture is loaded, so that the next billboard
+// drawn loads its own
 #define NO_TEXTURE_LOADED (-1)
 
+// Room for the file name in a host command, including padding
 #define HOST_FILE_NAME_SIZE_MAX 0x100
 
 typedef struct BillboardTexture {
@@ -39,9 +50,11 @@ typedef struct BillboardTexture {
     u16 *pixels;
 } BillboardTexture;
 
+// The size of every billboard texture, in texels
 #define BILLBOARD_TEXTURE_WIDTH 32
 #define BILLBOARD_TEXTURE_HEIGHT 64
 
+// A texture read from an asset when first drawn
 #define BILLBOARD_TEXTURE(assetId) \
     {(assetId), TEXTURE_LOADED_ON_DEMAND, BILLBOARD_TEXTURE_WIDTH, BILLBOARD_TEXTURE_HEIGHT, NULL}
 
@@ -80,7 +93,7 @@ static BillboardTexture f_BillboardTextures[BILLBOARD_TEXTURE_COUNT] = {
     BILLBOARD_TEXTURE(0x405),
     BILLBOARD_TEXTURE(0x406),
     BILLBOARD_TEXTURE(0x407),
-    BILLBOARD_TEXTURE(0x407),
+    BILLBOARD_TEXTURE(0x407), // Again, where 0x408 would follow
     BILLBOARD_TEXTURE(0x409),
     BILLBOARD_TEXTURE(0x40A),
     BILLBOARD_TEXTURE(0x40B),
@@ -116,25 +129,36 @@ static u8 *f_HeapEnd = NULL;
 static u16 f_DrawOrder[BILLBOARD_COUNT] = {0};
 static s8 f_UnusedBytesAfterDrawOrder[2] UNUSED = {1, 1};
 
+// Billboards this close to the course's edges are hidden
 #define COURSE_EDGE_X_MIN 256.0f
 #define COURSE_EDGE_Z_MIN 256.0f
 #define COURSE_EDGE_X_MAX 3840.0f
 #define COURSE_EDGE_Z_MAX 7936.0f
 
+// GetGroundHeight works in fixed point with 10 fraction bits
 #define GROUND_HEIGHT_SCALE 1024
 
+// GetViewDepth gives billboards closer than this to the camera a depth
+// between it and 0
 #define VIEW_DEPTH_NEAR (-0x800)
 
+// Depth given to the ball when no billboard needs to stay out of its way
 #define VIEW_DEPTH_BALL_HIDDEN (-0xFFFF)
 
+// The least opacity of a billboard close to the camera
 #define NEAR_BILLBOARD_ALPHA_MIN 0x80
 
+// Billboards are only lit from a light at least this high
 #define LIGHT_HEIGHT_MIN 0.1f
 
+// In the debug view, near billboards this close in front of the ball are
+// not drawn
 #define BALL_CLEARANCE_DEPTH 100
 
+// Depth of unused billboards, behind every used one
 #define VIEW_DEPTH_FAR 0x40000000
 
+// Like G_RM_ZB_XLU_SURF2, but also updating the depth buffer
 #define BILLBOARD_RENDER_MODE_BLENDED2 \
     (Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL | \
         GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA))
@@ -170,9 +194,14 @@ void RevertBillboardManager(void) {
     f_IsHeapReady = TRUE;
 }
 
+// The initial values of the colors local to DrawBillboards and
+// DrawFadingBillboards, which both copy
 const RgbColor g_BillboardLightColor = {255, 220, 160};
 const RgbColor g_BillboardEnvColor = {128, 64, 32};
 
+// Whether a point is near the edge of a course; no point of the
+// mini-golf course is. It is a macro, as an inline function compiles
+// differently from the original.
 #define IsNearCourseEdge(x, z) \
     (!g_GameState.isMiniGolf && \
         (((x) <= COURSE_EDGE_X_MIN) || \
@@ -233,6 +262,7 @@ void SortBillboardsByDepth(void) {
         }
     }
 
+    // Insertion sort, farthest first
     for (orderIndex = 1; orderIndex != BILLBOARD_COUNT; orderIndex++) {
         insertedIndex = f_DrawOrder[orderIndex];
         for (sortedIndex = orderIndex - 1; sortedIndex >= 0 &&
@@ -246,6 +276,9 @@ void SortBillboardsByDepth(void) {
     }
 }
 
+// Whether a billboard's texture is one read in on demand, has been read
+// and is not the one loaded for drawing. It is a macro, as an inline function
+// compiles differently from the original.
 #define NeedsTextureLoad(billboard, textureIndex) \
     (((billboard)->textureIndex != f_LoadedTextureIndex) && \
         (f_BillboardTextures[textureIndex].loadMode == TEXTURE_LOADED_ON_DEMAND) && \
@@ -326,12 +359,17 @@ void DrawBillboard(
     *displayListHead = gfx;
 }
 
+// Draws the billboards. Those far from the camera are drawn first, from
+// the nearest to the farthest; DrawFadingBillboards draws the close ones
+// that need to stay see-through. Here, the close ones are only drawn when
+// they stay opaque.
 void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
     Gfx *gfx = g_DisplayListHead;
     RgbColor lightColor UNUSED = g_BillboardLightColor;
     RgbColor envColor = g_BillboardEnvColor;
     Vec3 viewDirection;
     Vec3 lightDirection;
+    // Nothing uses it, but the original's frame has the room for it
     Vec3 unusedVector UNUSED;
     Radians lightPitch;
     Radians lightYaw;
@@ -530,6 +568,11 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
             continue;
         }
 
+        // Never true, as this loop draws no fading billboard that would set
+        // the flag, and the compiler drops the test: it only leaves the
+        // flag's unread register and 16 unused bytes of the frame. So the
+        // mode restored here is a guess; the match needs the test against
+        // TRUE, the flag cleared and any command drawn
         if (hasTranslucentMode == TRUE && alpha == OPAQUE_ALPHA) {
             hasTranslucentMode = FALSE;
             gDPPipeSync(gfx++);
@@ -555,9 +598,15 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
     g_DisplayListHead = gfx;
 }
 
+// Whether the billboards are hidden: by the game flag, while their heap
+// is not ready, or by the debug view. It is a macro, as an inline
+// function compiles differently from the original.
 #define AreBillboardsHidden() \
     (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !f_IsHeapReady || IsDebugBButtonView())
 
+// Draws the billboards close to the camera, translucent so that the camera
+// can see through them, from the farthest to the nearest. Those farther
+// than the ball stay opaque.
 void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex) {
     Gfx *gfx = g_DisplayListHead;
     RgbColor lightColor UNUSED = g_BillboardLightColor;
@@ -617,6 +666,8 @@ void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex) {
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);
 
+    // The blended mode set here is not the translucent surface mode that the
+    // loop switches to
     hasTranslucentMode = FALSE;
     gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, BILLBOARD_RENDER_MODE_BLENDED2);
     gDPPipeSync(gfx++);
@@ -689,6 +740,9 @@ void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex) {
     g_DisplayListHead = gfx;
 }
 
+// Development hardware could pass files to the host computer. These two
+// routines remain from that, but send their commands nowhere.
+
 enum HostCommand {
     HOST_COMMAND_WRITE_FILE = 10,
     HOST_COMMAND_READ_FILE
@@ -701,12 +755,14 @@ s32 WriteHostFile(const char *fileName, u32 size) {
     s32 result;
 
     if (size == 0) {
+        // "The transfer size is too small."
         osSyncPrintf("転送サイズが小さいです。");
         return HOST_FILE_SIZE_TOO_SMALL;
     }
 
     nameSize = strlen(fileName);
     if (nameSize == 0) {
+        // "The file name is too short"
         osSyncPrintf("ファイル名が短すぎます");
         return HOST_FILE_NAME_TOO_SHORT;
     }
@@ -724,6 +780,7 @@ s32 WriteHostFile(const char *fileName, u32 size) {
         result = HOST_FILE_OK;
     }
     else {
+        // "The file name is too long"
         osSyncPrintf("ファイル名が長すぎます");
         result = HOST_FILE_NAME_TOO_LONG;
     }
@@ -755,6 +812,7 @@ s32 ReadHostFile(const char *fileName, u32 *size) {
     *command = nameSize;
     if (*command == 0) {
         *size = 0;
+        // "The file has no data."
         osSyncPrintf("ファイルにデータがありません。");
     }
 

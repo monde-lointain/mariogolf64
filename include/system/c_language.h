@@ -1,8 +1,21 @@
+/*
+ * Names that the game's C uses as though the language had them: boolean
+ * types, the result of an operation that can fail, and the sizes of arrays,
+ * members and bytes.
+ *
+ * An enum whose values variables hold is paired with a typedef of the
+ * integer type that the original stores them in, which the variables take.
+ * The enum's own type would be an int, and unsigned if no constant is
+ * negative, either of which compiles to different code from the original's.
+ */
+
 #ifndef C_LANGUAGE_H
 #define C_LANGUAGE_H
 
 #include <ultra64.h>
 
+// Zero is false and any other value true, as C tests it. The sized forms
+// match the original's storage for a flag.
 typedef s32 Boolean;
 typedef u32 UBoolean;
 typedef s16 Boolean16;
@@ -18,12 +31,13 @@ enum Outcome {
 typedef s32 Outcome;
 
 #define ARRAY_COUNT(array) (s32)(sizeof(array) / sizeof((array)[0]))
-
+// The size of a struct member, without an instance to apply sizeof to
 #define MemberSize(type, member) (s32)sizeof(((type *)0)->member)
+// How many bytes into a struct a member starts
 #define MemberOffset(type, member) ((u32) & ((type *)0)->member)
 
 #define BITS_PER_BYTE 8
-
+// The largest s32 value
 #define S32_MAX 0x7FFFFFFF
 
 #endif
