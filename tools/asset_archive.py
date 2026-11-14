@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+"""Split the asset archive into its assets, or pack them into it again.
+
+    asset_archive.py split ARCHIVE DIRECTORY
+    asset_archive.py pack DIRECTORY ARCHIVE
+
+The archive begins with a table of each asset's size and its offset from
+the archive's start, eight bytes an asset, which ReadAssetFileBounds
+indexes by asset ID. The assets follow in the order of their IDs, each
+padded with zeros to a multiple of eight bytes.
+
+split writes each asset to DIRECTORY as its ID in three hexadecimal
+digits, such as 688.bin for ASSET_PLACES. pack reads them back in that
+order, so an asset can change size, but a new one must take the next ID.
+"""
+
+import struct
+import sys
+from pathlib import Path
+from typing import cast
+
+TABLE_ENTRY = struct.Struct(">iI")  # An asset's size, then its offset
+ASSET_ALIGNMENT = 8
+ARCHIVE_ALIGNMENT = 16
+ASSET_NAME_DIGITS = 3
+ASSET_SUFFIX = ".bin"
+# The original's writer filled a buffer of this many bytes and wrote it out
+# each time it was full. It padded the archive to ARCHIVE_ALIGNMENT without
+# clearing the buffer, so the padding repeats the bytes this far before it.
+WRITE_BUFFER_SIZE = 0x2000
+
+USAGE_EXIT = 2
+ARGUMENT_COUNT = 4
+
+
+def padding_to(size: int, alignment: int) -> int:
+    """Return how many bytes bring SIZE up to a multiple of ALIGNMENT."""
+    return -size % alignment
+
+
+def read_entry(archive: bytes, asset_id: int) -> tuple[int, int]:
+    """Return the size and offset that ARCHIVE's table gives an asset."""
+    entry = TABLE_ENTRY.unpack_from(archive, asset_id * TABLE_ENTRY.size)
+    return cast("tuple[int, int]", entry)
+
+
+def split(archive: bytes, directory: Path) -> None:
+    """Write each asset of ARCHIVE to its own file in DIRECTORY."""
+    # The first asset follows the table, so its offset is the table's size
+    _, table_size = read_entry(archive, 0)
+    directory.mkdir(parents=True, exist_ok=True)
+    for asset_id in range(table_size // TABLE_ENTRY.size):
+        size, offset = read_entry(archive, asset_id)
+        name = f"{asset_id:0{ASSET_NAME_DIGITS}X}{ASSET_SUFFIX}"
+        _ = (directory / name).write_bytes(archive[offset : offset + size])
+
+
+def read_assets(directory: Path) -> list[bytes]:
+    """Return the assets in DIRECTORY in the order of their IDs."""
+    paths = sorted(
+        directory.glob(f"*{ASSET_SUFFIX}"), key=lambda path: int(path.stem, 16)
+    )
+    if not paths:
+        sys.exit(f"expected the assets in {directory}; run make extract")
+    for asset_id, path in enumerate(paths):
+        if int(path.stem, 16) != asset_id:
+            sys.exit(
+                f"expected asset {asset_id:X} in {directory}, but found {path.name}"
+            )
+    return [path.read_bytes() for path in paths]
+
+
+def pack(assets: list[bytes]) -> bytes:
+    """Return the archive that holds ASSETS."""
+    table = bytearray()
+    body = bytearray()
+    table_size = len(assets) * TABLE_ENTRY.size
+    for asset in assets:
+        table += TABLE_ENTRY.pack(len(asset), table_size + len(body))
+        body += asset
+        body += bytes(padding_to(len(asset), ASSET_ALIGNMENT))
+
+    archive = table + body
+    for _ in range(padding_to(len(archive), ARCHIVE_ALIGNMENT)):
+        stale = len(archive) - WRITE_BUFFER_SIZE
+        archive.append(archive[stale] if stale >= 0 else 0)
+    return bytes(archive)
+
+
+def main() -> None:
+    """Split or pack the archive that the command line names."""
+    if len(sys.argv) != ARGUMENT_COUNT or sys.argv[1] not in {"split", "pack"}:
+        print(__doc__, file=sys.stderr)
+        sys.exit(USAGE_EXIT)
+    if sys.argv[1] == "split":
+        split(Path(sys.argv[2]).read_bytes(), Path(sys.argv[3]))
+    else:
+        out = Path(sys.argv[3])
+        out.parent.mkdir(parents=True, exist_ok=True)
+        _ = out.write_bytes(pack(read_assets(Path(sys.argv[2]))))
+
+
+if __name__ == "__main__":
+    main()

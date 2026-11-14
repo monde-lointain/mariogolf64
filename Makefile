@@ -120,6 +120,8 @@ endif
 ROM         := $(BUILD_DIR)/$(TARGET).z64
 # The cartridge's size, which 0xFF fills after the last asset
 ROM_SIZE    := 0x2000000
+# Where the asset archive's assets are split to, one file each
+ARCHIVE_DIR := assets/asset_archive
 ELF         := $(BUILD_DIR)/$(TARGET).elf
 MAP         := $(BUILD_DIR)/$(TARGET).map
 
@@ -235,6 +237,7 @@ endif
 extract:
 	$(PYTHON) -m splat split $(SPLAT_YAML)
 	$(PYTHON) tools/extract_textures.py
+	$(PYTHON) tools/asset_archive.py split assets/asset_archive.bin $(ARCHIVE_DIR)
 
 setup: tools extract
 
@@ -359,6 +362,14 @@ $(BUILD_DIR)/asm/data/%.s.o: asm/data/%.s
 
 $(BUILD_DIR)/%.bin.o: %.bin
 	@mkdir -p $(dir $@)
+	$(OBJCOPY) -I binary -O $(BIN_FORMAT) -B mips $< $@
+
+# The asset archive is packed from the assets that asset_archive.py splits
+# it into, so that one can change without the table being worked out again
+$(BUILD_DIR)/assets/asset_archive.bin: $(wildcard $(ARCHIVE_DIR)/*.bin) tools/asset_archive.py
+	$(PYTHON) tools/asset_archive.py pack $(ARCHIVE_DIR) $@
+
+$(BUILD_DIR)/assets/asset_archive.bin.o: $(BUILD_DIR)/assets/asset_archive.bin
 	$(OBJCOPY) -I binary -O $(BIN_FORMAT) -B mips $< $@
 
 # Textures in C data come from PNGs that extract_textures.py writes to
