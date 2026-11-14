@@ -739,10 +739,8 @@ Boolean HasWonFinalChallenge(void) {
     return FALSE;
 }
 
-#define UNLOCK_NOTICE_DONKEY_KONG 0
-#define UNLOCK_NOTICE_MAPLE 1
-#define UNLOCK_NOTICE_METAL_MARIO 2
-#define UNLOCK_NOTICE_RING_SHOT_COURSE_BASE 2
+// The count of opened ring shot courses starts at 1.
+#define UNLOCK_NOTICE_RING_SHOT_COURSE_BASE (UNLOCK_NOTICE_COURSES - 1)
 
 #define PLAYER_CHARACTER_SLOT 0
 #define TOURNAMENT_HALF_TURN_HOLE 9
@@ -1584,7 +1582,7 @@ DIM_BACKDROP:
                                     TallyCoursePoints();
                                     FreeScorecard();
                                     SetMenuBackdrop(MENU_BACKDROP_STILL);
-                                    OpenRoundResults(FALSE);
+                                    OpenRoundResults(OPEN_ROUND_RESULTS);
                                 }
                                 else {
                                     f_HoleEndStep = HOLE_END_STEP_WIPE_OUT;

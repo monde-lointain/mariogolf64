@@ -36,7 +36,6 @@
 #include "text.h"
 #include "tournament.h"
 #include "transfer_pak.h"
-#define CLOSE_ROUND_RESULTS (-1)
 
 enum ResultsState {
     RESULTS_SLIDING_IN,
@@ -66,15 +65,6 @@ enum BannerState {
 };
 
 typedef s32 BannerState;
-
-enum UnlockNotice {
-    UNLOCK_NOTICE_DONKEY_KONG,
-    UNLOCK_NOTICE_MAPLE,
-    UNLOCK_NOTICE_METAL_MARIO,
-    UNLOCK_NOTICE_COURSES
-};
-
-typedef s32 UnlockNotice;
 
 enum UnlockNoticeKind {
     UNLOCK_NOTICE_KIND_NONE,
@@ -354,7 +344,7 @@ s32 SumCoursePointsNeeded(CourseIndex courseIndex) {
     return total;
 }
 
-void OpenRoundResults(s32 request) {
+void OpenRoundResults(RoundResultsRequest request) {
     if (request == CLOSE_ROUND_RESULTS) {
         FreeRoundResults();
         return;
