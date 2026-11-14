@@ -2325,9 +2325,9 @@ void UpdateBestShots(void) {
 #define RECORD_COURSE_STRIP_SPACING 20
 #define RECORD_COURSE_NAME_X 120
 #define RECORD_COURSE_NAME_Y 180
-#define RECORD_DETAIL_X 200
-#define RECORD_DETAIL_Y 204
-#define MESSAGE_RECORD_DETAIL 0x76
+#define RECORD_HOLE_X 200
+#define RECORD_HOLE_Y 204
+#define MESSAGE_HOLE_NUMBER 0x76
 #define NO_RECORDS_X 160
 #define NO_RECORDS_Y 192
 #define MESSAGE_NO_RECORDS 0x16E
@@ -2536,9 +2536,9 @@ void DrawBestShots(Gfx **displayListHead) {
             0
         );
         SetTextSlot(
-            RECORD_DETAIL_X,
-            RECORD_DETAIL_Y,
-            MESSAGE_RECORD_DETAIL,
+            RECORD_HOLE_X,
+            RECORD_HOLE_Y,
+            MESSAGE_HOLE_NUMBER,
             TEXT_SLOT_LARGE_FONT,
             1,
             0,

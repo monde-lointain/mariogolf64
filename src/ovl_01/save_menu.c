@@ -2011,7 +2011,7 @@ const char f_SaveMenuNameFormat[] = "%s";
 #define FIRST_PEACHS_CASTLE_MINI_GOLF_COURSE (MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD)
 #define SAVED_GAME_HOLE_X 180
 #define SAVED_GAME_HOLE_Y 203
-#define MESSAGE_SAVED_GAME_HOLE 0x76
+#define MESSAGE_HOLE_NUMBER 0x76
 #define CONTROLLER_PROMPT_X 70
 #define CONTINUE_PROMPT_X 54
 #define PROMPT_Y 184
@@ -2430,7 +2430,7 @@ void DrawSavedGames(Gfx **displayListHead) {
             SetTextSlot(
                 SAVED_GAME_HOLE_X,
                 SAVED_GAME_HOLE_Y,
-                MESSAGE_SAVED_GAME_HOLE,
+                MESSAGE_HOLE_NUMBER,
                 TEXT_SLOT_LARGE_FONT,
                 1,
                 0,
