@@ -355,7 +355,7 @@ void GiveSlotClubs(s32 playerIndex) {
     Player *player;
     s32 starCount;
     s32 index;
-    s32 slot;
+    s32 clubSlot;
     s32 symbolIndex;
     s32 symbol;
 
@@ -391,14 +391,14 @@ void GiveSlotClubs(s32 playerIndex) {
     }
 
     if (starCount == REEL_COUNT) {
-        for (slot = 0; slot != CLUB_SYMBOL_COUNT; slot++) {
+        for (clubSlot = 0; clubSlot != CLUB_SYMBOL_COUNT; clubSlot++) {
             if (player->characterIndex >= CHARACTER_CLUB_SET_COUNT) {
-                player->clubs[slot] =
+                player->clubs[clubSlot] =
                     ((player->gameBoyCharacterIndex + CHARACTER_CLUB_SET_COUNT) * CLUB_SET_SIZE) +
-                    slot;
+                    clubSlot;
             }
             else {
-                player->clubs[slot] = (player->characterIndex * CLUB_SET_SIZE) + slot;
+                player->clubs[clubSlot] = (player->characterIndex * CLUB_SET_SIZE) + clubSlot;
             }
         }
 

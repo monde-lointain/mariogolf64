@@ -897,7 +897,7 @@ void PlanClubAndTarget(CoursePoint target) {
     ShotMode shotMode;
     u32 kind;
     s32 rest;
-    s32 slot;
+    s32 clubSlot;
     Club *club;
 
     clubType = CLUB_TYPE_DRIVER;
@@ -913,12 +913,12 @@ void PlanClubAndTarget(CoursePoint target) {
                 rest = rest * RAINY_PUTT_DISTANCE_SCALE;
             }
 
-            for (slot = 0; slot < f_ClubCount; slot++) {
-                if (!f_IsClubUsable[slot]) {
+            for (clubSlot = 0; clubSlot < f_ClubCount; clubSlot++) {
+                if (!f_IsClubUsable[clubSlot]) {
                     continue;
                 }
 
-                club = GetClub(g_Players[f_Shot.playerIndex].clubs[slot]);
+                club = GetClub(g_Players[f_Shot.playerIndex].clubs[clubSlot]);
                 if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
                     continue;
                 }
@@ -934,7 +934,7 @@ void PlanClubAndTarget(CoursePoint target) {
                 }
 
                 osSyncPrintf("skSCAI.powermode = %d\n", f_Shot.shotMode);
-                f_Shot.clubSlot = slot;
+                f_Shot.clubSlot = clubSlot;
             }
 
             break;
@@ -2457,11 +2457,11 @@ EVALUATE:
 }
 
 s32 FindClubSlot(s32 unused UNUSED, ClubType clubType) {
-    s32 slot;
+    s32 clubSlot;
 
-    for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
-        if (GetClub(g_Players[f_Shot.playerIndex].clubs[slot])->type == clubType) {
-            return slot;
+    for (clubSlot = 0; clubSlot < CLUB_SLOT_COUNT; clubSlot++) {
+        if (GetClub(g_Players[f_Shot.playerIndex].clubs[clubSlot])->type == clubType) {
+            return clubSlot;
         }
     }
 
@@ -2474,18 +2474,18 @@ s32 FindClubSlot(s32 unused UNUSED, ClubType clubType) {
 ClubType ChooseClubForDistance(s32 distance) {
     s32 fallback = CLUB_TYPE_SAND_WEDGE;
     ClubType type;
-    s32 slot;
+    s32 clubSlot;
     Club *club;
     s32 carry;
     s32 rating;
 
     for (type = CLUB_TYPE_SAND_WEDGE; type >= 0; type--) {
-        slot = FindClubSlot(f_Shot.playerIndex, type);
-        if (!f_IsClubUsable[slot]) {
+        clubSlot = FindClubSlot(f_Shot.playerIndex, type);
+        if (!f_IsClubUsable[clubSlot]) {
             continue;
         }
 
-        club = GetClub(g_Players[f_Shot.playerIndex].clubs[slot]);
+        club = GetClub(g_Players[f_Shot.playerIndex].clubs[clubSlot]);
         carry = GetShotWorldDistance(club, SHOT_MODE_NORMAL);
         if (g_HoleSetup.conditions.isRaining == TRUE &&
             ShotGolferTraits().consistency < CONSISTENCY_HIGH) {
@@ -2500,7 +2500,7 @@ ClubType ChooseClubForDistance(s32 distance) {
             }
         }
 
-        fallback = slot;
+        fallback = clubSlot;
         if (distance < carry) {
             return type;
         }

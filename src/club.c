@@ -4338,7 +4338,7 @@ void GetLieSpan(Club *club, Surface surface, s32 *span, ShotMode shotMode) {
 
 s32 StepToClubChoice(CurrentShot *targetShot) {
     Boolean hasStepped = FALSE;
-    s32 slot;
+    s32 clubSlot;
 
     if (g_CurrentShot.shotMode == targetShot->shotMode &&
         g_CurrentShot.clubSlot == targetShot->clubSlot) {
@@ -4366,11 +4366,11 @@ s32 StepToClubChoice(CurrentShot *targetShot) {
     if (!hasStepped) {
         if (targetShot->clubSlot > g_CurrentShot.clubSlot) {
             PlaySound(SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
-            for (slot = g_CurrentShot.clubSlot + 1; slot < CLUB_SLOT_COUNT; slot++) {
-                if (g_Players[g_CurrentShot.playerIndex].clubs[slot] != NO_CLUB &&
-                    (g_Clubs[g_Players[g_CurrentShot.playerIndex].clubs[slot]].surfaceMask &
+            for (clubSlot = g_CurrentShot.clubSlot + 1; clubSlot < CLUB_SLOT_COUNT; clubSlot++) {
+                if (g_Players[g_CurrentShot.playerIndex].clubs[clubSlot] != NO_CLUB &&
+                    (g_Clubs[g_Players[g_CurrentShot.playerIndex].clubs[clubSlot]].surfaceMask &
                         GetCurrentSurfaceClubMask(FALSE))) {
-                    g_CurrentShot.clubSlot = slot;
+                    g_CurrentShot.clubSlot = clubSlot;
                     hasStepped = TRUE;
                     break;
                 }
@@ -4382,11 +4382,11 @@ s32 StepToClubChoice(CurrentShot *targetShot) {
         }
         else if (targetShot->clubSlot < g_CurrentShot.clubSlot) {
             PlaySound(SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
-            for (slot = g_CurrentShot.clubSlot - 1; slot >= 0; slot--) {
-                if (g_Players[g_CurrentShot.playerIndex].clubs[slot] != NO_CLUB &&
-                    (g_Clubs[g_Players[g_CurrentShot.playerIndex].clubs[slot]].surfaceMask &
+            for (clubSlot = g_CurrentShot.clubSlot - 1; clubSlot >= 0; clubSlot--) {
+                if (g_Players[g_CurrentShot.playerIndex].clubs[clubSlot] != NO_CLUB &&
+                    (g_Clubs[g_Players[g_CurrentShot.playerIndex].clubs[clubSlot]].surfaceMask &
                         GetCurrentSurfaceClubMask(FALSE))) {
-                    g_CurrentShot.clubSlot = slot;
+                    g_CurrentShot.clubSlot = clubSlot;
                     hasStepped = TRUE;
                     break;
                 }
@@ -4402,28 +4402,28 @@ s32 StepToClubChoice(CurrentShot *targetShot) {
 }
 
 void HandleClubInput(void) {
-    s32 slot;
+    s32 clubSlot;
     u16 buttons;
 
     if (IsShotModeChangeDone()) {
         buttons = g_MenuControllerData[g_CurrentShot.controllerIndex].button;
         if (buttons & D_JPAD) {
-            for (slot = g_CurrentShot.clubSlot + 1; slot < CLUB_SLOT_COUNT; slot++) {
-                if (g_Players[g_CurrentShot.playerIndex].clubs[slot] != NO_CLUB &&
-                    (g_Clubs[g_Players[g_CurrentShot.playerIndex].clubs[slot]].surfaceMask &
+            for (clubSlot = g_CurrentShot.clubSlot + 1; clubSlot < CLUB_SLOT_COUNT; clubSlot++) {
+                if (g_Players[g_CurrentShot.playerIndex].clubs[clubSlot] != NO_CLUB &&
+                    (g_Clubs[g_Players[g_CurrentShot.playerIndex].clubs[clubSlot]].surfaceMask &
                         GetCurrentSurfaceClubMask(FALSE))) {
-                    g_CurrentShot.clubSlot = slot;
+                    g_CurrentShot.clubSlot = clubSlot;
                     PlaySound(SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
                     return;
                 }
             }
         }
         else if (buttons & U_JPAD) {
-            for (slot = g_CurrentShot.clubSlot - 1; slot >= 0; slot--) {
-                if (g_Players[g_CurrentShot.playerIndex].clubs[slot] != NO_CLUB &&
-                    (g_Clubs[g_Players[g_CurrentShot.playerIndex].clubs[slot]].surfaceMask &
+            for (clubSlot = g_CurrentShot.clubSlot - 1; clubSlot >= 0; clubSlot--) {
+                if (g_Players[g_CurrentShot.playerIndex].clubs[clubSlot] != NO_CLUB &&
+                    (g_Clubs[g_Players[g_CurrentShot.playerIndex].clubs[clubSlot]].surfaceMask &
                         GetCurrentSurfaceClubMask(FALSE))) {
-                    g_CurrentShot.clubSlot = slot;
+                    g_CurrentShot.clubSlot = clubSlot;
                     PlaySound(SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
                     return;
                 }

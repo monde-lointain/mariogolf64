@@ -1447,7 +1447,7 @@ void PickStartingClub(HoleSetup *hole) {
     s8 isUsable[CLUB_SLOT_COUNT];
     s32 clubCount;
     s32 cupDistance;
-    s32 slot;
+    s32 clubSlot;
     s32 rating;
     s32 lieRating;
     Club *club;
@@ -1500,9 +1500,9 @@ void PickStartingClub(HoleSetup *hole) {
         s32 distance;
         s32 gap;
 
-        for (slot = 0; slot < clubCount; slot++) {
+        for (clubSlot = 0; clubSlot < clubCount; clubSlot++) {
             rating = GetLieRating(
-                GetClub(g_Players[g_CurrentShot.playerIndex].clubs[slot]),
+                GetClub(g_Players[g_CurrentShot.playerIndex].clubs[clubSlot]),
                 g_CurrentShot.surface,
                 SHOT_MODE_NORMAL
             );
@@ -1519,12 +1519,12 @@ void PickStartingClub(HoleSetup *hole) {
             ratingMin = STARTING_CLUB_MIN_LIE_RATING;
         }
 
-        for (slot = 0; slot < clubCount; slot++) {
-            if (!isUsable[slot]) {
+        for (clubSlot = 0; clubSlot < clubCount; clubSlot++) {
+            if (!isUsable[clubSlot]) {
                 continue;
             }
 
-            club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[slot]);
+            club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[clubSlot]);
             if (club->surfaceMask & CLUB_SURFACE_GREEN) {
                 continue;
             }
@@ -1537,7 +1537,7 @@ void PickStartingClub(HoleSetup *hole) {
 
             gap = distance - cupDistance;
             if (Abs(gap) < bestGap && (!reaches || distance >= cupDistance)) {
-                bestSlot = slot;
+                bestSlot = clubSlot;
                 bestGap = Abs(gap);
                 if (distance >= cupDistance) {
                     reaches = TRUE;

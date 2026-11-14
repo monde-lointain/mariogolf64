@@ -2150,7 +2150,7 @@ void SetUpChosenGame(void) {
     MenuMemory *memory = GetMenuMemory();
     Player *player;
     s32 index;
-    s32 slot;
+    s32 clubSlot;
     s32 *holeSelection;
     s32 row;
     s32 column;
@@ -2277,23 +2277,24 @@ void SetUpChosenGame(void) {
             g_Players[index].isComputer = FALSE;
         }
 
-        for (slot = 0; slot != CLUB_SET_SIZE; slot++) {
-            if (!((f_PlayerClubMasks[index] >> slot) & 1)) {
-                player->clubs[slot] = NO_CLUB;
+        for (clubSlot = 0; clubSlot != CLUB_SET_SIZE; clubSlot++) {
+            if (!((f_PlayerClubMasks[index] >> clubSlot) & 1)) {
+                player->clubs[clubSlot] = NO_CLUB;
             }
             else {
                 if (g_ChosenCharacters[index] >= CHARACTER_KID) {
-                    player->clubs[slot] =
-                        slot + ((player->gameBoyCharacterIndex + CHARACTER_KID) * CLUB_SET_SIZE);
+                    player->clubs[clubSlot] = clubSlot +
+                        ((player->gameBoyCharacterIndex + CHARACTER_KID) * CLUB_SET_SIZE);
                 }
                 else {
-                    player->clubs[slot] = slot + (g_ChosenCharacters[index] * CLUB_SET_SIZE);
+                    player->clubs[clubSlot] =
+                        clubSlot + (g_ChosenCharacters[index] * CLUB_SET_SIZE);
                 }
             }
         }
 
-        for (; slot != CLUB_SLOT_COUNT; slot++) {
-            player->clubs[slot] = NO_CLUB;
+        for (; clubSlot != CLUB_SLOT_COUNT; clubSlot++) {
+            player->clubs[clubSlot] = NO_CLUB;
         }
 
         if (g_GameState.gameMode == GAME_MODE_TRAINING) {
