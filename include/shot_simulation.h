@@ -21,7 +21,7 @@ typedef struct SimulatedShot {
     s32 positionMin[3];
     s32 positionStepMin[3];
     Boolean isFirstBounceOut;
-    s32 endsOnGreen;
+    Boolean endsOnGreen;
     Boolean startsOnGreen;
     Boolean usesPutter;
     Boolean endsInCup;
