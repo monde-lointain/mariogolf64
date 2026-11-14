@@ -334,8 +334,37 @@ typedef s32 HoleFileStep;
 #define FINE_TILE_BLOCK_SPAN 2
 #define GROUND_HALF_CELL_COLUMNS (GROUND_TILE_GROUP_SIZE * FINE_TILE_CELL_SPAN)
 #define FINE_TILE_POINT_SPAN (FINE_TILE_CELL_SPAN + 1)
-#define FINE_TILE_BUILT_VERTEX_COUNT 17
 #define TILE_TRIANGLE_COUNT (FINE_TILE_CELL_SPAN * FINE_TILE_CELL_SPAN * 2)
+
+// A fine tile is built from the points on its border and its center, column
+// by column, and drawn with its inner midpoints loaded between the middle
+// columns and the last.
+enum TileVertexSlot {
+    TILE_VERTEX_ROW0_COLUMN0,
+    TILE_VERTEX_ROW1_COLUMN0,
+    TILE_VERTEX_ROW2_COLUMN0,
+    TILE_VERTEX_ROW3_COLUMN0,
+    TILE_VERTEX_ROW4_COLUMN0,
+    TILE_VERTEX_ROW0_COLUMN1,
+    TILE_VERTEX_ROW4_COLUMN1,
+    TILE_VERTEX_ROW0_COLUMN2,
+    TILE_VERTEX_ROW2_COLUMN2,
+    TILE_VERTEX_ROW4_COLUMN2,
+    TILE_VERTEX_ROW0_COLUMN3,
+    TILE_VERTEX_ROW4_COLUMN3,
+    TILE_VERTEX_ROW0_COLUMN4,
+    TILE_VERTEX_ROW1_COLUMN4,
+    TILE_VERTEX_ROW2_COLUMN4,
+    TILE_VERTEX_ROW3_COLUMN4,
+    TILE_VERTEX_ROW4_COLUMN4,
+    FINE_TILE_BUILT_VERTEX_COUNT
+};
+
+#define TILE_FIRST_COLUMN_VERTEX_COUNT TILE_VERTEX_ROW0_COLUMN1
+#define TILE_MIDDLE_COLUMN_VERTEX_COUNT (TILE_VERTEX_ROW0_COLUMN4 - TILE_VERTEX_ROW0_COLUMN1)
+#define TILE_LAST_COLUMN_VERTEX_COUNT (FINE_TILE_BUILT_VERTEX_COUNT - TILE_VERTEX_ROW0_COLUMN4)
+#define TILE_INNER_MIDPOINT_CACHE_SLOT TILE_VERTEX_ROW0_COLUMN4
+#define TILE_LAST_COLUMN_CACHE_SLOT (TILE_INNER_MIDPOINT_CACHE_SLOT + TILE_INNER_MIDPOINT_COUNT)
 
 #define BORDERLESS_TILE_FIRST_COORDINATE 4
 #define TEST_TILE_SIZE 0x88
@@ -4285,55 +4314,63 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                             vertexColumn = (groupTile * 2) + HalfFirstColumn(half);
                             CopyDoublePair(
                                 (f64 *)GridVertex(vertexColumn, row * 2),
-                                (f64 *)&vertices[0]
+                                (f64 *)&vertices[TILE_VERTEX_ROW0_COLUMN0]
                             );
                             CopyDoublePair(
                                 (f64 *)GridVertex(vertexColumn, (row * 2) + 1),
-                                (f64 *)&vertices[2]
+                                (f64 *)&vertices[TILE_VERTEX_ROW2_COLUMN0]
                             );
                             CopyDoublePair(
                                 (f64 *)GridVertex(vertexColumn, (row * 2) + 2),
-                                (f64 *)&vertices[4]
+                                (f64 *)&vertices[TILE_VERTEX_ROW4_COLUMN0]
                             );
                             CopyDoublePair(
                                 (f64 *)GridVertex(vertexColumn + 1, row * 2),
-                                (f64 *)&vertices[7]
+                                (f64 *)&vertices[TILE_VERTEX_ROW0_COLUMN2]
                             );
                             CopyDoublePair(
                                 (f64 *)GridVertex(vertexColumn + 1, (row * 2) + 1),
-                                (f64 *)&vertices[8]
+                                (f64 *)&vertices[TILE_VERTEX_ROW2_COLUMN2]
                             );
                             CopyDoublePair(
                                 (f64 *)GridVertex(vertexColumn + 1, (row * 2) + 2),
-                                (f64 *)&vertices[9]
+                                (f64 *)&vertices[TILE_VERTEX_ROW4_COLUMN2]
                             );
                             CopyDoublePair(
                                 (f64 *)GridVertex(vertexColumn + 2, row * 2),
-                                (f64 *)&vertices[12]
+                                (f64 *)&vertices[TILE_VERTEX_ROW0_COLUMN4]
                             );
                             CopyDoublePair(
                                 (f64 *)GridVertex(vertexColumn + 2, (row * 2) + 1),
-                                (f64 *)&vertices[14]
+                                (f64 *)&vertices[TILE_VERTEX_ROW2_COLUMN4]
                             );
                             CopyDoublePair(
                                 (f64 *)GridVertex(vertexColumn + 2, (row * 2) + 2),
-                                (f64 *)&vertices[16]
+                                (f64 *)&vertices[TILE_VERTEX_ROW4_COLUMN4]
                             );
                             if ((half * GROUND_TILE_GROUP_SIZE) + groupTile == 0 ||
                                 g_WorkArea.hole.tiles[tileIndex - 1].detail !=
                                     GROUND_DETAIL_MEDIUM) {
                                 CopyDoublePair(
                                     (f64 *)&midpoints[TILE_MIDPOINT_ROW1_COLUMN0],
-                                    (f64 *)&vertices[1]
+                                    (f64 *)&vertices[TILE_VERTEX_ROW1_COLUMN0]
                                 );
                                 CopyDoublePair(
                                     (f64 *)&midpoints[TILE_MIDPOINT_ROW3_COLUMN0],
-                                    (f64 *)&vertices[3]
+                                    (f64 *)&vertices[TILE_VERTEX_ROW3_COLUMN0]
                                 );
                             }
                             else {
-                                GetMidpointVertex(&vertices[0].v, &vertices[2].v, &vertices[1].v);
-                                GetMidpointVertex(&vertices[2].v, &vertices[4].v, &vertices[3].v);
+                                GetMidpointVertex(
+                                    &vertices[TILE_VERTEX_ROW0_COLUMN0].v,
+                                    &vertices[TILE_VERTEX_ROW2_COLUMN0].v,
+                                    &vertices[TILE_VERTEX_ROW1_COLUMN0].v
+                                );
+                                GetMidpointVertex(
+                                    &vertices[TILE_VERTEX_ROW2_COLUMN0].v,
+                                    &vertices[TILE_VERTEX_ROW4_COLUMN0].v,
+                                    &vertices[TILE_VERTEX_ROW3_COLUMN0].v
+                                );
                             }
 
                             if (row == 0 ||
@@ -4341,16 +4378,24 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                                         .detail != GROUND_DETAIL_MEDIUM) {
                                 CopyDoublePair(
                                     (f64 *)&midpoints[TILE_MIDPOINT_ROW0_COLUMN1],
-                                    (f64 *)&vertices[5]
+                                    (f64 *)&vertices[TILE_VERTEX_ROW0_COLUMN1]
                                 );
                                 CopyDoublePair(
                                     (f64 *)&midpoints[TILE_MIDPOINT_ROW0_COLUMN3],
-                                    (f64 *)&vertices[10]
+                                    (f64 *)&vertices[TILE_VERTEX_ROW0_COLUMN3]
                                 );
                             }
                             else {
-                                GetMidpointVertex(&vertices[0].v, &vertices[7].v, &vertices[5].v);
-                                GetMidpointVertex(&vertices[7].v, &vertices[12].v, &vertices[10].v);
+                                GetMidpointVertex(
+                                    &vertices[TILE_VERTEX_ROW0_COLUMN0].v,
+                                    &vertices[TILE_VERTEX_ROW0_COLUMN2].v,
+                                    &vertices[TILE_VERTEX_ROW0_COLUMN1].v
+                                );
+                                GetMidpointVertex(
+                                    &vertices[TILE_VERTEX_ROW0_COLUMN2].v,
+                                    &vertices[TILE_VERTEX_ROW0_COLUMN4].v,
+                                    &vertices[TILE_VERTEX_ROW0_COLUMN3].v
+                                );
                             }
 
                             if (row == GROUND_TILE_ROW_COUNT - 1 ||
@@ -4358,16 +4403,24 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                                         .detail != GROUND_DETAIL_MEDIUM) {
                                 CopyDoublePair(
                                     (f64 *)&midpoints[TILE_MIDPOINT_ROW4_COLUMN1],
-                                    (f64 *)&vertices[6]
+                                    (f64 *)&vertices[TILE_VERTEX_ROW4_COLUMN1]
                                 );
                                 CopyDoublePair(
                                     (f64 *)&midpoints[TILE_MIDPOINT_ROW4_COLUMN3],
-                                    (f64 *)&vertices[11]
+                                    (f64 *)&vertices[TILE_VERTEX_ROW4_COLUMN3]
                                 );
                             }
                             else {
-                                GetMidpointVertex(&vertices[4].v, &vertices[9].v, &vertices[6].v);
-                                GetMidpointVertex(&vertices[9].v, &vertices[16].v, &vertices[11].v);
+                                GetMidpointVertex(
+                                    &vertices[TILE_VERTEX_ROW4_COLUMN0].v,
+                                    &vertices[TILE_VERTEX_ROW4_COLUMN2].v,
+                                    &vertices[TILE_VERTEX_ROW4_COLUMN1].v
+                                );
+                                GetMidpointVertex(
+                                    &vertices[TILE_VERTEX_ROW4_COLUMN2].v,
+                                    &vertices[TILE_VERTEX_ROW4_COLUMN4].v,
+                                    &vertices[TILE_VERTEX_ROW4_COLUMN3].v
+                                );
                             }
 
                             if ((half * GROUND_TILE_GROUP_SIZE) + groupTile ==
@@ -4376,35 +4429,50 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                                     GROUND_DETAIL_MEDIUM) {
                                 CopyDoublePair(
                                     (f64 *)&midpoints[TILE_MIDPOINT_ROW1_COLUMN4],
-                                    (f64 *)&vertices[13]
+                                    (f64 *)&vertices[TILE_VERTEX_ROW1_COLUMN4]
                                 );
                                 CopyDoublePair(
                                     (f64 *)&midpoints[TILE_MIDPOINT_ROW3_COLUMN4],
-                                    (f64 *)&vertices[15]
+                                    (f64 *)&vertices[TILE_VERTEX_ROW3_COLUMN4]
                                 );
                             }
                             else {
                                 GetMidpointVertex(
-                                    &vertices[12].v,
-                                    &vertices[14].v,
-                                    &vertices[13].v
+                                    &vertices[TILE_VERTEX_ROW0_COLUMN4].v,
+                                    &vertices[TILE_VERTEX_ROW2_COLUMN4].v,
+                                    &vertices[TILE_VERTEX_ROW1_COLUMN4].v
                                 );
                                 GetMidpointVertex(
-                                    &vertices[14].v,
-                                    &vertices[16].v,
-                                    &vertices[15].v
+                                    &vertices[TILE_VERTEX_ROW2_COLUMN4].v,
+                                    &vertices[TILE_VERTEX_ROW4_COLUMN4].v,
+                                    &vertices[TILE_VERTEX_ROW3_COLUMN4].v
                                 );
                             }
 
-                            gSPVertex(gfx++, &vertices[0], 5, 0);
-                            gSPVertex(gfx++, &vertices[5], 7, 5);
+                            gSPVertex(
+                                gfx++,
+                                &vertices[TILE_VERTEX_ROW0_COLUMN0],
+                                TILE_FIRST_COLUMN_VERTEX_COUNT,
+                                TILE_VERTEX_ROW0_COLUMN0
+                            );
+                            gSPVertex(
+                                gfx++,
+                                &vertices[TILE_VERTEX_ROW0_COLUMN1],
+                                TILE_MIDDLE_COLUMN_VERTEX_COUNT,
+                                TILE_VERTEX_ROW0_COLUMN1
+                            );
                             gSPVertex(
                                 gfx++,
                                 &midpoints[TILE_FIRST_INNER_MIDPOINT],
                                 TILE_INNER_MIDPOINT_COUNT,
-                                12
+                                TILE_INNER_MIDPOINT_CACHE_SLOT
                             );
-                            gSPVertex(gfx++, &vertices[12], 5, 20);
+                            gSPVertex(
+                                gfx++,
+                                &vertices[TILE_VERTEX_ROW0_COLUMN4],
+                                TILE_LAST_COLUMN_VERTEX_COUNT,
+                                TILE_LAST_COLUMN_CACHE_SLOT
+                            );
                             vertices += FINE_TILE_BUILT_VERTEX_COUNT;
                             for (finePass = 0; finePass < GROUND_TILE_PASSES_MAX; finePass++) {
                                 LoadEditorTileTexture(
