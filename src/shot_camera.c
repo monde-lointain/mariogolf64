@@ -455,7 +455,7 @@ void StopFlightCamera(void) {
     g_IsCupViewShown = FALSE;
     f_CupViewHoldCount = 0;
     g_BallTrailState = BALL_TRAIL_OFF;
-    g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+    g_Cameras[MAIN_CAMERA].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
     StartHudAnimation(HUD_ANIMATION_NONE);
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;
@@ -671,19 +671,19 @@ void StartFlightCamera(s32 earlierFlightCount) {
     f_FlightPhase = FLIGHT_PHASE_LAUNCH;
     f_FlightCameraKind = FLIGHT_CAMERA_NONE;
     f_IsPinHitComing = FALSE;
-    g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+    g_Cameras[MAIN_CAMERA].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
     f_FlightBallPosition[AXIS_X] = f_ShotStartPosition[AXIS_X];
     f_FlightBallPosition[AXIS_Y] = f_ShotStartPosition[AXIS_Y];
     f_FlightBallPosition[AXIS_Z] = f_ShotStartPosition[AXIS_Z];
     ChooseFlightCameraKind();
     f_IsCameraKindNew = TRUE;
     PlaceFlightCamera(0);
-    g_Cameras[0].view.eye[AXIS_X] = f_CameraPosition[AXIS_X];
-    g_Cameras[0].view.eye[AXIS_Y] = f_CameraPosition[AXIS_Y];
-    g_Cameras[0].view.eye[AXIS_Z] = f_CameraPosition[AXIS_Z];
-    g_Cameras[0].view.lookAt[AXIS_X] = f_LookAtPoint[AXIS_X];
-    g_Cameras[0].view.lookAt[AXIS_Y] = f_LookAtPoint[AXIS_Y];
-    g_Cameras[0].view.lookAt[AXIS_Z] = f_LookAtPoint[AXIS_Z];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = f_CameraPosition[AXIS_X];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = f_CameraPosition[AXIS_Y];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = f_CameraPosition[AXIS_Z];
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] = f_LookAtPoint[AXIS_X];
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = f_LookAtPoint[AXIS_Y];
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = f_LookAtPoint[AXIS_Z];
 }
 
 #define LEADING_CLUB_SLOT_COUNT 6
@@ -1361,8 +1361,8 @@ void StartHoleCamerasAndSong(void) {
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;
     g_HoleFlyoverFrame = 0;
-    g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
-    g_Cameras[1].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+    g_Cameras[MAIN_CAMERA].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+    g_Cameras[INSET_CAMERA].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
     if (g_GameState.replayKind != REPLAY_KIND_NONE) {
         PlaySong(SONG_ROUND_REPLAY, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
         return;
@@ -1433,9 +1433,9 @@ void StartHoleFlyover(void) {
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
-    g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
+    g_Cameras[MAIN_CAMERA].mode = CAMERA_MODE_BEHIND_GOLFER;
     g_Cameras[INSET_CAMERA].mode = CAMERA_MODE_BEHIND_GOLFER;
-    g_Cameras[0].view.fieldOfView = FLYOVER_FIELD_OF_VIEW;
+    g_Cameras[MAIN_CAMERA].view.fieldOfView = FLYOVER_FIELD_OF_VIEW;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT, 0, 0, 0, 0, 0);
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, CHOICE_TEXT_SLOT, 0, 0, 0, 0, 0);
     SetInsetViewRectangle(
@@ -1506,11 +1506,11 @@ s32 StepHoleFlyover(void) {
     offset[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z];
     g_InsetView.ignoredSourceCode = FLYOVER_INSET_SOURCE_CODE;
     g_InsetView.ignoredSizeCode = FLYOVER_INSET_SIZE_CODE;
-    g_Cameras[0].view.lookAt[AXIS_X] =
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] =
         (g_HoleSetup.cupPosition[AXIS_X] + (offset[AXIS_X] * approach)) * COURSE_TO_WORLD_SCALE;
-    g_Cameras[0].view.lookAt[AXIS_Y] =
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] =
         (g_HoleSetup.cupPosition[AXIS_Y] + (offset[AXIS_Y] * approach)) * COURSE_TO_WORLD_SCALE;
-    g_Cameras[0].view.lookAt[AXIS_Z] =
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] =
         (g_HoleSetup.cupPosition[AXIS_Z] + (offset[AXIS_Z] * approach)) * COURSE_TO_WORLD_SCALE;
     yaw = atan2(offset[AXIS_X], offset[AXIS_Z]) + (halfTurns * M_PI);
     holeRadius = GetHoleRadius(GetCourseRecordIndex(), GetHoleRecordIndex());
@@ -1520,15 +1520,15 @@ s32 StepHoleFlyover(void) {
         FLYOVER_DISTANCE_SCALE;
     offset[AXIS_X] *= distance;
     offset[AXIS_Z] = cosf(yaw) * distance;
-    g_Cameras[0].view.eye[AXIS_X] =
-        g_Cameras[0].view.lookAt[AXIS_X] + (offset[AXIS_X] * COURSE_TO_WORLD_SCALE);
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] =
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] + (offset[AXIS_X] * COURSE_TO_WORLD_SCALE);
     yaw += yaw;
     height = ((holeRadius / 2) + (approach * FLYOVER_HEIGHT_APPROACH)) * FLYOVER_HEIGHT_SCALE;
     g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] =
         g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    g_Cameras[0].view.eye[AXIS_Y] = g_Cameras[0].view.lookAt[AXIS_Y] - height;
-    g_Cameras[0].view.eye[AXIS_Z] =
-        g_Cameras[0].view.lookAt[AXIS_Z] + (offset[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] - height;
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] =
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] + (offset[AXIS_Z] * COURSE_TO_WORLD_SCALE);
     g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] =
         (g_HoleSetup.cupPosition[AXIS_Y] - FLYOVER_INSET_LOOK_AT_DROP) * COURSE_TO_WORLD_SCALE;
     g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] =
@@ -1761,7 +1761,7 @@ void PlaceFlightCamera(s32 step) {
             f_CameraPosition[AXIS_Y] = f_FlightBallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
             f_CameraPosition[AXIS_Z] =
                 (f_FlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE) + position[AXIS_Z];
-            g_Cameras[0].view.fieldOfView = CHASE_FIELD_OF_VIEW;
+            g_Cameras[MAIN_CAMERA].view.fieldOfView = CHASE_FIELD_OF_VIEW;
             break;
         }
         case FLIGHT_CAMERA_FOLLOWING_PATH:
@@ -1772,7 +1772,7 @@ void PlaceFlightCamera(s32 step) {
                 COURSE_TO_WORLD_SCALE;
             f_CameraPosition[AXIS_Z] =
                 (f32)g_SimulatedShot.path[step - FOLLOW_STEP_COUNT][AXIS_Z] * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.fieldOfView = FOLLOW_FIELD_OF_VIEW;
+            g_Cameras[MAIN_CAMERA].view.fieldOfView = FOLLOW_FIELD_OF_VIEW;
             EaseLookAtFlyingBall();
             break;
         case FLIGHT_CAMERA_UNUSED_D:
@@ -1799,7 +1799,7 @@ void PlaceFlightCamera(s32 step) {
                 AimCameraYaw();
             }
 
-            g_Cameras[0].view.fieldOfView = TEE_VIEW_FIELD_OF_VIEW;
+            g_Cameras[MAIN_CAMERA].view.fieldOfView = TEE_VIEW_FIELD_OF_VIEW;
             break;
         case FLIGHT_CAMERA_BEHIND_START:
             if (f_IsCameraKindNew == TRUE) {
@@ -1810,7 +1810,7 @@ void PlaceFlightCamera(s32 step) {
                 f_IsCameraKindNew = FALSE;
                 f_IsBehindViewFar ^= TRUE;
                 yaw = f_ShotFlightYaw + M_PI;
-                g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+                g_Cameras[MAIN_CAMERA].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
                 if (f_IsBehindViewFar == FALSE) {
                     sideYaw = f_ShotFlightYaw + (M_PI / 4) +
                         ((f32)(rand() & RANDOM_YAW_MASK) * (RANDOM_YAW_TO_RADIANS / 4));
@@ -1886,7 +1886,7 @@ void PlaceFlightCamera(s32 step) {
 
                     sideYaw = f_ShotFlightYaw + (M_PI / 2) +
                         ((f32)(rand() & RANDOM_YAW_MASK) * RANDOM_YAW_TO_RADIANS);
-                    g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+                    g_Cameras[MAIN_CAMERA].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
                     yaw = f_ShotFlightYaw + M_PI;
                     sideDistance -=
                         RandomBelow(SIDE_VIEW_SPREAD_STEP_COUNT) * SIDE_VIEW_SPREAD_STEP;
@@ -1941,7 +1941,7 @@ void PlaceFlightCamera(s32 step) {
                 AimCameraYaw();
             }
 
-            g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+            g_Cameras[MAIN_CAMERA].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
             EaseLookAtFlyingBall();
             break;
         case FLIGHT_CAMERA_TRAILING_BALL:
@@ -1952,7 +1952,7 @@ void PlaceFlightCamera(s32 step) {
                 f_IsTrailViewClose ^= TRUE;
             }
 
-            g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+            g_Cameras[MAIN_CAMERA].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
             if (f_IsTrailViewClose == FALSE) {
                 if (f_ShotLength <= SHORT_SHOT_LENGTH_MAX) {
                     riseDistance = TRAIL_SHORT_SHOT_RISE;
@@ -2019,7 +2019,7 @@ void PlaceFlightCamera(s32 step) {
             break;
         case FLIGHT_CAMERA_FACING_CUP:
             yaw = f_EndYawFromCup;
-            g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+            g_Cameras[MAIN_CAMERA].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
             point[AXIS_X] = (-sinf(yaw) * FACING_CUP_VIEW_DISTANCE) + f_FlightBallPosition[AXIS_X];
             point[AXIS_Z] = (cosf(yaw) * FACING_CUP_VIEW_DISTANCE) + f_FlightBallPosition[AXIS_Z];
             point[AXIS_Y] = GetGroundHeight(point[AXIS_X], point[AXIS_Z]) - FACING_CUP_VIEW_RISE;
@@ -2068,18 +2068,18 @@ void PlaceFlightCamera(s32 step) {
             f_CameraPosition[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
             f_CameraPosition[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
             EaseLookAtFlyingBall();
-            g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+            g_Cameras[MAIN_CAMERA].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
             break;
         case FLIGHT_CAMERA_AIM_VIEW:
             if (f_IsCameraKindNew == TRUE) {
                 f_IsCameraKindNew = FALSE;
                 PlaceAimCamera();
-                f_CameraPosition[AXIS_X] = g_Cameras[0].view.eye[AXIS_X];
-                f_CameraPosition[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
-                f_CameraPosition[AXIS_Z] = g_Cameras[0].view.eye[AXIS_Z];
-                f_LookAtPoint[AXIS_X] = g_Cameras[0].view.lookAt[AXIS_X];
-                f_LookAtPoint[AXIS_Y] = g_Cameras[0].view.lookAt[AXIS_Y];
-                f_LookAtPoint[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z];
+                f_CameraPosition[AXIS_X] = g_Cameras[MAIN_CAMERA].view.eye[AXIS_X];
+                f_CameraPosition[AXIS_Y] = g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y];
+                f_CameraPosition[AXIS_Z] = g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z];
+                f_LookAtPoint[AXIS_X] = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X];
+                f_LookAtPoint[AXIS_Y] = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y];
+                f_LookAtPoint[AXIS_Z] = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z];
                 AimCameraYaw();
             }
 
@@ -2126,14 +2126,14 @@ void PlaceFlightCamera(s32 step) {
                 ((f32)g_CurrentShot.ballPosition[AXIS_Y] - CIRCLE_LOOK_AT_RISE) *
                 COURSE_TO_WORLD_SCALE;
             f_LookAtPoint[AXIS_Z] = (f32)g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+            g_Cameras[MAIN_CAMERA].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
             break;
         case FLIGHT_CAMERA_BESIDE_GOLFER:
             if (f_IsCameraKindNew == TRUE) {
                 Radians besideYaw;
                 f32 besideDistance;
 
-                g_Cameras[0].view.fieldOfView = BESIDE_GOLFER_FIELD_OF_VIEW;
+                g_Cameras[MAIN_CAMERA].view.fieldOfView = BESIDE_GOLFER_FIELD_OF_VIEW;
                 GetCharacterPointPosition(0, 1, position);
                 f_IsCameraKindNew = FALSE;
                 if (g_Players[g_CurrentShot.playerIndex].isLefty == TRUE) {
@@ -2179,7 +2179,7 @@ void PlaceFlightCamera(s32 step) {
                 AimCameraYaw();
             }
 
-            g_Cameras[0].view.fieldOfView = BESIDE_GOLFER_FLIGHT_FIELD_OF_VIEW;
+            g_Cameras[MAIN_CAMERA].view.fieldOfView = BESIDE_GOLFER_FLIGHT_FIELD_OF_VIEW;
             break;
     }
 
@@ -2941,7 +2941,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     }
 
     PlayFlightSounds(step);
-    g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+    g_Cameras[MAIN_CAMERA].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
     PlaceFlightCamera(step);
     g_AreCharactersDrawn = TRUE;
     g_IsCupViewShown = FALSE;
@@ -2975,27 +2975,27 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
         }
 
         if (!g_GameState.isMiniGolf && !g_SimulatedShot.endsInCup && IsPinHitViewed(step)) {
-            g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+            g_Cameras[MAIN_CAMERA].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
             StartHudAnimation(HUD_ANIMATION_NONE);
             g_InsetView.animation = INSET_VIEW_STILL;
             g_InsetView.step = 0;
             g_Cameras[INSET_CAMERA].view.drawFlags = 0;
-            g_Cameras[0].view.lookAt[AXIS_X] =
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] =
                 (f32)g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.lookAt[AXIS_Y] =
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] =
                 ((f32)g_HoleSetup.cupPosition[AXIS_Y] - CUP_LOOK_AT_DEPTH) * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.lookAt[AXIS_Z] =
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] =
                 (f32)g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.eye[AXIS_X] =
-                g_Cameras[0].view.lookAt[AXIS_X] + (sinf(f_CupViewYaw) * CUP_CLOSE_VIEW_DISTANCE);
-            g_Cameras[0].view.eye[AXIS_Y] =
-                g_Cameras[0].view.lookAt[AXIS_Y] - CUP_CLOSE_VIEW_HEIGHT;
-            g_Cameras[0].view.eye[AXIS_Z] =
-                g_Cameras[0].view.lookAt[AXIS_Z] - (cosf(f_CupViewYaw) * CUP_CLOSE_VIEW_DISTANCE);
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] +
+                (sinf(f_CupViewYaw) * CUP_CLOSE_VIEW_DISTANCE);
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] =
+                g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] - CUP_CLOSE_VIEW_HEIGHT;
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] -
+                (cosf(f_CupViewYaw) * CUP_CLOSE_VIEW_DISTANCE);
         }
         else if (IsCupPassPoint(f_BallCupGroundDistance, f_FlightBallPosition[AXIS_Y]) ||
             f_CupViewHoldCount > 0) {
-            g_Cameras[0].view.fieldOfView = CUP_VIEW_FIELD_OF_VIEW;
+            g_Cameras[MAIN_CAMERA].view.fieldOfView = CUP_VIEW_FIELD_OF_VIEW;
             StartHudAnimation(HUD_ANIMATION_NONE);
             g_IsCupViewShown = TRUE;
             g_AreCharactersDrawn = FALSE;
@@ -3008,37 +3008,37 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
             g_InsetView.animation = INSET_VIEW_STILL;
             g_InsetView.step = 0;
             g_Cameras[INSET_CAMERA].view.drawFlags = 0;
-            g_Cameras[0].view.lookAt[AXIS_X] =
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] =
                 (f32)g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.lookAt[AXIS_Y] =
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] =
                 (f32)g_HoleSetup.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.lookAt[AXIS_Z] =
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] =
                 (f32)g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
             point[AXIS_X] =
                 (-sinf(f_CameraYaw) * CUP_VIEW_DISTANCE) + g_HoleSetup.cupPosition[AXIS_X];
             point[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y] - CUP_VIEW_HEIGHT;
             point[AXIS_Z] =
                 (cosf(f_CameraYaw) * CUP_VIEW_DISTANCE) + g_HoleSetup.cupPosition[AXIS_Z];
-            g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         }
         else {
-            g_Cameras[0].view.eye[AXIS_X] = f_CameraPosition[AXIS_X];
-            g_Cameras[0].view.eye[AXIS_Y] = f_CameraPosition[AXIS_Y];
-            g_Cameras[0].view.eye[AXIS_Z] = f_CameraPosition[AXIS_Z];
-            g_Cameras[0].view.lookAt[AXIS_X] = f_LookAtPoint[AXIS_X];
-            g_Cameras[0].view.lookAt[AXIS_Y] = f_LookAtPoint[AXIS_Y];
-            g_Cameras[0].view.lookAt[AXIS_Z] = f_LookAtPoint[AXIS_Z];
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = f_CameraPosition[AXIS_X];
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = f_CameraPosition[AXIS_Y];
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = f_CameraPosition[AXIS_Z];
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] = f_LookAtPoint[AXIS_X];
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = f_LookAtPoint[AXIS_Y];
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = f_LookAtPoint[AXIS_Z];
         }
     }
     else {
-        g_Cameras[0].view.eye[AXIS_X] = f_CameraPosition[AXIS_X];
-        g_Cameras[0].view.eye[AXIS_Y] = f_CameraPosition[AXIS_Y];
-        g_Cameras[0].view.eye[AXIS_Z] = f_CameraPosition[AXIS_Z];
-        g_Cameras[0].view.lookAt[AXIS_X] = f_LookAtPoint[AXIS_X];
-        g_Cameras[0].view.lookAt[AXIS_Y] = f_LookAtPoint[AXIS_Y];
-        g_Cameras[0].view.lookAt[AXIS_Z] = f_LookAtPoint[AXIS_Z];
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = f_CameraPosition[AXIS_X];
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = f_CameraPosition[AXIS_Y];
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = f_CameraPosition[AXIS_Z];
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] = f_LookAtPoint[AXIS_X];
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = f_LookAtPoint[AXIS_Y];
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = f_LookAtPoint[AXIS_Z];
     }
 
     if (!g_IsCupViewShown) {
@@ -3069,10 +3069,10 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
             (f32)f_FlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     }
 
-    if (g_Cameras[0].view.eye[AXIS_X] == g_Cameras[0].view.lookAt[AXIS_X] &&
-        g_Cameras[0].view.eye[AXIS_Z] == g_Cameras[0].view.lookAt[AXIS_Z]) {
-        g_Cameras[0].view.lookAt[AXIS_X] += LOOK_AT_NUDGE;
-        g_Cameras[0].view.lookAt[AXIS_Z] += LOOK_AT_NUDGE;
+    if (g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] == g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] &&
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] == g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z]) {
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] += LOOK_AT_NUDGE;
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] += LOOK_AT_NUDGE;
     }
 
     if (g_Cameras[INSET_CAMERA].view.eye[AXIS_X] == g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] &&
@@ -3131,8 +3131,8 @@ void GetViewSidePoints(
     Radians plusQuarterAngle;
     Radians minusQuarterAngle;
 
-    offsetX = g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
-    offsetZ = g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
+    offsetX = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] - g_Cameras[MAIN_CAMERA].view.eye[AXIS_X];
+    offsetZ = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] - g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z];
     if ((s32)offsetX != 0 || (s32)offsetZ != 0) {
         yaw = M_PI - atan2f(offsetX, offsetZ);
     }

@@ -2581,9 +2581,12 @@ void DrawWindIndicator(Gfx **displayListHead, f32 x, f32 y) {
     Mat4 transform;
     Gfx *gfx = *displayListHead;
 
-    viewDirection[AXIS_X] = g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
-    viewDirection[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
-    viewDirection[AXIS_Y] = g_Cameras[0].view.lookAt[AXIS_Y] - g_Cameras[0].view.eye[AXIS_Y];
+    viewDirection[AXIS_X] =
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] - g_Cameras[MAIN_CAMERA].view.eye[AXIS_X];
+    viewDirection[AXIS_Z] =
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] - g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z];
+    viewDirection[AXIS_Y] =
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] - g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y];
     rotation[AXIS_X] = atan2(
                            viewDirection[AXIS_Y],
                            sqrtf(

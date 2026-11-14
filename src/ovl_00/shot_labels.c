@@ -239,7 +239,7 @@ void DrawShotLabels(Gfx **displayListHead) {
     }
 
     labelMode = SHOT_LABELS_NONE;
-    if (g_Cameras[0].mode == CAMERA_MODE_FREE_LOOK) {
+    if (g_Cameras[MAIN_CAMERA].mode == CAMERA_MODE_FREE_LOOK) {
         labelMode = SHOT_LABELS_OVERHEAD;
     }
     else if (g_GameState.step == GAME_STATE_TAKING_TURNS &&

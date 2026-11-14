@@ -410,11 +410,11 @@ void FreeStaffRoll(void) {
     s32 index;
 
     FreeEffectImages();
-    g_Cameras[0].view.scissorX = SCREEN_BORDER;
-    g_Cameras[0].view.scissorY = SCREEN_BORDER;
-    g_Cameras[0].view.scissorWidth = SCREEN_WIDTH - (2 * SCREEN_BORDER);
-    g_Cameras[0].view.scissorHeight = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
-    g_Cameras[0].view.zoom = 1.0f;
+    g_Cameras[MAIN_CAMERA].view.scissorX = SCREEN_BORDER;
+    g_Cameras[MAIN_CAMERA].view.scissorY = SCREEN_BORDER;
+    g_Cameras[MAIN_CAMERA].view.scissorWidth = SCREEN_WIDTH - (2 * SCREEN_BORDER);
+    g_Cameras[MAIN_CAMERA].view.scissorHeight = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
+    g_Cameras[MAIN_CAMERA].view.zoom = 1.0f;
     FreeAllCharacterSlots();
     for (index = 0; index < CAST_BUFFER_COUNT; index++) {
         FreeMemory(&f_CastBuffers[index]);
@@ -1136,7 +1136,7 @@ void RunStaffRollTimeline(s32 frame) {
         f_ShownSceneColorIndex = g_HoleSetup.conditions.sceneColorIndex;
     }
 
-    g_Cameras[0].view.fieldOfView = STAFF_ROLL_FIELD_OF_VIEW;
+    g_Cameras[MAIN_CAMERA].view.fieldOfView = STAFF_ROLL_FIELD_OF_VIEW;
     AnimateAllCharacters();
     if (f_IsReactionShown) {
         PlaceAndViewCharacter(f_CastSlot);
@@ -1157,22 +1157,23 @@ void RunStaffRollTimeline(s32 frame) {
         AddFramedSphere(focus, radius);
         FrameSpheres(0.0f);
         BisectFramingPitch(f_CastFramingPitch, f_CastFramingYaw, 0.0f);
-        view = &g_Cameras[0].view;
+        view = &g_Cameras[MAIN_CAMERA].view;
         GetFramedView(view->eye, view->lookAt);
         EaseStaffRollView(view->eye, view->lookAt, CAST_EASE_RATE, EASE_LOOK_AT | EASE_EYE);
     }
 
-    g_Cameras[0].view.fieldOfView = STAFF_ROLL_FIELD_OF_VIEW;
+    g_Cameras[MAIN_CAMERA].view.fieldOfView = STAFF_ROLL_FIELD_OF_VIEW;
     ClampFrames(shrink, frame - f_ViewShrinkStartFrame, VIEW_SHRINK_FRAMES);
-    ShrinkView(g_Cameras[0].view, shrink);
+    ShrinkView(g_Cameras[MAIN_CAMERA].view, shrink);
     g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vscale[0] =
-        g_Cameras[0].view.scissorWidth * 4;
+        g_Cameras[MAIN_CAMERA].view.scissorWidth * 4;
     g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vscale[1] =
-        g_Cameras[0].view.scissorHeight * 4;
+        g_Cameras[MAIN_CAMERA].view.scissorHeight * 4;
     g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vtrans[0] =
-        (g_Cameras[0].view.scissorX + (g_Cameras[0].view.scissorWidth / 2)) * 4;
+        (g_Cameras[MAIN_CAMERA].view.scissorX + (g_Cameras[MAIN_CAMERA].view.scissorWidth / 2)) * 4;
     g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vtrans[1] =
-        (g_Cameras[0].view.scissorY + (g_Cameras[0].view.scissorHeight / 2)) * 4;
+        (g_Cameras[MAIN_CAMERA].view.scissorY + (g_Cameras[MAIN_CAMERA].view.scissorHeight / 2)) *
+        4;
 }
 
 void UpdateStaffRoll(void) {
@@ -1258,7 +1259,7 @@ void UpdateStaffRoll(void) {
         PrintDebugText(g_PrintBuffer, LINE_COUNT_TEXT_COLUMN, LINE_COUNT_TEXT_ROW);
         StepNoiseTexture();
         g_SkyState.viewedWindAngles[0] =
-            ViewedWindAngle(g_HoleSetup.conditions.windDirection, &g_Cameras[0].view);
+            ViewedWindAngle(g_HoleSetup.conditions.windDirection, &g_Cameras[MAIN_CAMERA].view);
         if (g_SkyState.viewedWindAngles[0] > FULL_TURN_RADIANS) {
             g_SkyState.viewedWindAngles[0] -= FULL_TURN_RADIANS;
         }

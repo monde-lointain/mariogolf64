@@ -1202,7 +1202,7 @@ NO_RESULT UpdateReaction(u32 slotIndex) {
 
     PlayReactionSounds();
     if (slot != NULL) {
-        view = &g_Cameras[0].view;
+        view = &g_Cameras[MAIN_CAMERA].view;
         switch (slot->modelIndex % CHARACTER_COUNT) {
             case CHARACTER_PEACH:
                 FramePeachReaction(slotIndex, view);

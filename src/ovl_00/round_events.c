@@ -2708,10 +2708,10 @@ void DrawToadMovie(Gfx **displayListHead) {
     gDPSetScissor(
         gfx++,
         G_SC_NON_INTERLACE,
-        g_Cameras[0].view.scissorX,
-        g_Cameras[0].view.scissorY,
-        g_Cameras[0].view.scissorX + g_Cameras[0].view.scissorWidth,
-        g_Cameras[0].view.scissorY + g_Cameras[0].view.scissorHeight
+        g_Cameras[MAIN_CAMERA].view.scissorX,
+        g_Cameras[MAIN_CAMERA].view.scissorY,
+        g_Cameras[MAIN_CAMERA].view.scissorX + g_Cameras[MAIN_CAMERA].view.scissorWidth,
+        g_Cameras[MAIN_CAMERA].view.scissorY + g_Cameras[MAIN_CAMERA].view.scissorHeight
     );
     *displayListHead = gfx;
 }

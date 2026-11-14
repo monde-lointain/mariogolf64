@@ -2253,8 +2253,8 @@ void PlaceRainCenter(void) {
     s32 viewZ;
     f32 scale;
 
-    viewX = g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
-    viewZ = g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
+    viewX = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] - g_Cameras[MAIN_CAMERA].view.eye[AXIS_X];
+    viewZ = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] - g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z];
 
     scale = sqrtf((viewX * viewX) + (viewZ * viewZ));
     f_RainCenter[0] = viewX;
@@ -2269,8 +2269,8 @@ void PlaceRainCenter(void) {
         scale = 0.0f;
     }
 
-    f_RainCenter[0] = (f_RainCenter[0] * scale) + g_Cameras[0].view.eye[AXIS_X];
-    f_RainCenter[1] = (f_RainCenter[1] * scale) + g_Cameras[0].view.eye[AXIS_Z];
+    f_RainCenter[0] = (f_RainCenter[0] * scale) + g_Cameras[MAIN_CAMERA].view.eye[AXIS_X];
+    f_RainCenter[1] = (f_RainCenter[1] * scale) + g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z];
 }
 
 #define RAIN_SPREAD_STEP_COUNT 200
@@ -2291,7 +2291,7 @@ void ResetRaindrop(Raindrop *drop) {
                              RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE) +
         f_RainCenter[1];
     fallFrameCount = drop->head[AXIS_Y] / f_RainVelocity[AXIS_Y];
-    drop->head[AXIS_Y] += g_Cameras[0].view.eye[AXIS_Y] + RAIN_TOP_BELOW_EYE;
+    drop->head[AXIS_Y] += g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] + RAIN_TOP_BELOW_EYE;
     drop->head[AXIS_X] += f_RainVelocity[AXIS_X] * fallFrameCount;
     drop->head[AXIS_Z] += f_RainVelocity[AXIS_Z] * fallFrameCount;
     drop->tail[AXIS_X] = drop->head[AXIS_X] + (f_RainDriftX * RAINDROP_LENGTH);
@@ -2378,19 +2378,19 @@ void UpdateRain(void) {
         f_RainVelocity[AXIS_X] = f_RainDriftX * RAIN_FALL_SPEED;
         f_RainVelocity[AXIS_Z] = f_RainDriftZ * RAIN_FALL_SPEED;
         PlaceRainCenter();
-        shiftX = g_Cameras[0].view.eye[AXIS_X] - f_LastRainEye[AXIS_X];
-        shiftZ = g_Cameras[0].view.eye[AXIS_Z] - f_LastRainEye[AXIS_Z];
+        shiftX = g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] - f_LastRainEye[AXIS_X];
+        shiftZ = g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] - f_LastRainEye[AXIS_Z];
         if (sqrtf((shiftX * shiftX) + (shiftZ * shiftZ)) > RAIN_CAMERA_JUMP_DISTANCE) {
             cameraShift[AXIS_X] += shiftX;
             cameraShift[AXIS_Z] += shiftZ;
         }
-        else if (f_LastRainEye[AXIS_Y] < g_Cameras[0].view.eye[AXIS_Y]) {
-            cameraShift[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y] - f_LastRainEye[AXIS_Y];
+        else if (f_LastRainEye[AXIS_Y] < g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y]) {
+            cameraShift[AXIS_Y] = g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] - f_LastRainEye[AXIS_Y];
         }
 
-        f_LastRainEye[AXIS_X] = g_Cameras[0].view.eye[AXIS_X];
-        f_LastRainEye[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
-        f_LastRainEye[AXIS_Z] = g_Cameras[0].view.eye[AXIS_Z];
+        f_LastRainEye[AXIS_X] = g_Cameras[MAIN_CAMERA].view.eye[AXIS_X];
+        f_LastRainEye[AXIS_Y] = g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y];
+        f_LastRainEye[AXIS_Z] = g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z];
 
         f_Raindrops[f_GroundCheckDropIndex].groundHeight =
             GetGroundHeight(
@@ -2489,7 +2489,7 @@ void DrawRain(Gfx **displayListHead, CameraMatrices *matrices) {
     if (g_HoleSetup.conditions.isRaining == TRUE &&
         f_Weather == WEATHER_RAIN
 
-        && IsCloseUpCameraMode(g_Cameras[0].mode) == FALSE) {
+        && IsCloseUpCameraMode(g_Cameras[MAIN_CAMERA].mode) == FALSE) {
         UpdateRain();
         for (index = 0; index != f_RaindropCount; index++) {
             drop = &f_Raindrops[index];

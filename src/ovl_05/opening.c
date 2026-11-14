@@ -3073,14 +3073,14 @@ void UpdateOpening(void) {
 
     UpdateCameraEditor();
     EaseOpeningLookAt();
-    g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
-    g_Cameras[0].view.eye[0] = g_CameraEditor.points[0][0];
-    g_Cameras[0].view.eye[1] = g_CameraEditor.points[0][1];
-    g_Cameras[0].view.eye[2] = g_CameraEditor.points[0][2];
-    g_Cameras[0].view.lookAt[0] = g_CameraEditor.points[1][0];
-    g_Cameras[0].view.lookAt[1] = g_CameraEditor.points[1][1];
-    g_Cameras[0].view.lookAt[2] = g_CameraEditor.points[1][2];
-    g_Cameras[0].view.fieldOfView = g_CameraEditor.fieldOfView;
+    g_Cameras[MAIN_CAMERA].mode = CAMERA_MODE_BEHIND_GOLFER;
+    g_Cameras[MAIN_CAMERA].view.eye[0] = g_CameraEditor.points[0][0];
+    g_Cameras[MAIN_CAMERA].view.eye[1] = g_CameraEditor.points[0][1];
+    g_Cameras[MAIN_CAMERA].view.eye[2] = g_CameraEditor.points[0][2];
+    g_Cameras[MAIN_CAMERA].view.lookAt[0] = g_CameraEditor.points[1][0];
+    g_Cameras[MAIN_CAMERA].view.lookAt[1] = g_CameraEditor.points[1][1];
+    g_Cameras[MAIN_CAMERA].view.lookAt[2] = g_CameraEditor.points[1][2];
+    g_Cameras[MAIN_CAMERA].view.fieldOfView = g_CameraEditor.fieldOfView;
     if (f_OpeningShotState == 1) {
         f_UnusedStickOffsetX += g_ControllerStates[1].stickX * 0.002f;
         f_UnusedStickOffsetY += g_ControllerStates[1].stickY * 0.002f;
@@ -3156,9 +3156,9 @@ void DrawOpening(CameraMatrices *matrices, Gfx **displayListHead) {
     if (f_IsLookAtMarkerShown) {
         guTranslate(
             &f_LookAtMarkerTranslation,
-            g_Cameras[0].view.lookAt[0],
-            g_Cameras[0].view.lookAt[1],
-            g_Cameras[0].view.lookAt[2]
+            g_Cameras[MAIN_CAMERA].view.lookAt[0],
+            g_Cameras[MAIN_CAMERA].view.lookAt[1],
+            g_Cameras[MAIN_CAMERA].view.lookAt[2]
         );
         guScale(
             &f_LookAtMarkerScaling,

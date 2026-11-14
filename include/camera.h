@@ -45,7 +45,11 @@ typedef struct Camera {
     CameraMode mode;
 } Camera;
 
+#define MAIN_CAMERA 0
+#define INSET_CAMERA 1
 #define CAMERA_COUNT 2
+// A camera index for drawing with the opening's own camera instead
+#define OPENING_CAMERA CAMERA_COUNT
 
 extern Camera g_Cameras[CAMERA_COUNT];
 
@@ -74,9 +78,6 @@ typedef struct EasedView {
 // Parts of an EasedView to ease, combined.
 #define EASE_LOOK_AT (1 << 0)
 #define EASE_EYE (1 << 1)
-
-#define INSET_CAMERA 1
-#define OPENING_CAMERA 2
 
 enum InsetViewState {
     INSET_VIEW_STILL,

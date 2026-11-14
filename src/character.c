@@ -1953,17 +1953,17 @@ void PlaceAndViewCharacter(u32 slotIndex) {
 
     if (slot != NULL) {
         PlaceAtReactionSpot(slot->position, slot->rotation, slot->scale);
-        g_Cameras[0].view.lookAt[AXIS_X] = slot->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.lookAt[AXIS_Y] =
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] = slot->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] =
             (slot->position[AXIS_Y] - VIEW_DROP) * COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.lookAt[AXIS_Z] = slot->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.eye[AXIS_X] =
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = slot->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] =
             (slot->position[AXIS_X] +
                 (cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * VIEW_DISTANCE)) *
             COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.eye[AXIS_Y] =
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] =
             (slot->position[AXIS_Y] - VIEW_DROP) * COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.eye[AXIS_Z] =
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] =
             (slot->position[AXIS_Z] +
                 (sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * VIEW_DISTANCE)) *
             COURSE_TO_WORLD_SCALE;
@@ -2025,9 +2025,11 @@ void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotI
             return;
         }
 
-        viewDirection[AXIS_X] = g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
+        viewDirection[AXIS_X] =
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] - g_Cameras[MAIN_CAMERA].view.eye[AXIS_X];
         viewDirection[AXIS_Y] = 0.0f;
-        viewDirection[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
+        viewDirection[AXIS_Z] =
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] - g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z];
         if (fabsf(viewDirection[AXIS_X]) + fabsf(viewDirection[AXIS_Z]) >= 1.0f) {
             guNormalize(&viewDirection[AXIS_X], &viewDirection[AXIS_Y], &viewDirection[AXIS_Z]);
             viewDirection[AXIS_X] *= SECOND_LIGHT_DIRECTION_LENGTH;

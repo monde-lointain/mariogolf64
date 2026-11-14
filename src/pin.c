@@ -276,8 +276,10 @@ void SetPinMatrix(s32 cameraIndex) {
     Vec3 scale;
     Mat4 matrix;
     Radians heading = atan2(
-        (g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE) - g_Cameras[0].view.eye[AXIS_X],
-        (g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE) - g_Cameras[0].view.eye[AXIS_Z]
+        (g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE) -
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_X],
+        (g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE) -
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z]
     );
 
     translation[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;

@@ -47,32 +47,34 @@ void StartHoleIntroCamera(void) {
     f_IntroFrame = 0;
     f_IntroCameraDistance = INTRO_CAMERA_START_DISTANCE;
     f_IntroCameraHeight = INTRO_CAMERA_START_HEIGHT;
-    g_Cameras[1].view.lookAt[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    g_Cameras[1].view.lookAt[AXIS_Y] =
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] =
+        g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] =
         (g_CurrentShot.ballPosition[AXIS_Y] - INTRO_LOOK_AT_DROP) * COURSE_TO_WORLD_SCALE;
-    g_Cameras[1].view.lookAt[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] =
+        g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     if (g_GameState.holeIndex == GetFirstHoleIndex()) {
         Radians heading = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2);
 
-        g_Cameras[0].view.eye[AXIS_X] =
-            g_Cameras[1].view.lookAt[AXIS_X] + (-sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
-        g_Cameras[0].view.eye[AXIS_Y] =
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] +
+            (-sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] =
             (g_CurrentShot.ballPosition[AXIS_Y] + INTRO_CAMERA_FIRST_HEIGHT) *
             COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.eye[AXIS_Z] =
-            g_Cameras[1].view.lookAt[AXIS_Z] + (cosf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] +
+            (cosf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
     }
     else {
         Radians heading =
             ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2) - M_PI;
 
-        g_Cameras[0].view.eye[AXIS_X] =
-            g_Cameras[1].view.lookAt[AXIS_X] + (-sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
-        g_Cameras[0].view.eye[AXIS_Y] =
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] +
+            (-sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] =
             (g_CurrentShot.ballPosition[AXIS_Y] + INTRO_CAMERA_FIRST_HEIGHT) *
             COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.eye[AXIS_Z] =
-            g_Cameras[1].view.lookAt[AXIS_Z] + (cosf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] +
+            (cosf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
     }
 }
 
@@ -122,17 +124,21 @@ s32 UpdateHoleIntroCamera(void) {
         heading = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2) + -(f32)M_PI;
     }
 
-    g_Cameras[1].view.lookAt[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    g_Cameras[1].view.lookAt[AXIS_Y] =
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] =
+        g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] =
         (g_CurrentShot.ballPosition[AXIS_Y] - INTRO_LOOK_AT_DROP) * COURSE_TO_WORLD_SCALE;
-    g_Cameras[1].view.lookAt[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] =
+        g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     offset[AXIS_X] = -sinf(heading) * f_IntroCameraDistance * COURSE_TO_WORLD_SCALE;
     offset[AXIS_Y] =
         (g_CurrentShot.ballPosition[AXIS_Y] + f_IntroCameraHeight) * COURSE_TO_WORLD_SCALE;
     offset[AXIS_Z] = cosf(heading) * f_IntroCameraDistance * COURSE_TO_WORLD_SCALE;
-    g_Cameras[0].view.eye[AXIS_Y] = offset[AXIS_Y];
-    g_Cameras[0].view.eye[AXIS_X] = g_Cameras[1].view.lookAt[AXIS_X] + offset[AXIS_X];
-    g_Cameras[0].view.eye[AXIS_Z] = g_Cameras[1].view.lookAt[AXIS_Z] + offset[AXIS_Z];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = offset[AXIS_Y];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] =
+        g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] + offset[AXIS_X];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] =
+        g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] + offset[AXIS_Z];
     if (g_GameState.holeIndex == GetFirstHoleIndex()) {
         if (f_IntroFrame == FIRST_HOLE_INTRO_MOVIE_FRAME) {
             StartMovie(MOVIE_LAKITU);

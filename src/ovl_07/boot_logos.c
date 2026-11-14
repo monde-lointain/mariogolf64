@@ -105,23 +105,23 @@ void LoadBootLogos(void) {
     OpenEncodedAsset(ASSET_N64_LOGO, &asset);
     ReadEncodedAsset(&f_N64Logo, &asset);
     RequestSongStop();
-    g_Cameras[0].view.scissorX = SCREEN_BORDER;
-    g_Cameras[0].view.scissorY = SCREEN_BORDER;
-    g_Cameras[0].view.scissorWidth = SCREEN_WIDTH - (2 * SCREEN_BORDER);
-    g_Cameras[0].view.scissorHeight = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
-    g_Cameras[0].view.unreadSettings[0] = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
-    g_Cameras[0].view.unreadSettings[1] = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
-    g_Cameras[0].view.viewportCenterX = SCREEN_WIDTH;
-    g_Cameras[0].view.viewportCenterY = SCREEN_HEIGHT;
-    g_Cameras[0].view.eye[0] = 0.0f;
-    g_Cameras[0].view.eye[1] = 0.0f;
-    g_Cameras[0].view.eye[2] = 0.0f;
-    g_Cameras[0].view.lookAt[0] = 0.0f;
-    g_Cameras[0].view.lookAt[1] = 0.0f;
-    g_Cameras[0].view.drawFlags = CAMERA_DRAW_SCENE;
-    g_Cameras[0].view.lookAt[2] = -100.0f;
-    g_Cameras[0].view.zoom = 1.0f;
-    g_Cameras[0].view.fieldOfView = 45.0f;
+    g_Cameras[MAIN_CAMERA].view.scissorX = SCREEN_BORDER;
+    g_Cameras[MAIN_CAMERA].view.scissorY = SCREEN_BORDER;
+    g_Cameras[MAIN_CAMERA].view.scissorWidth = SCREEN_WIDTH - (2 * SCREEN_BORDER);
+    g_Cameras[MAIN_CAMERA].view.scissorHeight = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
+    g_Cameras[MAIN_CAMERA].view.unreadSettings[0] = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
+    g_Cameras[MAIN_CAMERA].view.unreadSettings[1] = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
+    g_Cameras[MAIN_CAMERA].view.viewportCenterX = SCREEN_WIDTH;
+    g_Cameras[MAIN_CAMERA].view.viewportCenterY = SCREEN_HEIGHT;
+    g_Cameras[MAIN_CAMERA].view.eye[0] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.eye[1] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.eye[2] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.lookAt[0] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.lookAt[1] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.drawFlags = CAMERA_DRAW_SCENE;
+    g_Cameras[MAIN_CAMERA].view.lookAt[2] = -100.0f;
+    g_Cameras[MAIN_CAMERA].view.zoom = 1.0f;
+    g_Cameras[MAIN_CAMERA].view.fieldOfView = 45.0f;
 }
 
 void LeaveBootLogos(void) {

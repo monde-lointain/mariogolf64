@@ -439,24 +439,26 @@ void PlaceShotCamera(void) {
     }
 
     if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
-        g_Cameras[0].mode = CAMERA_MODE_FREE_LOOK;
+        g_Cameras[MAIN_CAMERA].mode = CAMERA_MODE_FREE_LOOK;
         point[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
         point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
         point[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
         heading = (u16)g_FreeLookHeading * BINARY_ANGLE_TO_RADIANS;
         if (!g_GameState.isMiniGolf) {
-            g_Cameras[0].view.lookAt[AXIS_X] =
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] =
                 (point[AXIS_X] + (cosf(heading) * PAUSE_CAMERA_RADIUS)) * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.lookAt[AXIS_Z] = (point[AXIS_Z] - g_CurrentShot.aimCameraDistance +
-                                                   (sinf(heading) * PAUSE_CAMERA_RADIUS)) *
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] =
+                (point[AXIS_Z] - g_CurrentShot.aimCameraDistance +
+                    (sinf(heading) * PAUSE_CAMERA_RADIUS)) *
                 COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.eye[AXIS_X] =
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] =
                 (point[AXIS_X] + (cosf(heading) * -PAUSE_CAMERA_RADIUS)) * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.eye[AXIS_Y] =
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] =
                 (point[AXIS_Y] - PAUSE_CAMERA_RISE) * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.eye[AXIS_Z] = (point[AXIS_Z] - g_CurrentShot.aimCameraDistance +
-                                                (sinf(heading) * -PAUSE_CAMERA_RADIUS)) *
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] =
+                (point[AXIS_Z] - g_CurrentShot.aimCameraDistance +
+                    (sinf(heading) * -PAUSE_CAMERA_RADIUS)) *
                 COURSE_TO_WORLD_SCALE;
         }
         else {
@@ -464,21 +466,21 @@ void PlaceShotCamera(void) {
             point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y] +
                 ((g_HoleSetup.cupPosition[AXIS_Y] - g_HoleSetup.teePosition[AXIS_Y]) * 0.5f);
             point[AXIS_Z] = MINI_GOLF_CENTER_Z;
-            g_Cameras[0].view.lookAt[AXIS_X] =
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] =
                 (point[AXIS_X] + (cosf(heading) * MINI_GOLF_PAUSE_CAMERA_RADIUS)) *
                 COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.lookAt[AXIS_Z] =
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] =
                 (point[AXIS_Z] -
                     (g_CurrentShot.aimCameraDistance + MINI_GOLF_PAUSE_CAMERA_DISTANCE) +
                     (sinf(heading) * MINI_GOLF_PAUSE_CAMERA_RADIUS)) *
                 COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.eye[AXIS_X] =
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] =
                 (point[AXIS_X] + (cosf(heading) * -MINI_GOLF_PAUSE_CAMERA_RADIUS)) *
                 COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.eye[AXIS_Y] =
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] =
                 (point[AXIS_Y] - MINI_GOLF_PAUSE_CAMERA_RISE) * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.eye[AXIS_Z] =
+            g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] =
                 (point[AXIS_Z] -
                     (g_CurrentShot.aimCameraDistance + MINI_GOLF_PAUSE_CAMERA_DISTANCE) +
                     (sinf(heading) * -MINI_GOLF_PAUSE_CAMERA_RADIUS)) *
@@ -523,8 +525,8 @@ void PlaceShotCamera(void) {
         }
 
         lowestGround = GetAimCameraGround(point[AXIS_X], point[AXIS_Z]);
-        g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         for (probe = 0; probe != AIM_GROUND_PROBE_COUNT; probe++) {
             offset = probe * AIM_GROUND_PROBE_STEP;
             point[AXIS_X] = (cosf(heading) * (g_CurrentShot.aimCameraDistance + offset)) +
@@ -552,7 +554,7 @@ void PlaceShotCamera(void) {
             point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] + riseMax;
         }
 
-        g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
         if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
             point[AXIS_X] = (cosf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)) +
                 g_CurrentShot.ballPosition[AXIS_X];
@@ -560,7 +562,7 @@ void PlaceShotCamera(void) {
                 g_CurrentShot.ballPosition[AXIS_Z];
             point[AXIS_Y] = (lowestGround - GREEN_LOOK_RISE) -
                 (g_CurrentShot.aimCameraHeight * GREEN_LOOK_HEIGHT_SCALE);
-            g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
         }
         else {
             tilt = (AIM_TILT_FULL_DISTANCE -
@@ -577,17 +579,17 @@ void PlaceShotCamera(void) {
             point[AXIS_Z] =
                 (sinf(heading) * (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)) +
                 g_CurrentShot.ballPosition[AXIS_Z];
-            point[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
+            point[AXIS_Y] = g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y];
             worldTilt = tilt * COURSE_TO_WORLD_SCALE;
-            g_Cameras[0].view.lookAt[AXIS_Y] =
-                (g_Cameras[0].view.eye[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] =
+                (g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
                 (g_CurrentShot.aimCameraHeight * worldTilt) +
                 (f_DebugAimCameraTilt * AIM_CAMERA_DEBUG_TILT_SCALE);
         }
 
-        g_Cameras[0].view.heading = heading;
-        g_Cameras[0].view.lookAt[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.lookAt[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[MAIN_CAMERA].view.heading = heading;
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     }
     else {
         KeepAimCameraOnCourse();
@@ -606,22 +608,22 @@ void PlaceShotCamera(void) {
         point[AXIS_Z] = (sinf(heading) * g_CurrentShot.aimCameraDistance) + center[AXIS_Z];
         point[AXIS_Y] =
             (f32)GetAimCameraGround(point[AXIS_X], point[AXIS_Z]) + g_CurrentShot.aimCameraHeight;
-        g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
         point[AXIS_X] =
             (cosf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)) + center[AXIS_X];
         point[AXIS_Z] =
             (sinf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)) + center[AXIS_Z];
         point[AXIS_Y] = (center[AXIS_Y] - LOOK_BACK_RISE) -
             (g_CurrentShot.aimCameraHeight * LOOK_BACK_HEIGHT_SCALE);
-        g_Cameras[0].view.heading = heading;
-        g_Cameras[0].view.lookAt[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.lookAt[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[MAIN_CAMERA].view.heading = heading;
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     }
 
-    g_Cameras[0].view.fieldOfView = SHOT_CAMERA_FIELD_OF_VIEW;
+    g_Cameras[MAIN_CAMERA].view.fieldOfView = SHOT_CAMERA_FIELD_OF_VIEW;
     OnShotCameraPlaced();
 }
 
@@ -662,12 +664,12 @@ void AimDownRange(void) {
         g_CurrentShot.ballPosition[AXIS_X];
     lookAt[AXIS_Z] = (sinf(heading) * (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)) +
         g_CurrentShot.ballPosition[AXIS_Z];
-    lookAt[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
+    lookAt[AXIS_Y] = g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y];
     GetGroundHeight(lookAt[AXIS_X], lookAt[AXIS_Z]);
-    g_Cameras[0].view.heading = heading;
-    g_Cameras[0].view.lookAt[AXIS_X] = lookAt[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    g_Cameras[0].view.lookAt[AXIS_Z] = lookAt[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-    g_Cameras[0].view.lookAt[AXIS_Y] = (lookAt[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+    g_Cameras[MAIN_CAMERA].view.heading = heading;
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] = lookAt[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = lookAt[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = (lookAt[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
         (g_CurrentShot.aimCameraHeight * COURSE_TO_WORLD_SCALE);
 }
 
@@ -700,21 +702,21 @@ void PlaceAimCamera(void) {
     }
 
     scale = COURSE_TO_WORLD_SCALE;
-    (&g_Cameras[0])->view.lookAt[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
-    g_Cameras[0].view.lookAt[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+    (&g_Cameras[MAIN_CAMERA])->view.lookAt[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
     eye[AXIS_X] *= scale;
     eye[AXIS_Y] = (eye[AXIS_Y] + g_CurrentShot.aimCameraHeight) * scale;
     eye[AXIS_Z] *= scale;
-    g_Cameras[0].view.eye[AXIS_X] = eye[AXIS_X];
-    g_Cameras[0].view.eye[AXIS_Y] = eye[AXIS_Y];
-    g_Cameras[0].view.eye[AXIS_Z] = eye[AXIS_Z];
-    g_Cameras[0].view.lookAt[AXIS_Y] = (GetAimCameraGround(
-                                            g_CurrentShot.ballPosition[AXIS_X],
-                                            g_CurrentShot.ballPosition[AXIS_Z]
-                                        ) * scale) -
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = eye[AXIS_X];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = eye[AXIS_Y];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = eye[AXIS_Z];
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = (GetAimCameraGround(
+                                                      g_CurrentShot.ballPosition[AXIS_X],
+                                                      g_CurrentShot.ballPosition[AXIS_Z]
+                                                  ) * scale) -
         AIM_LOOK_AT_RISE;
-    g_Cameras[0].view.lookAt[AXIS_X] *= scale;
-    g_Cameras[0].view.lookAt[AXIS_Z] *= scale;
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] *= scale;
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] *= scale;
 }
 
 void StartFreeLook(void) {
@@ -1396,12 +1398,12 @@ s32 UpdateAimControls(void) {
         ClampAimCamera(AIM_CAMERA_HEIGHT_MIN, AIM_CAMERA_DISTANCE_MIN, AIM_CAMERA_DISTANCE_MAX);
     }
 
-    g_Cameras[1].view.eye[AXIS_X] = g_Cameras[0].view.eye[AXIS_X];
-    g_Cameras[1].view.eye[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
-    g_Cameras[1].view.eye[AXIS_Z] = g_Cameras[0].view.eye[AXIS_Z];
-    g_Cameras[1].view.lookAt[AXIS_X] = g_Cameras[0].view.lookAt[AXIS_X];
-    g_Cameras[1].view.lookAt[AXIS_Y] = g_Cameras[0].view.lookAt[AXIS_Y];
-    g_Cameras[1].view.lookAt[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z];
+    g_Cameras[INSET_CAMERA].view.eye[AXIS_X] = g_Cameras[MAIN_CAMERA].view.eye[AXIS_X];
+    g_Cameras[INSET_CAMERA].view.eye[AXIS_Y] = g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y];
+    g_Cameras[INSET_CAMERA].view.eye[AXIS_Z] = g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z];
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X];
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y];
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z];
     return FALSE;
 }
 
@@ -4990,7 +4992,7 @@ void UpdateTurns(void) {
         center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         AddFramedSphere(center, 7.5f);
         FrameSpheres(0);
-        GetFramedView(g_Cameras[0].view.eye, g_Cameras[0].view.lookAt);
+        GetFramedView(g_Cameras[MAIN_CAMERA].view.eye, g_Cameras[MAIN_CAMERA].view.lookAt);
     }
 
     if (g_RoundHud.isDistanceSignShown) {

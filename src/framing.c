@@ -134,12 +134,12 @@ void FrameSpheres(f32 depthOffset) {
     xMax = yMax;
     zMin = margin;
     zMax = -margin;
-    rightAngle = g_Cameras[0].view.fieldOfView * 0.5f;
+    rightAngle = g_Cameras[MAIN_CAMERA].view.fieldOfView * 0.5f;
     leftAngle = -rightAngle;
     topAngle = rightAngle * 0.75f;
     bottomAngle = leftAngle * 0.75f;
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
-        osSyncPrintf("forv %f\n", g_Cameras[0].view.fieldOfView);
+        osSyncPrintf("forv %f\n", g_Cameras[MAIN_CAMERA].view.fieldOfView);
     }
 
     guRotateF(rotation, rightAngle, 0.0f, 1.0f, 0.0f);

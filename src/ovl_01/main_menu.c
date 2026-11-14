@@ -1388,7 +1388,7 @@ void UpdateMenus(void) {
     g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] = center[AXIS_Z];
     SetScreenEffect(SCREEN_EFFECT_NONE, 0);
     g_IsHoleShownInMenuInset = FALSE;
-    g_Cameras[0].view.drawFlags = CAMERA_DRAW_SCENE;
+    g_Cameras[MAIN_CAMERA].view.drawFlags = CAMERA_DRAW_SCENE;
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
     g_InsetView.animation = INSET_VIEW_OPENING;
     switch (g_MenuScreen) {
