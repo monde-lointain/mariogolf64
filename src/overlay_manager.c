@@ -94,6 +94,9 @@ static Overlay f_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_14, f_StaffRollModuleIds, LoadStaffRoll, FreeStaffRoll),
 };
 
+// A module that no overlay holds, so it is always alive.
+#define NO_OVERLAY (-1)
+
 static s8 f_OverlayIndexOfModule[MODULE_COUNT];
 
 void LoadSceneryResources(void) {
@@ -116,7 +119,7 @@ void InitOverlayManager(void) {
     s32 moduleIndex;
 
     for (i = 0; i < MODULE_COUNT; i++) {
-        f_OverlayIndexOfModule[i] = -1;
+        f_OverlayIndexOfModule[i] = NO_OVERLAY;
         g_IsModuleAlive[i] = FALSE;
         g_ModuleRdpRequestFrames[i] = RDP_REQUEST_FRAME_NEVER;
     }
@@ -125,7 +128,7 @@ void InitOverlayManager(void) {
         moduleIds = f_Overlays[i].moduleIds;
         moduleIndex = 0;
         while (moduleIds[moduleIndex] != MODULE_ID_END) {
-            if (f_OverlayIndexOfModule[moduleIds[moduleIndex]] != -1 &&
+            if (f_OverlayIndexOfModule[moduleIds[moduleIndex]] != NO_OVERLAY &&
                 !IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
                 osSyncPrintf("OverlayManager\n");
             }
@@ -135,7 +138,7 @@ void InitOverlayManager(void) {
     }
 
     for (i = 0; i < MODULE_COUNT; i++) {
-        if (f_OverlayIndexOfModule[i] == -1) {
+        if (f_OverlayIndexOfModule[i] == NO_OVERLAY) {
             g_IsModuleAlive[i] = TRUE;
         }
     }
@@ -294,7 +297,7 @@ void UnloadOverlay(s32 overlayId) {
     }
 }
 
-s32 ReportModuleNotAlive(ModuleId moduleId UNUSED) {
+Boolean ReportModuleNotAlive(ModuleId moduleId UNUSED) {
     if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
         osSyncPrintf("Module %d not alive !!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     }
@@ -303,5 +306,5 @@ s32 ReportModuleNotAlive(ModuleId moduleId UNUSED) {
         osSyncPrintf("Module %d not alive !!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     }
 
-    return 0;
+    return FALSE;
 }

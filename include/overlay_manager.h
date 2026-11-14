@@ -70,9 +70,9 @@ s32 GetOverlayIndex(s32 overlayId);
 Boolean CanLoadOverlay(s32 overlayId);
 s32 LoadOverlay(s32 overlayId);
 void UnloadOverlay(s32 overlayId);
-s32 ReportModuleNotAlive(ModuleId moduleId);
+Boolean ReportModuleNotAlive(ModuleId moduleId);
 
-extern s8 g_IsModuleAlive[MODULE_COUNT];
+extern Boolean8 g_IsModuleAlive[MODULE_COUNT];
 extern s32 g_ModuleRdpRequestFrames[MODULE_COUNT];
 
 #endif
