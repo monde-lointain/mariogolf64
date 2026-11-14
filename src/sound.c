@@ -36,9 +36,13 @@
 #define DELAY_EDITOR_FIRST_ROW 5
 #define DELAY_EDITOR_KIND_ROW 4
 
-#define SONG_CHANGE_NONE 0
-#define SONG_CHANGE_SWITCH 1
-#define SONG_CHANGE_STOP 2
+enum SongChangeKind {
+    SONG_CHANGE_NONE,
+    SONG_CHANGE_SWITCH,
+    SONG_CHANGE_STOP
+};
+
+typedef s32 SongChangeKind;
 #define SONG_SWITCH_DELAY 2
 #define PLAYED_DELAY (-1)
 
@@ -51,7 +55,7 @@ typedef struct QueuedCharacterSound {
 } QueuedCharacterSound;
 
 typedef struct SongChange {
-    s32 state;
+    SongChangeKind kind;
     SongId songId;
     s32 flags;
     s32 delay;
@@ -567,7 +571,7 @@ NO_RESULT UpdateAudio(void) {
     if (audioFrame == f_LastAudioFrame) {
         osSyncPrintf(
             "Ouch!%d,%d,%d,%d!!!!!!!!!!!!!!!!\n",
-            f_PendingSongChange.state,
+            f_PendingSongChange.kind,
             f_PendingSongChange.songId,
             f_PendingSongChange.flags,
             f_PendingSongChange.delay
@@ -587,10 +591,10 @@ NO_RESULT UpdateAudio(void) {
     }
 
     UpdateCharacterSounds();
-    if (f_PendingSongChange.state != SONG_CHANGE_NONE &&
+    if (f_PendingSongChange.kind != SONG_CHANGE_NONE &&
         f_PendingSongChange.delay != 0 &&
         --f_PendingSongChange.delay == 0) {
-        if (f_PendingSongChange.state == SONG_CHANGE_SWITCH) {
+        if (f_PendingSongChange.kind == SONG_CHANGE_SWITCH) {
             if (f_SongHandle != NO_HANDLE) {
                 s32 mask = osSetIntMask(OS_IM_NONE);
                 MusHandleStop(f_SongHandle, 0);
@@ -601,11 +605,11 @@ NO_RESULT UpdateAudio(void) {
                 return;
             }
 
-            f_PendingSongChange.state = SONG_CHANGE_NONE;
+            f_PendingSongChange.kind = SONG_CHANGE_NONE;
             f_SongId = NO_SONG;
             PlaySong(f_PendingSongChange.songId, f_PendingSongChange.flags);
         }
-        else if (f_PendingSongChange.state == SONG_CHANGE_STOP) {
+        else if (f_PendingSongChange.kind == SONG_CHANGE_STOP) {
             if (f_SongHandle != NO_HANDLE) {
                 s32 mask = osSetIntMask(OS_IM_NONE);
                 MusHandleStop(f_SongHandle, 0);
@@ -614,7 +618,7 @@ NO_RESULT UpdateAudio(void) {
                 f_PendingSongChange.delay = 0;
             }
 
-            f_PendingSongChange.state = SONG_CHANGE_NONE;
+            f_PendingSongChange.kind = SONG_CHANGE_NONE;
         }
     }
 }
@@ -630,7 +634,7 @@ void StopSong(s32 fadeFrameCount) {
 }
 
 void RequestSongStop(void) {
-    f_PendingSongChange.state = SONG_CHANGE_STOP;
+    f_PendingSongChange.kind = SONG_CHANGE_STOP;
     f_PendingSongChange.delay = 1;
     f_SongId = NO_SONG;
 }
@@ -688,13 +692,13 @@ void PlaySong(SongId songId, s32 songFlags) {
 
         if (f_SongHandle != NO_HANDLE) {
             if ((songFlags & SONG_FLAG_RESTART) || f_SongId != songId) {
-                f_PendingSongChange.state = SONG_CHANGE_SWITCH;
+                f_PendingSongChange.kind = SONG_CHANGE_SWITCH;
                 f_PendingSongChange.songId = songId;
                 f_PendingSongChange.flags = songFlags;
                 f_PendingSongChange.delay = SONG_SWITCH_DELAY;
             }
         }
-        else if (f_PendingSongChange.state == SONG_CHANGE_SWITCH) {
+        else if (f_PendingSongChange.kind == SONG_CHANGE_SWITCH) {
             f_PendingSongChange.songId = songId;
             f_PendingSongChange.flags = songFlags;
         }
@@ -728,7 +732,7 @@ void InitAudio(void) {
     SoundChannel channel;
 
     InitMusic(NULL);
-    f_PendingSongChange.state = SONG_CHANGE_NONE;
+    f_PendingSongChange.kind = SONG_CHANGE_NONE;
     f_SongHandle = NO_HANDLE;
     f_SongId = NO_SONG;
     LoadSampleBank(
