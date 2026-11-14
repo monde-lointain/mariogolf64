@@ -36,6 +36,6 @@ void WaitForConfirmButton(void) {
     }
 }
 
-void RewriteWord(Gfx **displayListHead) {
+void DoNothingWithDisplayList(Gfx **displayListHead) {
     *displayListHead = *displayListHead;
 }

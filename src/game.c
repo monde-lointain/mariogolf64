@@ -1959,7 +1959,7 @@ s32 DrawGame(void) {
                     ClearBuffers(BUFFER_CLEAR_WHOLE);
                     gDPPipeSync(g_DisplayListHead++);
                     SetCameraScissor(g_Cameras[0].view);
-                    RewriteWord(&g_DisplayListHead);
+                    DoNothingWithDisplayList(&g_DisplayListHead);
                 }
 
                 break;
