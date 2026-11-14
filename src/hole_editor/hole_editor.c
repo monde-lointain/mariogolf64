@@ -630,7 +630,7 @@ static u8 f_MapCaptureHeader[CAPTURE_HEADER_SIZE] = BMP_HEADER(
     MAP_CAPTURE_HEIGHT,
     SCREEN_CAPTURE_SIZE - CAPTURE_HEADER_SIZE
 );
-static s32 f_ScreenCaptureNumber = 0;
+static s32 f_ScreenCaptureCount = 0;
 static u8 f_ScreenCaptureHeader[CAPTURE_HEADER_SIZE] = BMP_HEADER(
     SCREEN_CAPTURE_SIZE,
     SCREEN_WIDTH,
@@ -4967,10 +4967,10 @@ void CaptureFrame(void) {
         }
     }
 
-    sprintf(g_PrintBuffer, "x:/usgolf64/capture/cap%02d.bmp", (int)f_ScreenCaptureNumber);
+    sprintf(g_PrintBuffer, "x:/usgolf64/capture/cap%02d.bmp", (int)f_ScreenCaptureCount);
     WriteHostFile(g_PrintBuffer, SCREEN_CAPTURE_SIZE);
     FreeMemory(&capture);
-    f_ScreenCaptureNumber++;
+    f_ScreenCaptureCount++;
 }
 
 void CaptureFrameCorner(s32 captureIndex) {
