@@ -80,16 +80,6 @@ typedef struct TerrainColor {
     s8 alpha;
 } TerrainColor;
 
-typedef struct GroundTile {
-    u16 texels[GROUND_TILE_TEXEL_ROW_COUNT][GROUND_TILE_TEXEL_ROW_LENGTH];
-    s16 extraPassCount;
-    u16 mirroredCells;
-    s32 detail;
-    Vec3 center;
-    s32 midpointBlockIndex;
-    u8 unusedAfterMidpointBlock[0xA00 - 0x9A8];
-} GroundTile;
-
 enum GroundDetail {
     GROUND_DETAIL_HIDDEN = -1,
     GROUND_DETAIL_COARSE,
@@ -98,6 +88,16 @@ enum GroundDetail {
 };
 
 typedef s32 GroundDetail;
+
+typedef struct GroundTile {
+    u16 texels[GROUND_TILE_TEXEL_ROW_COUNT][GROUND_TILE_TEXEL_ROW_LENGTH];
+    s16 extraPassCount;
+    u16 mirroredCells;
+    GroundDetail detail;
+    Vec3 center;
+    s32 midpointBlockIndex;
+    u8 unusedAfterMidpointBlock[0xA00 - 0x9A8];
+} GroundTile;
 
 enum TerrainCode {
     TERRAIN_CODE_FAIRWAY,
