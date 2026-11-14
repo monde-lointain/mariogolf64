@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "language.h"
+#include "c_language.h"
 
 #define GAME_FLAG_COUNT 256
 #define GAME_FLAGS_PER_BYTE 8

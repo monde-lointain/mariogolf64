@@ -3,9 +3,9 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "compiler.h"
 #include "geometry.h"
-#include "language.h"
 #include "surface.h"
 
 #define GROUND_POINT_COLUMN_COUNT 33

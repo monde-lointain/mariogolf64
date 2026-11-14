@@ -5,6 +5,7 @@
 
 #include "address.h"
 #include "asset.h"
+#include "c_language.h"
 #include "camera.h"
 #include "compiler.h"
 #include "course_space.h"
@@ -17,7 +18,6 @@
 #include "heap.h"
 #include "hole_setup.h"
 #include "host_file.h"
-#include "language.h"
 #include "math_util.h"
 #include "shot_camera.h"
 #include "terrain.h"

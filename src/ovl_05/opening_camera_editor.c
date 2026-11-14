@@ -3,12 +3,12 @@
 #include <math.h>
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "compiler.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "geometry.h"
 #include "host_file.h"
-#include "language.h"
 #include "math_util.h"
 #include "sound.h"
 #include "text.h"

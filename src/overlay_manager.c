@@ -4,10 +4,10 @@
 #include <ultra64.h>
 
 #include "boot_logos.h"
+#include "c_language.h"
 #include "compiler.h"
 #include "game_flags.h"
 #include "golf_balls.h"
-#include "language.h"
 #include "main.h"
 #include "menu.h"
 #include "opening.h"

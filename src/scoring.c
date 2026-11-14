@@ -2,10 +2,10 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "course.h"
 #include "game_flags.h"
 #include "game_state.h"
-#include "language.h"
 #include "math_util.h"
 #include "menu.h"
 #include "player.h"

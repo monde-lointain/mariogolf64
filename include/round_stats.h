@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "bets.h"
-#include "language.h"
+#include "c_language.h"
 #include "player.h"
 
 typedef struct RoundStats {

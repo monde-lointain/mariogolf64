@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "language.h"
+#include "c_language.h"
 
 enum Movie {
     MOVIE_NONE = -1,

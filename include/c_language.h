@@ -1,5 +1,5 @@
-#ifndef LANGUAGE_H
-#define LANGUAGE_H
+#ifndef C_LANGUAGE_H
+#define C_LANGUAGE_H
 
 #include <ultra64.h>
 

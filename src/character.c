@@ -6,6 +6,7 @@
 
 #include "address.h"
 #include "asset.h"
+#include "c_language.h"
 #include "camera.h"
 #include "character.h"
 #include "character_model.h"
@@ -23,7 +24,6 @@
 #include "hole_loader.h"
 #include "hole_setup.h"
 #include "host_file.h"
-#include "language.h"
 #include "main.h"
 #include "math_util.h"
 #include "play.h"

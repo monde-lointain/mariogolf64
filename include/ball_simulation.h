@@ -3,11 +3,11 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "club.h"
 #include "course_space.h"
 #include "frame_time.h"
 #include "geometry.h"
-#include "language.h"
 #include "math_util.h"
 #include "surface.h"
 

@@ -7,6 +7,7 @@
 #define WIDENS_AIM_SLOPE_ANGLE
 
 #include "ball_physics.h"
+#include "c_language.h"
 #include "club.h"
 #include "collision.h"
 #include "compiler.h"
@@ -18,7 +19,6 @@
 #include "hole_creatures.h"
 #include "hole_setup.h"
 #include "hole_triangles.h"
-#include "language.h"
 #include "math_util.h"
 #include "particle_effects.h"
 #include "player.h"

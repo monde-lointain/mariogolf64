@@ -5,7 +5,7 @@
 #include <ultra64.h>
 
 #include "asset.h"
-#include "language.h"
+#include "c_language.h"
 #include "math_util.h"
 
 #define PAK_ACCESS_OK 0

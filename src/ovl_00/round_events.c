@@ -5,6 +5,7 @@
 
 #include "address.h"
 #include "asset.h"
+#include "c_language.h"
 #include "camera.h"
 #include "character.h"
 #include "compiler.h"
@@ -17,7 +18,6 @@
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "heap.h"
-#include "language.h"
 #include "math_util.h"
 #include "movie.h"
 #include "pin.h"

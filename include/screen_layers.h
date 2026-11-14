@@ -4,10 +4,10 @@
 #include <ultra64.h>
 
 #include "asset.h"
+#include "c_language.h"
 #include "controller.h"
 #include "course.h"
 #include "gbi_helpers.h"
-#include "language.h"
 
 enum WipeState {
     WIPE_NONE,

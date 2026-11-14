@@ -3,9 +3,9 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "course.h"
 #include "course_space.h"
-#include "language.h"
 
 #define CUP_POSITION_COUNT 4
 #define ROUTE_POINT_COUNT 8

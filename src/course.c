@@ -2,8 +2,8 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "game_state.h"
-#include "language.h"
 #include "main.h"
 #include "scene.h"
 

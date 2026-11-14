@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "geometry.h"
-#include "language.h"
 #include "math_util.h"
 
 #define EDITOR_POINT_EYE 0

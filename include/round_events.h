@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "camera.h"
-#include "language.h"
 #include "player.h"
 #include "text.h"
 

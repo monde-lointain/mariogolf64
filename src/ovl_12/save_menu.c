@@ -7,6 +7,7 @@
 
 #include "address.h"
 #include "asset.h"
+#include "c_language.h"
 #include "character.h"
 #include "compiler.h"
 #include "controller.h"
@@ -14,7 +15,6 @@
 #include "game_state.h"
 #include "gbi_helpers.h"
 #include "heap.h"
-#include "language.h"
 #include "math_util.h"
 #include "menu.h"
 #include "pause_menu.h"

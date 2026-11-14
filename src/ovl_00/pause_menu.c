@@ -5,6 +5,7 @@
 
 #include "address.h"
 #include "asset.h"
+#include "c_language.h"
 #include "compiler.h"
 #include "controller.h"
 #include "course.h"
@@ -14,7 +15,6 @@
 #include "geometry.h"
 #include "heap.h"
 #include "hole_setup.h"
-#include "language.h"
 #include "main.h"
 #include "math_util.h"
 #include "overlay_manager.h"

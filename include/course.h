@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "language.h"
+#include "c_language.h"
 
 #define COURSE_COUNT 6
 #define COURSE_HOLE_COUNT 18

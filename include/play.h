@@ -4,9 +4,9 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
+#include "c_language.h"
 #include "camera.h"
 #include "current_shot.h"
-#include "language.h"
 #include "math_util.h"
 #include "play_record.h"
 #include "player.h"

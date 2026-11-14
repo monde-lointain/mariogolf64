@@ -3,11 +3,11 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "character.h"
 #include "compiler.h"
 #include "course_space.h"
 #include "geometry.h"
-#include "language.h"
 
 enum ReactionAnimation {
     REACTION_ANIMATION_EAGLE = 12,

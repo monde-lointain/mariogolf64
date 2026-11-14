@@ -5,6 +5,7 @@
 
 #include "ball_simulation.h"
 #include "billboard.h"
+#include "c_language.h"
 #include "compiler.h"
 #include "course_space.h"
 #include "debug_text.h"
@@ -12,7 +13,6 @@
 #include "geometry.h"
 #include "hole_setup.h"
 #include "hole_triangles.h"
-#include "language.h"
 #include "main.h"
 #include "math_util.h"
 #include "pin.h"

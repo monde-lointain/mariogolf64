@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "asset.h"
-#include "language.h"
+#include "c_language.h"
 
 extern ImageAsset *g_ClubPanelImage;
 

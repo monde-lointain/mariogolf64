@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "course.h"
-#include "language.h"
 
 enum MatchStanding {
     MATCH_STANDING_DECIDED = -1,

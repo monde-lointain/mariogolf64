@@ -4,6 +4,7 @@
 
 #include "address.h"
 #include "asset.h"
+#include "c_language.h"
 #include "camera.h"
 #include "compiler.h"
 #include "course_space.h"
@@ -12,7 +13,6 @@
 #include "game_state.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
-#include "language.h"
 #include "math_util.h"
 #include "particle_effects.h"
 #include "play.h"

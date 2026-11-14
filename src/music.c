@@ -6,8 +6,8 @@
 #include <ultra64.h>
 
 #include "address.h"
+#include "c_language.h"
 #include "compiler.h"
-#include "language.h"
 #include "sound.h"
 
 typedef void (*AudioEventCallback)(NUScMsg message, s32 resetFrame);

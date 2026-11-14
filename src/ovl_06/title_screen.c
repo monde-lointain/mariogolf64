@@ -4,11 +4,11 @@
 
 #include "address.h"
 #include "asset.h"
+#include "c_language.h"
 #include "compiler.h"
 #include "controller.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
-#include "language.h"
 #include "main.h"
 #include "math_util.h"
 #include "menu.h"

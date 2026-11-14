@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "language.h"
+#include "c_language.h"
 #include "overlay_manager.h"
 
 enum Scene {

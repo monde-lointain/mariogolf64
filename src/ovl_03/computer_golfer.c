@@ -6,6 +6,7 @@
 
 #include "ball_simulation.h"
 #include "bets.h"
+#include "c_language.h"
 #include "character.h"
 #include "club.h"
 #include "collision.h"
@@ -20,7 +21,6 @@
 #include "hole_conditions.h"
 #include "hole_loader.h"
 #include "hole_setup.h"
-#include "language.h"
 #include "math_util.h"
 #include "play.h"
 #include "player.h"

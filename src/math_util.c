@@ -3,8 +3,8 @@
 #include <math.h>
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "compiler.h"
-#include "language.h"
 
 #define INT_LENGTH_COMPONENT_LIMIT 0x20000000
 #define IsSmallComponent(value) \

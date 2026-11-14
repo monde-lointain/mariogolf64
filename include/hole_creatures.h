@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "language.h"
+#include "c_language.h"
 #include "math_util.h"
 
 void LoadHoleCreatureImages(void);

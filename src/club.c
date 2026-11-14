@@ -5,6 +5,7 @@
 
 #include "asset.h"
 #include "ball_simulation.h"
+#include "c_language.h"
 #include "club.h"
 #include "club_panel.h"
 #include "controller.h"
@@ -16,7 +17,6 @@
 #include "heap.h"
 #include "hole_setup.h"
 #include "host_file.h"
-#include "language.h"
 #include "main.h"
 #include "math_util.h"
 #include "pin.h"

@@ -3,9 +3,9 @@
 #include <ultra64.h>
 
 #include "PR/R4300.h"
+#include "c_language.h"
 #include "compiler.h"
 #include "debug_text.h"
-#include "language.h"
 #include "sound.h"
 
 #define FAULT_MESSAGE 0x10

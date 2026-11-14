@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
-#include "language.h"
+#include "c_language.h"
 
 enum OpeningModel {
     OPENING_MODEL_MARIO = 3,

@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "camera.h"
-#include "language.h"
 
 #define BILLBOARD_COUNT 128
 #define BILLBOARD_TEXTURE_COUNT 46

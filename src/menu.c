@@ -7,6 +7,7 @@
 #include <ultra64.h>
 
 #include "asset.h"
+#include "c_language.h"
 #include "character.h"
 #include "club.h"
 #include "compiler.h"
@@ -20,7 +21,6 @@
 #include "heap.h"
 #include "hole_setup.h"
 #include "host_file.h"
-#include "language.h"
 #include "main.h"
 #include "main_menu.h"
 #include "math_util.h"

@@ -3,10 +3,10 @@
 #include <ultra64.h>
 
 #include "address.h"
+#include "c_language.h"
 #include "compiler.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
-#include "language.h"
 #include "main.h"
 #include "screen.h"
 #include "text.h"

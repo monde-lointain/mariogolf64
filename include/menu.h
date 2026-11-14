@@ -4,9 +4,9 @@
 #include <ultra64.h>
 
 #include "asset.h"
+#include "c_language.h"
 #include "character.h"
 #include "course.h"
-#include "language.h"
 #include "password.h"
 #include "play_record.h"
 #include "player.h"

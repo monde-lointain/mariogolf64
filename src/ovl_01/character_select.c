@@ -5,6 +5,7 @@
 
 #include "address.h"
 #include "asset.h"
+#include "c_language.h"
 #include "character.h"
 #include "character_model.h"
 #include "club.h"
@@ -15,7 +16,6 @@
 #include "game_flags.h"
 #include "game_state.h"
 #include "gbi_helpers.h"
-#include "language.h"
 #include "main_menu.h"
 #include "menu.h"
 #include "menu_memory.h"

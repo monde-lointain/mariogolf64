@@ -3,7 +3,7 @@
 #include <ultra64.h>
 
 #include "address.h"
-#include "language.h"
+#include "c_language.h"
 #include "math_util.h"
 
 #define HEAP_COUNT 3

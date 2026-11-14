@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "camera.h"
-#include "language.h"
 
 #define FLAGSTICK_HEIGHT 0xB400
 

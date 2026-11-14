@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "language.h"
+#include "c_language.h"
 
 void AddBirdieBadge(void);
 void RecordTournamentPlace(void);

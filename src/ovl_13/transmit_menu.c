@@ -5,6 +5,7 @@
 
 #include "address.h"
 #include "asset.h"
+#include "c_language.h"
 #include "character.h"
 #include "club.h"
 #include "compiler.h"
@@ -19,7 +20,6 @@
 #include "gbi_helpers.h"
 #include "heap.h"
 #include "host_file.h"
-#include "language.h"
 #include "math_util.h"
 #include "menu.h"
 #include "overlay_manager.h"

@@ -1,9 +1,9 @@
 #include <nusys.h>
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "compiler.h"
 #include "controller.h"
-#include "language.h"
 #include "transfer_pak.h"
 
 Boolean g_HasBroughtOverCharacter = FALSE;

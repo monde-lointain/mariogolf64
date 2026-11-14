@@ -7,6 +7,7 @@
 #define WIDENS_CHOSEN_OPTIONS
 
 #include "ball_simulation.h"
+#include "c_language.h"
 #include "camera.h"
 #include "camera_framing.h"
 #include "character_model.h"
@@ -25,7 +26,6 @@
 #include "hole_conditions.h"
 #include "hole_creatures.h"
 #include "hole_setup.h"
-#include "language.h"
 #include "main.h"
 #include "math_util.h"
 #include "movie.h"

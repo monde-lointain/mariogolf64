@@ -4,12 +4,12 @@
 
 #include "address.h"
 #include "asset.h"
+#include "c_language.h"
 #include "compiler.h"
 #include "current_shot.h"
 #include "game_state.h"
 #include "gbi_helpers.h"
 #include "heap.h"
-#include "language.h"
 #include "round_hud.h"
 #include "scene.h"
 #include "screen.h"

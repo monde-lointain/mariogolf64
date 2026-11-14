@@ -4,8 +4,8 @@
 #include <ultra64.h>
 
 #include "asset.h"
+#include "c_language.h"
 #include "compiler.h"
-#include "language.h"
 #include "surface.h"
 
 enum ShotMode {

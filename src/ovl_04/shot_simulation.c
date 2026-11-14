@@ -3,13 +3,13 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
+#include "c_language.h"
 #include "club.h"
 #include "compiler.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_state.h"
 #include "geometry.h"
-#include "language.h"
 #include "player.h"
 #include "surface.h"
 

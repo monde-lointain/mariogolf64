@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "billboard.h"
+#include "c_language.h"
 #include "camera.h"
 #include "character.h"
 #include "character_model.h"
@@ -16,7 +17,6 @@
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "hole_triangles.h"
-#include "language.h"
 #include "math_util.h"
 #include "particle_effects.h"
 #include "pin.h"

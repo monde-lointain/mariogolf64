@@ -8,6 +8,7 @@
 
 #include "address.h"
 #include "asset.h"
+#include "c_language.h"
 #include "camera.h"
 #include "compiler.h"
 #include "controller.h"
@@ -23,7 +24,6 @@
 #include "hole_conditions.h"
 #include "hole_loader.h"
 #include "hole_setup.h"
-#include "language.h"
 #include "math_util.h"
 #include "round_hud.h"
 #include "scene.h"

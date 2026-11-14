@@ -5,8 +5,8 @@
 
 #include "asset.h"
 #include "bets.h"
+#include "c_language.h"
 #include "course.h"
-#include "language.h"
 #include "math_util.h"
 #include "player.h"
 #include "round_stats.h"

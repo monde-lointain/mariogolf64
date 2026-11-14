@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "character.h"
-#include "language.h"
 
 enum TournamentBuffer {
     TOURNAMENT_BUFFER_WIDE_CLOUD = 1,

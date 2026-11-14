@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "language.h"
+#include "c_language.h"
 
 enum CharacterSelectBuffer {
     CHARACTER_SELECT_BUFFER_PLAYER_LABELS = 1,

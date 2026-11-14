@@ -4,12 +4,12 @@
 
 #include "address.h"
 #include "asset.h"
+#include "c_language.h"
 #include "compiler.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "gbi_helpers.h"
 #include "heap.h"
-#include "language.h"
 #include "main.h"
 #include "math_util.h"
 #include "screen.h"

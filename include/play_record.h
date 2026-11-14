@@ -3,11 +3,11 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "character.h"
 #include "club.h"
 #include "course.h"
 #include "hole_setup.h"
-#include "language.h"
 #include "math_util.h"
 #include "player.h"
 #include "scene.h"

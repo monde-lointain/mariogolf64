@@ -9,6 +9,7 @@
 
 #include "address.h"
 #include "billboard.h"
+#include "c_language.h"
 #include "camera.h"
 #include "compiler.h"
 #include "controller.h"
@@ -25,7 +26,6 @@
 #include "hole_setup.h"
 #include "hole_triangles.h"
 #include "host_file.h"
-#include "language.h"
 #include "main.h"
 #include "math_util.h"
 #include "play.h"

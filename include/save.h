@@ -3,12 +3,12 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "character.h"
 #include "course.h"
 #include "course_stats.h"
 #include "game_state.h"
 #include "hole_setup.h"
-#include "language.h"
 #include "play_record.h"
 #include "player.h"
 #include "round_stats.h"

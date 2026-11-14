@@ -2,6 +2,7 @@
 
 #include <ultra64.h>
 
+#include "c_language.h"
 #include "camera.h"
 #include "club.h"
 #include "compiler.h"
@@ -9,7 +10,6 @@
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "hole_setup.h"
-#include "language.h"
 #include "main.h"
 #include "math_util.h"
 

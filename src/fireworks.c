@@ -4,11 +4,11 @@
 
 #include "address.h"
 #include "asset.h"
+#include "c_language.h"
 #include "compiler.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "heap.h"
-#include "language.h"
 #include "math_util.h"
 #include "round_hud.h"
 #include "screen.h"

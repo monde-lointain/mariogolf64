@@ -4,9 +4,9 @@
 #include <ultra64.h>
 
 #include "bets.h"
+#include "c_language.h"
 #include "character.h"
 #include "course.h"
-#include "language.h"
 #include "player.h"
 
 #define BET_STAKE_SLOT_COUNT (BET_COUNT + 1)

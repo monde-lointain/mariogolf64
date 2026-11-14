@@ -5,11 +5,11 @@
 
 #include "asset.h"
 #include "bets.h"
+#include "c_language.h"
 #include "character.h"
 #include "club.h"
 #include "course.h"
 #include "course_space.h"
-#include "language.h"
 #include "surface.h"
 
 #define PLAYER_COUNT_MAX 4

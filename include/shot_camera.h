@@ -4,8 +4,8 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
+#include "c_language.h"
 #include "geometry.h"
-#include "language.h"
 #include "math_util.h"
 #include "player.h"
 #include "surface.h"
