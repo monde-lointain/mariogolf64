@@ -261,6 +261,12 @@ enum ScoreShape {
     SCORE_SHAPE_COUNT
 };
 
+// Contestants' scores swing by up to SWING_AMPLITUDE_COUNT - 1 strokes. On the
+// first courses the amplitudes are reversed and shifted so that most
+// contestants swing widely.
+#define SWING_AMPLITUDE_COUNT 10
+#define EARLY_COURSE_SWING_REVERSAL 13
+
 NO_RESULT SimulateScores(
     s32 holeCount,
     s32 lastAheadIndex,
@@ -283,11 +289,11 @@ NO_RESULT SimulateScores(
 
     for (index = firstIndex; index < endIndex; index++) {
         scoreShape = index % SCORE_SHAPE_COUNT;
-        swingAmplitude = index % 10;
+        swingAmplitude = index % SWING_AMPLITUDE_COUNT;
         if (g_GameState.courseIndex < COURSE_SHY_GUY_DESERT) {
-            swingAmplitude = 13 - swingAmplitude;
-            if (swingAmplitude >= 10) {
-                swingAmplitude = 9;
+            swingAmplitude = EARLY_COURSE_SWING_REVERSAL - swingAmplitude;
+            if (swingAmplitude >= SWING_AMPLITUDE_COUNT) {
+                swingAmplitude = SWING_AMPLITUDE_COUNT - 1;
             }
         }
 

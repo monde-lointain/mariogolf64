@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "compiler.h"
+#include "language.h"
 
 #define INT_LENGTH_COMPONENT_LIMIT 0x20000000
 #define IsSmallComponent(value) \
@@ -83,7 +84,7 @@ u16 ComputeCrc16(u8 *bytes, u32 size) {
         end = (u8 *)(size + (u32)bytes);
         do {
             crc ^= *bytes;
-            for (bitIndex = 0; bitIndex < 8; bitIndex++) {
+            for (bitIndex = 0; bitIndex < BITS_PER_BYTE; bitIndex++) {
                 if (crc & 1) {
                     crc = (crc >> 1) ^ CRC16_REFLECTED_POLYNOMIAL;
                 }
