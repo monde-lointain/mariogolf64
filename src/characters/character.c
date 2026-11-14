@@ -651,7 +651,7 @@ void WriteBallDistances(void) {
     char *cursor;
     char *end;
     char *source;
-    s32 modelIndex;
+    CharacterIndex characterIndex;
     s32 column;
     AnimationId animationId;
     ClubCategory clubCategory;
@@ -688,10 +688,10 @@ void WriteBallDistances(void) {
         "static const DISTPARA distp[PLAYABLE_NUM][5] = {\n"
     );
     AppendDistanceText(line);
-    for (modelIndex = 0; modelIndex < CHARACTER_COUNT; modelIndex++) {
+    for (characterIndex = 0; characterIndex < CHARACTER_COUNT; characterIndex++) {
         s32 distances[BALL_DISTANCE_COUNT];
 
-        LoadCharacter(MEASURED_SLOT, modelIndex, 0);
+        LoadCharacter(MEASURED_SLOT, characterIndex, 0);
         g_CharacterModelIndex = g_CharacterSlots[MEASURED_SLOT].modelIndex;
         for (column = 0; column < BALL_DISTANCE_COUNT; column++) {
             switch (column) {
