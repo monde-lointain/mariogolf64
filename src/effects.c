@@ -284,7 +284,7 @@ void PrepareShotEffects(BallSimulation *simulation) {
         ReadEncodedAsset(f_DebrisImage, &asset);
     }
     else {
-        switch (GetSurfaceInfo(g_CurrentShot.surface)->kind) {
+        switch (GetSurfaceTraits(g_CurrentShot.surface)->kind) {
             case SURFACE_KIND_FAIRWAY:
             case SURFACE_KIND_FAIRWAY_FAIR_LIE:
             case SURFACE_KIND_FAIRWAY_POOR_LIE:
@@ -653,7 +653,7 @@ void SpawnImpactEffects(BallSimulation *simulation) {
         simulation->surface
     );
     puffNumber = 1;
-    switch (GetSurfaceInfo(simulation->surface)->kind) {
+    switch (GetSurfaceTraits(simulation->surface)->kind) {
         case SURFACE_KIND_FAIRWAY:
         case SURFACE_KIND_FAIRWAY_FAIR_LIE:
         case SURFACE_KIND_FAIRWAY_POOR_LIE:

@@ -311,7 +311,7 @@ Boolean IsPinInCup(void) {
             return TRUE;
         }
 
-        return GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN;
+        return GetSurfaceTraits(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN;
     }
 
     return TRUE;

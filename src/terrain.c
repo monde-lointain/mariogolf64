@@ -382,18 +382,18 @@ s32 GetColorTerrainCode(s32 color) {
 
 #define SURFACE_PERCENT_MIN 5
 
-void GetSurfacePercentRange(SurfaceInfo *surfaceInfo, Club *club, s32 *range) {
-    if (club->surfaceMask & GetSurfaceClubMask(TRUE, surfaceInfo)) {
-        range[0] = surfaceInfo->percentMin;
-        range[1] = surfaceInfo->percentMax;
+void GetSurfacePercentRange(SurfaceTraits *surfaceTraits, Club *club, s32 *range) {
+    if (club->surfaceMask & GetSurfaceClubMask(TRUE, surfaceTraits)) {
+        range[0] = surfaceTraits->percentMin;
+        range[1] = surfaceTraits->percentMax;
     }
     else {
-        range[0] = surfaceInfo->percentMin - surfaceInfo->wrongClubPenalty;
+        range[0] = surfaceTraits->percentMin - surfaceTraits->wrongClubPenalty;
         if (range[0] < SURFACE_PERCENT_MIN) {
             range[0] = SURFACE_PERCENT_MIN;
         }
 
-        range[1] = surfaceInfo->percentMax - surfaceInfo->wrongClubPenalty;
+        range[1] = surfaceTraits->percentMax - surfaceTraits->wrongClubPenalty;
         if (range[1] < SURFACE_PERCENT_MIN) {
             range[1] = SURFACE_PERCENT_MIN;
         }
@@ -745,8 +745,8 @@ Surface GetSurface(s32 x, s32 z) {
     return FindSurface(x, z, FALSE);
 }
 
-SurfaceInfo *GetSurfaceInfoAt(s32 x, s32 z) {
-    return GetSurfaceInfo(GetSurface(x, z));
+SurfaceTraits *GetSurfaceTraitsAt(s32 x, s32 z) {
+    return GetSurfaceTraits(GetSurface(x, z));
 }
 
 u16 GetMapColor(s32 x, s32 z) {
@@ -777,7 +777,7 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
     s32 surfaceBlue;
     u16 surfaceColor;
 
-    switch (GetSurfaceInfo(surface)->kind) {
+    switch (GetSurfaceTraits(surface)->kind) {
         case SURFACE_KIND_FAIRWAY:
         case SURFACE_KIND_FAIRWAY_FAIR_LIE:
         case SURFACE_KIND_FAIRWAY_POOR_LIE:
@@ -1499,7 +1499,7 @@ void UpdateDebugScenes(void) {
 
     if (IsGameFlagSet(GAME_FLAG_SHOW_SURFACE_NAME)) {
         PrintDebugText(
-            GetSurfaceInfoAt(g_CurrentShot.targetPoint[AXIS_X], g_CurrentShot.targetPoint[AXIS_Z])
+            GetSurfaceTraitsAt(g_CurrentShot.targetPoint[AXIS_X], g_CurrentShot.targetPoint[AXIS_Z])
                 ->name,
             SURFACE_NAME_COLUMN,
             SURFACE_NAME_ROW

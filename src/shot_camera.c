@@ -254,7 +254,7 @@ static s32 f_GreenSoundCount;
 static Boolean f_IsLandingSoundPlayed;
 static s32 f_UnusedClearedFlightWord;
 static s8 f_PassedPathFlags;
-static SurfaceInfo *f_EndSurfaceInfo;
+static SurfaceTraits *f_EndSurfaceTraits;
 static FlightPhase f_FlightPhase;
 
 #define STANCE_AIM_OFFSET (-921.60004f)
@@ -320,7 +320,7 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
 #define AIM_SLOPE_RISE_MAX 0x1800
 
 SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot) {
-    SurfaceInfo *surfaceInfo;
+    SurfaceTraits *surfaceTraits;
     s32 sampleDistance;
     SignedBinaryAngle aimYaw;
     s32 yaw;
@@ -330,7 +330,7 @@ SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot) {
 
     aimYaw = shot->heading;
 
-    surfaceInfo = GetSurfaceInfo(player->ballSurface);
+    surfaceTraits = GetSurfaceTraits(player->ballSurface);
     sampleDistance = CROSS_SLOPE_DISTANCE;
     yaw = aimYaw + (BINARY_ANGLE_TURN / 4);
     if (player->isLefty) {
@@ -344,7 +344,7 @@ SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot) {
         (s32)(cos(angle) * sampleDistance) + player->ballPosition[AXIS_X],
         (s32)(sin(angle) * sampleDistance) + player->ballPosition[AXIS_Z]
     );
-    if (surfaceInfo->kind == SURFACE_KIND_TEE_UP) {
+    if (surfaceTraits->kind == SURFACE_KIND_TEE_UP) {
         height -= TEE_HEIGHT;
     }
 
@@ -409,8 +409,8 @@ SignedBinaryAngle GetAimSlopeAngle(Player *player, ShotLaunch *shot) {
 
 static const f64 f_UnusedZero = 0.0;
 
-SurfaceInfo *GetBallSurfaceInfo(Player *player, ShotLaunch *shot UNUSED) {
-    return GetSurfaceInfoAt(player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
+SurfaceTraits *GetBallSurfaceTraits(Player *player, ShotLaunch *shot UNUSED) {
+    return GetSurfaceTraitsAt(player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
 }
 
 Boolean IsDebugBButtonView(void) {
@@ -497,7 +497,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
     ClearShotEffects(CLEAR_KIND_ALL);
     ResetBallTrail();
     f_CameraChangeHoldCount = 0;
-    f_EndSurfaceInfo = GetSurfaceInfo(g_SimulatedShot.endSurface);
+    f_EndSurfaceTraits = GetSurfaceTraits(g_SimulatedShot.endSurface);
     if (earlierFlightCount == 0) {
         NextCameraPick(FALSE);
     }
@@ -555,7 +555,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
     if (g_SimulatedShot.startsOnGreen) {
         f_UnusedFlightStartKind = 1;
     }
-    else if (f_EndSurfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
+    else if (f_EndSurfaceTraits->kind == SURFACE_KIND_WATER_HAZARD) {
         f_UnusedFlightStartKind = 3;
     }
 
@@ -694,17 +694,17 @@ void StartFlightCamera(s32 earlierFlightCount) {
 
 void PlayContactSound(void) {
     Club *club;
-    SurfaceInfo *surfaceInfo;
+    SurfaceTraits *surfaceTraits;
 
     club =
         GetClub(g_Players[g_SimulatedShot.shot.playerIndex].clubs[g_SimulatedShot.shot.clubSlot]);
-    surfaceInfo = GetSurfaceInfo(g_CurrentShot.surface);
+    surfaceTraits = GetSurfaceTraits(g_CurrentShot.surface);
     if (club->kind == CLUB_KIND_WOOD) {
         if (IsPerfectPowerShot()) {
             PlaySound(SOUND_MENU_START, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
             StartContactEffect(CONTACT_EFFECT_POWER_WOOD);
         }
-        else if (surfaceInfo->kind == SURFACE_KIND_TEE_UP) {
+        else if (surfaceTraits->kind == SURFACE_KIND_TEE_UP) {
             StartContactEffect(CONTACT_EFFECT_SHOT);
             PlaySound(SOUND_MENU_START, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
         }
@@ -728,13 +728,13 @@ void PlayContactSound(void) {
             StartContactEffect(CONTACT_EFFECT_SHOT);
         }
 
-        if (surfaceInfo->kind == SURFACE_KIND_TEE_UP) {
+        if (surfaceTraits->kind == SURFACE_KIND_TEE_UP) {
             PlaySound(SOUND_CONTACT_IRON_TEE, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
         }
-        else if (IsFairwayKind(surfaceInfo->kind)) {
+        else if (IsFairwayKind(surfaceTraits->kind)) {
             PlaySound(SOUND_ENTER_TOURNAMENT, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
         }
-        else if (IsBunkerKind(surfaceInfo->kind)) {
+        else if (IsBunkerKind(surfaceTraits->kind)) {
             PlaySound(SOUND_CONTACT_IRON_BUNKER, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
         }
         else {
@@ -779,7 +779,7 @@ Boolean IsCupPassPoint(s32 cupDistance, s32 height) {
 s32 RateShotLength(void) {
     s32 endKind;
 
-    endKind = f_EndSurfaceInfo->kind;
+    endKind = f_EndSurfaceTraits->kind;
     if (endKind == SURFACE_KIND_OUT_OF_COURSE) {
         return SHOT_LENGTH_UNRATED;
     }
@@ -863,13 +863,13 @@ static inline void QueueOnlookerSounds(s32 kind) {
     (!g_SimulatedShot.usesPutter && \
         !g_SimulatedShot.startsOnGreen && \
         g_SimulatedShot.endsOnGreen && \
-        f_EndSurfaceInfo->kind == SURFACE_KIND_GREEN)
+        f_EndSurfaceTraits->kind == SURFACE_KIND_GREEN)
 
 void PlayFlightSounds(s32 step) {
     s32 shownRingCount;
     s32 scoreToPar;
     s32 i;
-    SurfaceInfo *surfaceInfo;
+    SurfaceTraits *surfaceTraits;
     Player *player;
     s32 *greenSoundCount;
     s32 *isPlayed;
@@ -890,7 +890,7 @@ void PlayFlightSounds(s32 step) {
     }
 
     if (step == SHOT_RESULT_STEP) {
-        if (f_EndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE && !g_GameState.isMiniGolf) {
+        if (f_EndSurfaceTraits->kind == SURFACE_KIND_OUT_OF_COURSE && !g_GameState.isMiniGolf) {
             PlaySound(SOUND_OUT_OF_COURSE, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
             QueueOnlookerSounds(CHARACTER_SOUND_KIND_OUT_OF_COURSE);
         }
@@ -1116,8 +1116,8 @@ void PlayFlightSounds(s32 step) {
             g_BallFlightStep > EARLY_STEP_COUNT &&
             HasHitGroundBefore(step, EARLY_STEP_COUNT) &&
             IsShotBeyond(FULL_SHOT_FRACTION)) {
-            surfaceInfo = GetSurfaceInfo(g_TurnBallSimulation.surface);
-            if (IsFairwayKind(surfaceInfo->kind) &&
+            surfaceTraits = GetSurfaceTraits(g_TurnBallSimulation.surface);
+            if (IsFairwayKind(surfaceTraits->kind) &&
                 !g_GameState.isMiniGolf &&
                 f_StartCupDistance > f_LandingCupDistance &&
                 IsAlbatrossOrBetter(g_Players[g_CurrentShot.playerIndex].strokeCount)) {
@@ -1133,19 +1133,19 @@ void PlayFlightSounds(s32 step) {
 
     if (g_BallFlightStep > EARLY_STEP_COUNT &&
         g_BallFlightStep == g_SimulatedShot.stepCount - LANDING_SOUND_STEP_COUNT) {
-        if (IsBunkerKind(f_EndSurfaceInfo->kind)) {
+        if (IsBunkerKind(f_EndSurfaceTraits->kind)) {
             f_IsLandingSoundPlayed = TRUE;
             PlaySound(SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_LANDING, SOUND_FULL_SCALE);
             QueueOnlookerSounds(CHARACTER_SOUND_KIND_BUNKER);
         }
-        else if (f_EndSurfaceInfo->kind == SURFACE_KIND_DEEP_ROUGH) {
+        else if (f_EndSurfaceTraits->kind == SURFACE_KIND_DEEP_ROUGH) {
             PlaySound(SOUND_DEEP_ROUGH_LANDING, FLIGHT_SOUND_CHANNEL_LANDING, SOUND_FULL_SCALE);
             QueueOnlookerSounds(CHARACTER_SOUND_KIND_BUNKER);
         }
-        else if (f_EndSurfaceInfo->kind == SURFACE_KIND_WASTE_AREA) {
+        else if (f_EndSurfaceTraits->kind == SURFACE_KIND_WASTE_AREA) {
             PlaySound(SOUND_WASTE_AREA_LANDING, FLIGHT_SOUND_CHANNEL_LANDING, SOUND_FULL_SCALE);
         }
-        else if (IsLostBallKind(f_EndSurfaceInfo->kind)) {
+        else if (IsLostBallKind(f_EndSurfaceTraits->kind)) {
             f_IsLandingSoundPlayed = TRUE;
             PlaySound(SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_LANDING, SOUND_FULL_SCALE);
             QueueOnlookerSounds(CHARACTER_SOUND_KIND_TROUBLE);
@@ -2484,7 +2484,7 @@ void ChooseFlightCameraKind(void) {
 
                 break;
             case FLIGHT_PHASE_NEARING_CONTACT:
-                if (IsTroubleSurface(f_EndSurfaceInfo)) {
+                if (IsTroubleSurface(f_EndSurfaceTraits)) {
                     kind = FLIGHT_CAMERA_AROUND_END;
                 }
                 else if (f_FlightCameraKind == FLIGHT_CAMERA_FOLLOWING_PATH) {
@@ -2508,7 +2508,7 @@ void ChooseFlightCameraKind(void) {
 
                 break;
             case FLIGHT_PHASE_END:
-                if (IsTroubleSurface(f_EndSurfaceInfo) || g_SimulatedShot.endsInCup) {
+                if (IsTroubleSurface(f_EndSurfaceTraits) || g_SimulatedShot.endsInCup) {
                 }
                 else {
                     if (f_CameraChangeHoldCount != 0 || g_SimulatedShot.stepCount < 21) {
@@ -3053,7 +3053,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     g_Cameras[INSET_CAMERA].view.eye[AXIS_Z] =
         (f32)f_ShotEndPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     g_Cameras[INSET_CAMERA].view.fieldOfView = INSET_FIELD_OF_VIEW;
-    if (f_EndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_BOUNDS) {
+    if (f_EndSurfaceTraits->kind == SURFACE_KIND_OUT_OF_BOUNDS) {
         g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] =
             (f32)f_ShotEndPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
         g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] =

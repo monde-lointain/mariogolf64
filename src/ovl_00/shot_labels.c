@@ -587,7 +587,7 @@ void DrawAimGuides(CameraMatrices *matrices) {
     club = GetSelectedClub();
     outOfBoundsGreen = sinf(f_OutOfBoundsPulseAngle) * OUT_OF_BOUNDS_GREEN_SWING;
     surfaceKind =
-        GetSurfaceInfoAt(g_CurrentShot.targetPoint[AXIS_X], g_CurrentShot.targetPoint[AXIS_Z])
+        GetSurfaceTraitsAt(g_CurrentShot.targetPoint[AXIS_X], g_CurrentShot.targetPoint[AXIS_Z])
             ->kind;
     if (g_IsCupViewShown) {
         return;

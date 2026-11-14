@@ -31,7 +31,7 @@ enum EndReaction {
 void ClearHoleIntroText(void);
 void StopFlightCamera(void);
 void StopHoleFlyover(void);
-SurfaceInfo *GetBallSurfaceInfo(Player *player, ShotLaunch *shot);
+SurfaceTraits *GetBallSurfaceTraits(Player *player, ShotLaunch *shot);
 SignedBinaryAngle GetAimSlopeAngle(Player *player, ShotLaunch *shot);
 SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot);
 s32 GetEndReaction(void);

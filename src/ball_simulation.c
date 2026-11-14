@@ -32,7 +32,7 @@ BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT] = {0};
 
 s8 g_ClubTestMode = CLUB_TEST_NONE;
 
-static SurfaceInfo f_SurfaceInfo[SURFACE_COUNT] = {
+static SurfaceTraits f_SurfaceTraits[SURFACE_COUNT] = {
     {SURFACE_KIND_OUT_OF_BOUNDS, "O.B.", 100, 100, 0, 0, 0, 0x500, SINK_DEPTH_HALF, 7},
     {SURFACE_KIND_FAIRWAY, "FAIRWAY", 98, 100, 5, 960, 500, 0x501, SINK_DEPTH_NONE, 0},
     {SURFACE_KIND_ROUGH, "ROUGH", 80, 90, 30, 600, 200, 0x508, SINK_DEPTH_HALF, 1},
@@ -148,12 +148,12 @@ static ImpactEffect f_ImpactEffects[LIE_RATING_MAX + 1][IMPACT_TIMING_ENTRY_COUN
 s32 g_UnusedLaunchCount = 0;
 static s32 f_UnusedWordsAfterLaunchCount[4] UNUSED = {0};
 
-SurfaceInfo *GetSurfaceInfo(Surface surface) {
+SurfaceTraits *GetSurfaceTraits(Surface surface) {
     if ((u32)surface >= SURFACE_COUNT) {
         surface = SURFACE_OUT_OF_BOUNDS;
     }
 
-    return &f_SurfaceInfo[surface];
+    return &f_SurfaceTraits[surface];
 }
 
 void ResetBallSimulations(void) {
@@ -514,7 +514,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             s32 pinHit;
 
             if (g_GameState.isMiniGolf ||
-                GetSurfaceInfo(simulation->launchSurface)->kind != SURFACE_KIND_GREEN) {
+                GetSurfaceTraits(simulation->launchSurface)->kind != SURFACE_KIND_GREEN) {
                 pinHit = FindPinHit(
                     startX,
                     startY,
@@ -1132,7 +1132,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 steepness = 1.0f;
             }
 
-            switch (GetSurfaceInfo(simulation->surface)->kind) {
+            switch (GetSurfaceTraits(simulation->surface)->kind) {
                 case SURFACE_KIND_GREEN:
                 case SURFACE_KIND_GREEN_EDGE:
                     if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
@@ -1206,7 +1206,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 velocity[AXIS_X] *= WATER_ENTRY_DRAG;
             }
 
-            softness = THOUSANDTHS_PER_ONE - GetSurfaceInfo(simulation->surface)->bounciness;
+            softness = THOUSANDTHS_PER_ONE - GetSurfaceTraits(simulation->surface)->bounciness;
             keep = ((f32)THOUSANDTHS_PER_ONE -
                        (SOFTNESS_SPEED_LOSS_SCALE * softness * steepness * steepness)) *
                 ONE_PER_THOUSANDTH;
@@ -1252,7 +1252,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             s32 cupDistance;
             BallSpeed impactSpeed;
             f32 slide = 0.0f;
-            SurfaceInfo *surfaceInfo;
+            SurfaceTraits *surfaceTraits;
             f32 friction = 1.0f;
             f32 spin;
             f32 restitution;
@@ -1356,7 +1356,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 slide = STILL_BALL_SLIDE;
             }
 
-            switch (GetSurfaceInfo(simulation->surface)->kind) {
+            switch (GetSurfaceTraits(simulation->surface)->kind) {
                 case SURFACE_KIND_GREEN:
                 case SURFACE_KIND_GREEN_EDGE:
                     PlayStrokeImpactSound(SOUND_LAND_GREEN, FULL_VOLUME_HIT_SPEED, impactSpeed);
@@ -1391,8 +1391,8 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 SpawnImpactEffects(simulation);
             }
 
-            surfaceInfo = GetSurfaceInfo(simulation->surface);
-            friction = (THOUSANDTHS_PER_ONE - surfaceInfo->bounciness) * ONE_PER_THOUSANDTH;
+            surfaceTraits = GetSurfaceTraits(simulation->surface);
+            friction = (THOUSANDTHS_PER_ONE - surfaceTraits->bounciness) * ONE_PER_THOUSANDTH;
             if (simulation->surface == SURFACE_BUNKER) {
                 BunkerBurial burial = BUNKER_BURIAL_NONE;
 
@@ -1422,14 +1422,14 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                         break;
                 }
             }
-            else if (surfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE ||
-                ((surfaceInfo->kind == SURFACE_KIND_OUT_OF_BOUNDS ||
-                     surfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) &&
+            else if (surfaceTraits->kind == SURFACE_KIND_OUT_OF_COURSE ||
+                ((surfaceTraits->kind == SURFACE_KIND_OUT_OF_BOUNDS ||
+                     surfaceTraits->kind == SURFACE_KIND_WATER_HAZARD) &&
                     impactSpeed < LOST_BALL_STOP_SPEED)) {
                 simulation->state = BALL_STATE_STOPPED;
             }
 
-            switch (GetSurfaceInfo(simulation->surface)->kind) {
+            switch (GetSurfaceTraits(simulation->surface)->kind) {
                 case SURFACE_KIND_GREEN:
                 case SURFACE_KIND_GREEN_EDGE:
                     friction *=
@@ -1635,7 +1635,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             !isNearCup &&
             contact == STEP_FLAG_GROUND_HIT) {
             TrianglePlane plane;
-            SurfaceInfo *surfaceInfo;
+            SurfaceTraits *surfaceTraits;
             s32 groundHeight;
             s32 slopeX;
             s32 slopeZ;
@@ -1648,10 +1648,10 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 (velocity[AXIS_X] * velocity[AXIS_X]) + (velocity[AXIS_Z] * velocity[AXIS_Z])
             );
             if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
-                surfaceInfo = &f_SurfaceInfo[SURFACE_GREEN];
+                surfaceTraits = &f_SurfaceTraits[SURFACE_GREEN];
                 SetFlatTriangle(&triangle);
                 if (g_ClubTestMode == CLUB_TEST_SHOT) {
-                    surfaceInfo = &f_SurfaceInfo[SURFACE_FAIRWAY];
+                    surfaceTraits = &f_SurfaceTraits[SURFACE_FAIRWAY];
                 }
 
                 groundHeight = 0;
@@ -1733,8 +1733,8 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                         break;
                 }
 
-                surfaceInfo = GetSurfaceInfo(simulation->surface);
-                if (surfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE) {
+                surfaceTraits = GetSurfaceTraits(simulation->surface);
+                if (surfaceTraits->kind == SURFACE_KIND_OUT_OF_COURSE) {
                     simulation->state = BALL_STATE_STOPPED;
                     goto SETTLE;
                 }
@@ -1783,7 +1783,7 @@ TAKE_OFF:
                 isSteep = TRUE;
             }
 
-            friction = surfaceInfo->rollSpeedKept * ONE_PER_THOUSANDTH;
+            friction = surfaceTraits->rollSpeedKept * ONE_PER_THOUSANDTH;
             if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
                 g_HoleSetup.conditions.isRaining == TRUE) {
                 friction *= RAIN_FRICTION_SCALE;
@@ -1882,7 +1882,7 @@ TAKE_OFF:
             }
 
             if (!isSteep &&
-                surfaceInfo->kind != SURFACE_KIND_GREEN &&
+                surfaceTraits->kind != SURFACE_KIND_GREEN &&
                 simulation->lastBounceStep + OFF_GREEN_STOP_STEPS < simulation->stepCount &&
                 sqrtf(
                     (velocity[AXIS_X] * velocity[AXIS_X]) + (velocity[AXIS_Y] * velocity[AXIS_Y]) +
@@ -2087,7 +2087,7 @@ SETTLE:
 
                 simulation->surfaceBelow =
                     FindSurface(simulation->position[AXIS_X], simulation->position[AXIS_Z], TRUE);
-                surfaceKind = GetSurfaceInfo(simulation->surfaceBelow)->kind;
+                surfaceKind = GetSurfaceTraits(simulation->surfaceBelow)->kind;
                 if (IsDropKind(surfaceKind) &&
                     FindGroundTriangle(
                         simulation->position[AXIS_X],
@@ -2310,10 +2310,10 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
     }
 
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-        SurfaceInfo *surfaceInfo = GetSurfaceInfo(simulation->launchSurface);
+        SurfaceTraits *surfaceTraits = GetSurfaceTraits(simulation->launchSurface);
 
         blend = PickLieBlend();
-        GetSurfacePercentRange(surfaceInfo, club, percentRange);
+        GetSurfacePercentRange(surfaceTraits, club, percentRange);
         speed = ((percentRange[0] * blend) + (percentRange[1] * (1.0f - blend))) * speed *
             ONE_PER_PERCENT;
     }
@@ -2401,7 +2401,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
         }
     }
     else {
-        GetSurfaceInfo(simulation->launchSurface);
+        GetSurfaceTraits(simulation->launchSurface);
         simulation->sideSpin =
             (((sideSign * entry->sideSpinChange * club->mishitScale) / MISHIT_SIDE_SPIN_DIVISOR) +
                 (shot->offsetX * (club->mishitScale * OFFSET_SIDE_SPIN_PER_MISHIT)) + slopeSpin +

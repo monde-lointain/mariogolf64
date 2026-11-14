@@ -1052,9 +1052,9 @@ void StartShotPanel(void) {
         g_CurrentShot.ballPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
         g_CurrentShot.ballPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
     );
-    if (GetSurfaceInfo(g_CurrentShot.surface)->lieImageAsset != f_LieImageAsset) {
-        f_LieImageAsset = GetSurfaceInfo(g_CurrentShot.surface)->lieImageAsset;
-        if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_TEE_GROUND) {
+    if (GetSurfaceTraits(g_CurrentShot.surface)->lieImageAsset != f_LieImageAsset) {
+        f_LieImageAsset = GetSurfaceTraits(g_CurrentShot.surface)->lieImageAsset;
+        if (GetSurfaceTraits(g_CurrentShot.surface)->kind == SURFACE_KIND_TEE_GROUND) {
             f_ShotPanelOffsetY = TEE_GROUND_PANEL_OFFSET_Y;
         }
         else {
@@ -1344,7 +1344,7 @@ void StartLandingReaction(s32 reaction) {
     }
 
     f_LandingReaction = reaction;
-    switch ((u32)GetSurfaceInfo(g_TurnBallSimulation.surface)->kind) {
+    switch ((u32)GetSurfaceTraits(g_TurnBallSimulation.surface)->kind) {
         case SURFACE_KIND_OUT_OF_BOUNDS:
             g_InsetView.animation = INSET_VIEW_OPENING;
             g_InsetView.ignoredSourceCode = LANDING_INSET_SOURCE_CODE;
@@ -1390,14 +1390,14 @@ void DrawLandingReaction(Gfx **displayListHead) {
     Vec3 rotation;
     Mat4 matrix;
     Mat4 offset;
-    SurfaceInfo *surfaceInfo;
+    SurfaceTraits *surfaceTraits;
     s32 distance;
 
     Radians angle;
     f32 size;
 
     if (f_LandingReaction != LANDING_REACTION_NONE) {
-        surfaceInfo = GetSurfaceInfo(g_TurnBallSimulation.surface);
+        surfaceTraits = GetSurfaceTraits(g_TurnBallSimulation.surface);
         if (f_LandingReactionFrame == 1) {
             PlaceGlyphGroup(
                 LANDING_GLYPH_GROUP_FIRST,
@@ -1405,7 +1405,7 @@ void DrawLandingReaction(Gfx **displayListHead) {
                 0,
                 0,
                 LANDING_NAME_GLYPH_Y,
-                surfaceInfo->name
+                surfaceTraits->name
             );
         }
 
@@ -1414,7 +1414,7 @@ void DrawLandingReaction(Gfx **displayListHead) {
                 g_TurnBallSimulation.position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
                 g_TurnBallSimulation.position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
             );
-            if (g_GameState.isMiniGolf || surfaceInfo->kind == SURFACE_KIND_GREEN) {
+            if (g_GameState.isMiniGolf || surfaceTraits->kind == SURFACE_KIND_GREEN) {
                 s32 hundredths = distance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
 
                 sprintf(
@@ -1513,7 +1513,7 @@ void DrawLandingReaction(Gfx **displayListHead) {
         else {
             SetUpTextDrawing(&gfx);
             gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-            DrawCenteredLargeText(&gfx, SCREEN_WIDTH / 2, LANDING_NAME_Y, surfaceInfo->name);
+            DrawCenteredLargeText(&gfx, SCREEN_WIDTH / 2, LANDING_NAME_Y, surfaceTraits->name);
             if (f_LandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
                 DrawCenteredMediumText(&gfx, SCREEN_WIDTH / 2, LANDING_DISTANCE_Y, g_PrintBuffer);
             }
@@ -2665,7 +2665,7 @@ void AdjustHudOffset(void) {
 #define IsWindIndicatorDrawn() \
     (g_HoleSetup.conditions.windSpeed != 0 && \
         g_RoundHud.isWindIndicatorShown && \
-        GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN && \
+        GetSurfaceTraits(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN && \
         !g_IsCupViewShown)
 #define PAUSE_PANEL_ARROWS_GAP 64
 #define CLUB_HEAD_ICON_X (-128.0f)
@@ -4018,7 +4018,7 @@ void DrawRoundHud(CameraView *view) {
     s32 height;
     Player *shooter;
     Club *selectedClub;
-    SurfaceInfo *surfaceInfo;
+    SurfaceTraits *surfaceTraits;
     f32 shotLength;
     s32 contestDistance;
     s32 secondsTotal;
@@ -4553,8 +4553,8 @@ void DrawRoundHud(CameraView *view) {
     SetTextColor(&g_DisplayListHead, 255, 255, 255);
     SetTextColor(&g_DisplayListHead, 255, 255, 255);
     if (g_RoundHud.isLieIconShown && !g_IsCupViewShown) {
-        surfaceInfo = GetSurfaceInfo(g_CurrentShot.surface);
-        GetSurfacePercentRange(surfaceInfo, GetSelectedClub(), percentRange);
+        surfaceTraits = GetSurfaceTraits(g_CurrentShot.surface);
+        GetSurfacePercentRange(surfaceTraits, GetSelectedClub(), percentRange);
         sprintf(g_PrintBuffer, "%3d-%3d", percentRange[0], percentRange[1]);
         DrawShadowedText(
             &g_DisplayListHead,

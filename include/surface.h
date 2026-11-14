@@ -84,7 +84,7 @@ typedef s32 SurfaceKind;
 #define SINK_DEPTH_HALF 1
 #define SINK_DEPTH_BURIED 2
 
-typedef struct SurfaceInfo {
+typedef struct SurfaceTraits {
     SurfaceKind kind;
     char *name;
     s8 percentMin;
@@ -95,9 +95,9 @@ typedef struct SurfaceInfo {
     s32 lieImageAsset;
     s32 sinkDepth;
     s32 ignoredSurfaceGroup;
-} SurfaceInfo;
+} SurfaceTraits;
 
-SurfaceInfo *GetSurfaceInfo(Surface surface);
-SurfaceInfo *GetSurfaceInfoAt(s32 x, s32 z);
+SurfaceTraits *GetSurfaceTraits(Surface surface);
+SurfaceTraits *GetSurfaceTraitsAt(s32 x, s32 z);
 
 #endif

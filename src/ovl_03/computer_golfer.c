@@ -448,7 +448,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
         }
 
         f_ClubCount = MarkUsableClubs(
-            (s32)GetSurfaceInfo(g_CurrentShot.surface),
+            (s32)GetSurfaceTraits(g_CurrentShot.surface),
             g_Players[g_CurrentShot.playerIndex].clubs,
             f_IsClubUsable
         );
@@ -466,7 +466,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
 
         osSyncPrintf("\n");
         PlanClubAndTarget(f_PlanTarget);
-        kind = GetSurfaceInfo(f_Shot.surface)->kind;
+        kind = GetSurfaceTraits(f_Shot.surface)->kind;
         if (kind == SURFACE_KIND_GREEN || kind == SURFACE_KIND_GREEN_EDGE) {
             f_TrialLevel = 0;
         }
@@ -525,7 +525,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
                             f_Shot.shotMode
                         );
                         GetSurfacePercentRange(
-                            GetSurfaceInfo(f_Shot.surface),
+                            GetSurfaceTraits(f_Shot.surface),
                             GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
                             percentRange
                         );
@@ -552,7 +552,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
                 f_PlanStage = PLAN_STAGE_TARGET_CHOSEN;
                 if (f_PlanTarget[AXIS_X] == g_HoleSetup.cupPosition[AXIS_X] &&
                     f_PlanTarget[AXIS_Z] == g_HoleSetup.cupPosition[AXIS_Z] &&
-                    GetSurfaceInfo(f_Shot.surface)->kind != SURFACE_KIND_GREEN) {
+                    GetSurfaceTraits(f_Shot.surface)->kind != SURFACE_KIND_GREEN) {
                     strokesOver = g_Players[f_Shot.playerIndex].strokeCount -
                         (g_HoleSetup.par + f_HoleTargetToPar - 2);
                     if (strokesOver <= 0) {
@@ -620,7 +620,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
             }
 
             GetSurfacePercentRange(
-                GetSurfaceInfo(f_Shot.surface),
+                GetSurfaceTraits(f_Shot.surface),
                 GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
                 percentRange
             );
@@ -766,7 +766,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
         strokeCount = g_Players[f_Shot.playerIndex].strokeCount;
         par = g_HoleSetup.par;
         mishit = 0;
-        if (GetSurfaceInfo(f_TrialShot.surface)->kind != SURFACE_KIND_GREEN &&
+        if (GetSurfaceTraits(f_TrialShot.surface)->kind != SURFACE_KIND_GREEN &&
             strokeCount < par + f_HoleTargetToPar - 1) {
             mishitMax = GetLieRating(
                 GetClub(g_Players[f_TrialShot.playerIndex].clubs[f_TrialShot.clubSlot]),
@@ -901,7 +901,7 @@ void PlanClubAndTarget(CoursePoint target) {
     Club *club;
 
     clubType = CLUB_TYPE_DRIVER;
-    kind = GetSurfaceInfo(f_Shot.surface)->kind;
+    kind = GetSurfaceTraits(f_Shot.surface)->kind;
     f_HoleStrokeTarget = ChooseHoleStrokeTarget();
     f_HoleTargetToPar = f_HoleStrokeTarget - g_HoleSetup.par;
     switch (kind) {
@@ -1643,7 +1643,7 @@ void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ)
     sinAngle = sinf(angle);
     *targetX = startX;
     *targetZ = startZ;
-    endRating = GetLandingRating(GetSurfaceInfoAt(endX, endZ)->kind);
+    endRating = GetLandingRating(GetSurfaceTraitsAt(endX, endZ)->kind);
     osSyncPrintf("TALevel %d\n", endRating);
 
     for (index = 0; index < (reach * TARGET_STEPS_PER_UNIT) + EXTRA_TARGET_STEP_COUNT; index++) {
@@ -1666,7 +1666,7 @@ void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ)
                 break;
             }
 
-            if (GetLandingRating(GetSurfaceInfoAt(candidateX, candidateZ)->kind) < endRating) {
+            if (GetLandingRating(GetSurfaceTraitsAt(candidateX, candidateZ)->kind) < endRating) {
                 continue;
             }
 
@@ -1731,7 +1731,7 @@ void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ)
                             continue;
                         }
 
-                        if (GetLandingRating(GetSurfaceInfoAt(
+                        if (GetLandingRating(GetSurfaceTraitsAt(
                                 candidateX + (column * TARGET_NEIGHBOR_SPACING * UNITS_PER_YARD),
                                 candidateZ + (row * TARGET_NEIGHBOR_SPACING * UNITS_PER_YARD)
                             )
@@ -1763,7 +1763,7 @@ void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ)
     osSyncPrintf("ResultX = %d, ResultY = %d\n", *targetX, *targetZ);
     osSyncPrintf(
         "Result TALevel %d\n",
-        GetLandingRating(GetSurfaceInfoAt(*targetX, *targetZ)->kind)
+        GetLandingRating(GetSurfaceTraitsAt(*targetX, *targetZ)->kind)
     );
 }
 
@@ -1817,7 +1817,7 @@ Boolean IsLineOffFairway(CoursePoint from, CoursePoint to) {
         stepLength = UNITS_PER_YARD;
         x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
         z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
-        kind = GetSurfaceInfoAt(x, z)->kind;
+        kind = GetSurfaceTraitsAt(x, z)->kind;
         if (IsOffFairway(kind)) {
             return TRUE;
         }
@@ -1844,7 +1844,7 @@ s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge) {
         stepLength = UNITS_PER_YARD;
         x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
         z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
-        if (GetSurfaceInfoAt(x, z)->kind == SURFACE_KIND_GREEN_EDGE) {
+        if (GetSurfaceTraitsAt(x, z)->kind == SURFACE_KIND_GREEN_EDGE) {
             edge[AXIS_X] = x;
             edge[AXIS_Z] = z;
             return GREEN_EDGE_FOUND;
@@ -1914,7 +1914,7 @@ ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
         g_HoleSetup.cupPosition[AXIS_X] - f_Shot.ballPosition[AXIS_X],
         g_HoleSetup.cupPosition[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]
     );
-    GetSurfaceInfo(f_Shot.surface);
+    GetSurfaceTraits(f_Shot.surface);
     if (IsLineOffFairway(f_Shot.ballPosition, g_HoleSetup.cupPosition) == TRUE) {
         osSyncPrintf("Appr60 Return point 1\n");
         if (ShotGolferTraits().windPlay < WIND_PLAY_FOLLOWING_WINDS) {
@@ -1930,7 +1930,7 @@ ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
     osSyncPrintf("Approach : Distance = %d\n", cupDistance);
     osSyncPrintf("Approach : EdgePercent = %f\n", edgeShare);
     FindPeakOnLine(f_Shot.ballPosition, g_HoleSetup.cupPosition, peak);
-    peakKind = GetSurfaceInfoAt(peak[AXIS_X], peak[AXIS_Z])->kind;
+    peakKind = GetSurfaceTraitsAt(peak[AXIS_X], peak[AXIS_Z])->kind;
     if (peakKind == SURFACE_KIND_GREEN || peakKind == SURFACE_KIND_GREEN_EDGE) {
         edgeDistance = IntLength2D(
             peak[AXIS_X] - f_Shot.ballPosition[AXIS_X],
@@ -2010,7 +2010,7 @@ s32 StepTrialShot(void) {
     s32 velocityY;
     s32 bounceCount;
     s32 heightMiss;
-    SurfaceInfo *surfaceInfo;
+    SurfaceTraits *surfaceTraits;
     s32 targetRating;
     s32 strokeCount;
     s32 par;
@@ -2179,7 +2179,7 @@ s32 StepTrialShot(void) {
         else {
 EVALUATE:
 
-            surfaceInfo = GetSurfaceInfo(f_TrialSimulation.surface);
+            surfaceTraits = GetSurfaceTraits(f_TrialSimulation.surface);
             if (FindGroundHit(
                     f_TrialSimulation.position[AXIS_X],
                     f_TrialSimulation.position[AXIS_Y] - PATH_GROUND_CLEARANCE,
@@ -2199,17 +2199,17 @@ EVALUATE:
             }
 
             targetRating = GetLandingRating(
-                GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind
+                GetSurfaceTraitsAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind
             );
-            if (GetLandingRating(surfaceInfo->kind) < targetRating) {
+            if (GetLandingRating(surfaceTraits->kind) < targetRating) {
                 IN_OWN_BLOCK({
                     f_TrialEvaluation += POOR_LANDING_EVALUATION;
-                    if (IsOutOfBoundsKind(surfaceInfo->kind)) {
+                    if (IsOutOfBoundsKind(surfaceTraits->kind)) {
                         f_TrialEvaluation = LOST_BALL_EVALUATION;
                         f_IsTrialLost = TRUE;
                     }
 
-                    if (surfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
+                    if (surfaceTraits->kind == SURFACE_KIND_WATER_HAZARD) {
                         osSyncPrintf("Water Hazzad\n");
                         f_TrialEvaluation = LOST_BALL_EVALUATION;
                         f_IsTrialLost = TRUE;
@@ -2231,7 +2231,7 @@ EVALUATE:
         if (f_TrialIndex != 0) {
             strokeCount = g_Players[f_Shot.playerIndex].strokeCount;
             par = g_HoleSetup.par;
-            if (GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
+            if (GetSurfaceTraitsAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
                 SURFACE_KIND_GREEN) {
                 s32 shotStroke = strokeCount + 1;
 
@@ -2327,7 +2327,7 @@ EVALUATE:
                     ((ShotGolferTraits().powerShotEagerness != 0 &&
                          ShotGolferTraits().clubBoldness < BOLD_CLUB_CHOICE) ||
                         (rand() & 1)) &&
-                    GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
+                    GetSurfaceTraitsAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
                         SURFACE_KIND_GREEN) {
                     f_Shot.shotMode = SHOT_MODE_POWER;
                     osSyncPrintf("Power mode\n ");
@@ -2492,7 +2492,7 @@ ClubType ChooseClubForDistance(s32 distance) {
             carry = carry * RAINY_DISTANCE_FRACTION;
         }
 
-        carry = carry * GetSurfaceInfo(f_Shot.surface)->percentMin / FULL_PERCENT;
+        carry = carry * GetSurfaceTraits(f_Shot.surface)->percentMin / FULL_PERCENT;
         rating = GetLieRating(club, f_Shot.surface, SHOT_MODE_NORMAL);
         if (ShotGolferTraits().clubBoldness < BOLD_CLUB_CHOICE) {
             if (rating == WORST_LIE_RATING) {
@@ -2537,7 +2537,7 @@ s32 ChooseShotOffset(void) {
     s32 aimYaw;
     s32 windDirection;
 
-    switch (GetSurfaceInfo(f_Shot.surface)->kind) {
+    switch (GetSurfaceTraits(f_Shot.surface)->kind) {
         case SURFACE_KIND_BUNKER:
         case SURFACE_KIND_BUNKER_FAIR_LIE:
         case SURFACE_KIND_BUNKER_POOR_LIE:
@@ -2703,7 +2703,7 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
         stepLength = UNITS_PER_YARD;
         x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
         z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
-        kind = GetSurfaceInfoAt(x, z)->kind;
+        kind = GetSurfaceTraitsAt(x, z)->kind;
         if (IsLostBallKind(kind)) {
             lostCount++;
         }
@@ -2754,7 +2754,7 @@ Boolean IsTrialShotSafe(void) {
     }
 
     if (f_TrialSimulation.state == BALL_STATE_STOPPED) {
-        kind = GetSurfaceInfo(f_TrialSimulation.surface)->kind;
+        kind = GetSurfaceTraits(f_TrialSimulation.surface)->kind;
         if (IsOutOfBoundsKind(kind) || kind == SURFACE_KIND_WATER_HAZARD) {
             osSyncPrintf("nmResultCheck: FALSE\n");
             return FALSE;

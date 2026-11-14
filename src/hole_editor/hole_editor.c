@@ -1058,7 +1058,7 @@ void UpdateHolePointEditor(void) {
             );
             PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
             PrintDebugText(
-                GetSurfaceInfoAt(
+                GetSurfaceTraitsAt(
                     g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X],
                     g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z]
                 )
@@ -1084,7 +1084,7 @@ void UpdateHolePointEditor(void) {
             );
             PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
             PrintDebugText(
-                GetSurfaceInfoAt(
+                GetSurfaceTraitsAt(
                     g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X],
                     g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z]
                 )
@@ -1157,7 +1157,7 @@ void UpdateHolePointEditor(void) {
             );
             PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
             PrintDebugText(
-                GetSurfaceInfoAt(
+                GetSurfaceTraitsAt(
                     g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X],
                     g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z]
                 )
@@ -1215,7 +1215,7 @@ void UpdateHolePointEditor(void) {
             );
             PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
             PrintDebugText(
-                GetSurfaceInfoAt(
+                GetSurfaceTraitsAt(
                     g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X],
                     g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z]
                 )

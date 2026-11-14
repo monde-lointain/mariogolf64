@@ -4157,8 +4157,8 @@ s32 GetSelectedShotWorldDistance(void) {
     return GetShotWorldDistance(GetSelectedClub(), g_CurrentShot.shotMode);
 }
 
-s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceInfo *surfaceInfo) {
-    SurfaceKind surfaceKind = surfaceInfo->kind;
+s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceTraits *surfaceTraits) {
+    SurfaceKind surfaceKind = surfaceTraits->kind;
     s32 mask;
 
     if (IsGameFlagSet(GAME_FLAG_ANY_CLUB_ANYWHERE)) {
@@ -4210,7 +4210,7 @@ s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceInfo *surfaceInfo) {
 }
 
 s32 GetCurrentSurfaceClubMask(s32 distinguishesKinds) {
-    return GetSurfaceClubMask(distinguishesKinds, GetSurfaceInfo(g_CurrentShot.surface));
+    return GetSurfaceClubMask(distinguishesKinds, GetSurfaceTraits(g_CurrentShot.surface));
 }
 
 static const char f_TeeUpLieRatings[LIE_RATING_LENGTH + 1] = "3444444555555";
@@ -4242,7 +4242,7 @@ s32 GetLieRating(Club *club, Surface surface, ShotMode shotMode) {
     const char *approachRatings;
     s32 rating;
 
-    switch (GetSurfaceInfo(surface)->kind) {
+    switch (GetSurfaceTraits(surface)->kind) {
         case SURFACE_KIND_TEE_UP:
             ratings = f_TeeUpLieRatings;
             approachRatings = f_TeeUpApproachLieRatings;

@@ -61,8 +61,8 @@ void SimulateShot(ShotLaunch *shot) {
     )
                                         ->rumbles;
     LaunchBallSimulation(simulation, LAUNCH_PURPOSE_TRIAL, shot);
-    g_SimulatedShot.startsOnGreen =
-        g_GameState.isMiniGolf || GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
+    g_SimulatedShot.startsOnGreen = g_GameState.isMiniGolf ||
+        GetSurfaceTraits(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
     step = 0;
     while (simulation->state != BALL_STATE_STOPPED) {
         stepFlags = StepBallSimulation(simulation);
@@ -131,15 +131,15 @@ void SimulateShot(ShotLaunch *shot) {
     g_SimulatedShot.endPosition[AXIS_Z] = simulation->position[AXIS_Z];
     g_SimulatedShot.endsInCup = simulation->isHoledOut;
     g_SimulatedShot.endSurface = simulation->surface;
-    g_SimulatedShot.endsOnGreen = GetSurfaceInfo(simulation->surface)->kind == SURFACE_KIND_GREEN;
+    g_SimulatedShot.endsOnGreen = GetSurfaceTraits(simulation->surface)->kind == SURFACE_KIND_GREEN;
     isWaterCut = FALSE;
     if (hasHoleTriangleBounce) {
-        isWaterCut = GetSurfaceInfo(simulation->surface)->kind != SURFACE_KIND_WATER_HAZARD;
+        isWaterCut = GetSurfaceTraits(simulation->surface)->kind != SURFACE_KIND_WATER_HAZARD;
     }
 
     g_SimulatedShot.isWaterCut = isWaterCut;
     osSyncPrintf("\nWaterCut%d\n", isWaterCut);
-    firstBounceKind = GetSurfaceInfo(simulation->firstBounceSurface)->kind;
+    firstBounceKind = GetSurfaceTraits(simulation->firstBounceSurface)->kind;
     if ((firstBounceKind == SURFACE_KIND_OUT_OF_BOUNDS) |
         (firstBounceKind == SURFACE_KIND_OUT_OF_COURSE)) {
         g_SimulatedShot.isFirstBounceOut = TRUE;

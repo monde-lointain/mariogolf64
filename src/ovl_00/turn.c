@@ -1418,7 +1418,7 @@ void UpdateShotFlags(void) {
         g_ShotFlags |= SHOT_FLAG_NO_IMPACT_POINT;
     }
 
-    if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
+    if (GetSurfaceTraits(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
         g_ShotFlags |= SHOT_FLAG_ON_GREEN;
     }
 
@@ -1455,7 +1455,7 @@ void PickStartingClub(HoleSetup *hole) {
     g_CurrentShot.clubSlot = 0;
     g_CurrentShot.shotMode = SHOT_MODE_NORMAL;
     clubCount = MarkUsableClubs(
-        (s32)GetSurfaceInfo(g_CurrentShot.surface),
+        (s32)GetSurfaceTraits(g_CurrentShot.surface),
         g_Players[g_CurrentShot.playerIndex].clubs,
         isUsable
     );
@@ -1464,7 +1464,7 @@ void PickStartingClub(HoleSetup *hole) {
         g_CurrentShot.ballPosition[AXIS_Z] - hole->cupPosition[AXIS_Z]
     );
     if (g_GameState.isMiniGolf ||
-        GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
+        GetSurfaceTraits(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
         s32 putterSlot;
 
         for (putterSlot = 0; putterSlot < clubCount; putterSlot++) {
@@ -2287,7 +2287,7 @@ void StartPlayerShot(s32 playerIndex) {
     g_CurrentShot.cupDistance =
         GetCupDistance(x - g_HoleSetup.cupPosition[AXIS_X], z - g_HoleSetup.cupPosition[AXIS_Z]);
     if (!g_IsTrainingHeadingKept || g_GameState.gameMode != GAME_MODE_TRAINING) {
-        SurfaceKind surfaceKind = GetSurfaceInfo(g_CurrentShot.surface)->kind;
+        SurfaceKind surfaceKind = GetSurfaceTraits(g_CurrentShot.surface)->kind;
 
         if (g_HolePoints.aimPoints[0][AXIS_X] == 0 || g_HolePoints.aimPoints[0][AXIS_Z] == 0) {
             g_HolePoints.aimPoints[0][AXIS_X] = g_HoleSetup.cupPosition[AXIS_X];
@@ -2387,8 +2387,8 @@ void PickNextPlayer(void) {
         }
         else {
             if (g_Players[playerIndex].strokeCount != 0) {
-                priority =
-                    GetSurfaceInfo(g_Players[playerIndex].ballSurface)->kind != SURFACE_KIND_GREEN;
+                priority = GetSurfaceTraits(g_Players[playerIndex].ballSurface)->kind !=
+                    SURFACE_KIND_GREEN;
             }
 
             distance = IntLength2D(
@@ -2462,12 +2462,12 @@ void FreeCharacterAndReactionLight(s32 slotIndex UNUSED) {
 
 void MeasureTeeShot(s32 playerIndex) {
     s32 distance;
-    SurfaceInfo *surfaceInfo;
+    SurfaceTraits *surfaceTraits;
 
     if (g_Players[playerIndex].strokeCount == 1) {
         distance = UNCOUNTED_DISTANCE;
-        surfaceInfo = GetSurfaceInfo(g_SimulatedShot.endSurface);
-        switch ((u32)surfaceInfo->kind) {
+        surfaceTraits = GetSurfaceTraits(g_SimulatedShot.endSurface);
+        switch ((u32)surfaceTraits->kind) {
             case SURFACE_KIND_FAIRWAY:
             case SURFACE_KIND_FAIRWAY_FAIR_LIE:
             case SURFACE_KIND_FAIRWAY_POOR_LIE:
@@ -2485,7 +2485,7 @@ void MeasureTeeShot(s32 playerIndex) {
         if (g_SimulatedShot.endsInCup) {
             distance = 0;
         }
-        else if (surfaceInfo->kind == SURFACE_KIND_GREEN) {
+        else if (surfaceTraits->kind == SURFACE_KIND_GREEN) {
             distance = GetCupDistance(
                 g_HoleSetup.cupPosition[AXIS_X] - g_SimulatedShot.endPosition[AXIS_X],
                 g_HoleSetup.cupPosition[AXIS_Z] - g_SimulatedShot.endPosition[AXIS_Z]
@@ -3114,7 +3114,7 @@ void UpdateTurns(void) {
                         break;
                     case HOLING_OUT_WINS_HOLE:
                     case HOLING_OUT_WINS_MATCH:
-                        if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
+                        if (GetSurfaceTraits(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
                             StartMovie(MOVIE_SINK_TO_WIN);
                         }
 
@@ -3126,7 +3126,7 @@ void UpdateTurns(void) {
                     if (g_GameState.replayKind != REPLAY_KIND_NONE) {
                         PlaySong(songId, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
                     }
-                    else if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
+                    else if (GetSurfaceTraits(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
                         songId = SONG_MINI_GOLF;
                         if (g_GameState.isMiniGolf) {
                             PlaySong(songId, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
@@ -3516,7 +3516,7 @@ void UpdateTurns(void) {
                             AIMING_MEAN_ALPHA
                     );
                     isReady = TRUE;
-                    if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN &&
+                    if (GetSurfaceTraits(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN &&
                         !g_GameState.isMiniGolf) {
                         f_GreenSongTempo += GREEN_SONG_TEMPO_STEP;
                         if (f_GreenSongTempo > GREEN_SONG_TEMPO_MAX) {
@@ -3813,7 +3813,7 @@ void UpdateTurns(void) {
                     }
 
                     if (GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) {
-                        if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
+                        if (GetSurfaceTraits(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
                             g_Players[playerIndex].puttCount++;
                             if (g_Players[playerIndex].puttCount > STROKE_COUNT_MAX) {
                                 g_Players[playerIndex].puttCount = STROKE_COUNT_MAX;
@@ -4168,7 +4168,7 @@ void UpdateTurns(void) {
 
                         if (g_TurnBallSimulation.state != BALL_STATE_ROLLING ||
                             g_GameState.isMiniGolf ||
-                            (GetSurfaceInfo(g_TurnBallSimulation.surfaceBelow)->kind ==
+                            (GetSurfaceTraits(g_TurnBallSimulation.surfaceBelow)->kind ==
                                     SURFACE_KIND_GREEN &&
                                 (s32)distance < (s32)previousDistance)) {
                             break;
@@ -4275,16 +4275,16 @@ void UpdateTurns(void) {
                 }
                 else if (isCameraDone) {
                     Player *player;
-                    SurfaceInfo *surfaceInfo;
+                    SurfaceTraits *surfaceTraits;
 
                     MeasureTeeShot(playerIndex);
                     UpdateContest(FALSE);
                     StartLandingReaction(-1);
                     player = &g_Players[playerIndex];
-                    surfaceInfo = GetSurfaceInfo(g_TurnBallSimulation.surface);
+                    surfaceTraits = GetSurfaceTraits(g_TurnBallSimulation.surface);
                     OnBallStepped(player);
                     ClearPassedRings(player);
-                    if (IsOutOfBoundsKind(surfaceInfo->kind) &&
+                    if (IsOutOfBoundsKind(surfaceTraits->kind) &&
                         !IsGameFlagSet(GAME_FLAG_NO_OUT_OF_BOUNDS_PENALTY)) {
                         g_Players[playerIndex].strokeCount++;
                         if (g_GameState.gameMode == GAME_MODE_TRAINING) {
@@ -4305,7 +4305,7 @@ void UpdateTurns(void) {
                             );
                         }
                     }
-                    else if (surfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
+                    else if (surfaceTraits->kind == SURFACE_KIND_WATER_HAZARD) {
                         player->ballPosition[AXIS_X] = g_TurnBallSimulation.dropPosition[AXIS_X];
                         player->ballPosition[AXIS_Z] = g_TurnBallSimulation.dropPosition[AXIS_Z];
                         player->ballPosition[AXIS_Y] = GetGroundHeight(
@@ -4333,8 +4333,8 @@ void UpdateTurns(void) {
                         player->ballSurface = g_TurnBallSimulation.surface;
                     }
 
-                    if (IsBunkerKind(surfaceInfo->kind) ||
-                        surfaceInfo->kind == SURFACE_KIND_BUNKER_UNUSED_LIE) {
+                    if (IsBunkerKind(surfaceTraits->kind) ||
+                        surfaceTraits->kind == SURFACE_KIND_BUNKER_UNUSED_LIE) {
                         player->hasBeenInBunker = TRUE;
                     }
 
@@ -4962,7 +4962,7 @@ void UpdateTurns(void) {
     }
 
     MarkNearbyGroundTiles(g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Z]);
-    GetBallSurfaceInfo(&g_Players[g_GameState.currentPlayerIndex], &f_ShotLaunch);
+    GetBallSurfaceTraits(&g_Players[g_GameState.currentPlayerIndex], &f_ShotLaunch);
     if (areCallsAllowed) {
         PlayWaitingPlayersCalls();
     }

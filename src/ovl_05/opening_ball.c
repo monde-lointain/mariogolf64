@@ -32,7 +32,7 @@
 
 static s8 f_OpeningClubTestMode = CLUB_TEST_NONE;
 
-static SurfaceInfo f_OpeningSurfaceInfo[SURFACE_COUNT] = {
+static SurfaceTraits f_OpeningSurfaceTraits[SURFACE_COUNT] = {
     {SURFACE_KIND_OUT_OF_BOUNDS, "O.B.", 100, 100, 0, 0, 0, 0x500, SINK_DEPTH_HALF, 7},
     {SURFACE_KIND_FAIRWAY, "ﾌｪｱｳｪｲ", 98, 100, 5, 960, 400, 0x501, SINK_DEPTH_NONE, 0},
     {SURFACE_KIND_ROUGH, "ﾗﾌ", 80, 90, 30, 600, 200, 0x508, SINK_DEPTH_HALF, 1},
@@ -200,12 +200,12 @@ s32 ToggleOpeningCharacter(u32 slotIndex, s32 characterIndex) {
     return TRUE;
 }
 
-static SurfaceInfo *GetOpeningSurfaceInfo(Surface surface) {
+static SurfaceTraits *GetOpeningSurfaceTraits(Surface surface) {
     if ((u32)surface >= SURFACE_COUNT) {
         surface = SURFACE_OUT_OF_BOUNDS;
     }
 
-    return &f_OpeningSurfaceInfo[surface];
+    return &f_OpeningSurfaceTraits[surface];
 }
 
 static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
@@ -572,9 +572,9 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             f32 pinFraction;
             s32 pinHit;
 
-            if (g_GameState.isMiniGolf ?
-                    g_Players[simulation->playerIndex].strokeCount == 1 :
-                    GetOpeningSurfaceInfo(simulation->launchSurface)->kind != SURFACE_KIND_GREEN) {
+            if (g_GameState.isMiniGolf ? g_Players[simulation->playerIndex].strokeCount == 1 :
+                                         GetOpeningSurfaceTraits(simulation->launchSurface)->kind !=
+                        SURFACE_KIND_GREEN) {
                 pinHit = FindPinHit(
                     startX,
                     startY,
@@ -1117,7 +1117,8 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                 }
             }
 
-            softness = THOUSANDTHS_PER_ONE - GetOpeningSurfaceInfo(simulation->surface)->bounciness;
+            softness =
+                THOUSANDTHS_PER_ONE - GetOpeningSurfaceTraits(simulation->surface)->bounciness;
             keep = ((f32)THOUSANDTHS_PER_ONE -
                        (SOFTNESS_SPEED_LOSS_SCALE * softness * steepness * steepness)) *
                 ONE_PER_THOUSANDTH;
@@ -1219,7 +1220,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             }
 
             friction =
-                (THOUSANDTHS_PER_ONE - GetOpeningSurfaceInfo(simulation->surface)->bounciness) *
+                (THOUSANDTHS_PER_ONE - GetOpeningSurfaceTraits(simulation->surface)->bounciness) *
                 ONE_PER_THOUSANDTH;
             if (simulation->surface == SURFACE_BUNKER) {
                 BunkerBurial burial = BUNKER_BURIAL_NONE;
@@ -1395,7 +1396,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
 
         if (simulation->state == BALL_STATE_ROLLING && !isNearCup) {
             TrianglePlane plane;
-            SurfaceInfo *surfaceInfo;
+            SurfaceTraits *surfaceTraits;
             s32 groundHeight;
             s32 slopeX;
             s32 slopeZ;
@@ -1407,10 +1408,10 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             isSteep = FALSE;
             if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
                 contact = STEP_FLAG_GROUND_HIT;
-                surfaceInfo = &f_OpeningSurfaceInfo[SURFACE_GREEN];
+                surfaceTraits = &f_OpeningSurfaceTraits[SURFACE_GREEN];
                 SetFlatTriangle(&triangle);
                 if (f_OpeningClubTestMode == CLUB_TEST_SHOT) {
-                    surfaceInfo = &f_OpeningSurfaceInfo[SURFACE_FAIRWAY];
+                    surfaceTraits = &f_OpeningSurfaceTraits[SURFACE_FAIRWAY];
                 }
 
                 groundHeight = 0;
@@ -1468,8 +1469,8 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                         break;
                 }
 
-                surfaceInfo = GetOpeningSurfaceInfo(simulation->surface);
-                if (surfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE) {
+                surfaceTraits = GetOpeningSurfaceTraits(simulation->surface);
+                if (surfaceTraits->kind == SURFACE_KIND_OUT_OF_COURSE) {
                     simulation->state = BALL_STATE_STOPPED;
                     goto SETTLE;
                 }
@@ -1497,7 +1498,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                 isSteep = TRUE;
             }
 
-            friction = surfaceInfo->rollSpeedKept * ONE_PER_THOUSANDTH;
+            friction = surfaceTraits->rollSpeedKept * ONE_PER_THOUSANDTH;
             if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
                 g_HoleSetup.conditions.isRaining == TRUE) {
                 friction *= RAIN_FRICTION_SCALE;
@@ -1583,7 +1584,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             }
 
             if (!isSteep &&
-                surfaceInfo->kind != SURFACE_KIND_GREEN &&
+                surfaceTraits->kind != SURFACE_KIND_GREEN &&
                 simulation->lastBounceStep + OFF_GREEN_STOP_STEPS < simulation->stepCount &&
                 GetOpeningLength3D(
                     simulation->velocity[AXIS_X],
@@ -1786,7 +1787,7 @@ SETTLE:
 
                 simulation->surfaceBelow =
                     GetSurface(simulation->position[AXIS_X], simulation->position[AXIS_Z]);
-                surfaceKind = GetOpeningSurfaceInfo(simulation->surfaceBelow)->kind;
+                surfaceKind = GetOpeningSurfaceTraits(simulation->surfaceBelow)->kind;
                 if (IsDropKind(surfaceKind) &&
                     FindGroundTriangle(
                         simulation->position[AXIS_X],
@@ -1875,10 +1876,10 @@ s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLau
     }
 
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-        SurfaceInfo *surfaceInfo = GetOpeningSurfaceInfo(simulation->launchSurface);
+        SurfaceTraits *surfaceTraits = GetOpeningSurfaceTraits(simulation->launchSurface);
 
         blend = PickOpeningLieBlend();
-        GetSurfacePercentRange(surfaceInfo, club, percentRange);
+        GetSurfacePercentRange(surfaceTraits, club, percentRange);
         speed = ((percentRange[0] * blend) + (percentRange[1] * (1.0f - blend))) * speed *
             ONE_PER_PERCENT;
     }

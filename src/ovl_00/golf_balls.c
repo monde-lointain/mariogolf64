@@ -68,7 +68,7 @@
 
 typedef struct GolfBall {
     Mtx matrices[DRAW_BUFFER_COUNT];
-    SurfaceInfo *surface;
+    SurfaceTraits *surface;
     f32 position[3];
     s32 alpha;
     u8 isInCup;
@@ -539,7 +539,7 @@ void UpdateGolfBalls(void) {
 
         if (currentIndex != i) {
             ball->state = BALL_STATE_STOPPED;
-            if (GetSurfaceInfo(player->ballSurface)->kind != SURFACE_KIND_GREEN &&
+            if (GetSurfaceTraits(player->ballSurface)->kind != SURFACE_KIND_GREEN &&
                 !g_GameState.isMiniGolf) {
                 ball->markerPlayerIndex = BALL_NO_MARKER;
             }
@@ -578,7 +578,7 @@ void UpdateGolfBalls(void) {
                 }
 
                 ball->alpha = BALL_SHOWN;
-                ball->surface = GetSurfaceInfo(simulation->surface);
+                ball->surface = GetSurfaceTraits(simulation->surface);
                 if (simulation->state == BALL_STATE_IN_CUP) {
                     ball->isInCup = TRUE;
                 }
@@ -603,7 +603,7 @@ void UpdateGolfBalls(void) {
                 ball->hasEnteredWater = simulation->hasEnteredWater;
                 ball->purpose = simulation->purpose;
                 if (currentIndex == simulation->playerIndex ||
-                    (GetSurfaceInfo(simulation->surface)->kind != SURFACE_KIND_GREEN &&
+                    (GetSurfaceTraits(simulation->surface)->kind != SURFACE_KIND_GREEN &&
                         !g_GameState.isMiniGolf)) {
                     ball->markerPlayerIndex = BALL_NO_MARKER;
                 }
@@ -838,8 +838,8 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     Boolean isCurrentBallAboveGround = FALSE;
     GolfBall *ball;
     BallAfterimage *afterimage;
-    SurfaceInfo *surface;
-    SurfaceInfo *pikaBallSurface;
+    SurfaceTraits *surface;
+    SurfaceTraits *pikaBallSurface;
     s32 groundHeight;
     s32 spriteKind;
     Boolean isAboveGround;

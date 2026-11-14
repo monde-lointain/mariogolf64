@@ -629,7 +629,7 @@ s32 UpdatePauseMenu(ControllerState *controller) {
 
     if (kind == PAUSE_OPTION_KIND_LIE) {
         hasLieChanged = FALSE;
-        switch (GetSurfaceInfo(g_CurrentShot.surface)->kind) {
+        switch (GetSurfaceTraits(g_CurrentShot.surface)->kind) {
             case SURFACE_KIND_TEE_UP:
                 lie = PAUSE_LIE_TEE_UP;
                 break;
