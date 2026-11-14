@@ -61,30 +61,33 @@ static u8 f_UnusedBlendedGreen;
 static u8 f_UnusedBlendedBlue;
 
 void DeriveSceneColors(void) {
-    SkyColors *entry;
+    SkyColors *colors;
     s32 vertexOffset;
     s32 channelIndex;
 
     f_UnusedFirstClearedWord = 0;
     f_UnusedSecondClearedWord = 0;
 
-    entry = g_SkyColors
+    // With one subscript this picks a course row of g_SkyColors, not a
+    // weather and time within the current course, so it reads the first
+    // sky of whichever course row the sum lands on.
+    colors = g_SkyColors
         [(g_HoleSetup.conditions.isRaining * 3) + g_HoleSetup.conditions.sceneColorIndex];
     for (vertexOffset = 0; vertexOffset != QUAD_VERTEX_COUNT; vertexOffset++) {
         for (channelIndex = 0; channelIndex != RGB_CHANNEL_COUNT; channelIndex++) {
             f_ShadedVertices[0][SHADED_QUAD_START + vertexOffset].v.cn[channelIndex] =
-                (s32)((entry->topColor[channelIndex] + entry->horizonColor[channelIndex]) * 0.3f);
+                (s32)((colors->topColor[channelIndex] + colors->horizonColor[channelIndex]) * 0.3f);
             f_ShadedVertices[1][SHADED_QUAD_START + vertexOffset].v.cn[channelIndex] =
-                (s32)((entry->topColor[channelIndex] + entry->horizonColor[channelIndex]) * 0.3f);
+                (s32)((colors->topColor[channelIndex] + colors->horizonColor[channelIndex]) * 0.3f);
         }
     }
 
-    f_UnusedBlendedRed = (s32)((entry->topColor[0] + entry->horizonColor[0]) * 0.35f);
-    f_UnusedBlendedGreen = (s32)((entry->topColor[1] + entry->horizonColor[1]) * 0.35f);
-    f_UnusedBlendedBlue = (s32)((entry->topColor[2] + entry->horizonColor[2]) * 0.35f);
-    f_UnusedDimmedRed = entry->noiseColor[0] * 0.8;
-    f_UnusedDimmedGreen = entry->noiseColor[1] * 0.8;
-    f_UnusedDimmedBlue = entry->noiseColor[2] * 0.8;
+    f_UnusedBlendedRed = (s32)((colors->topColor[0] + colors->horizonColor[0]) * 0.35f);
+    f_UnusedBlendedGreen = (s32)((colors->topColor[1] + colors->horizonColor[1]) * 0.35f);
+    f_UnusedBlendedBlue = (s32)((colors->topColor[2] + colors->horizonColor[2]) * 0.35f);
+    f_UnusedDimmedRed = colors->noiseColor[0] * 0.8;
+    f_UnusedDimmedGreen = colors->noiseColor[1] * 0.8;
+    f_UnusedDimmedBlue = colors->noiseColor[2] * 0.8;
 }
 
 void DoNothing(void) {
