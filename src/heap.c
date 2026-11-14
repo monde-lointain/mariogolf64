@@ -10,9 +10,13 @@
 
 #define GET_RETURN_ADDRESS(variable) __asm__ volatile("addu %0, $31, $0" : "=r"(variable))
 
-#define BLOCK_FREE 0
-#define BLOCK_USED 0x12345678
-#define BLOCK_SENTINEL (-1)
+enum BlockTag {
+    BLOCK_SENTINEL = -1,
+    BLOCK_FREE,
+    BLOCK_USED = 0x12345678
+};
+
+typedef s32 BlockTag;
 
 #define NO_BLOCK_SIZE S32_MAX
 #define UNMEASURED_SIZE (-1)
@@ -22,7 +26,7 @@
 
 typedef struct MemoryBlock {
     u32 size;
-    s32 tag;
+    BlockTag tag;
     struct MemoryBlock *next;
     struct MemoryBlock *previous;
 } MemoryBlock;
