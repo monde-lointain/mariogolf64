@@ -95,6 +95,9 @@ typedef struct InsetView {
 
 extern InsetView g_InsetView;
 
+// BuildRingTexels ignores its outerRadius and always uses this one.
+#define RING_OUTER_RADIUS 62
+
 void SetInsetViewRectangle(s32 centerX, s32 centerY, s32 width, s32 height);
 void SetLandingWaitFrameCount(s32 frameCount);
 void BuildRingTexels(u8 *texels, s32 width, s32 height, s32 outerRadius);

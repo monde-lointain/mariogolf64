@@ -198,7 +198,6 @@ static const char f_UnusedFloatFormat[] = "            %f";
 
 #define RING_INNER_RADIUS 5
 #define RING_PEAK_RADIUS 55
-#define RING_OUTER_RADIUS 62
 #define RING_INNER_INTENSITY 10
 #define RING_RISE_PER_TEXEL 5
 #define RING_PEAK_INTENSITY 255

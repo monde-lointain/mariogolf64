@@ -241,8 +241,6 @@ enum LandingGlyphGroup {
 #define LANDING_PANEL_PIVOT_X 72.0f
 #define LANDING_PANEL_PIVOT_Y (-20.0f)
 
-#define RING_TEXTURE_OUTER_RADIUS 62
-
 #define HUD_MARGIN 8
 
 #define LETTERBOX_GROWTH_STEP 2
@@ -1124,7 +1122,7 @@ void LoadRoundHud(void) {
     f_DistanceFont = AllocMemory(OpenEncodedAsset(ASSET_DISTANCE_DIGITS, &asset));
     ReadEncodedAsset(f_DistanceFont, &asset);
     g_RingTexels = AllocMemory(RING_TEXTURE_SIZE * RING_TEXTURE_SIZE);
-    BuildRingTexels(g_RingTexels, RING_TEXTURE_SIZE, RING_TEXTURE_SIZE, RING_TEXTURE_OUTER_RADIUS);
+    BuildRingTexels(g_RingTexels, RING_TEXTURE_SIZE, RING_TEXTURE_SIZE, RING_OUTER_RADIUS);
     for (i = 0; i != SHOT_OFFSET_MARKER_COUNT; i++) {
         f_ShotOffsetMarkerXs[i] = 0;
         f_ShotOffsetMarkerYs[i] = 0;
