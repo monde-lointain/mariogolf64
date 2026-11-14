@@ -1655,8 +1655,8 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 scrollX;
     f32 scrollZ;
     f32 height;
-    f32 dx;
-    f32 dy;
+    f32 deltaX;
+    f32 deltaY;
     f32 scale;
 
 #ifdef AVOID_UB
@@ -1906,26 +1906,26 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                 }
 
                 if (drawnColumn & 1) {
-                    dx = screenPoints[GridPointIndex(drawnRow, drawnColumn)].x -
+                    deltaX = screenPoints[GridPointIndex(drawnRow, drawnColumn)].x -
                         screenPoints[GridPointIndex(drawnRow, drawnColumn) - 1].x;
-                    dy = screenPoints[GridPointIndex(drawnRow, drawnColumn)].y -
+                    deltaY = screenPoints[GridPointIndex(drawnRow, drawnColumn)].y -
                         screenPoints[GridPointIndex(drawnRow, drawnColumn) - 1].y;
                 }
                 else {
-                    dx = screenPoints[GridPointIndex(drawnRow, drawnColumn)].x -
+                    deltaX = screenPoints[GridPointIndex(drawnRow, drawnColumn)].x -
                         screenPoints[GridPointIndex(drawnRow, drawnColumn) + 1].x;
-                    dy = screenPoints[GridPointIndex(drawnRow, drawnColumn)].y -
+                    deltaY = screenPoints[GridPointIndex(drawnRow, drawnColumn)].y -
                         screenPoints[GridPointIndex(drawnRow, drawnColumn) + 1].y;
                 }
 
-                if (dx == 0.0f && dy == 0.0f) {
+                if (deltaX == 0.0f && deltaY == 0.0f) {
                     screenPoints[GridPointIndex(drawnRow, drawnColumn)].isVisible = FALSE;
                     continue;
                 }
 
-                scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
-                dx *= scale;
-                dy *= scale;
+                scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((deltaX * deltaX) + (deltaY * deltaY));
+                deltaX *= scale;
+                deltaY *= scale;
                 SetGreenGridTint(slopes[GridPointIndex(drawnRow, drawnColumn)]);
                 if (drawnColumn & 1) {
                     gSPModifyVertex(
@@ -1942,8 +1942,8 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                         3,
                         G_MWO_POINT_XYSCREEN,
                         ScreenPointWord(
-                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].x + (s32)dy,
-                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].y - (s32)dx
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].x + (s32)deltaY,
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].y - (s32)deltaX
                         )
                     );
                     gSPModifyVertex(
@@ -1995,8 +1995,8 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                         1,
                         G_MWO_POINT_XYSCREEN,
                         ScreenPointWord(
-                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].x + (s32)dy,
-                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].y - (s32)dx
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].x + (s32)deltaY,
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].y - (s32)deltaX
                         )
                     );
                     gSPModifyVertex(
@@ -2059,15 +2059,15 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                     continue;
                 }
 
-                dx = screenPoints[point].x - screenPoints[point + columnCount].x;
-                dy = screenPoints[point].y - screenPoints[point + columnCount].y;
-                if (dx == 0.0f && dy == 0.0f) {
+                deltaX = screenPoints[point].x - screenPoints[point + columnCount].x;
+                deltaY = screenPoints[point].y - screenPoints[point + columnCount].y;
+                if (deltaX == 0.0f && deltaY == 0.0f) {
                     continue;
                 }
 
-                scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
-                dx *= scale;
-                dy *= scale;
+                scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((deltaX * deltaX) + (deltaY * deltaY));
+                deltaX *= scale;
+                deltaY *= scale;
                 SetGreenGridTint(slopes[point]);
                 gSPModifyVertex(
                     gfx++,
@@ -2105,8 +2105,8 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                     1,
                     G_MWO_POINT_XYSCREEN,
                     ScreenPointWord(
-                        screenPoints[point].x - (s32)dy,
-                        screenPoints[point].y + (s32)dx
+                        screenPoints[point].x - (s32)deltaY,
+                        screenPoints[point].y + (s32)deltaX
                     )
                 );
                 gSPModifyVertex(
@@ -2123,8 +2123,8 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                     3,
                     G_MWO_POINT_XYSCREEN,
                     ScreenPointWord(
-                        screenPoints[point + columnCount].x - (s32)dy,
-                        screenPoints[point + columnCount].y + (s32)dx
+                        screenPoints[point + columnCount].x - (s32)deltaY,
+                        screenPoints[point + columnCount].y + (s32)deltaX
                     )
                 );
                 if (screenPoints[point].depth < screenPoints[point + columnCount].depth) {

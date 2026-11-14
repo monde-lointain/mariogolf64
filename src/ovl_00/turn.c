@@ -1904,8 +1904,8 @@ void DrawShotPreview(CameraMatrices *matrices) {
 
     gDPPipeSync(g_DisplayListHead++);
     if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
-        f32 dx;
-        f32 dy;
+        f32 deltaX;
+        f32 deltaY;
         f32 scale;
         s32 offsetX;
         s32 offsetY;
@@ -1933,12 +1933,12 @@ void DrawShotPreview(CameraMatrices *matrices) {
         ball.y *= QUARTER_PIXELS_PER_PIXEL;
         end.x *= QUARTER_PIXELS_PER_PIXEL;
         end.y *= QUARTER_PIXELS_PER_PIXEL;
-        dx = end.x - ball.x;
-        dy = end.y - ball.y;
-        if (fabsf(dx) > 1.0f || fabsf(dy) > 1.0f) {
-            scale = PUTT_PREVIEW_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
-            dx *= scale;
-            dy *= scale;
+        deltaX = end.x - ball.x;
+        deltaY = end.y - ball.y;
+        if (fabsf(deltaX) > 1.0f || fabsf(deltaY) > 1.0f) {
+            scale = PUTT_PREVIEW_HALF_WIDTH / sqrtf((deltaX * deltaX) + (deltaY * deltaY));
+            deltaX *= scale;
+            deltaY *= scale;
             gSPLoadGeometryMode(g_DisplayListHead++, 0);
             gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_SHADING_SMOOTH);
             gDPSetCombineMode(
@@ -1960,8 +1960,8 @@ void DrawShotPreview(CameraMatrices *matrices) {
                 G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
             );
             gSPVertex(g_DisplayListHead++, f_PuttPreviewLineVertices, QUAD_VERTEX_COUNT, 0);
-            offsetX = dy;
-            offsetY = dx;
+            offsetX = deltaY;
+            offsetY = deltaX;
             gSPModifyVertex(
                 g_DisplayListHead++,
                 0,
