@@ -53,11 +53,12 @@
 enum ResultSound {
     RESULT_SOUND_NONE,
     RESULT_SOUND_GOOD_SHOT,
-    RESULT_SOUND_SUPERB_SHOT,
-    RESULT_SOUND_STAGE = 15
+    RESULT_SOUND_SUPERB_SHOT
 };
 
 typedef s8 ResultSound;
+
+#define RESULT_SOUND_WAIT_FRAME 15
 
 enum FlightPhase {
     FLIGHT_PHASE_NONE,
@@ -942,7 +943,7 @@ void PlayFlightSounds(s32 step) {
         }
     }
 
-    if (f_LandingWaitFrame == RESULT_SOUND_STAGE) {
+    if (f_LandingWaitFrame == RESULT_SOUND_WAIT_FRAME) {
         if (f_PendingResultSound == RESULT_SOUND_GOOD_SHOT) {
             PlaySound(SOUND_GOOD_SHOT, FLIGHT_SOUND_CHANNEL_RESULT, SOUND_FULL_SCALE);
         }
