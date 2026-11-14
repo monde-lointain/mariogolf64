@@ -1,5 +1,5 @@
-#ifndef COURSE_MENU_H
-#define COURSE_MENU_H
+#ifndef COURSE_STATS_SCREEN_H
+#define COURSE_STATS_SCREEN_H
 
 #include <ultra64.h>
 

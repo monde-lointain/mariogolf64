@@ -7,7 +7,7 @@
 #include "character.h"
 #include "compiler.h"
 #include "course.h"
-#include "course_menu.h"
+#include "course_stats_screen.h"
 #include "frame_time.h"
 #include "game.h"
 #include "gbi_helpers.h"

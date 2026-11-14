@@ -1,4 +1,4 @@
-#include "course_menu.h"
+#include "course_stats_screen.h"
 
 #include <ultra64.h>
 

@@ -639,7 +639,7 @@ segments:
       - [0xDE9B0, hasm, ovl_01/padding]
       - [0xDE9C0, c, ovl_01/main_menu]
       - [0xF3480, c, ovl_01/character_select]
-      - [0xF7F90, c, ovl_01/course_menu]
+      - [0xF7F90, c, ovl_01/course_stats_screen]
       - [0xFD310, c, ovl_01/best_times]
       - [0xFF940, c, ovl_01/character_table]
       - [0x101830, c, ovl_01/player_stats]
@@ -647,7 +647,7 @@ segments:
       - [0x110670, c, ovl_01/tournament_menu]
       - [0x115D80, .data, ovl_01/main_menu]
       - [0x119E80, .data, ovl_01/character_select]
-      - [0x11A020, .data, ovl_01/course_menu]
+      - [0x11A020, .data, ovl_01/course_stats_screen]
       - [0x11A0B0, .data, ovl_01/best_times]
       - [0x11A110, .data, ovl_01/character_table]
       - [0x11A320, .data, ovl_01/player_stats]
@@ -655,7 +655,7 @@ segments:
       - [0x11ADF0, .data, ovl_01/tournament_menu]
       - [0x11B110, .rodata, ovl_01/main_menu]
       - [0x11B730, .rodata, ovl_01/character_select]
-      - [0x11B790, .rodata, ovl_01/course_menu]
+      - [0x11B790, .rodata, ovl_01/course_stats_screen]
       - [0x11B870, .rodata, ovl_01/best_times]
       - [0x11B880, .rodata, ovl_01/character_table]
       - [0x11B920, .rodata, ovl_01/player_stats]
@@ -663,7 +663,7 @@ segments:
       - [0x11B9D0, .rodata, ovl_01/tournament_menu]
       - { start: 0x11BA50, type: .bss, vram: 0x80231AD0, name: ovl_01/main_menu }
       - { type: .bss, vram: 0x8023A3A0, name: ovl_01/character_select }
-      - { type: .bss, vram: 0x8023A790, name: ovl_01/course_menu }
+      - { type: .bss, vram: 0x8023A790, name: ovl_01/course_stats_screen }
       - { type: .bss, vram: 0x8023A9C0, name: ovl_01/best_times }
       - { type: .bss, vram: 0x8023AAE0, name: ovl_01/character_table }
       - { type: .bss, vram: 0x8023ACC0, name: ovl_01/player_stats }
