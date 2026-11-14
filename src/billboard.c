@@ -38,12 +38,6 @@ typedef struct BillboardTexture {
     u16 *pixels;
 } BillboardTexture;
 
-typedef struct BillboardColor {
-    s32 red;
-    s32 green;
-    s32 blue;
-} BillboardColor;
-
 #define BILLBOARD_TEXTURE_WIDTH 32
 #define BILLBOARD_TEXTURE_HEIGHT 64
 
@@ -175,8 +169,8 @@ void RevertBillboardManager(void) {
     f_IsHeapReady = TRUE;
 }
 
-const BillboardColor g_BillboardLightColor = {255, 220, 160};
-const BillboardColor g_BillboardEnvColor = {128, 64, 32};
+const RgbColor g_BillboardLightColor = {255, 220, 160};
+const RgbColor g_BillboardEnvColor = {128, 64, 32};
 
 #define IsNearCourseEdge(x, z) \
     (!g_GameState.isMiniGolf && \
@@ -333,8 +327,8 @@ void DrawBillboard(
 
 void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
     Gfx *gfx = g_DisplayListHead;
-    BillboardColor lightColor UNUSED = g_BillboardLightColor;
-    BillboardColor envColor = g_BillboardEnvColor;
+    RgbColor lightColor UNUSED = g_BillboardLightColor;
+    RgbColor envColor = g_BillboardEnvColor;
     Vec3 viewDirection;
     Vec3 lightDirection;
     Vec3 unusedVector UNUSED;
@@ -563,8 +557,8 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
 
 void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex) {
     Gfx *gfx = g_DisplayListHead;
-    BillboardColor lightColor UNUSED = g_BillboardLightColor;
-    BillboardColor envColor = g_BillboardEnvColor;
+    RgbColor lightColor UNUSED = g_BillboardLightColor;
+    RgbColor envColor = g_BillboardEnvColor;
     Boolean hasTranslucentMode;
     s32 ballDepth;
     s32 orderIndex;

@@ -145,7 +145,7 @@ typedef struct Prompt {
     s32 results[2];
 } Prompt;
 
-ScreenFadeColor g_ScreenFadeColor;
+RgbColor g_ScreenFadeColor;
 
 Gfx g_DecalTextureSetup[] = {
     gsDPPipeSync(),

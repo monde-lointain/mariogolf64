@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "controller.h"
+#include "gbi_helpers.h"
 #include "language.h"
 
 enum WipeState {
@@ -53,16 +54,10 @@ enum FadeDirection {
     FADE_IN
 };
 
-typedef struct ScreenFadeColor {
-    s32 red;
-    s32 green;
-    s32 blue;
-} ScreenFadeColor;
-
 extern s32 g_ScreenFadeDuration;
 extern s32 g_ScreenFadeFramesLeft;
 extern s32 g_ScreenFadeKind;
-extern ScreenFadeColor g_ScreenFadeColor;
+extern RgbColor g_ScreenFadeColor;
 extern Gfx g_DecalTextureSetup[];
 
 void DrawTextureRect(

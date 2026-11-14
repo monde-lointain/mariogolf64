@@ -3,6 +3,12 @@
 
 #include <ultra64.h>
 
+typedef struct RgbColor {
+    s32 red;
+    s32 green;
+    s32 blue;
+} RgbColor;
+
 #define TEXTURE_SCALE_HALF 0x8000
 #define TEXTURE_SCALE_FULL 0xFFFF
 #define HalfScaleTexelCoordinate(texel) ((texel) << 6)
