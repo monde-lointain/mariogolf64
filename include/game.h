@@ -50,7 +50,6 @@ extern u16 g_BlendedTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE];
 
 extern u8 *g_BlendedTextureScrollingLayer;
 extern u8 *g_BlendedTextureStillLayer;
-extern CameraMatrices f_CameraMatrices[2 * 2];
 
 void StartGame(void);
 void UpdateGame(void);

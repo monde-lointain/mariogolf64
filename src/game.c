@@ -274,7 +274,7 @@ static u8 f_UnusedBytesAfterSpinMatrices[16] UNUSED;
 
 #define VI_FEATURES (OS_VI_GAMMA_OFF | OS_VI_GAMMA_DITHER_ON | OS_VI_DITHER_FILTER_ON)
 
-CameraMatrices f_CameraMatrices[CAMERA_COUNT * DRAW_BUFFER_COUNT];
+FILE_STATIC CameraMatrices f_CameraMatrices[CAMERA_COUNT * DRAW_BUFFER_COUNT];
 Camera g_MapCamera;
 u16 g_BlendedTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE];
 u8 *g_BlendedTextureScrollingLayer;
