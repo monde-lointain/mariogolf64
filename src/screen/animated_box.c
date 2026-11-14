@@ -1,9 +1,9 @@
-#include "animated_box.h"
+#include "screen/animated_box.h"
 
 #include <ultra64.h>
 
 #include "game.h"
-#include "screen.h"
+#include "screen/screen.h"
 #include "system/compiler.h"
 
 #define BOX_ANIMATION_FRAME_COUNT 4

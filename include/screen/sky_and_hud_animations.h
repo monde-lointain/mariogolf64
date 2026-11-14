@@ -4,8 +4,8 @@
 #include <ultra64.h>
 
 #include "camera.h"
-#include "display_list.h"
 #include "math/math_util.h"
+#include "screen/display_list.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 

@@ -18,7 +18,7 @@
 #include "play.h"
 #include "save.h"
 #include "scene.h"
-#include "screen.h"
+#include "screen/screen.h"
 #include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"

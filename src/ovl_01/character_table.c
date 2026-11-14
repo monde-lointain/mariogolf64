@@ -5,7 +5,6 @@
 #define WIDENS_FACE_CHARACTER_INDEX
 
 #include "character.h"
-#include "display_list.h"
 #include "main_menu.h"
 #include "menu.h"
 #include "menu_arrows.h"
@@ -14,8 +13,9 @@
 #include "player_stats.h"
 #include "save.h"
 #include "save_screens.h"
-#include "screen.h"
-#include "sky_and_hud_animations.h"
+#include "screen/display_list.h"
+#include "screen/screen.h"
+#include "screen/sky_and_hud_animations.h"
 #include "sound.h"
 #include "system/asset.h"
 #include "system/compiler.h"

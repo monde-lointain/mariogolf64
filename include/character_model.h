@@ -7,9 +7,9 @@
 #include "character.h"
 #include "club.h"
 #include "course_space.h"
-#include "display_list.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
+#include "screen/display_list.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 

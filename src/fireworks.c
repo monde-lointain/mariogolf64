@@ -2,11 +2,11 @@
 
 #include <ultra64.h>
 
-#include "display_list.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "round_hud.h"
-#include "screen.h"
+#include "screen/display_list.h"
+#include "screen/screen.h"
 #include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"

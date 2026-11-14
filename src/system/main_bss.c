@@ -5,7 +5,6 @@
 #include <player_fx.h>
 #include <ultra64.h>
 
-#include "animated_box.h"
 #include "ball_simulation.h"
 #include "bets.h"
 #include "billboard.h"
@@ -37,11 +36,12 @@
 #include "round_stats.h"
 #include "save.h"
 #include "scorecard.h"
-#include "screen.h"
-#include "screen_layers.h"
+#include "screen/animated_box.h"
+#include "screen/screen.h"
+#include "screen/screen_layers.h"
+#include "screen/sky_and_hud_animations.h"
 #include "shot_camera.h"
 #include "shot_effects.h"
-#include "sky_and_hud_animations.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/crash_screen.h"

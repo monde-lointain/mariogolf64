@@ -5,7 +5,7 @@
 
 #include "controllers/controller.h"
 #include "course.h"
-#include "display_list.h"
+#include "screen/display_list.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 

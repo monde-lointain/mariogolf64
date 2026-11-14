@@ -3,12 +3,12 @@
 #define DEFINES_SET_TEXT_SLOT
 
 #include "current_shot.h"
-#include "display_list.h"
 #include "game_state.h"
 #include "round_hud.h"
 #include "scene.h"
-#include "screen.h"
-#include "screen_layers.h"
+#include "screen/display_list.h"
+#include "screen/screen.h"
+#include "screen/screen_layers.h"
 #include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"

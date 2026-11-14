@@ -4,7 +4,6 @@
 
 #include "camera.h"
 #include "course_space.h"
-#include "display_list.h"
 #include "game.h"
 #include "game_flags.h"
 #include "game_state.h"
@@ -13,7 +12,8 @@
 #include "particle_effects.h"
 #include "play.h"
 #include "player.h"
-#include "screen.h"
+#include "screen/display_list.h"
+#include "screen/screen.h"
 #include "shot_camera.h"
 #include "system/asset.h"
 #include "system/c_language.h"

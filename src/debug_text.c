@@ -2,9 +2,9 @@
 
 #include <ultra64.h>
 
-#include "display_list.h"
 #include "game_flags.h"
-#include "screen.h"
+#include "screen/display_list.h"
+#include "screen/screen.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/main.h"

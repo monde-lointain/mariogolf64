@@ -1,4 +1,4 @@
-#include "sky_and_hud_animations.h"
+#include "screen/sky_and_hud_animations.h"
 
 #include <framebuffer_count.h>
 #include <math.h>
@@ -10,7 +10,6 @@
 #include "controllers/controller.h"
 #include "course.h"
 #include "debug_text.h"
-#include "display_list.h"
 #include "fireworks.h"
 #include "game.h"
 #include "game_flags.h"
@@ -22,8 +21,9 @@
 #include "math/math_util.h"
 #include "round_hud.h"
 #include "scene.h"
-#include "scene_colors.h"
-#include "screen.h"
+#include "screen/display_list.h"
+#include "screen/scene_colors.h"
+#include "screen/screen.h"
 #include "shot_camera.h"
 #include "sound.h"
 #include "system/asset.h"

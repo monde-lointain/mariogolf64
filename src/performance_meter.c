@@ -3,9 +3,9 @@
 #include <nusys.h>
 #include <ultra64.h>
 
-#include "display_list.h"
 #include "math/geometry.h"
-#include "screen.h"
+#include "screen/display_list.h"
+#include "screen/screen.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/heap.h"

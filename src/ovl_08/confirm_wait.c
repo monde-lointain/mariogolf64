@@ -4,7 +4,7 @@
 
 #include "controllers/controller.h"
 #include "scene.h"
-#include "sky_and_hud_animations.h"
+#include "screen/sky_and_hud_animations.h"
 #include "sound.h"
 #include "system/compiler.h"
 #include "system/overlay_manager.h"

@@ -24,7 +24,7 @@
 #include "round_stats.h"
 #include "save.h"
 #include "scene.h"
-#include "screen.h"
+#include "screen/screen.h"
 #include "sound.h"
 #include "sram.h"
 #include "system/asset.h"

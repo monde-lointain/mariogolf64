@@ -1,11 +1,11 @@
-#include "rcp_init.h"
+#include "screen/rcp_init.h"
 
 #include <nusys.h>
 #include <ultra64.h>
 
-#include "display_list.h"
 #include "game.h"
-#include "screen.h"
+#include "screen/display_list.h"
+#include "screen/screen.h"
 #include "system/memory_address.h"
 #include "view_projection.h"
 

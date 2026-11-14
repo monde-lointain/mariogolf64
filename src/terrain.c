@@ -3,7 +3,6 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "animated_box.h"
 #include "billboard.h"
 #include "camera.h"
 #include "character_model.h"
@@ -13,7 +12,6 @@
 #include "course_space.h"
 #include "current_shot.h"
 #include "debug_text.h"
-#include "display_list.h"
 #include "game_flags.h"
 #include "game_state.h"
 #include "hole_builder.h"
@@ -27,7 +25,9 @@
 #include "play.h"
 #include "round_hud.h"
 #include "scene.h"
-#include "screen.h"
+#include "screen/animated_box.h"
+#include "screen/display_list.h"
+#include "screen/screen.h"
 #include "sound.h"
 #include "surface.h"
 #include "system/c_language.h"

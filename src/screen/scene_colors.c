@@ -1,12 +1,12 @@
-#include "scene_colors.h"
+#include "screen/scene_colors.h"
 
 #include <ultra64.h>
 
-#include "display_list.h"
 #include "game.h"
 #include "hole_setup.h"
 #include "play.h"
-#include "sky_and_hud_animations.h"
+#include "screen/display_list.h"
+#include "screen/sky_and_hud_animations.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
