@@ -83,9 +83,9 @@
 #define SLOPE_FAR_DROP 60.0f
 #define SLOPE_EXTRA_DROP 15.0f
 
-#define EDITOR_PAD 0
-#define OPTION_PAD 1
-#define SECOND_EDITOR_PAD 2
+#define EDITOR_CONTROLLER 0
+#define OPTION_CONTROLLER 1
+#define SECOND_EDITOR_CONTROLLER 2
 #define EDITED_POINT_SHADE 0xFF
 #define HEIGHT_STEP 4
 #define COARSE_NOISE_MASK 0x3F
@@ -735,19 +735,19 @@ void UpdateGroundPointEditor(void) {
     s32 madeDeadTriangle;
 
     madeDeadTriangle = FALSE;
-    if (g_MenuControllerData[EDITOR_PAD].button & R_JPAD) {
+    if (g_MenuControllerData[EDITOR_CONTROLLER].button & R_JPAD) {
         f_PointCursorColumn++;
     }
 
-    if (g_MenuControllerData[EDITOR_PAD].button & L_JPAD) {
+    if (g_MenuControllerData[EDITOR_CONTROLLER].button & L_JPAD) {
         f_PointCursorColumn--;
     }
 
-    if (g_MenuControllerData[EDITOR_PAD].button & D_JPAD) {
+    if (g_MenuControllerData[EDITOR_CONTROLLER].button & D_JPAD) {
         f_PointCursorRow--;
     }
 
-    if (g_MenuControllerData[EDITOR_PAD].button & U_JPAD) {
+    if (g_MenuControllerData[EDITOR_CONTROLLER].button & U_JPAD) {
         f_PointCursorRow++;
     }
 
@@ -767,8 +767,8 @@ void UpdateGroundPointEditor(void) {
         f_PointCursorRow = CELL_ROW_COUNT - 1;
     }
 
-    if (!(g_MenuControllerData[EDITOR_PAD].button & B_BUTTON)) {
-        if ((g_MenuControllerData[EDITOR_PAD].button & D_CBUTTONS) &&
+    if (!(g_MenuControllerData[EDITOR_CONTROLLER].button & B_BUTTON)) {
+        if ((g_MenuControllerData[EDITOR_CONTROLLER].button & D_CBUTTONS) &&
             (f_PointCursorRow & TILE_POINT_MASK)) {
             points[0] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
             points[1] = points[0];
@@ -781,7 +781,7 @@ void UpdateGroundPointEditor(void) {
             }
         }
 
-        if ((g_MenuControllerData[EDITOR_PAD].button & U_CBUTTONS) &&
+        if ((g_MenuControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) &&
             (f_PointCursorRow & TILE_POINT_MASK)) {
             points[1] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
             points[2] = points[1];
@@ -794,7 +794,7 @@ void UpdateGroundPointEditor(void) {
             }
         }
 
-        if ((g_MenuControllerData[EDITOR_PAD].button & L_CBUTTONS) &&
+        if ((g_MenuControllerData[EDITOR_CONTROLLER].button & L_CBUTTONS) &&
             (f_PointCursorColumn & TILE_POINT_MASK)) {
             points[2] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
             points[3] = points[2];
@@ -807,7 +807,7 @@ void UpdateGroundPointEditor(void) {
             }
         }
 
-        if ((g_MenuControllerData[EDITOR_PAD].button & R_CBUTTONS) &&
+        if ((g_MenuControllerData[EDITOR_CONTROLLER].button & R_CBUTTONS) &&
             (f_PointCursorColumn & TILE_POINT_MASK)) {
             points[3] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
             points[4] = points[3];
@@ -821,7 +821,7 @@ void UpdateGroundPointEditor(void) {
         }
     }
     else {
-        if ((g_MenuControllerData[EDITOR_PAD].button & D_CBUTTONS) &&
+        if ((g_MenuControllerData[EDITOR_CONTROLLER].button & D_CBUTTONS) &&
             (f_PointCursorRow & TILE_POINT_MASK)) {
             points[0] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
             points[1] = points[0];
@@ -833,7 +833,7 @@ void UpdateGroundPointEditor(void) {
             }
         }
 
-        if ((g_MenuControllerData[EDITOR_PAD].button & U_CBUTTONS) &&
+        if ((g_MenuControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) &&
             (f_PointCursorRow & TILE_POINT_MASK)) {
             points[1] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
             points[2] = points[1];
@@ -845,7 +845,7 @@ void UpdateGroundPointEditor(void) {
             }
         }
 
-        if ((g_MenuControllerData[EDITOR_PAD].button & L_CBUTTONS) &&
+        if ((g_MenuControllerData[EDITOR_CONTROLLER].button & L_CBUTTONS) &&
             (f_PointCursorColumn & TILE_POINT_MASK)) {
             points[2] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
             points[3] = points[2];
@@ -857,7 +857,7 @@ void UpdateGroundPointEditor(void) {
             }
         }
 
-        if ((g_MenuControllerData[EDITOR_PAD].button & R_CBUTTONS) &&
+        if ((g_MenuControllerData[EDITOR_CONTROLLER].button & R_CBUTTONS) &&
             (f_PointCursorColumn & TILE_POINT_MASK)) {
             points[3] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
             points[4] = points[3];
@@ -870,21 +870,21 @@ void UpdateGroundPointEditor(void) {
         }
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & R_TRIG) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & R_TRIG) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
         if (g_MapCamera.view.zoom >= CURSOR_ZOOM_MAX) {
             g_MapCamera.view.zoom = CURSOR_ZOOM_MAX;
         }
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & L_TRIG) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & L_TRIG) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
         if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
             g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
         }
     }
 
-    if (g_MenuControllerData[EDITOR_PAD].trigger & Z_TRIG) {
+    if (g_MenuControllerData[EDITOR_CONTROLLER].trigger & Z_TRIG) {
         f_CellCursorColumn = f_PointCursorColumn;
         f_CellCursorRow = f_PointCursorRow;
         ClearDebugText();
@@ -981,7 +981,7 @@ void UpdateHolePointEditor(void) {
             g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
     }
 
-    if (g_MenuControllerData[EDITOR_PAD].button & R_CBUTTONS) {
+    if (g_MenuControllerData[EDITOR_CONTROLLER].button & R_CBUTTONS) {
         ClearDebugText();
         f_HolePointEditMode++;
         if (f_HolePointEditMode == HOLE_POINT_MODE_COUNT) {
@@ -1012,7 +1012,7 @@ void UpdateHolePointEditor(void) {
         }
     }
 
-    if (g_MenuControllerData[EDITOR_PAD].button & L_CBUTTONS) {
+    if (g_MenuControllerData[EDITOR_CONTROLLER].button & L_CBUTTONS) {
         ClearDebugText();
         f_HolePointEditMode--;
         if (f_HolePointEditMode < 0) {
@@ -1044,7 +1044,7 @@ void UpdateHolePointEditor(void) {
     }
 
     if (f_HolePointEditMode == HOLE_POINT_MODE_PIN_TEE) {
-        if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
+        if (g_MenuControllerData[EDITOR_CONTROLLER].button & A_BUTTON) {
             g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] = f_HolePointCursor[0]
                 << WORLD_TO_COURSE_SHIFT;
             g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] = f_HolePointCursor[1]
@@ -1070,7 +1070,7 @@ void UpdateHolePointEditor(void) {
             }
         }
 
-        if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
+        if (g_MenuControllerData[EDITOR_CONTROLLER].button & B_BUTTON) {
             g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X] = f_HolePointCursor[0]
                 << WORLD_TO_COURSE_SHIFT;
             g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z] = f_HolePointCursor[1]
@@ -1096,7 +1096,7 @@ void UpdateHolePointEditor(void) {
             }
         }
 
-        if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
+        if (g_MenuControllerData[OPTION_CONTROLLER].button & B_BUTTON) {
             g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] = 0;
             g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Y] = 0;
             g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] = 0;
@@ -1107,7 +1107,7 @@ void UpdateHolePointEditor(void) {
             f_HolePointCursor[1] = 0;
         }
 
-        if (g_MenuControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+        if (g_MenuControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) {
             f_PinTeeIndex++;
             if (f_PinTeeIndex == CUP_POSITION_COUNT) {
                 f_PinTeeIndex = 0;
@@ -1119,7 +1119,7 @@ void UpdateHolePointEditor(void) {
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
-        if (g_MenuControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+        if (g_MenuControllerData[EDITOR_CONTROLLER].button & D_CBUTTONS) {
             f_PinTeeIndex--;
             if (f_PinTeeIndex < 0) {
                 f_PinTeeIndex = CUP_POSITION_COUNT - 1;
@@ -1131,7 +1131,7 @@ void UpdateHolePointEditor(void) {
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
-        if (g_MenuControllerData[EDITOR_PAD].button & START_BUTTON) {
+        if (g_MenuControllerData[EDITOR_CONTROLLER].button & START_BUTTON) {
             f_HolePointCursor[0] =
                 g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
             f_HolePointCursor[1] =
@@ -1143,7 +1143,7 @@ void UpdateHolePointEditor(void) {
     }
 
     if (f_HolePointEditMode == HOLE_POINT_MODE_AIM) {
-        if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
+        if (g_MenuControllerData[EDITOR_CONTROLLER].button & A_BUTTON) {
             g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X] = f_HolePointCursor[0]
                 << WORLD_TO_COURSE_SHIFT;
             g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z] = f_HolePointCursor[1]
@@ -1164,7 +1164,7 @@ void UpdateHolePointEditor(void) {
             );
         }
 
-        if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
+        if (g_MenuControllerData[OPTION_CONTROLLER].button & B_BUTTON) {
             g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X] = 0;
             g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Y] = 0;
             g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z] = 0;
@@ -1172,7 +1172,7 @@ void UpdateHolePointEditor(void) {
             f_HolePointCursor[1] = 0;
         }
 
-        if (g_MenuControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+        if (g_MenuControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) {
             f_AimPointIndex++;
             if (f_AimPointIndex == ARRAY_COUNT(g_HolePoints.aimPoints)) {
                 f_AimPointIndex = 0;
@@ -1184,7 +1184,7 @@ void UpdateHolePointEditor(void) {
                 g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
-        if (g_MenuControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+        if (g_MenuControllerData[EDITOR_CONTROLLER].button & D_CBUTTONS) {
             f_AimPointIndex--;
             if (f_AimPointIndex < 0) {
                 f_AimPointIndex = ARRAY_COUNT(g_HolePoints.aimPoints) - 1;
@@ -1201,7 +1201,7 @@ void UpdateHolePointEditor(void) {
     }
 
     if (f_HolePointEditMode == HOLE_POINT_MODE_ROUTE) {
-        if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
+        if (g_MenuControllerData[EDITOR_CONTROLLER].button & A_BUTTON) {
             g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] = f_HolePointCursor[0]
                 << WORLD_TO_COURSE_SHIFT;
             g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] = f_HolePointCursor[1]
@@ -1222,7 +1222,7 @@ void UpdateHolePointEditor(void) {
             );
         }
 
-        if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
+        if (g_MenuControllerData[OPTION_CONTROLLER].button & B_BUTTON) {
             g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] = 0;
             g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Y] = 0;
             g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] = 0;
@@ -1230,7 +1230,7 @@ void UpdateHolePointEditor(void) {
             f_HolePointCursor[1] = 0;
         }
 
-        if (g_MenuControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+        if (g_MenuControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) {
             f_RoutePointIndex++;
             if (f_RoutePointIndex == ROUTE_POINT_COUNT) {
                 f_RoutePointIndex = 0;
@@ -1242,7 +1242,7 @@ void UpdateHolePointEditor(void) {
                 g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
-        if (g_MenuControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+        if (g_MenuControllerData[EDITOR_CONTROLLER].button & D_CBUTTONS) {
             f_RoutePointIndex--;
             if (f_RoutePointIndex < 0) {
                 f_RoutePointIndex = ROUTE_POINT_COUNT - 1;
@@ -1258,35 +1258,35 @@ void UpdateHolePointEditor(void) {
         PrintDebugHex(f_RoutePointIndex, HOLE_POINT_TEXT_COLUMN, HOLE_POINT_INDEX_TEXT_ROW);
     }
 
-    if (!(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
-        if (*(u16 *)&g_MenuControllerData[EDITOR_PAD].stick_x != 0) {
-            stepX = (-cos(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_y) -
-                (sin(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_x);
-            stepZ = (-sin(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_y) +
-                (cos(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_x);
+    if (!(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG)) {
+        if (*(u16 *)&g_MenuControllerData[EDITOR_CONTROLLER].stick_x != 0) {
+            stepX = (-cos(HEADING_RADIANS) * g_MenuControllerData[EDITOR_CONTROLLER].stick_y) -
+                (sin(HEADING_RADIANS) * g_MenuControllerData[EDITOR_CONTROLLER].stick_x);
+            stepZ = (-sin(HEADING_RADIANS) * g_MenuControllerData[EDITOR_CONTROLLER].stick_y) +
+                (cos(HEADING_RADIANS) * g_MenuControllerData[EDITOR_CONTROLLER].stick_x);
             f_HolePointCursor[0] += stepX;
             f_HolePointCursor[1] += stepZ;
         }
         else {
-            if (g_MenuControllerData[EDITOR_PAD].button & U_JPAD) {
+            if (g_MenuControllerData[EDITOR_CONTROLLER].button & U_JPAD) {
                 stepX = -cos(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
                 isStepping = TRUE;
                 stepZ = -sin(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
             }
 
-            if (g_MenuControllerData[EDITOR_PAD].button & D_JPAD) {
+            if (g_MenuControllerData[EDITOR_CONTROLLER].button & D_JPAD) {
                 stepX = cos(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
                 isStepping = TRUE;
                 stepZ = sin(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
             }
 
-            if (g_MenuControllerData[EDITOR_PAD].button & R_JPAD) {
+            if (g_MenuControllerData[EDITOR_CONTROLLER].button & R_JPAD) {
                 stepX = -sin(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
                 isStepping = TRUE;
                 stepZ = cos(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
             }
 
-            if (g_MenuControllerData[EDITOR_PAD].button & L_JPAD) {
+            if (g_MenuControllerData[EDITOR_CONTROLLER].button & L_JPAD) {
                 stepX = sin(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
                 isStepping = TRUE;
                 stepZ = -cos(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
@@ -1299,26 +1299,26 @@ void UpdateHolePointEditor(void) {
         }
     }
 
-    if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+    if ((g_ControllerData[EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
         if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
             g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
         }
     }
 
-    if ((g_ControllerData[EDITOR_PAD].button & L_TRIG) ||
-        (g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+    if ((g_ControllerData[EDITOR_CONTROLLER].button & L_TRIG) ||
+        (g_ControllerData[EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
         if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
             g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
         }
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
         f_HolePointCameraHeadingAngle -=
-            g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
+            g_MenuControllerData[EDITOR_CONTROLLER].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
         f_HolePointCameraPitch -=
-            g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+            g_MenuControllerData[EDITOR_CONTROLLER].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
     }
 
     if (f_HolePointCameraPitch > 0.0f) {
@@ -1369,37 +1369,37 @@ void UpdateTriangleEditor(void) {
     stepY = 0.0f;
     stepRight = stepY;
     stepUp = stepRight;
-    if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepUp = 1.0f;
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & D_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepUp = -1.0f;
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & R_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & R_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepRight = 1.0f;
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & L_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & L_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepRight = -1.0f;
     }
 
-    if (g_ControllerData[OPTION_PAD].button & D_CBUTTONS) {
+    if (g_ControllerData[OPTION_CONTROLLER].button & D_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepY = 1.0f;
     }
 
-    if (g_ControllerData[OPTION_PAD].button & U_CBUTTONS) {
+    if (g_ControllerData[OPTION_CONTROLLER].button & U_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepY = -1.0f;
     }
 
-    if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
+    if (g_MenuControllerData[EDITOR_CONTROLLER].button & B_BUTTON) {
         f_EditedCornerIndex = (f_EditedCornerIndex + 1) % HOLE_TRIANGLE_VERTEX_COUNT;
     }
 
@@ -1420,7 +1420,8 @@ void UpdateTriangleEditor(void) {
         }
 
         for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
-            if (!(g_ControllerData[EDITOR_PAD].button & Z_TRIG) || f_EditedCornerIndex == corner) {
+            if (!(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) ||
+                f_EditedCornerIndex == corner) {
                 Vtx_t *vertex;
 
                 vertex = &g_WorkArea.hole.triangles[f_EditedTriangleIndex].vertices[corner].v;
@@ -1434,7 +1435,7 @@ void UpdateTriangleEditor(void) {
         PrepareHoleTriangles();
     }
 
-    if (g_MenuControllerData[OPTION_PAD].button & A_BUTTON) {
+    if (g_MenuControllerData[OPTION_CONTROLLER].button & A_BUTTON) {
         Vtx_t *vertex;
 
         vertex = &g_WorkArea.hole.triangles[f_EditedTriangleIndex].vertices[f_EditedCornerIndex].v;
@@ -1445,7 +1446,7 @@ void UpdateTriangleEditor(void) {
         PrepareHoleTriangles();
     }
 
-    if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
+    if (g_MenuControllerData[OPTION_CONTROLLER].button & B_BUTTON) {
         Vtx_t *vertex;
 
         vertex = &g_WorkArea.hole.triangles[f_EditedTriangleIndex].vertices[f_EditedCornerIndex].v;
@@ -1456,16 +1457,16 @@ void UpdateTriangleEditor(void) {
         PrepareHoleTriangles();
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & R_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         editKind = TRIANGLE_EDIT_SELECT;
         f_EditedTriangleIndex++;
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & L_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         editKind = TRIANGLE_EDIT_SELECT;
         f_EditedTriangleIndex--;
     }
@@ -1478,9 +1479,9 @@ void UpdateTriangleEditor(void) {
         f_EditedTriangleIndex = 0;
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & U_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & U_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         g_WorkArea.hole.triangles[f_EditedTriangleIndex].kind++;
         editKind = TRIANGLE_EDIT_KIND;
         if (g_WorkArea.hole.triangles[f_EditedTriangleIndex].kind >= HOLE_TRIANGLE_KIND_COUNT) {
@@ -1490,34 +1491,34 @@ void UpdateTriangleEditor(void) {
         PrepareHoleTriangles();
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & D_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & D_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         g_WorkArea.hole.triangles[f_EditedTriangleIndex].kind--;
         editKind = TRIANGLE_EDIT_KIND;
         PrepareHoleTriangles();
     }
 
-    if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+    if ((g_ControllerData[EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
         if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
             g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
         }
     }
 
-    if ((g_ControllerData[EDITOR_PAD].button & L_TRIG) ||
-        (g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+    if ((g_ControllerData[EDITOR_CONTROLLER].button & L_TRIG) ||
+        (g_ControllerData[EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
         if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
             g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
         }
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
         f_TriangleCameraHeadingAngle -=
-            g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
+            g_MenuControllerData[EDITOR_CONTROLLER].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
         f_TriangleCameraPitch -=
-            g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+            g_MenuControllerData[EDITOR_CONTROLLER].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
     }
 
     if (f_TriangleCameraPitch > 0.0f) {
@@ -1571,23 +1572,23 @@ void UpdateRingEditor(void) {
     PrintDebugText(g_PrintBuffer, RING_TEXT_COLUMN, RING_TEXT_ROW);
     stepRight = 0.0f;
     stepUp = stepRight;
-    if (!(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
-        if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+    if (!(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG)) {
+        if (g_ControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) {
             editKind = TRIANGLE_EDIT_MOVE;
             stepUp = 1.0f;
         }
 
-        if (g_ControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+        if (g_ControllerData[EDITOR_CONTROLLER].button & D_CBUTTONS) {
             editKind = TRIANGLE_EDIT_MOVE;
             stepUp = -1.0f;
         }
 
-        if (g_ControllerData[EDITOR_PAD].button & R_CBUTTONS) {
+        if (g_ControllerData[EDITOR_CONTROLLER].button & R_CBUTTONS) {
             editKind = TRIANGLE_EDIT_MOVE;
             stepRight = 1.0f;
         }
 
-        if (g_ControllerData[EDITOR_PAD].button & L_CBUTTONS) {
+        if (g_ControllerData[EDITOR_CONTROLLER].button & L_CBUTTONS) {
             editKind = TRIANGLE_EDIT_MOVE;
             stepRight = -1.0f;
         }
@@ -1596,7 +1597,7 @@ void UpdateRingEditor(void) {
         Vtx_t *scaleVertex =
             &g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[RING_SCALE_CORNER].v;
 
-        if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+        if (g_ControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) {
             scaleVertex->ob[AXIS_X] += RING_SCALE_STEP;
             if (scaleVertex->ob[AXIS_X] >= RING_SCALE_MAX) {
                 scaleVertex->ob[AXIS_X] = RING_SCALE_MAX;
@@ -1605,7 +1606,7 @@ void UpdateRingEditor(void) {
             PrepareHoleTriangles();
         }
 
-        if (g_ControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+        if (g_ControllerData[EDITOR_CONTROLLER].button & D_CBUTTONS) {
             scaleVertex->ob[AXIS_X] -= RING_SCALE_STEP;
             if (scaleVertex->ob[AXIS_X] < RING_SCALE_MIN) {
                 scaleVertex->ob[AXIS_X] = RING_SCALE_MIN;
@@ -1615,12 +1616,12 @@ void UpdateRingEditor(void) {
         }
     }
 
-    if (g_ControllerData[OPTION_PAD].button & D_CBUTTONS) {
+    if (g_ControllerData[OPTION_CONTROLLER].button & D_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepY = 1.0f;
     }
 
-    if (g_ControllerData[OPTION_PAD].button & U_CBUTTONS) {
+    if (g_ControllerData[OPTION_CONTROLLER].button & U_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepY = -1.0f;
     }
@@ -1655,7 +1656,7 @@ void UpdateRingEditor(void) {
         PrepareHoleTriangles();
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & A_BUTTON) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & A_BUTTON) {
         Vtx_t *directionVertex;
 
         g_WorkArea.hole.triangles[f_RingTriangleIndex].kind = HOLE_TRIANGLE_KIND_RING;
@@ -1671,16 +1672,16 @@ void UpdateRingEditor(void) {
         PrepareHoleTriangles();
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & R_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         editKind = TRIANGLE_EDIT_SELECT;
         f_RingTriangleIndex++;
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & L_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         editKind = TRIANGLE_EDIT_SELECT;
         f_RingTriangleIndex--;
     }
@@ -1693,7 +1694,7 @@ void UpdateRingEditor(void) {
         f_RingTriangleIndex = FIRST_RING_TRIANGLE;
     }
 
-    if (g_ControllerData[SECOND_EDITOR_PAD].button & B_BUTTON) {
+    if (g_ControllerData[SECOND_EDITOR_CONTROLLER].button & B_BUTTON) {
         g_WorkArea.hole.triangles[f_RingTriangleIndex].kind = HOLE_TRIANGLE_KIND_FLAT;
         g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[0].v.ob[AXIS_X] = 0;
         g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[0].v.ob[AXIS_Y] = 0;
@@ -1739,26 +1740,26 @@ void UpdateRingEditor(void) {
         g_WorkArea.hole.triangles[f_RingTriangleIndex].unusedEditorValues[2] = 0;
     }
 
-    if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+    if ((g_ControllerData[EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
         if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
             g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
         }
     }
 
-    if ((g_ControllerData[EDITOR_PAD].button & L_TRIG) ||
-        (g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+    if ((g_ControllerData[EDITOR_CONTROLLER].button & L_TRIG) ||
+        (g_ControllerData[EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
         if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
             g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
         }
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
         f_RingCameraHeadingAngle -=
-            g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
+            g_MenuControllerData[EDITOR_CONTROLLER].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
         f_RingCameraPitch -=
-            g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+            g_MenuControllerData[EDITOR_CONTROLLER].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
     }
 
     if (f_RingCameraPitch > 0.0f) {
@@ -1815,41 +1816,41 @@ void UpdateWallEditor(void) {
     stepY = 0.0f;
     stepRight = stepY;
     stepUp = stepRight;
-    if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepUp = 1.0f;
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & D_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepUp = -1.0f;
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & R_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & R_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepRight = 1.0f;
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & L_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & L_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepRight = -1.0f;
     }
 
-    if (g_ControllerData[OPTION_PAD].button & D_CBUTTONS) {
+    if (g_ControllerData[OPTION_CONTROLLER].button & D_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepY = 1.0f;
     }
 
-    if (g_ControllerData[OPTION_PAD].button & U_CBUTTONS) {
+    if (g_ControllerData[OPTION_CONTROLLER].button & U_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         stepY = -1.0f;
     }
 
-    if (g_ControllerData[OPTION_PAD].button & L_CBUTTONS) {
+    if (g_ControllerData[OPTION_CONTROLLER].button & L_CBUTTONS) {
         isDropping = TRUE;
     }
 
-    if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
+    if (g_MenuControllerData[EDITOR_CONTROLLER].button & B_BUTTON) {
         f_WallCornerIndex = (f_WallCornerIndex + 1) % WALL_BOTTOM_CORNER_COUNT;
     }
 
@@ -1874,7 +1875,8 @@ void UpdateWallEditor(void) {
         }
 
         for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
-            if (!(g_ControllerData[EDITOR_PAD].button & Z_TRIG) || f_WallCornerIndex == corner) {
+            if (!(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) ||
+                f_WallCornerIndex == corner) {
                 Vtx_t *vertex;
 
                 vertex = &g_WorkArea.hole.triangles[f_WallTriangleIndex].vertices[corner].v;
@@ -1924,7 +1926,7 @@ void UpdateWallEditor(void) {
         PrepareHoleTriangles();
     }
 
-    if (g_MenuControllerData[OPTION_PAD].button & A_BUTTON) {
+    if (g_MenuControllerData[OPTION_CONTROLLER].button & A_BUTTON) {
         Vtx_t *vertex;
 
         vertex = &g_WorkArea.hole.triangles[f_WallTriangleIndex].vertices[f_WallCornerIndex].v;
@@ -1935,7 +1937,7 @@ void UpdateWallEditor(void) {
         PrepareHoleTriangles();
     }
 
-    if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
+    if (g_MenuControllerData[OPTION_CONTROLLER].button & B_BUTTON) {
         Vtx_t *vertex;
 
         vertex = &g_WorkArea.hole.triangles[f_WallTriangleIndex].vertices[f_WallCornerIndex].v;
@@ -1947,16 +1949,16 @@ void UpdateWallEditor(void) {
         PrepareHoleTriangles();
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & R_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         editKind = TRIANGLE_EDIT_SELECT;
         f_WallTriangleIndex += WALL_TRIANGLE_COUNT;
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & L_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         editKind = TRIANGLE_EDIT_SELECT;
         f_WallTriangleIndex -= WALL_TRIANGLE_COUNT;
     }
@@ -1973,9 +1975,9 @@ void UpdateWallEditor(void) {
 
     g_WorkArea.hole.triangles[f_WallTriangleIndex].kind = HOLE_TRIANGLE_KIND_SHADED;
     g_WorkArea.hole.triangles[f_WallTriangleIndex + 1].kind = HOLE_TRIANGLE_KIND_SHADED;
-    if ((g_MenuControllerData[EDITOR_PAD].button & U_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & U_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         editKind = TRIANGLE_EDIT_KIND;
 
         if (g_WorkArea.hole.triangles[f_WallTriangleIndex].kind >= HOLE_TRIANGLE_KIND_COUNT) {
@@ -1985,33 +1987,33 @@ void UpdateWallEditor(void) {
         PrepareHoleTriangles();
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & D_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & D_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         editKind = TRIANGLE_EDIT_KIND;
         PrepareHoleTriangles();
     }
 
-    if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+    if ((g_ControllerData[EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
         if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
             g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
         }
     }
 
-    if ((g_ControllerData[EDITOR_PAD].button & L_TRIG) ||
-        (g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+    if ((g_ControllerData[EDITOR_CONTROLLER].button & L_TRIG) ||
+        (g_ControllerData[EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
         if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
             g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
         }
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
         f_WallCameraHeadingAngle -=
-            g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
+            g_MenuControllerData[EDITOR_CONTROLLER].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
         f_WallCameraPitch -=
-            g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+            g_MenuControllerData[EDITOR_CONTROLLER].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
     }
 
     if (f_WallCameraPitch > 0.0f) {
@@ -2200,19 +2202,19 @@ void UpdateHeightEditor(void) {
         g_ShowsGroundWaves = FALSE;
     }
 
-    if (g_MenuControllerData[OPTION_PAD].button & D_CBUTTONS) {
+    if (g_MenuControllerData[OPTION_CONTROLLER].button & D_CBUTTONS) {
         SlopeOutOfBoundsGround();
     }
 
-    if (g_MenuControllerData[SECOND_EDITOR_PAD].button & L_CBUTTONS) {
+    if (g_MenuControllerData[SECOND_EDITOR_CONTROLLER].button & L_CBUTTONS) {
         f_CLeftPickedHeight = GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)->v.ob[AXIS_Y];
     }
 
-    if (g_MenuControllerData[SECOND_EDITOR_PAD].button & U_CBUTTONS) {
+    if (g_MenuControllerData[SECOND_EDITOR_CONTROLLER].button & U_CBUTTONS) {
         f_CUpPickedHeight = GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)->v.ob[AXIS_Y];
     }
 
-    if (g_MenuControllerData[SECOND_EDITOR_PAD].button & R_CBUTTONS) {
+    if (g_MenuControllerData[SECOND_EDITOR_CONTROLLER].button & R_CBUTTONS) {
         s32 change = f_CUpPickedHeight - f_CLeftPickedHeight;
 
         editKind = HEIGHT_EDIT_POINT;
@@ -2225,7 +2227,7 @@ void UpdateHeightEditor(void) {
         MeasureGroundTiles();
     }
 
-    if (g_MenuControllerData[SECOND_EDITOR_PAD].button & D_CBUTTONS) {
+    if (g_MenuControllerData[SECOND_EDITOR_CONTROLLER].button & D_CBUTTONS) {
         s32 change = f_CLeftPickedHeight - f_CUpPickedHeight;
 
         editKind = HEIGHT_EDIT_POINT;
@@ -2238,7 +2240,7 @@ void UpdateHeightEditor(void) {
         MeasureGroundTiles();
     }
 
-    if (g_MenuControllerData[OPTION_PAD].button & A_BUTTON) {
+    if (g_MenuControllerData[OPTION_CONTROLLER].button & A_BUTTON) {
         if (f_ShowsGroundWaves) {
             f_ShowsGroundWaves = FALSE;
         }
@@ -2247,12 +2249,12 @@ void UpdateHeightEditor(void) {
         }
     }
 
-    if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
+    if (g_MenuControllerData[OPTION_CONTROLLER].button & B_BUTTON) {
         PutObjectsOnGround();
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
-        if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) {
+        if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
             ChangeGroundHeight(-HEIGHT_STEP);
         }
         else {
@@ -2272,8 +2274,8 @@ void UpdateHeightEditor(void) {
         MeasureGroundTiles();
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & D_CBUTTONS) {
-        if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & D_CBUTTONS) {
+        if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
             ChangeGroundHeight(HEIGHT_STEP);
         }
         else {
@@ -2293,7 +2295,7 @@ void UpdateHeightEditor(void) {
         MeasureGroundTiles();
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & R_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & R_CBUTTONS) {
         SetGroundPointHeightAndShade(
             f_HeightCursorColumn,
             f_HeightCursorRow,
@@ -2304,7 +2306,7 @@ void UpdateHeightEditor(void) {
         MeasureGroundTiles();
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & L_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & L_CBUTTONS) {
         SetGroundPointHeightAndShade(
             f_HeightCursorColumn,
             f_HeightCursorRow,
@@ -2315,7 +2317,7 @@ void UpdateHeightEditor(void) {
         MeasureGroundTiles();
     }
 
-    if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
+    if (g_MenuControllerData[EDITOR_CONTROLLER].button & A_BUTTON) {
         editKind = HEIGHT_EDIT_POINT;
         baseHeight = GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)->v.ob[AXIS_Y];
         baseHeight -= ROUGH_NOISE_OFFSET;
@@ -2328,7 +2330,7 @@ void UpdateHeightEditor(void) {
         MeasureGroundTiles();
     }
 
-    if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
+    if (g_MenuControllerData[EDITOR_CONTROLLER].button & B_BUTTON) {
         editKind = HEIGHT_EDIT_POINT;
         baseHeight = GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)->v.ob[AXIS_Y];
         baseHeight -= HEIGHT_STEP;
@@ -2341,7 +2343,7 @@ void UpdateHeightEditor(void) {
         MeasureGroundTiles();
     }
 
-    if (g_MenuControllerData[SECOND_EDITOR_PAD].button & B_BUTTON) {
+    if (g_MenuControllerData[SECOND_EDITOR_CONTROLLER].button & B_BUTTON) {
         editKind = HEIGHT_EDIT_POINT;
         baseHeight = GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)->v.ob[AXIS_Y];
         SetGroundPointHeightAndShade(
@@ -2353,20 +2355,20 @@ void UpdateHeightEditor(void) {
         MeasureGroundTiles();
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
-        !(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & R_JPAD) &&
+        !(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG)) {
         editKind = HEIGHT_EDIT_MOVE;
         direction = CURSOR_DIRECTION_RIGHT;
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) &&
-        !(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & L_JPAD) &&
+        !(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG)) {
         editKind = HEIGHT_EDIT_MOVE;
         direction = CURSOR_DIRECTION_LEFT;
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & D_JPAD) &&
-        !(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & D_JPAD) &&
+        !(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG)) {
         editKind = HEIGHT_EDIT_MOVE;
         if (direction == CURSOR_DIRECTION_RIGHT) {
             direction = CURSOR_DIRECTION_DOWN_RIGHT;
@@ -2379,8 +2381,8 @@ void UpdateHeightEditor(void) {
         }
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & U_JPAD) &&
-        !(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & U_JPAD) &&
+        !(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG)) {
         editKind = HEIGHT_EDIT_MOVE;
         if (direction == CURSOR_DIRECTION_RIGHT) {
             direction = CURSOR_DIRECTION_UP_RIGHT;
@@ -2393,20 +2395,20 @@ void UpdateHeightEditor(void) {
         }
     }
 
-    if ((g_MenuControllerData[SECOND_EDITOR_PAD].button & R_JPAD) &&
-        !(g_ControllerData[SECOND_EDITOR_PAD].button & Z_TRIG)) {
+    if ((g_MenuControllerData[SECOND_EDITOR_CONTROLLER].button & R_JPAD) &&
+        !(g_ControllerData[SECOND_EDITOR_CONTROLLER].button & Z_TRIG)) {
         editKind = HEIGHT_EDIT_MOVE;
         direction = CURSOR_DIRECTION_RIGHT;
     }
 
-    if ((g_MenuControllerData[SECOND_EDITOR_PAD].button & L_JPAD) &&
-        !(g_ControllerData[SECOND_EDITOR_PAD].button & Z_TRIG)) {
+    if ((g_MenuControllerData[SECOND_EDITOR_CONTROLLER].button & L_JPAD) &&
+        !(g_ControllerData[SECOND_EDITOR_CONTROLLER].button & Z_TRIG)) {
         editKind = HEIGHT_EDIT_MOVE;
         direction = CURSOR_DIRECTION_LEFT;
     }
 
-    if ((g_MenuControllerData[SECOND_EDITOR_PAD].button & D_JPAD) &&
-        !(g_ControllerData[SECOND_EDITOR_PAD].button & Z_TRIG)) {
+    if ((g_MenuControllerData[SECOND_EDITOR_CONTROLLER].button & D_JPAD) &&
+        !(g_ControllerData[SECOND_EDITOR_CONTROLLER].button & Z_TRIG)) {
         editKind = HEIGHT_EDIT_MOVE;
         if (direction == CURSOR_DIRECTION_RIGHT) {
             direction = CURSOR_DIRECTION_DOWN_RIGHT;
@@ -2419,8 +2421,8 @@ void UpdateHeightEditor(void) {
         }
     }
 
-    if ((g_MenuControllerData[SECOND_EDITOR_PAD].button & U_JPAD) &&
-        !(g_ControllerData[SECOND_EDITOR_PAD].button & Z_TRIG)) {
+    if ((g_MenuControllerData[SECOND_EDITOR_CONTROLLER].button & U_JPAD) &&
+        !(g_ControllerData[SECOND_EDITOR_CONTROLLER].button & Z_TRIG)) {
         editKind = HEIGHT_EDIT_MOVE;
         if (direction == CURSOR_DIRECTION_RIGHT) {
             direction = CURSOR_DIRECTION_UP_RIGHT;
@@ -2459,48 +2461,49 @@ void UpdateHeightEditor(void) {
         }
     }
 
-    if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+    if ((g_ControllerData[EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
         if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
             g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
         }
     }
 
-    if ((g_ControllerData[EDITOR_PAD].button & L_TRIG) ||
-        (g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+    if ((g_ControllerData[EDITOR_CONTROLLER].button & L_TRIG) ||
+        (g_ControllerData[EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
         if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
             g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
         }
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
         f_HeightCameraHeadingAngle -=
-            g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
+            g_MenuControllerData[EDITOR_CONTROLLER].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
         f_HeightCameraPitch -=
-            g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+            g_MenuControllerData[EDITOR_CONTROLLER].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
     }
 
-    if ((g_ControllerData[SECOND_EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+    if ((g_ControllerData[SECOND_EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
         if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
             g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
         }
     }
 
-    if ((g_ControllerData[SECOND_EDITOR_PAD].button & L_TRIG) ||
-        (g_ControllerData[SECOND_EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+    if ((g_ControllerData[SECOND_EDITOR_CONTROLLER].button & L_TRIG) ||
+        (g_ControllerData[SECOND_EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) ==
+            (Z_TRIG | R_TRIG)) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
         if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
             g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
         }
     }
 
-    if (g_ControllerData[SECOND_EDITOR_PAD].button & Z_TRIG) {
-        f_HeightCameraHeadingAngle -=
-            g_MenuControllerData[SECOND_EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
-        f_HeightCameraPitch -=
-            g_MenuControllerData[SECOND_EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+    if (g_ControllerData[SECOND_EDITOR_CONTROLLER].button & Z_TRIG) {
+        f_HeightCameraHeadingAngle -= g_MenuControllerData[SECOND_EDITOR_CONTROLLER].stick_x /
+            STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        f_HeightCameraPitch -= g_MenuControllerData[SECOND_EDITOR_CONTROLLER].stick_y /
+            STICK_STEP_SIZE * PITCH_STICK_SPEED;
     }
 
     if (f_HeightCameraPitch > 0.0f) {
@@ -3134,22 +3137,22 @@ void UpdateTreeEditor(void) {
     PrintDebugHex(f_EditedTreeIndex, TREE_TEXT_COLUMN, TREE_INDEX_TEXT_ROW);
     g_ShowsGroundWaves = FALSE;
     editKind = TRIANGLE_EDIT_NONE;
-    if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         g_Billboards[f_EditedTreeIndex].height++;
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & D_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         g_Billboards[f_EditedTreeIndex].height--;
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & R_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & R_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         g_Billboards[f_EditedTreeIndex].width++;
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & L_CBUTTONS) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & L_CBUTTONS) {
         editKind = TRIANGLE_EDIT_MOVE;
         g_Billboards[f_EditedTreeIndex].width--;
     }
@@ -3170,23 +3173,23 @@ void UpdateTreeEditor(void) {
         g_Billboards[f_EditedTreeIndex].width = 1;
     }
 
-    if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
+    if (g_MenuControllerData[EDITOR_CONTROLLER].button & A_BUTTON) {
         editKind = TRIANGLE_EDIT_MOVE;
         g_Billboards[f_EditedTreeIndex].isIgnoredEditorMark =
             !g_Billboards[f_EditedTreeIndex].isIgnoredEditorMark;
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & R_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         editKind = TRIANGLE_EDIT_SELECT;
         g_Billboards[f_EditedTreeIndex].isNearCourseEdge = FALSE;
         f_EditedTreeIndex++;
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & L_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         editKind = TRIANGLE_EDIT_SELECT;
         g_Billboards[f_EditedTreeIndex].isNearCourseEdge = FALSE;
         f_EditedTreeIndex--;
@@ -3200,16 +3203,16 @@ void UpdateTreeEditor(void) {
         f_EditedTreeIndex = 0;
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & U_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & U_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         editKind = TRIANGLE_EDIT_KIND;
         g_Billboards[f_EditedTreeIndex].textureIndex++;
     }
 
-    if ((g_MenuControllerData[EDITOR_PAD].button & D_JPAD) &&
-        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-            g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+    if ((g_MenuControllerData[EDITOR_CONTROLLER].button & D_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionX |
+            g_MenuRepeatStates[EDITOR_CONTROLLER].stickDirectionY) == 0) {
         editKind = TRIANGLE_EDIT_KIND;
         g_Billboards[f_EditedTreeIndex].textureIndex--;
     }
@@ -3223,7 +3226,7 @@ void UpdateTreeEditor(void) {
     }
 
     billboardIndex = 0;
-    if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
+    if (g_MenuControllerData[EDITOR_CONTROLLER].button & B_BUTTON) {
         for (; billboardIndex < BILLBOARD_COUNT; billboardIndex++) {
             if (IsFreeBillboard(g_Billboards[billboardIndex])) {
                 break;
@@ -3239,16 +3242,16 @@ void UpdateTreeEditor(void) {
         }
     }
 
-    if (!(g_ControllerData[EDITOR_PAD].button & Z_TRIG) &&
-        *(u16 *)&g_MenuControllerData[EDITOR_PAD].stick_x != 0) {
+    if (!(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) &&
+        *(u16 *)&g_MenuControllerData[EDITOR_CONTROLLER].stick_x != 0) {
         s32 moveX = (-cos((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
-                        g_MenuControllerData[EDITOR_PAD].stick_y) -
+                        g_MenuControllerData[EDITOR_CONTROLLER].stick_y) -
             (sin((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
-                g_MenuControllerData[EDITOR_PAD].stick_x);
+                g_MenuControllerData[EDITOR_CONTROLLER].stick_x);
         s32 moveZ = (-sin((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
-                        g_MenuControllerData[EDITOR_PAD].stick_y) +
+                        g_MenuControllerData[EDITOR_CONTROLLER].stick_y) +
             (cos((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
-                g_MenuControllerData[EDITOR_PAD].stick_x);
+                g_MenuControllerData[EDITOR_CONTROLLER].stick_x);
 
         editKind = TRIANGLE_EDIT_MOVE;
         g_Billboards[f_EditedTreeIndex].x += moveX;
@@ -3275,26 +3278,26 @@ void UpdateTreeEditor(void) {
             !g_Billboards[f_EditedTreeIndex].isNearCourseEdge;
     }
 
-    if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+    if ((g_ControllerData[EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
         if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
             g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
         }
     }
 
-    if ((g_ControllerData[EDITOR_PAD].button & L_TRIG) ||
-        (g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+    if ((g_ControllerData[EDITOR_CONTROLLER].button & L_TRIG) ||
+        (g_ControllerData[EDITOR_CONTROLLER].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
         if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
             g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
         }
     }
 
-    if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+    if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
         f_TreeCameraHeadingAngle -=
-            g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
+            g_MenuControllerData[EDITOR_CONTROLLER].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
         f_TreeCameraPitch -=
-            g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+            g_MenuControllerData[EDITOR_CONTROLLER].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
     }
 
     if (f_TreeCameraPitch > 0.0f) {
