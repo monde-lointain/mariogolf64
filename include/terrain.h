@@ -70,20 +70,20 @@ enum TileMidpointSlot {
 #define GROUND_TEXEL_SIZE (1 << GROUND_TEXEL_SHIFT)
 
 typedef struct TerrainColor {
-      s8 red;
-      s8 green;
-      s8 blue;
-      s8 alpha;
+    s8 red;
+    s8 green;
+    s8 blue;
+    s8 alpha;
 } TerrainColor;
 
 typedef struct GroundTile {
-      u16 texels[GROUND_TILE_TEXEL_ROW_COUNT][GROUND_TILE_TEXEL_ROW_LENGTH];
-      s16 extraPassCount;
-      u16 mirroredCells;
-      s32 detail;
-      Vec3 center;
-      s32 midpointBlockIndex;
-      u8 unusedAfterMidpointBlock[0xA00 - 0x9A8];
+    u16 texels[GROUND_TILE_TEXEL_ROW_COUNT][GROUND_TILE_TEXEL_ROW_LENGTH];
+    s16 extraPassCount;
+    u16 mirroredCells;
+    s32 detail;
+    Vec3 center;
+    s32 midpointBlockIndex;
+    u8 unusedAfterMidpointBlock[0xA00 - 0x9A8];
 } GroundTile;
 
 enum GroundDetail {
@@ -143,9 +143,9 @@ extern s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT];
 #define INTEGER_PLANE_UNIT (1 << INTEGER_PLANE_SHIFT)
 
 typedef struct IntegerPlane {
-      s32 normal[AXIS_COUNT];
-      s32 distance;
-      s32 normalLength;
+    s32 normal[AXIS_COUNT];
+    s32 distance;
+    s32 normalLength;
 } IntegerPlane;
 
 #define TILE_EDGE_TOP 0
@@ -212,8 +212,8 @@ extern f32 g_GroundNearDepthEighth;
 #define TRIANGLE_CORNER_COUNT 3
 
 typedef struct PlaneTriangle {
-      s32 tag;
-      s16 corners[AXIS_COUNT][TRIANGLE_CORNER_COUNT];
+    s32 tag;
+    s16 corners[AXIS_COUNT][TRIANGLE_CORNER_COUNT];
 } PlaneTriangle;
 
 #define FLAT_TRIANGLE_LEG 0x100
@@ -231,9 +231,9 @@ static inline void SetFlatTriangle(PlaneTriangle *triangle) {
 }
 
 typedef struct TrianglePlane {
-      f32 normal[AXIS_COUNT];
-      f32 distance;
-      f32 normalLength;
+    f32 normal[AXIS_COUNT];
+    f32 distance;
+    f32 normalLength;
 } TrianglePlane;
 
 s32 GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane);

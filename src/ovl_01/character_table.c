@@ -61,15 +61,15 @@ enum TablePopupCorner {
 #define TABLE_CELL_COUNT 17
 
 typedef struct TableCell {
-      s32 column;
-      s32 row;
+    s32 column;
+    s32 row;
 } TableCell;
 
 #define TABLE_LINE_COUNT 12
 
 typedef struct TableCorner {
-      s32 x;
-      s32 y;
+    s32 x;
+    s32 y;
 } TableCorner;
 
 #define TABLE_PANEL_LEFT 24

@@ -9,14 +9,14 @@ typedef struct FireworkShape FireworkShape;
 typedef struct FireworkParticle FireworkParticle;
 
 typedef struct Firework {
-      FireworkParticle *particles;
-      s32 particleCount;
-      s32 timer;
-      s32 ignoredLaunchValue;
-      u8 unusedAfterLaunchValue[0x14];
-      u8 ignoredLoadValue;
-      u8 isActive;
-      FireworkShape *shape;
+    FireworkParticle *particles;
+    s32 particleCount;
+    s32 timer;
+    s32 ignoredLaunchValue;
+    u8 unusedAfterLaunchValue[0x14];
+    u8 ignoredLoadValue;
+    u8 isActive;
+    FireworkShape *shape;
 } Firework;
 
 void StartFireworks(void);

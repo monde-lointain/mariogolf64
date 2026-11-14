@@ -71,17 +71,17 @@
     (((row) & 1) && !PointSlot(column) && (PointTile(column) > 0))
 
 typedef struct MapOverviewControls {
-      s32 cameraX;
-      s32 cameraZ;
-      s32 selectionIndex;
-      s32 adjustment;
-      Boolean isToggled;
+    s32 cameraX;
+    s32 cameraZ;
+    s32 selectionIndex;
+    s32 adjustment;
+    Boolean isToggled;
 } MapOverviewControls;
 
 typedef struct FlagPanel {
-      s32 firstRow;
-      s32 column;
-      s32 row;
+    s32 firstRow;
+    s32 column;
+    s32 row;
 } FlagPanel;
 
 #define MAP_TEXEL(column, row) \

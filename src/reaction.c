@@ -108,10 +108,10 @@
 #define REACTION_FRAME_ROW 4
 
 typedef struct EasedView {
-      f32 eye[AXIS_COUNT];
-      f32 lookAt[AXIS_COUNT];
-      s8 isEyeEased;
-      s8 isLookAtEased;
+    f32 eye[AXIS_COUNT];
+    f32 lookAt[AXIS_COUNT];
+    s8 isEyeEased;
+    s8 isLookAtEased;
 } EasedView;
 
 static s32 f_ReactionFrame = 0;

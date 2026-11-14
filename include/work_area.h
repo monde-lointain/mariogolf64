@@ -13,12 +13,12 @@ typedef union WorkArea {
     u8 bytes[WORK_AREA_SIZE];
 
     struct {
-          GroundTile tiles[GROUND_TILE_COUNT];
-          Vtx gridVertices[GROUND_GRID_VERTEX_SLOT_COUNT];
-          Vtx midpoints[GROUND_TILE_COUNT][TILE_MIDPOINT_COUNT];
-          HoleTriangle triangles[HOLE_TRIANGLE_COUNT];
-          u8 unusedAfterTriangles[TERRAIN_CODE_OFFSET - 0x5E120];
-          u8 terrainCodes[WORK_AREA_SIZE - TERRAIN_CODE_OFFSET];
+        GroundTile tiles[GROUND_TILE_COUNT];
+        Vtx gridVertices[GROUND_GRID_VERTEX_SLOT_COUNT];
+        Vtx midpoints[GROUND_TILE_COUNT][TILE_MIDPOINT_COUNT];
+        HoleTriangle triangles[HOLE_TRIANGLE_COUNT];
+        u8 unusedAfterTriangles[TERRAIN_CODE_OFFSET - 0x5E120];
+        u8 terrainCodes[WORK_AREA_SIZE - TERRAIN_CODE_OFFSET];
     } hole;
 } WorkArea;
 

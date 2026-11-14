@@ -54,9 +54,9 @@ enum FadeDirection {
 };
 
 typedef struct ScreenFadeColor {
-      s32 red;
-      s32 green;
-      s32 blue;
+    s32 red;
+    s32 green;
+    s32 blue;
 } ScreenFadeColor;
 
 extern s32 g_ScreenFadeDuration;

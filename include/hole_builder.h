@@ -8,9 +8,9 @@
 #define OFFSET_DISTANCE_SCALE 256
 
 typedef struct GridOffset {
-      s8 column;
-      s8 row;
-      u16 distance;
+    s8 column;
+    s8 row;
+    u16 distance;
 } GridOffset;
 
 #define LOADER_THREAD_STACK_SIZE 0x8000

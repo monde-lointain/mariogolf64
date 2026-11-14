@@ -40,18 +40,18 @@
 #define PLAYED_DELAY (-1)
 
 typedef struct QueuedCharacterSound {
-      CharacterId character;
-      s32 delay;
-      s32 kind;
-      SoundVolume volume;
-      SoundPan pan;
+    CharacterId character;
+    s32 delay;
+    s32 kind;
+    SoundVolume volume;
+    SoundPan pan;
 } QueuedCharacterSound;
 
 typedef struct SongChange {
-      s32 state;
-      SongId songId;
-      s32 flags;
-      s32 delay;
+    s32 state;
+    SongId songId;
+    s32 flags;
+    s32 delay;
 } SongChange;
 
 extern u8 g_SoundPointerBankRomStart[];

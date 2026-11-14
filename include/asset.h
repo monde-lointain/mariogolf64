@@ -6,26 +6,26 @@
 typedef u16 AssetId;
 
 typedef struct AssetFile {
-      u32 cursor;
-      s32 size;
-      u32 romStart;
-      u32 romEnd;
+    u32 cursor;
+    s32 size;
+    u32 romStart;
+    u32 romEnd;
 } AssetFile;
 
 #define ENCODING_BYTE_RUNS 1
 
 typedef struct EncodedAsset {
-      u8 unusedBeforeMethod[8];
-      s32 method;
-      s32 encodedSize;
-      AssetFile file;
+    u8 unusedBeforeMethod[8];
+    s32 method;
+    s32 encodedSize;
+    AssetFile file;
 } EncodedAsset;
 
 typedef struct ImageHeader {
-      u16 format;
-      u16 width;
-      u16 height;
-      u16 unusedAfterHeight;
+    u16 format;
+    u16 width;
+    u16 height;
+    u16 unusedAfterHeight;
 } ImageHeader;
 
 #define IMAGE_WIDTH_OFFSET 2

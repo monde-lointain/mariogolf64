@@ -147,8 +147,8 @@ typedef struct ImageCorner {
 } ImageCorner;
 
 typedef struct LabelCorner {
-      s32 x;
-      s32 y;
+    s32 x;
+    s32 y;
 } LabelCorner;
 
 #define CHOSEN_HOLE_WIND_SPEED_MASK 0x3F

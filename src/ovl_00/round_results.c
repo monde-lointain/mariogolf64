@@ -203,9 +203,9 @@ s32 UpdateMatchResults(ControllerState *controller);
 #define SCORE_PASSWORD_LINE_LENGTH (SCORE_PASSWORD_LENGTH / 2)
 
 typedef struct TrophyAssets {
-      s32 palette;
-      s32 image;
-      s32 frameCount;
+    s32 palette;
+    s32 image;
+    s32 frameCount;
 } TrophyAssets;
 
 typedef struct CoursePointsTally {

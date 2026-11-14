@@ -52,9 +52,9 @@ enum BootLogo {
 #define CAMELOT_LOGO_TOP 98
 
 typedef struct CamelotLogo {
-      ImageHeader header;
-      u16 palette[16];
-      u8 texels[0x11E8];
+    ImageHeader header;
+    u16 palette[16];
+    u8 texels[0x11E8];
 } CamelotLogo;
 
 #define NINTENDO_LOGO_WIDTH 188
@@ -64,8 +64,8 @@ typedef struct CamelotLogo {
 #define NINTENDO_LOGO_TOP 96
 
 typedef struct NintendoLogo {
-      ImageHeader header;
-      u8 texels[0x2348];
+    ImageHeader header;
+    u8 texels[0x2348];
 } NintendoLogo;
 
 #define N64_LOGO_WIDTH 128
@@ -75,8 +75,8 @@ typedef struct NintendoLogo {
 #define N64_LOGO_TOP 64
 
 typedef struct N64Logo {
-      ImageHeader header;
-      u16 texels[0x7008 / 2];
+    ImageHeader header;
+    u16 texels[0x7008 / 2];
 } N64Logo;
 
 #define CAMELOT_LOGO_ASSET 0x702

@@ -18,14 +18,14 @@
 #include "text.h"
 
 typedef struct MessageEntry {
-      u16 start;
-      u16 length;
+    u16 start;
+    u16 length;
 } MessageEntry;
 
 typedef struct MessageTable {
-      u16 size;
-      u16 messageCount;
-      MessageEntry messages[1];
+    u16 size;
+    u16 messageCount;
+    MessageEntry messages[1];
 } MessageTable;
 
 #define MessageEntryAt(id) (f_Messages->messages + (id))

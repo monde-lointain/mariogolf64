@@ -123,8 +123,8 @@ typedef s32 (*PaintRoutine)(s32 code, s32 nearestCode, s32 nearestDistance, s32 
 #define PAINTED_COLOR_SHIFT 16
 
 typedef struct PaintLogic {
-      s8 searchSpans[TERRAIN_CODE_COUNT];
-      PaintRoutine paint;
+    s8 searchSpans[TERRAIN_CODE_COUNT];
+    PaintRoutine paint;
 } PaintLogic;
 
 #define PAINT_OFFSET_COUNT 100
@@ -135,9 +135,9 @@ typedef struct PaintLogic {
 #define BEYOND_ALL_DISTANCES 0x10000
 
 typedef struct GroundLightColor {
-      u16 red;
-      u16 green;
-      u16 blue;
+    u16 red;
+    u16 green;
+    u16 blue;
 } GroundLightColor;
 
 #define MAP_COLUMN_COUNT (GROUND_TILE_COLUMN_COUNT * GROUND_TILE_TEXEL_SPAN)
@@ -204,13 +204,13 @@ enum TileVertexSlot {
 #define GROUND_VERTEX_END ((Vtx *)&g_WorkArea.bytes[0x82720])
 
 typedef struct HoleAssetIds {
-      u16 vertices;
-      u16 midpoints;
-      u16 trees;
-      u16 setup;
-      u16 points;
-      u16 triangles;
-      u16 attributes;
+    u16 vertices;
+    u16 midpoints;
+    u16 trees;
+    u16 setup;
+    u16 points;
+    u16 triangles;
+    u16 attributes;
 } HoleAssetIds;
 
 #define HOLE_ASSET_IDS(first) \
@@ -651,8 +651,7 @@ void DrawBandHeights(s16 *heights, s32 band) {
         s32 span;
         s32 lowerSpan;
 
-        inline void
-        DrawHeightRow(s32 x, s32 height, s32 toX, s32 toHeight, s32 rowZ) {
+        inline void DrawHeightRow(s32 x, s32 height, s32 toX, s32 toHeight, s32 rowZ) {
             s32 width;
             s32 count;
             s32 direction;

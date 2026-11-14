@@ -8,9 +8,9 @@
     ((catchUp) * ((stepsPerLine) < 10 ? 10 : 100) + (stepsPerLine))
 
 typedef struct PathPoint {
-      f32 x;
-      f32 y;
-      f32 z;
+    f32 x;
+    f32 y;
+    f32 z;
 } PathPoint;
 
 void DrawNothing(Gfx **displayListHead);

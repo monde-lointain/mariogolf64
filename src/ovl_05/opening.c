@@ -79,13 +79,13 @@ typedef enum OpeningBallState {
 #define OPENING_NAME_LOGO_SIZE 0x2208
 
 typedef struct OpeningNameLogo {
-      s32 assetId;
-      s32 width;
-      s32 height;
-      s32 x;
-      s32 y;
-      s32 shownWidth;
-      s32 shownHeight;
+    s32 assetId;
+    s32 width;
+    s32 height;
+    s32 x;
+    s32 y;
+    s32 shownWidth;
+    s32 shownHeight;
 } OpeningNameLogo;
 
 #define NAME_LOGO_UNFOLD 0

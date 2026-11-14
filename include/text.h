@@ -31,28 +31,28 @@ typedef s32 MessageId;
 #define TEXT_PALETTE_COLOR_COUNT 4
 
 typedef struct GlyphSprite {
-      Mtx matrix;
-      u16 code;
-      u8 fontSize;
-      s8 group;
-      u8 flags;
+    Mtx matrix;
+    u16 code;
+    u8 fontSize;
+    s8 group;
+    u8 flags;
 } GlyphSprite;
 
 #define GLYPH_SPRITE_COUNT 300
 #define GLYPH_GROUP_COUNT 20
 
 typedef struct TextSlot {
-      s32 x;
-      s32 y;
-      s32 fontSize;
-      s32 shownCount;
-      TextFlags flags;
-      MessageId messageId;
-      u8 red;
-      u8 green;
-      u8 blue;
-      u8 alpha;
-      s32 values[TEXT_SLOT_VALUE_COUNT];
+    s32 x;
+    s32 y;
+    s32 fontSize;
+    s32 shownCount;
+    TextFlags flags;
+    MessageId messageId;
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+    s32 values[TEXT_SLOT_VALUE_COUNT];
 } TextSlot;
 
 #define DECIMAL_BASE 10

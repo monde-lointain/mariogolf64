@@ -22,29 +22,29 @@ enum Weather {
 #define RAIN_SOUND_START_VOLUME 100
 
 typedef struct Effect {
-      Vec3 position;
-      Vec3 velocity;
-      u8 unusedAfterVelocity[0xC];
-      f32 tilt;
-      f32 alpha;
-      f32 alphaStep;
-      f32 scale;
-      f32 scaleStep;
-      s16 color;
-      s8 kind;
-      s8 frame;
-      s8 matrixIndex;
+    Vec3 position;
+    Vec3 velocity;
+    u8 unusedAfterVelocity[0xC];
+    f32 tilt;
+    f32 alpha;
+    f32 alphaStep;
+    f32 scale;
+    f32 scaleStep;
+    s16 color;
+    s8 kind;
+    s8 frame;
+    s8 matrixIndex;
 } Effect;
 
 #define EFFECT_COUNT 40
 
 typedef struct ShotDebris {
-      s32 ignoredSpawnCount;
-      s32 unusedAfterSpawnCount;
-      f32 ignoredNegativeSetting;
-      f32 ignoredPositiveSetting;
-      ClubKind clubKind;
-      s32 unusedAfterClubKind;
+    s32 ignoredSpawnCount;
+    s32 unusedAfterSpawnCount;
+    f32 ignoredNegativeSetting;
+    f32 ignoredPositiveSetting;
+    ClubKind clubKind;
+    s32 unusedAfterClubKind;
 } ShotDebris;
 
 typedef struct Raindrop Raindrop;

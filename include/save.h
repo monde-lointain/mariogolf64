@@ -60,12 +60,12 @@ enum SaveReadResult {
 };
 
 typedef struct SavedGame {
-      Boolean isValid;
-      u8 unusedBeforeHole[4];
-      HoleSetup hole;
-      GameState state;
-      RoundStats roundStats;
-      u8 unusedAfterRoundStats[4];
+    Boolean isValid;
+    u8 unusedBeforeHole[4];
+    HoleSetup hole;
+    GameState state;
+    RoundStats roundStats;
+    u8 unusedAfterRoundStats[4];
 } SavedGame;
 
 #define BEST_TIME_COUNT 3
@@ -74,56 +74,55 @@ typedef struct SavedGame {
 #define WON_UNSAVED_FLAG 0x80
 
 typedef struct MatchupRecord {
-      u8 lossCount;
-      u8 winBits;
+    u8 lossCount;
+    u8 winBits;
 } MatchupRecord;
 
 typedef struct Awards {
-      u8 unusedBeforeBadges[0xF4];
-      s8 birdieBadgeCounts[COURSE_COUNT][COURSE_HOLE_COUNT];
-      MatchupRecord matchups[CHARACTER_COUNT][CHARACTER_COUNT];
+    u8 unusedBeforeBadges[0xF4];
+    s8 birdieBadgeCounts[COURSE_COUNT][COURSE_HOLE_COUNT];
+    MatchupRecord matchups[CHARACTER_COUNT][CHARACTER_COUNT];
 } Awards;
 
 typedef struct SaveRecords {
-      Awards awards;
-      s32 bestTimeScoresToPar[COURSE_COUNT][BEST_TIME_COUNT];
-      s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT];
-      s32 bestTimeCharacters[COURSE_COUNT][BEST_TIME_COUNT];
-      s32 bestTimePalettes[COURSE_COUNT][BEST_TIME_COUNT];
-      CourseStats courseStats[COURSE_COUNT];
-      u8 unusedAfterCourseStats[0x990 - 0x7C0];
-      s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
+    Awards awards;
+    s32 bestTimeScoresToPar[COURSE_COUNT][BEST_TIME_COUNT];
+    s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT];
+    s32 bestTimeCharacters[COURSE_COUNT][BEST_TIME_COUNT];
+    s32 bestTimePalettes[COURSE_COUNT][BEST_TIME_COUNT];
+    CourseStats courseStats[COURSE_COUNT];
+    u8 unusedAfterCourseStats[0x990 - 0x7C0];
+    s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
 } SaveRecords;
 
 typedef struct SaveData {
-      u32 magic;
-      u32 longestDisplayListLength;
-      u8 invertedBuildDate[0x20];
-      s8 options[SAVE_OPTION_COUNT];
-      u8 unusedAfterOptions[0x38 - 0x2C];
-      SavedGame modeGames[MODE_GAME_COUNT];
-      Player modePlayers[MODE_PLAYER_COUNT];
-      PlayRecord modeRecords[MODE_RECORD_COUNT];
-      SaveRecords records;
-      s8 ringShotClearCounts[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT]
-                                       [CHARACTER_COUNT];
-      s32 coursePoints;
-      PlayRecord rankedRecords[RANKED_RECORD_COUNT];
-      RingShotRecord ringShotRecords[RING_SHOT_RECORD_COUNT];
-      SavedGame savedGames[SAVED_GAME_COUNT];
-      Player savedPlayers[SAVED_GAME_COUNT][MAX_PLAYER_COUNT];
+    u32 magic;
+    u32 longestDisplayListLength;
+    u8 invertedBuildDate[0x20];
+    s8 options[SAVE_OPTION_COUNT];
+    u8 unusedAfterOptions[0x38 - 0x2C];
+    SavedGame modeGames[MODE_GAME_COUNT];
+    Player modePlayers[MODE_PLAYER_COUNT];
+    PlayRecord modeRecords[MODE_RECORD_COUNT];
+    SaveRecords records;
+    s8 ringShotClearCounts[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT][CHARACTER_COUNT];
+    s32 coursePoints;
+    PlayRecord rankedRecords[RANKED_RECORD_COUNT];
+    RingShotRecord ringShotRecords[RING_SHOT_RECORD_COUNT];
+    SavedGame savedGames[SAVED_GAME_COUNT];
+    Player savedPlayers[SAVED_GAME_COUNT][MAX_PLAYER_COUNT];
 } SaveData;
 
 typedef struct SaveCheck {
-      u16 key;
-      u16 keyedCrc;
+    u16 key;
+    u16 keyedCrc;
 } SaveCheck;
 
 typedef struct SaveCopyLocation {
-      const char *dataFileName;
-      const char *checkFileName;
-      u32 dataSramAddress;
-      u32 checkSramAddress;
+    const char *dataFileName;
+    const char *checkFileName;
+    u32 dataSramAddress;
+    u32 checkSramAddress;
 } SaveCopyLocation;
 
 SaveData *GetSaveData(void);

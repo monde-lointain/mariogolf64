@@ -49,9 +49,9 @@
 #define RING_SCALE_ONE 1024.0f
 
 typedef struct RingCorners {
-      s32 unusedBeforeCoordinates;
-      s16 coordinates[3][HOLE_TRIANGLE_VERTEX_COUNT];
-      s16 unusedAfterCoordinates[(0x2C - 0x16) / 2];
+    s32 unusedBeforeCoordinates;
+    s16 coordinates[3][HOLE_TRIANGLE_VERTEX_COUNT];
+    s16 unusedAfterCoordinates[(0x2C - 0x16) / 2];
 } RingCorners;
 
 #define RING_SPIN_SPEED 2.0

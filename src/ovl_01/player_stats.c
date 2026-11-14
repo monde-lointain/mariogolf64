@@ -138,8 +138,8 @@ enum StatsDirection {
 #define HANDICAP_SLIDE_START (-512)
 
 typedef struct GridStep {
-      s8 column;
-      s8 row;
+    s8 column;
+    s8 row;
 } GridStep;
 
 void DrawBrickWallRows(Gfx **displayListHead, u8 slide);

@@ -19,9 +19,9 @@
 #define RADIANS_PER_HOLE ((f64)(3.1416f / COURSE_HOLE_COUNT))
 
 typedef struct ContestantProfile {
-      s8 baseScore;
-      u8 unusedBeforeHoleOffset[2];
-      s8 holeOffset;
+    s8 baseScore;
+    u8 unusedBeforeHoleOffset[2];
+    s8 holeOffset;
 } ContestantProfile;
 
 s16 g_ContestantNameIndices[TOURNAMENT_CONTESTANT_COUNT - 1];

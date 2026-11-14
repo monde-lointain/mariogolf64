@@ -59,16 +59,16 @@ enum HoleCreatureKind {
 #define MONKEY_HALF_IMAGE_SIZE 0x1000
 
 typedef struct HoleCreature {
-      Mtx matrices[DRAW_BUFFER_COUNT];
-      CoursePoint position;
-      f32 velocity[AXIS_COUNT];
-      s32 groundHeight;
-      Radians yaw;
-      Radians pitch;
-      u8 frameCount;
-      u8 isFacingBack;
-      u8 isGold;
-      u8 state;
+    Mtx matrices[DRAW_BUFFER_COUNT];
+    CoursePoint position;
+    f32 velocity[AXIS_COUNT];
+    s32 groundHeight;
+    Radians yaw;
+    Radians pitch;
+    u8 frameCount;
+    u8 isFacingBack;
+    u8 isGold;
+    u8 state;
 } HoleCreature;
 
 static AssetId f_CheepCheepViewAssets[CHEEP_CHEEP_VIEW_COUNT] UNUSED = {

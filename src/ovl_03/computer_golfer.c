@@ -50,15 +50,15 @@
 #define GREEN_EDGE_FOUND 1
 
 typedef struct GolferTraits {
-      s8 strongNine;
-      s8 consistency;
-      s8 clubBoldness;
-      s8 ignoredBoldnessValue;
-      s8 ignoredTraitLevel;
-      s8 windPlay;
-      s8 powerShotEagerness;
-      s8 courseTargetOffsets[COURSE_COUNT];
-      s8 baseTargetScore;
+    s8 strongNine;
+    s8 consistency;
+    s8 clubBoldness;
+    s8 ignoredBoldnessValue;
+    s8 ignoredTraitLevel;
+    s8 windPlay;
+    s8 powerShotEagerness;
+    s8 courseTargetOffsets[COURSE_COUNT];
+    s8 baseTargetScore;
 } GolferTraits;
 
 #define BOLD_CLUB_CHOICE 2
@@ -83,8 +83,8 @@ enum WindPlay {
 };
 
 typedef struct ShotOffset {
-      s8 offsetX;
-      s8 offsetY;
+    s8 offsetX;
+    s8 offsetY;
 } ShotOffset;
 
 #define APPROACH_BAND_COUNT 4
@@ -93,16 +93,16 @@ typedef struct ShotOffset {
 #define CLUB_CHANCE_KIND_COUNT 3
 
 typedef struct ClubName {
-      char name[4];
-      ClubType clubType;
+    char name[4];
+    ClubType clubType;
 } ClubName;
 
 #define DIRECTION_SECTOR_COUNT 256
 #define DIRECTION_SECTOR_SHIFT 8
 
 typedef struct RouteCoordinates {
-      s32 x[ROUTE_POINT_COUNT + 1];
-      s32 z[ROUTE_POINT_COUNT + 1];
+    s32 x[ROUTE_POINT_COUNT + 1];
+    s32 z[ROUTE_POINT_COUNT + 1];
 } RouteCoordinates;
 
 enum PlanStage {

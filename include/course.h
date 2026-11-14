@@ -56,20 +56,20 @@ extern s32 g_CourseNamePrimColors[];
 #define TOURNAMENT_NAME_SIZE 25
 
 typedef struct HoleRecord {
-      s8 par;
-      s8 handicap;
-      u16 yardages[3];
-      u8 flags;
+    s8 par;
+    s8 handicap;
+    u16 yardages[3];
+    u8 flags;
 } HoleRecord;
 
 typedef struct CourseRecord {
-      char name[20];
-      HoleRecord holes[18];
+    char name[20];
+    HoleRecord holes[18];
 } CourseRecord;
 
 typedef struct RingShotHole {
-      u8 courseRecordIndex;
-      u8 holeIndex;
+    u8 courseRecordIndex;
+    u8 holeIndex;
 } RingShotHole;
 
 extern CourseRecord g_CourseRecords[COURSE_RECORD_COUNT];

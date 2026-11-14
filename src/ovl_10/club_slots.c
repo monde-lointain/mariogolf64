@@ -140,21 +140,21 @@
 #define LOGO_ASSET 0x95A
 
 typedef struct ClubSlots {
-      s32 reelPositions[REEL_COUNT];
-      s32 stoppedSymbols[REEL_COUNT];
-      s32 stoppedReelCount;
-      Radians reelAngles[REEL_COUNT];
-      f32 reelSpeeds[REEL_COUNT];
-      s32 pressCount;
-      s32 playerIndex;
-      s32 resultTime;
-      Vtx *reelVertices;
-      Vtx *shadeVertices;
-      u8 *machineImage;
-      u8 *buttonsImage;
-      u8 *startImage;
-      u8 *symbolImages;
-      u8 *faceImages[MAX_PLAYER_COUNT][FACE_BUFFER_COUNT];
+    s32 reelPositions[REEL_COUNT];
+    s32 stoppedSymbols[REEL_COUNT];
+    s32 stoppedReelCount;
+    Radians reelAngles[REEL_COUNT];
+    f32 reelSpeeds[REEL_COUNT];
+    s32 pressCount;
+    s32 playerIndex;
+    s32 resultTime;
+    Vtx *reelVertices;
+    Vtx *shadeVertices;
+    u8 *machineImage;
+    u8 *buttonsImage;
+    u8 *startImage;
+    u8 *symbolImages;
+    u8 *faceImages[MAX_PLAYER_COUNT][FACE_BUFFER_COUNT];
 } ClubSlots;
 
 void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scale);

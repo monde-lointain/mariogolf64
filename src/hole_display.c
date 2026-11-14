@@ -172,11 +172,11 @@ void DrawSliceAnimation(void);
 #define LENS_FLARE_COUNT 8
 
 typedef struct LensFlare {
-      u8 color[3];
-      u8 envColor[3];
-      s32 size;
-      s32 ignoredScaleValue;
-      f32 position;
+    u8 color[3];
+    u8 envColor[3];
+    s32 size;
+    s32 ignoredScaleValue;
+    f32 position;
 } LensFlare;
 
 static u32 *f_CapturedFrame = (u32 *)MAIN_REGION_END;
@@ -3986,12 +3986,7 @@ void DrawTurnAwayAnimation(void) {
                     width = FRAME_TILE_WIDTH;
                 }
 
-                gSPModifyVertex(
-                    g_DisplayListHead++,
-                    TileUpperLeft(row, column),
-                    G_MWO_POINT_ST,
-                    0
-                );
+                gSPModifyVertex(g_DisplayListHead++, TileUpperLeft(row, column), G_MWO_POINT_ST, 0);
                 gSPModifyVertex(
                     g_DisplayListHead++,
                     TileLowerLeft(row, column),
@@ -4081,12 +4076,7 @@ void DrawTurnAwayAnimation(void) {
                 }
 
                 gDPPipeSync(g_DisplayListHead++);
-                gSPModifyVertex(
-                    g_DisplayListHead++,
-                    TileUpperLeft(row, column),
-                    G_MWO_POINT_ST,
-                    0
-                );
+                gSPModifyVertex(g_DisplayListHead++, TileUpperLeft(row, column), G_MWO_POINT_ST, 0);
                 gSPModifyVertex(
                     g_DisplayListHead++,
                     TileLowerLeft(row, column),

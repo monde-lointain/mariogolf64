@@ -21,10 +21,10 @@
 #define EXPANSION_REGION_END 0x80800000
 
 typedef struct MemoryBlock {
-      u32 size;
-      s32 tag;
-      struct MemoryBlock *next;
-      struct MemoryBlock *prev;
+    u32 size;
+    s32 tag;
+    struct MemoryBlock *next;
+    struct MemoryBlock *prev;
 } MemoryBlock;
 
 #define BLOCK_ALIGNMENT 8
@@ -35,9 +35,9 @@ typedef struct MemoryBlock {
 #define BlockOfMemory(pointer) ((MemoryBlock *)(pointer) - 1)
 
 typedef struct Heap {
-      MemoryBlock sentinel;
-      u32 freeSize;
-      u32 largestFreeSize;
+    MemoryBlock sentinel;
+    u32 freeSize;
+    u32 largestFreeSize;
 } Heap;
 
 static Heap f_Heaps[HEAP_COUNT];

@@ -58,27 +58,27 @@
 #define RAIN_SPLASH_COUNT 32
 
 struct Raindrop {
-      Vec3 head;
-      Vec3 tail;
-      f32 groundHeight;
-      f32 tailScale;
-      s16 headScreenX;
-      s16 headScreenY;
-      s16 tailScreenX;
-      s16 tailScreenY;
-      s16 tailDepth;
-      u16 flags;
-      s8 landedFrameCount;
-      u8 splashColumn;
+    Vec3 head;
+    Vec3 tail;
+    f32 groundHeight;
+    f32 tailScale;
+    s16 headScreenX;
+    s16 headScreenY;
+    s16 tailScreenX;
+    s16 tailScreenY;
+    s16 tailDepth;
+    u16 flags;
+    s8 landedFrameCount;
+    u8 splashColumn;
 };
 
 struct RainSplash {
-      Vec3 position;
-      f32 ignoredStartValue;
-      u8 unusedAfterStartValue[6];
-      s8 frameCount;
-      s8 ignoredFrameValue;
-      u8 column;
+    Vec3 position;
+    f32 ignoredStartValue;
+    u8 unusedAfterStartValue[6];
+    s8 frameCount;
+    s8 ignoredFrameValue;
+    u8 column;
 };
 
 enum EffectKind {

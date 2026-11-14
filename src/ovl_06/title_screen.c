@@ -45,16 +45,16 @@ enum TitleState {
 #define TITLE_LAST_STRIP_HEIGHT 2
 
 typedef struct TitleImage {
-      ImageHeader header;
-      u16 texels[TITLE_IMAGE_WIDTH * TITLE_IMAGE_HEIGHT];
+    ImageHeader header;
+    u16 texels[TITLE_IMAGE_WIDTH * TITLE_IMAGE_HEIGHT];
 } TitleImage;
 
 #define JAPANESE_LOGO_WIDTH 288
 #define JAPANESE_LOGO_HEIGHT 80
 
 typedef struct JapaneseLogo {
-      ImageHeader header;
-      u16 texels[JAPANESE_LOGO_WIDTH * JAPANESE_LOGO_HEIGHT];
+    ImageHeader header;
+    u16 texels[JAPANESE_LOGO_WIDTH * JAPANESE_LOGO_HEIGHT];
 } JapaneseLogo;
 
 #define PRESS_START_WIDTH 120
@@ -63,8 +63,8 @@ typedef struct JapaneseLogo {
 #define PRESS_START_TOP 188
 
 typedef struct PressStartText {
-      ImageHeader header;
-      u8 texels[PRESS_START_WIDTH * PRESS_START_HEIGHT / 2];
+    ImageHeader header;
+    u8 texels[PRESS_START_WIDTH * PRESS_START_HEIGHT / 2];
 } PressStartText;
 
 #define CODE_ENTERED (-1)
@@ -72,9 +72,9 @@ typedef struct PressStartText {
 #define DEBUG_CODE_HELD_BUTTONS (Z_TRIG | L_TRIG | R_TRIG)
 
 typedef struct ButtonCode {
-      char *sequence;
-      s32 progress;
-      void (*onEntered)(void);
+    char *sequence;
+    s32 progress;
+    void (*onEntered)(void);
 } ButtonCode;
 
 void OnUnlockCodeEntered(void);

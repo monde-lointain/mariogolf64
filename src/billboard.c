@@ -33,17 +33,17 @@
 #define HOST_FILE_NAME_SIZE_MAX 0x100
 
 typedef struct BillboardTexture {
-      s32 assetId;
-      s16 type;
-      s16 width;
-      s16 height;
-      u16 *pixels;
+    s32 assetId;
+    s16 type;
+    s16 width;
+    s16 height;
+    u16 *pixels;
 } BillboardTexture;
 
 typedef struct BillboardColor {
-      s32 red;
-      s32 green;
-      s32 blue;
+    s32 red;
+    s32 green;
+    s32 blue;
 } BillboardColor;
 
 #define BILLBOARD_TEXTURE_WIDTH 32

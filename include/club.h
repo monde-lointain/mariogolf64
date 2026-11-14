@@ -73,26 +73,26 @@ typedef s32 ClubKind;
 #define MAX_LIE_RATING 5
 
 typedef struct ClubParameters {
-      s32 power[SHOT_MODE_COUNT];
-      s32 deflection[SHOT_MODE_COUNT];
+    s32 power[SHOT_MODE_COUNT];
+    s32 deflection[SHOT_MODE_COUNT];
 } ClubParameters;
 
 typedef struct Club {
-      u8 mishitScale;
-      char name[4] NONSTRING;
-      s32 surfaceMask;
-      s16 distance;
-      s16 pitch;
-      s16 offsetPitch;
-      s16 spin;
-      s16 lieRatingPercent;
-      s16 type;
-      s32 power[SHOT_MODE_COUNT];
-      s16 kind;
-      s16 sideSpin;
-      s16 deflection[SHOT_MODE_COUNT];
-      AssetId headImageAsset;
-      s8 curve;
+    u8 mishitScale;
+    char name[4] NONSTRING;
+    s32 surfaceMask;
+    s16 distance;
+    s16 pitch;
+    s16 offsetPitch;
+    s16 spin;
+    s16 lieRatingPercent;
+    s16 type;
+    s32 power[SHOT_MODE_COUNT];
+    s16 kind;
+    s16 sideSpin;
+    s16 deflection[SHOT_MODE_COUNT];
+    AssetId headImageAsset;
+    s8 curve;
 } Club;
 
 extern Club g_Clubs[CLUB_COUNT];

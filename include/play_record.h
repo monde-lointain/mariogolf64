@@ -8,13 +8,13 @@
 #include "player.h"
 
 typedef struct RecordedShot {
-      BinaryAngle heading;
-      s8 powerGaugeFrame;
-      s8 impactGaugeFrame;
-      s8 shotMode;
-      s8 clubSlot;
-      s8 offsetX;
-      s8 offsetY;
+    BinaryAngle heading;
+    s8 powerGaugeFrame;
+    s8 impactGaugeFrame;
+    s8 shotMode;
+    s8 clubSlot;
+    s8 offsetX;
+    s8 offsetY;
 } RecordedShot;
 
 #define SCORE_KIND_MASK 0xF
@@ -31,33 +31,33 @@ enum ScoreKind {
 };
 
 typedef struct PlayRecord {
-      HoleSetup hole;
-      s32 gameMode;
-      s8 courseIndex;
-      s8 holeIndex;
-      u8 scoreKind;
-      s8 characterIndex;
-      u8 isLefty;
-      s8 paletteIndex;
-      u8 strokeCount;
-      u8 unusedAfterStrokeCount;
-      s32 noiseSeed;
-      RecordedShot shots[4];
-      u8 fifthShotStart[0x68 - 0x64];
+    HoleSetup hole;
+    s32 gameMode;
+    s8 courseIndex;
+    s8 holeIndex;
+    u8 scoreKind;
+    s8 characterIndex;
+    u8 isLefty;
+    s8 paletteIndex;
+    u8 strokeCount;
+    u8 unusedAfterStrokeCount;
+    s32 noiseSeed;
+    RecordedShot shots[4];
+    u8 fifthShotStart[0x68 - 0x64];
 } PlayRecord;
 
 typedef struct RingShotRecord {
-      HoleSetup hole;
-      s8 courseIndex;
-      s8 holeIndex;
-      s8 scoreKind;
-      s8 characterIndex;
-      u8 isLefty;
-      s8 paletteIndex;
-      u8 strokeCount;
-      u8 unusedAfterStrokeCount;
-      s32 noiseSeed;
-      RecordedShot shots[5];
+    HoleSetup hole;
+    s8 courseIndex;
+    s8 holeIndex;
+    s8 scoreKind;
+    s8 characterIndex;
+    u8 isLefty;
+    s8 paletteIndex;
+    u8 strokeCount;
+    u8 unusedAfterStrokeCount;
+    s32 noiseSeed;
+    RecordedShot shots[5];
 } RingShotRecord;
 
 extern PlayRecord g_PlayRecords[MAX_PLAYER_COUNT];

@@ -13,37 +13,37 @@
 #define TOURNAMENT_PLACE_COUNT 3
 
 typedef struct CourseStats {
-      s32 roundCount;
-      s32 bestScore;
-      s32 strokeTotal;
-      s32 longestDrive;
-      s32 averageDrive;
-      s32 averagedDriveCount;
-      s32 measuredDriveTotal;
-      s32 puttTotal;
-      s32 parOrBetterCount;
-      s32 parOnCount;
-      s32 sandSaveCount;
-      s32 missedSandSaveCount;
-      Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
-      s16 characterBestScores[CHARACTER_COUNT];
-      u8 hasCharacterBestScore[CHARACTER_COUNT];
-      u8 unusedAfterBestScores[0x74 - 0x72];
+    s32 roundCount;
+    s32 bestScore;
+    s32 strokeTotal;
+    s32 longestDrive;
+    s32 averageDrive;
+    s32 averagedDriveCount;
+    s32 measuredDriveTotal;
+    s32 puttTotal;
+    s32 parOrBetterCount;
+    s32 parOnCount;
+    s32 sandSaveCount;
+    s32 missedSandSaveCount;
+    Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
+    s16 characterBestScores[CHARACTER_COUNT];
+    u8 hasCharacterBestScore[CHARACTER_COUNT];
+    u8 unusedAfterBestScores[0x74 - 0x72];
 } CourseStats;
 
 typedef struct CourseStatFigures {
-      f32 roundCount;
-      f32 bestScore;
-      f32 averageScore;
-      f32 bestDrive;
-      f32 averageDrive;
-      f32 unusedDriveFigure;
-      f32 fairwayPercent;
-      f32 averagePutts;
-      f32 parSavePercent;
-      f32 parOnPercent;
-      f32 sandSavePercent;
-      Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
+    f32 roundCount;
+    f32 bestScore;
+    f32 averageScore;
+    f32 bestDrive;
+    f32 averageDrive;
+    f32 unusedDriveFigure;
+    f32 fairwayPercent;
+    f32 averagePutts;
+    f32 parSavePercent;
+    f32 parOnPercent;
+    f32 sandSavePercent;
+    Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
 } CourseStatFigures;
 
 extern CourseStatFigures g_CourseStatFigures[COURSE_COUNT + 1];

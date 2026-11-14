@@ -7,21 +7,21 @@
 #define BUTTON_REPEAT_DELAY_NEXT 3
 
 typedef struct ControllerState {
-      u16 buttons;
-      u16 heldButtons;
-      u16 pressedButtons;
-      u16 previousButtons;
-      u16 repeatedButtons;
-      u16 repeatDelay;
-      s8 stickX;
-      s8 stickY;
+    u16 buttons;
+    u16 heldButtons;
+    u16 pressedButtons;
+    u16 previousButtons;
+    u16 repeatedButtons;
+    u16 repeatDelay;
+    s8 stickX;
+    s8 stickY;
 } ControllerState;
 
 typedef struct MenuRepeatState {
-      s16 repeatDelay;
-      s8 stickDirectionX;
-      s8 stickDirectionY;
-      u16 previousButtons;
+    s16 repeatDelay;
+    s8 stickDirectionX;
+    s8 stickDirectionY;
+    u16 previousButtons;
 } MenuRepeatState;
 
 extern ControllerState g_ControllerStates[MAXCONTROLLERS];

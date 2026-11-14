@@ -263,49 +263,49 @@ enum ListingState {
 #define STATUS_MATCHUP_COLUMN_COUNT 14
 
 typedef struct StatusTime {
-      u8 minutes;
-      u8 seconds;
-      u8 hundredths;
-      u8 character;
-      u8 scoreToPar;
+    u8 minutes;
+    u8 seconds;
+    u8 hundredths;
+    u8 character;
+    u8 scoreToPar;
 } StatusTime;
 
 #define BIRDIE_BADGE_BYTE_COUNT ((COURSE_HOLE_COUNT + BITS_PER_BYTE - 1) / BITS_PER_BYTE)
 #define BirdieBadgeBit(holeInByte) (1 << (BITS_PER_BYTE - 1 - (holeInByte)))
 
 typedef struct StatusCourse {
-      u8 roundCount[2];
-      u8 bestScore;
-      u8 averageStrokes;
-      u8 longestDrive[2];
-      u8 averageDrive[2];
-      u8 fairwayRate;
-      u8 averagePutts;
-      u8 parOrBetterRate;
-      u8 parOnRate;
-      u8 sandSaveRate;
-      u8 places;
-      u8 characterBestScores[CHARACTER_COUNT];
-      StatusTime bestTimes[BEST_TIME_COUNT];
-      u8 birdieBadges[BIRDIE_BADGE_BYTE_COUNT];
+    u8 roundCount[2];
+    u8 bestScore;
+    u8 averageStrokes;
+    u8 longestDrive[2];
+    u8 averageDrive[2];
+    u8 fairwayRate;
+    u8 averagePutts;
+    u8 parOrBetterRate;
+    u8 parOnRate;
+    u8 sandSaveRate;
+    u8 places;
+    u8 characterBestScores[CHARACTER_COUNT];
+    StatusTime bestTimes[BEST_TIME_COUNT];
+    u8 birdieBadges[BIRDIE_BADGE_BYTE_COUNT];
 } StatusCourse;
 
 typedef struct StatusMatchupBits {
-      u8 wonBits[2];
-      u8 wonUnsavedBits[2];
+    u8 wonBits[2];
+    u8 wonUnsavedBits[2];
 } StatusMatchupBits;
 
 typedef struct StatusProgress {
-      u8 openCourses;
-      u8 ringShotStars[RING_SHOT_COURSE_COUNT];
-      u8 birdieBadgeCount;
-      StatusMatchupBits matchupBits[CHARACTER_COUNT];
+    u8 openCourses;
+    u8 ringShotStars[RING_SHOT_COURSE_COUNT];
+    u8 birdieBadgeCount;
+    StatusMatchupBits matchupBits[CHARACTER_COUNT];
 } StatusProgress;
 
 typedef struct StatusData {
-      StatusCourse courses[COURSE_COUNT];
-      StatusCourse allCourses;
-      StatusProgress progress;
+    StatusCourse courses[COURSE_COUNT];
+    StatusCourse allCourses;
+    StatusProgress progress;
 } StatusData;
 
 #define CARTRIDGE_SAVE_SIZE 0x200

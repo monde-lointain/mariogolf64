@@ -61,13 +61,13 @@
 #define LISTED_TOPIC_COUNT 5
 
 typedef struct TextListLayout {
-      s32 top;
-      s32 rowSpacing;
+    s32 top;
+    s32 rowSpacing;
 } TextListLayout;
 
 typedef struct TopicPageTable {
-      u8 unread[11];
-      s8 counts[HELP_TOPIC_COUNT + 1];
+    u8 unread[11];
+    s8 counts[HELP_TOPIC_COUNT + 1];
 } TopicPageTable;
 
 static void *f_HandImages;

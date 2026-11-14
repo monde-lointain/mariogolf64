@@ -559,11 +559,11 @@ static s32 f_LastWallEditKind = 0;
 void ToggleCellMirroring(s32 column, s32 row);
 
 typedef struct TriangleSlope {
-      s16 waveS;
-      s16 waveT;
-      s16 normalX;
-      s16 normalZ;
-      u8 shade;
+    s16 waveS;
+    s16 waveT;
+    s16 normalX;
+    s16 normalZ;
+    u8 shade;
 } TriangleSlope;
 
 #define EDITOR_BUFFER_SIZE 0x40000

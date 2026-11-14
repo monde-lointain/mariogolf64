@@ -15,12 +15,12 @@ enum NormalPlacement {
 #define NORMAL_LENGTH 127.0f
 
 typedef struct ScreenPoint {
-      s32 x;
-      s32 y;
-      s32 depth;
-      f32 scaleX;
-      f32 scaleY;
-      f32 depthStep;
+    s32 x;
+    s32 y;
+    s32 depth;
+    f32 scaleX;
+    f32 scaleY;
+    f32 depthStep;
 } ScreenPoint;
 
 void SetCpuProjection(Mtx *projection, Mtx *viewing, Vp *viewport);

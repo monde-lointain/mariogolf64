@@ -52,10 +52,10 @@ extern s32 g_ScreenEffect;
 extern Mtx g_ScreenOrthoMatrix;
 
 typedef struct ScreenRect {
-      s16 left;
-      s16 top;
-      s16 right;
-      s16 bottom;
+    s16 left;
+    s16 top;
+    s16 right;
+    s16 bottom;
 } ScreenRect;
 
 extern ScreenRect g_HudScissor;

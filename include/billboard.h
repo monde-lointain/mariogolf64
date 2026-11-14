@@ -10,21 +10,21 @@
 #define BILLBOARD_MASK_SIZE 16
 
 typedef struct Billboard {
-      s16 x;
-      s16 y;
-      s16 z;
-      s8 textureIndex;
-      u8 shapeIndex;
-      u8 isIgnoredEditorMark;
-      u16 isNearCourseEdge;
-      u16 width;
-      u16 height;
+    s16 x;
+    s16 y;
+    s16 z;
+    s8 textureIndex;
+    u8 shapeIndex;
+    u8 isIgnoredEditorMark;
+    u16 isNearCourseEdge;
+    u16 width;
+    u16 height;
 } Billboard;
 
 typedef struct BillboardTransform {
-      s32 viewDepth;
-      Mtx translation;
-      Mtx scale;
+    s32 viewDepth;
+    Mtx translation;
+    Mtx scale;
 } BillboardTransform;
 
 void DestroyBillboardManager(void);

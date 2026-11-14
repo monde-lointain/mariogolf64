@@ -101,17 +101,17 @@
 #define LZ_PATCH_OFFSET_SHIFT 8
 
 typedef struct LzStream {
-      u16 *input;
-      u16 *outputStart;
-      u16 *nextInput;
-      u16 *output;
-      u16 *inputEnd;
-      u16 flags;
-      u16 *window;
-      u16 windowIndex;
-      u16 patchCount;
-      u16 historyIndex;
-      u16 *history;
+    u16 *input;
+    u16 *outputStart;
+    u16 *nextInput;
+    u16 *output;
+    u16 *inputEnd;
+    u16 flags;
+    u16 *window;
+    u16 windowIndex;
+    u16 patchCount;
+    u16 historyIndex;
+    u16 *history;
 } LzStream;
 
 extern Vec3 g_MiniGolfScale;

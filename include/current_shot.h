@@ -9,24 +9,24 @@
 #include "surface.h"
 
 typedef struct CurrentShot {
-      SignedBinaryAngle heading;
-      s32 powerGaugeFrame;
-      s32 impactGaugeFrame;
-      ShotMode shotMode;
-      s32 clubSlot;
-      s32 offsetX;
-      s32 offsetY;
-      CoursePoint ballPosition;
-      Surface surface;
-      s32 playerIndex;
-      s32 controllerIndex;
-      s32 aimCameraDistance;
-      s32 unusedBeforeAimCameraHeight;
-      s32 aimCameraHeight;
-      s32 gaugeFrame;
-      CoursePoint targetPoint;
-      s32 cupDistance;
-      s8 powerShotCount;
+    SignedBinaryAngle heading;
+    s32 powerGaugeFrame;
+    s32 impactGaugeFrame;
+    ShotMode shotMode;
+    s32 clubSlot;
+    s32 offsetX;
+    s32 offsetY;
+    CoursePoint ballPosition;
+    Surface surface;
+    s32 playerIndex;
+    s32 controllerIndex;
+    s32 aimCameraDistance;
+    s32 unusedBeforeAimCameraHeight;
+    s32 aimCameraHeight;
+    s32 gaugeFrame;
+    CoursePoint targetPoint;
+    s32 cupDistance;
+    s8 powerShotCount;
 } CurrentShot;
 
 enum ImpactPointState {

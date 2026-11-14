@@ -27,8 +27,8 @@ extern u16 *g_PlayerFacePalettes[MAX_PLAYER_COUNT];
 #define UNCOUNTED_PUTTS (-1)
 
 typedef struct PlayerHole {
-      s8 strokes;
-      s8 putts;
+    s8 strokes;
+    s8 putts;
 } PlayerHole;
 
 #define PLAYER_NAME_SIZE 12
@@ -74,45 +74,45 @@ enum CButtonPalette {
 };
 
 typedef struct Player {
-      char name[PLAYER_NAME_SIZE];
-      s32 state;
-      CoursePoint ballPosition;
-      s8 ballSurface;
-      s8 characterIndex;
-      s8 isComputer;
-      s8 ignoredPlanMark;
-      u8 unusedBeforeLefty[0x22 - 0x20];
-      s8 isLefty;
-      s8 strokeCount;
-      s8 puttCount;
-      s8 teeOrder;
-      s8 holeStatus;
-      s8 controllerIndex;
-      s8 powerShotCount;
-      s8 handicap;
-      s8 soundPan;
-      PlayerHole holes[COURSE_HOLE_COUNT];
-      u8 unusedAfterHoles[0x52 - 0x4F];
-      s16 clubs[CLUB_SLOT_COUNT];
-      u8 unusedAfterClubs[0x74 - 0x72];
-      s32 stopwatchFrameCount;
-      s8 ringStates[RING_COUNT];
-      s8 paletteIndex;
-      s8 gameBoyCharacterIndex;
-      u8 unusedAfterGameBoyIndex[3];
-      s32 driveDistance;
-      s32 pinDistance;
-      s32 noiseSeed;
-      s8 gridColor;
-      u8 unusedAfterGridColor;
-      s16 betTallies[BET_COUNT];
-      s8 hasBeenInBunker;
-      u8 unusedAfterBunkerVisit[3];
-      s32 lastDriveDistance;
-      s32 points;
-      s16 unusedRestValue;
-      s8 notableShotCounts[SHOT_KIND_COUNT];
-      u8 unusedAfterShotCounts[0xB8 - 0xB6];
+    char name[PLAYER_NAME_SIZE];
+    s32 state;
+    CoursePoint ballPosition;
+    s8 ballSurface;
+    s8 characterIndex;
+    s8 isComputer;
+    s8 ignoredPlanMark;
+    u8 unusedBeforeLefty[0x22 - 0x20];
+    s8 isLefty;
+    s8 strokeCount;
+    s8 puttCount;
+    s8 teeOrder;
+    s8 holeStatus;
+    s8 controllerIndex;
+    s8 powerShotCount;
+    s8 handicap;
+    s8 soundPan;
+    PlayerHole holes[COURSE_HOLE_COUNT];
+    u8 unusedAfterHoles[0x52 - 0x4F];
+    s16 clubs[CLUB_SLOT_COUNT];
+    u8 unusedAfterClubs[0x74 - 0x72];
+    s32 stopwatchFrameCount;
+    s8 ringStates[RING_COUNT];
+    s8 paletteIndex;
+    s8 gameBoyCharacterIndex;
+    u8 unusedAfterGameBoyIndex[3];
+    s32 driveDistance;
+    s32 pinDistance;
+    s32 noiseSeed;
+    s8 gridColor;
+    u8 unusedAfterGridColor;
+    s16 betTallies[BET_COUNT];
+    s8 hasBeenInBunker;
+    u8 unusedAfterBunkerVisit[3];
+    s32 lastDriveDistance;
+    s32 points;
+    s16 unusedRestValue;
+    s8 notableShotCounts[SHOT_KIND_COUNT];
+    u8 unusedAfterShotCounts[0xB8 - 0xB6];
 } Player;
 
 extern Player g_Players[MAX_PLAYER_COUNT];

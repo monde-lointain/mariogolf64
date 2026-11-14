@@ -37,9 +37,9 @@ enum HudAnimation {
 };
 
 typedef struct Fog {
-      s32 color[3];
-      s32 near;
-      s32 far;
+    s32 color[3];
+    s32 near;
+    s32 far;
 } Fog;
 
 extern Fog g_SceneFog;
@@ -49,16 +49,16 @@ extern Fog g_DebugFog;
 #define SKY_BACKGROUND_CHANNEL_COUNT 4
 
 typedef struct SkyColors {
-      s32 addsNoise;
-      u8 topColor[3];
-      u8 horizonColor[3];
-      u8 noiseColor[3];
-      u8 backgroundColor[SKY_BACKGROUND_CHANNEL_COUNT];
-      u8 hasLensFlare;
-      struct Sun *sun;
-      u8 fogColor[3];
-      s16 fogNear;
-      s16 fogFar;
+    s32 addsNoise;
+    u8 topColor[3];
+    u8 horizonColor[3];
+    u8 noiseColor[3];
+    u8 backgroundColor[SKY_BACKGROUND_CHANNEL_COUNT];
+    u8 hasLensFlare;
+    struct Sun *sun;
+    u8 fogColor[3];
+    s16 fogNear;
+    s16 fogFar;
 } SkyColors;
 
 #define SKY_TIME_COUNT 4
@@ -67,15 +67,15 @@ typedef struct SkyColors {
 extern SkyColors g_SkyColors[][SKY_WEATHER_COUNT * SKY_TIME_COUNT];
 
 typedef struct Sun {
-      u8 unusedBeforeHeight[4];
-      s32 height;
-      u8 primColor[3];
-      u8 envColor[3];
-      s32 radius;
-      s16 unusedBeforeTexelStep;
-      s16 texelStep;
-      f32 maxGlare;
-      u8 imageKind;
+    u8 unusedBeforeHeight[4];
+    s32 height;
+    u8 primColor[3];
+    u8 envColor[3];
+    s32 radius;
+    s16 unusedBeforeTexelStep;
+    s16 texelStep;
+    f32 maxGlare;
+    u8 imageKind;
 } Sun;
 
 extern s32 g_MenuBackdropState;
@@ -92,14 +92,14 @@ extern u8 *g_CourseSkyImage;
 #define SKY_VIEW_COUNT 2
 
 typedef struct SkyState {
-      f32 horizonLevels[SKY_VIEW_COUNT];
-      f32 screenHeights[SKY_VIEW_COUNT];
-      f32 lookAtLevels[SKY_VIEW_COUNT];
-      Radians pitches[SKY_VIEW_COUNT];
-      Radians yaws[SKY_VIEW_COUNT];
-      f32 scrollX;
-      f32 scrollY;
-      f32 viewedWindAngles[SKY_VIEW_COUNT];
+    f32 horizonLevels[SKY_VIEW_COUNT];
+    f32 screenHeights[SKY_VIEW_COUNT];
+    f32 lookAtLevels[SKY_VIEW_COUNT];
+    Radians pitches[SKY_VIEW_COUNT];
+    Radians yaws[SKY_VIEW_COUNT];
+    f32 scrollX;
+    f32 scrollY;
+    f32 viewedWindAngles[SKY_VIEW_COUNT];
 } SkyState;
 
 extern SkyState g_SkyState;

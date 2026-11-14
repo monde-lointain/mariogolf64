@@ -2331,8 +2331,7 @@ void DrawSavedGames(Gfx **displayListHead) {
             QuarterPixels(SAVED_GAME_STRIP_TOP + (index * SAVED_GAME_STRIP_HEIGHT)),
             QuarterPixels(stripLeft + stripShownWidth),
             QuarterPixels(
-                SAVED_GAME_STRIP_TOP + SAVED_GAME_STRIP_HEIGHT +
-                (index * SAVED_GAME_STRIP_HEIGHT)
+                SAVED_GAME_STRIP_TOP + SAVED_GAME_STRIP_HEIGHT + (index * SAVED_GAME_STRIP_HEIGHT)
             ),
             G_TX_RENDERTILE,
             0,

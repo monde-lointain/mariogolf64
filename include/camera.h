@@ -19,27 +19,27 @@ enum CameraMode {
 #define CAMERA_DRAW_SCREEN_EFFECT (1 << 1)
 
 typedef struct CameraView {
-      Vec3 eye;
-      Vec3 lookAt;
-      Radians heading;
-      s32 scissorX;
-      s32 scissorY;
-      s32 scissorWidth;
-      s32 scissorHeight;
-      s32 unreadSettings[2];
-      s32 viewportCenterX;
-      s32 viewportCenterY;
-      f32 zoom;
-      s32 drawFlags;
-      f32 fieldOfView;
+    Vec3 eye;
+    Vec3 lookAt;
+    Radians heading;
+    s32 scissorX;
+    s32 scissorY;
+    s32 scissorWidth;
+    s32 scissorHeight;
+    s32 unreadSettings[2];
+    s32 viewportCenterX;
+    s32 viewportCenterY;
+    f32 zoom;
+    s32 drawFlags;
+    f32 fieldOfView;
 } CameraView;
 
 #define ViewportCenter(start, size) (((start) * 2) + (size))
 
 typedef struct Camera {
-      s32 unusedBeforeView;
-      CameraView view;
-      s32 mode;
+    s32 unusedBeforeView;
+    CameraView view;
+    s32 mode;
 } Camera;
 
 #define CAMERA_COUNT 2
@@ -47,16 +47,16 @@ typedef struct Camera {
 extern Camera g_Cameras[CAMERA_COUNT];
 
 typedef struct CameraMatrices {
-      Mtx perspective;
-      Mtx viewing;
-      Mtx placement;
-      Mtx billboard;
-      Mtx antiBillboard;
-      Mat4 perspectiveF;
-      Mat4 viewingF;
-      Mtx projection;
-      LookAt lookAt;
-      u8 unusedAfterLookAt[0x10];
+    Mtx perspective;
+    Mtx viewing;
+    Mtx placement;
+    Mtx billboard;
+    Mtx antiBillboard;
+    Mat4 perspectiveF;
+    Mat4 viewingF;
+    Mtx projection;
+    LookAt lookAt;
+    u8 unusedAfterLookAt[0x10];
 } CameraMatrices;
 
 #define INSET_CAMERA 1
@@ -69,10 +69,10 @@ enum InsetViewState {
 };
 
 typedef struct InsetView {
-      s32 animation;
-      s32 step;
-      s32 ignoredSourceCode;
-      s32 ignoredSizeCode;
+    s32 animation;
+    s32 step;
+    s32 ignoredSourceCode;
+    s32 ignoredSizeCode;
 } InsetView;
 
 extern InsetView g_InsetView;

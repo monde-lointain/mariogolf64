@@ -81,20 +81,20 @@
 #define CAPTION_SOUND_VOLUME 63
 
 typedef struct Banner {
-      s16 unusedBeforeImageAsset;
-      AssetId imageAsset;
-      s8 letterCount;
-      u8 letterWidth;
-      u8 letterHeight;
-      s8 animation;
+    s16 unusedBeforeImageAsset;
+    AssetId imageAsset;
+    s8 letterCount;
+    u8 letterWidth;
+    u8 letterHeight;
+    s8 animation;
 } Banner;
 
 typedef struct BannerLetter {
-      f32 x;
-      f32 y;
-      f32 scale;
-      s32 unusedLetterValue;
-      Mtx matrices[2];
+    f32 x;
+    f32 y;
+    f32 scale;
+    s32 unusedLetterValue;
+    Mtx matrices[2];
 } BannerLetter;
 
 enum BannerLayoutMode {
@@ -112,14 +112,14 @@ enum BannerAnimation {
 typedef s16 BannerLayout[BANNER_LAYOUT_FIRST_LETTER + BANNER_MAX_LETTERS];
 
 typedef struct LakituFlight {
-      f32 x;
-      f32 y;
-      f32 scale;
+    f32 x;
+    f32 y;
+    f32 scale;
 } LakituFlight;
 
 typedef struct LakituVelocity {
-      f32 x;
-      f32 y;
+    f32 x;
+    f32 y;
 } LakituVelocity;
 
 #define FLIP_MESSAGE_RESET (-2)

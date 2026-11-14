@@ -30,8 +30,8 @@
     }
 
 typedef struct AssetTableEntry {
-      s32 size;
-      u32 offset;
+    s32 size;
+    u32 offset;
 } AssetTableEntry;
 
 #define ASSET_TABLE ((AssetTableEntry *)g_AssetArchiveRomStart)
@@ -136,15 +136,15 @@ void ReadEncodedAsset(void *buffer, EncodedAsset *asset) {
 }
 
 typedef struct ChunkReader {
-      u8 rawChunk[ASSET_CHUNK_SIZE + 0x10];
-      s32 position;
-      u32 remaining;
+    u8 rawChunk[ASSET_CHUNK_SIZE + 0x10];
+    s32 position;
+    u32 remaining;
 } ChunkReader;
 
 typedef struct LargeChunkReader {
-      u8 rawChunk[ASSET_CHUNK_SIZE + 0x20];
-      s32 position;
-      u32 remaining;
+    u8 rawChunk[ASSET_CHUNK_SIZE + 0x20];
+    s32 position;
+    u32 remaining;
 } LargeChunkReader;
 
 void DecodeByteRuns(u8 *buffer, EncodedAsset *asset) {

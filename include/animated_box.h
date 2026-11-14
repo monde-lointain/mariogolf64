@@ -11,16 +11,16 @@ typedef enum AnimatedBoxState {
 } AnimatedBoxState;
 
 typedef struct AnimatedBox {
-      s16 left;
-      s16 top;
-      s16 right;
-      s16 bottom;
-      u8 red;
-      u8 green;
-      u8 blue;
-      u8 alpha;
-      s32 state;
-      s32 frameIndex;
+    s16 left;
+    s16 top;
+    s16 right;
+    s16 bottom;
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+    s32 state;
+    s32 frameIndex;
 } AnimatedBox;
 
 #define QUEUED_BOX_CAPACITY 10

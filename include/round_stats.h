@@ -8,13 +8,13 @@
 #include "player.h"
 
 typedef struct RoundStats {
-      s32 sandSaveCount;
-      s32 missedSandSaveCount;
-      s32 measuredDriveCount;
-      s32 longestDrive;
-      s32 averagedDriveTotal;
-      s32 averagedDriveCount;
-      Boolean isDriveAveraged;
+    s32 sandSaveCount;
+    s32 missedSandSaveCount;
+    s32 measuredDriveCount;
+    s32 longestDrive;
+    s32 averagedDriveTotal;
+    s32 averagedDriveCount;
+    Boolean isDriveAveraged;
 } RoundStats;
 
 extern s16 g_BetTallies[MAX_PLAYER_COUNT][BET_COUNT];
@@ -28,9 +28,9 @@ extern s32 g_HolePot;
 #define NO_CONTEST_WINNER (-1)
 
 typedef struct SkinsCarryover {
-      s8 intoLastHole;
-      s8 onLastHole;
-      s8 fromLastHole;
+    s8 intoLastHole;
+    s8 onLastHole;
+    s8 fromLastHole;
 } SkinsCarryover;
 
 s32 GetNetScoreToPar(s32 endHole, s32 playerIndex);

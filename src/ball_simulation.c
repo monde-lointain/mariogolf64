@@ -265,13 +265,13 @@ s32 StepBallSimulation(BallSimulation *simulation) {
 
     inline f32 GetStepNoise(void) {
         f32 noise = (u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
-                         g_Players[simulation->playerIndex].noiseSeed) &
-                   NOISE_BYTE_MASK) /
+                              g_Players[simulation->playerIndex].noiseSeed) &
+                        NOISE_BYTE_MASK) /
             MAX_NOISE_BYTE_PAIR_SUM;
 
         noise += (u32)((simulation->position[AXIS_X] - simulation->position[AXIS_Z] +
-                      g_Players[simulation->playerIndex].noiseSeed) &
-                NOISE_BYTE_MASK) /
+                           g_Players[simulation->playerIndex].noiseSeed) &
+                     NOISE_BYTE_MASK) /
             MAX_NOISE_BYTE_PAIR_SUM;
         return noise;
     }
@@ -1688,8 +1688,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     }
                 }
 
-                if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
-                    !g_GameState.isMiniGolf) {
+                if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST && !g_GameState.isMiniGolf) {
                     f32 sideX = velocity[AXIS_X];
                     f32 sideZ = velocity[AXIS_Z];
 

@@ -105,9 +105,9 @@ enum PauseMessage {
 };
 
 typedef struct PauseOption {
-      s16 message;
-      s16 action;
-      u16 kind;
+    s16 message;
+    s16 action;
+    u16 kind;
 } PauseOption;
 
 #define CHOICE_BOX_MAX_OPTIONS 4
@@ -132,11 +132,11 @@ enum ChoiceLabel {
 };
 
 typedef struct ChoiceBox {
-      s32 optionCount;
-      s32 halfWidth;
-      Boolean isVertical;
-      u8 labels[CHOICE_BOX_MAX_OPTIONS];
-      u8 results[CHOICE_BOX_MAX_OPTIONS];
+    s32 optionCount;
+    s32 halfWidth;
+    Boolean isVertical;
+    u8 labels[CHOICE_BOX_MAX_OPTIONS];
+    u8 results[CHOICE_BOX_MAX_OPTIONS];
 } ChoiceBox;
 
 #define CHOICE_BOX_CENTER_X (SCREEN_WIDTH / 2)

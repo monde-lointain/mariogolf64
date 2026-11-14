@@ -12,10 +12,10 @@
 #define AIM_POINT_COUNT 8
 
 typedef struct HolePoints {
-      CoursePoint cupPositions[CUP_POSITION_COUNT];
-      CoursePoint teePositions[CUP_POSITION_COUNT];
-      CoursePoint aimPoints[AIM_POINT_COUNT];
-      CoursePoint routePoints[ROUTE_POINT_COUNT];
+    CoursePoint cupPositions[CUP_POSITION_COUNT];
+    CoursePoint teePositions[CUP_POSITION_COUNT];
+    CoursePoint aimPoints[AIM_POINT_COUNT];
+    CoursePoint routePoints[ROUTE_POINT_COUNT];
 } HolePoints;
 
 extern HolePoints g_HolePoints;

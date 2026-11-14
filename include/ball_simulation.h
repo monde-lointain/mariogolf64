@@ -77,25 +77,25 @@ enum BallState {
         (plane).normal[AXIS_Y] * (plane).normal[AXIS_Y] * DROP_MAX_SLOPE_SQUARED)
 
 typedef struct ImpactEffect {
-      s8 speedChange;
-      s8 yawChange;
-      s8 pitchChange;
-      s8 sideSpinChange;
-      s8 spinChange;
-      s8 rumbles;
+    s8 speedChange;
+    s8 yawChange;
+    s8 pitchChange;
+    s8 sideSpinChange;
+    s8 spinChange;
+    s8 rumbles;
 } ImpactEffect;
 
 #define MAX_LAUNCH_POWER 256
 
 typedef struct ShotLaunch {
-      SignedBinaryAngle heading;
-      s32 clubIndex;
-      s32 power;
-      s32 impactTiming;
-      s32 offsetX;
-      s32 offsetY;
-      s32 playerIndex;
-      ShotMode shotMode;
+    SignedBinaryAngle heading;
+    s32 clubIndex;
+    s32 power;
+    s32 impactTiming;
+    s32 offsetX;
+    s32 offsetY;
+    s32 playerIndex;
+    ShotMode shotMode;
 } ShotLaunch;
 
 #define NO_BOUNCE_STEP (-2)
@@ -122,36 +122,36 @@ enum LaunchPurpose {
     ((purpose) == LAUNCH_PURPOSE_STROKE || (purpose) == LAUNCH_PURPOSE_TRIAL)
 
 typedef struct BallSimulation {
-      s32 startPosition[3];
-      s32 dropPosition[3];
-      s32 position[3];
-      s32 velocity[3];
-      s32 unusedResetValue;
-      s32 spinSpeed;
-      s32 sideSpin;
-      Radians spinHeading;
-      f32 spinSize;
-      Mat4 liftRotation;
-      f32 windVelocityX;
-      f32 windVelocityZ;
-      s32 state;
-      s32 purpose;
-      s32 bounceCount;
-      s32 stepCount;
-      s32 lastBounceStep;
-      s8 isHoledOut;
-      s8 hasEnteredWater;
-      s8 launchSurface;
-      s8 surface;
-      s8 surfaceBelow;
-      s8 playerIndex;
-      s8 stepFlags;
-      s8 firstBounceSurface;
-      s8 soundStates[BALL_SOUND_COUNT];
-      s8 hasHitFlag;
-      u8 previousStepFlags;
-      u16 rollFrameCount;
-      s8 isOverCup;
+    s32 startPosition[3];
+    s32 dropPosition[3];
+    s32 position[3];
+    s32 velocity[3];
+    s32 unusedResetValue;
+    s32 spinSpeed;
+    s32 sideSpin;
+    Radians spinHeading;
+    f32 spinSize;
+    Mat4 liftRotation;
+    f32 windVelocityX;
+    f32 windVelocityZ;
+    s32 state;
+    s32 purpose;
+    s32 bounceCount;
+    s32 stepCount;
+    s32 lastBounceStep;
+    s8 isHoledOut;
+    s8 hasEnteredWater;
+    s8 launchSurface;
+    s8 surface;
+    s8 surfaceBelow;
+    s8 playerIndex;
+    s8 stepFlags;
+    s8 firstBounceSurface;
+    s8 soundStates[BALL_SOUND_COUNT];
+    s8 hasHitFlag;
+    u8 previousStepFlags;
+    u16 rollFrameCount;
+    s8 isOverCup;
 } BallSimulation;
 
 #define SHOT_PREVIEW_MAX_DASH_LENGTH 0x4AFFF

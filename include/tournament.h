@@ -13,10 +13,10 @@
 #define PLACE_TIED 0x80
 
 typedef struct TournamentStanding {
-      s8 contestantId;
-      s16 score;
-      s8 holeCount;
-      u8 place;
+    s8 contestantId;
+    s16 score;
+    s8 holeCount;
+    u8 place;
 } TournamentStanding;
 
 #define NAMES_PER_COURSE 30

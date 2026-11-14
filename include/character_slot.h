@@ -40,23 +40,23 @@
 #define LIGHT_DIRECTION_SCALE 127.0f
 
 typedef struct CharacterModel {
-      u32 romStart;
-      u32 romEnd;
-      u32 segmentAddresses[CHARACTER_MODEL_SEGMENT_ADDRESS_COUNT];
-      s16 shadowScale;
-      u32 baseRomStart;
-      u32 baseRomEnd;
-      u32 frameDataStart;
-      u32 frameDataEnd;
+    u32 romStart;
+    u32 romEnd;
+    u32 segmentAddresses[CHARACTER_MODEL_SEGMENT_ADDRESS_COUNT];
+    s16 shadowScale;
+    u32 baseRomStart;
+    u32 baseRomEnd;
+    u32 frameDataStart;
+    u32 frameDataEnd;
 } CharacterModel;
 
 #define CHARACTER_SLOT_COUNT 4
 #define NO_CHARACTER_MODEL (-1)
 
 typedef struct CharacterPoint {
-      s16 *jointPath;
-      f32 offset[3];
-      s16 id;
+    s16 *jointPath;
+    f32 offset[3];
+    s16 id;
 } CharacterPoint;
 
 #define END_OF_JOINT_PATH (-1)
@@ -66,24 +66,24 @@ typedef struct CharacterPoint {
 #define ROLL_ORIGIN_DEGREES 180
 
 typedef struct KeyframeSpan {
-      s16 startFrame;
-      s16 endFrame;
-      s16 index;
+    s16 startFrame;
+    s16 endFrame;
+    s16 index;
 } KeyframeSpan;
 
 typedef struct JointAnimation {
-      s16 translationKeyCount;
-      s16 rotationKeyCount;
-      s16 scaleKeyCount;
-      s16 *translationFrames;
-      s16 *rotationFrames;
-      s16 *scaleFrames;
-      f32 (*translations)[3];
-      s16 (*rotations)[4];
-      f32 (*scales)[3];
-      KeyframeSpan translationSpan;
-      KeyframeSpan rotationSpan;
-      KeyframeSpan scaleSpan;
+    s16 translationKeyCount;
+    s16 rotationKeyCount;
+    s16 scaleKeyCount;
+    s16 *translationFrames;
+    s16 *rotationFrames;
+    s16 *scaleFrames;
+    f32 (*translations)[3];
+    s16 (*rotations)[4];
+    f32 (*scales)[3];
+    KeyframeSpan translationSpan;
+    KeyframeSpan rotationSpan;
+    KeyframeSpan scaleSpan;
 } JointAnimation;
 
 #define UNSET_KEYFRAME_SPAN (-1)
@@ -126,9 +126,9 @@ static inline void QuaternionToMatrix(f32 quaternion[4], Mat4 matrix) {
 }
 
 typedef struct AnimationEvent {
-      s16 frame;
-      u8 kind;
-      u8 value;
+    s16 frame;
+    u8 kind;
+    u8 value;
 } AnimationEvent;
 
 #define END_OF_ANIMATION_EVENTS (-1)
@@ -141,8 +141,8 @@ enum AnimationEventKind {
 };
 
 typedef struct AnimationEventAction {
-      u8 kind;
-      u8 value;
+    u8 kind;
+    u8 value;
 } AnimationEventAction;
 
 #define EVENT_ACTION_COUNT_MAX 16
@@ -153,90 +153,90 @@ enum TextureAnimationEvent {
 };
 
 typedef struct CharacterAnimation {
-      AnimationEvent *events;
-      s16 startFrame;
-      s16 frameCount;
-      u8 id;
+    AnimationEvent *events;
+    s16 startFrame;
+    s16 frameCount;
+    u8 id;
 } CharacterAnimation;
 
 typedef struct TextureAnimation {
-      s16 index;
-      s16 frameCount;
+    s16 index;
+    s16 frameCount;
 } TextureAnimation;
 
 #define RANDOM_TEXTURE_ANIMATION 0
 
 typedef struct AnimatedTexture {
-      u32 address;
-      u8 width;
-      u8 height;
+    u32 address;
+    u8 width;
+    u8 height;
 } AnimatedTexture;
 
 #define TRIANGLE_VERTEX_COUNT 3
 
 typedef struct TriangleTextureKey {
-      s16 frame;
-      s16 textureIndex;
-      s16 s[TRIANGLE_VERTEX_COUNT];
-      s16 t[TRIANGLE_VERTEX_COUNT];
+    s16 frame;
+    s16 textureIndex;
+    s16 s[TRIANGLE_VERTEX_COUNT];
+    s16 t[TRIANGLE_VERTEX_COUNT];
 } TriangleTextureKey;
 
 typedef struct TriangleTextureKeys {
-      s16 count;
-      s16 textureAnimationIndex;
-      TriangleTextureKey *keys;
+    s16 count;
+    s16 textureAnimationIndex;
+    TriangleTextureKey *keys;
 } TriangleTextureKeys;
 
 typedef struct AnimatedTriangle {
-      u32 vertices;
-      u32 loadTextureBlock;
-      TriangleTextureKeys *keySets;
-      s16 keySetCount;
-      s16 textureIndex;
-      s16 s[TRIANGLE_VERTEX_COUNT];
-      s16 t[TRIANGLE_VERTEX_COUNT];
+    u32 vertices;
+    u32 loadTextureBlock;
+    TriangleTextureKeys *keySets;
+    s16 keySetCount;
+    s16 textureIndex;
+    s16 s[TRIANGLE_VERTEX_COUNT];
+    s16 t[TRIANGLE_VERTEX_COUNT];
 } AnimatedTriangle;
 
 #define TEXTURE_ANIMATION_COUNT 32
 
 typedef struct TextureAnimationState {
-      s32 frame;
-      s8 pendingCopyCount;
+    s32 frame;
+    s8 pendingCopyCount;
 } TextureAnimationState;
 
 #define FRAME_DATA_COPY_COUNT 3
 #define TEXTURE_ANIMATION_PLAYING (FRAME_DATA_COPY_COUNT + 1)
 
 typedef struct CharacterSlot {
-      const CharacterModel *model;
-      void *modelBuffer;
-      s32 modelIndex;
-      s32 animationIndex;
-      f32 animationFrame;
-      s32 animationStartFrame;
-      s32 animationEndFrame;
-      s32 animationCount;
-      void *frameData[FRAME_DATA_COPY_COUNT];
-      Mtx *jointMatrices;
-      s32 frameDataIndex;
-      u32 lastDrawnFrame;
-      f32 position[3];
-      f32 rotation[3];
-      f32 scale[3];
-      f32 animationSpeed;
-      s8 isTranslucent;
-      u8 alpha;
-      Gfx *displayList;
-      f32 portraitCamera[PORTRAIT_CAMERA_VALUE_COUNT];
-      s16 shadowScale;
-      s8 lighting;
-      s8 isLooping;
-      s8 nextAnimationId;
-      s8 playsRandomTextureAnimation;
-      s8 randomTextureAnimationDelay;
-      TextureAnimationState textureAnimations[TEXTURE_ANIMATION_COUNT];
-      s8 usesFrontCulling;
-      s8 reusesLastMatrices;
+    const CharacterModel *model;
+    void *modelBuffer;
+    s32 modelIndex;
+    s32 animationIndex;
+    f32 animationFrame;
+    s32 animationStartFrame;
+    s32 animationEndFrame;
+    s32 animationCount;
+    void *frameData[FRAME_DATA_COPY_COUNT];
+    Mtx *jointMatrices;
+    s32 frameDataIndex;
+    u32 lastDrawnFrame;
+    f32 position[3];
+    f32 rotation[3];
+    f32 scale[3];
+    f32 animationSpeed;
+    s8 isTranslucent;
+    u8 alpha;
+    Gfx *displayList;
+    f32 portraitCamera[PORTRAIT_CAMERA_VALUE_COUNT];
+    s16 shadowScale;
+    s8 lighting;
+    s8 isLooping;
+    s8 nextAnimationId;
+    s8 playsRandomTextureAnimation;
+    s8 randomTextureAnimationDelay;
+    TextureAnimationState textureAnimations[TEXTURE_ANIMATION_COUNT];
+    s8 usesFrontCulling;
+    s8 reusesLastMatrices;
 } CharacterSlot;
 
 #define NO_NEXT_ANIMATION (-1)

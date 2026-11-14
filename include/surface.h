@@ -85,16 +85,16 @@ typedef s32 SurfaceKind;
 #define SINK_DEPTH_BURIED 2
 
 typedef struct SurfaceInfo {
-      SurfaceKind kind;
-      char *name;
-      s8 minPercent;
-      s8 maxPercent;
-      s8 wrongClubPenalty;
-      s16 rollSpeedKept;
-      s16 bounciness;
-      s32 lieImageAsset;
-      s32 sinkDepth;
-      s32 ignoredSurfaceGroup;
+    SurfaceKind kind;
+    char *name;
+    s8 minPercent;
+    s8 maxPercent;
+    s8 wrongClubPenalty;
+    s16 rollSpeedKept;
+    s16 bounciness;
+    s32 lieImageAsset;
+    s32 sinkDepth;
+    s32 ignoredSurfaceGroup;
 } SurfaceInfo;
 
 SurfaceInfo *GetSurfaceInfo(Surface surface);

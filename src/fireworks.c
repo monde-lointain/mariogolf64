@@ -73,23 +73,23 @@
         PARTICLE_VELOCITY_JITTER_STEP)
 
 struct FireworkShape {
-      u16 format;
-      u8 widthHighByte;
-      u8 width;
-      u8 heightHighByte;
-      u8 height;
-      u16 unusedAfterHeight;
-      u8 cells[TRAILING_ARRAY_LENGTH];
+    u16 format;
+    u8 widthHighByte;
+    u8 width;
+    u8 heightHighByte;
+    u8 height;
+    u16 unusedAfterHeight;
+    u8 cells[TRAILING_ARRAY_LENGTH];
 };
 
 struct FireworkParticle {
-      Mtx matrices[MATRIX_BUFFER_COUNT];
-      f32 x;
-      f32 y;
-      f32 velocityX;
-      f32 velocityY;
-      u8 unusedAfterVelocity[4];
-      s16 life;
+    Mtx matrices[MATRIX_BUFFER_COUNT];
+    f32 x;
+    f32 y;
+    f32 velocityX;
+    f32 velocityY;
+    u8 unusedAfterVelocity[4];
+    s16 life;
 };
 
 static s32 f_FireworkCount = 0;

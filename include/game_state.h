@@ -49,36 +49,36 @@ enum ReplayKind {
 #define ROUND_CONTINUED 2
 
 typedef struct GameState {
-      GameStateStep step;
-      u32 gameMode;
-      s32 playerCount;
-      CourseIndex courseIndex;
-      s32 holeIndex;
-      s32 unusedHoleValue;
-      Boolean isSuddenDeath;
-      s32 unusedAfterSuddenDeath;
-      s32 currentPlayerIndex;
-      s32 holeSelection;
-      s32 stopwatchFrameCount;
-      s32 roundSeed;
-      s8 isRoundContinued;
-      s8 replayKind;
-      s8 betRates[BET_COUNT];
-      u8 unusedAfterBetRates;
-      s8 isMiniGolf;
-      s8 isClubTournament;
-      u8 isImportedCharacterChosen;
-      s8 saveCount;
-      s16 carriedPots[CARRIED_POT_COUNT];
+    GameStateStep step;
+    u32 gameMode;
+    s32 playerCount;
+    CourseIndex courseIndex;
+    s32 holeIndex;
+    s32 unusedHoleValue;
+    Boolean isSuddenDeath;
+    s32 unusedAfterSuddenDeath;
+    s32 currentPlayerIndex;
+    s32 holeSelection;
+    s32 stopwatchFrameCount;
+    s32 roundSeed;
+    s8 isRoundContinued;
+    s8 replayKind;
+    s8 betRates[BET_COUNT];
+    u8 unusedAfterBetRates;
+    s8 isMiniGolf;
+    s8 isClubTournament;
+    u8 isImportedCharacterChosen;
+    s8 saveCount;
+    s16 carriedPots[CARRIED_POT_COUNT];
 } GameState;
 
 typedef struct HoleSetup {
-      CoursePoint cupPosition;
-      CoursePoint teePosition;
-      HoleConditions conditions;
-      s8 par;
-      s8 nextCupIndex;
-      u8 unusedAfterNextCup[0x34 - 0x2E];
+    CoursePoint cupPosition;
+    CoursePoint teePosition;
+    HoleConditions conditions;
+    s8 par;
+    s8 nextCupIndex;
+    u8 unusedAfterNextCup[0x34 - 0x2E];
 } HoleSetup;
 
 extern HoleSetup g_HoleSetup;

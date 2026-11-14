@@ -95,8 +95,8 @@ enum GridMove {
 #define HALF_PIXEL 0.5f
 
 typedef struct TagOffset {
-      s8 x;
-      s8 y;
+    s8 x;
+    s8 y;
 } TagOffset;
 
 void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer);

@@ -53,10 +53,10 @@
 #define STARS_PER_RING_SHOT_COURSE 4
 
 typedef struct ImportedCharacterCell {
-      s16 unusedBeforeColumn;
-      s16 column;
-      s16 unusedBeforeRow;
-      s16 row;
+    s16 unusedBeforeColumn;
+    s16 column;
+    s16 unusedBeforeRow;
+    s16 row;
 } ImportedCharacterCell;
 
 s16 g_LastMenuPlayerCountChoice;
@@ -132,8 +132,8 @@ FILE_STATIC SaveData g_SaveData;
 void PlaceImportedCharacters(void);
 
 typedef struct GridCell {
-      s16 column;
-      s16 row;
+    s16 column;
+    s16 row;
 } GridCell;
 
 s32 ReadSaveCopies(SaveData *save, u8 isInSram);

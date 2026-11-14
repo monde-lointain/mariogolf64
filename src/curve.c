@@ -19,8 +19,8 @@ static f32 f_UnusedFloatsAfterPathStep[33] UNUSED = {
 static f32 f_PathPosition[AXIS_COUNT];
 
 typedef struct PathSegment {
-      Vec3 start;
-      Vec3 end;
+    Vec3 start;
+    Vec3 end;
 } PathSegment;
 
 static PathSegment f_PathSegment;

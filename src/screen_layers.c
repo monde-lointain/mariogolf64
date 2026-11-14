@@ -140,9 +140,9 @@ enum HalfTurnState {
 #define PROMPT_SOUND_VOLUME 0x64
 
 typedef struct Prompt {
-      MessageId messageId;
-      s32 defaultChoice;
-      s32 results[2];
+    MessageId messageId;
+    s32 defaultChoice;
+    s32 results[2];
 } Prompt;
 
 ScreenFadeColor g_ScreenFadeColor;

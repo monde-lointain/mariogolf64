@@ -8,12 +8,12 @@
 #include "math_util.h"
 
 typedef struct HoleConditions {
-      s32 windSpeed;
-      BinaryAngle windDirection;
-      Boolean isRaining;
-      u32 sceneColorIndex;
-      BinaryAngle lightYaw;
-      BinaryAngle lightPitch;
+    s32 windSpeed;
+    BinaryAngle windDirection;
+    Boolean isRaining;
+    u32 sceneColorIndex;
+    BinaryAngle lightYaw;
+    BinaryAngle lightPitch;
 } HoleConditions;
 
 #define SCENE_COLOR_INDEX_ROUND_START 0

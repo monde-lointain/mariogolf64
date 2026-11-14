@@ -56,10 +56,10 @@ enum ShotLabels {
 #define LEADER_LINE_FAR_Y 12
 
 typedef struct ShotLabel {
-      s32 x;
-      s32 y;
-      s32 depth;
-      s32 corner;
+    s32 x;
+    s32 y;
+    s32 depth;
+    s32 corner;
 } ShotLabel;
 
 #define SIGN_WIDTH 40
@@ -106,9 +106,9 @@ enum SpotState {
 };
 
 typedef struct ScreenSpot {
-      s32 x;
-      s32 y;
-      s32 state;
+    s32 x;
+    s32 y;
+    s32 state;
 } ScreenSpot;
 
 static u8 f_PlayerTagColors[MAX_PLAYER_COUNT][3] =

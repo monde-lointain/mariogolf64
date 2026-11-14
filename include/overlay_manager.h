@@ -46,16 +46,16 @@ enum ModuleId {
 };
 
 typedef struct Overlay {
-      s8 isLoaded;
-      s8 *moduleIds;
-      u32 romStart;
-      u32 romEnd;
-      u8 *vramStart;
-      u8 *textEnd;
-      u8 *bssStart;
-      u8 *bssEnd;
-      void (*onLoad)(void);
-      void (*onUnload)(void);
+    s8 isLoaded;
+    s8 *moduleIds;
+    u32 romStart;
+    u32 romEnd;
+    u8 *vramStart;
+    u8 *textEnd;
+    u8 *bssStart;
+    u8 *bssEnd;
+    void (*onLoad)(void);
+    void (*onUnload)(void);
 } Overlay;
 
 void OnLoadOverlay2(void);

@@ -54,25 +54,25 @@ void StartHoleIntroCamera(void) {
     if (g_GameState.holeIndex == GetFirstHoleIndex()) {
         Radians heading = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2);
 
-        g_Cameras[0].view.eye[AXIS_X] = g_Cameras[1].view.lookAt[AXIS_X] +
-            (-sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
+        g_Cameras[0].view.eye[AXIS_X] =
+            g_Cameras[1].view.lookAt[AXIS_X] + (-sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
         g_Cameras[0].view.eye[AXIS_Y] =
             (g_CurrentShot.ballPosition[AXIS_Y] + INTRO_CAMERA_FIRST_HEIGHT) *
             COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.eye[AXIS_Z] = g_Cameras[1].view.lookAt[AXIS_Z] +
-            (cosf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
+        g_Cameras[0].view.eye[AXIS_Z] =
+            g_Cameras[1].view.lookAt[AXIS_Z] + (cosf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
     }
     else {
         Radians heading =
             ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2) - M_PI;
 
-        g_Cameras[0].view.eye[AXIS_X] = g_Cameras[1].view.lookAt[AXIS_X] +
-            (-sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
+        g_Cameras[0].view.eye[AXIS_X] =
+            g_Cameras[1].view.lookAt[AXIS_X] + (-sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
         g_Cameras[0].view.eye[AXIS_Y] =
             (g_CurrentShot.ballPosition[AXIS_Y] + INTRO_CAMERA_FIRST_HEIGHT) *
             COURSE_TO_WORLD_SCALE;
-        g_Cameras[0].view.eye[AXIS_Z] = g_Cameras[1].view.lookAt[AXIS_Z] +
-            (cosf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
+        g_Cameras[0].view.eye[AXIS_Z] =
+            g_Cameras[1].view.lookAt[AXIS_Z] + (cosf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
     }
 }
 

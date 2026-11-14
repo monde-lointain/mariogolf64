@@ -1601,9 +1601,7 @@ void DrawBetsPage(Gfx **displayListHead) {
         &gfx,
         QuarterPixels((j * BET_COLUMN_SPACING) + BET_IMAGE_LEFT + g_Scorecard.x),
         QuarterPixels(BET_IMAGE_TOP),
-        QuarterPixels(
-            (j * BET_COLUMN_SPACING) + (BET_IMAGE_LEFT + BET_IMAGE_SIZE) + g_Scorecard.x
-        ),
+        QuarterPixels((j * BET_COLUMN_SPACING) + (BET_IMAGE_LEFT + BET_IMAGE_SIZE) + g_Scorecard.x),
         QuarterPixels(BET_IMAGE_TOP + BET_IMAGE_SIZE),
         G_TX_RENDERTILE,
         0,
@@ -3750,7 +3748,6 @@ void DrawScoresPage(Gfx **displayListHead) {
         }
         else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
             g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-
             SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
             for (j = firstHole; j != shownHoleCount; j++) {
                 if (g_Players[i].holes[j].strokes == 0) {
@@ -3766,8 +3763,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     else {
                         DrawShadowedText(
                             &gfx,
-                            ((j - HOLES_PER_NINE) * CELL_WIDTH) + SKINS_MARK_LEFT +
-                                g_Scorecard.x,
+                            ((j - HOLES_PER_NINE) * CELL_WIDTH) + SKINS_MARK_LEFT + g_Scorecard.x,
                             backTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                             g_PrintBuffer
                         );

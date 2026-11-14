@@ -146,8 +146,8 @@ enum SceneryState {
 #define TEXEL_COORDINATE_SHIFT 5
 
 typedef struct ArrowShape {
-      Vtx body[ARROW_VERTEX_COUNT];
-      Vtx outline[ARROW_VERTEX_COUNT];
+    Vtx body[ARROW_VERTEX_COUNT];
+    Vtx outline[ARROW_VERTEX_COUNT];
 } ArrowShape;
 
 #define SHOT_OFFSET_MARKER_COUNT 5
@@ -650,9 +650,9 @@ static s32 f_LoadedHoleIntroImages = 0;
 #define GREEN_GRID_POINT_COUNT (GREEN_GRID_MAX_ROW_COUNT * GREEN_GRID_COLUMN_COUNT)
 
 typedef struct TrailPoint {
-      s32 x;
-      s32 y;
-      s32 depth;
+    s32 x;
+    s32 y;
+    s32 depth;
 } TrailPoint;
 
 static Mtx f_LandingPanelMatrices[MATRIX_BUFFER_COUNT];
@@ -1573,10 +1573,10 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
 #define GREEN_GRID_FADING 2
 
 typedef struct GridScreenPoint {
-      s32 x;
-      s32 y;
-      Boolean isVisible;
-      s32 depth;
+    s32 x;
+    s32 y;
+    Boolean isVisible;
+    s32 depth;
 } GridScreenPoint;
 
 #define GridPointIndex(row, column) (((row) * columnCount) + (column))

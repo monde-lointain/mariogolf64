@@ -233,19 +233,19 @@
 #define EASE_EYE (1 << 1)
 
 typedef struct StaffRollImage {
-      ImageHeader header;
-      u8 texels[STAFF_ROLL_IMAGE_SIZE];
+    ImageHeader header;
+    u8 texels[STAFF_ROLL_IMAGE_SIZE];
 } StaffRollImage;
 
 typedef struct StaffLine {
-      u16 start;
-      u16 length;
+    u16 start;
+    u16 length;
 } StaffLine;
 
 typedef struct StaffText {
-      u16 size;
-      u16 lineCount;
-      StaffLine lines[TRAILING_ARRAY_LENGTH];
+    u16 size;
+    u16 lineCount;
+    StaffLine lines[TRAILING_ARRAY_LENGTH];
 } StaffText;
 
 #define STAFF_LINE(text, index) ((text)->lines + (index))
@@ -258,10 +258,10 @@ typedef struct StaffText {
     ((u32)((character) - FIRST_OVERLAID_CHARACTER) < OVERLAID_CHARACTER_COUNT)
 
 typedef struct StaffRollEasedView {
-      f32 eye[AXIS_COUNT];
-      f32 lookAt[AXIS_COUNT];
-      s8 isEyeEased;
-      s8 isLookAtEased;
+    f32 eye[AXIS_COUNT];
+    f32 lookAt[AXIS_COUNT];
+    s8 isEyeEased;
+    s8 isLookAtEased;
 } StaffRollEasedView;
 
 extern u8 g_StaffTextRomStart[];

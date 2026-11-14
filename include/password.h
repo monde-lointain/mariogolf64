@@ -9,17 +9,17 @@
 #define SCORE_PASSWORD_LENGTH 20
 
 typedef struct TournamentRules {
-      s8 characterIndex;
-      s8 isSpeedGolf;
-      s8 courseIndex;
+    s8 characterIndex;
+    s8 isSpeedGolf;
+    s8 courseIndex;
 } TournamentRules;
 
 typedef struct ScoreReport {
-      u8 tournamentCode[TOURNAMENT_CODE_SIZE];
-      u8 characterIndex;
-      u16 score;
-      u32 time;
-      u8 gameBoyLevel;
+    u8 tournamentCode[TOURNAMENT_CODE_SIZE];
+    u8 characterIndex;
+    u16 score;
+    u32 time;
+    u8 gameBoyLevel;
 } ScoreReport;
 
 s32 DecodeTournamentPassword(u8 *code, char *password);

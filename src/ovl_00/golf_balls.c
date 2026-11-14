@@ -67,27 +67,27 @@
 #define CUP_VIEW_AFTERIMAGE_UNZOOM 0.5f
 
 typedef struct GolfBall {
-      Mtx matrices[DRAW_BUFFER_COUNT];
-      SurfaceInfo *surface;
-      f32 position[3];
-      s32 alpha;
-      u8 isInCup;
-      s32 state;
-      s8 markerPlayerIndex;
-      s8 purpose;
-      s8 hasEnteredWater;
+    Mtx matrices[DRAW_BUFFER_COUNT];
+    SurfaceInfo *surface;
+    f32 position[3];
+    s32 alpha;
+    u8 isInCup;
+    s32 state;
+    s8 markerPlayerIndex;
+    s8 purpose;
+    s8 hasEnteredWater;
 } GolfBall;
 
 typedef struct BallAfterimage {
-      f32 position[3];
-      s32 alpha;
-      Boolean isInCup;
+    f32 position[3];
+    s32 alpha;
+    Boolean isInCup;
 } BallAfterimage;
 
 typedef struct BallScreenPoint {
-      s32 x;
-      s32 y;
-      s32 depth;
+    s32 x;
+    s32 y;
+    s32 depth;
 } BallScreenPoint;
 
 static Gfx f_UnusedListBeforeBooMouth[] UNUSED = {gsSPEndDisplayList()};
@@ -849,9 +849,9 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     s32 afterimageProjectedDepth;
     s32 shadowDepth;
     s32 routePointDepth;
-#    ifdef AVOID_UB
+#ifdef AVOID_UB
     s32 primDepth = 0;
-#    endif
+#endif
     s32 shadowPrimDepth;
     s32 size;
     s32 waterShade;
@@ -987,9 +987,9 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     for (i = 0; i < GOLF_BALL_COUNT; i++) {
         ball = &f_GolfBalls[i];
         if (ball->alpha > 0) {
-#    ifndef AVOID_UB
+#ifndef AVOID_UB
             s32 primDepth;
-#    endif
+#endif
 
             surface = ball->surface;
             groundHeight = GetGroundHeight(
@@ -1669,8 +1669,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                 f_GolfBalls[i].alpha == BALL_SHOWN &&
                 (g_IsCupViewShown || ball->isInCup != TRUE)) {
                 pikaBallSurface = ball->surface;
-                if ((!isCurrentBallAboveGround ||
-                        pikaBallSurface->sinkDepth == SINK_DEPTH_NONE) &&
+                if ((!isCurrentBallAboveGround || pikaBallSurface->sinkDepth == SINK_DEPTH_NONE) &&
                     ball->alpha > 0) {
                     gDPPipeSync(gfx++);
                     gSPMatrix(
