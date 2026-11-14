@@ -86,8 +86,8 @@ void ResetSavedGameControllers(void);
 
 #define SAVE_MENU_CHOSEN_IMAGE_COUNT 2
 #define ASSET_SAVE_MENU_FRAME 0x70D
-#define COURSE_LABEL_WIDTH 136
-#define COURSE_LABEL_HEIGHT 16
+#define COURSE_NUMBERS_WIDTH 136
+#define COURSE_NUMBERS_HEIGHT 16
 #define COURSE_DIGIT_WIDTH 16
 #define COURSE_WORD_WIDTH 40
 #define COURSE_WORD_OFFSET_X (-5)
@@ -1079,12 +1079,12 @@ void DrawCourseLabel(
         gfx++,
         TextureAddress(ImageTexels(f_RingShotCourseNumbers)),
         G_IM_FMT_CI,
-        COURSE_LABEL_WIDTH,
-        COURSE_LABEL_HEIGHT,
+        COURSE_NUMBERS_WIDTH,
+        COURSE_NUMBERS_HEIGHT,
         0,
         0,
-        COURSE_LABEL_WIDTH - 1,
-        COURSE_LABEL_HEIGHT - 1,
+        COURSE_NUMBERS_WIDTH - 1,
+        COURSE_NUMBERS_HEIGHT - 1,
         0,
         G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP,
@@ -1100,7 +1100,7 @@ void DrawCourseLabel(
             QuarterPixels(left + COURSE_WORD_OFFSET_X),
             QuarterPixels(top),
             QuarterPixels(left + COURSE_WORD_OFFSET_X + COURSE_WORD_WIDTH),
-            QuarterPixels(top + COURSE_LABEL_HEIGHT),
+            QuarterPixels(top + COURSE_NUMBERS_HEIGHT),
             G_TX_RENDERTILE,
             TexelCoordinate(COURSE_DIGIT_WIDTH * COURSE_COUNT),
             0,
@@ -1116,7 +1116,7 @@ void DrawCourseLabel(
         QuarterPixels(left + COURSE_DIGIT_OFFSET_X),
         QuarterPixels(top),
         QuarterPixels(left + COURSE_DIGIT_OFFSET_X + COURSE_DIGIT_WIDTH),
-        QuarterPixels(top + COURSE_LABEL_HEIGHT),
+        QuarterPixels(top + COURSE_NUMBERS_HEIGHT),
         G_TX_RENDERTILE,
         TexelCoordinate(courseIndex * COURSE_DIGIT_WIDTH),
         0,
