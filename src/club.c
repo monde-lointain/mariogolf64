@@ -3928,19 +3928,19 @@ void GenerateClub(s32 clubIndex) {
 #define MISHIT_SCALE_MAX 145
 
 void GenerateClubSet(s32 setIndex, GameBoyCharacter *gameBoyCharacter) {
-    s32 clubIndex;
+    ClubType type;
     Club *club;
 
-    for (clubIndex = 0; clubIndex < CLUB_SET_SIZE; clubIndex++) {
-        club = GetClub((setIndex * CLUB_SET_SIZE) + clubIndex);
-        club->distance = gameBoyCharacter->clubs[clubIndex].distance;
+    for (type = 0; type < CLUB_SET_SIZE; type++) {
+        club = GetClub((setIndex * CLUB_SET_SIZE) + type);
+        club->distance = gameBoyCharacter->clubs[type].distance;
         if (club->distance > CLUB_DISTANCE_MAX) {
             club->distance = CLUB_DISTANCE_MAX;
         }
 
         osSyncPrintf("TargetDist %d\n", club->distance);
         club->pitch =
-            -((gameBoyCharacter->clubs[clubIndex].pitch * DEGREES_PER_TURN / BINARY_ANGLE_TURN) +
+            -((gameBoyCharacter->clubs[type].pitch * DEGREES_PER_TURN / BINARY_ANGLE_TURN) +
                 gameBoyCharacter->clubPitch);
         osSyncPrintf("Xang %d\n", club->pitch);
         if (club->pitch > FLATTEST_CLUB_PITCH) {
@@ -3951,7 +3951,7 @@ void GenerateClubSet(s32 setIndex, GameBoyCharacter *gameBoyCharacter) {
             club->pitch = STEEPEST_CLUB_PITCH;
         }
 
-        club->sideSpin = gameBoyCharacter->clubs[clubIndex].sideSpin;
+        club->sideSpin = gameBoyCharacter->clubs[type].sideSpin;
         if (club->sideSpin > CLUB_SIDE_SPIN_MAX) {
             club->sideSpin = CLUB_SIDE_SPIN_MAX;
         }
@@ -3989,7 +3989,7 @@ void GenerateClubSet(s32 setIndex, GameBoyCharacter *gameBoyCharacter) {
         }
 
         g_GameState.isMiniGolf = FALSE;
-        GenerateClub((setIndex * CLUB_SET_SIZE) + clubIndex);
+        GenerateClub((setIndex * CLUB_SET_SIZE) + type);
     }
 }
 

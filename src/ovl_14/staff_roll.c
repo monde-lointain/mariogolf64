@@ -167,9 +167,10 @@
 #define CAST_FADE_FRAMES 40
 #define LAST_FADE_FRAMES 80
 #define SHOTS_PER_STAGE 4
-#define TEE_CLUB 0
-#define FAIRWAY_CLUB 3
-#define APPROACH_CLUB 8
+// Clubs from the first club set, where a club's index is its type
+#define TEE_CLUB CLUB_TYPE_DRIVER
+#define FAIRWAY_CLUB CLUB_TYPE_TWO_IRON
+#define APPROACH_CLUB CLUB_TYPE_SEVEN_IRON
 #define CAST_SWING_LEAD_FRAMES 15
 #define FINAL_PUTT_LEAD_FRAMES 10
 #define CAST_YAW_STEP 30
