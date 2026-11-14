@@ -425,7 +425,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                 contact = 0;
             }
             else {
-                s32 hit;
+                s32 found;
 
                 if (IsStrokeOrTrialLaunch(simulation->purpose) &&
                     FindRingHit(
@@ -460,7 +460,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                         &f_OpeningContactFraction
                     );
                     if (g_GameState.isMiniGolf && simulation->state == BALL_STATE_ROLLING) {
-                        hit = FindMiniGolfGroundHit(
+                        found = FindMiniGolfGroundHit(
                             simulation,
                             startX,
                             startY,
@@ -472,14 +472,14 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                             &fraction
                         );
 
-                        if (hit && fraction < f_OpeningContactFraction) {
-                            contact = hit;
+                        if (found && fraction < f_OpeningContactFraction) {
+                            contact = found;
                             osSyncPrintf("PutterSpecialGroundCollision\n");
                             f_OpeningContactTriangle = triangle;
                             f_OpeningContactFraction = fraction;
                         }
                     }
-                    hit = FALSE;
+                    found = FALSE;
                 }
                 else {
                     contact = FindGroundHit(
@@ -492,13 +492,13 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                         &f_OpeningContactTriangle,
                         &f_OpeningContactFraction
                     );
-                    hit = FALSE;
+                    found = FALSE;
                 }
 
                 if (simulation->state == BALL_STATE_FLYING) {
                     if (simulation->lastBounceStep + BILLBOARD_HIT_BOUNCE_GAP <
                         simulation->stepCount) {
-                        hit = FindSimulationBillboardHit(
+                        found = FindSimulationBillboardHit(
                             startX,
                             startY,
                             startZ,
@@ -511,11 +511,11 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                         );
                     }
                     else {
-                        hit = FALSE;
+                        found = FALSE;
                     }
                 }
 
-                if (hit && contact == STEP_FLAG_GROUND_HIT) {
+                if (found && contact == STEP_FLAG_GROUND_HIT) {
                     if (f_OpeningContactFraction <= fraction) {
                         contact = STEP_FLAG_GROUND_HIT;
                         triangle = f_OpeningContactTriangle;
@@ -525,7 +525,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                         contact = STEP_FLAG_BILLBOARD_HIT;
                     }
                 }
-                else if (hit) {
+                else if (found) {
                     contact = STEP_FLAG_BILLBOARD_HIT;
                 }
                 else if (contact == STEP_FLAG_GROUND_HIT) {
@@ -538,7 +538,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
 
                 if (simulation->state == BALL_STATE_FLYING ||
                     simulation->state == BALL_STATE_ROLLING) {
-                    hit = FindHoleTriangleHit(
+                    found = FindHoleTriangleHit(
                         startX,
                         startY,
                         startZ,
@@ -550,10 +550,10 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                     );
                 }
                 else {
-                    hit = FALSE;
+                    found = FALSE;
                 }
 
-                if (hit && (contact == 0 || f_OpeningContactFraction <= fraction)) {
+                if (found && (contact == 0 || f_OpeningContactFraction <= fraction)) {
                     contact = STEP_FLAG_HOLE_TRIANGLE_HIT;
                     triangle = f_OpeningContactTriangle;
                     fraction = f_OpeningContactFraction;
