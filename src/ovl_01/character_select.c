@@ -210,7 +210,7 @@ s32 MoveGridCursor(s32 playerIndex, u8 direction, u8 canChooseMarked) {
     s16 column = oldColumn;
     s16 row = oldRow;
     u16 slot;
-    u16 character;
+    u16 characterIndex;
     void *faceImage;
     s32 unused[2] UNUSED;
 
@@ -256,32 +256,36 @@ s32 MoveGridCursor(s32 playerIndex, u8 direction, u8 canChooseMarked) {
     memory->characterColumns[playerIndex] = column;
     memory->characterRows[playerIndex] = row;
     if (column != oldColumn || row != oldRow) {
-        character = g_CharacterGrid[oldRow][oldColumn];
+        characterIndex = g_CharacterGrid[oldRow][oldColumn];
         f_FaceFrame = 0;
         f_FaceFrameTimer = 0;
         f_UnreadFaceToggle ^= 1;
         if (g_CharacterGrid[oldRow][oldColumn] < CHOOSABLE_MARK_LIMIT) {
-            character += MARKED_CHARACTER_OFFSET;
+            characterIndex += MARKED_CHARACTER_OFFSET;
         }
 
-        if ((s16)character >= FIRST_IMPORTED_CHARACTER) {
-            slot = character;
-            character = g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].characterIndex;
+        if ((s16)characterIndex >= FIRST_IMPORTED_CHARACTER) {
+            slot = characterIndex;
+            characterIndex =
+                g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].characterIndex;
         }
         else {
-            slot = character;
+            slot = characterIndex;
         }
 
         faceImage = g_CharacterFaceImages[(s16)slot];
         if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
-            OpenEncodedAsset(g_AlternateFaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
+            OpenEncodedAsset(
+                g_AlternateFaceAnimationAssets[(s16)characterIndex][f_FaceFrame],
+                &asset
+            );
         }
         else {
-            OpenEncodedAsset(g_FaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
+            OpenEncodedAsset(g_FaceAnimationAssets[(s16)characterIndex][f_FaceFrame], &asset);
         }
 
         ReadEncodedAsset(faceImage, &asset);
-        OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
+        OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][0], &file);
         ReadAssetFile(g_CharacterFacePalettes[(s16)slot], (s16)GetAssetFileSize(&file), &file);
     }
 
@@ -298,7 +302,7 @@ s32 MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, u8 canChooseMarked) {
     s32 column = oldColumn;
     s32 row = oldRow;
     u16 slot;
-    u16 character;
+    u16 characterIndex;
     void *faceImage;
     s32 unused[2] UNUSED;
 
@@ -365,32 +369,36 @@ s32 MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, u8 canChooseMarked) {
     memory->characterColumns[playerIndex] = column;
     memory->characterRows[playerIndex] = row;
     if (column != oldColumn || row != oldRow) {
-        character = g_CharacterGrid[oldRow][oldColumn];
+        characterIndex = g_CharacterGrid[oldRow][oldColumn];
         f_FaceFrame = 0;
         f_FaceFrameTimer = 0;
         f_UnreadFaceToggle ^= 1;
         if (g_CharacterGrid[oldRow][oldColumn] < CHOOSABLE_MARK_LIMIT) {
-            character += MARKED_CHARACTER_OFFSET;
+            characterIndex += MARKED_CHARACTER_OFFSET;
         }
 
-        if ((s16)character >= FIRST_IMPORTED_CHARACTER) {
-            slot = character;
-            character = g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].characterIndex;
+        if ((s16)characterIndex >= FIRST_IMPORTED_CHARACTER) {
+            slot = characterIndex;
+            characterIndex =
+                g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].characterIndex;
         }
         else {
-            slot = character;
+            slot = characterIndex;
         }
 
         faceImage = g_CharacterFaceImages[(s16)slot];
         if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
-            OpenEncodedAsset(g_AlternateFaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
+            OpenEncodedAsset(
+                g_AlternateFaceAnimationAssets[(s16)characterIndex][f_FaceFrame],
+                &asset
+            );
         }
         else {
-            OpenEncodedAsset(g_FaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
+            OpenEncodedAsset(g_FaceAnimationAssets[(s16)characterIndex][f_FaceFrame], &asset);
         }
 
         ReadEncodedAsset(faceImage, &asset);
-        OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
+        OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][0], &file);
         ReadAssetFile(g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file);
     }
 
@@ -477,7 +485,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
     s32 index;
     s32 otherIndex;
     s16 sameCharacterCount;
-    s32 character;
+    s32 characterIndex;
     s16 gridMark;
     s32 controllerIndex;
     u16 button;
@@ -732,22 +740,22 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             );
         }
 
-        character = g_CharacterGrid[memory->characterRows[playerIndex]]
-                                   [memory->characterColumns[playerIndex]];
-        if (((u8)canChooseMarked == TRUE) & (character < CHOOSABLE_MARK_LIMIT)) {
-            character += MARKED_CHARACTER_OFFSET;
+        characterIndex = g_CharacterGrid[memory->characterRows[playerIndex]]
+                                        [memory->characterColumns[playerIndex]];
+        if (((u8)canChooseMarked == TRUE) & (characterIndex < CHOOSABLE_MARK_LIMIT)) {
+            characterIndex += MARKED_CHARACTER_OFFSET;
         }
 
-        character = f_ChoiceCharacters[character];
-        if (character >= FIRST_IMPORTED_CHARACTER) {
-            if (g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen == TRUE) {
+        characterIndex = f_ChoiceCharacters[characterIndex];
+        if (characterIndex >= FIRST_IMPORTED_CHARACTER) {
+            if (g_ImportedCharacters[characterIndex - FIRST_IMPORTED_CHARACTER].isChosen == TRUE) {
                 PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
                 f_IsPromptShown = FALSE;
                 return UNSET_RESULT;
             }
 
-            index = character - FIRST_IMPORTED_CHARACTER;
-            character = g_ImportedCharacters[index].characterIndex;
+            index = characterIndex - FIRST_IMPORTED_CHARACTER;
+            characterIndex = g_ImportedCharacters[index].characterIndex;
             g_ImportedCharacters[index].isChosen = TRUE;
             g_GameState.isImportedCharacterChosen = TRUE;
             g_ImportedCharacterColumns[playerIndex] = memory->characterColumns[playerIndex];
@@ -766,7 +774,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
                 if ((u8)canChooseMarked == FALSE) {
                     if (((button & R_TRIG) != 0) &
                             (playerCount >= PLAYER_COUNT_WITHOUT_CONTROLLER_MIN) &&
-                        character < FIRST_IMPORTED_CHARACTER) {
+                        characterIndex < FIRST_IMPORTED_CHARACTER) {
                         if (g_ChosenPlayerCount - 1 == playerIndex &&
                             !IsGameFlagSet(GAME_FLAG_ALLOW_ALL_COMPUTER_PLAYERS)) {
                             for (otherIndex = 0; otherIndex != playerIndex; otherIndex++) {
@@ -812,15 +820,15 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             }
         }
 
-        g_ChosenCharacters[playerIndex] = character;
-        g_Players[playerIndex].characterIndex = character;
+        g_ChosenCharacters[playerIndex] = characterIndex;
+        g_Players[playerIndex].characterIndex = characterIndex;
         if (g_MenuRepeatButtons & Z_OR_L_BUTTONS) {
-            if (character < FIRST_IMPORTED_CHARACTER) {
+            if (characterIndex < FIRST_IMPORTED_CHARACTER) {
                 g_ChosenLefties[playerIndex] = TRUE;
             }
         }
 
-        if (character >= FIRST_IMPORTED_CHARACTER) {
+        if (characterIndex >= FIRST_IMPORTED_CHARACTER) {
             g_ChosenLefties[playerIndex] =
                 g_GameBoyCharacters[memory->characterColumns[playerIndex]].isLefty;
         }
@@ -975,7 +983,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
         if (rand() & 1) {
             PlayCharacterSound(
-                character,
+                characterIndex,
                 channel - FIRST_CHARACTER_SOUND_CHANNEL,
                 CHARACTER_SOUND_CHOSEN,
                 SOUND_FULL_SCALE,
@@ -984,7 +992,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
         }
         else {
             PlayCharacterSound(
-                character,
+                characterIndex,
                 channel - FIRST_CHARACTER_SOUND_CHANNEL,
                 CHARACTER_SOUND_OTHER_CHOSEN,
                 SOUND_FULL_SCALE,
@@ -1035,10 +1043,10 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
             g_ChoosingControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
             g_PlayerControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
-            character = g_CharacterGrid[memory->characterRows[playerIndex]]
-                                       [memory->characterColumns[playerIndex]];
-            if (character >= FIRST_IMPORTED_CHARACTER) {
-                g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen = FALSE;
+            characterIndex = g_CharacterGrid[memory->characterRows[playerIndex]]
+                                            [memory->characterColumns[playerIndex]];
+            if (characterIndex >= FIRST_IMPORTED_CHARACTER) {
+                g_ImportedCharacters[characterIndex - FIRST_IMPORTED_CHARACTER].isChosen = FALSE;
                 g_ImportedCharacterColumns[playerIndex] = NO_IMPORTED_COLUMN;
             }
 
@@ -1073,10 +1081,10 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             f_UnreadFaceToggle ^= 1;
             g_ChoosingControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
             g_PlayerControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
-            character = g_CharacterGrid[memory->characterRows[playerIndex]]
-                                       [memory->characterColumns[playerIndex]];
-            if (character >= FIRST_IMPORTED_CHARACTER) {
-                g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen = FALSE;
+            characterIndex = g_CharacterGrid[memory->characterRows[playerIndex]]
+                                            [memory->characterColumns[playerIndex]];
+            if (characterIndex >= FIRST_IMPORTED_CHARACTER) {
+                g_ImportedCharacters[characterIndex - FIRST_IMPORTED_CHARACTER].isChosen = FALSE;
                 g_ImportedCharacterColumns[playerIndex] = NO_IMPORTED_COLUMN;
             }
 
@@ -1151,19 +1159,20 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
         if (paletteIndex != NO_PALETTE) {
             chosenColumn = memory->characterColumns[playerIndex];
-            character = g_CharacterGrid[memory->characterRows[playerIndex]][chosenColumn];
-            if (((u8)canChooseMarked == TRUE) & (character < CHOOSABLE_MARK_LIMIT)) {
-                character += MARKED_CHARACTER_OFFSET;
+            characterIndex = g_CharacterGrid[memory->characterRows[playerIndex]][chosenColumn];
+            if (((u8)canChooseMarked == TRUE) & (characterIndex < CHOOSABLE_MARK_LIMIT)) {
+                characterIndex += MARKED_CHARACTER_OFFSET;
             }
 
-            character = f_ChoiceCharacters[character];
-            if (character >= FIRST_IMPORTED_CHARACTER) {
-                if (g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen == TRUE) {
+            characterIndex = f_ChoiceCharacters[characterIndex];
+            if (characterIndex >= FIRST_IMPORTED_CHARACTER) {
+                if (g_ImportedCharacters[characterIndex - FIRST_IMPORTED_CHARACTER].isChosen ==
+                    TRUE) {
                     return UNSET_RESULT;
                 }
 
-                character =
-                    g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].characterIndex;
+                characterIndex =
+                    g_ImportedCharacters[characterIndex - FIRST_IMPORTED_CHARACTER].characterIndex;
                 g_ImportedCharacterColumns[playerIndex] = chosenColumn;
                 if (chosenColumn < 0) {
                     g_ImportedCharacterColumns[playerIndex] = 0;
@@ -1175,7 +1184,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             }
 
             for (index = 0, sameCharacterCount = 0; index != playerIndex; index++) {
-                if (g_Players[index].characterIndex == character) {
+                if (g_Players[index].characterIndex == characterIndex) {
                     sameCharacterPlayers[sameCharacterCount] = index;
                     sameCharacterCount++;
                 }
@@ -1313,7 +1322,7 @@ void PlaceRivalCursor(void) {
 void LoadCharacterFaces(void) {
     EncodedAsset asset;
     AssetFile file;
-    CharacterId character = 0;
+    CharacterId characterIndex = 0;
     u8 *images = GetMenuImageBuffer();
     s32 slotIndex;
     AssetId faceAsset;
@@ -1329,24 +1338,24 @@ void LoadCharacterFaces(void) {
 
         if (slotIndex >= FIRST_IMPORTED_CHARACTER) {
             if (g_ImportedCharacters[slotIndex - FIRST_IMPORTED_CHARACTER].characterIndex >= 0) {
-                character =
+                characterIndex =
                     g_ImportedCharacters[slotIndex - FIRST_IMPORTED_CHARACTER].characterIndex;
             }
         }
         else {
-            character = slotIndex;
+            characterIndex = slotIndex;
         }
 
         if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
-            faceAsset = g_AlternateFaceAnimationAssets[character][0];
+            faceAsset = g_AlternateFaceAnimationAssets[characterIndex][0];
         }
         else {
-            faceAsset = g_FaceAnimationAssets[character][0];
+            faceAsset = g_FaceAnimationAssets[characterIndex][0];
         }
 
         OpenEncodedAsset(faceAsset, &asset);
         ReadEncodedAsset(faceImage, &asset);
-        OpenAssetFile(g_CharacterFacePaletteFiles[character][0], paletteFile);
+        OpenAssetFile(g_CharacterFacePaletteFiles[characterIndex][0], paletteFile);
         ReadAssetFile(palette, GetAssetFileSize(paletteFile), paletteFile);
     }
 }
@@ -1506,7 +1515,7 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
     s16 column;
     u16 slot;
     s16 gridMark;
-    u16 character;
+    u16 characterIndex;
     void *faceImage;
     void *facePalette;
 
@@ -1612,47 +1621,52 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
         f_UnreadFaceToggle ^= 1;
         gridMark = g_CharacterGrid[memory->characterRows[g_ChoosingPlayerIndex]]
                                   [memory->characterColumns[g_ChoosingPlayerIndex]];
-        character = g_CharacterGrid[memory->characterRows[g_ChoosingPlayerIndex]]
-                                   [memory->characterColumns[g_ChoosingPlayerIndex]];
+        characterIndex = g_CharacterGrid[memory->characterRows[g_ChoosingPlayerIndex]]
+                                        [memory->characterColumns[g_ChoosingPlayerIndex]];
         if (gridMark < CHOOSABLE_MARK_LIMIT) {
-            character += MARKED_CHARACTER_OFFSET;
-            slot = character;
+            characterIndex += MARKED_CHARACTER_OFFSET;
+            slot = characterIndex;
         }
         else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
-            slot = character;
-            character = g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].characterIndex;
+            slot = characterIndex;
+            characterIndex =
+                g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].characterIndex;
         }
         else {
-            slot = character;
+            slot = characterIndex;
         }
 
         faceImage = g_CharacterFaceImages[(s16)slot];
         facePalette = g_CharacterFacePalettes[(s16)slot];
         if (f_PreviewedPalette == 0) {
-            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
+            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][0], &file);
         }
         else if (f_PreviewedPalette == 1) {
-            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][1], &file);
+            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][1], &file);
         }
         else if (f_PreviewedPalette == 2) {
-            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][2], &file);
+            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][2], &file);
         }
         else if (f_PreviewedPalette == 3) {
-            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][3], &file);
+            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][3], &file);
         }
         else {
             OpenAssetFile(
-                g_CharacterFacePaletteFiles[(s16)character][(s16)GetUnusedPalette((s16)character)],
+                g_CharacterFacePaletteFiles[(s16)characterIndex]
+                                           [(s16)GetUnusedPalette((s16)characterIndex)],
                 &file
             );
         }
 
         ReadAssetFile(facePalette, (s16)GetAssetFileSize(&file), &file);
         if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
-            OpenEncodedAsset(g_AlternateFaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
+            OpenEncodedAsset(
+                g_AlternateFaceAnimationAssets[(s16)characterIndex][f_FaceFrame],
+                &asset
+            );
         }
         else {
-            OpenEncodedAsset(g_FaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
+            OpenEncodedAsset(g_FaceAnimationAssets[(s16)characterIndex][f_FaceFrame], &asset);
         }
         ReadEncodedAsset(faceImage, &asset);
         f_UnreadFaceColumn = memory->characterColumns[g_ChoosingPlayerIndex];
