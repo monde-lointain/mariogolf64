@@ -115,9 +115,6 @@ enum NumberField {
 
 typedef u8 NumberField;
 
-extern const char f_StatsStringFormat[];
-extern const char f_NumberedCourseFormat[];
-
 void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row);
 void DrawThreeDigitMenuNumber(
     Gfx **displayListHead,
@@ -641,35 +638,22 @@ void DrawCourseBanner(Gfx **displayListHead, u8 useCourseNames, s32 courseIndex)
     SetTextColor(&gfx, 255, 255, 255);
     if (!useCourseNames) {
         if (courseIndex + 1 == COURSE_COUNT + 1) {
-            sprintf(g_PrintBuffer, f_StatsStringFormat, g_TournamentNames[courseIndex]);
+            sprintf(g_PrintBuffer, "%s", g_TournamentNames[courseIndex]);
         }
         else {
-            sprintf(
-                g_PrintBuffer,
-                f_NumberedCourseFormat,
-                courseIndex + 1,
-                g_TournamentNames[courseIndex]
-            );
+            sprintf(g_PrintBuffer, "%d:%s", courseIndex + 1, g_TournamentNames[courseIndex]);
         }
     }
     else if (courseIndex + 1 == COURSE_COUNT + 1) {
-        sprintf(g_PrintBuffer, f_StatsStringFormat, g_CourseRecords[courseIndex].name);
+        sprintf(g_PrintBuffer, "%s", g_CourseRecords[courseIndex].name);
     }
     else {
-        sprintf(
-            g_PrintBuffer,
-            f_NumberedCourseFormat,
-            courseIndex + 1,
-            g_CourseRecords[courseIndex].name
-        );
+        sprintf(g_PrintBuffer, "%d:%s", courseIndex + 1, g_CourseRecords[courseIndex].name);
     }
 
     DrawCenteredLargeText(&gfx, SCREEN_WIDTH / 2, COURSE_NAME_Y, g_PrintBuffer);
     *displayListHead = gfx;
 }
-
-const char f_StatsStringFormat[] = "%s";
-const char f_NumberedCourseFormat[] = "%d:%s";
 
 void DrawStatsPanel(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
@@ -701,7 +685,7 @@ void DrawStatsPanel(Gfx **displayListHead) {
         statIndex++) {
         SetUpTextDrawing(&gfx);
         SetTextColor(&gfx, 255, 255, 255);
-        sprintf(g_PrintBuffer, f_StatsStringFormat, f_StatLabels[statIndex]);
+        sprintf(g_PrintBuffer, "%s", f_StatLabels[statIndex]);
         DrawLargeText(
             &gfx,
             STATS_LABEL_X,
@@ -882,14 +866,12 @@ void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row) {
     *displayListHead = gfx;
 }
 
-const char f_UnitMarkFormat[] = "%c";
-
 void DrawYardMark(Gfx **displayListHead, s16 x, s16 y) {
     Gfx *gfx = *displayListHead;
 
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 63, 255, 63);
-    sprintf(g_PrintBuffer, f_UnitMarkFormat, 'Y');
+    sprintf(g_PrintBuffer, "%c", 'Y');
     DrawLargeText(&gfx, x, y, g_PrintBuffer);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
@@ -901,7 +883,7 @@ void DrawPercentMark(Gfx **displayListHead, s16 x, s16 y) {
 
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 64, 192);
-    sprintf(g_PrintBuffer, f_UnitMarkFormat, '%');
+    sprintf(g_PrintBuffer, "%c", '%');
     DrawLargeText(&gfx, x, y, g_PrintBuffer);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
@@ -1545,8 +1527,6 @@ void DrawMenuNumber(
 #define DECIMAL_DIGIT_LIMIT 6
 #define DECIMAL_POINT_OFFSET (DIGIT_GLYPH_SIZE / 2)
 
-const char f_DecimalWholeFormat[] = "%d";
-
 void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
     Gfx *gfx = *displayListHead;
     s32 whole = number;
@@ -1600,7 +1580,7 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
         shift += DIGIT_GLYPH_SIZE;
     }
 
-    sprintf(g_PrintBuffer, f_DecimalWholeFormat, whole);
+    sprintf(g_PrintBuffer, "%d", whole);
     for (digitIndex = 0; digitIndex != DECIMAL_DIGIT_LIMIT; digitIndex++) {
         digit = g_PrintBuffer[digitIndex];
         if (digit == '\0') {

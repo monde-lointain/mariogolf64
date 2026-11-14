@@ -104,8 +104,6 @@ enum SaveMenuMode {
 typedef s32 SaveMenuMode;
 typedef s8 SaveMenuMode8;
 
-extern const char f_SaveMenuNameFormat[];
-
 void ResetSavedGameControllers(void);
 
 #define SAVE_MENU_CHOSEN_IMAGE_COUNT 2
@@ -1977,7 +1975,7 @@ Outcome ContinueSavedGame(void) {
         controllerIndex = f_SavedPlayerControllers[playerIndex];
         g_PlayerControllerIndices[playerIndex] = controllerIndex;
         g_Players[playerIndex].controllerIndex = controllerIndex;
-        sprintf(g_Players[playerIndex].name, f_SaveMenuNameFormat, savedPlayer->name);
+        sprintf(g_Players[playerIndex].name, "%s", savedPlayer->name);
         characterIndex = savedPlayer->characterIndex;
         g_ChosenCharacters[playerIndex] = characterIndex;
         g_Players[playerIndex].characterIndex = characterIndex;
@@ -1991,8 +1989,6 @@ Outcome ContinueSavedGame(void) {
 
     return OUTCOME_OK;
 }
-
-const char f_SaveMenuNameFormat[] = "%s";
 
 #define SAVED_GAMES_BACKDROP_LAYERS \
     (MENU_LAYER_COURSE_SCENE | MENU_LAYER_IGNORED | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER)
@@ -2433,7 +2429,7 @@ void DrawSavedGames(Gfx **displayListHead) {
                         COURSE_RECORD_LUIGIS_GARDEN;
                 }
 
-                sprintf(g_PrintBuffer, f_SaveMenuNameFormat, g_CourseRecords[index].name);
+                sprintf(g_PrintBuffer, "%s", g_CourseRecords[index].name);
                 DrawLargeText(&gfx, SAVED_GAME_COURSE_X, SAVED_GAME_COURSE_Y, g_PrintBuffer);
             }
 

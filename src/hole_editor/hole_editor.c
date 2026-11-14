@@ -303,8 +303,7 @@ typedef s32 HoleFileStep;
 #define UncachedAddress(address) AddressPast((address), KSEG1_OFFSET)
 
 #define AssertInEditor(condition, lineNumber) \
-    ((condition) ? (void)0 : \
-                   ReportFailedAssertion(f_EditorAssertionText, f_EditorFileName, lineNumber))
+    ((condition) ? (void)0 : ReportFailedAssertion("EX", "c:/usgolf64/hiedit.c", lineNumber))
 
 #define POLE_QUAD_COUNT 2
 
@@ -2603,9 +2602,6 @@ void UpdateHeightEditor(void) {
     );
     PrintDebugText(text, HEIGHT_TEXT_COLUMN, HEIGHT_TEXT_ROW);
 }
-
-static const char f_EditorAssertionText[] = "EX";
-static const char f_EditorFileName[] = "c:/usgolf64/hiedit.c";
 
 Boolean ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
     TerrainCode sideCodes[DIAGONAL_SIDE_COUNT][SIDE_CODE_COUNT];

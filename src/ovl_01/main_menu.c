@@ -197,8 +197,6 @@ typedef struct ImageCorner {
 
 #define COURSE_SCENE_SECOND_ROW_START TexelCoordinate(1)
 
-extern const char f_NameFormat[];
-
 #define NINE_HOLE_POWER_SHOT_COUNT 3
 #define EIGHTEEN_HOLE_POWER_SHOT_COUNT 6
 
@@ -2122,8 +2120,6 @@ void CheckControllersAndSetPans(void) {
 void OnMenuResourcesLoaded(void) {
 }
 
-const char f_NameFormat[] = "%s";
-
 #define IsHoleChoiceMode(mode) \
     ((mode) == GAME_MODE_STROKE || \
         (mode) == GAME_MODE_MATCH_GAME || \
@@ -2231,7 +2227,7 @@ void SetUpChosenGame(void) {
         player->controllerIndex = g_PlayerControllerIndices[index];
         sprintf(
             player->name,
-            f_NameFormat,
+            "%s",
             g_MenuCharacterNames[f_CharacterChoices[g_ChosenCharacters[index]]]
         );
         if (g_ChosenCharacters[index] >= CHARACTER_KID) {
@@ -2241,17 +2237,13 @@ void SetUpChosenGame(void) {
                 player->gameBoyCharacterIndex = column;
             }
 
-            sprintf(
-                player->name,
-                f_NameFormat,
-                g_GameBoyCharacters[player->gameBoyCharacterIndex].name
-            );
+            sprintf(player->name, "%s", g_GameBoyCharacters[player->gameBoyCharacterIndex].name);
         }
         else {
             player->gameBoyCharacterIndex = -1;
             sprintf(
                 player->name,
-                f_NameFormat,
+                "%s",
                 g_MenuCharacterNames[f_CharacterChoices[g_ChosenCharacters[index]]]
             );
         }
@@ -5190,9 +5182,6 @@ void DrawMenuBanner(Gfx **displayListHead) {
     (MENU_LAYER_COURSE_SCENE | MENU_LAYER_BOARD | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER | \
         MENU_LAYER_PER_SCREEN)
 
-const char f_PlainMenuHeading[] = "MAIN MENU";
-const char f_SaveSizesFormat[] = "%8d:%8d:%8d";
-
 #define IsChosenNewGameLabel(labelIndex) \
     ((g_MenuMemory.titleChoice == TITLE_CHOICE_NEW_GAME && \
          (labelIndex) == TITLE_LABEL_NEW_GAME) || \
@@ -5207,7 +5196,7 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
 
     SetUpShadowedTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
-    DrawShadowedText(&gfx, PLAIN_MENU_HEADING_X, PLAIN_MENU_HEADING_Y, (char *)f_PlainMenuHeading);
+    DrawShadowedText(&gfx, PLAIN_MENU_HEADING_X, PLAIN_MENU_HEADING_Y, "MAIN MENU");
     for (labelIndex = 0; labelIndex != PLAIN_MENU_NAME_COUNT; labelIndex++) {
         DrawShadowedText(
             &gfx,
@@ -5219,7 +5208,7 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
 
     sprintf(
         g_PrintBuffer,
-        f_SaveSizesFormat,
+        "%8d:%8d:%8d",
         MemberSize(SaveData, rankedRecords),
         MemberSize(SaveData, ringShotRecords),
         (s32)sizeof(SaveData)
@@ -5382,8 +5371,6 @@ const char f_UnusedEmptyString[] = "";
 #define CADDY_SELECT_NAME_X 96
 #define CADDY_SELECT_FIRST_Y 64
 #define CADDY_SELECT_LINE_HEIGHT 8
-
-extern const char g_CaddySelectTitle[];
 
 #define MODE_SELECT_BACKDROP_LAYERS \
     (MENU_LAYER_COURSE_SCENE | MENU_LAYER_IGNORED | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER)
@@ -6341,12 +6328,6 @@ void DrawMenuCharacters(Gfx **displayListHead) {
 #define VIEWER_BASE_OFFSET (-64.0f)
 #define VIEWER_DEPTH (-1000.0f)
 
-const char f_NumberedNameFormat[] = "%d:%s";
-const char f_PlayerNumberFormat[] = "%d:";
-const char f_ViewerAnimationFormat[] = "%d";
-const char f_PowerFormat[] = "POWER:%3d";
-const char f_SpinFormat[] = "SPIN :%3d";
-
 void DrawAnimationViewer(Gfx **displayListHead) {
     Gfx *gfx;
     s32 index;
@@ -6369,13 +6350,13 @@ void DrawAnimationViewer(Gfx **displayListHead) {
     gDPSetEnvColor(gfx++, 0x00, 0x10, 0x40, OPAQUE_ALPHA);
     sprintf(
         g_PrintBuffer,
-        f_NumberedNameFormat,
+        "%d:%s",
         g_MenuMemory.viewerCharacter + 1,
         g_MenuCharacterNames[g_MenuMemory.viewerCharacter]
     );
     DrawLargeText(&gfx, VIEWER_NAME_X, VIEWER_NAME_Y, g_PrintBuffer);
     for (index = 0; index != g_ChosenPlayerCount; index++) {
-        sprintf(g_PrintBuffer, f_PlayerNumberFormat, index + 1);
+        sprintf(g_PrintBuffer, "%d:", index + 1);
         DrawTextStub(
             &gfx,
             VIEWER_PLAYER_NUMBER_X,
@@ -6385,7 +6366,7 @@ void DrawAnimationViewer(Gfx **displayListHead) {
     }
 
     for (index = 0; index != g_ChoosingPlayerIndex; index++) {
-        sprintf(g_PrintBuffer, f_NameFormat, g_MenuCharacterNames[g_ChosenCharacters[index]]);
+        sprintf(g_PrintBuffer, "%s", g_MenuCharacterNames[g_ChosenCharacters[index]]);
         DrawTextStub(
             &gfx,
             VIEWER_PLAYER_NAME_X,
@@ -6396,19 +6377,15 @@ void DrawAnimationViewer(Gfx **displayListHead) {
 
     SetUpShadowedTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
-    sprintf(g_PrintBuffer, f_ViewerAnimationFormat, f_ViewerAnimation);
+    sprintf(g_PrintBuffer, "%d", f_ViewerAnimation);
     DrawShadowedText(&gfx, VIEWER_ANIMATION_X, VIEWER_ANIMATION_Y, g_PrintBuffer);
     sprintf(
         g_PrintBuffer,
-        f_PowerFormat,
+        "POWER:%3d",
         g_Clubs[g_MenuMemory.viewerCharacter * CLUB_SET_SIZE].distance
     );
     DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_POWER_Y, g_PrintBuffer);
-    sprintf(
-        g_PrintBuffer,
-        f_SpinFormat,
-        g_Clubs[g_MenuMemory.viewerCharacter * CLUB_SET_SIZE].spin
-    );
+    sprintf(g_PrintBuffer, "SPIN :%3d", g_Clubs[g_MenuMemory.viewerCharacter * CLUB_SET_SIZE].spin);
     DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SPIN_Y, g_PrintBuffer);
     if (g_Clubs[g_MenuMemory.viewerCharacter * CLUB_SET_SIZE].sideSpin > 0) {
         DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, "DRAW");
@@ -7539,7 +7516,7 @@ void DrawCourseSelectBanners(Gfx **displayListHead) {
         if (g_CourseSelectKind == COURSE_SELECT_KIND_COURSES) {
             sprintf(
                 g_PrintBuffer,
-                f_NumberedNameFormat,
+                "%d:%s",
                 g_MenuMemory.courseChoice + 1,
                 g_CourseRecords[g_MenuMemory.courseChoice].name
             );
@@ -7547,7 +7524,7 @@ void DrawCourseSelectBanners(Gfx **displayListHead) {
         else {
             sprintf(
                 g_PrintBuffer,
-                f_NumberedNameFormat,
+                "%d:%s",
                 g_MenuMemory.courseChoice + 1,
                 g_TournamentNames[g_MenuMemory.courseChoice]
             );
@@ -7556,7 +7533,7 @@ void DrawCourseSelectBanners(Gfx **displayListHead) {
     else {
         sprintf(
             g_PrintBuffer,
-            f_NumberedNameFormat,
+            "%d:%s",
             g_MenuMemory.miniGolfRecordChoice + 1,
             f_MiniGolfRecordNames[g_MenuMemory.miniGolfRecordChoice]
         );
@@ -8539,7 +8516,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
         else {
             sprintf(g_PrintBuffer, "BGM TEST : %2d", f_SoundTestSong);
             DrawShadowedText(&gfx, SONG_TEST_X, TEST_NUMBER_Y, g_PrintBuffer);
-            sprintf(g_PrintBuffer, f_NameFormat, f_SoundTestSongNames[f_SoundTestSong]);
+            sprintf(g_PrintBuffer, "%s", f_SoundTestSongNames[f_SoundTestSong]);
             DrawShadowedText(&gfx, SONG_NAME_X, TEST_NAME_Y, g_PrintBuffer);
         }
 
@@ -8579,7 +8556,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
 
         sprintf(g_PrintBuffer, "SE TEST : %3d", f_SoundTestSound);
         DrawShadowedText(&gfx, SOUND_TEST_X, TEST_NUMBER_Y, g_PrintBuffer);
-        sprintf(g_PrintBuffer, f_NameFormat, f_SoundTestSoundNames[f_SoundTestSound]);
+        sprintf(g_PrintBuffer, "%s", f_SoundTestSoundNames[f_SoundTestSound]);
         DrawShadowedText(&gfx, SOUND_NAME_X, TEST_NAME_Y, g_PrintBuffer);
         if (g_MenuMemory.optionsChoice == OPTIONS_CHOICE_SOUND_REVERB) {
             SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
@@ -8674,7 +8651,7 @@ void DrawCaddySelect(Gfx **displayListHead) {
     DrawMenuBackdropLayers(&gfx, BOARD_BACKDROP_LAYERS);
     SetUpShadowedTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
-    DrawShadowedText(&gfx, CADDY_SELECT_TITLE_X, CADDY_SELECT_TITLE_Y, (char *)g_CaddySelectTitle);
+    DrawShadowedText(&gfx, CADDY_SELECT_TITLE_X, CADDY_SELECT_TITLE_Y, "CADDY SELECT");
     for (caddyIndex = 0; caddyIndex != CADDY_COUNT; caddyIndex++) {
         if (g_MenuMemory.caddyChoice == caddyIndex) {
             SetTextColor(&gfx, 255, 255, 0);
@@ -8694,8 +8671,6 @@ void DrawCaddySelect(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
 }
-
-const char g_CaddySelectTitle[] = "CADDY SELECT";
 
 void DrawBlankScreen(Gfx **displayListHead UNUSED) {
 }

@@ -4226,30 +4226,6 @@ ClubSurfaceMask GetCurrentSurfaceClubMask(Boolean distinguishesKinds) {
     return GetSurfaceClubMask(distinguishesKinds, GetSurfaceTraits(g_CurrentShot.surface));
 }
 
-static const char f_TeeUpLieRatings[LIE_RATING_LENGTH + 1] = "3444444555555";
-static const char f_TeeUpApproachLieRatings[LIE_RATING_LENGTH + 1] = "5555555555555";
-static const char f_FairwayLieRatings[LIE_RATING_LENGTH + 1] = "3334444445555";
-static const char f_FairwayApproachLieRatings[LIE_RATING_LENGTH + 1] = "4444555555555";
-static const char f_FairwayFairLieLieRatings[LIE_RATING_LENGTH + 1] = "2333344444455";
-static const char f_FairwayFairLieApproachLieRatings[LIE_RATING_LENGTH + 1] = "3344445555555";
-static const char f_FairwayPoorLieLieRatings[LIE_RATING_LENGTH + 1] = "1222333344445";
-static const char f_FairwayPoorLieApproachLieRatings[LIE_RATING_LENGTH + 1] = "2333334444455";
-static const char f_RoughLieRatings[LIE_RATING_LENGTH + 1] = "1223333444455";
-static const char f_RoughApproachLieRatings[LIE_RATING_LENGTH + 1] = "2233344445555";
-static const char f_RoughPoorLieLieRatings[LIE_RATING_LENGTH + 1] = "1112223334445";
-static const char f_RoughPoorLieApproachLieRatings[LIE_RATING_LENGTH + 1] = "2222333444455";
-static const char f_DeepRoughLieRatings[LIE_RATING_LENGTH + 1] = "1111222233334";
-static const char f_DeepRoughApproachLieRatings[LIE_RATING_LENGTH + 1] = "1112222333344";
-static const char f_BunkerLieRatings[LIE_RATING_LENGTH + 1] = "1112223333445";
-static const char f_BunkerApproachLieRatings[LIE_RATING_LENGTH + 1] = "2223333444455";
-static const char f_BunkerFairLieLieRatings[LIE_RATING_LENGTH + 1] = "1111122222334";
-static const char f_BunkerFairLieApproachLieRatings[LIE_RATING_LENGTH + 1] = "1112223333444";
-static const char f_BunkerPoorLieLieRatings[LIE_RATING_LENGTH + 1] = "1111111222223";
-static const char f_BunkerPoorLieApproachLieRatings[LIE_RATING_LENGTH + 1] = "1111112223334";
-static const char f_CartWayLieRatings[LIE_RATING_LENGTH + 1] = "1112223333344";
-static const char f_CartWayApproachLieRatings[LIE_RATING_LENGTH + 1] = "2223333333444";
-static const char f_DefaultLieRatings[LIE_RATING_LENGTH + 1] = "3333333333333";
-
 LieRating GetLieRating(Club *club, Surface surface, ShotMode shotMode) {
     const char *ratings;
     const char *approachRatings;
@@ -4257,57 +4233,57 @@ LieRating GetLieRating(Club *club, Surface surface, ShotMode shotMode) {
 
     switch (GetSurfaceTraits(surface)->kind) {
         case SURFACE_KIND_TEE_UP:
-            ratings = f_TeeUpLieRatings;
-            approachRatings = f_TeeUpApproachLieRatings;
+            ratings = "3444444555555";
+            approachRatings = "5555555555555";
             break;
         case SURFACE_KIND_FAIRWAY:
         case SURFACE_KIND_GREEN_EDGE:
         case SURFACE_KIND_TEE_GROUND:
-            ratings = f_FairwayLieRatings;
-            approachRatings = f_FairwayApproachLieRatings;
+            ratings = "3334444445555";
+            approachRatings = "4444555555555";
             break;
         case SURFACE_KIND_FAIRWAY_FAIR_LIE:
         case SURFACE_KIND_SEMI_ROUGH:
-            ratings = f_FairwayFairLieLieRatings;
-            approachRatings = f_FairwayFairLieApproachLieRatings;
+            ratings = "2333344444455";
+            approachRatings = "3344445555555";
             break;
         case SURFACE_KIND_FAIRWAY_POOR_LIE:
-            ratings = f_FairwayPoorLieLieRatings;
-            approachRatings = f_FairwayPoorLieApproachLieRatings;
+            ratings = "1222333344445";
+            approachRatings = "2333334444455";
             break;
         case SURFACE_KIND_ROUGH:
         case SURFACE_KIND_ROCK:
         case SURFACE_KIND_BARE_GROUND:
-            ratings = f_RoughLieRatings;
-            approachRatings = f_RoughApproachLieRatings;
+            ratings = "1223333444455";
+            approachRatings = "2233344445555";
             break;
         case SURFACE_KIND_ROUGH_POOR_LIE:
-            ratings = f_RoughPoorLieLieRatings;
-            approachRatings = f_RoughPoorLieApproachLieRatings;
+            ratings = "1112223334445";
+            approachRatings = "2222333444455";
             break;
         case SURFACE_KIND_DEEP_ROUGH:
         case SURFACE_KIND_WASTE_AREA:
-            ratings = f_DeepRoughLieRatings;
-            approachRatings = f_DeepRoughApproachLieRatings;
+            ratings = "1111222233334";
+            approachRatings = "1112222333344";
             break;
         case SURFACE_KIND_BUNKER:
-            ratings = f_BunkerLieRatings;
-            approachRatings = f_BunkerApproachLieRatings;
+            ratings = "1112223333445";
+            approachRatings = "2223333444455";
             break;
         case SURFACE_KIND_BUNKER_FAIR_LIE:
-            ratings = f_BunkerFairLieLieRatings;
-            approachRatings = f_BunkerFairLieApproachLieRatings;
+            ratings = "1111122222334";
+            approachRatings = "1112223333444";
             break;
         case SURFACE_KIND_BUNKER_POOR_LIE:
-            ratings = f_BunkerPoorLieLieRatings;
-            approachRatings = f_BunkerPoorLieApproachLieRatings;
+            ratings = "1111111222223";
+            approachRatings = "1111112223334";
             break;
         case SURFACE_KIND_CART_WAY:
-            ratings = f_CartWayLieRatings;
-            approachRatings = f_CartWayApproachLieRatings;
+            ratings = "1112223333344";
+            approachRatings = "2223333333444";
             break;
         default:
-            ratings = f_DefaultLieRatings;
+            ratings = "3333333333333";
             approachRatings = ratings;
             break;
     }

@@ -81,8 +81,6 @@ s32 GetHeapLargestFreeSize(s32 heapIndex) {
     return f_Heaps[heapIndex].largestFreeSize;
 }
 
-static const char f_OutOfMemoryMessage[] = "メモリが確保できません %x\n";
-
 void *AllocFromHeap(s32 heapIndex, u32 size) {
     u32 callerAddress;
     u32 largestFreeSize;
@@ -126,7 +124,7 @@ void *AllocFromHeap(s32 heapIndex, u32 size) {
     f_Heaps[heapIndex].largestFreeSize = largestFreeSize;
     if (bestBlock == NULL) {
         osSetIntMask(mask);
-        osSyncPrintf(f_OutOfMemoryMessage, callerAddress);
+        osSyncPrintf("メモリが確保できません %x\n", callerAddress);
         return NULL;
     }
 
@@ -269,7 +267,7 @@ void *AllocMemory(u32 size) {
     f_LargestFreeMemorySize = largestFreeSize;
     if (bestBlock == NULL) {
         osSetIntMask(mask);
-        osSyncPrintf(f_OutOfMemoryMessage, callerAddress);
+        osSyncPrintf("メモリが確保できません %x\n", callerAddress);
         return NULL;
     }
 
@@ -293,8 +291,6 @@ void *AllocMemory(u32 size) {
     return BlockMemory(bestBlock);
 }
 
-static const char f_FreeNullMessage[] = "NULLポインタがfree()に渡されました. call from %x\n";
-
 void FreeMemory(void *pointerToBlock) {
     u32 callerAddress;
     void *pointer;
@@ -307,7 +303,7 @@ void FreeMemory(void *pointerToBlock) {
     pointer = *(void **)pointerToBlock;
     if (pointer == NULL) {
         osSetIntMask(mask);
-        osSyncPrintf(f_FreeNullMessage, callerAddress);
+        osSyncPrintf("NULLポインタがfree()に渡されました. call from %x\n", callerAddress);
         return;
     }
 
