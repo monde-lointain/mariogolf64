@@ -43,7 +43,7 @@ enum BootLogo {
 #define CAMELOT_FRAME_LIMIT 60
 #define CAMELOT_SKIP_FRAME_LIMIT 9
 #define CAMELOT_LEAVE_FRAME 26
-#define LEAVING_COUNTDOWN 16
+#define LEAVING_FADE_FRAMES 16
 
 #define CAMELOT_LOGO_WIDTH 192
 #define CAMELOT_LOGO_STRIP_HEIGHT 21
@@ -221,7 +221,7 @@ void UpdateBootLogos(void) {
         case BOOT_LOGO_LEAVING_NINTENDO:
         case BOOT_LOGO_LEAVING_CAMELOT:
             if (f_BootLogoFrame == 0) {
-                StartScreenFadeOut(0, 0, 0, LEAVING_COUNTDOWN);
+                StartScreenFadeOut(0, 0, 0, LEAVING_FADE_FRAMES);
             }
 
             if (IsScreenFadeDone()) {

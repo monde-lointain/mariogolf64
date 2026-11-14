@@ -30,8 +30,8 @@ enum TitleState {
 
 #define TITLE_IDLE_FRAME_COUNT 630
 #define TITLE_FRAME_LIMIT 900
-#define TITLE_ENTERING_COUNTDOWN 8
-#define LEAVING_COUNTDOWN 16
+#define TITLE_FADE_IN_FRAMES 8
+#define LEAVING_FADE_FRAMES 16
 
 #define ASSET_TITLE_IMAGE 0x6F4
 #define ASSET_NO_CONTROLLER_IMAGE 0x948
@@ -262,10 +262,10 @@ void UpdateTitleScreen(void) {
     UpdateButtonCodes();
     if (f_TitleFrame == 0) {
         if (g_TitleScreenEntrance == TITLE_ENTRANCE_FROM_OPENING) {
-            StartScreenFadeIn(255, 255, 255, TITLE_ENTERING_COUNTDOWN);
+            StartScreenFadeIn(255, 255, 255, TITLE_FADE_IN_FRAMES);
         }
         else {
-            StartScreenFadeIn(0, 0, 0, TITLE_ENTERING_COUNTDOWN);
+            StartScreenFadeIn(0, 0, 0, TITLE_FADE_IN_FRAMES);
         }
 
         g_TitleScreenEntrance = TITLE_ENTRANCE_SHOWN;
@@ -291,7 +291,7 @@ void UpdateTitleScreen(void) {
                 }
                 else if (IsLeavingForLogos(pressedButtons)) {
                     f_TitleStage = TITLE_GOING_TO_LOGOS;
-                    StartScreenFadeOut(0, 0, 0, LEAVING_COUNTDOWN);
+                    StartScreenFadeOut(0, 0, 0, LEAVING_FADE_FRAMES);
                 }
             }
 
