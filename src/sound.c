@@ -149,7 +149,7 @@ static u8 f_CharacterSoundIndexes[CHARACTER_SOUND_KIND_COUNT] = {
     CHARACTER_SOUND_CALL_OUT_C_RIGHT,
 };
 static CharacterIndex f_DelayEditorCharacter = 0;
-static s32 f_DelayEditorKind = 0;
+static CharacterSoundKind f_DelayEditorKind = CHARACTER_SOUND_KIND_FULL_SHOT;
 static SongChange f_PendingSongChange = {SONG_CHANGE_NONE, 0, 0, 0};
 static SongId f_SongId = NO_SONG;
 #define DeclareSongFile(name) extern u8 songs_##name##_ROM_START[], songs_##name##_ROM_END[]
@@ -448,7 +448,7 @@ void QueueCharacterSound(
     f_QueuedCharacterSounds[slot].pan = pan;
 }
 
-static void PreviewCharacterSound(CharacterIndex characterIndex, s32 kind) {
+static void PreviewCharacterSound(CharacterIndex characterIndex, CharacterSoundKind kind) {
     f_PreviewSoundDelays[characterIndex] = f_CharacterSoundDelays[kind][characterIndex];
 }
 
@@ -492,7 +492,7 @@ static void UpdateCharacterSounds(void) {
     }
 
     if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons & L_CBUTTONS) &&
-        f_DelayEditorKind > 0) {
+        f_DelayEditorKind > CHARACTER_SOUND_KIND_FULL_SHOT) {
         f_DelayEditorKind--;
     }
 
