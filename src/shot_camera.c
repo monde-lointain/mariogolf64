@@ -1454,7 +1454,7 @@ void ClearHoleIntroText(void) {
 }
 
 void StopHoleFlyover(void) {
-    g_HoleFlyoverFrame = HOLE_FLYOVER_ENDED;
+    g_HoleFlyoverFrame = HOLE_FLYOVER_DONE;
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;

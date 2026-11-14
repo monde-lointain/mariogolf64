@@ -273,7 +273,7 @@ void UpdateTitleScreen(void) {
 
     switch (f_TitleStage) {
         case TITLE_SHOWING:
-            if (HasScreenFadeEnded() && IsHudAnimationDone()) {
+            if (IsScreenFadeDone() && IsHudAnimationDone()) {
                 pressedButtons = 0;
                 for (controllerIndex = 0; controllerIndex != g_ControllerCount; controllerIndex++) {
                     pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
@@ -297,7 +297,7 @@ void UpdateTitleScreen(void) {
 
             break;
         case TITLE_GOING_TO_LOGOS:
-            if (HasScreenFadeEnded()) {
+            if (IsScreenFadeDone()) {
                 g_Scene = SCENE_SWAPPING_MODULES;
                 g_NextScene = SCENE_BOOT_LOGOS;
                 g_SceneModuleToUnload = MODULE_TITLE_SCREEN;

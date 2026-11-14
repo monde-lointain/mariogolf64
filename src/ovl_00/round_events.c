@@ -1144,7 +1144,7 @@ void DrawFlipMessage(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-Boolean IsMovieFinished(void) {
+Boolean IsMovieDone(void) {
     return f_CurrentMovie == MOVIE_NONE;
 }
 

@@ -30,7 +30,7 @@
 
 #define PLAN_THREAD_RUNNING 0
 #define PLAN_THREAD_COLLECTED 1
-#define PLAN_THREAD_FINISHED 2
+#define PLAN_THREAD_DONE 2
 #define PLAN_THREAD_ID 11
 #define PLAN_THREAD_PRIORITY 20
 #define PLAN_THREAD_STACK_SIZE 0x6000
@@ -111,7 +111,7 @@ enum PlanStage {
     PLAN_STAGE_TARGET_CHOSEN,
     PLAN_STAGE_TRIAL_TAKEN,
     PLAN_STAGE_UNUSED,
-    PLAN_STAGE_LEVEL_FINISHED,
+    PLAN_STAGE_LEVEL_DONE,
     PLAN_STAGE_TRIAL_RUNNING
 };
 
@@ -272,7 +272,7 @@ void RunShotPlan(void *arg UNUSED) {
     }
     while (planResult == PLAN_UNFINISHED);
 
-    f_PlanThreadState = PLAN_THREAD_FINISHED;
+    f_PlanThreadState = PLAN_THREAD_DONE;
     while (TRUE) {
     }
 }
@@ -280,7 +280,7 @@ void RunShotPlan(void *arg UNUSED) {
 s32 GetPlannedShot(CurrentShot *shot) {
     if (f_PlanThreadState != PLAN_THREAD_RUNNING) {
         *shot = f_PlannedShot;
-        if (f_PlanThreadState == PLAN_THREAD_FINISHED) {
+        if (f_PlanThreadState == PLAN_THREAD_DONE) {
             osDestroyThread(&f_PlanThread);
             f_PlanThreadState = PLAN_THREAD_COLLECTED;
         }
@@ -679,7 +679,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
             }
         }
 
-        f_PlanStage = PLAN_STAGE_LEVEL_FINISHED;
+        f_PlanStage = PLAN_STAGE_LEVEL_DONE;
         if (f_IsTrialLost == TRUE) {
             f_LostTrialCount++;
         }

@@ -2672,7 +2672,7 @@ s32 DrawGame(void) {
             SetScreenEffect(SCREEN_EFFECT_SPIN, FLYOVER_SPIN_FRAME_COUNT);
         }
     }
-    else if (g_HoleFlyoverFrame == HOLE_FLYOVER_ENDED) {
+    else if (g_HoleFlyoverFrame == HOLE_FLYOVER_DONE) {
         f_FadeAlpha -= FLYOVER_FADE_LIFT_ALPHA_STEP;
         if (f_FadeAlpha < 0) {
             f_FadeAlpha = 0;

@@ -114,7 +114,7 @@ s32 GetWipeProgress(void);
 void StartWipe(s32 kind);
 void DrawWipe(Gfx **displayListHead);
 void StopScreenFade(void);
-Boolean HasScreenFadeEnded(void);
+Boolean IsScreenFadeDone(void);
 void StartScreenFadeOut(s32 red, s32 green, s32 blue, s32 frameCount);
 void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount);
 void DrawScreenFade(Gfx **displayListHead);

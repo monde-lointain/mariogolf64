@@ -224,7 +224,7 @@ void UpdateBootLogos(void) {
                 StartScreenFadeOut(0, 0, 0, LEAVING_COUNTDOWN);
             }
 
-            if (HasScreenFadeEnded()) {
+            if (IsScreenFadeDone()) {
                 f_BootLogoStage = BOOT_LOGO_N64;
                 f_BootLogoFrame = 0;
                 SetScreenEffect(SCREEN_EFFECT_NONE, 0);

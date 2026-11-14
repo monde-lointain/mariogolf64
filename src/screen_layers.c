@@ -596,7 +596,7 @@ void StopScreenFade(void) {
     g_ScreenFadeKind = FADE_NONE;
 }
 
-Boolean HasScreenFadeEnded(void) {
+Boolean IsScreenFadeDone(void) {
     return g_ScreenFadeFramesLeft < 2;
 }
 

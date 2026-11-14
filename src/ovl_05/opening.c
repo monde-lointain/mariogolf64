@@ -3030,7 +3030,7 @@ void UpdateOpening(void) {
                 f_OpeningScene = OPENING_SCENE_END;
                 break;
             case OPENING_SCENE_END:
-                if (HasScreenFadeEnded()) {
+                if (IsScreenFadeDone()) {
                     StopEditorMoves();
                     g_TitleScreenEntrance = TITLE_ENTRANCE_FROM_OPENING;
                     g_Scene = SCENE_SWAPPING_MODULES;

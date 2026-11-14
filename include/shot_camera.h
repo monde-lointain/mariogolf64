@@ -11,7 +11,7 @@
 #include "surface.h"
 
 #define HOLE_FLYOVER_FRAME_COUNT 185
-#define HOLE_FLYOVER_ENDED (-1)
+#define HOLE_FLYOVER_DONE (-1)
 
 #define NOISE_GRID_COUNT 2
 

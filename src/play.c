@@ -475,7 +475,7 @@ void PlayContestMovies(void) {
             g_ContestMovieState = CONTEST_MOVIES_PLAYING;
         }
     }
-    else if (IsMovieFinished()) {
+    else if (IsMovieDone()) {
         g_ContestMovieState = CONTEST_MOVIES_DONE;
     }
 }
