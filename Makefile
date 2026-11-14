@@ -225,6 +225,12 @@ $(BUILD_DIR)/$(LIBNAUDIO_DIR)/%.o: OPTFLAGS := -O3
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nuboot.c.o: OPTFLAGS :=
 $(BUILD_DIR)/$(LIBKMC_DIR)/%.o: OPTFLAGS := -O1
 else
+# The modern build keeps every routine and object, used or not. Collecting
+# unreferenced sections (-ffunction-sections -fdata-sections --gc-sections)
+# would save about 55 KB of code and 80 KB of base RAM, which buys nothing
+# while the heap keeps the original's size; and the collector drops every
+# segment reached only through its ROM address, such as IPL3, the assets,
+# the sound banks and the build date, unless the script keeps each one.
 OPTFLAGS := -Os
 endif
 
