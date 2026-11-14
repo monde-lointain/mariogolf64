@@ -1386,7 +1386,7 @@ void DrawLandingReaction(Gfx **displayListHead) {
     Vec3 translation;
     Vec3 rotation;
     Mat4 matrix;
-    Mat4 offset;
+    Mat4 pivotTranslation;
     SurfaceTraits *surfaceTraits;
     s32 distance;
 
@@ -1485,8 +1485,8 @@ void DrawLandingReaction(Gfx **displayListHead) {
         translation[AXIS_Z] = LANDING_PANEL_Z;
         BuildTransformMatrix(matrix, rotation, translation, scale);
 
-        guTranslateF(offset, LANDING_PANEL_PIVOT_X, LANDING_PANEL_PIVOT_Y, 0.0f);
-        guMtxCatF(offset, matrix, matrix);
+        guTranslateF(pivotTranslation, LANDING_PANEL_PIVOT_X, LANDING_PANEL_PIVOT_Y, 0.0f);
+        guMtxCatF(pivotTranslation, matrix, matrix);
         ConvertMatrixToFixed(matrix, &f_LandingPanelMatrices[g_MatrixBufferIndex]);
         gSPMatrix(
             gfx++,
