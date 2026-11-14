@@ -1724,7 +1724,7 @@ DIM_BACKDROP:
 }
 
 void FillGroundNoise(s32 range, s32 base) {
-    s32 cell = 0;
+    s32 texelIndex = 0;
     s32 row;
     s32 column;
     s32 intensity;
@@ -1736,7 +1736,7 @@ void FillGroundNoise(s32 range, s32 base) {
                 intensity = GROUND_NOISE_INTENSITY_MAX;
             }
 
-            f_GroundNoiseTexels[cell++] = intensity;
+            f_GroundNoiseTexels[texelIndex++] = intensity;
         }
     }
 }
