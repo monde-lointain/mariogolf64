@@ -371,7 +371,7 @@ void SetSongReverb(SoundReverb reverb);
 void SetSongTempo(s32 tempo);
 void SetSongFrequencyOffset(f32 offset);
 SongId GetSongId(void);
-void PlaySong(SongId songId, s32 flags);
+void PlaySong(SongId songId, s32 songFlags);
 void InitAudio(void);
 
 #endif

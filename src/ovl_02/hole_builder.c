@@ -2755,20 +2755,20 @@ void ReadTileMirroredCells(void) {
     }
 }
 
-void ReadVertexX(s16 *coordinate, s32 flags);
-void ReadVertexY(s16 *coordinate, s32 flags);
-void ReadVertexZ(s16 *coordinate, s32 flags);
+void ReadVertexX(s16 *coordinate, s32 vertexFlags);
+void ReadVertexY(s16 *coordinate, s32 vertexFlags);
+void ReadVertexZ(s16 *coordinate, s32 vertexFlags);
 
 void ReadGridVertices(void) {
-    s8 flags;
+    s8 vertexFlags;
     s16 x;
     s16 y;
     s16 z;
     s32 vertexIndex;
 
     for (vertexIndex = 0;; vertexIndex++) {
-        ReadFileBytes(&flags, sizeof(flags));
-        if (flags == VERTEX_LIST_END) {
+        ReadFileBytes(&vertexFlags, sizeof(vertexFlags));
+        if (vertexFlags == VERTEX_LIST_END) {
             break;
         }
 
@@ -2777,17 +2777,17 @@ void ReadGridVertices(void) {
             break;
         }
 
-        if (!(flags & VERTEX_FLAG_SAME_X)) {
-            ReadVertexX(&x, flags);
+        if (!(vertexFlags & VERTEX_FLAG_SAME_X)) {
+            ReadVertexX(&x, vertexFlags);
             g_WorkArea.hole.gridVertices[vertexIndex].v.ob[AXIS_X] = x;
             g_WorkArea.hole.gridVertices[vertexIndex].v.tc[TEXTURE_AXIS_S] =
                 (x * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
         }
 
-        ReadVertexY(&y, flags);
+        ReadVertexY(&y, vertexFlags);
         g_WorkArea.hole.gridVertices[vertexIndex].v.ob[AXIS_Y] = y;
-        if (!(flags & VERTEX_FLAG_SAME_Z)) {
-            ReadVertexZ(&z, flags);
+        if (!(vertexFlags & VERTEX_FLAG_SAME_Z)) {
+            ReadVertexZ(&z, vertexFlags);
             g_WorkArea.hole.gridVertices[vertexIndex].v.ob[AXIS_Z] = z;
             g_WorkArea.hole.gridVertices[vertexIndex].v.tc[TEXTURE_AXIS_T] =
                 (z * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
@@ -2796,7 +2796,7 @@ void ReadGridVertices(void) {
 }
 
 void ReadTileMidpoints(void) {
-    s8 flags;
+    s8 vertexFlags;
     s16 x;
     s16 y;
     s16 z;
@@ -2806,22 +2806,22 @@ void ReadTileMidpoints(void) {
     midpoint = 0;
     tileIndex = 0;
     while (TRUE) {
-        ReadFileBytes(&flags, sizeof(flags));
-        if (flags == VERTEX_LIST_END) {
+        ReadFileBytes(&vertexFlags, sizeof(vertexFlags));
+        if (vertexFlags == VERTEX_LIST_END) {
             break;
         }
 
-        if (!(flags & VERTEX_FLAG_SAME_X)) {
-            ReadVertexX(&x, flags);
+        if (!(vertexFlags & VERTEX_FLAG_SAME_X)) {
+            ReadVertexX(&x, vertexFlags);
             g_WorkArea.hole.midpoints[tileIndex][midpoint].v.ob[AXIS_X] = x;
             g_WorkArea.hole.midpoints[tileIndex][midpoint].v.tc[TEXTURE_AXIS_S] =
                 (x * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
         }
 
-        ReadVertexY(&y, flags);
+        ReadVertexY(&y, vertexFlags);
         g_WorkArea.hole.midpoints[tileIndex][midpoint].v.ob[AXIS_Y] = y;
-        if (!(flags & VERTEX_FLAG_SAME_Z)) {
-            ReadVertexZ(&z, flags);
+        if (!(vertexFlags & VERTEX_FLAG_SAME_Z)) {
+            ReadVertexZ(&z, vertexFlags);
             g_WorkArea.hole.midpoints[tileIndex][midpoint].v.ob[AXIS_Z] = z;
             g_WorkArea.hole.midpoints[tileIndex][midpoint].v.tc[TEXTURE_AXIS_T] =
                 (z * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
@@ -2835,9 +2835,9 @@ void ReadTileMidpoints(void) {
     }
 }
 
-void ReadVertexX(s16 *coordinate, s32 flags) {
+void ReadVertexX(s16 *coordinate, s32 vertexFlags) {
     *coordinate = 0;
-    switch (flags & VERTEX_FLAG_X_ENCODING) {
+    switch (vertexFlags & VERTEX_FLAG_X_ENCODING) {
         case VERTEX_ENCODING_BYTE:
             ReadFileBytes(coordinate, 1);
             *coordinate = (u16)*coordinate >> BITS_PER_BYTE;
@@ -2856,9 +2856,9 @@ void ReadVertexX(s16 *coordinate, s32 flags) {
     }
 }
 
-void ReadVertexY(s16 *coordinate, s32 flags) {
+void ReadVertexY(s16 *coordinate, s32 vertexFlags) {
     *coordinate = 0;
-    switch ((u8)(flags & VERTEX_FLAG_Y_ENCODING) >> VERTEX_FLAG_Y_ENCODING_SHIFT) {
+    switch ((u8)(vertexFlags & VERTEX_FLAG_Y_ENCODING) >> VERTEX_FLAG_Y_ENCODING_SHIFT) {
         case VERTEX_ENCODING_BYTE:
             ReadFileBytes(coordinate, 1);
             *coordinate = (u16)*coordinate >> BITS_PER_BYTE;
@@ -2877,9 +2877,9 @@ void ReadVertexY(s16 *coordinate, s32 flags) {
     }
 }
 
-void ReadVertexZ(s16 *coordinate, s32 flags) {
+void ReadVertexZ(s16 *coordinate, s32 vertexFlags) {
     *coordinate = 0;
-    switch ((u8)(flags & VERTEX_FLAG_Z_ENCODING) >> VERTEX_FLAG_Z_ENCODING_SHIFT) {
+    switch ((u8)(vertexFlags & VERTEX_FLAG_Z_ENCODING) >> VERTEX_FLAG_Z_ENCODING_SHIFT) {
         case VERTEX_ENCODING_BYTE:
             ReadFileBytes(coordinate, 1);
             *coordinate = (u16)*coordinate >> BITS_PER_BYTE;

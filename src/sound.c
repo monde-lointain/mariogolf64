@@ -681,28 +681,28 @@ SongId GetSongId(void) {
     return f_SongId;
 }
 
-void PlaySong(SongId songId, s32 flags) {
+void PlaySong(SongId songId, s32 songFlags) {
     if (!IsGameFlagSet(GAME_FLAG_SILENCE_SONGS)) {
-        if (IsMusicOffChosen() && (flags & SONG_FLAG_FOLLOWS_MUSIC_OPTION)) {
+        if (IsMusicOffChosen() && (songFlags & SONG_FLAG_FOLLOWS_MUSIC_OPTION)) {
             RequestSongStop();
             return;
         }
 
         if (f_SongHandle != NO_HANDLE) {
-            if ((flags & SONG_FLAG_RESTART) || f_SongId != songId) {
+            if ((songFlags & SONG_FLAG_RESTART) || f_SongId != songId) {
                 f_PendingSongChange.state = SONG_CHANGE_SWITCH;
                 f_PendingSongChange.songId = songId;
-                f_PendingSongChange.flags = flags;
+                f_PendingSongChange.flags = songFlags;
                 f_PendingSongChange.delay = SONG_SWITCH_DELAY;
             }
         }
         else if (f_PendingSongChange.state == SONG_CHANGE_SWITCH) {
             f_PendingSongChange.songId = songId;
-            f_PendingSongChange.flags = flags;
+            f_PendingSongChange.flags = songFlags;
         }
         else {
             osSyncPrintf("SeqGo %d\n", songId);
-            if (!IsMusicOffChosen() || !(flags & SONG_FLAG_FOLLOWS_MUSIC_OPTION)) {
+            if (!IsMusicOffChosen() || !(songFlags & SONG_FLAG_FOLLOWS_MUSIC_OPTION)) {
                 f_SongId = songId;
                 if (songId > LAST_SONG_ID) {
                     songId = LAST_SONG_ID;
