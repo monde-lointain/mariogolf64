@@ -58,10 +58,15 @@
 #define BETS_PAGE_TALLY_LEFT 53
 #define BETS_PAGE_TALLY_TOP 112
 
-#define NO_BET_SUBTITLE (-1)
-#define BET_SUBTITLE_SCORE 0
-#define BET_SUBTITLE_SKINS 1
-#define BET_SUBTITLE_NASSAU 2
+enum BetSubtitle {
+    NO_BET_SUBTITLE = -1,
+    BET_SUBTITLE_SCORE,
+    BET_SUBTITLE_SKINS,
+    BET_SUBTITLE_NASSAU
+};
+
+typedef s32 BetSubtitle;
+typedef s8 BetSubtitle8;
 
 #define FLAP_TOP_QUAD 0
 #define FLAP_BOTTOM_QUAD 1
@@ -106,7 +111,7 @@ static const char *f_BetNames[BET_COUNT] = {
 static char f_UnusedCarryText[] UNUSED = "Carry";
 static s32 f_BetBlinkFrame = 0;
 static s32 f_BetBlinkTime = 0;
-static s8 f_BetSubtitleRows[BET_COUNT] = {
+static BetSubtitle8 f_BetSubtitleRows[BET_COUNT] = {
     NO_BET_SUBTITLE,
     NO_BET_SUBTITLE,
     BET_SUBTITLE_SCORE,
