@@ -4329,7 +4329,9 @@ void DrawRoundHud(CameraView *view) {
         sprintf(
             g_PrintBuffer,
             "%3dy",
-            (s16)g_CourseRecords[GetCourseRecordIndex()].holes[GetHoleRecordIndex()].yardages[0]
+            (s16)g_CourseRecords[GetCourseRecordIndex()]
+                .holes[GetHoleRecordIndex()]
+                .yardages[SHOWN_YARDAGE]
         );
         DrawDistanceText(
             &g_DisplayListHead,

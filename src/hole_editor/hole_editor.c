@@ -1088,10 +1088,10 @@ void UpdateHolePointEditor(void) {
                 SURFACE_TEXT_COLUMN,
                 SURFACE_TEXT_ROW
             );
-            if (f_PinTeeIndex == 0) {
-                g_HoleSetup.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
-                g_HoleSetup.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
-                g_HoleSetup.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
+            if (f_PinTeeIndex == DEFAULT_CUP) {
+                g_HoleSetup.cupPosition[AXIS_X] = g_HolePoints.cupPositions[DEFAULT_CUP][AXIS_X];
+                g_HoleSetup.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[DEFAULT_CUP][AXIS_Y];
+                g_HoleSetup.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[DEFAULT_CUP][AXIS_Z];
             }
         }
 
@@ -1114,10 +1114,10 @@ void UpdateHolePointEditor(void) {
                 SURFACE_TEXT_COLUMN,
                 SURFACE_TEXT_ROW
             );
-            if (f_PinTeeIndex == 0) {
-                g_HoleSetup.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
-                g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
-                g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
+            if (f_PinTeeIndex == PLAYED_TEE) {
+                g_HoleSetup.teePosition[AXIS_X] = g_HolePoints.teePositions[PLAYED_TEE][AXIS_X];
+                g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[PLAYED_TEE][AXIS_Y];
+                g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[PLAYED_TEE][AXIS_Z];
             }
         }
 
@@ -2107,12 +2107,12 @@ void PutObjectsOnGround(void) {
         }
     }
 
-    g_HoleSetup.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
-    g_HoleSetup.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
-    g_HoleSetup.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
-    g_HoleSetup.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
-    g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
-    g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
+    g_HoleSetup.cupPosition[AXIS_X] = g_HolePoints.cupPositions[DEFAULT_CUP][AXIS_X];
+    g_HoleSetup.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[DEFAULT_CUP][AXIS_Y];
+    g_HoleSetup.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[DEFAULT_CUP][AXIS_Z];
+    g_HoleSetup.teePosition[AXIS_X] = g_HolePoints.teePositions[PLAYED_TEE][AXIS_X];
+    g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[PLAYED_TEE][AXIS_Y];
+    g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[PLAYED_TEE][AXIS_Z];
     for (i = 0; i < ROUTE_POINT_COUNT; i++) {
         if (g_HolePoints.aimPoints[i][AXIS_X] != 0 && g_HolePoints.aimPoints[i][AXIS_Z] != 0) {
             g_HolePoints.aimPoints[i][AXIS_Y] = GetGroundHeight(

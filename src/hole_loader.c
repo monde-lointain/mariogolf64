@@ -838,9 +838,9 @@ NO_RESULT ChooseHoleConditions(void) {
         g_HoleSetup.cupPosition[AXIS_X] = g_HolePoints.cupPositions[cupIndex][AXIS_X];
         g_HoleSetup.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[cupIndex][AXIS_Y];
         g_HoleSetup.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[cupIndex][AXIS_Z];
-        g_HoleSetup.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
-        g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
-        g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
+        g_HoleSetup.teePosition[AXIS_X] = g_HolePoints.teePositions[PLAYED_TEE][AXIS_X];
+        g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[PLAYED_TEE][AXIS_Y];
+        g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[PLAYED_TEE][AXIS_Z];
         attemptCount++;
         cupIndex = (cupIndex + 1) & (CUP_POSITION_COUNT - 1);
         if (attemptCount >= CUP_ATTEMPT_COUNT_MAX) {

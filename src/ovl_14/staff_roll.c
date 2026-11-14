@@ -389,12 +389,12 @@ void LoadStaffRoll(void) {
     g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_LATE;
     g_HoleSetup.conditions.lightPitch = STAFF_ROLL_LIGHT_PITCH;
     g_HoleSetup.conditions.lightYaw = STAFF_ROLL_LIGHT_YAW;
-    g_HoleSetup.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
-    g_HoleSetup.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
-    g_HoleSetup.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
-    g_HoleSetup.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
-    g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
-    g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
+    g_HoleSetup.cupPosition[AXIS_X] = g_HolePoints.cupPositions[DEFAULT_CUP][AXIS_X];
+    g_HoleSetup.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[DEFAULT_CUP][AXIS_Y];
+    g_HoleSetup.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[DEFAULT_CUP][AXIS_Z];
+    g_HoleSetup.teePosition[AXIS_X] = g_HolePoints.teePositions[PLAYED_TEE][AXIS_X];
+    g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[PLAYED_TEE][AXIS_Y];
+    g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[PLAYED_TEE][AXIS_Z];
     SetGameFlag(GAME_FLAG_HOLE_LOADED);
     g_GameState.playerCount = 1;
     StopLoaderThread();
@@ -718,9 +718,9 @@ void RunStaffRollTimeline(s32 frame) {
             );
         }
 
-        point[AXIS_X] = g_HolePoints.aimPoints[0][AXIS_X];
-        point[AXIS_Y] = g_HolePoints.aimPoints[0][AXIS_Y];
-        point[AXIS_Z] = g_HolePoints.aimPoints[0][AXIS_Z];
+        point[AXIS_X] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_Z];
         PlaceCharacter(slotIndex, point, GOLFER_HEADING);
         f_CastSlot = slotIndex;
     }
@@ -749,12 +749,12 @@ void RunStaffRollTimeline(s32 frame) {
             ANIMATION_EVENT_IMPACT
         );
         ClearReactionSpot();
-        ConsiderReactionSpot(g_HolePoints.aimPoints[0]);
+        ConsiderReactionSpot(g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT]);
         StartReaction(slotIndex, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BOGEY);
         f_IsReactionShown = TRUE;
-        point[AXIS_X] = g_HolePoints.aimPoints[0][AXIS_X];
-        point[AXIS_Y] = g_HolePoints.aimPoints[0][AXIS_Y];
-        point[AXIS_Z] = g_HolePoints.aimPoints[0][AXIS_Z];
+        point[AXIS_X] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_Z];
         PlaceCharacter(slotIndex, point, -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F);
         f_CastSlot = slotIndex;
         f_CastIndex++;
@@ -797,9 +797,9 @@ void RunStaffRollTimeline(s32 frame) {
             );
         }
 
-        point[AXIS_X] = g_HolePoints.aimPoints[1][AXIS_X];
-        point[AXIS_Y] = g_HolePoints.aimPoints[1][AXIS_Y];
-        point[AXIS_Z] = g_HolePoints.aimPoints[1][AXIS_Z];
+        point[AXIS_X] = g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT][AXIS_Z];
         PlaceCharacter(slotIndex, point, GOLFER_HEADING);
         f_CastSlot = slotIndex;
     }
@@ -828,12 +828,12 @@ void RunStaffRollTimeline(s32 frame) {
             ANIMATION_EVENT_IMPACT
         );
         ClearReactionSpot();
-        ConsiderReactionSpot(g_HolePoints.aimPoints[1]);
+        ConsiderReactionSpot(g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT]);
         StartReaction(slotIndex, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BIRDIE);
         f_IsReactionShown = TRUE;
-        point[AXIS_X] = g_HolePoints.aimPoints[1][AXIS_X];
-        point[AXIS_Y] = g_HolePoints.aimPoints[1][AXIS_Y];
-        point[AXIS_Z] = g_HolePoints.aimPoints[1][AXIS_Z];
+        point[AXIS_X] = g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT][AXIS_Z];
         PlaceCharacter(slotIndex, point, -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F);
         f_CastSlot = slotIndex;
         f_CastIndex++;
@@ -991,9 +991,9 @@ void RunStaffRollTimeline(s32 frame) {
             ),
             ANIMATION_EVENT_IMPACT
         );
-        point[AXIS_X] = g_HolePoints.aimPoints[0][AXIS_X];
-        point[AXIS_Y] = g_HolePoints.aimPoints[0][AXIS_Y];
-        point[AXIS_Z] = g_HolePoints.aimPoints[0][AXIS_Z];
+        point[AXIS_X] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_Z];
         PlaceCharacter(slotIndex, point, GOLFER_HEADING);
         f_CastSlot = slotIndex;
     }
@@ -1012,12 +1012,12 @@ void RunStaffRollTimeline(s32 frame) {
             ANIMATION_EVENT_IMPACT
         );
         ClearReactionSpot();
-        ConsiderReactionSpot(g_HolePoints.aimPoints[0]);
+        ConsiderReactionSpot(g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT]);
         StartReaction(slotIndex, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BOGEY);
         f_IsReactionShown = TRUE;
-        point[AXIS_X] = g_HolePoints.aimPoints[0][AXIS_X];
-        point[AXIS_Y] = g_HolePoints.aimPoints[0][AXIS_Y];
-        point[AXIS_Z] = g_HolePoints.aimPoints[0][AXIS_Z];
+        point[AXIS_X] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_Z];
         PlaceCharacter(slotIndex, point, GOLFER_HEADING);
         f_CastSlot = slotIndex;
     }
@@ -1043,9 +1043,9 @@ void RunStaffRollTimeline(s32 frame) {
             GetAnimationEventFrame(slotIndex, swingAnimation, ANIMATION_EVENT_IMPACT) -
                 (2 * CAST_SWING_LEAD_FRAMES)
         );
-        point[AXIS_X] = g_HolePoints.aimPoints[1][AXIS_X];
-        point[AXIS_Y] = g_HolePoints.aimPoints[1][AXIS_Y];
-        point[AXIS_Z] = g_HolePoints.aimPoints[1][AXIS_Z];
+        point[AXIS_X] = g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT][AXIS_Z];
         PlaceCharacter(slotIndex, point, GOLFER_HEADING);
         f_CastSlot = slotIndex;
     }
@@ -1064,12 +1064,12 @@ void RunStaffRollTimeline(s32 frame) {
             ANIMATION_EVENT_IMPACT
         );
         ClearReactionSpot();
-        ConsiderReactionSpot(g_HolePoints.aimPoints[1]);
+        ConsiderReactionSpot(g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT]);
         StartReaction(slotIndex, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BIRDIE);
         f_IsReactionShown = TRUE;
-        point[AXIS_X] = g_HolePoints.aimPoints[1][AXIS_X];
-        point[AXIS_Y] = g_HolePoints.aimPoints[1][AXIS_Y];
-        point[AXIS_Z] = g_HolePoints.aimPoints[1][AXIS_Z];
+        point[AXIS_X] = g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.aimPoints[SECOND_SHOT_AIM_POINT][AXIS_Z];
         PlaceCharacter(slotIndex, point, GOLFER_HEADING);
         f_CastSlot = slotIndex;
     }

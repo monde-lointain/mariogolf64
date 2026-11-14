@@ -70,10 +70,14 @@ typedef u8 UHoleFlags8;
 #define TOURNAMENT_NAME_COUNT 7
 #define TOURNAMENT_NAME_SIZE 25
 
+// Every hole repeats its yardage this many times; the HUD shows the first.
+#define HOLE_YARDAGE_COUNT 3
+#define SHOWN_YARDAGE 0
+
 typedef struct HoleRecord {
     s8 par;
     s8 handicap;
-    u16 yardages[3];
+    u16 yardages[HOLE_YARDAGE_COUNT];
     UHoleFlags8 flags;
 } HoleRecord;
 

@@ -2310,17 +2310,18 @@ void StartPlayerShot(s32 playerIndex) {
     if (!g_IsTrainingHeadingKept || g_GameState.gameMode != GAME_MODE_TRAINING) {
         SurfaceKind surfaceKind = GetSurfaceTraits(g_CurrentShot.surface)->kind;
 
-        if (g_HolePoints.aimPoints[0][AXIS_X] == 0 || g_HolePoints.aimPoints[0][AXIS_Z] == 0) {
-            g_HolePoints.aimPoints[0][AXIS_X] = g_HoleSetup.cupPosition[AXIS_X];
-            g_HolePoints.aimPoints[0][AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y];
-            g_HolePoints.aimPoints[0][AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
+        if (g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_X] == 0 ||
+            g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_Z] == 0) {
+            g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_X] = g_HoleSetup.cupPosition[AXIS_X];
+            g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y];
+            g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
         }
 
         if (g_HoleSetup.par != PAR_THREE &&
             (surfaceKind == SURFACE_KIND_TEE_UP || surfaceKind == SURFACE_KIND_TEE_GROUND)) {
-            target[AXIS_X] = g_HolePoints.aimPoints[0][AXIS_X];
-            target[AXIS_Y] = g_HolePoints.aimPoints[0][AXIS_Y];
-            target[AXIS_Z] = g_HolePoints.aimPoints[0][AXIS_Z];
+            target[AXIS_X] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_X];
+            target[AXIS_Y] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_Y];
+            target[AXIS_Z] = g_HolePoints.aimPoints[TEE_SHOT_AIM_POINT][AXIS_Z];
         }
         else {
             target[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X];

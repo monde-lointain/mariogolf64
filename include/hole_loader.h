@@ -11,6 +11,14 @@
 #define ROUTE_POINT_COUNT 8
 #define AIM_POINT_COUNT 8
 
+// Play always starts from the first tee. The first cup is the one the editor
+// and staff roll use, and the first two aim points mark where the tee shot and
+// the second shot should land.
+#define PLAYED_TEE 0
+#define DEFAULT_CUP 0
+#define TEE_SHOT_AIM_POINT 0
+#define SECOND_SHOT_AIM_POINT 1
+
 typedef struct HolePoints {
     CoursePoint cupPositions[CUP_POSITION_COUNT];
     CoursePoint teePositions[CUP_POSITION_COUNT];
