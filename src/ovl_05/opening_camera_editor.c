@@ -83,22 +83,22 @@ void PlaceEditorCamera(f32 eyeX, f32 eyeY, f32 eyeZ, f32 lookAtX, f32 lookAtY, f
     MeasureEditorCamera();
 }
 
-void SetEditorPointSpeeds(s32 index, f32 topSpeed, f32 acceleration) {
-    g_CameraEditor.pointTopSpeeds[index] = topSpeed;
-    g_CameraEditor.pointAccelerations[index] = acceleration;
+void SetEditorPointSpeeds(s32 pointIndex, f32 topSpeed, f32 acceleration) {
+    g_CameraEditor.pointTopSpeeds[pointIndex] = topSpeed;
+    g_CameraEditor.pointAccelerations[pointIndex] = acceleration;
 }
 
-void SetEditorTurnSpeeds(s32 unusedIndex UNUSED, f32 topSpeed, f32 acceleration) {
+void SetEditorTurnSpeeds(s32 unusedPointIndex UNUSED, f32 topSpeed, f32 acceleration) {
     g_CameraEditor.turnTopSpeed = topSpeed;
     g_CameraEditor.turnAcceleration = acceleration;
 }
 
-void SetEditorTiltSpeeds(s32 unusedIndex UNUSED, f32 topSpeed, f32 acceleration) {
+void SetEditorTiltSpeeds(s32 unusedPointIndex UNUSED, f32 topSpeed, f32 acceleration) {
     g_CameraEditor.tiltTopSpeed = topSpeed;
     g_CameraEditor.tiltAcceleration = acceleration;
 }
 
-void SetEditorZoomSpeeds(s32 unusedIndex UNUSED, f32 topSpeed, f32 acceleration) {
+void SetEditorZoomSpeeds(s32 unusedPointIndex UNUSED, f32 topSpeed, f32 acceleration) {
     g_CameraEditor.zoomTopSpeed = topSpeed;
     g_CameraEditor.zoomAcceleration = acceleration;
 }
@@ -141,88 +141,88 @@ void MeasureEditorCamera(void) {
 #define EDITOR_ARRIVAL_ANGLE 0.001f
 #define EDITOR_EASE_SHARE 4
 
-void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
+void MoveEditorPoint(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
     f32 distance;
     s32 easeFrameCount;
     f32 speed;
 
     distance = sqrtf(
-        ((x - g_CameraEditor.points[index][0]) * (x - g_CameraEditor.points[index][0])) +
-        ((y - g_CameraEditor.points[index][1]) * (y - g_CameraEditor.points[index][1])) +
-        ((z - g_CameraEditor.points[index][2]) * (z - g_CameraEditor.points[index][2]))
+        ((x - g_CameraEditor.points[pointIndex][0]) * (x - g_CameraEditor.points[pointIndex][0])) +
+        ((y - g_CameraEditor.points[pointIndex][1]) * (y - g_CameraEditor.points[pointIndex][1])) +
+        ((z - g_CameraEditor.points[pointIndex][2]) * (z - g_CameraEditor.points[pointIndex][2]))
     );
     if (distance < EDITOR_ARRIVAL_DISTANCE) {
-        g_CameraEditor.points[index][0] = x;
-        g_CameraEditor.points[index][1] = y;
-        g_CameraEditor.points[index][2] = z;
+        g_CameraEditor.points[pointIndex][0] = x;
+        g_CameraEditor.points[pointIndex][1] = y;
+        g_CameraEditor.points[pointIndex][2] = z;
         return;
     }
 
     if (frameCount != 0) {
         easeFrameCount = frameCount / EDITOR_EASE_SHARE;
         speed = distance / (frameCount - easeFrameCount);
-        g_CameraEditor.pointTopSpeeds[index] = speed;
-        g_CameraEditor.pointAccelerations[index] = speed / (easeFrameCount + 1);
-        g_CameraEditor.pointBrakingDistances[index] = distance * (1.0 / EDITOR_EASE_SHARE);
-        if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_CARRYING)) {
-            if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_TIMED_MOVE)) {
-                g_CameraEditor.flags[index] ^= EDITOR_FLAG_TIMED_MOVE;
+        g_CameraEditor.pointTopSpeeds[pointIndex] = speed;
+        g_CameraEditor.pointAccelerations[pointIndex] = speed / (easeFrameCount + 1);
+        g_CameraEditor.pointBrakingDistances[pointIndex] = distance * (1.0 / EDITOR_EASE_SHARE);
+        if (!(g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_CARRYING)) {
+            if (!(g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_TIMED_MOVE)) {
+                g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_TIMED_MOVE;
             }
 
-            if (g_CameraEditor.flags[index] & EDITOR_FLAG_UNTIMED_MOVE) {
-                g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNTIMED_MOVE;
+            if (g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_UNTIMED_MOVE) {
+                g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_UNTIMED_MOVE;
             }
         }
     }
     else {
-        if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNTIMED_MOVE)) {
-            g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNTIMED_MOVE;
+        if (!(g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_UNTIMED_MOVE)) {
+            g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_UNTIMED_MOVE;
         }
 
-        if (g_CameraEditor.flags[index] & EDITOR_FLAG_TIMED_MOVE) {
-            g_CameraEditor.flags[index] ^= EDITOR_FLAG_TIMED_MOVE;
+        if (g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_TIMED_MOVE) {
+            g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_TIMED_MOVE;
         }
     }
 
-    g_CameraEditor.targets[index][0] = x;
-    g_CameraEditor.targets[index][1] = y;
-    g_CameraEditor.targets[index][2] = z;
+    g_CameraEditor.targets[pointIndex][0] = x;
+    g_CameraEditor.targets[pointIndex][1] = y;
+    g_CameraEditor.targets[pointIndex][2] = z;
 
-    x -= g_CameraEditor.points[index][0];
-    y -= g_CameraEditor.points[index][1];
-    z -= g_CameraEditor.points[index][2];
-    g_CameraEditor.moveAxes[index] = EDITOR_MOVE_AXIS_X;
+    x -= g_CameraEditor.points[pointIndex][0];
+    y -= g_CameraEditor.points[pointIndex][1];
+    z -= g_CameraEditor.points[pointIndex][2];
+    g_CameraEditor.moveAxes[pointIndex] = EDITOR_MOVE_AXIS_X;
     if ((f32)fabs(x) < (f32)fabs(z)) {
-        g_CameraEditor.moveAxes[index] = EDITOR_MOVE_AXIS_Z;
+        g_CameraEditor.moveAxes[pointIndex] = EDITOR_MOVE_AXIS_Z;
         x = z;
     }
 
     if ((f32)fabs(x) < (f32)fabs(y)) {
-        g_CameraEditor.moveAxes[index] = EDITOR_MOVE_AXIS_Y;
+        g_CameraEditor.moveAxes[pointIndex] = EDITOR_MOVE_AXIS_Y;
     }
 }
 
-void MoveEditorCamera(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
-    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_CARRYING)) {
-        g_CameraEditor.flags[index] ^= EDITOR_FLAG_CARRYING;
+void MoveEditorCamera(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
+    if (!(g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_CARRYING)) {
+        g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_CARRYING;
     }
 
-    if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_CARRYING) {
-        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_CARRYING;
+    if (g_CameraEditor.flags[pointIndex ^ 1] & EDITOR_FLAG_CARRYING) {
+        g_CameraEditor.flags[pointIndex ^ 1] ^= EDITOR_FLAG_CARRYING;
     }
 
-    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
-        g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
+    if (!(g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_PIVOT)) {
+        g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_PIVOT;
     }
 
-    if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_PIVOT) {
-        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_PIVOT;
+    if (g_CameraEditor.flags[pointIndex ^ 1] & EDITOR_FLAG_PIVOT) {
+        g_CameraEditor.flags[pointIndex ^ 1] ^= EDITOR_FLAG_PIVOT;
     }
 
-    MoveEditorPoint(index, x, y, z, frameCount);
+    MoveEditorPoint(pointIndex, x, y, z, frameCount);
 }
 
-void TurnEditorCamera(s32 index, Radians angle, s32 frameCount) {
+void TurnEditorCamera(s32 pointIndex, Radians angle, s32 frameCount) {
     s32 easeFrameCount;
     f32 speed;
 
@@ -240,24 +240,24 @@ void TurnEditorCamera(s32 index, Radians angle, s32 frameCount) {
     }
 
     g_CameraEditor.turnLeft = angle;
-    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
-        g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
+    if (!(g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_PIVOT)) {
+        g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_PIVOT;
     }
 
-    if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_PIVOT) {
-        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_PIVOT;
+    if (g_CameraEditor.flags[pointIndex ^ 1] & EDITOR_FLAG_PIVOT) {
+        g_CameraEditor.flags[pointIndex ^ 1] ^= EDITOR_FLAG_PIVOT;
     }
 
-    if (g_CameraEditor.flags[index] & EDITOR_FLAG_TURNING) {
-        g_CameraEditor.flags[index] ^= EDITOR_FLAG_TURNING;
+    if (g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_TURNING) {
+        g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_TURNING;
     }
 
-    if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_TURNING)) {
-        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_TURNING;
+    if (!(g_CameraEditor.flags[pointIndex ^ 1] & EDITOR_FLAG_TURNING)) {
+        g_CameraEditor.flags[pointIndex ^ 1] ^= EDITOR_FLAG_TURNING;
     }
 }
 
-void TiltEditorCamera(s32 index, Radians angle, s32 frameCount) {
+void TiltEditorCamera(s32 pointIndex, Radians angle, s32 frameCount) {
     s32 easeFrameCount;
     f32 speed;
 
@@ -275,24 +275,24 @@ void TiltEditorCamera(s32 index, Radians angle, s32 frameCount) {
     }
 
     g_CameraEditor.tiltLeft = angle;
-    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
-        g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
+    if (!(g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_PIVOT)) {
+        g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_PIVOT;
     }
 
-    if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_PIVOT) {
-        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_PIVOT;
+    if (g_CameraEditor.flags[pointIndex ^ 1] & EDITOR_FLAG_PIVOT) {
+        g_CameraEditor.flags[pointIndex ^ 1] ^= EDITOR_FLAG_PIVOT;
     }
 
-    if (g_CameraEditor.flags[index] & EDITOR_FLAG_TILTING) {
-        g_CameraEditor.flags[index] ^= EDITOR_FLAG_TILTING;
+    if (g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_TILTING) {
+        g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_TILTING;
     }
 
-    if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_TILTING)) {
-        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_TILTING;
+    if (!(g_CameraEditor.flags[pointIndex ^ 1] & EDITOR_FLAG_TILTING)) {
+        g_CameraEditor.flags[pointIndex ^ 1] ^= EDITOR_FLAG_TILTING;
     }
 }
 
-void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
+void ZoomEditorCamera(s32 pointIndex, f32 distance, s32 frameCount) {
     s32 easeFrameCount;
     f32 change;
     f32 speed;
@@ -312,20 +312,20 @@ void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
     }
 
     g_CameraEditor.zoomTarget = distance;
-    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
-        g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
+    if (!(g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_PIVOT)) {
+        g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_PIVOT;
     }
 
-    if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_PIVOT) {
-        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_PIVOT;
+    if (g_CameraEditor.flags[pointIndex ^ 1] & EDITOR_FLAG_PIVOT) {
+        g_CameraEditor.flags[pointIndex ^ 1] ^= EDITOR_FLAG_PIVOT;
     }
 
-    if (g_CameraEditor.flags[index] & EDITOR_FLAG_ZOOMING) {
-        g_CameraEditor.flags[index] ^= EDITOR_FLAG_ZOOMING;
+    if (g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_ZOOMING) {
+        g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_ZOOMING;
     }
 
-    if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_ZOOMING)) {
-        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_ZOOMING;
+    if (!(g_CameraEditor.flags[pointIndex ^ 1] & EDITOR_FLAG_ZOOMING)) {
+        g_CameraEditor.flags[pointIndex ^ 1] ^= EDITOR_FLAG_ZOOMING;
     }
 }
 
@@ -396,7 +396,7 @@ void StopEditorMoves(void) {
 void UpdateCameraEditor(void) {
     Boolean hasMoved = FALSE;
     Boolean hasLeader = FALSE;
-    s32 index;
+    s32 pointIndex;
     Boolean isDone;
     f32 x;
     f32 y;
@@ -413,24 +413,24 @@ void UpdateCameraEditor(void) {
         return;
     }
 
-    for (index = 0; index != EDITOR_POINT_COUNT; index++) {
+    for (pointIndex = 0; pointIndex != EDITOR_POINT_COUNT; pointIndex++) {
         if (g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_CARRYING) {
-            index = EDITOR_POINT_EYE;
+            pointIndex = EDITOR_POINT_EYE;
             hasLeader = TRUE;
         }
 
         if (g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] & EDITOR_FLAG_CARRYING) {
-            index = EDITOR_POINT_LOOK_AT;
+            pointIndex = EDITOR_POINT_LOOK_AT;
             hasLeader = TRUE;
         }
 
         if (!hasLeader &&
-            !(g_CameraEditor.flags[index] & EDITOR_FLAG_TIMED_MOVE) &&
-            !(g_CameraEditor.flags[index] & EDITOR_FLAG_UNTIMED_MOVE)) {
+            !(g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_TIMED_MOVE) &&
+            !(g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_UNTIMED_MOVE)) {
             continue;
         }
 
-        if (g_CameraEditor.moveAxes[index] == 0) {
+        if (g_CameraEditor.moveAxes[pointIndex] == 0) {
             if (hasLeader) {
                 break;
             }
@@ -438,83 +438,83 @@ void UpdateCameraEditor(void) {
             continue;
         }
 
-        x = g_CameraEditor.points[index][0];
-        y = g_CameraEditor.points[index][1];
-        z = g_CameraEditor.points[index][2];
-        if (g_CameraEditor.targets[index][0] != 0.0f ||
-            g_CameraEditor.targets[index][1] != 0.0f ||
-            g_CameraEditor.targets[index][2] != 0.0f) {
-            offsetX = g_CameraEditor.targets[index][0] - x;
-            offsetY = g_CameraEditor.targets[index][1] - y;
-            offsetZ = g_CameraEditor.targets[index][2] - z;
+        x = g_CameraEditor.points[pointIndex][0];
+        y = g_CameraEditor.points[pointIndex][1];
+        z = g_CameraEditor.points[pointIndex][2];
+        if (g_CameraEditor.targets[pointIndex][0] != 0.0f ||
+            g_CameraEditor.targets[pointIndex][1] != 0.0f ||
+            g_CameraEditor.targets[pointIndex][2] != 0.0f) {
+            offsetX = g_CameraEditor.targets[pointIndex][0] - x;
+            offsetY = g_CameraEditor.targets[pointIndex][1] - y;
+            offsetZ = g_CameraEditor.targets[pointIndex][2] - z;
             distance = sqrtf((offsetX * offsetX) + (offsetY * offsetY) + (offsetZ * offsetZ));
             if (distance < EDITOR_ARRIVAL_DISTANCE) {
-                x = g_CameraEditor.targets[index][0];
-                y = g_CameraEditor.targets[index][1];
-                z = g_CameraEditor.targets[index][2];
+                x = g_CameraEditor.targets[pointIndex][0];
+                y = g_CameraEditor.targets[pointIndex][1];
+                z = g_CameraEditor.targets[pointIndex][2];
             }
             else {
                 f32 velocityX;
                 f32 velocityY;
                 f32 velocityZ;
 
-                scale = g_CameraEditor.pointAccelerations[index] / distance;
-                g_CameraEditor.pointVelocities[index][0] += offsetX * scale;
-                g_CameraEditor.pointVelocities[index][1] += offsetY * scale;
-                g_CameraEditor.pointVelocities[index][2] += offsetZ * scale;
-                if (distance < g_CameraEditor.pointBrakingDistances[index]) {
-                    g_CameraEditor.pointTopSpeeds[index] -=
-                        g_CameraEditor.pointAccelerations[index] * EDITOR_BRAKING_RATE;
-                    if (g_CameraEditor.pointTopSpeeds[index] <
-                        g_CameraEditor.pointAccelerations[index]) {
-                        g_CameraEditor.pointTopSpeeds[index] =
-                            g_CameraEditor.pointAccelerations[index];
+                scale = g_CameraEditor.pointAccelerations[pointIndex] / distance;
+                g_CameraEditor.pointVelocities[pointIndex][0] += offsetX * scale;
+                g_CameraEditor.pointVelocities[pointIndex][1] += offsetY * scale;
+                g_CameraEditor.pointVelocities[pointIndex][2] += offsetZ * scale;
+                if (distance < g_CameraEditor.pointBrakingDistances[pointIndex]) {
+                    g_CameraEditor.pointTopSpeeds[pointIndex] -=
+                        g_CameraEditor.pointAccelerations[pointIndex] * EDITOR_BRAKING_RATE;
+                    if (g_CameraEditor.pointTopSpeeds[pointIndex] <
+                        g_CameraEditor.pointAccelerations[pointIndex]) {
+                        g_CameraEditor.pointTopSpeeds[pointIndex] =
+                            g_CameraEditor.pointAccelerations[pointIndex];
                     }
                 }
 
-                velocityX = g_CameraEditor.pointVelocities[index][0];
-                velocityY = g_CameraEditor.pointVelocities[index][1];
-                velocityZ = g_CameraEditor.pointVelocities[index][2];
+                velocityX = g_CameraEditor.pointVelocities[pointIndex][0];
+                velocityY = g_CameraEditor.pointVelocities[pointIndex][1];
+                velocityZ = g_CameraEditor.pointVelocities[pointIndex][2];
                 distance = sqrtf(
                     (velocityX * velocityX) + (velocityY * velocityY) + (velocityZ * velocityZ)
                 );
-                if (g_CameraEditor.pointTopSpeeds[index] < distance) {
-                    scale = g_CameraEditor.pointTopSpeeds[index] / distance;
-                    g_CameraEditor.pointVelocities[index][0] = velocityX * scale;
-                    g_CameraEditor.pointVelocities[index][1] = velocityY * scale;
-                    g_CameraEditor.pointVelocities[index][2] = velocityZ * scale;
+                if (g_CameraEditor.pointTopSpeeds[pointIndex] < distance) {
+                    scale = g_CameraEditor.pointTopSpeeds[pointIndex] / distance;
+                    g_CameraEditor.pointVelocities[pointIndex][0] = velocityX * scale;
+                    g_CameraEditor.pointVelocities[pointIndex][1] = velocityY * scale;
+                    g_CameraEditor.pointVelocities[pointIndex][2] = velocityZ * scale;
                 }
             }
         }
 
-        x += g_CameraEditor.pointVelocities[index][0];
-        y += g_CameraEditor.pointVelocities[index][1];
-        z += g_CameraEditor.pointVelocities[index][2];
+        x += g_CameraEditor.pointVelocities[pointIndex][0];
+        y += g_CameraEditor.pointVelocities[pointIndex][1];
+        z += g_CameraEditor.pointVelocities[pointIndex][2];
 
         isDone = FALSE;
-        switch (g_CameraEditor.moveAxes[index]) {
+        switch (g_CameraEditor.moveAxes[pointIndex]) {
             case EDITOR_MOVE_AXIS_X:
-                if (fabsf(x - g_CameraEditor.targets[index][0]) < EDITOR_ARRIVAL_DISTANCE ||
-                    (g_CameraEditor.points[index][0] - g_CameraEditor.targets[index][0]) *
-                            (x - g_CameraEditor.targets[index][0]) <
+                if (fabsf(x - g_CameraEditor.targets[pointIndex][0]) < EDITOR_ARRIVAL_DISTANCE ||
+                    (g_CameraEditor.points[pointIndex][0] - g_CameraEditor.targets[pointIndex][0]) *
+                            (x - g_CameraEditor.targets[pointIndex][0]) <
                         0.0f) {
                     isDone = TRUE;
                 }
 
                 break;
             case EDITOR_MOVE_AXIS_Y:
-                if (fabsf(y - g_CameraEditor.targets[index][1]) < EDITOR_ARRIVAL_DISTANCE ||
-                    (g_CameraEditor.points[index][1] - g_CameraEditor.targets[index][1]) *
-                            (x - g_CameraEditor.targets[index][1]) <
+                if (fabsf(y - g_CameraEditor.targets[pointIndex][1]) < EDITOR_ARRIVAL_DISTANCE ||
+                    (g_CameraEditor.points[pointIndex][1] - g_CameraEditor.targets[pointIndex][1]) *
+                            (x - g_CameraEditor.targets[pointIndex][1]) <
                         0.0f) {
                     isDone = TRUE;
                 }
 
                 break;
             case EDITOR_MOVE_AXIS_Z:
-                if (fabsf(z - g_CameraEditor.targets[index][2]) < EDITOR_ARRIVAL_DISTANCE ||
-                    (g_CameraEditor.points[index][2] - g_CameraEditor.targets[index][2]) *
-                            (z - g_CameraEditor.targets[index][2]) <
+                if (fabsf(z - g_CameraEditor.targets[pointIndex][2]) < EDITOR_ARRIVAL_DISTANCE ||
+                    (g_CameraEditor.points[pointIndex][2] - g_CameraEditor.targets[pointIndex][2]) *
+                            (z - g_CameraEditor.targets[pointIndex][2]) <
                         0.0f) {
                     isDone = TRUE;
                 }
@@ -523,29 +523,29 @@ void UpdateCameraEditor(void) {
         }
 
         if (isDone) {
-            x = g_CameraEditor.targets[index][0];
-            y = g_CameraEditor.targets[index][1];
-            z = g_CameraEditor.targets[index][2];
-            g_CameraEditor.pointVelocities[index][0] = 0.0f;
-            g_CameraEditor.pointVelocities[index][1] = 0.0f;
-            g_CameraEditor.pointVelocities[index][2] = 0.0f;
-            g_CameraEditor.targets[index][0] = 0.0f;
-            g_CameraEditor.targets[index][1] = 0.0f;
-            g_CameraEditor.targets[index][2] = 0.0f;
-            g_CameraEditor.pointBrakingDistances[index] = 0.0f;
+            x = g_CameraEditor.targets[pointIndex][0];
+            y = g_CameraEditor.targets[pointIndex][1];
+            z = g_CameraEditor.targets[pointIndex][2];
+            g_CameraEditor.pointVelocities[pointIndex][0] = 0.0f;
+            g_CameraEditor.pointVelocities[pointIndex][1] = 0.0f;
+            g_CameraEditor.pointVelocities[pointIndex][2] = 0.0f;
+            g_CameraEditor.targets[pointIndex][0] = 0.0f;
+            g_CameraEditor.targets[pointIndex][1] = 0.0f;
+            g_CameraEditor.targets[pointIndex][2] = 0.0f;
+            g_CameraEditor.pointBrakingDistances[pointIndex] = 0.0f;
             if (hasLeader) {
-                g_CameraEditor.flags[index] ^= EDITOR_FLAG_CARRYING;
+                g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_CARRYING;
             }
             else {
-                g_CameraEditor.flags[index] = 0;
+                g_CameraEditor.flags[pointIndex] = 0;
             }
 
-            g_CameraEditor.moveAxes[index] = 0;
+            g_CameraEditor.moveAxes[pointIndex] = 0;
         }
 
-        g_CameraEditor.points[index][0] = x;
-        g_CameraEditor.points[index][1] = y;
-        g_CameraEditor.points[index][2] = z;
+        g_CameraEditor.points[pointIndex][0] = x;
+        g_CameraEditor.points[pointIndex][1] = y;
+        g_CameraEditor.points[pointIndex][2] = z;
         if (hasLeader) {
             hasMoved = TRUE;
             break;
@@ -562,31 +562,31 @@ void UpdateCameraEditor(void) {
         x /= distance;
         y /= distance;
         z /= distance;
-        if (index == EDITOR_POINT_EYE) {
+        if (pointIndex == EDITOR_POINT_EYE) {
             x = -x;
             y = -y;
             z = -z;
         }
 
-        g_CameraEditor.points[index ^ 1][0] =
-            g_CameraEditor.points[index][0] + (x * g_CameraEditor.distance);
-        g_CameraEditor.points[index ^ 1][1] =
-            g_CameraEditor.points[index][1] + (y * g_CameraEditor.distance);
-        g_CameraEditor.points[index ^ 1][2] =
-            g_CameraEditor.points[index][2] + (z * g_CameraEditor.distance);
+        g_CameraEditor.points[pointIndex ^ 1][0] =
+            g_CameraEditor.points[pointIndex][0] + (x * g_CameraEditor.distance);
+        g_CameraEditor.points[pointIndex ^ 1][1] =
+            g_CameraEditor.points[pointIndex][1] + (y * g_CameraEditor.distance);
+        g_CameraEditor.points[pointIndex ^ 1][2] =
+            g_CameraEditor.points[pointIndex][2] + (z * g_CameraEditor.distance);
     }
 
     if (g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_PIVOT) {
-        index = EDITOR_POINT_LOOK_AT;
+        pointIndex = EDITOR_POINT_LOOK_AT;
         hasLeader = TRUE;
     }
 
     if (g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] & EDITOR_FLAG_PIVOT) {
-        index = EDITOR_POINT_EYE;
+        pointIndex = EDITOR_POINT_EYE;
         hasLeader = TRUE;
     }
 
-    if (g_CameraEditor.flags[index] & EDITOR_FLAG_ZOOMING) {
+    if (g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_ZOOMING) {
         f32 zoomLeft;
 
         z = g_CameraEditor.distance;
@@ -626,7 +626,7 @@ void UpdateCameraEditor(void) {
             g_CameraEditor.zoomSpeed = 0.0f;
             g_CameraEditor.zoomTarget = 0.0f;
             g_CameraEditor.zoomBrakingDistance = 0.0f;
-            g_CameraEditor.flags[index] ^= EDITOR_FLAG_ZOOMING;
+            g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_ZOOMING;
         }
 
         if (g_CameraEditor.distance < EDITOR_DISTANCE_MIN) {
@@ -636,7 +636,7 @@ void UpdateCameraEditor(void) {
         hasMoved = TRUE;
     }
 
-    if (g_CameraEditor.flags[index] & EDITOR_FLAG_TURNING) {
+    if (g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_TURNING) {
         if (g_CameraEditor.turnLeft != 0.0f) {
             if (fabsf(g_CameraEditor.turnLeft) < EDITOR_ARRIVAL_ANGLE) {
                 g_CameraEditor.heading += g_CameraEditor.turnLeft;
@@ -674,13 +674,13 @@ void UpdateCameraEditor(void) {
             g_CameraEditor.turnSpeed = 0.0f;
             g_CameraEditor.turnLeft = 0.0f;
             g_CameraEditor.turnBrakingAngle = 0.0f;
-            g_CameraEditor.flags[index] ^= EDITOR_FLAG_TURNING;
+            g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_TURNING;
         }
 
         hasMoved = TRUE;
     }
 
-    if (g_CameraEditor.flags[index] & EDITOR_FLAG_TILTING) {
+    if (g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_TILTING) {
         if (g_CameraEditor.tiltLeft != 0.0f) {
             if (fabsf(g_CameraEditor.tiltLeft) < EDITOR_ARRIVAL_ANGLE) {
                 g_CameraEditor.pitch += g_CameraEditor.tiltLeft;
@@ -723,7 +723,7 @@ void UpdateCameraEditor(void) {
             g_CameraEditor.tiltSpeed = 0.0f;
             g_CameraEditor.tiltLeft = 0.0f;
             g_CameraEditor.tiltBrakingAngle = 0.0f;
-            g_CameraEditor.flags[index] ^= EDITOR_FLAG_TILTING;
+            g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_TILTING;
         }
 
         hasMoved = TRUE;
@@ -776,18 +776,18 @@ void UpdateCameraEditor(void) {
         x /= distance;
         y /= distance;
         z /= distance;
-        if (index == EDITOR_POINT_EYE) {
+        if (pointIndex == EDITOR_POINT_EYE) {
             x = -x;
             y = -y;
             z = -z;
         }
 
-        g_CameraEditor.points[index][0] =
-            g_CameraEditor.points[index ^ 1][0] + (x * g_CameraEditor.distance);
-        g_CameraEditor.points[index][1] =
-            g_CameraEditor.points[index ^ 1][1] + (y * g_CameraEditor.distance);
-        g_CameraEditor.points[index][2] =
-            g_CameraEditor.points[index ^ 1][2] + (z * g_CameraEditor.distance);
+        g_CameraEditor.points[pointIndex][0] =
+            g_CameraEditor.points[pointIndex ^ 1][0] + (x * g_CameraEditor.distance);
+        g_CameraEditor.points[pointIndex][1] =
+            g_CameraEditor.points[pointIndex ^ 1][1] + (y * g_CameraEditor.distance);
+        g_CameraEditor.points[pointIndex][2] =
+            g_CameraEditor.points[pointIndex ^ 1][2] + (z * g_CameraEditor.distance);
     }
 
     MeasureEditorCamera();
