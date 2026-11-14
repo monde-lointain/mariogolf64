@@ -2661,7 +2661,7 @@ void ChooseFlightCameraKind(void) {
 #define LOOK_AT_NUDGE 0.1f
 
 Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
-    f32 point[3];
+    Vec3 point;
     s32 step;
     SoundVolume volume;
     s32 aheadStep;

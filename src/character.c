@@ -475,7 +475,7 @@ static const s32 f_BallDistances[CHARACTER_COUNT][BALL_DISTANCE_COUNT] = {
 };
 
 s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode shotMode) {
-    f32 position[3];
+    Vec3 position;
     char text[DEBUG_LINE_SIZE];
     s32 distance;
     s32 pointId = WOOD_DISTANCE_POINT;
@@ -1391,10 +1391,10 @@ void AnimateCharacter(u32 slotIndex) {
 }
 
 void UpdateJointKeyframeSpans(u32 slotIndex) {
-    f32 unusedMatrices[3][4][4] UNUSED;
-    f32 translationMatrix[4][4];
-    f32 jointMatrix[4][4];
-    f32 scaleMatrix[4][4] UNUSED;
+    Mat4 unusedMatrices[3] UNUSED;
+    Mat4 translationMatrix;
+    Mat4 jointMatrix;
+    Mat4 scaleMatrix UNUSED;
     f32 rotation[4];
     JointAnimation *joint;
     f32 x;
@@ -2001,9 +2001,9 @@ static inline f32 GetImpactFlashYaw(f32 yaw, Boolean isLefty) {
 }
 
 void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotIndex) {
-    f32 shadowPoint[3];
+    Vec3 shadowPoint;
     f32 corners[TRIANGLE_CORNER_COUNT][3];
-    f32 viewDirection[3];
+    Vec3 viewDirection;
     s32 lightDirection[3];
     Mat4 transform;
     Mat4 rotation;

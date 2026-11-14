@@ -71,7 +71,7 @@ typedef struct CharacterModel {
 
 typedef struct CharacterPoint {
     s16 *jointPath;
-    f32 offset[3];
+    Vec3 offset;
     s16 id;
 } CharacterPoint;
 
@@ -257,9 +257,9 @@ typedef struct CharacterSlot {
     Mtx *jointMatrices;
     s32 frameDataIndex;
     u32 lastDrawnFrame;
-    f32 position[3];
-    f32 rotation[3];
-    f32 scale[3];
+    Vec3 position;
+    Vec3 rotation;
+    Vec3 scale;
     f32 animationSpeed;
     Boolean8 isTranslucent;
     u8 alpha;

@@ -2722,7 +2722,7 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
     TrianglePlane plane;
     f32 cornerXs[TRIANGLE_CORNER_COUNT];
     f32 cornerZs[TRIANGLE_CORNER_COUNT];
-    f32 push[3];
+    Vec3 push;
     s32 x;
     s32 y;
     s32 z;

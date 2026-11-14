@@ -118,8 +118,8 @@ void SetCharacterAlpha(s32 alpha) {
 }
 
 void SetCharacterHighlight(CameraMatrices *matrices UNUSED) {
-    f32 lookAtMatrix[4][4];
-    f32 lightDirection[3];
+    Mat4 lookAtMatrix;
+    Vec3 lightDirection;
     Radians lightPitch;
     Radians lightYaw;
     Gfx *gfx;
@@ -4328,10 +4328,10 @@ const CharacterModel g_OpeningCharacterModels[OPENING_CHARACTER_MODEL_COUNT] = {
 };
 
 void AnimateCharacterJoints(u32 slotIndex) {
-    f32 unusedMatrices[3][4][4] UNUSED;
-    f32 translationMatrix[4][4];
-    f32 jointMatrix[4][4];
-    f32 scaleMatrix[4][4];
+    Mat4 unusedMatrices[3] UNUSED;
+    Mat4 translationMatrix;
+    Mat4 jointMatrix;
+    Mat4 scaleMatrix;
     f32 rotation[4];
     JointAnimation *joint;
     Mtx *matrix;
@@ -4753,7 +4753,7 @@ void GetCharacterSlotMatrix(CharacterSlot *slot, Mat4 matrix) {
 
 PointLookup GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position) {
     Mat4 matrix;
-    f32 modelPosition[3];
+    Vec3 modelPosition;
     PointLookup result;
 
     result = GetCharacterPointModelPosition(slotIndex, pointId, modelPosition);

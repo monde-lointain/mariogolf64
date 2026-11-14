@@ -321,9 +321,9 @@ void DrawHoleTriangles(
 
 void DrawRings(Gfx **displayListHead, CameraMatrices *matrices UNUSED, Camera *camera UNUSED) {
     Gfx *gfx = *displayListHead;
-    f32 transform[4][4];
-    f32 ringPoint[3];
-    f32 worldPoint[3];
+    Mat4 transform;
+    Vec3 ringPoint;
+    Vec3 worldPoint;
     s32 position[3];
     s32 triangleIndex;
     s32 red;
@@ -581,10 +581,10 @@ static void AddTestRing(void) {
 }
 
 static s32 BuildRingMatrices(void) {
-    f32 rotation[4][4];
-    f32 transform[4][4];
+    Mat4 rotation;
+    Mat4 transform;
     RingCorners corners;
-    f32 up[3];
+    Vec3 up;
     f32 scale;
     s32 ringCount = 0;
     s32 index;

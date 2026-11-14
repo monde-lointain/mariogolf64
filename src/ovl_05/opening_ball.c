@@ -705,8 +705,8 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                             ) < CUP_PULL_HEIGHT_MAX) {
                             if ((f32)cupDistance < CUP_PULL_OUTER_RADIUS &&
                                 (f32)cupDistance >= CUP_PULL_INNER_RADIUS) {
-                                f32 toCup[3];
-                                f32 direction[3];
+                                Vec3 toCup;
+                                Vec3 direction;
                                 f32 alignment;
                                 Radians angle;
                                 f32 pull;
@@ -1005,7 +1005,7 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
             }
 
             {
-                f32 reflected[3];
+                Vec3 reflected;
                 f32 push = 2.0f * approach;
 
                 reflected[AXIS_X] = simulation->velocity[AXIS_X] - (-normalZ * push);
@@ -1426,7 +1426,7 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                         (plane.normal[AXIS_Z] * simulation->velocity[AXIS_Z]);
 
                     if (pressing >= OPENING_ROLL_JUMP_SPEED) {
-                        f32 along[3];
+                        Vec3 along;
 
                         along[AXIS_X] =
                             simulation->velocity[AXIS_X] - (plane.normal[AXIS_X] * pressing);
@@ -1600,8 +1600,8 @@ ROLLED:
 
         if ((simulation->state == BALL_STATE_FLYING || simulation->state == BALL_STATE_ROLLING) &&
             contact == 0) {
-            f32 relative[3];
-            f32 turned[3];
+            Vec3 relative;
+            Vec3 turned;
             BallSpeed airSpeed;
             f32 drag;
             s32 sideSpin;

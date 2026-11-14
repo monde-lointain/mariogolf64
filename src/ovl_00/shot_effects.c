@@ -551,7 +551,7 @@ void DrawShotEffectsHud(Gfx **displayListHead UNUSED) {
 
 void StartSwingTrail(SwingTrailKind kind) {
     f32 samples[SWING_TRAIL_AXIS_COUNT][SWING_TRAIL_SAMPLES_MAX];
-    f32 point[3];
+    Vec3 point;
     s32 i;
     f32 position;
 
@@ -620,8 +620,8 @@ void StartSwingTrail(SwingTrailKind kind) {
 }
 
 void DrawSwingTrail(Gfx **displayListHead, CameraMatrices *matrices) {
-    f32 outerPoint[3];
-    f32 innerPoint[3];
+    Vec3 outerPoint;
+    Vec3 innerPoint;
     Mat4 projection;
     s32 step;
     s32 segment;

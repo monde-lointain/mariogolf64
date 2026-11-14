@@ -1719,8 +1719,8 @@ void BuildShotPreview(ShotLaunch *shot, s32 playerState) {
     BallSimulation simulation;
     ShotLaunch previewShot;
     CoursePoint start;
-    f32 dash[4][4];
-    f32 align[4][4];
+    Mat4 dash;
+    Mat4 align;
     s32 step;
     s32 length;
     Boolean8 *isMiniGolf;

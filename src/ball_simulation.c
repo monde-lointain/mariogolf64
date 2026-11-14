@@ -652,8 +652,8 @@ StepFlags StepBallSimulation(BallSimulation *simulation) {
                                 (f32)Abs(
                                     simulation->position[AXIS_Y] - g_HoleSetup.cupPosition[AXIS_Y]
                                 ) < CUP_PULL_HEIGHT_MAX) {
-                                f32 toCup[3];
-                                f32 direction[3];
+                                Vec3 toCup;
+                                Vec3 direction;
                                 f32 alignment;
                                 Radians angle;
                                 f32 pull;
@@ -713,8 +713,8 @@ StepFlags StepBallSimulation(BallSimulation *simulation) {
                             ) < CUP_PULL_OUTER_RADIUS &&
                             (f32)Abs(startY - g_HoleSetup.cupPosition[AXIS_Y]) <
                                 CUP_PULL_HEIGHT_MAX) {
-                            f32 fromCup[3];
-                            f32 direction[3];
+                            Vec3 fromCup;
+                            Vec3 direction;
                             BallSpeed speed;
                             BallSpeed outwardSpeed;
                             f32 alignment;
@@ -953,7 +953,7 @@ StepFlags StepBallSimulation(BallSimulation *simulation) {
         if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
             (g_GameState.isMiniGolf || IsGameFlagSet(GAME_FLAG_WALL_HITS))) {
             CoursePoint hitPosition;
-            f32 reflected[3];
+            Vec3 reflected;
             PlaneTriangle wall;
             f32 wallFraction;
             f32 normalX;
@@ -1277,7 +1277,7 @@ StepFlags StepBallSimulation(BallSimulation *simulation) {
             );
             if ((f32)cupDistance < CUP_PULL_OUTER_RADIUS &&
                 (f32)cupDistance >= CUP_PULL_INNER_RADIUS) {
-                f32 toCup[3];
+                Vec3 toCup;
 
                 toCup[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X];
                 toCup[AXIS_Y] = 1.0f;
@@ -1558,8 +1558,8 @@ StepFlags StepBallSimulation(BallSimulation *simulation) {
             }
             else {
                 f32 keptFraction = 1.0f - spin;
-                f32 normalPart[3];
-                f32 tangent[3];
+                Vec3 normalPart;
+                Vec3 tangent;
                 s32 spinVelocityX;
                 s32 spinVelocityZ;
                 s32 driftX;
@@ -1676,7 +1676,7 @@ StepFlags StepBallSimulation(BallSimulation *simulation) {
 
                     if ((g_GameState.isMiniGolf && pressing >= MINI_GOLF_ROLL_JUMP_SPEED) ||
                         pressing >= ROLL_JUMP_SPEED) {
-                        f32 along[3];
+                        Vec3 along;
                         f32 damping;
 
                         damping = 1.0f;
@@ -1906,7 +1906,7 @@ ROLLED:
         if ((simulation->state == BALL_STATE_FLYING || simulation->state == BALL_STATE_ROLLING) &&
             contact == 0) {
             {
-                f32 relative[3];
+                Vec3 relative;
                 BallSpeed airSpeed;
                 f32 drag;
                 f32 sideSpin;
@@ -1966,7 +1966,7 @@ ROLLED:
                 simulation->sideSpin = simulation->sideSpin * SIDE_SPIN_DECAY;
                 lift = simulation->spinSpeed * LIFT_PER_SPIN;
                 if (simulation->spinSpeed != 0 && airSpeed > LIFT_AIR_SPEED_MIN) {
-                    f32 turned[3];
+                    Vec3 turned;
                     f32 scale;
 
                     guMtxXFMF(

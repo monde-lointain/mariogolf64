@@ -69,7 +69,7 @@
 typedef struct GolfBall {
     Mtx matrices[DRAW_BUFFER_COUNT];
     SurfaceTraits *surface;
-    f32 position[3];
+    Vec3 position;
     s32 alpha;
     UBoolean8 isInCup;
     BallState state;
@@ -79,7 +79,7 @@ typedef struct GolfBall {
 } GolfBall;
 
 typedef struct BallAfterimage {
-    f32 position[3];
+    Vec3 position;
     s32 alpha;
     Boolean isInCup;
 } BallAfterimage;
@@ -676,7 +676,7 @@ void UpdateGolfBalls(void) {
             previous = &f_BallAfterimages[f_BallAfterimageHead - 1];
         }
         {
-            f32 offset[3];
+            Vec3 offset;
 
             offset[0] = ball->position[AXIS_X] - previous->position[AXIS_X];
             offset[1] = ball->position[AXIS_Y] - previous->position[AXIS_Y];
