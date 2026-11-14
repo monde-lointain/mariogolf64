@@ -3965,7 +3965,7 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainStyle) {
     UBoolean8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; // For the current and the last fine tile
     Boolean keepsCombineMode;
-    EditorCombineMode combineMode; // An EDITOR_COMBINE_*
+    EditorCombineMode combineMode;
     Gfx *gfx;
     s32 half;
     Vtx *vertices;

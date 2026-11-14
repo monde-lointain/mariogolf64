@@ -328,7 +328,7 @@ typedef struct StatusCourse {
     u8 parSavePercent; // As percentages
     u8 parOnPercent;
     u8 sandSavePercent;
-    u8 places; // STATUS_*_PLACE bits
+    u8 places; // STATUS_FIRST_PLACE and the other place bits
     u8 characterBestScores[CHARACTER_COUNT];
     StatusTime bestTimes[BEST_TIME_COUNT];
     u8 birdieBadges[BIRDIE_BADGE_BYTE_COUNT]; // See BirdieBadgeBit
@@ -3648,7 +3648,7 @@ PakResult ReadCartridgeCharacters(void) {
 }
 
 // Opens a controller's Game Boy pak, restarting the Game Boy pak manager after
-// each failed attempt, and returns the last PAK_RESULT_*
+// each failed attempt, and returns the last attempt's result
 PakResult OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *file) {
     s32 failureCount;
     PakResult result;
@@ -3904,7 +3904,7 @@ void SetNoticeState(NoticeState state, MessageId messageId) {
     }
 }
 
-// Returns the NOTICE_* state, so the screens wait for the notice to close
+// Returns the notice's state, so the screens wait for the notice to close
 NoticeState GetNoticeState(void) {
     return f_NoticeState;
 }

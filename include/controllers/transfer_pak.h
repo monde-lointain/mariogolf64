@@ -184,7 +184,7 @@ typedef struct GameBoyTransfer {
     ImageAsset *accessingImage;
     ImageAsset *shotTypesImage;
     Boolean hasGameBoyPak;
-    TransmitScreen screen; // TRANSMIT_SCREEN_*
+    TransmitScreen screen;
     TransferMode transferMode;
     s32 optionIndex;
     s32 characterCount; // Of g_GameBoyCharacters
@@ -192,7 +192,7 @@ typedef struct GameBoyTransfer {
     OSGbpakId cartridgeHeader;
     GameBoyCharacter cartridgeCharacters[CARTRIDGE_CHARACTER_COUNT];
     s32 sourceIndices[GAME_BOY_CHARACTER_COUNT];
-    ListingState listingStates[CARTRIDGE_CHARACTER_COUNT]; // LISTING_*
+    ListingState listingStates[CARTRIDGE_CHARACTER_COUNT];
     s32 listedCharacterCount;
     // Each controller's cartridge is opened, then its saves read, a step each
     s32 readStep;

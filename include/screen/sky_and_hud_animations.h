@@ -113,10 +113,9 @@ typedef struct Sun {
     s16 unusedBeforeTexelStep;
     s16 texelStep;
     f32 glareMax; // The most that DrawLensFlare's glare grows to
-    SkyImageKind imageKind; // A SKY_IMAGE_KIND_* value
+    SkyImageKind imageKind;
 } Sun;
 
-// A MENU_BACKDROP_STATE_* value
 extern MenuBackdropState g_MenuBackdropState;
 
 // Images that InitSkyColors loads and recolors with the sky's colors

@@ -32,7 +32,6 @@ typedef s32 MenuWindowCheck;
 void ResetMenuWindow(void);
 void ShowMenuWindow(void);
 void CloseMenuWindow(void);
-// These return MENU_WINDOW_CHECK_* values
 MenuWindowCheck IsMenuWindowOpen(void);
 MenuWindowCheck IsMenuWindowClosed(void);
 void LoadMenuWindowImage(CharacterIndex characterIndex);

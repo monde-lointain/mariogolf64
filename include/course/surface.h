@@ -133,7 +133,7 @@ typedef struct SurfaceTraits {
     s16 rollSpeedKept;
     s16 bounciness;
     WideAssetId lieImageAsset; // The HUD's picture of the lie
-    SinkDepth sinkDepth; // A SINK_DEPTH_* value
+    SinkDepth sinkDepth;
     // A group of like surfaces, which nothing reads: 0 fairway, 1 rough or bare
     // ground, 2 bunker, 3 water, 4 cart way, 5 deep rough or waste area, 6
     // green, 7 out of bounds, 8 tee and 9 rock

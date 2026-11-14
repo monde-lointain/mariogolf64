@@ -273,7 +273,7 @@ void HideGameBoyCharacters(void) {
     f_SavedGameBoySlots[3] = fourthSlot;
 }
 
-// Moves the player's grid cursor a step in the GRID_MOVE_* direction, wrapping
+// Moves the player's grid cursor a step in the given direction, wrapping
 // at the edges and skipping slots that can't be chosen, and reads the face of
 // the character it leaves. Returns -1 if it couldn't move, otherwise 0.
 Boolean MoveGridCursor(s32 playerIndex, GridMove direction, UBoolean8 canChooseMarked) {
@@ -370,9 +370,9 @@ Boolean MoveGridCursor(s32 playerIndex, GridMove direction, UBoolean8 canChooseM
     return -(column == oldColumn && row == oldRow);
 }
 
-// Moves the player's grid cursor a step in the STICK_DIAGONAL_*
-// direction, then sideways only if that slot can't be chosen, as
-// MoveGridCursor does. Returns -1 if it couldn't move, otherwise 0.
+// Moves the player's grid cursor a step in the diagonal direction, then
+// sideways only if that slot can't be chosen, as MoveGridCursor does. Returns
+// -1 if it couldn't move, otherwise 0.
 Boolean MoveGridCursorDiagonal(
     s32 playerIndex,
     UStickDiagonal8 diagonal,
@@ -499,7 +499,7 @@ Boolean MoveGridCursorDiagonal(
     return FALSE;
 }
 
-// Returns the STICK_DIAGONAL_* direction of the controllers' sticks combined,
+// Returns the diagonal direction of the controllers' sticks combined,
 // counting only the bits of each axis that its previous reading lacked, so
 // that a held stick isn't reported every frame.
 StickDiagonal GetStickDiagonal(void) {

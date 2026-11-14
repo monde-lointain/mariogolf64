@@ -87,7 +87,7 @@ struct Raindrop {
     s16 tailScreenX;
     s16 tailScreenY;
     s16 tailDepth;
-    URaindropFlags16 flags; // RAINDROP_* bits
+    URaindropFlags16 flags;
     s8 landedFrameCount; // RAINDROP_FALLING until the drop reaches the ground
     u8 splashColumn; // The column of f_RainSplashImage frames it lands with
 };
@@ -200,7 +200,7 @@ static Vtx f_RainStreakVertices[] = {
     {{{48, -1, -100}, 0, {0, 0}, {0x90, 0xA0, 0xA0, 0x5F}}},
     {{{48, 0, -100}, 0, {0, 0}, {0x90, 0xA0, 0xA0, 0x5F}}},
 };
-static Weather f_Weather = WEATHER_NONE; // A WEATHER_* value
+static Weather f_Weather = WEATHER_NONE;
 static Vec3 f_LastRainEye = {0.0f, 0.0f, 0.0f}; // The camera's eye on UpdateRain's last frame
 static s32 f_ShownBadgeCount = 0;
 static Boolean f_IsBadgeCountShown = FALSE;

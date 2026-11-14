@@ -97,7 +97,7 @@ enum FlightCameraKind {
     // The camera left as it was, which ChooseFlightCameraKind picks when no
     // other kind applies; it loses to any kind picked later
     FLIGHT_CAMERA_UNCHANGED,
-    // FLIGHT_CAMERA_UNUSED_* kinds are never picked
+    // The FLIGHT_CAMERA_UNUSED_ kinds are never picked
     FLIGHT_CAMERA_UNUSED_A,
     // Beside the tee, looking at it
     FLIGHT_CAMERA_BESIDE_TEE,
@@ -196,7 +196,7 @@ static s32 f_BillboardHitStep = 0;
 // Counted down from a billboard hit's discovery, but read by no routine
 static s32 f_BillboardHitCountdown = 0;
 static Radians f_CameraYaw = 0.0f;
-// FLIGHT_EVENT_* bits for what the path comes to ahead of the ball
+// The FLIGHT_EVENT_ bits for what the path comes to ahead of the ball
 static s32 f_ComingFlightEvents = 0;
 // A random angle about the ball for the trailing view
 static Radians f_TrailViewAngle = 0.0f;
@@ -1431,9 +1431,9 @@ void EaseCameraPosition(Vec3 target) {
     EaseCameraCoordinate(AXIS_Z, offset);
 }
 
-// PlaceCameraAroundShotEnd's ranges: PUTT_* for a shot from the green,
-// SIMPLE_CAMERA_* when the simple flight camera is chosen in the options and
-// DEFAULT_* otherwise
+// PlaceCameraAroundShotEnd's ranges: the PUTT_ ones for a shot from the
+// green, the SIMPLE_CAMERA_ ones when the simple flight camera is chosen in the
+// options and the DEFAULT_ ones otherwise
 #define PUTT_HEIGHT_SPREAD_FRACTION 0.2
 #define DISTANCE_SPREAD_FRACTION 0.2f
 #define DEFAULT_HEIGHT_SPREAD_FRACTION 0.1f

@@ -163,9 +163,9 @@ typedef s32 NotableShot;
 // A golfer in the round, human or computer, and their round so far
 typedef struct Player {
     char name[PLAYER_NAME_SIZE];
-    PlayerState state; // A PLAYER_STATE_* value
+    PlayerState state;
     CoursePoint ballPosition;
-    Surface8 ballSurface; // A SURFACE_* value
+    Surface8 ballSurface;
     CharacterIndex8 characterIndex; // Also the index of the character's club set
     Boolean8 isComputer; // Played by the computer, with no controller
     // Set to -9 as the computer starts planning a shot; nothing reads it
@@ -175,7 +175,7 @@ typedef struct Player {
     s8 strokeCount; // On the current hole
     s8 puttCount; // Strokes from the green on the current hole
     s8 teeOrder; // From 0, the player's turn on the next tee
-    HoleStatus holeStatus; // A HOLE_STATUS_* value
+    HoleStatus holeStatus;
     s8 controllerIndex; // Into g_PlayerControllerPorts, when below MAXCONTROLLERS
     s8 powerShotCount; // Left in the round; POWER_SHOTS_UNLIMITED in training and replays
     s8 handicap; // Gives strokes on the holes it ranks within
@@ -185,16 +185,16 @@ typedef struct Player {
     ClubIndex16 clubs[CLUB_SLOT_COUNT]; // Indices into g_Clubs, by bag slot
     u8 unusedAfterClubs[0x74 - 0x72];
     s32 stopwatchFrameCount; // The player's time in the stopwatch modes
-    s8 ringStates[RING_COUNT]; // RING_STATE_* values, for Ring Shot
+    s8 ringStates[RING_COUNT]; // RING_STATE_ values, for Ring Shot
     CButtonPalette8 paletteIndex; // Which of the character's palettes it wears
     s8 gameBoyCharacterIndex; // For the Game Boy characters, from CHARACTER_KID on
     u8 unusedAfterGameBoyIndex[3];
     s32 driveDistance; // UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE
     s32 pinDistance; // UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE
     s32 noiseSeed; // Added into the ball's flight noise, and kept in the replay records
-    GridColor gridColor; // GRID_COLOR_*, for the grid drawn over the green
+    GridColor gridColor; // For the grid drawn over the green
     u8 unusedAfterGridColor;
-    s16 betTallies[BET_COUNT]; // What the player has won on each BET_* bet
+    s16 betTallies[BET_COUNT]; // What the player has won on each bet
     Boolean8 hasBeenInBunker; // On the hole being played
     u8 unusedAfterBunkerVisit[3];
     s32 lastDriveDistance; // The driveDistance that RecordDrive took

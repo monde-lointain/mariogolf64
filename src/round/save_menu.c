@@ -220,7 +220,7 @@ enum ReplayLabel {
 
 typedef s32 ReplayLabel;
 
-// The MODE_ICON_* index by GameState.gameMode; modes that the menu never names
+// The MODE_ICON_ index by GameState.gameMode; modes that the menu never names
 // hold 0 or 3
 static s8 f_ModeIcons[GAME_MODE_ICON_COUNT] = {
     MODE_ICON_STROKE,
@@ -276,7 +276,7 @@ static ImageAsset *f_CourseNumbersImage;
 static ImageAsset *f_SaveMenuTitleImage;
 static s32 f_IconFrames[SAVED_GAME_COUNT];
 
-// Returns the MODE_ICON_* index of a saved game's mode, or NO_MODE_ICON
+// Returns the MODE_ICON_ index of a saved game's mode, or NO_MODE_ICON
 s32 GetModeIconIndex(GameState *state) {
     s32 iconIndex;
 
@@ -1566,7 +1566,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
 }
 
 // Slides the replay records in and out and lets the player choose one to
-// store the replay in. It returns a REPLAY_MENU_* value.
+// store the replay in. It returns the menu's state.
 ReplayMenuState UpdateReplaySaveMenu(ControllerState *controller) {
     SaveData *save;
     s32 row;

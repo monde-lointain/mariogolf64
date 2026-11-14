@@ -165,7 +165,7 @@ void DrawMenuNumber(
     NumberField field
 );
 
-// The STAT_* shown on the panel's top row, which Up and Down scroll
+// The STAT_ row shown at the top of the panel, which Up and Down scroll
 static s16 f_FirstShownStat = 0;
 // The trophy's frame of g_TrophyFrameAssets, stepped when its timer reaches
 // TROPHY_FRAME_DELAY
@@ -179,7 +179,7 @@ static s32 f_StatsArrowFrame = 0;
 static s32 f_StatsArrowTimer = 0;
 // Read by no routine
 static s32 f_UnreadStatsWord UNUSED = 0;
-// The panel's label for each STAT_*
+// The panel's label for each STAT_ row
 static const char *f_StatLabels[STATS_COUNT] = {
     "Round",
     "Best Score",
@@ -1886,7 +1886,7 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
 const char f_UnreadFirstEmptyText[] = "";
 const char f_UnreadSecondEmptyText[] = "";
 
-// Draws the MENU_SIGN_* sign's glyph with its top-left corner at (x, y)
+// Draws the sign's glyph with its top-left corner at (x, y)
 void DrawMenuSign(Gfx **displayListHead, s32 x, s32 y, MenuSign sign) {
     Gfx *gfx = *displayListHead;
     s32 glyphIndex = DIGIT_GLYPH_TIMES;

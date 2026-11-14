@@ -57,7 +57,6 @@ extern CurrentShot g_CurrentShot;
 #else
 extern volatile CurrentShot g_CurrentShot;
 #endif
-// An IMPACT_POINT_* value
 extern ImpactPointState g_ImpactPointState;
 
 #endif

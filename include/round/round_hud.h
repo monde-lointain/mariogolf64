@@ -132,7 +132,7 @@ typedef struct RoundHud {
     UBoolean8 isPuttingClubChosen;
     u8 unusedAfterClubChoice;
     s8 shooterIndex; // Of the player whose turn it is
-    UHudFlags8 flags; // HUD_FLAG_* bits
+    UHudFlags8 flags;
     UBoolean8 areLieArrowsShown; // While the pause menu sets the lie
     UBoolean8 areWindSpeedArrowsShown;
     UBoolean8 areWindDirectionArrowsShown;

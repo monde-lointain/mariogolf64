@@ -46,7 +46,7 @@ typedef struct CameraView {
     s32 viewportCenterX; // In half pixels
     s32 viewportCenterY;
     f32 zoom;
-    s32 drawFlags; // CAMERA_DRAW_* bits
+    s32 drawFlags; // CAMERA_DRAW_ bits
     f32 fieldOfView; // In degrees
 } CameraView;
 
@@ -57,7 +57,7 @@ typedef struct CameraView {
 typedef struct Camera {
     s32 unusedBeforeView;
     CameraView view;
-    CameraMode mode; // A CAMERA_MODE_* value
+    CameraMode mode;
 } Camera;
 
 #define MAIN_CAMERA 0
@@ -109,7 +109,7 @@ typedef s32 InsetViewState;
 
 // How the inset view opens and closes
 typedef struct InsetView {
-    InsetViewState animation; // INSET_VIEW_*
+    InsetViewState animation;
     s32 step;
     // Two codes nothing reads. The source code is the same for the landing
     // reaction's insets and differs for the flyover's; the size code is the

@@ -503,7 +503,7 @@ static s32 f_UnusedDebugHoleIndex;
 // the second, so that the impact comes at most SKIPPED_SWING_IMPACT_FRAME
 // frames in
 static s32 f_SkippedSwingFrames;
-static ShotSource f_ShotSource; // A SHOT_SOURCE_* value
+static ShotSource f_ShotSource;
 static s32 f_TurnTimerStart; // Nothing reads it
 // The shot preview's matrices, by draw buffer
 static Mtx f_ShotPreviewMatrices[DRAW_BUFFER_COUNT][SHOT_PREVIEW_STEPS_MAX];

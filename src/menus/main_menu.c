@@ -7999,7 +7999,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
 #define HOLES_BANNER_STRIP_HEIGHT 11
 #define COURSE_NAME_Y 176
 #define HOLES_CHOICE_Y 202
-// A HOLES_CHOICE_* value plus this is the message that explains it
+// A HOLES_CHOICE_ value plus this is the message that explains it
 #define MESSAGE_HOLES_CHOICE_BASE 0xC3
 #define HOLES_CHOICE_TEXT_SLOT 1
 

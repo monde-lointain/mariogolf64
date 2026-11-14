@@ -51,7 +51,7 @@
 // The bytes of each of the four images that LoadScoreLabelBuffer reads into one
 // buffer
 #define PLAYER_STATS_IMAGE_SIZE 0x258
-// They are the ASSET_JAPANESE_*_LABEL score labels
+// The ASSET_JAPANESE_ score labels, from birdie to hole in one
 #define SCORE_LABEL_COUNT 4
 
 // DrawCharacterFace writes names beside the faces of these first characters
@@ -249,7 +249,7 @@ static s16 f_BetSetStakeSlots[OFFERING_BET_SET_COUNT][BET_SET_COLUMN_COUNT_MAX] 
 };
 // How many columns each bet set uses
 static u8 f_BetSetColumnCounts[OFFERING_BET_SET_COUNT] = {5, 6, 3, 3, 3, 3, 4};
-// Each BET_PRESET_*'s stake level for each bet
+// Each bet preset's stake level for each bet
 static u8 f_BetPresetStakeLevels[BET_PRESET_COUNT][BET_STAKE_SLOT_COUNT] = {
     {4, 4, 1, 0, 0, NO_BET, NO_BET, NO_BET},
     {4, 4, 0, 0, 0, NO_BET, 0, NO_BET},

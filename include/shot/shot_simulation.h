@@ -20,7 +20,7 @@ typedef struct SimulatedShot {
     s32 startPosition[AXIS_COUNT];
     s32 endPosition[AXIS_COUNT];
     s32 path[PATH_STEP_COUNT][AXIS_COUNT];
-    // The STEP_FLAG_* bits that StepBallSimulation gave each step
+    // The flags that StepBallSimulation gave each step
     StepFlags8 pathFlags[PATH_STEP_COUNT];
     s32 stepCount;
     s32 positionMax[AXIS_COUNT]; // Over the kept steps
@@ -37,7 +37,7 @@ typedef struct SimulatedShot {
     Surface firstBounceSurface; // As the simulation's; never read
     ShotLaunch shot;
     s32 flagHitStep; // The step that hits the flag, or NO_STEP
-    Surface8 endSurface; // A SURFACE_* value
+    Surface8 endSurface;
     Boolean8 isWaterCut; // See SHOT_KIND_WATER_CUT
     s8 impactRumbles; // As its ImpactEffect's rumbles
 } SimulatedShot;

@@ -143,7 +143,7 @@ typedef struct ShotLaunch {
 #define NO_BOUNCE_STEP (-2)
 
 // BallSimulation.soundStates' entries
-#define BALL_SOUND_CUP_IN 0 // A CUP_IN_SOUND_* value
+#define BALL_SOUND_CUP_IN 0 // Holds a CupInSoundState
 #define BALL_SOUND_ROLL 1 // Whether the roll sound is playing
 #define BALL_SOUND_COUNT 8
 
@@ -203,7 +203,7 @@ typedef struct BallSimulation {
     Mat4 liftRotation;
     f32 windVelocityX;
     f32 windVelocityZ;
-    BallState state; // A BALL_STATE_* value
+    BallState state;
     LaunchPurpose purpose;
     // Hits on the ground, hole triangles and billboards
     s32 bounceCount;
@@ -212,12 +212,12 @@ typedef struct BallSimulation {
     s32 lastBounceStep;
     Boolean8 isHoledOut; // Set as the ball stops in the cup
     Boolean8 hasEnteredWater; // Set once the ball is in the water
-    Surface8 launchSurface; // The SURFACE_* launched from
-    Surface8 surface; // The SURFACE_* that the ball is on
-    Surface8 surfaceBelow; // The SURFACE_* under the ball, in the air too
+    Surface8 launchSurface; // The surface launched from
+    Surface8 surface; // The surface that the ball is on
+    Surface8 surfaceBelow; // The surface under the ball, in the air too
     s8 playerIndex;
-    StepFlags8 stepFlags; // STEP_FLAG_* bits of the last substep
-    // The SURFACE_* of the first bounce, if on the ground; at first, where
+    StepFlags8 stepFlags; // Of the last substep
+    // The surface of the first bounce, if on the ground; at first, where
     // the ball started
     Surface8 firstBounceSurface;
     s8 soundStates[BALL_SOUND_COUNT];

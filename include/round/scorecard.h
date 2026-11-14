@@ -97,7 +97,7 @@ typedef struct Scorecard {
     UBoolean8 isOddFaceStep; // Flips at each face step; never read
     u8 faceFrameTime; // Frames since the faces were opened
     u8 faceFrame; // Which of the faces' images they show
-    // Which way a tournament player's place moved on the hole, a PLACE_* value
+    // Which way a tournament player's place moved on the hole
     PlaceChange placeChange;
     s32 topRow; // The contestant at the top of the leaderboard
     s32 x; // The scorecard's offset from its place on the screen
@@ -106,7 +106,7 @@ typedef struct Scorecard {
     s32 stateTime; // Frames since g_ScorecardState changed
     // The last hole's result is already on the scorecard
     Boolean isTallied;
-    s32 holeWinnerIndex; // The player who won the last hole, or a HOLE_WINNER_* value
+    s32 holeWinnerIndex; // The player who won the last hole, or a HOLE_WINNER_ value
     ScorecardLayout layout;
     s32 pageCount;
     Boolean hasBets;

@@ -98,12 +98,12 @@ typedef s8 WindPlay8;
 
 // How a character plays when the computer controls it
 typedef struct GolferTraits {
-    StrongNine8 strongNine; // STRONG_NINE_*
-    Consistency8 consistency; // CONSISTENCY_*: steadier golfers mishit less
+    StrongNine8 strongNine;
+    Consistency8 consistency; // Steadier golfers mishit less
     s8 clubBoldness; // BOLD_CLUB_CHOICE or less
     s8 ignoredBoldnessValue; // 6, or 12 when clubBoldness is above 0; nothing reads it
     s8 ignoredTraitLevel; // 0 to 2; nothing reads it
-    WindPlay8 windPlay; // WIND_PLAY_*: which winds the golfer offsets shots for
+    WindPlay8 windPlay; // Which winds the golfer offsets shots for
     s8 powerShotEagerness; // 0 to 2; only nonzero is tested
     s8 courseTargetOffsets[COURSE_COUNT]; // Added to baseTargetScore on each course
     s8 baseTargetScore; // Its target score to par before the course's offset
@@ -113,7 +113,7 @@ typedef struct GolferTraits {
 // harder at planned shots and takes power shots readily
 #define BOLD_CLUB_CHOICE 2
 
-// The spin-like launch values that each SHOT_OFFSET_* gives a shot
+// The spin-like launch values that each SHOT_OFFSET_ value gives a shot
 typedef struct ShotOffset {
     s8 offsetX; // Becomes f_Shot.offsetX
     s8 offsetY; // Becomes f_Shot.offsetY
@@ -169,7 +169,7 @@ enum PlanStage {
 
 typedef s8 PlanStage;
 
-// The traits of each character, in CHARACTER_* order
+// The traits of each character, by CharacterIndex
 static GolferTraits f_GolferTraits[CHARACTER_COUNT] = {
     // Plum
     {0, 0, 0, 6, 0, WIND_PLAY_STRONG_WINDS, 0, {0, 2, 2, 2, 2, 2}, 10},
@@ -317,7 +317,7 @@ static s32 f_TargetCarry;
 static s32 f_ClubCount;
 // The count of trials to take at the level
 static s32 f_LevelTrialCount;
-// The SHOT_OFFSET_* that PlanShot chose for the shot
+// The SHOT_OFFSET_ value that PlanShot chose for the shot
 static s32 f_ShotOffset;
 static s32 f_TrialStepCount;
 // Set when the trial is good enough to take

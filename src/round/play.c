@@ -771,7 +771,7 @@ void QuitPlayToTitle(void) {
     f_HoleEndStep = HOLE_END_STEP_QUIT;
 }
 
-// The number that the GAME_FLAG_FLAGGED_NUMBER_* flags spell, one for each of
+// The number that the GAME_FLAG_FLAGGED_NUMBER_ flags spell, one for each of
 // its five bits. Nothing calls it.
 s32 GetFlaggedFiveBitNumber(void) {
     return (IsGameFlagSet(GAME_FLAG_FLAGGED_NUMBER_SIXTEENS) << 4) |

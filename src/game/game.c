@@ -1777,7 +1777,7 @@ s32 DrawGame(void) {
     u16 insetPerspNorm;
     u16 perspectiveNormalization;
     Boolean drawsScene;
-    TerrainStyle terrainStyle; // A TERRAIN_STYLE_* value
+    TerrainStyle terrainStyle;
     DrawMode drawMode;
     s32 cameraIndex;
     s32 slotIndex;

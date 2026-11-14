@@ -363,7 +363,7 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
 // leap, and can print the ball's speed, height and collisions as debug text.
 // The sparks it starts on a stroke's pin and wall hits are called at ovl_00's
 // addresses, which lie in the opening's BSS while it is loaded. Returns the
-// STEP_FLAG_* bits for the step.
+// STEP_FLAG_ bits for the step.
 StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
     PlaneTriangle triangle;
 

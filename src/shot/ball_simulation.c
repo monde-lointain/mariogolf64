@@ -215,7 +215,7 @@ void ResetBallSimulations(void) {
 // ball bounces within the first 40% of its path. Each substep tests the path
 // against rings, the ground, billboards, the pin, the cup, walls and hole
 // triangles, then bounces, rolls, sinks or stops the ball, and a flying ball
-// feels drag, curve, lift and the wind. Returns the STEP_FLAG_* bits for the
+// feels drag, curve, lift and the wind. Returns the STEP_FLAG_ bits for the
 // step.
 StepFlags StepBallSimulation(BallSimulation *simulation) {
     PlaneTriangle hit;

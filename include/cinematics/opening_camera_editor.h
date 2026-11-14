@@ -71,8 +71,8 @@ typedef struct CameraEditor {
     Radians tiltBrakingAngle; // Within which a tilt starts braking
     Radians turnBrakingAngle; // Within which a turn starts braking
     f32 zoomBrakingDistance; // Within which a zoom starts braking
-    EditorFlags flags[EDITOR_POINT_COUNT]; // EDITOR_FLAG_* bits
-    EditorMoveAxis moveAxes[EDITOR_POINT_COUNT]; // EDITOR_MOVE_AXIS_*, along which a move ends
+    EditorFlags flags[EDITOR_POINT_COUNT];
+    EditorMoveAxis moveAxes[EDITOR_POINT_COUNT]; // The axes along which a move ends
 } CameraEditor;
 
 extern CameraEditor g_CameraEditor;

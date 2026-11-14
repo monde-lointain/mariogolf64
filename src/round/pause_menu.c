@@ -136,11 +136,10 @@ typedef s32 PauseMessage;
 typedef s16 PauseMessage16;
 
 typedef struct PauseOption {
-    // Its label, a PAUSE_MESSAGE_* value
+    // Its label
     PauseMessage16 message;
-    // A PAUSE_ACTION_* value, done when the option is chosen
+    // Done when the option is chosen
     PauseAction16 action;
-    // A PAUSE_OPTION_KIND_* value
     PauseOptionKind kind;
 } PauseOption;
 
@@ -272,7 +271,7 @@ static PauseOption f_PauseOptions[] = {
 
 static char *f_PauseValueTexts[] = {"Clear", "Rain", "Black", "White"};
 
-// The options of each PAUSE_LAYOUT_*, as f_PauseOptions indices. An option's
+// The options of each pause layout, as f_PauseOptions indices. An option's
 // index is its action, so the indices are written as actions.
 static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
     // PAUSE_LAYOUT_SPEED_GOLF
@@ -380,7 +379,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
     },
 };
 
-// The number of options in each PAUSE_LAYOUT_*
+// The number of options in each pause layout
 static s8 f_PauseLayoutOptionCounts[] = {5, 6, 9, 7, 9, 6, 6, 5, 6, 5, 6};
 
 static s32 f_PauseLayout = PAUSE_LAYOUT_NONE;

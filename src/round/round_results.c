@@ -56,7 +56,7 @@ typedef s32 ResultsState;
 enum BannerKind {
     BANNER_KIND_NONE, // Set with BANNER_HIDDEN as the results load
     BANNER_KIND_TOURNAMENT_PLACE,
-    // BANNER_KIND_UNUSED_* kinds are never set
+    // The BANNER_KIND_UNUSED_ kinds are never set
     BANNER_KIND_UNUSED_A,
     BANNER_KIND_POINTS,
     BANNER_KIND_UNUSED_B,
@@ -270,7 +270,8 @@ extern const char f_UnusedModeNamesText[];
 
 static Boolean f_AreResultsLoaded = FALSE;
 static ResultsState f_ResultsState = RESULTS_SLIDING_IN;
-// The step within the results' state, from each mode's *_STEP_* values
+// The step within the results' state, from each mode's own steps, such as
+// TOURNAMENT_STEP_START
 static s32 f_ResultsStep = 0;
 // Frames the results have run, which some steps reset to time a wait
 static s32 f_ResultsStepTime = 0;
@@ -819,7 +820,7 @@ void LoadRoundResults(void) {
 }
 
 // Loads the notice of what the round unlocked: one of the characters for
-// UNLOCK_NOTICE_* below UNLOCK_NOTICE_COURSES, or else the course from
+// the notices below UNLOCK_NOTICE_COURSES, or else the course from
 // UNLOCK_NOTICE_COURSES on.
 void LoadUnlockNotice(UnlockNotice unlock) {
     EncodedAsset asset;

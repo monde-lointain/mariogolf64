@@ -125,7 +125,7 @@ void DrawTableStar(Gfx **displayListHead, s32 left, s32 top);
 // The popup's top-left corner on the screen, set with its corner
 static s32 f_TablePopupLeft = TABLE_POPUP_LEFT_X;
 static s32 f_TablePopupTop = TABLE_POPUP_TOP_Y;
-// The TABLE_POPUP_* corner where the table's popup is
+// The corner where the table's popup is
 static TablePopupCorner f_TablePopupCorner = TABLE_POPUP_TOP_LEFT;
 // The arrows' blink frame, flipped every TABLE_ARROW_BLINK_FRAMES frames
 static s32 f_TableArrowFrame = 0;

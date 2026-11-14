@@ -138,7 +138,7 @@ s32 FindRingHit(
     f32 *fraction
 );
 // Finds the nearest hole triangle that a path hits. It sets the triangle,
-// whose tag then holds the HOLE_TRIANGLE_KIND_*, and the fraction along
+// whose tag then holds the triangle's kind, and the fraction along
 // the path, and returns whether one is hit.
 Boolean FindHoleTriangleHit(
     s32 startX,

@@ -152,7 +152,7 @@ typedef s32 SpotState;
 typedef struct ScreenSpot {
     s32 x;
     s32 y;
-    // A SPOT_* value: SPOT_HIDDEN behind the camera, else SPOT_SHOWN
+    // SPOT_HIDDEN behind the camera, else SPOT_SHOWN
     SpotState state;
 } ScreenSpot;
 

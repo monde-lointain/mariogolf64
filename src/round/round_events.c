@@ -119,7 +119,7 @@ typedef struct Banner {
     s8 letterCount;
     u8 letterWidth;
     u8 letterHeight;
-    BannerAnimation animation; // A BANNER_ANIMATION_* value
+    BannerAnimation animation;
 } Banner;
 
 // Where a letter of the shown banner is, and its matrix in each matrix buffer
@@ -2969,7 +2969,7 @@ Boolean IsContactEffectShown(void) {
     return g_ContactEffectAge != NO_CONTACT_EFFECT_AGE;
 }
 
-// Returns the CONTACT_STYLE_* of the player's character, or for a Game Boy one,
+// Returns the contact style of the player's character, or for a Game Boy one,
 // of its ball
 ContactStyle GetContactStyle(Player *player) {
     GameBoyCharacter *gameBoyCharacter;

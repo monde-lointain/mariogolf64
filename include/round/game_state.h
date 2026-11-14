@@ -70,7 +70,7 @@ typedef s8 ReplayKind;
 // to be continued with.
 typedef struct GameState {
     GameStateStep step;
-    GameMode gameMode; // A GAME_MODE_* value
+    GameMode gameMode;
     s32 playerCount;
     CourseIndex courseIndex;
     s32 holeIndex;
@@ -79,12 +79,12 @@ typedef struct GameState {
     Boolean isSuddenDeath;
     s32 unusedAfterSuddenDeath;
     s32 currentPlayerIndex;
-    s32 holeSelection; // A HOLE_SELECTION_* value
+    s32 holeSelection; // A HOLE_SELECTION_ value
     s32 stopwatchFrameCount; // The time the stopwatch modes show, in frames
     s32 roundSeed; // Draws the cups, the tournament field's scores and the computers' luck
     Boolean8 isRoundContinued; // ROUND_CONTINUED or FALSE
     ReplayKind replayKind; // The replay that leaving the menus starts
-    s8 betRates[BET_COUNT]; // What each BET_* bet is worth; the menus also set one past the end
+    s8 betRates[BET_COUNT]; // What each bet is worth; the menus also set one past the end
     u8 unusedAfterBetRates;
     Boolean8 isMiniGolf; // Keeps billboards near the course's edge, and tilts them less
     Boolean8 isClubTournament; // Entered with a tournament code

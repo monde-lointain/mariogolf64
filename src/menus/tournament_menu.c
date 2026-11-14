@@ -202,7 +202,8 @@ static MenuWindowState f_MenuWindowState = MENU_WINDOW_OPENING;
 static f32 f_MenuWindowScaleX = 0.0f;
 static f32 f_MenuWindowScaleY = 0.0f;
 static s32 f_UnusedWordsAfterWindowScale[2] UNUSED = {0, 0};
-// How far the chosen Yes or No button has grown, and a YES_NO_PULSE_* value
+// How far the chosen Yes or No button has grown, and whether it is growing or
+// shrinking
 static s32 f_YesNoPulse = 0;
 static s32 f_YesNoPulseDirection = 0;
 // The images that the window can show
@@ -253,16 +254,14 @@ static ImageAsset *f_CodeGlyphsImage = NULL;
 static ImageAsset *f_PointingHandImage = NULL;
 static ImageAsset *f_CodeCursorBox = NULL;
 static s32 f_UnusedWordAfterCursorBox UNUSED = 0;
-// The pointing hand's CODE_HAND_* motion, how far it has reached, and the
+// Which way the pointing hand is moving, how far it has reached, and the
 // frames until its next step
 static s32 f_CodeHandMotion = 0;
 static s32 f_CodeHandReach = 0;
 static s32 f_CodeHandStepTimer = 0;
 // The characters of f_EnteredCode entered so far
 static s32 f_EnteredCodeLength = 0;
-// A CLUB_CODE_STATE_* value
 static ClubCodeState f_ClubCodeState = CLUB_CODE_STATE_ENTERING;
-// A CLUB_CODE_PHASE_* value
 static ClubCodePhase f_ClubTournamentPhase = CLUB_CODE_PHASE_TYPING;
 // The club tournament name that the entered password picks
 static s32 f_DecodedNameIndex = 0;
@@ -270,7 +269,6 @@ static s32 f_DecodedNameIndex = 0;
 static s32 f_UnusedDoubledHandReach = 0;
 // Cleared by ResetCodeEntry, and read by no routine
 static s32 f_UnusedCodeEntryWord = 0;
-// A CLUB_CHOICE_* value
 static UClubChoice8 f_ClubWindowChoice = CLUB_CHOICE_YES;
 // The keyboard's keys
 static u8 f_CodeKeys[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT] = {

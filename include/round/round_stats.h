@@ -24,7 +24,7 @@ typedef struct RoundStats {
     Boolean isDriveAveraged;
 } RoundStats;
 
-// What each player has won on each BET_* bet this game
+// What each player has won on each bet this game
 extern s16 g_BetTallies[PLAYER_COUNT_MAX][BET_COUNT];
 extern RoundStats g_RoundStats;
 // The pots of the contests and of the hole, which a tie carries over

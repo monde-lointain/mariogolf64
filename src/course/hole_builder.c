@@ -536,8 +536,8 @@ static HoleAssetIds f_HoleAssetIds[COURSE_RECORD_COUNT][COURSE_HOLE_COUNT] = {
 };
 Vec3 g_MiniGolfScale = {1.0f, 1.0f, 1.0f};
 // The paint logic of each host hole, by course and hole numbers from 1. The
-// entries are enum PaintLogicIndex values, left as numbers because the hole
-// editor's flags step them to the next logic.
+// entries are numbered as the courses are, and left as numbers because the
+// hole editor's flags step them to the next logic.
 static s32 f_HolePaintLogics[HOLE_FILE_COURSE_COUNT][COURSE_HOLE_COUNT] = {
     {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
@@ -2696,7 +2696,7 @@ void ScaleMiniGolfHole(void) {
     g_HoleSetup.cupPosition[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
 }
 
-// Returns the paint logic (a PAINT_LOGIC_* value) that a course record's
+// Returns the paint logic, numbered as the courses are, that a course record's
 // terrain is painted with. BuildHole picks the mini-golf courses' logics
 // itself, so the mini-golf records' cases take their logics' numbers.
 CourseIndex GetCoursePaintLogic(CourseRecordIndex courseRecordIndex) {

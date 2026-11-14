@@ -58,7 +58,7 @@ typedef struct MenuMemory {
     // The course select's course: an open one, or the next one still shut
     CourseIndex8 courseChoice;
     s8 courseSpin; // How far the courses still have to turn to reach it
-    HolesChoice holesChoice; // HOLES_CHOICE_*
+    HolesChoice holesChoice;
     s8 caddyChoice; // The debug caddy select's caddy
     s8 unusedAfterCaddyChoice;
     s8 mainChoice;
@@ -97,7 +97,7 @@ typedef struct MenuMemory {
     s8 savedGameIndex;
     // Updates left of the saved games' boards turning, negative when turning right
     s8 savedGameTurn;
-    u8 optionBits; // Each OPTION_BIT_* mirrors a saved option
+    u8 optionBits; // Each OPTION_BIT_ bit mirrors a saved option
     // The menus were entered with the transmit buttons, so the main menu offers it
     UBoolean8 isTransmitShown;
     s8 codeKeyColumn; // The club tournament code keyboard's chosen key

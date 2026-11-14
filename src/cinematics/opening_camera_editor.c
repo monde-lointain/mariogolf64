@@ -393,7 +393,7 @@ Boolean AreEditorMovesDone(void) {
     return FALSE;
 }
 
-// Returns whether neither point has any of the EDITOR_FLAG_* bits in mask
+// Returns whether neither point has any of the EDITOR_FLAG_ bits in mask
 Boolean AreEditorFlagsClear(s32 mask) {
     if (!(g_CameraEditor.flags[EDITOR_POINT_EYE] & mask) &&
         !(g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] & mask)) {

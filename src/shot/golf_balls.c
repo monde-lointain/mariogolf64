@@ -95,9 +95,9 @@ typedef struct GolfBall {
     Vec3 position;
     s32 alpha; // Or BALL_HIDDEN
     UBoolean8 isInCup;
-    BallState state; // A BALL_STATE_* value
+    BallState state;
     s8 markerPlayerIndex; // Or BALL_NO_MARKER
-    LaunchPurpose8 purpose; // A LAUNCH_PURPOSE_* value
+    LaunchPurpose8 purpose;
     Boolean8 hasEnteredWater; // As its simulation's
 } GolfBall;
 

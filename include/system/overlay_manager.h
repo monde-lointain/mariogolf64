@@ -24,7 +24,7 @@
 #define MODULE_ID_END (-1)
 
 // Module IDs. A module is named for the overlay that f_Overlays puts it in or
-// for the code that checks it. A MODULE_UNUSED_* module shares the overlay
+// for the code that checks it. A MODULE_UNUSED_ module shares the overlay
 // of the module it is named after, and no code names it outside f_Overlays'
 // lists.
 enum ModuleId {

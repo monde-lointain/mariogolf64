@@ -1706,7 +1706,7 @@ void MoveBallToCupEdge(BallSimulation *simulation) {
 
 // Finds whether a ball moving from one point to another hits the
 // flagstick or the flag. It sets the ball's new velocity and the fraction
-// of the way along the path, and returns which it hits as a PIN_HIT_*.
+// of the way along the path, and returns which part it hits.
 //
 // Much of it is written to match. The counts below are of the words that
 // differ with one thing changed, and in brackets how many of those differ in

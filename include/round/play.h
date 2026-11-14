@@ -90,7 +90,6 @@ typedef s32 LetterboxState;
 // The state of the black bars that grow over the top and bottom of the
 // HUD's area: the turn steps it and the round HUD draws the bars from it
 extern LetterboxState g_LetterboxState;
-// A PAUSE_SCREEN_* value
 extern PauseScreen g_PauseScreen;
 
 // Keeps the last heading for the next shot, in Training
@@ -107,7 +106,6 @@ extern SignedBinaryAngle g_FreeLookHeading;
 extern s32 g_ShotSetupFrameCount;
 // Frames, up to turn.c's IMPACT_POINT_LINGER_FRAMES, since Z or L was let go
 extern s32 g_ImpactPointLingerFrameCount;
-// SHOT_FLAG_* bits
 extern ShotFlags g_ShotFlags;
 // Cleared on the tee, and set once a shot of the hole has come to rest or the
 // hole has been given up; the hole's first aim skips
@@ -130,7 +128,6 @@ enum ContestMovieState {
 
 typedef s8 ContestMovieState;
 
-// A CONTEST_MOVIES_* value
 extern ContestMovieState g_ContestMovieState;
 extern u32 g_GroundDrawFrame;
 extern CurrentShot g_SavedShots[PLAYER_COUNT_MAX];
