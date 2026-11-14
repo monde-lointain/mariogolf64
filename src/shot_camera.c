@@ -2259,10 +2259,10 @@ void PlaceFlightCamera(s32 step) {
     (g_SimulatedShot.endsInCup || f_LandingCupDistance < NEAR_CUP_DISTANCE_MAX)
 #define DEBUG_CAMERA_CONTROLLER 1
 
-#define IsTroubleSurface(info) \
-    (IsBunkerKind((info)->kind) || \
-        (info)->kind == SURFACE_KIND_WATER_HAZARD || \
-        (info)->kind == SURFACE_KIND_OUT_OF_BOUNDS)
+#define IsTroubleSurface(traits) \
+    (IsBunkerKind((traits)->kind) || \
+        (traits)->kind == SURFACE_KIND_WATER_HAZARD || \
+        (traits)->kind == SURFACE_KIND_OUT_OF_BOUNDS)
 
 void ChooseFlightCameraKind(void) {
     s32 animationId;
