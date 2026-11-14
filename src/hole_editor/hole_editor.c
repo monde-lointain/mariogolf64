@@ -299,7 +299,6 @@ enum TriangleEdit {
 
 #define WHITE_TEXTURE_SIZE 32
 #define WHITE_TEXEL (-1)
-#define CLIP_RATIO_TEXT_SIZE 0x98
 
 #define WAVE_TMEM 0x180
 #define WAVE_SCROLL_DIVISOR 32

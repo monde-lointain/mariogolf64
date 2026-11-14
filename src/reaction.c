@@ -24,9 +24,6 @@
 #include "sound.h"
 #include "terrain.h"
 
-#define EASE_LOOK_AT (1 << 0)
-#define EASE_EYE (1 << 1)
-
 #define FIRST_REACTION_CHANNEL 4
 #define LAST_REACTION_CHANNEL 7
 #define NO_REACTION_SOUND (-1)

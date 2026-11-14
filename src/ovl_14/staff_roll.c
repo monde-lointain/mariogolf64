@@ -229,9 +229,6 @@
     } \
     while (FALSE)
 
-#define EASE_LOOK_AT (1 << 0)
-#define EASE_EYE (1 << 1)
-
 typedef struct StaffRollImage {
     ImageHeader header;
     u8 texels[STAFF_ROLL_IMAGE_SIZE];

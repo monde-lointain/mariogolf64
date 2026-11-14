@@ -22,6 +22,7 @@
 #include "screen.h"
 #include "shot_camera.h"
 #include "surface.h"
+#include "text.h"
 #include "turn.h"
 
 enum ShotLabels {
@@ -123,11 +124,9 @@ static s32 f_PinFlagWaveFrame = 0;
 
 u8 g_UnusedBytesAfterFlagWaveFrame[4];
 
+// Redeclared without a prototype: the calls below must pass their
+// coordinates as plain ints for the build to match.
 void DrawCenteredShadowedText();
-extern void *g_ShadowedFontImage;
-extern char g_PrintBuffer[];
-#define SHADOWED_FONT_IMAGE_WIDTH 256
-#define SHADOWED_FONT_IMAGE_HEIGHT 32
 
 void DrawShotLabels(Gfx **displayListHead) {
     ScreenPoint point;

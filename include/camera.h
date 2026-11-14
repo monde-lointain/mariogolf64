@@ -68,6 +68,10 @@ typedef struct EasedView {
     s8 isLookAtEased;
 } EasedView;
 
+// Parts of an EasedView to ease, combined.
+#define EASE_LOOK_AT (1 << 0)
+#define EASE_EYE (1 << 1)
+
 #define INSET_CAMERA 1
 #define OPENING_CAMERA 2
 
