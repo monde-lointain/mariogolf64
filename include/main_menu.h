@@ -27,7 +27,7 @@ enum CourseSelectLayout {
 
 extern void *g_MenuLabelImages[2];
 extern s16 g_ChosenLabelGrowth;
-extern s32 g_IsHoleShownInMenuInset;
+extern Boolean g_IsHoleShownInMenuInset;
 
 enum LabelGrowthDirection {
     LABEL_GROWING,

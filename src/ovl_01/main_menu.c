@@ -242,7 +242,7 @@ extern const char f_PeachsCastleName[];
 extern const char f_LuigisGardenName[];
 
 static Gfx f_UnusedEmptyDisplayList[] UNUSED = {gsSPEndDisplayList()};
-s32 g_IsHoleShownInMenuInset = FALSE;
+Boolean g_IsHoleShownInMenuInset = FALSE;
 static s32 f_MenuCharacterCount = CHARACTER_COUNT;
 static u8 f_UnusedBytesAfterCharacterCount[8] UNUSED =
     {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -250,8 +250,8 @@ static s32 f_UnusedListChoice = 0;
 static s32 f_StartingHoleSelection = 0;
 static s32 f_UnusedWordAfterHoleSelection UNUSED = 0;
 static s32 f_ViewerAnimation = VIEWER_STARTING_ANIMATION;
-static s32 f_IsViewerAdjusting = 0;
-static s32 f_IsChosenAnimationPlaying = 0;
+static Boolean f_IsViewerAdjusting = 0;
+static Boolean f_IsChosenAnimationPlaying = 0;
 static s32 f_ModeCounts[PLAYER_COUNT_MAX] = {7, 5, 4, 4};
 static s32 f_UnusedModeCounts[4] UNUSED = {3, 5, 4, 4};
 static u16 f_PlayerClubMasks[PLAYER_COUNT_MAX] =

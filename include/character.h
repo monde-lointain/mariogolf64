@@ -93,7 +93,7 @@ extern u8 *g_ShadowTexture;
 void PlaceCharacterForShot(u32 slotIndex);
 NO_RESULT ReuseLastCharacterMatrices(u32 slotIndex);
 void SetCharacterSlotAlpha(u32 slotIndex, s32 alpha);
-void SetCharacterFrontCulling(u32 slotIndex, s32 usesFrontCulling);
+void SetCharacterFrontCulling(u32 slotIndex, Boolean usesFrontCulling);
 void SetPlaysRandomTextureAnimation(u32 slotIndex, s32 playsRandomTextureAnimation);
 NO_RESULT SetTextureAnimationFrame(u32 slotIndex, s32 index, s32 frame);
 void ResetCharacterSlots(void);
@@ -101,7 +101,7 @@ s32 GetCharacterBufferSize(void);
 void SetCharacterBuffer(s32 slotIndex, u8 *buffer);
 
 s32 GetAnimationFrameCount(u32 slotIndex, s32 animationId);
-void SetCharacterTranslucent(u32 slotIndex, s32 isTranslucent);
+void SetCharacterTranslucent(u32 slotIndex, Boolean isTranslucent);
 void WriteBallDistancesIfEnabled(void);
 
 #endif

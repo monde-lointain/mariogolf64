@@ -99,7 +99,7 @@ static Boolean f_IsOddRetrace = FALSE;
 void HandleGfxRetrace(s32 pendingTaskCount);
 void EnterDevelopmentDebugger(s32 argument);
 
-s32 g_HasOwnControllers;
+Boolean g_HasOwnControllers;
 s32 g_ControllerCount;
 NUContData g_ControllerData[MAXCONTROLLERS];
 ControllerState g_ControllerStates[MAXCONTROLLERS];

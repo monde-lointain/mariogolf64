@@ -59,7 +59,7 @@ s16 g_LastMenuPlayerCountChoice;
 GameState g_BackedUpGameState;
 Player g_BackedUpPlayers[PLAYER_COUNT_MAX];
 s32 g_ChosenPlayerCount;
-s32 g_IsNintendoClubTournament;
+Boolean g_IsNintendoClubTournament;
 s32 g_ClubTournamentNameIndex;
 s32 g_ClubTournamentNumber;
 u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];

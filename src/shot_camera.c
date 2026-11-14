@@ -246,7 +246,7 @@ static Radians f_ShotFlightYaw;
 static Radians f_BillboardHitYaw;
 static Radians f_EndYawFromCup;
 static Radians f_StartYawFromCup;
-static s32 f_IsLaterFlight;
+static Boolean f_IsLaterFlight;
 static Vec3 f_CameraPosition;
 static Vec3 f_LookAtPoint;
 static s32 f_GreenSoundCount;

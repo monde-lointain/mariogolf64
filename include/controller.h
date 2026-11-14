@@ -3,6 +3,8 @@
 
 #include <nusys.h>
 
+#include "language.h"
+
 #define BUTTON_REPEAT_DELAY_FIRST 15
 #define BUTTON_REPEAT_DELAY_NEXT 3
 
@@ -41,7 +43,7 @@ extern s32 g_ControllerCount;
 extern s32 g_PlayerControllerPorts[MAXCONTROLLERS];
 extern ControllerState g_TurnController;
 extern ControllerState g_MergedController;
-extern s32 g_HasOwnControllers;
+extern Boolean g_HasOwnControllers;
 
 void ReadControllers(void);
 

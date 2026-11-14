@@ -57,14 +57,14 @@ extern s32 g_LetterboxState;
 extern s32 g_PauseScreen;
 
 extern s8 g_IsTrainingHeadingKept;
-extern s32 g_IsAimCameraEasing;
+extern Boolean g_IsAimCameraEasing;
 extern Boolean g_HasPressedShotButton;
 extern SignedBinaryAngle g_LookBackHeading;
 extern SignedBinaryAngle g_FreeLookHeading;
 extern s32 g_ShotSetupFrameCount;
 extern s32 g_ImpactPointLingerFrameCount;
 extern s32 g_ShotFlags;
-extern s32 g_HasShotComeToRest;
+extern Boolean g_HasShotComeToRest;
 extern s8 g_IsHudTurnAwayRequested;
 extern CurrentShot g_ScriptedShot;
 extern s8 g_ReplayStrokeCount;

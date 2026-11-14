@@ -1173,7 +1173,7 @@ void SetAnimationSpeed(u32 slotIndex, f32 speed) {
     }
 }
 
-void SetAnimationLooping(u32 slotIndex, s32 isLooping) {
+void SetAnimationLooping(u32 slotIndex, Boolean isLooping) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
@@ -1189,7 +1189,7 @@ void SetNextAnimation(u32 slotIndex, s32 nextAnimationId) {
     }
 }
 
-void SetCharacterTranslucent(u32 slotIndex, s32 isTranslucent) {
+void SetCharacterTranslucent(u32 slotIndex, Boolean isTranslucent) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
@@ -1254,7 +1254,7 @@ s32 GetAnimationFrameCount(u32 slotIndex, s32 animationId) {
     return -1;
 }
 
-void SetCharacterFrontCulling(u32 slotIndex, s32 usesFrontCulling) {
+void SetCharacterFrontCulling(u32 slotIndex, Boolean usesFrontCulling) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {

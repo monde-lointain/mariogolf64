@@ -283,7 +283,7 @@ typedef u8 BetSet;
 
 extern BetSet g_BetSet;
 extern s16 g_LastMenuPlayerCountChoice;
-extern s32 g_IsNintendoClubTournament;
+extern Boolean g_IsNintendoClubTournament;
 extern s32 g_ClubTournamentNameIndex;
 extern s32 g_ClubTournamentNumber;
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
