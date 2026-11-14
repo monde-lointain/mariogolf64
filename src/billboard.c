@@ -335,8 +335,8 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
     Gfx *gfx = g_DisplayListHead;
     BillboardColor lightColor UNUSED = g_BillboardLightColor;
     BillboardColor envColor = g_BillboardEnvColor;
-    Vec3 viewDir;
-    Vec3 lightDir;
+    Vec3 viewDirection;
+    Vec3 lightDirection;
     Vec3 unusedVector UNUSED;
     Radians lightPitch;
     Radians lightYaw;
@@ -361,16 +361,17 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
 
     lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
     lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
-    viewDir[AXIS_X] = g_Cameras[0].view.lookAt[0] - g_Cameras[0].view.eye[0];
-    viewDir[AXIS_Y] = 0.0f;
-    viewDir[AXIS_Z] = g_Cameras[0].view.lookAt[2] - g_Cameras[0].view.eye[2];
-    lightDir[AXIS_X] = cosf(lightPitch) * cosf(lightYaw);
-    lightDir[AXIS_Z] = cosf(lightPitch) * sinf(lightYaw);
-    lightDir[AXIS_Y] = sinf(lightPitch);
-    if (fabsf(viewDir[AXIS_X]) + fabsf(viewDir[AXIS_Z]) >= 1.0f) {
-        guNormalize(&viewDir[AXIS_X], &viewDir[AXIS_Y], &viewDir[AXIS_Z]);
-        guNormalize(&lightDir[AXIS_X], &lightDir[AXIS_Y], &lightDir[AXIS_Z]);
-        alignment = (viewDir[AXIS_X] * lightDir[AXIS_X]) + (viewDir[AXIS_Z] * lightDir[AXIS_Z]);
+    viewDirection[AXIS_X] = g_Cameras[0].view.lookAt[0] - g_Cameras[0].view.eye[0];
+    viewDirection[AXIS_Y] = 0.0f;
+    viewDirection[AXIS_Z] = g_Cameras[0].view.lookAt[2] - g_Cameras[0].view.eye[2];
+    lightDirection[AXIS_X] = cosf(lightPitch) * cosf(lightYaw);
+    lightDirection[AXIS_Z] = cosf(lightPitch) * sinf(lightYaw);
+    lightDirection[AXIS_Y] = sinf(lightPitch);
+    if (fabsf(viewDirection[AXIS_X]) + fabsf(viewDirection[AXIS_Z]) >= 1.0f) {
+        guNormalize(&viewDirection[AXIS_X], &viewDirection[AXIS_Y], &viewDirection[AXIS_Z]);
+        guNormalize(&lightDirection[AXIS_X], &lightDirection[AXIS_Y], &lightDirection[AXIS_Z]);
+        alignment = (viewDirection[AXIS_X] * lightDirection[AXIS_X]) +
+            (viewDirection[AXIS_Z] * lightDirection[AXIS_Z]);
         lightHeight = cosf(lightPitch);
         if (lightHeight >= LIGHT_HEIGHT_MIN) {
             leftAlignment = alignment;
