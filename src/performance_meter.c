@@ -300,7 +300,7 @@ void DrawPerformanceMeter(
     s32 rdpCommandBarLength UNUSED;
     s32 rdpPipeBarLength UNUSED;
     s32 rdpTmemBarLength UNUSED;
-    f32 posY;
+    f32 translationY;
     Gfx *gfx;
     u32 viMode;
     u32 scale;
@@ -332,9 +332,9 @@ void DrawPerformanceMeter(
         RenderTargetAddress(osVirtualToPhysical(nuGfxCfb_ptr))
     );
 
-    posY = (240.0 - METER_TOP_Y) - y;
-    if (posY == 0.0) {
-        posY = 0.1f;
+    translationY = (240.0 - METER_TOP_Y) - y;
+    if (translationY == 0.0) {
+        translationY = 0.1f;
     }
 
     if (extraFrameCount > MAX_EXTRA_FRAME_COUNT) {
@@ -353,7 +353,12 @@ void DrawPerformanceMeter(
     );
     guLookAt(&f_MeterViewMatrix, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
     guScale(&f_MeterScaleMatrix, f_FrameScales[extraFrameCount] * (f32)scale, (f32)scale, 1.0f);
-    guTranslate(&f_MeterTranslationMatrix, 20.0 / f_FrameScales[extraFrameCount], posY, 0.0f);
+    guTranslate(
+        &f_MeterTranslationMatrix,
+        20.0 / f_FrameScales[extraFrameCount],
+        translationY,
+        0.0f
+    );
     gSPMatrix(gfx++, &f_MeterProjectionMatrix, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &f_MeterViewMatrix, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
     guMtxIdent(&f_MeterIdentityMatrix);
