@@ -925,8 +925,8 @@ void PlayTallySound(void) {
 
 void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 value) {
     Gfx *gfx = *displayListHead;
-    u8 *digit;
-    u8 ch;
+    u8 *text;
+    u8 character;
     s32 offset;
 
     sprintf(g_PrintBuffer, f_NumberFormat, value);
@@ -948,9 +948,9 @@ void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 value) {
         G_TX_NOLOD
     );
     offset = 0;
-    for (digit = (u8 *)g_PrintBuffer; (ch = *digit) != '\0';
-        digit++, offset += DISTANCE_DIGIT_WIDTH) {
-        if (ch != ' ') {
+    for (text = (u8 *)g_PrintBuffer; (character = *text) != '\0';
+        text++, offset += DISTANCE_DIGIT_WIDTH) {
+        if (character != ' ') {
             gSPScisTextureRectangle(
                 gfx++,
                 QuarterPixels(x + offset),
@@ -958,7 +958,7 @@ void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 value) {
                 QuarterPixels(x + offset + DISTANCE_DIGIT_WIDTH),
                 QuarterPixels(y + DISTANCE_GLYPH_HEIGHT),
                 G_TX_RENDERTILE,
-                TexelCoordinate((ch - '0') * DISTANCE_DIGIT_WIDTH),
+                TexelCoordinate((character - '0') * DISTANCE_DIGIT_WIDTH),
                 0,
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
