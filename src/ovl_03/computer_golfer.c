@@ -49,20 +49,6 @@
 #define PATH_GROUND_CLEARANCE 0x600
 #define GREEN_EDGE_FOUND 1
 
-typedef struct GolferTraits {
-    s8 strongNine;
-    s8 consistency;
-    s8 clubBoldness;
-    s8 ignoredBoldnessValue;
-    s8 ignoredTraitLevel;
-    s8 windPlay;
-    s8 powerShotEagerness;
-    s8 courseTargetOffsets[COURSE_COUNT];
-    s8 baseTargetScore;
-} GolferTraits;
-
-#define BOLD_CLUB_CHOICE 2
-
 enum StrongNine {
     STRONG_NINE_NEITHER,
     STRONG_NINE_FRONT,
@@ -81,6 +67,27 @@ enum WindPlay {
     WIND_PLAY_STRONG_WINDS,
     WIND_PLAY_FOLLOWING_WINDS
 };
+
+typedef s32 StrongNine;
+typedef s8 StrongNine8;
+typedef s32 Consistency;
+typedef s8 Consistency8;
+typedef s32 WindPlay;
+typedef s8 WindPlay8;
+
+typedef struct GolferTraits {
+    StrongNine8 strongNine;
+    Consistency8 consistency;
+    s8 clubBoldness;
+    s8 ignoredBoldnessValue;
+    s8 ignoredTraitLevel;
+    WindPlay8 windPlay;
+    s8 powerShotEagerness;
+    s8 courseTargetOffsets[COURSE_COUNT];
+    s8 baseTargetScore;
+} GolferTraits;
+
+#define BOLD_CLUB_CHOICE 2
 
 typedef struct ShotOffset {
     s8 offsetX;
@@ -1098,7 +1105,7 @@ s32 ChooseHoleStrokeTarget(void) {
     s32 lossCount;
     s32 winBits;
     s32 targetScore;
-    s32 strongNine;
+    StrongNine strongNine;
     s32 index;
     s32 groupCount;
     s32 frontStrokes;
@@ -1914,7 +1921,7 @@ ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
     f32 edgeShare;
     SurfaceKind peakKind;
     s32 band;
-    s32 consistency;
+    Consistency consistency;
 
     *targetX = g_HoleSetup.cupPosition[AXIS_X];
     *targetZ = g_HoleSetup.cupPosition[AXIS_Z];
@@ -2541,7 +2548,7 @@ enum ClubChanceSet {
 s32 RollClubCategoryChance(s32 chanceSetIndex);
 
 s32 ChooseShotOffset(void) {
-    s32 windPlay;
+    WindPlay windPlay;
     WideBinaryAngle aimYaw;
     s32 windDirection;
 
