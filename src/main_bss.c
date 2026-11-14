@@ -335,4 +335,4 @@ BillboardTransform g_BillboardTransforms[BILLBOARD_COUNT] BSS ALIGNED(8) = {{0}}
 OSMesgQueue nuContDataMutexQ BSS ALIGNED(8) = {0};
 UNREAD_COMMON(0x8);
 CharacterSlot g_CharacterSlots[CHARACTER_SLOT_COUNT] BSS ALIGNED(8) = {{0}};
-void *g_MenuCourseSceneryAsset BSS = {0};
+void *g_MenuCourseSceneImage BSS = {0};

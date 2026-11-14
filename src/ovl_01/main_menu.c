@@ -180,15 +180,12 @@ typedef struct ImageCorner {
 #define NARROW_BOARD_TOP 36
 #define NARROW_BOARD_SHOWN_WIDTH 170
 
-#define BACKDROP_WIDTH 152
-#define BACKDROP_SCALE 2
-#define BACKDROP_SEAM_ROW_COUNT 2
-#define BACKDROP_SECOND_ROW_START TexelCoordinate(1)
-#define BACKDROP_STRIP_ROW_COUNT 11
-#define BACKDROP_STRIP_COUNT 11
-#define BACKDROP_LEFT 8
-#define BACKDROP_FIRST_TOP 8
-#define BACKDROP_TOP 10
+#define COURSE_SCENE_SCALE 2
+#define COURSE_SCENE_SEAM_ROW_COUNT 2
+#define COURSE_SCENE_SECOND_ROW_START TexelCoordinate(1)
+#define COURSE_SCENE_LEFT 8
+#define COURSE_SCENE_FIRST_TOP 8
+#define COURSE_SCENE_TOP 10
 
 extern const char f_NameFormat[];
 
@@ -1582,7 +1579,7 @@ void UpdateMenus(void) {
                 OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
                 ReadEncodedAsset(g_ImageSlots[f_ImageSlotIndex], &asset);
                 OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
-                ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
+                ReadEncodedAsset(g_MenuCourseSceneImage, &asset);
                 f_MenuBoardImageIndex ^= 1;
                 OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
                 ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
@@ -1601,7 +1598,7 @@ void UpdateMenus(void) {
                 OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
                 ReadEncodedAsset(g_ImageSlots[f_ImageSlotIndex], &asset);
                 OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
-                ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
+                ReadEncodedAsset(g_MenuCourseSceneImage, &asset);
                 f_MenuBoardImageIndex ^= 1;
                 OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
                 ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
@@ -1624,7 +1621,7 @@ void UpdateMenus(void) {
                 OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
                 ReadEncodedAsset(g_ImageSlots[f_ImageSlotIndex], &asset);
                 OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
-                ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
+                ReadEncodedAsset(g_MenuCourseSceneImage, &asset);
                 f_MenuBoardImageIndex ^= 1;
                 OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
                 ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
@@ -1683,7 +1680,7 @@ void UpdateMenus(void) {
                 BuildCharacterGrid(1, FALSE);
                 HideGameBoyCharacters();
                 OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
-                ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
+                ReadEncodedAsset(g_MenuCourseSceneImage, &asset);
                 f_MenuBoardImageIndex ^= 1;
                 LoadCharacterSelectBuffer(
                     g_MenuBoardImages[f_MenuBoardImageIndex],
@@ -1714,7 +1711,7 @@ void UpdateMenus(void) {
                 OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
                 ReadEncodedAsset(g_ImageSlots[f_ImageSlotIndex], &asset);
                 OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
-                ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
+                ReadEncodedAsset(g_MenuCourseSceneImage, &asset);
                 f_MenuBoardImageIndex ^= 1;
                 LoadPlayerStatsBuffer(
                     g_MenuBoardImages[f_MenuBoardImageIndex],
@@ -1812,7 +1809,7 @@ void UpdateMenus(void) {
                     OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
                     ReadEncodedAsset(g_ImageSlots[f_ImageSlotIndex], &asset);
                     OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
-                    ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
+                    ReadEncodedAsset(g_MenuCourseSceneImage, &asset);
                     f_MenuBoardImageIndex ^= 1;
                     OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
                     ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
@@ -1881,15 +1878,15 @@ void UpdateMenus(void) {
                 }
 
                 OpenEncodedAsset(ASSET_SKY, &asset);
-                ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
+                ReadEncodedAsset(g_MenuCourseSceneImage, &asset);
                 OpenEncodedAsset(ASSET_WATER, &asset);
                 ReadEncodedAsset(
-                    ImageAt(g_MenuCourseSceneryAsset, COURSE_SELECT_WATER_OFFSET),
+                    ImageAt(g_MenuCourseSceneImage, COURSE_SELECT_WATER_OFFSET),
                     &asset
                 );
                 OpenEncodedAsset(ASSET_BLENDED_TEXTURE_SCROLLING_LAYER, &asset);
                 ReadEncodedAsset(
-                    ImageAt(g_MenuCourseSceneryAsset, COURSE_SELECT_LAYER_OFFSET),
+                    ImageAt(g_MenuCourseSceneImage, COURSE_SELECT_LAYER_OFFSET),
                     &asset
                 );
                 f_ShownTrophyBufferIndex = 0;
@@ -4409,11 +4406,12 @@ void DrawMenuScreen(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-#define CLAMPED_BACKDROP_STRIP_COUNT 4
-#define CLAMPED_BACKDROP_LAST_TOP \
-    (BACKDROP_TOP + \
-        ((CLAMPED_BACKDROP_STRIP_COUNT - 1) * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE))
-#define CLAMPED_BACKDROP_BOTTOM 162
+#define CLAMPED_COURSE_SCENE_STRIP_COUNT 4
+#define CLAMPED_COURSE_SCENE_LAST_TOP \
+    (COURSE_SCENE_TOP + \
+        ((CLAMPED_COURSE_SCENE_STRIP_COUNT - 1) * COURSE_SCENE_STRIP_ROW_COUNT * \
+            COURSE_SCENE_SCALE))
+#define CLAMPED_COURSE_SCENE_BOTTOM 162
 
 #define BOARD_WIDTH 256
 #define BOARD_STRIP_HEIGHT 8
@@ -4447,26 +4445,26 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
 
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_MenuCourseSceneryAsset)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_MenuCourseSceneImage)));
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
 
-    if (layers & MENU_LAYER_SCENERY) {
+    if (layers & MENU_LAYER_COURSE_SCENE) {
         if (g_MenuScreen == MENU_SCREEN_COURSE_SELECT ||
             g_MenuScreen == MENU_SCREEN_BET_SETTINGS ||
             g_MenuScreen == MENU_SCREEN_HANDICAPS) {
-            for (stripIndex = 0; stripIndex != CLAMPED_BACKDROP_STRIP_COUNT; stripIndex++) {
+            for (stripIndex = 0; stripIndex != CLAMPED_COURSE_SCENE_STRIP_COUNT; stripIndex++) {
                 if (stripIndex == 0) {
                     gDPLoadTextureBlock(
                         gfx++,
-                        TextureAddress(LargeImageTexels(g_MenuCourseSceneryAsset)),
+                        TextureAddress(LargeImageTexels(g_MenuCourseSceneImage)),
                         G_IM_FMT_CI,
                         G_IM_SIZ_8b,
-                        BACKDROP_WIDTH,
-                        BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT,
+                        COURSE_SCENE_WIDTH,
+                        COURSE_SCENE_STRIP_ROW_COUNT + COURSE_SCENE_SEAM_ROW_COUNT,
                         0,
                         G_TX_NOMIRROR | G_TX_WRAP,
                         G_TX_NOMIRROR | G_TX_WRAP,
@@ -4479,31 +4477,34 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
 
                     gSPScisTextureRectangle(
                         gfx++,
-                        QuarterPixels(BACKDROP_LEFT),
-                        QuarterPixels(BACKDROP_FIRST_TOP),
-                        QuarterPixels(BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+                        QuarterPixels(COURSE_SCENE_LEFT),
+                        QuarterPixels(COURSE_SCENE_FIRST_TOP),
                         QuarterPixels(
-                            BACKDROP_FIRST_TOP + ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE)
+                            COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * COURSE_SCENE_SCALE)
+                        ),
+                        QuarterPixels(
+                            COURSE_SCENE_FIRST_TOP +
+                            ((COURSE_SCENE_STRIP_ROW_COUNT + 1) * COURSE_SCENE_SCALE)
                         ),
                         G_TX_RENDERTILE,
                         0,
                         0,
-                        TEXEL_STEP_ONE / BACKDROP_SCALE,
-                        TEXEL_STEP_ONE / BACKDROP_SCALE
+                        TEXEL_STEP_ONE / COURSE_SCENE_SCALE,
+                        TEXEL_STEP_ONE / COURSE_SCENE_SCALE
                     );
                 }
                 else {
                     gDPPipeSync(gfx++);
-                    loadedRowCount = BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT;
+                    loadedRowCount = COURSE_SCENE_STRIP_ROW_COUNT + COURSE_SCENE_SEAM_ROW_COUNT;
                     gDPLoadTextureBlock(
                         gfx++,
                         TextureAddress(LargeImageTexelsAt(
-                            g_MenuCourseSceneryAsset,
-                            stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT
+                            g_MenuCourseSceneImage,
+                            stripIndex * COURSE_SCENE_WIDTH * COURSE_SCENE_STRIP_ROW_COUNT
                         )),
                         G_IM_FMT_CI,
                         G_IM_SIZ_8b,
-                        BACKDROP_WIDTH,
+                        COURSE_SCENE_WIDTH,
                         loadedRowCount,
                         0,
                         G_TX_NOMIRROR | G_TX_CLAMP,
@@ -4515,52 +4516,58 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
                     );
                     gDPPipeSync(gfx++);
 
-                    if (stripIndex == CLAMPED_BACKDROP_STRIP_COUNT - 1) {
+                    if (stripIndex == CLAMPED_COURSE_SCENE_STRIP_COUNT - 1) {
                         gSPScisTextureRectangle(
                             gfx++,
-                            QuarterPixels(BACKDROP_LEFT),
-                            QuarterPixels(CLAMPED_BACKDROP_LAST_TOP),
-                            QuarterPixels(BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
-                            QuarterPixels(CLAMPED_BACKDROP_BOTTOM),
+                            QuarterPixels(COURSE_SCENE_LEFT),
+                            QuarterPixels(CLAMPED_COURSE_SCENE_LAST_TOP),
+                            QuarterPixels(
+                                COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * COURSE_SCENE_SCALE)
+                            ),
+                            QuarterPixels(CLAMPED_COURSE_SCENE_BOTTOM),
                             G_TX_RENDERTILE,
                             0,
-                            BACKDROP_SECOND_ROW_START,
-                            TEXEL_STEP_ONE / BACKDROP_SCALE,
-                            TEXEL_STEP_ONE / BACKDROP_SCALE
+                            COURSE_SCENE_SECOND_ROW_START,
+                            TEXEL_STEP_ONE / COURSE_SCENE_SCALE,
+                            TEXEL_STEP_ONE / COURSE_SCENE_SCALE
                         );
                     }
                     else {
-                        stripTop =
-                            BACKDROP_TOP + (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);
+                        stripTop = COURSE_SCENE_TOP +
+                            (stripIndex * COURSE_SCENE_STRIP_ROW_COUNT * COURSE_SCENE_SCALE);
                         gSPScisTextureRectangle(
                             gfx++,
-                            QuarterPixels(BACKDROP_LEFT),
+                            QuarterPixels(COURSE_SCENE_LEFT),
                             QuarterPixels(stripTop),
-                            QuarterPixels(BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
-                            QuarterPixels(stripTop + (BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE)),
+                            QuarterPixels(
+                                COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * COURSE_SCENE_SCALE)
+                            ),
+                            QuarterPixels(
+                                stripTop + (COURSE_SCENE_STRIP_ROW_COUNT * COURSE_SCENE_SCALE)
+                            ),
                             G_TX_RENDERTILE,
                             0,
-                            BACKDROP_SECOND_ROW_START,
-                            TEXEL_STEP_ONE / BACKDROP_SCALE,
-                            TEXEL_STEP_ONE / BACKDROP_SCALE
+                            COURSE_SCENE_SECOND_ROW_START,
+                            TEXEL_STEP_ONE / COURSE_SCENE_SCALE,
+                            TEXEL_STEP_ONE / COURSE_SCENE_SCALE
                         );
                     }
                 }
             }
         }
         else {
-            for (stripIndex = 0; stripIndex != BACKDROP_STRIP_COUNT; stripIndex++) {
+            for (stripIndex = 0; stripIndex != COURSE_SCENE_STRIP_COUNT; stripIndex++) {
                 shownRowCount =
-                    (stripIndex != BACKDROP_STRIP_COUNT - 1) ? BACKDROP_STRIP_ROW_COUNT : 1;
+                    (stripIndex != COURSE_SCENE_STRIP_COUNT - 1) ? COURSE_SCENE_STRIP_ROW_COUNT : 1;
 
                 if (stripIndex == 0) {
                     gDPLoadTextureBlock(
                         gfx++,
-                        TextureAddress(LargeImageTexels(g_MenuCourseSceneryAsset)),
+                        TextureAddress(LargeImageTexels(g_MenuCourseSceneImage)),
                         G_IM_FMT_CI,
                         G_IM_SIZ_8b,
-                        BACKDROP_WIDTH,
-                        BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT,
+                        COURSE_SCENE_WIDTH,
+                        COURSE_SCENE_STRIP_ROW_COUNT + COURSE_SCENE_SEAM_ROW_COUNT,
                         0,
                         G_TX_NOMIRROR | G_TX_WRAP,
                         G_TX_NOMIRROR | G_TX_WRAP,
@@ -4573,17 +4580,20 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
 
                     gSPScisTextureRectangle(
                         gfx++,
-                        QuarterPixels(BACKDROP_LEFT),
-                        QuarterPixels(BACKDROP_FIRST_TOP),
-                        QuarterPixels(BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+                        QuarterPixels(COURSE_SCENE_LEFT),
+                        QuarterPixels(COURSE_SCENE_FIRST_TOP),
                         QuarterPixels(
-                            BACKDROP_FIRST_TOP + ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE)
+                            COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * COURSE_SCENE_SCALE)
+                        ),
+                        QuarterPixels(
+                            COURSE_SCENE_FIRST_TOP +
+                            ((COURSE_SCENE_STRIP_ROW_COUNT + 1) * COURSE_SCENE_SCALE)
                         ),
                         G_TX_RENDERTILE,
                         0,
                         0,
-                        TEXEL_STEP_ONE / BACKDROP_SCALE,
-                        TEXEL_STEP_ONE / BACKDROP_SCALE
+                        TEXEL_STEP_ONE / COURSE_SCENE_SCALE,
+                        TEXEL_STEP_ONE / COURSE_SCENE_SCALE
                     );
                 }
                 else {
@@ -4591,13 +4601,13 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
                     gDPLoadTextureBlock(
                         gfx++,
                         TextureAddress(
-                            LargeImageTexels(g_MenuCourseSceneryAsset) +
-                            (stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT)
+                            LargeImageTexels(g_MenuCourseSceneImage) +
+                            (stripIndex * COURSE_SCENE_WIDTH * COURSE_SCENE_STRIP_ROW_COUNT)
                         ),
                         G_IM_FMT_CI,
                         G_IM_SIZ_8b,
-                        BACKDROP_WIDTH,
-                        shownRowCount + BACKDROP_SEAM_ROW_COUNT,
+                        COURSE_SCENE_WIDTH,
+                        shownRowCount + COURSE_SCENE_SEAM_ROW_COUNT,
                         0,
                         G_TX_NOMIRROR | G_TX_WRAP,
                         G_TX_NOMIRROR | G_TX_WRAP,
@@ -4608,23 +4618,25 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
                     );
                     gDPPipeSync(gfx++);
 
-                    stripTop =
-                        BACKDROP_TOP + (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);
+                    stripTop = COURSE_SCENE_TOP +
+                        (stripIndex * COURSE_SCENE_STRIP_ROW_COUNT * COURSE_SCENE_SCALE);
                     gSPScisTextureRectangle(
                         gfx++,
-                        QuarterPixels(BACKDROP_LEFT),
+                        QuarterPixels(COURSE_SCENE_LEFT),
                         QuarterPixels(stripTop),
-                        QuarterPixels(BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
                         QuarterPixels(
-                            BACKDROP_TOP +
-                            (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE) +
-                            (shownRowCount * BACKDROP_SCALE)
+                            COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * COURSE_SCENE_SCALE)
+                        ),
+                        QuarterPixels(
+                            COURSE_SCENE_TOP +
+                            (stripIndex * COURSE_SCENE_STRIP_ROW_COUNT * COURSE_SCENE_SCALE) +
+                            (shownRowCount * COURSE_SCENE_SCALE)
                         ),
                         G_TX_RENDERTILE,
                         0,
-                        BACKDROP_SECOND_ROW_START,
-                        TEXEL_STEP_ONE / BACKDROP_SCALE,
-                        TEXEL_STEP_ONE / BACKDROP_SCALE
+                        COURSE_SCENE_SECOND_ROW_START,
+                        TEXEL_STEP_ONE / COURSE_SCENE_SCALE,
+                        TEXEL_STEP_ONE / COURSE_SCENE_SCALE
                     );
                 }
             }
@@ -4810,8 +4822,8 @@ void DrawLargeBannerBackdropLayers(Gfx **displayListHead, s32 layers) {
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    if (layers & MENU_LAYER_SCENERY) {
-        DrawMenuScenery(&gfx);
+    if (layers & MENU_LAYER_COURSE_SCENE) {
+        DrawMenuCourseScene(&gfx);
     }
 
     if (layers & MENU_LAYER_BOARD) {
@@ -4830,7 +4842,7 @@ void DrawLargeBannerBackdropLayers(Gfx **displayListHead, s32 layers) {
     *displayListHead = gfx;
 }
 
-void DrawMenuScenery(Gfx **displayListHead) {
+void DrawMenuCourseScene(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
     s32 shownRowCount;
@@ -4838,17 +4850,18 @@ void DrawMenuScenery(Gfx **displayListHead) {
 
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_MenuCourseSceneryAsset)));
-    for (stripIndex = 0; stripIndex != BACKDROP_STRIP_COUNT; stripIndex++) {
-        shownRowCount = (stripIndex != BACKDROP_STRIP_COUNT - 1) ? BACKDROP_STRIP_ROW_COUNT : 1;
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_MenuCourseSceneImage)));
+    for (stripIndex = 0; stripIndex != COURSE_SCENE_STRIP_COUNT; stripIndex++) {
+        shownRowCount =
+            (stripIndex != COURSE_SCENE_STRIP_COUNT - 1) ? COURSE_SCENE_STRIP_ROW_COUNT : 1;
         if (stripIndex == 0) {
             gDPLoadTextureBlock(
                 gfx++,
-                TextureAddress(LargeImageTexels(g_MenuCourseSceneryAsset)),
+                TextureAddress(LargeImageTexels(g_MenuCourseSceneImage)),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                BACKDROP_WIDTH,
-                BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT,
+                COURSE_SCENE_WIDTH,
+                COURSE_SCENE_STRIP_ROW_COUNT + COURSE_SCENE_SEAM_ROW_COUNT,
                 0,
                 G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP,
@@ -4860,17 +4873,18 @@ void DrawMenuScenery(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
             gSPScisTextureRectangle(
                 gfx++,
-                QuarterPixels(BACKDROP_LEFT),
-                QuarterPixels(BACKDROP_FIRST_TOP),
-                QuarterPixels(BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+                QuarterPixels(COURSE_SCENE_LEFT),
+                QuarterPixels(COURSE_SCENE_FIRST_TOP),
+                QuarterPixels(COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * COURSE_SCENE_SCALE)),
                 QuarterPixels(
-                    BACKDROP_FIRST_TOP + ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE)
+                    COURSE_SCENE_FIRST_TOP +
+                    ((COURSE_SCENE_STRIP_ROW_COUNT + 1) * COURSE_SCENE_SCALE)
                 ),
                 G_TX_RENDERTILE,
                 0,
                 0,
-                TEXEL_STEP_ONE / BACKDROP_SCALE,
-                TEXEL_STEP_ONE / BACKDROP_SCALE
+                TEXEL_STEP_ONE / COURSE_SCENE_SCALE,
+                TEXEL_STEP_ONE / COURSE_SCENE_SCALE
             );
         }
         else {
@@ -4878,13 +4892,13 @@ void DrawMenuScenery(Gfx **displayListHead) {
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(
-                    LargeImageTexels(g_MenuCourseSceneryAsset) +
-                    (stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT)
+                    LargeImageTexels(g_MenuCourseSceneImage) +
+                    (stripIndex * COURSE_SCENE_WIDTH * COURSE_SCENE_STRIP_ROW_COUNT)
                 ),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                BACKDROP_WIDTH,
-                shownRowCount + BACKDROP_SEAM_ROW_COUNT,
+                COURSE_SCENE_WIDTH,
+                shownRowCount + COURSE_SCENE_SEAM_ROW_COUNT,
                 0,
                 G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP,
@@ -4894,21 +4908,23 @@ void DrawMenuScenery(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             gDPPipeSync(gfx++);
-            stripTop = BACKDROP_TOP + (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);
+            stripTop =
+                COURSE_SCENE_TOP + (stripIndex * COURSE_SCENE_STRIP_ROW_COUNT * COURSE_SCENE_SCALE);
             gSPScisTextureRectangle(
                 gfx++,
-                QuarterPixels(BACKDROP_LEFT),
+                QuarterPixels(COURSE_SCENE_LEFT),
                 QuarterPixels(stripTop),
-                QuarterPixels(BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+                QuarterPixels(COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * COURSE_SCENE_SCALE)),
                 QuarterPixels(
-                    BACKDROP_TOP + (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE) +
-                    (shownRowCount * BACKDROP_SCALE)
+                    COURSE_SCENE_TOP +
+                    (stripIndex * COURSE_SCENE_STRIP_ROW_COUNT * COURSE_SCENE_SCALE) +
+                    (shownRowCount * COURSE_SCENE_SCALE)
                 ),
                 G_TX_RENDERTILE,
                 0,
-                BACKDROP_SECOND_ROW_START,
-                TEXEL_STEP_ONE / BACKDROP_SCALE,
-                TEXEL_STEP_ONE / BACKDROP_SCALE
+                COURSE_SCENE_SECOND_ROW_START,
+                TEXEL_STEP_ONE / COURSE_SCENE_SCALE,
+                TEXEL_STEP_ONE / COURSE_SCENE_SCALE
             );
         }
     }
@@ -5170,7 +5186,7 @@ void DrawMenuBanner(Gfx **displayListHead) {
 #define PLAIN_MENU_FIGURES_X 32
 #define PLAIN_MENU_FIGURES_Y 100
 #define BOARD_BACKDROP_LAYERS \
-    (MENU_LAYER_SCENERY | MENU_LAYER_BOARD | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER | \
+    (MENU_LAYER_COURSE_SCENE | MENU_LAYER_BOARD | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER | \
         MENU_LAYER_PER_SCREEN)
 
 const char f_PlainMenuHeading[] = "MAIN MENU";
@@ -5372,7 +5388,7 @@ const char f_UnusedEmptyString[] = "";
 extern const char g_CaddySelectTitle[];
 
 #define MODE_SELECT_BACKDROP_LAYERS \
-    (MENU_LAYER_SCENERY | MENU_LAYER_IGNORED | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER)
+    (MENU_LAYER_COURSE_SCENE | MENU_LAYER_IGNORED | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER)
 #define MODE_SELECT_LIGHT_YAW 0
 #define MODE_SELECT_LIGHT_PITCH 0x3000
 #define MODE_BOARD_EYE_HEIGHT 70.0f
@@ -5438,7 +5454,7 @@ extern const char g_CaddySelectTitle[];
 #define BET_BADGE_COLOR_MIDPOINT 127
 #define BET_BADGE_COLOR_SWING 127.0f
 #define BET_BADGE_ENV_DIVISOR 4
-#define COURSE_SELECT_BACK_LAYERS MENU_LAYER_SCENERY
+#define COURSE_SELECT_BACK_LAYERS MENU_LAYER_COURSE_SCENE
 #define COURSE_SELECT_FRONT_LAYERS (MENU_LAYER_IGNORED | MENU_LAYER_BANNER)
 #define BET_SLIDE_STEP 32
 #define BET_SLIDE_DISTANCE 512
@@ -6715,9 +6731,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, WATER_BLEND_ALPHA);
         gDPLoadTextureBlock(
             gfx++,
-            TextureAddress(
-                ImageBody(ImageAt(g_MenuCourseSceneryAsset, COURSE_SELECT_WATER_OFFSET))
-            ),
+            TextureAddress(ImageBody(ImageAt(g_MenuCourseSceneImage, COURSE_SELECT_WATER_OFFSET))),
             G_IM_FMT_RGBA,
             G_IM_SIZ_16b,
             WATER_TEXTURE_SIZE,
@@ -6732,9 +6746,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
         );
         gDPLoadMultiBlock(
             gfx++,
-            TextureAddress(
-                ImageBody(ImageAt(g_MenuCourseSceneryAsset, COURSE_SELECT_LAYER_OFFSET))
-            ),
+            TextureAddress(ImageBody(ImageAt(g_MenuCourseSceneImage, COURSE_SELECT_LAYER_OFFSET))),
             WATER_LAYER_TMEM,
             WATER_LAYER_TILE,
             G_IM_FMT_RGBA,
@@ -7954,8 +7966,8 @@ const char f_PeachsCastleName[] = "Peach's Castle";
 const char f_LuigisGardenName[] = "Luigi's Garden";
 
 #define OPTIONS_BACKDROP_LAYERS \
-    (MENU_LAYER_SCENERY | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER | MENU_LAYER_PER_SCREEN | \
-        MENU_LAYER_TALL_NARROW_BOARD)
+    (MENU_LAYER_COURSE_SCENE | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER | \
+        MENU_LAYER_PER_SCREEN | MENU_LAYER_TALL_NARROW_BOARD)
 
 #define MARIO_WIDTH 100
 #define MARIO_HEIGHT 128

@@ -187,9 +187,6 @@ enum ListingState {
 #define OPTION_POINTER_GAP 8
 #define COURSE_SCENE_LEFT 8
 #define COURSE_SCENE_TOP 8
-#define COURSE_SCENE_WIDTH 152
-#define COURSE_SCENE_STRIP_ROWS 11
-#define COURSE_SCENE_STRIP_COUNT 11
 #define TITLE_LEFT 60
 #define TITLE_TOP 16
 #define TITLE_WIDTH 200
@@ -2410,7 +2407,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     LoadLargePalette(&gfx, ImageBody(transfer->courseSceneImage));
     for (index = 0; index != COURSE_SCENE_STRIP_COUNT; index++) {
-        rowCount = (index != COURSE_SCENE_STRIP_COUNT - 1) ? COURSE_SCENE_STRIP_ROWS : 1;
+        rowCount = (index != COURSE_SCENE_STRIP_COUNT - 1) ? COURSE_SCENE_STRIP_ROW_COUNT : 1;
         if (index == 0) {
             LoadTextureBlock(
                 &gfx,
@@ -2418,7 +2415,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 COURSE_SCENE_WIDTH,
-                COURSE_SCENE_STRIP_ROWS + 2,
+                COURSE_SCENE_STRIP_ROW_COUNT + 2,
                 0,
                 0,
                 0,
@@ -2432,7 +2429,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
                 QuarterPixels(COURSE_SCENE_LEFT),
                 QuarterPixels(COURSE_SCENE_TOP),
                 QuarterPixels(COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * 2)),
-                QuarterPixels(COURSE_SCENE_TOP + ((COURSE_SCENE_STRIP_ROWS + 1) * 2)),
+                QuarterPixels(COURSE_SCENE_TOP + ((COURSE_SCENE_STRIP_ROW_COUNT + 1) * 2)),
                 G_TX_RENDERTILE,
                 0,
                 0,
@@ -2444,7 +2441,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
             LoadTextureBlock(
                 &gfx,
                 LargeImageTexels(transfer->courseSceneImage) +
-                    (index * (COURSE_SCENE_WIDTH * COURSE_SCENE_STRIP_ROWS)),
+                    (index * (COURSE_SCENE_WIDTH * COURSE_SCENE_STRIP_ROW_COUNT)),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 COURSE_SCENE_WIDTH,
@@ -2460,10 +2457,11 @@ void DrawTransmitMenu(Gfx **displayListHead) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels(COURSE_SCENE_LEFT),
-                QuarterPixels(COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROWS * 2)),
+                QuarterPixels(COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROW_COUNT * 2)),
                 QuarterPixels(COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * 2)),
                 QuarterPixels(
-                    COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROWS * 2) + (rowCount * 2)
+                    COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROW_COUNT * 2) +
+                    (rowCount * 2)
                 ),
                 G_TX_RENDERTILE,
                 0,

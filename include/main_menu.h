@@ -16,14 +16,14 @@ enum CourseSelectLayout {
     COURSE_SELECT_LAYOUT_PLAIN
 };
 
-#define MENU_LAYER_SCENERY (1 << 0)
+#define MENU_LAYER_COURSE_SCENE (1 << 0)
 #define MENU_LAYER_IGNORED (1 << 1)
 #define MENU_LAYER_BOARD (1 << 2)
 #define MENU_LAYER_BANNER (1 << 3)
 #define MENU_LAYER_LARGE_BANNER (1 << 4)
 #define MENU_LAYER_PER_SCREEN (1 << 5)
 #define MENU_LAYER_TALL_NARROW_BOARD (1 << 7)
-#define PLAIN_BACKDROP_LAYERS (MENU_LAYER_SCENERY | MENU_LAYER_IGNORED | MENU_LAYER_BANNER)
+#define PLAIN_BACKDROP_LAYERS (MENU_LAYER_COURSE_SCENE | MENU_LAYER_IGNORED | MENU_LAYER_BANNER)
 
 extern void *g_MenuLabelImages[2];
 extern s16 g_ChosenLabelGrowth;
@@ -86,7 +86,7 @@ void UpdateMenus(void);
 void *GetMenuImageBuffer(void);
 void StartLoadingChosenHole(void);
 void DrawMenuScreen(Gfx **displayListHead);
-void DrawMenuScenery(Gfx **displayListHead);
+void DrawMenuCourseScene(Gfx **displayListHead);
 void DrawMenuBanner(Gfx **displayListHead);
 void DrawSpinningBadge(Gfx **displayListHead, void *image, s32 x, s32 y);
 

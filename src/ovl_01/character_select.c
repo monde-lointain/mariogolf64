@@ -1381,7 +1381,7 @@ void DrawCharacterSelect(Gfx **displayListHead, u8 isSinglePlayer) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
     gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-    DrawMenuScenery(&gfx);
+    DrawMenuCourseScene(&gfx);
     DrawMenuBanner(&gfx);
     DrawCharacterBoard(&gfx);
     DrawGridFaces(&gfx, isSinglePlayer);

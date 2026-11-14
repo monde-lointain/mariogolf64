@@ -102,7 +102,7 @@ Boolean g_IsChosenHoleLoadStarted;
 u8 g_IsMenuWipeOpening;
 u8 g_IsRingShotWipeOpening;
 void *g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
-void *g_MenuCourseSceneryAsset;
+void *g_MenuCourseSceneImage;
 MenuMemory g_MenuMemory;
 s32 g_MenuScreen;
 void *g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
@@ -1191,8 +1191,8 @@ void LoadMenuResources(void) {
         return;
     }
 
-    g_MenuCourseSceneryAsset = AllocMemory(OpenEncodedAsset(ASSET_COURSE_SCENE, &asset));
-    ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
+    g_MenuCourseSceneImage = AllocMemory(OpenEncodedAsset(ASSET_COURSE_SCENE, &asset));
+    ReadEncodedAsset(g_MenuCourseSceneImage, &asset);
     g_BrickWallImage = AllocMemory(OpenEncodedAsset(BRICK_WALL_IMAGE_ASSET, &asset));
     ReadEncodedAsset(g_BrickWallImage, &asset);
     g_MenuBoardImages[0] = AllocMemory(OpenEncodedAsset(ASSET_WIDE_BOARD, &asset));
@@ -1323,7 +1323,7 @@ void FreeMenuResources(void) {
     s32 index;
 
     g_LoadedMenuScreen = NO_MENU_SCREEN;
-    FreeMemory(&g_MenuCourseSceneryAsset);
+    FreeMemory(&g_MenuCourseSceneImage);
     FreeMemory(&g_BrickWallImage);
     for (index = 0; index != ARRAY_COUNT(g_MenuIconImages); index++) {
         FreeMemory(&g_MenuIconImages[index]);

@@ -62,7 +62,7 @@ extern s16 g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT];
 extern void *g_TrophyPalettes[TROPHY_PALETTE_COUNT];
 #define TROPHY_FRAME_BUFFER_COUNT 2
 extern void *g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
-extern void *g_MenuCourseSceneryAsset;
+extern void *g_MenuCourseSceneImage;
 
 #define PLAYER_COUNT_ASSET_ROW_LENGTH 12
 extern AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH];
@@ -170,6 +170,9 @@ extern s16 g_ImportedCharacterColumns[PLAYER_COUNT_MAX];
 extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT];
 
 // Images that more than one menu draws.
+#define COURSE_SCENE_WIDTH 152
+#define COURSE_SCENE_STRIP_ROW_COUNT 11
+#define COURSE_SCENE_STRIP_COUNT 11
 #define STAR_WIDTH 32
 #define STAR_HEIGHT 24
 #define STAR_FRAME_COUNT 15
