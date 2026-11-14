@@ -22,7 +22,6 @@
 #include "geometry.h"
 #include "hole_display.h"
 #include "hole_loader.h"
-#include "include_asm.h"
 #include "main_menu.h"
 #include "math_util.h"
 #include "menu.h"

@@ -29,7 +29,6 @@
 #include "hole_conditions.h"
 #include "hole_loader.h"
 #include "host_file.h"
-#include "include_asm.h"
 #include "language.h"
 #include "main.h"
 #include "math_util.h"
@@ -780,9 +779,6 @@ void WriteBallDistances(void) {
     FreeMemory(&source);
 }
 
-/* As above, so the data below lands in .rodata */
-RESUME_RODATA_SECTION();
-
 /* Unreferenced; left by debug output that the routines below no longer have */
 static const char f_UnusedFrameFormat[] = "TA %d : FRAME %d    ";
 
@@ -1072,9 +1068,6 @@ void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
         }
     }
 }
-
-/* As above, so the data below lands in .rodata */
-RESUME_RODATA_SECTION();
 
 static const char f_NotDisposedFormat[] = "Polychara slot %d not disposed yet!!!!!!!\n";
 /* Unreferenced; left by debug output that LoadCharacter no longer has */

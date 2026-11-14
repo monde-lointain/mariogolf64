@@ -8,7 +8,6 @@
 #include "PR/R4300.h"
 #include "compiler.h"
 #include "debug_text.h"
-#include "include_asm.h"
 #include "language.h"
 #include "sound.h"
 

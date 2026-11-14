@@ -22,8 +22,7 @@ options:
   undefined_funcs_auto_path: build/splat/undefined_funcs_auto.txt
   undefined_syms_auto_path: build/splat/undefined_syms_auto.txt
 
-  # The macro files in include/ are kept by hand; labels.inc must have
-  # no blank lines (see the note at its top)
+  # The macro file in include/ is kept by hand
   generate_asm_macros_files: False
 
   asm_path: asm

@@ -13,7 +13,6 @@
 #include "game.h"
 #include "game_state.h"
 #include "geometry.h"
-#include "include_asm.h"
 #include "language.h"
 #include "main.h"
 #include "math_util.h"

@@ -12,7 +12,6 @@
 #include "compiler.h"
 #include "gbi_helpers.h"
 #include "hole_display.h"
-#include "include_asm.h"
 #include "main_menu.h"
 #include "menu.h"
 #include "menu_arrows.h"

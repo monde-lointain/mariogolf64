@@ -28,7 +28,6 @@
 #include "hole_editor.h"
 #include "hole_loader.h"
 #include "hole_triangles.h"
-#include "include_asm.h"
 #include "language.h"
 #include "main.h"
 #include "math_util.h"

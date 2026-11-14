@@ -11,7 +11,6 @@
 
 #include "character.h"
 #include "compiler.h"
-#include "include_asm.h"
 #include "language.h"
 
 #define PASSWORD_SYMBOL_COUNT 28

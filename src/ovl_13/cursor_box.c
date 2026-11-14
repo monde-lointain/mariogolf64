@@ -11,7 +11,6 @@
 #include "game.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
-#include "include_asm.h"
 #include "math_util.h"
 #include "screen.h"
 

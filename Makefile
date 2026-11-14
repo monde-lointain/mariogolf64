@@ -6,12 +6,12 @@ SPLAT_DIR   := build/splat
 SPLAT_LD    := $(SPLAT_DIR)/$(TARGET).ld
 KMC_DIR     := tools/gcc_kmc
 
-# Set NON_MATCHING=1 to build the C drafts of the routines that don't match
-# yet in place of their asm. Its ROM doesn't match, so it's laid out to let
-# code and data move (see the layouts below).
+# Set NON_MATCHING=1 to build a ROM that needn't match the original: it
+# avoids the original's undefined behavior and is laid out to let code and
+# data move (see the layouts below).
 NON_MATCHING ?= 0
 # Set MODERN=1 to build with a modern GCC instead of KMC GCC 2.7.2. Its code
-# differs in size from the original's, so it builds the drafts too.
+# differs in size from the original's, so its ROM doesn't match either.
 MODERN      ?= 0
 ifneq ($(MODERN),0)
 override NON_MATCHING := 1
@@ -377,9 +377,7 @@ $(foreach png,$(TEXTURE_PNGS),$(eval \
 # GCC searches first for quoted includes.
 ICONV := iconv -f UTF-8 -t SHIFT_JIS
 
-# A C file is rebuilt whenever the assembly it includes with INCLUDE_ASM changes
-.SECONDEXPANSION:
-$(BUILD_DIR)/%.c.o: %.c $$(wildcard asm/nonmatchings/$$(subst src/,,$$*)/*.s)
+$(BUILD_DIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
 ifneq ($(RUN_CC_CHECK),0)
 	$(CC_CHECK) $(INCLUDES) $(DEFINES) $<

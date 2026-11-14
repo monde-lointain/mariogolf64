@@ -23,7 +23,6 @@
 #include "golf_balls.h"
 #include "heap.h"
 #include "hole_objects.h"
-#include "include_asm.h"
 #include "math_util.h"
 #include "movie.h"
 #include "round_events.h"

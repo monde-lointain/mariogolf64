@@ -11,7 +11,6 @@
 #include "debug_text.h"
 #include "geometry.h"
 #include "host_file.h"
-#include "include_asm.h"
 #include "language.h"
 #include "math_util.h"
 #include "sound.h"

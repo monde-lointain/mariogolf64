@@ -21,7 +21,6 @@
 #include "geometry.h"
 #include "heap.h"
 #include "hole_display.h"
-#include "include_asm.h"
 #include "language.h"
 #include "math_util.h"
 #include "round_hud.h"

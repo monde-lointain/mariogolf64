@@ -21,10 +21,6 @@ PPIndentWidth: 4
 # than broken inside it
 ColumnLimit: 100
 
-# splat reads the function or symbol name from each INCLUDE_ASM and
-# INCLUDE_RODATA call, and doesn't expect it on a line of its own
-WhitespaceSensitiveMacros: [INCLUDE_ASM, INCLUDE_RODATA]
-
 # Pure blocks: the { ends the control line or routine header, the } lines up
 # with the statement it closes, and else and while start a line of their own
 BreakBeforeBraces: Custom

@@ -22,7 +22,6 @@
 #include "geometry.h"
 #include "heap.h"
 #include "host_file.h"
-#include "include_asm.h"
 #include "language.h"
 #include "math_util.h"
 #include "shot_camera.h"

@@ -10,7 +10,6 @@
 #include "course_stats.h"
 #include "effects.h"
 #include "game_state.h"
-#include "include_asm.h"
 #include "language.h"
 #include "round_stats.h"
 #include "save.h"

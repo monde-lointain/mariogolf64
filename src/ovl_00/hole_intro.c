@@ -13,7 +13,6 @@
 #include "debug_text.h"
 #include "game_state.h"
 #include "geometry.h"
-#include "include_asm.h"
 #include "math_util.h"
 #include "movie.h"
 #include "scoring.h"

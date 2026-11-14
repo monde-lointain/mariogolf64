@@ -9,7 +9,6 @@
 #include <ultra64.h>
 
 #include "address.h"
-#include "include_asm.h"
 #include "language.h"
 #include "math_util.h"
 

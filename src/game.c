@@ -33,7 +33,6 @@
 #include "hole_editor.h"
 #include "hole_objects.h"
 #include "hole_triangles.h"
-#include "include_asm.h"
 #include "language.h"
 #include "main.h"
 #include "main_menu.h"

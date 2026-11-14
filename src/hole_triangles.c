@@ -17,7 +17,6 @@
 #include "game_state.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
-#include "include_asm.h"
 #include "language.h"
 #include "math_util.h"
 #include "play.h"

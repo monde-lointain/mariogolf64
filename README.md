@@ -25,8 +25,8 @@ make -j       # build and verify build/mariogolf64.z64
 
 ## Progress
 
-`make progress` builds the drafts of the routines that don't match yet
-(`NON_MATCHING=1`) and writes the progress images and page to
+Every routine matches the original's. `make progress` also builds the ROM
+that needn't match (`NON_MATCHING=1`) and writes the progress images and page to
 `build/progress`: a treemap of the code by source file (`progress.svg`),
 every routine by state (`functions.svg`), the matched code over time
 (`history.svg`, `day.svg`, `daily.svg`) and all of them on one page

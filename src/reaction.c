@@ -22,7 +22,6 @@
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "hole_triangles.h"
-#include "include_asm.h"
 #include "language.h"
 #include "math_util.h"
 #include "pin.h"
@@ -1524,6 +1523,5 @@ Boolean IsEasedEyeHeightZero(void) {
     return isZero;
 }
 
-RESUME_RODATA_SECTION();
 static const char f_UnusedFloatFormat[] = "            %f";
 static const char f_UnusedEmptyText[] = "";

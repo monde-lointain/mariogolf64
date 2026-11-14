@@ -16,7 +16,6 @@
 #include "game_state.h"
 #include "gbi_helpers.h"
 #include "heap.h"
-#include "include_asm.h"
 #include "language.h"
 #include "menu_memory.h"
 #include "save.h"
