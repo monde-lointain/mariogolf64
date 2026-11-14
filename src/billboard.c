@@ -32,7 +32,7 @@
 
 typedef struct BillboardTexture {
     s32 assetId;
-    s16 type;
+    s16 loadMode;
     s16 width;
     s16 height;
     u16 *pixels;
@@ -247,7 +247,7 @@ void SortBillboardsByDepth(void) {
 
 #define NeedsTextureLoad(billboard, textureIndex) \
     (((billboard)->textureIndex != f_LoadedTextureIndex) && \
-        (f_BillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND) && \
+        (f_BillboardTextures[textureIndex].loadMode == TEXTURE_LOADED_ON_DEMAND) && \
         (f_BillboardTextures[textureIndex].pixels != NULL))
 
 void DrawBillboard(
@@ -262,7 +262,7 @@ void DrawBillboard(
     s32 texelSize;
 
     if (f_BillboardTextures[textureIndex].pixels == NULL &&
-        f_BillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND) {
+        f_BillboardTextures[textureIndex].loadMode == TEXTURE_LOADED_ON_DEMAND) {
         texelSize = f_BillboardTextures[textureIndex].width *
             f_BillboardTextures[textureIndex].height * sizeof(u16);
         f_BillboardTextures[textureIndex].pixels =
