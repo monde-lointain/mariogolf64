@@ -3467,8 +3467,6 @@ void ShowWindFlyGuy(s32 show) {
 #define WIND_STREAK_LAST_SLOT ((WIND_STREAK_QUADS_PER_RUN - 1) * 2)
 #define WIND_STREAK_TEXTURE_S 0x5FF
 #define WIND_STREAK_TEXTURE_T_SHIFT 8
-#define WIND_STREAK_IMAGE_WIDTH 48
-#define WIND_STREAK_IMAGE_HEIGHT 128
 #define WIND_STREAK_IMAGE_MASK_T 7
 #define WIND_STREAK_DEPTH (-300.0f)
 #define FLY_GUY_IMAGE_WIDTH 32
@@ -3587,8 +3585,8 @@ void DrawWindFlyGuy(Gfx **displayListHead) {
         &gfx,
         ImageBody(f_MovieBuffer + FLY_GUY_IMAGE_SIZE),
         G_IM_FMT_I,
-        WIND_STREAK_IMAGE_WIDTH,
-        WIND_STREAK_IMAGE_HEIGHT,
+        STREAK_IMAGE_WIDTH,
+        STREAK_IMAGE_HEIGHT,
         0,
         G_TX_MIRROR,
         G_TX_MIRROR,

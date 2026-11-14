@@ -4414,12 +4414,10 @@ void LoadLakitu(void) {
 #define LAKITU_IMAGE_SIZE 32
 #define LAKITU_DRAWN_SIZE 48
 #define LAKITU_SCALE TexelRunStep(LAKITU_IMAGE_SIZE, LAKITU_DRAWN_SIZE)
-#define LAKITU_TRAIL_IMAGE_WIDTH 48
-#define LAKITU_TRAIL_IMAGE_HEIGHT 128
 #define LAKITU_TRAIL_BATCH_SEGMENT_COUNT 16
 #define LAKITU_TRAIL_DRAWN_SEGMENT_COUNT 31
 #define LAKITU_TRAIL_ROWS_PER_SEGMENT 8
-#define LAKITU_TRAIL_RIGHT_S (TexelCoordinate(LAKITU_TRAIL_IMAGE_WIDTH) - 1)
+#define LAKITU_TRAIL_RIGHT_S (TexelCoordinate(STREAK_IMAGE_WIDTH) - 1)
 #define LakituTrailT(segment) TexelCoordinate((segment) * LAKITU_TRAIL_ROWS_PER_SEGMENT)
 #define LakituTrailSecondBatchSlot(segment) \
     (((LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 2) * 2) - \
@@ -4527,13 +4525,13 @@ void DrawLakitu(Gfx **displayListHead) {
             gfx++,
             TextureAddress(ImageBody(f_LakituTrailImage)),
             G_IM_FMT_I,
-            LAKITU_TRAIL_IMAGE_WIDTH,
-            LAKITU_TRAIL_IMAGE_HEIGHT,
+            STREAK_IMAGE_WIDTH,
+            STREAK_IMAGE_HEIGHT,
             0,
             G_TX_MIRROR | G_TX_WRAP,
             G_TX_MIRROR | G_TX_WRAP,
             G_TX_NOMASK,
-            TextureMask(LAKITU_TRAIL_IMAGE_HEIGHT),
+            TextureMask(STREAK_IMAGE_HEIGHT),
             G_TX_NOLOD,
             G_TX_NOLOD
         );

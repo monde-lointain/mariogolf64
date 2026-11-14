@@ -74,6 +74,8 @@ void ReadAssetFile(void *buffer, u32 size, AssetFile *file);
 #define ASSET_LARGE_DIGITS 0x689
 #define ASSET_SCORE_LABELS 0x68A
 #define ASSET_STREAK_IMAGE 0x6AF
+#define STREAK_IMAGE_WIDTH 48
+#define STREAK_IMAGE_HEIGHT 128
 #define ASSET_CURSOR_BOX 0x6EF
 #define ASSET_WIDE_CLOUD 0x70B
 #define ASSET_YES_NO 0x70C
