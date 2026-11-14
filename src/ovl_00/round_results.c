@@ -84,6 +84,15 @@ enum UnlockNoticeKind {
 
 typedef s32 UnlockNoticeKind;
 
+// A course notice swings in until its angle reaches a half turn, then
+// keeps swinging until NOTICE_DONE_FRAME.
+enum NoticeStage {
+    NOTICE_STAGE_SWINGING_IN,
+    NOTICE_STAGE_SWINGING
+};
+
+typedef s32 NoticeStage;
+
 #define NORMAL_TALLY_SPEED 1
 #define FAST_TALLY_SPEED 10
 #define TALLY_SOUND_INTERVAL_MASK 3
@@ -311,7 +320,7 @@ static u8 *f_PlaceDigitsImage;
 static UnlockNoticeKind f_UnlockNoticeKind;
 static Boolean f_HasBets;
 static CharacterIndex f_FaceCharacterIndex;
-static s32 f_NoticeStage;
+static NoticeStage f_NoticeStage;
 static s32 f_NoticeFrameCount;
 static s32 f_NoticeSwing;
 static s32 f_CourseNoticeShift;
@@ -722,7 +731,7 @@ void LoadUnlockNotice(UnlockNotice unlock) {
     f_NoticeLift = 0;
     f_CharacterNoticeShift = 0;
     f_NoticeFrameCount = 0;
-    f_NoticeStage = 0;
+    f_NoticeStage = NOTICE_STAGE_SWINGING_IN;
     f_NoticeSwing = 0;
     f_CourseNoticeShift = 0;
     f_NoticeAngle = 0;
@@ -791,7 +800,7 @@ s32 UpdateUnlockNotice(void) {
     if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
         f_NoticeFrameCount++;
         switch (f_NoticeStage) {
-            case 0:
+            case NOTICE_STAGE_SWINGING_IN:
                 f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
                 f_CourseNoticeShift = 0;
                 f_NoticeAngle += NOTICE_SWING_STEP;
@@ -800,11 +809,11 @@ s32 UpdateUnlockNotice(void) {
                 }
 
                 if (f_NoticeFrameCount >= NOTICE_SWING_FRAMES) {
-                    f_NoticeStage = 1;
+                    f_NoticeStage = NOTICE_STAGE_SWINGING;
                 }
 
                 break;
-            case 1:
+            case NOTICE_STAGE_SWINGING:
                 f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
                 f_NoticeAngle += NOTICE_SWING_STEP;
                 if (f_NoticeFrameCount < NOTICE_DONE_FRAME) {
@@ -1379,7 +1388,7 @@ void StartResultsNotice(UnlockNoticeKind kind) {
         case UNLOCK_NOTICE_KIND_NONE:
             break;
         case UNLOCK_NOTICE_KIND_COURSE:
-            f_NoticeStage = 0;
+            f_NoticeStage = NOTICE_STAGE_SWINGING_IN;
             f_NoticeFrameCount = 0;
             f_NoticeSwing = SCREEN_WIDTH;
             f_CourseNoticeShift = 0;
@@ -1403,7 +1412,7 @@ void UpdateCourseResultsNotice(void) {
 
     f_NoticeFrameCount++;
     switch (f_NoticeStage) {
-        case 0:
+        case NOTICE_STAGE_SWINGING_IN:
             f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
             f_CourseNoticeShift = 0;
             f_NoticeAngle += NOTICE_SWING_STEP;
@@ -1412,11 +1421,11 @@ void UpdateCourseResultsNotice(void) {
             }
 
             if (f_NoticeFrameCount >= NOTICE_SWING_FRAMES) {
-                f_NoticeStage = 1;
+                f_NoticeStage = NOTICE_STAGE_SWINGING;
             }
 
             break;
-        case 1:
+        case NOTICE_STAGE_SWINGING:
             f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
             f_NoticeAngle += NOTICE_SWING_STEP;
             if (f_NoticeFrameCount >= NOTICE_DONE_FRAME) {
