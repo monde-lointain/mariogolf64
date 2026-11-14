@@ -1050,9 +1050,9 @@ static s32 f_MenuEmptyStarFrameAssets[STAR_FRAME_COUNT] = {
 s32 g_AnimatedIconFrameIndex = 0;
 u8 g_AnimatedIconBufferIndex = 0;
 s8 g_AnimatedIconFrameTime = 0;
-static s32 f_SpinningStarFrameIndex = 0;
+static s32 f_SpinningIconFrameIndex = 0;
 static u8 f_SpinningStarBufferIndex = 0;
-static s8 f_SpinningStarFrameTime = 0;
+static s8 f_SpinningIconFrameTime = 0;
 static u8 f_WavingToadImageIndex = 0;
 static s32 f_UnusedWordAfterToadImage UNUSED = 0;
 static s32 f_MiniGolfDiscFrame = MINI_GOLF_FACING_FRAME;
@@ -1642,9 +1642,9 @@ void UpdateMenus(void) {
                 OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
                 ReadEncodedAsset(g_SpinningBadgeImage, &asset);
                 LoadCourseMenuBuffer(g_MenuSpareImages[1], COURSE_MENU_BUFFER_LARGE_DIGITS);
-                f_SpinningStarFrameIndex = 0;
+                f_SpinningIconFrameIndex = 0;
                 f_SpinningStarBufferIndex = 0;
-                f_SpinningStarFrameTime = 0;
+                f_SpinningIconFrameTime = 0;
                 OpenEncodedAsset(f_MenuStarFrameAssets[g_AnimatedIconFrameIndex], &asset);
                 ReadEncodedAsset(g_MenuArrowSizedImages[0], &asset);
                 break;
@@ -1907,9 +1907,9 @@ void UpdateMenus(void) {
                     g_ImageSlots[f_ImageSlotIndex],
                     COURSE_MENU_BUFFER_LARGE_DIGITS
                 );
-                f_SpinningStarFrameIndex = 0;
+                f_SpinningIconFrameIndex = 0;
                 f_SpinningStarBufferIndex = 0;
-                f_SpinningStarFrameTime = 0;
+                f_SpinningIconFrameTime = 0;
                 f_UnusedSpinningStarCounter = 0;
                 f_MenuBoardImageIndex ^= 1;
                 LoadPlayerStatsBuffer(
@@ -1950,8 +1950,8 @@ void UpdateMenus(void) {
                 break;
 
             case MENU_SCREEN_COURSE_STATS:
-                f_SpinningStarFrameTime = 0;
-                f_SpinningStarFrameIndex = 0;
+                f_SpinningIconFrameTime = 0;
+                f_SpinningIconFrameIndex = 0;
                 if (g_IsDebugEnabled) {
                     ReadSavedGames();
                 }
@@ -2934,8 +2934,8 @@ void UpdateModeSelect(void) {
             if (g_ChosenPlayerCount == 1) {
                 g_AnimatedIconFrameTime = 0;
                 g_AnimatedIconFrameIndex = 0;
-                f_SpinningStarFrameTime = 0;
-                f_SpinningStarFrameIndex = 0;
+                f_SpinningIconFrameTime = 0;
+                f_SpinningIconFrameIndex = 0;
             }
         }
         else if (g_MenuRepeatButtons & R_JPAD) {
@@ -2948,8 +2948,8 @@ void UpdateModeSelect(void) {
             if (g_ChosenPlayerCount == 1) {
                 g_AnimatedIconFrameTime = 0;
                 g_AnimatedIconFrameIndex = 0;
-                f_SpinningStarFrameTime = 0;
-                f_SpinningStarFrameIndex = 0;
+                f_SpinningIconFrameTime = 0;
+                f_SpinningIconFrameIndex = 0;
             }
         }
     }
@@ -5357,8 +5357,7 @@ const char f_UnusedEmptyString[] = "";
 #define MAIN_CHOICE_LABEL_HEIGHT 20
 #define MAIN_CHOICE_LABEL_IMAGE_SIZE (MAIN_CHOICE_LABEL_WIDTH * MAIN_CHOICE_LABEL_HEIGHT / 2)
 
-#define ANIMATED_ICON_FRAME_COUNT 6
-#define ANIMATED_ICON_FRAME_DURATION 2
+#define SPINNING_ICON_FRAME_DURATION 2
 #define MODE_ICON_LEFT 168
 #define MODE_ICON_TOP 96
 
@@ -8711,7 +8710,7 @@ void DrawSpinningBadge(Gfx **displayListHead, void *image, s32 x, s32 y) {
     gDPPipeSync(gfx++);
     gDPLoadTextureTile_4b(
         gfx++,
-        TextureAddress(ImageTexels(image) + (f_SpinningStarFrameIndex * SPINNING_BADGE_FRAME_SIZE)),
+        TextureAddress(ImageTexels(image) + (f_SpinningIconFrameIndex * SPINNING_BADGE_FRAME_SIZE)),
         G_IM_FMT_CI,
         SPINNING_BADGE_SIZE,
         SPINNING_BADGE_SIZE,
@@ -8741,12 +8740,12 @@ void DrawSpinningBadge(Gfx **displayListHead, void *image, s32 x, s32 y) {
         TEXEL_STEP_ONE
     );
     gDPPipeSync(gfx++);
-    f_SpinningStarFrameTime++;
-    if (f_SpinningStarFrameTime == ANIMATED_ICON_FRAME_DURATION) {
-        f_SpinningStarFrameTime = 0;
-        f_SpinningStarFrameIndex++;
-        if (f_SpinningStarFrameIndex >= ANIMATED_ICON_FRAME_COUNT) {
-            f_SpinningStarFrameIndex = 0;
+    f_SpinningIconFrameTime++;
+    if (f_SpinningIconFrameTime == SPINNING_ICON_FRAME_DURATION) {
+        f_SpinningIconFrameTime = 0;
+        f_SpinningIconFrameIndex++;
+        if (f_SpinningIconFrameIndex >= SPINNING_BADGE_FRAME_COUNT) {
+            f_SpinningIconFrameIndex = 0;
         }
     }
 
@@ -8819,16 +8818,16 @@ void DrawSpinningStars(
         gDPPipeSync(gfx++);
     }
 
-    f_SpinningStarFrameTime++;
-    if (f_SpinningStarFrameTime == ANIMATED_ICON_FRAME_DURATION) {
-        f_SpinningStarFrameTime = 0;
-        f_SpinningStarFrameIndex++;
-        if (f_SpinningStarFrameIndex >= STAR_FRAME_COUNT) {
-            f_SpinningStarFrameIndex = 0;
+    f_SpinningIconFrameTime++;
+    if (f_SpinningIconFrameTime == SPINNING_ICON_FRAME_DURATION) {
+        f_SpinningIconFrameTime = 0;
+        f_SpinningIconFrameIndex++;
+        if (f_SpinningIconFrameIndex >= STAR_FRAME_COUNT) {
+            f_SpinningIconFrameIndex = 0;
         }
 
         f_SpinningStarBufferIndex = f_SpinningStarBufferIndex == 0;
-        OpenEncodedAsset(f_MenuStarFrameAssets[f_SpinningStarFrameIndex], &asset);
+        OpenEncodedAsset(f_MenuStarFrameAssets[f_SpinningIconFrameIndex], &asset);
         ReadEncodedAsset(g_MenuArrowSizedImages[f_SpinningStarBufferIndex], &asset);
     }
 
