@@ -2373,14 +2373,13 @@ Boolean IsNintendoClubTournament(void) {
     return g_IsNintendoClubTournament != 0;
 }
 
-#define FIRST_TOURNAMENT_NAME_MESSAGE 0x16F
 #define FIRST_COURSE_NAME_MESSAGE 0x1EB
 #define STROKE_PLAY_MESSAGE 0x9E
 #define SPEED_GOLF_MESSAGE 0x9D
 #define FIRST_MINI_GOLF_TITLE_MESSAGE 0xC7
 #define SECOND_MINI_GOLF_TITLE_MESSAGE 0xC8
 
-s32 GetClubTournamentNameMessage(void) {
+MessageId GetClubTournamentNameMessage(void) {
     s32 nameIndex;
 
     nameIndex = g_ClubTournamentNameIndex;
@@ -2388,10 +2387,10 @@ s32 GetClubTournamentNameMessage(void) {
         nameIndex = 0;
     }
 
-    return nameIndex + FIRST_TOURNAMENT_NAME_MESSAGE;
+    return nameIndex + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME;
 }
 
-s32 GetClubTournamentCourseMessage(void) {
+MessageId GetClubTournamentCourseMessage(void) {
     s32 courseIndex;
 
     courseIndex = GetClubTournamentCourse();
@@ -2421,8 +2420,8 @@ void CopyTournamentCode(u8 *destination) {
     }
 }
 
-s32 GetClubTournamentModeMessage(void) {
-    s32 messageId;
+MessageId GetClubTournamentModeMessage(void) {
+    MessageId messageId;
 
     switch (g_ClubTournamentRules.isSpeedGolf) {
         case 0:
@@ -2437,8 +2436,8 @@ s32 GetClubTournamentModeMessage(void) {
     return messageId;
 }
 
-s32 GetClubTournamentCourseTitleMessage(void) {
-    s32 messageId;
+MessageId GetClubTournamentCourseTitleMessage(void) {
+    MessageId messageId;
 
     if (g_ClubTournamentRules.courseIndex >= MINI_GOLF_COURSE_INDEX) {
         messageId = FIRST_MINI_GOLF_TITLE_MESSAGE;

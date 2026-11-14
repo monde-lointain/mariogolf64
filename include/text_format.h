@@ -3,6 +3,9 @@
 
 #include <ultra64.h>
 
+typedef s32 MessageId;
+#define NO_MESSAGE (-1)
+
 typedef s32 TextFlags;
 #define TEXT_FLAG_TYPED 0x01
 #define TEXT_FLAG_TYPING_SOUND 0x02
@@ -22,5 +25,6 @@ typedef s32 TextFlags;
 // Messages that more than one file shows.
 #define MESSAGE_FIRST_RING_SHOT_HOLE 0x4B
 #define MESSAGE_HOLE_NUMBER 0x76
+#define MESSAGE_FIRST_CLUB_TOURNAMENT_NAME 0x16F
 
 #endif

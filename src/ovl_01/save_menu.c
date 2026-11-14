@@ -1992,7 +1992,7 @@ const char f_SaveMenuNameFormat[] = "%s";
 #define SAVED_GAME_ARROW_Y 124
 #define SAVED_GAME_COURSE_X 110
 #define SAVED_GAME_COURSE_Y 187
-#define MESSAGE_FIRST_TOURNAMENT_COURSE 0x6F
+#define MESSAGE_FIRST_TOURNAMENT_NAME 0x6F
 #define FIRST_PEACHS_CASTLE_MINI_GOLF_COURSE (MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD)
 #define SAVED_GAME_HOLE_X 180
 #define SAVED_GAME_HOLE_Y 203
@@ -2390,7 +2390,7 @@ void DrawSavedGames(Gfx **displayListHead) {
                 SetTextSlot(
                     SAVED_GAME_COURSE_X,
                     SAVED_GAME_COURSE_Y,
-                    MESSAGE_FIRST_TOURNAMENT_COURSE + index,
+                    MESSAGE_FIRST_TOURNAMENT_NAME + index,
                     TEXT_SLOT_LARGE_FONT,
                     0,
                     0,

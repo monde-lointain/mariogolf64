@@ -14,11 +14,8 @@
 
 #define TEXT_SLOT_COUNT 12
 #define TEXT_SLOT_VALUE_COUNT 4
-#define NO_MESSAGE (-1)
 #define CLEARED_TEXT_X (SCREEN_WIDTH / 2)
 #define CLEARED_TEXT_Y 114
-
-typedef s32 MessageId;
 
 // Where one string sits in a table of u16 character codes.
 typedef struct TextSpan {

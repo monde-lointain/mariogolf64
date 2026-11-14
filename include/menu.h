@@ -10,6 +10,7 @@
 #include "password.h"
 #include "play_record.h"
 #include "player.h"
+#include "text_format.h"
 
 enum MenuScreen {
     MENU_SCREEN_TITLE,
@@ -235,10 +236,10 @@ extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT
 #define WHEEL_ARROW_Y 94
 
 s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing);
-s32 GetClubTournamentCourseTitleMessage(void);
+MessageId GetClubTournamentCourseTitleMessage(void);
 s32 GetClubTournamentGameMode(void);
-s32 GetClubTournamentModeMessage(void);
-s32 GetClubTournamentNameMessage(void);
+MessageId GetClubTournamentModeMessage(void);
+MessageId GetClubTournamentNameMessage(void);
 s32 GetClubTournamentNumber(void);
 s32 GetRingShotCourseOpenedAtStarCount(void);
 Boolean HasEveryRingShotStar(void);
