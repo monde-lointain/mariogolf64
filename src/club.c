@@ -4349,7 +4349,7 @@ void GetLieSpan(Club *club, Surface surface, s32 *lieSpan, ShotMode shotMode) {
     }
 }
 
-s32 StepToClubChoice(CurrentShot *targetShot) {
+Boolean StepToClubChoice(CurrentShot *targetShot) {
     Boolean hasStepped = FALSE;
     s32 clubSlot;
 

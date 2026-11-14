@@ -5,6 +5,7 @@
 
 #include "asset.h"
 #include "compiler.h"
+#include "language.h"
 #include "surface.h"
 
 enum ShotMode {
@@ -127,6 +128,6 @@ void GetSurfacePercentRange(SurfaceTraits *surfaceTraits, Club *club, s32 *range
 void GetLieSpan(Club *club, Surface surface, s32 *lieSpan, ShotMode shotMode);
 void UpdateClubControls(void);
 void UpdateShotModeControls(void);
-s32 StepToClubChoice(struct CurrentShot *targetShot);
+Boolean StepToClubChoice(struct CurrentShot *targetShot);
 
 #endif
