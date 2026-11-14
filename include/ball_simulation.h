@@ -155,6 +155,8 @@ typedef struct BallSimulation {
     s8 playerIndex;
     s8 stepFlags;
     Surface8 firstBounceSurface;
+    // A CUP_IN_SOUND state for BALL_SOUND_CUP_IN; whether the sound is
+    // playing for BALL_SOUND_ROLL.
     s8 soundStates[BALL_SOUND_COUNT];
     Boolean8 hasHitFlag;
     u8 previousStepFlags;

@@ -114,6 +114,8 @@ typedef struct Player {
     ClubIndex16 clubs[CLUB_SLOT_COUNT];
     u8 unusedAfterClubs[0x74 - 0x72];
     s32 stopwatchFrameCount;
+    // RING_STATE_NONE or RING_STATE_SHOWN, or once passed, a fade frame count
+    // from RING_STATE_PASSED up to RING_STATE_FADED.
     s8 ringStates[RING_COUNT];
     CButtonPalette8 paletteIndex;
     s8 gameBoyCharacterIndex;
