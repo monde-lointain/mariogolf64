@@ -149,7 +149,7 @@ typedef struct LakituVelocity {
 #define CONTACT_DROP_PER_PIN_SCALE 0.3f
 #define CONTACT_STYLE_SOUND_CHANNEL 15
 #define CONTACT_PUTT_Y (-2)
-#define BANNER_OVER_PAR_NUMBER (BANNER_STROKES_OVER_PAR + 1)
+#define BANNER_NUMBERED_OVER_PAR (BANNER_STROKES_OVER_PAR + 1)
 #define BANNER_LETTER_SPACING 32
 #define BANNER_Z (-300.0f)
 #define FLIP_MESSAGE_DEGREES_PER_FRAME 18.0f
@@ -539,9 +539,9 @@ void StartBanner(s32 banner) {
     f_BannerFrame = 0;
     if (banner > BANNER_STROKES_OVER_PAR) {
         f_BannerNumber = banner - BANNER_STROKES_OVER_PAR;
-        f_CurrentBanner = BANNER_OVER_PAR_NUMBER;
-        if (f_LoadedBanner < BANNER_OVER_PAR_NUMBER || f_LoadedBanner == BANNER_NONE) {
-            OpenEncodedAsset(f_Banners[BANNER_OVER_PAR_NUMBER].imageAsset, &asset);
+        f_CurrentBanner = BANNER_NUMBERED_OVER_PAR;
+        if (f_LoadedBanner < BANNER_NUMBERED_OVER_PAR || f_LoadedBanner == BANNER_NONE) {
+            OpenEncodedAsset(f_Banners[BANNER_NUMBERED_OVER_PAR].imageAsset, &asset);
             ReadEncodedAsset(f_MovieBuffer, &asset);
         }
 
@@ -580,7 +580,7 @@ void StartBanner(s32 banner) {
         }
     }
 
-    if ((f_LoadedBanner != f_CurrentBanner && f_CurrentBanner < BANNER_OVER_PAR_NUMBER) ||
+    if ((f_LoadedBanner != f_CurrentBanner && f_CurrentBanner < BANNER_NUMBERED_OVER_PAR) ||
         f_LoadedBanner == BANNER_NONE) {
         OpenEncodedAsset(f_Banners[f_CurrentBanner].imageAsset, &asset);
         ReadEncodedAsset(f_MovieBuffer, &asset);
@@ -892,7 +892,7 @@ void DrawBanner(Gfx **displayListHead) {
             break;
     }
 
-    if (f_CurrentBanner < BANNER_OVER_PAR_NUMBER) {
+    if (f_CurrentBanner < BANNER_NUMBERED_OVER_PAR) {
         for (letterIndex = 0; letterIndex != f_Banners[f_CurrentBanner].letterCount;
             letterIndex++) {
             f_ActiveBannerLetters[letterIndex].x =
@@ -1009,7 +1009,7 @@ void DrawBanner(Gfx **displayListHead) {
         PhysicalAddress(&g_ScreenOrthoMatrix),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
     );
-    if (f_CurrentBanner < BANNER_OVER_PAR_NUMBER) {
+    if (f_CurrentBanner < BANNER_NUMBERED_OVER_PAR) {
         DrawBannerLetters(&gfx);
         DrawLetterBannerExtras(&gfx);
     }
