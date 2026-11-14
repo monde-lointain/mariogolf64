@@ -39,8 +39,8 @@
 s8 g_IsModuleAlive[MODULE_COUNT];
 s32 g_ModuleRdpRequestFrames[MODULE_COUNT];
 
-static s8 f_UnusedModuleIds[] UNUSED = {0x00, MODULE_ID_END};
-static s8 f_PlayModuleIds[] = {
+static ModuleId8 f_UnusedModuleIds[] UNUSED = {0x00, MODULE_ID_END};
+static ModuleId8 f_PlayModuleIds[] = {
     MODULE_ROUND_RESULTS,
     MODULE_WIND_BOO,
     MODULE_GOLF_BALLS,
@@ -54,24 +54,25 @@ static s8 f_PlayModuleIds[] = {
     MODULE_CLUB_PANEL,
     MODULE_ID_END,
 };
-static s8 f_MenuModuleIds[] = {MODULE_MENU, MODULE_ID_END};
-static s8 f_HoleBuilderModuleIds[] =
+static ModuleId8 f_MenuModuleIds[] = {MODULE_MENU, MODULE_ID_END};
+static ModuleId8 f_HoleBuilderModuleIds[] =
     {MODULE_HOLE_BUILDER, MODULE_UNUSED_HOLE_BUILDER, MODULE_ID_END};
-static s8 f_ComputerGolferModuleIds[] = {MODULE_COMPUTER_GOLFER, MODULE_ID_END};
-static s8 f_ShotSimulationModuleIds[] = {MODULE_SHOT_SIMULATION, MODULE_ID_END};
-static s8 f_OpeningModuleIds[] =
+static ModuleId8 f_ComputerGolferModuleIds[] = {MODULE_COMPUTER_GOLFER, MODULE_ID_END};
+static ModuleId8 f_ShotSimulationModuleIds[] = {MODULE_SHOT_SIMULATION, MODULE_ID_END};
+static ModuleId8 f_OpeningModuleIds[] =
     {MODULE_OPENING, MODULE_UNUSED_OPENING_A, MODULE_UNUSED_OPENING_B, MODULE_ID_END};
-static s8 f_TitleScreenModuleIds[] =
+static ModuleId8 f_TitleScreenModuleIds[] =
     {MODULE_TITLE_SCREEN, MODULE_UNUSED_TITLE_SCREEN, MODULE_ID_END};
-static s8 f_BootLogosModuleIds[] = {MODULE_BOOT_LOGOS, MODULE_ID_END};
-static s8 f_ConfirmWaitModuleIds[] = {MODULE_CONFIRM_WAIT, MODULE_ID_END};
-static s8 f_ScorecardModuleIds[] = {MODULE_SCORECARD, MODULE_UNUSED_SCORECARD, MODULE_ID_END};
-static s8 f_ClubSlotsModuleIds[] = {MODULE_CLUB_SLOTS, MODULE_ID_END};
-static s8 f_CourseSelectModuleIds[] = {MODULE_COURSE_SELECT, MODULE_ID_END};
-static s8 f_SaveMenuModuleIds[] = {MODULE_SAVE_MENU, MODULE_ID_END};
-static s8 f_TransmitModuleIds[] =
+static ModuleId8 f_BootLogosModuleIds[] = {MODULE_BOOT_LOGOS, MODULE_ID_END};
+static ModuleId8 f_ConfirmWaitModuleIds[] = {MODULE_CONFIRM_WAIT, MODULE_ID_END};
+static ModuleId8 f_ScorecardModuleIds[] =
+    {MODULE_SCORECARD, MODULE_UNUSED_SCORECARD, MODULE_ID_END};
+static ModuleId8 f_ClubSlotsModuleIds[] = {MODULE_CLUB_SLOTS, MODULE_ID_END};
+static ModuleId8 f_CourseSelectModuleIds[] = {MODULE_COURSE_SELECT, MODULE_ID_END};
+static ModuleId8 f_SaveMenuModuleIds[] = {MODULE_SAVE_MENU, MODULE_ID_END};
+static ModuleId8 f_TransmitModuleIds[] =
     {MODULE_TRANSMIT, MODULE_UNUSED_TRANSMIT_A, MODULE_UNUSED_TRANSMIT_B, MODULE_ID_END};
-static s8 f_StaffRollModuleIds[] = {MODULE_STAFF_ROLL, MODULE_ID_END};
+static ModuleId8 f_StaffRollModuleIds[] = {MODULE_STAFF_ROLL, MODULE_ID_END};
 
 static Overlay f_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_00, f_PlayModuleIds, NULL, NULL),
@@ -105,13 +106,13 @@ void LoadOpeningResources(void) {
     LoadOpening();
 }
 
-s32 GetOverlayOfModule(s32 moduleId) {
+s32 GetOverlayOfModule(ModuleId moduleId) {
     return f_OverlayIndexOfModule[moduleId] | OVERLAY_ID_BASE;
 }
 
 void InitOverlayManager(void) {
     s32 i;
-    s8 *moduleIds;
+    ModuleId8 *moduleIds;
     s32 moduleIndex;
 
     for (i = 0; i < MODULE_COUNT; i++) {
@@ -156,7 +157,7 @@ Boolean CanLoadOverlay(s32 overlayId) {
     s32 overlayIndex = GetOverlayIndex(overlayId);
     u32 otherOverlayIndex;
     s32 moduleIndex;
-    s8 *moduleIds;
+    ModuleId8 *moduleIds;
 
     if (f_Overlays[overlayIndex].isLoaded) {
         if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
@@ -217,7 +218,7 @@ Boolean CanLoadOverlay(s32 overlayId) {
 
 s32 LoadOverlay(s32 overlayId) {
     Overlay *overlay;
-    s8 *moduleIds;
+    ModuleId8 *moduleIds;
     s32 moduleIndex;
 
     if (CanLoadOverlay(overlayId)) {
@@ -262,7 +263,7 @@ s32 LoadOverlay(s32 overlayId) {
 void UnloadOverlay(s32 overlayId) {
     Overlay *overlay;
     s32 moduleIndex;
-    s8 *moduleIds;
+    ModuleId8 *moduleIds;
 
     overlayId = GetOverlayIndex(overlayId);
     // overlayId now holds the overlay's index; a separate local breaks the match.
@@ -293,7 +294,7 @@ void UnloadOverlay(s32 overlayId) {
     }
 }
 
-s32 ReportModuleNotAlive(s32 moduleId UNUSED) {
+s32 ReportModuleNotAlive(ModuleId moduleId UNUSED) {
     if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
         osSyncPrintf("Module %d not alive !!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     }

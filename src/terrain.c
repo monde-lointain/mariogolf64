@@ -155,13 +155,13 @@ static u8 f_UnusedBytesAfterTerrainBlockCount[16] UNUSED = {
 };
 /* clang-format on */
 
-s32 g_Scene = SCENE_FLAG_PANEL;
-s32 g_NextScene = SCENE_SWAPPING_MODULES;
-static s32 f_SceneBeforeFlags = SCENE_BOOT_LOGOS;
-s32 g_SceneModuleToUnload = MODULE_BOOT_LOGOS;
-s32 g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
-s32 g_SubModuleId = MODULE_SCORECARD;
-s32 g_PendingSubModuleId = MODULE_SCORECARD;
+Scene g_Scene = SCENE_FLAG_PANEL;
+Scene g_NextScene = SCENE_SWAPPING_MODULES;
+static Scene f_SceneBeforeFlagPanel = SCENE_BOOT_LOGOS;
+ModuleId g_SceneModuleToUnload = MODULE_BOOT_LOGOS;
+ModuleId g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
+ModuleId g_SubModuleId = MODULE_SCORECARD;
+ModuleId g_PendingSubModuleId = MODULE_SCORECARD;
 s32 g_SubModuleState = SUB_MODULE_UNLOADED;
 static TerrainColor f_TerrainColors[TERRAIN_COLOR_COUNT] = {
     {0x05, 0x19, 0x00, 1},
@@ -192,7 +192,7 @@ static AnimatedBox f_SceneMenuBox = {
     BOX_CLOSED,
     0,
 };
-static s32 f_SceneMenuScenes[SCENE_MENU_LENGTH] = {
+static Scene f_SceneMenuScenes[SCENE_MENU_LENGTH] = {
     SCENE_PLAY_HOLE,
     SCENE_GROUND_CAMERA,
     SCENE_HEIGHTS,
@@ -1274,7 +1274,7 @@ void UpdateFlagPanel(void) {
     }
 }
 
-const char *GetDebugSceneLabel(u32 scene) {
+const char *GetDebugSceneLabel(Scene scene) {
     switch (scene) {
         case SCENE_FLAG_PANEL:
             return "FLAGS ";
@@ -1526,14 +1526,14 @@ void UpdateDebugScenes(void) {
 
         if (g_Scene == SCENE_FLAG_PANEL) {
             ClearDebugText();
-            g_Scene = f_SceneBeforeFlags;
+            g_Scene = f_SceneBeforeFlagPanel;
             InitClubs();
             if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
                 nuContRmbMgrRemove();
             }
         }
         else {
-            f_SceneBeforeFlags = g_Scene;
+            f_SceneBeforeFlagPanel = g_Scene;
             g_Scene = SCENE_FLAG_PANEL;
         }
 

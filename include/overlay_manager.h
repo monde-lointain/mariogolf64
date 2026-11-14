@@ -45,9 +45,13 @@ enum ModuleId {
     MODULE_UNUSED_TRANSMIT_B
 };
 
+typedef s32 ModuleId;
+// A ModuleId in a byte, as the overlays' module lists keep it.
+typedef s8 ModuleId8;
+
 typedef struct Overlay {
     Boolean8 isLoaded;
-    s8 *moduleIds;
+    ModuleId8 *moduleIds;
     u32 romStart;
     u32 romEnd;
     u8 *vramStart;
@@ -60,13 +64,13 @@ typedef struct Overlay {
 
 void LoadSceneryResources(void);
 void LoadOpeningResources(void);
-s32 GetOverlayOfModule(s32 moduleId);
+s32 GetOverlayOfModule(ModuleId moduleId);
 void InitOverlayManager(void);
 s32 GetOverlayIndex(s32 overlayId);
 Boolean CanLoadOverlay(s32 overlayId);
 s32 LoadOverlay(s32 overlayId);
 void UnloadOverlay(s32 overlayId);
-s32 ReportModuleNotAlive(s32 moduleId);
+s32 ReportModuleNotAlive(ModuleId moduleId);
 
 extern s8 g_IsModuleAlive[MODULE_COUNT];
 extern s32 g_ModuleRdpRequestFrames[MODULE_COUNT];

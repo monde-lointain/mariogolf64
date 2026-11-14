@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "language.h"
+#include "overlay_manager.h"
 
 enum Scene {
     SCENE_MAP_OVERVIEW = 0,
@@ -35,6 +36,8 @@ enum Scene {
     SCENE_STAFF_ROLL = 30
 };
 
+typedef s32 Scene;
+
 #define IsGroundEditorScene(scene) ((scene) == SCENE_CELL_EDITOR || (scene) == SCENE_POINT_EDITOR)
 
 enum SubModuleState {
@@ -43,12 +46,12 @@ enum SubModuleState {
     SUB_MODULE_UNLOADED = -1
 };
 
-extern s32 g_Scene;
-extern s32 g_NextScene;
-extern s32 g_SceneModuleToUnload;
-extern s32 g_SceneModuleToLoad;
-extern s32 g_SubModuleId;
-extern s32 g_PendingSubModuleId;
+extern Scene g_Scene;
+extern Scene g_NextScene;
+extern ModuleId g_SceneModuleToUnload;
+extern ModuleId g_SceneModuleToLoad;
+extern ModuleId g_SubModuleId;
+extern ModuleId g_PendingSubModuleId;
 extern s32 g_SubModuleState;
 
 enum GameMode {
