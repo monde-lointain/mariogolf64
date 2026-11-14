@@ -173,6 +173,7 @@ typedef struct AnimationEvent {
 
 typedef struct AnimationEventAction {
     AnimationEventKind8 kind;
+    // The value of the AnimationEvent it acts on.
     u8 value;
 } AnimationEventAction;
 
