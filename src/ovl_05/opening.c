@@ -91,35 +91,48 @@ typedef struct OpeningNameLogo {
 #define NAME_LOGO_FLIP_UP 20
 #define NAME_LOGO_STILL 30
 
-#define OPENING_CUE_MARIO_TEE_SHOT 0
-#define OPENING_CUE_PEACH_CHEER 1
-#define OPENING_CUE_LUIGI_CHEER 2
-#define OPENING_CUE_PEACH_TEE_SHOT 4
-#define OPENING_CUE_PLUM_CHEER 5
-#define OPENING_CUE_PLUM_TEE_SHOT 7
-#define OPENING_CUE_MARIO_CHEER 8
-#define OPENING_CUE_LUIGI_TEE_SHOT 9
-#define OPENING_CUE_PEACH_PLUM_WALK 11
-#define OPENING_CUE_MARIO_LUIGI_WALK 12
-#define OPENING_CUE_MARIO_REACH_BALL 13
-#define OPENING_CUE_PEACH_WAVE 14
-#define OPENING_CUE_PEACH_APPROACH 15
-#define OPENING_CUE_BALL_INSPECTION 17
-#define OPENING_CUE_MARIO_LOOK_UP 18
-#define OPENING_CUE_FREEZE 19
-#define OPENING_CUE_UNFREEZE 20
-#define OPENING_CUE_BABY_MARIO_ARRIVAL 21
-#define OPENING_CUE_BABY_MARIO_RIDE 22
-#define OPENING_CUE_MARIO_PUZZLED 23
-#define OPENING_CUE_CLEAR_CHARACTERS 24
-#define OPENING_CUE_LUIGI_SEARCH 25
-#define OPENING_CUE_TOAD_FLAG 26
-#define OPENING_CUE_LUIGI_DISMAY 27
-#define OPENING_CUE_GATHERING 28
-#define OPENING_CUE_COUNT 29
-#define OPENING_CUE_INVALID 29
-#define OPENING_CUES_FINISHED 30
-#define OPENING_CUE_DONE 31
+enum OpeningCue {
+    OPENING_CUE_MARIO_TEE_SHOT,
+    OPENING_CUE_PEACH_CHEER,
+    OPENING_CUE_LUIGI_CHEER,
+    OPENING_CUE_PEACH_TEE_SHOT = 4,
+    OPENING_CUE_PLUM_CHEER,
+    OPENING_CUE_PLUM_TEE_SHOT = 7,
+    OPENING_CUE_MARIO_CHEER,
+    OPENING_CUE_LUIGI_TEE_SHOT,
+    OPENING_CUE_PEACH_PLUM_WALK = 11,
+    OPENING_CUE_MARIO_LUIGI_WALK,
+    OPENING_CUE_MARIO_REACH_BALL,
+    OPENING_CUE_PEACH_WAVE,
+    OPENING_CUE_PEACH_APPROACH,
+    OPENING_CUE_BALL_INSPECTION = 17,
+    OPENING_CUE_MARIO_LOOK_UP,
+    OPENING_CUE_FREEZE,
+    OPENING_CUE_UNFREEZE,
+    OPENING_CUE_BABY_MARIO_ARRIVAL,
+    OPENING_CUE_BABY_MARIO_RIDE,
+    OPENING_CUE_MARIO_PUZZLED,
+    OPENING_CUE_CLEAR_CHARACTERS,
+    OPENING_CUE_LUIGI_SEARCH,
+    OPENING_CUE_TOAD_FLAG,
+    OPENING_CUE_LUIGI_DISMAY,
+    OPENING_CUE_GATHERING,
+    OPENING_CUE_COUNT,
+    OPENING_CUE_INVALID = 29,
+    OPENING_CUES_FINISHED,
+    OPENING_CUE_DONE
+};
+
+typedef s32 OpeningCue;
+
+enum LookAtEase {
+    LOOK_AT_EASE_NONE,
+    LOOK_AT_EASE_FAST,
+    LOOK_AT_EASE_SLOW,
+    LOOK_AT_EASE_SPEEDING_UP
+};
+
+typedef s32 LookAtEase;
 
 #define LAKITU_IMAGE_BUFFER_SIZE 0x608
 #define LAKITU_TRAIL_IMAGE_BUFFER_SIZE 0xC08
@@ -307,7 +320,7 @@ static OpeningNameLogo f_OpeningNameLogos[OPENING_NAME_LOGO_COUNT] = {
 static Boolean f_AreImpactLinesShown = FALSE;
 static Boolean f_IsBurstShown = FALSE;
 static s32 f_ShotBallScale = 0;
-static s32 f_LookAtEaseMode = 0;
+static LookAtEase f_LookAtEaseMode = LOOK_AT_EASE_NONE;
 static s32 f_UnusedWordAfterEaseMode UNUSED = 0;
 static OpeningBallState f_OpeningBallStates[OPENING_BALL_SLOT_COUNT] = {
     OPENING_BALL_HIDDEN,
@@ -619,7 +632,7 @@ static void *f_OpeningBillboardHeap;
 static Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT][OPENING_SHOT_DASH_COUNT_MAX];
 
 CameraEditor g_CameraEditor;
-s32 f_OpeningCue;
+OpeningCue f_OpeningCue;
 BallSimulation f_OpeningShotSimulation;
 
 void AdvanceOpeningSoundChannel(void) {
@@ -1633,7 +1646,7 @@ void UpdateOpening(void) {
                 }
 
                 if (f_OpeningSceneFramesLeft == 0) {
-                    f_LookAtEaseMode = 1;
+                    f_LookAtEaseMode = LOOK_AT_EASE_FAST;
                     f_OpeningSceneFramesLeft = 50;
                     f_OpeningScene++;
                 }
@@ -1650,7 +1663,7 @@ void UpdateOpening(void) {
             case OPENING_SCENE_PEACH_DRIVE:
                 PlaceEditorCamera(957.619f, -131.446f, 4629.353f, 973.561f, -133.0f, 4671.789f);
                 f_OpeningCue = OPENING_CUE_PEACH_TEE_SHOT;
-                f_LookAtEaseMode = 0;
+                f_LookAtEaseMode = LOOK_AT_EASE_NONE;
                 f_OpeningSceneFramesLeft = 100;
                 f_OpeningShotState = 0;
                 f_OpeningShotSimulation.position[AXIS_X] = 0xF1882;
@@ -1775,7 +1788,7 @@ void UpdateOpening(void) {
                         4540.245f
                     );
                     f_ShotBallScale = 1;
-                    f_LookAtEaseMode = 1;
+                    f_LookAtEaseMode = LOOK_AT_EASE_FAST;
                     f_OpeningSceneFramesLeft = 70;
                     f_OpeningScene++;
                     AdvanceOpeningSoundChannel();
@@ -1796,7 +1809,7 @@ void UpdateOpening(void) {
                 f_OpeningScene++;
                 LoadNameLogo(3, 0);
                 f_OpeningShotState = 0;
-                f_LookAtEaseMode = 0;
+                f_LookAtEaseMode = LOOK_AT_EASE_NONE;
                 f_OpeningShotSimulation.position[AXIS_X] = 0xF3930;
                 f_OpeningShotSimulation.position[AXIS_Z] = 0x48D1D1;
                 f_OpeningShotSimulation.position[AXIS_Y] = GetGroundHeight(0xF3930, 0x48D1D1);
@@ -1976,7 +1989,7 @@ void UpdateOpening(void) {
                         f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE,
                         f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE
                     );
-                    f_LookAtEaseMode = 2;
+                    f_LookAtEaseMode = LOOK_AT_EASE_SLOW;
                     f_OpeningSceneFramesLeft = 140;
                     f_IsNameSlotShown[0] = FALSE;
                     f_OpeningScene++;
@@ -2034,7 +2047,7 @@ void UpdateOpening(void) {
 
                 if (f_OpeningSceneFramesLeft == 0) {
                     f_OpeningScene = OPENING_SCENE_PEACH_PLUM_WALK;
-                    f_LookAtEaseMode = 0;
+                    f_LookAtEaseMode = LOOK_AT_EASE_NONE;
                 }
 
                 break;
@@ -2459,7 +2472,7 @@ void UpdateOpening(void) {
                     f_OpeningCue = OPENING_CUE_UNFREEZE;
                     f_OpeningSceneFramesLeft = 120;
                     f_OpeningScene = OPENING_SCENE_BABY_MARIO_ARRIVAL;
-                    f_LookAtEaseMode = 3;
+                    f_LookAtEaseMode = LOOK_AT_EASE_SPEEDING_UP;
                 }
 
                 break;
@@ -2531,7 +2544,7 @@ void UpdateOpening(void) {
                     f_OpeningBallStates[1] = OPENING_BALL_HIDDEN;
                     f_IsLogoBallSlot[1] = FALSE;
                     f_ShotBallScale = 0;
-                    f_LookAtEaseMode = 0;
+                    f_LookAtEaseMode = LOOK_AT_EASE_NONE;
                     PlaySound(SOUND_LOOK_AT_CUP, f_OpeningSoundChannel, 0x50);
                     AdvanceOpeningSoundChannel();
                 }
@@ -3204,7 +3217,7 @@ void UpdateOpening(void) {
                 PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
                 SetGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
                 f_IsLookAtMarkerShown = TRUE;
-                f_LookAtEaseMode = 0;
+                f_LookAtEaseMode = LOOK_AT_EASE_NONE;
             }
 
             if (g_IsDebugEnabled &&
@@ -5042,10 +5055,6 @@ void DrawOpeningShotBall(Gfx **displayListHead) {
         *displayListHead = gfx;
     }
 }
-
-#define LOOK_AT_EASE_FAST 1
-#define LOOK_AT_EASE_SLOW 2
-#define LOOK_AT_EASE_SPEEDING_UP 3
 
 void EaseOpeningLookAt(void) {
     switch (f_LookAtEaseMode) {
