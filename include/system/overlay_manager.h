@@ -61,6 +61,9 @@ typedef struct Overlay {
     void (*onUnload)(void);
 } Overlay;
 
+extern Boolean8 g_IsModuleAlive[MODULE_COUNT];
+extern s32 g_ModuleRdpRequestFrames[MODULE_COUNT];
+
 void LoadSceneryResources(void);
 void LoadOpeningResources(void);
 s32 GetOverlayOfModule(ModuleId moduleId);
@@ -70,8 +73,5 @@ Boolean CanLoadOverlay(s32 overlayId);
 Boolean LoadOverlay(s32 overlayId);
 void UnloadOverlay(s32 overlayId);
 Boolean ReportModuleNotAlive(ModuleId moduleId);
-
-extern Boolean8 g_IsModuleAlive[MODULE_COUNT];
-extern s32 g_ModuleRdpRequestFrames[MODULE_COUNT];
 
 #endif

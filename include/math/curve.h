@@ -13,10 +13,11 @@ typedef struct PathPoint {
     f32 z;
 } PathPoint;
 
-void DrawNothing(Gfx **displayListHead);
+void ResetPath(void);
 s32 StepAlongPath(PathPoint *points, s32 pointCount, s32 pace, PathPoint *position);
 
 f32 InterpolateHermite(f32 values[], f32 position);
-void ResetPath(void);
+
+void DrawNothing(Gfx **displayListHead);
 
 #endif

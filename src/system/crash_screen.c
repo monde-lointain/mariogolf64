@@ -19,6 +19,8 @@
 
 #define FAULT_THREAD_STACK_SIZE 0x2000
 
+#define PrintFaultMessage(column, row) PrintMessage((s8 *)f_FaultText, (column), (row))
+
 typedef struct RegisterFieldValue {
     u32 mask;
     u32 value;
@@ -33,19 +35,17 @@ static u8 f_FaultThreadStack[FAULT_THREAD_STACK_SIZE] UNUSED;
 
 static OSMesgQueue f_FaultMessageQueue;
 
-OSThread *__osGetCurrFaultedThread(void);
-void RunFaultThread(void *arg);
-void PrintFaultContext(OSThread *thread);
-void PrintRegisterFields(u32 registerValue, char *name, RegisterFieldValue *fields);
-
 FILE_STATIC char f_FaultText[FAULT_TEXT_SIZE];
-
-#define PrintFaultMessage(column, row) PrintMessage((s8 *)f_FaultText, (column), (row))
 
 static s32 f_UnusedFaultContextValue = 0;
 static s32 f_FaultTextRow = 7;
 
 const char g_EmptyString[] = "";
+
+OSThread *__osGetCurrFaultedThread(void);
+void RunFaultThread(void *arg);
+void PrintFaultContext(OSThread *thread);
+void PrintRegisterFields(u32 registerValue, char *name, RegisterFieldValue *fields);
 
 void RunBootHook(void) {
     if (FALSE) {

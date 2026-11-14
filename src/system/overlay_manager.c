@@ -22,6 +22,8 @@
 
 #define RDP_REQUEST_FRAMES_IN_USE 2
 
+#define NO_OVERLAY (-1)
+
 #define BASE_RDRAM_SIZE 0x400000
 
 #define OVERLAY_ENTRY(name, moduleIds, onLoad, onUnload) \
@@ -93,8 +95,6 @@ static Overlay f_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_13, f_TransmitModuleIds, LoadTransmitMenu, FreeTransmitMenu),
     OVERLAY_ENTRY(ovl_14, f_StaffRollModuleIds, LoadStaffRoll, FreeStaffRoll),
 };
-
-#define NO_OVERLAY (-1)
 
 static s8 f_OverlayIndexOfModule[MODULE_COUNT];
 

@@ -39,6 +39,9 @@
 
 #define FramebufferAddress(index) \
     ((u16 *)(BASE_RDRAM_END - ((FRAMEBUFFER_COUNT - (index)) * FRAMEBUFFER_SIZE)))
+#define GameFlagByte(flag) (f_GameFlagBits[(flag) / GAME_FLAGS_PER_BYTE])
+#define GameFlagMask(flag) (0x80 >> ((flag) % GAME_FLAGS_PER_BYTE))
+#define GameFlagClearMask(flag) (0xFF7F >> ((flag) % GAME_FLAGS_PER_BYTE))
 
 enum CharacterSlotRole {
     CHARACTER_SLOT_PARTNER = 1,
@@ -118,9 +121,6 @@ ControllerState g_TurnController;
 
 FILE_STATIC volatile MainLoopState g_MainLoopState;
 FILE_STATIC u8 f_GameFlagBits[GAME_FLAG_BYTE_COUNT];
-#define GameFlagByte(flag) (f_GameFlagBits[(flag) / GAME_FLAGS_PER_BYTE])
-#define GameFlagMask(flag) (0x80 >> ((flag) % GAME_FLAGS_PER_BYTE))
-#define GameFlagClearMask(flag) (0xFF7F >> ((flag) % GAME_FLAGS_PER_BYTE))
 FILE_STATIC NUContData g_PreviousMenuControllerData[MAXCONTROLLERS];
 FILE_STATIC u8 g_ConnectedControllerBits;
 

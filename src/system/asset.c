@@ -30,21 +30,33 @@
         } \
     }
 
+#define ASSET_TABLE ((AssetTableEntry *)g_AssetArchiveRomStart)
+
 typedef struct AssetTableEntry {
     s32 size;
     u32 offset;
 } AssetTableEntry;
 
-extern u8 g_AssetArchiveRomStart[];
+typedef struct ChunkReader {
+    u8 rawChunk[ASSET_CHUNK_SIZE + 0x10];
+    s32 position;
+    u32 remaining;
+} ChunkReader;
 
-#define ASSET_TABLE ((AssetTableEntry *)g_AssetArchiveRomStart)
+typedef struct LargeChunkReader {
+    u8 rawChunk[ASSET_CHUNK_SIZE + 0x20];
+    s32 position;
+    u32 remaining;
+} LargeChunkReader;
+
+extern u8 g_AssetArchiveRomStart[];
 static AssetFile f_AssetFilePool[ASSET_FILE_POOL_SIZE];
 static u8 f_UnusedBufferAfterAssetFilePool[0x40] UNUSED;
 
+FILE_STATIC WideAssetId f_LastOpenedAssetId;
+
 void DecodeByteRuns(u8 *buffer, EncodedAsset *asset);
 void DecodeHalfwordRuns(u8 *buffer, EncodedAsset *asset);
-
-FILE_STATIC WideAssetId f_LastOpenedAssetId;
 
 void InitAssetFiles(void) {
     s32 index;
@@ -137,18 +149,6 @@ void ReadEncodedAsset(void *buffer, EncodedAsset *asset) {
         DecodeHalfwordRuns(buffer, asset);
     }
 }
-
-typedef struct ChunkReader {
-    u8 rawChunk[ASSET_CHUNK_SIZE + 0x10];
-    s32 position;
-    u32 remaining;
-} ChunkReader;
-
-typedef struct LargeChunkReader {
-    u8 rawChunk[ASSET_CHUNK_SIZE + 0x20];
-    s32 position;
-    u32 remaining;
-} LargeChunkReader;
 
 void DecodeByteRuns(u8 *buffer, EncodedAsset *asset) {
     ChunkReader reader;
