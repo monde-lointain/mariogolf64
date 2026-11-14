@@ -2191,7 +2191,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
     s32 i;
     s32 rank;
     s32 place;
-    s32 course;
+    s32 courseIndex;
     s32 top;
     s32 trophyHeight;
 
@@ -2437,27 +2437,27 @@ void DrawResultsBanner(Gfx **displayListHead) {
     );
     DrawLargeTextSlot(&gfx, BANNER_TEXT_SLOT);
     if (f_BannerKind == BANNER_KIND_TOURNAMENT_PLACE) {
-        course = g_GameState.courseIndex;
+        courseIndex = g_GameState.courseIndex;
         if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
             EncodedAsset asset;
 
             f_TrophyShineFrame = (f_TrophyShineFrame + 1) % TROPHY_SHINE_CYCLE;
             if (f_TallySpeed == FAST_TALLY_SPEED) {
                 f_TrophyFrame++;
-                if (f_TrophyFrame == f_TrophyAssets[course].frameCount) {
+                if (f_TrophyFrame == f_TrophyAssets[courseIndex].frameCount) {
                     f_TrophyFrame = 0;
                 }
 
-                OpenEncodedAsset(f_TrophyAssets[course].image + f_TrophyFrame, &asset);
+                OpenEncodedAsset(f_TrophyAssets[courseIndex].image + f_TrophyFrame, &asset);
                 ReadEncodedAsset(f_TrophyImage, &asset);
             }
             else if (f_TrophyShineFrame % TROPHY_FRAME_TICKS == 0) {
                 f_TrophyFrame++;
-                if (f_TrophyFrame == f_TrophyAssets[course].frameCount) {
+                if (f_TrophyFrame == f_TrophyAssets[courseIndex].frameCount) {
                     f_TrophyFrame = 0;
                 }
 
-                OpenEncodedAsset(f_TrophyAssets[course].image + f_TrophyFrame, &asset);
+                OpenEncodedAsset(f_TrophyAssets[courseIndex].image + f_TrophyFrame, &asset);
                 ReadEncodedAsset(f_TrophyImage, &asset);
             }
 
@@ -2467,24 +2467,24 @@ void DrawResultsBanner(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
             gDPSetTextureFilter(gfx++, G_TF_POINT);
             LoadLargePalette(&gfx, f_TrophyPalette);
-            top = -f_TrophySizes[course][TROPHY_PART_HEIGHTS] -
-                f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
+            top = -f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS] -
+                f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS + 1];
             for (i = 0; i != TROPHY_PART_COUNT; i++) {
                 gDPLoadTextureTile(
                     gfx++,
                     TextureAddress(
                         (u32)f_TrophyImage +
-                        (i * f_TrophySizes[course][TROPHY_WIDTH] *
-                            f_TrophySizes[course][TROPHY_PART_HEIGHTS])
+                        (i * f_TrophySizes[courseIndex][TROPHY_WIDTH] *
+                            f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS])
                     ),
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
-                    f_TrophySizes[course][TROPHY_WIDTH],
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + i],
+                    f_TrophySizes[courseIndex][TROPHY_WIDTH],
+                    f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS + i],
                     0,
                     0,
-                    f_TrophySizes[course][TROPHY_WIDTH] - 1,
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1,
+                    f_TrophySizes[courseIndex][TROPHY_WIDTH] - 1,
+                    f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS + i] - 1,
                     0,
                     0,
                     0,
@@ -2496,14 +2496,14 @@ void DrawResultsBanner(Gfx **displayListHead) {
                 DrawTextureRect(
                     &gfx,
                     QuarterPixels(
-                        TROPHY_CENTER_X + f_BannerX - (f_TrophySizes[course][TROPHY_WIDTH] / 2)
+                        TROPHY_CENTER_X + f_BannerX - (f_TrophySizes[courseIndex][TROPHY_WIDTH] / 2)
                     ),
                     QuarterPixels(top + TROPHY_BOTTOM),
                     QuarterPixels(
-                        TROPHY_CENTER_X + f_BannerX + (f_TrophySizes[course][TROPHY_WIDTH] / 2)
+                        TROPHY_CENTER_X + f_BannerX + (f_TrophySizes[courseIndex][TROPHY_WIDTH] / 2)
                     ),
                     QuarterPixels(
-                        TROPHY_BOTTOM + top + f_TrophySizes[course][TROPHY_PART_HEIGHTS + i]
+                        TROPHY_BOTTOM + top + f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS + i]
                     ),
                     G_TX_RENDERTILE,
                     0,
@@ -2511,7 +2511,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                     TEXEL_STEP_ONE,
                     TEXEL_STEP_ONE
                 );
-                top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
+                top += f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS + i];
             }
 
             gDPPipeSync(gfx++);
@@ -2542,24 +2542,24 @@ void DrawResultsBanner(Gfx **displayListHead) {
                 GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
                 G_RM_AA_ZB_TEX_EDGE2
             );
-            top = -f_TrophySizes[course][TROPHY_PART_HEIGHTS] -
-                f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
+            top = -f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS] -
+                f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS + 1];
             for (i = 0; i != TROPHY_PART_COUNT; i++) {
                 gDPLoadTextureTile(
                     gfx++,
                     TextureAddress(
                         (u32)f_TrophyImage +
-                        (i * f_TrophySizes[course][TROPHY_WIDTH] *
-                            f_TrophySizes[course][TROPHY_PART_HEIGHTS])
+                        (i * f_TrophySizes[courseIndex][TROPHY_WIDTH] *
+                            f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS])
                     ),
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
-                    f_TrophySizes[course][TROPHY_WIDTH],
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + i],
+                    f_TrophySizes[courseIndex][TROPHY_WIDTH],
+                    f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS + i],
                     0,
                     0,
-                    f_TrophySizes[course][TROPHY_WIDTH] - 1,
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1,
+                    f_TrophySizes[courseIndex][TROPHY_WIDTH] - 1,
+                    f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS + i] - 1,
                     0,
                     0,
                     0,
@@ -2571,14 +2571,14 @@ void DrawResultsBanner(Gfx **displayListHead) {
                 DrawTextureRect(
                     &gfx,
                     QuarterPixels(
-                        TROPHY_CENTER_X + f_BannerX - (f_TrophySizes[course][TROPHY_WIDTH] / 2)
+                        TROPHY_CENTER_X + f_BannerX - (f_TrophySizes[courseIndex][TROPHY_WIDTH] / 2)
                     ),
                     QuarterPixels(top + TROPHY_BOTTOM),
                     QuarterPixels(
-                        TROPHY_CENTER_X + f_BannerX + (f_TrophySizes[course][TROPHY_WIDTH] / 2)
+                        TROPHY_CENTER_X + f_BannerX + (f_TrophySizes[courseIndex][TROPHY_WIDTH] / 2)
                     ),
                     QuarterPixels(
-                        TROPHY_BOTTOM + top + f_TrophySizes[course][TROPHY_PART_HEIGHTS + i]
+                        TROPHY_BOTTOM + top + f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS + i]
                     ),
                     G_TX_RENDERTILE,
                     0,
@@ -2586,7 +2586,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                     TEXEL_STEP_ONE,
                     TEXEL_STEP_ONE
                 );
-                top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
+                top += f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS + i];
             }
 
             gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
@@ -2645,20 +2645,22 @@ void DrawResultsBanner(Gfx **displayListHead) {
 
             if (f_TrophyShineFrame >= TROPHY_SHINE_START) {
                 if (f_TrophyShineFrame < TROPHY_SHINE_CYCLE) {
-                    trophyHeight = f_TrophySizes[course][TROPHY_PART_HEIGHTS] +
-                        f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
+                    trophyHeight = f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS] +
+                        f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS + 1];
                     DrawTextureRect(
                         &gfx,
                         QuarterPixels(
-                            TROPHY_CENTER_X + f_BannerX - (f_TrophySizes[course][TROPHY_WIDTH] / 2)
+                            TROPHY_CENTER_X + f_BannerX -
+                            (f_TrophySizes[courseIndex][TROPHY_WIDTH] / 2)
                         ),
                         QuarterPixels(TROPHY_BOTTOM - trophyHeight),
                         QuarterPixels(
-                            TROPHY_CENTER_X + f_BannerX + (f_TrophySizes[course][TROPHY_WIDTH] / 2)
+                            TROPHY_CENTER_X + f_BannerX +
+                            (f_TrophySizes[courseIndex][TROPHY_WIDTH] / 2)
                         ),
                         QuarterPixels(
                             TROPHY_BOTTOM - trophyHeight +
-                            f_TrophySizes[course][TROPHY_SHINE_HEIGHT]
+                            f_TrophySizes[courseIndex][TROPHY_SHINE_HEIGHT]
                         ),
                         G_TX_RENDERTILE,
                         TexelCoordinate(
