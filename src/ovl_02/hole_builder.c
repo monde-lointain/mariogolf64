@@ -14,6 +14,7 @@
 #include "geometry.h"
 #include "hole_conditions.h"
 #include "hole_loader.h"
+#include "hole_setup.h"
 #include "hole_triangles.h"
 #include "host_file.h"
 #include "language.h"

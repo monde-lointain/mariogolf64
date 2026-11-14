@@ -14,6 +14,7 @@
 #include "game_state.h"
 #include "geometry.h"
 #include "heap.h"
+#include "hole_setup.h"
 #include "host_file.h"
 #include "language.h"
 #include "main.h"

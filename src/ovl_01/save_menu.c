@@ -1,6 +1,8 @@
 #include <string.h>
 #include <ultra64.h>
 
+#include "hole_setup.h"
+
 #define WIDENS_FACE_DRAW_MODE
 
 #include "address.h"

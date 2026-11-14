@@ -36,6 +36,7 @@
 #include "hole_display.h"
 #include "hole_intro.h"
 #include "hole_loader.h"
+#include "hole_setup.h"
 #include "language.h"
 #include "main.h"
 #include "math_util.h"

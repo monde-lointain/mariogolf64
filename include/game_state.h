@@ -5,8 +5,6 @@
 
 #include "bets.h"
 #include "course.h"
-#include "course_space.h"
-#include "hole_conditions.h"
 #include "language.h"
 #include "player.h"
 #include "scene.h"
@@ -74,17 +72,6 @@ typedef struct GameState {
     s8 saveCount;
     s16 carriedPots[CARRIED_POT_COUNT];
 } GameState;
-
-typedef struct HoleSetup {
-    CoursePoint cupPosition;
-    CoursePoint teePosition;
-    HoleConditions conditions;
-    s8 par;
-    s8 nextCupIndex;
-    u8 unusedAfterNextCup[0x34 - 0x2E];
-} HoleSetup;
-
-extern HoleSetup g_HoleSetup;
 
 extern GameState g_GameState;
 

@@ -6,9 +6,9 @@
 #include "asset.h"
 #include "compiler.h"
 #include "game.h"
-#include "game_state.h"
 #include "gbi_helpers.h"
 #include "hole_display.h"
+#include "hole_setup.h"
 #include "language.h"
 #include "play.h"
 

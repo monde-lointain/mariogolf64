@@ -22,6 +22,7 @@
 #include "hole_builder.h"
 #include "hole_editor.h"
 #include "hole_loader.h"
+#include "hole_setup.h"
 #include "hole_triangles.h"
 #include "language.h"
 #include "main.h"

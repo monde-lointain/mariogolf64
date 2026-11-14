@@ -1,5 +1,7 @@
 #include "game.h"
 
+#include "hole_setup.h"
+
 #define READS_LOADER_FLAG_VOLATILE
 #define READS_CURRENT_SHOT_VOLATILE
 

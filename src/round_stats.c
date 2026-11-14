@@ -9,6 +9,7 @@
 #include "course_stats.h"
 #include "debug_text.h"
 #include "game_state.h"
+#include "hole_setup.h"
 #include "language.h"
 #include "player.h"
 #include "round_hud.h"

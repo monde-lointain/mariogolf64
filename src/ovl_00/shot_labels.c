@@ -2,6 +2,8 @@
 
 #include <ultra64.h>
 
+#include "hole_setup.h"
+
 #define CALLS_CENTERED_SHADOWED_TEXT_UNPROTOTYPED
 
 #include "address.h"

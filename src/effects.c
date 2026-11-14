@@ -21,6 +21,7 @@
 #include "geometry.h"
 #include "heap.h"
 #include "hole_conditions.h"
+#include "hole_setup.h"
 #include "language.h"
 #include "math_util.h"
 #include "player.h"

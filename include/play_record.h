@@ -5,10 +5,12 @@
 
 #include "character.h"
 #include "club.h"
-#include "game_state.h"
+#include "course.h"
+#include "hole_setup.h"
 #include "language.h"
 #include "math_util.h"
 #include "player.h"
+#include "scene.h"
 
 typedef struct RecordedShot {
     BinaryAngle heading;
