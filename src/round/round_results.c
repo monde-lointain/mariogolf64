@@ -3,12 +3,10 @@
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "awards.h"
 #include "characters/character.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
 #include "course/course.h"
-#include "course_stats.h"
 #include "debug_text.h"
 #include "game_flags.h"
 #include "math/math_util.h"
@@ -22,7 +20,9 @@
 #include "round/scorecard.h"
 #include "round/scoring.h"
 #include "round/tournament.h"
-#include "save.h"
+#include "save/awards.h"
+#include "save/course_stats.h"
+#include "save/save.h"
 #include "scene.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"

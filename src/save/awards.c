@@ -1,14 +1,14 @@
-#include "awards.h"
+#include "save/awards.h"
 
 #include <ultra64.h>
 
 #include "course/course.h"
-#include "course_stats.h"
 #include "round/game_state.h"
 #include "round/round_stats.h"
 #include "round/scoring.h"
 #include "round/tournament.h"
-#include "save.h"
+#include "save/course_stats.h"
+#include "save/save.h"
 #include "scene.h"
 #include "shot/particle_effects.h"
 #include "system/c_language.h"

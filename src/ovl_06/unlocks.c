@@ -5,10 +5,10 @@
 #include "audio/sound.h"
 #include "characters/character.h"
 #include "course/course.h"
-#include "course_stats.h"
 #include "menu.h"
-#include "save.h"
-#include "sram.h"
+#include "save/course_stats.h"
+#include "save/save.h"
+#include "save/sram.h"
 
 #define GRANTED_WIN_ROW_COUNT 14
 #define GRANTED_CLEAR_CHARACTER_COUNT 13

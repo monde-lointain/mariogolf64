@@ -4,7 +4,6 @@
 
 #include "course/course.h"
 #include "course/hole_setup.h"
-#include "course_stats.h"
 #include "debug_text.h"
 #include "round/bets.h"
 #include "round/game_state.h"
@@ -13,7 +12,8 @@
 #include "round/round_stats.h"
 #include "round/scorecard.h"
 #include "round/scoring.h"
-#include "save.h"
+#include "save/course_stats.h"
+#include "save/save.h"
 #include "scene.h"
 #include "shot/club.h"
 #include "system/c_language.h"

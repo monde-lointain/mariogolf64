@@ -6,7 +6,6 @@
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "awards.h"
 #include "camera/camera.h"
 #include "camera/shot_camera.h"
 #include "camera/view_projection.h"
@@ -30,7 +29,6 @@
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "menu.h"
-#include "play_record.h"
 #include "round/club_slots.h"
 #include "round/game_state.h"
 #include "round/movie.h"
@@ -45,7 +43,9 @@
 #include "round/scoring.h"
 #include "round/tournament.h"
 #include "round/turn.h"
-#include "save.h"
+#include "save/awards.h"
+#include "save/play_record.h"
+#include "save/save.h"
 #include "scene.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
