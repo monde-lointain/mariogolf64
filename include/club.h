@@ -78,6 +78,12 @@ typedef s32 ClubSurfaceMask;
 #define FAIRWAY_WOOD_SURFACES (~(CLUB_SURFACE_GREEN | CLUB_SURFACE_ROUGH | CLUB_SURFACE_BUNKER))
 #define IRON_SURFACES (~CLUB_SURFACE_GREEN)
 
+// How well a club plays from a lie, from LIE_RATING_MIN to LIE_RATING_MAX,
+// or NO_LIE_RATING for a putter.
+typedef s32 LieRating;
+
+#define NO_LIE_RATING 0
+#define LIE_RATING_MIN 1
 #define LIE_RATING_MAX 5
 
 typedef struct ClubParameters {
@@ -132,7 +138,7 @@ s32 GetSelectedShotDistance(void);
 s32 GetSelectedShotWorldDistance(void);
 ClubSurfaceMask GetSurfaceClubMask(Boolean distinguishesKinds, SurfaceTraits *surfaceTraits);
 ClubSurfaceMask GetCurrentSurfaceClubMask(Boolean distinguishesKinds);
-s32 GetLieRating(Club *club, Surface surface, ShotMode shotMode);
+LieRating GetLieRating(Club *club, Surface surface, ShotMode shotMode);
 void GetSurfacePercentRange(SurfaceTraits *surfaceTraits, Club *club, s32 *range);
 void GetLieSpan(Club *club, Surface surface, s32 *lieSpan, ShotMode shotMode);
 void UpdateClubControls(void);

@@ -1452,8 +1452,8 @@ void ChooseStartingClub(HoleSetup *hole) {
     s32 clubCount;
     s32 cupDistance;
     s32 clubSlot;
-    s32 rating;
-    s32 lieRating;
+    LieRating rating;
+    LieRating lieRating;
     Club *club;
 
     g_CurrentShot.clubSlot = 0;
@@ -1497,9 +1497,9 @@ void ChooseStartingClub(HoleSetup *hole) {
         }
     }
     else {
-        s32 ratingMin = 0;
+        LieRating ratingMin = NO_LIE_RATING;
         s32 bestGap = S32_MAX;
-        s32 reaches = FALSE;
+        Boolean reaches = FALSE;
         s32 bestSlot = 0;
         s32 distance;
         s32 gap;

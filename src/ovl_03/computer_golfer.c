@@ -2483,7 +2483,6 @@ s32 FindClubSlot(s32 unused UNUSED, ClubType clubType) {
     return 0;
 }
 
-#define WORST_LIE_RATING 1
 #define RAINY_DISTANCE_FRACTION 0.95f
 
 ClubType ChooseClubForDistance(s32 distance) {
@@ -2492,7 +2491,7 @@ ClubType ChooseClubForDistance(s32 distance) {
     s32 clubSlot;
     Club *club;
     s32 carry;
-    s32 rating;
+    LieRating rating;
 
     for (clubType = CLUB_TYPE_SAND_WEDGE; clubType >= 0; clubType--) {
         clubSlot = FindClubSlot(f_Shot.playerIndex, clubType);
@@ -2510,7 +2509,7 @@ ClubType ChooseClubForDistance(s32 distance) {
         carry = carry * GetSurfaceTraits(f_Shot.surface)->percentMin / FULL_PERCENT;
         rating = GetLieRating(club, f_Shot.surface, SHOT_MODE_NORMAL);
         if (ShotGolferTraits().clubBoldness < BOLD_CLUB_CHOICE) {
-            if (rating == WORST_LIE_RATING) {
+            if (rating == LIE_RATING_MIN) {
                 continue;
             }
         }

@@ -4250,10 +4250,10 @@ static const char f_CartWayLieRatings[LIE_RATING_LENGTH + 1] = "1112223333344";
 static const char f_CartWayApproachLieRatings[LIE_RATING_LENGTH + 1] = "2223333333444";
 static const char f_DefaultLieRatings[LIE_RATING_LENGTH + 1] = "3333333333333";
 
-s32 GetLieRating(Club *club, Surface surface, ShotMode shotMode) {
+LieRating GetLieRating(Club *club, Surface surface, ShotMode shotMode) {
     const char *ratings;
     const char *approachRatings;
-    s32 rating;
+    LieRating rating;
 
     switch (GetSurfaceTraits(surface)->kind) {
         case SURFACE_KIND_TEE_UP:
@@ -4321,8 +4321,8 @@ s32 GetLieRating(Club *club, Surface surface, ShotMode shotMode) {
         }
 
         rating = ((rating * club->lieRatingPercent) + 50) / 100;
-        if (rating <= 0) {
-            rating = 1;
+        if (rating <= NO_LIE_RATING) {
+            rating = LIE_RATING_MIN;
         }
 
         if (rating > LIE_RATING_MAX) {
@@ -4330,16 +4330,16 @@ s32 GetLieRating(Club *club, Surface surface, ShotMode shotMode) {
         }
     }
     else {
-        rating = 0;
+        rating = NO_LIE_RATING;
     }
 
     return rating;
 }
 
 void GetLieSpan(Club *club, Surface surface, s32 *lieSpan, ShotMode shotMode) {
-    s32 rating = GetLieRating(club, surface, shotMode);
+    LieRating rating = GetLieRating(club, surface, shotMode);
 
-    if (rating > 0) {
+    if (rating > NO_LIE_RATING) {
         lieSpan[0] = (rating * 2) - 1;
         lieSpan[1] = rating - 1;
     }
