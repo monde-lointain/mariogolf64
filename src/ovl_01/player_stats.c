@@ -2931,7 +2931,7 @@ void LoadBestShotFaces(void) {
     s32 index;
     s32 row;
     s32 column;
-    s32 paletteIndex;
+    CButtonPalette paletteIndex;
     CharacterIndex characterIndex;
 
     for (index = 0; index != CHARACTER_COUNT; index++) {
@@ -2953,8 +2953,8 @@ void LoadBestShotFaces(void) {
                     characterIndex = CHARACTER_COUNT - 1;
                 }
 
-                if (paletteIndex < 0) {
-                    paletteIndex = 0;
+                if (paletteIndex < UP_C_PALETTE) {
+                    paletteIndex = UP_C_PALETTE;
                 }
 
                 if (paletteIndex >= CHARACTER_PALETTE_COUNT) {

@@ -121,7 +121,7 @@ void LoadRoundHud(void);
 void DrawInsetViewFrame(void);
 void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices);
 void DrawHoleIntroImages(Gfx **displayListHead);
-void LoadPlayerFace(s32 playerIndex, CharacterIndex characterIndex, s32 paletteIndex);
+void LoadPlayerFace(s32 playerIndex, CharacterIndex characterIndex, CButtonPalette paletteIndex);
 void StopHoleIntro(void);
 void DrawColorTest(Gfx **displayListHead);
 void StartHoleIntro(void);

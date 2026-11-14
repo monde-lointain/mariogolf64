@@ -4485,7 +4485,7 @@ void UpdateTurns(void) {
             }
             case PLAYER_STATE_STARTING_REACTION: {
                 CharacterIndex characterIndex;
-                s32 paletteIndex;
+                CButtonPalette paletteIndex;
                 ReactionAnimation reaction;
 
                 if (IsCharacterSlotBusy(0)) {
@@ -4504,7 +4504,7 @@ void UpdateTurns(void) {
                 ClearShotEffects(CLEAR_KIND_EFFECTS);
                 StopFlightCamera();
                 if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) && f_HasReactionTestRun) {
-                    paletteIndex = 0;
+                    paletteIndex = UP_C_PALETTE;
                     LoadCharacter(0, f_ReactionTestCharacter + CHARACTER_COUNT, paletteIndex);
                 }
                 else {

@@ -6155,7 +6155,7 @@ void DrawMenuCharacters(Gfx **displayListHead) {
     s32 column;
     s32 layout;
     CharacterIndex characterIndex;
-    s32 paletteIndex;
+    CButtonPalette paletteIndex;
     s32 raise;
     u16 slot;
     Vec3 translation;
@@ -6236,7 +6236,7 @@ void DrawMenuCharacters(Gfx **displayListHead) {
 
         if (IsRivalSlot(characterCount, rival, slot)) {
             characterIndex = rival;
-            paletteIndex = 1;
+            paletteIndex = LEFT_C_PALETTE;
         }
         else {
             characterIndex = g_Players[slot].characterIndex;
