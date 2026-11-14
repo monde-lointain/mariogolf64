@@ -8909,8 +8909,8 @@ void DrawMenuRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY) {
             growHeight = 0;
         }
 
-        left = starPositions[holeIndex][0] * RING_SHOT_STAR_RADIUS;
-        top = starPositions[holeIndex][1] * RING_SHOT_STAR_RADIUS;
+        left = starPositions[holeIndex][AXIS_X] * RING_SHOT_STAR_RADIUS;
+        top = starPositions[holeIndex][AXIS_Y] * RING_SHOT_STAR_RADIUS;
         left += centerX - (RING_SHOT_STAR_WIDTH / 2);
         top += centerY - (RING_SHOT_STAR_HEIGHT / 2);
 

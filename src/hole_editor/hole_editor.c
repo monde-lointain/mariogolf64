@@ -989,15 +989,20 @@ void UpdateHolePointEditor(void) {
     Boolean isStepping;
     f64 cameraDistance;
 
-    sprintf(text, "X:%d Z:%d             ", (int)f_HolePointCursor[0], (int)f_HolePointCursor[1]);
+    sprintf(
+        text,
+        "X:%d Z:%d             ",
+        (int)f_HolePointCursor[GROUND_AXIS_X],
+        (int)f_HolePointCursor[GROUND_AXIS_Z]
+    );
     PrintDebugText(text, CURSOR_TEXT_COLUMN, CURSOR_TEXT_ROW);
     g_ShowsGroundWaves = FALSE;
     isStepping = FALSE;
     if (f_HolePointEditMode == HOLE_POINT_MODE_UNSET) {
         f_HolePointEditMode = HOLE_POINT_MODE_PIN_TEE;
-        f_HolePointCursor[0] =
+        f_HolePointCursor[GROUND_AXIS_X] =
             g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-        f_HolePointCursor[1] =
+        f_HolePointCursor[GROUND_AXIS_Z] =
             g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
     }
 
@@ -1009,25 +1014,25 @@ void UpdateHolePointEditor(void) {
         }
 
         if (f_HolePointEditMode == HOLE_POINT_MODE_PIN_TEE) {
-            f_HolePointCursor[0] =
+            f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-            f_HolePointCursor[1] =
+            f_HolePointCursor[GROUND_AXIS_Z] =
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
             f_AimPointIndex = 0;
             f_RoutePointIndex = 0;
         }
 
         if (f_HolePointEditMode == HOLE_POINT_MODE_AIM) {
-            f_HolePointCursor[0] =
+            f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-            f_HolePointCursor[1] =
+            f_HolePointCursor[GROUND_AXIS_Z] =
                 g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
         if (f_HolePointEditMode == HOLE_POINT_MODE_ROUTE) {
-            f_HolePointCursor[0] =
+            f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-            f_HolePointCursor[1] =
+            f_HolePointCursor[GROUND_AXIS_Z] =
                 g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
     }
@@ -1040,34 +1045,34 @@ void UpdateHolePointEditor(void) {
         }
 
         if (f_HolePointEditMode == HOLE_POINT_MODE_PIN_TEE) {
-            f_HolePointCursor[0] =
+            f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-            f_HolePointCursor[1] =
+            f_HolePointCursor[GROUND_AXIS_Z] =
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
             f_AimPointIndex = 0;
             f_RoutePointIndex = 0;
         }
 
         if (f_HolePointEditMode == HOLE_POINT_MODE_AIM) {
-            f_HolePointCursor[0] =
+            f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-            f_HolePointCursor[1] =
+            f_HolePointCursor[GROUND_AXIS_Z] =
                 g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
         if (f_HolePointEditMode == HOLE_POINT_MODE_ROUTE) {
-            f_HolePointCursor[0] =
+            f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-            f_HolePointCursor[1] =
+            f_HolePointCursor[GROUND_AXIS_Z] =
                 g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
     }
 
     if (f_HolePointEditMode == HOLE_POINT_MODE_PIN_TEE) {
         if (g_MenuControllerData[EDITOR_CONTROLLER].button & A_BUTTON) {
-            g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] = f_HolePointCursor[0]
+            g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] = f_HolePointCursor[GROUND_AXIS_X]
                 << WORLD_TO_COURSE_SHIFT;
-            g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] = f_HolePointCursor[1]
+            g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] = f_HolePointCursor[GROUND_AXIS_Z]
                 << WORLD_TO_COURSE_SHIFT;
             g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Y] = GetGroundHeight(
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X],
@@ -1091,9 +1096,9 @@ void UpdateHolePointEditor(void) {
         }
 
         if (g_MenuControllerData[EDITOR_CONTROLLER].button & B_BUTTON) {
-            g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X] = f_HolePointCursor[0]
+            g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X] = f_HolePointCursor[GROUND_AXIS_X]
                 << WORLD_TO_COURSE_SHIFT;
-            g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z] = f_HolePointCursor[1]
+            g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z] = f_HolePointCursor[GROUND_AXIS_Z]
                 << WORLD_TO_COURSE_SHIFT;
             g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Y] = GetGroundHeight(
                 g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X],
@@ -1123,8 +1128,8 @@ void UpdateHolePointEditor(void) {
             g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X] = 0;
             g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Y] = 0;
             g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z] = 0;
-            f_HolePointCursor[0] = 0;
-            f_HolePointCursor[1] = 0;
+            f_HolePointCursor[GROUND_AXIS_X] = 0;
+            f_HolePointCursor[GROUND_AXIS_Z] = 0;
         }
 
         if (g_MenuControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) {
@@ -1133,9 +1138,9 @@ void UpdateHolePointEditor(void) {
                 f_PinTeeIndex = 0;
             }
 
-            f_HolePointCursor[0] =
+            f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-            f_HolePointCursor[1] =
+            f_HolePointCursor[GROUND_AXIS_Z] =
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
@@ -1145,16 +1150,16 @@ void UpdateHolePointEditor(void) {
                 f_PinTeeIndex = CUP_POSITION_COUNT - 1;
             }
 
-            f_HolePointCursor[0] =
+            f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-            f_HolePointCursor[1] =
+            f_HolePointCursor[GROUND_AXIS_Z] =
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
         if (g_MenuControllerData[EDITOR_CONTROLLER].button & START_BUTTON) {
-            f_HolePointCursor[0] =
+            f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-            f_HolePointCursor[1] =
+            f_HolePointCursor[GROUND_AXIS_Z] =
                 g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
@@ -1164,9 +1169,9 @@ void UpdateHolePointEditor(void) {
 
     if (f_HolePointEditMode == HOLE_POINT_MODE_AIM) {
         if (g_MenuControllerData[EDITOR_CONTROLLER].button & A_BUTTON) {
-            g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X] = f_HolePointCursor[0]
+            g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X] = f_HolePointCursor[GROUND_AXIS_X]
                 << WORLD_TO_COURSE_SHIFT;
-            g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z] = f_HolePointCursor[1]
+            g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z] = f_HolePointCursor[GROUND_AXIS_Z]
                 << WORLD_TO_COURSE_SHIFT;
             g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Y] = GetGroundHeight(
                 g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X],
@@ -1188,8 +1193,8 @@ void UpdateHolePointEditor(void) {
             g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X] = 0;
             g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Y] = 0;
             g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z] = 0;
-            f_HolePointCursor[0] = 0;
-            f_HolePointCursor[1] = 0;
+            f_HolePointCursor[GROUND_AXIS_X] = 0;
+            f_HolePointCursor[GROUND_AXIS_Z] = 0;
         }
 
         if (g_MenuControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) {
@@ -1198,9 +1203,9 @@ void UpdateHolePointEditor(void) {
                 f_AimPointIndex = 0;
             }
 
-            f_HolePointCursor[0] =
+            f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-            f_HolePointCursor[1] =
+            f_HolePointCursor[GROUND_AXIS_Z] =
                 g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
@@ -1210,9 +1215,9 @@ void UpdateHolePointEditor(void) {
                 f_AimPointIndex = ARRAY_COUNT(g_HolePoints.aimPoints) - 1;
             }
 
-            f_HolePointCursor[0] =
+            f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-            f_HolePointCursor[1] =
+            f_HolePointCursor[GROUND_AXIS_Z] =
                 g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
@@ -1222,9 +1227,9 @@ void UpdateHolePointEditor(void) {
 
     if (f_HolePointEditMode == HOLE_POINT_MODE_ROUTE) {
         if (g_MenuControllerData[EDITOR_CONTROLLER].button & A_BUTTON) {
-            g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] = f_HolePointCursor[0]
+            g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] = f_HolePointCursor[GROUND_AXIS_X]
                 << WORLD_TO_COURSE_SHIFT;
-            g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] = f_HolePointCursor[1]
+            g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] = f_HolePointCursor[GROUND_AXIS_Z]
                 << WORLD_TO_COURSE_SHIFT;
             g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Y] = GetGroundHeight(
                 g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X],
@@ -1246,8 +1251,8 @@ void UpdateHolePointEditor(void) {
             g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] = 0;
             g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Y] = 0;
             g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] = 0;
-            f_HolePointCursor[0] = 0;
-            f_HolePointCursor[1] = 0;
+            f_HolePointCursor[GROUND_AXIS_X] = 0;
+            f_HolePointCursor[GROUND_AXIS_Z] = 0;
         }
 
         if (g_MenuControllerData[EDITOR_CONTROLLER].button & U_CBUTTONS) {
@@ -1256,9 +1261,9 @@ void UpdateHolePointEditor(void) {
                 f_RoutePointIndex = 0;
             }
 
-            f_HolePointCursor[0] =
+            f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-            f_HolePointCursor[1] =
+            f_HolePointCursor[GROUND_AXIS_Z] =
                 g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
@@ -1268,9 +1273,9 @@ void UpdateHolePointEditor(void) {
                 f_RoutePointIndex = ROUTE_POINT_COUNT - 1;
             }
 
-            f_HolePointCursor[0] =
+            f_HolePointCursor[GROUND_AXIS_X] =
                 g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
-            f_HolePointCursor[1] =
+            f_HolePointCursor[GROUND_AXIS_Z] =
                 g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
         }
 
@@ -1284,8 +1289,8 @@ void UpdateHolePointEditor(void) {
                 (sin(HEADING_RADIANS) * g_MenuControllerData[EDITOR_CONTROLLER].stick_x);
             stepZ = (-sin(HEADING_RADIANS) * g_MenuControllerData[EDITOR_CONTROLLER].stick_y) +
                 (cos(HEADING_RADIANS) * g_MenuControllerData[EDITOR_CONTROLLER].stick_x);
-            f_HolePointCursor[0] += stepX;
-            f_HolePointCursor[1] += stepZ;
+            f_HolePointCursor[GROUND_AXIS_X] += stepX;
+            f_HolePointCursor[GROUND_AXIS_Z] += stepZ;
         }
         else {
             if (g_MenuControllerData[EDITOR_CONTROLLER].button & U_JPAD) {
@@ -1313,8 +1318,8 @@ void UpdateHolePointEditor(void) {
             }
 
             if (isStepping) {
-                f_HolePointCursor[0] += stepX;
-                f_HolePointCursor[1] += stepZ;
+                f_HolePointCursor[GROUND_AXIS_X] += stepX;
+                f_HolePointCursor[GROUND_AXIS_Z] += stepZ;
             }
         }
     }
@@ -1350,11 +1355,11 @@ void UpdateHolePointEditor(void) {
     }
 
     f_HolePointCameraYaw = f_HolePointCameraYawAngle * EDITOR_ANGLE_TO_RADIANS;
-    g_MapCamera.view.lookAt[AXIS_X] = f_HolePointCursor[0];
-    g_MapCamera.view.lookAt[AXIS_Z] = f_HolePointCursor[1];
+    g_MapCamera.view.lookAt[AXIS_X] = f_HolePointCursor[GROUND_AXIS_X];
+    g_MapCamera.view.lookAt[AXIS_Z] = f_HolePointCursor[GROUND_AXIS_Z];
     g_MapCamera.view.lookAt[AXIS_Y] = GetGroundHeight(
-                                          f_HolePointCursor[0] << WORLD_TO_COURSE_SHIFT,
-                                          f_HolePointCursor[1] << WORLD_TO_COURSE_SHIFT
+                                          f_HolePointCursor[GROUND_AXIS_X] << WORLD_TO_COURSE_SHIFT,
+                                          f_HolePointCursor[GROUND_AXIS_Z] << WORLD_TO_COURSE_SHIFT
                                       ) *
         (1.0f / (1 << WORLD_TO_COURSE_SHIFT));
     cameraDistance = EDITOR_CAMERA_DISTANCE;
@@ -2882,16 +2887,16 @@ void ShapeGroundFromCodes(void) {
                     z = row * VERTEX_UNITS_PER_CODE;
                     for (treeIndex = 0; treeIndex < treeCount; treeIndex++) {
                         if (IntLength2D(
-                                x - treePositions[treeIndex][0],
-                                z - treePositions[treeIndex][1]
+                                x - treePositions[treeIndex][GROUND_AXIS_X],
+                                z - treePositions[treeIndex][GROUND_AXIS_Z]
                             ) < TREE_SPACING) {
                             break;
                         }
                     }
 
                     if (treeIndex == treeCount) {
-                        treePositions[treeCount][0] = x;
-                        treePositions[treeCount][1] = z;
+                        treePositions[treeCount][GROUND_AXIS_X] = x;
+                        treePositions[treeCount][GROUND_AXIS_Z] = z;
                         treeCount++;
 
                         if (treeCount == BILLBOARD_COUNT) {
@@ -2920,12 +2925,12 @@ PLANTED:
     for (billboardIndex = 0; billboardIndex < treeCount; billboardIndex++) {
         g_Billboards[billboardIndex].y =
             (GetGroundHeight(
-                 treePositions[billboardIndex][0] << WORLD_TO_COURSE_SHIFT,
-                 treePositions[billboardIndex][1] << WORLD_TO_COURSE_SHIFT
+                 treePositions[billboardIndex][GROUND_AXIS_X] << WORLD_TO_COURSE_SHIFT,
+                 treePositions[billboardIndex][GROUND_AXIS_Z] << WORLD_TO_COURSE_SHIFT
              ) / (1 << WORLD_TO_COURSE_SHIFT)) +
             1;
-        g_Billboards[billboardIndex].x = treePositions[billboardIndex][0];
-        g_Billboards[billboardIndex].z = treePositions[billboardIndex][1];
+        g_Billboards[billboardIndex].x = treePositions[billboardIndex][GROUND_AXIS_X];
+        g_Billboards[billboardIndex].z = treePositions[billboardIndex][GROUND_AXIS_Z];
         g_Billboards[billboardIndex].textureIndex = TREE_TEXTURE_INDEX;
         g_Billboards[billboardIndex].shapeIndex = 0;
         g_Billboards[billboardIndex].isNearCourseEdge = TREE_NEAR_EDGE;

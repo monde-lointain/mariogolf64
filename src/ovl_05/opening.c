@@ -4507,15 +4507,15 @@ void LoadLakitu(void) {
         for (segmentIndex = 0; segmentIndex < LAKITU_TRAIL_SEGMENT_COUNT; segmentIndex++) {
             guTranslate(
                 &f_LakituTrailMatrices[segmentIndex],
-                f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2),
-                (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1],
+                f_LakituScreenPoint[AXIS_X] - (SCREEN_WIDTH / 2),
+                (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[AXIS_Y],
                 -LAKITU_TRAIL_DEPTH
             );
         }
     }
 
-    f_LakituTrailStart[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH;
-    f_LakituTrailStart[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
+    f_LakituTrailStart[AXIS_X] = f_LakituScreenPoint[AXIS_X] - SCREEN_WIDTH;
+    f_LakituTrailStart[AXIS_Y] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[AXIS_Y];
 }
 
 #define LAKITU_IMAGE_SIZE 32
@@ -4574,10 +4574,10 @@ void DrawLakitu(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(
             gfx++,
-            QuarterPixels(f_LakituScreenPoint[0] - (LAKITU_DRAWN_SIZE / 2)),
-            QuarterPixels(f_LakituScreenPoint[1] - (LAKITU_DRAWN_SIZE / 2)),
-            QuarterPixels(f_LakituScreenPoint[0] + (LAKITU_DRAWN_SIZE / 2)),
-            QuarterPixels(f_LakituScreenPoint[1] + (LAKITU_DRAWN_SIZE / 2)),
+            QuarterPixels(f_LakituScreenPoint[AXIS_X] - (LAKITU_DRAWN_SIZE / 2)),
+            QuarterPixels(f_LakituScreenPoint[AXIS_Y] - (LAKITU_DRAWN_SIZE / 2)),
+            QuarterPixels(f_LakituScreenPoint[AXIS_X] + (LAKITU_DRAWN_SIZE / 2)),
+            QuarterPixels(f_LakituScreenPoint[AXIS_Y] + (LAKITU_DRAWN_SIZE / 2)),
             G_TX_RENDERTILE,
             TexelCoordinate(LAKITU_IMAGE_SIZE),
             0,
@@ -4588,16 +4588,16 @@ void DrawLakitu(Gfx **displayListHead) {
         rotation[AXIS_X] = 0.0f;
         rotation[AXIS_Y] = 0.0f;
         rotation[AXIS_Z] = atan2(
-            f_LakituTrailStart[0] - (f32)(f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2)),
-            f_LakituTrailStart[1] - (f32)((SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1])
+            f_LakituTrailStart[AXIS_X] - (f32)(f_LakituScreenPoint[AXIS_X] - (SCREEN_WIDTH / 2)),
+            f_LakituTrailStart[AXIS_Y] - (f32)((SCREEN_HEIGHT / 2) - f_LakituScreenPoint[AXIS_Y])
         );
-        translation[AXIS_X] = f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2);
-        translation[AXIS_Y] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
+        translation[AXIS_X] = f_LakituScreenPoint[AXIS_X] - (SCREEN_WIDTH / 2);
+        translation[AXIS_Y] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[AXIS_Y];
         translation[AXIS_Z] = -LAKITU_TRAIL_DEPTH;
         BuildRotationMatrix(matrix, rotation, translation);
         ConvertMatrixToFixed(matrix, &f_LakituTrailMatrices[f_LakituTrailNewestIndex]);
-        f_LakituTrailStart[0] = f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2);
-        f_LakituTrailStart[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
+        f_LakituTrailStart[AXIS_X] = f_LakituScreenPoint[AXIS_X] - (SCREEN_WIDTH / 2);
+        f_LakituTrailStart[AXIS_Y] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[AXIS_Y];
         gSPLoadGeometryMode(gfx++, 0);
         gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
         AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_CLD_SURF, G_RM_CLD_SURF2);
@@ -4755,8 +4755,8 @@ void MoveLakitu(void) {
             f_IsLakituFlying = FALSE;
         }
 
-        f_LakituScreenPoint[0] += LAKITU_DRIFT_X + (s32)(cos(angle) * LAKITU_LOOP_RADIUS_X);
-        f_LakituScreenPoint[1] -= LAKITU_DRIFT_Y + (s32)(sin(angle) * LAKITU_LOOP_RADIUS_Y);
+        f_LakituScreenPoint[AXIS_X] += LAKITU_DRIFT_X + (s32)(cos(angle) * LAKITU_LOOP_RADIUS_X);
+        f_LakituScreenPoint[AXIS_Y] -= LAKITU_DRIFT_Y + (s32)(sin(angle) * LAKITU_LOOP_RADIUS_Y);
     }
 }
 
@@ -5299,9 +5299,9 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
     }
 
     if (f_LogoLetterStates[LOGO_LETTER_M] == LOGO_LETTER_WAITING &&
-        f_LakituScreenPoint[0] > LOGO_M_DROP_X) {
+        f_LakituScreenPoint[AXIS_X] > LOGO_M_DROP_X) {
         f_LogoLetters[LOGO_LETTER_M].x = LOGO_M_DROP_X;
-        f_LogoLetters[LOGO_LETTER_M].y = f_LakituScreenPoint[1];
+        f_LogoLetters[LOGO_LETTER_M].y = f_LakituScreenPoint[AXIS_Y];
         f_LogoLetterStates[LOGO_LETTER_M] = LOGO_LETTER_FALLING;
         g_ScreenFadeDuration = LOGO_GRAYING_DURATION;
         g_ScreenFadeFramesLeft = g_ScreenFadeDuration;
@@ -5314,58 +5314,58 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
     }
 
     if (f_LogoLetterStates[LOGO_LETTER_A] == LOGO_LETTER_WAITING &&
-        f_LakituScreenPoint[0] > LOGO_A_DROP_X) {
+        f_LakituScreenPoint[AXIS_X] > LOGO_A_DROP_X) {
         f_LogoLetters[LOGO_LETTER_A].x = LOGO_A_DROP_X;
-        f_LogoLetters[LOGO_LETTER_A].y = f_LakituScreenPoint[1];
+        f_LogoLetters[LOGO_LETTER_A].y = f_LakituScreenPoint[AXIS_Y];
         f_LogoLetterStates[LOGO_LETTER_A] = LOGO_LETTER_FALLING;
     }
 
     if (f_LogoLetterStates[LOGO_LETTER_R] == LOGO_LETTER_WAITING &&
-        f_LakituScreenPoint[0] > LOGO_R_DROP_X) {
+        f_LakituScreenPoint[AXIS_X] > LOGO_R_DROP_X) {
         f_LogoLetters[LOGO_LETTER_R].x = LOGO_R_DROP_X;
-        f_LogoLetters[LOGO_LETTER_R].y = f_LakituScreenPoint[1];
+        f_LogoLetters[LOGO_LETTER_R].y = f_LakituScreenPoint[AXIS_Y];
         f_LogoLetterStates[LOGO_LETTER_R] = LOGO_LETTER_FALLING;
     }
 
     if (f_LogoLetterStates[LOGO_LETTER_I] == LOGO_LETTER_WAITING &&
-        f_LakituScreenPoint[0] > LOGO_I_DROP_X) {
+        f_LakituScreenPoint[AXIS_X] > LOGO_I_DROP_X) {
         f_LogoLetters[LOGO_LETTER_I].x = LOGO_I_DROP_X;
-        f_LogoLetters[LOGO_LETTER_I].y = f_LakituScreenPoint[1];
+        f_LogoLetters[LOGO_LETTER_I].y = f_LakituScreenPoint[AXIS_Y];
         f_LogoLetterStates[LOGO_LETTER_I] = LOGO_LETTER_FALLING;
     }
 
     if (f_LogoLetterStates[LOGO_LETTER_FIRST_O] == LOGO_LETTER_WAITING &&
-        f_LakituScreenPoint[0] > LOGO_FIRST_O_DROP_X) {
+        f_LakituScreenPoint[AXIS_X] > LOGO_FIRST_O_DROP_X) {
         f_LogoLetters[LOGO_LETTER_FIRST_O].x = LOGO_FIRST_O_DROP_X;
-        f_LogoLetters[LOGO_LETTER_FIRST_O].y = f_LakituScreenPoint[1];
+        f_LogoLetters[LOGO_LETTER_FIRST_O].y = f_LakituScreenPoint[AXIS_Y];
         f_LogoLetterStates[LOGO_LETTER_FIRST_O] = LOGO_LETTER_FALLING;
     }
 
     if (f_LogoLetterStates[LOGO_LETTER_G] == LOGO_LETTER_WAITING &&
-        f_LakituScreenPoint[0] > LOGO_G_DROP_X) {
+        f_LakituScreenPoint[AXIS_X] > LOGO_G_DROP_X) {
         f_LogoLetters[LOGO_LETTER_G].x = LOGO_G_DROP_X;
-        f_LogoLetters[LOGO_LETTER_G].y = f_LakituScreenPoint[1];
+        f_LogoLetters[LOGO_LETTER_G].y = f_LakituScreenPoint[AXIS_Y];
         f_LogoLetterStates[LOGO_LETTER_G] = LOGO_LETTER_FALLING;
     }
 
     if (f_LogoLetterStates[LOGO_LETTER_SECOND_O] == LOGO_LETTER_WAITING &&
-        f_LakituScreenPoint[0] > LOGO_SECOND_O_DROP_X) {
+        f_LakituScreenPoint[AXIS_X] > LOGO_SECOND_O_DROP_X) {
         f_LogoLetters[LOGO_LETTER_SECOND_O].x = LOGO_SECOND_O_DROP_X;
-        f_LogoLetters[LOGO_LETTER_SECOND_O].y = f_LakituScreenPoint[1];
+        f_LogoLetters[LOGO_LETTER_SECOND_O].y = f_LakituScreenPoint[AXIS_Y];
         f_LogoLetterStates[LOGO_LETTER_SECOND_O] = LOGO_LETTER_FALLING;
     }
 
     if (f_LogoLetterStates[LOGO_LETTER_L] == LOGO_LETTER_WAITING &&
-        f_LakituScreenPoint[0] > LOGO_L_DROP_X) {
+        f_LakituScreenPoint[AXIS_X] > LOGO_L_DROP_X) {
         f_LogoLetters[LOGO_LETTER_L].x = LOGO_L_DROP_X;
-        f_LogoLetters[LOGO_LETTER_L].y = f_LakituScreenPoint[1];
+        f_LogoLetters[LOGO_LETTER_L].y = f_LakituScreenPoint[AXIS_Y];
         f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_FALLING;
     }
 
     if (f_LogoLetterStates[LOGO_LETTER_F] == LOGO_LETTER_WAITING &&
-        f_LakituScreenPoint[0] > LOGO_F_DROP_X) {
+        f_LakituScreenPoint[AXIS_X] > LOGO_F_DROP_X) {
         f_LogoLetters[LOGO_LETTER_F].x = LOGO_F_DROP_X;
-        f_LogoLetters[LOGO_LETTER_F].y = f_LakituScreenPoint[1];
+        f_LogoLetters[LOGO_LETTER_F].y = f_LakituScreenPoint[AXIS_Y];
         f_LogoLetterStates[LOGO_LETTER_F] = LOGO_LETTER_FALLING;
         f_LogoState = LOGO_CLUB_STARTING;
     }
@@ -5395,8 +5395,8 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
         guRotate(&f_LogoClubRotations[g_DrawBufferIndex], f_LogoClubAngle, 0.0f, 0.0f, 1.0f);
         guScale(
             &f_LogoClubScalings[g_DrawBufferIndex],
-            f_LogoClubScale[0],
-            f_LogoClubScale[1],
+            f_LogoClubScale[AXIS_X],
+            f_LogoClubScale[AXIS_Y],
             1.0f
         );
         gDPPipeSync(gfx++);
@@ -5861,8 +5861,8 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
         f_LogoLetterScales[LOGO_LETTER_L][AXIS_Y] += f_LogoScaleStep;
         f_LogoClubPosition[AXIS_X] += f_LogoClubStepX;
         f_LogoClubPosition[AXIS_Y] += f_LogoClubStepY;
-        f_LogoClubScale[0] += f_LogoScaleStep;
-        f_LogoClubScale[1] += f_LogoScaleStep;
+        f_LogoClubScale[AXIS_X] += f_LogoScaleStep;
+        f_LogoClubScale[AXIS_Y] += f_LogoScaleStep;
         if (f_LogoLetterScales[LOGO_LETTER_M][AXIS_X] < LOGO_SHRUNK_SCALE) {
             f_LogoState = LOGO_SHRUNK;
         }

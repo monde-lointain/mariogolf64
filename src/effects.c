@@ -2238,8 +2238,8 @@ void PlaceRainCenter(void) {
     viewZ = g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] - g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z];
 
     scale = sqrtf((viewX * viewX) + (viewZ * viewZ));
-    f_RainCenter[0] = viewX;
-    f_RainCenter[1] = viewZ;
+    f_RainCenter[GROUND_AXIS_X] = viewX;
+    f_RainCenter[GROUND_AXIS_Z] = viewZ;
     // Skips views shorter than one unit. Comparing the truncated length
     // with 0 as an int instead of a float breaks the match.
     if ((s32)scale != 0.0f) {
@@ -2250,8 +2250,10 @@ void PlaceRainCenter(void) {
         scale = 0.0f;
     }
 
-    f_RainCenter[0] = (f_RainCenter[0] * scale) + g_Cameras[MAIN_CAMERA].view.eye[AXIS_X];
-    f_RainCenter[1] = (f_RainCenter[1] * scale) + g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z];
+    f_RainCenter[GROUND_AXIS_X] =
+        (f_RainCenter[GROUND_AXIS_X] * scale) + g_Cameras[MAIN_CAMERA].view.eye[AXIS_X];
+    f_RainCenter[GROUND_AXIS_Z] =
+        (f_RainCenter[GROUND_AXIS_Z] * scale) + g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z];
 }
 
 #define RAIN_SPREAD_STEP_COUNT 200
@@ -2264,13 +2266,13 @@ void ResetRaindrop(Raindrop *drop) {
 
     drop->head[AXIS_X] = (((rand() % RAIN_SPREAD_STEP_COUNT) - (RAIN_SPREAD_STEP_COUNT / 2)) *
                              RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE) +
-        f_RainCenter[0];
+        f_RainCenter[GROUND_AXIS_X];
     drop->head[AXIS_Y] =
         (-RAINDROP_LOWEST_RISE - (rand() % RAIN_SPREAD_STEP_COUNT * RAIN_SPREAD_STEP)) *
         COURSE_TO_WORLD_SCALE;
     drop->head[AXIS_Z] = (((rand() % RAIN_SPREAD_STEP_COUNT) - (RAIN_SPREAD_STEP_COUNT / 2)) *
                              RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE) +
-        f_RainCenter[1];
+        f_RainCenter[GROUND_AXIS_Z];
     fallFrameCount = drop->head[AXIS_Y] / f_RainVelocity[AXIS_Y];
     drop->head[AXIS_Y] += g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] + RAIN_TOP_BELOW_EYE;
     drop->head[AXIS_X] += f_RainVelocity[AXIS_X] * fallFrameCount;
@@ -2289,11 +2291,11 @@ void ResetRainSplash(RainSplash *splash) {
     splash->position[AXIS_X] =
         (((rand() % RAIN_SPLASH_SPREAD_STEP_COUNT) - (RAIN_SPLASH_SPREAD_STEP_COUNT / 2)) *
             RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE) +
-        f_RainCenter[0];
+        f_RainCenter[GROUND_AXIS_X];
     splash->position[AXIS_Z] =
         (((rand() % RAIN_SPLASH_SPREAD_STEP_COUNT) - (RAIN_SPLASH_SPREAD_STEP_COUNT / 2)) *
             RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE) +
-        f_RainCenter[1];
+        f_RainCenter[GROUND_AXIS_Z];
     splash->position[AXIS_Y] = GetGroundHeight(
                                    splash->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
                                    splash->position[AXIS_Z] * WORLD_TO_COURSE_SCALE

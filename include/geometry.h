@@ -10,6 +10,9 @@
 typedef f32 Vec3[AXIS_COUNT];
 #define PLANE_AXIS_COUNT 2
 typedef f32 Vec2[PLANE_AXIS_COUNT];
+// A point on the ground holds X and Z in a plane array.
+#define GROUND_AXIS_X 0
+#define GROUND_AXIS_Z 1
 
 typedef f32 Mat4[4][4];
 
