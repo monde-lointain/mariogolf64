@@ -176,6 +176,6 @@ ImpactEffect *GetImpactTimingEntry(
     s32 impactTiming
 );
 s32 StepBallSimulation(BallSimulation *simulation);
-s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *shot);
+s32 LaunchBallSimulation(BallSimulation *simulation, LaunchPurpose purpose, ShotLaunch *shot);
 
 #endif

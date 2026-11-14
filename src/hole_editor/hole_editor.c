@@ -1,13 +1,13 @@
+// The original calls SetGroundPointHeightAndShade here unprototyped; see
+// terrain.h.
+#define CALLS_GROUND_POINT_SETTER_UNPROTOTYPED
+
 #include "hole_editor.h"
 
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ultra64.h>
-
-// The original calls SetGroundPointHeightAndShade here unprototyped; see
-// terrain.h.
-#define CALLS_GROUND_POINT_SETTER_UNPROTOTYPED
 
 #include "address.h"
 #include "billboard.h"

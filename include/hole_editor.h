@@ -4,10 +4,11 @@
 #include <ultra64.h>
 
 #include "camera.h"
+#include "terrain.h"
 
 void CaptureFrame(void);
 void CaptureMapImage(void);
-void DrawHoleEditorGround(CameraMatrices *matrices, s32 terrainStyle);
+void DrawHoleEditorGround(CameraMatrices *matrices, TerrainStyle terrainStyle);
 void DrawTargetPole(CameraMatrices *matrices, Gfx **displayListHead);
 void FillWaveTexels(void);
 void UpdateCellEditor(void);

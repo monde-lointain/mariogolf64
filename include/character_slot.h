@@ -331,7 +331,7 @@ void SetCharacterClub(u32 slotIndex, s32 clubIndex);
 s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, AnimationEventKind kind);
 s32 GetAnimationIndex(u32 slotIndex, s32 animationId);
 void AdvanceAnimation(u32 slotIndex, s32 frameCount);
-void SetCharacterLighting(u32 slotIndex, s32 lighting);
+void SetCharacterLighting(u32 slotIndex, CharacterLighting lighting);
 void AnimateAllCharacters(void);
 void PlaceAndViewCharacter(u32 slotIndex);
 void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading);

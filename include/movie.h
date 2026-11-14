@@ -31,7 +31,7 @@ typedef s32 Movie;
 void AllocMovieBuffer(void);
 void FreeMovieBuffer(void);
 Boolean IsMovieDone(void);
-void StartMovie(s32 movie);
+void StartMovie(Movie movie);
 Boolean IsMoviePastCue(void);
 void DrawMovie(Gfx **displayListHead);
 

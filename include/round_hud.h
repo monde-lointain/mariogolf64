@@ -140,8 +140,8 @@ extern ImageAsset *g_PinFlagImages;
 #define SHOT_PREVIEW_IMAGE_SIZE 32
 extern ImageAsset *g_ShotPreviewDashImage;
 
-void StartLandingReaction(s32 reaction);
-void StartShotEffect(s32 effect);
+void StartLandingReaction(LandingReaction reaction);
+void StartShotEffect(ShotEffect effect);
 void DrawHoleFlag(Boolean isBackDrawn);
 
 void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices);

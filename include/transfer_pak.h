@@ -155,7 +155,7 @@ Boolean IsGameBoyCharacterPresent(s32 gameBoyCharacterIndex);
 char *GetGameBoyCharacterName(s32 gameBoyCharacterIndex);
 void ClearBootTransmitPending(void);
 Boolean IsBootTransmitPending(void);
-void ResetGameBoyTransfer(s32 transferMode);
+void ResetGameBoyTransfer(TransferMode transferMode);
 void ForceStopRumble(void);
 void InitRumblePaks(void);
 void StopAllRumble(void);

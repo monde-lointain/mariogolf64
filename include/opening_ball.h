@@ -19,7 +19,11 @@ enum OpeningModel {
 
 typedef s32 OpeningModel;
 
-s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *shot);
+s32 LaunchOpeningBallSimulation(
+    BallSimulation *simulation,
+    LaunchPurpose purpose,
+    ShotLaunch *shot
+);
 s32 StepOpeningBallSimulation(BallSimulation *simulation);
 Boolean ToggleOpeningCharacter(u32 slotIndex, OpeningModel model);
 

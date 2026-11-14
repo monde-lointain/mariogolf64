@@ -76,7 +76,7 @@ void CloseSaveMenu(void);
 void HideRoundHud(void);
 void LeaveGameSaveMenu(void);
 void OpenControlsScreen(void);
-void OpenSaveMenu(s32 kind);
+void OpenSaveMenu(SaveMenuList kind);
 void ResumeRound(void);
 void SaveGameToSlot(void);
 void SaveReplayToSlot(void);
