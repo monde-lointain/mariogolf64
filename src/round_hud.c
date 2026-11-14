@@ -4549,7 +4549,7 @@ void DrawRoundHud(CameraView *view) {
         DrawAnimatedIcon(&g_DisplayListHead, f_LetterboxHeight);
     }
 
-    BeginShadowedText(&g_DisplayListHead);
+    SetUpShadowedTextDrawing(&g_DisplayListHead);
     SetTextColor(&g_DisplayListHead, 255, 255, 255);
     SetTextColor(&g_DisplayListHead, 255, 255, 255);
     if (g_RoundHud.isLieIconShown && !g_IsCupViewShown) {

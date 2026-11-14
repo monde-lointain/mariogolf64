@@ -4321,7 +4321,7 @@ void DrawMenuScreen(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-    BeginShadowedText(&gfx);
+    SetUpShadowedTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     f_MenuBobPhase += MENU_BOB_PHASE_STEP;
     f_MenuBobOffset = sinf(f_MenuBobPhase) * MENU_BOB_HEIGHT;
@@ -4411,7 +4411,7 @@ void DrawMenuScreen(Gfx **displayListHead) {
             break;
     }
 
-    BeginShadowedText(&gfx);
+    SetUpShadowedTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
@@ -5196,7 +5196,7 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
     s32 labelOffset;
     s16 growth;
 
-    BeginShadowedText(&gfx);
+    SetUpShadowedTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     DrawShadowedText(&gfx, PLAIN_MENU_HEADING_X, PLAIN_MENU_HEADING_Y, (char *)f_PlainMenuHeading);
     for (labelIndex = 0; labelIndex != PLAIN_MENU_NAME_COUNT; labelIndex++) {
@@ -6401,7 +6401,7 @@ void DrawAnimationViewer(Gfx **displayListHead) {
         );
     }
 
-    BeginShadowedText(&gfx);
+    SetUpShadowedTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     sprintf(g_PrintBuffer, f_ViewerAnimationFormat, f_ViewerAnimation);
     DrawShadowedText(&gfx, VIEWER_ANIMATION_X, VIEWER_ANIMATION_Y, g_PrintBuffer);
@@ -8534,7 +8534,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
     }
 
     if (IsGameFlagSet(GAME_FLAG_OPTIONS_SOUND_TEST)) {
-        BeginShadowedText(&gfx);
+        SetUpShadowedTextDrawing(&gfx);
         SetTextColor(&gfx, 255, 255, 255);
         if (g_MenuMemory.optionsChoice == OPTIONS_CHOICE_SONG) {
             SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
@@ -8683,7 +8683,7 @@ void DrawCaddySelect(Gfx **displayListHead) {
     s32 caddyIndex;
 
     DrawMenuBackdropLayers(&gfx, BOARD_BACKDROP_LAYERS);
-    BeginShadowedText(&gfx);
+    SetUpShadowedTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     DrawShadowedText(&gfx, CADDY_SELECT_TITLE_X, CADDY_SELECT_TITLE_Y, (char *)g_CaddySelectTitle);
     for (caddyIndex = 0; caddyIndex != CADDY_COUNT; caddyIndex++) {

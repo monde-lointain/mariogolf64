@@ -147,7 +147,7 @@ Boolean IsTextSlotRevealed(s32 slot);
 s32 MeasureText(READ_ONLY char *text, s32 fontSize, TextFlags flags);
 void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, s32 slot);
 void DrawSmallText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
-void BeginShadowedText(Gfx **displayListHead);
+void SetUpShadowedTextDrawing(Gfx **displayListHead);
 void DrawCenteredSmallText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
 void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
 void DrawCondensedShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);

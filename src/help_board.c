@@ -497,7 +497,7 @@ void DrawHelpBoard(Gfx **displayListHead) {
     }
 
     gDPPipeSync(gfx++);
-    BeginShadowedText(&gfx);
+    SetUpShadowedTextDrawing(&gfx);
     SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
     if (f_OpenTopic == 0) {
         for (index = 0, topic = f_FirstListedTopic; index != LISTED_TOPIC_COUNT; index++, topic++) {

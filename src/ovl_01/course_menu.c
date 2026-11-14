@@ -1035,7 +1035,7 @@ void DrawCourseTrophies(Gfx **displayListHead) {
 
     openCourseCount = GetOpenCourseCount();
     if (memory->statsCourse == openCourseCount) {
-        BeginShadowedText(&gfx);
+        SetUpShadowedTextDrawing(&gfx);
         SetTextColor(&gfx, 255, 255, 255);
         openCourseCount = CountOpenCourses(save->coursePoints);
         if (openCourseCount < COURSE_COUNT) {

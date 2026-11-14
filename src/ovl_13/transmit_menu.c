@@ -1612,7 +1612,7 @@ void DrawCharacterStats(
 
     SetUpTextDrawing(&gfx);
     DrawLargeText(&gfx, STATS_NAME_LEFT, STATS_NAME_TOP, gameBoyCharacter->name);
-    BeginShadowedText(&gfx);
+    SetUpShadowedTextDrawing(&gfx);
     sprintf(
         g_PrintBuffer,
         "  %2d     :%3d",
@@ -1864,7 +1864,7 @@ void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     MessageId messageId;
 
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    BeginShadowedText(&gfx);
+    SetUpShadowedTextDrawing(&gfx);
     for (gameBoyCharacterIndex = 0; gameBoyCharacterIndex != g_GameBoyTransfer.characterCount;
         gameBoyCharacterIndex++) {
         GameBoyCharacter *gameBoyCharacter = &g_GameBoyCharacters[gameBoyCharacterIndex];

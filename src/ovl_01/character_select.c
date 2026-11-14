@@ -1438,7 +1438,7 @@ void DrawCharacterSelect(Gfx **displayListHead, u8 isSinglePlayer) {
         OPAQUE_ALPHA
     );
     clubSet = f_ChoiceCharacters[choiceIndex];
-    BeginShadowedText(&gfx);
+    SetUpShadowedTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     sprintf(g_PrintBuffer, "%dY", g_Clubs[(clubSet * CLUB_SET_SIZE) + CLUB_TYPE_DRIVER].distance);
     DrawShadowedText(&gfx, DRIVE_DISTANCE_X, DRIVE_DISTANCE_Y, g_PrintBuffer);

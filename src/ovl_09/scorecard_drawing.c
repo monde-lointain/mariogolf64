@@ -1680,7 +1680,7 @@ void DrawBetsPage(Gfx **displayListHead) {
         );
     }
 
-    BeginShadowedText(&gfx);
+    SetUpShadowedTextDrawing(&gfx);
     column = 0;
     for (i = 0; i != BET_COUNT; i++) {
         if (g_GameState.betRates[i] != UNSET_BET_RATE) {
@@ -1771,7 +1771,7 @@ void DrawBetsPage(Gfx **displayListHead) {
         j += g_GameState.betRates[i] >= 0;
     }
 
-    BeginShadowedText(&gfx);
+    SetUpShadowedTextDrawing(&gfx);
     SetTextColor(&gfx, BET_RATE_RED, BET_RATE_GREEN, 0);
     column = 0;
     for (i = 0; i != BET_COUNT; i++) {
@@ -3545,7 +3545,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         }
     }
 
-    BeginShadowedText(&gfx);
+    SetUpShadowedTextDrawing(&gfx);
     SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
     for (i = 0; i != g_GameState.playerCount; i++) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
@@ -3617,7 +3617,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         }
     }
 
-    BeginShadowedText(&gfx);
+    SetUpShadowedTextDrawing(&gfx);
     SetTextColor(&gfx, 0xFF, 0xFF, 0);
     for (i = 0; i != HOLES_PER_NINE; i++) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {

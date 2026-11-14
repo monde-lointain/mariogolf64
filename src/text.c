@@ -2151,7 +2151,7 @@ void DrawTextStub(
 ) {
 }
 
-void BeginShadowedText(Gfx **displayListHead) {
+void SetUpShadowedTextDrawing(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
     gDPPipeSync(gfx++);
