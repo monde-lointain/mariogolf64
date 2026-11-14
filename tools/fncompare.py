@@ -78,7 +78,6 @@ INCLUDES = [
     "-Iinclude",
     "-Ilib/libkmc/include",
     "-Ilib/ultralib/include",
-    "-Ilib/ultralib/include/PR",
     "-Ilib/libmus/include",
     "-Ibuild/lib/libnusys/include",
     "-Ilib/libnusys/include",

@@ -133,8 +133,11 @@ OBJCOPY     := $(CROSS)objcopy
 PYTHON      := .venv/bin/python3
 
 # Each library's headers are in its own include directory. NuSystem's is
-# included through its converted copy, as the rule below explains.
-INCLUDES    := -Iinclude -Ilib/libkmc/include -Ilib/ultralib/include -Ilib/ultralib/include/PR \
+# included through its converted copy, as the rule below explains. The
+# game reaches libultra's PR/ headers through <ultra64.h>, so PR/ isn't
+# searched, and a bare "rcp.h" can only name the game's own header, never
+# libultra's PR/rcp.h.
+INCLUDES    := -Iinclude -Ilib/libkmc/include -Ilib/ultralib/include \
                -Ilib/libmus/include -I$(BUILD_DIR)/lib/libnusys/include -Ilib/libnusys/include -Isrc -I$(BUILD_DIR)
 DEFINES     := -D_LANGUAGE_C -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI_2 -DNDEBUG -D_FINALROM -DBUILD_VERSION=VERSION_J \
                $(GAME_DEFINES)
@@ -408,8 +411,8 @@ endif
 	$(DEPS) $(CC) -c $(CFLAGS) -I$(dir $<) $(INCLUDES) $(DEFINES) -o $@ $(BUILD_DIR)/$*.sjis.c
 
 # main_bss.c defines libmus's bss objects too, whose types only its sources
-# declare
-$(BUILD_DIR)/src/main_bss.c.o: INCLUDES += -I$(LIBMUS_DIR)/src
+# declare. Those include libultra's headers from PR/ by their bare names.
+$(BUILD_DIR)/src/main_bss.c.o: INCLUDES += -I$(LIBMUS_DIR)/src -I$(ULTRALIB_DIR)/include/PR
 
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.c
 	@mkdir -p $(dir $@)
