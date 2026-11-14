@@ -1608,6 +1608,8 @@ void AimCameraYaw(void) {
 #define TRAIL_EASE_PERCENT_STEP 2.0f
 #define TRAIL_EFFECT_END_FRACTION 0.1f
 #define TRAIL_ANGLE_SCALE 0.25
+// The trail view's angle stays this far inside a full turn on each side.
+#define TRAIL_ANGLE_MARGIN (M_PI / 6)
 #define FACING_CUP_VIEW_DISTANCE 76800.0f
 #define FACING_CUP_VIEW_RISE 0x5A00
 #define FACING_CUP_EASE_DEAD_ZONE 0.5f
@@ -1974,22 +1976,22 @@ void PlaceFlightCamera(s32 step) {
                 easeFraction = 0.0f;
             }
 
-            if (easeFraction > 100.0f) {
-                easeFraction = 100.0f;
+            if (easeFraction > PERCENT_PER_WHOLE) {
+                easeFraction = PERCENT_PER_WHOLE;
             }
 
-            easeFraction *= 0.01f;
+            easeFraction *= 1.0f / PERCENT_PER_WHOLE;
             if (easeFraction < TRAIL_EFFECT_END_FRACTION) {
                 StartHudAnimation(HUD_ANIMATION_NONE);
             }
 
             angle = f_TrailViewAngle;
-            if (angle < M_PI / 6) {
-                angle = M_PI / 6;
+            if (angle < TRAIL_ANGLE_MARGIN) {
+                angle = TRAIL_ANGLE_MARGIN;
             }
 
-            if (angle > FULL_TURN_RADIANS - (M_PI / 6)) {
-                angle = FULL_TURN_RADIANS - (M_PI / 6);
+            if (angle > FULL_TURN_RADIANS - TRAIL_ANGLE_MARGIN) {
+                angle = FULL_TURN_RADIANS - TRAIL_ANGLE_MARGIN;
             }
 
             if (f_ShotLength <= SHORT_SHOT_LENGTH_MAX) {
@@ -2255,6 +2257,11 @@ void PlaceFlightCamera(s32 step) {
 #define IsEndingNearCup() \
     (g_SimulatedShot.endsInCup || f_LandingCupDistance < NEAR_CUP_DISTANCE_MAX)
 #define DEBUG_CAMERA_CONTROLLER 1
+// Flight lengths, in simulation steps, that change which camera is picked.
+#define LONG_FLIGHT_STEP_COUNT 120
+#define BESIDE_GOLFER_FLIGHT_STEPS_MIN 61
+#define NEAR_LAUNCH_FLIGHT_STEPS_MIN 16
+#define END_VIEW_FLIGHT_STEPS_MIN 21
 
 #define IsTroubleSurface(traits) \
     (IsBunkerKind((traits)->kind) || \
@@ -2305,7 +2312,7 @@ void ChooseFlightCameraKind(void) {
                     }
                     else if (pick == 3) {
                         if ((f_ComingFlightEvents & FLIGHT_EVENT_CUP_PASS) ||
-                            g_SimulatedShot.stepCount > 120) {
+                            g_SimulatedShot.stepCount > LONG_FLIGHT_STEP_COUNT) {
                             kind = FLIGHT_CAMERA_BEHIND_START;
                         }
                         else {
@@ -2364,7 +2371,8 @@ void ChooseFlightCameraKind(void) {
                 }
                 else if (pick == 5) {
                     kind = FLIGHT_CAMERA_AIM_VIEW;
-                    if (f_IsBallGroundLevel == TRUE && g_SimulatedShot.stepCount >= 61) {
+                    if (f_IsBallGroundLevel == TRUE &&
+                        g_SimulatedShot.stepCount >= BESIDE_GOLFER_FLIGHT_STEPS_MIN) {
                         kind = FLIGHT_CAMERA_BESIDE_GOLFER;
                     }
                 }
@@ -2389,7 +2397,8 @@ void ChooseFlightCameraKind(void) {
                 }
                 else if (pick == 9) {
                     kind = FLIGHT_CAMERA_AIM_VIEW;
-                    if (f_ShotLength >= MID_SHOT_LENGTH_MIN && g_SimulatedShot.stepCount >= 16) {
+                    if (f_ShotLength >= MID_SHOT_LENGTH_MIN &&
+                        g_SimulatedShot.stepCount >= NEAR_LAUNCH_FLIGHT_STEPS_MIN) {
                         kind = FLIGHT_CAMERA_NEAR_LAUNCH;
                     }
                 }
@@ -2410,7 +2419,7 @@ void ChooseFlightCameraKind(void) {
                     }
                 }
                 else if (f_FlightCameraKind == FLIGHT_CAMERA_BESIDE_GOLFER) {
-                    if (g_SimulatedShot.stepCount < 120) {
+                    if (g_SimulatedShot.stepCount < LONG_FLIGHT_STEP_COUNT) {
                         kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                     }
                     else if (g_SimulatedShot.usesPutter) {
@@ -2430,7 +2439,7 @@ void ChooseFlightCameraKind(void) {
                 break;
             case FLIGHT_PHASE_CLIMB:
                 if (f_FlightCameraKind == FLIGHT_CAMERA_BESIDE_GOLFER) {
-                    if (g_SimulatedShot.stepCount < 120) {
+                    if (g_SimulatedShot.stepCount < LONG_FLIGHT_STEP_COUNT) {
                         kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                     }
                     else if (g_SimulatedShot.usesPutter) {
@@ -2508,7 +2517,8 @@ void ChooseFlightCameraKind(void) {
                 if (IsTroubleSurface(f_EndSurfaceTraits) || g_SimulatedShot.endsInCup) {
                 }
                 else {
-                    if (f_CameraChangeHoldCount != 0 || g_SimulatedShot.stepCount < 21) {
+                    if (f_CameraChangeHoldCount != 0 ||
+                        g_SimulatedShot.stepCount < END_VIEW_FLIGHT_STEPS_MIN) {
                         f_HasFlightPhaseChanged = TRUE;
                     }
                     else if (f_LandingCupDistance <= SHORT_SHOT_LENGTH_MAX ||
@@ -2543,7 +2553,8 @@ void ChooseFlightCameraKind(void) {
                         break;
                     case 6:
                         kind = FLIGHT_CAMERA_AIM_VIEW;
-                        if (f_IsBallGroundLevel == TRUE && g_SimulatedShot.stepCount >= 61) {
+                        if (f_IsBallGroundLevel == TRUE &&
+                            g_SimulatedShot.stepCount >= BESIDE_GOLFER_FLIGHT_STEPS_MIN) {
                             kind = FLIGHT_CAMERA_BESIDE_GOLFER;
                         }
 
@@ -2610,6 +2621,10 @@ void ChooseFlightCameraKind(void) {
 #define CUP_PASS_LOOKAHEAD_STEP_COUNT 30
 #define PATH_FLAG_LOOKAHEAD_STEP_COUNT 60
 #define BILLBOARD_HIT_VIEW_STEP_MIN 60
+#define LONG_SHOT_EFFECT_STEP 40
+#define LONG_SHOT_EFFECT_FLIGHT_STEP_COUNT 80
+// The HUD animation stops this many steps before the ball lands.
+#define HUD_CLEAR_STEPS_LEFT 40
 #define BILLBOARD_HIT_VIEW_STEP_COUNT 10
 #define END_VIEW_DISTANCE_MIN 0x25800
 #define CAMERA_CHOICE_STEP_COUNT_MIN 40
@@ -2890,8 +2905,8 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     }
 
     if (f_ShotLength > VERY_LONG_SHOT_LENGTH_MIN &&
-        g_BallFlightStep == 40 &&
-        g_SimulatedShot.stepCount > 80) {
+        g_BallFlightStep == LONG_SHOT_EFFECT_STEP &&
+        g_SimulatedShot.stepCount > LONG_SHOT_EFFECT_FLIGHT_STEP_COUNT) {
         StartShotEffect(SHOT_EFFECT_LONG_SHOT);
     }
 
@@ -3088,7 +3103,8 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
         g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] += LOOK_AT_NUDGE;
     }
 
-    if (g_SimulatedShot.stepCount < g_BallFlightStep + 40 && IsHudAnimationDone() == 1) {
+    if (g_SimulatedShot.stepCount < g_BallFlightStep + HUD_CLEAR_STEPS_LEFT &&
+        IsHudAnimationDone() == TRUE) {
         StartHudAnimation(HUD_ANIMATION_NONE);
     }
 
