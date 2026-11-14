@@ -156,7 +156,7 @@ enum PrizeBracket {
 #define NOTICE_SHINE_SOUND_VOLUME 63
 #define RESULTS_LABEL_SCORE 2
 #define RESULTS_LABEL_POINTS 5
-#define MESSAGE_POINTS_TO_NEXT_COURSE 0x46
+#define MESSAGE_MORE_POINTS_TO_NEXT_COURSE 0x46
 #define MESSAGE_ALL_COURSES_OPEN 0x47
 #define RESULTS_TEXT_SLOT 0
 #define RESULTS_TEXT_RED 230
@@ -3393,7 +3393,7 @@ void DrawTournamentResults(Gfx **displayListHead) {
         SetTextSlot(
             f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
             f_ResultsTop + POINTS_TO_NEXT_COURSE_Y,
-            MESSAGE_POINTS_TO_NEXT_COURSE,
+            MESSAGE_MORE_POINTS_TO_NEXT_COURSE,
             TEXT_SLOT_LARGE_FONT,
             RESULTS_TEXT_SLOT,
             0,
@@ -3517,7 +3517,7 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
         SetTextSlot(
             f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
             f_ResultsTop + POINTS_TO_NEXT_COURSE_Y,
-            MESSAGE_POINTS_TO_NEXT_COURSE,
+            MESSAGE_MORE_POINTS_TO_NEXT_COURSE,
             TEXT_SLOT_LARGE_FONT,
             RESULTS_TEXT_SLOT,
             0,
@@ -3831,7 +3831,7 @@ void DrawPlayersResults(Gfx **displayListHead) {
         SetTextSlot(
             f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
             f_ResultsTop + POINTS_TO_NEXT_COURSE_Y,
-            MESSAGE_POINTS_TO_NEXT_COURSE,
+            MESSAGE_MORE_POINTS_TO_NEXT_COURSE,
             TEXT_SLOT_LARGE_FONT,
             RESULTS_TEXT_SLOT,
             0,
@@ -4175,7 +4175,7 @@ void DrawMatchResults(Gfx **displayListHead) {
         SetTextSlot(
             f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
             f_ResultsTop + POINTS_TO_NEXT_COURSE_Y,
-            MESSAGE_POINTS_TO_NEXT_COURSE,
+            MESSAGE_MORE_POINTS_TO_NEXT_COURSE,
             TEXT_SLOT_LARGE_FONT,
             RESULTS_TEXT_SLOT,
             0,
