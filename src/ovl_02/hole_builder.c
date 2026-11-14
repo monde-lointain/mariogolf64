@@ -2220,8 +2220,8 @@ void ScaleMiniGolfHole(void) {
     g_HoleSetup.cupPosition[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
 }
 
-s32 GetCoursePaintLogic(CourseRecordIndex course) {
-    switch (course) {
+s32 GetCoursePaintLogic(CourseRecordIndex courseRecordIndex) {
+    switch (courseRecordIndex) {
         case COURSE_RECORD_TOAD_HIGHLANDS:
             return PAINT_LOGIC_TOAD_HIGHLANDS;
         case COURSE_RECORD_KOOPA_PARK:
@@ -2246,25 +2246,28 @@ s32 GetCoursePaintLogic(CourseRecordIndex course) {
 }
 
 void ClearHoleBuild(void);
-void OpenHoleAsset(CourseRecordIndex course, s32 hole, s8 kind);
+void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 kind);
 void ReadBillboards(void);
 void ReadGridVertices(void);
 void ReadHoleTriangles(void);
 void ReadTileMidpoints(void);
 
-void FinishHolePoints(CourseRecordIndex course UNUSED, s32 hole UNUSED) {
+void FinishHolePoints(CourseRecordIndex courseRecordIndex UNUSED, s32 holeIndex UNUSED) {
 }
 
-void BuildHole(s32 course, s32 hole) {
+// courseRecordIndex and holeIndex index the hole asset tables, except
+// that when GAME_FLAG_READ_HOST_HOLE is set, they hold the hole editor's
+// one-based course and hole numbers, which name the host files.
+void BuildHole(s32 courseRecordIndex, s32 holeIndex) {
     AssetFile asset;
     char path[HOST_PATH_SIZE];
     u32 size;
     s32 pointsSize;
 
-    if (course == COURSE_RECORD_SHY_GUY_DESERT) {
+    if (courseRecordIndex == COURSE_RECORD_SHY_GUY_DESERT) {
         FillGroundNoise(GROUND_NOISE_RANGE, LIGHT_GROUND_NOISE_BASE);
     }
-    else if (course == COURSE_RECORD_YOSHIS_ISLAND) {
+    else if (courseRecordIndex == COURSE_RECORD_YOSHIS_ISLAND) {
         FillGroundNoise(GROUND_NOISE_RANGE, LIGHT_GROUND_NOISE_BASE);
     }
     else {
@@ -2280,7 +2283,7 @@ void BuildHole(s32 course, s32 hole) {
         FillGroundNoise(MINI_GOLF_GROUND_NOISE_RANGE, MINI_GOLF_GROUND_NOISE_BASE);
     }
     else if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
-        f_PaintLogic = f_HolePaintLogics[course - 1][hole - 1];
+        f_PaintLogic = f_HolePaintLogics[courseRecordIndex - 1][holeIndex - 1];
         if (IsGameFlagSet(GAME_FLAG_NEXT_HOST_PAINT_LOGIC_A)) {
             f_PaintLogic++;
         }
@@ -2290,28 +2293,28 @@ void BuildHole(s32 course, s32 hole) {
         }
     }
     else {
-        f_PaintLogic = GetCoursePaintLogic(course);
+        f_PaintLogic = GetCoursePaintLogic(courseRecordIndex);
     }
 
     osSyncPrintf("PaintLogic%d\n", f_PaintLogic);
     if (!IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
-        if (IsGameFlagSet(GAME_FLAG_NEXT_COURSE_FIRST_HOLE) && hole == 0) {
-            hole = COURSE_HOLE_COUNT;
+        if (IsGameFlagSet(GAME_FLAG_NEXT_COURSE_FIRST_HOLE) && holeIndex == 0) {
+            holeIndex = COURSE_HOLE_COUNT;
         }
 
         ClearHoleBuild();
-        OpenHoleAsset(course, hole, HOLE_ASSET_VERTICES);
+        OpenHoleAsset(courseRecordIndex, holeIndex, HOLE_ASSET_VERTICES);
         ReadGridVertices();
-        OpenHoleAsset(course, hole, HOLE_ASSET_MIDPOINTS);
+        OpenHoleAsset(courseRecordIndex, holeIndex, HOLE_ASSET_MIDPOINTS);
         ReadTileMidpoints();
-        OpenHoleAsset(course, hole, HOLE_ASSET_TREES);
+        OpenHoleAsset(courseRecordIndex, holeIndex, HOLE_ASSET_TREES);
         ReadBillboards();
         if (!g_GameState.isRoundContinued && g_Scene != SCENE_STAFF_ROLL) {
             if (g_GameState.gameMode == GAME_MODE_TITLE_HOLE) {
                 OpenAssetFile(TITLE_HOLE_SETUP_ASSET, &asset);
             }
             else {
-                OpenAssetFile(f_HoleAssetIds[course][hole].setup, &asset);
+                OpenAssetFile(f_HoleAssetIds[courseRecordIndex][holeIndex].setup, &asset);
             }
 
             ReadAssetFile(&g_HoleSetup, GetAssetFileSize(&asset), &asset);
@@ -2321,16 +2324,16 @@ void BuildHole(s32 course, s32 hole) {
             OpenAssetFile(TITLE_HOLE_POINTS_ASSET, &asset);
         }
         else {
-            OpenAssetFile(f_HoleAssetIds[course][hole].points, &asset);
+            OpenAssetFile(f_HoleAssetIds[courseRecordIndex][holeIndex].points, &asset);
         }
 
         pointsSize = GetAssetFileSize(&asset);
         ReadAssetFile(&g_HolePoints, pointsSize, &asset);
         osSyncPrintf("%d\n", pointsSize);
-        FinishHolePoints(course, hole);
-        OpenHoleAsset(course, hole, HOLE_ASSET_TRIANGLES);
+        FinishHolePoints(courseRecordIndex, holeIndex);
+        OpenHoleAsset(courseRecordIndex, holeIndex, HOLE_ASSET_TRIANGLES);
         ReadHoleTriangles();
-        OpenHoleAsset(course, hole, HOLE_ASSET_ATTRIBUTES);
+        OpenHoleAsset(courseRecordIndex, holeIndex, HOLE_ASSET_ATTRIBUTES);
         MeasureGroundTiles();
         PrepareHoleTriangles();
         f_IsCodeMapCleaned = TRUE;
@@ -2346,22 +2349,64 @@ void BuildHole(s32 course, s32 hole) {
         ClearGameFlag(GAME_FLAG_SKIP_HOST_HOLE_READ);
     }
     else {
-        sprintf(path, "bin/course%d/hole%d%2.2d.vtx", (int)course, (int)course, (int)hole);
+        sprintf(
+            path,
+            "bin/course%d/hole%d%2.2d.vtx",
+            (int)courseRecordIndex,
+            (int)courseRecordIndex,
+            (int)holeIndex
+        );
         ReadHostFile(path, &size);
-        sprintf(path, "bin/course%d/hole%d%2.2d.dtx", (int)course, (int)course, (int)hole);
+        sprintf(
+            path,
+            "bin/course%d/hole%d%2.2d.dtx",
+            (int)courseRecordIndex,
+            (int)courseRecordIndex,
+            (int)holeIndex
+        );
         ReadHostFile(path, &size);
-        sprintf(path, "bin/course%d/hole%d%2.2d.tre", (int)course, (int)course, (int)hole);
+        sprintf(
+            path,
+            "bin/course%d/hole%d%2.2d.tre",
+            (int)courseRecordIndex,
+            (int)courseRecordIndex,
+            (int)holeIndex
+        );
         ReadHostFile(path, &size);
-        sprintf(path, "bin/course%d/hole%d%2.2d.hol", (int)course, (int)course, (int)hole);
+        sprintf(
+            path,
+            "bin/course%d/hole%d%2.2d.hol",
+            (int)courseRecordIndex,
+            (int)courseRecordIndex,
+            (int)holeIndex
+        );
         ReadHostFile(path, &size);
-        sprintf(path, "bin/course%d/hole%d%2.2d.pnt", (int)course, (int)course, (int)hole);
+        sprintf(
+            path,
+            "bin/course%d/hole%d%2.2d.pnt",
+            (int)courseRecordIndex,
+            (int)courseRecordIndex,
+            (int)holeIndex
+        );
         ReadHostFile(path, &size);
-        sprintf(path, "bin/course%d/hole%d%2.2d.tri", (int)course, (int)course, (int)hole);
+        sprintf(
+            path,
+            "bin/course%d/hole%d%2.2d.tri",
+            (int)courseRecordIndex,
+            (int)courseRecordIndex,
+            (int)holeIndex
+        );
         if (ReadHostFile(path, &size) == HOST_FILE_OK) {
             MoveRingsToEnd();
         }
 
-        sprintf(path, "bin/course%d/hole%d%2.2d.att", (int)course, (int)course, (int)hole);
+        sprintf(
+            path,
+            "bin/course%d/hole%d%2.2d.att",
+            (int)courseRecordIndex,
+            (int)courseRecordIndex,
+            (int)holeIndex
+        );
         ReadHostFile(path, &size);
     }
 
@@ -2853,7 +2898,7 @@ void ReadVertexZ(s16 *coordinate, s32 flags) {
     }
 }
 
-void OpenHoleAsset(CourseRecordIndex course, s32 hole, s8 kind) {
+void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 kind) {
     f_ReadCursor = HOLE_FILE_BUFFER;
     switch (kind) {
         case HOLE_ASSET_VERTICES:
@@ -2861,7 +2906,7 @@ void OpenHoleAsset(CourseRecordIndex course, s32 hole, s8 kind) {
                 OpenAssetFile(TITLE_HOLE_VERTICES_ASSET, &f_HoleAsset);
             }
             else {
-                OpenAssetFile(f_HoleAssetIds[course][hole].vertices, &f_HoleAsset);
+                OpenAssetFile(f_HoleAssetIds[courseRecordIndex][holeIndex].vertices, &f_HoleAsset);
             }
 
             break;
@@ -2870,7 +2915,7 @@ void OpenHoleAsset(CourseRecordIndex course, s32 hole, s8 kind) {
                 OpenAssetFile(TITLE_HOLE_MIDPOINTS_ASSET, &f_HoleAsset);
             }
             else {
-                OpenAssetFile(f_HoleAssetIds[course][hole].midpoints, &f_HoleAsset);
+                OpenAssetFile(f_HoleAssetIds[courseRecordIndex][holeIndex].midpoints, &f_HoleAsset);
             }
 
             break;
@@ -2879,7 +2924,7 @@ void OpenHoleAsset(CourseRecordIndex course, s32 hole, s8 kind) {
                 OpenAssetFile(TITLE_HOLE_TREES_ASSET, &f_HoleAsset);
             }
             else {
-                OpenAssetFile(f_HoleAssetIds[course][hole].trees, &f_HoleAsset);
+                OpenAssetFile(f_HoleAssetIds[courseRecordIndex][holeIndex].trees, &f_HoleAsset);
             }
 
             break;
@@ -2888,7 +2933,7 @@ void OpenHoleAsset(CourseRecordIndex course, s32 hole, s8 kind) {
                 OpenAssetFile(TITLE_HOLE_TRIANGLES_ASSET, &f_HoleAsset);
             }
             else {
-                OpenAssetFile(f_HoleAssetIds[course][hole].triangles, &f_HoleAsset);
+                OpenAssetFile(f_HoleAssetIds[courseRecordIndex][holeIndex].triangles, &f_HoleAsset);
             }
 
             break;
@@ -2897,7 +2942,10 @@ void OpenHoleAsset(CourseRecordIndex course, s32 hole, s8 kind) {
                 OpenAssetFile(TITLE_HOLE_ATTRIBUTES_ASSET, &f_HoleAsset);
             }
             else {
-                OpenAssetFile(f_HoleAssetIds[course][hole].attributes, &f_HoleAsset);
+                OpenAssetFile(
+                    f_HoleAssetIds[courseRecordIndex][holeIndex].attributes,
+                    &f_HoleAsset
+                );
             }
 
             GetAssetFileSize(&f_HoleAsset);
