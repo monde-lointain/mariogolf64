@@ -702,7 +702,7 @@ void DrawRingShotRecords(Gfx **displayListHead) {
                         gDPPipeSync(gfx++);
                     }
                 }
-                while (0);
+                while (FALSE);
             }
         }
 
@@ -783,7 +783,7 @@ void DrawRingShotRecords(Gfx **displayListHead) {
 
                     listIndex++;
                 }
-                while (0);
+                while (FALSE);
             }
         }
 

@@ -1223,7 +1223,7 @@ void SnapLookAtPoint(void) {
             f_CameraPosition[axis] += (offset) * CAMERA_EASE_FRACTION; \
         } \
     } \
-    while (0)
+    while (FALSE)
 
 void EaseCameraPosition(Vec3 target) {
     f32 offset;

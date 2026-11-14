@@ -3010,7 +3010,7 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
 
                         j = 0;
                     }
-                    while (0);
+                    while (FALSE);
                     for (i = 0; i != g_GameState.playerCount; i++) {
                         StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
                         for (j = 0; j != g_GameState.playerCount; j++) {

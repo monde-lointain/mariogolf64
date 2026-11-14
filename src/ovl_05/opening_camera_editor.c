@@ -391,7 +391,7 @@ void StopEditorMoves(void) {
             (topSpeed) = (acceleration); \
         } \
     } \
-    while (0)
+    while (FALSE)
 
 void UpdateCameraEditor(void) {
     Boolean hasMoved = FALSE;

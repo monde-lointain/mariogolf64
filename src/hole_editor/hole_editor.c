@@ -3532,7 +3532,7 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
     void AppendText(char *source) {
         char character;
 
-        for (;;) {
+        while (TRUE) {
             if ((character = *source++) == '\0') {
                 return;
             }

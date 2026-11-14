@@ -2123,7 +2123,7 @@ s32 StepTrialShot(void) {
                 return 0;
             }
         }
-        while (0);
+        while (FALSE);
     }
 
     if (!f_IsPutting) {
@@ -2208,7 +2208,7 @@ EVALUATE:
                         f_IsTrialLost = TRUE;
                     }
                 }
-                while (0);
+                while (FALSE);
             }
 
             heightMiss = f_PlanTarget[AXIS_Y] - f_TrialSimulation.position[AXIS_Y];

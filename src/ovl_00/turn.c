@@ -2754,7 +2754,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
         g_CurrentShot.targetPoint[AXIS_Z] = \
             (sinf(angle) * length) + g_CurrentShot.ballPosition[AXIS_Z]; \
     } \
-    while (0)
+    while (FALSE)
 
 void UpdateTurns(void) {
     s32 playerIndex;

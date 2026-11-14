@@ -1428,9 +1428,9 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
                     labelIndex = columnIndex + PLAYER_LABEL_COMPUTER_FIRST;
                 }
             }
-            while (0);
+            while (FALSE);
         }
-        while (0);
+        while (FALSE);
 
         gDPLoadMultiBlock_4b(
             gfx++,

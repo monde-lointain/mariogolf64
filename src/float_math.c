@@ -11,7 +11,7 @@ typedef union {
         shape.value = (source); \
         (destination) = shape.word; \
     } \
-    while (0)
+    while (FALSE)
 
 #define SET_FLOAT_WORD(destination, source) \
     do { \
@@ -19,7 +19,7 @@ typedef union {
         shape.word = (source); \
         (destination) = shape.value; \
     } \
-    while (0)
+    while (FALSE)
 
 #define SIGN_MASK 0x80000000
 #define MAGNITUDE_MASK 0x7FFFFFFF

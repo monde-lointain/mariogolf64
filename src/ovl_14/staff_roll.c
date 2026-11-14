@@ -209,7 +209,7 @@
             (frames) = (limit); \
         } \
     } \
-    while (0)
+    while (FALSE)
 
 #define ShrinkView(view, frames) \
     do { \
@@ -227,7 +227,7 @@
         (view).viewportCenterY = ViewportCenter(top, height); \
         (view).zoom = 2.0f * height * (1.0f / UNIT_ZOOM_HEIGHT); \
     } \
-    while (0)
+    while (FALSE)
 
 #define EASE_LOOK_AT (1 << 0)
 #define EASE_EYE (1 << 1)

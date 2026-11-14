@@ -57,7 +57,7 @@
     do { \
         statements; \
     } \
-    while (0)
+    while (FALSE)
 
 #define ASSIGN_FOR_VALUE(assignment) ({ assignment; })
 
