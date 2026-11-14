@@ -1434,8 +1434,9 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_COURSE_STRIP_WIDTH 64
 #define NOTICE_COURSE_STRIP_HEIGHT 32
 #define NOTICE_COURSE_STRIP_COUNT 2
-#define NOTICE_COURSE_CENTER_X (SCREEN_WIDTH / 2)
-#define NOTICE_COURSE_CENTER_Y 128
+// The course and character notices pop up around the same point.
+#define NOTICE_CENTER_X (SCREEN_WIDTH / 2)
+#define NOTICE_CENTER_Y 128
 #define NOTICE_COURSE_SCALE_BIAS 2.0f
 #define NOTICE_TITLE_STRIP_WIDTH 160
 #define NOTICE_TITLE_STRIP_COUNT 8
@@ -1499,8 +1500,8 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        top = NOTICE_COURSE_CENTER_Y - size + (i * size);
-        centerX = f_NoticeSwing + NOTICE_COURSE_CENTER_X;
+        top = NOTICE_CENTER_Y - size + (i * size);
+        centerX = f_NoticeSwing + NOTICE_CENTER_X;
         DrawTextureRectangle(
             &gfx,
             QuarterPixels(centerX - size),
@@ -1660,7 +1661,7 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
     }
 
     if (f_NoticeFrameCount >= NOTICE_PAN_START && f_NoticeFrameCount < NOTICE_PAN_END) {
-        pan = (f_NoticeSwing + NOTICE_COURSE_CENTER_X) * NOTICE_PAN_RANGE / NOTICE_COURSE_CENTER_X;
+        pan = (f_NoticeSwing + NOTICE_CENTER_X) * NOTICE_PAN_RANGE / NOTICE_CENTER_X;
         if (pan < SOUND_PAN_LEFT) {
             pan = SOUND_PAN_LEFT;
         }
@@ -1736,8 +1737,6 @@ void UpdateCharacterResultsNotice(void) {
 #define NOTICE_POP_FRAMES 10
 #define NOTICE_POP_STEP 0.15f
 #define NOTICE_POP_SETTLE_ANGLE (3 * M_PI / 4)
-#define NOTICE_CENTER_X (SCREEN_WIDTH / 2)
-#define NOTICE_CENTER_Y 128
 #define NOTICE_PLAQUE_POP_SIZE 36.0f
 #define NOTICE_FACE_SIZE 32
 #define NOTICE_FACE_POP_SIZE 24.0f
