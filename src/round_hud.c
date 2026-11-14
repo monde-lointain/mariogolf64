@@ -719,13 +719,13 @@ void PrepareHoleDisplay(void) {
 #endif
 
 void InitRoundHud(void) {
-    s32 grid;
+    s32 gridIndex;
     s32 row;
     s32 column;
 
     f_UnusedHudInitWord = 0;
-    for (grid = 0; grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
-        Vtx *vertex = HoleFlagGridVertices(grid);
+    for (gridIndex = 0; gridIndex != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; gridIndex++) {
+        Vtx *vertex = HoleFlagGridVertices(gridIndex);
 
         for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
             for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, vertex++) {
@@ -742,8 +742,9 @@ void InitRoundHud(void) {
         }
     }
 
-    for (grid = MATRIX_BUFFER_COUNT; grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
-        Vtx *vertex = HoleFlagGridVertices(grid);
+    for (gridIndex = MATRIX_BUFFER_COUNT; gridIndex != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT;
+        gridIndex++) {
+        Vtx *vertex = HoleFlagGridVertices(gridIndex);
 
         for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
             for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, vertex++) {
