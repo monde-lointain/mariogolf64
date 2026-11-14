@@ -115,7 +115,7 @@
 #define LOGO_HEIGHT 72
 #define LOGO_STRIP_HEIGHT 8
 #define LOGO_STRIP_COUNT 9
-#define LOGO_X 160
+#define LOGO_X (SCREEN_WIDTH / 2)
 #define LOGO_Y 42
 #define LOGO_BOB_STEP 0.2f
 #define LOGO_BOB_HEIGHT 5.0f

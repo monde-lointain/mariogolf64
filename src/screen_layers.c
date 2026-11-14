@@ -111,7 +111,6 @@ enum HalfTurnState {
 #define PROMPT_CHOICE_YES 0
 #define PROMPT_CHOICE_NO 1
 #define SAVING_RESULT_COUNT (PROMPT_RESULT_SAVE_REPLAY + 1)
-#define PROMPT_TEXT_X 160
 #define PROMPT_TEXT_Y 108
 #define SAVE_SOUND_CHANNEL 15
 #define PROMPT_GROWTH_FRAMES 4
@@ -720,7 +719,7 @@ s32 UpdatePrompt(ControllerState *controller) {
 
     if (f_PromptState == PROMPT_STATE_CHOOSING) {
         SetTextSlot(
-            PROMPT_TEXT_X,
+            PROMPT_CENTER_X,
             PROMPT_TEXT_Y,
             prompt->messageId,
             TEXT_SLOT_LARGE_FONT,

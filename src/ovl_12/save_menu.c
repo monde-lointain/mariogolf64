@@ -63,7 +63,7 @@ enum SaveMenuState {
 #define SAVE_MENU_SOUND_PAN 0xFF
 
 #define SAVE_MENU_TITLE_IMAGE 0x6A5
-#define MESSAGE_CENTER_X 160
+#define MESSAGE_CENTER_X (SCREEN_WIDTH / 2)
 #define MESSAGE_CENTER_Y 114
 #define NO_TEXT (-1)
 

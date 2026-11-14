@@ -691,7 +691,7 @@ void UpdateBetSettings(void) {
 #define BET_BANNER_LEFT 80
 #define BET_BANNER_RIGHT 240
 #define BET_BANNER_TOP 152
-#define BET_LABEL_CENTER_X 160
+#define BET_LABEL_CENTER_X (SCREEN_WIDTH / 2)
 #define BET_LABEL_TOP 156
 
 void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled) {
@@ -2326,7 +2326,7 @@ void UpdateBestShots(void) {
 #define RECORD_COURSE_NAME_Y 180
 #define RECORD_HOLE_X 200
 #define RECORD_HOLE_Y 204
-#define NO_RECORDS_X 160
+#define NO_RECORDS_X (SCREEN_WIDTH / 2)
 #define NO_RECORDS_Y 192
 #define MESSAGE_NO_RECORDS 0x16E
 
