@@ -2518,21 +2518,22 @@ void ComputeRoundStatistics(void) {
             g_CourseStatFigures[courseIndex].bestDrive = courseStats->longestDrive * YARDS_PER_UNIT;
             g_CourseStatFigures[courseIndex].driveAverage =
                 courseStats->driveAverage * YARDS_PER_UNIT;
-            g_CourseStatFigures[courseIndex].fairwayPercent =
-                courseStats->measuredDriveTotal * reciprocal * (100.0f / HOLES_PER_ROUND);
+            g_CourseStatFigures[courseIndex].fairwayPercent = courseStats->measuredDriveTotal *
+                reciprocal * ((f32)PERCENT_PER_WHOLE / HOLES_PER_ROUND);
             g_CourseStatFigures[courseIndex].puttAverage =
                 courseStats->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND);
-            g_CourseStatFigures[courseIndex].parSavePercent =
-                courseStats->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND);
+            g_CourseStatFigures[courseIndex].parSavePercent = courseStats->parOrBetterCount *
+                reciprocal * ((f32)PERCENT_PER_WHOLE / HOLES_PER_ROUND);
             g_CourseStatFigures[courseIndex].parOnPercent =
-                courseStats->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND);
+                courseStats->parOnCount * reciprocal * ((f32)PERCENT_PER_WHOLE / HOLES_PER_ROUND);
             sandSaveAttemptCount = courseStats->sandSaveCount + courseStats->missedSandSaveCount;
             if (sandSaveAttemptCount <= 0) {
                 g_CourseStatFigures[courseIndex].sandSavePercent = 0.0f;
             }
             else {
                 g_CourseStatFigures[courseIndex].sandSavePercent =
-                    ((f32)courseStats->sandSaveCount / (f32)sandSaveAttemptCount) * 100.0f;
+                    ((f32)courseStats->sandSaveCount / (f32)sandSaveAttemptCount) *
+                    (f32)PERCENT_PER_WHOLE;
             }
 
             g_CourseStatFigures[courseIndex].hasPlace[THIRD_PLACE_INDEX] =
@@ -2623,14 +2624,17 @@ void ComputeRoundStatistics(void) {
         }
         else {
             g_CourseStatFigures[COURSE_COUNT].sandSavePercent =
-                (sandSaveSum / sandSaveChanceSum) * 100.0f;
+                (sandSaveSum / sandSaveChanceSum) * (f32)PERCENT_PER_WHOLE;
         }
 
         holeCount = g_CourseStatFigures[COURSE_COUNT].roundCount * HOLES_PER_ROUND;
         g_CourseStatFigures[COURSE_COUNT].puttAverage = puttSum / holeCount;
-        g_CourseStatFigures[COURSE_COUNT].fairwayPercent = (measuredDriveSum / holeCount) * 100.0f;
-        g_CourseStatFigures[COURSE_COUNT].parSavePercent = (parOrBetterSum / holeCount) * 100.0f;
-        g_CourseStatFigures[COURSE_COUNT].parOnPercent = (parOnSum / holeCount) * 100.0f;
+        g_CourseStatFigures[COURSE_COUNT].fairwayPercent =
+            (measuredDriveSum / holeCount) * (f32)PERCENT_PER_WHOLE;
+        g_CourseStatFigures[COURSE_COUNT].parSavePercent =
+            (parOrBetterSum / holeCount) * (f32)PERCENT_PER_WHOLE;
+        g_CourseStatFigures[COURSE_COUNT].parOnPercent =
+            (parOnSum / holeCount) * (f32)PERCENT_PER_WHOLE;
         g_CourseStatFigures[COURSE_COUNT].scoreAverage =
             strokeSum / g_CourseStatFigures[COURSE_COUNT].roundCount;
         if (driveYardSum > 0.0f && driveCountSum > 0) {

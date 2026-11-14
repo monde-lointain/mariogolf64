@@ -246,7 +246,6 @@ typedef s32 ListingState;
 #define HUNDREDTHS_PER_TENTH 10
 #define HALF_TENTH_HUNDREDTHS 5
 #define TENTHS_PER_ONE 10
-#define PERCENTS_PER_ONE 100.0f
 
 #define STATUS_CLEARED_SIZE 0x400
 #define STATUS_SCORE_BIAS 54
@@ -3922,16 +3921,17 @@ void BuildStatusData(StatusData *status) {
                 course->driveAverage[1] = figure >> BITS_PER_BYTE;
                 course->fairwayPercent = RoundedWholePart(
                     courseStats->measuredDriveTotal * reciprocal *
-                    (PERCENTS_PER_ONE / HOLES_PER_ROUND)
+                    ((f32)PERCENT_PER_WHOLE / HOLES_PER_ROUND)
                 );
                 course->puttAverage =
                     PackTenths(courseStats->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND));
                 course->parSavePercent = RoundedWholePart(
                     courseStats->parOrBetterCount * reciprocal *
-                    (PERCENTS_PER_ONE / HOLES_PER_ROUND)
+                    ((f32)PERCENT_PER_WHOLE / HOLES_PER_ROUND)
                 );
                 course->parOnPercent = RoundedWholePart(
-                    courseStats->parOnCount * reciprocal * (PERCENTS_PER_ONE / HOLES_PER_ROUND)
+                    courseStats->parOnCount * reciprocal *
+                    ((f32)PERCENT_PER_WHOLE / HOLES_PER_ROUND)
                 );
                 sandSaveAttemptCount =
                     courseStats->sandSaveCount + courseStats->missedSandSaveCount;
@@ -3941,7 +3941,7 @@ void BuildStatusData(StatusData *status) {
                 else {
                     course->sandSavePercent = RoundedWholePart(
                         ((f32)courseStats->sandSaveCount / (f32)sandSaveAttemptCount) *
-                        PERCENTS_PER_ONE
+                        (f32)PERCENT_PER_WHOLE
                     );
                 }
 

@@ -3402,7 +3402,7 @@ static Club f_NoClub = {
 static ShotLaunch f_ClubTestShot =
     {STRAIGHT_ANGLE, NO_CLUB, LAUNCH_POWER_MAX, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 #define LIE_RATING_LEVEL_MAX 4
-#define DEFAULT_LIE_RATING_PERCENT 100
+#define DEFAULT_LIE_RATING_PERCENT PERCENT_PER_WHOLE
 static u8 f_LieRatingPercents[(LIE_RATING_LEVEL_MAX * 2) + 1] =
     {30, 50, 70, 80, 100, 115, 120, 145, 170};
 static s8 f_StockCurves[CLUB_SET_COUNT] =
@@ -3866,7 +3866,7 @@ void GenerateClub(s32 clubIndex) {
                 "Try %d: dist %fYd:  Error %f%\n",
                 tryIndex + 1,
                 distance * YARDS_PER_UNIT,
-                error / targetDistance * 100.0f
+                error / targetDistance * (f32)PERCENT_PER_WHOLE
             );
             if (fabsf(error) < targetDistance * GENERATION_TOLERANCE) {
                 break;
@@ -4320,7 +4320,7 @@ LieRating GetLieRating(Club *club, Surface surface, ShotMode shotMode) {
             rating = ratings[club->type] - '0';
         }
 
-        rating = ((rating * club->lieRatingPercent) + 50) / 100;
+        rating = ((rating * club->lieRatingPercent) + (PERCENT_PER_WHOLE / 2)) / PERCENT_PER_WHOLE;
         if (rating <= NO_LIE_RATING) {
             rating = LIE_RATING_MIN;
         }

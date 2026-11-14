@@ -66,8 +66,7 @@
 #define SKY_VERTEX_COUNT 10
 #define SKY_BLEND_STEP_COUNT 1000
 
-#define SKY_PERCENT_TO_STEPS (SKY_BLEND_STEP_COUNT / 100)
-#define PERCENT_COUNT 100
+#define SKY_PERCENT_TO_STEPS (SKY_BLEND_STEP_COUNT / PERCENT_PER_WHOLE)
 #define PALETTE_START (IMAGE_HEADER_SIZE / PALETTE_COLOR_SIZE)
 #define SKY_IMAGE_CHANNEL_MAX 31
 #define SKY_IMAGE_HORIZON_PARTS 5
@@ -1723,15 +1722,15 @@ void InitSkyColors(void) {
             blended[2] = from->backgroundColor[2] +
                 ((to->backgroundColor[2] - from->backgroundColor[2]) * f_SkyBlendStep /
                     SKY_BLEND_STEP_COUNT);
-            red = ((red * (PERCENT_COUNT - colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+            red = ((red * (PERCENT_PER_WHOLE - colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
                       (blended[0] * colors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
-                PERCENT_COUNT;
-            green = ((green * (PERCENT_COUNT - colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+                PERCENT_PER_WHOLE;
+            green = ((green * (PERCENT_PER_WHOLE - colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
                         (blended[1] * colors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
-                PERCENT_COUNT;
-            blue = ((blue * (PERCENT_COUNT - colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+                PERCENT_PER_WHOLE;
+            blue = ((blue * (PERCENT_PER_WHOLE - colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
                        (blended[2] * colors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
-                PERCENT_COUNT;
+                PERCENT_PER_WHOLE;
         }
 
         if (red < 0) {
@@ -1869,12 +1868,14 @@ s32 UpdateSkyEditor(void) {
                 f_EditedSkyColors->backgroundColor[f_SkyEditorRow]++;
                 isImageChanged = TRUE;
                 if (f_SkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
-                    if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] == PERCENT_COUNT + 1) {
+                    if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] ==
+                        PERCENT_PER_WHOLE + 1) {
                         f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = 0;
                     }
 
-                    if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] > PERCENT_COUNT + 1) {
-                        f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = PERCENT_COUNT;
+                    if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] >
+                        PERCENT_PER_WHOLE + 1) {
+                        f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = PERCENT_PER_WHOLE;
                     }
                 }
                 else {
@@ -1905,12 +1906,14 @@ s32 UpdateSkyEditor(void) {
                 f_EditedSkyColors->backgroundColor[f_SkyEditorRow]--;
                 isImageChanged = TRUE;
                 if (f_SkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
-                    if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] == PERCENT_COUNT + 1) {
+                    if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] ==
+                        PERCENT_PER_WHOLE + 1) {
                         f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = 0;
                     }
 
-                    if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] > PERCENT_COUNT + 1) {
-                        f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = PERCENT_COUNT;
+                    if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] >
+                        PERCENT_PER_WHOLE + 1) {
+                        f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = PERCENT_PER_WHOLE;
                     }
                 }
                 else {
@@ -2006,23 +2009,23 @@ s32 UpdateSkyEditor(void) {
             }
             else {
                 red = ((red *
-                           (PERCENT_COUNT -
+                           (PERCENT_PER_WHOLE -
                                f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
                           (f_EditedSkyColors->backgroundColor[0] *
                               f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
-                    PERCENT_COUNT;
+                    PERCENT_PER_WHOLE;
                 green = ((green *
-                             (PERCENT_COUNT -
+                             (PERCENT_PER_WHOLE -
                                  f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
                             (f_EditedSkyColors->backgroundColor[1] *
                                 f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
-                    PERCENT_COUNT;
+                    PERCENT_PER_WHOLE;
                 blue = ((blue *
-                            (PERCENT_COUNT -
+                            (PERCENT_PER_WHOLE -
                                 f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
                            (f_EditedSkyColors->backgroundColor[2] *
                                f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
-                    PERCENT_COUNT;
+                    PERCENT_PER_WHOLE;
             }
 
             if (red < 0) {

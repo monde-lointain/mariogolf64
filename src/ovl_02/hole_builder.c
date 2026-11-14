@@ -3039,7 +3039,6 @@ void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 assetK
 #define SHADOW_LIGHT_DISTANCE 1000.0f
 #define SOLIDITY_ROW_SHIFT 5
 #define SOLIDITY_ROW_LENGTH (1 << SOLIDITY_ROW_SHIFT)
-#define LIT_PERCENT_FULL 100
 #define LIT_PERCENT_AT_BASE 50.0f
 #define SHADOW_NEARNESS_LIMIT 1.5f
 #define SHADOW_NEARNESS_MIN 0.1f
@@ -3206,7 +3205,7 @@ void CastBillboardShadows(void) {
                 if (((-width <= viewY) & (viewY < height)) == 0)
                     continue;
 
-                litPercent = LIT_PERCENT_FULL;
+                litPercent = PERCENT_PER_WHOLE;
                 widthFraction = fabsf(viewX) * widthScale;
                 heightFraction = viewY * heightScale;
                 if (widthFraction + fabsf(heightFraction * 2) < 1.0f)
@@ -3226,14 +3225,14 @@ void CastBillboardShadows(void) {
                             (fabsf((lightView[0][2] * column) + rowPoint[AXIS_Z]) * heightScale);
                         if (nearness > SHADOW_NEARNESS_MIN) {
                             solidLitPercent =
-                                LIT_PERCENT_FULL - (solidity * nearness * SHADOW_SOLIDITY_SCALE);
+                                PERCENT_PER_WHOLE - (solidity * nearness * SHADOW_SOLIDITY_SCALE);
                             if (solidLitPercent < litPercent)
                                 litPercent = solidLitPercent;
                         }
                     }
                 }
 
-                if (litPercent == LIT_PERCENT_FULL)
+                if (litPercent == PERCENT_PER_WHOLE)
                     continue;
 
                 color = *GetShadowedTexel(column, row);
@@ -3249,7 +3248,7 @@ void CastBillboardShadows(void) {
                     brightness = SHADOW_BRIGHTNESS_MAX;
 
                 scale = SHADOW_SCALE_ONE -
-                    ((LIT_PERCENT_FULL - litPercent) * brightness * SHADOW_DARKENING_SCALE);
+                    ((PERCENT_PER_WHOLE - litPercent) * brightness * SHADOW_DARKENING_SCALE);
                 red = (red * scale) >> SHADOW_SCALE_FRACTION_BITS;
                 green = (green * scale) >> SHADOW_SCALE_FRACTION_BITS;
                 blue = (blue * scale) >> SHADOW_SCALE_FRACTION_BITS;

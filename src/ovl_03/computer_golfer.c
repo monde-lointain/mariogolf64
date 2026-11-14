@@ -389,7 +389,6 @@ s32 GetSideSlope(void) {
 #define LEVEL_MISS_DISTANCE 0x1E00
 #define MISS_STRETCH 2.5f
 #define MISS_REPORT_COUNT 40
-#define FULL_PERCENT 100
 #define PLANNED_POWER_GAUGE_FRAME_MIN 2
 #define POWER_GAUGE_FRAME_BOOST 1.2f
 #define LEVEL_TRIAL_COUNT 4
@@ -538,8 +537,8 @@ s32 PlanShot(CurrentShot *plannedShot) {
                             GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
                             percentRange
                         );
-                        shortestReach =
-                            shortestReach * percentRange[0] / (FULL_PERCENT * GAUGE_FULL_FRAME);
+                        shortestReach = shortestReach * percentRange[0] /
+                            (PERCENT_PER_WHOLE * GAUGE_FULL_FRAME);
                         if (shortestReach < CLUB_DOWN_REACH_MIN ||
                             targetDistance / shortestReach >= CLUB_DOWN_REACH_COUNT) {
                             break;
@@ -633,8 +632,8 @@ s32 PlanShot(CurrentShot *plannedShot) {
                 GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
                 percentRange
             );
-            reach =
-                reach * (percentRange[1] + percentRange[0]) / (2 * FULL_PERCENT * GAUGE_FULL_FRAME);
+            reach = reach * (percentRange[1] + percentRange[0]) /
+                (2 * PERCENT_PER_WHOLE * GAUGE_FULL_FRAME);
             distance = (rand() & 3) + (distance / reach);
             if (GetClubBoldness() >= BOLD_CLUB_CHOICE) {
                 distance = distance * POWER_GAUGE_FRAME_BOOST;
@@ -2506,7 +2505,7 @@ ClubType ChooseClubForDistance(s32 distance) {
             carry = carry * RAINY_DISTANCE_FRACTION;
         }
 
-        carry = carry * GetSurfaceTraits(f_Shot.surface)->percentMin / FULL_PERCENT;
+        carry = carry * GetSurfaceTraits(f_Shot.surface)->percentMin / PERCENT_PER_WHOLE;
         rating = GetLieRating(club, f_Shot.surface, SHOT_MODE_NORMAL);
         if (ShotGolferTraits().clubBoldness < BOLD_CLUB_CHOICE) {
             if (rating == LIE_RATING_MIN) {
@@ -2679,17 +2678,17 @@ s32 RollClubCategoryChance(ClubChanceSet chanceSet) {
     }
 
     if (IsShotClubOfTypes(CLUB_TYPE_DRIVER, CLUB_TYPE_LAST_WOOD)) {
-        if (rand() % FULL_PERCENT < f_ClubCategoryChances[chanceSet][CLUB_CHANCE_WOOD]) {
+        if (rand() % PERCENT_PER_WHOLE < f_ClubCategoryChances[chanceSet][CLUB_CHANCE_WOOD]) {
             return TRUE;
         }
     }
     else if (IsShotClubOfTypes(CLUB_TYPE_FIRST_IRON, CLUB_TYPE_LAST_IRON)) {
-        if (rand() % FULL_PERCENT < f_ClubCategoryChances[chanceSet][CLUB_CHANCE_IRON]) {
+        if (rand() % PERCENT_PER_WHOLE < f_ClubCategoryChances[chanceSet][CLUB_CHANCE_IRON]) {
             return TRUE;
         }
     }
     else {
-        if (rand() % FULL_PERCENT < f_ClubCategoryChances[chanceSet][CLUB_CHANCE_OTHER]) {
+        if (rand() % PERCENT_PER_WHOLE < f_ClubCategoryChances[chanceSet][CLUB_CHANCE_OTHER]) {
             return TRUE;
         }
     }
