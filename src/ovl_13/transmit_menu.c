@@ -52,18 +52,23 @@ typedef s32 TransmitOption;
 
 #define MESSAGE_FIRST_TRANSMIT_OPTION_HINT 0x143
 
-#define BRING_READING 0
-#define BRING_CHOOSING 2
-#define BRING_BRINGING 3
-#define BRING_ASKING 4
-#define BRING_UNUSED 5
-#define BRING_BROUGHT 7
-#define BRING_CHOOSING_SLOT 8
-#define BRING_NO_CHARACTERS 10
-#define BRING_CONFIRMING 12
-#define BRING_STARTING 13
-#define BRING_SHOWING_ERROR 14
-#define BRING_NEXT_CARTRIDGE 16
+enum BringStep {
+    BRING_READING,
+    BRING_CHOOSING = 2,
+    BRING_BRINGING,
+    BRING_ASKING,
+    BRING_UNUSED,
+    BRING_BROUGHT = 7,
+    BRING_CHOOSING_SLOT,
+    BRING_NO_CHARACTERS = 10,
+    BRING_CONFIRMING = 12,
+    BRING_STARTING,
+    BRING_SHOWING_ERROR,
+    BRING_NEXT_CARTRIDGE = 16
+};
+
+typedef s32 BringStep;
+
 #define BRINGING_FRAME_COUNT 16
 
 enum SendStatusStep {
@@ -100,6 +105,27 @@ enum NoticeState {
 };
 
 typedef s32 NoticeState;
+
+enum PakResult {
+    PAK_RESULT_STILL_READING = -1,
+    // OpenGameBoyPak returns this for an error it does not name.
+    PAK_RESULT_UNKNOWN_ERROR = PAK_RESULT_STILL_READING,
+    PAK_RESULT_CONNECTOR_PROBLEM,
+    PAK_RESULT_OK,
+    PAK_RESULT_NO_CHARACTERS,
+    PAK_RESULT_NO_PAK,
+    PAK_RESULT_NO_CARTRIDGE,
+    PAK_RESULT_WRONG_CARTRIDGE,
+    PAK_RESULT_OTHER_PAK,
+    PAK_RESULT_LOOSE_PAK,
+    PAK_RESULT_REMOVED_RETRYING,
+    PAK_RESULT_CARTRIDGE_REMOVED,
+    PAK_RESULT_CORRUPTED,
+    PAK_RESULT_CARTRIDGE_REPLACED,
+    PAK_RESULT_UNINITIALIZED
+};
+
+typedef s32 PakResult;
 
 #define MESSAGE_INSERT_TRANSFER_PAK 0x149
 #define MESSAGE_SWAP_FOR_TRANSFER_PAK 0x148
@@ -161,14 +187,6 @@ typedef s32 ShotType;
 #define FACES_TOP 136
 #define FACE_SPACING 40
 #define FACE_CURSOR_MARGIN 9
-
-enum ListingState {
-    LISTING_NONE,
-    LISTING_SHOWN,
-    LISTING_BRINGING
-};
-
-typedef s32 ListingState;
 
 #define LISTED_FACES_LEFT 28
 #define LISTED_FACES_TOP 56
@@ -389,33 +407,19 @@ typedef s32 ExperienceWriteResult;
 
 #define FIRST_GAME_BOY_GOLFER CHARACTER_KID
 
-s32 ReadCartridgeCharacters(void);
+PakResult ReadCartridgeCharacters(void);
 void BringOverCharacter(s32 listedIndex, s32 gameBoyCharacterIndex);
 void ListPresentCharacters(void);
 void ClearCartridgeCharacters(void);
 void ResetSendStatus(void);
 void ResetSendExperience(void);
-s32 TagCartridges(void);
+PakResult TagCartridges(void);
 StatusCheck CheckStatusCartridge(s32 cartridgeIndex);
 StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex);
 ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex);
 void SetNoticeState(NoticeState state, MessageId messageId);
 NoticeState GetNoticeState(void);
 
-#define PAK_RESULT_STILL_READING (-1)
-#define PAK_RESULT_CONNECTOR_PROBLEM 0
-#define PAK_RESULT_OK 1
-#define PAK_RESULT_NO_CHARACTERS 2
-#define PAK_RESULT_NO_PAK 3
-#define PAK_RESULT_NO_CARTRIDGE 4
-#define PAK_RESULT_WRONG_CARTRIDGE 5
-#define PAK_RESULT_OTHER_PAK 6
-#define PAK_RESULT_LOOSE_PAK 7
-#define PAK_RESULT_REMOVED_RETRYING 8
-#define PAK_RESULT_CARTRIDGE_REMOVED 9
-#define PAK_RESULT_CORRUPTED 10
-#define PAK_RESULT_CARTRIDGE_REPLACED 11
-#define PAK_RESULT_UNINITIALIZED 12
 #define GAME_BOY_PAK_OPEN_ATTEMPTS 3
 
 #define GAME_BOY_TITLE_CHECKED_LENGTH 14
@@ -425,8 +429,8 @@ extern ImageAsset *g_PressingHandImage;
 
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer);
 
-s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file);
-s32 OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *file);
+PakResult OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file);
+PakResult OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *file);
 
 s32 RoundedWholePart(f32 value);
 
@@ -579,7 +583,7 @@ void ShowTransferError(u32 result);
 
 void UpdateBringCharacters(void) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
-    s32 result;
+    PakResult result;
 
     switch (transfer->screenStep) {
         default:
@@ -2970,7 +2974,7 @@ StatusCheck CheckStatusCartridge(s32 cartridgeIndex) {
     u8 save[CARTRIDGE_SAVE_SIZE];
     Boolean isSignatureWrong;
     s32 index;
-    s32 result;
+    PakResult result;
     s32 readResult;
     s32 computedChecksum;
     s32 storedChecksum;
@@ -3155,7 +3159,7 @@ StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex) {
     return STATUS_WRITE_FAILED;
 }
 
-s32 ReadCartridgeCharacters(void) {
+PakResult ReadCartridgeCharacters(void) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     u8 save[CARTRIDGE_SAVE_SIZE];
     u8 characterData[CHARACTER_DATA_SIZE];
@@ -3415,9 +3419,9 @@ s32 ReadCartridgeCharacters(void) {
     return PAK_RESULT_STILL_READING;
 }
 
-s32 OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *file) {
+PakResult OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *file) {
     s32 failureCount;
-    s32 result;
+    PakResult result;
 
     for (failureCount = 0; failureCount != GAME_BOY_PAK_OPEN_ATTEMPTS; failureCount++) {
         result = OpenGameBoyPak(port, header, file);
@@ -3431,7 +3435,7 @@ s32 OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *file) 
     return result;
 }
 
-s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
+PakResult OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
     Boolean isMarioGolf = TRUE;
     s32 index;
     u8 pakStatus;
@@ -3448,7 +3452,7 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
             return PAK_RESULT_OTHER_PAK;
         default:
             osSyncPrintf("1st GB DEFAULT ERROR %d\n", port);
-            return -1;
+            return PAK_RESULT_UNKNOWN_ERROR;
     }
 
     switch (nuContGBPakGetStatus(file, &pakStatus)) {
@@ -3542,7 +3546,7 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
     return -1;
 }
 
-s32 TagCartridges(void) {
+PakResult TagCartridges(void) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     OSGbpakId header;
     NUContPakFile file;

@@ -95,6 +95,14 @@ typedef s32 TransmitScreen;
 
 #define CARTRIDGE_TAG_SIZE 16
 
+enum ListingState {
+    LISTING_NONE,
+    LISTING_SHOWN,
+    LISTING_BRINGING
+};
+
+typedef s32 ListingState;
+
 enum PressingHand {
     PRESSING_HAND_HIDDEN,
     PRESSING_HAND_LOW,
@@ -129,10 +137,12 @@ typedef struct GameBoyTransfer {
     OSGbpakId cartridgeHeader;
     GameBoyCharacter cartridgeCharacters[CARTRIDGE_CHARACTER_COUNT];
     s32 sourceIndices[GAME_BOY_CHARACTER_COUNT];
-    s32 listingStates[CARTRIDGE_CHARACTER_COUNT];
+    ListingState listingStates[CARTRIDGE_CHARACTER_COUNT];
     s32 listedCharacterCount;
     s32 readStep;
+    // A PakResult, or a PFS error code after a failed read or write.
     s32 transferResult;
+    // A BringStep, SendStatusStep or SendExperienceStep, by transferMode.
     s32 screenStep;
     s32 bringingFrame;
     s32 listedCharacterIndex;
