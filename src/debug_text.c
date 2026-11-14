@@ -337,7 +337,7 @@ void PrintDebugPaddedHex(u32 number, s32 column, s32 row) {
 }
 
 void AddToDebugLog(char *text) {
-    s32 count;
+    s32 blanksLeft;
     s8 character;
 
     while (TRUE) {
@@ -350,7 +350,7 @@ void AddToDebugLog(char *text) {
             f_DebugLogCursor =
                 (((f_DebugLogCursor / TEXT_COLUMN_COUNT) * TEXT_COLUMN_COUNT) + TEXT_COLUMN_COUNT) %
                 ARRAY_COUNT(f_DebugLog);
-            for (count = TEXT_COLUMN_COUNT; count != 0; count--) {
+            for (blanksLeft = TEXT_COLUMN_COUNT; blanksLeft != 0; blanksLeft--) {
                 f_DebugLog[f_DebugLogCursor++] = ' ';
             }
 
