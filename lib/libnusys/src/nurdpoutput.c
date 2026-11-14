@@ -13,5 +13,5 @@
 /* The RSP fifo buffer 									*/
 /* It is set as the separate object for making the 16-byte boundary sort*/
 /*----------------------------------------------------------------------*/
-u8 nuRDPOutputBuf[NU_GFX_RDP_OUTPUTBUFF_SIZE];
+u8 nuRDPOutputBuf[NU_GFX_RDP_OUTPUTBUFF_SIZE] __attribute__((aligned(16)));
 
