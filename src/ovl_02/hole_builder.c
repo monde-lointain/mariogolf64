@@ -61,11 +61,17 @@ enum VertexEncoding {
 #define CLEARED_BILLBOARD_HEIGHT 256
 #define BUILD_BUFFER_START ((u8 *)0x80315000)
 
-#define HOLE_ASSET_VERTICES 1
-#define HOLE_ASSET_MIDPOINTS 2
-#define HOLE_ASSET_TREES 3
-#define HOLE_ASSET_TRIANGLES 4
-#define HOLE_ASSET_ATTRIBUTES 5
+enum HoleAssetKind {
+    HOLE_ASSET_VERTICES = 1,
+    HOLE_ASSET_MIDPOINTS,
+    HOLE_ASSET_TREES,
+    HOLE_ASSET_TRIANGLES,
+    HOLE_ASSET_ATTRIBUTES
+};
+
+typedef s32 HoleAssetKind;
+typedef s8 HoleAssetKind8;
+
 #define ASSET_TITLE_HOLE_VERTICES 0x3F0
 #define ASSET_TITLE_HOLE_MIDPOINTS 0x3F1
 #define ASSET_TITLE_HOLE_TREES 0x3F2
@@ -2317,7 +2323,7 @@ CourseIndex GetCoursePaintLogic(CourseRecordIndex courseRecordIndex) {
 }
 
 void ClearHoleBuild(void);
-void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 assetKind);
+void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, HoleAssetKind8 assetKind);
 void ReadBillboards(void);
 void ReadGridVertices(void);
 void ReadHoleTriangles(void);
@@ -2969,7 +2975,7 @@ void ReadVertexZ(s16 *coordinate, s32 vertexFlags) {
     }
 }
 
-void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 assetKind) {
+void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, HoleAssetKind8 assetKind) {
     f_ReadCursor = HOLE_FILE_BUFFER;
     switch (assetKind) {
         case HOLE_ASSET_VERTICES:

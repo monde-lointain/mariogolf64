@@ -191,10 +191,15 @@ typedef s32 TriangleEdit;
 #define HEX_DUMP_LINE_BYTES (HEX_DUMP_LINE_WORDS * (s32)sizeof(u32))
 #define HOLE_EDITOR_HEX_DUMP_ASSERT_LINE 3027
 
-#define HOLE_FILE_STEP_ACTION 0
-#define HOLE_FILE_STEP_COURSE 1
-#define HOLE_FILE_STEP_HOLE 2
-#define HOLE_FILE_STEP_CONFIRM 3
+enum HoleFileStep {
+    HOLE_FILE_STEP_ACTION,
+    HOLE_FILE_STEP_COURSE,
+    HOLE_FILE_STEP_HOLE,
+    HOLE_FILE_STEP_CONFIRM
+};
+
+typedef s32 HoleFileStep;
+
 #define HOLE_FILE_BLINK_BIT 4
 #define HOLE_FILE_ARROW_COLUMN 7
 #define HOLE_FILE_LABEL_COLUMN 10
@@ -612,7 +617,7 @@ static HeightEdit f_LastHeightEditKind = HEIGHT_EDIT_NONE;
 
 static s32 f_UnusedHoleFileSetting UNUSED = 1;
 static Boolean f_IsSavingHoleFiles = FALSE;
-static s32 f_HoleFileStep = 0;
+static HoleFileStep f_HoleFileStep = HOLE_FILE_STEP_ACTION;
 static s32 f_HoleFileHoleNumber = 1;
 static s32 f_HoleFileCourseNumber = 1;
 static s32 f_HoleFilePromptFrames = 0;

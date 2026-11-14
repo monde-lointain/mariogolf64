@@ -74,9 +74,15 @@ typedef u8 UStickDiagonal8;
 #define CURVE_LABEL_IMAGE_HEIGHT 24
 #define CURVE_LABEL_LEFT 210
 #define CURVE_LABEL_TOP 174
-#define CURVE_LABEL_STRAIGHT 0
-#define CURVE_LABEL_DRAW 1
-#define CURVE_LABEL_FADE 2
+
+enum CurveLabel {
+    CURVE_LABEL_STRAIGHT,
+    CURVE_LABEL_DRAW,
+    CURVE_LABEL_FADE
+};
+
+typedef s32 CurveLabel;
+
 #define BUTTON_ICON_WIDTH 32
 #define BUTTON_ICON_HEIGHT 24
 #define BUTTON_ICON_TOP 20
@@ -2152,7 +2158,7 @@ void DrawCurveMeter(Gfx **displayListHead, s32 clubSet) {
     s32 cellIndex;
     s32 endCell;
     ImageAsset *labelImage;
-    s32 labelRow;
+    CurveLabel labelRow;
 
     if (curve < 0) {
         firstCell = CURVE_METER_CENTER + curve;

@@ -74,12 +74,18 @@
 #define MAIN_CHOICE_COUNT 4
 
 #define CLUBHOUSE_CHOICE_COUNT 5
-#define CLUBHOUSE_ROOM_COURSE_STATS 0
-#define CLUBHOUSE_ROOM_BEST_SHOTS 1
-#define CLUBHOUSE_ROOM_RING_SHOT 2
-#define CLUBHOUSE_ROOM_BIRDIE_BADGES 3
-#define CLUBHOUSE_ROOM_CHARACTER_TABLE 4
-#define CLUBHOUSE_ROOM_BEST_TIMES 5
+
+enum ClubhouseRoom {
+    CLUBHOUSE_ROOM_COURSE_STATS,
+    CLUBHOUSE_ROOM_BEST_SHOTS,
+    CLUBHOUSE_ROOM_RING_SHOT,
+    CLUBHOUSE_ROOM_BIRDIE_BADGES,
+    CLUBHOUSE_ROOM_CHARACTER_TABLE,
+    CLUBHOUSE_ROOM_BEST_TIMES
+};
+
+typedef s32 ClubhouseRoom;
+typedef s16 ClubhouseRoom16;
 
 #define OPTIONS_CHOICE_MUSIC 0
 #define OPTIONS_CHOICE_MONO 1
@@ -301,14 +307,14 @@ static u8 f_ModeChoiceIcons[PLAYER_COUNT_MAX][MODE_CHOICE_LIMIT] = {
 };
 static u8 f_UnusedModeChoiceIcons[4][12] UNUSED =
     {{2, 8, 3}, {2, 6, 7, 10, 5}, {2, 7, 10, 5}, {2, 7, 10, 5}};
-static s16 f_ClubhouseRooms[CLUBHOUSE_CHOICE_COUNT] = {
+static ClubhouseRoom16 f_ClubhouseRooms[CLUBHOUSE_CHOICE_COUNT] = {
     CLUBHOUSE_ROOM_COURSE_STATS,
     CLUBHOUSE_ROOM_CHARACTER_TABLE,
     CLUBHOUSE_ROOM_BEST_TIMES,
     CLUBHOUSE_ROOM_RING_SHOT,
     CLUBHOUSE_ROOM_BEST_SHOTS,
 };
-static s16 f_UnusedBirdieBadgesRoom UNUSED = CLUBHOUSE_ROOM_BIRDIE_BADGES;
+static ClubhouseRoom16 f_UnusedBirdieBadgesRoom UNUSED = CLUBHOUSE_ROOM_BIRDIE_BADGES;
 static const char *f_PlainMenuNames[] =
     {"1P GAME", "2P GAME", "3P GAME", "4P GAME", "CONTINUE", "HOUISE"};
 static const char *f_UnusedModeNames[] UNUSED = {
