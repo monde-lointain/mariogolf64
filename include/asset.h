@@ -122,6 +122,10 @@ enum MenuArrow {
 #define SHINE_SIZE 64
 #define SHINE_IMAGE_BUFFER_SIZE 0x1210
 #define ASSET_DRIVER_HEAD_IMAGE 0x4E3
+#define ASSET_HOLES_BADGES 0x65D
+#define ASSET_BRICK_WALL 0x721
+#define ASSET_STAT_LABELS 0x978
+#define ASSET_SHOT_TYPES 0x979
 
 extern u8 g_AssetArchiveRomStart[];
 

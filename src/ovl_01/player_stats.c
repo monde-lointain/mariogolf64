@@ -73,7 +73,6 @@ enum GatheredBestShots {
 #define BET_LABEL_WIDTH 128
 #define BET_LABEL_HEIGHT 20
 #define BET_LABEL_IMAGE_SIZE (BET_LABEL_WIDTH * BET_LABEL_HEIGHT / 2)
-#define ASSET_STATS_BRICK_WALL 0x721
 #define ASSET_TRIPLE_PAGE_ARROWS 0x828
 #define ASSET_DOUBLE_PAGE_ARROWS 0x829
 #define BET_SET_COLUMN_COUNT_MAX 6
@@ -461,7 +460,7 @@ void LoadPlayerStatsBuffer(void *buffer, s16 bufferKind) {
             break;
         case PLAYER_STATS_BUFFER_BRICK_WALL:
             f_BrickWall = buffer;
-            OpenEncodedAsset(ASSET_STATS_BRICK_WALL, &asset);
+            OpenEncodedAsset(ASSET_BRICK_WALL, &asset);
             ReadEncodedAsset(f_BrickWall, &asset);
             break;
         case PLAYER_STATS_BUFFER_TRIPLE_PAGE_ARROWS:

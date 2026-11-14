@@ -1339,7 +1339,6 @@ s32 GetChosenCourseIndex(void) {
 #define ASSET_OPTIONS_SHADOW 0x97E
 #define ASSET_SKY 0x51F
 #define ASSET_WATER 0x4D8
-#define ASSET_HOLES_BADGES 0x65D
 
 void UpdateMenus(void) {
     AssetFile file;
