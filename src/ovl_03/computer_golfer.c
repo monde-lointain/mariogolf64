@@ -2473,14 +2473,14 @@ s32 FindClubSlot(s32 unused UNUSED, ClubType clubType) {
 
 ClubType ChooseClubForDistance(s32 distance) {
     s32 fallback = CLUB_TYPE_SAND_WEDGE;
-    ClubType type;
+    ClubType clubType;
     s32 clubSlot;
     Club *club;
     s32 carry;
     s32 rating;
 
-    for (type = CLUB_TYPE_SAND_WEDGE; type >= 0; type--) {
-        clubSlot = FindClubSlot(f_Shot.playerIndex, type);
+    for (clubType = CLUB_TYPE_SAND_WEDGE; clubType >= 0; clubType--) {
+        clubSlot = FindClubSlot(f_Shot.playerIndex, clubType);
         if (!f_IsClubUsable[clubSlot]) {
             continue;
         }
@@ -2502,7 +2502,7 @@ ClubType ChooseClubForDistance(s32 distance) {
 
         fallback = clubSlot;
         if (distance < carry) {
-            return type;
+            return clubType;
         }
     }
 

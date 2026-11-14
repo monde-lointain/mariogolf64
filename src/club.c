@@ -4158,7 +4158,7 @@ s32 GetSelectedShotWorldDistance(void) {
 }
 
 s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceInfo *surfaceInfo) {
-    SurfaceKind kind = surfaceInfo->kind;
+    SurfaceKind surfaceKind = surfaceInfo->kind;
     s32 mask;
 
     if (IsGameFlagSet(GAME_FLAG_ANY_CLUB_ANYWHERE)) {
@@ -4170,10 +4170,10 @@ s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceInfo *surfaceInfo) {
     }
 
     if (!distinguishesKinds) {
-        return (kind != SURFACE_KIND_GREEN) ? CLUB_SURFACE_ALL : CLUB_SURFACE_GREEN;
+        return (surfaceKind != SURFACE_KIND_GREEN) ? CLUB_SURFACE_ALL : CLUB_SURFACE_GREEN;
     }
 
-    switch (kind) {
+    switch (surfaceKind) {
         case SURFACE_KIND_ROUGH:
         case SURFACE_KIND_ROCK:
         case SURFACE_KIND_BARE_GROUND:

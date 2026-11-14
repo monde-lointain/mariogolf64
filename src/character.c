@@ -483,19 +483,19 @@ s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubKind, ShotMode shotMo
     s32 pointId = WOOD_DISTANCE_POINT;
     s32 column;
     CharacterSlot *slot;
-    ClubKind kind;
+    ClubKind clubKind;
     f32 depth;
 
     slot = GetUsedCharacterSlot(slotIndex);
     column = CLUB_KIND_WOOD;
     if (!isClubKind) {
-        kind = GetCharacterClubKind(slotIndex, club);
+        clubKind = GetCharacterClubKind(slotIndex, club);
     }
     else {
-        kind = club;
+        clubKind = club;
     }
 
-    switch (kind) {
+    switch (clubKind) {
 #ifdef AVOID_UB
         default:
 #endif
@@ -562,7 +562,7 @@ void WriteBallDistances(void) {
     s32 modelIndex;
     s32 column;
     s32 animationId;
-    ClubKind kind;
+    ClubKind clubKind;
 
     void AppendDistanceText(char *text) {
         char character;
@@ -601,23 +601,23 @@ void WriteBallDistances(void) {
             switch (column) {
                 case CLUB_KIND_WOOD:
                     animationId = WOOD_DISTANCE_ANIMATION;
-                    kind = CLUB_KIND_WOOD;
+                    clubKind = CLUB_KIND_WOOD;
                     break;
                 case CLUB_KIND_IRON:
                     animationId = IRON_DISTANCE_ANIMATION;
-                    kind = CLUB_KIND_IRON;
+                    clubKind = CLUB_KIND_IRON;
                     break;
                 case CLUB_KIND_WEDGE:
                     animationId = WEDGE_DISTANCE_ANIMATION;
-                    kind = CLUB_KIND_WEDGE;
+                    clubKind = CLUB_KIND_WEDGE;
                     break;
                 case CLUB_KIND_PUTTER:
                     animationId = PUTTER_DISTANCE_ANIMATION;
-                    kind = CLUB_KIND_PUTTER;
+                    clubKind = CLUB_KIND_PUTTER;
                     break;
                 case BALL_DISTANCE_WOOD_APPROACH:
                     animationId = WOOD_APPROACH_DISTANCE_ANIMATION;
-                    kind = CLUB_KIND_WOOD;
+                    clubKind = CLUB_KIND_WOOD;
                     break;
             }
 
@@ -628,7 +628,7 @@ void WriteBallDistances(void) {
             }
 
             AnimateCharacter(MEASURED_SLOT);
-            distances[column] = GetBallDistance(MEASURED_SLOT, kind, TRUE, MEASURED_SHOT_MODE);
+            distances[column] = GetBallDistance(MEASURED_SLOT, clubKind, TRUE, MEASURED_SHOT_MODE);
         }
 
         osSyncPrintf("\n");

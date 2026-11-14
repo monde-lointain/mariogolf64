@@ -1780,14 +1780,14 @@ SETTLE:
             }
 
             if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-                SurfaceKind kind;
+                SurfaceKind surfaceKind;
                 PlaneTriangle ground;
                 TrianglePlane plane;
 
                 simulation->surfaceBelow =
                     GetSurface(simulation->position[AXIS_X], simulation->position[AXIS_Z]);
-                kind = GetOpeningSurfaceInfo(simulation->surfaceBelow)->kind;
-                if (IsDropKind(kind) &&
+                surfaceKind = GetOpeningSurfaceInfo(simulation->surfaceBelow)->kind;
+                if (IsDropKind(surfaceKind) &&
                     FindGroundTriangle(
                         simulation->position[AXIS_X],
                         simulation->position[AXIS_Z],
