@@ -666,30 +666,30 @@ void WriteBallDistancesIfEnabled(void) {
 
 void SetCharacterClub(u32 slotIndex, s32 clubIndex) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
-    s32 choice;
+    s32 choiceIndex;
 
     if (slot != NULL) {
         g_CharacterModelIndex = slot->modelIndex;
         switch (GetCharacterClubKind(slotIndex, clubIndex)) {
             case CLUB_KIND_WOOD:
-                choice = WOOD_DISPLAY_LIST_CHOICE;
+                choiceIndex = WOOD_DISPLAY_LIST_CHOICE;
                 break;
             case CLUB_KIND_IRON:
-                choice = IRON_DISPLAY_LIST_CHOICE;
+                choiceIndex = IRON_DISPLAY_LIST_CHOICE;
                 break;
             case CLUB_KIND_WEDGE:
-                choice = WEDGE_DISPLAY_LIST_CHOICE;
+                choiceIndex = WEDGE_DISPLAY_LIST_CHOICE;
                 break;
             case CLUB_KIND_PUTTER:
-                choice = PUTTER_DISPLAY_LIST_CHOICE;
+                choiceIndex = PUTTER_DISPLAY_LIST_CHOICE;
                 break;
             default:
-                choice = NO_DISPLAY_LIST_CHOICE;
+                choiceIndex = NO_DISPLAY_LIST_CHOICE;
                 break;
         }
 
         MapModelBuffer(slot);
-        SelectCharacterDisplayList(slotIndex, choice);
+        SelectCharacterDisplayList(slotIndex, choiceIndex);
     }
 }
 

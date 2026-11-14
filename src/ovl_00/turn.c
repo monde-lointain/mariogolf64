@@ -2438,14 +2438,14 @@ void ClearPassedRings(Player *player) {
 }
 
 void PlayAmbientSound(void) {
-    s32 choice;
+    s32 choiceIndex;
 
     if (++f_AmbientSoundIdleFrameCount == AMBIENT_SOUND_INTERVAL) {
-        choice = guRandom() % AMBIENT_SOUND_CHOICES;
+        choiceIndex = guRandom() % AMBIENT_SOUND_CHOICES;
         f_AmbientSoundIdleFrameCount = 0;
-        if (f_AmbientSounds[GetCourseRecordIndex()][choice] != NO_AMBIENT_SOUND) {
+        if (f_AmbientSounds[GetCourseRecordIndex()][choiceIndex] != NO_AMBIENT_SOUND) {
             PlaySoundWithEffects(
-                f_AmbientSounds[GetCourseRecordIndex()][choice],
+                f_AmbientSounds[GetCourseRecordIndex()][choiceIndex],
                 AMBIENT_SOUND_CHANNEL,
                 AMBIENT_SOUND_VOLUME,
                 AMBIENT_SOUND_REVERB,

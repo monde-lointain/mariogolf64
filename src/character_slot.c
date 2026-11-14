@@ -4608,30 +4608,30 @@ void FreeAllCharacterSlots(void) {
 
 s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
     CharacterSlot *slot;
-    s32 choice;
+    s32 checkedIndex;
 
     slot = GetUsedCharacterSlot(slotIndex);
     if (slot != NULL) {
-        choice = 0;
+        checkedIndex = 0;
         if (choiceIndex == NO_DISPLAY_LIST_CHOICE) {
             ModelChosenDisplayList(slot->model)->words.w0 = G_ENDDL << 24;
             ModelChosenDisplayList(slot->model)->words.w1 = 0;
             return 0;
         }
 
-        for (; choice < choiceIndex; choice++) {
-            if (ModelDisplayListChoices(slot->model)[choice] == END_OF_DISPLAY_LIST_CHOICES) {
+        for (; checkedIndex < choiceIndex; checkedIndex++) {
+            if (ModelDisplayListChoices(slot->model)[checkedIndex] == END_OF_DISPLAY_LIST_CHOICES) {
                 return -1;
             }
         }
 
-        if (ModelDisplayListChoices(slot->model)[choice] == END_OF_DISPLAY_LIST_CHOICES) {
+        if (ModelDisplayListChoices(slot->model)[checkedIndex] == END_OF_DISPLAY_LIST_CHOICES) {
             return -1;
         }
 
         ModelChosenDisplayList(slot->model)->words.w0 = G_DL << 24;
         ModelChosenDisplayList(slot->model)->words.w1 =
-            ModelDisplayListChoices(slot->model)[choice];
+            ModelDisplayListChoices(slot->model)[checkedIndex];
         return 0;
     }
 
