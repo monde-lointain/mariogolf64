@@ -892,7 +892,7 @@ static inline s8 GetBillboardMaskCell(s32 textureIndex, s32 row, s32 column) {
 
 const char g_PathDebugBlankText[] = "          ";
 
-s32 FindMiniGolfGroundHit(
+Boolean FindMiniGolfGroundHit(
     BallSimulation *simulation,
     s32 startX,
     s32 startY,
@@ -1148,7 +1148,7 @@ s32 FindMiniGolfGroundHit(
     return FALSE;
 }
 
-s32 FindGroundHit(
+Boolean FindGroundHit(
     s32 startX,
     s32 startY,
     s32 startZ,
@@ -1899,7 +1899,7 @@ s32 GetTrianglePlaneCopy(PlaneTriangle *triangle, TrianglePlane *plane) {
     return 0;
 }
 
-s32 FindHoleTriangleHit(
+Boolean FindHoleTriangleHit(
     s32 startX,
     s32 startY,
     s32 startZ,
@@ -2107,7 +2107,7 @@ s32 FindHoleTriangleHit(
     return FALSE;
 }
 
-s32 FindWallHit(
+Boolean FindWallHit(
     s32 startX,
     s32 startY,
     s32 startZ,

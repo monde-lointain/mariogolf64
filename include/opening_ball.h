@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
+#include "language.h"
 
 enum OpeningModel {
     OPENING_MODEL_MARIO = 3,
@@ -20,6 +21,6 @@ typedef s32 OpeningModel;
 
 s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *shot);
 s32 StepOpeningBallSimulation(BallSimulation *simulation);
-s32 ToggleOpeningCharacter(u32 slotIndex, OpeningModel model);
+Boolean ToggleOpeningCharacter(u32 slotIndex, OpeningModel model);
 
 #endif

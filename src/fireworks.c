@@ -176,7 +176,7 @@ void FreeFireworks(void) {
     f_FireworkState = FIREWORKS_FREED;
 }
 
-s32 HaveFireworksStayedFreed(void) {
+Boolean HaveFireworksStayedFreed(void) {
     if (f_FireworkState > FIREWORKS_FREED) {
         return FALSE;
     }

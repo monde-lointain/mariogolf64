@@ -825,7 +825,7 @@ void SetScorecardState(ScorecardState state) {
     g_Scorecard.stateTime = 0;
 }
 
-s32 TallyScorecardSkins(void);
+Boolean TallyScorecardSkins(void);
 
 void AnimateScorecard(void) {
     EncodedAsset asset;
@@ -1029,7 +1029,7 @@ void UpdateScorecard(u16 buttons, u16 pressedButtons) {
     }
 }
 
-s32 UpdateShownScorecard(u16 buttons) {
+Boolean UpdateShownScorecard(u16 buttons) {
     AnimateScorecard();
     if (g_ScorecardState != SCORECARD_SHOWN) {
         return FALSE;
@@ -1423,7 +1423,7 @@ void FreeResultCharacters(void) {
     f_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
 }
 
-s32 LoadResultCharacters(void) {
+Boolean LoadResultCharacters(void) {
     s32 holeIndex = g_Scorecard.content.holeIndex - 1;
     SongId songId;
 
@@ -1472,7 +1472,7 @@ s32 LoadResultCharacters(void) {
     return TRUE;
 }
 
-s32 TallyScorecardSkins(void) {
+Boolean TallyScorecardSkins(void) {
     switch (g_Scorecard.layout) {
         case SCORECARD_LAYOUT_STROKE:
         case SCORECARD_LAYOUT_TOURNAMENT:

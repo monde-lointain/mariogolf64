@@ -2545,7 +2545,7 @@ enum ClubChanceSet {
 
 typedef s32 ClubChanceSet;
 
-s32 RollClubCategoryChance(ClubChanceSet chanceSet);
+Boolean RollClubCategoryChance(ClubChanceSet chanceSet);
 
 s32 ChooseShotOffset(void) {
     WindPlay windPlay;
@@ -2672,7 +2672,7 @@ s32 ChooseShotOffset(void) {
     (f_Shot.clubSlot >= FindClubSlot(f_Shot.playerIndex, (firstType)) && \
         FindClubSlot(f_Shot.playerIndex, (lastType)) >= f_Shot.clubSlot)
 
-s32 RollClubCategoryChance(ClubChanceSet chanceSet) {
+Boolean RollClubCategoryChance(ClubChanceSet chanceSet) {
     if (g_Players[f_Shot.playerIndex].strokeCount == 0) {
         return TRUE;
     }

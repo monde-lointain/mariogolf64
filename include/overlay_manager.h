@@ -68,7 +68,7 @@ s32 GetOverlayOfModule(ModuleId moduleId);
 void InitOverlayManager(void);
 s32 GetOverlayIndex(s32 overlayId);
 Boolean CanLoadOverlay(s32 overlayId);
-s32 LoadOverlay(s32 overlayId);
+Boolean LoadOverlay(s32 overlayId);
 void UnloadOverlay(s32 overlayId);
 Boolean ReportModuleNotAlive(ModuleId moduleId);
 

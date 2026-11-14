@@ -1051,7 +1051,7 @@ void TurnAim(s32 turnsLookBackHeading) {
         } \
     }
 
-s32 UpdateAimControls(void) {
+Boolean UpdateAimControls(void) {
     Vec3 toCup;
     s32 headingLeft;
     s32 step;

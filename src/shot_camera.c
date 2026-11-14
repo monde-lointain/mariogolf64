@@ -1467,7 +1467,7 @@ void StopHoleFlyover(void) {
     }
 }
 
-s32 StepHoleFlyover(void) {
+Boolean StepHoleFlyover(void) {
     Vec3 offset;
     f32 halfTurns;
     f32 widening;
@@ -2655,7 +2655,7 @@ void ChooseFlightCameraKind(void) {
 #define INSET_FIELD_OF_VIEW 30.0f
 #define LOOK_AT_NUDGE 0.1f
 
-s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
+Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     f32 point[3];
     s32 step;
     SoundVolume volume;

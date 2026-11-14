@@ -210,10 +210,10 @@ extern const char f_NoPointsText[];
 void FreeRoundResults(void);
 void LoadRoundResults(void);
 void DrawResultsBanner(Gfx **displayListHead);
-s32 UpdateTournamentResults(ControllerState *controller);
-s32 ShowScorePassword(ControllerState *controller);
-s32 UpdateCoursePointsResults(ControllerState *controller);
-s32 UpdateMatchResults(ControllerState *controller);
+Boolean UpdateTournamentResults(ControllerState *controller);
+Boolean ShowScorePassword(ControllerState *controller);
+Boolean UpdateCoursePointsResults(ControllerState *controller);
+Boolean UpdateMatchResults(ControllerState *controller);
 
 #define SCORE_PASSWORD_LINE_LENGTH (SCORE_PASSWORD_LENGTH / 2)
 
@@ -794,7 +794,7 @@ void FreeUnlockNotice(void) {
     f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
 }
 
-s32 UpdateUnlockNotice(void) {
+Boolean UpdateUnlockNotice(void) {
     EncodedAsset asset;
 
     if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
@@ -2076,7 +2076,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-s32 UpdateRoundResults(ControllerState *controller) {
+Boolean UpdateRoundResults(ControllerState *controller) {
     Boolean isDone;
 
     switch (f_ResultsState) {
@@ -2710,7 +2710,7 @@ enum TournamentStep {
 #define NEW_BEST_SCORE_SOUND_CHANNEL 3
 #define WIN_SOUND_PAN 32
 
-s32 UpdateTournamentResults(ControllerState *controller) {
+Boolean UpdateTournamentResults(ControllerState *controller) {
     EncodedAsset asset;
     CourseStats *courseStats;
     s32 overshoot;
@@ -2916,7 +2916,7 @@ enum ScorePasswordStep {
     SCORE_PASSWORD_STEP_DONE
 };
 
-s32 ShowScorePassword(ControllerState *controller) {
+Boolean ShowScorePassword(ControllerState *controller) {
     ScoreReport report;
     s32 unused[2] UNUSED;
 
@@ -2973,7 +2973,7 @@ enum PointsStep {
     POINTS_STEP_START_TALLY
 };
 
-s32 UpdateCoursePointsResults(ControllerState *controller) {
+Boolean UpdateCoursePointsResults(ControllerState *controller) {
     EncodedAsset asset;
     s32 playerIndex;
     s32 otherIndex;
@@ -3132,7 +3132,7 @@ enum MatchStep {
         (character) != CHARACTER_DONKEY_KONG && \
         (character) < CHARACTER_METAL_MARIO)
 
-s32 UpdateMatchResults(ControllerState *controller) {
+Boolean UpdateMatchResults(ControllerState *controller) {
     EncodedAsset asset;
     s32 playerIndex;
     s32 overshoot;

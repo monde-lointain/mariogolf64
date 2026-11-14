@@ -1785,7 +1785,7 @@ void InitSkyColors(void) {
 #define FOG_DEPTH_MAX 1200
 static SkyColors *f_EditedSkyColors;
 
-s32 UpdateSkyEditor(void) {
+Boolean UpdateSkyEditor(void) {
     EncodedAsset asset;
     Boolean isImageChanged;
     s32 index;

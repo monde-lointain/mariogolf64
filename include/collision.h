@@ -27,7 +27,7 @@ enum BillboardCell {
 
 typedef s32 BillboardCell;
 
-s32 FindMiniGolfGroundHit(
+Boolean FindMiniGolfGroundHit(
     BallSimulation *simulation,
     s32 startX,
     s32 startY,
@@ -103,7 +103,7 @@ PinHit FindPinHit(
     Boolean hasHitFlag,
     BallSimulation *simulation
 );
-s32 FindWallHit(
+Boolean FindWallHit(
     s32 startX,
     s32 startY,
     s32 startZ,
@@ -124,7 +124,7 @@ s32 FindRingHit(
     PlaneTriangle *hitRing,
     f32 *fraction
 );
-s32 FindHoleTriangleHit(
+Boolean FindHoleTriangleHit(
     s32 startX,
     s32 startY,
     s32 startZ,
@@ -134,7 +134,7 @@ s32 FindHoleTriangleHit(
     PlaneTriangle *hit,
     f32 *fraction
 );
-s32 FindGroundHit(
+Boolean FindGroundHit(
     s32 startX,
     s32 startY,
     s32 startZ,

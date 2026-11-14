@@ -7,6 +7,7 @@
 #include "compiler.h"
 #include "course_space.h"
 #include "geometry.h"
+#include "language.h"
 
 enum ReactionAnimation {
     REACTION_ANIMATION_EAGLE = 12,
@@ -18,7 +19,7 @@ enum ReactionAnimation {
 typedef s32 ReactionAnimation;
 typedef s8 ReactionAnimation8;
 
-s32 AddReactionLight(Gfx **displayListHead, Lights2 *lights);
+Boolean AddReactionLight(Gfx **displayListHead, Lights2 *lights);
 void StartReaction(u32 slotIndex, CharacterIndex characterIndex, ReactionAnimation animation);
 void TurnOffReactionLight(void);
 NO_RESULT UpdateReaction(u32 slotIndex);

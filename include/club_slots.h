@@ -3,10 +3,12 @@
 
 #include <ultra64.h>
 
+#include "language.h"
+
 void DrawClubSlots(Gfx **displayListHead);
 void FreeClubSlots(void);
 s32 GetClubSlotsState(void);
 void LoadClubSlots(void);
-s32 UpdateClubSlots(void);
+Boolean UpdateClubSlots(void);
 
 #endif

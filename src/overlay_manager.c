@@ -219,7 +219,7 @@ Boolean CanLoadOverlay(s32 overlayId) {
     return TRUE;
 }
 
-s32 LoadOverlay(s32 overlayId) {
+Boolean LoadOverlay(s32 overlayId) {
     Overlay *overlay;
     ModuleId8 *moduleIds;
     s32 moduleIndex;

@@ -3,7 +3,9 @@
 
 #include <ultra64.h>
 
-s32 UpdateHoleIntroCamera(void);
+#include "language.h"
+
+Boolean UpdateHoleIntroCamera(void);
 void StartHoleIntroCamera(void);
 
 #endif

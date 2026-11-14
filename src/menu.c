@@ -133,7 +133,7 @@ typedef struct GridCell {
 } GridCell;
 
 SaveReadResult ReadSaveCopies(SaveData *save, UBoolean8 isInSram);
-s32 WriteSaveCopies(SaveData *save, UBoolean8 isInSram);
+Boolean WriteSaveCopies(SaveData *save, UBoolean8 isInSram);
 
 s8 g_LoadedMenuScreen = NO_MENU_SCREEN;
 s8 g_PlayerControllerIndices[PLAYER_COUNT_MAX] =
@@ -2933,7 +2933,7 @@ SaveReadResult ReadSaveCopies(SaveData *save, UBoolean8 isInSram) {
     return (unmarkedCount == SAVE_COPY_COUNT) ? SAVE_READ_NEVER_WRITTEN : SAVE_READ_FAILED;
 }
 
-s32 WriteSaveCopies(SaveData *save, UBoolean8 isInSram) {
+Boolean WriteSaveCopies(SaveData *save, UBoolean8 isInSram) {
     u8 checkBuffer[0xC0];
     SaveCheck *check;
     u16 crc;

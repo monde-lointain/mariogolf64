@@ -1003,7 +1003,7 @@ void DrawOpeningShotPath(CameraMatrices *matrices UNUSED) {
         PlaceCharacter(f_CueSlotIndex, (point), DegreesToRadians(heading)); \
     }
 
-s32 UpdateOpeningCharacters(void) {
+Boolean UpdateOpeningCharacters(void) {
     CoursePoint marioTeeShotPoint;
     CoursePoint peachCheerPoint;
     CoursePoint luigiCheerPoint;

@@ -119,7 +119,7 @@ enum ResultCharactersState {
 typedef s32 ResultCharactersState;
 
 extern s32 f_ResultCharactersLoadStep;
-s32 LoadResultCharacters(void);
+Boolean LoadResultCharacters(void);
 
 void DrawMatchResult(Gfx **displayListHead);
 void DrawStandingsPage(Gfx **displayListHead);
@@ -138,6 +138,6 @@ void DrawScorecard(Gfx **displayListHead);
 void FreeResultCharacters(void);
 void FreeScorecard(void);
 void StartScorecardTally(s32 layout);
-s32 UpdateShownScorecard(u16 buttons);
+Boolean UpdateShownScorecard(u16 buttons);
 
 #endif

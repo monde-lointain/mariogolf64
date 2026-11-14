@@ -78,7 +78,7 @@ void StartHoleIntroCamera(void) {
     }
 }
 
-s32 UpdateHoleIntroCamera(void) {
+Boolean UpdateHoleIntroCamera(void) {
     Vec3 offset;
     Radians heading;
 

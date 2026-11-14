@@ -201,7 +201,7 @@ void HideGameBoyCharacters(void) {
     f_SavedGameBoySlots[3] = fourthSlot;
 }
 
-s32 MoveGridCursor(s32 playerIndex, GridMove direction, UBoolean8 canChooseMarked) {
+Boolean MoveGridCursor(s32 playerIndex, GridMove direction, UBoolean8 canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
     MenuMemory *memory = GetMenuMemory();

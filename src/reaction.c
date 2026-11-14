@@ -205,7 +205,7 @@ void EaseReactionView(f32 *eye, f32 *lookAt, f32 rate, s32 easedParts) {
     }
 }
 
-s32 AddReactionLight(Gfx **displayListHead, Lights2 *lights) {
+Boolean AddReactionLight(Gfx **displayListHead, Lights2 *lights) {
     Gfx *gfx = *displayListHead;
 
     if (f_HasReactionLight) {

@@ -409,7 +409,7 @@ void GiveSlotClubs(s32 playerIndex) {
         ((player)->isComputer) || \
         IsGameFlagSet(GAME_FLAG_FAST_AUTOPLAY))
 
-s32 UpdateClubSlots(void) {
+Boolean UpdateClubSlots(void) {
     Player *player;
     s32 controllerIndex;
 

@@ -188,7 +188,7 @@ static s32 f_UnusedOpeningLaunchCount = 0;
 static PlaneTriangle f_OpeningContactTriangle;
 static f32 f_OpeningContactFraction;
 
-s32 ToggleOpeningCharacter(u32 slotIndex, OpeningModel model) {
+Boolean ToggleOpeningCharacter(u32 slotIndex, OpeningModel model) {
     if (IsCharacterSlotBusy(slotIndex)) {
         FreeCharacterSlot(slotIndex);
         return FALSE;
