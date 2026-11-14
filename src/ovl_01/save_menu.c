@@ -78,9 +78,26 @@ enum {
 #define SAVE_ICON_SHOWN_WIDTH 32
 #define SAVE_ICON_SHOWN_STRIP_HEIGHT 12
 
-#define SAVE_MENU_MODE_COUNT 10
-#define SAVE_MENU_MODE_MINI_GOLF 10
-#define NO_SAVE_MENU_MODE (-1)
+enum SaveMenuMode {
+    NO_SAVE_MENU_MODE = -1,
+    SAVE_MENU_MODE_TOURNAMENT,
+    SAVE_MENU_MODE_GET_CHARACTER,
+    SAVE_MENU_MODE_STROKE,
+    SAVE_MENU_MODE_SPEED_GOLF,
+    SAVE_MENU_MODE_MATCH_GAME,
+    SAVE_MENU_MODE_CLUB_SLOTS,
+    SAVE_MENU_MODE_RING_SHOT,
+    SAVE_MENU_MODE_TRAINING,
+    SAVE_MENU_MODE_SKINS_MATCH,
+    SAVE_MENU_MODE_UNLISTED_STROKE,
+    // A saved game is mini golf by its isMiniGolf flag, not by its game mode,
+    // so the modes before this one are those with a game mode.
+    SAVE_MENU_MODE_MINI_GOLF,
+    SAVE_MENU_MODE_COUNT
+};
+
+typedef s32 SaveMenuMode;
+typedef s8 SaveMenuMode8;
 
 extern const char f_SaveMenuNameFormat[];
 
@@ -147,11 +164,11 @@ static s16 f_HumanPlayerCount = PLAYER_COUNT_MAX;
 static u8 f_IsGameChosen = 0;
 static u8 f_AreControllersAssigned = 0;
 static u8 f_ShownCourseBufferIndex = 0;
-static s32 f_SavedGameModes[SAVED_GAME_COUNT] =
+static SaveMenuMode f_SavedGameModes[SAVED_GAME_COUNT] =
     {NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE};
-static WideAssetId f_ModeImageAssets[SAVE_MENU_MODE_MINI_GOLF + 1] =
+static WideAssetId f_ModeImageAssets[SAVE_MENU_MODE_COUNT] =
     {0x0623, 0x0629, 0x0599, 0x05AF, 0x0631, 0x0665, 0x05B7, 0x05DD, 0x065E, 0x0599, 0x06FC};
-static u32 f_SaveMenuGameModes[SAVE_MENU_MODE_COUNT] = {
+static u32 f_SaveMenuGameModes[SAVE_MENU_MODE_MINI_GOLF] = {
     GAME_MODE_TOURNAMENT,
     GAME_MODE_GET_CHARACTER,
     GAME_MODE_STROKE,
@@ -163,7 +180,7 @@ static u32 f_SaveMenuGameModes[SAVE_MENU_MODE_COUNT] = {
     GAME_MODE_SKINS_MATCH,
     GAME_MODE_UNLISTED_STROKE,
 };
-static s32 f_SaveMenuModeIcons[SAVE_MENU_MODE_MINI_GOLF + 1] = {
+static s32 f_SaveMenuModeIcons[SAVE_MENU_MODE_COUNT] = {
     MODE_ICON_TOURNAMENT,
     MODE_ICON_GET_CHARACTER,
     MODE_ICON_STROKE,
@@ -1306,7 +1323,7 @@ void ReadSavedGames(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s8 gameIndex;
-    s8 modeIndex;
+    SaveMenuMode8 mode;
 
     for (gameIndex = 0; gameIndex != SAVED_GAME_COUNT; gameIndex++) {
         f_SavedGameModes[gameIndex] = NO_SAVE_MENU_MODE;
@@ -1321,10 +1338,9 @@ void ReadSavedGames(void) {
                 f_SavedGameModes[gameIndex] = SAVE_MENU_MODE_MINI_GOLF;
             }
             else {
-                for (modeIndex = 0; modeIndex != SAVE_MENU_MODE_COUNT; modeIndex++) {
-                    if (save->savedGames[gameIndex].state.gameMode ==
-                        f_SaveMenuGameModes[modeIndex]) {
-                        f_SavedGameModes[gameIndex] = modeIndex;
+                for (mode = 0; mode != SAVE_MENU_MODE_MINI_GOLF; mode++) {
+                    if (save->savedGames[gameIndex].state.gameMode == f_SaveMenuGameModes[mode]) {
+                        f_SavedGameModes[gameIndex] = mode;
                         break;
                     }
                 }
@@ -1395,7 +1411,7 @@ void LoadSaveMenuBuffers(ImageAsset **buffers, SaveMenuBuffer bufferKind) {
     EncodedAsset asset;
     MenuMemory *memory = GetMenuMemory();
     s32 imageIndex;
-    s32 mode;
+    SaveMenuMode mode;
 
     switch (bufferKind) {
         case SAVE_MENU_BUFFER_SLOTS:
@@ -1403,7 +1419,7 @@ void LoadSaveMenuBuffers(ImageAsset **buffers, SaveMenuBuffer bufferKind) {
             for (imageIndex = 0; imageIndex != SAVED_GAME_COUNT; imageIndex++) {
                 mode = f_SavedGameModes[imageIndex];
                 if (mode == NO_SAVE_MENU_MODE) {
-                    mode = 0;
+                    mode = SAVE_MENU_MODE_TOURNAMENT;
                 }
 
                 OpenEncodedAsset(f_ModeImageAssets[mode], &asset);
@@ -1418,7 +1434,7 @@ void LoadSaveMenuBuffers(ImageAsset **buffers, SaveMenuBuffer bufferKind) {
             for (imageIndex = 0; imageIndex != SAVE_MENU_CHOSEN_IMAGE_COUNT; imageIndex++) {
                 mode = f_SavedGameModes[memory->savedGameIndex];
                 if (mode == NO_SAVE_MENU_MODE) {
-                    mode = 0;
+                    mode = SAVE_MENU_MODE_TOURNAMENT;
                 }
 
                 OpenEncodedAsset(f_ModeImageAssets[mode], &asset);
