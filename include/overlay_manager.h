@@ -46,7 +46,6 @@ enum ModuleId {
 };
 
 typedef s32 ModuleId;
-// A ModuleId in a byte, as the overlays' module lists keep it.
 typedef s8 ModuleId8;
 
 typedef struct Overlay {

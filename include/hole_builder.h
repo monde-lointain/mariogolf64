@@ -18,7 +18,6 @@ typedef struct GridOffset {
 
 #define LOADER_THREAD_STACK_SIZE 0x8000
 extern u8 g_LoaderThreadStack[LOADER_THREAD_STACK_SIZE];
-// How much the loader scales a mini golf hole's points, set by hole_loader.c.
 extern Vec3 g_MiniGolfScale;
 
 s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 countMax);

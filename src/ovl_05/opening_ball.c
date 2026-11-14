@@ -332,8 +332,6 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
     s32 startZ;
     s32 previousVelocityX;
     s32 previousVelocityZ;
-    // A ground hit stores the hit finders' TRUE, which equals
-    // STEP_FLAG_GROUND_HIT.
     StepFlags contact;
     StepFlags stepFlags = 0;
     Boolean printsDebugText;

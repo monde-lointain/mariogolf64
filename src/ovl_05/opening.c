@@ -45,8 +45,6 @@
 
 #define OPENING_BILLBOARD_HEAP_SIZE 0x7038
 
-// OPENING_SHOT_PLAIN_FLIGHT steps the ball without the flight's leftover
-// point lookups; no scene sets it.
 enum OpeningShotState {
     OPENING_SHOT_IDLE,
     OPENING_SHOT_FLYING,
@@ -805,8 +803,6 @@ void PlayOpeningAmbientSounds(void) {
 
 void LoadOpeningLogo(void);
 
-// Slot 0 keeps the default character buffer; the slots after it get the
-// opening's own buffers, and the last borrows the depth buffer.
 #define FIRST_ALLOCATED_CHARACTER_SLOT 1
 #define DEPTH_BUFFER_CHARACTER_SLOT 3
 

@@ -27,7 +27,6 @@ typedef s32 EditorMoveAxis;
 #define EDITOR_FLAG_TILTING 0x20
 #define EDITOR_FLAG_ZOOMING 0x40
 #define EDITOR_FLAG_CARRYING 0x80
-// A set of EDITOR_FLAG bits.
 typedef s32 EditorFlags;
 
 typedef struct CameraEditor {

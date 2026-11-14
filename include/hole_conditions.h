@@ -24,7 +24,6 @@ typedef struct HoleConditions {
 #define SCENE_COLOR_INDEX_SUDDEN_DEATH 11
 
 #define WIND_SPEED_UNIT 0x10000
-// Masks a random number to the count of wind speed steps, 0 to 63
 #define RANDOM_WIND_STEP_MASK 0x3F
 
 #define WIND_DIRECTION_TO_RADIANS ((f32)(FULL_TURN_RADIANS / 0x10000))

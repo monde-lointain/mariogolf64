@@ -9,7 +9,6 @@
 extern u16 *g_MessageFramebuffer;
 
 #define DEBUG_TEXT_BUFFER_SIZE 128
-// The width and height of a debug text glyph, in pixels
 #define DEBUG_GLYPH_SIZE 8
 
 #define SIMULATION_FAULT_TEXT_COLUMN 10

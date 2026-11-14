@@ -8,7 +8,6 @@
 #include "language.h"
 #include "math_util.h"
 
-// The pak routines return this on success and a PFS_ERR_ code otherwise.
 #define PAK_ACCESS_OK 0
 
 #define GAME_BOY_CHARACTER_COUNT 4
@@ -140,9 +139,7 @@ typedef struct GameBoyTransfer {
     ListingState listingStates[CARTRIDGE_CHARACTER_COUNT];
     s32 listedCharacterCount;
     s32 readStep;
-    // A PakResult, or a PFS error code after a failed read or write.
     s32 transferResult;
-    // A BringStep, SendStatusStep or SendExperienceStep, by transferMode.
     s32 screenStep;
     s32 bringingFrame;
     s32 listedCharacterIndex;

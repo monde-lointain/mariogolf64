@@ -932,7 +932,6 @@ void PlanClubAndTarget(CoursePoint target) {
     surfaceKind = GetSurfaceTraits(f_Shot.surface)->kind;
     f_HoleStrokeTarget = ChooseHoleStrokeTarget();
     f_HoleTargetToPar = f_HoleStrokeTarget - g_HoleSetup.par;
-    // The original switches on the kind as unsigned.
     switch ((u32)surfaceKind) {
         case SURFACE_KIND_GREEN:
         case SURFACE_KIND_GREEN_EDGE:
@@ -2029,15 +2028,9 @@ ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
 #define LONG_PUTT_DISTANCE_MIN 0x7800
 #define PUTT_DRIFT_LIMIT 0xF000
 #define AIM_CHANGE_STEP 0x400
-// After this many aim changes on blocked or unstopped trials, the planner
-// drops to a shorter club.
 #define BLOCKED_TRIAL_AIM_CHANGES_MAX 17
 #define UNSTOPPED_TRIAL_AIM_CHANGES_MAX 3
-// A trial that would need this many times its power is treated as blocked.
 #define BLOCKED_POWER_RATIO 10.0f
-// How much worse than acceptable a trial may evaluate and still be taken,
-// growing as the golfer falls behind the hole's stroke target. Putts allow a
-// share of their distance instead.
 #define NEAR_TARGET_EVALUATION_SLACK 500
 #define BEHIND_TARGET_EVALUATION_SLACK 0x8000
 #define OFF_GREEN_EVALUATION_SLACK 8000
@@ -2050,8 +2043,6 @@ s32 StepTrialShot(void) {
     f32 fraction;
     StepFlags stepFlags;
     BallState ballState;
-    // Holds the same flags as stepFlags; reading them from a copy is needed
-    // for the match.
     StepFlags stepFlagsCopy;
     s32 velocityY;
     s32 bounceCount;

@@ -372,7 +372,6 @@ void EncodeScorePassword(ScoreReport *report, char *password) {
     u8 unusedBuffer[8] UNUSED;
     u8 symbols[SCORE_PASSWORD_LENGTH];
     ScoreReport clampedReport;
-    // Reaching the copy through a pointer is needed for the match.
     ScoreReport *clamped = &clampedReport;
     s32 symbolCount = 0;
     u32 number;

@@ -37,7 +37,6 @@
 #define STATUS_OPTION_ROW 0
 #define SECOND_OPTION_ROW 1
 #define MAIN_MENU_OPTION_ROW 2
-// Swaps the status and second rows, the only rows outside the boot menu.
 #define OPTION_ROW_FLIP 1
 
 #define MESSAGE_FIRST_TRANSMIT_OPTION 0x13F
@@ -110,7 +109,6 @@ typedef s32 NoticeState;
 
 enum PakResult {
     PAK_RESULT_STILL_READING = -1,
-    // OpenGameBoyPak returns this for an error it does not name.
     PAK_RESULT_UNKNOWN_ERROR = PAK_RESULT_STILL_READING,
     PAK_RESULT_CONNECTOR_PROBLEM,
     PAK_RESULT_OK,
@@ -452,8 +450,6 @@ void DumpCartridgeRam(void) {
     PrintDebugText("          ", DUMP_STATUS_COLUMN, DUMP_READ_ROW);
     PrintDebugText("          ", DUMP_STATUS_COLUMN, DUMP_WRITE_ROW);
 
-    // Bug: OpenGameBoyPakWithRetries returns PAK_RESULT_OK on success, so this
-    // dumps the RAM only after a connector problem.
     if (OpenGameBoyPakWithRetries(0, &transfer->cartridgeHeader, &transfer->pakFile) ==
         PAK_RESULT_CONNECTOR_PROBLEM) {
         PrintDebugText("GOLF OK", DUMP_STATUS_COLUMN, DUMP_OPEN_ROW);
@@ -854,7 +850,6 @@ void ShowTransferError(PakResult result) {
 
 void UpdateSendStatus(void) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
-    // A PakResult from tagging, then a StatusWriteResult from writing.
     s32 result;
 
     switch (transfer->screenStep) {
@@ -4109,8 +4104,6 @@ void BuildStatusData(StatusData *status) {
         }
     }
 
-    // courseIndex is reused here to walk the characters; a separate
-    // characterIndex variable changes register allocation and breaks the match.
     for (courseIndex = 0; courseIndex != CHARACTER_COUNT; courseIndex++) {
         row = f_StatusCharacterOrder[courseIndex];
         matchupBits[1] = 0;

@@ -167,7 +167,6 @@
 #define CAST_FADE_FRAMES 40
 #define LAST_FADE_FRAMES 80
 #define SHOTS_PER_STAGE 4
-// Clubs from the first club set, where a club's index is its type
 #define TEE_CLUB CLUB_TYPE_DRIVER
 #define FAIRWAY_CLUB CLUB_TYPE_TWO_IRON
 #define APPROACH_CLUB CLUB_TYPE_SEVEN_IRON
@@ -520,8 +519,6 @@ AnimationId GetSwingAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotM
             animationId = PUTTER_ANIMATIONS + SWING_ANIMATION;
             break;
         default:
-            // Unlike the other categories, this falls back to the wood
-            // stance rather than a swing.
             animationId = WOOD_ANIMATIONS;
             break;
     }

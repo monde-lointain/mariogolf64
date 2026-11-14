@@ -21,8 +21,6 @@ void RecordComputerMatchupResult(s32 rowCharacter, s32 columnCharacter, Boolean 
     Awards *awards;
     u8 winCount;
     s32 winBits;
-    // The new win bits or loss count. Giving each its own variable
-    // breaks the match.
     s32 tally;
 
     awards = &GetSaveData()->records.awards;

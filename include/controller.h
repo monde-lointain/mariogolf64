@@ -10,12 +10,10 @@
 
 #define RUMBLE_FREQUENCY 0x100
 
-// The debug editors read their controls from these ports.
 #define EDITOR_CONTROLLER 0
 #define OPTION_CONTROLLER 1
 #define SECOND_EDITOR_CONTROLLER 2
 
-// Most debug displays and tests read their controls from the second port.
 #define DEBUG_CONTROLLER 1
 
 typedef struct ControllerState {

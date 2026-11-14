@@ -4,8 +4,6 @@
 #include <ultra64.h>
 
 typedef s32 MessageId;
-// A MessageId in a signed halfword, as the original keeps its message
-// tables.
 typedef s16 MessageId16;
 #define NO_MESSAGE (-1)
 
@@ -26,7 +24,6 @@ typedef u8 UTextFlags8;
 #define FONT_SIZE_SMALL 8
 #define TEXT_SLOT_LARGE_FONT 1
 
-// Messages that more than one file shows.
 #define MESSAGE_FIRST_RING_SHOT_HOLE 0x4B
 #define MESSAGE_HOLE_NUMBER 0x76
 #define MESSAGE_FIRST_CLUB_TOURNAMENT_NAME 0x16F

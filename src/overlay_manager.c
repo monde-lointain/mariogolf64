@@ -94,7 +94,6 @@ static Overlay f_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_14, f_StaffRollModuleIds, LoadStaffRoll, FreeStaffRoll),
 };
 
-// A module that no overlay holds, so it is always alive.
 #define NO_OVERLAY (-1)
 
 static s8 f_OverlayIndexOfModule[MODULE_COUNT];
@@ -226,7 +225,6 @@ Boolean LoadOverlay(s32 overlayId) {
 
     if (CanLoadOverlay(overlayId)) {
         overlayId = GetOverlayIndex(overlayId);
-        // overlayId now holds the overlay's index; a separate local breaks the match.
         if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
             osSyncPrintf("Load ModuleSet %x (absolute No.)\n", overlayId);
         }
@@ -269,7 +267,6 @@ void UnloadOverlay(s32 overlayId) {
     ModuleId8 *moduleIds;
 
     overlayId = GetOverlayIndex(overlayId);
-    // overlayId now holds the overlay's index; a separate local breaks the match.
     overlay = &f_Overlays[overlayId];
     if (overlay->isLoaded) {
         if (overlay->onUnload != NULL) {

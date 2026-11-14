@@ -4,14 +4,9 @@
 #include <ultra64.h>
 
 typedef u16 AssetId;
-// An AssetId held in a word, as the original keeps it in tables, struct
-// fields and some parameters; it can also hold a negative "none" value.
 typedef s32 WideAssetId;
-// An AssetId in a signed halfword, as the original keeps its palette and
-// disc file tables.
 typedef s16 SignedAssetId;
 
-// One RGBA16 color of a loaded palette (TLUT) file.
 typedef u16 PaletteColor;
 
 typedef struct AssetFile {
@@ -45,7 +40,6 @@ typedef struct ImageHeader {
     ((((u8 *)(image))[IMAGE_WIDTH_OFFSET] << 8) | ((u8 *)(image))[IMAGE_WIDTH_LOW_BYTE])
 #define ReadImageHeight(image) \
     ((((u8 *)(image))[IMAGE_HEIGHT_OFFSET] << 8) | ((u8 *)(image))[IMAGE_HEIGHT_LOW_BYTE])
-// For images known to be narrower and shorter than 256 texels
 #define ReadSmallImageWidth(image) (((u8 *)(image))[IMAGE_WIDTH_LOW_BYTE])
 #define ReadSmallImageHeight(image) (((u8 *)(image))[IMAGE_HEIGHT_LOW_BYTE])
 
@@ -54,9 +48,6 @@ AssetFile *OpenPooledAssetFile(WideAssetId assetId);
 void CloseAssetFile(AssetFile *file);
 s32 GetAssetFileSize(AssetFile *file);
 void ReadAssetFile(void *buffer, u32 size, AssetFile *file);
-// An image asset as loaded: an IMAGE_HEADER_SIZE header, then a small or
-// large palette, then the texels. Its size varies, so it is opaque; reach
-// its parts through ImageBody, ImagePalette, ImageTexels and LargeImageTexels.
 typedef void ImageAsset;
 
 #define IMAGE_HEADER_SIZE 8
@@ -95,8 +86,6 @@ typedef void ImageAsset;
 #define SPINNING_BADGE_FRAME_SIZE (SPINNING_BADGE_SIZE * SPINNING_BADGE_SIZE / 2)
 #define SPINNING_BADGE_FRAME_COUNT 6
 #define ASSET_PLACES 0x688
-// The places image is a column of 32x32 parts: the numbers of the first
-// four places, then their suffixes.
 #define PLACE_PART_SIZE 32
 #define PLACE_PART_IMAGE_SIZE (PLACE_PART_SIZE * PLACE_PART_SIZE)
 #define PLACE_NUMBER_PART_COUNT 4
@@ -113,7 +102,6 @@ typedef void ImageAsset;
 #define ASSET_COURSE_NUMBERS 0x70E
 #define ASSET_POINTING_HAND 0x70F
 #define POINTING_HAND_SIZE 24
-// The menus load 76 rows of the pointing hand image, a few more than its 72.
 #define POINTING_HAND_LOAD_HEIGHT 76
 #define ASSET_GREEN_ARROWS_COPY 0x71E
 #define ASSET_GREEN_ARROWS 0x720
@@ -146,7 +134,6 @@ typedef s32 MenuArrow;
 #define PRESSING_HAND_IMAGE_COUNT 3
 #define PRESSING_HAND_FRAMES_PER_IMAGE 3
 #define PRESSING_HAND_FRAME_COUNT (PRESSING_HAND_IMAGE_COUNT * PRESSING_HAND_FRAMES_PER_IMAGE)
-// Where screens show the pressing hand in the lower right corner
 #define CORNER_PRESSING_HAND_LEFT 272
 #define CORNER_PRESSING_HAND_TOP 192
 #define ASSET_NINTENDO_BADGE 0x949

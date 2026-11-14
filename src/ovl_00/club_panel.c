@@ -50,7 +50,6 @@ typedef s32 ClubPanelState;
 #define ASSET_PANEL_PUTT_MIDDLE 0x571
 #define ASSET_PANEL_PUTT_SHORT 0x572
 
-// Neither a shot mode nor TRUE or FALSE, so that the first check differs
 #define PANEL_NOT_SHOWN 0xFF
 #define INITIAL_CLUB_PANEL_DEBUG_VALUE (-2)
 

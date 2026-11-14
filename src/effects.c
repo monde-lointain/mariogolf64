@@ -54,7 +54,6 @@
 
 #define RAINDROP_OFF_SCREEN (1 << 0)
 #define RAINDROP_HEAD_GROUNDED (1 << 4)
-// A set of RAINDROP flag bits.
 typedef u16 URaindropFlags16;
 #define RAIN_SPLASH_COUNT 32
 
@@ -2240,8 +2239,6 @@ void PlaceRainCenter(void) {
     scale = sqrtf((viewX * viewX) + (viewZ * viewZ));
     f_RainCenter[GROUND_AXIS_X] = viewX;
     f_RainCenter[GROUND_AXIS_Z] = viewZ;
-    // Skips views shorter than one unit. Comparing the truncated length
-    // with 0 as an int instead of a float breaks the match.
     if ((s32)scale != 0.0f) {
         scale = RAIN_CENTER_DISTANCE / scale;
     }

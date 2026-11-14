@@ -21,7 +21,6 @@ typedef s32 WipeState;
 #define WIPE_CLOSED_PROGRESS 0
 #define WIPE_OPEN_PROGRESS 20
 
-// The text slot that in-game prompts are written to.
 #define PROMPT_TEXT_SLOT 0
 
 enum PromptId {

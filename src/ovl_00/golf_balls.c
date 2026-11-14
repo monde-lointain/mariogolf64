@@ -798,8 +798,6 @@ typedef s32 BallSprite;
 #define BALL_NEAR_DEPTH (-200)
 #define BALL_DOT_DEPTH (-40000)
 #define BALL_DEPTH_BIAS 60.0f
-// Balls and their shadows are drawn at a fixed depth pulled toward the camera
-// by about a ball's size, so the ground never hides them.
 #define BALL_DEPTH_PULL 10.5f
 #define NEAR_BALL_DEPTH_OFFSET 48.0f
 #define FAR_BALL_DEPTH_OFFSET 8.0f
@@ -809,18 +807,13 @@ typedef s32 BallSprite;
 #define PulledBallDepth(point, offset) \
     ((point).depth - ((point).depthStep * (BALL_DEPTH_PULL * g_PinVertexScale)) + (offset) - \
         BALL_DEPTH_BIAS)
-// A shadow shrinks and fades as the ball sinks below the ground, as into the
-// cup, by one shade per this many course units of depth, down to a minimum.
 #define FULL_SHADOW_SHADE 0x7F
 #define SHADOW_FADE_DEPTH 512
 #define SHADOW_SHADE_MIN 0x5F
 #define CUP_VIEW_SHADOW_FADE_DEPTH 128
 #define CUP_VIEW_SHADOW_SHADE_MIN 0x3F
 #define SHADOW_DEPTH_GAP_MIN 8
-// Afterimages are at least two pixels across.
 #define AFTERIMAGE_HALF_SIZE_MIN QuarterPixels(1)
-// A ball this far below the ground counts as underground, and a ball in the
-// cup this far above it casts no shadow.
 #define UNDERGROUND_BALL_DEPTH 153.6f
 #define SHADOWLESS_CUP_BALL_HEIGHT 768.0f
 #define PIKA_BALL_DEPTH 20000

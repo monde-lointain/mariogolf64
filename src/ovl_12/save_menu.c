@@ -3,7 +3,6 @@
 #include <framebuffer_count.h>
 #include <ultra64.h>
 
-// The original calls MeasureText here without its flags; see text.h.
 #define OMITS_MEASURE_TEXT_FLAGS
 
 #include "address.h"

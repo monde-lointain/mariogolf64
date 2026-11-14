@@ -47,8 +47,6 @@ enum TileMidpointSlot {
 #define GROUND_GRID_ROW_COUNT ((GROUND_POINT_ROW_COUNT + 1) / 2)
 #define GROUND_GRID_EVEN_COLUMN_COUNT ((GROUND_GRID_COLUMN_COUNT + 1) / 2)
 #define GROUND_TILE_GRID_SPAN (GROUND_TILE_POINT_SPAN / 2)
-// A tile cell slot with this flag names a grid vertex instead of a
-// midpoint.
 #define GRID_VERTEX_SLOT_FLAG 0x80
 #define GridVertexSlot(index) (GRID_VERTEX_SLOT_FLAG | (index))
 #define MINI_GOLF_TILE_X_SHIFT 17
@@ -243,7 +241,6 @@ extern f32 g_GroundNearDepthEighth;
 #define TRIANGLE_CORNER_COUNT 3
 
 typedef struct PlaneTriangle {
-    // The HoleTriangleKind of a hit hole triangle, or the index of a hit ring.
     s32 tag;
     s16 corners[AXIS_COUNT][TRIANGLE_CORNER_COUNT];
 } PlaneTriangle;
@@ -273,8 +270,6 @@ Outcome GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane);
 Vtx *GetGroundPoint(u32 column, u32 row);
 Vtx *GetGridVertex(u32 column, u32 row);
 NO_RESULT SetGroundPoint(s32 column, s32 row, Vtx_t *point);
-// The hole editor calls this without a prototype in the original; a file
-// that defines CALLS_GROUND_POINT_SETTER_UNPROTOTYPED does too.
 #if !defined(AVOID_UB) && defined(CALLS_GROUND_POINT_SETTER_UNPROTOTYPED)
 NO_RESULT SetGroundPointHeightAndShade();
 #else

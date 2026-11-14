@@ -3379,10 +3379,6 @@ void DrawShotEffect(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-// factor and otherFactor are reused in turn as the flag's column and row
-// skew, the shares of a cell's shade taken from its neighbor and kept
-// from itself, the swing amplitude (factor only) and the bulge strength
-// and scale; giving each use its own variable breaks the match.
 void WaveHoleFlag(void) {
     s32 row;
     s32 column;

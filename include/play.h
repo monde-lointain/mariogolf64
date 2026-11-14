@@ -15,7 +15,6 @@
 #define SHOT_FLAG_NO_IMPACT_POINT 2
 #define SHOT_FLAG_APPROACH 4
 #define SHOT_FLAG_NEAR_CUP 8
-// A set of SHOT_FLAG bits.
 typedef s32 ShotFlags;
 
 enum PlayKind {

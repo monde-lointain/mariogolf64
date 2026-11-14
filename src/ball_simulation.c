@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-// The original reads GetAimSlopeAngle's result here as a full s32; see
-// shot_camera.h.
 #define WIDENS_AIM_SLOPE_ANGLE
 
 #include "ball_physics.h"
@@ -192,8 +190,6 @@ StepFlags StepBallSimulation(BallSimulation *simulation) {
     s32 startX;
     s32 startY;
     s32 startZ;
-    // A ground hit stores the hit finders' TRUE, which equals
-    // STEP_FLAG_GROUND_HIT.
     StepFlags contact;
     Boolean hitsHoleTriangle;
     Boolean isNearCup;

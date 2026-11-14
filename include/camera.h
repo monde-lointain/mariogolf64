@@ -48,7 +48,6 @@ typedef struct Camera {
 #define MAIN_CAMERA 0
 #define INSET_CAMERA 1
 #define CAMERA_COUNT 2
-// A camera index for drawing with the opening's own camera instead
 #define OPENING_CAMERA CAMERA_COUNT
 
 extern Camera g_Cameras[CAMERA_COUNT];
@@ -66,8 +65,6 @@ typedef struct CameraMatrices {
     u8 unusedAfterLookAt[0x10];
 } CameraMatrices;
 
-// A camera eye and look-at point that each start easing toward their
-// target once set.
 typedef struct EasedView {
     f32 eye[AXIS_COUNT];
     f32 lookAt[AXIS_COUNT];
@@ -75,7 +72,6 @@ typedef struct EasedView {
     Boolean8 isLookAtEased;
 } EasedView;
 
-// Parts of an EasedView to ease, combined.
 #define EASE_LOOK_AT (1 << 0)
 #define EASE_EYE (1 << 1)
 
@@ -96,7 +92,6 @@ typedef struct InsetView {
 
 extern InsetView g_InsetView;
 
-// BuildRingTexels ignores its outerRadius and always uses this one.
 #define RING_OUTER_RADIUS 62
 
 void SetInsetViewRectangle(s32 centerX, s32 centerY, s32 width, s32 height);

@@ -1,6 +1,5 @@
 #include "game.h"
 
-// The original reads the loader flag and current shot as volatile here.
 #define READS_LOADER_FLAG_VOLATILE
 #define READS_CURRENT_SHOT_VOLATILE
 
@@ -73,14 +72,11 @@
 #define AUDIO_TEST_THIRD_CHANNEL 11
 #define AUDIO_TEST_VOLUME 0x60
 
-// The frame step pause and screen tests read the second controller, and the
-// inset view test the fourth as well; the debug menu reads the first.
 #define SECOND_INSET_TEST_CONTROLLER 3
 #define DEBUG_MENU_CONTROLLER 0
 #define SCREEN_TEST_FADE_STEP 8
 
 #define INSET_VIEW_STEP_COUNT 8
-// The sounds play one step into each animation.
 #define INSET_VIEW_OPEN_SOUND_STEP 1
 #define INSET_VIEW_CLOSE_SOUND_STEP (INSET_VIEW_STEP_COUNT - 1)
 
@@ -904,8 +900,6 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
     }
     else {
         if (gameStep == GAME_STATE_TAKING_TURNS) {
-            // A dead store, but reading g_CurrentShot.playerIndex alone
-            // compiles differently, so the original must have stored it
             gameStep = g_CurrentShot.playerIndex;
         }
 
@@ -1761,7 +1755,7 @@ s32 DrawGame(void) {
         else if (drawMode == DRAW_MODE_UNUSED_CLEAR) {
             InitRcp((cameraIndex * DRAW_BUFFER_COUNT) + g_DrawBufferIndex);
         }
-        else if (drawMode < DRAW_MODE_UNUSED_CLEAR) { // The inset screen or the course
+        else if (drawMode < DRAW_MODE_UNUSED_CLEAR) {
             InitRcp((cameraIndex * DRAW_BUFFER_COUNT) + g_DrawBufferIndex);
         }
         else {

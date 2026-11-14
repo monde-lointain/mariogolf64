@@ -247,8 +247,6 @@ s32 PaintDrivingRange(TerrainCode code, TerrainCode nearestCode, s32 nearestDist
 
 static u32 f_PaintSeed = 0;
 #define PAINT_RANDOM_SHIFT 16
-// Most courses paint no-drop ground as dark soil, speckled by two fields of
-// each paint random value.
 #define SpeckledSoilColor(random) Rgba16(((random) & 4) + 2, 4 - (((random) >> 5) & 3), 0, 1)
 
 static PaintLogic f_PaintLogics[] = {
@@ -2317,8 +2315,6 @@ CourseIndex GetCoursePaintLogic(CourseRecordIndex courseRecordIndex) {
             return COURSE_MARIOS_STAR;
         case COURSE_RECORD_LUIGIS_GARDEN:
             return COURSE_LUIGIS_GARDEN_FIRST;
-        // Not COURSE_PEACHS_CASTLE_FIRST: the original paints Peach's
-        // Castle with the second Luigi's Garden layout's logic here.
         case COURSE_RECORD_PEACHS_CASTLE:
             return COURSE_LUIGIS_GARDEN_SECOND;
         case COURSE_RECORD_DRIVING_RANGE:
@@ -2338,9 +2334,6 @@ void ReadTileMidpoints(void);
 void FinishHolePoints(CourseRecordIndex courseRecordIndex UNUSED, s32 holeIndex UNUSED) {
 }
 
-// courseRecordIndex and holeIndex index the hole asset tables, except
-// that when GAME_FLAG_READ_HOST_HOLE is set, they hold the hole editor's
-// one-based course and hole numbers, which name the host files.
 void BuildHole(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
     AssetFile asset;
     char path[HOST_PATH_SIZE];
@@ -3390,7 +3383,6 @@ void GetGroundLightColors(GroundLightColor *light, GroundLightColor *shade) {
 #define HEIGHT_FADE_LIMIT 0.25f
 #define HEIGHT_FADE_FULL 1.0f
 
-// Each slope light holds a word per ColorChannel.
 #define SLOPE_LIGHT_WORD_COUNT 4
 
 void ShadeGroundTiles(void) {

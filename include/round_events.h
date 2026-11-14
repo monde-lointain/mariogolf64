@@ -72,8 +72,6 @@ typedef s32 ContactStyle;
 #define BANNER_BOGEY 16
 #define BANNER_STROKES_OVER_PAR 16
 
-// The frames since the contact effect started, or NO_CONTACT_EFFECT_AGE
-// while none is shown
 #define NO_CONTACT_EFFECT_AGE (-1)
 
 extern s32 g_ContactEffectAge;

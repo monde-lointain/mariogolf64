@@ -62,8 +62,6 @@ typedef struct ScreenRectangle {
 
 extern ScreenRectangle g_HudScissor;
 
-// A timed effect counts down frameCount frames; the saved frame effect
-// keeps its SavedFrameStep there instead.
 void SetScreenEffect(ScreenEffect effect, s32 frameCount);
 
 #endif

@@ -1,7 +1,6 @@
 #include <string.h>
 #include <ultra64.h>
 
-// The original passes DrawCharacterFace's draw mode here as s32; see player_stats.h.
 #define WIDENS_FACE_DRAW_MODE
 
 #include "address.h"
@@ -66,7 +65,6 @@ enum CourseImageBuffer {
 
 typedef u8 UCourseImageBuffer8;
 
-// Flips between the two course image buffers.
 #define COURSE_IMAGE_BUFFER_FLIP 1
 
 enum SavedGameBoard {
@@ -95,8 +93,6 @@ enum SaveMenuMode {
     SAVE_MENU_MODE_TRAINING,
     SAVE_MENU_MODE_SKINS_MATCH,
     SAVE_MENU_MODE_UNLISTED_STROKE,
-    // A saved game is mini golf by its isMiniGolf flag, not by its game mode,
-    // so the modes before this one are those with a game mode.
     SAVE_MENU_MODE_MINI_GOLF,
     SAVE_MENU_MODE_COUNT
 };

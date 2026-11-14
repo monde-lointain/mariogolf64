@@ -37,7 +37,6 @@ enum Surface {
 };
 
 typedef s32 Surface;
-// A Surface in a byte, as the ball and player structs keep it.
 typedef s8 Surface8;
 
 enum SurfaceKind {
@@ -69,7 +68,6 @@ enum SurfaceKind {
 
 typedef s32 SurfaceKind;
 
-// How far a tee raises the ball off the ground.
 #define TEE_HEIGHT 307.2f
 
 #define IsOutOfBoundsKind(kind) \

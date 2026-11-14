@@ -5,9 +5,7 @@
 #include <string.h>
 #include <ultra64.h>
 
-// The original reads the chosen options here as s32; see save.h.
 #define WIDENS_CHOSEN_OPTIONS
-// The original reads GetChosenBestShot's result here as s32; see player_stats.h.
 #define WIDENS_CHOSEN_BEST_SHOT
 
 #include "address.h"
@@ -126,8 +124,6 @@ typedef s16 ClubhouseRoom16;
 #define STAR_COUNT_MAX 6
 #define CHOSEN_STAR_GROWTH 8
 #define MENU_CHARACTER_LAYOUT_COUNT 4
-// The layouts are indexed by character count less one; a found rival
-// stands alone.
 #define SOLO_CHARACTER_LAYOUT 0
 #define MENU_CHARACTER_SLOT_COUNT 5
 #define MENU_CHARACTER_SOLO_SCALE 5.0f
@@ -4172,8 +4168,6 @@ void UpdateCaddySelect(void) {
 
     if (g_MenuPressedButtons & B_BUTTON) {
         PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-        // The original compares the mode choice, an index into the mode icons,
-        // with a menu screen, and returns to the screen of that number.
         if (g_MenuMemory.modeChoice == MENU_SCREEN_MODE_SELECT) {
             g_MenuScreen = g_MenuMemory.modeChoice;
         }

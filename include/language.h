@@ -4,15 +4,12 @@
 #include <ultra64.h>
 
 typedef s32 Boolean;
-// TRUE or FALSE kept at another width or signedness, where the original's
-// struct layout or code fixes them.
 typedef u32 UBoolean;
 typedef s16 Boolean16;
 typedef u16 UBoolean16;
 typedef s8 Boolean8;
 typedef u8 UBoolean8;
 
-// How a routine ended, in the original's convention of 0 for success.
 enum Outcome {
     OUTCOME_FAILED = -1,
     OUTCOME_OK

@@ -3,7 +3,6 @@
 #include <PR/libmus.h>
 #include <ultra64.h>
 
-// The original reads the chosen options here as s32; see save.h.
 #define WIDENS_CHOSEN_OPTIONS
 
 #include "address.h"

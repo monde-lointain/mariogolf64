@@ -133,8 +133,6 @@ void guNormalize(f32 *x, f32 *y, f32 *z) {
     f32 yValue = *y;
     f32 zValue = *z;
 
-    // length holds the squared length and then its reciprocal; separate
-    // variables break the match.
     f32 length = (xValue * xValue) + (yValue * yValue) + (zValue * zValue);
 
     if (length < 0.0f) {

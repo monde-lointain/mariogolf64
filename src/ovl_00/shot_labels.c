@@ -2,7 +2,6 @@
 
 #include <ultra64.h>
 
-// The original calls DrawCenteredShadowedText here unprototyped; see text.h.
 #define CALLS_CENTERED_SHADOWED_TEXT_UNPROTOTYPED
 
 #include "address.h"

@@ -108,9 +108,7 @@ enum PauseMessage {
     PAUSE_MESSAGE_BASIC_CONTROLS
 };
 
-// A pause option's message, counted from MESSAGE_FIRST_PAUSE_OPTION.
 typedef s32 PauseMessage;
-// A PauseMessage in a signed halfword, as the pause options table keeps it.
 typedef s16 PauseMessage16;
 
 typedef struct PauseOption {

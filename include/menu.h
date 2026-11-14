@@ -54,7 +54,6 @@ extern s32 g_MenuPressedButtons;
 
 extern AssetId g_CourseIconAssets[];
 extern AssetId g_TournamentIconAssets[];
-// How many courses the course choice offers; always COURSE_COUNT.
 extern s32 g_MenuCourseCount;
 extern UBoolean8 g_AreBetPagesBlocked;
 
@@ -71,7 +70,6 @@ extern ImageAsset *g_MenuCourseSceneImage;
 #define PLAYER_COUNT_ASSET_ROW_LENGTH 12
 extern AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH];
 
-// A rectangle corner in screen pixels.
 typedef struct ScreenCorner {
     s32 x;
     s32 y;
@@ -93,10 +91,7 @@ extern ImageAsset *g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
 extern ImageAsset *g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
 
 #define MINI_GOLF_DISC_IMAGE_COUNT 2
-// The menus double-buffer their boards, labels, titles and trophies so
-// that one image can load while the other shows.
 #define MENU_IMAGE_BUFFER_COUNT 2
-// The course icons, or a player count's first mode icons.
 #define MENU_ICON_COUNT 7
 #define MINI_GOLF_TURN_FRAME_COUNT 5
 #define MINI_GOLF_FACING_FRAME 2
@@ -180,7 +175,6 @@ extern s16 g_ImportedCharacterColumns[PLAYER_COUNT_MAX];
 
 extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT];
 
-// Images that more than one menu draws.
 #define NAME_PLATE_WIDTH 200
 #define NAME_PLATE_HEIGHT 30
 #define NAME_PLATE_STRIP_HEIGHT 10
@@ -189,11 +183,9 @@ extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT
 #define COURSE_SCENE_STRIP_ROW_COUNT 11
 #define COURSE_SCENE_STRIP_COUNT 11
 #define COURSE_SCENE_SCALE 2
-// Each strip loads extra rows below it so filtering blends across the seam.
 #define COURSE_SCENE_SEAM_ROW_COUNT 2
 #define COURSE_SCENE_LEFT 8
 #define COURSE_SCENE_FIRST_TOP 8
-// The first strip shows one extra row, so later strips are laid out from here.
 #define COURSE_SCENE_TOP (COURSE_SCENE_FIRST_TOP + COURSE_SCENE_SCALE)
 #define STAR_WIDTH 32
 #define STAR_HEIGHT 24

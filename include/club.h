@@ -61,20 +61,15 @@ typedef s16 ClubCategory16;
 
 #define CLUB_SLOT_COUNT 16
 
-// A slot in a player's bag, Player.clubs; slot N holds the club of ClubType
-// N, or NO_CLUB.
 typedef s32 ClubSlot;
 typedef s8 ClubSlot8;
 
 #define NO_CLUB (-1)
 
-// An index into g_Clubs: a club set's index times CLUB_SET_SIZE, plus a
-// ClubType.
 typedef s32 ClubIndex;
 typedef u32 UClubIndex;
 typedef s16 ClubIndex16;
 
-// A set of CLUB_SURFACE_ bits naming the surfaces a club can be used on.
 typedef s32 ClubSurfaceMask;
 
 #define CLUB_SURFACE_GREEN 0x1
@@ -91,8 +86,6 @@ typedef s32 ClubSurfaceMask;
 #define FAIRWAY_WOOD_SURFACES (~(CLUB_SURFACE_GREEN | CLUB_SURFACE_ROUGH | CLUB_SURFACE_BUNKER))
 #define IRON_SURFACES (~CLUB_SURFACE_GREEN)
 
-// How well a club plays from a lie, from LIE_RATING_MIN to LIE_RATING_MAX,
-// or NO_LIE_RATING for a putter.
 typedef s32 LieRating;
 
 #define NO_LIE_RATING 0

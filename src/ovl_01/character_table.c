@@ -2,7 +2,6 @@
 
 #include <ultra64.h>
 
-// The original passes DrawCharacterFace's character index here as s32; see player_stats.h.
 #define WIDENS_FACE_CHARACTER_INDEX
 
 #include "address.h"

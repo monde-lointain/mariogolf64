@@ -1436,8 +1436,6 @@ Boolean LoadResultCharacters(void) {
     LoadCharacter(1, g_Players[1].characterIndex + CHARACTER_COUNT, g_Players[1].paletteIndex);
     songId = SONG_MATCH_RESULT;
     if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-        // songId briefly holds player 1's stroke count; a separate variable
-        // breaks the match.
         songId = g_Players[0].holes[holeIndex].strokeCount;
         if (songId < g_Players[1].holes[holeIndex].strokeCount) {
             songId = SONG_HOLE_WON;

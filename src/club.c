@@ -3676,7 +3676,6 @@ void DoNothingWithClubs(void) {
 s32 GetShotDistance(Club *club, ShotMode shotMode) {
     s32 distance = 0;
 
-    // The original switches on the mode as unsigned, here and below.
     if (club->surfaceMask & CLUB_SURFACE_GREEN) {
         switch ((u32)shotMode) {
             case PUTT_MODE_LONG:

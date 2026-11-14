@@ -18,7 +18,6 @@
 #define CLEARED_TEXT_X (SCREEN_WIDTH / 2)
 #define CLEARED_TEXT_Y 114
 
-// Where one string sits in a table of u16 character codes.
 typedef struct TextSpan {
     u16 start;
     u16 length;
@@ -39,7 +38,6 @@ typedef struct GlyphSprite {
     u16 code;
     u8 fontSize;
     s8 group;
-    // TEXT_FLAG and GLYPH_FLAG bits.
     UTextFlags8 flags;
 } GlyphSprite;
 
@@ -166,9 +164,6 @@ void DrawCenteredSmallText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *
 void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
 void DrawCondensedShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
 void DrawCenteredNarrowText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
-// The shot labels call this without a prototype in the original, passing
-// their coordinates as plain ints; a file that defines
-// CALLS_CENTERED_SHADOWED_TEXT_UNPROTOTYPED does too.
 #if !defined(AVOID_UB) && defined(CALLS_CENTERED_SHADOWED_TEXT_UNPROTOTYPED)
 void DrawCenteredShadowedText();
 #else

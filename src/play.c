@@ -231,7 +231,6 @@ s32 GetAimCameraGround(s32 x, s32 z) {
     return height;
 }
 
-// The round that GAME_FLAG_ROUND_KIND_HIGH_BIT and _LOW_BIT choose.
 enum FlaggedRoundKind {
     FLAGGED_ROUND_STROKE,
     FLAGGED_ROUND_TRAINING,
@@ -266,10 +265,8 @@ void SetUpFlaggedRound(void) {
             g_GameState.playerCount = 2;
             g_GameState.step = GAME_STATE_START;
             g_GameState.gameMode = GAME_MODE_MATCH_GAME;
-            // The original has no break here, so a flagged match game
-            // becomes a three-player skins match.
 
-        default: // FLAGGED_ROUND_SKINS_MATCH
+        default:
             g_GameState.playerCount = 3;
             g_GameState.courseIndex = 0;
             g_GameState.holeIndex = 0;
@@ -301,8 +298,6 @@ void FormatDefaultPlayerName(s32 index, char *name) {
 void SetUpPlayers(void) {
     s32 playerIndex;
     s32 holeIndex;
-    // Counts both NotableShot kinds and ClubSlots; splitting it changes the
-    // original's register use.
     NotableShot slot;
 
     if (g_Scene == SCENE_PLAY_BEST_SHOT_REPLAY ||
@@ -741,7 +736,6 @@ Boolean HasWonFinalChallenge(void) {
     return FALSE;
 }
 
-// The count of opened ring shot courses starts at 1.
 #define UNLOCK_NOTICE_RING_SHOT_COURSE_BASE (UNLOCK_NOTICE_COURSES - 1)
 
 #define PLAYER_CHARACTER_SLOT 0

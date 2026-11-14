@@ -261,9 +261,6 @@ enum ScoreShape {
     SCORE_SHAPE_COUNT
 };
 
-// Contestants' scores swing by up to SWING_AMPLITUDE_COUNT - 1 strokes. On the
-// first courses the amplitudes are reversed and shifted so that most
-// contestants swing widely.
 #define SWING_AMPLITUDE_COUNT 10
 #define EARLY_COURSE_SWING_REVERSAL 13
 

@@ -66,9 +66,6 @@ void DeriveSceneColors(void) {
     f_UnusedFirstClearedWord = 0;
     f_UnusedSecondClearedWord = 0;
 
-    // With one subscript this picks a course row of g_SkyColors, not a
-    // weather and time within the current course, so it reads the first
-    // sky of whichever course row the sum lands on.
     colors = g_SkyColors
         [(g_HoleSetup.conditions.isRaining * 3) + g_HoleSetup.conditions.sceneColorIndex];
     for (vertexOffset = 0; vertexOffset != QUAD_VERTEX_COUNT; vertexOffset++) {

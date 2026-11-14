@@ -12,7 +12,6 @@
 #define TOURNAMENT_PASSWORD_LENGTH 8
 #define SCORE_PASSWORD_LENGTH 20
 
-// The characterIndex of a tournament that lets the player choose
 #define ANY_CHARACTER (-1)
 
 typedef struct TournamentRules {

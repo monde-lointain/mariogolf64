@@ -36,7 +36,6 @@ enum PauseAction {
 };
 
 typedef s32 PauseAction;
-// A PauseAction in a signed halfword, as the pause options table keeps it.
 typedef s16 PauseAction16;
 
 enum ChoiceBoxId {
@@ -65,8 +64,6 @@ extern Vec2 g_LiePanelPosition;
 extern Vec2 g_WindPanelPosition;
 
 void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap);
-// A true isClosing for RequestPauseMenu; the original passes -1 rather
-// than TRUE.
 #define CLOSING_PAUSE_MENU (-1)
 
 void RequestPauseMenu(Boolean canGiveUp, Boolean isClosing);

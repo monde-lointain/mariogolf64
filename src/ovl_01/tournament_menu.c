@@ -36,7 +36,6 @@
 
 #define MENU_WINDOW_PICTURE_COUNT 15
 
-// Holding a C button shows the club tournament's picture in another palette.
 enum MenuWindowPalette {
     MENU_WINDOW_PALETTE_PLAIN,
     MENU_WINDOW_PALETTE_C_LEFT,
@@ -154,7 +153,6 @@ enum ClubChoice {
 
 typedef u8 UClubChoice8;
 
-// Flips between the two choices.
 #define CLUB_CHOICE_FLIP 1
 
 static ImageAsset *f_WideCloudImage = NULL;

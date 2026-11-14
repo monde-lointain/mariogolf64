@@ -66,8 +66,6 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
 
 void TallySkins(s32 endHole) {
     s32 playerIndex;
-    // hole also indexes players in the first loop, and winner is first used
-    // as an is-anyone-playing flag; splitting either breaks the match.
     s32 hole;
     s32 winner;
     s32 skins;

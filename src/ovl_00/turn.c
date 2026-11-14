@@ -72,12 +72,9 @@
 #define IMPACT_POINT_SOUND_VOLUME 60
 #define IMPACT_POINT_SOUND_REVERB 20
 
-// The aim tilt test and shot preview tuning read the first controller;
-// moving the ball and turning the debug framing read the second.
 #define TEST_CONTROLLER 0
 #define DEBUG_AIM_TILT_STEP 1.0f
 #define DEBUG_FRAMING_TURN_PER_STICK 0.002f
-// The ball moves faster the further the stick leans.
 #define BALL_MOVE_SPEED_PER_STICK 2
 #define IMPACT_POINT_SOUND_PAN 230
 
@@ -2787,8 +2784,6 @@ void ShowHoleOutBanner(s32 playerIndex) {
 #define STATE_ERROR_TEXT_COLUMN 20
 #define STATE_ERROR_TEXT_ROW 2
 
-// After a hole out, frames into the state at which the song plays and the
-// banner shows.
 #define HOLE_OUT_SONG_FRAME 1
 #define ONLOOKERS_BANNER_CLEAR_FRAME 29
 #define ONLOOKERS_BANNER_FRAME 30

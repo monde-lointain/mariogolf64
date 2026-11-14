@@ -72,7 +72,6 @@
 
 #define LZ_STREAM_FLAG_FIRST (1 << 0)
 #define LZ_STREAM_FLAG_LAST (1 << 1)
-// A set of LZ_STREAM_FLAG bits.
 typedef u16 ULzStreamFlags16;
 #define LZ_HEADER_WORD_COUNT 2
 #define LZ_LITERAL_RUN_LENGTH 16

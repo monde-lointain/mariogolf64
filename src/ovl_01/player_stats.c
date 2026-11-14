@@ -2570,7 +2570,6 @@ void ReadBestShots(void) {
     SaveData *save = GetSaveData();
     s32 kindRecords[STATS_GRID_ROW_COUNT][STATS_KIND_LIST_SIZE];
     s32 index;
-    // Also holds the saved best shot row; splitting it changes the code.
     s32 recordIndex;
     s32 birdieCount;
     s32 eagleCount;

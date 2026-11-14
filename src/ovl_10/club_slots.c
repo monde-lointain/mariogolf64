@@ -1055,8 +1055,6 @@ void DrawClubSlots(Gfx **displayListHead) {
         else {
             ImageAsset *faceImage = g_PlayerFaceImages[topOrPlayerIndex];
 
-            // The still face is only FACE_HEIGHT rows, but the game loads
-            // a frame-sized block and draws just the face's rows.
             LoadTextureBlock(
                 &gfx,
                 faceImage,

@@ -233,14 +233,12 @@ void UpdateAndDrawFireworks(Gfx **displayListHead) {
     s32 i;
     s32 index;
     FireworkParticle *particle;
-    // The drawing loop needs its own particle pointer for the match.
     FireworkParticle *drawnParticle;
     f32 directionX;
     f32 directionY;
     f32 inverseSpeed;
     f32 length;
     f32 tailScale;
-    // Each use of a firework's timer needs its own copy for the match.
     s32 timer;
     s32 fadeTimer;
     s32 trailTimer;

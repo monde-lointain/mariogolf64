@@ -74,8 +74,6 @@ enum UnlockNoticeKind {
 
 typedef s32 UnlockNoticeKind;
 
-// A course notice swings in until its angle reaches a half turn, then
-// keeps swinging until NOTICE_DONE_FRAME.
 enum NoticeStage {
     NOTICE_STAGE_SWINGING_IN,
     NOTICE_STAGE_SWINGING
@@ -1422,7 +1420,6 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_COURSE_STRIP_WIDTH 64
 #define NOTICE_COURSE_STRIP_HEIGHT 32
 #define NOTICE_COURSE_STRIP_COUNT 2
-// The course and character notices pop up around the same point.
 #define NOTICE_CENTER_X (SCREEN_WIDTH / 2)
 #define NOTICE_CENTER_Y 128
 #define NOTICE_COURSE_SCALE_BIAS 2.0f

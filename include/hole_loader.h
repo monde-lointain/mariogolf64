@@ -11,9 +11,6 @@
 #define ROUTE_POINT_COUNT 8
 #define AIM_POINT_COUNT 8
 
-// Play always starts from the first tee. The first cup is the one the editor
-// and staff roll use, and the first two aim points mark where the tee shot and
-// the second shot should land.
 #define PLAYED_TEE 0
 #define DEFAULT_CUP 0
 #define TEE_SHOT_AIM_POINT 0
@@ -28,8 +25,6 @@ typedef struct HolePoints {
 
 extern HolePoints g_HolePoints;
 
-// The original reads this as volatile only in a file that defines
-// READS_LOADER_FLAG_VOLATILE; newer compilers always need it volatile.
 #if defined(__IS_KMC__) && !defined(READS_LOADER_FLAG_VOLATILE)
 extern Boolean g_HasLoaderFinished;
 #else

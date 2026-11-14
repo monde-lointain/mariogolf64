@@ -130,8 +130,6 @@ void ResetSaveData(void);
 void InitSaveData(void);
 void RecordDisplayListLength(u32 commandCount);
 void WriteSaveData(void);
-// menu.c returns the options as s8, but the original's callers elsewhere
-// read a full s32; a file that defines WIDENS_CHOSEN_OPTIONS gets that form.
 #if defined(AVOID_UB) || !defined(WIDENS_CHOSEN_OPTIONS)
 Boolean8 IsMusicOffChosen(void);
 Boolean8 IsMonoChosen(void);

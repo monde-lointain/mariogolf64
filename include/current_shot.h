@@ -40,8 +40,6 @@ typedef s32 ImpactPointState;
 #define GAUGE_FULL_FRAME 30
 #define GAUGE_IMPACT_FRAME (2 * GAUGE_FULL_FRAME)
 
-// The original reads this as volatile only in a file that defines
-// READS_CURRENT_SHOT_VOLATILE; newer compilers always need it volatile.
 #if defined(__IS_KMC__) && !defined(READS_CURRENT_SHOT_VOLATILE)
 extern CurrentShot g_CurrentShot;
 #else

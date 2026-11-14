@@ -29,7 +29,6 @@ typedef s32 CodeEntryBuffer;
 
 void LoadTournamentBuffer(void *buffer, TournamentBuffer bufferKind);
 
-// Passed as DrawYesNoWindow's okTextShown to leave out the OK label.
 #define NO_OK_TEXT (-1)
 void DrawYesNoWindow(
     Gfx **displayListHead,

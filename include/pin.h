@@ -6,7 +6,6 @@
 #include "camera.h"
 #include "language.h"
 
-// The flagstick's height above the cup, in course units.
 #define FLAGSTICK_HEIGHT 0xB400
 
 extern s32 g_PinVertexScale;

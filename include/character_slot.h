@@ -37,9 +37,6 @@
 #define CHARACTER_MODEL_ADDRESS 0x02000000
 #define CHARACTER_MODEL_PAGE_COUNT 32
 
-// SetMultiTlb's page size, SMALLEST_PAGE_SIZE shifted left by the mode.
-// Odd sizes have no page mask of their own, so they are mapped as two
-// pages of the next smaller size.
 enum TlbPageMode {
     TLB_PAGE_MODE_4K,
     TLB_PAGE_MODE_8K,
@@ -97,7 +94,6 @@ typedef struct KeyframeSpan {
     s16 startKeyIndex;
 } KeyframeSpan;
 
-// Rotations are quaternions stored x, y, z, then w.
 #define QUATERNION_W 3
 #define QUATERNION_COMPONENT_COUNT 4
 
@@ -173,14 +169,11 @@ typedef u8 AnimationEventKind8;
 typedef struct AnimationEvent {
     s16 frame;
     AnimationEventKind8 kind;
-    // For ANIMATION_EVENT_TEXTURE_ANIMATION, a TextureAnimationEvent or a
-    // texture animation to play.
     u8 value;
 } AnimationEvent;
 
 typedef struct AnimationEventAction {
     AnimationEventKind8 kind;
-    // The value of the AnimationEvent it acts on.
     u8 value;
 } AnimationEventAction;
 

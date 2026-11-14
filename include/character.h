@@ -7,8 +7,6 @@
 #include "compiler.h"
 #include "language.h"
 
-// Identifies an animation within a character model; each model numbers its
-// own animations.
 typedef s32 AnimationId;
 typedef s8 AnimationId8;
 typedef u8 UAnimationId8;
@@ -35,8 +33,6 @@ enum CharacterIndex {
 };
 
 typedef s32 CharacterIndex;
-// A CharacterIndex kept in a byte or halfword, as the original stores it in
-// player, menu, saved, imported and Game Boy records and some menu locals.
 typedef s8 CharacterIndex8;
 typedef u8 UCharacterIndex8;
 typedef s16 CharacterIndex16;
@@ -66,9 +62,6 @@ enum CharacterChoice {
 
 extern AssetId g_CharacterFirstFaceAssets[CHARACTER_COUNT];
 #define CHARACTER_FACE_IMAGE_OFFSET 9
-// The still face at CHARACTER_FACE_IMAGE_OFFSET is FACE_WIDTH by
-// FACE_HEIGHT; the face animation frames before it are FACE_FRAME_SIZE
-// square.
 #define FACE_WIDTH 32
 #define FACE_HEIGHT 24
 #define FACE_FRAME_SIZE 32

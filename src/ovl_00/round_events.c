@@ -3009,8 +3009,6 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
     Vec3 spinScale;
     Gfx *gfx = *displayListHead;
     s32 alpha;
-    /* Counts both contact matrices and ribbon segments; separate
-       variables allocate registers differently. */
     s32 sharedIndex;
     s32 pass;
 

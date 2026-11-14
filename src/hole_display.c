@@ -62,9 +62,6 @@
 #define SUN_GLARE_FLARE_STRENGTH 1.5f
 #define SUN_GLARE_FULL_STRENGTH 1.0f
 
-// The sky is drawn as a fan of five vertices: the top corners and center on
-// the screen's top edge, and the two horizon corners. A second fan follows
-// with the pitch mirrored.
 #define SKY_TOP_LEFT 0
 #define SKY_HORIZON_LEFT 1
 #define SKY_HORIZON_RIGHT 2
@@ -195,8 +192,6 @@ static s8 f_SceneSkyColorTimes[] = {0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3};
 static s8 f_SceneSkyBlendPercents[] = {0, 80, 0, 0, 0, 0, 0, 20, 50, 75, 100, 100};
 static f32 f_SunScreenX[SKY_VIEW_COUNT] = {0.0f, 0.0f};
 static f32 f_SunScreenY[SKY_VIEW_COUNT] = {0.0f, 0.0f};
-// The sky colors pick one of these for each time of day; the rainy sunset
-// is paler. Suns 3 and 5 are never used.
 #define MORNING_SUN 0
 #define MIDDAY_SUN 1
 #define RAINY_SUNSET_SUN 2

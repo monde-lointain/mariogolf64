@@ -301,7 +301,6 @@ enum Song {
 #define SONG_FLAG_UNREAD 0x01
 #define SONG_FLAG_FOLLOWS_MUSIC_OPTION 0x10
 #define SONG_FLAG_RESTART 0x80
-// A set of SONG_FLAG bits.
 typedef s32 SongFlags;
 
 #define NO_SONG (-1)

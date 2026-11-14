@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-// The original reads the chosen options here as s32; see save.h.
 #define WIDENS_CHOSEN_OPTIONS
 
 #include "ball_simulation.h"
@@ -1608,7 +1607,6 @@ void AimCameraYaw(void) {
 #define TRAIL_EASE_PERCENT_STEP 2.0f
 #define TRAIL_EFFECT_END_FRACTION 0.1f
 #define TRAIL_ANGLE_SCALE 0.25
-// The trail view's angle stays this far inside a full turn on each side.
 #define TRAIL_ANGLE_MARGIN (M_PI / 6)
 #define FACING_CUP_VIEW_DISTANCE 76800.0f
 #define FACING_CUP_VIEW_RISE 0x5A00
@@ -2256,7 +2254,6 @@ void PlaceFlightCamera(s32 step) {
     ((distance) >= CUP_LANDING_DISTANCE_MIN && (distance) <= CUP_LANDING_DISTANCE_MAX)
 #define IsEndingNearCup() \
     (g_SimulatedShot.endsInCup || f_LandingCupDistance < NEAR_CUP_DISTANCE_MAX)
-// Flight lengths, in simulation steps, that change which camera is picked.
 #define LONG_FLIGHT_STEP_COUNT 120
 #define BESIDE_GOLFER_FLIGHT_STEPS_MIN 61
 #define NEAR_LAUNCH_FLIGHT_STEPS_MIN 16
@@ -2622,7 +2619,6 @@ void ChooseFlightCameraKind(void) {
 #define BILLBOARD_HIT_VIEW_STEP_MIN 60
 #define LONG_SHOT_EFFECT_STEP 40
 #define LONG_SHOT_EFFECT_FLIGHT_STEP_COUNT 80
-// The HUD animation stops this many steps before the ball lands.
 #define HUD_CLEAR_STEPS_LEFT 40
 #define BILLBOARD_HIT_VIEW_STEP_COUNT 10
 #define END_VIEW_DISTANCE_MIN 0x25800
@@ -2971,8 +2967,6 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
             StartFastBallAfterimage();
         }
 
-        // The path flags are signed bytes, so 0x100 is set by sign extension
-        // whenever STEP_FLAG_CUP_PULL is.
         if ((g_SimulatedShot.pathFlags[step] & (STEP_FLAG_CUP_PULL << 1)) ||
             (g_SimulatedShot.pathFlags[step] & STEP_FLAG_LIPPED_OUT)) {
             StartContactEffect(CONTACT_EFFECT_NONE);

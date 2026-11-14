@@ -791,8 +791,6 @@ void AdvanceTextureAnimations(
     Vtx *vertex;
     s32 stateFrame;
     s32 animationIndex;
-    /* Counts both triangle vertices and animation slots; separate
-       variables allocate registers differently. */
     s32 sharedIndex;
 
     if (FindUsedSlot(slotIndex, &slot)) {
@@ -1099,8 +1097,6 @@ CharacterAnimation *FindAnimation(u32 slotIndex, AnimationId animationId) {
 
     if (slot != NULL) {
         MapModelBuffer(slot);
-        // animationId is reused for the animation's index; a separate
-        // variable breaks the match.
         animationId = GetAnimationIndex(slotIndex, animationId);
         if (ModelAnimations(slot->model)[animationId].events == NULL) {
             return NULL;

@@ -29,8 +29,6 @@ typedef s32 CourseSelectLayout;
 #define MENU_LAYER_TALL_NARROW_BOARD (1 << 7)
 #define PLAIN_BACKDROP_LAYERS (MENU_LAYER_COURSE_SCENE | MENU_LAYER_IGNORED | MENU_LAYER_BANNER)
 
-// The mode select and the game save menu turn their choices on the same
-// carousel of boards.
 #define CAROUSEL_EYE_HEIGHT 70.0f
 #define CAROUSEL_EYE_DISTANCE 60.0f
 #define CAROUSEL_RADIUS_X 48.0f
@@ -56,8 +54,6 @@ extern LabelGrowthDirection g_ChosenLabelGrowthDirection;
 extern ImageAsset *g_NamePlateImage;
 extern s32 g_ChosenPlayerCount;
 
-// The bet pages' phases: the BET phases choose the bet settings, and the
-// later MENU phases choose the handicaps that follow them.
 enum BetPagesPhase {
     MENU_PHASE_START,
     BET_PHASE_OPENING,

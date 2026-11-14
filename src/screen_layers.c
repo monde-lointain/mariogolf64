@@ -123,7 +123,6 @@ enum PromptChoice {
 
 typedef s32 PromptChoice;
 
-// Flips between the two choices.
 #define PROMPT_CHOICE_FLIP 1
 #define SAVING_RESULT_COUNT (PROMPT_RESULT_SAVE_REPLAY + 1)
 #define PROMPT_TEXT_Y 108

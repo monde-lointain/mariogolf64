@@ -213,7 +213,6 @@ void HideGameBoyCharacters(void) {
     f_SavedGameBoySlots[3] = fourthSlot;
 }
 
-// Returns -TRUE when the cursor cannot move, and FALSE when it moves.
 Boolean MoveGridCursor(s32 playerIndex, GridMove direction, UBoolean8 canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
@@ -305,7 +304,6 @@ Boolean MoveGridCursor(s32 playerIndex, GridMove direction, UBoolean8 canChooseM
     return -(column == oldColumn && row == oldRow);
 }
 
-// Returns -TRUE when the cursor cannot move, and FALSE when it moves.
 Boolean MoveGridCursorDiagonal(
     s32 playerIndex,
     UStickDiagonal8 diagonal,

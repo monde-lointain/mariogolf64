@@ -47,7 +47,6 @@ typedef f32 BallSpeed;
 #define STEP_FLAG_HOLE_TRIANGLE_BOUNCE 0x40
 #define STEP_FLAG_CUP_PULL 0x80
 
-// A set of STEP_FLAG bits.
 typedef s32 StepFlags;
 typedef s8 StepFlags8;
 typedef u8 UStepFlags8;
@@ -97,8 +96,6 @@ typedef struct ImpactEffect {
 
 typedef struct ShotLaunch {
     SignedBinaryAngle heading;
-    // A slot in the player's bag, except in club tests, which store the
-    // CLUB_TYPE_* to test.
     ClubSlot clubSlot;
     s32 power;
     s32 impactTiming;
@@ -164,8 +161,6 @@ typedef struct BallSimulation {
     s8 playerIndex;
     StepFlags8 stepFlags;
     Surface8 firstBounceSurface;
-    // A CUP_IN_SOUND state for BALL_SOUND_CUP_IN; whether the sound is
-    // playing for BALL_SOUND_ROLL.
     s8 soundStates[BALL_SOUND_COUNT];
     Boolean8 hasHitFlag;
     UStepFlags8 previousStepFlags;

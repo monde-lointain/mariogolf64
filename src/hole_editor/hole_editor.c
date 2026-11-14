@@ -1,5 +1,3 @@
-// The original calls SetGroundPointHeightAndShade here unprototyped; see
-// terrain.h.
 #define CALLS_GROUND_POINT_SETTER_UNPROTOTYPED
 
 #include "hole_editor.h"
@@ -42,7 +40,6 @@
 #include "work_area.h"
 
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)
-// A midpoint is leveled between the two ground points beside it.
 #define SEGMENT_POINT_COUNT 3
 #define SEGMENT_START 0
 #define SEGMENT_MIDPOINT 1
@@ -71,7 +68,6 @@
 #define TREE_DISTANCE_MAX 10
 #define TREE_SPACING 0x100
 #define TREE_TEXTURE_INDEX 2
-// The editor marks a tree near the edge with this true value rather than TRUE
 #define TREE_NEAR_EDGE 0x100
 #define TREE_WIDTH 0x80
 #define TREE_HEIGHT 0x100
@@ -110,8 +106,6 @@ enum HeightEdit {
 
 typedef s32 HeightEdit;
 
-// Each direction times BINARY_ANGLE_EIGHTH_TURN, added to the camera's yaw,
-// is the angle the height cursor steps at. 1 goes unused.
 enum CursorDirection {
     CURSOR_DIRECTION_NONE,
     CURSOR_DIRECTION_RIGHT = 2,
@@ -335,9 +329,6 @@ typedef s32 HoleFileStep;
 #define FINE_TILE_POINT_SPAN (FINE_TILE_CELL_SPAN + 1)
 #define TILE_TRIANGLE_COUNT (FINE_TILE_CELL_SPAN * FINE_TILE_CELL_SPAN * 2)
 
-// A fine tile is built from the points on its border and its center, column
-// by column, and drawn with its inner midpoints loaded between the middle
-// columns and the last.
 enum TileVertexSlot {
     TILE_VERTEX_ROW0_COLUMN0,
     TILE_VERTEX_ROW1_COLUMN0,

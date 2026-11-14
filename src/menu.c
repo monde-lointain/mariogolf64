@@ -2016,7 +2016,6 @@ Boolean IsMetalMarioUnlocked(void) {
     return badgeCount == COURSE_COUNT * COURSE_HOLE_COUNT;
 }
 
-// The cells the unlockable characters take once earned.
 #define MAPLE_GRID_ROW 0
 #define MAPLE_GRID_COLUMN 5
 #define DONKEY_KONG_GRID_ROW 1
@@ -2026,9 +2025,6 @@ Boolean IsMetalMarioUnlocked(void) {
 #define BOWSER_GRID_ROW 0
 #define BOWSER_GRID_COLUMN 6
 
-// playerCount is reused to count a character's wins and then to hold an
-// imported character's ID, and characterIndex later holds a grid entry;
-// giving each use its own variable breaks the match.
 void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     EncodedAsset asset;
     AssetFile file;
@@ -2386,8 +2382,6 @@ Boolean IsNintendoClubTournament(void) {
 }
 
 #define MESSAGE_FIRST_COURSE_NAME 0x1EA
-// The original names a club tournament's course with the message after its
-// own: Koopa Park for Toad Highlands, and DUMMY for Mario's Star.
 #define CLUB_COURSE_NAME_MESSAGE_SHIFT 1
 #define MESSAGE_STROKE_PLAY 0x9E
 #define MESSAGE_SPEED_GOLF 0x9D

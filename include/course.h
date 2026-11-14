@@ -27,8 +27,6 @@ enum CourseRecordIndex {
 
 typedef s32 CourseRecordIndex;
 
-// A CourseIndex: the six main courses, then each mini golf course's
-// three layouts, then the driving range.
 enum Course {
     COURSE_TOAD_HIGHLANDS,
     COURSE_KOOPA_PARK,
@@ -51,8 +49,6 @@ enum Course {
 #define COURSE_INDEX_COUNT (DRIVING_RANGE_COURSE_INDEX + 1)
 
 typedef s32 CourseIndex;
-// A CourseIndex kept in a byte, as the original stores it in saved and
-// menu records.
 typedef s8 CourseIndex8;
 
 extern s32 g_CourseNameEnvColors[];
@@ -60,7 +56,6 @@ extern s32 g_CourseNamePrimColors[];
 
 #define HOLE_FLAG_MARKED_PAR_FIVE (1 << 0)
 #define HOLE_FLAG_PAR_THREE (1 << 1)
-// A set of HOLE_FLAG bits.
 typedef u8 UHoleFlags8;
 
 #define PAR_THREE 3
@@ -70,7 +65,6 @@ typedef u8 UHoleFlags8;
 #define TOURNAMENT_NAME_COUNT 7
 #define TOURNAMENT_NAME_SIZE 25
 
-// Every hole repeats its yardage this many times; the HUD shows the first.
 #define HOLE_YARDAGE_COUNT 3
 #define SHOWN_YARDAGE 0
 
