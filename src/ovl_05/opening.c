@@ -45,8 +45,6 @@
 
 #define OPENING_BILLBOARD_HEAP_SIZE 0x7038
 
-#define SHADOW_TEXTURE_SIZE 32
-
 typedef enum OpeningBallImage {
     MARIO_FACE_BALL,
     DONKEY_KONG_FACE_BALL,
