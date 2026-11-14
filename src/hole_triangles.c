@@ -551,17 +551,17 @@ static void BuildRingVertices(void) {
         isRaised = (index & 1) ^ isOuter;
         angle = (index / RING_SIDE_COUNT) * RING_SECTION_ANGLE;
         offsetX = cosf(angle) * (isOuter - 0.5f) * RING_THICKNESS;
-        offsetZ = sinf(angle) * (isOuter - 0.5f) * RING_THICKNESS;
+        offsetY = sinf(angle) * (isOuter - 0.5f) * RING_THICKNESS;
         x = (cosf(angle) * RING_RADIUS) + offsetX;
-        y = (sinf(angle) * RING_RADIUS) + offsetZ;
-        offsetY = (isRaised - 0.5f) * RING_THICKNESS;
+        y = (sinf(angle) * RING_RADIUS) + offsetY;
+        offsetZ = (isRaised - 0.5f) * RING_THICKNESS;
         vertex->n.ob[AXIS_X] = x;
         vertex->n.ob[AXIS_Y] = y;
-        vertex->n.ob[AXIS_Z] = offsetY;
-        guNormalize(&offsetX, &offsetY, &offsetZ);
-        vertex->n.n[0] = offsetX * RING_NORMAL_SCALE;
-        vertex->n.n[1] = offsetZ * RING_NORMAL_SCALE;
-        vertex->n.n[2] = offsetY * RING_NORMAL_SCALE;
+        vertex->n.ob[AXIS_Z] = offsetZ;
+        guNormalize(&offsetX, &offsetZ, &offsetY);
+        vertex->n.n[AXIS_X] = offsetX * RING_NORMAL_SCALE;
+        vertex->n.n[AXIS_Y] = offsetY * RING_NORMAL_SCALE;
+        vertex->n.n[AXIS_Z] = offsetZ * RING_NORMAL_SCALE;
         vertex->n.a = RING_VERTEX_ALPHA;
     }
 }
