@@ -131,12 +131,12 @@ s32 DecodeLzChunk(LzStream *stream) {
     u16 *input;
     u16 *output;
     u16 *inputEnd;
-    u16 *copy;
+    u16 *carriedInput;
     u16 *source;
     s32 controlBits;
     u16 reference;
     u16 *referenceEnd;
-    u16 *repeat;
+    u16 *referenceOutput;
     u16 evenWord;
     u16 oddWord;
     Boolean hasMoreInput;
@@ -156,12 +156,12 @@ s32 DecodeLzChunk(LzStream *stream) {
     while (TRUE) {
         if (input >= inputEnd - LZ_LITERAL_RUN_LENGTH) {
             if (hasMoreInput) {
-                copy = stream->nextInput;
+                carriedInput = stream->nextInput;
                 while (input < inputEnd) {
-                    *--copy = *--inputEnd;
+                    *--carriedInput = *--inputEnd;
                 }
 
-                stream->input = copy;
+                stream->input = carriedInput;
                 stream->output = output;
                 return -1;
             }
@@ -228,12 +228,12 @@ s32 DecodeLzChunk(LzStream *stream) {
             referenceEnd =
                 output + ((reference & LZ_REFERENCE_LENGTH_MASK) + LZ_REFERENCE_LENGTH_MIN);
             *output = *source++;
-            repeat = output + 1;
+            referenceOutput = output + 1;
             do {
-                *repeat++ = *source++;
+                *referenceOutput++ = *source++;
             }
-            while (repeat != referenceEnd);
-            output = repeat;
+            while (referenceOutput != referenceEnd);
+            output = referenceOutput;
         }
     }
 }
@@ -246,7 +246,7 @@ s32 DecodePatchedLzChunk(LzStream *stream) {
     u16 *input;
     u16 *inputEnd;
     u16 *window;
-    u16 *copy;
+    u16 *carriedInput;
     u16 windowIndex;
     s32 controlBits;
     s32 reference;
@@ -310,12 +310,12 @@ s32 DecodePatchedLzChunk(LzStream *stream) {
     while (TRUE) {
         if (input >= inputEnd - LZ_LITERAL_RUN_LENGTH) {
             if (hasMoreInput) {
-                copy = stream->nextInput;
+                carriedInput = stream->nextInput;
                 while (input < inputEnd) {
-                    *--copy = *--inputEnd;
+                    *--carriedInput = *--inputEnd;
                 }
 
-                stream->input = copy;
+                stream->input = carriedInput;
                 stream->windowIndex = windowIndex;
                 stream->output = output;
                 stream->patchCount = patchCount;
