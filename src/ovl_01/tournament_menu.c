@@ -1251,7 +1251,7 @@ void ResetCodeEntry(void) {
     f_CodeHandReach = 0;
     f_CodeHandStepTimer = 0;
     f_UnusedDoubledHandReach = 0;
-    f_ClubTournamentPhase = 0;
+    f_ClubTournamentPhase = CLUB_CODE_PHASE_TYPING;
     f_ClubWindowChoice = 0;
     f_IsClubTournamentEntered = TRUE;
     f_UnusedCodeEntryWord = 0;
@@ -1520,7 +1520,7 @@ void UpdateClubWindow(void) {
             );
         }
 
-        f_ClubTournamentPhase = FALSE;
+        f_ClubTournamentPhase = CLUB_CODE_PHASE_TYPING;
         f_ClubWindowChoice = CLUB_CHOICE_YES;
         return;
     }
@@ -1605,7 +1605,7 @@ void UpdateClubWindow(void) {
     else if (pressedButtons & B_BUTTON) {
         PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         f_ClubWindowChoice = CLUB_CHOICE_YES;
-        f_ClubTournamentPhase = FALSE;
+        f_ClubTournamentPhase = CLUB_CODE_PHASE_TYPING;
         for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
             SetTextSlot(
                 0,
@@ -1757,7 +1757,7 @@ void DrawClubTournament(Gfx **displayListHead) {
     DrawCodeHand(&gfx);
     DrawCodeCursor(&gfx);
     DrawCodePrompt(&gfx);
-    if (f_ClubTournamentPhase == 1) {
+    if (f_ClubTournamentPhase == CLUB_CODE_PHASE_DETAILS) {
         if (IsNintendoClubTournament()) {
             windowStyle = (GetClubTournamentCharacter() != ANY_CHARACTER) ?
                 CLUB_WINDOW_STYLE_PICTURE | CLUB_WINDOW_STYLE_NINTENDO :
