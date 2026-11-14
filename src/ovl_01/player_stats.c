@@ -2932,7 +2932,7 @@ void LoadBestShotFaces(void) {
     s32 row;
     s32 column;
     s32 paletteIndex;
-    CharacterId characterIndex;
+    CharacterIndex characterIndex;
 
     for (index = 0; index != CHARACTER_COUNT; index++) {
         OpenEncodedAsset(g_CharacterFaceAssets[index], &asset);

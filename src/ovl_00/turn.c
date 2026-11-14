@@ -4477,7 +4477,7 @@ void UpdateTurns(void) {
                 break;
             }
             case PLAYER_STATE_STARTING_REACTION: {
-                CharacterId characterIndex;
+                CharacterIndex characterIndex;
                 s32 paletteIndex;
                 s32 reaction;
 

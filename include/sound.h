@@ -349,14 +349,14 @@ void SetSoundReverb(SoundChannel channel, SoundReverb reverb);
 void FadeOutSound(SoundChannel channel, u32 frameCount);
 void SetSoundTempo(SoundChannel channel, s32 tempo);
 void PlayCharacterSound(
-    CharacterId characterIndex,
+    CharacterIndex characterIndex,
     s32 voiceSlot,
     s32 soundIndex,
     SoundVolume volume,
     SoundPan pan
 );
 void QueueCharacterSound(
-    CharacterId characterIndex,
+    CharacterIndex characterIndex,
     s32 slot,
     s32 kind,
     SoundVolume volume,

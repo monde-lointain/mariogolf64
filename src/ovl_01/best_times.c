@@ -466,7 +466,7 @@ void DrawBestTimeFace(
     Gfx **displayListHead,
     s32 left,
     s32 top,
-    CharacterId characterIndex,
+    CharacterIndex characterIndex,
     u8 drawMode
 ) {
     Gfx *gfx = *displayListHead;
@@ -759,10 +759,10 @@ void LoadBestTimesFaces(void) {
     EncodedAsset asset;
     AssetFile file;
     SaveData *save = GetSaveData();
-    CharacterId characterIndex;
+    CharacterIndex characterIndex;
     CourseIndex courseIndex;
     s32 rank;
-    CharacterId holderCharacterIndex;
+    CharacterIndex holderCharacterIndex;
     s32 paletteIndex;
 
     for (characterIndex = 0; characterIndex != CHARACTER_COUNT; characterIndex++) {

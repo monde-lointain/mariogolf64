@@ -6,7 +6,7 @@
 #include "asset.h"
 #include "compiler.h"
 
-enum CharacterId {
+enum CharacterIndex {
     CHARACTER_PLUM,
     CHARACTER_CHARLIE,
     CHARACTER_MAPLE,
@@ -27,7 +27,7 @@ enum CharacterId {
     CHARACTER_JOE
 };
 
-typedef s32 CharacterId;
+typedef s32 CharacterIndex;
 
 enum CharacterChoice {
     CHARACTER_CHOICE_PLUM,

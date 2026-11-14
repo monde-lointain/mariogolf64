@@ -1799,7 +1799,7 @@ void InsertBestTime(
     s32 courseIndex,
     s32 time,
     s32 scoreToPar,
-    CharacterId characterIndex,
+    CharacterIndex characterIndex,
     s32 paletteIndex
 ) {
     SaveData *save;
@@ -2206,7 +2206,7 @@ void PlaceImportedCharacters(void) {
     }
 }
 
-s32 FindCharacterOnGrid(CharacterId characterIndex) {
+s32 FindCharacterOnGrid(CharacterIndex characterIndex) {
     s32 slot;
     s32 row;
     s32 column;

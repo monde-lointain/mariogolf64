@@ -113,7 +113,7 @@ void DrawCharacterFace(
     void *palette,
     s32 left,
     s32 top,
-    CharacterId characterIndex,
+    CharacterIndex characterIndex,
     u8 drawMode
 );
 #endif
@@ -128,7 +128,7 @@ static s32 f_TablePopupCorner = TABLE_POPUP_TOP_LEFT;
 static s32 f_TableArrowFrame = 0;
 static s32 f_TableArrowTimer = 0;
 static s32 f_UnreadTableArrowState = 0;
-static CharacterId f_TableCharacters[CHARACTER_COUNT] = {
+static CharacterIndex f_TableCharacters[CHARACTER_COUNT] = {
     CHARACTER_PLUM,
     CHARACTER_CHARLIE,
     CHARACTER_PEACH,
@@ -669,8 +669,8 @@ void DrawTablePopup(Gfx **displayListHead) {
     MenuMemory *memory = GetMenuMemory();
     s32 index;
     s32 row;
-    CharacterId rowCharacter;
-    CharacterId columnCharacter;
+    CharacterIndex rowCharacter;
+    CharacterIndex columnCharacter;
     s32 rowWins;
     s32 columnWins;
     u8 faceMode;
@@ -952,7 +952,7 @@ void DrawTableStar(Gfx **displayListHead, s32 left, s32 top) {
 void LoadTableFaces(void) {
     EncodedAsset asset;
     AssetFile file;
-    CharacterId characterIndex;
+    CharacterIndex characterIndex;
 
     GetSaveData();
     for (characterIndex = 0; characterIndex != CHARACTER_COUNT; characterIndex++) {

@@ -121,7 +121,7 @@ static s32 f_SavedGameBoySlots[GAME_BOY_CHARACTER_COUNT] =
     {EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT};
 static s32 f_SelectBufferAssets[CHARACTER_SELECT_IMAGE_KIND_COUNT] =
     {0x08E8, 0x05E3, 0x08EF, 0x050F, 0x0521, 0x06EF, 0x05FF, 0x0600, 0x08EE};
-static CharacterId f_ChoiceCharacters[CHARACTER_COUNT] = {
+static CharacterIndex f_ChoiceCharacters[CHARACTER_COUNT] = {
     CHARACTER_PLUM,
     CHARACTER_CHARLIE,
     CHARACTER_PEACH,
@@ -1322,7 +1322,7 @@ void PlaceRivalCursor(void) {
 void LoadCharacterFaces(void) {
     EncodedAsset asset;
     AssetFile file;
-    CharacterId characterIndex = 0;
+    CharacterIndex characterIndex = 0;
     u8 *images = GetMenuImageBuffer();
     s32 slotIndex;
     AssetId faceAsset;
@@ -1680,7 +1680,7 @@ s32 GetUnusedPalette(s32 choiceIndex) {
     s32 freePalette = 0;
     s32 playerIndex = 0;
     s32 sameCount = 0;
-    CharacterId characterIndex = f_ChoiceCharacters[choiceIndex];
+    CharacterIndex characterIndex = f_ChoiceCharacters[choiceIndex];
     s32 unused[4] UNUSED;
     s32 samePlayers[PLAYER_COUNT_MAX];
     s32 sameIndex;

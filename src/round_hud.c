@@ -807,7 +807,7 @@ void InitRoundHud(void) {
     g_InsetView.step = 0;
 }
 
-void LoadPlayerFace(s32 playerIndex, CharacterId characterIndex, s32 paletteIndex) {
+void LoadPlayerFace(s32 playerIndex, CharacterIndex characterIndex, s32 paletteIndex) {
     EncodedAsset asset;
     AssetFile file;
 

@@ -224,7 +224,7 @@ s32 AddReactionLight(Gfx **displayListHead, Lights2 *lights) {
     return FALSE;
 }
 
-void StartReaction(u32 slotIndex, CharacterId characterIndex, s32 animationId) {
+void StartReaction(u32 slotIndex, CharacterIndex characterIndex, s32 animationId) {
     f_ReactionCharacter = characterIndex;
     f_HasReactionLight = FALSE;
     f_ReactionFrame = 0;

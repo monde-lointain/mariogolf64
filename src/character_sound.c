@@ -359,7 +359,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
 static s32 f_UnusedWordsAfterCharacterSounds[2] UNUSED = {0};
 
 void PlayCharacterSound(
-    CharacterId characterIndex,
+    CharacterIndex characterIndex,
     s32 voiceSlot,
     s32 soundIndex,
     SoundVolume volume,

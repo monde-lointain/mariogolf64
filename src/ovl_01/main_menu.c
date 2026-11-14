@@ -6164,7 +6164,7 @@ void DrawMenuCharacters(Gfx **displayListHead) {
     s32 row;
     s32 column;
     s32 layout;
-    CharacterId characterIndex;
+    CharacterIndex characterIndex;
     s32 paletteIndex;
     s32 raise;
     u16 slot;

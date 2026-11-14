@@ -971,7 +971,7 @@ void LoadRingShotRecordFaces(void) {
     AssetFile file;
     SaveData *save = GetSaveData();
     s32 index;
-    CharacterId characterIndex;
+    CharacterIndex characterIndex;
     s32 paletteIndex;
 
     for (index = 0; index != CHARACTER_COUNT; index++) {
@@ -1932,7 +1932,7 @@ s32 ContinueSavedGame(void) {
     MenuMemory *memory = GetMenuMemory();
     Player *savedPlayer;
     s32 playerIndex;
-    CharacterId characterIndex;
+    CharacterIndex characterIndex;
     u16 controllerIndex;
 
     if (f_SavedGameModes[memory->savedGameIndex] == NO_SAVE_MENU_MODE) {

@@ -265,7 +265,7 @@ static s32 f_TrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT] = {
 };
 static s32 f_TrophyShineFrame = 0;
 static s32 f_TrophyFrame = 0;
-static CharacterId f_DebugUnlockCharacter = 0;
+static CharacterIndex f_DebugUnlockCharacter = 0;
 static const char *f_UnusedModeNamesPointers[2] UNUSED = {NULL, f_UnusedModeNamesText};
 static u8 f_TextSlotColors[][3] = {
     {0xFF, 0xFF, 0xFF},
@@ -304,7 +304,7 @@ static u8 *f_DigitsImage;
 static u8 *f_PlaceDigitsImage;
 static s32 f_UnlockNoticeKind;
 static Boolean f_HasBets;
-static CharacterId f_PortraitCharacterIndex;
+static CharacterIndex f_PortraitCharacterIndex;
 static s32 f_NoticeStage;
 static s32 f_NoticeFrameCount;
 static s32 f_NoticeSwing;

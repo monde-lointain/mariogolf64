@@ -114,7 +114,7 @@ enum GridSearchResult {
     CHARACTER_ON_GRID
 };
 
-s32 FindCharacterOnGrid(CharacterId characterIndex);
+s32 FindCharacterOnGrid(CharacterIndex characterIndex);
 
 #define NO_CONTROLLER_INDEX 4
 #define UNCHOSEN_CONTROLLER (-1)
@@ -203,7 +203,7 @@ void InsertBestTime(
     s32 courseIndex,
     s32 time,
     s32 scoreToPar,
-    CharacterId characterIndex,
+    CharacterIndex characterIndex,
     s32 paletteIndex
 );
 void InsertRankedRecord(PlayRecord *record);
