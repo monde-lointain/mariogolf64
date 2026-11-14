@@ -74,7 +74,7 @@ void DetectGameBoyPaks(void) {
     g_GameBoyTransfer.hasGameBoyPak = FALSE;
     for (index = 0; index < g_ControllerCount; index++) {
         switch (nuContGBPakOpen(&file, g_PlayerControllerPorts[index])) {
-            case 0:
+            case PAK_ACCESS_OK:
                 osSyncPrintf("GB PACK OK %d\n", index);
                 g_GameBoyTransfer.hasGameBoyPak = TRUE;
                 break;

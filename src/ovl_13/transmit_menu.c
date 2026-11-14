@@ -448,16 +448,19 @@ void DumpCartridgeRam(void) {
     PrintDebugText("          ", DUMP_STATUS_COLUMN, DUMP_READ_ROW);
     PrintDebugText("          ", DUMP_STATUS_COLUMN, DUMP_WRITE_ROW);
 
-    if (OpenGameBoyPakWithRetries(0, &transfer->cartridgeHeader, &transfer->pakFile) == 0) {
+    // Bug: OpenGameBoyPakWithRetries returns PAK_RESULT_OK on success, so this
+    // dumps the RAM only after a connector problem.
+    if (OpenGameBoyPakWithRetries(0, &transfer->cartridgeHeader, &transfer->pakFile) ==
+        PAK_RESULT_CONNECTOR_PROBLEM) {
         PrintDebugText("GOLF OK", DUMP_STATUS_COLUMN, DUMP_OPEN_ROW);
         if (nuContGBPakFread(
                 &transfer->pakFile,
                 CARTRIDGE_RAM_ADDRESS,
                 cartridgeRam,
                 CARTRIDGE_RAM_SIZE
-            ) == 0) {
+            ) == PAK_ACCESS_OK) {
             PrintDebugText("READ OK", DUMP_STATUS_COLUMN, DUMP_READ_ROW);
-            if (WriteHostFile("x:/golf/capture/gbsram.bin", CARTRIDGE_RAM_SIZE) == 0) {
+            if (WriteHostFile("x:/golf/capture/gbsram.bin", CARTRIDGE_RAM_SIZE) == HOST_FILE_OK) {
                 PrintDebugText("WRITE OK", DUMP_STATUS_COLUMN, DUMP_WRITE_ROW);
             }
         }
@@ -2747,7 +2750,7 @@ ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
     transfer->hasMissingCartridge = FALSE;
     transfer->hasWrongCartridge = FALSE;
     transfer->openedCartridgeCount = 0;
-    result = 0;
+    result = PAK_ACCESS_OK;
     for (controllerIndex = 0; controllerIndex != g_ControllerCount; controllerIndex++) {
         transfer->transferResult = OpenGameBoyPakWithRetries(
             g_PlayerControllerPorts[controllerIndex],
@@ -2783,7 +2786,7 @@ ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
                 save,
                 CARTRIDGE_SAVE_SIZE
             );
-            if (result != 0) {
+            if (result != PAK_ACCESS_OK) {
                 nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
                 continue;
             }
@@ -2829,7 +2832,7 @@ ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
                     characterData,
                     dataSize
                 );
-                if (result != 0) {
+                if (result != PAK_ACCESS_OK) {
                     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
                     continue;
                 }
@@ -2873,7 +2876,7 @@ ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
                         &characterData[DATA_EXPERIENCE_OFFSET],
                         DATA_EXPERIENCE_WRITE_SIZE
                     );
-                    if (result != 0) {
+                    if (result != PAK_ACCESS_OK) {
                         nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
                         continue;
                     }
@@ -2895,7 +2898,7 @@ ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
                         &save[recordOffset + RECORD_CHECKSUM_OFFSET],
                         SAVE_HALFWORD_SIZE
                     );
-                    if (result != 0) {
+                    if (result != PAK_ACCESS_OK) {
                         nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
                         continue;
                     }
@@ -2910,7 +2913,7 @@ ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
                         &save[SAVE_CHECKSUM_OFFSET],
                         SAVE_HALFWORD_SIZE
                     );
-                    if (result != 0) {
+                    if (result != PAK_ACCESS_OK) {
                         nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
                         continue;
                     }
@@ -2953,7 +2956,7 @@ ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
     else if (transfer->hasOtherPak == TRUE) {
         transfer->transferResult = PAK_RESULT_OTHER_PAK;
     }
-    else if (result != 0) {
+    else if (result != PAK_ACCESS_OK) {
         transfer->transferResult = result;
         return EXPERIENCE_WRITE_PAK_ERROR;
     }
@@ -2984,7 +2987,7 @@ StatusCheck CheckStatusCartridge(s32 cartridgeIndex) {
         isSignatureWrong = FALSE;
         readResult =
             nuContGBPakFread(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
-        if (readResult != 0) {
+        if (readResult != PAK_ACCESS_OK) {
             osSyncPrintf("head error  2\n");
             transfer->transferResult = readResult;
             nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
@@ -3051,7 +3054,7 @@ StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex) {
     if (transfer->transferResult == PAK_RESULT_OK) {
         result =
             nuContGBPakFread(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
-        if (result != 0) {
+        if (result != PAK_ACCESS_OK) {
             nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
             transfer->transferResult = result;
             return STATUS_WRITE_PAK_ERROR;
@@ -3089,7 +3092,7 @@ StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex) {
             &save[SAVE_HAS_STATUS_OFFSET],
             SAVE_HALFWORD_SIZE
         );
-        if (result != 0) {
+        if (result != PAK_ACCESS_OK) {
             nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
             transfer->transferResult = result;
             return STATUS_WRITE_PAK_ERROR;
@@ -3102,7 +3105,7 @@ StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex) {
             statusData,
             statusSize
         );
-        if (result != 0) {
+        if (result != PAK_ACCESS_OK) {
             nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
             transfer->transferResult = result;
             return STATUS_WRITE_PAK_ERROR;
@@ -3123,7 +3126,7 @@ StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex) {
             &save[SAVE_STATUS_CHECKSUM_OFFSET],
             SAVE_HALFWORD_SIZE
         );
-        if (result != 0) {
+        if (result != PAK_ACCESS_OK) {
             nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
             transfer->transferResult = result;
             return STATUS_WRITE_PAK_ERROR;
@@ -3139,7 +3142,7 @@ StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex) {
             &save[SAVE_CHECKSUM_OFFSET],
             SAVE_HALFWORD_SIZE
         );
-        if (result != 0) {
+        if (result != PAK_ACCESS_OK) {
             nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
             transfer->transferResult = result;
             return STATUS_WRITE_PAK_ERROR;
@@ -3234,7 +3237,7 @@ s32 ReadCartridgeCharacters(void) {
                 save,
                 CARTRIDGE_SAVE_SIZE
             );
-            if (result == 0) {
+            if (result == PAK_ACCESS_OK) {
                 checksum = ComputeSaveChecksum(save);
                 storedChecksum = GetStoredChecksum(save);
                 isSignatureWrong = FALSE;
@@ -3254,7 +3257,7 @@ s32 ReadCartridgeCharacters(void) {
         }
 
         if (checkedState == SAVE_CHECKED) {
-            if (result == 0) {
+            if (result == PAK_ACCESS_OK) {
                 if (save[recordOffset] == RECORD_PRESENT) {
                     checkedState = NOT_CHECKED;
 
@@ -3291,7 +3294,7 @@ s32 ReadCartridgeCharacters(void) {
 
         if (checkedState == DATA_CHECKED) {
             switch (result) {
-                case 0:
+                case PAK_ACCESS_OK:
                     isAlreadyBrought = FALSE;
 
                     osSyncPrintf("スロット%d 読み込み成功しました  \n", saveIndex);
@@ -3436,7 +3439,7 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
     u8 pakStatus;
 
     switch (nuContGBPakOpen(file, port)) {
-        case 0:
+        case PAK_ACCESS_OK:
             osSyncPrintf("1st GB PACK OK %d\n", port);
             break;
         case PFS_ERR_NOPACK:
@@ -3451,11 +3454,11 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
     }
 
     switch (nuContGBPakGetStatus(file, &pakStatus)) {
-        case 0:
+        case PAK_ACCESS_OK:
         case PFS_ERR_NEW_GBCART:
             if (!(pakStatus & OS_GBPAK_POWER)) {
                 switch (nuContGBPakPower(file, NU_CONT_GBPAK_POWER_ON)) {
-                    case 0:
+                    case PAK_ACCESS_OK:
                         osSyncPrintf("3rd 電源ＯＮ\n");
                         break;
                     case PFS_ERR_NOPACK:
@@ -3470,7 +3473,7 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
             switch (nuContGBPakReadID(file, header, &pakStatus)) {
                 case PFS_ERR_NEW_GBCART:
                     osSyncPrintf("4th GBカートリッジの挿抜が行われました。\n");
-                case 0:
+                case PAK_ACCESS_OK:
                     if (!(pakStatus & OS_GBPAK_GBCART_ON)) {
                         osSyncPrintf("5th ＧＢパックにカセットが刺さってません。\n");
                         return PAK_RESULT_CARTRIDGE_REMOVED;

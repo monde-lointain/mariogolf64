@@ -8,6 +8,9 @@
 #include "language.h"
 #include "math_util.h"
 
+// The pak routines return this on success and a PFS_ERR_ code otherwise.
+#define PAK_ACCESS_OK 0
+
 #define GAME_BOY_CHARACTER_COUNT 4
 #define GAME_BOY_CHARACTER_NAME_LENGTH 12
 #define GAME_BOY_EXPERIENCE_MAX 9999
