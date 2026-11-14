@@ -3927,8 +3927,6 @@ void DrawColorTest(Gfx **displayListHead) {
 #define HANDICAP_X 42
 #define DRIVE_DISTANCE_X 16
 #define PIN_DISTANCE_X 8
-#define FACE_WIDTH 32
-#define FACE_HEIGHT 24
 #define FACE_INSET_X 4
 #define FACE_INSET_Y 4
 #define SMALL_FACE_WIDTH 24

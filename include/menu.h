@@ -169,8 +169,6 @@ extern s16 g_ImportedCharacterColumns[PLAYER_COUNT_MAX];
 
 extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT];
 
-#define FACE_WIDTH 32
-#define FACE_HEIGHT 24
 #define FACE_WITH_NAME 0
 #define FACE_PLAIN 1
 #define FACE_DARKENED 10

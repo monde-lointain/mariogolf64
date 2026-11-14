@@ -29,8 +29,6 @@
 #include "text.h"
 #include "tournament.h"
 
-#define FACE_SIZE 32
-
 #define PLACE_IMAGE_COUNT 4
 #define PLACE_HALF_WIDTH 32
 #define PLACE_HEIGHT 32
@@ -52,7 +50,6 @@
 
 #define LEADERBOARD_SCORE_COLUMN 12
 #define LEADERBOARD_HOLES_COLUMN 18
-#define SMALL_FACE_HEIGHT 24
 #define MIRRORED_FACE_MASK 5
 
 #define HOLE_NUMBER_ENV_COLOR 0xFFFF0000
@@ -168,8 +165,8 @@ void DrawScorecardFace(Gfx **displayListHead, s32 left, s32 top, s32 playerIndex
         g_Scorecard.faceImages[playerIndex],
         G_IM_FMT_CI,
         G_IM_SIZ_8b,
-        FACE_SIZE,
-        FACE_SIZE,
+        FACE_FRAME_SIZE,
+        FACE_FRAME_SIZE,
         0,
         0,
         0,
@@ -182,8 +179,8 @@ void DrawScorecardFace(Gfx **displayListHead, s32 left, s32 top, s32 playerIndex
         &gfx,
         QuarterPixels(left),
         QuarterPixels(top),
-        QuarterPixels(left + FACE_SIZE),
-        QuarterPixels(top + FACE_SIZE),
+        QuarterPixels(left + FACE_FRAME_SIZE),
+        QuarterPixels(top + FACE_FRAME_SIZE),
         G_TX_RENDERTILE,
         0,
         0,
@@ -202,8 +199,8 @@ void DrawSmallFace(Gfx **displayListHead, s32 left, s32 top, s32 playerIndex, Bo
         g_PlayerFaceImages[playerIndex],
         G_IM_FMT_CI,
         G_IM_SIZ_8b,
-        FACE_SIZE,
-        SMALL_FACE_HEIGHT,
+        FACE_WIDTH,
+        FACE_HEIGHT,
         0,
         G_TX_MIRROR,
         G_TX_MIRROR,
@@ -216,10 +213,10 @@ void DrawSmallFace(Gfx **displayListHead, s32 left, s32 top, s32 playerIndex, Bo
         &gfx,
         QuarterPixels(left),
         QuarterPixels(top),
-        QuarterPixels(left + FACE_SIZE),
-        QuarterPixels(top + SMALL_FACE_HEIGHT),
+        QuarterPixels(left + FACE_WIDTH),
+        QuarterPixels(top + FACE_HEIGHT),
         G_TX_RENDERTILE,
-        isMirrored * TexelCoordinate(FACE_SIZE),
+        isMirrored * TexelCoordinate(FACE_WIDTH),
         0,
         TEXEL_STEP_ONE,
         TEXEL_STEP_ONE
@@ -3468,8 +3465,8 @@ void DrawScoresPage(Gfx **displayListHead) {
                     g_PlayerFaceImages[i],
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
-                    FACE_SIZE,
-                    SMALL_FACE_HEIGHT,
+                    FACE_WIDTH,
+                    FACE_HEIGHT,
                     0,
                     G_TX_MIRROR,
                     0,

@@ -172,8 +172,6 @@ enum ModeName {
 #define COURSE_TOP 36
 #define LABEL_LEFT 128
 #define LABEL_TOP 38
-#define FACE_IMAGE_WIDTH 32
-#define FACE_IMAGE_HEIGHT 24
 #define CHARACTER_LEFT 32
 #define CHARACTER_TOP 40
 #define HOLE_TEXT_LEFT 64
@@ -929,7 +927,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
 
                 gDPPipeSync(gfx++);
                 golfersLeft = GOLFERS_LEFT;
-                golfersRight = GOLFERS_LEFT + FACE_IMAGE_WIDTH;
+                golfersRight = GOLFERS_LEFT + FACE_WIDTH;
                 state = &save->savedGames[row].state;
                 if (row == f_CursorIndex) {
                     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
@@ -954,8 +952,8 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                         f_FaceImages[(row * PLAYER_COUNT_MAX) + index],
                         G_IM_FMT_CI,
                         G_IM_SIZ_8b,
-                        FACE_IMAGE_WIDTH,
-                        FACE_IMAGE_HEIGHT,
+                        FACE_WIDTH,
+                        FACE_HEIGHT,
                         0,
                         0,
                         0,
@@ -975,7 +973,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                             (index * GOLFER_SPACING) + (f_SlideOffsets[row] + golfersRight) -
                             (state->playerCount * (GOLFER_SPACING / 2))
                         ),
-                        QuarterPixels(GOLFER_TOP + (row * GAME_ROW_SPACING) + FACE_IMAGE_HEIGHT),
+                        QuarterPixels(GOLFER_TOP + (row * GAME_ROW_SPACING) + FACE_HEIGHT),
                         G_TX_RENDERTILE,
                         0,
                         0,
@@ -1937,8 +1935,8 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                     f_FaceImages[index],
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
-                    FACE_IMAGE_WIDTH,
-                    FACE_IMAGE_HEIGHT,
+                    FACE_WIDTH,
+                    FACE_HEIGHT,
                     0,
                     0,
                     0,
@@ -1951,8 +1949,8 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                     &gfx,
                     QuarterPixels(rowOffsets[index] + CHARACTER_LEFT),
                     QuarterPixels(CHARACTER_TOP + (index * REPLAY_ROW_SPACING)),
-                    QuarterPixels(rowOffsets[index] + CHARACTER_LEFT + FACE_IMAGE_WIDTH),
-                    QuarterPixels(CHARACTER_TOP + (index * REPLAY_ROW_SPACING) + FACE_IMAGE_HEIGHT),
+                    QuarterPixels(rowOffsets[index] + CHARACTER_LEFT + FACE_WIDTH),
+                    QuarterPixels(CHARACTER_TOP + (index * REPLAY_ROW_SPACING) + FACE_HEIGHT),
                     G_TX_RENDERTILE,
                     0,
                     0,

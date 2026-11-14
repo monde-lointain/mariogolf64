@@ -101,14 +101,12 @@
 #define START_ANGLE_STEP DegreesToRadians(20)
 #define START_ANGLE_MAX DegreesToRadians(120)
 
-#define FACE_SIZE 32
 #define FACE_BUFFER_COUNT 2
 #define FACE_LEFT 256
 #define FACE_TOP 72
 #define FACE_SPACING 34
 #define OTHER_FACE_LEFT 264
 #define OTHER_FACE_TOP 76
-#define OTHER_FACE_HEIGHT 24
 #define FACE_FRAME_TIME 3
 #define FACE_LAST_FRAME 4
 #define FACE_HOLD_COUNT 9
@@ -976,8 +974,8 @@ void DrawClubSlots(Gfx **displayListHead) {
                 faceImage,
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                FACE_SIZE,
-                FACE_SIZE,
+                FACE_FRAME_SIZE,
+                FACE_FRAME_SIZE,
                 0,
                 0,
                 0,
@@ -992,8 +990,8 @@ void DrawClubSlots(Gfx **displayListHead) {
                 &gfx,
                 QuarterPixels(FACE_LEFT),
                 QuarterPixels(FACE_TOP + (topOrPlayerIndex * FACE_SPACING)),
-                QuarterPixels(FACE_LEFT + FACE_SIZE),
-                QuarterPixels(FACE_TOP + FACE_SIZE + (topOrPlayerIndex * FACE_SPACING)),
+                QuarterPixels(FACE_LEFT + FACE_FRAME_SIZE),
+                QuarterPixels(FACE_TOP + FACE_FRAME_SIZE + (topOrPlayerIndex * FACE_SPACING)),
                 G_TX_RENDERTILE,
                 0,
                 0,
@@ -1061,13 +1059,15 @@ void DrawClubSlots(Gfx **displayListHead) {
         else {
             u8 *faceImage = g_PlayerFaceImages[topOrPlayerIndex];
 
+            // The still face is only FACE_HEIGHT rows, but the game loads
+            // a frame-sized block and draws just the face's rows.
             LoadTextureBlock(
                 &gfx,
                 faceImage,
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                FACE_SIZE,
-                FACE_SIZE,
+                FACE_WIDTH,
+                FACE_FRAME_SIZE,
                 0,
                 0,
                 0,
@@ -1081,10 +1081,8 @@ void DrawClubSlots(Gfx **displayListHead) {
                 &gfx,
                 QuarterPixels(OTHER_FACE_LEFT),
                 QuarterPixels(OTHER_FACE_TOP + (topOrPlayerIndex * FACE_SPACING)),
-                QuarterPixels(OTHER_FACE_LEFT + FACE_SIZE),
-                QuarterPixels(
-                    OTHER_FACE_TOP + OTHER_FACE_HEIGHT + (topOrPlayerIndex * FACE_SPACING)
-                ),
+                QuarterPixels(OTHER_FACE_LEFT + FACE_WIDTH),
+                QuarterPixels(OTHER_FACE_TOP + FACE_HEIGHT + (topOrPlayerIndex * FACE_SPACING)),
                 G_TX_RENDERTILE,
                 0,
                 0,

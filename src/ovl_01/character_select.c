@@ -1499,7 +1499,6 @@ void DrawCharacterSelect(Gfx **displayListHead, u8 isSinglePlayer) {
 
 s32 GetUnusedPalette(s32 choiceIndex);
 
-#define FACE_SIZE 32
 #define FACE_SPACING 40
 #define FACE_GRID_LEFT 24
 #define FACE_GRID_TOP 56
@@ -1543,8 +1542,8 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
                     TextureAddress(faceImage),
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
-                    FACE_SIZE,
-                    FACE_SIZE,
+                    FACE_FRAME_SIZE,
+                    FACE_FRAME_SIZE,
                     0,
                     G_TX_NOMIRROR | G_TX_WRAP,
                     G_TX_NOMIRROR | G_TX_WRAP,
@@ -1558,8 +1557,8 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
                     gfx++,
                     QuarterPixels(column * FACE_SPACING + FACE_GRID_LEFT),
                     QuarterPixels(row * FACE_SPACING + FACE_GRID_TOP),
-                    QuarterPixels(column * FACE_SPACING + FACE_GRID_LEFT + FACE_SIZE),
-                    QuarterPixels(row * FACE_SPACING + FACE_GRID_TOP + FACE_SIZE),
+                    QuarterPixels(column * FACE_SPACING + FACE_GRID_LEFT + FACE_FRAME_SIZE),
+                    QuarterPixels(row * FACE_SPACING + FACE_GRID_TOP + FACE_FRAME_SIZE),
                     G_TX_RENDERTILE,
                     0,
                     0,
@@ -1579,8 +1578,8 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
                     TextureAddress(faceImage),
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
-                    FACE_SIZE,
-                    FACE_SIZE,
+                    FACE_FRAME_SIZE,
+                    FACE_FRAME_SIZE,
                     0,
                     G_TX_NOMIRROR | G_TX_WRAP,
                     G_TX_NOMIRROR | G_TX_WRAP,
@@ -1594,8 +1593,8 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
                     gfx++,
                     QuarterPixels(column * FACE_SPACING + FACE_GRID_LEFT),
                     QuarterPixels(row * FACE_SPACING + FACE_GRID_TOP),
-                    QuarterPixels(column * FACE_SPACING + FACE_GRID_LEFT + FACE_SIZE),
-                    QuarterPixels(row * FACE_SPACING + FACE_GRID_TOP + FACE_SIZE),
+                    QuarterPixels(column * FACE_SPACING + FACE_GRID_LEFT + FACE_FRAME_SIZE),
+                    QuarterPixels(row * FACE_SPACING + FACE_GRID_TOP + FACE_FRAME_SIZE),
                     G_TX_RENDERTILE,
                     0,
                     0,

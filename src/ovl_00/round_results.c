@@ -111,7 +111,6 @@ enum FaceAnimation {
 #define RESULTS_LABEL_STORED_WIDTH 80
 #define RESULTS_LABEL_HEIGHT 18
 
-#define FACE_SIZE 32
 #define FACE_SIZE_LOG2 5
 
 #define COURSE_POINTS_MAX S32_MAX
@@ -1343,8 +1342,8 @@ void DrawPlayerFace(Gfx **displayListHead, s32 x, s32 y, s32 playerIndex, Boolea
         f_PlayerFaceImages[playerIndex],
         G_IM_FMT_CI,
         G_IM_SIZ_8b,
-        FACE_SIZE,
-        FACE_SIZE,
+        FACE_FRAME_SIZE,
+        FACE_FRAME_SIZE,
         0,
         G_TX_MIRROR,
         G_TX_NOMIRROR,
@@ -1357,10 +1356,10 @@ void DrawPlayerFace(Gfx **displayListHead, s32 x, s32 y, s32 playerIndex, Boolea
         &gfx,
         QuarterPixels(x),
         QuarterPixels(y),
-        QuarterPixels(x + FACE_SIZE),
-        QuarterPixels(y + FACE_SIZE),
+        QuarterPixels(x + FACE_FRAME_SIZE),
+        QuarterPixels(y + FACE_FRAME_SIZE),
         G_TX_RENDERTILE,
-        isMirrored * TexelCoordinate(FACE_SIZE),
+        isMirrored * TexelCoordinate(FACE_FRAME_SIZE),
         0,
         TEXEL_STEP_ONE,
         TEXEL_STEP_ONE

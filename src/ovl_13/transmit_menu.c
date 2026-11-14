@@ -151,7 +151,6 @@ enum ShotType {
 #define FACES_LEFT 24
 #define FACES_TOP 136
 #define FACE_SPACING 40
-#define FACE_SIZE 32
 #define FACE_CURSOR_MARGIN 9
 
 enum ListingState {
@@ -2054,8 +2053,8 @@ void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
                 transfer->faceImages[golferIndex],
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                FACE_SIZE,
-                FACE_SIZE,
+                FACE_FRAME_SIZE,
+                FACE_FRAME_SIZE,
                 0,
                 0,
                 0,
@@ -2068,8 +2067,10 @@ void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
                 &gfx,
                 QuarterPixels(FACES_LEFT + (gameBoyCharacterIndex * FACE_SPACING)),
                 QuarterPixels(FACES_TOP),
-                QuarterPixels(FACES_LEFT + (gameBoyCharacterIndex * FACE_SPACING) + FACE_SIZE),
-                QuarterPixels(FACES_TOP + FACE_SIZE),
+                QuarterPixels(
+                    FACES_LEFT + (gameBoyCharacterIndex * FACE_SPACING) + FACE_FRAME_SIZE
+                ),
+                QuarterPixels(FACES_TOP + FACE_FRAME_SIZE),
                 G_TX_RENDERTILE,
                 0,
                 0,
@@ -2200,8 +2201,8 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
                 transfer->faceImages[golferIndex],
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                FACE_SIZE,
-                FACE_SIZE,
+                FACE_FRAME_SIZE,
+                FACE_FRAME_SIZE,
                 0,
                 0,
                 0,
@@ -2214,8 +2215,8 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
                 &gfx,
                 QuarterPixels(left),
                 QuarterPixels(top),
-                QuarterPixels(left + FACE_SIZE),
-                QuarterPixels(top + FACE_SIZE),
+                QuarterPixels(left + FACE_FRAME_SIZE),
+                QuarterPixels(top + FACE_FRAME_SIZE),
                 G_TX_RENDERTILE,
                 0,
                 0,
