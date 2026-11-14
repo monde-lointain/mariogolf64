@@ -290,7 +290,7 @@ void PrintDebugText(const char *text, s32 column, s32 row) {
     }
 }
 
-void PrintDebugHex(u32 value, s32 column, s32 row) {
+void PrintDebugHex(u32 number, s32 column, s32 row) {
     char digits[HEX_DIGIT_COUNT + 1];
     char *digit = &digits[HEX_DIGIT_COUNT];
     s32 nibble;
@@ -299,21 +299,21 @@ void PrintDebugHex(u32 value, s32 column, s32 row) {
     column += HEX_DIGIT_COUNT;
     *digit = '\0';
     do {
-        nibble = value & 0xF;
+        nibble = number & 0xF;
         character = nibble + '0';
         if (character > '9') {
             character = nibble + 'A' - 10;
         }
 
         *--digit = character;
-        value >>= 4;
+        number >>= 4;
         column--;
     }
-    while (value != 0);
+    while (number != 0);
     PrintDebugText(digit, column, row);
 }
 
-void PrintDebugPaddedHex(u32 value, s32 column, s32 row) {
+void PrintDebugPaddedHex(u32 number, s32 column, s32 row) {
     char digits[HEX_DIGIT_COUNT + 1];
     char *digit = &digits[HEX_DIGIT_COUNT];
     s32 nibble;
@@ -322,7 +322,7 @@ void PrintDebugPaddedHex(u32 value, s32 column, s32 row) {
     column += HEX_DIGIT_COUNT;
     *digit = '\0';
     do {
-        nibble = value & 0xF;
+        nibble = number & 0xF;
         character = nibble + '0';
         if (character > '9') {
             character = nibble + 'A' - 10;
@@ -330,7 +330,7 @@ void PrintDebugPaddedHex(u32 value, s32 column, s32 row) {
 
         *--digit = character;
         column--;
-        value >>= 4;
+        number >>= 4;
     }
     while (digit != digits);
     PrintDebugText(digit, column, row);

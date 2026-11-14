@@ -564,8 +564,8 @@ s32 LoadPatchedLzData(u32 romAddress, void *destination, u32 size) {
 }
 
 s32 GetHoleRandom(s32 seed, s32 holeIndex) {
-    void SetHoleSeed(s32 value) {
-        f_HoleSeed = value;
+    void SetHoleSeed(s32 newSeed) {
+        f_HoleSeed = newSeed;
     }
 
     s32 NextHoleRandom(void) {

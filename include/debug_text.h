@@ -19,8 +19,8 @@ void DrawDebugText(Gfx **displayListHead);
 void SetDebugTextHighlight(Boolean isHighlighted);
 void PutDebugText(s8 *text, s32 column, s32 row);
 void PrintDebugText(const char *text, s32 column, s32 row);
-void PrintDebugHex(u32 value, s32 column, s32 row);
-void PrintDebugPaddedHex(u32 value, s32 column, s32 row);
+void PrintDebugHex(u32 number, s32 column, s32 row);
+void PrintDebugPaddedHex(u32 number, s32 column, s32 row);
 void AddToDebugLog(char *text);
 void ShowDebugLog(void);
 

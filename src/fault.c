@@ -36,7 +36,7 @@ static OSMesgQueue f_FaultMessageQueue;
 OSThread *__osGetCurrFaultedThread(void);
 void RunFaultThread(void *arg);
 void PrintFaultContext(OSThread *thread);
-void PrintRegisterFields(u32 value, char *name, RegisterFieldValue *fields);
+void PrintRegisterFields(u32 registerValue, char *name, RegisterFieldValue *fields);
 
 FILE_STATIC char f_FaultText[FAULT_TEXT_SIZE];
 
@@ -327,15 +327,15 @@ void PrintFaultContext(OSThread *thread) {
     PrintFaultText();
 }
 
-void PrintRegisterFields(u32 value, char *name, RegisterFieldValue *fields) {
+void PrintRegisterFields(u32 registerValue, char *name, RegisterFieldValue *fields) {
     Boolean isFirst = TRUE;
 
-    sprintf(f_FaultText, "%s\t\t0x%08x ", name, (unsigned int)value);
+    sprintf(f_FaultText, "%s\t\t0x%08x ", name, (unsigned int)registerValue);
     PrintFaultText();
     sprintf(f_FaultText, "<");
     PrintFaultText();
     while (fields->mask != 0) {
-        if ((value & fields->mask) == fields->value) {
+        if ((registerValue & fields->mask) == fields->value) {
             if (isFirst) {
                 isFirst = FALSE;
             }

@@ -2372,17 +2372,17 @@ EVALUATE:
             }
             else {
                 s32 GetPowerGaugeFrame(s32 amount) {
-                    s32 value = (amount * POWER_TO_GAUGE_FRAME_SCALE) + 0.5f;
+                    s32 gaugeFrame = (amount * POWER_TO_GAUGE_FRAME_SCALE) + 0.5f;
 
-                    if (value < POWER_GAUGE_FRAME_MIN) {
-                        value = POWER_GAUGE_FRAME_MIN;
+                    if (gaugeFrame < POWER_GAUGE_FRAME_MIN) {
+                        gaugeFrame = POWER_GAUGE_FRAME_MIN;
                     }
 
-                    if (value > GAUGE_FULL_FRAME - 1) {
-                        value = GAUGE_FULL_FRAME;
+                    if (gaugeFrame > GAUGE_FULL_FRAME - 1) {
+                        gaugeFrame = GAUGE_FULL_FRAME;
                     }
 
-                    return value;
+                    return gaugeFrame;
                 }
 
                 f_Shot.powerGaugeFrame = GetPowerGaugeFrame(launchPower);
