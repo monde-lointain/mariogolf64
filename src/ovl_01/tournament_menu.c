@@ -522,7 +522,7 @@ void GetSaveDataAndMenuMemory(void) {
 #define OK_TEXT_RED 95
 #define OK_TEXT_GREEN 63
 #define OK_TEXT_BLUE 255
-#define OK_TEXT_ALPHA 255
+#define OK_TEXT_ALPHA OPAQUE_ALPHA
 
 void DrawYesNoWindow(
     Gfx **displayListHead,

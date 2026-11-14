@@ -721,7 +721,7 @@ void DrawLetterBannerExtras(Gfx **displayListHead) {
 #define BANNER_WOBBLE_DEPTH_LOSS 0.05f
 #define BANNER_WOBBLE_SMALLEST_DEPTH 0.1f
 #define BANNER_WOBBLE_TURN_PER_FRAME (M_PI / 10)
-#define BANNER_ALPHA_MAX 255
+#define BANNER_ALPHA_MAX OPAQUE_ALPHA
 #define BANNER_BLEND_ALPHA 1
 
 void DrawBanner(Gfx **displayListHead) {
