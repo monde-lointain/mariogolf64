@@ -1574,13 +1574,13 @@ void DrawStaffRoll(Gfx **displayListHead) {
 void MeasureStaffLine(s32 lineIndex, s32 *width, s32 *height) {
     s32 lineWidth = 0;
     s32 index;
-    s32 start = STAFF_LINE(f_StaffText, lineIndex)->start;
+    s32 lineStart = STAFF_LINE(f_StaffText, lineIndex)->start;
     s32 length = STAFF_LINE(f_StaffText, lineIndex)->length;
     s32 firstCharacter = FIRST_STAFF_CHARACTER(f_StaffText);
     s32 character;
 
     for (index = 0; index != length; index++) {
-        character = STAFF_CHARACTER(f_StaffText, firstCharacter + start + index);
+        character = STAFF_CHARACTER(f_StaffText, firstCharacter + lineStart + index);
         if (character < STAFF_CHARACTER_LIMIT && !IS_OVERLAID_CHARACTER(character)) {
             lineWidth += STAFF_GLYPH_WIDTH;
         }
@@ -1592,7 +1592,7 @@ void MeasureStaffLine(s32 lineIndex, s32 *width, s32 *height) {
 
 void DrawStaffLine(Gfx **displayListHead, s32 left, s32 top, s32 lineIndex) {
     Gfx *gfx = *displayListHead;
-    s32 start = STAFF_LINE(f_StaffText, lineIndex)->start;
+    s32 lineStart = STAFF_LINE(f_StaffText, lineIndex)->start;
     s32 length = STAFF_LINE(f_StaffText, lineIndex)->length;
     s32 firstCharacter = FIRST_STAFF_CHARACTER(f_StaffText);
     s32 width;
@@ -1607,7 +1607,7 @@ void DrawStaffLine(Gfx **displayListHead, s32 left, s32 top, s32 lineIndex) {
     MeasureStaffLine(lineIndex, &width, &height);
     gDPPipeSync(gfx++);
     for (index = 0; index != length; index++) {
-        character = STAFF_CHARACTER(f_StaffText, start + index + firstCharacter);
+        character = STAFF_CHARACTER(f_StaffText, lineStart + index + firstCharacter);
         if (character < STAFF_CHARACTER_LIMIT) {
             row = character / STAFF_FONT_COLUMN_COUNT;
             column = character - (row * STAFF_FONT_COLUMN_COUNT);
