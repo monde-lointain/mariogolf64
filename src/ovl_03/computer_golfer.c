@@ -195,7 +195,7 @@ ClubType ChooseClubForDistance(s32 distance);
 s32 StepTrialShot(void);
 Boolean IsTrialShotSafe(void);
 s32 ChooseShotOffset(void);
-s32 FindClubSlot(s32 unused, ClubType clubType);
+ClubSlot FindClubSlot(s32 unused, ClubType clubType);
 s32 PlanRoute(s8 *route);
 void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ);
 void PlanClubAndTarget(CoursePoint target);
@@ -412,7 +412,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
     s32 strokesOver;
     s32 distance;
     s32 reach;
-    s32 nextSlot;
+    ClubSlot nextSlot;
     s32 shortestReach;
     s32 targetDistance;
     s32 missDistance;
@@ -905,7 +905,7 @@ void PlanClubAndTarget(CoursePoint target) {
     ShotMode shotMode;
     SurfaceKind surfaceKind;
     s32 cupDistance;
-    s32 clubSlot;
+    ClubSlot clubSlot;
     Club *club;
 
     clubType = CLUB_TYPE_DRIVER;
@@ -2470,8 +2470,8 @@ EVALUATE:
     return 1;
 }
 
-s32 FindClubSlot(s32 unused UNUSED, ClubType clubType) {
-    s32 clubSlot;
+ClubSlot FindClubSlot(s32 unused UNUSED, ClubType clubType) {
+    ClubSlot clubSlot;
 
     for (clubSlot = 0; clubSlot < CLUB_SLOT_COUNT; clubSlot++) {
         if (GetClub(g_Players[f_Shot.playerIndex].clubs[clubSlot])->type == clubType) {
@@ -2487,7 +2487,7 @@ s32 FindClubSlot(s32 unused UNUSED, ClubType clubType) {
 ClubType ChooseClubForDistance(s32 distance) {
     ClubType fallback = CLUB_TYPE_SAND_WEDGE;
     ClubType clubType;
-    s32 clubSlot;
+    ClubSlot clubSlot;
     Club *club;
     s32 carry;
     LieRating rating;

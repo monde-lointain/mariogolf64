@@ -94,7 +94,7 @@ typedef struct ShotLaunch {
     SignedBinaryAngle heading;
     // A slot in the player's bag, except in club tests, which store the
     // CLUB_TYPE_* to test.
-    s32 clubSlot;
+    ClubSlot clubSlot;
     s32 power;
     s32 impactTiming;
     s32 offsetX;

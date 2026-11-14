@@ -1450,7 +1450,7 @@ void ChooseStartingClub(HoleSetup *hole) {
     Boolean8 isUsable[CLUB_SLOT_COUNT];
     s32 clubCount;
     s32 cupDistance;
-    s32 clubSlot;
+    ClubSlot clubSlot;
     LieRating rating;
     LieRating lieRating;
     Club *club;
@@ -1468,7 +1468,7 @@ void ChooseStartingClub(HoleSetup *hole) {
     );
     if (g_GameState.isMiniGolf ||
         GetSurfaceTraits(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
-        s32 putterSlot;
+        ClubSlot putterSlot;
 
         for (putterSlot = 0; putterSlot < clubCount; putterSlot++) {
             if (!isUsable[putterSlot]) {

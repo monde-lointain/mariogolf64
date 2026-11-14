@@ -352,7 +352,7 @@ void GiveSlotClubs(s32 playerIndex) {
     Player *player;
     s32 starCount;
     s32 index;
-    s32 clubSlot;
+    ClubSlot clubSlot;
     s32 symbolIndex;
     s32 symbol;
 

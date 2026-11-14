@@ -13,7 +13,7 @@ typedef struct CurrentShot {
     s32 powerGaugeFrame;
     s32 impactGaugeFrame;
     ShotMode shotMode;
-    s32 clubSlot;
+    ClubSlot clubSlot;
     s32 offsetX;
     s32 offsetY;
     CoursePoint ballPosition;

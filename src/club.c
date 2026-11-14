@@ -4351,7 +4351,7 @@ void GetLieSpan(Club *club, Surface surface, s32 *lieSpan, ShotMode shotMode) {
 
 Boolean StepToClubChoice(CurrentShot *targetShot) {
     Boolean hasStepped = FALSE;
-    s32 clubSlot;
+    ClubSlot clubSlot;
 
     if (g_CurrentShot.shotMode == targetShot->shotMode &&
         g_CurrentShot.clubSlot == targetShot->clubSlot) {
@@ -4415,7 +4415,7 @@ Boolean StepToClubChoice(CurrentShot *targetShot) {
 }
 
 void UpdateClubControls(void) {
-    s32 clubSlot;
+    ClubSlot clubSlot;
     u16 buttons;
 
     if (IsShotModeChangeDone()) {

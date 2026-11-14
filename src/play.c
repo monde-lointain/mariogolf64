@@ -205,7 +205,7 @@ s32 GetGaugeFramePower(s32 gaugeFrame) {
 }
 
 s32 MarkUsableClubs(s32 unused UNUSED, s16 *clubs, Boolean8 *isUsable) {
-    s32 clubSlot;
+    ClubSlot clubSlot;
 
     for (clubSlot = 0; clubSlot < CLUB_SET_SIZE; clubSlot++) {
         isUsable[clubSlot] =
@@ -301,6 +301,8 @@ void FormatDefaultPlayerName(s32 index, char *name) {
 void SetUpPlayers(void) {
     s32 playerIndex;
     s32 holeIndex;
+    // Counts both NotableShot kinds and ClubSlots; splitting it changes the
+    // original's register use.
     NotableShot slot;
 
     if (g_Scene == SCENE_PLAY_BEST_SHOT_REPLAY ||

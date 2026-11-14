@@ -2126,7 +2126,7 @@ void SetUpChosenGame(void) {
     MenuMemory *memory = GetMenuMemory();
     Player *player;
     s32 index;
-    s32 clubSlot;
+    ClubSlot clubSlot;
     s32 *holeSelection;
     s32 row;
     s32 column;

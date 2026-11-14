@@ -60,6 +60,12 @@ typedef s32 ClubCategory;
 typedef s16 ClubCategory16;
 
 #define CLUB_SLOT_COUNT 16
+
+// A slot in a player's bag, Player.clubs; slot N holds the club of ClubType
+// N, or NO_CLUB.
+typedef s32 ClubSlot;
+typedef s8 ClubSlot8;
+
 #define NO_CLUB (-1)
 
 // A set of CLUB_SURFACE_ bits naming the surfaces a club can be used on.

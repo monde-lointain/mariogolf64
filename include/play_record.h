@@ -15,7 +15,7 @@ typedef struct RecordedShot {
     s8 powerGaugeFrame;
     s8 impactGaugeFrame;
     ShotMode8 shotMode;
-    s8 clubSlot;
+    ClubSlot8 clubSlot;
     s8 offsetX;
     s8 offsetY;
 } RecordedShot;
