@@ -3892,7 +3892,7 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
     },
 };
 
-const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
+const CharacterModel g_OpeningCharacterModels[OPENING_CHARACTER_MODEL_COUNT] = {
     {
         ModelRomBounds(opening_mario),
         {

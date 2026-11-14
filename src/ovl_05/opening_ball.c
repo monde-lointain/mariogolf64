@@ -26,7 +26,7 @@
 #include "surface.h"
 #include "terrain.h"
 
-#define OTHER_CHARACTER_MODEL_KIND CHARACTER_MODEL_KIND_COUNT
+#define OPENING_CHARACTER_MODEL_KIND CHARACTER_MODEL_KIND_COUNT
 
 #define OPENING_CLUB_COUNT 2
 
@@ -194,7 +194,7 @@ s32 ToggleOpeningCharacter(u32 slotIndex, s32 characterIndex) {
         return FALSE;
     }
 
-    LoadCharacter(slotIndex, characterIndex, OTHER_CHARACTER_MODEL_KIND);
+    LoadCharacter(slotIndex, characterIndex, OPENING_CHARACTER_MODEL_KIND);
     SetCharacterAnimation(slotIndex, REACTION_ANIMATION_BIRDIE);
     SetAnimationSpeed(slotIndex, 1.0f);
     return TRUE;

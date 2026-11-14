@@ -14,7 +14,7 @@
 #define CHARACTER_MODEL_KIND_COUNT 4
 #define CHARACTER_MODELS_PER_KIND 36
 #define ModelCharacter(modelIndex) ((modelIndex) % CHARACTER_MODELS_PER_KIND)
-#define OTHER_CHARACTER_MODEL_COUNT 18
+#define OPENING_CHARACTER_MODEL_COUNT 18
 #define CHARACTER_MODEL_SEGMENT_ADDRESS_COUNT 15
 
 #define CHARACTER_MODEL_DISPLAY_LIST 0
@@ -271,7 +271,7 @@ extern s32 g_CharacterModelIndex;
 
 extern const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT]
                                              [CHARACTER_MODELS_PER_KIND];
-extern const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT];
+extern const CharacterModel g_OpeningCharacterModels[OPENING_CHARACTER_MODEL_COUNT];
 
 void SetCharacterAlpha(s32 alpha);
 void AnimateCharacterJoints(u32 slotIndex);

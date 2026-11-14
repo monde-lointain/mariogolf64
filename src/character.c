@@ -937,8 +937,8 @@ void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 kind) {
         slot->model = &g_CharacterModels[0][g_CharacterModelIndex];
     }
     else {
-        g_CharacterModelIndex = (u32)characterIndex % OTHER_CHARACTER_MODEL_COUNT;
-        slot->model = &g_OtherCharacterModels[g_CharacterModelIndex];
+        g_CharacterModelIndex = (u32)characterIndex % OPENING_CHARACTER_MODEL_COUNT;
+        slot->model = &g_OpeningCharacterModels[g_CharacterModelIndex];
     }
 
     if (IsCharacterSlotBusy(slotIndex)) {
