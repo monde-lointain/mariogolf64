@@ -192,7 +192,7 @@ static inline s32 RandomLaunchHeightJitter(void) {
 void LaunchFirework(Firework *firework, s32 fireworkIndex UNUSED) {
     s32 particleIndex;
     f32 originX;
-    s32 random;
+    s32 heightJitter;
     f32 originY;
     s32 width;
     s32 height;
@@ -201,11 +201,11 @@ void LaunchFirework(Firework *firework, s32 fireworkIndex UNUSED) {
 
     particleIndex = 0;
     originX = guRandom() % FIREWORK_LAUNCH_WIDTH;
-    random = RandomLaunchHeightJitter();
+    heightJitter = RandomLaunchHeightJitter();
     width = firework->shape->width;
     height = firework->shape->height;
     firework->ignoredLaunchValue = IGNORED_LAUNCH_VALUE;
-    originY = random + FIREWORK_LAUNCH_HEIGHT;
+    originY = heightJitter + FIREWORK_LAUNCH_HEIGHT;
     for (row = 0; row != height; row++) {
         for (column = 0; column != width; column++) {
             if (*(firework->shape->cells + (column + (row * width))) == SHAPE_PARTICLE_CELL) {
