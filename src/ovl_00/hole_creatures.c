@@ -1,4 +1,4 @@
-#include "hole_objects.h"
+#include "hole_creatures.h"
 
 #include <math.h>
 #include <ultra64.h>

@@ -16,7 +16,7 @@
 #include "game_flags.h"
 #include "game_state.h"
 #include "geometry.h"
-#include "hole_objects.h"
+#include "hole_creatures.h"
 #include "hole_setup.h"
 #include "hole_triangles.h"
 #include "language.h"

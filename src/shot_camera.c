@@ -23,7 +23,7 @@
 #include "geometry.h"
 #include "golf_balls.h"
 #include "hole_conditions.h"
-#include "hole_objects.h"
+#include "hole_creatures.h"
 #include "hole_setup.h"
 #include "language.h"
 #include "main.h"

@@ -585,7 +585,7 @@ segments:
       - [0xADD40, c, ovl_00/round_results]
       - [0xB68F0, c, ovl_00/golf_balls]
       - [0xBBD00, c, ovl_00/turn]
-      - [0xC69F0, c, ovl_00/hole_objects]
+      - [0xC69F0, c, ovl_00/hole_creatures]
       - [0xC7A40, c, ovl_00/round_events]
       - [0xCFE10, c, ovl_00/shot_effects]
       - [0xD1FC0, c, ovl_00/pause_menu]
@@ -595,7 +595,7 @@ segments:
       - [0xD8F70, .data, ovl_00/round_results]
       - [0xD9160, .data, ovl_00/golf_balls]
       - [0xDD140, .data, ovl_00/turn]
-      - [0xDD320, .data, ovl_00/hole_objects]
+      - [0xDD320, .data, ovl_00/hole_creatures]
       - [0xDD410, .data, ovl_00/round_events]
       - [0xDDB60, .data, ovl_00/shot_effects]
       - [0xDDC20, .data, ovl_00/pause_menu]
@@ -605,7 +605,7 @@ segments:
       - [0xDDF10, .rodata, ovl_00/round_results]
       - [0xDE190, .rodata, ovl_00/golf_balls]
       - [0xDE1F0, .rodata, ovl_00/turn]
-      - [0xDE570, .rodata, ovl_00/hole_objects]
+      - [0xDE570, .rodata, ovl_00/hole_creatures]
       - [0xDE590, .rodata, ovl_00/round_events]
       - [0xDE710, .rodata, ovl_00/shot_effects]
       - [0xDE740, .rodata, ovl_00/pause_menu]
@@ -615,13 +615,13 @@ segments:
       - { start: 0xDE9B0, type: .bss, vram: 0x802256B0, name: ovl_00/round_results }
       - { type: .bss, vram: 0x80225810, name: ovl_00/golf_balls }
       - { type: .bss, vram: 0x80227110, name: ovl_00/turn }
-      - { type: .bss, vram: 0x80227C90, name: ovl_00/hole_objects }
+      - { type: .bss, vram: 0x80227C90, name: ovl_00/hole_creatures }
       - { type: .bss, vram: 0x80227CA0, name: ovl_00/round_events }
       - { type: .bss, vram: 0x80228000, name: ovl_00/shot_effects }
       - { type: .bss, vram: 0x8022B530, name: ovl_00/pause_menu }
       - { type: .bss, vram: 0x8022B540, name: ovl_00/club_panel }
       - { type: .bss, vram: 0x8022B5C0, name: ovl_00/turn, linker_section: COMMON .scommon }
-      - { type: .bss, vram: 0x8022B5D0, name: ovl_00/hole_objects, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022B5D0, name: ovl_00/hole_creatures, linker_section: COMMON .scommon }
       - { type: .bss, vram: 0x8022BC60, name: ovl_00/round_events, linker_section: COMMON .scommon }
       - { type: .bss, vram: 0x8022D660, name: ovl_00/shot_effects, linker_section: COMMON .scommon }
       - { type: .bss, vram: 0x8022D678, name: ovl_00/pause_menu, linker_section: COMMON .scommon }

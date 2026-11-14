@@ -1,5 +1,5 @@
-#ifndef HOLE_OBJECTS_H
-#define HOLE_OBJECTS_H
+#ifndef HOLE_CREATURES_H
+#define HOLE_CREATURES_H
 
 #include <ultra64.h>
 

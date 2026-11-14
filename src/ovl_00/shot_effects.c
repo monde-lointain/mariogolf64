@@ -17,7 +17,7 @@
 #include "geometry.h"
 #include "golf_balls.h"
 #include "heap.h"
-#include "hole_objects.h"
+#include "hole_creatures.h"
 #include "math_util.h"
 #include "movie.h"
 #include "round_events.h"
