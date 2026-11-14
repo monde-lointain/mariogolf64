@@ -1845,9 +1845,6 @@ TriangleFacing GetTriangleFacing(
     return facing;
 }
 
-#define NORMAL_ERROR_TEXT_COLUMN 3
-#define NORMAL_ERROR_TEXT_ROW 15
-
 Outcome GetTrianglePlaneCopy(PlaneTriangle *triangle, TrianglePlane *plane) {
     s32 firstX;
     s32 secondX;

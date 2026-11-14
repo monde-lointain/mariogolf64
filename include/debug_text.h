@@ -12,6 +12,8 @@ extern u16 *g_MessageFramebuffer;
 
 #define SIMULATION_FAULT_TEXT_COLUMN 10
 #define SIMULATION_FAULT_TEXT_ROW 12
+#define NORMAL_ERROR_TEXT_COLUMN 3
+#define NORMAL_ERROR_TEXT_ROW 15
 
 void SetUpDebugTextDrawing(Gfx **displayListHead);
 void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture);

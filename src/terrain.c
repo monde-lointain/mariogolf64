@@ -1813,8 +1813,6 @@ Boolean AreTrianglesDifferent(PlaneTriangle *first, PlaneTriangle *second) {
 
 #define NORMAL_PART_MAX 0x4000
 #define NORMAL_REDUCTION 256
-#define NORMAL_ERROR_COLUMN 3
-#define NORMAL_ERROR_ROW 15
 
 #define IsNormalTooLong(normalX, normalY, normalZ) \
     ((Abs(normalX) > NORMAL_PART_MAX) || \
@@ -1856,7 +1854,7 @@ Outcome GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane) {
 
     length = sqrt((normalX * normalX) + (normalY * normalY) + (normalZ * normalZ));
     if (length == 0) {
-        PrintDebugText("NormalError", NORMAL_ERROR_COLUMN, NORMAL_ERROR_ROW);
+        PrintDebugText("NormalError", NORMAL_ERROR_TEXT_COLUMN, NORMAL_ERROR_TEXT_ROW);
         plane->normal[AXIS_X] = 0;
         plane->normal[AXIS_Y] = INTEGER_PLANE_UNIT;
         plane->normal[AXIS_Z] = 0;
@@ -1907,7 +1905,7 @@ Outcome GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane) {
             (normalZ * triangle->corners[AXIS_Z][0]));
     if (length == 0.0f) {
         if (g_IsDebugEnabled) {
-            PrintDebugText("NormalFError", NORMAL_ERROR_COLUMN, NORMAL_ERROR_ROW);
+            PrintDebugText("NormalFError", NORMAL_ERROR_TEXT_COLUMN, NORMAL_ERROR_TEXT_ROW);
         }
 
         plane->normal[AXIS_X] = 0.0f;
