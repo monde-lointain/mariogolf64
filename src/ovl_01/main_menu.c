@@ -6354,7 +6354,7 @@ void DrawAnimationViewer(Gfx **displayListHead) {
     gfx = *displayListHead;
 
     if (g_ControllerStates[0].pressedButtons & START_BUTTON) {
-        f_IsViewerAdjusting ^= 1;
+        f_IsViewerAdjusting ^= TRUE;
     }
 
     if (f_IsViewerAdjusting == FALSE) {

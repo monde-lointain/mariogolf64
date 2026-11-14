@@ -146,8 +146,16 @@ typedef s32 CodeKeyResult;
 #define CLUB_COURSE_SLOT 4
 #define CLUB_MODE_SLOT 5
 #define CLUB_TEXT_SLOT_COUNT 11
-#define CLUB_CHOICE_YES 0
-#define CLUB_CHOICE_NO 1
+
+enum ClubChoice {
+    CLUB_CHOICE_YES,
+    CLUB_CHOICE_NO
+};
+
+typedef u8 UClubChoice8;
+
+// Flips between the two choices.
+#define CLUB_CHOICE_FLIP 1
 
 static ImageAsset *f_WideCloudImage = NULL;
 static ImageAsset *f_YesNoImage = NULL;
@@ -213,7 +221,7 @@ static ClubCodePhase f_ClubTournamentPhase = CLUB_CODE_PHASE_TYPING;
 static s32 f_DecodedNameIndex = 0;
 static s32 f_UnusedDoubledHandReach = 0;
 static s32 f_UnusedCodeEntryWord = 0;
-static u8 f_ClubWindowChoice = CLUB_CHOICE_YES;
+static UClubChoice8 f_ClubWindowChoice = CLUB_CHOICE_YES;
 static u8 f_CodeKeys[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT] = {
     {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'},
     {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'},
@@ -1252,7 +1260,7 @@ void ResetCodeEntry(void) {
     f_CodeHandStepTimer = 0;
     f_UnusedDoubledHandReach = 0;
     f_ClubTournamentPhase = CLUB_CODE_PHASE_TYPING;
-    f_ClubWindowChoice = 0;
+    f_ClubWindowChoice = CLUB_CHOICE_YES;
     f_IsClubTournamentEntered = TRUE;
     f_UnusedCodeEntryWord = 0;
 }
@@ -1623,7 +1631,7 @@ void UpdateClubWindow(void) {
     }
     else if ((pressedButtons & L_JPAD) || ((u16)pressedButtons & R_JPAD)) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        f_ClubWindowChoice ^= 1;
+        f_ClubWindowChoice ^= CLUB_CHOICE_FLIP;
     }
 }
 

@@ -115,8 +115,16 @@ enum PromptState {
 
 typedef s32 PromptState;
 
-#define PROMPT_CHOICE_YES 0
-#define PROMPT_CHOICE_NO 1
+enum PromptChoice {
+    PROMPT_CHOICE_YES,
+    PROMPT_CHOICE_NO,
+    PROMPT_CHOICE_COUNT
+};
+
+typedef s32 PromptChoice;
+
+// Flips between the two choices.
+#define PROMPT_CHOICE_FLIP 1
 #define SAVING_RESULT_COUNT (PROMPT_RESULT_SAVE_REPLAY + 1)
 #define PROMPT_TEXT_Y 108
 #define SAVE_SOUND_CHANNEL 15
@@ -144,8 +152,8 @@ typedef s32 PromptState;
 
 typedef struct Prompt {
     MessageId messageId;
-    s32 defaultChoice;
-    s32 results[2];
+    PromptChoice defaultChoice;
+    PromptResult results[PROMPT_CHOICE_COUNT];
 } Prompt;
 
 RgbColor g_ScreenFadeColor;
@@ -203,7 +211,7 @@ static Prompt f_Prompts[] = {
 static s32 f_PromptIndex = 0;
 static s32 f_PromptFrame = 0;
 static PromptState f_PromptState = PROMPT_STATE_CLOSED;
-static s32 f_PromptChoice = PROMPT_CHOICE_YES;
+static PromptChoice f_PromptChoice = PROMPT_CHOICE_YES;
 static Radians f_ChoiceBobAngle = 0.0f;
 static ImageAsset *f_HalfTurnImage;
 static ImageAsset *f_WipeShapeImage;
@@ -758,7 +766,7 @@ PromptResult UpdatePrompt(ControllerState *controller) {
         }
 
         if (controller->repeatedButtons & (L_JPAD | R_JPAD)) {
-            f_PromptChoice ^= 1;
+            f_PromptChoice ^= PROMPT_CHOICE_FLIP;
             PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
             return NO_PROMPT_RESULT;
         }

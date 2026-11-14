@@ -3868,7 +3868,7 @@ void DrawColorTest(Gfx **displayListHead) {
     }
 
     if (g_ControllerStates[COLOR_TEST_CONTROLLER].pressedButtons & R_TRIG) {
-        f_IsTestGradientShown ^= 1;
+        f_IsTestGradientShown ^= TRUE;
     }
 
     if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & U_JPAD) {

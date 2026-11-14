@@ -91,6 +91,9 @@ enum GridColor {
 
 typedef s8 GridColor;
 
+// Flips between the two grid colors.
+#define GRID_COLOR_FLIP 1
+
 typedef struct Player {
     char name[PLAYER_NAME_SIZE];
     PlayerState state;

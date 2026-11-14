@@ -800,7 +800,7 @@ PauseAction UpdatePauseMenu(ControllerState *controller) {
     }
     else if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {
         if (controller->repeatedButtons & (L_JPAD | R_JPAD)) {
-            g_Players[g_CurrentShot.playerIndex].gridColor ^= 1;
+            g_Players[g_CurrentShot.playerIndex].gridColor ^= GRID_COLOR_FLIP;
             if (g_CurrentShot.playerIndex == 0) {
                 GetSaveData()->options[SAVE_OPTION_GRID_COLOR] =
                     g_Players[g_CurrentShot.playerIndex].gridColor;
