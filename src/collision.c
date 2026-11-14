@@ -1845,6 +1845,9 @@ TriangleFacing GetTriangleFacing(
     return facing;
 }
 
+#define NORMAL_ERROR_TEXT_COLUMN 3
+#define NORMAL_ERROR_TEXT_ROW 15
+
 Outcome GetTrianglePlaneCopy(PlaneTriangle *triangle, TrianglePlane *plane) {
     s32 firstX;
     s32 secondX;
@@ -1874,7 +1877,7 @@ Outcome GetTrianglePlaneCopy(PlaneTriangle *triangle, TrianglePlane *plane) {
         -((normalX * triangle->corners[AXIS_X][0]) + (normalY * triangle->corners[AXIS_Y][0]) +
             (normalZ * triangle->corners[AXIS_Z][0]));
     if (length == 0.0f) {
-        PrintDebugText("NormalFError", 3, 15);
+        PrintDebugText("NormalFError", NORMAL_ERROR_TEXT_COLUMN, NORMAL_ERROR_TEXT_ROW);
         plane->normal[AXIS_X] = 0.0f;
         plane->normal[AXIS_Z] = 0.0f;
         plane->distance = 0.0f;

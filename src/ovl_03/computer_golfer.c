@@ -406,6 +406,9 @@ s32 GetSideSlope(void) {
 #define HIGH_CONSISTENCY_MISHIT_DIVISOR 125
 #define NEAR_TARGET_MISHIT_DIVISOR 208
 
+#define TARGET_TEXT_COLUMN 3
+#define TARGET_TEXT_ROW 12
+
 s32 PlanShot(CurrentShot *plannedShot) {
     char text[DEBUG_TEXT_BUFFER_SIZE];
     s32 percentRange[2];
@@ -487,7 +490,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
         osSyncPrintf("wnmTargetScoreOffset = %d\n", f_HoleTargetToPar);
         osSyncPrintf("ClubIndex = %d\n", f_Shot.clubSlot);
         sprintf(text, "Target %d   ", (int)f_HoleTargetToPar);
-        PrintDebugText(text, 3, 12);
+        PrintDebugText(text, TARGET_TEXT_COLUMN, TARGET_TEXT_ROW);
         f_PlanStage = PLAN_STAGE_STARTED;
         return PLAN_UNFINISHED;
     }
@@ -2095,7 +2098,11 @@ s32 StepTrialShot(void) {
             stepFlagsCopy = stepFlags;
             if (f_TrialStepCount >= STEP_COUNT_MAX) {
                 SetDebugTextHighlight(TRUE);
-                PrintDebugText(f_SimulationFaultText, 10, 12);
+                PrintDebugText(
+                    f_SimulationFaultText,
+                    SIMULATION_FAULT_TEXT_COLUMN,
+                    SIMULATION_FAULT_TEXT_ROW
+                );
                 break;
             }
 
@@ -2764,7 +2771,11 @@ Boolean IsTrialShotSafe(void) {
         stepFlags = StepBallSimulation(&f_TrialSimulation);
         if (f_TrialStepCount >= STEP_COUNT_MAX) {
             SetDebugTextHighlight(TRUE);
-            PrintDebugText(f_SimulationFaultText, 10, 12);
+            PrintDebugText(
+                f_SimulationFaultText,
+                SIMULATION_FAULT_TEXT_COLUMN,
+                SIMULATION_FAULT_TEXT_ROW
+            );
             break;
         }
 

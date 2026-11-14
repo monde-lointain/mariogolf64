@@ -119,8 +119,8 @@ void SimulateShot(ShotLaunch *shot) {
 
         step++;
         if (step >= STEP_COUNT_MAX) {
-            SetDebugTextHighlight(1);
-            PrintDebugText("Sim Fault!", 10, 12);
+            SetDebugTextHighlight(TRUE);
+            PrintDebugText("Sim Fault!", SIMULATION_FAULT_TEXT_COLUMN, SIMULATION_FAULT_TEXT_ROW);
             break;
         }
     }

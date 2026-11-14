@@ -684,7 +684,7 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                             if (speed < CUP_IN_SPEED_MAX &&
                                 (f32)simulation->velocity[AXIS_Y] >= -CUP_IN_RISE_SPEED_MAX) {
                                 if (printsDebugText) {
-                                    SetDebugTextHighlight(1);
+                                    SetDebugTextHighlight(TRUE);
                                     PrintDebugText(
                                         "CUPIN!",
                                         CUP_DEBUG_TEXT_COLUMN,
@@ -715,7 +715,7 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
 
                                 isNearCup = TRUE;
                                 if (printsDebugText) {
-                                    SetDebugTextHighlight(1);
+                                    SetDebugTextHighlight(TRUE);
                                     PrintDebugText(
                                         "KURU!",
                                         CUP_DEBUG_TEXT_COLUMN,

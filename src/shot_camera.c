@@ -2652,6 +2652,15 @@ void ChooseFlightCameraKind(void) {
 #define INSET_FIELD_OF_VIEW 30.0f
 #define LOOK_AT_NUDGE 0.1f
 
+#define FLIGHT_STEP_TEXT_COLUMN 8
+#define FLIGHT_STEP_TEXT_ROW 2
+#define FLIGHT_KIND_TEXT_COLUMN 10
+#define FLIGHT_KIND_TEXT_ROW 3
+#define FIRST_BLANKED_TEXT_COLUMN 16
+#define FIRST_BLANKED_TEXT_ROW 4
+#define SECOND_BLANKED_TEXT_COLUMN 10
+#define SECOND_BLANKED_TEXT_ROW 2
+
 Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     Vec3 point;
     s32 step;
@@ -2875,9 +2884,9 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
             (int)step,
             (int)g_BallFlightStep
         );
-        PrintDebugText(g_PrintBuffer, 8, 2);
+        PrintDebugText(g_PrintBuffer, FLIGHT_STEP_TEXT_COLUMN, FLIGHT_STEP_TEXT_ROW);
         sprintf(g_PrintBuffer, "TYPE:%2d TIME:%2d", (int)f_FlightCameraKind, (int)f_FlightPhase);
-        PrintDebugText(g_PrintBuffer, 10, 3);
+        PrintDebugText(g_PrintBuffer, FLIGHT_KIND_TEXT_COLUMN, FLIGHT_KIND_TEXT_ROW);
     }
 
     if (f_ShotLength > VERY_LONG_SHOT_LENGTH_MIN &&
@@ -3097,8 +3106,12 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
 
             if (++f_LandingWaitFrame >= f_LandingWaitFrameCount) {
                 if (IsGameFlagSet(GAME_FLAG_BLANK_TEXT_AFTER_FLIGHT)) {
-                    PrintDebugText("        ", 16, 4);
-                    PrintDebugText("         ", 10, 2);
+                    PrintDebugText("        ", FIRST_BLANKED_TEXT_COLUMN, FIRST_BLANKED_TEXT_ROW);
+                    PrintDebugText(
+                        "         ",
+                        SECOND_BLANKED_TEXT_COLUMN,
+                        SECOND_BLANKED_TEXT_ROW
+                    );
                 }
 
                 return TRUE;

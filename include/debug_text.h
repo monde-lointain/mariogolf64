@@ -10,6 +10,9 @@ extern u16 *g_MessageFramebuffer;
 
 #define DEBUG_TEXT_BUFFER_SIZE 128
 
+#define SIMULATION_FAULT_TEXT_COLUMN 10
+#define SIMULATION_FAULT_TEXT_ROW 12
+
 void SetUpDebugTextDrawing(Gfx **displayListHead);
 void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture);
 void PrintMessage(s8 *text, u32 column, u32 row);

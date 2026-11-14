@@ -1715,6 +1715,11 @@ void PrintCoursePoints(void) {
         (state) == PLAYER_STATE_SETTING_IMPACT || \
         (state) == PLAYER_STATE_UNUSED_AIMING)
 
+#define PREVIEW_TUNING_TEXT_COLUMN 10
+#define PREVIEW_TUNING_TEXT_ROW 10
+#define PREVIEW_STEP_TEXT_COLUMN 10
+#define PREVIEW_STEP_TEXT_ROW 3
+
 void BuildShotPreview(ShotLaunch *shot, s32 playerState) {
     BallSimulation simulation;
     ShotLaunch previewShot;
@@ -1734,7 +1739,7 @@ void BuildShotPreview(ShotLaunch *shot, s32 playerState) {
     previewShot.heading = g_CurrentShot.heading;
     previewShot.clubSlot = g_CurrentShot.clubSlot;
     if (IsGameFlagSet(GAME_FLAG_TUNE_SHOT_PREVIEW)) {
-        PrintDebugText("               ", 10, 10);
+        PrintDebugText("               ", PREVIEW_TUNING_TEXT_COLUMN, PREVIEW_TUNING_TEXT_ROW);
         if ((g_ControllerStates[0].pressedButtons & U_JPAD) &&
             f_ShotPreviewStepCount < SHOT_PREVIEW_STEPS_MAX) {
             f_ShotPreviewStepCount++;
@@ -1756,7 +1761,7 @@ void BuildShotPreview(ShotLaunch *shot, s32 playerState) {
         }
 
         sprintf(g_PrintBuffer, "prec:%4d", (int)f_ShotPreviewStepCount);
-        PrintDebugText(g_PrintBuffer, 10, 3);
+        PrintDebugText(g_PrintBuffer, PREVIEW_STEP_TEXT_COLUMN, PREVIEW_STEP_TEXT_ROW);
     }
 
     if (IsBeforePowerSet(playerState)) {
@@ -2764,6 +2769,15 @@ void ShowHoleOutBanner(s32 playerIndex) {
     } \
     while (FALSE)
 
+#define SWING_TEMPO_TEXT_COLUMN 10
+#define SWING_TEMPO_TEXT_ROW 10
+#define BALL_POSITION_TEXT_COLUMN 3
+#define BALL_POSITION_TEXT_ROW 6
+#define REACTION_TEST_TEXT_COLUMN 3
+#define REACTION_TEST_TEXT_ROW 3
+#define STATE_ERROR_TEXT_COLUMN 20
+#define STATE_ERROR_TEXT_ROW 2
+
 void UpdateTurns(void) {
     s32 playerIndex;
     PlayerState state;
@@ -3532,7 +3546,11 @@ void UpdateTurns(void) {
 
                         if (IsGameFlagSet(GAME_FLAG_SHOW_SWING_TEMPO)) {
                             sprintf(g_PrintBuffer, "tempo:%5.2f", f_GreenSongTempo);
-                            PrintDebugText(g_PrintBuffer, 10, 10);
+                            PrintDebugText(
+                                g_PrintBuffer,
+                                SWING_TEMPO_TEXT_COLUMN,
+                                SWING_TEMPO_TEXT_ROW
+                            );
                         }
 
                         SetSongTempo(f_GreenSongTempo);
@@ -3622,7 +3640,7 @@ void UpdateTurns(void) {
                                     g_CurrentShot.ballPosition[AXIS_Z]
                                 )
                             );
-                            PrintDebugText(text, 3, 6);
+                            PrintDebugText(text, BALL_POSITION_TEXT_COLUMN, BALL_POSITION_TEXT_ROW);
                             ClearGameFlag(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT);
                             isMovingBall = (g_ControllerData[1].button & Z_TRIG) != 0;
                             if (isMovingBall) {
@@ -4699,7 +4717,7 @@ void UpdateTurns(void) {
                             f_ReactionTestCharacter,
                             motionName
                         );
-                        PrintDebugText(text, 3, 3);
+                        PrintDebugText(text, REACTION_TEST_TEXT_COLUMN, REACTION_TEST_TEXT_ROW);
                         if (!IsCharacterSlotBusy(0)) {
                             LoadCharacter(0, f_ReactionTestCharacter + CHARACTER_COUNT, 0);
                         }
@@ -4957,8 +4975,8 @@ void UpdateTurns(void) {
 
                 break;
             default:
-                SetDebugTextHighlight(1);
-                PrintDebugText("P-S-ERR", 20, 2);
+                SetDebugTextHighlight(TRUE);
+                PrintDebugText("P-S-ERR", STATE_ERROR_TEXT_COLUMN, STATE_ERROR_TEXT_ROW);
                 nextState = PLAYER_STATE_AIMING;
                 break;
         }

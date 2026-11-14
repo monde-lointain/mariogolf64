@@ -73,6 +73,13 @@
 #define AUDIO_TEST_THIRD_CHANNEL 11
 #define AUDIO_TEST_VOLUME 0x60
 
+// The frame step pause and screen tests read the second controller, and the
+// inset view test the fourth as well; the debug menu reads the first.
+#define DEBUG_CONTROLLER 1
+#define SECOND_INSET_TEST_CONTROLLER 3
+#define DEBUG_MENU_CONTROLLER 0
+#define SCREEN_TEST_FADE_STEP 8
+
 #define INSET_VIEW_STEP_COUNT 8
 
 typedef struct InsetViewRectangle {
@@ -1573,6 +1580,11 @@ s32 __MusIntMemRemaining(void);
         (view).scissorY + (view).scissorHeight \
     )
 
+#define FRAME_BUFFER_TEXT_COLUMN 3
+#define FRAME_BUFFER_TEXT_ROW 4
+#define FRAME_RATE_TEXT_COLUMN 3
+#define FRAME_RATE_TEXT_ROW 5
+
 s32 DrawGame(void) {
     Boolean usesFloatMatrices;
     CameraMatrices *matrices;
@@ -2763,33 +2775,33 @@ s32 DrawGame(void) {
         }
     }
 
-    if (g_IsDebugEnabled && (g_ControllerStates[1].pressedButtons & L_TRIG)) {
+    if (g_IsDebugEnabled && (g_ControllerStates[DEBUG_CONTROLLER].pressedButtons & L_TRIG)) {
         g_FrameStepState = FRAME_STEP_PAUSED;
     }
 
     if (IsGameFlagSet(GAME_FLAG_SCREEN_TEST_BUTTONS)) {
-        if (g_ControllerStates[1].buttons & D_CBUTTONS) {
+        if (g_ControllerStates[DEBUG_CONTROLLER].buttons & D_CBUTTONS) {
             SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
         }
 
-        if (g_ControllerStates[1].buttons & U_CBUTTONS) {
+        if (g_ControllerStates[DEBUG_CONTROLLER].buttons & U_CBUTTONS) {
             SetScreenEffect(SCREEN_EFFECT_SPIN, SCREEN_TEST_SPIN_FRAME_COUNT);
         }
 
-        if (g_ControllerStates[1].buttons & L_CBUTTONS) {
+        if (g_ControllerStates[DEBUG_CONTROLLER].buttons & L_CBUTTONS) {
             SetScreenEffect(SCREEN_EFFECT_TILED_IMAGE, SCREEN_TEST_FRAME_COUNT);
         }
 
-        if (g_ControllerStates[1].buttons & R_CBUTTONS) {
+        if (g_ControllerStates[DEBUG_CONTROLLER].buttons & R_CBUTTONS) {
             SetScreenEffect(SCREEN_EFFECT_EMPTY, SCREEN_TEST_FRAME_COUNT);
         }
 
-        if (g_ControllerStates[1].buttons & D_CBUTTONS) {
-            f_FadeAlpha -= 8;
+        if (g_ControllerStates[DEBUG_CONTROLLER].buttons & D_CBUTTONS) {
+            f_FadeAlpha -= SCREEN_TEST_FADE_STEP;
         }
 
-        if (g_ControllerStates[1].buttons & U_CBUTTONS) {
-            f_FadeAlpha += 8;
+        if (g_ControllerStates[DEBUG_CONTROLLER].buttons & U_CBUTTONS) {
+            f_FadeAlpha += SCREEN_TEST_FADE_STEP;
         }
 
         if (f_FadeAlpha > OPAQUE_ALPHA) {
@@ -2800,15 +2812,15 @@ s32 DrawGame(void) {
             f_FadeAlpha = 0;
         }
 
-        if (g_ControllerStates[1].pressedButtons & B_BUTTON) {
+        if (g_ControllerStates[DEBUG_CONTROLLER].pressedButtons & B_BUTTON) {
             g_FrameStepState = FRAME_STEP_PAUSED;
         }
 
-        if (g_ControllerStates[1].pressedButtons & D_JPAD) {
+        if (g_ControllerStates[DEBUG_CONTROLLER].pressedButtons & D_JPAD) {
             g_UnreadDebugSwitch ^= TRUE;
         }
 
-        if (g_ControllerStates[1].pressedButtons & U_JPAD) {
+        if (g_ControllerStates[DEBUG_CONTROLLER].pressedButtons & U_JPAD) {
             g_Cameras[INSET_CAMERA].view.drawFlags ^= CAMERA_DRAW_SCENE;
         }
     }
@@ -2840,9 +2852,13 @@ s32 DrawGame(void) {
     }
 
     if (IsGameFlagSet(GAME_FLAG_SHOW_FRAME_RATE)) {
-        PrintDebugText(!g_HasThreeFrameBuffers ? "2 Frame Buffer" : "3 Frame Buffer", 3, 4);
+        PrintDebugText(
+            !g_HasThreeFrameBuffers ? "2 Frame Buffer" : "3 Frame Buffer",
+            FRAME_BUFFER_TEXT_COLUMN,
+            FRAME_BUFFER_TEXT_ROW
+        );
         sprintf(g_PrintBuffer, "%2d draw/sec", g_FramesPerSecond);
-        PrintDebugText(g_PrintBuffer, 3, 5);
+        PrintDebugText(g_PrintBuffer, FRAME_RATE_TEXT_COLUMN, FRAME_RATE_TEXT_ROW);
     }
 
     if (IsGameFlagSet(GAME_FLAG_SHOW_DEBUG_LOG)) {
@@ -2860,11 +2876,11 @@ s32 DrawGame(void) {
     }
 
     if (IsGameFlagSet(GAME_FLAG_SCREEN_TEST_BUTTONS)) {
-        if (g_ControllerStates[1].pressedButtons & Z_TRIG) {
+        if (g_ControllerStates[DEBUG_CONTROLLER].pressedButtons & Z_TRIG) {
             CaptureFrame();
         }
 
-        if (g_ControllerStates[1].pressedButtons & R_JPAD) {
+        if (g_ControllerStates[DEBUG_CONTROLLER].pressedButtons & R_JPAD) {
             CaptureMapImage();
         }
     }
@@ -3149,21 +3165,23 @@ void UpdateGame(void) {
         }
 
         if (IsGameFlagSet(GAME_FLAG_SCREEN_TEST_BUTTONS)) {
-            if ((g_ControllerStates[1].pressedButtons & L_JPAD) &&
+            if ((g_ControllerStates[DEBUG_CONTROLLER].pressedButtons & L_JPAD) &&
                 g_InsetView.step < INSET_VIEW_STEP_COUNT) {
                 g_InsetView.animation = INSET_VIEW_OPENING;
             }
 
-            if ((g_ControllerStates[1].pressedButtons & R_JPAD) && g_InsetView.step > 0) {
+            if ((g_ControllerStates[DEBUG_CONTROLLER].pressedButtons & R_JPAD) &&
+                g_InsetView.step > 0) {
                 g_InsetView.animation = INSET_VIEW_CLOSING;
             }
 
-            if ((g_ControllerStates[3].pressedButtons & L_JPAD) &&
+            if ((g_ControllerStates[SECOND_INSET_TEST_CONTROLLER].pressedButtons & L_JPAD) &&
                 g_InsetView.step < INSET_VIEW_STEP_COUNT) {
                 g_InsetView.animation = INSET_VIEW_OPENING;
             }
 
-            if ((g_ControllerStates[3].pressedButtons & R_JPAD) && g_InsetView.step > 0) {
+            if ((g_ControllerStates[SECOND_INSET_TEST_CONTROLLER].pressedButtons & R_JPAD) &&
+                g_InsetView.step > 0) {
                 g_InsetView.animation = INSET_VIEW_CLOSING;
             }
         }
@@ -3233,22 +3251,23 @@ void UpdateGame(void) {
             PrintDebugText(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + 1);
             PrintDebugText(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + 2);
             PrintDebugText(">", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + f_DebugMenuValueIndex);
-            if ((g_ControllerStates[0].repeatedButtons & U_CBUTTONS) && f_DebugMenuValueIndex > 0) {
+            if ((g_ControllerStates[DEBUG_MENU_CONTROLLER].repeatedButtons & U_CBUTTONS) &&
+                f_DebugMenuValueIndex > 0) {
                 f_DebugMenuValueIndex--;
             }
 
-            if ((g_ControllerStates[0].repeatedButtons & D_CBUTTONS) &&
+            if ((g_ControllerStates[DEBUG_MENU_CONTROLLER].repeatedButtons & D_CBUTTONS) &&
                 f_DebugMenuValueIndex < DEBUG_MENU_VALUE_COUNT - 1) {
                 f_DebugMenuValueIndex++;
             }
 
-            if (g_ControllerStates[0].repeatedButtons & L_CBUTTONS) {
+            if (g_ControllerStates[DEBUG_MENU_CONTROLLER].repeatedButtons & L_CBUTTONS) {
                 if (f_DebugMenuValues[f_DebugMenuValueIndex] > 0) {
                     f_DebugMenuValues[f_DebugMenuValueIndex]--;
                 }
             }
 
-            if (g_ControllerStates[0].repeatedButtons & R_CBUTTONS) {
+            if (g_ControllerStates[DEBUG_MENU_CONTROLLER].repeatedButtons & R_CBUTTONS) {
                 if (f_DebugMenuValues[f_DebugMenuValueIndex] < DEBUG_MENU_VALUE_MAX) {
                     f_DebugMenuValues[f_DebugMenuValueIndex]++;
                 }

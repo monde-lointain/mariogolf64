@@ -632,7 +632,7 @@ StepFlags StepBallSimulation(BallSimulation *simulation) {
                             if (speed < CUP_IN_SPEED_MAX &&
                                 velocity[AXIS_Y] >= -CUP_IN_RISE_SPEED_MAX) {
                                 if (printsDebugText) {
-                                    SetDebugTextHighlight(1);
+                                    SetDebugTextHighlight(TRUE);
                                     PrintDebugText(
                                         "CUPIN!",
                                         CUP_DEBUG_TEXT_COLUMN,
@@ -661,7 +661,7 @@ StepFlags StepBallSimulation(BallSimulation *simulation) {
                                 f32 pull;
 
                                 if (printsDebugText) {
-                                    SetDebugTextHighlight(1);
+                                    SetDebugTextHighlight(TRUE);
                                     PrintDebugText(
                                         "KURU!",
                                         CUP_DEBUG_TEXT_COLUMN,
