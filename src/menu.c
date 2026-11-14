@@ -204,7 +204,7 @@ AssetId g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD * MINI_GOLF_DISC_
                                      {0x085D, 0x085E, 0x085F, 0x0860, 0x0861},
                                      {0x086C, 0x086D, 0x086E, 0x086F, 0x0870},
 };
-s16 g_MiniGolfDiscFiles[] = {0x0876, 0x0876, 0x0876, 0x0876, 0x0876, 0x0876};
+SignedAssetId g_MiniGolfDiscFiles[] = {0x0876, 0x0876, 0x0876, 0x0876, 0x0876, 0x0876};
 TrophySize g_TrophySizes[COURSE_COUNT] =
     {{40, 48}, {40, 51}, {40, 51}, {32, 64}, {48, 42}, {36, 51}};
 static u8 f_UnusedBytesAfterTrophySizes[12] UNUSED = {0};
@@ -430,7 +430,7 @@ AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT] = {
         TROPHY_FRAME_END,
     },
 };
-s16 g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT] = {
+SignedAssetId g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT] = {
     {0x088C, 0x088B, 0x088A},
     {0x08B1, 0x08B0, 0x08AF},
     {0x0879, 0x0878, 0x0877},
@@ -846,7 +846,7 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
     },
 };
-s16 g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT] = {
+SignedAssetId g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT] = {
     {0x07B8, 0x07B9, 0x07BA, 0x07BB},
     {0x0748, 0x0749, 0x074A, 0x074B},
     {0x07AA, 0x07AB, 0x07AC, 0x07AD},

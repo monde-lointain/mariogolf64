@@ -60,7 +60,7 @@ extern u8 g_AreBetPagesBlocked;
 #define TROPHY_PALETTE_COUNT 3
 extern AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT];
 #define TROPHY_FRAME_END (-1)
-extern s16 g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT];
+extern SignedAssetId g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT];
 extern void *g_TrophyPalettes[TROPHY_PALETTE_COUNT];
 #define TROPHY_FRAME_BUFFER_COUNT 2
 extern void *g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
@@ -96,7 +96,7 @@ extern void *g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
 extern AssetId g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD * MINI_GOLF_DISC_IMAGE_COUNT]
                                         [MINI_GOLF_TURN_FRAME_COUNT];
 extern AssetId g_MiniGolfCourseIconAssets[];
-extern s16 g_MiniGolfDiscFiles[];
+extern SignedAssetId g_MiniGolfDiscFiles[];
 
 extern void *g_CharacterFaceImages[CHARACTER_COUNT];
 extern void *g_CharacterFacePalettes[CHARACTER_COUNT];

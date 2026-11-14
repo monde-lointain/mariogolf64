@@ -369,7 +369,7 @@ AssetId g_CharacterFirstFaceAssets[CHARACTER_COUNT] = {
     0x810,
     0x81E,
 };
-s16 g_CharacterFirstPaletteFiles[CHARACTER_COUNT] = {
+SignedAssetId g_CharacterFirstPaletteFiles[CHARACTER_COUNT] = {
     0x7B8,
     0x748,
     0x79C,

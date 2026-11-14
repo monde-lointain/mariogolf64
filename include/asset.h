@@ -7,6 +7,9 @@ typedef u16 AssetId;
 // An AssetId held in a word, as the original keeps it in tables, struct
 // fields and some parameters; it can also hold a negative "none" value.
 typedef s32 WideAssetId;
+// An AssetId in a signed halfword, as the original keeps its palette and
+// disc file tables.
+typedef s16 SignedAssetId;
 
 typedef struct AssetFile {
     u32 cursor;

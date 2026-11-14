@@ -277,7 +277,7 @@ AssetId g_CharacterFaceAssets[CHARACTER_COUNT] = {
     0x0819,
     0x0827,
 };
-s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT] = {
+SignedAssetId g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT] = {
     {0x07B8, 0x07B9, 0x07BA, 0x07BB},
     {0x0748, 0x0749, 0x074A, 0x074B},
     {0x079C, 0x079D, 0x079E, 0x079F},

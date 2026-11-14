@@ -64,10 +64,10 @@ extern AssetId g_CharacterFirstFaceAssets[CHARACTER_COUNT];
 #define FACE_WIDTH 32
 #define FACE_HEIGHT 24
 #define FACE_FRAME_SIZE 32
-extern s16 g_CharacterFirstPaletteFiles[CHARACTER_COUNT];
+extern SignedAssetId g_CharacterFirstPaletteFiles[CHARACTER_COUNT];
 #define CHARACTER_PALETTE_COUNT 4
 extern AssetId g_CharacterFaceAssets[CHARACTER_COUNT];
-extern s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
+extern SignedAssetId g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 
 #define IMPORTED_CHARACTER_COUNT 4
 #define IMPORTED_CHARACTER_NAME_LENGTH 12
@@ -86,7 +86,7 @@ extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
 
 extern char g_CharacterNames[][IMPORTED_CHARACTER_NAME_LENGTH];
 
-extern s16 g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT];
+extern SignedAssetId g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT];
 
 #define FACE_ANIMATION_FRAME_COUNT 8
 extern AssetId g_FaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT];
