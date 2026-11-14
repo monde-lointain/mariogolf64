@@ -50,7 +50,7 @@
 
 typedef struct RingCorners {
     s32 unusedBeforeCoordinates;
-    s16 coordinates[3][TRIANGLE_VERTEX_COUNT];
+    s16 coordinates[AXIS_COUNT][TRIANGLE_VERTEX_COUNT];
     s16 unusedAfterCoordinates[(0x2C - 0x16) / 2];
 } RingCorners;
 
@@ -596,45 +596,46 @@ static s32 BuildRingMatrices(void) {
             continue;
         }
 
-        corners.coordinates[0][0] = triangle->vertices[0].v.ob[AXIS_X];
-        corners.coordinates[0][1] = triangle->vertices[1].v.ob[AXIS_X];
-        corners.coordinates[0][2] = triangle->vertices[2].v.ob[AXIS_X];
-        corners.coordinates[1][0] = triangle->vertices[0].v.ob[AXIS_Y];
-        corners.coordinates[1][1] = triangle->vertices[1].v.ob[AXIS_Y];
-        corners.coordinates[1][2] = triangle->vertices[2].v.ob[AXIS_Y];
-        corners.coordinates[2][0] = triangle->vertices[0].v.ob[AXIS_Z];
-        corners.coordinates[2][1] = triangle->vertices[1].v.ob[AXIS_Z];
-        corners.coordinates[2][2] = triangle->vertices[2].v.ob[AXIS_Z];
-        if (corners.coordinates[0][1] | corners.coordinates[1][1] | corners.coordinates[2][1]) {
-            triangle->ignoredCenter[AXIS_X] =
-                (corners.coordinates[0][0] + corners.coordinates[0][1] +
-                    corners.coordinates[0][2]) /
-                3;
-            triangle->ignoredCenter[AXIS_Y] =
-                (corners.coordinates[1][0] + corners.coordinates[1][1] +
-                    corners.coordinates[1][2]) /
-                3;
-            triangle->ignoredCenter[AXIS_Z] =
-                (corners.coordinates[2][0] + corners.coordinates[2][1] +
-                    corners.coordinates[2][2]) /
-                3;
+        corners.coordinates[AXIS_X][RING_CENTER] = triangle->vertices[RING_CENTER].v.ob[AXIS_X];
+        corners.coordinates[AXIS_X][RING_FACING] = triangle->vertices[RING_FACING].v.ob[AXIS_X];
+        corners.coordinates[AXIS_X][RING_SCALE] = triangle->vertices[RING_SCALE].v.ob[AXIS_X];
+        corners.coordinates[AXIS_Y][RING_CENTER] = triangle->vertices[RING_CENTER].v.ob[AXIS_Y];
+        corners.coordinates[AXIS_Y][RING_FACING] = triangle->vertices[RING_FACING].v.ob[AXIS_Y];
+        corners.coordinates[AXIS_Y][RING_SCALE] = triangle->vertices[RING_SCALE].v.ob[AXIS_Y];
+        corners.coordinates[AXIS_Z][RING_CENTER] = triangle->vertices[RING_CENTER].v.ob[AXIS_Z];
+        corners.coordinates[AXIS_Z][RING_FACING] = triangle->vertices[RING_FACING].v.ob[AXIS_Z];
+        corners.coordinates[AXIS_Z][RING_SCALE] = triangle->vertices[RING_SCALE].v.ob[AXIS_Z];
+        if (corners.coordinates[AXIS_X][RING_FACING] | corners.coordinates[AXIS_Y][RING_FACING] |
+            corners.coordinates[AXIS_Z][RING_FACING]) {
+            triangle->ignoredCenter[AXIS_X] = (corners.coordinates[AXIS_X][RING_CENTER] +
+                                                  corners.coordinates[AXIS_X][RING_FACING] +
+                                                  corners.coordinates[AXIS_X][RING_SCALE]) /
+                TRIANGLE_VERTEX_COUNT;
+            triangle->ignoredCenter[AXIS_Y] = (corners.coordinates[AXIS_Y][RING_CENTER] +
+                                                  corners.coordinates[AXIS_Y][RING_FACING] +
+                                                  corners.coordinates[AXIS_Y][RING_SCALE]) /
+                TRIANGLE_VERTEX_COUNT;
+            triangle->ignoredCenter[AXIS_Z] = (corners.coordinates[AXIS_Z][RING_CENTER] +
+                                                  corners.coordinates[AXIS_Z][RING_FACING] +
+                                                  corners.coordinates[AXIS_Z][RING_SCALE]) /
+                TRIANGLE_VERTEX_COUNT;
             up[AXIS_X] = up[AXIS_Z] = 0.0f;
             up[AXIS_Y] = -1.0f;
             guAlignF(
                 rotation,
                 0.0f,
-                corners.coordinates[0][1],
-                corners.coordinates[1][1],
-                corners.coordinates[2][1]
+                corners.coordinates[AXIS_X][RING_FACING],
+                corners.coordinates[AXIS_Y][RING_FACING],
+                corners.coordinates[AXIS_Z][RING_FACING]
             );
-            scale = corners.coordinates[0][2] / RING_SCALE_ONE;
+            scale = corners.coordinates[AXIS_X][RING_SCALE] / RING_SCALE_ONE;
             guScaleF(transform, scale, scale, scale);
             guMtxCatF(transform, rotation, rotation);
             guTranslateF(
                 transform,
-                corners.coordinates[0][0],
-                corners.coordinates[1][0],
-                corners.coordinates[2][0]
+                corners.coordinates[AXIS_X][RING_CENTER],
+                corners.coordinates[AXIS_Y][RING_CENTER],
+                corners.coordinates[AXIS_Z][RING_CENTER]
             );
             guMtxCatF(rotation, transform, rotation);
         }

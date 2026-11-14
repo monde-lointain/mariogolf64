@@ -26,6 +26,12 @@ enum HoleTriangleKind {
 typedef u32 HoleTriangleKind;
 typedef s8 HoleTriangleKind8;
 
+// The vertices of a ring triangle hold its center, the direction it faces
+// and, in X, its scale.
+#define RING_CENTER 0
+#define RING_FACING 1
+#define RING_SCALE 2
+
 typedef struct HoleTriangle {
     HoleTriangleKind kind;
     Vtx vertices[TRIANGLE_VERTEX_COUNT];
