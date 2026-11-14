@@ -44,15 +44,15 @@ static Hilite f_Hilites[DRAW_BUFFER_COUNT];
 
 void SetCharacterAlpha(s32 alpha) {
     Gfx *gfx;
-    s32 i;
+    s32 colorIndex;
 
     gfx = &g_CharacterEnvColorDisplayLists[0][0];
-    for (i = 0; i != ENV_COLOR_COUNT; i++) {
+    for (colorIndex = 0; colorIndex != ENV_COLOR_COUNT; colorIndex++) {
         gDPSetEnvColor(
             gfx++,
-            g_CharacterEnvColors[i][0],
-            g_CharacterEnvColors[i][1],
-            g_CharacterEnvColors[i][2],
+            g_CharacterEnvColors[colorIndex][0],
+            g_CharacterEnvColors[colorIndex][1],
+            g_CharacterEnvColors[colorIndex][2],
             alpha
         );
         gSPEndDisplayList(gfx++);
@@ -4608,29 +4608,30 @@ void FreeAllCharacterSlots(void) {
 
 s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
     CharacterSlot *slot;
-    s32 i;
+    s32 choice;
 
     slot = GetUsedCharacterSlot(slotIndex);
     if (slot != NULL) {
-        i = 0;
+        choice = 0;
         if (choiceIndex == NO_DISPLAY_LIST_CHOICE) {
             ModelChosenDisplayList(slot->model)->words.w0 = G_ENDDL << 24;
             ModelChosenDisplayList(slot->model)->words.w1 = 0;
             return 0;
         }
 
-        for (; i < choiceIndex; i++) {
-            if (ModelDisplayListChoices(slot->model)[i] == END_OF_DISPLAY_LIST_CHOICES) {
+        for (; choice < choiceIndex; choice++) {
+            if (ModelDisplayListChoices(slot->model)[choice] == END_OF_DISPLAY_LIST_CHOICES) {
                 return -1;
             }
         }
 
-        if (ModelDisplayListChoices(slot->model)[i] == END_OF_DISPLAY_LIST_CHOICES) {
+        if (ModelDisplayListChoices(slot->model)[choice] == END_OF_DISPLAY_LIST_CHOICES) {
             return -1;
         }
 
         ModelChosenDisplayList(slot->model)->words.w0 = G_DL << 24;
-        ModelChosenDisplayList(slot->model)->words.w1 = ModelDisplayListChoices(slot->model)[i];
+        ModelChosenDisplayList(slot->model)->words.w1 =
+            ModelDisplayListChoices(slot->model)[choice];
         return 0;
     }
 

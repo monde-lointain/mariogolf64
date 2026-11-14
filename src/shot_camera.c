@@ -835,16 +835,16 @@ s32 GetEndReaction(void) {
 #define LONG_LANDING_MIN_DISTANCE (60.0f * UNITS_PER_YARD)
 
 static inline void QueueOnlookerSounds(s32 kind) {
-    s32 i;
+    s32 playerIndex;
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
-        if (i != g_CurrentShot.playerIndex) {
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+        if (playerIndex != g_CurrentShot.playerIndex) {
             QueueCharacterSound(
-                g_Players[i].characterIndex,
-                i,
+                g_Players[playerIndex].characterIndex,
+                playerIndex,
                 kind,
                 SOUND_FULL_SCALE,
-                g_Players[i].soundPan
+                g_Players[playerIndex].soundPan
             );
         }
     }

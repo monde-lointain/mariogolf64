@@ -458,11 +458,11 @@ void RollGolfBall(GolfBall *ball UNUSED, BallSimulation *simulation) {
 }
 
 void ResetBallAfterimage(void) {
-    s32 i;
+    s32 afterimageIndex;
 
-    for (i = 0; i != AFTERIMAGE_MAX_LENGTH; i++) {
-        f_BallAfterimages[i].alpha = AFTERIMAGE_UNUSED;
-        f_BallAfterimages[i].isInCup = FALSE;
+    for (afterimageIndex = 0; afterimageIndex != AFTERIMAGE_MAX_LENGTH; afterimageIndex++) {
+        f_BallAfterimages[afterimageIndex].alpha = AFTERIMAGE_UNUSED;
+        f_BallAfterimages[afterimageIndex].isInCup = FALSE;
     }
 
     f_BallAfterimages[0].position[AXIS_X] =
@@ -494,11 +494,11 @@ void ResetBallRotation(void) {
 }
 
 void ResetGolfBalls(void) {
-    s32 i;
+    s32 ballIndex;
 
-    for (i = 0; i < GOLF_BALL_COUNT; i++) {
-        f_GolfBalls[i].alpha = BALL_HIDDEN;
-        f_GolfBalls[i].state = BALL_STATE_STOPPED;
+    for (ballIndex = 0; ballIndex < GOLF_BALL_COUNT; ballIndex++) {
+        f_GolfBalls[ballIndex].alpha = BALL_HIDDEN;
+        f_GolfBalls[ballIndex].state = BALL_STATE_STOPPED;
     }
 
     ResetBallAfterimage();
@@ -751,10 +751,10 @@ void UpdateGolfBalls(void) {
 
 Boolean IsAnyBallInCup(void) {
     Boolean isInCup = FALSE;
-    s32 i;
+    s32 ballIndex;
 
-    for (i = 0; i != GOLF_BALL_COUNT; i++) {
-        if (f_GolfBalls[i].isInCup == TRUE && f_GolfBalls[i].alpha != BALL_HIDDEN) {
+    for (ballIndex = 0; ballIndex != GOLF_BALL_COUNT; ballIndex++) {
+        if (f_GolfBalls[ballIndex].isInCup == TRUE && f_GolfBalls[ballIndex].alpha != BALL_HIDDEN) {
             isInCup = TRUE;
         }
     }

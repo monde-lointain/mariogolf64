@@ -33,7 +33,7 @@ static Boolean f_IsSecondPadOnEye = FALSE;
 f32 f_CameraSnapshots[SNAPSHOT_COUNT][SNAPSHOT_POINT_COUNT][3];
 
 void ResetCameraEditor(void) {
-    s32 i;
+    s32 pointIndex;
 
     g_CameraEditor.points[EDITOR_POINT_EYE][0] = 0.0f;
     g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] = 0.0f;
@@ -42,22 +42,22 @@ void ResetCameraEditor(void) {
     g_CameraEditor.points[EDITOR_POINT_EYE][1] = -100.0f;
     g_CameraEditor.points[EDITOR_POINT_EYE][2] = 100.0f;
     g_CameraEditor.fieldOfView = 45.0f;
-    for (i = 0; i != EDITOR_POINT_COUNT; i++) {
-        g_CameraEditor.targets[i][0] = 0.0f;
-        g_CameraEditor.targets[i][1] = 0.0f;
-        g_CameraEditor.targets[i][2] = 0.0f;
-        g_CameraEditor.pointVelocities[i][0] = 0.0f;
-        g_CameraEditor.pointVelocities[i][1] = 0.0f;
-        g_CameraEditor.pointVelocities[i][2] = 0.0f;
+    for (pointIndex = 0; pointIndex != EDITOR_POINT_COUNT; pointIndex++) {
+        g_CameraEditor.targets[pointIndex][0] = 0.0f;
+        g_CameraEditor.targets[pointIndex][1] = 0.0f;
+        g_CameraEditor.targets[pointIndex][2] = 0.0f;
+        g_CameraEditor.pointVelocities[pointIndex][0] = 0.0f;
+        g_CameraEditor.pointVelocities[pointIndex][1] = 0.0f;
+        g_CameraEditor.pointVelocities[pointIndex][2] = 0.0f;
 
-        g_CameraEditor.pointVelocities[i][0] = 0.0f;
-        g_CameraEditor.pointVelocities[i][1] = 0.0f;
-        g_CameraEditor.pointVelocities[i][2] = 0.0f;
-        g_CameraEditor.pointTopSpeeds[i] = 30.0f;
-        g_CameraEditor.pointAccelerations[i] = 3.0f;
-        g_CameraEditor.pointBrakingDistances[i] = 0.0f;
-        g_CameraEditor.moveAxes[i] = 0;
-        g_CameraEditor.flags[i] = 0;
+        g_CameraEditor.pointVelocities[pointIndex][0] = 0.0f;
+        g_CameraEditor.pointVelocities[pointIndex][1] = 0.0f;
+        g_CameraEditor.pointVelocities[pointIndex][2] = 0.0f;
+        g_CameraEditor.pointTopSpeeds[pointIndex] = 30.0f;
+        g_CameraEditor.pointAccelerations[pointIndex] = 3.0f;
+        g_CameraEditor.pointBrakingDistances[pointIndex] = 0.0f;
+        g_CameraEditor.moveAxes[pointIndex] = 0;
+        g_CameraEditor.flags[pointIndex] = 0;
     }
 
     g_CameraEditor.tiltBrakingAngle = 0.0f;
@@ -349,24 +349,24 @@ Boolean AreEditorFlagsClear(s32 mask) {
 }
 
 void StopEditorMoves(void) {
-    s32 i;
+    s32 pointIndex;
 
-    for (i = 0; i != EDITOR_POINT_COUNT; i++) {
-        g_CameraEditor.targets[i][0] = 0.0f;
-        g_CameraEditor.targets[i][1] = 0.0f;
-        g_CameraEditor.targets[i][2] = 0.0f;
-        g_CameraEditor.pointVelocities[i][0] = 0.0f;
-        g_CameraEditor.pointVelocities[i][1] = 0.0f;
-        g_CameraEditor.pointVelocities[i][2] = 0.0f;
+    for (pointIndex = 0; pointIndex != EDITOR_POINT_COUNT; pointIndex++) {
+        g_CameraEditor.targets[pointIndex][0] = 0.0f;
+        g_CameraEditor.targets[pointIndex][1] = 0.0f;
+        g_CameraEditor.targets[pointIndex][2] = 0.0f;
+        g_CameraEditor.pointVelocities[pointIndex][0] = 0.0f;
+        g_CameraEditor.pointVelocities[pointIndex][1] = 0.0f;
+        g_CameraEditor.pointVelocities[pointIndex][2] = 0.0f;
 
-        g_CameraEditor.pointVelocities[i][0] = 0.0f;
-        g_CameraEditor.pointVelocities[i][1] = 0.0f;
-        g_CameraEditor.pointVelocities[i][2] = 0.0f;
-        g_CameraEditor.pointTopSpeeds[i] = 30.0f;
-        g_CameraEditor.pointAccelerations[i] = 3.0f;
-        g_CameraEditor.pointBrakingDistances[i] = 0.0f;
-        g_CameraEditor.moveAxes[i] = 0;
-        g_CameraEditor.flags[i] = 0;
+        g_CameraEditor.pointVelocities[pointIndex][0] = 0.0f;
+        g_CameraEditor.pointVelocities[pointIndex][1] = 0.0f;
+        g_CameraEditor.pointVelocities[pointIndex][2] = 0.0f;
+        g_CameraEditor.pointTopSpeeds[pointIndex] = 30.0f;
+        g_CameraEditor.pointAccelerations[pointIndex] = 3.0f;
+        g_CameraEditor.pointBrakingDistances[pointIndex] = 0.0f;
+        g_CameraEditor.moveAxes[pointIndex] = 0;
+        g_CameraEditor.flags[pointIndex] = 0;
     }
 
     g_CameraEditor.tiltBrakingAngle = 0.0f;

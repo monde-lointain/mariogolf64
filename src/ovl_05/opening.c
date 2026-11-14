@@ -1425,7 +1425,7 @@ void UpdateOpening(void) {
     Vec3 handPoint;
     s32 slot;
     SoundChannel channel;
-    s32 i;
+    s32 controllerIndex;
     s32 pressedButtons;
     s32 skipButtons;
 
@@ -3116,8 +3116,8 @@ void UpdateOpening(void) {
         !IsGameFlagSet(GAME_FLAG_EDIT_OPENING_CAMERA)) {
         if (f_OpeningScene != OPENING_SCENE_SKIPPED) {
             pressedButtons = 0;
-            for (i = 0; i != g_ControllerCount; i++) {
-                pressedButtons |= g_ControllerStates[i].pressedButtons;
+            for (controllerIndex = 0; controllerIndex != g_ControllerCount; controllerIndex++) {
+                pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
             }
 
             if (g_IsDebugEnabled) {
@@ -5138,7 +5138,7 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
     Gfx *gfx = *displayListHead;
     s32 texelsOffset;
     s32 letterTexelsOffset;
-    s32 i;
+    s32 logoLetter;
     s32 letterIndex;
     s32 j;
     Radians angle;
@@ -5277,17 +5277,17 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
     }
 
     if (isDrawn == TRUE) {
-        for (i = 0; i < LOGO_LETTER_COUNT; i++) {
+        for (logoLetter = 0; logoLetter < LOGO_LETTER_COUNT; logoLetter++) {
             guTranslate(
-                &f_LogoLetterTranslations[i][g_DrawBufferIndex],
-                f_LogoLetters[i].x - (SCREEN_WIDTH / 2.0f),
-                (SCREEN_HEIGHT - f_LogoLetters[i].y) - (SCREEN_HEIGHT / 2.0f),
-                f_LogoLetters[i].depth + LOGO_Z
+                &f_LogoLetterTranslations[logoLetter][g_DrawBufferIndex],
+                f_LogoLetters[logoLetter].x - (SCREEN_WIDTH / 2.0f),
+                (SCREEN_HEIGHT - f_LogoLetters[logoLetter].y) - (SCREEN_HEIGHT / 2.0f),
+                f_LogoLetters[logoLetter].depth + LOGO_Z
             );
             guScale(
-                &f_LogoLetterScalings[i][g_DrawBufferIndex],
-                f_LogoLetterScales[i][AXIS_X],
-                f_LogoLetterScales[i][AXIS_Y],
+                &f_LogoLetterScalings[logoLetter][g_DrawBufferIndex],
+                f_LogoLetterScales[logoLetter][AXIS_X],
+                f_LogoLetterScales[logoLetter][AXIS_Y],
                 1.0f
             );
         }
@@ -5351,10 +5351,10 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoLettersAlpha);
         gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
         gDPPipeSync(gfx++);
-        for (i = 0; i < LOGO_LETTER_COUNT; i++) {
+        for (logoLetter = 0; logoLetter < LOGO_LETTER_COUNT; logoLetter++) {
             for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
-                letterTexelsOffset = ((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
-                                         LOGO_LETTER_HALF_HEIGHT) +
+                letterTexelsOffset = ((j + (logoLetter * LOGO_LETTER_HALF_COUNT)) *
+                                         LOGO_LETTER_WIDTH * LOGO_LETTER_HALF_HEIGHT) +
                     LARGE_PALETTED_TEXELS_OFFSET;
                 gDPLoadTextureBlock(
                     gfx++,
@@ -5378,15 +5378,19 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
                 );
                 gSPMatrix(
                     gfx++,
-                    PhysicalAddress(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
+                    PhysicalAddress(&f_LogoLetterTranslations[logoLetter][g_DrawBufferIndex]),
                     G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
                 );
                 gSPMatrix(
                     gfx++,
-                    PhysicalAddress(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
+                    PhysicalAddress(&f_LogoLetterScalings[logoLetter][g_DrawBufferIndex]),
                     G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH
                 );
-                gDPSetPrimDepth(gfx++, f_LogoLetters[i].depth + LOGO_LETTER_DEPTH_OFFSET, 0);
+                gDPSetPrimDepth(
+                    gfx++,
+                    f_LogoLetters[logoLetter].depth + LOGO_LETTER_DEPTH_OFFSET,
+                    0
+                );
                 gDPPipeSync(gfx++);
                 gSPVertex(gfx++, f_LogoLetterVertices[j], QUAD_VERTEX_COUNT, 0);
                 gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -5477,9 +5481,9 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
                 GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM)
         );
         gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
-        for (i = 0; i < LOGO_LETTER_COUNT; i++) {
+        for (logoLetter = 0; logoLetter < LOGO_LETTER_COUNT; logoLetter++) {
             for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
-                texelsOffset = ((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
+                texelsOffset = ((j + (logoLetter * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
                                    LOGO_LETTER_HALF_HEIGHT) +
                     LARGE_PALETTED_TEXELS_OFFSET;
                 gDPLoadTextureBlock(
@@ -5505,12 +5509,12 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
                 );
                 gSPMatrix(
                     gfx++,
-                    PhysicalAddress(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
+                    PhysicalAddress(&f_LogoLetterTranslations[logoLetter][g_DrawBufferIndex]),
                     G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
                 );
                 gSPMatrix(
                     gfx++,
-                    PhysicalAddress(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
+                    PhysicalAddress(&f_LogoLetterScalings[logoLetter][g_DrawBufferIndex]),
                     G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH
                 );
                 gDPPipeSync(gfx++);
@@ -5595,75 +5599,77 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
     AppendSyncedRdpState(gfx, gDPSetDepthSource, G_ZS_PIXEL);
     *displayListHead = gfx;
 
-    for (i = 0; i < LOGO_LETTER_COUNT; i++) {
-        if (f_LogoLetterStates[i] == LOGO_LETTER_FALLING) {
-            if (f_LogoLetterSpeeds[i] > 0.0f) {
-                if (i != LOGO_LETTER_L) {
-                    if (f_LogoLetters[i].y + (s32)f_LogoLetterSpeeds[i] >= LOGO_LETTER_GROUND_Y) {
-                        f_LogoLetterSpeeds[i] *= LOGO_LETTER_BOUNCINESS;
-                        f_LogoLetters[i].y = LOGO_LETTER_GROUND_Y - 1;
-                        if (f_LogoLetterSpeeds[i] <= LOGO_LETTER_MIN_BOUNCE_SPEED) {
-                            f_LogoLetterSpeeds[i] = 0.0f;
-                            f_LogoLetterStates[i] = LOGO_LETTER_LANDED;
+    for (logoLetter = 0; logoLetter < LOGO_LETTER_COUNT; logoLetter++) {
+        if (f_LogoLetterStates[logoLetter] == LOGO_LETTER_FALLING) {
+            if (f_LogoLetterSpeeds[logoLetter] > 0.0f) {
+                if (logoLetter != LOGO_LETTER_L) {
+                    if (f_LogoLetters[logoLetter].y + (s32)f_LogoLetterSpeeds[logoLetter] >=
+                        LOGO_LETTER_GROUND_Y) {
+                        f_LogoLetterSpeeds[logoLetter] *= LOGO_LETTER_BOUNCINESS;
+                        f_LogoLetters[logoLetter].y = LOGO_LETTER_GROUND_Y - 1;
+                        if (f_LogoLetterSpeeds[logoLetter] <= LOGO_LETTER_MIN_BOUNCE_SPEED) {
+                            f_LogoLetterSpeeds[logoLetter] = 0.0f;
+                            f_LogoLetterStates[logoLetter] = LOGO_LETTER_LANDED;
                             continue;
                         }
 
-                        f_LogoLetterSpeeds[i] = -f_LogoLetterSpeeds[i];
-                        f_LogoLetterStates[i] = LOGO_LETTER_SQUASHING;
-                        f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASH_FRAMES;
+                        f_LogoLetterSpeeds[logoLetter] = -f_LogoLetterSpeeds[logoLetter];
+                        f_LogoLetterStates[logoLetter] = LOGO_LETTER_SQUASHING;
+                        f_LogoLetterSquashFrames[logoLetter] = LOGO_LETTER_SQUASH_FRAMES;
                     }
                 }
                 else {
-                    if (f_LogoLetters[i].y + (s32)f_LogoLetterSpeeds[i] >= LOGO_LETTER_L_GROUND_Y) {
-                        f_LogoLetterSpeeds[i] *= LOGO_LETTER_BOUNCINESS;
-                        f_LogoLetters[i].y = LOGO_LETTER_L_GROUND_Y - 1;
-                        if (f_LogoLetterSpeeds[i] <= LOGO_LETTER_MIN_BOUNCE_SPEED) {
-                            f_LogoLetterSpeeds[i] = 0.0f;
-                            f_LogoLetterStates[i] = LOGO_LETTER_LANDED;
+                    if (f_LogoLetters[logoLetter].y + (s32)f_LogoLetterSpeeds[logoLetter] >=
+                        LOGO_LETTER_L_GROUND_Y) {
+                        f_LogoLetterSpeeds[logoLetter] *= LOGO_LETTER_BOUNCINESS;
+                        f_LogoLetters[logoLetter].y = LOGO_LETTER_L_GROUND_Y - 1;
+                        if (f_LogoLetterSpeeds[logoLetter] <= LOGO_LETTER_MIN_BOUNCE_SPEED) {
+                            f_LogoLetterSpeeds[logoLetter] = 0.0f;
+                            f_LogoLetterStates[logoLetter] = LOGO_LETTER_LANDED;
                             continue;
                         }
 
-                        f_LogoLetterSpeeds[i] = -f_LogoLetterSpeeds[i];
-                        f_LogoLetterStates[i] = LOGO_LETTER_SQUASHING;
-                        f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASH_FRAMES;
+                        f_LogoLetterSpeeds[logoLetter] = -f_LogoLetterSpeeds[logoLetter];
+                        f_LogoLetterStates[logoLetter] = LOGO_LETTER_SQUASHING;
+                        f_LogoLetterSquashFrames[logoLetter] = LOGO_LETTER_SQUASH_FRAMES;
                     }
                 }
             }
 
-            f_LogoLetters[i].y += (s32)f_LogoLetterSpeeds[i];
-            f_LogoLetterSpeeds[i] += LOGO_LETTER_GRAVITY;
-            f_LogoLetterScales[i][AXIS_X] += LOGO_LETTER_GROWTH;
-            f_LogoLetterScales[i][AXIS_Y] += LOGO_LETTER_GROWTH;
-            if (f_LogoLetterScales[i][AXIS_X] > 1.0f) {
-                f_LogoLetterScales[i][AXIS_X] = 1.0f;
+            f_LogoLetters[logoLetter].y += (s32)f_LogoLetterSpeeds[logoLetter];
+            f_LogoLetterSpeeds[logoLetter] += LOGO_LETTER_GRAVITY;
+            f_LogoLetterScales[logoLetter][AXIS_X] += LOGO_LETTER_GROWTH;
+            f_LogoLetterScales[logoLetter][AXIS_Y] += LOGO_LETTER_GROWTH;
+            if (f_LogoLetterScales[logoLetter][AXIS_X] > 1.0f) {
+                f_LogoLetterScales[logoLetter][AXIS_X] = 1.0f;
             }
 
-            if (f_LogoLetterScales[i][AXIS_Y] > 1.0f) {
-                f_LogoLetterScales[i][AXIS_Y] = 1.0f;
+            if (f_LogoLetterScales[logoLetter][AXIS_Y] > 1.0f) {
+                f_LogoLetterScales[logoLetter][AXIS_Y] = 1.0f;
             }
         }
-        else if (f_LogoLetterStates[i] == LOGO_LETTER_SQUASHING) {
-            f_LogoLetterScales[i][AXIS_X] += LOGO_LETTER_SQUASH_STEP;
-            f_LogoLetterScales[i][AXIS_Y] -= LOGO_LETTER_SQUASH_STEP;
-            f_LogoLetterSquashFrames[i]--;
-            if (f_LogoLetterSquashFrames[i] == 0) {
-                f_LogoLetterStates[i] = LOGO_LETTER_SQUASHED;
-                f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASHED_FRAMES;
+        else if (f_LogoLetterStates[logoLetter] == LOGO_LETTER_SQUASHING) {
+            f_LogoLetterScales[logoLetter][AXIS_X] += LOGO_LETTER_SQUASH_STEP;
+            f_LogoLetterScales[logoLetter][AXIS_Y] -= LOGO_LETTER_SQUASH_STEP;
+            f_LogoLetterSquashFrames[logoLetter]--;
+            if (f_LogoLetterSquashFrames[logoLetter] == 0) {
+                f_LogoLetterStates[logoLetter] = LOGO_LETTER_SQUASHED;
+                f_LogoLetterSquashFrames[logoLetter] = LOGO_LETTER_SQUASHED_FRAMES;
             }
         }
-        else if (f_LogoLetterStates[i] == LOGO_LETTER_SQUASHED) {
-            f_LogoLetterSquashFrames[i]--;
-            if (f_LogoLetterSquashFrames[i] == 0) {
-                f_LogoLetterStates[i] = LOGO_LETTER_STRETCHING;
-                f_LogoLetterSquashFrames[i] = LOGO_LETTER_STRETCH_FRAMES;
+        else if (f_LogoLetterStates[logoLetter] == LOGO_LETTER_SQUASHED) {
+            f_LogoLetterSquashFrames[logoLetter]--;
+            if (f_LogoLetterSquashFrames[logoLetter] == 0) {
+                f_LogoLetterStates[logoLetter] = LOGO_LETTER_STRETCHING;
+                f_LogoLetterSquashFrames[logoLetter] = LOGO_LETTER_STRETCH_FRAMES;
             }
         }
-        else if (f_LogoLetterStates[i] == LOGO_LETTER_STRETCHING) {
-            f_LogoLetterScales[i][AXIS_X] -= LOGO_LETTER_STRETCH_STEP;
-            f_LogoLetterScales[i][AXIS_Y] += LOGO_LETTER_STRETCH_STEP;
-            f_LogoLetterSquashFrames[i]--;
-            if (f_LogoLetterSquashFrames[i] == 0) {
-                f_LogoLetterStates[i] = LOGO_LETTER_FALLING;
+        else if (f_LogoLetterStates[logoLetter] == LOGO_LETTER_STRETCHING) {
+            f_LogoLetterScales[logoLetter][AXIS_X] -= LOGO_LETTER_STRETCH_STEP;
+            f_LogoLetterScales[logoLetter][AXIS_Y] += LOGO_LETTER_STRETCH_STEP;
+            f_LogoLetterSquashFrames[logoLetter]--;
+            if (f_LogoLetterSquashFrames[logoLetter] == 0) {
+                f_LogoLetterStates[logoLetter] = LOGO_LETTER_FALLING;
             }
         }
     }

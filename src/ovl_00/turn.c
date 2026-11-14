@@ -1552,13 +1552,13 @@ void PickStartingClub(HoleSetup *hole) {
 
 void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation) {
     Player *player = &g_Players[playerIndex];
-    s32 i;
+    s32 ringIndex;
     s32 groundHeight;
 
     StopSound(IMPACT_POINT_SOUND_CHANNEL);
-    for (i = 0; i < RING_COUNT; i++) {
-        if (player->ringStates[i] != RING_STATE_NONE) {
-            player->ringStates[i] = RING_STATE_SHOWN;
+    for (ringIndex = 0; ringIndex < RING_COUNT; ringIndex++) {
+        if (player->ringStates[ringIndex] != RING_STATE_NONE) {
+            player->ringStates[ringIndex] = RING_STATE_SHOWN;
         }
 
         SetRingShotCleared(FALSE);
@@ -2151,10 +2151,10 @@ void RecordRingShotHole(s32 playerIndex) {
 }
 
 Boolean HasNoRingsLeft(Player *player) {
-    s32 i;
+    s32 ringIndex;
 
-    for (i = 0; i < RING_COUNT; i++) {
-        if (player->ringStates[i] != RING_STATE_NONE) {
+    for (ringIndex = 0; ringIndex < RING_COUNT; ringIndex++) {
+        if (player->ringStates[ringIndex] != RING_STATE_NONE) {
             return FALSE;
         }
     }
@@ -2163,10 +2163,10 @@ Boolean HasNoRingsLeft(Player *player) {
 }
 
 Boolean AreAllRingsPassed(Player *player) {
-    s32 i;
+    s32 ringIndex;
 
-    for (i = 0; i < RING_COUNT; i++) {
-        if (player->ringStates[i] == RING_STATE_SHOWN) {
+    for (ringIndex = 0; ringIndex < RING_COUNT; ringIndex++) {
+        if (player->ringStates[ringIndex] == RING_STATE_SHOWN) {
             return FALSE;
         }
     }
@@ -2347,7 +2347,7 @@ void OnBallStepped(Player *player UNUSED) {
 }
 
 void PickNextPlayer(void) {
-    s32 i;
+    s32 playerIndex;
     s32 finishedCount;
     s32 nextPlayer;
     s32 bestPriority;
@@ -2375,44 +2375,45 @@ void PickNextPlayer(void) {
     bestPriority = 0;
     bestTeeOrder = S32_MAX;
     nextPlayer = 0;
-    for (i = 0; i < g_GameState.playerCount; i++) {
+    for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
         priority = LIE_PRIORITY_TEE;
-        if (g_Players[i].holeStatus != HOLE_STATUS_PLAYING) {
+        if (g_Players[playerIndex].holeStatus != HOLE_STATUS_PLAYING) {
             continue;
         }
 
         if (IsGameFlagSet(GAME_FLAG_FEWEST_STROKES_FIRST)) {
             distance = 0;
-            priority = STROKE_PRIORITY_BASE - g_Players[i].strokeCount;
+            priority = STROKE_PRIORITY_BASE - g_Players[playerIndex].strokeCount;
         }
         else {
-            if (g_Players[i].strokeCount != 0) {
-                priority = GetSurfaceInfo(g_Players[i].ballSurface)->kind != SURFACE_KIND_GREEN;
+            if (g_Players[playerIndex].strokeCount != 0) {
+                priority =
+                    GetSurfaceInfo(g_Players[playerIndex].ballSurface)->kind != SURFACE_KIND_GREEN;
             }
 
             distance = IntLength2D(
-                g_HoleSetup.cupPosition[AXIS_X] - g_Players[i].ballPosition[AXIS_X],
-                g_HoleSetup.cupPosition[AXIS_Z] - g_Players[i].ballPosition[AXIS_Z]
+                g_HoleSetup.cupPosition[AXIS_X] - g_Players[playerIndex].ballPosition[AXIS_X],
+                g_HoleSetup.cupPosition[AXIS_Z] - g_Players[playerIndex].ballPosition[AXIS_Z]
             );
         }
 
         if (priority > bestPriority) {
             bestPriority = priority;
-            nextPlayer = i;
+            nextPlayer = playerIndex;
             bestDistance = distance;
             bestTeeOrder = g_Players[nextPlayer].teeOrder;
         }
         else if (priority == bestPriority) {
             if (distance > bestDistance) {
-                nextPlayer = i;
+                nextPlayer = playerIndex;
                 bestDistance = distance;
                 bestTeeOrder = g_Players[nextPlayer].teeOrder;
             }
             else if (distance == bestDistance) {
-                if (g_Players[i].teeOrder < bestTeeOrder) {
-                    bestTeeOrder = g_Players[i].teeOrder;
+                if (g_Players[playerIndex].teeOrder < bestTeeOrder) {
+                    bestTeeOrder = g_Players[playerIndex].teeOrder;
                     bestDistance = distance;
-                    nextPlayer = i;
+                    nextPlayer = playerIndex;
                 }
             }
         }
@@ -2427,11 +2428,11 @@ void PickNextPlayer(void) {
 }
 
 void ClearPassedRings(Player *player) {
-    s32 i;
+    s32 ringIndex;
 
-    for (i = 0; i < RING_COUNT; i++) {
-        if (player->ringStates[i] >= RING_STATE_PASSED) {
-            player->ringStates[i] = RING_STATE_NONE;
+    for (ringIndex = 0; ringIndex < RING_COUNT; ringIndex++) {
+        if (player->ringStates[ringIndex] >= RING_STATE_PASSED) {
+            player->ringStates[ringIndex] = RING_STATE_NONE;
         }
     }
 }
@@ -2529,15 +2530,15 @@ void StartTurnRumble(s32 playerIndex) {
 }
 
 void PlayWaitingPlayersCalls(void) {
-    s32 i;
+    s32 playerIndex;
     s32 controllerIndex;
     u16 pressed;
 
     if (g_HasOwnControllers == TRUE) {
-        for (i = 0; i < g_GameState.playerCount; i++) {
-            if ((g_Players[i].state == PLAYER_STATE_WAITING) |
-                (g_Players[i].state == PLAYER_STATE_HOLE_DONE)) {
-                controllerIndex = g_Players[i].controllerIndex;
+        for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+            if ((g_Players[playerIndex].state == PLAYER_STATE_WAITING) |
+                (g_Players[playerIndex].state == PLAYER_STATE_HOLE_DONE)) {
+                controllerIndex = g_Players[playerIndex].controllerIndex;
                 if (controllerIndex == g_Players[g_GameState.currentPlayerIndex].controllerIndex) {
                     continue;
                 }
@@ -2549,74 +2550,74 @@ void PlayWaitingPlayersCalls(void) {
                 pressed = g_ControllerStates[controllerIndex].pressedButtons;
                 if (pressed & U_JPAD) {
                     PlayCharacterSound(
-                        g_Players[i].characterIndex,
-                        i,
+                        g_Players[playerIndex].characterIndex,
+                        playerIndex,
                         CHARACTER_SOUND_CALL_OUT_UP,
                         SOUND_FULL_SCALE,
-                        g_Players[i].soundPan
+                        g_Players[playerIndex].soundPan
                     );
                 }
                 else if (pressed & D_JPAD) {
                     PlayCharacterSound(
-                        g_Players[i].characterIndex,
-                        i,
+                        g_Players[playerIndex].characterIndex,
+                        playerIndex,
                         CHARACTER_SOUND_CALL_OUT_DOWN,
                         SOUND_FULL_SCALE,
-                        g_Players[i].soundPan
+                        g_Players[playerIndex].soundPan
                     );
                 }
                 else if (pressed & L_JPAD) {
                     PlayCharacterSound(
-                        g_Players[i].characterIndex,
-                        i,
+                        g_Players[playerIndex].characterIndex,
+                        playerIndex,
                         CHARACTER_SOUND_CALL_OUT_LEFT,
                         SOUND_FULL_SCALE,
-                        g_Players[i].soundPan
+                        g_Players[playerIndex].soundPan
                     );
                 }
                 else if (pressed & R_JPAD) {
                     PlayCharacterSound(
-                        g_Players[i].characterIndex,
-                        i,
+                        g_Players[playerIndex].characterIndex,
+                        playerIndex,
                         CHARACTER_SOUND_CALL_OUT_RIGHT,
                         SOUND_FULL_SCALE,
-                        g_Players[i].soundPan
+                        g_Players[playerIndex].soundPan
                     );
                 }
                 else if (pressed & U_CBUTTONS) {
                     PlayCharacterSound(
-                        g_Players[i].characterIndex,
-                        i,
+                        g_Players[playerIndex].characterIndex,
+                        playerIndex,
                         CHARACTER_SOUND_CALL_OUT_C_UP,
                         SOUND_FULL_SCALE,
-                        g_Players[i].soundPan
+                        g_Players[playerIndex].soundPan
                     );
                 }
                 else if (pressed & D_CBUTTONS) {
                     PlayCharacterSound(
-                        g_Players[i].characterIndex,
-                        i,
+                        g_Players[playerIndex].characterIndex,
+                        playerIndex,
                         CHARACTER_SOUND_CALL_OUT_C_DOWN,
                         SOUND_FULL_SCALE,
-                        g_Players[i].soundPan
+                        g_Players[playerIndex].soundPan
                     );
                 }
                 else if (pressed & L_CBUTTONS) {
                     PlayCharacterSound(
-                        g_Players[i].characterIndex,
-                        i,
+                        g_Players[playerIndex].characterIndex,
+                        playerIndex,
                         CHARACTER_SOUND_CALL_OUT_C_LEFT,
                         SOUND_FULL_SCALE,
-                        g_Players[i].soundPan
+                        g_Players[playerIndex].soundPan
                     );
                 }
                 else if (pressed & R_CBUTTONS) {
                     PlayCharacterSound(
-                        g_Players[i].characterIndex,
-                        i,
+                        g_Players[playerIndex].characterIndex,
+                        playerIndex,
                         CHARACTER_SOUND_CALL_OUT_C_RIGHT,
                         SOUND_FULL_SCALE,
-                        g_Players[i].soundPan
+                        g_Players[playerIndex].soundPan
                     );
                 }
             }
@@ -2761,7 +2762,7 @@ void UpdateTurns(void) {
     s32 state;
     s32 nextState;
     Boolean areCallsAllowed;
-    s32 i;
+    s32 skipStep;
     s32 checkedPlayer;
     s32 outPlayer;
     s32 aimingPollIndex;
@@ -4156,7 +4157,7 @@ void UpdateTurns(void) {
                         previousPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
                     );
 
-                    for (i = 0; i < MAX_ROLL_SKIP_STEPS; i++) {
+                    for (skipStep = 0; skipStep < MAX_ROLL_SKIP_STEPS; skipStep++) {
                         u32 distance = IntLength2D(
                             g_TurnBallSimulation.position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
                             g_TurnBallSimulation.position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]

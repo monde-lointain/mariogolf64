@@ -828,7 +828,7 @@ s32 TallyScorecardSkins(void);
 
 void AnimateScorecard(void) {
     EncodedAsset asset;
-    s32 i;
+    s32 playerIndex;
     s32 slideSpeed;
 
     switch (g_ScorecardState) {
@@ -911,13 +911,14 @@ void AnimateScorecard(void) {
                 g_Scorecard.faceFrame++;
                 g_Scorecard.isOddFaceStep ^= 1;
                 if (g_Scorecard.faceFrame < FACE_FRAME_COUNT) {
-                    for (i = 0; i != g_GameState.playerCount; i++) {
+                    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
                         OpenEncodedAsset(
-                            g_CharacterImageAssets[g_Players[i].characterIndex] +
-                                g_Scorecard.faceFrame + g_Scorecard.content.faceImageOffsets[i],
+                            g_CharacterImageAssets[g_Players[playerIndex].characterIndex] +
+                                g_Scorecard.faceFrame +
+                                g_Scorecard.content.faceImageOffsets[playerIndex],
                             &asset
                         );
-                        ReadEncodedAsset(g_Scorecard.faceImages[i], &asset);
+                        ReadEncodedAsset(g_Scorecard.faceImages[playerIndex], &asset);
                     }
                 }
                 else {
@@ -1112,7 +1113,7 @@ void DrawLargeImage(Gfx **displayListHead, u8 *image, s32 left, s32 top) {
 
 void DrawScorecard(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    s32 i;
+    s32 pageIndex;
     s32 dropY;
 
     if (g_ScorecardState == SCORECARD_UNUSED_MATCH_RESULT) {
@@ -1122,8 +1123,8 @@ void DrawScorecard(Gfx **displayListHead) {
         if (g_ScorecardState != SCORECARD_CLOSED) {
             DrawScorecardTable(&gfx, g_Scorecard.pageCount, g_RoundHud.scorecardPage);
             gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-            for (i = 0; i != g_Scorecard.pageCount; i++) {
-                if (i == g_RoundHud.scorecardPage) {
+            for (pageIndex = 0; pageIndex != g_Scorecard.pageCount; pageIndex++) {
+                if (pageIndex == g_RoundHud.scorecardPage) {
                     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
                     dropY = 0;
                 }
@@ -1145,16 +1146,17 @@ void DrawScorecard(Gfx **displayListHead) {
                 if (g_Scorecard.pageCount == THREE_PAGE_COUNT) {
                     DrawLargeImage(
                         &gfx,
-                        g_Scorecard.pageTitleImages[i],
-                        ((i * THREE_PAGE_TITLE_SPACING) + THREE_PAGE_TITLE_LEFT) + g_Scorecard.x,
+                        g_Scorecard.pageTitleImages[pageIndex],
+                        ((pageIndex * THREE_PAGE_TITLE_SPACING) + THREE_PAGE_TITLE_LEFT) +
+                            g_Scorecard.x,
                         g_Scorecard.y + PAGE_TITLE_TOP + dropY
                     );
                 }
                 else {
                     DrawLargeImage(
                         &gfx,
-                        g_Scorecard.pageTitleImages[i],
-                        ((i * PAGE_TITLE_SPACING) + PAGE_TITLE_LEFT) + g_Scorecard.x,
+                        g_Scorecard.pageTitleImages[pageIndex],
+                        ((pageIndex * PAGE_TITLE_SPACING) + PAGE_TITLE_LEFT) + g_Scorecard.x,
                         g_Scorecard.y + PAGE_TITLE_TOP + dropY
                     );
                 }

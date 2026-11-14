@@ -201,10 +201,11 @@ s32 GetGaugeFramePower(s32 value) {
 }
 
 s32 MarkUsableClubs(s32 unused UNUSED, s16 *clubs, s8 *isUsable) {
-    s32 i;
+    s32 clubSlot;
 
-    for (i = 0; i < CLUB_SET_SIZE; i++) {
-        isUsable[i] = (GetClub(clubs[i])->surfaceMask & GetCurrentSurfaceClubMask(TRUE)) != 0;
+    for (clubSlot = 0; clubSlot < CLUB_SET_SIZE; clubSlot++) {
+        isUsable[clubSlot] =
+            (GetClub(clubs[clubSlot])->surfaceMask & GetCurrentSurfaceClubMask(TRUE)) != 0;
     }
 
     return CLUB_SET_SIZE;
@@ -284,7 +285,7 @@ void FormatDefaultPlayerName(s32 index, char *name) {
 }
 
 void SetUpPlayers(void) {
-    s32 i;
+    s32 playerIndex;
     s32 hole;
     s32 slot;
 
@@ -324,39 +325,40 @@ void SetUpPlayers(void) {
             }
         }
 
-        i = 0;
+        playerIndex = 0;
         for (slot = SHOT_KIND_COUNT - 1; slot >= 0; slot--) {
-            g_Players[i].notableShotCounts[slot] = 0;
+            g_Players[playerIndex].notableShotCounts[slot] = 0;
         }
     }
     else {
-        for (i = 0; i < MAX_PLAYER_COUNT; i++) {
-            FormatDefaultPlayerName(i, g_Players[i].name);
-            g_Players[i].characterIndex = i;
-            g_Players[i].isLefty = 0;
-            g_Players[i].isComputer = FALSE;
-            g_Players[i].teeOrder = 0;
-            g_Players[i].gridColor = GetSaveData()->options[SAVE_OPTION_GRID_COLOR];
+        for (playerIndex = 0; playerIndex < MAX_PLAYER_COUNT; playerIndex++) {
+            FormatDefaultPlayerName(playerIndex, g_Players[playerIndex].name);
+            g_Players[playerIndex].characterIndex = playerIndex;
+            g_Players[playerIndex].isLefty = 0;
+            g_Players[playerIndex].isComputer = FALSE;
+            g_Players[playerIndex].teeOrder = 0;
+            g_Players[playerIndex].gridColor = GetSaveData()->options[SAVE_OPTION_GRID_COLOR];
             for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
-                g_Players[i].holes[hole].strokes = 0;
-                g_Players[i].holes[hole].putts = UNCOUNTED_PUTTS;
+                g_Players[playerIndex].holes[hole].strokes = 0;
+                g_Players[playerIndex].holes[hole].putts = UNCOUNTED_PUTTS;
             }
 
             for (slot = SHOT_KIND_COUNT - 1; slot >= 0; slot--) {
-                g_Players[i].notableShotCounts[slot] = 0;
+                g_Players[playerIndex].notableShotCounts[slot] = 0;
             }
 
             for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
                 if (slot >= CLUB_SET_SIZE) {
-                    g_Players[i].clubs[slot] = NO_CLUB;
+                    g_Players[playerIndex].clubs[slot] = NO_CLUB;
                 }
                 else {
-                    g_Players[i].clubs[slot] = slot + (g_Players[i].characterIndex * CLUB_SET_SIZE);
+                    g_Players[playerIndex].clubs[slot] =
+                        slot + (g_Players[playerIndex].characterIndex * CLUB_SET_SIZE);
                 }
             }
 
-            g_Players[i].stopwatchFrameCount = 0;
-            g_Players[i].noiseSeed = NextRandom();
+            g_Players[playerIndex].stopwatchFrameCount = 0;
+            g_Players[playerIndex].noiseSeed = NextRandom();
         }
     }
 }
@@ -399,40 +401,40 @@ void InitPlay(PlayKind kind) {
 }
 
 void PlacePlayersOnTee(void) {
-    s32 i;
+    s32 playerIndex;
     s32 ring;
     f32 teeHeight;
 
     g_HasShotComeToRest = 0;
     g_IsHudTurnAwayRequested = FALSE;
     if (g_GameState.isRoundContinued != ROUND_CONTINUED) {
-        for (i = 0; i < MAX_PLAYER_COUNT; i++) {
-            g_Players[i].state = PLAYER_STATE_WAITING;
-            g_Players[i].ballPosition[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
+        for (playerIndex = 0; playerIndex < MAX_PLAYER_COUNT; playerIndex++) {
+            g_Players[playerIndex].state = PLAYER_STATE_WAITING;
+            g_Players[playerIndex].ballPosition[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
             teeHeight = g_HoleSetup.teePosition[AXIS_Y];
-            g_Players[i].ballPosition[AXIS_Y] =
+            g_Players[playerIndex].ballPosition[AXIS_Y] =
                 !g_GameState.isMiniGolf ? teeHeight - TEE_HEIGHT : teeHeight;
-            g_Players[i].ballPosition[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
-            g_Players[i].strokeCount = 0;
-            g_Players[i].puttCount = 0;
-            g_Players[i].holeStatus = HOLE_STATUS_PLAYING;
-            g_Players[i].ballSurface = SURFACE_TEE_UP;
+            g_Players[playerIndex].ballPosition[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
+            g_Players[playerIndex].strokeCount = 0;
+            g_Players[playerIndex].puttCount = 0;
+            g_Players[playerIndex].holeStatus = HOLE_STATUS_PLAYING;
+            g_Players[playerIndex].ballSurface = SURFACE_TEE_UP;
             if (g_GameState.isMiniGolf) {
-                g_Players[i].ballSurface = GetSurface(
-                    g_Players[i].ballPosition[AXIS_X],
-                    g_Players[i].ballPosition[AXIS_Z]
+                g_Players[playerIndex].ballSurface = GetSurface(
+                    g_Players[playerIndex].ballPosition[AXIS_X],
+                    g_Players[playerIndex].ballPosition[AXIS_Z]
                 );
             }
 
-            g_Players[i].driveDistance = UNMEASURED_DISTANCE;
-            g_Players[i].pinDistance = UNMEASURED_DISTANCE;
-            g_Players[i].hasBeenInBunker = FALSE;
+            g_Players[playerIndex].driveDistance = UNMEASURED_DISTANCE;
+            g_Players[playerIndex].pinDistance = UNMEASURED_DISTANCE;
+            g_Players[playerIndex].hasBeenInBunker = FALSE;
             for (ring = RING_COUNT - 1; ring >= 0; ring--) {
-                g_Players[i].ringStates[ring] = 0;
+                g_Players[playerIndex].ringStates[ring] = 0;
             }
 
             if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-                g_Players[i].powerShotCount = RING_SHOT_POWER_SHOT_COUNT;
+                g_Players[playerIndex].powerShotCount = RING_SHOT_POWER_SHOT_COUNT;
             }
         }
     }
@@ -443,21 +445,21 @@ void PlacePlayersOnTee(void) {
 }
 
 void PlayContestMovies(void) {
-    s32 i;
+    s32 playerIndex;
 
     if (g_ContestMovieState == CONTEST_MOVIES_WAITING) {
-        for (i = 0; i < g_GameState.playerCount; i++) {
-            if (g_Players[i].strokeCount == 0) {
+        for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+            if (g_Players[playerIndex].strokeCount == 0) {
                 break;
             }
 
-            if (g_Players[i].state != PLAYER_STATE_WAITING &&
-                g_Players[i].state != PLAYER_STATE_HOLE_DONE) {
+            if (g_Players[playerIndex].state != PLAYER_STATE_WAITING &&
+                g_Players[playerIndex].state != PLAYER_STATE_HOLE_DONE) {
                 break;
             }
         }
 
-        if (g_GameState.replayKind == REPLAY_KIND_NONE && i == g_GameState.playerCount) {
+        if (g_GameState.replayKind == REPLAY_KIND_NONE && playerIndex == g_GameState.playerCount) {
             if (IsMarkedParFive(g_GameState.courseIndex, g_GameState.holeIndex) &&
                 GetContestWinner() != NO_CONTEST_WINNER) {
                 StartMovie(MOVIE_LONGEST_DRIVE);
@@ -482,7 +484,7 @@ void PlayContestMovies(void) {
 
 s32 IsHoleOver(void) {
     Boolean isDone = FALSE;
-    s32 i;
+    s32 playerIndex;
 
     if (g_ContestMovieState == CONTEST_MOVIES_PLAYING) {
         return FALSE;
@@ -496,14 +498,14 @@ s32 IsHoleOver(void) {
                     return FALSE;
                 }
 
-                for (i = 0; i < g_GameState.playerCount; i++) {
-                    if (g_Players[i].state != PLAYER_STATE_HOLE_DONE &&
-                        g_Players[i].state != PLAYER_STATE_WAITING) {
+                for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+                    if (g_Players[playerIndex].state != PLAYER_STATE_HOLE_DONE &&
+                        g_Players[playerIndex].state != PLAYER_STATE_WAITING) {
                         break;
                     }
                 }
 
-                if (i == g_GameState.playerCount) {
+                if (playerIndex == g_GameState.playerCount) {
                     isDone = TRUE;
                     IN_OWN_BLOCK(return isDone);
                 }
@@ -516,15 +518,15 @@ s32 IsHoleOver(void) {
                     return FALSE;
                 }
 
-                for (i = 0; i < g_GameState.playerCount; i++) {
-                    if (g_Players[i].state != PLAYER_STATE_HOLE_DONE &&
-                        g_Players[i].state != PLAYER_STATE_WAITING) {
+                for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+                    if (g_Players[playerIndex].state != PLAYER_STATE_HOLE_DONE &&
+                        g_Players[playerIndex].state != PLAYER_STATE_WAITING) {
                         break;
                     }
                 }
 
                 isDone = FALSE;
-                if (i == g_GameState.playerCount) {
+                if (playerIndex == g_GameState.playerCount) {
                     IN_OWN_BLOCK(isDone = TRUE);
                     return isDone;
                 }
@@ -534,13 +536,13 @@ s32 IsHoleOver(void) {
         );
     }
 
-    for (i = 0; i < g_GameState.playerCount; i++) {
-        if (g_Players[i].state != PLAYER_STATE_HOLE_DONE) {
+    for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+        if (g_Players[playerIndex].state != PLAYER_STATE_HOLE_DONE) {
             break;
         }
     }
 
-    if (i == g_GameState.playerCount) {
+    if (playerIndex == g_GameState.playerCount) {
         isDone = TRUE;
     }
 
@@ -555,41 +557,41 @@ s32 IsHoleOver(void) {
 void SetNextTeeOrder(void) {
     s32 orders[MAX_PLAYER_COUNT];
     s8 results[MAX_PLAYER_COUNT];
-    s32 i;
-    s32 j;
+    s32 playerIndex;
+    s32 otherIndex;
 
     if (g_GameState.replayKind == REPLAY_KIND_NONE &&
         (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
             g_GameState.gameMode == GAME_MODE_CLUB_SLOTS)) {
         if (GetGroupHoleResult(results) != GROUP_HOLE_WON) {
-            for (i = 0; i < g_GameState.playerCount; i++) {
-                orders[i] = g_Players[i].teeOrder;
+            for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+                orders[playerIndex] = g_Players[playerIndex].teeOrder;
             }
         }
         else {
-            for (i = 0; i < g_GameState.playerCount; i++) {
-                if (results[i] != GROUP_PLAYER_WINNER) {
-                    orders[i] = g_Players[i].teeOrder + 1;
+            for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+                if (results[playerIndex] != GROUP_PLAYER_WINNER) {
+                    orders[playerIndex] = g_Players[playerIndex].teeOrder + 1;
                 }
                 else {
-                    orders[i] = 0;
+                    orders[playerIndex] = 0;
                 }
             }
         }
     }
     else {
-        for (i = 0; i < g_GameState.playerCount; i++) {
-            orders[i] = 0;
-            for (j = 0; j < g_GameState.playerCount; j++) {
-                if (j != i && TeesAfter(i, j)) {
-                    orders[i]++;
+        for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+            orders[playerIndex] = 0;
+            for (otherIndex = 0; otherIndex < g_GameState.playerCount; otherIndex++) {
+                if (otherIndex != playerIndex && TeesAfter(playerIndex, otherIndex)) {
+                    orders[playerIndex]++;
                 }
             }
         }
     }
 
-    IN_OWN_BLOCK(for (i = 0; i < g_GameState.playerCount; i++) {
-        g_Players[i].teeOrder = orders[i];
+    IN_OWN_BLOCK(for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+        g_Players[playerIndex].teeOrder = orders[playerIndex];
     });
 }
 
@@ -679,18 +681,18 @@ s32 GetFlaggedFiveBitNumber(void) {
 }
 
 void BackUpPlayState(void) {
-    s32 i;
+    s32 playerIndex;
 
     g_BackedUpGameState = g_GameState;
-    for (i = 0; i < MAX_PLAYER_COUNT; i++) {
-        g_BackedUpPlayers[i] = g_Players[i];
+    for (playerIndex = 0; playerIndex < MAX_PLAYER_COUNT; playerIndex++) {
+        g_BackedUpPlayers[playerIndex] = g_Players[playerIndex];
     }
 }
 
 Boolean HasWonFinalChallenge(void) {
     s32 firstHole;
     TournamentStanding *standing;
-    s32 i;
+    s32 contestantIndex;
 
     if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
         if (GetMatchWinner(0, 1) == MATCH_SIDE_PLAYER) {
@@ -709,8 +711,9 @@ Boolean HasWonFinalChallenge(void) {
                 GetNetScoreToPar(firstHole + GetRoundHoleCount(), 0),
                 g_GameState.roundSeed
             );
-            for (i = 0; i != TOURNAMENT_CONTESTANT_COUNT; i++) {
-                standing = &g_TournamentStandings[i];
+            for (contestantIndex = 0; contestantIndex != TOURNAMENT_CONTESTANT_COUNT;
+                contestantIndex++) {
+                standing = &g_TournamentStandings[contestantIndex];
                 if (standing->contestantId == PLAYER_CONTESTANT &&
                     (standing->place & PLACE_MASK) == 1) {
                     return TRUE;
@@ -768,7 +771,7 @@ void UpdatePlay(void) {
     s32 repeat;
     s32 again;
     s32 anyHuman;
-    s32 i;
+    s32 playerSlot;
     s32 playerIndex;
     s32 result;
     s32 clearHud;
@@ -1172,17 +1175,20 @@ void UpdatePlay(void) {
                         s8 results[MAX_PLAYER_COUNT];
 
                         if (GetGroupHoleResult(results) != TRUE) {
-                            for (i = 0; i < g_GameState.playerCount; i++) {
-                                g_Players[i].holes[g_GameState.holeIndex].strokes = 0;
+                            for (playerSlot = 0; playerSlot < g_GameState.playerCount;
+                                playerSlot++) {
+                                g_Players[playerSlot].holes[g_GameState.holeIndex].strokes = 0;
                             }
                         }
                         else {
-                            for (i = 0; i < g_GameState.playerCount; i++) {
-                                if (results[i] != TRUE) {
-                                    g_Players[i].holes[g_GameState.holeIndex].strokes = 0;
+                            for (playerSlot = 0; playerSlot < g_GameState.playerCount;
+                                playerSlot++) {
+                                if (results[playerSlot] != TRUE) {
+                                    g_Players[playerSlot].holes[g_GameState.holeIndex].strokes = 0;
                                 }
                                 else {
-                                    g_Players[i].holes[g_GameState.holeIndex].strokes = TRUE;
+                                    g_Players[playerSlot].holes[g_GameState.holeIndex].strokes =
+                                        TRUE;
                                 }
                             }
                         }
@@ -1200,8 +1206,8 @@ void UpdatePlay(void) {
                         g_RoundHud.scorecardPage = -1;
                         g_RoundHud.isHoleIntroTextShown = FALSE;
                         EndHoleIntro();
-                        for (i = 0; i < g_GameState.playerCount; i++) {
-                            g_Players[i].holeStatus = HOLE_STATUS_PLAYING;
+                        for (playerSlot = 0; playerSlot < g_GameState.playerCount; playerSlot++) {
+                            g_Players[playerSlot].holeStatus = HOLE_STATUS_PLAYING;
                         }
 
                         if (g_GameState.gameMode == GAME_MODE_TRAINING) {
@@ -1765,20 +1771,21 @@ void CopyDoublePair(f64 *from, f64 *to) {
 void MarkNearbyGroundTiles(u32 x, u32 z) {
     u32 column;
     u32 row;
-    s32 i;
-    s32 j;
+    s32 rowOffset;
+    s32 columnOffset;
 
     if (!g_GameState.isMiniGolf) {
         column = x >> GROUND_TILE_SHIFT;
         row = z >> GROUND_TILE_SHIFT;
         if (column < GROUND_TILE_COLUMN_COUNT) {
             if (row < GROUND_TILE_ROW_COUNT) {
-                for (i = -1; i < 2; i++) {
-                    for (j = -1; j < 2; j++) {
-                        if (column + j < GROUND_TILE_COLUMN_COUNT &&
-                            row + i < GROUND_TILE_ROW_COUNT) {
+                for (rowOffset = -1; rowOffset < 2; rowOffset++) {
+                    for (columnOffset = -1; columnOffset < 2; columnOffset++) {
+                        if (column + columnOffset < GROUND_TILE_COLUMN_COUNT &&
+                            row + rowOffset < GROUND_TILE_ROW_COUNT) {
                             g_IsGroundTileNearby
-                                [((row + i) * GROUND_TILE_COLUMN_COUNT) + (column + j)] = TRUE;
+                                [((row + rowOffset) * GROUND_TILE_COLUMN_COUNT) +
+                                    (column + columnOffset)] = TRUE;
                         }
                     }
                 }
@@ -1929,9 +1936,9 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     s32 detail;
     s32 maxDetail;
     s32 previousDetail;
-    s32 i;
+    s32 edgeIndex;
     s32 culledTileIndex;
-    s32 j;
+    s32 culledOffset;
     s32 segmentIndex;
     s32 edgeSegment;
     s32 row;
@@ -2126,9 +2133,9 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
         tile->detail = detail;
         if ((culledTileIndex & (GROUND_TILE_GROUP_SIZE - 1)) == GROUND_TILE_GROUP_SIZE - 1) {
             if (maxDetail > GROUND_DETAIL_COARSE) {
-                for (j = 0; j < GROUND_TILE_GROUP_SIZE; j++) {
-                    if (tiles[culledTileIndex - j].detail == GROUND_DETAIL_COARSE) {
-                        tiles[culledTileIndex - j].detail = GROUND_DETAIL_MEDIUM;
+                for (culledOffset = 0; culledOffset < GROUND_TILE_GROUP_SIZE; culledOffset++) {
+                    if (tiles[culledTileIndex - culledOffset].detail == GROUND_DETAIL_COARSE) {
+                        tiles[culledTileIndex - culledOffset].detail = GROUND_DETAIL_MEDIUM;
                     }
                 }
             }
@@ -2152,9 +2159,9 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
         osSyncPrintf("%f\n", g_GroundFarthestDepth);
     }
 
-    for (i = 0; i < ARRAY_COUNT(snapsEdge); i++) {
+    for (edgeIndex = 0; edgeIndex < ARRAY_COUNT(snapsEdge); edgeIndex++) {
         for (segmentIndex = 0; segmentIndex < TILE_VERTEX_SEGMENT_COUNT; segmentIndex++) {
-            snapsEdge[i][segmentIndex] = FALSE;
+            snapsEdge[edgeIndex][segmentIndex] = FALSE;
         }
     }
 
@@ -2194,16 +2201,16 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
             }
 
             if (groupDetail >= GROUND_DETAIL_FINE) {
-                s32 k;
+                s32 groupOffset;
 
-                for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+                for (groupOffset = 0; groupOffset < GROUND_TILE_GROUP_SIZE; groupOffset++) {
                     if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
                         osSyncPrintf("%d", g_WorkArea.hole.tiles[tileIndex].detail);
                     }
                     if (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_FINE &&
                         g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
                         if (IsGameFlagSet(GAME_FLAG_HOLE_LOADED)) {
-                            if ((half * GROUND_TILE_GROUP_SIZE) + k != 0) {
+                            if ((half * GROUND_TILE_GROUP_SIZE) + groupOffset != 0) {
                                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] =
                                     IsCoarse(tileIndex - 1);
                                 snapsEdge[current][TILE_EDGE_LEFT] =
@@ -2236,7 +2243,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                                 snapsEdge[current][TILE_EDGE_BOTTOM] = FALSE;
                             }
 
-                            if ((half * GROUND_TILE_GROUP_SIZE) + k !=
+                            if ((half * GROUND_TILE_GROUP_SIZE) + groupOffset !=
                                 GROUND_TILE_COLUMN_COUNT - 1) {
                                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] =
                                     IsCoarse(tileIndex + 1);
@@ -2270,42 +2277,48 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                     else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
                         gSPVertex(
                             gfx++,
-                            GridVertex(HalfFirstColumn(half) + (k * 2), row * 2),
+                            GridVertex(HalfFirstColumn(half) + (groupOffset * 2), row * 2),
                             2,
                             0
                         );
                         gSPVertex(
                             gfx++,
-                            GridVertex(HalfFirstColumn(half) + (k * 2) + 1, row * 2),
+                            GridVertex(HalfFirstColumn(half) + (groupOffset * 2) + 1, row * 2),
                             1,
                             2
                         );
                         gSPVertex(
                             gfx++,
-                            GridVertex(HalfFirstColumn(half) + (k * 2), (row * 2) + 1),
+                            GridVertex(HalfFirstColumn(half) + (groupOffset * 2), (row * 2) + 1),
                             2,
                             3
                         );
                         gSPVertex(
                             gfx++,
-                            GridVertex(HalfFirstColumn(half) + (k * 2) + 1, (row * 2) + 1),
+                            GridVertex(
+                                HalfFirstColumn(half) + (groupOffset * 2) + 1,
+                                (row * 2) + 1
+                            ),
                             1,
                             5
                         );
                         gSPVertex(
                             gfx++,
-                            GridVertex(HalfFirstColumn(half) + (k * 2), (row * 2) + 2),
+                            GridVertex(HalfFirstColumn(half) + (groupOffset * 2), (row * 2) + 2),
                             2,
                             6
                         );
                         gSPVertex(
                             gfx++,
-                            GridVertex(HalfFirstColumn(half) + (k * 2) + 1, (row * 2) + 2),
+                            GridVertex(
+                                HalfFirstColumn(half) + (groupOffset * 2) + 1,
+                                (row * 2) + 2
+                            ),
                             1,
                             8
                         );
                         for (mediumPass = 0; mediumPass < GROUND_TILE_MAX_PASSES; mediumPass++) {
-                            LoadTileTexture(tileIndex, firstTileS, k, row);
+                            LoadTileTexture(tileIndex, firstTileS, groupOffset, row);
                             gSP2Triangles(gfx++, 0, 2, 3, 0, 2, 5, 3, 0);
                             gSP2Triangles(gfx++, 2, 1, 5, 0, 1, 4, 5, 0);
                             gSP2Triangles(gfx++, 3, 5, 6, 0, 5, 8, 6, 0);
@@ -2320,7 +2333,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                 }
             }
             else if (groupDetail > GROUND_DETAIL_COARSE) {
-                s32 k;
+                s32 groupOffset;
 
                 spareSlot = middleSlot;
                 middleSlot = topSlot;
@@ -2381,10 +2394,10 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                     );
                 }
 
-                for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+                for (groupOffset = 0; groupOffset < GROUND_TILE_GROUP_SIZE; groupOffset++) {
                     if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
                         for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-                            LoadTileTexture(tileIndex, firstTileS, k, row);
+                            LoadTileTexture(tileIndex, firstTileS, groupOffset, row);
                             DrawTileQuads(
                                 topSlot,
                                 topSlot + ODD_SLOT,

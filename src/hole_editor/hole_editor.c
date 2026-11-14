@@ -2552,7 +2552,7 @@ s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
     s32 sideCodes[DIAGONAL_SIDE_COUNT][SIDE_CODE_COUNT];
     s32 width;
     s32 height;
-    s32 i;
+    s32 codeIndex;
     s32 rowOffset;
     s32 columnOffset;
     s32 code;
@@ -2560,15 +2560,15 @@ s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
     f32 distance;
 
     void AddSideCode(s32 * codes, s32 code) {
-        s32 i;
+        s32 codeIndex;
 
-        for (i = 0; i < SIDE_CODE_COUNT; i++) {
-            if (codes[i] == code) {
+        for (codeIndex = 0; codeIndex < SIDE_CODE_COUNT; codeIndex++) {
+            if (codes[codeIndex] == code) {
                 return;
             }
 
-            if (codes[i] == NO_TERRAIN_CODE) {
-                codes[i] = code;
+            if (codes[codeIndex] == NO_TERRAIN_CODE) {
+                codes[codeIndex] = code;
                 return;
             }
         }
@@ -2577,9 +2577,9 @@ s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
     width = endColumn - column;
     height = endRow - row;
     AssertInEditor(width > 0 && height > 0, HOLE_EDITOR_DIAGONAL_ASSERT_LINE);
-    for (i = 0; i < DIAGONAL_SIDE_COUNT; i++) {
-        sideCodes[i][0] = NO_TERRAIN_CODE;
-        sideCodes[i][1] = NO_TERRAIN_CODE;
+    for (codeIndex = 0; codeIndex < DIAGONAL_SIDE_COUNT; codeIndex++) {
+        sideCodes[codeIndex][0] = NO_TERRAIN_CODE;
+        sideCodes[codeIndex][1] = NO_TERRAIN_CODE;
     }
 
     inverseLength = 1.0f / sqrtf((width * width) + (height * height));
@@ -2643,13 +2643,13 @@ void ToggleCellMirroring(s32 column, s32 row) {
 void InterpolateColumnPoints(Vtx *vertices, s32 column, s32 row, s32 weight) {
     Vtx *ends[2];
     s32 firstWeight;
-    s32 i;
+    s32 pointIndex;
 
     firstWeight = EDGE_WEIGHT_MAX - weight;
     ends[0] = GetGridVertex(column, row);
     ends[1] = GetGridVertex(column + 1, row);
-    for (i = 0; i < EDGE_POINT_COUNT; i++) {
-        Vtx *vertex = &vertices[f_TileMidpointSlots[i][((column & 1) * 2) + 1]];
+    for (pointIndex = 0; pointIndex < EDGE_POINT_COUNT; pointIndex++) {
+        Vtx *vertex = &vertices[f_TileMidpointSlots[pointIndex][((column & 1) * 2) + 1]];
 
         vertex->v.ob[AXIS_X] =
             ((ends[0]->v.ob[AXIS_X] * firstWeight) + (ends[1]->v.ob[AXIS_X] * weight)) /
@@ -2663,13 +2663,13 @@ void InterpolateColumnPoints(Vtx *vertices, s32 column, s32 row, s32 weight) {
 void InterpolateRowPoints(Vtx *vertices, s32 column, s32 row, s32 weight) {
     Vtx *ends[2];
     s32 firstWeight;
-    s32 i;
+    s32 pointIndex;
 
     firstWeight = EDGE_WEIGHT_MAX - weight;
     ends[0] = GetGridVertex(column, row);
     ends[1] = GetGridVertex(column, row + 1);
-    for (i = 0; i < EDGE_POINT_COUNT; i++) {
-        Vtx *vertex = &vertices[f_TileMidpointSlots[((row & 1) * 2) + 1][i]];
+    for (pointIndex = 0; pointIndex < EDGE_POINT_COUNT; pointIndex++) {
+        Vtx *vertex = &vertices[f_TileMidpointSlots[((row & 1) * 2) + 1][pointIndex]];
 
         vertex->v.ob[AXIS_Z] =
             ((ends[0]->v.ob[AXIS_Z] * firstWeight) + (ends[1]->v.ob[AXIS_Z] * weight)) /
@@ -3121,7 +3121,7 @@ void UpdateTreeEditor(void) {
     Mat4 translation;
     Mat4 unusedMatrix UNUSED;
     s32 editKind;
-    s32 i;
+    s32 billboardIndex;
     s32 height;
     f64 cameraDistance;
 
@@ -3225,20 +3225,20 @@ void UpdateTreeEditor(void) {
         g_Billboards[f_EditedTreeIndex].textureIndex = BILLBOARD_TEXTURE_COUNT - 1;
     }
 
-    i = 0;
+    billboardIndex = 0;
     if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
-        for (; i < BILLBOARD_COUNT; i++) {
-            if (IsFreeBillboard(g_Billboards[i])) {
+        for (; billboardIndex < BILLBOARD_COUNT; billboardIndex++) {
+            if (IsFreeBillboard(g_Billboards[billboardIndex])) {
                 break;
             }
         }
 
-        if (i != BILLBOARD_COUNT) {
-            g_Billboards[i] = g_Billboards[f_EditedTreeIndex];
-            g_Billboards[i].x += COPIED_TREE_OFFSET;
+        if (billboardIndex != BILLBOARD_COUNT) {
+            g_Billboards[billboardIndex] = g_Billboards[f_EditedTreeIndex];
+            g_Billboards[billboardIndex].x += COPIED_TREE_OFFSET;
             editKind = TRIANGLE_EDIT_SELECT;
             g_Billboards[f_EditedTreeIndex].isNearCourseEdge = FALSE;
-            f_EditedTreeIndex = i;
+            f_EditedTreeIndex = billboardIndex;
         }
     }
 
@@ -3585,7 +3585,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
     s32 row;
     s32 detailTileIndex;
     s32 groupTileIndex;
-    s32 j;
+    s32 edgeSegment;
     s32 segmentIndex;
     s32 edge;
     s32 pass;
@@ -3604,7 +3604,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
     Boolean isMirrored;
     Vtx *midpoints;
     GroundTile *tile;
-    s32 k;
+    s32 groupOffset;
 
     void GetMidpointVertex(Vtx_t * first, Vtx_t * second, Vtx_t * midpoint) {
         midpoint->ob[AXIS_X] = (first->ob[AXIS_X] + second->ob[AXIS_X]) / 2;
@@ -4219,14 +4219,16 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] = FALSE;
                                 snapsEdge[current][TILE_EDGE_RIGHT] = FALSE;
                             }
-                            for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
-                                if (snapsEdge[current][j] || snapsEdge[current ^ 1][j]) {
+                            for (edgeSegment = 0; edgeSegment < TILE_VERTEX_SEGMENT_COUNT;
+                                edgeSegment++) {
+                                if (snapsEdge[current][edgeSegment] ||
+                                    snapsEdge[current ^ 1][edgeSegment]) {
                                     s32 offset;
 
-                                    offset = snapsEdge[current][j] ?
-                                        g_CoarseVertexOffsets[tileIndex][j] :
+                                    offset = snapsEdge[current][edgeSegment] ?
+                                        g_CoarseVertexOffsets[tileIndex][edgeSegment] :
                                         0;
-                                    gSPSegment(gfx++, j + 1, offset);
+                                    gSPSegment(gfx++, edgeSegment + 1, offset);
                                 }
                             }
 
@@ -4824,13 +4826,13 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                     GROUND_TILE_GROUP_SIZE + 1,
                     bottomSlot
                 );
-                for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+                for (groupOffset = 0; groupOffset < GROUND_TILE_GROUP_SIZE; groupOffset++) {
                     if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
                         for (coarsePass = 0; coarsePass < GROUND_TILE_MAX_PASSES; coarsePass++) {
                             LoadEditorTileTexture(
                                 tileIndex,
                                 firstTileS,
-                                k,
+                                groupOffset,
                                 row,
                                 coarsePass,
                                 GROUND_OVERLAY_NOISE

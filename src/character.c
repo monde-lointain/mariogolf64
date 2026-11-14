@@ -60,7 +60,7 @@ static inline CharacterAnimation *ModelAnimations(const CharacterModel *model) {
 #define FrameDataAddress(slot, address) \
     (SEGMENT_OFFSET(address) + (u32)(slot)->frameData[(slot)->frameDataIndex])
 
-#define SetTriangleTexture(slot, triangle, texture, sCoordinates, tCoordinates) \
+#define SetTriangleTexture(slot, triangle, texture, sCoordinates, tCoordinates, vertexIndex) \
     { \
         gfx = (Gfx *) \
             FrameDataAddress(slot, (triangle)->loadTextureBlock + LOAD_TEXTURE_BLOCK_OFFSET); \
@@ -79,10 +79,11 @@ static inline CharacterAnimation *ModelAnimations(const CharacterModel *model) {
             G_TX_NOLOD, \
             G_TX_NOLOD \
         ); \
-        for (i = 0; i < TRIANGLE_VERTEX_COUNT; i++) { \
-            vertex = (Vtx *)FrameDataAddress(slot, (i * VTX_SIZE) + (triangle)->vertices); \
-            vertex->v.tc[TEXTURE_AXIS_S] = (sCoordinates)[i]; \
-            vertex->v.tc[TEXTURE_AXIS_T] = (tCoordinates)[i]; \
+        for ((vertexIndex) = 0; (vertexIndex) < TRIANGLE_VERTEX_COUNT; (vertexIndex)++) { \
+            vertex = \
+                (Vtx *)FrameDataAddress(slot, ((vertexIndex) * VTX_SIZE) + (triangle)->vertices); \
+            vertex->v.tc[TEXTURE_AXIS_S] = (sCoordinates)[(vertexIndex)]; \
+            vertex->v.tc[TEXTURE_AXIS_T] = (tCoordinates)[(vertexIndex)]; \
         } \
     }
 
@@ -701,16 +702,16 @@ s32 GetAnimationEventActions(
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     s32 count = 0;
     AnimationEvent *event;
-    s32 i;
+    s32 eventIndex;
 
     if (slot != NULL && animationIndex < slot->animationCount) {
         event = ModelAnimations(slot->model)[animationIndex].events;
         if (event != NULL) {
-            for (i = 0; event[i].frame != END_OF_ANIMATION_EVENTS; i++) {
-                if (event[i].frame == frame) {
+            for (eventIndex = 0; event[eventIndex].frame != END_OF_ANIMATION_EVENTS; eventIndex++) {
+                if (event[eventIndex].frame == frame) {
                     if (count < EVENT_ACTION_COUNT_MAX) {
-                        actions[count].kind = event[i].kind;
-                        actions[count].value = event[i].value;
+                        actions[count].kind = event[eventIndex].kind;
+                        actions[count].value = event[eventIndex].value;
                         count++;
                     }
                 }
@@ -725,15 +726,15 @@ s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, s32 kind) {
     s32 frame = -1;
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     AnimationEvent *event;
-    s32 i;
+    s32 eventIndex;
 
     if (slot != NULL && animationIndex < slot->animationCount) {
         event = ModelAnimations(slot->model)[animationIndex].events;
         if (event != NULL) {
-            for (i = 0; event[i].frame != END_OF_ANIMATION_EVENTS; i++) {
-                if (event[i].kind == kind) {
-                    frame =
-                        event[i].frame - ModelAnimations(slot->model)[animationIndex].startFrame;
+            for (eventIndex = 0; event[eventIndex].frame != END_OF_ANIMATION_EVENTS; eventIndex++) {
+                if (event[eventIndex].kind == kind) {
+                    frame = event[eventIndex].frame -
+                        ModelAnimations(slot->model)[animationIndex].startFrame;
                     break;
                 }
             }
@@ -755,7 +756,7 @@ void ResetTriangleTextures(u32 slotIndex) {
     AnimatedTexture *texture;
     Gfx *gfx;
     Vtx *vertex;
-    s32 i;
+    s32 vertexIndex;
 
     if (FindUsedSlot(slotIndex, &slot)) {
         MapModelBuffer(slot);
@@ -765,7 +766,7 @@ void ResetTriangleTextures(u32 slotIndex) {
                 texture += triangle->textureIndex;
             }
 
-            SetTriangleTexture(slot, triangle, texture, triangle->s, triangle->t);
+            SetTriangleTexture(slot, triangle, texture, triangle->s, triangle->t, vertexIndex);
             triangleIndex++;
         }
     }
@@ -790,7 +791,9 @@ void AdvanceTextureAnimations(
     Vtx *vertex;
     s32 stateFrame;
     s32 animationIndex;
-    s32 i;
+    /* Counts both triangle vertices and animation slots; separate
+       variables allocate registers differently. */
+    s32 sharedIndex;
 
     if (FindUsedSlot(slotIndex, &slot)) {
         u8 unusedTail[0x80] UNUSED;
@@ -805,7 +808,14 @@ void AdvanceTextureAnimations(
                         key = &keySet->keys[keyIndex];
                         if (stateFrame >= key->frame) {
                             texture = &ModelAnimatedTextures(slot->model)[key->textureIndex];
-                            SetTriangleTexture(slot, triangle, texture, key->s, key->t);
+                            SetTriangleTexture(
+                                slot,
+                                triangle,
+                                texture,
+                                key->s,
+                                key->t,
+                                sharedIndex
+                            );
                         }
                     }
                 }
@@ -814,8 +824,8 @@ void AdvanceTextureAnimations(
             triangleIndex++;
         }
 
-        for (i = 0; i < TEXTURE_ANIMATION_COUNT; i++) {
-            animationIndex = ModelTextureAnimations(slot->model)[i].index;
+        for (sharedIndex = 0; sharedIndex < TEXTURE_ANIMATION_COUNT; sharedIndex++) {
+            animationIndex = ModelTextureAnimations(slot->model)[sharedIndex].index;
             if (animationIndex < 0) {
                 break;
             }
@@ -823,7 +833,7 @@ void AdvanceTextureAnimations(
             if (slot->textureAnimations[animationIndex].pendingCopyCount >=
                 TEXTURE_ANIMATION_PLAYING) {
                 if (++slot->textureAnimations[animationIndex].frame >=
-                    ModelTextureAnimations(slot->model)[i].frameCount) {
+                    ModelTextureAnimations(slot->model)[sharedIndex].frameCount) {
                     slot->textureAnimations[animationIndex].pendingCopyCount =
                         FRAME_DATA_COPY_COUNT;
                     if (animationIndex == RANDOM_TEXTURE_ANIMATION) {
@@ -831,7 +841,7 @@ void AdvanceTextureAnimations(
                     }
                     else {
                         slot->textureAnimations[animationIndex].frame =
-                            ModelTextureAnimations(slot->model)[i].frameCount;
+                            ModelTextureAnimations(slot->model)[sharedIndex].frameCount;
                     }
                 }
             }
@@ -853,10 +863,10 @@ NO_RESULT SetTextureAnimationFrame(u32 slotIndex, s32 index, s32 frame) {
 
 void StopTextureAnimations(u32 slotIndex) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
-    s32 i;
+    s32 animationIndex;
 
-    for (i = TEXTURE_ANIMATION_COUNT - 1; i >= 0; i--) {
-        slot->textureAnimations[i].pendingCopyCount = 0;
+    for (animationIndex = TEXTURE_ANIMATION_COUNT - 1; animationIndex >= 0; animationIndex--) {
+        slot->textureAnimations[animationIndex].pendingCopyCount = 0;
     }
 }
 
@@ -883,7 +893,7 @@ void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
     Vtx *vertex;
     TriangleTextureKeys *keySet;
     s32 keySetIndex;
-    s32 i;
+    s32 vertexIndex;
 
     if (FindUsedSlot(slotIndex, &slot)) {
         MapModelBuffer(slot);
@@ -892,7 +902,14 @@ void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
             for (keySetIndex = 0; keySetIndex < triangle->keySetCount; keySetIndex++) {
                 keySet = &triangle->keySets[keySetIndex];
                 if (keySet->textureAnimationIndex == textureAnimationIndex) {
-                    SetTriangleTexture(slot, triangle, texture, triangle->s, triangle->t);
+                    SetTriangleTexture(
+                        slot,
+                        triangle,
+                        texture,
+                        triangle->s,
+                        triangle->t,
+                        vertexIndex
+                    );
                 }
             }
 
@@ -1267,7 +1284,7 @@ void AnimateCharacter(u32 slotIndex) {
     AnimationEventAction actions[EVENT_ACTION_COUNT_MAX];
     char text[DEBUG_LINE_SIZE];
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
-    s32 i = 0;
+    s32 actionIndex = 0;
     s32 actionCount;
     Boolean hasLooped;
 
@@ -1280,8 +1297,8 @@ void AnimateCharacter(u32 slotIndex) {
             slot->animationFrame,
             actions
         );
-        for (; i < actionCount; i++) {
-            switch (actions[i].kind) {
+        for (; actionIndex < actionCount; actionIndex++) {
+            switch (actions[actionIndex].kind) {
                 case ANIMATION_EVENT_LOOP_START:
                     break;
                 case ANIMATION_EVENT_LOOP_END:
@@ -1297,14 +1314,14 @@ void AnimateCharacter(u32 slotIndex) {
 
                     break;
                 case ANIMATION_EVENT_TEXTURE_ANIMATION:
-                    if (actions[i].value == TEXTURE_ANIMATION_EVENT_START_RANDOM) {
+                    if (actions[actionIndex].value == TEXTURE_ANIMATION_EVENT_START_RANDOM) {
                         slot->playsRandomTextureAnimation = TRUE;
                     }
-                    else if (actions[i].value == TEXTURE_ANIMATION_EVENT_STOP_RANDOM) {
+                    else if (actions[actionIndex].value == TEXTURE_ANIMATION_EVENT_STOP_RANDOM) {
                         slot->playsRandomTextureAnimation = FALSE;
                     }
                     else {
-                        PlayTextureAnimation(slotIndex, actions[i].value);
+                        PlayTextureAnimation(slotIndex, actions[actionIndex].value);
                     }
 
                     break;
@@ -1596,7 +1613,7 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
 void AnimateCharacterInSameCopy(u32 slotIndex) {
     AnimationEventAction actions[EVENT_ACTION_COUNT_MAX];
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
-    s32 i = 0;
+    s32 actionIndex = 0;
     s32 actionCount;
     Boolean hasLooped;
 
@@ -1609,8 +1626,8 @@ void AnimateCharacterInSameCopy(u32 slotIndex) {
             slot->animationFrame,
             actions
         );
-        for (; i < actionCount; i++) {
-            switch (actions[i].kind) {
+        for (; actionIndex < actionCount; actionIndex++) {
+            switch (actions[actionIndex].kind) {
                 case ANIMATION_EVENT_LOOP_START:
                     break;
                 case ANIMATION_EVENT_LOOP_END:
@@ -1626,14 +1643,14 @@ void AnimateCharacterInSameCopy(u32 slotIndex) {
 
                     break;
                 case ANIMATION_EVENT_TEXTURE_ANIMATION:
-                    if (actions[i].value == TEXTURE_ANIMATION_EVENT_START_RANDOM) {
+                    if (actions[actionIndex].value == TEXTURE_ANIMATION_EVENT_START_RANDOM) {
                         slot->playsRandomTextureAnimation = TRUE;
                     }
-                    else if (actions[i].value == TEXTURE_ANIMATION_EVENT_STOP_RANDOM) {
+                    else if (actions[actionIndex].value == TEXTURE_ANIMATION_EVENT_STOP_RANDOM) {
                         slot->playsRandomTextureAnimation = FALSE;
                     }
                     else {
-                        PlayTextureAnimation(slotIndex, actions[i].value);
+                        PlayTextureAnimation(slotIndex, actions[actionIndex].value);
                     }
 
                     break;
@@ -1687,10 +1704,10 @@ void AnimateCharacterInSameCopy(u32 slotIndex) {
 }
 
 void AnimateAllCharacters(void) {
-    s32 i;
+    s32 slotIndex;
 
-    for (i = 0; i < CHARACTER_SLOT_COUNT; i++) {
-        AnimateCharacter(i);
+    for (slotIndex = 0; slotIndex < CHARACTER_SLOT_COUNT; slotIndex++) {
+        AnimateCharacter(slotIndex);
     }
 }
 
@@ -1701,7 +1718,7 @@ s32 GetCharacterBufferSize(void) {
 void SetCharacterBuffer(s32 slotIndex, u8 *buffer) {
     u32 alignedBuffer = RoundUpTo((u32)buffer, SMALLEST_PAGE_SIZE);
     s32 warningCount;
-    s32 i;
+    s32 copyIndex;
 
     if (g_CharacterSlots[slotIndex].modelIndex != NO_CHARACTER_MODEL) {
         for (warningCount = 0; warningCount < WARNING_REPEAT_COUNT; warningCount++) {
@@ -1710,21 +1727,21 @@ void SetCharacterBuffer(s32 slotIndex, u8 *buffer) {
     }
     else {
         g_CharacterSlots[slotIndex].modelBuffer = (void *)alignedBuffer;
-        for (i = 0; i < FRAME_DATA_COPY_COUNT; i++) {
-            g_CharacterSlots[slotIndex].frameData[i] =
+        for (copyIndex = 0; copyIndex < FRAME_DATA_COPY_COUNT; copyIndex++) {
+            g_CharacterSlots[slotIndex].frameData[copyIndex] =
                 AddressPast(g_CharacterSlots[slotIndex].modelBuffer, FRAME_DATA_OFFSET) +
-                (i * FRAME_DATA_COPY_SIZE);
+                (copyIndex * FRAME_DATA_COPY_SIZE);
         }
     }
 }
 
 void ResetCharacterSlots(void) {
-    s32 i;
+    s32 slotIndex;
 
     FreeAllCharacterSlots();
-    for (i = 0; i < CHARACTER_SLOT_COUNT; i++) {
-        g_CharacterSlots[i].lastDrawnFrame = LONG_AGO_FRAME;
-        SetCharacterBuffer(i, (u8 *)DEFAULT_CHARACTER_BUFFER);
+    for (slotIndex = 0; slotIndex < CHARACTER_SLOT_COUNT; slotIndex++) {
+        g_CharacterSlots[slotIndex].lastDrawnFrame = LONG_AGO_FRAME;
+        SetCharacterBuffer(slotIndex, (u8 *)DEFAULT_CHARACTER_BUFFER);
     }
 }
 

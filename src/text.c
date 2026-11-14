@@ -349,17 +349,17 @@ void SetTextSlotValue(s32 value, s32 slot, s32 valueIndex) {
 }
 
 void SetTextName(char *name) {
-    s32 i;
+    s32 characterIndex;
     char character;
 
-    for (i = 0; i != TEXT_NAME_SIZE - 1; i++) {
-        character = name[i];
-        g_TextName[i] = character;
+    for (characterIndex = 0; characterIndex != TEXT_NAME_SIZE - 1; characterIndex++) {
+        character = name[characterIndex];
+        g_TextName[characterIndex] = character;
         if (character >= 'a' && character <= 'z') {
-            g_TextName[i] = character + LOWERCASE_CODE_OFFSET;
+            g_TextName[characterIndex] = character + LOWERCASE_CODE_OFFSET;
         }
 
-        if (name[i] == '\0') {
+        if (name[characterIndex] == '\0') {
             break;
         }
     }
@@ -453,7 +453,7 @@ Boolean IsTextSlotRevealed(s32 slot) {
 void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
     Gfx *gfx = *displayListHead;
     TextSlot *textSlot = &g_TextSlots[slot];
-    s32 i;
+    s32 characterIndex;
     s32 start;
     s32 length;
     Boolean isIconLoaded;
@@ -491,8 +491,8 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
     advance =
         (textSlot->flags & TEXT_FLAG_WIDE_SPACING) ? WIDE_LARGE_FONT_ADVANCE : FONT_SIZE_LARGE;
     gDPPipeSync(gfx++);
-    for (i = 0; i != length; i++) {
-        code = ((u16 *)f_Messages)[start + i + g_MessageCodesStart];
+    for (characterIndex = 0; characterIndex != length; characterIndex++) {
+        code = ((u16 *)f_Messages)[start + characterIndex + g_MessageCodesStart];
         if (isIconLoaded == TRUE) {
             gDPSetCombineLERP(
                 gfx++,
@@ -974,7 +974,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
 void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
     Gfx *gfx = *displayListHead;
     TextSlot *textSlot = &g_TextSlots[slot];
-    s32 i;
+    s32 characterIndex;
     s32 start;
     s32 length;
     Boolean isIconLoaded;
@@ -1010,8 +1010,8 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
     }
 
     gDPPipeSync(gfx++);
-    for (i = 0; i != length; i++) {
-        code = ((u16 *)f_Messages)[start + i + g_MessageCodesStart];
+    for (characterIndex = 0; characterIndex != length; characterIndex++) {
+        code = ((u16 *)f_Messages)[start + characterIndex + g_MessageCodesStart];
         if (isIconLoaded == TRUE) {
             gDPSetCombineLERP(
                 gfx++,
@@ -1531,7 +1531,7 @@ s32 MeasureText(READ_ONLY char *text, s32 fontSize, TextFlags flags) {
 
 void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, s32 slot) {
     s32 lineWidths[MESSAGE_LINE_COUNT] = {0, 0, 0};
-    s32 i;
+    s32 characterIndex;
     s32 lineCount;
     s32 line;
     s32 widest;
@@ -1544,8 +1544,8 @@ void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, 
     length = MessageEntryAt(messageId)->length;
     start = MessageEntryAt(messageId)->start;
     line = 0;
-    for (i = 0; i != length; i++) {
-        code = ((u16 *)f_Messages)[g_MessageCodesStart + start + i];
+    for (characterIndex = 0; characterIndex != length; characterIndex++) {
+        code = ((u16 *)f_Messages)[g_MessageCodesStart + start + characterIndex];
         if (code < MESSAGE_CODE_GLYPH) {
             if (code < CHARACTER_CODE_MARK_FIRST ||
                 code >= CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
@@ -2246,10 +2246,10 @@ void DrawCenteredShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY cha
 
     s32 left = x;
     s16 right = x;
-    s32 i;
+    s32 characterIndex;
 
-    for (i = 0; text[i] != '\0'; i++) {
-        if (text[i] == '.') {
+    for (characterIndex = 0; text[characterIndex] != '\0'; characterIndex++) {
+        if (text[characterIndex] == '.') {
             right += SHADOWED_POINT_WIDTH;
         }
         else {
@@ -2327,23 +2327,23 @@ void DrawCondensedShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY ch
 }
 
 void ClearGlyphSprites(void) {
-    s32 i;
+    s32 spriteIndex;
 
-    for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {
-        g_GlyphSprites[i].group = NO_GLYPH_GROUP;
+    for (spriteIndex = 0; spriteIndex != GLYPH_SPRITE_COUNT; spriteIndex++) {
+        g_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
     }
 }
 
 void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, READ_ONLY char *text) {
-    s32 i;
+    s32 spriteIndex;
     s32 halfWidth;
     s32 advance;
     s32 placedCount;
 
     if (fontSize == NO_FONT_SIZE) {
-        for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {
-            if (g_GlyphSprites[i].group == group) {
-                g_GlyphSprites[i].group = NO_GLYPH_GROUP;
+        for (spriteIndex = 0; spriteIndex != GLYPH_SPRITE_COUNT; spriteIndex++) {
+            if (g_GlyphSprites[spriteIndex].group == group) {
+                g_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
             }
         }
 
@@ -2361,16 +2361,16 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
     }
 
     g_GlyphGroupSizes[group] = GetTextLength(text);
-    for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {
-        if (g_GlyphSprites[i].group == group) {
-            g_GlyphSprites[i].group = NO_GLYPH_GROUP;
+    for (spriteIndex = 0; spriteIndex != GLYPH_SPRITE_COUNT; spriteIndex++) {
+        if (g_GlyphSprites[spriteIndex].group == group) {
+            g_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
         }
     }
 
-    for (i = 0, placedCount = 0, advance = 0;
-        placedCount != g_GlyphGroupSizes[group] && i != GLYPH_SPRITE_COUNT;
-        i++) {
-        if (g_GlyphSprites[i].group == NO_GLYPH_GROUP) {
+    for (spriteIndex = 0, placedCount = 0, advance = 0;
+        placedCount != g_GlyphGroupSizes[group] && spriteIndex != GLYPH_SPRITE_COUNT;
+        spriteIndex++) {
+        if (g_GlyphSprites[spriteIndex].group == NO_GLYPH_GROUP) {
             switch (text[placedCount]) {
                 case CHARACTER_CODE_OTHER_MARK_FIRST:
                 case CHARACTER_CODE_OTHER_MARK_FIRST + 1:
@@ -2378,7 +2378,7 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
                 case CHARACTER_CODE_MARK_FIRST + 1:
                     if (fontSize == FONT_SIZE_LARGE) {
                         guTranslate(
-                            &g_GlyphSprites[i].matrix,
+                            &g_GlyphSprites[spriteIndex].matrix,
                             advance - halfWidth + x - LARGE_MARK_BACKSPACE,
                             y + LARGE_MARK_RISE,
                             0
@@ -2386,7 +2386,7 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
                     }
                     else if (fontSize == FONT_SIZE_MEDIUM) {
                         guTranslate(
-                            &g_GlyphSprites[i].matrix,
+                            &g_GlyphSprites[spriteIndex].matrix,
                             advance - halfWidth + x - MEDIUM_MARK_BACKSPACE,
                             y + MEDIUM_MARK_RISE,
                             0
@@ -2394,7 +2394,7 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
                     }
                     else {
                         guTranslate(
-                            &g_GlyphSprites[i].matrix,
+                            &g_GlyphSprites[spriteIndex].matrix,
                             advance - halfWidth + x,
                             y + SMALL_MARK_RISE,
                             0
@@ -2403,7 +2403,7 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
 
                     break;
                 default:
-                    guTranslate(&g_GlyphSprites[i].matrix, advance - halfWidth + x, y, 0);
+                    guTranslate(&g_GlyphSprites[spriteIndex].matrix, advance - halfWidth + x, y, 0);
                     if (fontSize == FONT_SIZE_LARGE) {
                         if (flags & TEXT_FLAG_FIXED_WIDTH) {
                             advance += FONT_SIZE_LARGE;
@@ -2419,10 +2419,10 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
                     break;
             }
 
-            g_GlyphSprites[i].code = text[placedCount];
-            g_GlyphSprites[i].fontSize = fontSize;
-            g_GlyphSprites[i].flags = flags;
-            g_GlyphSprites[i].group = group;
+            g_GlyphSprites[spriteIndex].code = text[placedCount];
+            g_GlyphSprites[spriteIndex].fontSize = fontSize;
+            g_GlyphSprites[spriteIndex].flags = flags;
+            g_GlyphSprites[spriteIndex].group = group;
             placedCount++;
         }
     }
@@ -2431,7 +2431,7 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
 s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId messageId) {
     s32 width;
     s32 height;
-    s32 i;
+    s32 spriteIndex;
     s32 start;
     s32 length;
     s32 codeIndex;
@@ -2439,9 +2439,9 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
     s32 code;
 
     if (fontSize == NO_FONT_SIZE) {
-        for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {
-            if (g_GlyphSprites[i].group == group) {
-                g_GlyphSprites[i].group = NO_GLYPH_GROUP;
+        for (spriteIndex = 0; spriteIndex != GLYPH_SPRITE_COUNT; spriteIndex++) {
+            if (g_GlyphSprites[spriteIndex].group == group) {
+                g_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
             }
         }
 
@@ -2455,35 +2455,35 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
     height /= 2;
     y += height;
     g_GlyphGroupSizes[group] = length;
-    for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {
-        if (g_GlyphSprites[i].group == group) {
-            g_GlyphSprites[i].group = NO_GLYPH_GROUP;
+    for (spriteIndex = 0; spriteIndex != GLYPH_SPRITE_COUNT; spriteIndex++) {
+        if (g_GlyphSprites[spriteIndex].group == group) {
+            g_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
         }
     }
 
     codeIndex = 0;
     advance = 0;
-    for (i = 0; codeIndex != length; i++) {
-        if (g_GlyphSprites[i].group == NO_GLYPH_GROUP) {
+    for (spriteIndex = 0; codeIndex != length; spriteIndex++) {
+        if (g_GlyphSprites[spriteIndex].group == NO_GLYPH_GROUP) {
             code = ((u16 *)f_Messages)[g_MessageCodesStart + start + codeIndex];
             if (code < MESSAGE_CODE_GLYPH) {
                 if (code >= CHARACTER_CODE_MARK_FIRST &&
                     code < CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
                     guTranslate(
-                        &g_GlyphSprites[i].matrix,
+                        &g_GlyphSprites[spriteIndex].matrix,
                         advance - width + x - LARGE_MARK_BACKSPACE,
                         y + MESSAGE_MARK_RISE,
                         0
                     );
                 }
                 else {
-                    guTranslate(&g_GlyphSprites[i].matrix, advance - width + x, y, 0);
+                    guTranslate(&g_GlyphSprites[spriteIndex].matrix, advance - width + x, y, 0);
                     advance += f_LargeFontWidths[code];
                 }
 
-                g_GlyphSprites[i].code = code;
-                g_GlyphSprites[i].fontSize = fontSize;
-                g_GlyphSprites[i].group = group;
+                g_GlyphSprites[spriteIndex].code = code;
+                g_GlyphSprites[spriteIndex].fontSize = fontSize;
+                g_GlyphSprites[spriteIndex].group = group;
             }
             else if (code >= MESSAGE_CODE_CONTROL) {
                 switch (code) {
@@ -2505,11 +2505,11 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
                     case MESSAGE_CODE_START_BUTTON:
                     case MESSAGE_CODE_L_BUTTON:
                     case MESSAGE_CODE_R_BUTTON:
-                        guTranslate(&g_GlyphSprites[i].matrix, advance - width + x, y, 0);
+                        guTranslate(&g_GlyphSprites[spriteIndex].matrix, advance - width + x, y, 0);
                         advance += fontSize;
-                        g_GlyphSprites[i].code = code;
-                        g_GlyphSprites[i].fontSize = fontSize;
-                        g_GlyphSprites[i].group = group;
+                        g_GlyphSprites[spriteIndex].code = code;
+                        g_GlyphSprites[spriteIndex].fontSize = fontSize;
+                        g_GlyphSprites[spriteIndex].group = group;
                         break;
                 }
             }
@@ -2525,7 +2525,7 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
 
 void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
     Gfx *gfx = *displayListHead;
-    s32 i;
+    s32 spriteIndex;
     Boolean isIconLoaded;
     s32 iconOffset;
     u32 code;
@@ -2542,8 +2542,8 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
 #endif
     isIconLoaded = FALSE;
     gDPPipeSync(gfx++);
-    for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {
-        if (g_GlyphSprites[i].group == group) {
+    for (spriteIndex = 0; spriteIndex != GLYPH_SPRITE_COUNT; spriteIndex++) {
+        if (g_GlyphSprites[spriteIndex].group == group) {
             iconOffset = NO_ICON;
             if (isIconLoaded == TRUE) {
                 gDPSetCombineLERP(
@@ -2570,12 +2570,12 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
                 isIconLoaded = FALSE;
             }
 
-            code = g_GlyphSprites[i].code;
+            code = g_GlyphSprites[spriteIndex].code;
             if (code < MESSAGE_CODE_GLYPH) {
-                s = (code % FONT_GLYPHS_PER_ROW) * g_GlyphSprites[i].fontSize;
-                t = (code / FONT_GLYPHS_PER_ROW) * g_GlyphSprites[i].fontSize;
+                s = (code % FONT_GLYPHS_PER_ROW) * g_GlyphSprites[spriteIndex].fontSize;
+                t = (code / FONT_GLYPHS_PER_ROW) * g_GlyphSprites[spriteIndex].fontSize;
                 gDPPipeSync(gfx++);
-                if (g_GlyphSprites[i].fontSize == FONT_SIZE_LARGE) {
+                if (g_GlyphSprites[spriteIndex].fontSize == FONT_SIZE_LARGE) {
                     gDPSetTextureImage(
                         gfx++,
                         G_IM_FMT_I,
@@ -2584,7 +2584,7 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
                         TextureAddress(ImageBody(f_LargeFontImage))
                     );
                 }
-                else if (g_GlyphSprites[i].fontSize == FONT_SIZE_MEDIUM) {
+                else if (g_GlyphSprites[spriteIndex].fontSize == FONT_SIZE_MEDIUM) {
                     gDPSetTextureImage(
                         gfx++,
                         G_IM_FMT_I,
@@ -2760,21 +2760,21 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
             gDPPipeSync(gfx++);
             gSPMatrix(
                 gfx++,
-                PhysicalAddress(&g_GlyphSprites[i].matrix),
+                PhysicalAddress(&g_GlyphSprites[spriteIndex].matrix),
                 G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW
             );
-            fontSize = g_GlyphSprites[i].fontSize;
+            fontSize = g_GlyphSprites[spriteIndex].fontSize;
             top = 0;
             left = 0;
             bottom = fontSize;
             if (fontSize == FONT_SIZE_LARGE) {
-                if (g_GlyphSprites[i].flags & GLYPH_FLAG_TOP_PART) {
+                if (g_GlyphSprites[spriteIndex].flags & GLYPH_FLAG_TOP_PART) {
                     gSPVertex(gfx++, f_LargeGlyphTopVertices, QUAD_VERTEX_COUNT, 0);
                     bottom = LARGE_GLYPH_PART_ROW;
                 }
-                else if (g_GlyphSprites[i].flags & GLYPH_FLAG_BOTTOM_PART) {
+                else if (g_GlyphSprites[spriteIndex].flags & GLYPH_FLAG_BOTTOM_PART) {
                     gSPVertex(gfx++, f_LargeGlyphBottomVertices, QUAD_VERTEX_COUNT, 0);
-                    bottom = g_GlyphSprites[i].fontSize;
+                    bottom = g_GlyphSprites[spriteIndex].fontSize;
                     top = LARGE_GLYPH_PART_ROW;
                 }
                 else {

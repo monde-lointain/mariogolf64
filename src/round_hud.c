@@ -699,16 +699,16 @@ static void *f_HoleContestImage;
 static void *f_MatchStandingImage;
 
 void PrepareHoleDisplay(void) {
-    s32 i;
+    s32 vertexIndex;
 
     g_MatrixBufferIndex = 0;
-    for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
-        f_Arrows[0].body[i].v.tc[TEXTURE_AXIS_T] =
-            ((f_Arrows[0].body[i].v.ob[AXIS_Y] / ARROW_UNITS_PER_TEXEL_ROW) +
+    for (vertexIndex = 0; vertexIndex != ARROW_VERTEX_COUNT; vertexIndex++) {
+        f_Arrows[0].body[vertexIndex].v.tc[TEXTURE_AXIS_T] =
+            ((f_Arrows[0].body[vertexIndex].v.ob[AXIS_Y] / ARROW_UNITS_PER_TEXEL_ROW) +
                 ARROW_CENTER_TEXEL_ROW)
             << TEXEL_COORDINATE_SHIFT;
-        f_Arrows[1].body[i].v.tc[TEXTURE_AXIS_T] =
-            ((f_Arrows[1].body[i].v.ob[AXIS_Y] / ARROW_UNITS_PER_TEXEL_ROW) +
+        f_Arrows[1].body[vertexIndex].v.tc[TEXTURE_AXIS_T] =
+            ((f_Arrows[1].body[vertexIndex].v.ob[AXIS_Y] / ARROW_UNITS_PER_TEXEL_ROW) +
                 ARROW_CENTER_TEXEL_ROW)
             << TEXEL_COORDINATE_SHIFT;
     }
@@ -1311,16 +1311,17 @@ void DrawInsetViewFrame(void) {
 
 void ScrollWindArrow(void) {
     s32 step = g_HoleSetup.conditions.windSpeed / WIND_SPEED_PER_ARROW_SCROLL_STEP;
-    s32 i;
+    s32 vertexIndex;
 
-    for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
-        f_Arrows[g_MatrixBufferIndex].body[i].v.tc[TEXTURE_AXIS_T] += step;
+    for (vertexIndex = 0; vertexIndex != ARROW_VERTEX_COUNT; vertexIndex++) {
+        f_Arrows[g_MatrixBufferIndex].body[vertexIndex].v.tc[TEXTURE_AXIS_T] += step;
     }
 
     if (f_Arrows[g_MatrixBufferIndex].body[0].v.tc[TEXTURE_AXIS_T] >
         ARROW_TEXTURE_COORDINATE_LIMIT) {
-        for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
-            f_Arrows[g_MatrixBufferIndex].body[i].v.tc[TEXTURE_AXIS_T] -= ARROW_TEXTURE_PERIOD;
+        for (vertexIndex = 0; vertexIndex != ARROW_VERTEX_COUNT; vertexIndex++) {
+            f_Arrows[g_MatrixBufferIndex].body[vertexIndex].v.tc[TEXTURE_AXIS_T] -=
+                ARROW_TEXTURE_PERIOD;
         }
     }
 }
@@ -2152,13 +2153,16 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
 }
 
 void ResetBallTrail(void) {
-    s32 i;
+    s32 pointIndex;
 
     f_BallTrailHead = 0;
-    for (i = 0; i != BALL_TRAIL_LENGTH; i++) {
-        f_BallTrail[i][AXIS_X] = g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-        f_BallTrail[i][AXIS_Y] = g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-        f_BallTrail[i][AXIS_Z] = g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    for (pointIndex = 0; pointIndex != BALL_TRAIL_LENGTH; pointIndex++) {
+        f_BallTrail[pointIndex][AXIS_X] =
+            g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        f_BallTrail[pointIndex][AXIS_Y] =
+            g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        f_BallTrail[pointIndex][AXIS_Z] =
+            g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     }
 }
 
@@ -2175,7 +2179,7 @@ void ResetBallTrail(void) {
 void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
     Gfx *gfx = *displayListHead;
     ScreenPoint point;
-    s32 i;
+    s32 pointIndex;
     s32 index;
     f32 deltaX;
     f32 deltaY;
@@ -2199,7 +2203,7 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
 
         if (g_IsCupViewShown != TRUE) {
             index = f_BallTrailHead;
-            for (i = 0; i != BALL_TRAIL_LENGTH; i++, index--) {
+            for (pointIndex = 0; pointIndex != BALL_TRAIL_LENGTH; pointIndex++, index--) {
                 if (index == -1) {
                     index = BALL_TRAIL_LENGTH - 1;
                 }
@@ -2210,13 +2214,13 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
                         f_BallTrail[index][AXIS_Z],
                         &point
                     ) < 0) {
-                    f_BallTrailPoints[i].x = point.x * QUARTER_PIXELS_PER_PIXEL;
-                    f_BallTrailPoints[i].y = point.y * QUARTER_PIXELS_PER_PIXEL;
-                    f_BallTrailPoints[i].depth = point.depth -
+                    f_BallTrailPoints[pointIndex].x = point.x * QUARTER_PIXELS_PER_PIXEL;
+                    f_BallTrailPoints[pointIndex].y = point.y * QUARTER_PIXELS_PER_PIXEL;
+                    f_BallTrailPoints[pointIndex].depth = point.depth -
                         (point.depthStep * (g_PinVertexScale * BALL_TRAIL_DEPTH_BIAS));
                 }
                 else {
-                    f_BallTrailPoints[i].depth = BALL_TRAIL_HIDDEN;
+                    f_BallTrailPoints[pointIndex].depth = BALL_TRAIL_HIDDEN;
                 }
             }
 
@@ -2250,11 +2254,11 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
                 G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW
             );
             gSPVertex(gfx++, f_BallTrailVertices, ARRAY_COUNT(f_BallTrailVertices), 0);
-            for (i = 0; i != BALL_TRAIL_LENGTH - 1; i++) {
-                if (f_BallTrailPoints[i].depth != BALL_TRAIL_HIDDEN &&
-                    f_BallTrailPoints[i + 1].depth != BALL_TRAIL_HIDDEN) {
-                    deltaX = f_BallTrailPoints[i].x - f_BallTrailPoints[i + 1].x;
-                    deltaY = f_BallTrailPoints[i].y - f_BallTrailPoints[i + 1].y;
+            for (pointIndex = 0; pointIndex != BALL_TRAIL_LENGTH - 1; pointIndex++) {
+                if (f_BallTrailPoints[pointIndex].depth != BALL_TRAIL_HIDDEN &&
+                    f_BallTrailPoints[pointIndex + 1].depth != BALL_TRAIL_HIDDEN) {
+                    deltaX = f_BallTrailPoints[pointIndex].x - f_BallTrailPoints[pointIndex + 1].x;
+                    deltaY = f_BallTrailPoints[pointIndex].y - f_BallTrailPoints[pointIndex + 1].y;
 
                     if (deltaX == 0.0f && deltaY == 0.0f) {
                     }
@@ -2264,19 +2268,39 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
                         deltaX *= scale;
                         deltaY *= scale;
                         gDPPipeSync(gfx++);
-                        gDPSetPrimDepth(gfx++, f_BallTrailPoints[i].depth, 0);
+                        gDPSetPrimDepth(gfx++, f_BallTrailPoints[pointIndex].depth, 0);
                         gDPPipeSync(gfx++);
-                        gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
-                        gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
-                        gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
-                        gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
+                        gSPModifyVertex(
+                            gfx++,
+                            0,
+                            G_MWO_POINT_RGBA,
+                            BallTrailSegmentColor(pointIndex)
+                        );
+                        gSPModifyVertex(
+                            gfx++,
+                            1,
+                            G_MWO_POINT_RGBA,
+                            BallTrailSegmentColor(pointIndex)
+                        );
+                        gSPModifyVertex(
+                            gfx++,
+                            2,
+                            G_MWO_POINT_RGBA,
+                            BallTrailSegmentColor(pointIndex)
+                        );
+                        gSPModifyVertex(
+                            gfx++,
+                            3,
+                            G_MWO_POINT_RGBA,
+                            BallTrailSegmentColor(pointIndex)
+                        );
                         gSPModifyVertex(
                             gfx++,
                             0,
                             G_MWO_POINT_XYSCREEN,
                             ScreenPointWord(
-                                f_BallTrailPoints[i].x + (s32)deltaY,
-                                f_BallTrailPoints[i].y - (s32)deltaX
+                                f_BallTrailPoints[pointIndex].x + (s32)deltaY,
+                                f_BallTrailPoints[pointIndex].y - (s32)deltaX
                             )
                         );
                         gSPModifyVertex(
@@ -2284,8 +2308,8 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
                             1,
                             G_MWO_POINT_XYSCREEN,
                             ScreenPointWord(
-                                f_BallTrailPoints[i].x - (s32)deltaY,
-                                f_BallTrailPoints[i].y + (s32)deltaX
+                                f_BallTrailPoints[pointIndex].x - (s32)deltaY,
+                                f_BallTrailPoints[pointIndex].y + (s32)deltaX
                             )
                         );
                         gSPModifyVertex(
@@ -2293,8 +2317,8 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
                             2,
                             G_MWO_POINT_XYSCREEN,
                             ScreenPointWord(
-                                f_BallTrailPoints[i + 1].x + (s32)deltaY,
-                                f_BallTrailPoints[i + 1].y - (s32)deltaX
+                                f_BallTrailPoints[pointIndex + 1].x + (s32)deltaY,
+                                f_BallTrailPoints[pointIndex + 1].y - (s32)deltaX
                             )
                         );
                         gSPModifyVertex(
@@ -2302,8 +2326,8 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
                             3,
                             G_MWO_POINT_XYSCREEN,
                             ScreenPointWord(
-                                f_BallTrailPoints[i + 1].x - (s32)deltaY,
-                                f_BallTrailPoints[i + 1].y + (s32)deltaX
+                                f_BallTrailPoints[pointIndex + 1].x - (s32)deltaY,
+                                f_BallTrailPoints[pointIndex + 1].y + (s32)deltaX
                             )
                         );
                         gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
@@ -3477,11 +3501,11 @@ void WaveHoleFlag(void) {
 }
 
 void ResetShotOffsetMarker(void) {
-    s32 i;
+    s32 markerIndex;
 
-    for (i = 0; i != SHOT_OFFSET_MARKER_COUNT; i++) {
-        f_ShotOffsetMarkerXs[i] = 0;
-        f_ShotOffsetMarkerYs[i] = 0;
+    for (markerIndex = 0; markerIndex != SHOT_OFFSET_MARKER_COUNT; markerIndex++) {
+        f_ShotOffsetMarkerXs[markerIndex] = 0;
+        f_ShotOffsetMarkerYs[markerIndex] = 0;
     }
 }
 

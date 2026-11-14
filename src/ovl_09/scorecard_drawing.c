@@ -330,7 +330,7 @@ void DrawScorecardLabel(Gfx **displayListHead, s32 left, s32 top, s32 labelIndex
 
 void DrawMatchResult(Gfx **displayListHead) {
     s32 holeNumber = g_Scorecard.content.holeIndex;
-    s32 i;
+    s32 playerIndex;
     s32 x;
     s32 holeIndex;
     s32 ownHole;
@@ -344,12 +344,14 @@ void DrawMatchResult(Gfx **displayListHead) {
     holeIndex = holeNumber - 1;
     ownHole = holeIndex;
     x = MATCH_RESULT_LEFT;
-    for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
-        if (g_Players[i].holes[ownHole].strokes == g_Players[i ^ 1].holes[holeIndex].strokes) {
+    for (playerIndex = 0; playerIndex != MATCH_PLAYER_COUNT; playerIndex++) {
+        if (g_Players[playerIndex].holes[ownHole].strokes ==
+            g_Players[playerIndex ^ 1].holes[holeIndex].strokes) {
             SetTextColor(&gfx, 0xFF, 0xFF, 0);
             DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char *)f_DrawText);
         }
-        else if (g_Players[i].holes[ownHole].strokes < g_Players[i ^ 1].holes[holeIndex].strokes) {
+        else if (g_Players[playerIndex].holes[ownHole].strokes <
+            g_Players[playerIndex ^ 1].holes[holeIndex].strokes) {
             SetTextColor(&gfx, 0xFF, 0x7F, 0x7F);
             DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char *)f_WinText);
         }
@@ -387,8 +389,8 @@ void DrawMatchResult(Gfx **displayListHead) {
             PhysicalAddress(&g_ScreenOrthoMatrix),
             G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH
         );
-        for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
-            translation[AXIS_X] = (i * RESULT_CHARACTER_SPACING) + RESULT_CHARACTER_LEFT;
+        for (playerIndex = 0; playerIndex != MATCH_PLAYER_COUNT; playerIndex++) {
+            translation[AXIS_X] = (playerIndex * RESULT_CHARACTER_SPACING) + RESULT_CHARACTER_LEFT;
             rotation[AXIS_X] = 0.0f;
             rotation[AXIS_Y] = 0;
             rotation[AXIS_Z] = 0;
@@ -398,14 +400,14 @@ void DrawMatchResult(Gfx **displayListHead) {
             scale[AXIS_Y] = RESULT_CHARACTER_SCALE;
             scale[AXIS_Z] = RESULT_CHARACTER_SCALE;
             BuildTransformMatrix(matrix, rotation, translation, scale);
-            ConvertMatrixToFixed(matrix, &f_ResultCharacterMatrices[i]);
+            ConvertMatrixToFixed(matrix, &f_ResultCharacterMatrices[playerIndex]);
             gSPMatrix(
                 gfx++,
-                PhysicalAddress(&f_ResultCharacterMatrices[i]),
+                PhysicalAddress(&f_ResultCharacterMatrices[playerIndex]),
                 G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
             );
             g_DisplayListHead = gfx;
-            DrawCharacter(i);
+            DrawCharacter(playerIndex);
             *displayListHead = g_DisplayListHead;
             gfx = *displayListHead;
         }
@@ -441,7 +443,7 @@ void DrawStandingsPage(Gfx **displayListHead) {
     Gfx *gfx;
     s32 holeIndex;
     s32 shift;
-    s32 i;
+    s32 playerIndex;
     s32 j;
     s32 betTotal;
 
@@ -464,15 +466,15 @@ void DrawStandingsPage(Gfx **displayListHead) {
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);
 
-    for (i = 0; i < g_GameState.playerCount; i++) {
-        scoresToPar[i] = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
+    for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+        scoresToPar[playerIndex] = GetNetScoreToPar(g_Scorecard.content.holeIndex, playerIndex);
     }
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
-        places[i] = 0;
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+        places[playerIndex] = 0;
         for (j = 0; j != g_GameState.playerCount; j++) {
-            if (i != j && scoresToPar[i] > scoresToPar[j]) {
-                places[i]++;
+            if (playerIndex != j && scoresToPar[playerIndex] > scoresToPar[j]) {
+                places[playerIndex]++;
             }
         }
     }
@@ -482,21 +484,21 @@ void DrawStandingsPage(Gfx **displayListHead) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
-    for (i = 0; i != g_GameState.playerCount; i++) {
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
         DrawScorecardFace(
             &gfx,
             shift + STANDINGS_FACE_LEFT + g_Scorecard.x,
-            STANDINGS_ROW_TOP + (i * STANDINGS_ROW_SPACING),
-            i
+            STANDINGS_ROW_TOP + (playerIndex * STANDINGS_ROW_SPACING),
+            playerIndex
         );
     }
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
         DrawPlace(
             &gfx,
             shift + STANDINGS_PLACE_LEFT + g_Scorecard.x,
-            STANDINGS_ROW_TOP + (i * STANDINGS_ROW_SPACING),
-            places[i] & PLACE_MASK
+            STANDINGS_ROW_TOP + (playerIndex * STANDINGS_ROW_SPACING),
+            places[playerIndex] & PLACE_MASK
         );
     }
 
@@ -530,25 +532,25 @@ void DrawStandingsPage(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    for (i = 0; i != g_GameState.playerCount; i++) {
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
         betTotal = 0;
-        if (scoresToPar[i] == 0) {
+        if (scoresToPar[playerIndex] == 0) {
             sprintf(g_PrintBuffer, f_ZeroToParFormat);
         }
         else {
-            sprintf(g_PrintBuffer, f_ScoreToParFormat, scoresToPar[i]);
+            sprintf(g_PrintBuffer, f_ScoreToParFormat, scoresToPar[playerIndex]);
         }
 
         DrawDigitText(
             &gfx,
             shift + STANDINGS_SCORE_LEFT + g_Scorecard.x,
-            STANDINGS_TEXT_TOP + (i * STANDINGS_ROW_SPACING),
+            STANDINGS_TEXT_TOP + (playerIndex * STANDINGS_ROW_SPACING),
             g_PrintBuffer
         );
         if (g_Scorecard.hasBets) {
             for (j = 0; j != BET_COUNT; j++) {
                 if (g_GameState.betRates[j] > 0) {
-                    betTotal += g_BetTallies[i][j];
+                    betTotal += g_BetTallies[playerIndex][j];
                 }
             }
 
@@ -562,7 +564,7 @@ void DrawStandingsPage(Gfx **displayListHead) {
             DrawDigitText(
                 &gfx,
                 g_Scorecard.x + STANDINGS_BET_TOTAL_LEFT,
-                STANDINGS_TEXT_TOP + (i * STANDINGS_ROW_SPACING),
+                STANDINGS_TEXT_TOP + (playerIndex * STANDINGS_ROW_SPACING),
                 g_PrintBuffer
             );
         }
@@ -1123,8 +1125,8 @@ void DrawSkinsPage(Gfx **displayListHead) {
     s32 skinCounts[MAX_PLAYER_COUNT];
     Gfx *gfx;
     s32 holeIndex;
-    s32 i;
-    s32 j;
+    s32 playerIndex;
+    s32 otherIndex;
     s32 red;
     s32 green;
 
@@ -1152,32 +1154,34 @@ void DrawSkinsPage(Gfx **displayListHead) {
         0
     );
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
-        if (g_Scorecard.holeWinnerIndex == i) {
-            skinCounts[i] = g_RoundHud.skinsTotals[i] - g_Scorecard.skinsCarryover.onLastHole;
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+        if (g_Scorecard.holeWinnerIndex == playerIndex) {
+            skinCounts[playerIndex] =
+                g_RoundHud.skinsTotals[playerIndex] - g_Scorecard.skinsCarryover.onLastHole;
         }
         else {
-            skinCounts[i] = g_RoundHud.skinsTotals[i];
+            skinCounts[playerIndex] = g_RoundHud.skinsTotals[playerIndex];
         }
     }
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
-        places[i] = 0;
-        for (j = 0; j != g_GameState.playerCount; j++) {
-            if (i != j) {
-                if (skinCounts[i] < skinCounts[j]) {
-                    places[i]++;
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+        places[playerIndex] = 0;
+        for (otherIndex = 0; otherIndex != g_GameState.playerCount; otherIndex++) {
+            if (playerIndex != otherIndex) {
+                if (skinCounts[playerIndex] < skinCounts[otherIndex]) {
+                    places[playerIndex]++;
                 }
 
-                if (skinCounts[i] == skinCounts[j]) {
-                    places[i] |= PLACE_TIED;
+                if (skinCounts[playerIndex] == skinCounts[otherIndex]) {
+                    places[playerIndex] |= PLACE_TIED;
                 }
             }
         }
     }
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
-        if (g_Scorecard.holeWinnerIndex >= 0 && g_Players[i].holes[holeIndex].strokes != 0) {
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+        if (g_Scorecard.holeWinnerIndex >= 0 &&
+            g_Players[playerIndex].holes[holeIndex].strokes != 0) {
             f_WinColorAngle += WIN_COLOR_STEP;
             red = (u8)((s32)(sinf(f_WinColorAngle) * WIN_COLOR_SWING) + WIN_COLOR_MIDPOINT);
             green =
@@ -1192,7 +1196,7 @@ void DrawSkinsPage(Gfx **displayListHead) {
             DrawSmallText(
                 &gfx,
                 g_Scorecard.x + SKINS_WIN_LEFT,
-                SKINS_WIN_TOP + (i * SKINS_ROW_SPACING),
+                SKINS_WIN_TOP + (playerIndex * SKINS_ROW_SPACING),
                 (char *)f_WinText
             );
         }
@@ -1201,12 +1205,12 @@ void DrawSkinsPage(Gfx **displayListHead) {
     gSPDisplayList(gfx++, g_DecalTextureSetup);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    for (i = 0; i != g_GameState.playerCount; i++) {
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
         DrawScorecardFace(
             &gfx,
             g_Scorecard.x + SKINS_FACE_LEFT,
-            SKINS_ROW_TOP + (i * SKINS_ROW_SPACING),
-            i
+            SKINS_ROW_TOP + (playerIndex * SKINS_ROW_SPACING),
+            playerIndex
         );
     }
 
@@ -1214,12 +1218,12 @@ void DrawSkinsPage(Gfx **displayListHead) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
-    for (i = 0; i != g_GameState.playerCount; i++) {
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
         DrawPlace(
             &gfx,
             g_Scorecard.x + SKINS_PLACE_LEFT,
-            SKINS_ROW_TOP + (i * SKINS_ROW_SPACING),
-            places[i] & PLACE_MASK
+            SKINS_ROW_TOP + (playerIndex * SKINS_ROW_SPACING),
+            places[playerIndex] & PLACE_MASK
         );
     }
 
@@ -1239,13 +1243,13 @@ void DrawSkinsPage(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    for (i = 0; i != g_GameState.playerCount; i++) {
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
         DrawTextureRect(
             &gfx,
             QuarterPixels(g_Scorecard.x + SKIN_ICON_LEFT),
-            QuarterPixels(SKIN_ICON_TOP + (i * SKINS_ROW_SPACING)),
+            QuarterPixels(SKIN_ICON_TOP + (playerIndex * SKINS_ROW_SPACING)),
             QuarterPixels(g_Scorecard.x + SKIN_ICON_LEFT + SKIN_ICON_SIZE),
-            QuarterPixels(SKIN_ICON_TOP + SKIN_ICON_SIZE + (i * SKINS_ROW_SPACING)),
+            QuarterPixels(SKIN_ICON_TOP + SKIN_ICON_SIZE + (playerIndex * SKINS_ROW_SPACING)),
             G_TX_RENDERTILE,
             0,
             0,
@@ -1282,12 +1286,12 @@ void DrawSkinsPage(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    for (i = 0; i != g_GameState.playerCount; i++) {
-        sprintf(g_PrintBuffer, "* %d", (int)skinCounts[i]);
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+        sprintf(g_PrintBuffer, "* %d", (int)skinCounts[playerIndex]);
         DrawDigitText(
             &gfx,
             g_Scorecard.x + SKINS_COUNT_LEFT,
-            SKINS_COUNT_TOP + (i * SKINS_ROW_SPACING),
+            SKINS_COUNT_TOP + (playerIndex * SKINS_ROW_SPACING),
             g_PrintBuffer
         );
     }
@@ -1841,7 +1845,7 @@ const char f_BetDashText[] = "-";
 void DrawSpeedGolfPage(Gfx **displayListHead) {
     s32 shownHoleCount;
     Gfx *gfx = *displayListHead;
-    s32 i;
+    s32 holeIndex;
     s32 minutes;
     s32 seconds;
     s32 hundredths;
@@ -1853,22 +1857,22 @@ void DrawSpeedGolfPage(Gfx **displayListHead) {
     }
 
     SetUpGradientTextDrawing(&gfx, 0);
-    for (i = 0; i != NINE_HOLE_COUNT; i++) {
-        sprintf(g_PrintBuffer, f_TwoDigitFormat, i + 1);
+    for (holeIndex = 0; holeIndex != NINE_HOLE_COUNT; holeIndex++) {
+        sprintf(g_PrintBuffer, f_TwoDigitFormat, holeIndex + 1);
         DrawLargeTextWithShadow(
             &gfx,
             g_Scorecard.x + HOLE_NUMBER_LEFT,
-            (i * HOLE_ROW_SPACING) + HOLE_NUMBER_TOP + g_Scorecard.y,
+            (holeIndex * HOLE_ROW_SPACING) + HOLE_NUMBER_TOP + g_Scorecard.y,
             g_PrintBuffer,
             HOLE_NUMBER_ENV_COLOR,
             HOLE_NUMBER_PRIM_COLOR,
             0
         );
-        sprintf(g_PrintBuffer, f_TwoDigitFormat, i + NINE_HOLE_COUNT + 1);
+        sprintf(g_PrintBuffer, f_TwoDigitFormat, holeIndex + NINE_HOLE_COUNT + 1);
         DrawLargeTextWithShadow(
             &gfx,
             g_Scorecard.x + HOLE_NUMBER_LEFT + BACK_NINE_SPACING,
-            (i * HOLE_ROW_SPACING) + HOLE_NUMBER_TOP + g_Scorecard.y,
+            (holeIndex * HOLE_ROW_SPACING) + HOLE_NUMBER_TOP + g_Scorecard.y,
             g_PrintBuffer,
             HOLE_NUMBER_ENV_COLOR,
             HOLE_NUMBER_PRIM_COLOR,
@@ -1899,50 +1903,50 @@ void DrawSpeedGolfPage(Gfx **displayListHead) {
 
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
-    for (i = 0; i != NINE_HOLE_COUNT; i++) {
-        if (i < shownHoleCount) {
-            minutes = g_HoleTimeMinutes[i];
+    for (holeIndex = 0; holeIndex != NINE_HOLE_COUNT; holeIndex++) {
+        if (holeIndex < shownHoleCount) {
+            minutes = g_HoleTimeMinutes[holeIndex];
             if (minutes < 0) {
                 sprintf(g_PrintBuffer, f_StringFormat, "--------");
                 DrawMediumText(
                     &gfx,
                     g_Scorecard.x + HOLE_TIME_LEFT,
-                    (i * HOLE_ROW_SPACING) + HOLE_TIME_TOP + g_Scorecard.y,
+                    (holeIndex * HOLE_ROW_SPACING) + HOLE_TIME_TOP + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
             else {
-                hundredths = g_HoleTimeHundredths[i];
-                seconds = g_HoleTimeSeconds[i];
+                hundredths = g_HoleTimeHundredths[holeIndex];
+                seconds = g_HoleTimeSeconds[holeIndex];
                 sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes, seconds, hundredths);
                 DrawMediumText(
                     &gfx,
                     g_Scorecard.x + HOLE_TIME_LEFT,
-                    (i * HOLE_ROW_SPACING) + HOLE_TIME_TOP + g_Scorecard.y,
+                    (holeIndex * HOLE_ROW_SPACING) + HOLE_TIME_TOP + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
         }
 
-        if (i + NINE_HOLE_COUNT < shownHoleCount) {
-            minutes = g_HoleTimeMinutes[i + NINE_HOLE_COUNT];
+        if (holeIndex + NINE_HOLE_COUNT < shownHoleCount) {
+            minutes = g_HoleTimeMinutes[holeIndex + NINE_HOLE_COUNT];
             if (minutes < 0) {
                 sprintf(g_PrintBuffer, f_StringFormat, "--------");
                 DrawMediumText(
                     &gfx,
                     g_Scorecard.x + HOLE_TIME_LEFT + BACK_NINE_SPACING,
-                    (i * HOLE_ROW_SPACING) + HOLE_TIME_TOP + g_Scorecard.y,
+                    (holeIndex * HOLE_ROW_SPACING) + HOLE_TIME_TOP + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
             else {
-                hundredths = g_HoleTimeHundredths[i + NINE_HOLE_COUNT];
-                seconds = g_HoleTimeSeconds[i + NINE_HOLE_COUNT];
+                hundredths = g_HoleTimeHundredths[holeIndex + NINE_HOLE_COUNT];
+                seconds = g_HoleTimeSeconds[holeIndex + NINE_HOLE_COUNT];
                 sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes, seconds, hundredths);
                 DrawMediumText(
                     &gfx,
                     g_Scorecard.x + HOLE_TIME_LEFT + BACK_NINE_SPACING,
-                    (i * HOLE_ROW_SPACING) + HOLE_TIME_TOP + g_Scorecard.y,
+                    (holeIndex * HOLE_ROW_SPACING) + HOLE_TIME_TOP + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
@@ -2055,7 +2059,7 @@ void FormatLeaderboardRow(char *row, TournamentStanding *standing) {
 void DrawLeaderboardPage(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     TournamentStanding *standing;
-    s32 i;
+    s32 rowIndex;
     s32 shade;
     s32 bottomFlapShade;
     s32 group;
@@ -2096,12 +2100,12 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     );
     gDPPipeSync(gfx++);
 
-    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
-        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
+    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
+        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
             shade = COLOR_CHANNEL_MAX;
-            if (g_Scorecard.content.isRowFlipping[i] == TRUE &&
-                !(g_Scorecard.content.rowFlipAngles[i] > FLAP_EDGE_ON_ANGLE)) {
-                shade = (sinf(g_Scorecard.content.rowFlipAngles[i]) * FLAP_SHADE_RANGE) +
+            if (g_Scorecard.content.isRowFlipping[rowIndex] == TRUE &&
+                !(g_Scorecard.content.rowFlipAngles[rowIndex] > FLAP_EDGE_ON_ANGLE)) {
+                shade = (sinf(g_Scorecard.content.rowFlipAngles[rowIndex]) * FLAP_SHADE_RANGE) +
                     FLAP_FACING_SHADE;
             }
         }
@@ -2113,10 +2117,10 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
         DrawTextureRect(
             &gfx,
             QuarterPixels(g_Scorecard.x + ROW_LEFT),
-            QuarterPixels(((i * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
+            QuarterPixels(((rowIndex * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
             QuarterPixels(g_Scorecard.x + ROW_LEFT + ROW_IMAGE_WIDTH),
             QuarterPixels(
-                (i * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_IMAGE_HEIGHT + g_Scorecard.y
+                (rowIndex * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_IMAGE_HEIGHT + g_Scorecard.y
             ),
             G_TX_RENDERTILE,
             0,
@@ -2128,13 +2132,14 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
 
     LoadLargePalette(&gfx, ImageBody(g_Scorecard.flapNameImages));
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
-    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
-        if (g_Scorecard.content.isRowFlipping[i] == TRUE &&
-            (s32)g_Scorecard.content.rowFlipAngles[i] == 0) {
+    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
+        if (g_Scorecard.content.isRowFlipping[rowIndex] == TRUE &&
+            (s32)g_Scorecard.content.rowFlipAngles[rowIndex] == 0) {
             LoadTextureBlock(
                 &gfx,
                 g_Scorecard.flapNameImages +
-                    ((i * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) + LARGE_PALETTED_TEXELS_OFFSET),
+                    ((rowIndex * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) +
+                        LARGE_PALETTED_TEXELS_OFFSET),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 FLAP_NAME_IMAGE_WIDTH,
@@ -2150,10 +2155,11 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT),
-                QuarterPixels(((i * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
+                QuarterPixels(((rowIndex * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
                 QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT + FLAP_NAME_IMAGE_WIDTH),
                 QuarterPixels(
-                    (i * LEADERBOARD_ROW_SPACING) + (ROW_IMAGE_HEIGHT + ROW_TOP) + g_Scorecard.y
+                    (rowIndex * LEADERBOARD_ROW_SPACING) + (ROW_IMAGE_HEIGHT + ROW_TOP) +
+                    g_Scorecard.y
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -2166,16 +2172,19 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
 
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
-    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
-        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
-            FormatLeaderboardRow(g_PrintBuffer, &g_TournamentStandings[g_Scorecard.topRow + i]);
+    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
+        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
+            FormatLeaderboardRow(
+                g_PrintBuffer,
+                &g_TournamentStandings[g_Scorecard.topRow + rowIndex]
+            );
             DrawFixedWidthLargeText(
                 &gfx,
                 g_Scorecard.x + ROW_TEXT_LEFT,
-                RowTextTop(i),
+                RowTextTop(rowIndex),
                 g_PrintBuffer
             );
-            contestantId = g_TournamentStandings[g_Scorecard.topRow + i].contestantId;
+            contestantId = g_TournamentStandings[g_Scorecard.topRow + rowIndex].contestantId;
             if (contestantId == PLAYER_CONTESTANT) {
                 sprintf(g_PrintBuffer, "%-8s  ", g_Players[0].name);
             }
@@ -2187,7 +2196,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 );
             }
 
-            DrawLargeText(&gfx, g_Scorecard.x + ROW_NAME_LEFT, RowTextTop(i), g_PrintBuffer);
+            DrawLargeText(&gfx, g_Scorecard.x + ROW_NAME_LEFT, RowTextTop(rowIndex), g_PrintBuffer);
         }
     }
 
@@ -2197,30 +2206,30 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     gSPSetLights1(gfx++, f_FlapLights);
     gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
     gSPSetGeometryMode(gfx++, G_SHADE | G_LIGHTING | G_SHADING_SMOOTH);
-    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
-        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
-            g_Scorecard.content.isRowFlipping[i] == TRUE) {
+    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
+        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
+            g_Scorecard.content.isRowFlipping[rowIndex] == TRUE) {
             Mat4 matrix;
             Vec3 translation;
             Vec3 rotation;
 
-            if (g_Scorecard.content.rowFlipAngles[i] > FLAP_EDGE_ON_ANGLE) {
-                rotation[AXIS_X] = g_Scorecard.content.rowFlipAngles[i] + M_PI;
+            if (g_Scorecard.content.rowFlipAngles[rowIndex] > FLAP_EDGE_ON_ANGLE) {
+                rotation[AXIS_X] = g_Scorecard.content.rowFlipAngles[rowIndex] + M_PI;
                 rotation[AXIS_Y] = 0;
                 rotation[AXIS_Z] = 0;
             }
             else {
-                rotation[AXIS_X] = g_Scorecard.content.rowFlipAngles[i];
+                rotation[AXIS_X] = g_Scorecard.content.rowFlipAngles[rowIndex];
                 rotation[AXIS_Y] = 0;
                 rotation[AXIS_Z] = 0;
             }
 
             translation[AXIS_X] = g_Scorecard.x;
             translation[AXIS_Y] = (SCREEN_HEIGHT / 2.0f) -
-                ((i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y);
+                ((rowIndex * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y);
             translation[AXIS_Z] = FLAP_DISTANCE;
             BuildRotationMatrix(matrix, rotation, translation);
-            ConvertMatrixToFixed(matrix, &f_FlapMatrices[i][g_MatrixBufferIndex]);
+            ConvertMatrixToFixed(matrix, &f_FlapMatrices[rowIndex][g_MatrixBufferIndex]);
         }
     }
 
@@ -2257,15 +2266,15 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
 
-    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
-        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
-            g_Scorecard.content.isRowFlipping[i] == TRUE) {
-            if (g_Scorecard.content.rowFlipAngles[i] < FLAP_EDGE_ON_ANGLE) {
+    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
+        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
+            g_Scorecard.content.isRowFlipping[rowIndex] == TRUE) {
+            if (g_Scorecard.content.rowFlipAngles[rowIndex] < FLAP_EDGE_ON_ANGLE) {
                 bottomFlapShade = COLOR_CHANNEL_MAX;
             }
             else {
                 bottomFlapShade = FLAP_LIT_SHADE -
-                    (sinf(g_Scorecard.content.rowFlipAngles[i] - FLAP_EDGE_ON_ANGLE) *
+                    (sinf(g_Scorecard.content.rowFlipAngles[rowIndex] - FLAP_EDGE_ON_ANGLE) *
                         FLAP_SHADE_RANGE);
             }
 
@@ -2282,11 +2291,13 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 &gfx,
                 QuarterPixels(g_Scorecard.x + ROW_LEFT),
                 QuarterPixels(
-                    (i * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_BOTTOM_HALF_ROW + g_Scorecard.y
+                    (rowIndex * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_BOTTOM_HALF_ROW +
+                    g_Scorecard.y
                 ),
                 QuarterPixels(g_Scorecard.x + ROW_LEFT + ROW_IMAGE_WIDTH),
                 QuarterPixels(
-                    (i * LEADERBOARD_ROW_SPACING) + (ROW_IMAGE_HEIGHT + ROW_TOP) + g_Scorecard.y
+                    (rowIndex * LEADERBOARD_ROW_SPACING) + (ROW_IMAGE_HEIGHT + ROW_TOP) +
+                    g_Scorecard.y
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -2298,14 +2309,14 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     }
 
     LoadLargePalette(&gfx, ImageBody(g_Scorecard.flapNameImages));
-    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
-        if (g_Scorecard.content.isRowFlipping[i] == TRUE) {
-            if (g_Scorecard.content.rowFlipAngles[i] < FLAP_EDGE_ON_ANGLE) {
+    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
+        if (g_Scorecard.content.isRowFlipping[rowIndex] == TRUE) {
+            if (g_Scorecard.content.rowFlipAngles[rowIndex] < FLAP_EDGE_ON_ANGLE) {
                 shade = COLOR_CHANNEL_MAX;
             }
             else {
                 shade = FLAP_LIT_SHADE -
-                    (sinf(g_Scorecard.content.rowFlipAngles[i] - FLAP_EDGE_ON_ANGLE) *
+                    (sinf(g_Scorecard.content.rowFlipAngles[rowIndex] - FLAP_EDGE_ON_ANGLE) *
                         FLAP_SHADE_RANGE);
             }
 
@@ -2313,7 +2324,8 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
             LoadTextureBlock(
                 &gfx,
                 g_Scorecard.flapNameImages +
-                    ((i * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) + LARGE_PALETTED_TEXELS_OFFSET),
+                    ((rowIndex * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) +
+                        LARGE_PALETTED_TEXELS_OFFSET),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 FLAP_NAME_IMAGE_WIDTH,
@@ -2330,11 +2342,13 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 &gfx,
                 QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT),
                 QuarterPixels(
-                    (i * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_BOTTOM_HALF_ROW + g_Scorecard.y
+                    (rowIndex * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_BOTTOM_HALF_ROW +
+                    g_Scorecard.y
                 ),
                 QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT + FLAP_NAME_IMAGE_WIDTH),
                 QuarterPixels(
-                    (i * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_IMAGE_HEIGHT + g_Scorecard.y
+                    (rowIndex * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_IMAGE_HEIGHT +
+                    g_Scorecard.y
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -2365,15 +2379,15 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     gDPPipeSync(gfx++);
-    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
-        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
-            g_Scorecard.content.isRowFlipping[i] == TRUE) {
+    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
+        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
+            g_Scorecard.content.isRowFlipping[rowIndex] == TRUE) {
             gSPMatrix(
                 gfx++,
-                PhysicalAddress(&f_FlapMatrices[i][g_MatrixBufferIndex]),
+                PhysicalAddress(&f_FlapMatrices[rowIndex][g_MatrixBufferIndex]),
                 G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
             );
-            if (g_Scorecard.content.rowFlipAngles[i] > FLAP_EDGE_ON_ANGLE) {
+            if (g_Scorecard.content.rowFlipAngles[rowIndex] > FLAP_EDGE_ON_ANGLE) {
                 gSPVertex(gfx++, f_FlapVertices[FLAP_BOTTOM_QUAD], QUAD_VERTEX_COUNT, 0);
             }
             else {
@@ -2385,14 +2399,15 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     }
 
     LoadLargePalette(&gfx, ImageBody(g_Scorecard.flapNameImages));
-    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
-        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
-            g_Scorecard.content.isRowFlipping[i] == TRUE &&
-            g_Scorecard.content.rowFlipAngles[i] < FLAP_EDGE_ON_ANGLE) {
+    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
+        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
+            g_Scorecard.content.isRowFlipping[rowIndex] == TRUE &&
+            g_Scorecard.content.rowFlipAngles[rowIndex] < FLAP_EDGE_ON_ANGLE) {
             LoadTextureBlock(
                 &gfx,
                 g_Scorecard.flapNameImages +
-                    ((i * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) + LARGE_PALETTED_TEXELS_OFFSET),
+                    ((rowIndex * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) +
+                        LARGE_PALETTED_TEXELS_OFFSET),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 FLAP_NAME_IMAGE_WIDTH,
@@ -2407,7 +2422,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
             );
             gSPMatrix(
                 gfx++,
-                PhysicalAddress(&f_FlapMatrices[i][g_MatrixBufferIndex]),
+                PhysicalAddress(&f_FlapMatrices[rowIndex][g_MatrixBufferIndex]),
                 G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
             );
             gDPPipeSync(gfx++);
@@ -2421,11 +2436,11 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
     SetUpPerspectiveTextDrawing(&gfx);
-    for (i = 0, group = 0; i != LEADERBOARD_ROW_COUNT; i++) {
-        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
-            if (g_Scorecard.content.isRowFlipping[i] == TRUE &&
-                g_Scorecard.content.rowFlipAngles[i] > FLAP_EDGE_ON_ANGLE) {
-                standing = &g_TournamentStandings[g_Scorecard.topRow + i];
+    for (rowIndex = 0, group = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
+        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
+            if (g_Scorecard.content.isRowFlipping[rowIndex] == TRUE &&
+                g_Scorecard.content.rowFlipAngles[rowIndex] > FLAP_EDGE_ON_ANGLE) {
+                standing = &g_TournamentStandings[g_Scorecard.topRow + rowIndex];
                 FormatLeaderboardRow(g_PrintBuffer, standing);
                 PlaceGlyphGroup(
                     group,
@@ -2456,7 +2471,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 );
                 gSPMatrix(
                     gfx++,
-                    PhysicalAddress(&f_FlapMatrices[i][g_MatrixBufferIndex]),
+                    PhysicalAddress(&f_FlapMatrices[rowIndex][g_MatrixBufferIndex]),
                     G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
                 );
                 DrawGlyphGroup(&gfx, group);
@@ -2473,8 +2488,8 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     gDPSetTexturePersp(gfx++, G_TP_NONE);
 
     if (g_Scorecard.content.flipTime > LAST_ROW_FLIP_TIME) {
-        for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
-            TournamentStanding *rowStanding = &g_TournamentStandings[g_Scorecard.topRow + i];
+        for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
+            TournamentStanding *rowStanding = &g_TournamentStandings[g_Scorecard.topRow + rowIndex];
 
             if (rowStanding->contestantId == PLAYER_CONTESTANT) {
                 gSPDisplayList(gfx++, g_DecalTextureSetup);
@@ -2483,7 +2498,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 DrawSmallFace(
                     &gfx,
                     g_Scorecard.x + LEADERBOARD_FACE_LEFT,
-                    LEADERBOARD_FACE_TOP + (i * LEADERBOARD_ROW_SPACING),
+                    LEADERBOARD_FACE_TOP + (rowIndex * LEADERBOARD_ROW_SPACING),
                     0,
                     TRUE
                 );
@@ -2531,8 +2546,9 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     if (g_Scorecard.content.flipTime > LAST_ROW_FLIP_TIME) {
-        for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
-            if (g_TournamentStandings[g_Scorecard.topRow + i].contestantId == PLAYER_CONTESTANT &&
+        for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
+            if (g_TournamentStandings[g_Scorecard.topRow + rowIndex].contestantId ==
+                    PLAYER_CONTESTANT &&
                 g_Scorecard.placeChange != PLACE_HELD) {
                 halfSize = FELL_ARROW_HALF_SIZE;
                 if (g_Scorecard.placeChange & PLACE_FELL) {
@@ -2558,12 +2574,12 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                     &gfx,
                     QuarterPixels(g_Scorecard.x + ARROW_CENTER_X - roundedHalfSize),
                     QuarterPixels(
-                        ((i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y) -
+                        ((rowIndex * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y) -
                         roundedHalfSize
                     ),
                     QuarterPixels(g_Scorecard.x + ARROW_CENTER_X + roundedHalfSize),
                     QuarterPixels(
-                        ((i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y) +
+                        ((rowIndex * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y) +
                         roundedHalfSize
                     ),
                     G_TX_RENDERTILE,

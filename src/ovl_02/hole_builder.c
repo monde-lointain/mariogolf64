@@ -1975,7 +1975,7 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
     s32 cell = CellAt(cellOffset);
     s32 block;
     u32 fill;
-    s32 i;
+    s32 wordIndex;
     u32 *word;
 
     if (cell == code) {
@@ -1992,7 +1992,7 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
             fill |= fill << BITS_PER_BYTE;
             fill |= fill << (BITS_PER_BYTE * 2);
             word = (u32 *)&g_WorkArea.hole.terrainCodes[block * TERRAIN_CODE_BLOCK_SIZE];
-            for (i = 0; i < TERRAIN_CODE_BLOCK_WORD_COUNT; i++) {
+            for (wordIndex = 0; wordIndex < TERRAIN_CODE_BLOCK_WORD_COUNT; wordIndex++) {
                 *word++ = fill;
             }
 
@@ -2415,18 +2415,18 @@ void SaveHoleFiles(s32 course, s32 hole) {
 #define RING_MOVE_LOG_ROW (-141)
 
 void MoveRingsToEnd(void) {
-    s32 i;
+    s32 triangleIndex;
     s32 slot;
 
     PrintDebugText("Change Start", RING_MOVE_NOTICE_COLUMN, RING_MOVE_NOTICE_ROW);
-    for (i = 0; i != HOLE_TRIANGLE_COUNT - RING_COUNT; i++) {
-        if (g_WorkArea.hole.triangles[i].kind == HOLE_TRIANGLE_KIND_RING) {
+    for (triangleIndex = 0; triangleIndex != HOLE_TRIANGLE_COUNT - RING_COUNT; triangleIndex++) {
+        if (g_WorkArea.hole.triangles[triangleIndex].kind == HOLE_TRIANGLE_KIND_RING) {
             for (slot = HOLE_TRIANGLE_COUNT - RING_COUNT; slot != HOLE_TRIANGLE_COUNT;
-                slot++, i++) {
-                sprintf(g_PrintBuffer, "%d <-- %d", (int)slot, (int)i);
+                slot++, triangleIndex++) {
+                sprintf(g_PrintBuffer, "%d <-- %d", (int)slot, (int)triangleIndex);
                 PrintDebugText(g_PrintBuffer, RING_MOVE_LOG_COLUMN, RING_MOVE_LOG_ROW);
-                g_WorkArea.hole.triangles[slot] = g_WorkArea.hole.triangles[i];
-                bzero(&g_WorkArea.hole.triangles[i], sizeof(HoleTriangle));
+                g_WorkArea.hole.triangles[slot] = g_WorkArea.hole.triangles[triangleIndex];
+                bzero(&g_WorkArea.hole.triangles[triangleIndex], sizeof(HoleTriangle));
             }
 
             PrintDebugText("Change End", RING_MOVE_NOTICE_COLUMN, RING_MOVE_NOTICE_ROW);
@@ -2487,17 +2487,17 @@ void ResetBuildBuffer(void) {
 }
 
 void ClearBillboards(void) {
-    s32 i;
+    s32 billboardIndex;
 
-    for (i = 0; i < BILLBOARD_COUNT; i++) {
-        g_Billboards[i].x = 0;
-        g_Billboards[i].y = 0;
-        g_Billboards[i].z = 0;
-        g_Billboards[i].textureIndex = -1;
-        g_Billboards[i].isIgnoredEditorMark = 0;
-        g_Billboards[i].isNearCourseEdge = TRUE;
-        g_Billboards[i].width = CLEARED_BILLBOARD_WIDTH;
-        g_Billboards[i].height = CLEARED_BILLBOARD_HEIGHT;
+    for (billboardIndex = 0; billboardIndex < BILLBOARD_COUNT; billboardIndex++) {
+        g_Billboards[billboardIndex].x = 0;
+        g_Billboards[billboardIndex].y = 0;
+        g_Billboards[billboardIndex].z = 0;
+        g_Billboards[billboardIndex].textureIndex = -1;
+        g_Billboards[billboardIndex].isIgnoredEditorMark = 0;
+        g_Billboards[billboardIndex].isNearCourseEdge = TRUE;
+        g_Billboards[billboardIndex].width = CLEARED_BILLBOARD_WIDTH;
+        g_Billboards[billboardIndex].height = CLEARED_BILLBOARD_HEIGHT;
     }
 }
 
@@ -2506,35 +2506,35 @@ void ClearHoleTriangles(void) {
 }
 
 void ClearTileBorders(void) {
-    s32 i;
+    s32 tileIndex;
 
-    for (i = 0; i < GROUND_TILE_COUNT; i++) {
-        g_WorkArea.hole.tiles[i]
+    for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
+        g_WorkArea.hole.tiles[tileIndex]
             .texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0;
-        g_WorkArea.hole.tiles[i].mirroredCells = 0;
+        g_WorkArea.hole.tiles[tileIndex].mirroredCells = 0;
     }
 }
 
 void InitGridVertices(void) {
     s16 x;
     s16 z;
-    s32 i;
+    s32 vertexIndex;
 
     x = 0;
     z = 0;
-    for (i = 0; i < GRID_VERTEX_COUNT; i++) {
-        g_WorkArea.hole.gridVertices[i].v.ob[AXIS_X] = x;
-        g_WorkArea.hole.gridVertices[i].v.tc[TEXTURE_AXIS_S] =
+    for (vertexIndex = 0; vertexIndex < GRID_VERTEX_COUNT; vertexIndex++) {
+        g_WorkArea.hole.gridVertices[vertexIndex].v.ob[AXIS_X] = x;
+        g_WorkArea.hole.gridVertices[vertexIndex].v.tc[TEXTURE_AXIS_S] =
             (x * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
-        g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Y] = 0;
-        g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Z] = z;
-        g_WorkArea.hole.gridVertices[i].v.flag = 0;
-        g_WorkArea.hole.gridVertices[i].v.tc[TEXTURE_AXIS_T] =
+        g_WorkArea.hole.gridVertices[vertexIndex].v.ob[AXIS_Y] = 0;
+        g_WorkArea.hole.gridVertices[vertexIndex].v.ob[AXIS_Z] = z;
+        g_WorkArea.hole.gridVertices[vertexIndex].v.flag = 0;
+        g_WorkArea.hole.gridVertices[vertexIndex].v.tc[TEXTURE_AXIS_T] =
             (z * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
-        g_WorkArea.hole.gridVertices[i].v.cn[0] = 0;
-        g_WorkArea.hole.gridVertices[i].v.cn[1] = 0;
-        g_WorkArea.hole.gridVertices[i].v.cn[2] = 0;
-        g_WorkArea.hole.gridVertices[i].v.cn[3] = 0;
+        g_WorkArea.hole.gridVertices[vertexIndex].v.cn[0] = 0;
+        g_WorkArea.hole.gridVertices[vertexIndex].v.cn[1] = 0;
+        g_WorkArea.hole.gridVertices[vertexIndex].v.cn[2] = 0;
+        g_WorkArea.hole.gridVertices[vertexIndex].v.cn[3] = 0;
         x += TILE_SPAN;
         if (x == (GROUND_TILE_COLUMN_COUNT + 1) * TILE_SPAN) {
             x = HALF_TILE_SPAN;
@@ -2552,7 +2552,7 @@ void InitTileMidpoints(void) {
     s16 x;
     s16 z;
     s32 tile;
-    s32 i;
+    s32 midpointIndex;
 
     offsets[0][0] = QuarterTileSpans(1);
     offsets[0][1] = 0;
@@ -2589,19 +2589,21 @@ void InitTileMidpoints(void) {
     x = 0;
     z = 0;
     for (tile = 0; tile < GROUND_TILE_COUNT; tile++) {
-        for (i = 0; i < TILE_MIDPOINT_COUNT; i++) {
-            g_WorkArea.hole.midpoints[tile][i].v.ob[AXIS_X] = x + offsets[i][0];
-            g_WorkArea.hole.midpoints[tile][i].v.ob[AXIS_Y] = 0;
-            g_WorkArea.hole.midpoints[tile][i].v.ob[AXIS_Z] = z + offsets[i][1];
-            g_WorkArea.hole.midpoints[tile][i].v.flag = 0;
-            g_WorkArea.hole.midpoints[tile][i].v.tc[TEXTURE_AXIS_S] =
-                ((x + offsets[i][0]) * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
-            g_WorkArea.hole.midpoints[tile][i].v.tc[TEXTURE_AXIS_T] =
-                ((z + offsets[i][1]) * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
-            g_WorkArea.hole.midpoints[tile][i].v.cn[0] = 0;
-            g_WorkArea.hole.midpoints[tile][i].v.cn[1] = 0;
-            g_WorkArea.hole.midpoints[tile][i].v.cn[2] = 0;
-            g_WorkArea.hole.midpoints[tile][i].v.cn[3] = 0;
+        for (midpointIndex = 0; midpointIndex < TILE_MIDPOINT_COUNT; midpointIndex++) {
+            g_WorkArea.hole.midpoints[tile][midpointIndex].v.ob[AXIS_X] =
+                x + offsets[midpointIndex][0];
+            g_WorkArea.hole.midpoints[tile][midpointIndex].v.ob[AXIS_Y] = 0;
+            g_WorkArea.hole.midpoints[tile][midpointIndex].v.ob[AXIS_Z] =
+                z + offsets[midpointIndex][1];
+            g_WorkArea.hole.midpoints[tile][midpointIndex].v.flag = 0;
+            g_WorkArea.hole.midpoints[tile][midpointIndex].v.tc[TEXTURE_AXIS_S] =
+                ((x + offsets[midpointIndex][0]) * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
+            g_WorkArea.hole.midpoints[tile][midpointIndex].v.tc[TEXTURE_AXIS_T] =
+                ((z + offsets[midpointIndex][1]) * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
+            g_WorkArea.hole.midpoints[tile][midpointIndex].v.cn[0] = 0;
+            g_WorkArea.hole.midpoints[tile][midpointIndex].v.cn[1] = 0;
+            g_WorkArea.hole.midpoints[tile][midpointIndex].v.cn[2] = 0;
+            g_WorkArea.hole.midpoints[tile][midpointIndex].v.cn[3] = 0;
         }
 
         x += TILE_SPAN;
@@ -2655,24 +2657,24 @@ void ReadAttributeRuns(void) {
 
 void ReadBillboards(void) {
     u8 count;
-    u8 i;
+    u8 billboardIndex;
 
     ReadFileBytes(&count, sizeof(count));
-    for (i = 0; i < count; i++) {
-        if (i >= BILLBOARD_COUNT) {
+    for (billboardIndex = 0; billboardIndex < count; billboardIndex++) {
+        if (billboardIndex >= BILLBOARD_COUNT) {
             osSyncPrintf("ER2\n");
             return;
         }
 
-        ReadFileBytes(&g_Billboards[i].x, sizeof(s16));
-        ReadFileBytes(&g_Billboards[i].y, sizeof(s16));
-        ReadFileBytes(&g_Billboards[i].z, sizeof(s16));
-        ReadFileBytes(&g_Billboards[i].textureIndex, sizeof(s8));
-        g_Billboards[i].shapeIndex = 0;
-        ReadFileBytes(&g_Billboards[i].isIgnoredEditorMark, sizeof(u8));
-        g_Billboards[i].isNearCourseEdge = FALSE;
-        ReadFileBytes(&g_Billboards[i].width, sizeof(u16));
-        ReadFileBytes(&g_Billboards[i].height, sizeof(u16));
+        ReadFileBytes(&g_Billboards[billboardIndex].x, sizeof(s16));
+        ReadFileBytes(&g_Billboards[billboardIndex].y, sizeof(s16));
+        ReadFileBytes(&g_Billboards[billboardIndex].z, sizeof(s16));
+        ReadFileBytes(&g_Billboards[billboardIndex].textureIndex, sizeof(s8));
+        g_Billboards[billboardIndex].shapeIndex = 0;
+        ReadFileBytes(&g_Billboards[billboardIndex].isIgnoredEditorMark, sizeof(u8));
+        g_Billboards[billboardIndex].isNearCourseEdge = FALSE;
+        ReadFileBytes(&g_Billboards[billboardIndex].width, sizeof(u16));
+        ReadFileBytes(&g_Billboards[billboardIndex].height, sizeof(u16));
     }
 }
 
@@ -2680,17 +2682,17 @@ void ReadHoleTriangles(void) {
     u8 unused[0x10] UNUSED;
     u8 count;
     s8 kind;
-    u8 i;
+    u8 triangleIndex;
     HoleTriangle *triangle;
 
     ReadFileBytes(&count, sizeof(count));
-    for (i = 0; i < count; i++) {
+    for (triangleIndex = 0; triangleIndex < count; triangleIndex++) {
         if (count >= HOLE_TRIANGLE_COUNT) {
             osSyncPrintf("ER3\n");
             return;
         }
 
-        triangle = &g_WorkArea.hole.triangles[i];
+        triangle = &g_WorkArea.hole.triangles[triangleIndex];
         ReadFileBytes(&kind, sizeof(kind));
         triangle->kind = kind;
         ReadFileBytes(triangle->vertices[0].v.ob, sizeof(s16) * AXIS_COUNT);
@@ -2700,10 +2702,10 @@ void ReadHoleTriangles(void) {
 }
 
 void ReadTileMirroredCells(void) {
-    s32 i;
+    s32 tileIndex;
 
-    for (i = 0; i < GROUND_TILE_COUNT; i++) {
-        ReadFileBytes(&g_WorkArea.hole.tiles[i].mirroredCells, sizeof(u16));
+    for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
+        ReadFileBytes(&g_WorkArea.hole.tiles[tileIndex].mirroredCells, sizeof(u16));
     }
 }
 
@@ -2716,32 +2718,32 @@ void ReadGridVertices(void) {
     s16 x;
     s16 y;
     s16 z;
-    s32 i;
+    s32 vertexIndex;
 
-    for (i = 0;; i++) {
+    for (vertexIndex = 0;; vertexIndex++) {
         ReadFileBytes(&flags, sizeof(flags));
         if (flags == VERTEX_LIST_END) {
             break;
         }
 
-        if (i >= GROUND_GRID_VERTEX_SLOT_COUNT) {
+        if (vertexIndex >= GROUND_GRID_VERTEX_SLOT_COUNT) {
             osSyncPrintf("ER4\n");
             break;
         }
 
         if (!(flags & VERTEX_FLAG_SAME_X)) {
             ReadVertexX(&x, flags);
-            g_WorkArea.hole.gridVertices[i].v.ob[AXIS_X] = x;
-            g_WorkArea.hole.gridVertices[i].v.tc[TEXTURE_AXIS_S] =
+            g_WorkArea.hole.gridVertices[vertexIndex].v.ob[AXIS_X] = x;
+            g_WorkArea.hole.gridVertices[vertexIndex].v.tc[TEXTURE_AXIS_S] =
                 (x * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
         }
 
         ReadVertexY(&y, flags);
-        g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Y] = y;
+        g_WorkArea.hole.gridVertices[vertexIndex].v.ob[AXIS_Y] = y;
         if (!(flags & VERTEX_FLAG_SAME_Z)) {
             ReadVertexZ(&z, flags);
-            g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Z] = z;
-            g_WorkArea.hole.gridVertices[i].v.tc[TEXTURE_AXIS_T] =
+            g_WorkArea.hole.gridVertices[vertexIndex].v.ob[AXIS_Z] = z;
+            g_WorkArea.hole.gridVertices[vertexIndex].v.tc[TEXTURE_AXIS_T] =
                 (z * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
         }
     }
@@ -3166,7 +3168,7 @@ void GetGroundLightColors(GroundLightColor *light, GroundLightColor *shade) {
     GroundLightColor keyLights[2];
     GroundLightColor keyShades[2];
     s32 keyIndexes[2];
-    s32 i;
+    s32 keyIndex;
     f32 fraction;
 
     s32 InterpolateChannel(s32 from, s32 to, f32 fraction) {
@@ -3186,39 +3188,39 @@ void GetGroundLightColors(GroundLightColor *light, GroundLightColor *shade) {
         keyIndexes[1] = SCENE_COLOR_INDEX_DRIVING_RANGE;
     }
 
-    for (i = 0; i < 2; i++) {
-        switch (keyIndexes[i]) {
+    for (keyIndex = 0; keyIndex < 2; keyIndex++) {
+        switch (keyIndexes[keyIndex]) {
             default:
             case SCENE_COLOR_INDEX_ROUND_END: {
                 static const GroundLightColor endLight = {23, 18, 14};
                 static const GroundLightColor endShade = {10, 6, 0};
 
-                keyLights[i] = endLight;
-                keyShades[i] = endShade;
+                keyLights[keyIndex] = endLight;
+                keyShades[keyIndex] = endShade;
                 break;
             }
             case SCENE_COLOR_INDEX_DRIVING_RANGE: {
                 static const GroundLightColor middleLight = {21, 21, 21};
                 static const GroundLightColor middleShade = {4, 4, 4};
 
-                keyLights[i] = middleLight;
-                keyShades[i] = middleShade;
+                keyLights[keyIndex] = middleLight;
+                keyShades[keyIndex] = middleShade;
                 break;
             }
             case SCENE_COLOR_INDEX_ROUND_START: {
                 static const GroundLightColor startLight = {20, 20, 20};
                 static const GroundLightColor startShade = {6, 6, 6};
 
-                keyLights[i] = startLight;
-                keyShades[i] = startShade;
+                keyLights[keyIndex] = startLight;
+                keyShades[keyIndex] = startShade;
                 break;
             }
             case SCENE_COLOR_INDEX_SUDDEN_DEATH: {
                 static const GroundLightColor suddenDeathLight = {20, 20, 2};
                 static const GroundLightColor suddenDeathShade = {0, 0, 0};
 
-                keyLights[i] = suddenDeathLight;
-                keyShades[i] = suddenDeathShade;
+                keyLights[keyIndex] = suddenDeathLight;
+                keyShades[keyIndex] = suddenDeathShade;
                 break;
             }
         }
@@ -3627,7 +3629,7 @@ void ToggleGroundTileBorders(void) {
         s32 strippedTileRow;
         s32 strippedTexelColumn;
         s32 strippedTexelRow;
-        s32 i;
+        s32 texelIndex;
 
         for (strippedTileRow = 0; strippedTileRow < GROUND_TILE_ROW_COUNT; strippedTileRow++) {
             for (strippedTileColumn = 0; strippedTileColumn < GROUND_TILE_COLUMN_COUNT;
@@ -3648,10 +3650,10 @@ void ToggleGroundTileBorders(void) {
                 }
 
                 texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0;
-                for (i = 0; i < BORDERED_TILE_TEXEL_COUNT; i++) {
+                for (texelIndex = 0; texelIndex < BORDERED_TILE_TEXEL_COUNT; texelIndex++) {
                     g_WorkArea.hole
                         .tiles[(strippedTileRow * GROUND_TILE_COLUMN_COUNT) + strippedTileColumn]
-                        .texels[0][i] = texels[0][i];
+                        .texels[0][texelIndex] = texels[0][texelIndex];
                 }
             }
         }
@@ -3749,11 +3751,11 @@ void SetTileTextureCoords(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
 }
 
 static inline void CopyVertices(Vtx *destination, Vtx *source, s32 count) {
-    s32 i;
+    s32 vertexIndex;
 
-    for (i = 0; i < count; i++) {
-        ((f64 *)&destination[i])[0] = ((f64 *)&source[i])[0];
-        ((f64 *)&destination[i])[1] = ((f64 *)&source[i])[1];
+    for (vertexIndex = 0; vertexIndex < count; vertexIndex++) {
+        ((f64 *)&destination[vertexIndex])[0] = ((f64 *)&source[vertexIndex])[0];
+        ((f64 *)&destination[vertexIndex])[1] = ((f64 *)&source[vertexIndex])[1];
     }
 }
 

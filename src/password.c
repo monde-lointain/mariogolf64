@@ -256,9 +256,9 @@ static TournamentRules f_TournamentRules[TOURNAMENT_RULES_COUNT] = {
 
 static u8 ReverseBits(u8 bits) {
     u8 reversed = 0;
-    s32 i;
+    s32 bitIndex;
 
-    for (i = 0; i < BITS_PER_BYTE; i++) {
+    for (bitIndex = 0; bitIndex < BITS_PER_BYTE; bitIndex++) {
         reversed *= 2;
         if (bits & 1) {
             reversed |= 1;
@@ -271,20 +271,20 @@ static u8 ReverseBits(u8 bits) {
 }
 
 s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 variant) {
-    s32 i;
+    s32 symbolIndex;
     char **entry;
 
-    for (i = 0; i < symbolCount; i++) {
-        if (symbols[i] >= PASSWORD_SYMBOL_COUNT) {
+    for (symbolIndex = 0; symbolIndex < symbolCount; symbolIndex++) {
+        if (symbols[symbolIndex] >= PASSWORD_SYMBOL_COUNT) {
             return -1;
         }
 
-        entry = &f_PasswordAlphabet[(symbols[i] + i) % PASSWORD_SYMBOL_COUNT];
+        entry = &f_PasswordAlphabet[(symbols[symbolIndex] + symbolIndex) % PASSWORD_SYMBOL_COUNT];
         if (variant) {
-            password[i] = (*entry)[0];
+            password[symbolIndex] = (*entry)[0];
         }
         else {
-            password[i] = (*entry)[0];
+            password[symbolIndex] = (*entry)[0];
         }
     }
 
@@ -292,17 +292,17 @@ s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 varia
 }
 
 static s32 ReadPasswordSymbols(u8 *symbols, char *password, s32 symbolCount) {
-    s32 i;
+    s32 symbolIndex;
     s32 symbol;
     s32 characterIndex;
 
-    for (i = 0; i < symbolCount; i++) {
+    for (symbolIndex = 0; symbolIndex < symbolCount; symbolIndex++) {
         for (symbol = 0; symbol < PASSWORD_SYMBOL_COUNT; symbol++) {
             char *characters = f_PasswordAlphabet[symbol];
             Boolean isFound = FALSE;
 
             for (characterIndex = 0; characters[characterIndex] != '\0'; characterIndex++) {
-                if (characters[characterIndex] == password[i]) {
+                if (characters[characterIndex] == password[symbolIndex]) {
                     isFound = TRUE;
                     break;
                 }
@@ -317,7 +317,8 @@ static s32 ReadPasswordSymbols(u8 *symbols, char *password, s32 symbolCount) {
             return -1;
         }
 
-        symbols[i] = (symbol + PASSWORD_SYMBOL_COUNT - i) % PASSWORD_SYMBOL_COUNT;
+        symbols[symbolIndex] =
+            (symbol + PASSWORD_SYMBOL_COUNT - symbolIndex) % PASSWORD_SYMBOL_COUNT;
     }
 
     return 0;
@@ -373,7 +374,7 @@ void EncodeScorePassword(ScoreReport *source, char *password) {
     ScoreReport *clamped = &report;
     s32 symbolCount = 0;
     u32 number;
-    s32 i;
+    s32 symbolIndex;
 
     report = *source;
 
@@ -397,34 +398,38 @@ void EncodeScorePassword(ScoreReport *source, char *password) {
 
     number = (clamped->tournamentCode[0] << 16) | (clamped->tournamentCode[1] << 8) |
         clamped->tournamentCode[2];
-    for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
+    for (symbolIndex = 0; symbolIndex < NUMBER_SYMBOL_COUNT; symbolIndex++) {
         symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
         number /= PASSWORD_SYMBOL_COUNT;
     }
 
     number = (clamped->gameBoyLevel * TIME_RANGE) + clamped->time + TIME_NUMBER_SALT;
-    for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
+    for (symbolIndex = 0; symbolIndex < NUMBER_SYMBOL_COUNT; symbolIndex++) {
         symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
         number /= PASSWORD_SYMBOL_COUNT;
     }
 
     number = (clamped->characterIndex * SCORE_RANGE) + (s16)clamped->score +
         ((rand() % SCORE_NOISE_RANGE) * (CHARACTER_COUNT * SCORE_RANGE)) + SCORE_NUMBER_SALT;
-    for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
+    for (symbolIndex = 0; symbolIndex < NUMBER_SYMBOL_COUNT; symbolIndex++) {
         symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
         number /= PASSWORD_SYMBOL_COUNT;
     }
 
-    for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
-        symbols[i] = (symbols[i] + symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) % PASSWORD_SYMBOL_COUNT;
-        symbols[NUMBER_SYMBOL_COUNT + i] =
-            (symbols[NUMBER_SYMBOL_COUNT + i] + symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) %
+    for (symbolIndex = 0; symbolIndex < NUMBER_SYMBOL_COUNT; symbolIndex++) {
+        symbols[symbolIndex] =
+            (symbols[symbolIndex] + symbols[(2 * NUMBER_SYMBOL_COUNT) + symbolIndex]) %
+            PASSWORD_SYMBOL_COUNT;
+        symbols[NUMBER_SYMBOL_COUNT + symbolIndex] =
+            (symbols[NUMBER_SYMBOL_COUNT + symbolIndex] +
+                symbols[(2 * NUMBER_SYMBOL_COUNT) + symbolIndex]) %
             PASSWORD_SYMBOL_COUNT;
     }
 
-    for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
-        symbols[symbolCount++] = (symbols[i] + symbols[NUMBER_SYMBOL_COUNT + i] +
-                                     symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) %
+    for (symbolIndex = 0; symbolIndex < NUMBER_SYMBOL_COUNT; symbolIndex++) {
+        symbols[symbolCount++] =
+            (symbols[symbolIndex] + symbols[NUMBER_SYMBOL_COUNT + symbolIndex] +
+                symbols[(2 * NUMBER_SYMBOL_COUNT) + symbolIndex]) %
             PASSWORD_SYMBOL_COUNT;
     }
 

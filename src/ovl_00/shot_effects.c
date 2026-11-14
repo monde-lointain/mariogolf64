@@ -169,12 +169,12 @@ void StopAllSounds(void) {
 
 s32 StartSparkBurst(void) {
     s32 found = NO_SPARK_BURST;
-    s32 i;
+    s32 burstIndex;
 
-    for (i = 0; i != SPARK_BURST_COUNT; i++) {
-        if (f_SparkBurstAges[i] == NO_SPARK_BURST) {
-            found = i;
-            f_SparkBurstAges[i] = 1;
+    for (burstIndex = 0; burstIndex != SPARK_BURST_COUNT; burstIndex++) {
+        if (f_SparkBurstAges[burstIndex] == NO_SPARK_BURST) {
+            found = burstIndex;
+            f_SparkBurstAges[burstIndex] = 1;
             f_SparkBurstTimers[found] = SPARK_BURST_TIME;
             break;
         }
@@ -186,7 +186,7 @@ s32 StartSparkBurst(void) {
 void StartImpactSparks(void) {
     s32 count = 0;
     s32 burst;
-    s32 i;
+    s32 sparkIndex;
 
     f_ImpactFrameCount = 1;
     burst = StartSparkBurst();
@@ -194,21 +194,21 @@ void StartImpactSparks(void) {
         f_SparkBurstPoints[burst][AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
         f_SparkBurstPoints[burst][AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
         f_SparkBurstPoints[burst][AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
-        for (i = 0; i != SPARK_COUNT; i++) {
-            if (f_SparkLives[i] == 0) {
+        for (sparkIndex = 0; sparkIndex != SPARK_COUNT; sparkIndex++) {
+            if (f_SparkLives[sparkIndex] == 0) {
                 f32 speed;
 
-                f_SparkOffsets[i][AXIS_X] = 0;
-                f_SparkOffsets[i][AXIS_Y] = 0;
-                f_SparkAngles[i] =
+                f_SparkOffsets[sparkIndex][AXIS_X] = 0;
+                f_SparkOffsets[sparkIndex][AXIS_Y] = 0;
+                f_SparkAngles[sparkIndex] =
                     ((f32)count * IMPACT_SPARK_SPACING) + DegreesToRadians((guRandom() % 20) - 10);
-                f_SparkKinds[i] = SPARK_KIND_IMPACT;
+                f_SparkKinds[sparkIndex] = SPARK_KIND_IMPACT;
                 speed = (guRandom() % IMPACT_SPARK_SPEED_RANGE) + IMPACT_SPARK_MIN_SPEED;
-                f_SparkVelocities[i][AXIS_X] = sinf(f_SparkAngles[i]) * speed;
+                f_SparkVelocities[sparkIndex][AXIS_X] = sinf(f_SparkAngles[sparkIndex]) * speed;
                 count++;
-                f_SparkVelocities[i][AXIS_Y] = -cosf(f_SparkAngles[i]) * speed;
-                f_SparkLives[i] = SPARK_LIFE;
-                f_SparkBursts[i] = burst;
+                f_SparkVelocities[sparkIndex][AXIS_Y] = -cosf(f_SparkAngles[sparkIndex]) * speed;
+                f_SparkLives[sparkIndex] = SPARK_LIFE;
+                f_SparkBursts[sparkIndex] = burst;
             }
 
             if (count == IMPACT_SPARK_COUNT) {
@@ -247,23 +247,25 @@ void StartFlagSparks(CoursePoint point UNUSED) {
 void StartFlagstickSparks(CoursePoint point) {
     s32 count = 0;
     s32 burst = StartSparkBurst();
-    s32 i;
+    s32 sparkIndex;
 
     if (burst != NO_SPARK_BURST) {
         f_SparkBurstPoints[burst][AXIS_X] = point[AXIS_X];
         f_SparkBurstPoints[burst][AXIS_Y] = point[AXIS_Y];
         f_SparkBurstPoints[burst][AXIS_Z] = point[AXIS_Z];
-        for (i = 0; i != SPARK_COUNT; i++) {
-            if (f_SparkLives[i] == 0) {
-                f_SparkOffsets[i][AXIS_X] = 0;
-                f_SparkOffsets[i][AXIS_Y] = 0;
-                f_SparkAngles[i] = (f32)count * FLAGSTICK_SPARK_SPACING;
-                f_SparkKinds[i] = SPARK_KIND_FLAGSTICK;
+        for (sparkIndex = 0; sparkIndex != SPARK_COUNT; sparkIndex++) {
+            if (f_SparkLives[sparkIndex] == 0) {
+                f_SparkOffsets[sparkIndex][AXIS_X] = 0;
+                f_SparkOffsets[sparkIndex][AXIS_Y] = 0;
+                f_SparkAngles[sparkIndex] = (f32)count * FLAGSTICK_SPARK_SPACING;
+                f_SparkKinds[sparkIndex] = SPARK_KIND_FLAGSTICK;
                 count++;
-                f_SparkVelocities[i][AXIS_X] = sinf(f_SparkAngles[i]) * FLAGSTICK_SPARK_SPEED;
-                f_SparkVelocities[i][AXIS_Y] = -cosf(f_SparkAngles[i]) * FLAGSTICK_SPARK_SPEED;
-                f_SparkLives[i] = SPARK_LIFE;
-                f_SparkBursts[i] = burst;
+                f_SparkVelocities[sparkIndex][AXIS_X] =
+                    sinf(f_SparkAngles[sparkIndex]) * FLAGSTICK_SPARK_SPEED;
+                f_SparkVelocities[sparkIndex][AXIS_Y] =
+                    -cosf(f_SparkAngles[sparkIndex]) * FLAGSTICK_SPARK_SPEED;
+                f_SparkLives[sparkIndex] = SPARK_LIFE;
+                f_SparkBursts[sparkIndex] = burst;
             }
 
             if (count == FLAGSTICK_SPARK_COUNT) {

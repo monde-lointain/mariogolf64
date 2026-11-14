@@ -188,34 +188,34 @@ const BillboardColor g_BillboardEnvColor = {128, 64, 32};
             ((z) >= COURSE_EDGE_MAX_Z)))
 
 void PlaceBillboards(void) {
-    s32 i;
+    s32 billboardIndex;
     f32 x;
     f32 z;
     f32 y;
 
-    for (i = 0; i != BILLBOARD_COUNT; i++) {
-        f_DrawOrder[i] = i;
+    for (billboardIndex = 0; billboardIndex != BILLBOARD_COUNT; billboardIndex++) {
+        f_DrawOrder[billboardIndex] = billboardIndex;
     }
 
-    for (i = 0; i < BILLBOARD_COUNT; i++) {
-        if (g_Billboards[i].textureIndex >= 0) {
-            x = g_Billboards[i].x;
-            z = g_Billboards[i].z;
+    for (billboardIndex = 0; billboardIndex < BILLBOARD_COUNT; billboardIndex++) {
+        if (g_Billboards[billboardIndex].textureIndex >= 0) {
+            x = g_Billboards[billboardIndex].x;
+            z = g_Billboards[billboardIndex].z;
             if (IsNearCourseEdge(x, z)) {
-                g_Billboards[i].isNearCourseEdge = TRUE;
+                g_Billboards[billboardIndex].isNearCourseEdge = TRUE;
             }
             else {
-                g_Billboards[i].isNearCourseEdge = FALSE;
+                g_Billboards[billboardIndex].isNearCourseEdge = FALSE;
             }
 
             y = GetGroundHeight(x * GROUND_HEIGHT_SCALE, z * GROUND_HEIGHT_SCALE) /
                 GROUND_HEIGHT_SCALE;
-            g_Billboards[i].y = y;
-            guTranslate(&g_BillboardTransforms[i].translation, x, y, z);
+            g_Billboards[billboardIndex].y = y;
+            guTranslate(&g_BillboardTransforms[billboardIndex].translation, x, y, z);
             guScale(
-                &g_BillboardTransforms[i].scale,
-                g_Billboards[i].width,
-                g_Billboards[i].height,
+                &g_BillboardTransforms[billboardIndex].scale,
+                g_Billboards[billboardIndex].width,
+                g_Billboards[billboardIndex].height,
                 1.0f
             );
         }
@@ -223,23 +223,26 @@ void PlaceBillboards(void) {
 }
 
 void SortBillboardsByDepth(void) {
-    s32 i;
+    s32 orderIndex;
     s32 sortedIndex;
     u16 insertedIndex;
 
-    for (i = 0; i != BILLBOARD_COUNT; i++) {
-        if (g_Billboards[i].textureIndex < 0) {
-            g_BillboardTransforms[i].viewDepth = VIEW_DEPTH_FAR;
+    for (orderIndex = 0; orderIndex != BILLBOARD_COUNT; orderIndex++) {
+        if (g_Billboards[orderIndex].textureIndex < 0) {
+            g_BillboardTransforms[orderIndex].viewDepth = VIEW_DEPTH_FAR;
         }
         else {
-            g_BillboardTransforms[i].viewDepth =
-                GetViewDepth(g_Billboards[i].x, g_Billboards[i].y, g_Billboards[i].z);
+            g_BillboardTransforms[orderIndex].viewDepth = GetViewDepth(
+                g_Billboards[orderIndex].x,
+                g_Billboards[orderIndex].y,
+                g_Billboards[orderIndex].z
+            );
         }
     }
 
-    for (i = 1; i != BILLBOARD_COUNT; i++) {
-        insertedIndex = f_DrawOrder[i];
-        for (sortedIndex = i - 1; sortedIndex >= 0 &&
+    for (orderIndex = 1; orderIndex != BILLBOARD_COUNT; orderIndex++) {
+        insertedIndex = f_DrawOrder[orderIndex];
+        for (sortedIndex = orderIndex - 1; sortedIndex >= 0 &&
             g_BillboardTransforms[f_DrawOrder[sortedIndex]].viewDepth <
                 g_BillboardTransforms[insertedIndex].viewDepth;
             sortedIndex--) {

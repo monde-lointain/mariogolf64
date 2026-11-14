@@ -1269,7 +1269,7 @@ NO_RESULT ConsiderReactionSpot(CoursePoint point) {
     s32 height;
     s32 sample;
     Boolean isNearBillboard;
-    s32 i;
+    s32 billboardIndex;
     Billboard *billboard;
 
     height = GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
@@ -1293,8 +1293,8 @@ NO_RESULT ConsiderReactionSpot(CoursePoint point) {
     roughness *= 2;
     if (!f_HasReactionSpot) {
         isNearBillboard = FALSE;
-        for (i = 0; i < BILLBOARD_COUNT; i++) {
-            billboard = &g_Billboards[i];
+        for (billboardIndex = 0; billboardIndex < BILLBOARD_COUNT; billboardIndex++) {
+            billboard = &g_Billboards[billboardIndex];
             if ((s32)IntLength2D(
                     (billboard->x << WORLD_TO_COURSE_SHIFT) - point[AXIS_X],
                     (billboard->z << WORLD_TO_COURSE_SHIFT) - point[AXIS_Z]
@@ -1331,7 +1331,7 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
     Radians heading;
     Radians pitch;
     f32 distance;
-    s32 i;
+    s32 refinementStep;
     f32 cosine;
     f32 absRadius;
     f32 radius = SPOT_PLACE_DISTANCE;
@@ -1347,7 +1347,7 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
     ahead[AXIS_Z] = (sinf(heading) * radius) + spot[AXIS_Z];
     ahead[AXIS_Y] = GetGroundHeight(ahead[AXIS_X], ahead[AXIS_Z]);
     pitch = atan2(ahead[AXIS_Y] - spot[AXIS_Y], radius);
-    for (i = 0; i < PITCH_REFINEMENT_COUNT; i++) {
+    for (refinementStep = 0; refinementStep < PITCH_REFINEMENT_COUNT; refinementStep++) {
         cosine = cosf(pitch);
         absRadius = radius;
         if (absRadius < 0.0f) {

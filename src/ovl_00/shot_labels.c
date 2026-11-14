@@ -137,8 +137,8 @@ void DrawShotLabels(Gfx **displayListHead) {
     s32 corner;
     s32 tries;
 
-    s32 i;
-    s32 j;
+    s32 playerIndex;
+    s32 earlierIndex;
 
     void DrawLeaderLine(s32 x, s32 y, s32 corner) {
         gDPPipeSync(gfx++);
@@ -250,8 +250,8 @@ void DrawShotLabels(Gfx **displayListHead) {
     }
 
     if (f_ShotLabelPlayers != players) {
-        for (i = 0; i != MAX_PLAYER_COUNT; i++) {
-            f_ShotLabels[i].corner = NO_CORNER;
+        for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
+            f_ShotLabels[playerIndex].corner = NO_CORNER;
         }
     }
 
@@ -271,25 +271,26 @@ void DrawShotLabels(Gfx **displayListHead) {
             cup.state = SPOT_HIDDEN;
         }
 
-        for (i = 0; i != g_GameState.playerCount; i++) {
+        for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             if (players == SHOT_LABELS_OTHER_BALLS &&
-                (g_CurrentShot.playerIndex == i || g_Players[i].strokeCount == 0)) {
-                f_ShotLabels[i].corner = NO_CORNER;
+                (g_CurrentShot.playerIndex == playerIndex ||
+                    g_Players[playerIndex].strokeCount == 0)) {
+                f_ShotLabels[playerIndex].corner = NO_CORNER;
                 continue;
             }
 
-            if (g_Players[i].holeStatus != HOLE_STATUS_PLAYING) {
-                f_ShotLabels[i].corner = NO_CORNER;
+            if (g_Players[playerIndex].holeStatus != HOLE_STATUS_PLAYING) {
+                f_ShotLabels[playerIndex].corner = NO_CORNER;
                 continue;
             }
 
             if (ProjectPoint(
-                    g_Players[i].ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-                    g_Players[i].ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
-                    g_Players[i].ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE,
+                    g_Players[playerIndex].ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+                    g_Players[playerIndex].ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+                    g_Players[playerIndex].ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE,
                     &point
                 ) >= 0) {
-                f_ShotLabels[i].corner = NO_CORNER;
+                f_ShotLabels[playerIndex].corner = NO_CORNER;
                 continue;
             }
 
@@ -297,34 +298,34 @@ void DrawShotLabels(Gfx **displayListHead) {
                 point.x > SCREEN_WIDTH + TAG_SCREEN_MARGIN ||
                 point.y < -TAG_SCREEN_MARGIN ||
                 point.y > SCREEN_HEIGHT + TAG_SCREEN_MARGIN) {
-                f_ShotLabels[i].x = point.x;
-                f_ShotLabels[i].y = point.y;
-                f_ShotLabels[i].depth = point.depth;
-                f_ShotLabels[i].corner = NO_CORNER;
+                f_ShotLabels[playerIndex].x = point.x;
+                f_ShotLabels[playerIndex].y = point.y;
+                f_ShotLabels[playerIndex].depth = point.depth;
+                f_ShotLabels[playerIndex].corner = NO_CORNER;
                 continue;
             }
 
-            if (f_ShotLabels[i].corner == NO_CORNER) {
+            if (f_ShotLabels[playerIndex].corner == NO_CORNER) {
                 if (players == SHOT_LABELS_OTHER_BALLS) {
-                    f_ShotLabels[i].corner = (i & 1) + CORNER_UPPER_LEFT;
+                    f_ShotLabels[playerIndex].corner = (playerIndex & 1) + CORNER_UPPER_LEFT;
                 }
                 else {
-                    f_ShotLabels[i].corner = i;
+                    f_ShotLabels[playerIndex].corner = playerIndex;
                 }
             }
 
-            f_ShotLabels[i].x = point.x + f_TagOffsetsX[f_ShotLabels[i].corner];
-            f_ShotLabels[i].y = point.y + f_TagOffsetsY[f_ShotLabels[i].corner];
-            f_ShotLabels[i].depth = point.depth;
+            f_ShotLabels[playerIndex].x = point.x + f_TagOffsetsX[f_ShotLabels[playerIndex].corner];
+            f_ShotLabels[playerIndex].y = point.y + f_TagOffsetsY[f_ShotLabels[playerIndex].corner];
+            f_ShotLabels[playerIndex].depth = point.depth;
             if (players == SHOT_LABELS_OVERHEAD) {
                 for (tries = 0; tries != CORNER_COUNT; tries++) {
                     s32 overlaps = FALSE;
 
-                    corner = (f_ShotLabels[i].corner + tries) % CORNER_COUNT;
-                    for (j = 0; j != i; j++) {
-                        if (f_ShotLabels[j].corner != NO_CORNER &&
+                    corner = (f_ShotLabels[playerIndex].corner + tries) % CORNER_COUNT;
+                    for (earlierIndex = 0; earlierIndex != playerIndex; earlierIndex++) {
+                        if (f_ShotLabels[earlierIndex].corner != NO_CORNER &&
                             IsTagOverlapping(
-                                f_ShotLabels[j],
+                                f_ShotLabels[earlierIndex],
                                 point.x + f_TagOffsetsX[corner],
                                 point.y + f_TagOffsetsY[corner]
                             )) {
@@ -333,8 +334,8 @@ void DrawShotLabels(Gfx **displayListHead) {
                     }
 
                     if (!overlaps) {
-                        f_ShotLabels[i].x = point.x + f_TagOffsetsX[corner];
-                        f_ShotLabels[i].y = point.y + f_TagOffsetsY[corner];
+                        f_ShotLabels[playerIndex].x = point.x + f_TagOffsetsX[corner];
+                        f_ShotLabels[playerIndex].y = point.y + f_TagOffsetsY[corner];
                         goto PLACED;
                     }
                 }
@@ -344,8 +345,8 @@ void DrawShotLabels(Gfx **displayListHead) {
                 for (tries = 0; tries != UPPER_CORNER_COUNT; tries++) {
                     s32 overlaps = FALSE;
 
-                    corner =
-                        ((f_ShotLabels[i].corner + tries) % UPPER_CORNER_COUNT) + CORNER_UPPER_LEFT;
+                    corner = ((f_ShotLabels[playerIndex].corner + tries) % UPPER_CORNER_COUNT) +
+                        CORNER_UPPER_LEFT;
                     if (cup.state == SPOT_SHOWN &&
                         IsTagOverlapping(
                             cup,
@@ -353,21 +354,23 @@ void DrawShotLabels(Gfx **displayListHead) {
                             point.y + f_TagOffsetsY[corner]
                         )) {
                         if (corner == CORNER_UPPER_LEFT) {
-                            f_ShotLabels[i].corner = CORNER_UPPER_RIGHT;
+                            f_ShotLabels[playerIndex].corner = CORNER_UPPER_RIGHT;
                         }
                         else {
-                            f_ShotLabels[i].corner = CORNER_UPPER_LEFT;
+                            f_ShotLabels[playerIndex].corner = CORNER_UPPER_LEFT;
                         }
 
-                        f_ShotLabels[i].x = point.x + f_TagOffsetsX[f_ShotLabels[i].corner];
-                        f_ShotLabels[i].y = point.y + f_TagOffsetsY[f_ShotLabels[i].corner];
+                        f_ShotLabels[playerIndex].x =
+                            point.x + f_TagOffsetsX[f_ShotLabels[playerIndex].corner];
+                        f_ShotLabels[playerIndex].y =
+                            point.y + f_TagOffsetsY[f_ShotLabels[playerIndex].corner];
                         goto NEXT;
                     }
 
-                    for (j = 0; j != i; j++) {
-                        if (f_ShotLabels[j].corner != NO_CORNER &&
+                    for (earlierIndex = 0; earlierIndex != playerIndex; earlierIndex++) {
+                        if (f_ShotLabels[earlierIndex].corner != NO_CORNER &&
                             IsTagOverlapping(
-                                f_ShotLabels[j],
+                                f_ShotLabels[earlierIndex],
                                 point.x + f_TagOffsetsX[corner],
                                 point.y + f_TagOffsetsY[corner]
                             )) {
@@ -376,8 +379,8 @@ void DrawShotLabels(Gfx **displayListHead) {
                     }
 
                     if (!overlaps) {
-                        f_ShotLabels[i].x = point.x + f_TagOffsetsX[corner];
-                        f_ShotLabels[i].y = point.y + f_TagOffsetsY[corner];
+                        f_ShotLabels[playerIndex].x = point.x + f_TagOffsetsX[corner];
+                        f_ShotLabels[playerIndex].y = point.y + f_TagOffsetsY[corner];
                         goto PLACED;
                     }
                 }
@@ -385,7 +388,7 @@ void DrawShotLabels(Gfx **displayListHead) {
             }
 
 PLACED:
-            f_ShotLabels[i].corner = corner;
+            f_ShotLabels[playerIndex].corner = corner;
 
 NEXT:;
         }
@@ -428,19 +431,23 @@ NEXT:;
         );
         gDPPipeSync(gfx++);
         gDPSetDepthSource(gfx++, G_ZS_PRIM);
-        for (i = 0; i != g_GameState.playerCount; i++) {
-            if (f_ShotLabels[i].corner != NO_CORNER) {
-                gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
+        for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+            if (f_ShotLabels[playerIndex].corner != NO_CORNER) {
+                gDPSetPrimDepth(gfx++, f_ShotLabels[playerIndex].depth, 0);
                 gDPSetPrimColor(
                     gfx++,
                     0,
                     0,
-                    f_PlayerTagColors[i][0],
-                    f_PlayerTagColors[i][1],
-                    f_PlayerTagColors[i][2],
+                    f_PlayerTagColors[playerIndex][0],
+                    f_PlayerTagColors[playerIndex][1],
+                    f_PlayerTagColors[playerIndex][2],
                     TAG_ALPHA
                 );
-                DrawLeaderLine(f_ShotLabels[i].x, f_ShotLabels[i].y, f_ShotLabels[i].corner);
+                DrawLeaderLine(
+                    f_ShotLabels[playerIndex].x,
+                    f_ShotLabels[playerIndex].y,
+                    f_ShotLabels[playerIndex].corner
+                );
             }
         }
 
@@ -450,14 +457,15 @@ NEXT:;
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_PlayerTagImages)));
         gDPPipeSync(gfx++);
-        for (i = 0; i != g_GameState.playerCount; i++) {
-            if (f_ShotLabels[i].corner != NO_CORNER) {
-                gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
+        for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+            if (f_ShotLabels[playerIndex].corner != NO_CORNER) {
+                gDPSetPrimDepth(gfx++, f_ShotLabels[playerIndex].depth, 0);
                 DrawPlayerTag(
-                    f_ShotLabels[i].x,
-                    f_ShotLabels[i].y,
-                    f_ShotLabels[i].corner,
-                    g_Players[i].isComputer ? i + COMPUTER_TAG_OFFSET : i
+                    f_ShotLabels[playerIndex].x,
+                    f_ShotLabels[playerIndex].y,
+                    f_ShotLabels[playerIndex].corner,
+                    g_Players[playerIndex].isComputer ? playerIndex + COMPUTER_TAG_OFFSET :
+                                                        playerIndex
                 );
             }
         }
@@ -499,19 +507,23 @@ NEXT:;
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        for (i = 0; i != g_GameState.playerCount; i++) {
-            if (f_ShotLabels[i].corner != NO_CORNER) {
-                gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
+        for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+            if (f_ShotLabels[playerIndex].corner != NO_CORNER) {
+                gDPSetPrimDepth(gfx++, f_ShotLabels[playerIndex].depth, 0);
                 gDPSetPrimColor(
                     gfx++,
                     0,
                     0,
-                    f_PlayerTagColors[i][0],
-                    f_PlayerTagColors[i][1],
-                    f_PlayerTagColors[i][2],
+                    f_PlayerTagColors[playerIndex][0],
+                    f_PlayerTagColors[playerIndex][1],
+                    f_PlayerTagColors[playerIndex][2],
                     TAG_SHADOW_ALPHA
                 );
-                DrawLeaderLine(f_ShotLabels[i].x, f_ShotLabels[i].y, f_ShotLabels[i].corner);
+                DrawLeaderLine(
+                    f_ShotLabels[playerIndex].x,
+                    f_ShotLabels[playerIndex].y,
+                    f_ShotLabels[playerIndex].corner
+                );
             }
         }
 
@@ -540,14 +552,15 @@ NEXT:;
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_PlayerTagImages)));
         gDPPipeSync(gfx++);
-        for (i = 0; i != g_GameState.playerCount; i++) {
-            if (f_ShotLabels[i].corner != NO_CORNER) {
-                gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
+        for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+            if (f_ShotLabels[playerIndex].corner != NO_CORNER) {
+                gDPSetPrimDepth(gfx++, f_ShotLabels[playerIndex].depth, 0);
                 DrawPlayerTag(
-                    f_ShotLabels[i].x,
-                    f_ShotLabels[i].y,
-                    f_ShotLabels[i].corner,
-                    g_Players[i].isComputer ? i + COMPUTER_TAG_OFFSET : i
+                    f_ShotLabels[playerIndex].x,
+                    f_ShotLabels[playerIndex].y,
+                    f_ShotLabels[playerIndex].corner,
+                    g_Players[playerIndex].isComputer ? playerIndex + COMPUTER_TAG_OFFSET :
+                                                        playerIndex
                 );
             }
         }

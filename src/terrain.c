@@ -285,28 +285,28 @@ s32 FindNearestTerrainColor(s32 color) {
     s32 colorRed = (color >> RGBA16_RED_SHIFT) & RGBA16_CHANNEL_MASK;
     s32 colorGreen = (color >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
     s32 colorBlue = (color >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK;
-    s32 i;
+    s32 colorIndex;
     s32 red;
     s32 green;
     s32 blue;
     s32 distance;
 
-    for (i = 0; i < TERRAIN_COLOR_COUNT; i++) {
-        red = colorRed - f_TerrainColors[i].red;
+    for (colorIndex = 0; colorIndex < TERRAIN_COLOR_COUNT; colorIndex++) {
+        red = colorRed - f_TerrainColors[colorIndex].red;
         if (red < 0) {
             red = -red;
         }
 
-        green = colorGreen - f_TerrainColors[i].green;
+        green = colorGreen - f_TerrainColors[colorIndex].green;
         if (green < 0) {
             green = -green;
         }
 
-        blue = colorBlue - f_TerrainColors[i].blue;
+        blue = colorBlue - f_TerrainColors[colorIndex].blue;
         distance = red + green + Abs(blue);
         if (distance < nearestDistance) {
             nearestDistance = distance;
-            nearestIndex = i;
+            nearestIndex = colorIndex;
         }
     }
 
@@ -411,7 +411,7 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     s32 shiftedX;
     s32 shiftedZ;
     s32 waterBias;
-    s32 i;
+    s32 neighborIndex;
     s32 column;
     s32 row;
     s32 stepColumn;
@@ -457,8 +457,8 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
         }
 
         if (hit.tag == HOLE_TRIANGLE_KIND_FLAT) {
-            i = WaterProbeHeight(fraction, MINI_GOLF_WATER_PROBE_REACH) + waterBias;
-            if (i < GetTerrainHeight(x, z)) {
+            neighborIndex = WaterProbeHeight(fraction, MINI_GOLF_WATER_PROBE_REACH) + waterBias;
+            if (neighborIndex < GetTerrainHeight(x, z)) {
                 return SURFACE_WATER_HAZARD;
             }
         }
@@ -468,9 +468,11 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     row = shiftedZ / MINI_GOLF_TEXEL_LENGTH;
     stepColumn = ((shiftedX & (MINI_GOLF_TEXEL_WIDTH - 1)) < MINI_GOLF_TEXEL_WIDTH / 2) ? -1 : 1;
     stepRow = ((shiftedZ & (MINI_GOLF_TEXEL_LENGTH - 1)) < MINI_GOLF_TEXEL_LENGTH / 2) ? -1 : 1;
-    for (i = 0; i < NEAREST_CODE_COUNT; i++) {
-        switch (
-            GetTerrainCode((i & 1) ? column + stepColumn : column, (i & 2) ? row + stepRow : row)) {
+    for (neighborIndex = 0; neighborIndex < NEAREST_CODE_COUNT; neighborIndex++) {
+        switch (GetTerrainCode(
+            (neighborIndex & 1) ? column + stepColumn : column,
+            (neighborIndex & 2) ? row + stepRow : row
+        )) {
             case TERRAIN_CODE_FAIRWAY:
                 weight = 1.0f;
                 surface = SURFACE_MINI_GOLF_FAIRWAY;
@@ -533,8 +535,8 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
                 break;
         }
 
-        surfaces[i] = surface;
-        weights[i] = weight;
+        surfaces[neighborIndex] = surface;
+        weights[neighborIndex] = weight;
     }
 
     return surfaces[0];
@@ -550,7 +552,7 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     PlaneTriangle hit;
     f32 fraction;
     s32 waterBias;
-    s32 i;
+    s32 neighborIndex;
     s32 column;
     s32 row;
     s32 fractionX;
@@ -598,9 +600,11 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     stepColumn = (fractionX < GROUND_TEXEL_SIZE / 2) ? -1 : 1;
     fractionZ = z & (GROUND_TEXEL_SIZE - 1);
     stepRow = (fractionZ < GROUND_TEXEL_SIZE / 2) ? -1 : 1;
-    for (i = 0; i < NEAREST_CODE_COUNT; i++) {
-        switch (
-            GetTerrainCode((i & 1) ? column + stepColumn : column, (i & 2) ? row + stepRow : row)) {
+    for (neighborIndex = 0; neighborIndex < NEAREST_CODE_COUNT; neighborIndex++) {
+        switch (GetTerrainCode(
+            (neighborIndex & 1) ? column + stepColumn : column,
+            (neighborIndex & 2) ? row + stepRow : row
+        )) {
             case TERRAIN_CODE_FAIRWAY:
                 weight = 1.0f;
                 surface = SURFACE_FAIRWAY;
@@ -663,17 +667,17 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
                 break;
         }
 
-        surfaces[i] = surface;
-        weights[i] = weight;
+        surfaces[neighborIndex] = surface;
+        weights[neighborIndex] = weight;
     }
 
-    for (i = 1; i < NEAREST_CODE_COUNT; i++) {
-        if (surfaces[i] != surfaces[0]) {
+    for (neighborIndex = 1; neighborIndex < NEAREST_CODE_COUNT; neighborIndex++) {
+        if (surfaces[neighborIndex] != surfaces[0]) {
             break;
         }
     }
 
-    if (i == NEAREST_CODE_COUNT) {
+    if (neighborIndex == NEAREST_CODE_COUNT) {
         return surface;
     }
 
@@ -1312,7 +1316,7 @@ const char *GetDebugSceneLabel(u32 scene) {
 
 NO_RESULT UpdateDebugSceneMenu(void) {
     u32 selectedIndex;
-    u32 i;
+    u32 entryIndex;
     s32 row;
 
     g_CurrentShot.surface = 0;
@@ -1333,8 +1337,9 @@ NO_RESULT UpdateDebugSceneMenu(void) {
         }
     }
 
-    for (i = 0, row = SCENE_MENU_TOP_ROW; i < SCENE_MENU_LENGTH; i++, row++) {
-        if (i == selectedIndex) {
+    for (entryIndex = 0, row = SCENE_MENU_TOP_ROW; entryIndex < SCENE_MENU_LENGTH;
+        entryIndex++, row++) {
+        if (entryIndex == selectedIndex) {
             SetDebugTextHighlight(TRUE);
             PrintDebugText("->", SCENE_MENU_CURSOR_COLUMN, selectedIndex + SCENE_MENU_TOP_ROW);
         }
@@ -1342,7 +1347,11 @@ NO_RESULT UpdateDebugSceneMenu(void) {
             PrintDebugText("  ", SCENE_MENU_CURSOR_COLUMN, row);
         }
 
-        PrintDebugText(GetDebugSceneLabel(f_SceneMenuScenes[i]), SCENE_MENU_LABEL_COLUMN, row);
+        PrintDebugText(
+            GetDebugSceneLabel(f_SceneMenuScenes[entryIndex]),
+            SCENE_MENU_LABEL_COLUMN,
+            row
+        );
     }
 
     if (g_MenuControllerData[0].button & U_JPAD) {
@@ -1455,15 +1464,15 @@ Boolean IsOverlayInExpansionMemory(void) {
 #define GROUND_TEXEL_WORLD_SIZE (GROUND_TEXEL_SIZE >> WORLD_TO_COURSE_SHIFT)
 
 void MarkBillboardsOnMap(void) {
-    s32 i;
+    s32 billboardIndex;
     u16 color = 0xF801;
     u32 column;
     u32 row;
 
-    for (i = 0; i < BILLBOARD_COUNT; i++) {
-        if (g_Billboards[i].textureIndex >= 0) {
-            column = g_Billboards[i].x / GROUND_TEXEL_WORLD_SIZE;
-            row = g_Billboards[i].z / GROUND_TEXEL_WORLD_SIZE;
+    for (billboardIndex = 0; billboardIndex < BILLBOARD_COUNT; billboardIndex++) {
+        if (g_Billboards[billboardIndex].textureIndex >= 0) {
+            column = g_Billboards[billboardIndex].x / GROUND_TEXEL_WORLD_SIZE;
+            row = g_Billboards[billboardIndex].z / GROUND_TEXEL_WORLD_SIZE;
             MAP_TEXEL(column, row) = color;
         }
     }
@@ -1780,12 +1789,12 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle) {
 }
 
 Boolean AreTrianglesDifferent(PlaneTriangle *first, PlaneTriangle *second) {
-    s32 i;
+    s32 cornerIndex;
 
-    for (i = 0; i < TRIANGLE_CORNER_COUNT; i++) {
-        if (first->corners[AXIS_X][i] != second->corners[AXIS_X][i] ||
-            first->corners[AXIS_Y][i] != second->corners[AXIS_Y][i] ||
-            first->corners[AXIS_Z][i] != second->corners[AXIS_Z][i]) {
+    for (cornerIndex = 0; cornerIndex < TRIANGLE_CORNER_COUNT; cornerIndex++) {
+        if (first->corners[AXIS_X][cornerIndex] != second->corners[AXIS_X][cornerIndex] ||
+            first->corners[AXIS_Y][cornerIndex] != second->corners[AXIS_Y][cornerIndex] ||
+            first->corners[AXIS_Z][cornerIndex] != second->corners[AXIS_Z][cornerIndex]) {
             return TRUE;
         }
     }

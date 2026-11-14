@@ -329,10 +329,10 @@ static s32 f_PortraitTimers[MAX_PLAYER_COUNT];
 
 s32 SumCoursePointsNeeded(CourseIndex courseIndex) {
     s32 total = 0;
-    s32 i;
+    s32 course;
 
-    for (i = 1; i < courseIndex + 1; i++) {
-        total += GetCoursePointsNeeded(i);
+    for (course = 1; course < courseIndex + 1; course++) {
+        total += GetCoursePointsNeeded(course);
     }
 
     return total;
@@ -841,7 +841,7 @@ s32 UpdateUnlockNotice(void) {
 }
 
 void FreeRoundResults(void) {
-    s32 i;
+    s32 playerIndex;
 
     if (f_AreResultsLoaded) {
         f_AreResultsLoaded = FALSE;
@@ -865,9 +865,9 @@ void FreeRoundResults(void) {
             FreeMemory(&f_UnusedResultsPalette);
         }
 
-        for (i = 0; i != g_GameState.playerCount; i++) {
-            FreeMemory(&f_PlayerPortraitImages[i]);
-            FreeMemory(&f_PlayerPortraitPalettes[i]);
+        for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+            FreeMemory(&f_PlayerPortraitImages[playerIndex]);
+            FreeMemory(&f_PlayerPortraitPalettes[playerIndex]);
         }
 
         if (!g_GameState.isClubTournament) {
@@ -925,7 +925,7 @@ void PlayTallySound(void) {
 
 void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 value) {
     Gfx *gfx = *displayListHead;
-    u8 *c;
+    u8 *digit;
     u8 ch;
     s32 offset;
 
@@ -948,7 +948,8 @@ void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 value) {
         G_TX_NOLOD
     );
     offset = 0;
-    for (c = (u8 *)g_PrintBuffer; (ch = *c) != '\0'; c++, offset += DISTANCE_DIGIT_WIDTH) {
+    for (digit = (u8 *)g_PrintBuffer; (ch = *digit) != '\0';
+        digit++, offset += DISTANCE_DIGIT_WIDTH) {
         if (ch != ' ') {
             gSPScisTextureRectangle(
                 gfx++,
@@ -1007,7 +1008,7 @@ void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 value) {
 
 void DrawPlaceNumber(Gfx **displayListHead, s32 x, s32 y, s32 place) {
     Gfx *gfx = *displayListHead;
-    char *c;
+    char *digit;
     s32 width;
     s32 suffix;
     s32 lastDigit;
@@ -1019,14 +1020,14 @@ void DrawPlaceNumber(Gfx **displayListHead, s32 x, s32 y, s32 place) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     LoadLargePalette(&gfx, ImageBody(f_PlaceDigitsImage));
     width = 0;
-    for (c = g_PrintBuffer; *c != '\0'; c++) {
+    for (digit = g_PrintBuffer; *digit != '\0'; digit++) {
         width += PLACE_GLYPH_SPACING;
     }
 
     x += PLACE_NUMBER_X_OFFSET - (width / 2);
     width = 0;
-    for (c = g_PrintBuffer; *c != '\0'; c++, width += PLACE_GLYPH_SPACING) {
-        character = *c;
+    for (digit = g_PrintBuffer; *digit != '\0'; digit++, width += PLACE_GLYPH_SPACING) {
+        character = *digit;
         if (character == ' ') {
             continue;
         }
@@ -1764,7 +1765,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
     s32 width;
     s32 height;
     s32 titleCenterX;
-    s32 i;
+    s32 stripIndex;
     s32 liftFromCenter;
     s32 shineTexelX;
 
@@ -1862,11 +1863,11 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
     width = pop * NOTICE_CHARACTER_TITLE_POP_WIDTH;
     if (width > 0 && height > 0) {
         LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
-        for (i = 0; i != NOTICE_CHARACTER_TITLE_STRIP_COUNT; i++) {
+        for (stripIndex = 0; stripIndex != NOTICE_CHARACTER_TITLE_STRIP_COUNT; stripIndex++) {
             LoadTextureBlock(
                 &gfx,
                 LargeImageTexels(f_NoticeTitleImage) +
-                    (i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
+                    (stripIndex * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 NOTICE_CHARACTER_TITLE_WIDTH,
@@ -1883,9 +1884,11 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels(NOTICE_CENTER_X - width - f_NoticeLift),
-                QuarterPixels(CharacterTitleStripTop(i, height) + f_CharacterNoticeShift),
+                QuarterPixels(CharacterTitleStripTop(stripIndex, height) + f_CharacterNoticeShift),
                 QuarterPixels(width - liftFromCenter),
-                QuarterPixels(CharacterTitleStripTop(i, height) + height + f_CharacterNoticeShift),
+                QuarterPixels(
+                    CharacterTitleStripTop(stripIndex, height) + height + f_CharacterNoticeShift
+                ),
                 G_TX_RENDERTILE,
                 0,
                 0,
@@ -1922,11 +1925,11 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
             GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
             G_RM_AA_ZB_TEX_EDGE2
         );
-        for (i = 0; i != NOTICE_CHARACTER_TITLE_STRIP_COUNT; i++) {
+        for (stripIndex = 0; stripIndex != NOTICE_CHARACTER_TITLE_STRIP_COUNT; stripIndex++) {
             LoadTextureBlock(
                 &gfx,
                 LargeImageTexels(f_NoticeTitleImage) +
-                    (i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
+                    (stripIndex * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 NOTICE_CHARACTER_TITLE_WIDTH,
@@ -1943,9 +1946,11 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels(titleCenterX - width),
-                QuarterPixels(CharacterTitleStripTop(i, height) + f_CharacterNoticeShift),
+                QuarterPixels(CharacterTitleStripTop(stripIndex, height) + f_CharacterNoticeShift),
                 QuarterPixels(width + titleCenterX),
-                QuarterPixels(CharacterTitleStripTop(i, height) + height + f_CharacterNoticeShift),
+                QuarterPixels(
+                    CharacterTitleStripTop(stripIndex, height) + height + f_CharacterNoticeShift
+                ),
                 G_TX_RENDERTILE,
                 0,
                 0,
@@ -2956,8 +2961,8 @@ enum PointsStep {
 
 s32 UpdateCoursePointsResults(ControllerState *controller) {
     EncodedAsset asset;
-    s32 i;
-    s32 j;
+    s32 playerIndex;
+    s32 otherIndex;
     s32 overshoot;
 
     GetSaveData();
@@ -2972,8 +2977,8 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
         case UNLOCK_NOTICE_KIND_NONE:
             if (f_OpenCourseCount < COURSE_COUNT &&
                 f_PointsToNextCourse + f_CoursePointsTally.earned == 0) {
-                for (i = 0; i != g_GameState.playerCount; i++) {
-                    StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
+                for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+                    StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, playerIndex);
                 }
 
                 StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
@@ -3005,17 +3010,18 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
 
                     do {
                         if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH) {
-                            j = 1;
+                            otherIndex = 1;
                         }
 
-                        j = 0;
+                        otherIndex = 0;
                     }
                     while (FALSE);
-                    for (i = 0; i != g_GameState.playerCount; i++) {
-                        StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
-                        for (j = 0; j != g_GameState.playerCount; j++) {
-                            if (i != j && f_PlayerRanks[i] > f_PlayerRanks[j]) {
-                                StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, i);
+                    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+                        StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, playerIndex);
+                        for (otherIndex = 0; otherIndex != g_GameState.playerCount; otherIndex++) {
+                            if (playerIndex != otherIndex &&
+                                f_PlayerRanks[playerIndex] > f_PlayerRanks[otherIndex]) {
+                                StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, playerIndex);
                             }
                         }
                     }
@@ -3115,7 +3121,7 @@ enum MatchStep {
 
 s32 UpdateMatchResults(ControllerState *controller) {
     EncodedAsset asset;
-    s32 i;
+    s32 playerIndex;
     s32 overshoot;
 
     GetSaveData();
@@ -3130,8 +3136,8 @@ s32 UpdateMatchResults(ControllerState *controller) {
         case UNLOCK_NOTICE_KIND_NONE:
             if (f_OpenCourseCount < COURSE_COUNT &&
                 f_PointsToNextCourse + f_CoursePointsTally.earned == 0) {
-                for (i = 0; i != g_GameState.playerCount; i++) {
-                    StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
+                for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+                    StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, playerIndex);
                 }
 
                 StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
@@ -3620,14 +3626,14 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
 void DrawPlayersResults(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 betShift = FOUR_DIGIT_BET_SHIFT;
-    s32 i;
+    s32 playerIndex;
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
-        if (f_PlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+        if (f_PlayerBetTotals[playerIndex] > FOUR_DIGIT_BET_MAX) {
             betShift = 0;
         }
 
-        if (f_PlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
+        if (f_PlayerBetTotals[playerIndex] < FOUR_DIGIT_BET_MIN) {
             betShift = 0;
         }
     }
@@ -3655,21 +3661,21 @@ void DrawPlayersResults(Gfx **displayListHead) {
             f_ResultsTop + RESULTS_HEADING_Y,
             RESULTS_LABEL_POINTS
         );
-        for (i = 0; i != g_GameState.playerCount; i++) {
+        for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             if (g_GameState.playerCount >= 2) {
                 DrawPlaceIcon(
                     &gfx,
                     f_ResultsSlide + BETTING_RESULTS_PLACE_X,
-                    f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
-                    f_PlayerRanks[i]
+                    f_ResultsTop + RESULTS_ICON_ROW_Y + (playerIndex * RESULTS_ROW_HEIGHT),
+                    f_PlayerRanks[playerIndex]
                 );
             }
 
             DrawPlayerPortrait(
                 &gfx,
                 f_ResultsSlide + BETTING_RESULTS_PORTRAIT_X,
-                f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
-                i,
+                f_ResultsTop + RESULTS_ICON_ROW_Y + (playerIndex * RESULTS_ROW_HEIGHT),
+                playerIndex,
                 FALSE
             );
         }
@@ -3687,21 +3693,21 @@ void DrawPlayersResults(Gfx **displayListHead) {
             f_ResultsTop + RESULTS_HEADING_Y,
             RESULTS_LABEL_POINTS
         );
-        for (i = 0; i != g_GameState.playerCount; i++) {
+        for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             if (g_GameState.playerCount >= 2) {
                 DrawRank(
                     &gfx,
                     f_ResultsSlide + PLAIN_RESULTS_RANK_X,
-                    f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
-                    f_PlayerRanks[i]
+                    f_ResultsTop + RESULTS_ICON_ROW_Y + (playerIndex * RESULTS_ROW_HEIGHT),
+                    f_PlayerRanks[playerIndex]
                 );
             }
 
             DrawPlayerPortrait(
                 &gfx,
                 f_ResultsSlide + PLAIN_RESULTS_PORTRAIT_X,
-                f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
-                i,
+                f_ResultsTop + RESULTS_ICON_ROW_Y + (playerIndex * RESULTS_ROW_HEIGHT),
+                playerIndex,
                 FALSE
             );
         }
@@ -3723,76 +3729,76 @@ void DrawPlayersResults(Gfx **displayListHead) {
         G_TX_NOLOD
     );
     if (f_HasBets) {
-        for (i = 0; i != g_GameState.playerCount; i++) {
+        for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                 g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[i]);
+                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[playerIndex]);
             }
-            else if (f_PlayerResults[i] == 0) {
+            else if (f_PlayerResults[playerIndex] == 0) {
                 sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
             }
             else {
-                sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[i]);
+                sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[playerIndex]);
             }
 
             DrawDigitText(
                 &gfx,
                 f_ResultsSlide + BETTING_RESULTS_SCORE_X,
-                f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                f_ResultsTop + RESULTS_TEXT_ROW_Y + (playerIndex * RESULTS_ROW_HEIGHT),
                 g_PrintBuffer
             );
-            sprintf(g_PrintBuffer, "%5d", (int)f_PlayerBetTotals[i]);
+            sprintf(g_PrintBuffer, "%5d", (int)f_PlayerBetTotals[playerIndex]);
             DrawDigitText(
                 &gfx,
                 f_ResultsSlide + BETTING_RESULTS_BET_TOTAL_X + betShift,
-                f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                f_ResultsTop + RESULTS_TEXT_ROW_Y + (playerIndex * RESULTS_ROW_HEIGHT),
                 g_PrintBuffer
             );
-            if (f_PlayerPoints[i] < 0) {
-                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
+            if (f_PlayerPoints[playerIndex] < 0) {
+                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[playerIndex]);
             }
             else {
-                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
+                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[playerIndex]);
             }
 
             DrawDigitText(
                 &gfx,
                 f_ResultsSlide + BETTING_RESULTS_POINTS_X,
-                f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                f_ResultsTop + RESULTS_TEXT_ROW_Y + (playerIndex * RESULTS_ROW_HEIGHT),
                 g_PrintBuffer
             );
         }
     }
     else {
-        for (i = 0; i != g_GameState.playerCount; i++) {
+        for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                 g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[i]);
+                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[playerIndex]);
             }
-            else if (f_PlayerResults[i] == 0) {
+            else if (f_PlayerResults[playerIndex] == 0) {
                 sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
             }
             else {
-                sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[i]);
+                sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[playerIndex]);
             }
 
             DrawDigitText(
                 &gfx,
                 f_ResultsSlide + PLAIN_RESULTS_SCORE_X,
-                f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                f_ResultsTop + RESULTS_TEXT_ROW_Y + (playerIndex * RESULTS_ROW_HEIGHT),
                 g_PrintBuffer
             );
-            if (f_PlayerPoints[i] < 0) {
-                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
+            if (f_PlayerPoints[playerIndex] < 0) {
+                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[playerIndex]);
             }
             else {
-                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
+                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[playerIndex]);
             }
 
             DrawDigitText(
                 &gfx,
                 f_ResultsSlide + PLAIN_RESULTS_POINTS_X,
-                f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                f_ResultsTop + RESULTS_TEXT_ROW_Y + (playerIndex * RESULTS_ROW_HEIGHT),
                 g_PrintBuffer
             );
         }
@@ -3877,14 +3883,14 @@ void DrawMatchResults(Gfx **displayListHead) {
     s32 betShift = FOUR_DIGIT_BET_SHIFT;
     s32 standingRow;
     s32 holeCount;
-    s32 i;
+    s32 playerIndex;
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
-        if (f_PlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+        if (f_PlayerBetTotals[playerIndex] > FOUR_DIGIT_BET_MAX) {
             betShift = 0;
         }
 
-        if (f_PlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
+        if (f_PlayerBetTotals[playerIndex] < FOUR_DIGIT_BET_MIN) {
             betShift = 0;
         }
     }
@@ -3983,30 +3989,30 @@ void DrawMatchResults(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    for (i = 0; i != g_GameState.playerCount; i++) {
-        if (f_PlayerResults[i] > 0) {
-            if (f_PlayerResults[i] >= MIN_TWO_DIGIT_HOLE_COUNT) {
-                standingShift[i] = 0;
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+        if (f_PlayerResults[playerIndex] > 0) {
+            if (f_PlayerResults[playerIndex] >= MIN_TWO_DIGIT_HOLE_COUNT) {
+                standingShift[playerIndex] = 0;
             }
             else {
-                standingShift[i] = STANDING_ONE_DIGIT_UP_SHIFT;
+                standingShift[playerIndex] = STANDING_ONE_DIGIT_UP_SHIFT;
             }
         }
-        else if (f_PlayerResults[i] < 0) {
-            if (f_PlayerResults[i] <= -MIN_TWO_DIGIT_HOLE_COUNT) {
-                standingShift[i] = STANDING_TWO_DIGIT_DOWN_SHIFT;
+        else if (f_PlayerResults[playerIndex] < 0) {
+            if (f_PlayerResults[playerIndex] <= -MIN_TWO_DIGIT_HOLE_COUNT) {
+                standingShift[playerIndex] = STANDING_TWO_DIGIT_DOWN_SHIFT;
             }
             else {
-                standingShift[i] = STANDING_ONE_DIGIT_DOWN_SHIFT;
+                standingShift[playerIndex] = STANDING_ONE_DIGIT_DOWN_SHIFT;
             }
         }
     }
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
-        if (f_PlayerResults[i] > 0) {
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+        if (f_PlayerResults[playerIndex] > 0) {
             standingRow = STANDING_WORD_UP_ROW;
         }
-        else if (f_PlayerResults[i] < 0) {
+        else if (f_PlayerResults[playerIndex] < 0) {
             standingRow = STANDING_WORD_DOWN_ROW;
         }
         else {
@@ -4016,14 +4022,17 @@ void DrawMatchResults(Gfx **displayListHead) {
         if (f_HasBets) {
             DrawTextureRect(
                 &gfx,
-                QuarterPixels(BETTING_MATCH_STANDING_X + f_ResultsSlide + standingShift[i]),
-                QuarterPixels(f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)),
+                QuarterPixels(
+                    BETTING_MATCH_STANDING_X + f_ResultsSlide + standingShift[playerIndex]
+                ),
+                QuarterPixels(f_ResultsTop + MATCH_STANDING_Y + (playerIndex * MATCH_ROW_HEIGHT)),
                 QuarterPixels(
                     BETTING_MATCH_STANDING_X + (f_ResultsSlide + STANDING_WORD_WIDTH) +
-                    standingShift[i]
+                    standingShift[playerIndex]
                 ),
                 QuarterPixels(
-                    f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT
+                    f_ResultsTop + MATCH_STANDING_Y + (playerIndex * MATCH_ROW_HEIGHT) +
+                    STANDING_WORD_HEIGHT
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -4035,14 +4044,15 @@ void DrawMatchResults(Gfx **displayListHead) {
         else {
             DrawTextureRect(
                 &gfx,
-                QuarterPixels(PLAIN_MATCH_STANDING_X + f_ResultsSlide + standingShift[i]),
-                QuarterPixels(f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)),
+                QuarterPixels(PLAIN_MATCH_STANDING_X + f_ResultsSlide + standingShift[playerIndex]),
+                QuarterPixels(f_ResultsTop + MATCH_STANDING_Y + (playerIndex * MATCH_ROW_HEIGHT)),
                 QuarterPixels(
                     PLAIN_MATCH_STANDING_X + (f_ResultsSlide + STANDING_WORD_WIDTH) +
-                    standingShift[i]
+                    standingShift[playerIndex]
                 ),
                 QuarterPixels(
-                    f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT
+                    f_ResultsTop + MATCH_STANDING_Y + (playerIndex * MATCH_ROW_HEIGHT) +
+                    STANDING_WORD_HEIGHT
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -4068,10 +4078,10 @@ void DrawMatchResults(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    for (i = 0; i != g_GameState.playerCount; i++) {
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
         if (f_HasBets) {
             if (f_PlayerResults[0] != 0) {
-                holeCount = f_PlayerResults[i];
+                holeCount = f_PlayerResults[playerIndex];
                 if (holeCount < 0) {
                     holeCount = -holeCount;
                 }
@@ -4079,36 +4089,36 @@ void DrawMatchResults(Gfx **displayListHead) {
                 sprintf(g_PrintBuffer, "%2d", holeCount);
                 DrawDigitText(
                     &gfx,
-                    (f_ResultsSlide + BETTING_MATCH_HOLE_COUNT_X) + standingShift[i],
-                    f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT),
+                    (f_ResultsSlide + BETTING_MATCH_HOLE_COUNT_X) + standingShift[playerIndex],
+                    f_ResultsTop + MATCH_STANDING_Y + (playerIndex * MATCH_ROW_HEIGHT),
                     g_PrintBuffer
                 );
             }
 
-            sprintf(g_PrintBuffer, f_NumberFormat, f_PlayerBetTotals[i]);
+            sprintf(g_PrintBuffer, f_NumberFormat, f_PlayerBetTotals[playerIndex]);
             DrawDigitText(
                 &gfx,
                 (BETTING_MATCH_BET_TOTAL_X + f_ResultsSlide) + betShift,
-                f_ResultsTop + MATCH_NUMBER_Y + (i * MATCH_ROW_HEIGHT),
+                f_ResultsTop + MATCH_NUMBER_Y + (playerIndex * MATCH_ROW_HEIGHT),
                 g_PrintBuffer
             );
-            if (f_PlayerPoints[i] < 0) {
-                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
+            if (f_PlayerPoints[playerIndex] < 0) {
+                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[playerIndex]);
             }
             else {
-                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
+                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[playerIndex]);
             }
 
             DrawDigitText(
                 &gfx,
                 f_ResultsSlide + BETTING_MATCH_POINTS_X,
-                f_ResultsTop + MATCH_NUMBER_Y + (i * MATCH_ROW_HEIGHT),
+                f_ResultsTop + MATCH_NUMBER_Y + (playerIndex * MATCH_ROW_HEIGHT),
                 g_PrintBuffer
             );
         }
         else {
             if (f_PlayerResults[0] != 0) {
-                holeCount = f_PlayerResults[i];
+                holeCount = f_PlayerResults[playerIndex];
                 if (holeCount < 0) {
                     holeCount = -holeCount;
                 }
@@ -4116,23 +4126,23 @@ void DrawMatchResults(Gfx **displayListHead) {
                 sprintf(g_PrintBuffer, "%2d", holeCount);
                 DrawDigitText(
                     &gfx,
-                    (f_ResultsSlide + PLAIN_MATCH_HOLE_COUNT_X) + standingShift[i],
-                    f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT),
+                    (f_ResultsSlide + PLAIN_MATCH_HOLE_COUNT_X) + standingShift[playerIndex],
+                    f_ResultsTop + MATCH_STANDING_Y + (playerIndex * MATCH_ROW_HEIGHT),
                     g_PrintBuffer
                 );
             }
 
-            if (f_PlayerPoints[i] < 0) {
-                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
+            if (f_PlayerPoints[playerIndex] < 0) {
+                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[playerIndex]);
             }
             else {
-                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
+                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[playerIndex]);
             }
 
             DrawDigitText(
                 &gfx,
                 f_ResultsSlide + PLAIN_MATCH_POINTS_X,
-                f_ResultsTop + MATCH_NUMBER_Y + (i * PLAIN_MATCH_POINTS_ROW_HEIGHT),
+                f_ResultsTop + MATCH_NUMBER_Y + (playerIndex * PLAIN_MATCH_POINTS_ROW_HEIGHT),
                 g_PrintBuffer
             );
         }

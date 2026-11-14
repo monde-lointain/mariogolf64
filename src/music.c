@@ -93,14 +93,14 @@ void HandleAudioReset(NUScMsg type, s32 frame) {
 }
 
 void LoadSampleBank(u8 *pointerBankRom, u32 pointerBankSize, u8 *waveBankRom) {
-    u32 i;
+    u32 pointerIndex;
 
     f_PointerBank = __MusIntMemMalloc(pointerBankSize);
     nuPiReadRom((u32)pointerBankRom, f_PointerBank, pointerBankSize);
     osSyncPrintf("nuAuSampleBank_ptr %x, size%d\n", f_PointerBank, pointerBankSize);
-    for (i = 0; i < PRINTED_BANK_SIZE; i++) {
-        osSyncPrintf("%2.2X ", f_PointerBank[i]);
-        if ((i & PRINTED_ROW_END) == PRINTED_ROW_END) {
+    for (pointerIndex = 0; pointerIndex < PRINTED_BANK_SIZE; pointerIndex++) {
+        osSyncPrintf("%2.2X ", f_PointerBank[pointerIndex]);
+        if ((pointerIndex & PRINTED_ROW_END) == PRINTED_ROW_END) {
             osSyncPrintf("\n");
         }
     }

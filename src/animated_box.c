@@ -80,7 +80,7 @@ void QueueAnimatedBox(AnimatedBox *box) {
 }
 
 void DrawAnimatedBoxes(void) {
-    s32 i;
+    s32 boxIndex;
 
     gDPPipeSync(g_DisplayListHead++);
     gDPPipeSync(g_DisplayListHead++);
@@ -91,8 +91,8 @@ void DrawAnimatedBoxes(void) {
     gDPSetRenderMode(g_DisplayListHead++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
     gDPSetCombineMode(g_DisplayListHead++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gDPPipeSync(g_DisplayListHead++);
-    for (i = 0; i != f_QueuedBoxCount; i++) {
-        DrawAnimatedBox(&g_DisplayListHead, f_QueuedBoxes[i]);
+    for (boxIndex = 0; boxIndex != f_QueuedBoxCount; boxIndex++) {
+        DrawAnimatedBox(&g_DisplayListHead, f_QueuedBoxes[boxIndex]);
     }
 
     f_QueuedBoxCount = 0;

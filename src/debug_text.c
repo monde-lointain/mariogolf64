@@ -89,8 +89,8 @@ void SetUpDebugTextDrawing(Gfx **displayListHead) {
 void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
     s32 index;
     s32 rowFontIndex;
-    s32 y;
-    s32 x;
+    s32 pixelRow;
+    s32 wordColumn;
     s32 rowIndex;
     s32 fontIndex;
     s32 textureIndex;
@@ -115,15 +115,15 @@ void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
         glyphFontIndex =
             ((character & (GLYPHS_PER_FONT_ROW - 1)) * (GLYPH_SIZE / PIXELS_PER_FONT_WORD)) |
             ((character / GLYPHS_PER_FONT_ROW) * (GLYPH_SIZE * FONT_ROW_WORD_COUNT));
-        y = 0;
+        pixelRow = 0;
         fontIndex = glyphFontIndex;
         textureIndex = index;
-        for (; y < GLYPH_SIZE; y++) {
-            x = 0;
+        for (; pixelRow < GLYPH_SIZE; pixelRow++) {
+            wordColumn = 0;
             rowIndex = textureIndex * 2;
             rowFontIndex = fontIndex;
-            for (; x < GLYPH_SIZE / PIXELS_PER_FONT_WORD; x++) {
-                texture[rowIndex + x] = f_DebugFont[rowFontIndex + x];
+            for (; wordColumn < GLYPH_SIZE / PIXELS_PER_FONT_WORD; wordColumn++) {
+                texture[rowIndex + wordColumn] = f_DebugFont[rowFontIndex + wordColumn];
             }
 
             fontIndex += FONT_ROW_WORD_COUNT;
@@ -147,8 +147,8 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
     u16 *currentFramebuffer = (u16 *)(osVirtualToPhysical(osViGetCurrentFramebuffer()) + K1BASE);
     u16 *nextFramebuffer = (u16 *)(osVirtualToPhysical(osViGetNextFramebuffer()) + K1BASE);
     s32 glyphStart;
-    s32 y;
-    s32 x;
+    s32 pixelRow;
+    s32 pixelColumn;
     s32 pixelIndex;
     u16 color;
 
@@ -164,22 +164,22 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
     character -= FIRST_GLYPH;
     glyphStart = ((character & (GLYPHS_PER_FONT_ROW - 1)) * (GLYPH_SIZE / PIXELS_PER_FONT_WORD)) +
         ((character / GLYPHS_PER_FONT_ROW) * (GLYPH_SIZE * FONT_ROW_WORD_COUNT));
-    y = 0;
+    pixelRow = 0;
     if (column >= TEXT_COLUMN_COUNT || row >= TEXT_ROW_COUNT) {
         return;
     }
 
-    for (; y < GLYPH_SIZE; y++) {
-        for (x = 0; x < GLYPH_SIZE; x++) {
-            color =
-                ((f_DebugFont
-                         [glyphStart + (y * FONT_ROW_WORD_COUNT) + (x / PIXELS_PER_FONT_WORD)] >>
-                     ((3 - (x & 3)) * 4)) &
-                    0xF) == FONT_INK ?
+    for (; pixelRow < GLYPH_SIZE; pixelRow++) {
+        for (pixelColumn = 0; pixelColumn < GLYPH_SIZE; pixelColumn++) {
+            color = ((f_DebugFont
+                             [glyphStart + (pixelRow * FONT_ROW_WORD_COUNT) +
+                                 (pixelColumn / PIXELS_PER_FONT_WORD)] >>
+                         ((3 - (pixelColumn & 3)) * 4)) &
+                        0xF) == FONT_INK ?
                 MESSAGE_INK_COLOR :
                 MESSAGE_PAPER_COLOR;
-            pixelIndex =
-                (((row * GLYPH_SIZE) + y) * MESSAGE_SCREEN_WIDTH) + ((column * GLYPH_SIZE) + x);
+            pixelIndex = (((row * GLYPH_SIZE) + pixelRow) * MESSAGE_SCREEN_WIDTH) +
+                ((column * GLYPH_SIZE) + pixelColumn);
             currentFramebuffer[pixelIndex] = color;
             nextFramebuffer[pixelIndex] = color;
         }

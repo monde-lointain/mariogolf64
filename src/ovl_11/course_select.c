@@ -263,7 +263,7 @@ s32 CountOpenRingShotCourses(void) {
 void LoadCourseSelect(Boolean isHoleSelect) {
     EncodedAsset asset;
     AssetFile file;
-    s32 i;
+    s32 courseIndex;
     s32 size;
 
     if (f_LoadedScreen != COURSE_SELECT_UNLOADED) {
@@ -303,9 +303,10 @@ void LoadCourseSelect(Boolean isHoleSelect) {
     f_CourseTurnStep = 0;
     f_ShownCourse = g_GameState.courseIndex;
     f_NextCourse = g_GameState.courseIndex;
-    for (i = 0; i != COURSE_INDEX_COUNT; i++) {
-        f_CourseBadges[i] = AllocMemory(OpenEncodedAsset(f_CourseBadgeAssets[i], &asset));
-        ReadEncodedAsset(f_CourseBadges[i], &asset);
+    for (courseIndex = 0; courseIndex != COURSE_INDEX_COUNT; courseIndex++) {
+        f_CourseBadges[courseIndex] =
+            AllocMemory(OpenEncodedAsset(f_CourseBadgeAssets[courseIndex], &asset));
+        ReadEncodedAsset(f_CourseBadges[courseIndex], &asset);
     }
 
     f_CourseImage = AllocMemory(
@@ -361,7 +362,7 @@ void TurnCourseImage(void) {
 }
 
 void FreeCourseSelect(void) {
-    s32 i;
+    s32 courseIndex;
 
     if (f_LoadedScreen == COURSE_SELECT_UNLOADED) {
         osSyncPrintf("ring dest err");
@@ -369,8 +370,8 @@ void FreeCourseSelect(void) {
     }
 
     FreeMemory(&f_BoardImage);
-    for (i = 0; i != COURSE_INDEX_COUNT; i++) {
-        FreeMemory(&f_CourseBadges[i]);
+    for (courseIndex = 0; courseIndex != COURSE_INDEX_COUNT; courseIndex++) {
+        FreeMemory(&f_CourseBadges[courseIndex]);
     }
 
     FreeMemory(&f_CourseImage);

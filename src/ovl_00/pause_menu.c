@@ -923,7 +923,7 @@ void DrawPauseMenu(Gfx **displayListHead) {
     s32 red;
     s32 green;
     s32 blue;
-    s32 i;
+    s32 optionIndex;
     s32 message;
     u16 kind;
     u16 selectedKind;
@@ -1038,10 +1038,10 @@ void DrawPauseMenu(Gfx **displayListHead) {
     glowBlue =
         (s32)(sinf(f_PauseGlowAngle + (M_PI / 2)) * COLOR_WAVE_AMPLITUDE) + COLOR_WAVE_MIDDLE;
     SetUpTextDrawing(&gfx);
-    for (i = 0; i != f_PauseLayoutOptionCounts[f_PauseLayout]; i++) {
-        message = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].message;
-        kind = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].kind;
-        if (f_PauseSelection == i) {
+    for (optionIndex = 0; optionIndex != f_PauseLayoutOptionCounts[f_PauseLayout]; optionIndex++) {
+        message = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][optionIndex]].message;
+        kind = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][optionIndex]].kind;
+        if (f_PauseSelection == optionIndex) {
             red = glowRed;
             green = glowGreen;
             blue = glowBlue;
@@ -1052,7 +1052,7 @@ void DrawPauseMenu(Gfx **displayListHead) {
             blue = PAUSE_LABEL_BLUE;
         }
 
-        if (f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].kind ==
+        if (f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][optionIndex]].kind ==
             PAUSE_OPTION_KIND_GIVE_UP) {
             if (!f_IsGiveUpAllowed) {
                 message = PAUSE_MESSAGE_FIRST_STROKE;
@@ -1061,10 +1061,10 @@ void DrawPauseMenu(Gfx **displayListHead) {
 
         SetTextSlot(
             PAUSE_LABEL_X,
-            PauseLabelY(i),
+            PauseLabelY(optionIndex),
             message + PAUSE_OPTION_MESSAGE_BASE,
             TEXT_SLOT_LARGE_FONT,
-            i,
+            optionIndex,
             PAUSE_LABEL_FLAGS,
             red,
             green,
@@ -1072,13 +1072,13 @@ void DrawPauseMenu(Gfx **displayListHead) {
             OPAQUE_ALPHA
         );
         gDPSetPrimColor(gfx++, 0, 0, red, green, blue, OPAQUE_ALPHA);
-        DrawLargeTextSlot(&gfx, i);
+        DrawLargeTextSlot(&gfx, optionIndex);
         if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {
             if (g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_BLACK) {
                 DrawLargeText(
                     &gfx,
                     PAUSE_VALUE_X,
-                    PauseLabelY(i),
+                    PauseLabelY(optionIndex),
                     f_PauseValueTexts[PAUSE_VALUE_TEXT_BLACK]
                 );
             }
@@ -1086,7 +1086,7 @@ void DrawPauseMenu(Gfx **displayListHead) {
                 DrawLargeText(
                     &gfx,
                     PAUSE_VALUE_X,
-                    PauseLabelY(i),
+                    PauseLabelY(optionIndex),
                     f_PauseValueTexts[PAUSE_VALUE_TEXT_WHITE]
                 );
             }
@@ -1097,7 +1097,7 @@ void DrawPauseMenu(Gfx **displayListHead) {
                 DrawLargeText(
                     &gfx,
                     PAUSE_VALUE_X,
-                    PauseLabelY(i),
+                    PauseLabelY(optionIndex),
                     f_PauseValueTexts[PAUSE_VALUE_TEXT_RAIN]
                 );
             }
@@ -1105,7 +1105,7 @@ void DrawPauseMenu(Gfx **displayListHead) {
                 DrawLargeText(
                     &gfx,
                     PAUSE_VALUE_X,
-                    PauseLabelY(i),
+                    PauseLabelY(optionIndex),
                     f_PauseValueTexts[PAUSE_VALUE_TEXT_CLEAR]
                 );
             }

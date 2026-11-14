@@ -1609,7 +1609,7 @@ s32 FindPinHit(
     s32 hasHitFlag,
     BallSimulation *simulation
 ) {
-    s32 i;
+    s32 pinIndex;
     s32 fromX = startX;
     s32 toX = endX;
     s32 fromZ = startZ;
@@ -1638,7 +1638,7 @@ s32 FindPinHit(
     Radians angle;
     f32 bounceSpeed;
 
-    for (i = 0; i < PIN_COUNT; i++) {
+    for (pinIndex = 0; pinIndex < PIN_COUNT; pinIndex++) {
         if (fromX < (s32)(g_HoleSetup.cupPosition[AXIS_X] - FLAG_REACH)) {
             if (toX < (s32)(g_HoleSetup.cupPosition[AXIS_X] - FLAG_REACH)) {
                 continue;
@@ -1917,7 +1917,7 @@ s32 FindHoleTriangleHit(
     s32 lowestZ;
     s32 highestZ;
     s32 hitIndex;
-    s32 i;
+    s32 triangleIndex;
     HoleTriangle *candidate;
     f32 nearestFraction;
     f32 startSide;
@@ -1980,8 +1980,8 @@ s32 FindHoleTriangleHit(
     }
 
     nearestFraction = NO_PLANE_HIT_FRACTION;
-    for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
-        candidate = &g_WorkArea.hole.triangles[i];
+    for (triangleIndex = 0; triangleIndex < HOLE_TRIANGLE_COUNT; triangleIndex++) {
+        candidate = &g_WorkArea.hole.triangles[triangleIndex];
         if (candidate->kind == HOLE_TRIANGLE_KIND_RING) {
             continue;
         }
@@ -2077,7 +2077,7 @@ s32 FindHoleTriangleHit(
 
                     if (sides != 0) {
                         nearestFraction = hitFraction;
-                        hitIndex = i;
+                        hitIndex = triangleIndex;
                     }
                 }
             }
@@ -2130,7 +2130,7 @@ s32 FindWallHit(
     s32 hitX;
     s32 hitY;
     s32 hitZ;
-    s32 i;
+    s32 triangleIndex;
     f32 nearestFraction;
     f32 startSide;
     f32 endSide;
@@ -2143,7 +2143,7 @@ s32 FindWallHit(
     s32 hitPointU;
     s32 hitPointV;
     s32 facing;
-    s32 k;
+    s32 cornerIndex;
     Boolean isDebug = IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS);
 
     hitIndex = NO_HOLE_TRIANGLE;
@@ -2193,8 +2193,8 @@ s32 FindWallHit(
     }
 
     nearestFraction = NO_PLANE_HIT_FRACTION;
-    for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
-        HoleTriangle *candidate = &g_WorkArea.hole.triangles[i];
+    for (triangleIndex = 0; triangleIndex < HOLE_TRIANGLE_COUNT; triangleIndex++) {
+        HoleTriangle *candidate = &g_WorkArea.hole.triangles[triangleIndex];
 
         if (candidate->kind != HOLE_TRIANGLE_KIND_SHADED) {
             continue;
@@ -2419,9 +2419,10 @@ s32 FindWallHit(
 
                 if (hitFraction == 0.0f) {
                     nearestCorner = FARTHEST_CORNER_DISTANCE;
-                    for (k = 0; k < TRIANGLE_CORNER_COUNT; k++) {
+                    for (cornerIndex = 0; cornerIndex < TRIANGLE_CORNER_COUNT; cornerIndex++) {
                         cornerDistance = fabsf(
-                            hitPointU - (triangle.corners[AXIS_X][k] << WORLD_TO_COURSE_SHIFT)
+                            hitPointU -
+                            (triangle.corners[AXIS_X][cornerIndex] << WORLD_TO_COURSE_SHIFT)
                         );
                         if (cornerDistance < nearestCorner) {
                             nearestCorner = cornerDistance;
@@ -2588,9 +2589,10 @@ s32 FindWallHit(
 
                 if (hitFraction == 0.0f) {
                     nearestCorner = FARTHEST_CORNER_DISTANCE;
-                    for (k = 0; k < TRIANGLE_CORNER_COUNT; k++) {
+                    for (cornerIndex = 0; cornerIndex < TRIANGLE_CORNER_COUNT; cornerIndex++) {
                         cornerDistance = fabsf(
-                            hitPointV - (triangle.corners[AXIS_Z][k] << WORLD_TO_COURSE_SHIFT)
+                            hitPointV -
+                            (triangle.corners[AXIS_Z][cornerIndex] << WORLD_TO_COURSE_SHIFT)
                         );
                         if (cornerDistance < nearestCorner) {
                             nearestCorner = cornerDistance;
@@ -2638,53 +2640,53 @@ s32 FindWallHit(
         hitZ = ((endZ - startZ) * hitFraction) + startZ;
         if (hitY + WALL_HEIGHT_SLACK > GetGroundHeight(hitX, hitZ)) {
             nearestFraction = hitFraction;
-            if (hitIndex != i) {
+            if (hitIndex != triangleIndex) {
                 osSyncPrintf("New Logic attemped!!!!! ratio %f\n", nearestFraction);
             }
 
-            hitIndex = i;
+            hitIndex = triangleIndex;
         }
 
         edgeCrosses[0] =
             ((cornersU[1] - cornersU[0]) * (hitPointV - (cornersV[0] * WORLD_TO_COURSE_SCALE))) -
             ((cornersV[1] - cornersV[0]) * (hitPointU - (cornersU[0] * WORLD_TO_COURSE_SCALE)));
         if (edgeCrosses[0] < 0) {
-            k = EDGE_SIDE_NEGATIVE;
+            cornerIndex = EDGE_SIDE_NEGATIVE;
         }
         else {
-            k = (edgeCrosses[0] == 0) ? EDGE_SIDE_ON : EDGE_SIDE_POSITIVE;
+            cornerIndex = (edgeCrosses[0] == 0) ? EDGE_SIDE_ON : EDGE_SIDE_POSITIVE;
         }
 
         edgeCrosses[1] =
             ((cornersU[2] - cornersU[1]) * (hitPointV - (cornersV[1] * WORLD_TO_COURSE_SCALE))) -
             ((cornersV[2] - cornersV[1]) * (hitPointU - (cornersU[1] * WORLD_TO_COURSE_SCALE)));
         if (edgeCrosses[1] < 0) {
-            k &= EDGE_SIDE_NEGATIVE;
+            cornerIndex &= EDGE_SIDE_NEGATIVE;
         }
         else if (edgeCrosses[1] == 0) {
-            k &= EDGE_SIDE_ON;
+            cornerIndex &= EDGE_SIDE_ON;
         }
         else {
-            k &= EDGE_SIDE_POSITIVE;
+            cornerIndex &= EDGE_SIDE_POSITIVE;
         }
 
-        if (k != 0) {
+        if (cornerIndex != 0) {
             edgeCrosses[2] = ((cornersU[1] - cornersU[0]) *
                                  (hitPointV - (cornersV[0] * WORLD_TO_COURSE_SCALE))) -
                 ((cornersV[1] - cornersV[0]) * (hitPointU - (cornersU[0] * WORLD_TO_COURSE_SCALE)));
             if (edgeCrosses[2] < 0) {
-                k &= EDGE_SIDE_NEGATIVE;
+                cornerIndex &= EDGE_SIDE_NEGATIVE;
             }
             else if (edgeCrosses[2] == 0) {
-                k &= EDGE_SIDE_ON;
+                cornerIndex &= EDGE_SIDE_ON;
             }
             else {
-                k &= EDGE_SIDE_POSITIVE;
+                cornerIndex &= EDGE_SIDE_POSITIVE;
             }
 
-            if (k != 0) {
+            if (cornerIndex != 0) {
                 nearestFraction = hitFraction;
-                hitIndex = i;
+                hitIndex = triangleIndex;
                 if (g_IsDebugEnabled) {
                     PrintDebugText("Hit\n", WALL_DEBUG_COLUMN, WALL_DEBUG_ROW + 2);
                     osSyncPrintf("Hit Triangle %d  ratio %f\n", hitIndex, nearestFraction);
@@ -2729,7 +2731,7 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
     s32 highestY;
     s32 lowestZ;
     s32 highestZ;
-    s32 i;
+    s32 triangleIndex;
     s32 corner;
     HoleTriangle *candidate;
     f32 side;
@@ -2752,8 +2754,8 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
         highestY = (y / WHOLE_UNIT_SIZE) + 1;
         lowestZ = (z / WHOLE_UNIT_SIZE) - 1;
         highestZ = (z / WHOLE_UNIT_SIZE) + 1;
-        for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
-            candidate = &g_WorkArea.hole.triangles[i];
+        for (triangleIndex = 0; triangleIndex < HOLE_TRIANGLE_COUNT; triangleIndex++) {
+            candidate = &g_WorkArea.hole.triangles[triangleIndex];
             if (candidate->kind != HOLE_TRIANGLE_KIND_SHADED) {
                 continue;
             }
@@ -2909,7 +2911,7 @@ s32 FindRingHit(
     TrianglePlane plane;
     s32 hitNumber;
     s32 ringNumber;
-    s32 i;
+    s32 triangleIndex;
     HoleTriangle *triangle;
     f32 nearestFraction;
     f32 startSide;
@@ -2943,8 +2945,8 @@ s32 FindRingHit(
 
     ringNumber = 0;
     nearestFraction = NO_PLANE_HIT_FRACTION;
-    for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
-        triangle = &g_WorkArea.hole.triangles[i];
+    for (triangleIndex = 0; triangleIndex < HOLE_TRIANGLE_COUNT; triangleIndex++) {
+        triangle = &g_WorkArea.hole.triangles[triangleIndex];
         if (triangle->kind != HOLE_TRIANGLE_KIND_RING) {
             continue;
         }

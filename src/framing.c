@@ -122,7 +122,7 @@ void FrameSpheres(f32 depthOffset) {
     f32 centerY;
     f32 clearEyeZ;
     f32 margin;
-    s32 i;
+    s32 sphereIndex;
 
     margin = Z_MARGIN;
     minY = FAR_EXTENT;
@@ -141,37 +141,37 @@ void FrameSpheres(f32 depthOffset) {
 
     guRotateF(rotation, rightAngle, 0.0f, 1.0f, 0.0f);
     guMtxCatF(f_FramingRotation, rotation, rotation);
-    for (i = 0; i < f_FramedSphereCount; i++) {
-        TransformPoint(rotation, f_FramedSphereCenters[i], point);
-        if (point[AXIS_X] - f_FramedSphereRadii[i] < minX) {
-            minX = point[AXIS_X] - f_FramedSphereRadii[i];
+    for (sphereIndex = 0; sphereIndex < f_FramedSphereCount; sphereIndex++) {
+        TransformPoint(rotation, f_FramedSphereCenters[sphereIndex], point);
+        if (point[AXIS_X] - f_FramedSphereRadii[sphereIndex] < minX) {
+            minX = point[AXIS_X] - f_FramedSphereRadii[sphereIndex];
         }
     }
 
     guRotateF(rotation, leftAngle, 0.0f, 1.0f, 0.0f);
     guMtxCatF(f_FramingRotation, rotation, rotation);
-    for (i = 0; i < f_FramedSphereCount; i++) {
-        TransformPoint(rotation, f_FramedSphereCenters[i], point);
-        if (maxX < point[AXIS_X] + f_FramedSphereRadii[i]) {
-            maxX = point[AXIS_X] + f_FramedSphereRadii[i];
+    for (sphereIndex = 0; sphereIndex < f_FramedSphereCount; sphereIndex++) {
+        TransformPoint(rotation, f_FramedSphereCenters[sphereIndex], point);
+        if (maxX < point[AXIS_X] + f_FramedSphereRadii[sphereIndex]) {
+            maxX = point[AXIS_X] + f_FramedSphereRadii[sphereIndex];
         }
     }
 
     guRotateF(rotation, topAngle, -1.0f, 0.0f, 0.0f);
     guMtxCatF(f_FramingRotation, rotation, rotation);
-    for (i = 0; i < f_FramedSphereCount; i++) {
-        TransformPoint(rotation, f_FramedSphereCenters[i], point);
-        if (point[AXIS_Y] - f_FramedSphereRadii[i] < minY) {
-            minY = point[AXIS_Y] - f_FramedSphereRadii[i];
+    for (sphereIndex = 0; sphereIndex < f_FramedSphereCount; sphereIndex++) {
+        TransformPoint(rotation, f_FramedSphereCenters[sphereIndex], point);
+        if (point[AXIS_Y] - f_FramedSphereRadii[sphereIndex] < minY) {
+            minY = point[AXIS_Y] - f_FramedSphereRadii[sphereIndex];
         }
     }
 
     guRotateF(rotation, bottomAngle, -1.0f, 0.0f, 0.0f);
     guMtxCatF(f_FramingRotation, rotation, rotation);
-    for (i = 0; i < f_FramedSphereCount; i++) {
-        TransformPoint(rotation, f_FramedSphereCenters[i], point);
-        if (maxY < point[AXIS_Y] + f_FramedSphereRadii[i]) {
-            maxY = point[AXIS_Y] + f_FramedSphereRadii[i];
+    for (sphereIndex = 0; sphereIndex < f_FramedSphereCount; sphereIndex++) {
+        TransformPoint(rotation, f_FramedSphereCenters[sphereIndex], point);
+        if (maxY < point[AXIS_Y] + f_FramedSphereRadii[sphereIndex]) {
+            maxY = point[AXIS_Y] + f_FramedSphereRadii[sphereIndex];
         }
     }
 
@@ -208,33 +208,33 @@ void FrameSpheres(f32 depthOffset) {
     maxY = -FAR_EXTENT;
     maxX = maxY;
     guMtxCatF(f_FramingRotation, rotation, rotation);
-    for (i = 0; i < f_FramedSphereCount; i++) {
-        TransformPoint(rotation, f_FramedSphereCenters[i], point);
+    for (sphereIndex = 0; sphereIndex < f_FramedSphereCount; sphereIndex++) {
+        TransformPoint(rotation, f_FramedSphereCenters[sphereIndex], point);
         if (g_ControllerData[1].trigger & D_CBUTTONS) {
             osSyncPrintf("rZ %f\n", point[AXIS_Z]);
         }
-        if (point[AXIS_Z] - f_FramedSphereRadii[i] < minZ) {
-            minZ = point[AXIS_Z] - f_FramedSphereRadii[i];
+        if (point[AXIS_Z] - f_FramedSphereRadii[sphereIndex] < minZ) {
+            minZ = point[AXIS_Z] - f_FramedSphereRadii[sphereIndex];
         }
 
-        if (maxZ < point[AXIS_Z] + f_FramedSphereRadii[i]) {
-            maxZ = point[AXIS_Z] + f_FramedSphereRadii[i];
+        if (maxZ < point[AXIS_Z] + f_FramedSphereRadii[sphereIndex]) {
+            maxZ = point[AXIS_Z] + f_FramedSphereRadii[sphereIndex];
         }
 
-        if (point[AXIS_X] - f_FramedSphereRadii[i] < minX) {
-            minX = point[AXIS_X] - f_FramedSphereRadii[i];
+        if (point[AXIS_X] - f_FramedSphereRadii[sphereIndex] < minX) {
+            minX = point[AXIS_X] - f_FramedSphereRadii[sphereIndex];
         }
 
-        if (maxX < point[AXIS_X] + f_FramedSphereRadii[i]) {
-            maxX = point[AXIS_X] + f_FramedSphereRadii[i];
+        if (maxX < point[AXIS_X] + f_FramedSphereRadii[sphereIndex]) {
+            maxX = point[AXIS_X] + f_FramedSphereRadii[sphereIndex];
         }
 
-        if (point[AXIS_Y] - f_FramedSphereRadii[i] < minY) {
-            minY = point[AXIS_Y] - f_FramedSphereRadii[i];
+        if (point[AXIS_Y] - f_FramedSphereRadii[sphereIndex] < minY) {
+            minY = point[AXIS_Y] - f_FramedSphereRadii[sphereIndex];
         }
 
-        if (maxY < point[AXIS_Y] + f_FramedSphereRadii[i]) {
-            maxY = point[AXIS_Y] + f_FramedSphereRadii[i];
+        if (maxY < point[AXIS_Y] + f_FramedSphereRadii[sphereIndex]) {
+            maxY = point[AXIS_Y] + f_FramedSphereRadii[sphereIndex];
         }
     }
 

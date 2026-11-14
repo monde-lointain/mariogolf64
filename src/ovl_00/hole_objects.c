@@ -138,11 +138,11 @@ Radians GetCameraYaw(void) {
 }
 
 Boolean IsMonkeyShown(void) {
-    s32 i;
+    s32 creatureIndex;
     HoleCreature *creature;
 
-    for (i = 0; i != HOLE_CREATURE_COUNT; i++) {
-        creature = &f_HoleCreatures[i];
+    for (creatureIndex = 0; creatureIndex != HOLE_CREATURE_COUNT; creatureIndex++) {
+        creature = &f_HoleCreatures[creatureIndex];
         if (creature->state == HOLE_CREATURE_MONKEY) {
             return TRUE;
         }
@@ -157,7 +157,7 @@ void StartMonkeyDrop(Radians cameraYaw) {
     Vec3 rotation;
     Vec3 scale;
     Mat4 transform;
-    s32 i;
+    s32 creatureIndex;
     HoleCreature *creature;
 
     if (IsMonkeyShown()) {
@@ -166,8 +166,8 @@ void StartMonkeyDrop(Radians cameraYaw) {
 
     OpenEncodedAsset(f_MonkeyFrameAssets[0], &asset);
     ReadEncodedAsset(f_MonkeyImage, &asset);
-    for (i = 0; i != HOLE_CREATURE_COUNT; i++) {
-        creature = &f_HoleCreatures[i];
+    for (creatureIndex = 0; creatureIndex != HOLE_CREATURE_COUNT; creatureIndex++) {
+        creature = &f_HoleCreatures[creatureIndex];
         if (creature->state == HOLE_CREATURE_NONE) {
             creature->state = HOLE_CREATURE_MONKEY;
             creature->isGold = FALSE;
@@ -196,11 +196,11 @@ void StartMonkeyDrop(Radians cameraYaw) {
 }
 
 void ClearHoleCreatures(void) {
-    s32 i;
+    s32 creatureIndex;
     HoleCreature *creature;
 
-    for (i = 0; i != HOLE_CREATURE_COUNT; i++) {
-        creature = &f_HoleCreatures[i];
+    for (creatureIndex = 0; creatureIndex != HOLE_CREATURE_COUNT; creatureIndex++) {
+        creature = &f_HoleCreatures[creatureIndex];
         creature->state = HOLE_CREATURE_NONE;
     }
 }
@@ -211,7 +211,7 @@ void StartCheepCheepLeap(s32 startValue) {
     Vec3 rotation;
     Vec3 scale;
     Mat4 transform;
-    s32 i;
+    s32 creatureIndex;
     HoleCreature *creature;
     f32 speed;
 
@@ -219,8 +219,8 @@ void StartCheepCheepLeap(s32 startValue) {
     f_AreCheepCheepsLeaping = TRUE;
     f_UnusedLeapValue = 0;
     f_OtherUnusedLeapValue = 0;
-    for (i = 0; i != HOLE_CREATURE_COUNT; i++) {
-        creature = &f_HoleCreatures[i];
+    for (creatureIndex = 0; creatureIndex != HOLE_CREATURE_COUNT; creatureIndex++) {
+        creature = &f_HoleCreatures[creatureIndex];
         if (creature->state == HOLE_CREATURE_NONE) {
             s32 random = guRandom();
 
@@ -275,7 +275,7 @@ void StartCheepCheepLeap(s32 startValue) {
 
 void DrawHoleCreatures(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    s32 i;
+    s32 creatureIndex;
     HoleCreature *creature;
     f32 unused[6] UNUSED;
     Vec3 translation;
@@ -323,8 +323,8 @@ void DrawHoleCreatures(Gfx **displayListHead) {
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    for (i = 0; i != HOLE_CREATURE_COUNT; i++) {
-        creature = &f_HoleCreatures[i];
+    for (creatureIndex = 0; creatureIndex != HOLE_CREATURE_COUNT; creatureIndex++) {
+        creature = &f_HoleCreatures[creatureIndex];
         if (creature->state == HOLE_CREATURE_NONE) {
         }
         else if (creature->state == HOLE_CREATURE_CHEEP_CHEEP) {
