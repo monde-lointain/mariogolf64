@@ -296,7 +296,7 @@ s32 GetGroundHeight(s32 x, s32 z);
 
 void BuildAllTileMidpoints(void);
 s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ, s32 secondX, s32 secondZ);
-s32 GetTerrainCode(s32 column, s32 row);
+TerrainCode GetTerrainCode(s32 column, s32 row);
 void MarkBillboardsOnMap(void);
 
 #endif

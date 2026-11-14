@@ -245,8 +245,7 @@ typedef s32 TriangleEdit;
 #define DIAGONAL_DISTANCE_MIN 3.0f
 #define DIAGONAL_SIDE_COUNT 4
 #define SIDE_CODE_COUNT 2
-#define HasTwoSideCodes(codes) ((codes)[SIDE_CODE_COUNT - 1] != NO_TERRAIN_CODE)
-#define NO_TERRAIN_CODE (-1)
+#define HasTwoSideCodes(codes) ((codes)[SIDE_CODE_COUNT - 1] != TERRAIN_CODE_NONE)
 #define HOLE_EDITOR_DIAGONAL_ASSERT_LINE 2046
 #define VERTEX_UNITS_PER_CODE 16
 
@@ -2564,17 +2563,17 @@ static const char f_EditorAssertionText[] = "EX";
 static const char f_EditorFileName[] = "c:/usgolf64/hiedit.c";
 
 s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
-    s32 sideCodes[DIAGONAL_SIDE_COUNT][SIDE_CODE_COUNT];
+    TerrainCode sideCodes[DIAGONAL_SIDE_COUNT][SIDE_CODE_COUNT];
     s32 width;
     s32 height;
     s32 codeIndex;
     s32 rowOffset;
     s32 columnOffset;
-    s32 code;
+    TerrainCode code;
     f32 inverseLength;
     f32 distance;
 
-    void AddSideCode(s32 * codes, s32 code) {
+    void AddSideCode(TerrainCode * codes, TerrainCode code) {
         s32 codeIndex;
 
         for (codeIndex = 0; codeIndex < SIDE_CODE_COUNT; codeIndex++) {
@@ -2582,7 +2581,7 @@ s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
                 return;
             }
 
-            if (codes[codeIndex] == NO_TERRAIN_CODE) {
+            if (codes[codeIndex] == TERRAIN_CODE_NONE) {
                 codes[codeIndex] = code;
                 return;
             }
@@ -2593,8 +2592,8 @@ s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
     height = endRow - row;
     AssertInEditor(width > 0 && height > 0, HOLE_EDITOR_DIAGONAL_ASSERT_LINE);
     for (codeIndex = 0; codeIndex < DIAGONAL_SIDE_COUNT; codeIndex++) {
-        sideCodes[codeIndex][0] = NO_TERRAIN_CODE;
-        sideCodes[codeIndex][1] = NO_TERRAIN_CODE;
+        sideCodes[codeIndex][0] = TERRAIN_CODE_NONE;
+        sideCodes[codeIndex][1] = TERRAIN_CODE_NONE;
     }
 
     inverseLength = 1.0f / sqrtf((width * width) + (height * height));

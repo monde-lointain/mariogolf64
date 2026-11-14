@@ -240,7 +240,7 @@ static inline s32 GetCellCodeOffset(s32 cellEntry, s32 column, s32 row) {
         ((cellEntry & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
 }
 
-s32 GetTerrainCode(s32 column, s32 row) {
+TerrainCode GetTerrainCode(s32 column, s32 row) {
     s32 cellEntry;
     s32 cellOffset;
 
