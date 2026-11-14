@@ -147,8 +147,6 @@ typedef s32 MenuArrow;
 #define ASSET_STAT_LABELS 0x978
 #define ASSET_SHOT_TYPES 0x979
 
-extern u8 g_AssetArchiveRomStart[];
-
 s32 OpenEncodedAsset(AssetId assetId, EncodedAsset *asset);
 void ReadEncodedAsset(void *buffer, EncodedAsset *asset);
 void InitAssetFiles(void);

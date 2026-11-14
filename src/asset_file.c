@@ -34,6 +34,8 @@ typedef struct AssetTableEntry {
     u32 offset;
 } AssetTableEntry;
 
+extern u8 g_AssetArchiveRomStart[];
+
 #define ASSET_TABLE ((AssetTableEntry *)g_AssetArchiveRomStart)
 static AssetFile f_AssetFilePool[ASSET_FILE_POOL_SIZE];
 static u8 f_UnusedBufferAfterAssetFilePool[0x40] UNUSED;
