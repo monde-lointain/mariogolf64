@@ -8019,7 +8019,6 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 #define ERASE_WINDOW_HEIGHT 160
 #define ERASE_WINDOW_CENTER_X 160
 #define ERASE_WINDOW_CENTER_Y 120
-#define NO_OK_TEXT (-1)
 #define ERASE_MESSAGE 0xC9
 #define ERASE_MESSAGE_X 160
 #define ERASE_MESSAGE_Y 106

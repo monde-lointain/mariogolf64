@@ -21,6 +21,9 @@ enum CodeEntryBuffer {
 };
 
 void LoadTournamentBuffer(void *buffer, s16 bufferKind);
+
+// Passed as DrawYesNoWindow's okTextShown to leave out the OK label.
+#define NO_OK_TEXT (-1)
 void DrawYesNoWindow(
     Gfx **displayListHead,
     s32 width,
