@@ -1335,14 +1335,14 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
     f32 cosine;
     f32 absRadius;
     f32 radius = SPOT_PLACE_DISTANCE;
-    SignedBinaryAngle aim = g_CurrentShot.heading;
-    s32 sidewaysAim;
+    SignedBinaryAngle shotHeading = g_CurrentShot.heading;
+    s32 sidewaysHeading;
 
     spot[AXIS_X] = f_ReactionSpot[AXIS_X];
     spot[AXIS_Y] = f_ReactionSpot[AXIS_Y];
     spot[AXIS_Z] = f_ReactionSpot[AXIS_Z];
-    sidewaysAim = aim + QUARTER_BINARY_TURN;
-    heading = (BinaryAngle)sidewaysAim * BINARY_ANGLE_TO_RADIANS;
+    sidewaysHeading = shotHeading + QUARTER_BINARY_TURN;
+    heading = (BinaryAngle)sidewaysHeading * BINARY_ANGLE_TO_RADIANS;
     ahead[AXIS_X] = (cosf(heading) * radius) + spot[AXIS_X];
     ahead[AXIS_Z] = (sinf(heading) * radius) + spot[AXIS_Z];
     ahead[AXIS_Y] = GetGroundHeight(ahead[AXIS_X], ahead[AXIS_Z]);
