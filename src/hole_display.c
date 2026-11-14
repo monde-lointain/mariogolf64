@@ -35,7 +35,6 @@
 
 #define TITLE_HOLE_INDEX 9
 #define TITLE_COURSE_INDEX 0
-#define TITLE_WIND_SPEED_MASK 0x3F
 #define TITLE_WIND_SPEED_STEP 6000
 #define TITLE_LIGHT_PITCH 0x1000
 #define TITLE_LIGHT_YAW 0x6000
@@ -1365,7 +1364,7 @@ void SetUpTitleHole(void) {
     g_GameState.unusedHoleValue = 0;
     g_GameState.gameMode = GAME_MODE_TITLE_HOLE;
     g_HoleSetup.conditions.isRaining = FALSE;
-    g_HoleSetup.conditions.windSpeed = (rand() & TITLE_WIND_SPEED_MASK) * TITLE_WIND_SPEED_STEP;
+    g_HoleSetup.conditions.windSpeed = (rand() & RANDOM_WIND_STEP_MASK) * TITLE_WIND_SPEED_STEP;
     g_HoleSetup.conditions.windDirection = rand();
     g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
     g_HoleSetup.conditions.lightPitch = TITLE_LIGHT_PITCH;

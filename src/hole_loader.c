@@ -46,7 +46,6 @@
 #define DRY_DRAW_COUNT 3
 
 #define WIND_SPEED_STEP 10000
-#define WIND_SPEED_STEP_MASK 0x3F
 #define WIND_SPEED_MIN 0x18000
 #define DRIVING_RANGE_WIND_DIRECTION 0x4000
 
@@ -743,7 +742,7 @@ NO_RESULT ChooseHoleConditions(void) {
         }
 
         do {
-            g_HoleSetup.conditions.windSpeed = (rand() & WIND_SPEED_STEP_MASK) * WIND_SPEED_STEP;
+            g_HoleSetup.conditions.windSpeed = (rand() & RANDOM_WIND_STEP_MASK) * WIND_SPEED_STEP;
             if (g_HoleSetup.conditions.windSpeed < WIND_SPEED_MIN) {
                 g_HoleSetup.conditions.windSpeed = 0;
             }
