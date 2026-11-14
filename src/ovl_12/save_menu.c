@@ -230,7 +230,7 @@ static s8 f_ModeIcons[GAME_MODE_ICON_COUNT] = {
 static s32 f_MenuKind = SAVE_MENU_CLOSED;
 static Boolean f_IsControlsShown = FALSE;
 static s32 f_CursorIndex = 0;
-static s32 f_StateFrame = 0;
+static s32 f_StateFrameCount = 0;
 static s32 f_MenuState = SAVE_MENU_STATE_OPENING;
 static char *f_ModeNames[MODE_NAME_COUNT] = {
     "Tournament",
@@ -475,7 +475,7 @@ void OpenSaveMenu(s32 kind) {
         }
     }
 
-    f_StateFrame = 0;
+    f_StateFrameCount = 0;
     f_MenuState = SAVE_MENU_STATE_OPENING;
     f_SlideOffsets[0] = SCREEN_WIDTH;
     f_SlideOffsets[1] = SCREEN_WIDTH;
@@ -1265,7 +1265,7 @@ void SaveGameToSlot(void) {
     game = &save->savedGames[f_CursorIndex];
     SaveOrContinueGame(f_CursorIndex, FALSE);
     state = &game->state;
-    f_StateFrame = 0;
+    f_StateFrameCount = 0;
     InvalidateBrokenSavedGames();
     if (save->savedGames[f_CursorIndex].isValid) {
         f_MenuState = SAVE_MENU_STATE_SAVED;
@@ -1299,7 +1299,7 @@ void SaveGameToSlot(void) {
 }
 
 void LeaveGameSaveMenu(void) {
-    f_StateFrame = 0;
+    f_StateFrameCount = 0;
     f_MenuState = SAVE_MENU_STATE_LEAVING;
 }
 
@@ -1310,7 +1310,7 @@ void SaveReplayToSlot(void) {
 
     record = &GetSaveData()->ringShotRecords[f_CursorIndex];
     SaveRingShotRecord(f_CursorIndex, g_RingShotRecords);
-    f_StateFrame = 0;
+    f_StateFrameCount = 0;
     InvalidateBrokenRingShotRecords();
     if (record->scoreKind & SCORE_KIND_RECORDED) {
         OpenEncodedAsset(
@@ -1333,7 +1333,7 @@ void SaveReplayToSlot(void) {
 }
 
 void LeaveReplaySaveMenu(void) {
-    f_StateFrame = 0;
+    f_StateFrameCount = 0;
     f_MenuState = SAVE_MENU_STATE_LEAVING;
 }
 
@@ -1342,11 +1342,11 @@ void UpdateGameSaveMenu(ControllerState *controller) {
     s32 row;
 
     save = GetSaveData();
-    f_StateFrame++;
+    f_StateFrameCount++;
     switch (f_MenuState) {
         case SAVE_MENU_STATE_OPENING:
             for (row = 0; row != SLIDE_ROW_COUNT; row++) {
-                if (row < f_StateFrame && f_SlideOffsets[row] > 0) {
+                if (row < f_StateFrameCount && f_SlideOffsets[row] > 0) {
                     if (f_SlideOffsets[row] == 1) {
                         f_SlideOffsets[row] = 0;
                     }
@@ -1356,7 +1356,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
                 }
             }
 
-            if (f_StateFrame == SLIDE_FRAMES) {
+            if (f_StateFrameCount == SLIDE_FRAMES) {
                 f_MenuState = SAVE_MENU_STATE_CHOOSING;
             }
 
@@ -1375,7 +1375,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
                     0
                 );
                 AnimateModeIcons(TRUE);
-                f_StateFrame = 0;
+                f_StateFrameCount = 0;
                 f_MenuState = SAVE_MENU_STATE_BACKING_OUT;
                 break;
             }
@@ -1422,7 +1422,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
             break;
         case SAVE_MENU_STATE_BACKING_OUT:
             for (row = 0; row != SLIDE_ROW_COUNT; row++) {
-                if (row < f_StateFrame) {
+                if (row < f_StateFrameCount) {
                     if (f_SlideOffsets[row] >= SLIDE_OUT_START_OFFSET) {
                         f_SlideOffsets[row] -= SLIDE_OUT_START_STEP;
                     }
@@ -1432,7 +1432,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
                 }
             }
 
-            if (f_StateFrame == SLIDE_SOUND_FRAME) {
+            if (f_StateFrameCount == SLIDE_SOUND_FRAME) {
                 PlaySoundWithEffects(
                     SOUND_PANEL_CLOSE,
                     g_NextSoundChannel,
@@ -1442,7 +1442,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
                 );
             }
 
-            if (f_StateFrame == SLIDE_FRAMES) {
+            if (f_StateFrameCount == SLIDE_FRAMES) {
                 f_MenuState = SAVE_MENU_STATE_BACKED_OUT;
             }
 
@@ -1464,15 +1464,15 @@ void UpdateGameSaveMenu(ControllerState *controller) {
             g_RoundHud.isProgressShown = TRUE;
             break;
         case SAVE_MENU_STATE_SAVED:
-            if (f_StateFrame == SAVED_WAIT_FRAMES) {
+            if (f_StateFrameCount == SAVED_WAIT_FRAMES) {
                 f_MenuState = SAVE_MENU_STATE_LEAVING;
-                f_StateFrame = 0;
+                f_StateFrameCount = 0;
             }
 
             break;
         case SAVE_MENU_STATE_LEAVING:
             for (row = 0; row != SLIDE_ROW_COUNT; row++) {
-                if (row < f_StateFrame) {
+                if (row < f_StateFrameCount) {
                     if (f_SlideOffsets[row] >= SLIDE_OUT_START_OFFSET) {
                         f_SlideOffsets[row] -= SLIDE_OUT_START_STEP;
                     }
@@ -1482,7 +1482,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
                 }
             }
 
-            if (f_StateFrame == SLIDE_SOUND_FRAME) {
+            if (f_StateFrameCount == SLIDE_SOUND_FRAME) {
                 PlaySoundWithEffects(
                     SOUND_PANEL_CLOSE,
                     g_NextSoundChannel,
@@ -1492,7 +1492,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
                 );
             }
 
-            if (f_StateFrame == SLIDE_FRAMES) {
+            if (f_StateFrameCount == SLIDE_FRAMES) {
                 g_PauseScreen = PAUSE_SCREEN_NONE;
                 CloseSaveMenu();
                 QuitPlayToTitle();
@@ -1507,11 +1507,11 @@ s32 UpdateReplaySaveMenu(ControllerState *controller) {
     s32 row;
 
     save = GetSaveData();
-    f_StateFrame++;
+    f_StateFrameCount++;
     switch (f_MenuState) {
         case SAVE_MENU_STATE_OPENING:
             for (row = 0; row != SLIDE_ROW_COUNT; row++) {
-                if (row < f_StateFrame && f_SlideOffsets[row] > 0) {
+                if (row < f_StateFrameCount && f_SlideOffsets[row] > 0) {
                     if (f_SlideOffsets[row] == 1) {
                         f_SlideOffsets[row] = 0;
                     }
@@ -1521,7 +1521,7 @@ s32 UpdateReplaySaveMenu(ControllerState *controller) {
                 }
             }
 
-            if (f_StateFrame == SLIDE_FRAMES) {
+            if (f_StateFrameCount == SLIDE_FRAMES) {
                 f_MenuState = SAVE_MENU_STATE_CHOOSING;
             }
 
@@ -1572,15 +1572,15 @@ s32 UpdateReplaySaveMenu(ControllerState *controller) {
 
             break;
         case SAVE_MENU_STATE_SAVED:
-            if (f_StateFrame == SAVED_WAIT_FRAMES) {
+            if (f_StateFrameCount == SAVED_WAIT_FRAMES) {
                 f_MenuState = SAVE_MENU_STATE_LEAVING;
-                f_StateFrame = 0;
+                f_StateFrameCount = 0;
             }
 
             break;
         case SAVE_MENU_STATE_LEAVING:
             for (row = 0; row != SLIDE_ROW_COUNT; row++) {
-                if (row < f_StateFrame) {
+                if (row < f_StateFrameCount) {
                     if (f_SlideOffsets[row] >= SLIDE_OUT_START_OFFSET) {
                         f_SlideOffsets[row] -= SLIDE_OUT_START_STEP;
                     }
@@ -1590,7 +1590,7 @@ s32 UpdateReplaySaveMenu(ControllerState *controller) {
                 }
             }
 
-            if (f_StateFrame == SAVED_WAIT_FRAMES) {
+            if (f_StateFrameCount == SAVED_WAIT_FRAMES) {
                 CloseSaveMenu();
                 return REPLAY_MENU_CLOSED;
             }
@@ -2188,7 +2188,7 @@ void OpenControlsScreen(void) {
     ReadEncodedAsset(picture, &encodedAsset);
     f_SlideOffsets[0] = SCREEN_HEIGHT;
     f_IsControlsShown = TRUE;
-    f_StateFrame = 0;
+    f_StateFrameCount = 0;
     f_ResumedSongId = GetSongId();
     PlaySong(SONG_CONTROLS, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
 }
@@ -2259,7 +2259,7 @@ void DrawControlsScreen(Gfx **displayListHead) {
 }
 
 void UpdateControlsScreen(ControllerState *controller) {
-    f_StateFrame++;
+    f_StateFrameCount++;
     switch (f_MenuState) {
         case SAVE_MENU_STATE_OPENING:
             if (f_SlideOffsets[0] > 0) {
@@ -2271,7 +2271,7 @@ void UpdateControlsScreen(ControllerState *controller) {
                 }
             }
 
-            if (f_StateFrame == SLIDE_SOUND_FRAME) {
+            if (f_StateFrameCount == SLIDE_SOUND_FRAME) {
                 PlaySoundWithEffects(
                     SOUND_CONTROLS_OPEN,
                     g_NextSoundChannel,
@@ -2281,7 +2281,7 @@ void UpdateControlsScreen(ControllerState *controller) {
                 );
             }
 
-            if (f_StateFrame == SLIDE_FRAMES) {
+            if (f_StateFrameCount == SLIDE_FRAMES) {
                 f_MenuState = SAVE_MENU_STATE_CHOOSING;
             }
 
@@ -2289,7 +2289,7 @@ void UpdateControlsScreen(ControllerState *controller) {
         case SAVE_MENU_STATE_CHOOSING:
             if (controller->pressedButtons & (A_BUTTON | B_BUTTON)) {
                 PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_VOLUME_MEDIUM);
-                f_StateFrame = 0;
+                f_StateFrameCount = 0;
                 f_MenuState = SAVE_MENU_STATE_BACKING_OUT;
             }
 
@@ -2302,7 +2302,7 @@ void UpdateControlsScreen(ControllerState *controller) {
                 f_SlideOffsets[0] += f_SlideOffsets[0] / 2;
             }
 
-            if (f_StateFrame == SLIDE_SOUND_FRAME) {
+            if (f_StateFrameCount == SLIDE_SOUND_FRAME) {
                 PlaySoundWithEffects(
                     SOUND_CONTROLS_CLOSE,
                     g_NextSoundChannel,
@@ -2312,7 +2312,7 @@ void UpdateControlsScreen(ControllerState *controller) {
                 );
             }
 
-            if (f_StateFrame == SLIDE_FRAMES) {
+            if (f_StateFrameCount == SLIDE_FRAMES) {
                 f_MenuState = SAVE_MENU_STATE_BACKED_OUT;
             }
 

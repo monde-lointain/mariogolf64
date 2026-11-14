@@ -30,7 +30,7 @@
 #define CLUB_SLOTS_SPEEDING 2
 #define CLUB_SLOTS_STOPPING 3
 #define CLUB_SLOTS_STOPPED 4
-#define CLUB_SLOTS_STATE_TIME 20
+#define CLUB_SLOTS_STATE_FRAME_COUNT 20
 #define CLUB_SLOTS_RESULT_DELAY 30
 #define REEL_STOP_WAIT_TIME 150
 
@@ -204,7 +204,7 @@ static AssetId f_SymbolAssets[SYMBOL_COUNT] = {
     0x58F,
     0x582,
 };
-static s32 f_StateTime = 0;
+static s32 f_StateFrameCount = 0;
 static s32 f_StopWaitTime = 0;
 static s32 f_TickTime = 0;
 static Radians f_StartAngle = 0.0f;
@@ -425,16 +425,16 @@ s32 UpdateClubSlots(void) {
 
     switch (f_ClubSlotsState) {
         case CLUB_SLOTS_STARTING:
-            if (++f_StateTime == CLUB_SLOTS_STATE_TIME) {
-                f_StateTime = 0;
+            if (++f_StateFrameCount == CLUB_SLOTS_STATE_FRAME_COUNT) {
+                f_StateFrameCount = 0;
                 f_ClubSlotsState = CLUB_SLOTS_SPEEDING;
                 PlaySound(SOUND_PROMPT_OPEN, g_NextSoundChannel, SOUND_FULL_SCALE);
             }
 
             break;
         case CLUB_SLOTS_SPEEDING:
-            if (++f_StateTime == CLUB_SLOTS_STATE_TIME) {
-                f_StateTime = 0;
+            if (++f_StateFrameCount == CLUB_SLOTS_STATE_FRAME_COUNT) {
+                f_StateFrameCount = 0;
                 f_ClubSlotsState = CLUB_SLOTS_STOPPING;
                 f_StopWaitTime = 0;
             }
