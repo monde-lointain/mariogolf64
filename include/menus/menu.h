@@ -252,20 +252,28 @@ extern s16 g_ImportedCharacterColumns[PLAYER_COUNT_MAX];
 #define MENU_CHARACTERS_EYE_Y 70.0f
 #define MENU_CHARACTERS_EYE_Z 60.0f
 
-// Indices of the game-mode icon animations in g_ModeIconAnimations
-#define MODE_ICON_TOURNAMENT 0
-#define MODE_ICON_GET_CHARACTER 1
-#define MODE_ICON_STROKE 2
-#define MODE_ICON_SPEED_GOLF 3
-#define MODE_ICON_TRAINING 4
-#define MODE_ICON_MINI_GOLF 5
-#define MODE_ICON_MATCH_GAME 6
-#define MODE_ICON_SKINS_MATCH 7
-#define MODE_ICON_RING_SHOT 8
-#define MODE_ICON_UNLISTED_STROKE 9
-#define MODE_ICON_CLUB_SLOTS 10
-#define NO_MODE_ICON (-1)
-#define MODE_ICON_COUNT 11
+// The game modes' icons, indexing g_ModeIconAnimations; NO_MODE_ICON is a mode
+// without one
+enum ModeIcon {
+    NO_MODE_ICON = -1,
+    MODE_ICON_TOURNAMENT,
+    MODE_ICON_GET_CHARACTER,
+    MODE_ICON_STROKE,
+    MODE_ICON_SPEED_GOLF,
+    MODE_ICON_TRAINING,
+    MODE_ICON_MINI_GOLF,
+    MODE_ICON_MATCH_GAME,
+    MODE_ICON_SKINS_MATCH,
+    MODE_ICON_RING_SHOT,
+    MODE_ICON_UNLISTED_STROKE,
+    MODE_ICON_CLUB_SLOTS,
+    MODE_ICON_COUNT
+};
+
+typedef s32 ModeIcon;
+typedef s8 ModeIcon8;
+typedef u8 UModeIcon8;
+
 // The table holds three rows past the last icon, copies of rows 2, 2 and 5
 #define MODE_ICON_ANIMATION_COUNT 14
 // Each icon's frames are asset ids, ended by END_OF_ICON_FRAMES

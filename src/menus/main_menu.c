@@ -373,7 +373,7 @@ static f32 f_SoundTestSoundFrequency = 0.0f;
 static f32 f_SoundTestSongFrequency = 0.0f;
 static s32 f_SoundTestSongTempo = NORMAL_SONG_TEMPO;
 // The mode that each of the mode select's choices picks, by player count
-static u8 f_ModeChoiceIcons[PLAYER_COUNT_MAX][MODE_CHOICE_LIMIT] = {
+static UModeIcon8 f_ModeChoiceIcons[PLAYER_COUNT_MAX][MODE_CHOICE_LIMIT] = {
     {
         MODE_ICON_TOURNAMENT,
         MODE_ICON_GET_CHARACTER,
@@ -1518,7 +1518,7 @@ void UpdateMenus(void) {
     u8 *imageBuffer;
     ImageAsset *tournamentImage;
     u8 *optionBits;
-    u8 iconIndex;
+    UModeIcon8 iconIndex;
 
     save = GetSaveData();
     GetMenuMemory();
@@ -2834,8 +2834,10 @@ void UpdateModeSelect(void) {
     s32 i;
     u32 step;
     s16 gridMark;
-    s32 iconIndex;
-    s32 chosenIcon;
+    // The chosen mode's icon, read once to start the mode and again for its
+    // prompt. One local for both reads doesn't match.
+    ModeIcon iconIndex;
+    ModeIcon chosenIcon;
 
     if (isDone != TRUE || GetWipeKind() != WIPE_NONE) {
         return;
@@ -6498,7 +6500,7 @@ void DrawModeIcon(Gfx **displayListHead) {
     EncodedAsset asset;
     s32 stripIndex;
     ImageAsset *image;
-    u8 iconIndex;
+    UModeIcon8 iconIndex;
 
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -6581,7 +6583,7 @@ void DrawScaledModeIcon(Gfx **displayListHead, s32 left, s32 top, s32 halfSize, 
     EncodedAsset asset;
     s32 stripIndex;
     ImageAsset *image;
-    u8 iconIndex;
+    UModeIcon8 iconIndex;
 
     gDPPipeSync(gfx++);
     image = g_AnimatedIconImages[g_AnimatedIconBufferIndex];

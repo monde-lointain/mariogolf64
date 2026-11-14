@@ -251,7 +251,7 @@ static u32 f_SaveMenuGameModes[SAVE_MENU_MODE_MINI_GOLF] = {
     GAME_MODE_UNLISTED_STROKE,
 };
 // The mode icon of each save menu mode, mini golf last
-static s32 f_SaveMenuModeIcons[SAVE_MENU_MODE_COUNT] = {
+static ModeIcon f_SaveMenuModeIcons[SAVE_MENU_MODE_COUNT] = {
     MODE_ICON_TOURNAMENT,
     MODE_ICON_GET_CHARACTER,
     MODE_ICON_STROKE,
@@ -2279,7 +2279,7 @@ void DrawSavedGames(Gfx **displayListHead) {
     // 10; for its course, 26; and for the text slots, 346.
     s32 index;
     s32 labelX;
-    s32 iconIndex;
+    ModeIcon iconIndex;
     s32 slotOffset;
 
     DrawLargeBannerBackdropLayers(&gfx, SAVED_GAMES_BACKDROP_LAYERS);
@@ -2782,7 +2782,7 @@ void DrawChosenGameBoard(Gfx **displayListHead, s32 left, s32 top, s32 halfSize,
     EncodedAsset asset;
     s32 stripIndex;
     ImageAsset *image;
-    u8 iconIndex;
+    UModeIcon8 iconIndex;
 
     gDPPipeSync(gfx++);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_GameBoards[memory->savedGameIndex])));

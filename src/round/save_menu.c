@@ -220,9 +220,9 @@ enum ReplayLabel {
 
 typedef s32 ReplayLabel;
 
-// The MODE_ICON_ index by GameState.gameMode; modes that the menu never names
-// hold 0 or 3
-static s8 f_ModeIcons[GAME_MODE_ICON_COUNT] = {
+// The mode icon by GameState.gameMode; modes that the menu never names hold 0
+// or 3
+static ModeIcon8 f_ModeIcons[GAME_MODE_ICON_COUNT] = {
     MODE_ICON_STROKE,
     0,
     MODE_ICON_MATCH_GAME,
@@ -276,9 +276,9 @@ static ImageAsset *f_CourseNumbersImage;
 static ImageAsset *f_SaveMenuTitleImage;
 static s32 f_IconFrames[SAVED_GAME_COUNT];
 
-// Returns the MODE_ICON_ index of a saved game's mode, or NO_MODE_ICON
-s32 GetModeIconIndex(GameState *state) {
-    s32 iconIndex;
+// Returns the icon of a saved game's mode, or NO_MODE_ICON
+ModeIcon GetModeIconIndex(GameState *state) {
+    ModeIcon iconIndex;
 
     if (state->isMiniGolf) {
         iconIndex = MODE_ICON_MINI_GOLF;
@@ -347,7 +347,7 @@ void OpenSaveMenu(SaveMenuList kind) {
     SaveData *save;
     s32 slot;
     s32 playerIndex;
-    s32 iconIndex;
+    ModeIcon iconIndex;
     RingShotRecord *record;
     Player *player;
     GameState *state;
