@@ -405,7 +405,7 @@ void LoadStaffRoll(void) {
     LoadEffectImages();
 }
 
-void UnloadStaffRoll(void) {
+void FreeStaffRoll(void) {
     s32 index;
 
     FreeEffectImages();

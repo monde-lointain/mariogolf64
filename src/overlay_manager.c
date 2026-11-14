@@ -90,7 +90,7 @@ static Overlay f_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_11, f_CourseSelectModuleIds, NULL, NULL),
     OVERLAY_ENTRY(ovl_12, f_SaveMenuModuleIds, NULL, NULL),
     OVERLAY_ENTRY(ovl_13, f_TransmitModuleIds, LoadTransmitMenu, FreeTransmitMenu),
-    OVERLAY_ENTRY(ovl_14, f_StaffRollModuleIds, LoadStaffRoll, UnloadStaffRoll),
+    OVERLAY_ENTRY(ovl_14, f_StaffRollModuleIds, LoadStaffRoll, FreeStaffRoll),
 };
 
 static s8 f_OverlayIndexOfModule[MODULE_COUNT];

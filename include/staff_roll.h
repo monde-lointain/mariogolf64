@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 void LoadStaffRoll(void);
-void UnloadStaffRoll(void);
+void FreeStaffRoll(void);
 void UpdateStaffRoll(void);
 
 void DrawStaffRoll(Gfx **displayListHead);
