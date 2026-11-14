@@ -2019,6 +2019,20 @@ static const char f_SimulationFaultText[] = "AI Sim Fault!";
 #define LONG_PUTT_DISTANCE_MIN 0x7800
 #define PUTT_DRIFT_LIMIT 0xF000
 #define AIM_CHANGE_STEP 0x400
+// After this many aim changes on blocked or unstopped trials, the planner
+// drops to a shorter club.
+#define BLOCKED_TRIAL_AIM_CHANGES_MAX 17
+#define UNSTOPPED_TRIAL_AIM_CHANGES_MAX 3
+// A trial that would need this many times its power is treated as blocked.
+#define BLOCKED_POWER_RATIO 10.0f
+// How much worse than acceptable a trial may evaluate and still be taken,
+// growing as the golfer falls behind the hole's stroke target. Putts allow a
+// share of their distance instead.
+#define NEAR_TARGET_EVALUATION_SLACK 500
+#define BEHIND_TARGET_EVALUATION_SLACK 0x8000
+#define OFF_GREEN_EVALUATION_SLACK 8000
+#define NEAR_TARGET_PUTT_SLACK_SHARE 0.3f
+#define BEHIND_TARGET_PUTT_SLACK_SHARE 0.4f
 #define EXCLUDED_SECTOR_COUNT 9
 
 s32 StepTrialShot(void) {
@@ -2270,12 +2284,14 @@ EVALUATE:
                 }
                 else if (!f_IsPutting) {
                     if (strokesOver >= -1) {
-                        if (f_BestEvaluation <= f_AcceptableEvaluation + 500) {
+                        if (f_BestEvaluation <=
+                            f_AcceptableEvaluation + NEAR_TARGET_EVALUATION_SLACK) {
                             f_IsTrialAccepted = TRUE;
                             return 1;
                         }
                     }
-                    else if (f_BestEvaluation < f_AcceptableEvaluation + 0x8000) {
+                    else if (f_BestEvaluation <
+                        f_AcceptableEvaluation + BEHIND_TARGET_EVALUATION_SLACK) {
                         f_IsTrialAccepted = TRUE;
                         return 1;
                     }
@@ -2287,20 +2303,21 @@ EVALUATE:
                                        ) *
                         APPROACH_TOLERANCE_SCALE;
                     if (strokesOver >= -1) {
-                        if (f_BestEvaluation <=
-                            (approachDistance * 0.3f) + f_AcceptableEvaluation) {
+                        if (f_BestEvaluation <= (approachDistance * NEAR_TARGET_PUTT_SLACK_SHARE) +
+                                f_AcceptableEvaluation) {
                             f_IsTrialAccepted = TRUE;
                             return 1;
                         }
                     }
                     else if (f_BestEvaluation <=
-                        (approachDistance * 0.4f) + f_AcceptableEvaluation) {
+                        (approachDistance * BEHIND_TARGET_PUTT_SLACK_SHARE) +
+                            f_AcceptableEvaluation) {
                         f_IsTrialAccepted = TRUE;
                         return 1;
                     }
                 }
             }
-            else if (f_BestEvaluation < f_AcceptableEvaluation + 8000) {
+            else if (f_BestEvaluation < f_AcceptableEvaluation + OFF_GREEN_EVALUATION_SLACK) {
                 f_IsTrialAccepted = TRUE;
                 return 1;
             }
@@ -2372,7 +2389,7 @@ EVALUATE:
                     f_NeedsShorterClub = TRUE;
                     return 1;
                 }
-                else if (f_HasFirstFallHit || ratio >= 10.0f) {
+                else if (f_HasFirstFallHit || ratio >= BLOCKED_POWER_RATIO) {
                     f_AimChangeCount++;
                     f_Shot.heading +=
                         (!(f_AimChangeCount & 1) ? -1 : 1) * (f_AimChangeCount * AIM_CHANGE_STEP);
@@ -2382,7 +2399,7 @@ EVALUATE:
                             index - (EXCLUDED_SECTOR_COUNT / 2))] = TRUE;
                     }
 
-                    if (f_AimChangeCount >= 17) {
+                    if (f_AimChangeCount >= BLOCKED_TRIAL_AIM_CHANGES_MAX) {
                         osSyncPrintf("Level Down\n");
                         f_AimChangeCount = 0;
                         f_NeedsShorterClub = TRUE;
@@ -2472,7 +2489,7 @@ EVALUATE:
         f_Shot.heading += (!(f_AimChangeCount & 1) ? -1 : 1) * (f_AimChangeCount * AIM_CHANGE_STEP);
 
         osSyncPrintf("Angle Change4\n");
-        if (f_AimChangeCount >= 3) {
+        if (f_AimChangeCount >= UNSTOPPED_TRIAL_AIM_CHANGES_MAX) {
             osSyncPrintf("Level Down\n");
             f_AimChangeCount = 0;
             f_NeedsShorterClub = TRUE;
