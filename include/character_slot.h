@@ -269,7 +269,7 @@ typedef struct CharacterSlot {
     CharacterLighting8 lighting;
     Boolean8 isLooping;
     s8 nextAnimationId;
-    s8 playsRandomTextureAnimation;
+    Boolean8 playsRandomTextureAnimation;
     s8 randomTextureAnimationDelay;
     TextureAnimationState textureAnimations[TEXTURE_ANIMATION_COUNT];
     Boolean8 usesFrontCulling;

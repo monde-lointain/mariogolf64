@@ -99,7 +99,7 @@ void PlaceCharacterForShot(u32 slotIndex);
 NO_RESULT ReuseLastCharacterMatrices(u32 slotIndex);
 void SetCharacterSlotAlpha(u32 slotIndex, s32 alpha);
 void SetCharacterFrontCulling(u32 slotIndex, Boolean usesFrontCulling);
-void SetPlaysRandomTextureAnimation(u32 slotIndex, s32 playsRandomTextureAnimation);
+void SetPlaysRandomTextureAnimation(u32 slotIndex, Boolean playsRandomTextureAnimation);
 NO_RESULT SetTextureAnimationFrame(u32 slotIndex, s32 index, s32 frame);
 void ResetCharacterSlots(void);
 s32 GetCharacterBufferSize(void);

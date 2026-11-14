@@ -3946,7 +3946,7 @@ void UpdateTurns(void) {
                             )
                         );
                         SetAnimationSpeed(0, 1.0f);
-                        SetPlaysRandomTextureAnimation(0, 0);
+                        SetPlaysRandomTextureAnimation(0, FALSE);
                     }
                 }
 
@@ -4060,7 +4060,7 @@ void UpdateTurns(void) {
                             shotMode
                         )
                     );
-                    SetPlaysRandomTextureAnimation(0, 0);
+                    SetPlaysRandomTextureAnimation(0, FALSE);
                     if (f_SwingCount > FIRST_REPLAY_SWING_COUNT) {
                         if (f_SwingCount == FIRST_REPLAY_SWING_COUNT + 1) {
                             if (f_StateEventFrame > SKIPPED_SWING_IMPACT_FRAME) {
@@ -4144,7 +4144,7 @@ void UpdateTurns(void) {
                 OnBallStepped(&g_Players[playerIndex]);
                 isCameraDone = UpdateFlightCamera(TRUE, g_TurnController.buttons);
                 if (f_StateFrameCounts[playerIndex] == RANDOM_TEXTURE_RESUME_FRAME) {
-                    SetPlaysRandomTextureAnimation(0, 1);
+                    SetPlaysRandomTextureAnimation(0, TRUE);
                 }
 
                 if (IsBButtonHeld()) {

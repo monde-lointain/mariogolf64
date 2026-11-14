@@ -1138,7 +1138,7 @@ void SetCharacterAnimation(u32 slotIndex, s32 animationId) {
     }
 }
 
-void SetPlaysRandomTextureAnimation(u32 slotIndex, s32 playsRandomTextureAnimation) {
+void SetPlaysRandomTextureAnimation(u32 slotIndex, Boolean playsRandomTextureAnimation) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
