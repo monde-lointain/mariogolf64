@@ -4416,17 +4416,18 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                                 (row * FINE_TILE_CELL_SPAN) +
                                                                     cellRow + pointRow
                                                             );
-                                                            s32 st;
+                                                            s32 packedTextureCoords;
 
                                                             if (IsGameFlagSet(
                                                                     GAME_FLAG_TEST_GROUND_TEXTURE
                                                                 )) {
-                                                                st = ((
-                                                                          MIRRORED_TEST_S -
-                                                                          (point->v.tc
-                                                                                  [TEXTURE_AXIS_S] /
-                                                                              2)
-                                                                      ) << 16) |
+                                                                packedTextureCoords =
+                                                                    ((
+                                                                         MIRRORED_TEST_S -
+                                                                         (point->v.tc
+                                                                                 [TEXTURE_AXIS_S] /
+                                                                             2)
+                                                                     ) << 16) |
                                                                     ((point->v.tc[TEXTURE_AXIS_T] /
                                                                          2) &
                                                                         0xFFFF);
@@ -4440,12 +4441,13 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                                 );
                                                             }
                                                             else {
-                                                                st = ((
-                                                                          mirroredS -
-                                                                          (point->v.tc
-                                                                                  [TEXTURE_AXIS_S] /
-                                                                              2)
-                                                                      ) << 16) |
+                                                                packedTextureCoords =
+                                                                    ((
+                                                                         mirroredS -
+                                                                         (point->v.tc
+                                                                                 [TEXTURE_AXIS_S] /
+                                                                             2)
+                                                                     ) << 16) |
                                                                     (point->v.tc[TEXTURE_AXIS_T] /
                                                                         2);
                                                             }
@@ -4456,7 +4458,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                                     [cellRow + pointRow]
                                                                     [cellColumn + pointColumn],
                                                                 G_MWO_POINT_ST,
-                                                                st
+                                                                packedTextureCoords
                                                             );
                                                         }
                                                     }
@@ -4597,7 +4599,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                                 (row * FINE_TILE_CELL_SPAN) +
                                                                     cellRow + pointRow
                                                             );
-                                                            s32 st =
+                                                            s32 packedTextureCoords =
                                                                 ((point->v.tc[TEXTURE_AXIS_S] / 2)
                                                                     << 16) |
                                                                 (point->v.tc[TEXTURE_AXIS_T] / 2);
@@ -4621,7 +4623,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                                     [cellRow + pointRow]
                                                                     [cellColumn + pointColumn],
                                                                 G_MWO_POINT_ST,
-                                                                st
+                                                                packedTextureCoords
                                                             );
                                                         }
                                                     }
