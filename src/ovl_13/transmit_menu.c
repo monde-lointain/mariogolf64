@@ -579,7 +579,7 @@ void FreeTransmitMenu(void) {
     }
 }
 
-void ShowTransferError(u32 result);
+void ShowTransferError(PakResult result);
 
 void UpdateBringCharacters(void) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
@@ -808,7 +808,7 @@ void ShowPakError(s32 pfsError) {
     }
 }
 
-void ShowTransferError(u32 result) {
+void ShowTransferError(PakResult result) {
     g_GameBoyTransfer.pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
     switch (result) {
         case PAK_RESULT_NO_CHARACTERS:
@@ -3560,7 +3560,7 @@ PakResult TagCartridges(void) {
     Boolean wasCartridgePulled = FALSE;
     s32 controllerIndex;
     s32 index;
-    s32 result;
+    PakResult result;
 
     transfer->taggedCartridgeCount = 0;
     for (controllerIndex = 0; controllerIndex != MAXCONTROLLERS; controllerIndex++) {
