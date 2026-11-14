@@ -33,6 +33,7 @@
 #include "round_hud.h"
 #include "scene.h"
 #include "scoring.h"
+#include "screen_layers.h"
 #include "shot_effects.h"
 #include "shot_simulation.h"
 #include "sound.h"
@@ -189,7 +190,6 @@ enum ResultSound {
 #define FLYOVER_INSET_SIZE 128
 #define FLYOVER_INSET_SOURCE_CODE 100
 #define FLYOVER_INSET_SIZE_CODE 101
-#define PROMPT_TEXT_SLOT 0
 #define CHOICE_TEXT_SLOT 1
 
 #define CAMERA_EASE_DEAD_ZONE 1.0f
