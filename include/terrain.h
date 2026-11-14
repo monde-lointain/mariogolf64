@@ -243,6 +243,7 @@ extern f32 g_GroundNearDepthEighth;
 #define TRIANGLE_CORNER_COUNT 3
 
 typedef struct PlaneTriangle {
+    // The HoleTriangleKind of a hit hole triangle, or the index of a hit ring.
     s32 tag;
     s16 corners[AXIS_COUNT][TRIANGLE_CORNER_COUNT];
 } PlaneTriangle;
