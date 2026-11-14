@@ -58,7 +58,7 @@ void ResetCameraEditor(void) {
         g_CameraEditor.pointTopSpeeds[pointIndex] = 30.0f;
         g_CameraEditor.pointAccelerations[pointIndex] = 3.0f;
         g_CameraEditor.pointBrakingDistances[pointIndex] = 0.0f;
-        g_CameraEditor.moveAxes[pointIndex] = 0;
+        g_CameraEditor.moveAxes[pointIndex] = EDITOR_MOVE_AXIS_NONE;
         g_CameraEditor.flags[pointIndex] = 0;
     }
 
@@ -367,7 +367,7 @@ void StopEditorMoves(void) {
         g_CameraEditor.pointTopSpeeds[pointIndex] = 30.0f;
         g_CameraEditor.pointAccelerations[pointIndex] = 3.0f;
         g_CameraEditor.pointBrakingDistances[pointIndex] = 0.0f;
-        g_CameraEditor.moveAxes[pointIndex] = 0;
+        g_CameraEditor.moveAxes[pointIndex] = EDITOR_MOVE_AXIS_NONE;
         g_CameraEditor.flags[pointIndex] = 0;
     }
 
@@ -432,7 +432,7 @@ void UpdateCameraEditor(void) {
             continue;
         }
 
-        if (g_CameraEditor.moveAxes[pointIndex] == 0) {
+        if (g_CameraEditor.moveAxes[pointIndex] == EDITOR_MOVE_AXIS_NONE) {
             if (hasLeader) {
                 break;
             }
@@ -542,7 +542,7 @@ void UpdateCameraEditor(void) {
                 g_CameraEditor.flags[pointIndex] = 0;
             }
 
-            g_CameraEditor.moveAxes[pointIndex] = 0;
+            g_CameraEditor.moveAxes[pointIndex] = EDITOR_MOVE_AXIS_NONE;
         }
 
         g_CameraEditor.points[pointIndex][0] = x;

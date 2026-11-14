@@ -12,10 +12,13 @@
 #define EDITOR_POINT_COUNT 2
 
 enum EditorMoveAxis {
-    EDITOR_MOVE_AXIS_X = 1,
+    EDITOR_MOVE_AXIS_NONE,
+    EDITOR_MOVE_AXIS_X,
     EDITOR_MOVE_AXIS_Y,
     EDITOR_MOVE_AXIS_Z
 };
+
+typedef s32 EditorMoveAxis;
 
 #define EDITOR_FLAG_TIMED_MOVE 0x2
 #define EDITOR_FLAG_UNTIMED_MOVE 0x4
@@ -54,7 +57,7 @@ typedef struct CameraEditor {
     Radians turnBrakingAngle;
     f32 zoomBrakingDistance;
     EditorFlags flags[EDITOR_POINT_COUNT];
-    s32 moveAxes[EDITOR_POINT_COUNT];
+    EditorMoveAxis moveAxes[EDITOR_POINT_COUNT];
 } CameraEditor;
 
 extern CameraEditor g_CameraEditor;
