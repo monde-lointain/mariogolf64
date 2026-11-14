@@ -97,7 +97,7 @@ void DrawHoleTriangles(
     f32 edgeX;
     f32 edgeY;
     f32 edgeZ;
-    f32 along;
+    f32 zAlignment;
     s32 alpha;
 
     if (IsGameFlagSet(GAME_FLAG_TEST_RING)) {
@@ -242,12 +242,12 @@ void DrawHoleTriangles(
                 }
 
                 guNormalize(&edgeX, &edgeY, &edgeZ);
-                along = edgeZ;
-                if (along < 0.0f) {
-                    along = -along;
+                zAlignment = edgeZ;
+                if (zAlignment < 0.0f) {
+                    zAlignment = -zAlignment;
                 }
 
-                alpha = (along * SHADED_ALPHA_SCALE) + SHADED_ALPHA_BASE;
+                alpha = (zAlignment * SHADED_ALPHA_SCALE) + SHADED_ALPHA_BASE;
                 if (alpha > SHADED_ALPHA_MAX) {
                     alpha = SHADED_ALPHA_MAX;
                 }
