@@ -75,12 +75,8 @@ enum PlanksState {
 #define COURSE_TURN_FRAME_COUNT 7
 #define COURSE_TURN_MIDDLE 4
 
-#define ARROWS_WIDTH 16
-#define ARROWS_HEIGHT 64
-#define ARROWS_FRAME_SIZE (ARROWS_WIDTH * ARROWS_HEIGHT / 2)
 #define ARROW_FRAME_DURATION 4
 #define ARROW_LEFT 152
-#define ARROW_SIZE 16
 #define ARROW_PUSH_UP (-6)
 #define ARROW_PUSH_DOWN 6
 #define ARROW_STEP 4
@@ -756,10 +752,10 @@ void DrawRingShotSelect(Gfx **displayListHead) {
                 f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_DURATION) >= ARROW_FRAME_DURATION;
             LoadNibbleTextureBlock(
                 &gfx,
-                ImageTexels(f_ArrowsImage) + (arrowFrame * ARROWS_FRAME_SIZE),
+                ImageTexels(f_ArrowsImage) + (arrowFrame * GREEN_ARROW_FRAME_SIZE),
                 G_IM_FMT_CI,
-                ARROWS_WIDTH,
-                ARROWS_HEIGHT,
+                GREEN_ARROW_SIZE,
+                GREEN_ARROW_FRAME_HEIGHT,
                 0,
                 0,
                 0,
@@ -777,9 +773,9 @@ void DrawRingShotSelect(Gfx **displayListHead) {
                     push + RING_SHOT_UP_ARROW_TOP -
                     (f_PressedDirection == DIRECTION_UP ? ARROW_STEP : 0)
                 ),
-                QuarterPixels(ARROW_LEFT + ARROW_SIZE),
+                QuarterPixels(ARROW_LEFT + GREEN_ARROW_SIZE),
                 QuarterPixels(
-                    push + RING_SHOT_UP_ARROW_TOP + ARROW_SIZE -
+                    push + RING_SHOT_UP_ARROW_TOP + GREEN_ARROW_SIZE -
                     (f_PressedDirection == DIRECTION_UP ? ARROW_STEP : 0)
                 ),
                 G_TX_RENDERTILE,
@@ -796,14 +792,14 @@ void DrawRingShotSelect(Gfx **displayListHead) {
                     push + RING_SHOT_DOWN_ARROW_TOP +
                     (f_PressedDirection == DIRECTION_DOWN ? ARROW_STEP : 0)
                 ),
-                QuarterPixels(ARROW_LEFT + ARROW_SIZE),
+                QuarterPixels(ARROW_LEFT + GREEN_ARROW_SIZE),
                 QuarterPixels(
-                    push + RING_SHOT_DOWN_ARROW_TOP + ARROW_SIZE +
+                    push + RING_SHOT_DOWN_ARROW_TOP + GREEN_ARROW_SIZE +
                     (f_PressedDirection == DIRECTION_DOWN ? ARROW_STEP : 0)
                 ),
                 G_TX_RENDERTILE,
                 0,
-                TexelCoordinate(ARROW_SIZE),
+                TexelCoordinate(GreenArrowRow(MENU_ARROW_DOWN)),
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
@@ -942,7 +938,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
 
         arrowFrame =
             (f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_DURATION) >= ARROW_FRAME_DURATION) *
-            ARROWS_FRAME_SIZE;
+            GREEN_ARROW_FRAME_SIZE;
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
@@ -955,8 +951,8 @@ void DrawHoleSelect(Gfx **displayListHead) {
             &gfx,
             ImageTexelsAt(f_ArrowsImage, arrowFrame),
             G_IM_FMT_CI,
-            ARROWS_WIDTH,
-            ARROWS_HEIGHT,
+            GREEN_ARROW_SIZE,
+            GREEN_ARROW_FRAME_HEIGHT,
             0,
             0,
             0,
@@ -974,9 +970,9 @@ void DrawHoleSelect(Gfx **displayListHead) {
                 push + HOLE_UP_ARROW_TOP + f_SlideOffset -
                 (f_PressedDirection == DIRECTION_UP ? ARROW_STEP : 0)
             ),
-            QuarterPixels(ARROW_LEFT + ARROW_SIZE),
+            QuarterPixels(ARROW_LEFT + GREEN_ARROW_SIZE),
             QuarterPixels(
-                push + HOLE_UP_ARROW_TOP + ARROW_SIZE + f_SlideOffset -
+                push + HOLE_UP_ARROW_TOP + GREEN_ARROW_SIZE + f_SlideOffset -
                 (f_PressedDirection == DIRECTION_UP ? ARROW_STEP : 0)
             ),
             G_TX_RENDERTILE,
@@ -993,14 +989,14 @@ void DrawHoleSelect(Gfx **displayListHead) {
                 push + HOLE_DOWN_ARROW_TOP + f_SlideOffset +
                 (f_PressedDirection == DIRECTION_DOWN ? ARROW_STEP : 0)
             ),
-            QuarterPixels(ARROW_LEFT + ARROW_SIZE),
+            QuarterPixels(ARROW_LEFT + GREEN_ARROW_SIZE),
             QuarterPixels(
-                push + HOLE_DOWN_ARROW_TOP + ARROW_SIZE + f_SlideOffset +
+                push + HOLE_DOWN_ARROW_TOP + GREEN_ARROW_SIZE + f_SlideOffset +
                 (f_PressedDirection == DIRECTION_DOWN ? ARROW_STEP : 0)
             ),
             G_TX_RENDERTILE,
             0,
-            TexelCoordinate(ARROW_SIZE),
+            TexelCoordinate(GreenArrowRow(MENU_ARROW_DOWN)),
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
@@ -1015,13 +1011,13 @@ void DrawHoleSelect(Gfx **displayListHead) {
                 QuarterPixels(SIDE_ARROW_TOP - f_SlideOffset),
                 QuarterPixels(
                     f_PressedDirection == DIRECTION_LEFT ?
-                        LEFT_ARROW_LEFT - ARROW_STEP + ARROW_SIZE :
-                        LEFT_ARROW_LEFT + ARROW_SIZE
+                        LEFT_ARROW_LEFT - ARROW_STEP + GREEN_ARROW_SIZE :
+                        LEFT_ARROW_LEFT + GREEN_ARROW_SIZE
                 ),
-                QuarterPixels(SIDE_ARROW_TOP + ARROW_SIZE - f_SlideOffset),
+                QuarterPixels(SIDE_ARROW_TOP + GREEN_ARROW_SIZE - f_SlideOffset),
                 G_TX_RENDERTILE,
                 0,
-                TexelCoordinate(3 * ARROW_SIZE),
+                TexelCoordinate(GreenArrowRow(MENU_ARROW_LEFT)),
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
@@ -1035,13 +1031,13 @@ void DrawHoleSelect(Gfx **displayListHead) {
                 QuarterPixels(SIDE_ARROW_TOP - f_SlideOffset),
                 QuarterPixels(
                     f_PressedDirection == DIRECTION_RIGHT ?
-                        RIGHT_ARROW_LEFT + ARROW_STEP + ARROW_SIZE :
-                        RIGHT_ARROW_LEFT + ARROW_SIZE
+                        RIGHT_ARROW_LEFT + ARROW_STEP + GREEN_ARROW_SIZE :
+                        RIGHT_ARROW_LEFT + GREEN_ARROW_SIZE
                 ),
-                QuarterPixels(SIDE_ARROW_TOP + ARROW_SIZE - f_SlideOffset),
+                QuarterPixels(SIDE_ARROW_TOP + GREEN_ARROW_SIZE - f_SlideOffset),
                 G_TX_RENDERTILE,
                 0,
-                TexelCoordinate(2 * ARROW_SIZE),
+                TexelCoordinate(GreenArrowRow(MENU_ARROW_RIGHT)),
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
