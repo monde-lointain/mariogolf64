@@ -191,8 +191,8 @@
 #define DEFAULT_FRAMED_RADIUS 15.0f
 #define CAST_EASE_RATE 0.1f
 #define VIEW_SHRINK_FRAMES 30
-#define FULL_VIEW_WIDTH 303.0f
-#define FULL_VIEW_HEIGHT 223.0f
+#define UNSHRUNK_VIEW_WIDTH 303.0f
+#define UNSHRUNK_VIEW_HEIGHT 223.0f
 #define SHRINK_LEFT_STEP 5.0000005f
 #define SHRINK_TOP_STEP 0.5f
 #define SHRINK_WIDTH_STEP 5.3333335f
@@ -216,8 +216,8 @@
         f32 progress = (frames); \
         s32 left = progress * SHRINK_LEFT_STEP; \
         s32 top = progress * SHRINK_TOP_STEP; \
-        s32 height = FULL_VIEW_HEIGHT - (progress * SHRINK_HEIGHT_STEP); \
-        s32 width = FULL_VIEW_WIDTH - (progress * SHRINK_WIDTH_STEP); \
+        s32 height = UNSHRUNK_VIEW_HEIGHT - (progress * SHRINK_HEIGHT_STEP); \
+        s32 width = UNSHRUNK_VIEW_WIDTH - (progress * SHRINK_WIDTH_STEP); \
 \
         (view).scissorX = left; \
         (view).scissorY = top; \
