@@ -8,7 +8,7 @@
 #include "compiler.h"
 #include "sound.h"
 
-typedef void (*AudioEventCallback)(NUScMsg type, s32 frame);
+typedef void (*AudioEventCallback)(NUScMsg message, s32 resetFrame);
 
 #define SONG_BUFFER_SIZE 0xC000
 #define SOUND_EFFECT_BUFFER_SIZE 0x4000
@@ -73,18 +73,18 @@ void SetAudioEventCallback(AudioEventCallback callback) {
     osSetIntMask(mask);
 }
 
-void HandleAudioReset(NUScMsg type, s32 frame) {
-    switch (type) {
+void HandleAudioReset(NUScMsg message, s32 resetFrame) {
+    switch (message) {
         case NU_SC_PRENMI_MSG:
             MusStop(MUSFLAG_EFFECTS, 0);
             MusSetFxType(0);
             break;
         case NU_SC_RETRACE_MSG:
-            if (frame == RESET_FX_OFF_FRAME) {
+            if (resetFrame == RESET_FX_OFF_FRAME) {
                 MusSetFxType(0);
             }
 
-            if (frame == RESET_TASKS_OFF_FRAME) {
+            if (resetFrame == RESET_TASKS_OFF_FRAME) {
                 f_IsAudioTaskEnabled = FALSE;
             }
 
