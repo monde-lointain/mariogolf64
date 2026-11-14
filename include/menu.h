@@ -52,6 +52,7 @@ extern s32 g_MenuPressedButtons;
 
 extern AssetId g_CourseIconAssets[];
 extern AssetId g_TournamentIconAssets[];
+// How many courses the course choice offers; always COURSE_COUNT.
 extern s32 g_MenuCourseCount;
 extern u8 g_AreBetPagesBlocked;
 

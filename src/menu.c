@@ -1159,7 +1159,7 @@ static char f_DebugImportedNames[IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NA
 static ImportedCharacterCell f_ImportedCharacterCells[IMPORTED_CHARACTER_COUNT] =
     {{0, 0, 0, 2}, {0, 1, 0, 2}, {0, 2, 0, 2}, {0, 3, 0, 2}};
 static s16 f_CharacterSlots[] = {0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 0};
-s32 g_MenuCourseCount = 6;
+s32 g_MenuCourseCount = COURSE_COUNT;
 static s8 f_UnreadMenuEntryByte = 0;
 u8 g_AreBetPagesBlocked = 0;
 static s32 f_UnusedWordsAfterBetPagesBlocked[2] UNUSED = {0};
@@ -2645,7 +2645,7 @@ void ComputeRoundStatistics(void) {
 void ResetMenuChoices(void) {
     s8 index;
 
-    g_MenuCourseCount = 6;
+    g_MenuCourseCount = COURSE_COUNT;
     g_IsChosenHoleLoadStarted = FALSE;
     g_MenuScreen = MENU_SCREEN_TITLE;
     g_ChosenPlayerCount = 0;
