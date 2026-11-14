@@ -122,8 +122,8 @@ ROM         := $(BUILD_DIR)/$(TARGET).z64
 ROM_SIZE    := 0x2000000
 # Where the asset archive's assets are split to, one file each
 ARCHIVE_DIR := assets/asset_archive
-# The message file's messages as text, a message a line
-MESSAGE_TEXT := assets/text/messages.txt
+# The files of messages that are built from text, a message a line
+TEXT_FILES  := assets/text/messages assets/text/staff_roll
 ELF         := $(BUILD_DIR)/$(TARGET).elf
 MAP         := $(BUILD_DIR)/$(TARGET).map
 
@@ -240,7 +240,9 @@ extract:
 	$(PYTHON) -m splat split $(SPLAT_YAML)
 	$(PYTHON) tools/extract_textures.py
 	$(PYTHON) tools/asset_archive.py split assets/asset_archive.bin $(ARCHIVE_DIR)
-	$(PYTHON) tools/messages.py decode assets/text/messages.bin $(MESSAGE_TEXT)
+	for text in $(TEXT_FILES); do \
+		$(PYTHON) tools/messages.py decode $$text.bin $$text.txt || exit; \
+	done
 
 setup: tools extract
 
@@ -372,11 +374,11 @@ $(BUILD_DIR)/%.bin.o: %.bin
 $(BUILD_DIR)/assets/asset_archive.bin: $(wildcard $(ARCHIVE_DIR)/*.bin) tools/asset_archive.py
 	$(PYTHON) tools/asset_archive.py pack $(ARCHIVE_DIR) $@
 
-# The message file is encoded from the text that messages.py decodes it to
-$(BUILD_DIR)/assets/text/messages.bin: $(MESSAGE_TEXT) tools/messages.py tools/asset_archive.py
+# The text files are encoded from the text that messages.py decodes them to
+$(TEXT_FILES:%=$(BUILD_DIR)/%.bin): $(BUILD_DIR)/%.bin: %.txt tools/messages.py tools/asset_archive.py
 	$(PYTHON) tools/messages.py encode $< $@
 
-$(BUILD_DIR)/assets/asset_archive.bin.o $(BUILD_DIR)/assets/text/messages.bin.o: %.o: %
+$(BUILD_DIR)/assets/asset_archive.bin.o $(TEXT_FILES:%=$(BUILD_DIR)/%.bin.o): %.o: %
 	$(OBJCOPY) -I binary -O $(BIN_FORMAT) -B mips $< $@
 
 # Textures in C data come from PNGs that extract_textures.py writes to

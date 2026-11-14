@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Turn the message file into text, or text into the message file.
+"""Turn a message file into text, or text into a message file.
 
     messages.py decode MESSAGES TEXT
     messages.py encode TEXT MESSAGES
@@ -13,6 +13,10 @@ digit or mark of ASCII stands for its own code and a small letter for
 the code 0x80 above its own, where the fonts keep the small letters.
 Braces hold the name of a control code, such as {br} for a line break,
 or any other code as a number, such as {0xDE}.
+
+The staff roll's text is a file of the same form, whose messages are the
+lines that the roll shows. It draws no control code, so a line with one
+and nothing else is an empty line.
 """
 
 import struct
