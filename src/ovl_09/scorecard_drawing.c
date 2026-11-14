@@ -228,7 +228,7 @@ static Mtx f_FlapMatrices[LEADERBOARD_ROW_COUNT][MATRIX_BUFFER_COUNT];
 void DrawPlace(Gfx **displayListHead, s32 left, s32 top, s32 place) {
     Gfx *gfx = *displayListHead;
 
-    LoadLargePalette(&gfx, ImageBody(g_Scorecard.placesImage));
+    LoadLargePalette(&gfx, ImagePalette(g_Scorecard.placesImage));
     LoadTextureBlock(
         &gfx,
         g_Scorecard.placesImage + ((place * PLACE_PART_IMAGE_SIZE) + PLACE_SUFFIX_PARTS_OFFSET),
@@ -289,7 +289,7 @@ void DrawPlace(Gfx **displayListHead, s32 left, s32 top, s32 place) {
 void DrawScorecardLabel(Gfx **displayListHead, s32 left, s32 top, s32 labelIndex) {
     Gfx *gfx = *displayListHead;
 
-    LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.labelsImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.labelsImage));
     gDPLoadTextureTile_4b(
         gfx++,
         TextureAddress(ImageTexels(g_Scorecard.labelsImage) + labelIndex * LABEL_SIZE),
@@ -512,7 +512,7 @@ void DrawStandingsPage(Gfx **displayListHead) {
         );
     }
 
-    LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.digitsImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.digitsImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(g_Scorecard.digitsImage),
@@ -803,7 +803,7 @@ void DrawMatchPage(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.matchPanelImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.matchPanelImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(g_Scorecard.matchPanelImage),
@@ -845,7 +845,7 @@ void DrawMatchPage(Gfx **displayListHead) {
 
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
-    LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.winsNeededImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.winsNeededImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(g_Scorecard.winsNeededImage),
@@ -942,7 +942,7 @@ void DrawMatchPage(Gfx **displayListHead) {
     }
 
     gDPPipeSync(gfx++);
-    LoadLargePalette(&gfx, ImageBody(g_Scorecard.winMarkImage));
+    LoadLargePalette(&gfx, ImagePalette(g_Scorecard.winMarkImage));
     LoadTextureBlock(
         &gfx,
         LargeImageTexels(g_Scorecard.winMarkImage),
@@ -1038,7 +1038,7 @@ void DrawMatchPage(Gfx **displayListHead) {
             );
         }
 
-        LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.winnerArrowImage));
+        LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.winnerArrowImage));
         LoadNibbleTextureBlock(
             &gfx,
             ImageTexels(g_Scorecard.winnerArrowImage),
@@ -1224,7 +1224,7 @@ void DrawSkinsPage(Gfx **displayListHead) {
         );
     }
 
-    LoadLargePalette(&gfx, ImageBody(g_Scorecard.winMarkImage));
+    LoadLargePalette(&gfx, ImagePalette(g_Scorecard.winMarkImage));
     LoadTextureBlock(
         &gfx,
         g_Scorecard.winMarkImage + SKIN_ICON_TEXELS_OFFSET,
@@ -1268,7 +1268,7 @@ void DrawSkinsPage(Gfx **displayListHead) {
         TEXEL_STEP_ONE
     );
 
-    LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.digitsImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.digitsImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(g_Scorecard.digitsImage),
@@ -1369,7 +1369,7 @@ void DrawBetsPage(Gfx **displayListHead) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
-    LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.gridImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.gridImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(g_Scorecard.gridImage),
@@ -1543,7 +1543,7 @@ void DrawBetsPage(Gfx **displayListHead) {
                 gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
             }
 
-            LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.betImages[j][frame]));
+            LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.betImages[j][frame]));
             gDPLoadTextureTile_4b(
                 gfx++,
                 TextureAddress(ImageTexels(g_Scorecard.betImages[j][frame])),
@@ -1581,7 +1581,7 @@ void DrawBetsPage(Gfx **displayListHead) {
     }
 
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
-    LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.totalHeadingImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.totalHeadingImage));
     gDPLoadTextureTile_4b(
         gfx++,
         TextureAddress(ImageTexels(g_Scorecard.totalHeadingImage)),
@@ -1613,7 +1613,7 @@ void DrawBetsPage(Gfx **displayListHead) {
         TEXEL_STEP_ONE
     );
 
-    LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.betSubtitlesImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.betSubtitlesImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(g_Scorecard.betSubtitlesImage),
@@ -2079,7 +2079,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.leaderboardRowImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.leaderboardRowImage));
     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
     LoadNibbleTextureBlock(
         &gfx,
@@ -2127,7 +2127,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
         );
     }
 
-    LoadLargePalette(&gfx, ImageBody(g_Scorecard.flapNameImages));
+    LoadLargePalette(&gfx, ImagePalette(g_Scorecard.flapNameImages));
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
     for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
         if (g_Scorecard.content.isRowFlipping[row] == TRUE &&
@@ -2241,7 +2241,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
-    LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.leaderboardRowImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.leaderboardRowImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(g_Scorecard.leaderboardRowImage),
@@ -2299,7 +2299,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
         }
     }
 
-    LoadLargePalette(&gfx, ImageBody(g_Scorecard.flapNameImages));
+    LoadLargePalette(&gfx, ImagePalette(g_Scorecard.flapNameImages));
     for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
         if (g_Scorecard.content.isRowFlipping[row] == TRUE) {
             if (g_Scorecard.content.rowFlipAngles[row] < FLAP_EDGE_ON_ANGLE) {
@@ -2349,7 +2349,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     }
 
     gDPPipeSync(gfx++);
-    LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.leaderboardRowImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.leaderboardRowImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(g_Scorecard.leaderboardRowImage),
@@ -2387,7 +2387,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
         }
     }
 
-    LoadLargePalette(&gfx, ImageBody(g_Scorecard.flapNameImages));
+    LoadLargePalette(&gfx, ImagePalette(g_Scorecard.flapNameImages));
     for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
         if (row * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
             g_Scorecard.content.isRowFlipping[row] == TRUE &&
@@ -3285,7 +3285,7 @@ void DrawScoresPage(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_POINT);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.totalLabelsImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.totalLabelsImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(g_Scorecard.totalLabelsImage),
@@ -4109,7 +4109,7 @@ void DrawBetTallies(Gfx **displayListHead) {
     s32 column;
     s32 digit;
 
-    LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.digitsImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_Scorecard.digitsImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(g_Scorecard.digitsImage),

@@ -513,7 +513,11 @@ void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex)
         }
 
         if (cupDepth < SMALL_CUP_DEPTH) {
-            gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(f_SmallCupTexture)));
+            gDPLoadTLUT_pal16(
+                g_DisplayListHead++,
+                0,
+                TextureAddress(ImagePalette(f_SmallCupTexture))
+            );
             gDPPipeSync(g_DisplayListHead++);
             gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
             gDPLoadTextureBlock_4b(
@@ -773,7 +777,7 @@ void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex)
             gDPLoadTLUT_pal16(
                 g_DisplayListHead++,
                 0,
-                TextureAddress(ImageBody(f_FlagstickTexture))
+                TextureAddress(ImagePalette(f_FlagstickTexture))
             );
             gDPLoadTextureBlock_4b(
                 g_DisplayListHead++,

@@ -523,7 +523,7 @@ void DrawCourseStats(Gfx **displayListHead) {
         image = (drawnIndex == courseCount) ? COURSE_TOTALS_IMAGE : drawnIndex;
         halfSize = iconScale[drawnIndex] * COURSE_ICON_HALF_SIZE;
         texelStep = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
-        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_CourseStatsIcons[image])));
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_CourseStatsIcons[image])));
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         for (sortIndex = 0; sortIndex != COURSE_ICON_STRIP_COUNT; sortIndex++) {
@@ -600,7 +600,7 @@ void DrawCourseBanner(Gfx **displayListHead, u8 useCourseNames, s32 courseIndex)
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_CourseStatsNamePlate)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_CourseStatsNamePlate)));
     for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -991,7 +991,7 @@ void DrawStatsScrollArrows(Gfx **displayListHead) {
         gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_CourseStatsDigitsAndArrows)));
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_CourseStatsDigitsAndArrows)));
         for (arrowIndex = 0; arrowIndex != arrowCount; arrowIndex++) {
             top = (arrowIndex != 0) ? STATS_DOWN_ARROW_TOP : STATS_UP_ARROW_TOP;
             if (arrowCount == 1 && firstArrow) {
@@ -1321,7 +1321,7 @@ void DrawMenuNumber(
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_LargeDigitsImage)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_LargeDigitsImage)));
     shift = 0;
     if (mark != MENU_NUMBER_PLAIN) {
         switch (mark) {
@@ -1590,7 +1590,7 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_LargeDigitsImage)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_LargeDigitsImage)));
     shift = 0;
     if (whole >= 0 && whole < DECIMAL_BASE) {
         shift = 2 * DIGIT_GLYPH_SIZE;
@@ -1735,7 +1735,7 @@ void DrawMenuSign(Gfx **displayListHead, s32 x, s32 y, MenuSign sign) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_LargeDigitsImage)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_LargeDigitsImage)));
     gDPLoadTextureBlock_4b(
         gfx++,
         TextureAddress(ImageTexels(f_LargeDigitsImage) + (glyphIndex * DIGIT_GLYPH_IMAGE_SIZE)),
@@ -1779,7 +1779,7 @@ void DrawOffLabel(Gfx **displayListHead, s32 x, s32 y) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_LargeDigitsImage)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_LargeDigitsImage)));
     for (glyphIndex = 0; glyphIndex != DIGIT_GLYPH_OFF_COUNT; glyphIndex++) {
         gDPLoadTextureBlock_4b(
             gfx++,
@@ -1841,7 +1841,7 @@ void DrawBlinkingSideArrows(
 
     frameOffset = (*blinkFrame * GREEN_ARROW_FRAME_SIZE) + PALETTED_TEXELS_OFFSET;
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(image)));
     for (arrowIndex = 0; arrowIndex != SIDE_ARROW_COUNT; arrowIndex++) {
         imageOffset = (SIDE_ARROW_FIRST_IMAGE + arrowIndex) * GREEN_ARROW_IMAGE_SIZE;
         gDPLoadTextureTile_4b(

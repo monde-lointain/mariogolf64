@@ -225,14 +225,14 @@ void DrawTextureRectangle(
     *displayListHead = gfx;
 }
 
-void LoadSmallPalette(Gfx **displayListHead, s32 paletteIndex, void *tlut) {
+void LoadSmallPalette(Gfx **displayListHead, s32 paletteIndex, PaletteColor *tlut) {
     Gfx *gfx = *displayListHead;
 
     gDPLoadTLUT_pal16(gfx++, paletteIndex, TextureAddress(tlut));
     *displayListHead = gfx;
 }
 
-void LoadLargePalette(Gfx **displayListHead, void *tlut) {
+void LoadLargePalette(Gfx **displayListHead, PaletteColor *tlut) {
     Gfx *gfx = *displayListHead;
 
     gDPLoadTLUT_pal256(gfx++, TextureAddress(tlut));
@@ -893,7 +893,7 @@ void DrawPrompt(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-        LoadLargePalette(&gfx, ImageBody(f_YesNoImage));
+        LoadLargePalette(&gfx, ImagePalette(f_YesNoImage));
         LoadTextureBlock(
             &gfx,
             AddressPast(f_YesNoImage, YES_TEXELS_OFFSET),

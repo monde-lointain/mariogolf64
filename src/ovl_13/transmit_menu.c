@@ -1652,7 +1652,7 @@ void DrawCharacterStats(
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadSmallPalette(&gfx, 0, ImageBody(transfer->shotTypesImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(transfer->shotTypesImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(transfer->shotTypesImage),
@@ -1679,7 +1679,7 @@ void DrawCharacterStats(
         TEXEL_STEP_ONE,
         TEXEL_STEP_ONE
     );
-    LoadSmallPalette(&gfx, 0, ImageBody(transfer->statLabelsImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(transfer->statLabelsImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(transfer->statLabelsImage),
@@ -1706,7 +1706,7 @@ void DrawCharacterStats(
         TEXEL_STEP_ONE,
         TEXEL_STEP_ONE
     );
-    LoadSmallPalette(&gfx, 0, ImageBody(transfer->statBarsImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(transfer->statBarsImage));
     gDPLoadTextureTile_4b(
         gfx++,
         TextureAddress(ImageTexels(transfer->statBarsImage)),
@@ -1737,7 +1737,7 @@ void DrawCharacterStats(
         TEXEL_STEP_ONE,
         TEXEL_STEP_ONE
     );
-    LoadLargePalette(&gfx, ImageBody(transfer->curveSegmentsImage));
+    LoadLargePalette(&gfx, ImagePalette(transfer->curveSegmentsImage));
     LoadTextureBlock(
         &gfx,
         LargeImageTexels(transfer->curveSegmentsImage),
@@ -1924,7 +1924,7 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-    LoadSmallPalette(&gfx, 0, ImageBody(transfer->transferPakIconsImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(transfer->transferPakIconsImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(transfer->transferPakIconsImage),
@@ -1978,7 +1978,7 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
             pointerSwing = sinf(f_StatusPointerAngle) * POINTER_SWING_DISTANCE;
             gDPPipeSync(gfx++);
             gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-            LoadSmallPalette(&gfx, 0, ImageBody(transfer->pointerImage));
+            LoadSmallPalette(&gfx, 0, ImagePalette(transfer->pointerImage));
             LoadNibbleTextureBlock(
                 &gfx,
                 ImageTexels(transfer->transferPakIconsImage),
@@ -2112,7 +2112,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     DrawImportedFaces(&gfx, transfer);
-    LoadSmallPalette(&gfx, 0, ImageBody(transfer->transferPakIconsImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(transfer->transferPakIconsImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(transfer->transferPakIconsImage),
@@ -2156,7 +2156,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
         }
     }
 
-    LoadSmallPalette(&gfx, 0, ImageBody(transfer->statBarsImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(transfer->statBarsImage));
     gDPLoadTextureTile_4b(
         gfx++,
         TextureAddress(ImageTexels(transfer->statBarsImage)),
@@ -2262,7 +2262,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
     gDPSetTexturePersp(gfx++, G_TP_NONE);
     if (transfer->screenStep == BRING_CHOOSING) {
         f_CharacterArrowFrame = (f_CharacterArrowFrame + 1) % ARROW_CYCLE_TICKS;
-        LoadSmallPalette(&gfx, 0, ImageBody(transfer->arrowsImage));
+        LoadSmallPalette(&gfx, 0, ImagePalette(transfer->arrowsImage));
         LoadNibbleTextureBlock(
             &gfx,
             ImageTexelsAt(
@@ -2334,7 +2334,7 @@ void DrawSendExperienceScreen(Gfx **displayListHead, GameBoyTransfer *transfer) 
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     }
 
-    LoadSmallPalette(&gfx, 0, ImageBody(transfer->transferPakIconsImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(transfer->transferPakIconsImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(transfer->transferPakIconsImage),
@@ -2421,7 +2421,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadLargePalette(&gfx, ImageBody(transfer->courseSceneImage));
+    LoadLargePalette(&gfx, ImagePalette(transfer->courseSceneImage));
     for (index = 0; index != COURSE_SCENE_STRIP_COUNT; index++) {
         rowCount = (index != COURSE_SCENE_STRIP_COUNT - 1) ? COURSE_SCENE_STRIP_ROW_COUNT : 1;
         if (index == 0) {
@@ -2493,7 +2493,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
         }
     }
 
-    LoadLargePalette(&gfx, ImageBody(transfer->titleImage));
+    LoadLargePalette(&gfx, ImagePalette(transfer->titleImage));
     for (index = 0; index != TITLE_STRIP_COUNT; index++) {
         gDPLoadTextureTile(
             gfx++,
@@ -2602,7 +2602,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
         pointerSwing = sinf(f_OptionPointerAngle) * POINTER_SWING_DISTANCE;
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        LoadSmallPalette(&gfx, 0, ImageBody(transfer->pointerImage));
+        LoadSmallPalette(&gfx, 0, ImagePalette(transfer->pointerImage));
         gDPLoadTextureTile_4b(
             gfx++,
             TextureAddress(ImageTexels(transfer->pointerImage)),
@@ -3772,7 +3772,7 @@ void DrawAccessingSign(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 strip;
 
-    LoadLargePalette(&gfx, ImageBody(g_GameBoyTransfer.accessingImage));
+    LoadLargePalette(&gfx, ImagePalette(g_GameBoyTransfer.accessingImage));
     for (strip = 0; strip != ACCESSING_STRIP_COUNT; strip++) {
         LoadTextureBlock(
             &gfx,
@@ -3812,7 +3812,7 @@ void DrawPressingHand(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
     f_PressingHandFrame = (f_PressingHandFrame + 1) % PRESSING_HAND_FRAME_COUNT;
-    LoadLargePalette(&gfx, ImageBody(g_PressingHandImage));
+    LoadLargePalette(&gfx, ImagePalette(g_PressingHandImage));
     LoadTextureBlock(
         &gfx,
         LargeImageTexels(g_PressingHandImage) +

@@ -771,7 +771,7 @@ void DrawSwingTrail(Gfx **displayListHead, CameraMatrices *matrices) {
     gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_SwingTrailImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_SwingTrailImage)));
     gDPLoadTextureBlock(
         gfx++,
         TextureAddress(LargeImageTexels(f_SwingTrailImage)),

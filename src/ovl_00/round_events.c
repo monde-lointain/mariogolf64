@@ -1570,7 +1570,7 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
         }
 
         growth = frame * WINNER_GROWTH_STEP;
-        LoadSmallPalette(&gfx, 0, ImageBody(f_MovieBuffer + WINNER_PLAQUE_OFFSET));
+        LoadSmallPalette(&gfx, 0, ImagePalette(f_MovieBuffer + WINNER_PLAQUE_OFFSET));
         LoadNibbleTextureBlock(
             &gfx,
             ImageTexels(f_MovieBuffer + WINNER_PLAQUE_OFFSET),
@@ -1599,7 +1599,7 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
             texelStep,
             texelStep
         );
-        LoadLargePalette(&gfx, f_MovieBuffer + WINNER_PALETTE_OFFSET);
+        LoadLargePalette(&gfx, (PaletteColor *)(f_MovieBuffer + WINNER_PALETTE_OFFSET));
         LoadTextureBlock(
             &gfx,
             f_MovieBuffer + WINNER_FACE_OFFSET,
@@ -3207,7 +3207,7 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
             gDPSetTextureLUT(gfx++, G_TT_RGBA16);
             gDPLoadTLUT_pal256(
                 gfx++,
-                TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET))
+                TextureAddress(ImagePalette(g_SharedEffectImages + CONTACT_IMAGE_OFFSET))
             );
             gDPLoadTextureBlock(
                 gfx++,
@@ -3233,7 +3233,7 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
             gDPSetTextureLUT(gfx++, G_TT_RGBA16);
             gDPLoadTLUT_pal256(
                 gfx++,
-                TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET))
+                TextureAddress(ImagePalette(g_SharedEffectImages + CONTACT_IMAGE_OFFSET))
             );
             gDPLoadTextureBlock(
                 gfx++,
@@ -3363,7 +3363,7 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
             gDPSetTextureLUT(gfx++, G_TT_RGBA16);
             gDPLoadTLUT_pal256(
                 gfx++,
-                TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET))
+                TextureAddress(ImagePalette(g_SharedEffectImages + CONTACT_IMAGE_OFFSET))
             );
             gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, CONTACT_SPIN_ALPHA);
             gDPLoadTextureBlock(

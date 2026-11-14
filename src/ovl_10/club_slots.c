@@ -769,7 +769,7 @@ void DrawClubSlots(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadLargePalette(&gfx, ImageBody(f_Slots->machineImage));
+    LoadLargePalette(&gfx, ImagePalette(f_Slots->machineImage));
     texelOffset = LARGE_PALETTED_TEXELS_OFFSET;
     for (topOrPlayerIndex = SCREEN_BORDER; topOrPlayerIndex < MACHINE_BOTTOM;
         topOrPlayerIndex += MACHINE_STRIP_HEIGHT) {
@@ -831,7 +831,7 @@ void DrawClubSlots(Gfx **displayListHead) {
         texelOffset += MACHINE_STRIP_HEIGHT * MACHINE_WIDTH;
     }
 
-    LoadLargePalette(&gfx, ImageBody(f_Slots->buttonsImage));
+    LoadLargePalette(&gfx, ImagePalette(f_Slots->buttonsImage));
     for (buttonOrStartStripIndex = 0; buttonOrStartStripIndex != REEL_COUNT;
         buttonOrStartStripIndex++) {
         if (buttonOrStartStripIndex > f_Slots->pressCount - 1) {
@@ -905,7 +905,7 @@ void DrawClubSlots(Gfx **displayListHead) {
         }
 
         gDPPipeSync(gfx++);
-        LoadLargePalette(&gfx, ImageBody(f_Slots->startImage));
+        LoadLargePalette(&gfx, ImagePalette(f_Slots->startImage));
         texelOffset = LARGE_PALETTED_TEXELS_OFFSET;
         for (buttonOrStartStripIndex = 0; buttonOrStartStripIndex != START_STRIP_COUNT;
             buttonOrStartStripIndex++) {
@@ -1193,7 +1193,7 @@ void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scal
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_LogoImage)));
     for (index = 0; index != LOGO_STRIP_COUNT; index++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -1239,7 +1239,7 @@ void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scal
         GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
         G_RM_AA_ZB_TEX_EDGE2
     );
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_LogoImage)));
     for (index = 0; index != LOGO_STRIP_COUNT; index++) {
         gDPLoadTextureBlock(
             gfx++,

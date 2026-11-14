@@ -3261,7 +3261,7 @@ void DrawNameLogos(Gfx **displayListHead) {
             gDPSetAlphaCompare(gfx++, G_AC_NONE);
             gDPPipeSync(gfx++);
             gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-            gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_NameSlotImages[slot])));
+            gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_NameSlotImages[slot])));
             gDPPipeSync(gfx++);
             for (strip = 0; strip != NAME_LOGO_STRIP_COUNT; strip++) {
                 texelsOffset =
@@ -3617,10 +3617,13 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                 gDPSetTextureLOD(gfx++, G_TL_TILE);
                 gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
                 if (f_IsLogoBallSlot[slot]) {
-                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoBallImages)));
+                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_LogoBallImages)));
                 }
                 else {
-                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_OpeningBallImages[slot])));
+                    gDPLoadTLUT_pal256(
+                        gfx++,
+                        TextureAddress(ImagePalette(f_OpeningBallImages[slot]))
+                    );
                 }
 
                 for (stripIndex = 0; stripIndex < OPENING_BALL_STRIP_COUNT; stripIndex++) {
@@ -3776,7 +3779,7 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                     gDPSetTexturePersp(gfx++, G_TP_PERSP);
                     gDPPipeSync(gfx++);
                     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoMarioImage)));
+                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_LogoMarioImage)));
                     gDPLoadTextureBlock(
                         gfx++,
                         TextureAddress(LargeImageTexels(f_LogoMarioImage)),
@@ -4023,12 +4026,12 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                     gDPPipeSync(gfx++);
                     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
                     if (f_IsLogoBallSlot[slot]) {
-                        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoBallImages)));
+                        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_LogoBallImages)));
                     }
                     else {
                         gDPLoadTLUT_pal256(
                             gfx++,
-                            TextureAddress(ImageBody(f_OpeningBallImages[slot]))
+                            TextureAddress(ImagePalette(f_OpeningBallImages[slot]))
                         );
                     }
 
@@ -4213,7 +4216,7 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                         gDPSetTexturePersp(gfx++, G_TP_PERSP);
                         gDPPipeSync(gfx++);
                         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-                        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoMarioImage)));
+                        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_LogoMarioImage)));
                         gDPLoadTextureBlock(
                             gfx++,
                             TextureAddress(LargeImageTexels(f_LogoMarioImage)),
@@ -4324,7 +4327,7 @@ void DrawOpeningImpactLines(Gfx **displayListHead) {
             AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
             AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
             AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_RGBA16);
-            gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_OpeningEffectImage)));
+            gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_OpeningEffectImage)));
             gDPPipeSync(gfx++);
 
             for (stripIndex = 0, row = IMPACT_LINES_STRIP_COUNT - 1;
@@ -4441,7 +4444,7 @@ void DrawLakitu(Gfx **displayListHead) {
         gDPSetAlphaCompare(gfx++, G_AC_NONE);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LakituImage)));
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_LakituImage)));
         gDPPipeSync(gfx++);
         gDPLoadTextureBlock(
             gfx++,
@@ -4688,7 +4691,7 @@ void DrawOpeningBurst(Gfx **displayListHead) {
         AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
         AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
         AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_RGBA16);
-        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_OpeningEffectImage)));
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_OpeningEffectImage)));
         gDPPipeSync(gfx++);
         gDPLoadTextureBlock_4b(
             gfx++,
@@ -4895,7 +4898,7 @@ void DrawOpeningShotBall(Gfx **displayListHead) {
             AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
             gDPPipeSync(gfx++);
             gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-            gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_ShotBallImage)));
+            gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_ShotBallImage)));
             gDPPipeSync(gfx++);
             for (stripIndex = 0; stripIndex != SHOT_BALL_STRIP_COUNT; stripIndex++) {
                 gDPLoadTextureBlock(
@@ -5334,7 +5337,7 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
         AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_RGBA16);
         AppendSyncedRdpState(gfx, gDPSetTextureLOD, G_TL_TILE);
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoLettersAlpha);
-        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_LogoLetterImages)));
         gDPPipeSync(gfx++);
         for (logoLetter = 0; logoLetter < LOGO_LETTER_COUNT; logoLetter++) {
             for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
@@ -5384,7 +5387,7 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
         }
 
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoClubAlpha);
-        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoClubImage)));
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_LogoClubImage)));
         gDPPipeSync(gfx++);
         for (j = 0; j < LOGO_CLUB_STRIP_COUNT; j++) {
             texelsOffset =
@@ -5465,7 +5468,7 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
             AA_EN | Z_UPD | IM_RD | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA | ALPHA_CVG_SEL |
                 GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM)
         );
-        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_LogoLetterImages)));
         for (logoLetter = 0; logoLetter < LOGO_LETTER_COUNT; logoLetter++) {
             for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
                 texelsOffset = ((j + (logoLetter * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *

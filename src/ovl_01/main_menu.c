@@ -4432,7 +4432,7 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
 
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_MenuCourseSceneImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(g_MenuCourseSceneImage)));
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
@@ -4640,7 +4640,7 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         gDPLoadTLUT_pal256(
             gfx++,
-            TextureAddress(ImageBody(g_MenuBoardImages[f_MenuBoardImageIndex]))
+            TextureAddress(ImagePalette(g_MenuBoardImages[f_MenuBoardImageIndex]))
         );
 
         for (stripIndex = 0; stripIndex != BOARD_STRIP_COUNT; stripIndex++) {
@@ -4691,7 +4691,7 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         gDPLoadTLUT_pal256(
             gfx++,
-            TextureAddress(ImageBody(g_MenuBoardImages[f_MenuBoardImageIndex]))
+            TextureAddress(ImagePalette(g_MenuBoardImages[f_MenuBoardImageIndex]))
         );
 
         for (stripIndex = 0; stripIndex != NARROW_BOARD_STRIP_COUNT; stripIndex++) {
@@ -4741,7 +4741,7 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
 
     if (layers & MENU_LAYER_BANNER) {
         image = g_MenuTitleImages[f_MenuTitleImageIndex];
-        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(image)));
 
         for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
             gDPLoadTextureBlock(
@@ -4837,7 +4837,7 @@ void DrawMenuCourseScene(Gfx **displayListHead) {
 
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_MenuCourseSceneImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(g_MenuCourseSceneImage)));
     for (stripIndex = 0; stripIndex != COURSE_SCENE_STRIP_COUNT; stripIndex++) {
         shownRowCount =
             (stripIndex != COURSE_SCENE_STRIP_COUNT - 1) ? COURSE_SCENE_STRIP_ROW_COUNT : 1;
@@ -4932,7 +4932,10 @@ void DrawNarrowMenuBoard(Gfx **displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_MenuBoardImages[f_MenuBoardImageIndex])));
+    gDPLoadTLUT_pal256(
+        gfx++,
+        TextureAddress(ImagePalette(g_MenuBoardImages[f_MenuBoardImageIndex]))
+    );
     for (stripIndex = 0; stripIndex != NARROW_BOARD_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -4979,7 +4982,7 @@ void DrawNamePlateBanner(Gfx **displayListHead) {
 
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(g_NamePlateImage)));
     for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -5026,7 +5029,7 @@ void DrawSmallNamePlate(Gfx **displayListHead, s32 left, s32 top) {
 
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(g_NamePlateImage)));
     for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -5073,7 +5076,7 @@ void DrawLargeMenuBanner(Gfx **displayListHead) {
 
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(g_NamePlateImage)));
     for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -5119,7 +5122,7 @@ void DrawMenuBanner(Gfx **displayListHead) {
     u8 *image = g_MenuTitleImages[f_MenuTitleImageIndex];
     s32 stripTop;
 
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(image)));
     for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -5216,7 +5219,7 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
         gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
     }
 
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ImageSlots[f_ImageSlotIndex])));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(g_ImageSlots[f_ImageSlotIndex])));
     for (labelIndex = 0; labelIndex != TITLE_LABEL_COUNT; labelIndex++) {
         if (IsChosenNewGameLabel(labelIndex) ||
             (g_MenuMemory.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE == labelIndex &&
@@ -5266,7 +5269,7 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
     gDPLoadTLUT_pal16(
         gfx++,
         0,
-        TextureAddress(ImageBody(g_MenuLabelImages[f_MenuLabelImageIndex]))
+        TextureAddress(ImagePalette(g_MenuLabelImages[f_MenuLabelImageIndex]))
     );
     for (labelIndex = 0; labelIndex != TITLE_LABEL_COUNT; labelIndex++) {
         if (IsChosenNewGameLabel(labelIndex) ||
@@ -5572,7 +5575,7 @@ void DrawModeSelect(Gfx **displayListHead) {
             bobOffset = 0.0f;
         }
 
-        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_ModeIconImages[drawnIndex])));
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(g_ModeIconImages[drawnIndex])));
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         if ((g_MenuMemory.modeChoice == drawnIndex) && (g_MenuMemory.modeSpin == 0)) {
@@ -5628,7 +5631,7 @@ void DrawModeSelect(Gfx **displayListHead) {
                     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
                     gDPLoadTLUT_pal256(
                         gfx++,
-                        TextureAddress(ImageBody(g_ModeIconImages[drawnIndex]))
+                        TextureAddress(ImagePalette(g_ModeIconImages[drawnIndex]))
                     );
                     areCharactersDrawn = TRUE;
                 }
@@ -5700,7 +5703,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
 
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(g_NamePlateImage)));
     if (g_ChosenPlayerCount == 1) {
         for (i = 0; i != NAME_PLATE_STRIP_COUNT; i++) {
             gDPLoadTextureBlock(
@@ -5779,7 +5782,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     }
 
     i = g_MenuMemory.modeChoice;
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ImageSlots[f_ImageSlotIndex])));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(g_ImageSlots[f_ImageSlotIndex])));
     labelIndex = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][i];
     gDPLoadTextureBlock_4b(
         gfx++,
@@ -5826,7 +5829,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 
     image = g_SecondAnimatedIconImages[0];
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(image)));
     for (i = 0; i != g_ChosenPlayerCount; i++) {
         if (g_PlayerControllerIndices[i] != NO_CONTROLLER_INDEX) {
             position[AXIS_X] = f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][0];
@@ -5867,7 +5870,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     }
 
     image = g_SecondAnimatedIconImages[1];
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(image)));
     for (i = 0; i != g_ChosenPlayerCount; i++) {
         position[AXIS_X] = f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][0];
         position[AXIS_Y] = f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][1];
@@ -6009,7 +6012,7 @@ void DrawModeIcon(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     image = g_AnimatedIconImages[g_AnimatedIconBufferIndex];
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(image)));
     for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -6076,7 +6079,7 @@ void DrawScaledModeIcon(Gfx **displayListHead, s32 left, s32 top, s32 halfSize, 
 
     gDPPipeSync(gfx++);
     image = g_AnimatedIconImages[g_AnimatedIconBufferIndex];
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(image)));
     for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -6995,7 +6998,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
             gDPSetTextureFilter(gfx++, G_TF_BILERP);
             gDPPipeSync(gfx++);
             gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-            gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_HoleBadgeImages)));
+            gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(g_HoleBadgeImages)));
             for (otherIndex = 0; otherIndex != HOLES_BADGE_COUNT; otherIndex++) {
                 if ((otherIndex == HOLES_BADGE_BET) && (g_AreBetPagesBlocked != 1)) {
                     gDPPipeSync(gfx++);
@@ -7439,7 +7442,7 @@ void DrawCourseSelectBanners(Gfx **displayListHead) {
 
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(g_NamePlateImage)));
     if (COURSE_SELECT_LAYOUT == COURSE_SELECT_LAYOUT_HOLES) {
         for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
             gDPLoadTextureBlock(
@@ -7609,7 +7612,7 @@ void DrawMainMenu(Gfx **displayListHead) {
     s32 choiceIndex;
 
     DrawMenuBackdropLayers(&gfx, BOARD_BACKDROP_LAYERS);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ImageSlots[f_ImageSlotIndex])));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(g_ImageSlots[f_ImageSlotIndex])));
     for (choiceIndex = 0; choiceIndex != MAIN_CHOICE_COUNT; choiceIndex++) {
         if (g_MenuMemory.mainChoice != choiceIndex) {
             gDPLoadTextureBlock_4b(
@@ -7649,7 +7652,7 @@ void DrawMainMenu(Gfx **displayListHead) {
     gDPLoadTLUT_pal16(
         gfx++,
         0,
-        TextureAddress(ImageBody(g_MenuLabelImages[f_MenuLabelImageIndex]))
+        TextureAddress(ImagePalette(g_MenuLabelImages[f_MenuLabelImageIndex]))
     );
     choiceIndex = g_MenuMemory.mainChoice;
     gDPLoadTextureBlock_4b(
@@ -7714,7 +7717,7 @@ void DrawMainMenuWithoutTransmit(Gfx **displayListHead) {
     s32 labelOffset;
 
     DrawMenuBackdropLayers(&gfx, BOARD_BACKDROP_LAYERS);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ImageSlots[f_ImageSlotIndex])));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(g_ImageSlots[f_ImageSlotIndex])));
     for (choiceIndex = 0; choiceIndex != MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT; choiceIndex++) {
         if (g_MenuMemory.mainChoiceWithoutTransmit != choiceIndex) {
             labelOffset = MAIN_CHOICE_FULL_OPTIONS * MAIN_CHOICE_LABEL_IMAGE_SIZE;
@@ -7760,7 +7763,7 @@ void DrawMainMenuWithoutTransmit(Gfx **displayListHead) {
     gDPLoadTLUT_pal16(
         gfx++,
         0,
-        TextureAddress(ImageBody(g_MenuLabelImages[f_MenuLabelImageIndex]))
+        TextureAddress(ImagePalette(g_MenuLabelImages[f_MenuLabelImageIndex]))
     );
     choiceIndex = g_MenuMemory.mainChoiceWithoutTransmit;
     if (choiceIndex == MAIN_CHOICE_OPTIONS) {
@@ -7833,7 +7836,7 @@ void DrawClubhouse(Gfx **displayListHead) {
     s32 labelOffset;
 
     DrawMenuBackdropLayers(&gfx, BOARD_BACKDROP_LAYERS);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ImageSlots[f_ImageSlotIndex])));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(g_ImageSlots[f_ImageSlotIndex])));
     for (choiceIndex = 0; choiceIndex != CLUBHOUSE_CHOICE_COUNT; choiceIndex++) {
         if (choiceIndex != g_MenuMemory.clubhouseChoice) {
             labelOffset = f_ClubhouseRooms[choiceIndex] * ROOM_LABEL_IMAGE_SIZE;
@@ -7871,7 +7874,7 @@ void DrawClubhouse(Gfx **displayListHead) {
     gDPLoadTLUT_pal16(
         gfx++,
         0,
-        TextureAddress(ImageBody(g_MenuLabelImages[f_MenuLabelImageIndex]))
+        TextureAddress(ImagePalette(g_MenuLabelImages[f_MenuLabelImageIndex]))
     );
     choiceIndex = g_MenuMemory.clubhouseChoice;
     gDPLoadTextureBlock_4b(
@@ -8089,7 +8092,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    LoadLargePalette(&gfx, ImageBody(marioImage));
+    LoadLargePalette(&gfx, ImagePalette(marioImage));
     for (loopIndex = 0; loopIndex != MARIO_STRIP_COUNT; loopIndex++) {
         gDPLoadTextureTile(
             gfx++,
@@ -8124,7 +8127,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
         );
     }
 
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(g_NamePlateImage)));
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, DIMMED_COLOR);
     for (toggleIndex = 0; toggleIndex != OPTION_TOGGLE_COUNT; toggleIndex++) {
         for (loopIndex = 0; loopIndex != NAME_PLATE_STRIP_COUNT; loopIndex++) {
@@ -8262,7 +8265,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
     }
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ImageSlots[f_ImageSlotIndex])));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(g_ImageSlots[f_ImageSlotIndex])));
     for (loopIndex = 0; loopIndex != OPTIONS_CHOICE_COUNT; loopIndex++) {
         if (g_MenuMemory.optionsChoice != loopIndex) {
             LoadNibbleTextureBlock(
@@ -8296,7 +8299,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
         }
     }
 
-    LoadSmallPalette(&gfx, 0, ImageBody(g_MenuLabelImages[f_MenuLabelImageIndex]));
+    LoadSmallPalette(&gfx, 0, ImagePalette(g_MenuLabelImages[f_MenuLabelImageIndex]));
     for (loopIndex = 0; loopIndex != OPTIONS_CHOICE_COUNT; loopIndex++) {
         if (g_MenuMemory.optionsChoice == loopIndex) {
             LoadNibbleTextureBlock(
@@ -8355,7 +8358,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
         gfx++,
         0,
         TextureAddress(
-            ImageBody(ImageAt(g_MenuLabelImages[f_MenuLabelImageIndex], OPTION_VALUES_OFFSET))
+            ImagePalette(ImageAt(g_MenuLabelImages[f_MenuLabelImageIndex], OPTION_VALUES_OFFSET))
         )
     );
     for (loopIndex = 0; loopIndex != OPTION_TOGGLE_COUNT; loopIndex++) {
@@ -8419,7 +8422,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
         );
     }
 
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(arrows)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(arrows)));
     if (g_MenuMemory.optionsChoice != OPTIONS_CHOICE_ERASE_SAVE_DATA) {
         f_OptionsArrowTimer = (f_OptionsArrowTimer + 1) % ARROW_TIMER_PERIOD;
         frameIndex = f_OptionsArrowTimer < ARROW_FRAME_DURATION;
@@ -8691,7 +8694,7 @@ void DrawSpinningBadge(Gfx **displayListHead, ImageAsset *image, s32 x, s32 y) {
     s32 unused[8] UNUSED;
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(image)));
     gDPPipeSync(gfx++);
     gDPLoadTextureTile_4b(
         gfx++,
@@ -8751,7 +8754,7 @@ void DrawSpinningStars(
     s32 growWidth = 0;
     s32 growHeight = 0;
 
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(image)));
     gDPLoadTextureBlock_4b(
         gfx++,
         TextureAddress(ImageTexels(image)),
@@ -8850,7 +8853,7 @@ void DrawMenuRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY) {
     s32 top;
 
     image = g_AnimatedIconImages[g_AnimatedIconBufferIndex];
-    gDPLoadTLUT_pal16(gfx++, GOLD_STAR_PALETTE, TextureAddress(ImageBody(image)));
+    gDPLoadTLUT_pal16(gfx++, GOLD_STAR_PALETTE, TextureAddress(ImagePalette(image)));
     gDPLoadTextureBlock_4b(
         gfx++,
         TextureAddress(ImageTexels(image)),
@@ -8867,7 +8870,7 @@ void DrawMenuRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY) {
     );
     gDPPipeSync(gfx++);
     image = g_SecondAnimatedIconImages[g_AnimatedIconBufferIndex];
-    gDPLoadTLUT_pal16(gfx++, SILVER_STAR_PALETTE, TextureAddress(ImageBody(image)));
+    gDPLoadTLUT_pal16(gfx++, SILVER_STAR_PALETTE, TextureAddress(ImagePalette(image)));
     gDPLoadMultiBlock_4b(
         gfx++,
         TextureAddress(ImageTexels(image)),
@@ -8948,7 +8951,10 @@ void DrawWavingToad(Gfx **displayListHead, s32 left, s32 top) {
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_MenuSpareImages[f_WavingToadImageIndex])));
+    gDPLoadTLUT_pal256(
+        gfx++,
+        TextureAddress(ImagePalette(g_MenuSpareImages[f_WavingToadImageIndex]))
+    );
     for (stripIndex = 0; stripIndex != TOAD_STRIP_COUNT; stripIndex++) {
         rowCount = TOAD_LAST_STRIP_HEIGHT;
         if (stripIndex == 0) {

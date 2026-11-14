@@ -1683,7 +1683,7 @@ void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead) {
     );
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_DropletImage)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_DropletImage)));
     for (index = 0; index != EFFECT_COUNT; index++) {
         effect = &f_Effects[index];
         if (effect->kind == EFFECT_KIND_TEAR) {
@@ -2025,7 +2025,7 @@ void DrawDivot(Gfx **displayListHead, Effect *effect) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_DivotImage)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_DivotImage)));
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
     gDPPipeSync(gfx++);
@@ -2101,7 +2101,7 @@ void DrawDivotMark(Gfx **displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_DivotImage)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_DivotImage)));
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
 
@@ -2760,7 +2760,7 @@ void DrawBirdieBadgeCount(Gfx **displayListHead) {
             }
         }
 
-        LoadSmallPalette(&gfx, 0, ImageBody(f_CloudImage));
+        LoadSmallPalette(&gfx, 0, ImagePalette(f_CloudImage));
 
         gDPLoadTextureTile_4b(
             gfx++,
@@ -2792,7 +2792,7 @@ void DrawBirdieBadgeCount(Gfx **displayListHead) {
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
-        LoadSmallPalette(&gfx, 0, ImageBody(f_ClumpImage));
+        LoadSmallPalette(&gfx, 0, ImagePalette(f_ClumpImage));
         LoadNibbleTextureBlock(
             &gfx,
             ImageTexels(f_ClumpImage),

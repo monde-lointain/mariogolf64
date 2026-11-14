@@ -85,8 +85,8 @@ void DrawTextureRectangle(
     s32 dsdx,
     s32 dtdy
 );
-void LoadSmallPalette(Gfx **displayListHead, s32 paletteIndex, void *tlut);
-void LoadLargePalette(Gfx **displayListHead, void *tlut);
+void LoadSmallPalette(Gfx **displayListHead, s32 paletteIndex, PaletteColor *tlut);
+void LoadLargePalette(Gfx **displayListHead, PaletteColor *tlut);
 void LoadNibbleTextureBlock(
     Gfx **displayListHead,
     void *texels,

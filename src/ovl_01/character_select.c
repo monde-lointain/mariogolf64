@@ -1717,7 +1717,7 @@ void DrawCharacterBoard(Gfx **displayListHead) {
     ImageAsset *labelImage;
 
     GetMenuImageBuffer();
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_CharacterBoard)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_CharacterBoard)));
     for (stripIndex = 0; stripIndex != BOARD_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock_4b(
             gfx++,
@@ -1754,7 +1754,7 @@ void DrawCharacterBoard(Gfx **displayListHead) {
 
     labelImage = GetMenuImageBuffer();
     labelImage += CHARACTER_SELECT_FIRST_IMAGE_SIZE;
-    LoadSmallPalette(&gfx, 0, ImageBody(labelImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(labelImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(labelImage),
@@ -1823,7 +1823,7 @@ void DrawPlayerTags(Gfx **displayListHead, u8 tagMode) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_PlayerTags)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_PlayerTags)));
     if (g_MenuScreen == MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT) {
         tagCount = 1;
     }
@@ -2053,7 +2053,7 @@ void DrawComputerIcon(Gfx **displayListHead, s32 unused UNUSED) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ComputerLeftyIcons)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(g_ComputerLeftyIcons)));
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(
         gfx++,
@@ -2103,7 +2103,7 @@ void DrawLeftyIcon(Gfx **displayListHead, s32 unused UNUSED) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ComputerLeftyIcons)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(g_ComputerLeftyIcons)));
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(
         gfx++,
@@ -2170,7 +2170,7 @@ void DrawCurveMeter(Gfx **displayListHead, s32 clubSet) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_CurveMeterCells)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_CurveMeterCells)));
     for (cellIndex = firstCell; cellIndex != endCell; cellIndex++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -2209,7 +2209,7 @@ void DrawCurveMeter(Gfx **displayListHead, s32 clubSet) {
     }
 
     labelImage = GetMenuImageBuffer();
-    LoadSmallPalette(&gfx, 0, ImageBody(labelImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(labelImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(labelImage),

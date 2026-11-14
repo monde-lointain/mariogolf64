@@ -638,7 +638,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
 
         sinf(f_PanelWaveAngle);
         f_PanelWaveAngle += DegreesToRadians(SWAY_DEGREES_PER_FRAME);
-        LoadLargePalette(&gfx, ImageBody(f_NamePlateImage));
+        LoadLargePalette(&gfx, ImagePalette(f_NamePlateImage));
         for (strip = 0; strip != NAME_PLATE_STRIP_COUNT; strip++) {
             LoadTextureBlock(
                 &gfx,
@@ -762,7 +762,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
         f_TitleSwayAngle += DegreesToRadians(SWAY_DEGREES_PER_FRAME);
-        LoadLargePalette(&gfx, ImageBody(f_SaveMenuTitleImage));
+        LoadLargePalette(&gfx, ImagePalette(f_SaveMenuTitleImage));
         imageLeft = TITLE_IMAGE_LEFT;
 
         for (row = 0; row != TITLE_STRIP_COUNT; row++) {
@@ -807,7 +807,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
 
         for (row = 0; row != SAVED_GAME_COUNT; row++) {
-            LoadLargePalette(&gfx, ImageBody(f_ModeIconImages[row][f_IconImageIndex ^ 1]));
+            LoadLargePalette(&gfx, ImagePalette(f_ModeIconImages[row][f_IconImageIndex ^ 1]));
             if (save->savedGames[row].isValid) {
                 gDPPipeSync(gfx++);
                 if (row == f_CursorIndex) {
@@ -1607,7 +1607,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
-        LoadLargePalette(&gfx, ImageBody(f_NamePlateImage));
+        LoadLargePalette(&gfx, ImagePalette(f_NamePlateImage));
         for (index = 0; index != NAME_PLATE_STRIP_COUNT; index++) {
             stripHeight = RECORD_PANEL_STRIP_HEIGHT;
             LoadTextureBlock(
@@ -1713,7 +1713,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             );
         }
 
-        LoadSmallPalette(&gfx, 0, ImageBody(f_CourseNumbersImage));
+        LoadSmallPalette(&gfx, 0, ImagePalette(f_CourseNumbersImage));
         gDPLoadTextureTile_4b(
             gfx++,
             TextureAddress(ImageTexels(f_CourseNumbersImage)),
@@ -1830,7 +1830,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 }
 
                 gDPPipeSync(gfx++);
-                LoadSmallPalette(&gfx, 0, ImageBody(f_ReplayLabelImages[rowLabels[index]]));
+                LoadSmallPalette(&gfx, 0, ImagePalette(f_ReplayLabelImages[rowLabels[index]]));
                 LoadNibbleTextureBlock(
                     &gfx,
                     ImageTexels(f_ReplayLabelImages[rowLabels[index]]),
@@ -2019,7 +2019,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         f_ReplayTitleBobAngle += DegreesToRadians(TITLE_BOB_DEGREES_PER_FRAME);
-        LoadLargePalette(&gfx, ImageBody(f_NamePlateImage));
+        LoadLargePalette(&gfx, ImagePalette(f_NamePlateImage));
         for (index = 0; index != NAME_PLATE_STRIP_COUNT; index++) {
             stripHeight = TITLE_PANEL_STRIP_HEIGHT;
             LoadTextureBlock(
@@ -2184,7 +2184,7 @@ void DrawControlsScreen(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-        LoadLargePalette(&gfx, ImageBody(f_NamePlateImage));
+        LoadLargePalette(&gfx, ImagePalette(f_NamePlateImage));
         for (strip = 0; strip != CONTROLS_STRIP_COUNT; strip++) {
             LoadTextureBlock(
                 &gfx,

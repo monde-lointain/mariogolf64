@@ -2515,7 +2515,7 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     );
     gDPSetEnvColor(gfx++, WIND_TEXT_ENV_RED, WIND_TEXT_ENV_GREEN, WIND_TEXT_ENV_BLUE, OPAQUE_ALPHA);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_WindSpeedFont)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_WindSpeedFont)));
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTextureBlock_4b(
@@ -2862,7 +2862,7 @@ void DrawShotPanelIcons(Gfx **displayListHead, CameraView *view UNUSED) {
         gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
         gDPPipeSync(gfx++);
         gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_LieImage)));
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_LieImage)));
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_NONE);
         gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
@@ -2931,7 +2931,7 @@ void DrawHoleFlag(Boolean isBackDrawn) {
     gDPPipeSync(g_DisplayListHead++);
     gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
     gDPSetBlendColor(g_DisplayListHead++, 255, 255, 255, 1);
-    gDPLoadTLUT_pal256(g_DisplayListHead++, TextureAddress(ImageBody(f_HoleImage)));
+    gDPLoadTLUT_pal256(g_DisplayListHead++, TextureAddress(ImagePalette(f_HoleImage)));
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
     gDPPipeSync(g_DisplayListHead++);
@@ -3535,7 +3535,11 @@ void SetShotOffsetMarker(s32 x, s32 y) {
 
 void DrawShotOffsetMarker(void) {
     gDPPipeSync(g_DisplayListHead++);
-    gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(f_ShotOffsetMarkerImage)));
+    gDPLoadTLUT_pal16(
+        g_DisplayListHead++,
+        0,
+        TextureAddress(ImagePalette(f_ShotOffsetMarkerImage))
+    );
     f_ShotOffsetMarkerFrame = (f_ShotOffsetMarkerFrame + 1) % SHOT_OFFSET_MARKER_FRAME_COUNT;
     if (g_RoundHud.flags & HUD_FLAG_ANIMATE_OFFSET_MARKER) {
         f_ShotOffsetMarkerTexelOffset = f_ShotOffsetMarkerFrame * SHOT_OFFSET_MARKER_FRAME_SIZE;
@@ -3620,7 +3624,7 @@ void DrawAnimatedIcon(Gfx **displayListHead, s32 letterboxHeight) {
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         gDPLoadTLUT_pal256(
             gfx++,
-            TextureAddress(ImageBody(f_AnimatedIconImages[f_AnimatedIconImageIndex]))
+            TextureAddress(ImagePalette(f_AnimatedIconImages[f_AnimatedIconImageIndex]))
         );
         gDPPipeSync(gfx++);
         gDPSetRenderMode(
@@ -3668,7 +3672,7 @@ void DrawAnimatedIcon(Gfx **displayListHead, s32 letterboxHeight) {
             label = ANIMATED_ICON_LABEL_CUP;
         }
 
-        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_AnimatedIconLabelImages[label])));
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_AnimatedIconLabelImages[label])));
         gDPLoadTextureBlock_4b(
             gfx++,
             TextureAddress(ImageTexels(f_AnimatedIconLabelImages[label])),
@@ -4175,7 +4179,7 @@ void DrawRoundHud(CameraView *view) {
     if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
         f_PinFlagTime = (f_PinFlagTime + 1) & (PIN_FLAG_TIME_COUNT - 1);
         gDPPipeSync(g_DisplayListHead++);
-        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(g_PinFlagImages)));
+        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImagePalette(g_PinFlagImages)));
         gDPLoadTextureBlock_4b(
             g_DisplayListHead++,
             TextureAddress(ImageTexels(g_PinFlagImages)),
@@ -4204,7 +4208,7 @@ void DrawRoundHud(CameraView *view) {
             TEXEL_STEP_ONE
         );
         gDPPipeSync(g_DisplayListHead++);
-        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(f_RestLabelImage)));
+        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImagePalette(f_RestLabelImage)));
         gDPLoadTextureBlock_4b(
             g_DisplayListHead++,
             TextureAddress(ImageTexels(f_RestLabelImage)),
@@ -4267,7 +4271,7 @@ void DrawRoundHud(CameraView *view) {
 
             gDPPipeSync(g_DisplayListHead++);
             gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
-            gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(f_RingImages)));
+            gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImagePalette(f_RingImages)));
             gDPLoadTextureBlock_4b(
                 g_DisplayListHead++,
                 TextureAddress(ImageTexels(f_RingImages) + f_RingFrame * RING_FRAME_SIZE),
@@ -4301,7 +4305,7 @@ void DrawRoundHud(CameraView *view) {
         }
     }
 
-    gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(f_DistanceFont)));
+    gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImagePalette(f_DistanceFont)));
     gDPLoadTextureBlock_4b(
         g_DisplayListHead++,
         TextureAddress(ImageTexels(f_DistanceFont)),
@@ -4449,7 +4453,7 @@ void DrawRoundHud(CameraView *view) {
             UpdateClubPanelImages();
         }
 
-        gDPLoadTLUT_pal256(g_DisplayListHead++, TextureAddress(ImageBody(g_ClubPanelImage)));
+        gDPLoadTLUT_pal256(g_DisplayListHead++, TextureAddress(ImagePalette(g_ClubPanelImage)));
         gDPLoadTextureBlock(
             g_DisplayListHead++,
             TextureAddress(LargeImageTexels(g_ClubPanelImage)),
@@ -4482,7 +4486,7 @@ void DrawRoundHud(CameraView *view) {
         gDPLoadTLUT_pal16(
             g_DisplayListHead++,
             0,
-            TextureAddress(ImageBody(f_ClubNameImages[f_ClubNameImageIndex]))
+            TextureAddress(ImagePalette(f_ClubNameImages[f_ClubNameImageIndex]))
         );
         gDPLoadTextureBlock_4b(
             g_DisplayListHead++,
@@ -4515,7 +4519,7 @@ void DrawRoundHud(CameraView *view) {
     }
 
     if (g_RoundHud.isHoleInfoShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
-        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(f_ParImage)));
+        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImagePalette(f_ParImage)));
         gDPLoadTextureBlock_4b(
             g_DisplayListHead++,
             TextureAddress(ImageTexels(f_ParImage)),
@@ -4925,7 +4929,7 @@ void DrawHoleIntroImages(Gfx **displayListHead) {
                     IsMarkedParFive(GetCourseRecordIndex(), g_GameState.holeIndex)) ||
                 (g_GameState.betRates[BET_NEAREST_PIN] > 0 &&
                     IsParThree(GetCourseRecordIndex(), g_GameState.holeIndex))) {
-                gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_HoleContestImage)));
+                gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_HoleContestImage)));
                 for (strip = 0; strip != CONTEST_IMAGE_STRIP_COUNT; strip++) {
                     gDPLoadTextureBlock(
                         gfx++,
@@ -4967,7 +4971,7 @@ void DrawHoleIntroImages(Gfx **displayListHead) {
 
             if (IsOneOnOneMatchMode(g_GameState.gameMode) &&
                 (f_LoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED)) {
-                gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_MatchStandingImage)));
+                gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_MatchStandingImage)));
                 for (strip = 0; strip != MATCH_IMAGE_STRIP_COUNT; strip++) {
                     gDPLoadTextureTile(
                         gfx++,

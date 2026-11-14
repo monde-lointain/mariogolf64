@@ -2743,7 +2743,7 @@ void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
     gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_CourseSkyImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(g_CourseSkyImage)));
     f_BackdropStripCount = COURSE_BACKDROP_STRIP_COUNT;
     f_BackdropStripHeight = COURSE_BACKDROP_STRIP_HEIGHT;
     f_BackdropImageWidth = BACKDROP_IMAGE_WIDTH;
@@ -3673,7 +3673,7 @@ void DrawMenuBackdrop(Gfx **displayListHead) {
         );
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_BackdropPatternImage)));
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(g_BackdropPatternImage)));
         gDPPipeSync(gfx++);
         gSPTextureRectangle(
             gfx++,

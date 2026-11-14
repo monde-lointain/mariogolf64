@@ -846,7 +846,7 @@ void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    LoadSmallPalette(&gfx, 0, ImageBody(f_PauseArrowsImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(f_PauseArrowsImage));
     LoadNibbleTextureBlock(
         &gfx,
         ImageTexels(f_PauseArrowsImage) +
@@ -1128,7 +1128,7 @@ void DrawPauseMenu(Gfx **displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     teeFrame = sway >= PAUSE_TEE_LEAN_SWAY;
-    LoadSmallPalette(&gfx, 0, ImageBody(f_PauseCursorImage));
+    LoadSmallPalette(&gfx, 0, ImagePalette(f_PauseCursorImage));
     gDPLoadTextureTile_4b(
         gfx++,
         TextureAddress(ImageTexels(f_PauseCursorImage)),
@@ -1429,7 +1429,7 @@ void DrawChoiceBox(Gfx **displayListHead) {
             );
             cursorX = (s32)(sinf(f_ChoiceCursorAngle) * CHOICE_CURSOR_SWAY) + CHOICE_CURSOR_X;
             cursorX -= chosenWidth / 2;
-            LoadSmallPalette(&gfx, 0, ImageBody(f_ChoiceBoxCursorImage));
+            LoadSmallPalette(&gfx, 0, ImagePalette(f_ChoiceBoxCursorImage));
             gDPLoadTextureTile_4b(
                 gfx++,
                 TextureAddress(ImageTexels(f_ChoiceBoxCursorImage)),

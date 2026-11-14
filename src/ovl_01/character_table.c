@@ -682,7 +682,7 @@ void DrawTablePopup(Gfx **displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_TablePopupBanner)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_TablePopupBanner)));
     for (index = 0; index != NAME_PLATE_STRIP_COUNT; index++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -896,7 +896,7 @@ void DrawTableStar(Gfx **displayListHead, s32 left, s32 top) {
 
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_TableStar)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_TableStar)));
     gDPLoadTextureBlock_4b(
         gfx++,
         TextureAddress(ImageTexels(f_TableStar)),

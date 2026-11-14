@@ -883,7 +883,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                 if (isIconLoaded == FALSE) {
                     gDPPipeSync(gfx++);
                     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_TextIconImage)));
+                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_TextIconImage)));
                     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
                     isIconLoaded = TRUE;
                 }
@@ -1316,7 +1316,7 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
                 if (isIconLoaded == FALSE) {
                     gDPPipeSync(gfx++);
                     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_TextIconImage)));
+                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_TextIconImage)));
                     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
                     isIconLoaded = TRUE;
                 }
@@ -2688,7 +2688,7 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
                 if (isIconLoaded == FALSE) {
                     gDPPipeSync(gfx++);
                     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_TextIconImage)));
+                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_TextIconImage)));
                     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
                     isIconLoaded = TRUE;
                 }

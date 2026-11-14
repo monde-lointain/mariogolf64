@@ -638,7 +638,7 @@ void DrawRingShotRecords(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
 
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_RingShotNamePlate)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_RingShotNamePlate)));
     for (index = 0; index != RING_SHOT_STRIP_COUNT; index++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -1092,7 +1092,7 @@ void DrawCourseLabel(
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_RingShotCourseNumbers)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_RingShotCourseNumbers)));
     gDPLoadTextureTile_4b(
         gfx++,
         TextureAddress(ImageTexels(f_RingShotCourseNumbers)),
@@ -1158,7 +1158,7 @@ void DrawRingShotRowIcon(Gfx **displayListHead, s32 imageIndex, s32 left, s32 to
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_RingShotCourseIcons[imageIndex])));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_RingShotCourseIcons[imageIndex])));
     for (stripIndex = 0; stripIndex != SAVE_ICON_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -2176,7 +2176,7 @@ void DrawSavedGames(Gfx **displayListHead) {
                 );
             }
 
-            gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_GameBoards[drawnIndex])));
+            gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_GameBoards[drawnIndex])));
             for (index = 0; index != GAME_BOARD_STRIP_COUNT; index++) {
                 gDPLoadTextureBlock(
                     gfx++,
@@ -2216,7 +2216,7 @@ void DrawSavedGames(Gfx **displayListHead) {
             if (f_SavedGameModes[drawnIndex] != NO_SAVE_MENU_MODE) {
                 ImageAsset *modeImage = f_SavedGameModeImages[drawnIndex];
 
-                gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(modeImage)));
+                gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(modeImage)));
                 for (index = 0; index != MODE_ICON_STRIP_COUNT; index++) {
                     gDPLoadTextureBlock(
                         gfx++,
@@ -2286,7 +2286,7 @@ void DrawSavedGames(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
 
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_SavedGamesNamePlate)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_SavedGamesNamePlate)));
     for (index = 0; index != SAVED_GAME_STRIP_COUNT; index++) {
         if (playerCount == 1) {
             stripLeft = SAVED_GAME_STRIP_LEFT;
@@ -2342,7 +2342,7 @@ void DrawSavedGames(Gfx **displayListHead) {
     if (f_SavedGameModes[index] != NO_SAVE_MENU_MODE) {
         labelX = (playerCount == 1) ? SINGLE_PLAYER_MODE_LABEL_X : MODE_LABEL_X;
         iconIndex = f_SaveMenuModeIcons[f_SavedGameModes[index]];
-        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_GameModeLabels)));
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_GameModeLabels)));
         gDPLoadTextureBlock_4b(
             gfx++,
             TextureAddress(
@@ -2532,7 +2532,7 @@ void DrawChosenGameBoard(Gfx **displayListHead, s32 left, s32 top, s32 halfSize,
     u8 iconIndex;
 
     gDPPipeSync(gfx++);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_GameBoards[memory->savedGameIndex])));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_GameBoards[memory->savedGameIndex])));
     for (stripIndex = 0; stripIndex != GAME_BOARD_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
@@ -2570,7 +2570,7 @@ void DrawChosenGameBoard(Gfx **displayListHead, s32 left, s32 top, s32 halfSize,
 
     if (f_SavedGameModes[memory->savedGameIndex] != NO_SAVE_MENU_MODE) {
         image = f_ChosenModeIconBuffers[g_AnimatedIconBufferIndex];
-        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(image)));
         for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
             gDPLoadTextureBlock(
                 gfx++,
@@ -2791,7 +2791,7 @@ void DrawPlayerControllers(Gfx **displayListHead) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     image = f_ControllerIcons;
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(image)));
     for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
         if (f_SavedPlayerControllers[playerIndex] != NO_CONTROLLER) {
             position[AXIS_X] = f_SavedGameControllerIconPositions[playerCount - 1][playerIndex][0];
@@ -2834,7 +2834,7 @@ void DrawPlayerControllers(Gfx **displayListHead) {
     }
 
     image = f_PlayerLabels;
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(image)));
     for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
         position[AXIS_X] = f_SavedGameControllerIconPositions[playerCount - 1][playerIndex][0];
         position[AXIS_Y] = f_SavedGameControllerIconPositions[playerCount - 1][playerIndex][1];
@@ -2907,7 +2907,7 @@ void DrawSavedCourseImage(Gfx **displayListHead) {
     GetMenuMemory();
     gDPLoadTLUT_pal256(
         gfx++,
-        TextureAddress(ImageBody(f_CourseImageBuffers[f_ShownCourseBufferIndex]))
+        TextureAddress(ImagePalette(f_CourseImageBuffers[f_ShownCourseBufferIndex]))
     );
     for (stripIndex = 0; stripIndex != COURSE_THUMBNAIL_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(

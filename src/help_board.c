@@ -369,7 +369,7 @@ void DrawHelpBoard(Gfx **displayListHead) {
         gDPSetTextureFilter(gfx++, G_TF_BILERP);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_HandImages)));
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_HandImages)));
         gDPLoadTextureTile_4b(
             gfx++,
             TextureAddress(ImageTexels(f_HandImages)),
@@ -446,7 +446,7 @@ void DrawHelpBoard(Gfx **displayListHead) {
         }
 
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_ArrowImages)));
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_ArrowImages)));
         for (index = 0; index != ARROW_COUNT; index++) {
             if (IsTopicArrowShown(index)) {
                 gDPLoadTextureTile_4b(
@@ -618,7 +618,7 @@ void DrawChalkboard(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
     gDPPipeSync(gfx++);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_ChalkboardImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_ChalkboardImage)));
     for (stripIndex = 0; stripIndex != CHALKBOARD_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,

@@ -56,7 +56,7 @@ s32 GetAssetFileSize(AssetFile *file);
 void ReadAssetFile(void *buffer, u32 size, AssetFile *file);
 // An image asset as loaded: an IMAGE_HEADER_SIZE header, then a small or
 // large palette, then the texels. Its size varies, so it is opaque; reach
-// its parts through ImageBody, ImageTexels and LargeImageTexels.
+// its parts through ImageBody, ImagePalette, ImageTexels and LargeImageTexels.
 typedef void ImageAsset;
 
 #define IMAGE_HEADER_SIZE 8
@@ -69,9 +69,11 @@ typedef void ImageAsset;
     (IMAGE_HEADER_SIZE + (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE))
 #define ImageAt(buffer, offset) ((u8 *)(buffer) + (offset))
 #define ImageBody(image) ((u8 *)(image) + IMAGE_HEADER_SIZE)
+#define ImagePalette(image) ((PaletteColor *)ImageBody(image))
 #define ImageTexels(image) ((u8 *)(image) + PALETTED_TEXELS_OFFSET)
 #define LargeImageTexels(image) ((u8 *)(image) + LARGE_PALETTED_TEXELS_OFFSET)
 #define ImageBodyAt(image, offset) ((u8 *)(image) + ((offset) + IMAGE_HEADER_SIZE))
+#define ImagePaletteAt(image, offset) ((PaletteColor *)ImageBodyAt(image, offset))
 #define ImageTexelsAt(image, offset) ((u8 *)(image) + ((offset) + PALETTED_TEXELS_OFFSET))
 #define LargeImageTexelsAt(image, offset) \
     ((u8 *)(image) + ((offset) + LARGE_PALETTED_TEXELS_OFFSET))

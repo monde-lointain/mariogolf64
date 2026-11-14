@@ -576,7 +576,7 @@ void DrawPlanks(Gfx **displayListHead) {
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadLargePalette(&gfx, ImageBody(f_PlanksImage));
+    LoadLargePalette(&gfx, ImagePalette(f_PlanksImage));
     switch (f_PlankMotion) {
         case PLANKS_SHUT:
             break;
@@ -741,7 +741,7 @@ void DrawRingShotSelect(Gfx **displayListHead) {
         gDPSetTextureFilter(gfx++, G_TF_BILERP);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        LoadSmallPalette(&gfx, 0, ImageBody(f_ArrowsImage));
+        LoadSmallPalette(&gfx, 0, ImagePalette(f_ArrowsImage));
         if (g_GameState.replayKind == REPLAY_KIND_NONE && CountOpenRingShotCourses() >= 2) {
             arrowFrame =
                 f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_DURATION) >= ARROW_FRAME_DURATION;
@@ -847,7 +847,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
         gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        LoadLargePalette(&gfx, ImageBody(f_BoardImage));
+        LoadLargePalette(&gfx, ImagePalette(f_BoardImage));
         for (stripIndex = 0; stripIndex != HOLE_SIGN_STRIP_COUNT; stripIndex++) {
             gDPLoadTextureTile(
                 gfx++,
@@ -941,7 +941,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
         gDPSetTextureFilter(gfx++, G_TF_BILERP);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        LoadSmallPalette(&gfx, 0, ImageBody(f_ArrowsImage));
+        LoadSmallPalette(&gfx, 0, ImagePalette(f_ArrowsImage));
         LoadNibbleTextureBlock(
             &gfx,
             ImageTexelsAt(f_ArrowsImage, arrowFrame),
@@ -1086,7 +1086,7 @@ void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY) {
 
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadLargePalette(&gfx, ImageBody(f_BoardImage));
+    LoadLargePalette(&gfx, ImagePalette(f_BoardImage));
     for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         LoadTextureBlock(
             &gfx,
@@ -1146,7 +1146,7 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
     CourseIndex courseIndex;
     ImageAsset *spinningImage = f_StarImages[f_StarBufferIndex];
 
-    LoadSmallPalette(&gfx, TILE_SPINNING_STAR, ImageBody(spinningImage));
+    LoadSmallPalette(&gfx, TILE_SPINNING_STAR, ImagePalette(spinningImage));
     gDPLoadTextureBlock_4b(
         gfx++,
         TextureAddress(ImageTexels(spinningImage)),
@@ -1163,7 +1163,7 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
     );
     gDPPipeSync(gfx++);
     spinningImage = f_EmptyStarImages[f_StarBufferIndex];
-    LoadSmallPalette(&gfx, TILE_SPINNING_EMPTY_STAR, ImageBody(spinningImage));
+    LoadSmallPalette(&gfx, TILE_SPINNING_EMPTY_STAR, ImagePalette(spinningImage));
     gDPLoadMultiBlock_4b(
         gfx++,
         TextureAddress(ImageTexels(spinningImage)),
@@ -1180,7 +1180,7 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    LoadSmallPalette(&gfx, TILE_STILL_STAR, ImageBody(f_StarImages[STILL_STAR_IMAGE]));
+    LoadSmallPalette(&gfx, TILE_STILL_STAR, ImagePalette(f_StarImages[STILL_STAR_IMAGE]));
     gDPLoadMultiBlock_4b(
         gfx++,
         TextureAddress(ImageTexels(f_StarImages[STILL_STAR_IMAGE])),
@@ -1197,7 +1197,11 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    LoadSmallPalette(&gfx, TILE_STILL_EMPTY_STAR, ImageBody(f_EmptyStarImages[STILL_STAR_IMAGE]));
+    LoadSmallPalette(
+        &gfx,
+        TILE_STILL_EMPTY_STAR,
+        ImagePalette(f_EmptyStarImages[STILL_STAR_IMAGE])
+    );
     gDPLoadMultiBlock_4b(
         gfx++,
         TextureAddress(ImageTexels(f_EmptyStarImages[STILL_STAR_IMAGE])),

@@ -654,7 +654,7 @@ void DrawYesNoWindow(
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    LoadLargePalette(&gfx, ImageBody(f_YesNoImage));
+    LoadLargePalette(&gfx, ImagePalette(f_YesNoImage));
     for (index = 0; index != YES_NO_BUTTON_COUNT; index++) {
         LoadTextureBlock(
             &gfx,
@@ -938,7 +938,7 @@ void DrawClubWindow(
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    LoadLargePalette(&gfx, ImageBody(f_YesNoImage));
+    LoadLargePalette(&gfx, ImagePalette(f_YesNoImage));
     for (index = 0; index != YES_NO_BUTTON_COUNT; index++) {
         LoadTextureBlock(
             &gfx,
@@ -1013,7 +1013,7 @@ void DrawClubWindow(
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        LoadLargePalette(&gfx, ImageBody(f_NintendoBadge));
+        LoadLargePalette(&gfx, ImagePalette(f_NintendoBadge));
         badgeX = centerX;
         badgeTop =
             (s32)(centerY - windowHalfHeight + (s32)(f_MenuWindowScaleY * NINTENDO_BADGE_OFFSET)) -
@@ -1057,7 +1057,7 @@ void DrawClubWindow(
         (s32)(centerY + windowHalfHeight - (s32)(f_MenuWindowScaleY * WINDOW_IMAGE_OFFSET_Y)) -
         courseStripRows;
     courseX = windowLeft + (s32)(f_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
-    LoadLargePalette(&gfx, ImageBody(f_ClubCourseIcon));
+    LoadLargePalette(&gfx, ImagePalette(f_ClubCourseIcon));
     for (index = 0; index != COURSE_ICON_STRIP_COUNT; index++) {
         LoadTextureBlock(
             &gfx,
@@ -1640,7 +1640,7 @@ void DrawClubNumber(Gfx **displayListHead, s32 x, s32 top, s32 number) {
     sprintf(g_PrintBuffer, "%d", number);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadLargePalette(&gfx, ImageBody(image));
+    LoadLargePalette(&gfx, ImagePalette(image));
     width = 0;
     for (digit = g_PrintBuffer; *digit != '\0'; digit++) {
         width += PLACE_GLYPH_SPACING;
@@ -1903,7 +1903,7 @@ void DrawCodeEntryBar(Gfx **displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_CodeEntryBarImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_CodeEntryBarImage)));
     gDPPipeSync(gfx++);
     for (stripIndex = 0; stripIndex != CODE_ENTRY_BAR_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
@@ -1958,7 +1958,7 @@ void DrawCodePanels(Gfx **displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_NamePlateImage)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_NamePlateImage)));
     gDPPipeSync(gfx++);
     for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
@@ -2030,7 +2030,7 @@ void DrawCodeHand(Gfx **displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_PointingHandImage)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_PointingHandImage)));
     gDPLoadTextureTile_4b(
         gfx++,
         TextureAddress(ImageTexels(f_PointingHandImage)),
@@ -2107,7 +2107,7 @@ void DrawCodeKeys(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_CodeGlyphsImage)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_CodeGlyphsImage)));
     for (row = 0; row != CODE_KEYBOARD_ROW_COUNT; row++) {
         for (column = 0; column != CODE_KEYBOARD_COLUMN_COUNT; column++) {
             glyph = f_CodeKeyGlyphs[row][column];

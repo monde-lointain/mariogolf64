@@ -319,7 +319,7 @@ void DrawBestTimes(Gfx **displayListHead) {
         drawnIndex = drawOrder[index];
         halfSize = iconScale[drawnIndex] * COURSE_ICON_HALF_SIZE;
         texelStep = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
-        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_BestTimesCourseIcons[drawnIndex])));
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_BestTimesCourseIcons[drawnIndex])));
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         for (otherIndex = 0; otherIndex != COURSE_ICON_STRIP_COUNT; otherIndex++) {
@@ -493,7 +493,7 @@ void DrawBestTimeFace(
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     }
 
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_CharacterFaceStrip)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_CharacterFaceStrip)));
     gDPLoadTextureBlock(
         gfx++,
         TextureAddress(
@@ -556,7 +556,7 @@ void DrawPlaceLabel(Gfx **displayListHead, s32 left, s32 top, s32 place) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_PlaceLabels)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_PlaceLabels)));
     gDPLoadTextureBlock(
         gfx++,
         TextureAddress(LargeImageTexelsAt(f_PlaceLabels, (place - 1) * PLACE_PART_IMAGE_SIZE)),
@@ -650,7 +650,7 @@ void DrawStopwatchTime(Gfx **displayListHead, s32 left, s32 top, s32 frameCount)
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StopwatchGlyphs)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_StopwatchGlyphs)));
     for (group = 0; group != TIME_GROUP_COUNT; group++) {
         for (digit = 0; digit != TIME_GROUP_DIGIT_COUNT; digit++) {
             gDPLoadTextureBlock_4b(

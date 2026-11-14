@@ -723,7 +723,7 @@ void DrawBetSettings(
 
         if (i != memory->betColumn) {
             icon = ImageAt(f_BetIcons, betIndex * BET_ICON_SLOT_SIZE);
-            gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(icon)));
+            gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(icon)));
             if (memory->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][i]] == 0) {
                 gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
                 gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
@@ -810,7 +810,7 @@ void DrawBetSettings(
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StakeMark)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_StakeMark)));
     gDPPipeSync(gfx++);
 
     markRaise = 0;
@@ -871,7 +871,7 @@ void DrawBetSettings(
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_StatsNamePlate)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_StatsNamePlate)));
 
     bannerShift = slide;
     if (isSlideReversed) {
@@ -984,7 +984,7 @@ void DrawBetIcon(Gfx **displayListHead, s32 left, s32 top, s32 size, s32 texture
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
     image = f_ChosenBetIconFrames[g_AnimatedIconBufferIndex];
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(image)));
     gDPLoadTextureTile_4b(
         gfx++,
         TextureAddress(ImageTexels(image)),
@@ -1321,7 +1321,7 @@ void DrawHandicaps(
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_StatsNamePlate)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_StatsNamePlate)));
     offsetY = slide;
     if (isVerticalSlideReversed) {
         offsetY = -slide;
@@ -1362,11 +1362,11 @@ void DrawHandicaps(
         gDPPipeSync(gfx++);
     }
 
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_HandicapPlaque)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_HandicapPlaque)));
     gDPLoadTLUT_pal16(
         gfx++,
         HANDICAP_LABEL_PALETTE,
-        TextureAddress(ImageBody(f_StatsPlayerLabels))
+        TextureAddress(ImagePalette(f_StatsPlayerLabels))
     );
     for (column = 0; column != g_ChosenPlayerCount; column++) {
         if (column == memory->handicapPlayer) {
@@ -1474,7 +1474,7 @@ void DrawHandicaps(
     }
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StatsGreenArrows)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_StatsGreenArrows)));
     arrowTop = HANDICAP_COLUMN_TOP;
     for (i = 0; i != MENU_ARROW_COUNT; i++) {
         if (i == MENU_ARROW_LEFT) {
@@ -1633,7 +1633,7 @@ void DrawBetLabel(Gfx **displayListHead, s32 centerX, s32 top, u8 labelIndex) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_BetLabels)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_BetLabels)));
     gDPLoadTextureBlock_4b(
         gfx++,
         TextureAddress(ImageTexels(f_BetLabels) + (labelIndex * BET_LABEL_IMAGE_SIZE)),
@@ -1740,7 +1740,7 @@ void DrawBrickWallRows(Gfx **displayListHead, u8 slide) {
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_BrickWall)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_BrickWall)));
     for (row = 0; row != STATS_SLIDE_ROW_COUNT; row++) {
         gDPPipeSync(gfx++);
         gDPLoadTextureBlock(
@@ -1832,7 +1832,7 @@ void DrawPageArrows(Gfx **displayListHead) {
     }
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_PageArrows)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_PageArrows)));
     gDPPipeSync(gfx++);
     for (arrowIndex = 0; arrowIndex != PAGE_ARROW_COUNT; arrowIndex++) {
         if (arrowIndex == PAGE_ARROW_RIGHT) {
@@ -1919,7 +1919,7 @@ void DrawCenteredPageArrows(Gfx **displayListHead, s32 gap, s32 centerY) {
     }
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_PageArrows)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_PageArrows)));
     gDPPipeSync(gfx++);
     for (arrowIndex = 0; arrowIndex != PAGE_ARROW_COUNT; arrowIndex++) {
         if (arrowIndex == PAGE_ARROW_RIGHT) {
@@ -2037,7 +2037,7 @@ void DrawTurnedPageArrows(Gfx **displayListHead, s32 spacing, s32 y) {
         guScale(&f_TurnedArrowScales[arrowIndex], 1.0f, 1.0f, 1.0f);
         gDPPipeSync(gfx++);
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_PageArrows)));
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_PageArrows)));
         gDPLoadTextureTile_4b(
             gfx++,
             TextureAddress(ImageTexels(f_PageArrows) + (f_PageArrowFrame * PAGE_ARROW_IMAGE_SIZE)),
@@ -2099,7 +2099,7 @@ void DrawUpDownArrows(Gfx **displayListHead, s32 centerY) {
     }
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StatsGreenArrows)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_StatsGreenArrows)));
     for (arrowIndex = 0; arrowIndex != STATS_ARROW_COUNT; arrowIndex++) {
         gDPLoadTextureTile_4b(
             gfx++,
@@ -2369,7 +2369,7 @@ void DrawBestShots(Gfx **displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_BestShotsNamePlate)));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(f_BestShotsNamePlate)));
     for (index = 0; index != RECORDS_STRIP_COUNT; index++) {
         gDPLoadTextureBlock(
             gfx++,

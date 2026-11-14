@@ -458,7 +458,7 @@ NEXT:;
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_PlayerTagImages)));
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(g_PlayerTagImages)));
         gDPPipeSync(gfx++);
         for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             if (f_ShotLabels[playerIndex].corner != NO_CORNER) {
@@ -553,7 +553,7 @@ NEXT:;
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, TAG_SHADOW_ALPHA);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_PlayerTagImages)));
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(g_PlayerTagImages)));
         gDPPipeSync(gfx++);
         for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             if (f_ShotLabels[playerIndex].corner != NO_CORNER) {
@@ -661,7 +661,7 @@ void DrawAimGuides(CameraMatrices *matrices) {
             gDPLoadTLUT_pal16(
                 g_DisplayListHead++,
                 0,
-                TextureAddress(ImageBody(g_DistanceSignImage))
+                TextureAddress(ImagePalette(g_DistanceSignImage))
             );
             gDPLoadTextureTile_4b(
                 g_DisplayListHead++,
@@ -974,7 +974,7 @@ void DrawAimGuides(CameraMatrices *matrices) {
                     gDPLoadTLUT_pal16(
                         g_DisplayListHead++,
                         0,
-                        TextureAddress(ImageBody(g_PinFlagImages))
+                        TextureAddress(ImagePalette(g_PinFlagImages))
                     );
                     gDPPipeSync(g_DisplayListHead++);
                     gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
