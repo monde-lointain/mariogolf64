@@ -263,7 +263,7 @@ void DrawBillboard(
     Billboard *billboard,
     BillboardTransform *transform,
     s32 textureIndex,
-    CameraMatrices *cameraMatrices
+    CameraMatrices *matrices
 ) {
     Gfx *gfx = *displayListHead;
     AssetFile file;
@@ -322,7 +322,7 @@ void DrawBillboard(
     }
 
     gSPMatrix(gfx++, &transform->translation, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-    gSPMatrix(gfx++, &cameraMatrices->billboard, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &matrices->billboard, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &transform->scale, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
     gDPPipeSync(gfx++);
     gSPVertex(gfx++, f_BillboardVertices[billboard->shapeIndex], QUAD_VERTEX_COUNT, 0);
@@ -333,7 +333,7 @@ void DrawBillboard(
     *displayListHead = gfx;
 }
 
-void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
+void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
     Gfx *gfx = g_DisplayListHead;
     BillboardColor lightColor UNUSED = g_BillboardLightColor;
     BillboardColor envColor = g_BillboardEnvColor;
@@ -477,7 +477,7 @@ void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
                 &g_Billboards[billboardIndex],
                 &g_BillboardTransforms[billboardIndex],
                 textureIndex,
-                cameraMatrices
+                matrices
             );
         }
     }
@@ -545,7 +545,7 @@ void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
             &g_Billboards[billboardIndex],
             &g_BillboardTransforms[billboardIndex],
             textureIndex,
-            cameraMatrices
+            matrices
         );
     }
 
@@ -562,7 +562,7 @@ void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
 #define AreBillboardsHidden() \
     (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !f_IsHeapReady || IsDebugBButtonView())
 
-void DrawFadingBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
+void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex) {
     Gfx *gfx = g_DisplayListHead;
     BillboardColor lightColor UNUSED = g_BillboardLightColor;
     BillboardColor envColor = g_BillboardEnvColor;
@@ -679,7 +679,7 @@ void DrawFadingBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
             &g_Billboards[billboardIndex],
             &g_BillboardTransforms[billboardIndex],
             textureIndex,
-            cameraMatrices
+            matrices
         );
     }
 
