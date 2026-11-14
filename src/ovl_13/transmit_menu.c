@@ -401,7 +401,7 @@ s32 TagCartridges(void);
 s32 CheckStatusCartridge(s32 cartridgeIndex);
 s32 WriteStatusToCartridge(s32 cartridgeIndex);
 s32 WriteExperienceToCartridge(s32 characterIndex);
-void SetNoticeState(s32 state, MessageId message);
+void SetNoticeState(s32 state, MessageId messageId);
 s32 GetNoticeState(void);
 
 #define PAK_RESULT_STILL_READING (-1)
@@ -1491,7 +1491,7 @@ static Radians f_OptionPointerAngle = 0.0f;
 static char f_GameBoyCartridgeTitle[16] = "MARIO GOLF\0AWXE";
 static char f_CartridgeSaveSignature[16] = "CAMELOT GAMEBOY";
 static s32 f_NoticeState = NOTICE_HIDDEN;
-static MessageId f_NoticeMessage = 0;
+static MessageId f_NoticeMessageId = 0;
 static s32 f_NoticeSize = 0;
 static s32 f_PressingHandFrame = 0;
 static s32 f_UnusedZeros[2] UNUSED = {0, 0};
@@ -1562,25 +1562,25 @@ void ListPresentCharacters(void) {
 
 void DrawSendStatusHint(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *displayList = *displayListHead;
-    MessageId message = NO_MESSAGE;
+    MessageId messageId = NO_MESSAGE;
 
     switch (transfer->screenStep) {
         case SEND_STATUS_CHOOSING:
-            message = CHOOSE_CARTRIDGE_MESSAGE;
+            messageId = CHOOSE_CARTRIDGE_MESSAGE;
             break;
         case SEND_STATUS_SENT:
-            message = SEND_STATUS_MESSAGE;
+            messageId = SEND_STATUS_MESSAGE;
             break;
         case SEND_STATUS_READY:
-            message = KEEP_POWER_ON_MESSAGE;
+            messageId = KEEP_POWER_ON_MESSAGE;
             break;
     }
 
-    if (message != NO_MESSAGE) {
+    if (messageId != NO_MESSAGE) {
         SetTextSlot(
             HINT_LEFT,
             HINT_TOP,
-            message,
+            messageId,
             TEXT_SLOT_LARGE_FONT,
             HINT_TEXT_SLOT,
             TEXT_FLAG_DRAWN_BY_OWNER,
@@ -1790,7 +1790,7 @@ void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     GameBoyCharacter *character = g_GameBoyCharacters;
     Gfx *displayList = *displayListHead;
     Boolean isCharacterShown = FALSE;
-    MessageId message;
+    MessageId messageId;
 
     SetUpTextDrawing(&displayList);
     gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
@@ -1815,24 +1815,24 @@ void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
 
     SetUpTextDrawing(&displayList);
     if (transfer->readStep == LastCartridgeReadStep(g_ControllerCount)) {
-        message = NO_MESSAGE;
+        messageId = NO_MESSAGE;
         switch (transfer->screenStep) {
             case BRING_CHOOSING:
-                message = CHOOSE_CHARACTER_MESSAGE;
+                messageId = CHOOSE_CHARACTER_MESSAGE;
                 break;
             case BRING_CHOOSING_SLOT:
-                message = CHOOSE_SWAPPED_CHARACTER_MESSAGE;
+                messageId = CHOOSE_SWAPPED_CHARACTER_MESSAGE;
                 break;
             case BRING_BROUGHT:
-                message = CHARACTER_BROUGHT_MESSAGE;
+                messageId = CHARACTER_BROUGHT_MESSAGE;
                 break;
         }
 
-        if (message != NO_MESSAGE) {
+        if (messageId != NO_MESSAGE) {
             SetTextSlot(
                 HINT_LEFT,
                 HINT_TOP,
-                message,
+                messageId,
                 TEXT_SLOT_LARGE_FONT,
                 HINT_TEXT_SLOT,
                 TEXT_FLAG_DRAWN_BY_OWNER,
@@ -1851,7 +1851,7 @@ void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
 void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *displayList = *displayListHead;
     s32 slot;
-    MessageId message;
+    MessageId messageId;
 
     gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     BeginShadowedText(&displayList);
@@ -1869,21 +1869,21 @@ void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
 
     DrawCharacterStats(&displayList, &g_GameBoyCharacters[transfer->characterIndex], transfer);
     SetUpTextDrawing(&displayList);
-    message = NO_MESSAGE;
+    messageId = NO_MESSAGE;
     switch (transfer->screenStep) {
         case SEND_EXPERIENCE_CHOOSING:
-            message = CHOOSE_EXPERIENCE_MESSAGE;
+            messageId = CHOOSE_EXPERIENCE_MESSAGE;
             break;
         case SEND_EXPERIENCE_SENT:
-            message = EXPERIENCE_SENT_MESSAGE;
+            messageId = EXPERIENCE_SENT_MESSAGE;
             break;
     }
 
-    if (message != NO_MESSAGE) {
+    if (messageId != NO_MESSAGE) {
         SetTextSlot(
             HINT_LEFT,
             HINT_TOP,
-            message,
+            messageId,
             TEXT_SLOT_LARGE_FONT,
             HINT_TEXT_SLOT,
             TEXT_FLAG_DRAWN_BY_OWNER,
@@ -3597,11 +3597,11 @@ s32 TagCartridges(void) {
     return PAK_RESULT_LOOSE_PAK;
 }
 
-void SetNoticeState(s32 state, MessageId message) {
+void SetNoticeState(s32 state, MessageId messageId) {
     f_NoticeState = state;
     if (state == NOTICE_OPENING) {
         f_NoticeSize = 0;
-        f_NoticeMessage = message;
+        f_NoticeMessageId = messageId;
     }
 
     if (state == NOTICE_CLOSING) {
@@ -3715,7 +3715,7 @@ void DrawNotice(Gfx **displayListHead) {
         SetTextSlot(
             NOTICE_CENTER_X,
             NOTICE_TEXT_TOP,
-            f_NoticeMessage,
+            f_NoticeMessageId,
             TEXT_SLOT_LARGE_FONT,
             NOTICE_TEXT_SLOT,
             TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER,
