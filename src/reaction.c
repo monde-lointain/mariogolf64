@@ -1256,27 +1256,27 @@ void ClearReactionSpot(void) {
 NO_RESULT ConsiderReactionSpot(CoursePoint point) {
     s32 roughness;
     s32 ringNumber;
-    s32 height;
-    s32 sample;
+    s32 groundHeight;
+    s32 sampleIndex;
     Boolean isNearBillboard;
     s32 billboardIndex;
     Billboard *billboard;
 
-    height = GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
+    groundHeight = GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
     roughness = 0;
     for (ringNumber = 1; ringNumber <= SPOT_RING_COUNT; ringNumber++) {
-        for (sample = 0; sample < SPOT_SAMPLES_PER_RING; sample++) {
-            Radians angle = sample * SPOT_SAMPLE_ANGLE;
+        for (sampleIndex = 0; sampleIndex < SPOT_SAMPLES_PER_RING; sampleIndex++) {
+            Radians angle = sampleIndex * SPOT_SAMPLE_ANGLE;
             f32 offsetX = cosf(angle) * ringNumber * SPOT_RING_SPACING;
             f32 offsetZ = sinf(angle) * ringNumber * SPOT_RING_SPACING;
-            s32 difference =
-                GetGroundHeight(point[AXIS_X] + offsetX, point[AXIS_Z] + offsetZ) - height;
+            s32 heightDifference =
+                GetGroundHeight(point[AXIS_X] + offsetX, point[AXIS_Z] + offsetZ) - groundHeight;
 
-            if (difference < 0) {
-                difference = -difference;
+            if (heightDifference < 0) {
+                heightDifference = -heightDifference;
             }
 
-            roughness += difference / (ringNumber + 1);
+            roughness += heightDifference / (ringNumber + 1);
         }
     }
 
