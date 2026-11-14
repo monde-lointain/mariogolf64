@@ -2229,7 +2229,7 @@ void StartWeather(s32 weather) {
     f_Weather = weather;
 }
 
-void EndWeather(void) {
+void StopWeather(void) {
     if (f_Weather == WEATHER_RAIN) {
         FreeMemory(&f_RainSplashImage);
         FreeMemory(&f_Raindrops);

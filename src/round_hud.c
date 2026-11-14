@@ -817,7 +817,7 @@ void LoadPlayerFace(s32 playerIndex, CharacterId characterIndex, s32 paletteInde
     ReadAssetFile(g_PlayerFacePalettes[playerIndex], GetAssetFileSize(&file), &file);
 }
 
-void EndHoleIntro(void) {
+void StopHoleIntro(void) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
         if (f_IsCourseSelectLoaded == TRUE) {
             f_IsCourseSelectLoaded = FALSE;
@@ -842,7 +842,7 @@ void EndHoleIntro(void) {
 void StartHoleIntro(void) {
     EncodedAsset asset;
 
-    EndWeather();
+    StopWeather();
     StartWeather(WEATHER_RAIN);
     if (g_HoleSetup.conditions.isRaining == TRUE) {
         PlaySound(RAIN_SOUND, RAIN_SOUND_CHANNEL, RAIN_SOUND_START_VOLUME);
@@ -999,7 +999,7 @@ void FreeScenery(void) {
     if (f_SceneryState != SCENERY_UNLOADED) {
         DestroyBillboardManager();
         FreeMemory(&f_SceneryBillboardHeap);
-        EndWeather();
+        StopWeather();
         ClearShotEffects(CLEAR_KIND_ALL);
         FreeSceneryImages();
         f_SceneryState = SCENERY_UNLOADED;

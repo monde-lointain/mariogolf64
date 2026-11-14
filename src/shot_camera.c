@@ -451,7 +451,7 @@ s32 NextCameraPick(Boolean isDealing) {
     return pick;
 }
 
-void EndFlightCamera(void) {
+void StopFlightCamera(void) {
     g_AreCharactersDrawn = TRUE;
     g_IsCupViewShown = FALSE;
     f_CupViewHoldCount = 0;
@@ -1454,7 +1454,7 @@ void ClearHoleIntroText(void) {
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, CHOICE_TEXT_SLOT, 0, 0, 0, 0, 0);
 }
 
-void EndHoleFlyover(void) {
+void StopHoleFlyover(void) {
     g_HoleFlyoverFrame = HOLE_FLYOVER_ENDED;
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;

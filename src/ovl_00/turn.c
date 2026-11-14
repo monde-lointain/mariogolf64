@@ -3372,7 +3372,7 @@ void UpdateTurns(void) {
                     }
                     else if (choice == PAUSE_ACTION_HOLE_OUT) {
                         RequestPauseMenu(0, -1);
-                        EndFlightCamera();
+                        StopFlightCamera();
                         ClearShotEffects(CLEAR_KIND_ALL);
                         FreeCharacterAndReactionLight(0);
                         nextState = PLAYER_STATE_HOLE_DONE;
@@ -4375,7 +4375,7 @@ void UpdateTurns(void) {
                                 nextState = PLAYER_STATE_STARTING_REACTION;
                             }
                             else {
-                                EndFlightCamera();
+                                StopFlightCamera();
                                 StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
                                 nextState = PLAYER_STATE_ENDING_TURN;
                             }
@@ -4399,7 +4399,7 @@ void UpdateTurns(void) {
                                 GiveUpHole(playerIndex);
                             }
                             else {
-                                EndFlightCamera();
+                                StopFlightCamera();
                                 StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
                                 nextState = PLAYER_STATE_ENDING_TURN;
                             }
@@ -4427,7 +4427,7 @@ void UpdateTurns(void) {
                                 nextState = PLAYER_STATE_STARTING_REACTION;
                             }
                             else {
-                                EndFlightCamera();
+                                StopFlightCamera();
                                 StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
                                 nextState = PLAYER_STATE_ENDING_TURN;
                             }
@@ -4464,7 +4464,7 @@ void UpdateTurns(void) {
                             nextState = PLAYER_STATE_STARTING_REACTION;
                         }
                         else {
-                            EndFlightCamera();
+                            StopFlightCamera();
                             if (!IsGameFlagSet(GAME_FLAG_FAST_AUTOPLAY)) {
                                 StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
                             }
@@ -4495,7 +4495,7 @@ void UpdateTurns(void) {
                 ConsiderReactionSpot(g_HoleSetup.cupPosition);
                 ConsiderReactionSpot(g_HoleSetup.teePosition);
                 ClearShotEffects(CLEAR_KIND_EFFECTS);
-                EndFlightCamera();
+                StopFlightCamera();
                 if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) && f_HasReactionTestRun) {
                     paletteIndex = 0;
                     LoadCharacter(0, f_ReactionTestCharacter + CHARACTER_COUNT, paletteIndex);
@@ -4706,7 +4706,7 @@ void UpdateTurns(void) {
 
                     switch (UpdateChoiceBox(&g_TurnController)) {
                         case CHOICE_RESULT_CONTINUE:
-                            EndFlightCamera();
+                            StopFlightCamera();
                             StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
                             ForceStopRumble();
                             nextState = PLAYER_STATE_WAITING;
@@ -4714,7 +4714,7 @@ void UpdateTurns(void) {
                         case CHOICE_RESULT_MULLIGAN:
                             g_IsTrainingHeadingKept = TRUE;
                             g_Players[playerIndex] = g_SavedPlayers[playerIndex];
-                            EndFlightCamera();
+                            StopFlightCamera();
                             StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
                             ForceStopRumble();
                             nextState = PLAYER_STATE_WAITING;
@@ -4726,7 +4726,7 @@ void UpdateTurns(void) {
                             }
 
                             nextState = PLAYER_STATE_HOLE_DONE;
-                            EndFlightCamera();
+                            StopFlightCamera();
                             FreeCharacterAndReactionLight(0);
                             if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME)) {
                                 nextState = PLAYER_STATE_STARTING_REACTION;
@@ -4743,7 +4743,7 @@ void UpdateTurns(void) {
                 else {
                     switch (UpdateChoiceBox(&g_TurnController)) {
                         case CHOICE_RESULT_START_OVER:
-                            EndFlightCamera();
+                            StopFlightCamera();
                             PlaySound(
                                 SOUND_RING_SHOT_RETRY,
                                 RING_SHOT_RETRY_SOUND_CHANNEL,
@@ -4756,7 +4756,7 @@ void UpdateTurns(void) {
                             break;
                         case CHOICE_RESULT_RING_SHOT_HOLE_OUT:
                             nextState = PLAYER_STATE_HOLE_DONE;
-                            EndFlightCamera();
+                            StopFlightCamera();
                             FreeCharacterAndReactionLight(0);
                             ForceStopRumble();
                             break;

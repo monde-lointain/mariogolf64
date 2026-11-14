@@ -986,9 +986,9 @@ void UpdatePlay(void) {
                     if (f_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES || IsAButtonPressed()) {
                         if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
                             StartHoleFlyover();
-                            EndHoleIntro();
+                            StopHoleIntro();
                             g_GameState.step = GAME_STATE_TAKING_TURNS;
-                            EndHoleFlyover();
+                            StopHoleFlyover();
                             StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
                             f_PlayStateFrameCount = 0;
                         }
@@ -1004,9 +1004,9 @@ void UpdatePlay(void) {
                         (IsPlayAdvancingItself() && f_PlayStateFrameCount >= AUTO_ADVANCE_FRAMES)) {
                         if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
                             StartHoleFlyover();
-                            EndHoleIntro();
+                            StopHoleIntro();
                             g_GameState.step = GAME_STATE_TAKING_TURNS;
-                            EndHoleFlyover();
+                            StopHoleFlyover();
                             StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
                             f_PlayStateFrameCount = 0;
                         }
@@ -1104,7 +1104,7 @@ void UpdatePlay(void) {
             case GAME_STATE_END_INTRO:
                 StepHoleFlyover();
                 g_GameState.step = GAME_STATE_FLYOVER;
-                EndHoleIntro();
+                StopHoleIntro();
                 StartHoleFlyover();
                 break;
             case GAME_STATE_FLYOVER:
@@ -1115,7 +1115,7 @@ void UpdatePlay(void) {
                 if (StepHoleFlyover() ||
                     (IsHudAnimationDone() && (IsAButtonPressed() || IsPlayAdvancingItself()))) {
                     g_GameState.step = GAME_STATE_TAKING_TURNS;
-                    EndHoleFlyover();
+                    StopHoleFlyover();
                 }
 
                 f_PlayStateFrameCount = 0;
@@ -1206,7 +1206,7 @@ void UpdatePlay(void) {
                         f_PlayStateFrameCount = 0;
                         g_RoundHud.scorecardPage = -1;
                         g_RoundHud.isHoleIntroTextShown = FALSE;
-                        EndHoleIntro();
+                        StopHoleIntro();
                         for (playerSlot = 0; playerSlot < g_GameState.playerCount; playerSlot++) {
                             g_Players[playerSlot].holeStatus = HOLE_STATUS_PLAYING;
                         }
