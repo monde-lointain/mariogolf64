@@ -222,7 +222,7 @@ void UpdateBestTimes(void) {
 
 void DrawBestTimes(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    u16 perspNorm;
+    u16 perspectiveNormalization;
     f32 iconX[COURSE_COUNT];
     f32 iconY[COURSE_COUNT];
     f32 iconScale[COURSE_COUNT];
@@ -251,7 +251,7 @@ void DrawBestTimes(Gfx **displayListHead) {
     DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
     guPerspectiveF(
         f_BestTimesWheelProjection,
-        &perspNorm,
+        &perspectiveNormalization,
         WHEEL_FIELD_OF_VIEW,
         SCREEN_ASPECT_RATIO,
         WHEEL_NEAR_PLANE,

@@ -403,7 +403,7 @@ void DrawStatsScrollArrows(Gfx **displayListHead);
 
 void DrawCourseStats(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    u16 perspNorm;
+    u16 perspectiveNormalization;
     f32 iconX[WHEEL_SLOT_LIMIT];
     f32 iconY[WHEEL_SLOT_LIMIT];
     f32 iconScale[WHEEL_SLOT_LIMIT];
@@ -428,7 +428,7 @@ void DrawCourseStats(Gfx **displayListHead) {
     DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
     guPerspectiveF(
         f_WheelProjection,
-        &perspNorm,
+        &perspectiveNormalization,
         WHEEL_FIELD_OF_VIEW,
         SCREEN_ASPECT_RATIO,
         WHEEL_NEAR_PLANE,

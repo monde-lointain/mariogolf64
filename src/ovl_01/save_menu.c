@@ -2029,7 +2029,7 @@ void DrawSavedMiniGolfImage(Gfx **displayListHead);
 
 void DrawSavedGames(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    u16 perspNorm;
+    u16 perspectiveNormalization;
     f32 boardX[COURSE_COUNT];
     f32 boardY[COURSE_COUNT];
     f32 boardScale[COURSE_COUNT];
@@ -2068,7 +2068,7 @@ void DrawSavedGames(Gfx **displayListHead) {
 
     guPerspectiveF(
         f_BoardProjection,
-        &perspNorm,
+        &perspectiveNormalization,
         WHEEL_FIELD_OF_VIEW,
         SCREEN_ASPECT_RATIO,
         WHEEL_NEAR_PLANE,

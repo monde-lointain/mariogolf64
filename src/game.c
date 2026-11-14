@@ -1573,7 +1573,7 @@ s32 DrawGame(void) {
     CameraMatrices *matrices;
     u16 mapPerspNorm;
     u16 insetPerspNorm;
-    u16 perspNorm;
+    u16 perspectiveNormalization;
     Boolean drawsScene;
     s32 terrainStyle;
     u32 drawMode;
@@ -2117,7 +2117,7 @@ s32 DrawGame(void) {
 
                         guPerspectiveF(
                             matrices->perspectiveF,
-                            &perspNorm,
+                            &perspectiveNormalization,
                             g_Cameras[viewIndex].view.fieldOfView,
                             SCREEN_ASPECT_RATIO,
                             -nearZ,
@@ -2125,8 +2125,8 @@ s32 DrawGame(void) {
                             1.0f
                         );
                         ConvertMatrixToFixed(matrices->perspectiveF, &matrices->perspective);
-                        g_PerspectiveNormalization = perspNorm;
-                        gSPPerspNormalize(g_DisplayListHead++, perspNorm);
+                        g_PerspectiveNormalization = perspectiveNormalization;
+                        gSPPerspNormalize(g_DisplayListHead++, perspectiveNormalization);
                         guTranslate(&matrices->placement, 0.0f, 0.0f, 0.0f);
                         courseView = &g_Cameras[viewIndex].view;
                         guLookAtReflectF(

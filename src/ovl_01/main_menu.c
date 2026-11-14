@@ -5468,7 +5468,7 @@ void DrawSpinningStars(
 
 void DrawModeSelect(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    u16 perspNorm;
+    u16 perspectiveNormalization;
     f32 boardX[WHEEL_SLOT_LIMIT];
     f32 boardY[WHEEL_SLOT_LIMIT];
     f32 boardScale[WHEEL_SLOT_LIMIT];
@@ -5503,7 +5503,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     DrawLargeBannerBackdropLayers(&gfx, MODE_SELECT_BACKDROP_LAYERS);
     guPerspectiveF(
         f_ModeSelectProjection,
-        &perspNorm,
+        &perspectiveNormalization,
         WHEEL_FIELD_OF_VIEW,
         SCREEN_ASPECT_RATIO,
         WHEEL_NEAR_PLANE,
@@ -6631,7 +6631,7 @@ void DrawAnimationViewer(Gfx **displayListHead) {
 
 void DrawCourseSelect(Gfx **displayListHead) {
     Gfx *gfx;
-    u16 perspNorm;
+    u16 perspectiveNormalization;
     u16 wheelPerspNorm;
     u8 unusedStackBeforeIcons[0x10] UNUSED;
     f32 iconX[COURSE_COUNT];
@@ -6677,14 +6677,14 @@ void DrawCourseSelect(Gfx **displayListHead) {
         guTranslate(&f_WaterTranslation, 0.0f, 0.0f, -WATER_PLANE_DISTANCE);
         guPerspective(
             &f_WaterProjection,
-            &perspNorm,
+            &perspectiveNormalization,
             WATER_FIELD_OF_VIEW,
             SCREEN_ASPECT_RATIO,
             WHEEL_NEAR_PLANE,
             WHEEL_FAR_PLANE,
             WATER_PERSPECTIVE_SCALE
         );
-        gSPPerspNormalize(gfx++, perspNorm);
+        gSPPerspNormalize(gfx++, perspectiveNormalization);
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
         gDPSetCycleType(gfx++, G_CYC_2CYCLE);
