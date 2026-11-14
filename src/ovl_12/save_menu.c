@@ -136,11 +136,7 @@ enum ModeName {
 #define REPLAY_ROW_COUNT (RING_SHOT_RECORD_COUNT + 1)
 #define FIRST_REPLAY_ROW_TOP 36
 #define REPLAY_ROW_SPACING 34
-#define PANEL_IMAGE_WIDTH 200
-#define PANEL_IMAGE_HEIGHT 30
-#define PANEL_STRIP_COUNT 3
-#define PANEL_STRIP_HEIGHT (PANEL_IMAGE_HEIGHT / PANEL_STRIP_COUNT)
-#define PANEL_STRIP_SIZE (PANEL_IMAGE_WIDTH * PANEL_STRIP_HEIGHT)
+#define NAME_PLATE_STRIP_SIZE (NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT)
 #define WIDE_PANEL_LEFT 24
 #define WIDE_PANEL_WIDTH 272
 #define RECORD_PANEL_STRIP_HEIGHT 11
@@ -149,8 +145,8 @@ enum ModeName {
 #define HOLE_OUT_PANEL_STRIP_HEIGHT 8
 #define WIDE_PANEL_HALF_WIDTH (WIDE_PANEL_WIDTH / 2)
 #define NARROW_PANEL_HALF_WIDTH (NARROW_PANEL_WIDTH / 2)
-#define RECORD_PANEL_HEIGHT (RECORD_PANEL_STRIP_HEIGHT * PANEL_STRIP_COUNT)
-#define HOLE_OUT_PANEL_HEIGHT (HOLE_OUT_PANEL_STRIP_HEIGHT * PANEL_STRIP_COUNT)
+#define RECORD_PANEL_HEIGHT (RECORD_PANEL_STRIP_HEIGHT * NAME_PLATE_STRIP_COUNT)
+#define HOLE_OUT_PANEL_HEIGHT (HOLE_OUT_PANEL_STRIP_HEIGHT * NAME_PLATE_STRIP_COUNT)
 #define TITLE_PANEL_LEFT 96
 #define TITLE_PANEL_TOP 13
 #define TITLE_PANEL_WIDTH 128
@@ -265,7 +261,7 @@ static u8 f_UnusedBytesAfterSlideOffsets[8] UNUSED;
 static void *f_FacePalettes[FACE_IMAGE_COUNT];
 static void *f_FaceImages[FACE_IMAGE_COUNT];
 static void *f_ModeIconImages[SAVED_GAME_COUNT][2];
-static void *f_PanelImage;
+static void *f_NamePlateImage;
 static void *f_ReplayLabelImages[REPLAY_LABEL_COUNT];
 static void *f_CourseNumbersImage;
 static void *f_SaveMenuTitleImage;
@@ -331,7 +327,7 @@ void OpenSaveMenu(s32 kind) {
     }
 
     ReadEncodedAsset(
-        f_PanelImage = AllocMemory(OpenEncodedAsset(ASSET_NAME_PLATE, &encodedAsset)),
+        f_NamePlateImage = AllocMemory(OpenEncodedAsset(ASSET_NAME_PLATE, &encodedAsset)),
         &encodedAsset
     );
     ReadEncodedAsset(
@@ -492,7 +488,7 @@ void CloseSaveMenu(void) {
     s32 index;
 
     SetSongVolume(SOUND_FULL_SCALE);
-    FreeMemory(&f_PanelImage);
+    FreeMemory(&f_NamePlateImage);
     FreeMemory(&f_SaveMenuTitleImage);
     if (f_MenuKind == SAVE_MENU_GAMES) {
         for (index = 0; index != SAVED_GAME_COUNT; index++) {
@@ -676,15 +672,15 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
 
         sinf(f_PanelWaveAngle);
         f_PanelWaveAngle += DegreesToRadians(SWAY_DEGREES_PER_FRAME);
-        LoadLargePalette(&gfx, ImageBody(f_PanelImage));
-        for (strip = 0; strip != PANEL_STRIP_COUNT; strip++) {
+        LoadLargePalette(&gfx, ImageBody(f_NamePlateImage));
+        for (strip = 0; strip != NAME_PLATE_STRIP_COUNT; strip++) {
             LoadTextureBlock(
                 &gfx,
-                LargeImageTexels(f_PanelImage) + (strip * PANEL_STRIP_SIZE),
+                LargeImageTexels(f_NamePlateImage) + (strip * NAME_PLATE_STRIP_SIZE),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                PANEL_IMAGE_WIDTH,
-                PANEL_STRIP_HEIGHT,
+                NAME_PLATE_WIDTH,
+                NAME_PLATE_STRIP_HEIGHT,
                 0,
                 G_TX_MIRROR,
                 G_TX_MIRROR,
@@ -723,18 +719,18 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                     QuarterPixels(f_SlideOffsets[index] + WIDE_PANEL_LEFT),
                     QuarterPixels(
                         GAME_PANEL_MIDDLE + (index * GAME_ROW_SPACING) + (strip * stripHeight) -
-                        (stripHeight * PANEL_STRIP_COUNT / 2)
+                        (stripHeight * NAME_PLATE_STRIP_COUNT / 2)
                     ),
                     QuarterPixels(f_SlideOffsets[index] + WIDE_PANEL_LEFT + WIDE_PANEL_WIDTH),
                     QuarterPixels(
                         GAME_PANEL_MIDDLE + (index * GAME_ROW_SPACING) + (strip * stripHeight) -
-                        (stripHeight * PANEL_STRIP_COUNT / 2) + stripHeight
+                        (stripHeight * NAME_PLATE_STRIP_COUNT / 2) + stripHeight
                     ),
                     G_TX_RENDERTILE,
                     0,
                     0,
-                    TexelRunStep(PANEL_IMAGE_WIDTH, WIDE_PANEL_WIDTH),
-                    TexelRunStep(PANEL_IMAGE_HEIGHT, stripHeight * PANEL_STRIP_COUNT)
+                    TexelRunStep(NAME_PLATE_WIDTH, WIDE_PANEL_WIDTH),
+                    TexelRunStep(NAME_PLATE_HEIGHT, stripHeight * NAME_PLATE_STRIP_COUNT)
                 );
             }
 
@@ -767,18 +763,18 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                 QuarterPixels(f_SlideOffsets[index] + NARROW_PANEL_LEFT),
                 QuarterPixels(
                     END_GAME_PANEL_MIDDLE + (index * GAME_ROW_SPACING) + (strip * stripHeight) -
-                    (stripHeight * PANEL_STRIP_COUNT / 2)
+                    (stripHeight * NAME_PLATE_STRIP_COUNT / 2)
                 ),
                 QuarterPixels(f_SlideOffsets[index] + NARROW_PANEL_LEFT + NARROW_PANEL_WIDTH),
                 QuarterPixels(
                     END_GAME_PANEL_MIDDLE + (index * GAME_ROW_SPACING) + (strip * stripHeight) -
-                    (stripHeight * PANEL_STRIP_COUNT / 2) + stripHeight
+                    (stripHeight * NAME_PLATE_STRIP_COUNT / 2) + stripHeight
                 ),
                 G_TX_RENDERTILE,
                 0,
                 0,
-                TexelRunStep(PANEL_IMAGE_WIDTH, NARROW_PANEL_WIDTH),
-                TexelRunStep(PANEL_IMAGE_HEIGHT, stripHeight * PANEL_STRIP_COUNT)
+                TexelRunStep(NAME_PLATE_WIDTH, NARROW_PANEL_WIDTH),
+                TexelRunStep(NAME_PLATE_HEIGHT, stripHeight * NAME_PLATE_STRIP_COUNT)
             );
             gDPSetPrimColor(
                 gfx++,
@@ -1647,16 +1643,16 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
-        LoadLargePalette(&gfx, ImageBody(f_PanelImage));
-        for (index = 0; index != PANEL_STRIP_COUNT; index++) {
+        LoadLargePalette(&gfx, ImageBody(f_NamePlateImage));
+        for (index = 0; index != NAME_PLATE_STRIP_COUNT; index++) {
             stripHeight = RECORD_PANEL_STRIP_HEIGHT;
             LoadTextureBlock(
                 &gfx,
-                LargeImageTexels(f_PanelImage) + (index * PANEL_STRIP_SIZE),
+                LargeImageTexels(f_NamePlateImage) + (index * NAME_PLATE_STRIP_SIZE),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                PANEL_IMAGE_WIDTH,
-                PANEL_STRIP_HEIGHT,
+                NAME_PLATE_WIDTH,
+                NAME_PLATE_STRIP_HEIGHT,
                 0,
                 G_TX_MIRROR,
                 G_TX_MIRROR,
@@ -1704,8 +1700,8 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                     G_TX_RENDERTILE,
                     0,
                     0,
-                    TexelRunStep(PANEL_IMAGE_WIDTH, WIDE_PANEL_WIDTH),
-                    TexelRunStep(PANEL_IMAGE_HEIGHT, stripHeight * PANEL_STRIP_COUNT)
+                    TexelRunStep(NAME_PLATE_WIDTH, WIDE_PANEL_WIDTH),
+                    TexelRunStep(NAME_PLATE_HEIGHT, stripHeight * NAME_PLATE_STRIP_COUNT)
                 );
             }
 
@@ -1748,8 +1744,8 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 G_TX_RENDERTILE,
                 0,
                 0,
-                TexelRunStep(PANEL_IMAGE_WIDTH, NARROW_PANEL_WIDTH),
-                TexelRunStep(PANEL_IMAGE_HEIGHT, stripHeight * PANEL_STRIP_COUNT)
+                TexelRunStep(NAME_PLATE_WIDTH, NARROW_PANEL_WIDTH),
+                TexelRunStep(NAME_PLATE_HEIGHT, stripHeight * NAME_PLATE_STRIP_COUNT)
             );
         }
 
@@ -2059,16 +2055,16 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         f_ReplayTitleBobAngle += DegreesToRadians(TITLE_BOB_DEGREES_PER_FRAME);
-        LoadLargePalette(&gfx, ImageBody(f_PanelImage));
-        for (index = 0; index != PANEL_STRIP_COUNT; index++) {
+        LoadLargePalette(&gfx, ImageBody(f_NamePlateImage));
+        for (index = 0; index != NAME_PLATE_STRIP_COUNT; index++) {
             stripHeight = TITLE_PANEL_STRIP_HEIGHT;
             LoadTextureBlock(
                 &gfx,
-                LargeImageTexels(f_PanelImage) + (index * PANEL_STRIP_SIZE),
+                LargeImageTexels(f_NamePlateImage) + (index * NAME_PLATE_STRIP_SIZE),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                PANEL_IMAGE_WIDTH,
-                PANEL_STRIP_HEIGHT,
+                NAME_PLATE_WIDTH,
+                NAME_PLATE_STRIP_HEIGHT,
                 0,
                 G_TX_MIRROR,
                 G_TX_MIRROR,
@@ -2077,7 +2073,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            titleHeight = stripHeight * PANEL_STRIP_COUNT;
+            titleHeight = stripHeight * NAME_PLATE_STRIP_COUNT;
             DrawTextureRect(
                 &gfx,
                 QuarterPixels(rowOffsets[1] + TITLE_PANEL_LEFT),
@@ -2089,8 +2085,8 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 G_TX_RENDERTILE,
                 0,
                 0,
-                TexelRunStep(PANEL_IMAGE_WIDTH, TITLE_PANEL_WIDTH),
-                TexelRunStep(PANEL_IMAGE_HEIGHT, titleHeight)
+                TexelRunStep(NAME_PLATE_WIDTH, TITLE_PANEL_WIDTH),
+                TexelRunStep(NAME_PLATE_HEIGHT, titleHeight)
             );
         }
 
@@ -2182,11 +2178,11 @@ void OpenControlsScreen(void) {
 
     if (g_GameState.isMiniGolf) {
         picture = AllocMemory(OpenEncodedAsset(MINI_GOLF_CONTROLS_PICTURE, &encodedAsset));
-        f_PanelImage = picture;
+        f_NamePlateImage = picture;
     }
     else {
         picture = AllocMemory(OpenEncodedAsset(CONTROLS_PICTURE, &encodedAsset));
-        f_PanelImage = picture;
+        f_NamePlateImage = picture;
     }
 
     ReadEncodedAsset(picture, &encodedAsset);
@@ -2198,7 +2194,7 @@ void OpenControlsScreen(void) {
 }
 
 void CloseControlsScreen(void) {
-    FreeMemory(&f_PanelImage);
+    FreeMemory(&f_NamePlateImage);
     f_IsControlsShown = FALSE;
     PlaySong(f_ResumedSongId, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
 }
@@ -2224,11 +2220,11 @@ void DrawControlsScreen(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-        LoadLargePalette(&gfx, ImageBody(f_PanelImage));
+        LoadLargePalette(&gfx, ImageBody(f_NamePlateImage));
         for (strip = 0; strip != CONTROLS_STRIP_COUNT; strip++) {
             LoadTextureBlock(
                 &gfx,
-                LargeImageTexels(f_PanelImage) +
+                LargeImageTexels(f_NamePlateImage) +
                     (strip * CONTROLS_STRIP_HEIGHT * CONTROLS_PICTURE_WIDTH),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,

@@ -4756,17 +4756,17 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
         image = g_MenuTitleImages[f_MenuTitleImageIndex];
         gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
 
-        for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+        for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(
                     LargeImageTexels(image) +
-                    (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                    (stripIndex * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT)
                 ),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                MENU_BANNER_WIDTH,
-                MENU_BANNER_STRIP_HEIGHT,
+                NAME_PLATE_WIDTH,
+                NAME_PLATE_STRIP_HEIGHT,
                 0,
                 G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP,
@@ -4781,13 +4781,13 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
                 gfx++,
                 QuarterPixels(MENU_BANNER_LEFT),
                 QuarterPixels(
-                    BOBBING_BANNER_TOP + (stripIndex * MENU_BANNER_STRIP_HEIGHT) + bobOffset +
+                    BOBBING_BANNER_TOP + (stripIndex * NAME_PLATE_STRIP_HEIGHT) + bobOffset +
                     BOBBING_BANNER_DROP
                 ),
-                QuarterPixels(MENU_BANNER_LEFT + MENU_BANNER_WIDTH),
+                QuarterPixels(MENU_BANNER_LEFT + NAME_PLATE_WIDTH),
                 QuarterPixels(
-                    BOBBING_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
-                    (stripIndex * MENU_BANNER_STRIP_HEIGHT) + bobOffset + BOBBING_BANNER_DROP
+                    BOBBING_BANNER_TOP + NAME_PLATE_STRIP_HEIGHT +
+                    (stripIndex * NAME_PLATE_STRIP_HEIGHT) + bobOffset + BOBBING_BANNER_DROP
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -4993,17 +4993,17 @@ void DrawNamePlateBanner(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
-    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+    for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
                 LargeImageTexels(g_NamePlateImage) +
-                (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                (stripIndex * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT)
             ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            MENU_BANNER_WIDTH,
-            MENU_BANNER_STRIP_HEIGHT,
+            NAME_PLATE_WIDTH,
+            NAME_PLATE_STRIP_HEIGHT,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -5013,13 +5013,13 @@ void DrawNamePlateBanner(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        stripTop = UNUSED_BANNER_TOP + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
+        stripTop = UNUSED_BANNER_TOP + (stripIndex * NAME_PLATE_STRIP_HEIGHT);
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(MENU_BANNER_LEFT),
             QuarterPixels(stripTop),
-            QuarterPixels(MENU_BANNER_LEFT + MENU_BANNER_WIDTH),
-            QuarterPixels(stripTop + MENU_BANNER_STRIP_HEIGHT),
+            QuarterPixels(MENU_BANNER_LEFT + NAME_PLATE_WIDTH),
+            QuarterPixels(stripTop + NAME_PLATE_STRIP_HEIGHT),
             G_TX_RENDERTILE,
             0,
             0,
@@ -5040,17 +5040,17 @@ void DrawSmallNamePlate(Gfx **displayListHead, s32 left, s32 top) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
-    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+    for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
                 LargeImageTexels(g_NamePlateImage) +
-                stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT
+                stripIndex * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT
             ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            MENU_BANNER_WIDTH,
-            MENU_BANNER_STRIP_HEIGHT,
+            NAME_PLATE_WIDTH,
+            NAME_PLATE_STRIP_HEIGHT,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -5060,17 +5060,17 @@ void DrawSmallNamePlate(Gfx **displayListHead, s32 left, s32 top) {
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        stripTop = top + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
+        stripTop = top + (stripIndex * NAME_PLATE_STRIP_HEIGHT);
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(left),
             QuarterPixels(stripTop),
             QuarterPixels(left + SMALL_BANNER_WIDTH),
-            QuarterPixels(stripTop + MENU_BANNER_STRIP_HEIGHT),
+            QuarterPixels(stripTop + NAME_PLATE_STRIP_HEIGHT),
             G_TX_RENDERTILE,
             0,
             0,
-            TexelRunStep(MENU_BANNER_WIDTH, SMALL_BANNER_WIDTH),
+            TexelRunStep(NAME_PLATE_WIDTH, SMALL_BANNER_WIDTH),
             TEXEL_STEP_ONE
         );
         gDPPipeSync(gfx++);
@@ -5087,17 +5087,17 @@ void DrawLargeMenuBanner(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
-    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+    for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
                 LargeImageTexels(g_NamePlateImage) +
-                (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                (stripIndex * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT)
             ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            MENU_BANNER_WIDTH,
-            MENU_BANNER_STRIP_HEIGHT,
+            NAME_PLATE_WIDTH,
+            NAME_PLATE_STRIP_HEIGHT,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -5117,8 +5117,8 @@ void DrawLargeMenuBanner(Gfx **displayListHead) {
             G_TX_RENDERTILE,
             0,
             0,
-            TexelRunStep(MENU_BANNER_WIDTH, LARGE_BANNER_WIDTH),
-            TexelRunStep(MENU_BANNER_STRIP_HEIGHT, LARGE_BANNER_STRIP_HEIGHT)
+            TexelRunStep(NAME_PLATE_WIDTH, LARGE_BANNER_WIDTH),
+            TexelRunStep(NAME_PLATE_STRIP_HEIGHT, LARGE_BANNER_STRIP_HEIGHT)
         );
         gDPPipeSync(gfx++);
     }
@@ -5133,17 +5133,16 @@ void DrawMenuBanner(Gfx **displayListHead) {
     s32 stripTop;
 
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
-    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+    for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
-                LargeImageTexels(image) +
-                (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                LargeImageTexels(image) + (stripIndex * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT)
             ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            MENU_BANNER_WIDTH,
-            MENU_BANNER_STRIP_HEIGHT,
+            NAME_PLATE_WIDTH,
+            NAME_PLATE_STRIP_HEIGHT,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -5153,13 +5152,13 @@ void DrawMenuBanner(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        stripTop = MENU_BANNER_TOP + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
+        stripTop = MENU_BANNER_TOP + (stripIndex * NAME_PLATE_STRIP_HEIGHT);
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(MENU_BANNER_LEFT),
             QuarterPixels(stripTop),
-            QuarterPixels(MENU_BANNER_LEFT + MENU_BANNER_WIDTH),
-            QuarterPixels(stripTop + MENU_BANNER_STRIP_HEIGHT),
+            QuarterPixels(MENU_BANNER_LEFT + NAME_PLATE_WIDTH),
+            QuarterPixels(stripTop + NAME_PLATE_STRIP_HEIGHT),
             G_TX_RENDERTILE,
             0,
             0,
@@ -5724,17 +5723,17 @@ void DrawModeSelect(Gfx **displayListHead) {
 
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
     if (g_ChosenPlayerCount == 1) {
-        for (i = 0; i != MENU_BANNER_STRIP_COUNT; i++) {
+        for (i = 0; i != NAME_PLATE_STRIP_COUNT; i++) {
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(
                     LargeImageTexels(g_NamePlateImage) +
-                    (i * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                    (i * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT)
                 ),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                MENU_BANNER_WIDTH,
-                MENU_BANNER_STRIP_HEIGHT,
+                NAME_PLATE_WIDTH,
+                NAME_PLATE_STRIP_HEIGHT,
                 0,
                 G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP,
@@ -5747,32 +5746,32 @@ void DrawModeSelect(Gfx **displayListHead) {
             gSPScisTextureRectangle(
                 gfx++,
                 QuarterPixels(MODE_BANNER_LEFT),
-                QuarterPixels(MODE_BANNER_TOP + (i * MENU_BANNER_STRIP_HEIGHT)),
+                QuarterPixels(MODE_BANNER_TOP + (i * NAME_PLATE_STRIP_HEIGHT)),
                 QuarterPixels(MODE_BANNER_LEFT + SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH),
                 QuarterPixels(
-                    MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT + (i * MENU_BANNER_STRIP_HEIGHT)
+                    MODE_BANNER_TOP + NAME_PLATE_STRIP_HEIGHT + (i * NAME_PLATE_STRIP_HEIGHT)
                 ),
                 G_TX_RENDERTILE,
                 0,
                 0,
-                TexelRunStep(MENU_BANNER_WIDTH, SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH),
+                TexelRunStep(NAME_PLATE_WIDTH, SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH),
                 TEXEL_STEP_ONE
             );
             gDPPipeSync(gfx++);
         }
     }
     else {
-        for (i = 0; i != MENU_BANNER_STRIP_COUNT; i++) {
+        for (i = 0; i != NAME_PLATE_STRIP_COUNT; i++) {
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(
                     LargeImageTexels(g_NamePlateImage) +
-                    (i * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                    (i * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT)
                 ),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                MENU_BANNER_WIDTH,
-                MENU_BANNER_STRIP_HEIGHT,
+                NAME_PLATE_WIDTH,
+                NAME_PLATE_STRIP_HEIGHT,
                 0,
                 G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP,
@@ -5785,15 +5784,15 @@ void DrawModeSelect(Gfx **displayListHead) {
             gSPScisTextureRectangle(
                 gfx++,
                 QuarterPixels(MODE_BANNER_LEFT),
-                QuarterPixels(MODE_BANNER_TOP + (i * MENU_BANNER_STRIP_HEIGHT)),
+                QuarterPixels(MODE_BANNER_TOP + (i * NAME_PLATE_STRIP_HEIGHT)),
                 QuarterPixels(MODE_BANNER_LEFT + MODE_BANNER_SHOWN_WIDTH),
                 QuarterPixels(
-                    MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT + (i * MENU_BANNER_STRIP_HEIGHT)
+                    MODE_BANNER_TOP + NAME_PLATE_STRIP_HEIGHT + (i * NAME_PLATE_STRIP_HEIGHT)
                 ),
                 G_TX_RENDERTILE,
                 0,
                 0,
-                TexelRunStep(MENU_BANNER_WIDTH, MODE_BANNER_SHOWN_WIDTH),
+                TexelRunStep(NAME_PLATE_WIDTH, MODE_BANNER_SHOWN_WIDTH),
                 TEXEL_STEP_ONE
             );
             gDPPipeSync(gfx++);
@@ -7462,17 +7461,17 @@ void DrawCourseSelectBanners(Gfx **displayListHead) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
     if (COURSE_SELECT_LAYOUT == COURSE_SELECT_LAYOUT_HOLES) {
-        for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+        for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(
                     LargeImageTexels(g_NamePlateImage) +
-                    stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT
+                    stripIndex * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT
                 ),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                MENU_BANNER_WIDTH,
-                MENU_BANNER_STRIP_HEIGHT,
+                NAME_PLATE_WIDTH,
+                NAME_PLATE_STRIP_HEIGHT,
                 0,
                 G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP,
@@ -7492,25 +7491,25 @@ void DrawCourseSelectBanners(Gfx **displayListHead) {
                 G_TX_RENDERTILE,
                 0,
                 0,
-                TexelRunStep(MENU_BANNER_WIDTH, HOLES_BANNER_WIDTH),
-                TexelRunStep(MENU_BANNER_STRIP_HEIGHT, HOLES_BANNER_STRIP_HEIGHT)
+                TexelRunStep(NAME_PLATE_WIDTH, HOLES_BANNER_WIDTH),
+                TexelRunStep(NAME_PLATE_STRIP_HEIGHT, HOLES_BANNER_STRIP_HEIGHT)
             );
             gDPPipeSync(gfx++);
         }
     }
 
     squeeze = COURSE_SELECT_LAYOUT != COURSE_SELECT_LAYOUT_AWARDS ? COURSE_NAME_BANNER_SQUEEZE : 0;
-    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+    for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
                 LargeImageTexels(g_NamePlateImage) +
-                stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT
+                stripIndex * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT
             ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            MENU_BANNER_WIDTH,
-            MENU_BANNER_STRIP_HEIGHT,
+            NAME_PLATE_WIDTH,
+            NAME_PLATE_STRIP_HEIGHT,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -7520,17 +7519,17 @@ void DrawCourseSelectBanners(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        stripTop = COURSE_NAME_BANNER_TOP + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
+        stripTop = COURSE_NAME_BANNER_TOP + (stripIndex * NAME_PLATE_STRIP_HEIGHT);
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(COURSE_NAME_BANNER_LEFT + (squeeze / 2)),
             QuarterPixels(slide + stripTop),
             QuarterPixels(COURSE_NAME_BANNER_LEFT + COURSE_NAME_BANNER_WIDTH - (squeeze / 2)),
-            QuarterPixels(slide + stripTop + MENU_BANNER_STRIP_HEIGHT),
+            QuarterPixels(slide + stripTop + NAME_PLATE_STRIP_HEIGHT),
             G_TX_RENDERTILE,
             0,
             0,
-            TexelRunStep(MENU_BANNER_WIDTH, COURSE_NAME_BANNER_WIDTH - squeeze),
+            TexelRunStep(NAME_PLATE_WIDTH, COURSE_NAME_BANNER_WIDTH - squeeze),
             TEXEL_STEP_ONE
         );
         gDPPipeSync(gfx++);
@@ -8149,15 +8148,15 @@ void DrawOptionsScreen(Gfx **displayListHead) {
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, DIMMED_COLOR);
     for (toggleIndex = 0; toggleIndex != OPTION_TOGGLE_COUNT; toggleIndex++) {
-        for (loopIndex = 0; loopIndex != MENU_BANNER_STRIP_COUNT; loopIndex++) {
+        for (loopIndex = 0; loopIndex != NAME_PLATE_STRIP_COUNT; loopIndex++) {
             LoadTextureBlock(
                 &gfx,
                 LargeImageTexels(g_NamePlateImage) +
-                    (loopIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
+                    (loopIndex * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                MENU_BANNER_WIDTH,
-                MENU_BANNER_STRIP_HEIGHT,
+                NAME_PLATE_WIDTH,
+                NAME_PLATE_STRIP_HEIGHT,
                 0,
                 0,
                 0,
@@ -8211,8 +8210,8 @@ void DrawOptionsScreen(Gfx **displayListHead) {
                     G_TX_RENDERTILE,
                     0,
                     0,
-                    TexelRunStep(MENU_BANNER_WIDTH, VALUE_BANNER_WIDTH),
-                    TexelRunStep(MENU_BANNER_STRIP_HEIGHT, VALUE_BANNER_STRIP_HEIGHT)
+                    TexelRunStep(NAME_PLATE_WIDTH, VALUE_BANNER_WIDTH),
+                    TexelRunStep(NAME_PLATE_STRIP_HEIGHT, VALUE_BANNER_STRIP_HEIGHT)
                 );
                 gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
                 DrawTextureRect(
@@ -8229,8 +8228,8 @@ void DrawOptionsScreen(Gfx **displayListHead) {
                     G_TX_RENDERTILE,
                     0,
                     0,
-                    TexelRunStep(MENU_BANNER_WIDTH, VALUE_BANNER_WIDTH),
-                    TexelRunStep(MENU_BANNER_STRIP_HEIGHT, VALUE_BANNER_STRIP_HEIGHT)
+                    TexelRunStep(NAME_PLATE_WIDTH, VALUE_BANNER_WIDTH),
+                    TexelRunStep(NAME_PLATE_STRIP_HEIGHT, VALUE_BANNER_STRIP_HEIGHT)
                 );
             }
             else {
@@ -8276,8 +8275,8 @@ void DrawOptionsScreen(Gfx **displayListHead) {
                     G_TX_RENDERTILE,
                     0,
                     0,
-                    TexelRunStep(MENU_BANNER_WIDTH, VALUE_BANNER_WIDTH),
-                    TexelRunStep(MENU_BANNER_STRIP_HEIGHT, VALUE_BANNER_STRIP_HEIGHT)
+                    TexelRunStep(NAME_PLATE_WIDTH, VALUE_BANNER_WIDTH),
+                    TexelRunStep(NAME_PLATE_STRIP_HEIGHT, VALUE_BANNER_STRIP_HEIGHT)
                 );
             }
         }

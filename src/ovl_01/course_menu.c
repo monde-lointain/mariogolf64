@@ -588,17 +588,17 @@ void DrawCourseBanner(Gfx **displayListHead, u8 useCourseNames, s32 courseIndex)
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_CourseStatsNamePlate)));
-    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+    for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
                 LargeImageTexels(f_CourseStatsNamePlate) +
-                (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                (stripIndex * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT)
             ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            MENU_BANNER_WIDTH,
-            MENU_BANNER_STRIP_HEIGHT,
+            NAME_PLATE_WIDTH,
+            NAME_PLATE_STRIP_HEIGHT,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -613,13 +613,13 @@ void DrawCourseBanner(Gfx **displayListHead, u8 useCourseNames, s32 courseIndex)
             gfx++,
             QuarterPixels(MENU_BANNER_LEFT),
             QuarterPixels(stripTop),
-            QuarterPixels(MENU_BANNER_LEFT + MENU_BANNER_WIDTH),
+            QuarterPixels(MENU_BANNER_LEFT + NAME_PLATE_WIDTH),
             QuarterPixels(stripTop + COURSE_BANNER_STRIP_SPACING),
             G_TX_RENDERTILE,
             0,
             0,
             TEXEL_STEP_ONE,
-            TexelRunStep(MENU_BANNER_STRIP_HEIGHT, COURSE_BANNER_STRIP_SPACING)
+            TexelRunStep(NAME_PLATE_STRIP_HEIGHT, COURSE_BANNER_STRIP_SPACING)
         );
         gDPPipeSync(gfx++);
     }

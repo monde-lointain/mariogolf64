@@ -882,17 +882,17 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
         bannerShift = -slide;
     }
 
-    for (i = 0; i != MENU_BANNER_STRIP_COUNT; i++) {
+    for (i = 0; i != NAME_PLATE_STRIP_COUNT; i++) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
                 LargeImageTexels(f_StatsNamePlate) +
-                (i * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                (i * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT)
             ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            MENU_BANNER_WIDTH,
-            MENU_BANNER_STRIP_HEIGHT,
+            NAME_PLATE_WIDTH,
+            NAME_PLATE_STRIP_HEIGHT,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -914,23 +914,23 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
             G_TX_RENDERTILE,
             0,
             0,
-            TexelRunStep(MENU_BANNER_WIDTH, WIDE_BANNER_RIGHT - WIDE_BANNER_LEFT),
-            TexelRunStep(MENU_BANNER_STRIP_HEIGHT, WIDE_BANNER_STRIP_HEIGHT)
+            TexelRunStep(NAME_PLATE_WIDTH, WIDE_BANNER_RIGHT - WIDE_BANNER_LEFT),
+            TexelRunStep(NAME_PLATE_STRIP_HEIGHT, WIDE_BANNER_STRIP_HEIGHT)
         );
         gDPPipeSync(gfx++);
     }
 
-    for (i = 0; i != MENU_BANNER_STRIP_COUNT; i++) {
+    for (i = 0; i != NAME_PLATE_STRIP_COUNT; i++) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
                 LargeImageTexels(f_StatsNamePlate) +
-                (i * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                (i * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT)
             ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            MENU_BANNER_WIDTH,
-            MENU_BANNER_STRIP_HEIGHT,
+            NAME_PLATE_WIDTH,
+            NAME_PLATE_STRIP_HEIGHT,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -940,17 +940,17 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        stripTop = (i * MENU_BANNER_STRIP_HEIGHT) + BET_BANNER_TOP;
+        stripTop = (i * NAME_PLATE_STRIP_HEIGHT) + BET_BANNER_TOP;
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(BET_BANNER_LEFT),
             QuarterPixels(bannerShift + stripTop),
             QuarterPixels(BET_BANNER_RIGHT),
-            QuarterPixels(bannerShift + stripTop + MENU_BANNER_STRIP_HEIGHT),
+            QuarterPixels(bannerShift + stripTop + NAME_PLATE_STRIP_HEIGHT),
             G_TX_RENDERTILE,
             0,
             0,
-            TexelRunStep(MENU_BANNER_WIDTH, BET_BANNER_RIGHT - BET_BANNER_LEFT),
+            TexelRunStep(NAME_PLATE_WIDTH, BET_BANNER_RIGHT - BET_BANNER_LEFT),
             TEXEL_STEP_ONE
         );
         gDPPipeSync(gfx++);

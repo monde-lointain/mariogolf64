@@ -1938,17 +1938,17 @@ void DrawCodePanels(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_NamePlateImage)));
     gDPPipeSync(gfx++);
-    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+    for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
                 LargeImageTexels(f_NamePlateImage) +
-                (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                (stripIndex * NAME_PLATE_WIDTH * NAME_PLATE_STRIP_HEIGHT)
             ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            MENU_BANNER_WIDTH,
-            MENU_BANNER_STRIP_HEIGHT,
+            NAME_PLATE_WIDTH,
+            NAME_PLATE_STRIP_HEIGHT,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -1970,8 +1970,8 @@ void DrawCodePanels(Gfx **displayListHead) {
             G_TX_RENDERTILE,
             0,
             0,
-            TexelRunStep(MENU_BANNER_WIDTH, CODE_UPPER_PANEL_WIDTH),
-            TexelRunStep(MENU_BANNER_STRIP_HEIGHT, CODE_UPPER_PANEL_STRIP_HEIGHT)
+            TexelRunStep(NAME_PLATE_WIDTH, CODE_UPPER_PANEL_WIDTH),
+            TexelRunStep(NAME_PLATE_STRIP_HEIGHT, CODE_UPPER_PANEL_STRIP_HEIGHT)
         );
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(
@@ -1986,8 +1986,8 @@ void DrawCodePanels(Gfx **displayListHead) {
             G_TX_RENDERTILE,
             0,
             0,
-            TexelRunStep(MENU_BANNER_WIDTH, CODE_LOWER_PANEL_WIDTH),
-            TexelRunStep(MENU_BANNER_STRIP_HEIGHT, CODE_LOWER_PANEL_STRIP_HEIGHT)
+            TexelRunStep(NAME_PLATE_WIDTH, CODE_LOWER_PANEL_WIDTH),
+            TexelRunStep(NAME_PLATE_STRIP_HEIGHT, CODE_LOWER_PANEL_STRIP_HEIGHT)
         );
         gDPPipeSync(gfx++);
     }

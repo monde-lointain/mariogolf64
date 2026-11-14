@@ -170,6 +170,10 @@ extern s16 g_ImportedCharacterColumns[PLAYER_COUNT_MAX];
 extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT];
 
 // Images that more than one menu draws.
+#define NAME_PLATE_WIDTH 200
+#define NAME_PLATE_HEIGHT 30
+#define NAME_PLATE_STRIP_HEIGHT 10
+#define NAME_PLATE_STRIP_COUNT 3
 #define COURSE_SCENE_WIDTH 152
 #define COURSE_SCENE_STRIP_ROW_COUNT 11
 #define COURSE_SCENE_STRIP_COUNT 11

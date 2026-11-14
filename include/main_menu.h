@@ -73,9 +73,6 @@ extern Boolean g_IsChosenHoleLoadStarted;
 extern s32 g_ChoosingPlayerIndex;
 extern char g_MenuCharacterNames[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH];
 
-#define MENU_BANNER_WIDTH 200
-#define MENU_BANNER_STRIP_HEIGHT 10
-#define MENU_BANNER_STRIP_COUNT 3
 #define MENU_BANNER_LEFT 60
 
 s32 GetOpenCourseCount(void);
