@@ -1861,12 +1861,12 @@ void LoadToolCodeMap(void) {
 #define NeighborCodeIndex(column, row, columnStep, rowStep) \
     ((((row) + (rowStep)) * MAP_COLUMN_COUNT) + (column) + (columnStep))
 
-static inline u8 GetCode(s32 index) {
+static inline u8 GetBuildCode(s32 index) {
     f_BuildCursor = &f_BuildBuffer[index];
     return *f_BuildCursor;
 }
 
-static inline void SetCode(s32 index, u8 code) {
+static inline void SetBuildCode(s32 index, u8 code) {
     f_BuildCursor = &f_BuildBuffer[index];
     *f_BuildCursor = code;
 }
@@ -1878,20 +1878,20 @@ static inline void SetCode(s32 index, u8 code) {
         s32 next; \
 \
         (index) = CodeIndex(column, row); \
-        code = GetCode(index); \
+        code = GetBuildCode(index); \
         (index) = NeighborCodeIndex(column, row, -(columnStep), -(rowStep)); \
-        (previous) = GetCode(index); \
+        (previous) = GetBuildCode(index); \
         (index) = NeighborCodeIndex(column, row, -(columnStep), -(rowStep)); \
-        previousAgain = GetCode(index); \
+        previousAgain = GetBuildCode(index); \
         (index) = NeighborCodeIndex(column, row, columnStep, rowStep); \
-        next = GetCode(index); \
+        next = GetBuildCode(index); \
         if (code != (previous) && previousAgain == next) { \
             u8 fill; \
 \
             (index) = NeighborCodeIndex(column, row, columnStep, rowStep); \
-            fill = GetCode(index); \
+            fill = GetBuildCode(index); \
             (index) = CodeIndex(column, row); \
-            SetCode(index, fill); \
+            SetBuildCode(index, fill); \
         } \
     }
 
