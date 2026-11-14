@@ -159,8 +159,6 @@ enum PrizeBracket {
 #define RESULTS_TEXT_GREEN 230
 #define RESULTS_TEXT_BLUE 255
 #define RESULTS_TEXT_ALPHA 255
-#define LARGE_DIGIT_WIDTH 16
-#define LARGE_DIGITS_HEIGHT 256
 #define POINTS_TOTAL_X 29
 #define POINTS_TOTAL_Y 201
 #define POINTS_TO_NEXT_COURSE_X 64
@@ -1100,7 +1098,6 @@ void DrawPlaceIcon(Gfx **displayListHead, s32 x, s32 y, s32 place) {
 #define RANK_FOURTH 3
 #define RANK_TWENTY_FIRST 20
 #define RANK_TWENTY_FOURTH 23
-#define PLACE_DIGIT_WIDTH 24
 #define PLACE_DIGIT_SPACING 20
 #define PLACE_DIGIT_X 4
 #define PLACE_DIGIT_Y 10
@@ -1153,9 +1150,9 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
         );
         DrawTextureRect(
             &gfx,
-            QuarterPixels(x + PLACE_DIGIT_WIDTH),
+            QuarterPixels(x + PLACE_GLYPH_SIZE),
             QuarterPixels(y),
-            QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_PART_SIZE),
+            QuarterPixels(x + PLACE_GLYPH_SIZE + PLACE_PART_SIZE),
             QuarterPixels(y + PLACE_PART_SIZE),
             G_TX_RENDERTILE,
             0,
@@ -1177,12 +1174,12 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
                     gfx++,
                     TextureAddress(ImageTexels(f_SecondBannerImage)),
                     G_IM_FMT_CI,
-                    PLACE_DIGIT_WIDTH,
+                    PLACE_GLYPH_SIZE,
                     0,
                     0,
-                    digit * PLACE_DIGIT_WIDTH,
-                    PLACE_DIGIT_WIDTH - 1,
-                    digit * PLACE_DIGIT_WIDTH + PLACE_DIGIT_WIDTH - 1,
+                    digit * PLACE_GLYPH_SIZE,
+                    PLACE_GLYPH_SIZE - 1,
+                    digit * PLACE_GLYPH_SIZE + PLACE_GLYPH_SIZE - 1,
                     0,
                     G_TX_NOMIRROR | G_TX_WRAP,
                     G_TX_NOMIRROR | G_TX_WRAP,
@@ -1195,11 +1192,11 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
                     &gfx,
                     QuarterPixels(x + digitX),
                     QuarterPixels(y + PLACE_DIGIT_Y),
-                    QuarterPixels(x + digitX + PLACE_DIGIT_WIDTH),
-                    QuarterPixels(y + PLACE_DIGIT_Y + PLACE_DIGIT_WIDTH),
+                    QuarterPixels(x + digitX + PLACE_GLYPH_SIZE),
+                    QuarterPixels(y + PLACE_DIGIT_Y + PLACE_GLYPH_SIZE),
                     G_TX_RENDERTILE,
                     0,
-                    TexelCoordinate(digit * PLACE_DIGIT_WIDTH),
+                    TexelCoordinate(digit * PLACE_GLYPH_SIZE),
                     TEXEL_STEP_ONE,
                     TEXEL_STEP_ONE
                 );
@@ -1272,9 +1269,9 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
         );
         DrawTextureRect(
             &gfx,
-            QuarterPixels(x + PLACE_DIGIT_WIDTH),
+            QuarterPixels(x + PLACE_GLYPH_SIZE),
             QuarterPixels(y),
-            QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_PART_SIZE),
+            QuarterPixels(x + PLACE_GLYPH_SIZE + PLACE_PART_SIZE),
             QuarterPixels(y + PLACE_PART_SIZE),
             G_TX_RENDERTILE,
             0,
@@ -3402,8 +3399,8 @@ void DrawTournamentResults(Gfx **displayListHead) {
         &gfx,
         ImageTexels(f_ResultsLargeDigitsImage),
         G_IM_FMT_CI,
-        LARGE_DIGIT_WIDTH,
-        LARGE_DIGITS_HEIGHT,
+        DIGIT_GLYPH_SIZE,
+        DIGIT_FONT_HEIGHT,
         0,
         0,
         0,
@@ -3526,8 +3523,8 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
         &gfx,
         ImageTexels(f_ResultsLargeDigitsImage),
         G_IM_FMT_CI,
-        LARGE_DIGIT_WIDTH,
-        LARGE_DIGITS_HEIGHT,
+        DIGIT_GLYPH_SIZE,
+        DIGIT_FONT_HEIGHT,
         0,
         0,
         0,
@@ -3714,8 +3711,8 @@ void DrawPlayersResults(Gfx **displayListHead) {
         &gfx,
         ImageTexels(f_ResultsLargeDigitsImage),
         G_IM_FMT_CI,
-        LARGE_DIGIT_WIDTH,
-        LARGE_DIGITS_HEIGHT,
+        DIGIT_GLYPH_SIZE,
+        DIGIT_FONT_HEIGHT,
         0,
         0,
         0,
@@ -4064,8 +4061,8 @@ void DrawMatchResults(Gfx **displayListHead) {
         &gfx,
         ImageTexels(f_ResultsLargeDigitsImage),
         G_IM_FMT_CI,
-        LARGE_DIGIT_WIDTH,
-        LARGE_DIGITS_HEIGHT,
+        DIGIT_GLYPH_SIZE,
+        DIGIT_FONT_HEIGHT,
         0,
         0,
         0,

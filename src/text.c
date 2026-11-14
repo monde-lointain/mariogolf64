@@ -2857,15 +2857,15 @@ s32 GetDigitGlyphTop(char code) {
         case ':':
             return DIGIT_GLYPH_COLON * DIGIT_GLYPH_SIZE;
         case '*':
-            return DIGIT_GLYPH_STAR * DIGIT_GLYPH_SIZE;
+            return DIGIT_GLYPH_TIMES * DIGIT_GLYPH_SIZE;
         case '+':
             return DIGIT_GLYPH_PLUS * DIGIT_GLYPH_SIZE;
         case '-':
             return DIGIT_GLYPH_MINUS * DIGIT_GLYPH_SIZE;
         case '#':
-            return DIGIT_GLYPH_HASH * DIGIT_GLYPH_SIZE;
+            return DIGIT_GLYPH_PLUS_MINUS * DIGIT_GLYPH_SIZE;
         case '!':
-            return DIGIT_GLYPH_EXCLAMATION * DIGIT_GLYPH_SIZE;
+            return DIGIT_GLYPH_CIRCLE * DIGIT_GLYPH_SIZE;
         default:
             return (code - '0' + DIGIT_GLYPH_ZERO) * DIGIT_GLYPH_SIZE;
     }

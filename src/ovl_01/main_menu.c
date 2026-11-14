@@ -5406,7 +5406,6 @@ extern const char g_CaddySelectTitle[];
 #define WON_COUNT_ICON_Y 64
 #define WON_COUNT_X 250
 #define WON_COUNT_Y 72
-#define WON_COUNT_DIGIT_WIDTH 16
 #define TWO_DIGIT_WON_COUNT_MIN 10
 #define THREE_DIGIT_WON_COUNT_MIN 100
 
@@ -5956,7 +5955,7 @@ void DrawModeSelect(Gfx **displayListHead) {
 
         i = 0;
         if (badgeCount < TWO_DIGIT_WON_COUNT_MIN) {
-            i = WON_COUNT_DIGIT_WIDTH;
+            i = DIGIT_GLYPH_SIZE;
         }
 
         if ((badgeCount >= TWO_DIGIT_WON_COUNT_MIN) && (badgeCount < THREE_DIGIT_WON_COUNT_MIN)) {
@@ -5964,7 +5963,7 @@ void DrawModeSelect(Gfx **displayListHead) {
         }
 
         if (badgeCount >= THREE_DIGIT_WON_COUNT_MIN) {
-            i = -WON_COUNT_DIGIT_WIDTH;
+            i = -DIGIT_GLYPH_SIZE;
         }
 
         DrawSpinningBadge(&gfx, g_SpinningBadgeImage, WON_COUNT_ICON_X + i, WON_COUNT_ICON_Y);
@@ -5985,7 +5984,7 @@ void DrawModeSelect(Gfx **displayListHead) {
 
         i = 0;
         if (starCount < TWO_DIGIT_WON_COUNT_MIN) {
-            i = WON_COUNT_DIGIT_WIDTH;
+            i = DIGIT_GLYPH_SIZE;
         }
 
         if ((starCount >= TWO_DIGIT_WON_COUNT_MIN) && (badgeCount < THREE_DIGIT_WON_COUNT_MIN)) {
@@ -5993,7 +5992,7 @@ void DrawModeSelect(Gfx **displayListHead) {
         }
 
         if (starCount >= THREE_DIGIT_WON_COUNT_MIN) {
-            i = -WON_COUNT_DIGIT_WIDTH;
+            i = -DIGIT_GLYPH_SIZE;
         }
 
         DrawSpinningStars(&gfx, WON_COUNT_ICON_X + i, WON_COUNT_ICON_Y, 1, FALSE);
@@ -6984,7 +6983,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
             }
 
             if (badgeCount < TWO_DIGIT_WON_COUNT_MIN) {
-                otherIndex = WON_COUNT_DIGIT_WIDTH;
+                otherIndex = DIGIT_GLYPH_SIZE;
             }
 
             if ((badgeCount >= TWO_DIGIT_WON_COUNT_MIN) &&
@@ -6993,7 +6992,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
             }
 
             if (badgeCount >= THREE_DIGIT_WON_COUNT_MIN) {
-                otherIndex = -WON_COUNT_DIGIT_WIDTH;
+                otherIndex = -DIGIT_GLYPH_SIZE;
             }
 
             DrawSpinningBadge(
@@ -7195,7 +7194,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
             }
 
             if (badgeCount < TWO_DIGIT_WON_COUNT_MIN) {
-                otherIndex = WON_COUNT_DIGIT_WIDTH;
+                otherIndex = DIGIT_GLYPH_SIZE;
             }
 
             if ((badgeCount >= TWO_DIGIT_WON_COUNT_MIN) &&
@@ -7204,7 +7203,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
             }
 
             if (badgeCount >= THREE_DIGIT_WON_COUNT_MIN) {
-                otherIndex = -WON_COUNT_DIGIT_WIDTH;
+                otherIndex = -DIGIT_GLYPH_SIZE;
             }
 
             gDPPipeSync(gfx++);

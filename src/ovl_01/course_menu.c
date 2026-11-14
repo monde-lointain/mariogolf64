@@ -61,17 +61,7 @@
 #define STATS_ONE_DIGIT_X 144
 #define STATS_UNIT_X 178
 #define STATS_UNIT_OFFSET_Y 4
-#define MENU_GLYPH_SIZE 16
-#define MENU_GLYPH_IMAGE_SIZE (MENU_GLYPH_SIZE * MENU_GLYPH_SIZE / 2)
-#define MENU_GLYPH_TIMES 0
-#define MENU_GLYPH_FIRST_DIGIT 1
-#define MENU_GLYPH_PLUS 12
-#define MENU_GLYPH_MINUS 13
-#define MENU_GLYPH_PLUS_MINUS 14
-#define MENU_GLYPH_CIRCLE 15
-#define OFF_FIRST_GLYPH 16
-#define OFF_GLYPH_COUNT 2
-#define MENU_GLYPH_POINT 18
+#define DIGIT_GLYPH_OFF_COUNT 2
 #define ONE_DIGIT_NUMBER_MAX (DECIMAL_BASE - 1)
 #define TWO_DIGIT_NUMBER_MAX ((DECIMAL_BASE * DECIMAL_BASE) - 1)
 #define IsOneDigitNumber(n) ((n) >= -ONE_DIGIT_NUMBER_MAX && (n) <= ONE_DIGIT_NUMBER_MAX)
@@ -97,7 +87,6 @@
 #define BADGE_ICON_Y 144
 #define BADGE_COUNT_X 250
 #define BADGE_COUNT_Y 146
-#define BADGE_COUNT_DIGIT_WIDTH 16
 
 #define TROPHY_SPACING 24
 #define TROPHY_SHIFT_LEFT 20
@@ -157,7 +146,7 @@ static void **f_UnreadLastTrophyBuffers;
 static void **f_CourseStatsIcons;
 static void *f_CourseStatsNamePlate;
 static void *f_CourseStatsDigitsAndArrows;
-static void *f_MenuGlyphs;
+static void *f_LargeDigitsImage;
 static void *f_CourseStatsGreenArrows;
 
 static u8 f_UnreadStatsBytes[0x4] UNUSED;
@@ -242,9 +231,9 @@ void LoadCourseMenuBuffer(void *buffer, s16 bufferKind) {
             ReadEncodedAsset(f_CourseStatsDigitsAndArrows, &asset);
             break;
         case COURSE_MENU_BUFFER_LARGE_DIGITS:
-            f_MenuGlyphs = buffer;
+            f_LargeDigitsImage = buffer;
             OpenEncodedAsset(ASSET_LARGE_DIGITS, &asset);
-            ReadEncodedAsset(f_MenuGlyphs, &asset);
+            ReadEncodedAsset(f_LargeDigitsImage, &asset);
             break;
         case COURSE_MENU_BUFFER_GREEN_ARROWS:
             f_CourseStatsGreenArrows = buffer;
@@ -924,7 +913,7 @@ void DrawStatsBadgeCount(Gfx **displayListHead) {
     }
 
     if (badgeCount < 10) {
-        index = BADGE_COUNT_DIGIT_WIDTH;
+        index = DIGIT_GLYPH_SIZE;
     }
 
     if (badgeCount >= 10 && badgeCount < 100) {
@@ -932,7 +921,7 @@ void DrawStatsBadgeCount(Gfx **displayListHead) {
     }
 
     if (badgeCount >= 100) {
-        index = -BADGE_COUNT_DIGIT_WIDTH;
+        index = -DIGIT_GLYPH_SIZE;
     }
 
     gDPPipeSync(gfx++);
@@ -1286,48 +1275,48 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_MenuGlyphs)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_LargeDigitsImage)));
     shift = 0;
     if (mark != MENU_NUMBER_PLAIN) {
         switch (mark) {
             case MENU_NUMBER_SIGNED:
                 if (number > 0) {
-                    index = MENU_GLYPH_PLUS;
+                    index = DIGIT_GLYPH_PLUS;
                     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x7F, OPAQUE_ALPHA);
                 }
                 else if (number < 0) {
-                    index = MENU_GLYPH_MINUS;
+                    index = DIGIT_GLYPH_MINUS;
                     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0x7F, OPAQUE_ALPHA);
                 }
                 else {
-                    index = MENU_GLYPH_PLUS_MINUS;
+                    index = DIGIT_GLYPH_PLUS_MINUS;
                 }
                 break;
             case MENU_NUMBER_RED_TINT:
                 gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                 gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x7F, OPAQUE_ALPHA);
-                index = MENU_GLYPH_TIMES;
+                index = DIGIT_GLYPH_TIMES;
                 break;
             case MENU_NUMBER_GREEN_TINT:
                 gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                 gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0x7F, OPAQUE_ALPHA);
-                index = MENU_GLYPH_TIMES;
+                index = DIGIT_GLYPH_TIMES;
                 break;
             case MENU_NUMBER_TIMES:
             default:
-                index = MENU_GLYPH_TIMES;
+                index = DIGIT_GLYPH_TIMES;
                 break;
         }
 
         if (mark != MENU_NUMBER_RED_TINT && mark != MENU_NUMBER_GREEN_TINT) {
             gDPLoadTextureBlock_4b(
                 gfx++,
-                TextureAddress(ImageTexels(f_MenuGlyphs) + (index * MENU_GLYPH_IMAGE_SIZE)),
+                TextureAddress(ImageTexels(f_LargeDigitsImage) + (index * DIGIT_GLYPH_IMAGE_SIZE)),
                 G_IM_FMT_CI,
-                MENU_GLYPH_SIZE,
-                MENU_GLYPH_SIZE,
+                DIGIT_GLYPH_SIZE,
+                DIGIT_GLYPH_SIZE,
                 0,
                 G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP,
@@ -1341,8 +1330,8 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8
                 gfx++,
                 QuarterPixels(x),
                 QuarterPixels(y),
-                QuarterPixels(x + MENU_GLYPH_SIZE),
-                QuarterPixels(y + MENU_GLYPH_SIZE),
+                QuarterPixels(x + DIGIT_GLYPH_SIZE),
+                QuarterPixels(y + DIGIT_GLYPH_SIZE),
                 G_TX_RENDERTILE,
                 0,
                 0,
@@ -1350,22 +1339,22 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8
                 TEXEL_STEP_ONE
             );
             gDPPipeSync(gfx++);
-            shift = MENU_GLYPH_SIZE;
+            shift = DIGIT_GLYPH_SIZE;
         }
     }
 
     if (number >= 0 && number < TWO_DIGIT_FIRST) {
         digitCount = 1;
         if (field == NUMBER_FIELD_TWO) {
-            shift += MENU_GLYPH_SIZE;
+            shift += DIGIT_GLYPH_SIZE;
         }
 
         if (field == NUMBER_FIELD_THREE) {
-            shift += 2 * MENU_GLYPH_SIZE;
+            shift += 2 * DIGIT_GLYPH_SIZE;
         }
 
         if (field == NUMBER_FIELD_FOUR) {
-            shift += 3 * MENU_GLYPH_SIZE;
+            shift += 3 * DIGIT_GLYPH_SIZE;
         }
 
         if (field == NUMBER_FIELD_TWO_NARROW) {
@@ -1378,11 +1367,11 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8
     if (number >= TWO_DIGIT_FIRST && number < THREE_DIGIT_FIRST) {
         digitCount = 2;
         if (field == NUMBER_FIELD_THREE) {
-            shift += 2 * MENU_GLYPH_SIZE;
+            shift += 2 * DIGIT_GLYPH_SIZE;
         }
 
         if (field == NUMBER_FIELD_FOUR) {
-            shift += 3 * MENU_GLYPH_SIZE;
+            shift += 3 * DIGIT_GLYPH_SIZE;
         }
 
         digits[0] = number / DECIMAL_BASE;
@@ -1392,7 +1381,7 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8
     if (number >= THREE_DIGIT_FIRST && number < FOUR_DIGIT_FIRST) {
         digitCount = 3;
         if (field == NUMBER_FIELD_FOUR) {
-            shift += 3 * MENU_GLYPH_SIZE;
+            shift += 3 * DIGIT_GLYPH_SIZE;
         }
 
         digits[0] = number / THREE_DIGIT_FIRST;
@@ -1411,15 +1400,15 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8
     if (number < 0 && number > -TWO_DIGIT_FIRST) {
         digitCount = 1;
         if (field == NUMBER_FIELD_TWO) {
-            shift += MENU_GLYPH_SIZE;
+            shift += DIGIT_GLYPH_SIZE;
         }
 
         if (field == NUMBER_FIELD_THREE) {
-            shift += 2 * MENU_GLYPH_SIZE;
+            shift += 2 * DIGIT_GLYPH_SIZE;
         }
 
         if (field == NUMBER_FIELD_FOUR) {
-            shift += 3 * MENU_GLYPH_SIZE;
+            shift += 3 * DIGIT_GLYPH_SIZE;
         }
 
         if (field == NUMBER_FIELD_TWO_NARROW) {
@@ -1432,11 +1421,11 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8
     if (number <= -TWO_DIGIT_FIRST && number > -THREE_DIGIT_FIRST) {
         digitCount = 2;
         if (field == NUMBER_FIELD_THREE) {
-            shift += 2 * MENU_GLYPH_SIZE;
+            shift += 2 * DIGIT_GLYPH_SIZE;
         }
 
         if (field == NUMBER_FIELD_FOUR) {
-            shift += 3 * MENU_GLYPH_SIZE;
+            shift += 3 * DIGIT_GLYPH_SIZE;
         }
 
         digits[0] = -number / DECIMAL_BASE;
@@ -1446,7 +1435,7 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8
     if (number <= -THREE_DIGIT_FIRST && number > -FOUR_DIGIT_FIRST) {
         digitCount = 3;
         if (field == NUMBER_FIELD_FOUR) {
-            shift += 3 * MENU_GLYPH_SIZE;
+            shift += 3 * DIGIT_GLYPH_SIZE;
         }
 
         digits[0] = -number / THREE_DIGIT_FIRST;
@@ -1462,7 +1451,7 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8
         digits[3] = ((-number % FOUR_DIGIT_FIRST) % THREE_DIGIT_FIRST) % DECIMAL_BASE;
     }
 
-    spacing = MENU_GLYPH_SIZE;
+    spacing = DIGIT_GLYPH_SIZE;
     if (field == NUMBER_FIELD_TWO_NARROW) {
         spacing = NARROW_DIGIT_SPACING;
     }
@@ -1471,12 +1460,12 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8
         gDPLoadTextureBlock_4b(
             gfx++,
             TextureAddress(
-                ImageTexels(f_MenuGlyphs) +
-                ((digits[index] + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE)
+                ImageTexels(f_LargeDigitsImage) +
+                ((digits[index] + DIGIT_GLYPH_ZERO) * DIGIT_GLYPH_IMAGE_SIZE)
             ),
             G_IM_FMT_CI,
-            MENU_GLYPH_SIZE,
-            MENU_GLYPH_SIZE,
+            DIGIT_GLYPH_SIZE,
+            DIGIT_GLYPH_SIZE,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -1490,8 +1479,8 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8
             gfx++,
             QuarterPixels(x + shift + (index * spacing)),
             QuarterPixels(y),
-            QuarterPixels(x + shift + (index * spacing) + MENU_GLYPH_SIZE),
-            QuarterPixels(y + MENU_GLYPH_SIZE),
+            QuarterPixels(x + shift + (index * spacing) + DIGIT_GLYPH_SIZE),
+            QuarterPixels(y + DIGIT_GLYPH_SIZE),
             G_TX_RENDERTILE,
             0,
             0,
@@ -1509,7 +1498,7 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8
 #define DECIMAL_WHOLE_LIMIT 999
 #define DECIMAL_DIGIT_LIMIT 6
 #define HUNDREDTHS_PER_UNIT 100.0f
-#define DECIMAL_POINT_OFFSET (MENU_GLYPH_SIZE / 2)
+#define DECIMAL_POINT_OFFSET (DIGIT_GLYPH_SIZE / 2)
 
 const char f_DecimalWholeFormat[] = "%d";
 
@@ -1556,14 +1545,14 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_MenuGlyphs)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_LargeDigitsImage)));
     shift = 0;
     if (whole >= 0 && whole < DECIMAL_BASE) {
-        shift = 2 * MENU_GLYPH_SIZE;
+        shift = 2 * DIGIT_GLYPH_SIZE;
     }
 
     if (whole >= DECIMAL_BASE && whole < DECIMAL_BASE * DECIMAL_BASE) {
-        shift += MENU_GLYPH_SIZE;
+        shift += DIGIT_GLYPH_SIZE;
     }
 
     sprintf(g_PrintBuffer, f_DecimalWholeFormat, whole);
@@ -1576,12 +1565,12 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
         gDPLoadTextureBlock_4b(
             gfx++,
             TextureAddress(
-                ImageTexels(f_MenuGlyphs) +
-                ((digit - '0' + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE)
+                ImageTexels(f_LargeDigitsImage) +
+                ((digit - '0' + DIGIT_GLYPH_ZERO) * DIGIT_GLYPH_IMAGE_SIZE)
             ),
             G_IM_FMT_CI,
-            MENU_GLYPH_SIZE,
-            MENU_GLYPH_SIZE,
+            DIGIT_GLYPH_SIZE,
+            DIGIT_GLYPH_SIZE,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -1593,10 +1582,10 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(
             gfx++,
-            QuarterPixels(x + shift + (digitIndex * MENU_GLYPH_SIZE)),
+            QuarterPixels(x + shift + (digitIndex * DIGIT_GLYPH_SIZE)),
             QuarterPixels(y),
-            QuarterPixels(x + shift + (digitIndex * MENU_GLYPH_SIZE) + MENU_GLYPH_SIZE),
-            QuarterPixels(y + MENU_GLYPH_SIZE),
+            QuarterPixels(x + shift + (digitIndex * DIGIT_GLYPH_SIZE) + DIGIT_GLYPH_SIZE),
+            QuarterPixels(y + DIGIT_GLYPH_SIZE),
             G_TX_RENDERTILE,
             0,
             0,
@@ -1608,10 +1597,12 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
 
     gDPLoadTextureBlock_4b(
         gfx++,
-        TextureAddress(ImageTexels(f_MenuGlyphs) + (MENU_GLYPH_POINT * MENU_GLYPH_IMAGE_SIZE)),
+        TextureAddress(
+            ImageTexels(f_LargeDigitsImage) + (DIGIT_GLYPH_POINT * DIGIT_GLYPH_IMAGE_SIZE)
+        ),
         G_IM_FMT_CI,
-        MENU_GLYPH_SIZE,
-        MENU_GLYPH_SIZE,
+        DIGIT_GLYPH_SIZE,
+        DIGIT_GLYPH_SIZE,
         0,
         G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP,
@@ -1623,13 +1614,13 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(
         gfx++,
-        QuarterPixels(x + shift + ((digitIndex - 1) * MENU_GLYPH_SIZE) + DECIMAL_POINT_OFFSET),
+        QuarterPixels(x + shift + ((digitIndex - 1) * DIGIT_GLYPH_SIZE) + DECIMAL_POINT_OFFSET),
         QuarterPixels(y),
         QuarterPixels(
-            x + shift + ((digitIndex - 1) * MENU_GLYPH_SIZE) + DECIMAL_POINT_OFFSET +
-            MENU_GLYPH_SIZE
+            x + shift + ((digitIndex - 1) * DIGIT_GLYPH_SIZE) + DECIMAL_POINT_OFFSET +
+            DIGIT_GLYPH_SIZE
         ),
-        QuarterPixels(y + MENU_GLYPH_SIZE),
+        QuarterPixels(y + DIGIT_GLYPH_SIZE),
         G_TX_RENDERTILE,
         0,
         0,
@@ -1640,12 +1631,12 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
     gDPLoadTextureBlock_4b(
         gfx++,
         TextureAddress(
-            ImageTexels(f_MenuGlyphs) +
-            ((fraction + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE)
+            ImageTexels(f_LargeDigitsImage) +
+            ((fraction + DIGIT_GLYPH_ZERO) * DIGIT_GLYPH_IMAGE_SIZE)
         ),
         G_IM_FMT_CI,
-        MENU_GLYPH_SIZE,
-        MENU_GLYPH_SIZE,
+        DIGIT_GLYPH_SIZE,
+        DIGIT_GLYPH_SIZE,
         0,
         G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP,
@@ -1657,10 +1648,10 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(
         gfx++,
-        QuarterPixels(x + shift + (digitIndex * MENU_GLYPH_SIZE)),
+        QuarterPixels(x + shift + (digitIndex * DIGIT_GLYPH_SIZE)),
         QuarterPixels(y),
-        QuarterPixels(x + shift + (digitIndex * MENU_GLYPH_SIZE) + MENU_GLYPH_SIZE),
-        QuarterPixels(y + MENU_GLYPH_SIZE),
+        QuarterPixels(x + shift + (digitIndex * DIGIT_GLYPH_SIZE) + DIGIT_GLYPH_SIZE),
+        QuarterPixels(y + DIGIT_GLYPH_SIZE),
         G_TX_RENDERTILE,
         0,
         0,
@@ -1678,16 +1669,16 @@ const char f_UnreadSecondEmptyText[] = "";
 
 void DrawMenuSign(Gfx **displayListHead, s32 x, s32 y, u8 sign) {
     Gfx *gfx = *displayListHead;
-    s32 glyphIndex = MENU_GLYPH_TIMES;
+    s32 glyphIndex = DIGIT_GLYPH_TIMES;
 
     switch (sign) {
         case MENU_SIGN_DASH:
-            glyphIndex = MENU_GLYPH_MINUS;
+            glyphIndex = DIGIT_GLYPH_MINUS;
             break;
         case MENU_SIGN_TIMES:
             break;
         case MENU_SIGN_CIRCLE:
-            glyphIndex = MENU_GLYPH_CIRCLE;
+            glyphIndex = DIGIT_GLYPH_CIRCLE;
             break;
     }
 
@@ -1699,13 +1690,13 @@ void DrawMenuSign(Gfx **displayListHead, s32 x, s32 y, u8 sign) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_MenuGlyphs)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_LargeDigitsImage)));
     gDPLoadTextureBlock_4b(
         gfx++,
-        TextureAddress(ImageTexels(f_MenuGlyphs) + (glyphIndex * MENU_GLYPH_IMAGE_SIZE)),
+        TextureAddress(ImageTexels(f_LargeDigitsImage) + (glyphIndex * DIGIT_GLYPH_IMAGE_SIZE)),
         G_IM_FMT_CI,
-        MENU_GLYPH_SIZE,
-        MENU_GLYPH_SIZE,
+        DIGIT_GLYPH_SIZE,
+        DIGIT_GLYPH_SIZE,
         0,
         G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP,
@@ -1719,8 +1710,8 @@ void DrawMenuSign(Gfx **displayListHead, s32 x, s32 y, u8 sign) {
         gfx++,
         QuarterPixels(x),
         QuarterPixels(y),
-        QuarterPixels(x + MENU_GLYPH_SIZE),
-        QuarterPixels(y + MENU_GLYPH_SIZE),
+        QuarterPixels(x + DIGIT_GLYPH_SIZE),
+        QuarterPixels(y + DIGIT_GLYPH_SIZE),
         G_TX_RENDERTILE,
         0,
         0,
@@ -1743,16 +1734,17 @@ void DrawOffLabel(Gfx **displayListHead, s32 x, s32 y) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_MenuGlyphs)));
-    for (glyphIndex = 0; glyphIndex != OFF_GLYPH_COUNT; glyphIndex++) {
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_LargeDigitsImage)));
+    for (glyphIndex = 0; glyphIndex != DIGIT_GLYPH_OFF_COUNT; glyphIndex++) {
         gDPLoadTextureBlock_4b(
             gfx++,
             TextureAddress(
-                ImageTexels(f_MenuGlyphs) + ((OFF_FIRST_GLYPH + glyphIndex) * MENU_GLYPH_IMAGE_SIZE)
+                ImageTexels(f_LargeDigitsImage) +
+                ((DIGIT_GLYPH_OFF + glyphIndex) * DIGIT_GLYPH_IMAGE_SIZE)
             ),
             G_IM_FMT_CI,
-            MENU_GLYPH_SIZE,
-            MENU_GLYPH_SIZE,
+            DIGIT_GLYPH_SIZE,
+            DIGIT_GLYPH_SIZE,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -1764,10 +1756,10 @@ void DrawOffLabel(Gfx **displayListHead, s32 x, s32 y) {
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(
             gfx++,
-            QuarterPixels(x + (glyphIndex * MENU_GLYPH_SIZE)),
+            QuarterPixels(x + (glyphIndex * DIGIT_GLYPH_SIZE)),
             QuarterPixels(y),
-            QuarterPixels(x + (glyphIndex * MENU_GLYPH_SIZE) + MENU_GLYPH_SIZE),
-            QuarterPixels(y + MENU_GLYPH_SIZE),
+            QuarterPixels(x + (glyphIndex * DIGIT_GLYPH_SIZE) + DIGIT_GLYPH_SIZE),
+            QuarterPixels(y + DIGIT_GLYPH_SIZE),
             G_TX_RENDERTILE,
             0,
             0,
