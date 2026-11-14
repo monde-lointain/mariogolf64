@@ -225,10 +225,18 @@ s32 GetAimCameraGround(s32 x, s32 z) {
     return height;
 }
 
+// The round that GAME_FLAG_ROUND_KIND_HIGH_BIT and _LOW_BIT choose.
+enum FlaggedRoundKind {
+    FLAGGED_ROUND_STROKE,
+    FLAGGED_ROUND_TRAINING,
+    FLAGGED_ROUND_MATCH_GAME,
+    FLAGGED_ROUND_SKINS_MATCH
+};
+
 void SetUpFlaggedRound(void) {
     switch ((IsGameFlagSet(GAME_FLAG_ROUND_KIND_HIGH_BIT) * 2) +
         IsGameFlagSet(GAME_FLAG_ROUND_KIND_LOW_BIT)) {
-        case 0:
+        case FLAGGED_ROUND_STROKE:
             g_GameState.courseIndex = 0;
             g_GameState.holeIndex = 0;
             g_GameState.unusedHoleValue = 0;
@@ -237,7 +245,7 @@ void SetUpFlaggedRound(void) {
             g_GameState.step = GAME_STATE_START;
             g_GameState.gameMode = GAME_MODE_STROKE;
             break;
-        case 1:
+        case FLAGGED_ROUND_TRAINING:
             g_GameState.courseIndex = 0;
             g_GameState.holeIndex = 0;
             g_GameState.unusedHoleValue = 0;
@@ -245,15 +253,17 @@ void SetUpFlaggedRound(void) {
             g_GameState.step = GAME_STATE_START;
             g_GameState.gameMode = GAME_MODE_TRAINING;
             break;
-        case 2:
+        case FLAGGED_ROUND_MATCH_GAME:
             g_GameState.courseIndex = 0;
             g_GameState.holeIndex = 0;
             g_GameState.unusedHoleValue = 0;
             g_GameState.playerCount = 2;
             g_GameState.step = GAME_STATE_START;
             g_GameState.gameMode = GAME_MODE_MATCH_GAME;
+            // The original has no break here, so a flagged match game
+            // becomes a three-player skins match.
 
-        default:
+        default: // FLAGGED_ROUND_SKINS_MATCH
             g_GameState.playerCount = 3;
             g_GameState.courseIndex = 0;
             g_GameState.holeIndex = 0;
