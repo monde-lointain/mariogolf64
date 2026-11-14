@@ -367,16 +367,17 @@ s32 DecodeTournamentPassword(u8 *code, char *password) {
     return 0;
 }
 
-void EncodeScorePassword(ScoreReport *source, char *password) {
+void EncodeScorePassword(ScoreReport *report, char *password) {
     u8 unusedBuffer[8] UNUSED;
     u8 symbols[SCORE_PASSWORD_LENGTH];
-    ScoreReport report;
-    ScoreReport *clamped = &report;
+    ScoreReport clampedReport;
+    // Reaching the copy through a pointer is needed for the match.
+    ScoreReport *clamped = &clampedReport;
     s32 symbolCount = 0;
     u32 number;
     s32 symbolIndex;
 
-    report = *source;
+    clampedReport = *report;
 
     if (clamped->characterIndex >= CHARACTER_COUNT) {
         clamped->characterIndex = 0;
