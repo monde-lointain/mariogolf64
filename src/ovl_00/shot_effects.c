@@ -33,7 +33,7 @@
 
 #define IMPACT_SPARK_COUNT 20
 #define IMPACT_SPARK_SPACING (M_PI * (2.0f / IMPACT_SPARK_COUNT))
-#define IMPACT_SPARK_MIN_SPEED 8.0f
+#define IMPACT_SPARK_SPEED_MIN 8.0f
 #define IMPACT_SPARK_SPEED_RANGE 16
 #define FLAGSTICK_SPARK_COUNT 10
 #define FLAGSTICK_SPARK_SPACING (M_PI * (2.0f / FLAGSTICK_SPARK_COUNT))
@@ -64,7 +64,7 @@ enum SwingTrailState {
 #define SWING_TRAIL_SAMPLES 14
 #define POWER_SHOT_SWING_TRAIL_SAMPLES 14
 #define NORMAL_SHOT_SWING_TRAIL_SAMPLES 14
-#define SWING_TRAIL_MAX_SAMPLES 56
+#define SWING_TRAIL_SAMPLES_MAX 56
 #define SWING_TRAIL_AXIS_COUNT 6
 #define SWING_TRAIL_PATH_LENGTH (SWING_TRAIL_SAMPLES * 2)
 #define SWING_TRAIL_MATRIX_COUNT 64
@@ -78,9 +78,9 @@ enum SwingTrailState {
 #define SPARK_DRAG 0.98f
 #define SPARK_MODEL_Z (-100.0f)
 #define SPARK_MODEL_SCALE 0.1f
-#define SPARK_MAX_SCREEN_COORDINATE 511
+#define SPARK_SCREEN_COORDINATE_MAX 511
 #define IsSparkCoordinateInRange(coordinate) \
-    ((coordinate) >= -SPARK_MAX_SCREEN_COORDINATE && (coordinate) <= SPARK_MAX_SCREEN_COORDINATE)
+    ((coordinate) >= -SPARK_SCREEN_COORDINATE_MAX && (coordinate) <= SPARK_SCREEN_COORDINATE_MAX)
 
 static s32 f_ImpactFrameCount = 0;
 static Vtx f_SparkVertices[3] = {
@@ -203,7 +203,7 @@ void StartImpactSparks(void) {
                 f_SparkAngles[sparkIndex] =
                     ((f32)count * IMPACT_SPARK_SPACING) + DegreesToRadians((guRandom() % 20) - 10);
                 f_SparkKinds[sparkIndex] = SPARK_KIND_IMPACT;
-                speed = (guRandom() % IMPACT_SPARK_SPEED_RANGE) + IMPACT_SPARK_MIN_SPEED;
+                speed = (guRandom() % IMPACT_SPARK_SPEED_RANGE) + IMPACT_SPARK_SPEED_MIN;
                 f_SparkVelocities[sparkIndex][AXIS_X] = sinf(f_SparkAngles[sparkIndex]) * speed;
                 count++;
                 f_SparkVelocities[sparkIndex][AXIS_Y] = -cosf(f_SparkAngles[sparkIndex]) * speed;
@@ -281,9 +281,9 @@ void StartFlagstickSparks(CoursePoint point) {
 #define IMPACT_FLASH_LOWEST_LEVEL 1
 #define SPARK_BURST_SHOWN 1
 #define SPARK_BURST_HIDDEN (-1)
-#define SPARK_BURST_MAX_AGE 127
+#define SPARK_BURST_AGE_MAX 127
 #define SPARK_DISTANCE_SCALE 0.3f
-#define SPARK_MAX_SCALE 2.0f
+#define SPARK_SCALE_MAX 2.0f
 #define SPARK_AGE_GROWTH 0.0625f
 #define SPARK_START_SIZE 0.3f
 #define SPARK_IMAGE_HALF_SIZE 8.0f
@@ -344,8 +344,8 @@ void DrawSparks(Gfx **displayListHead) {
                 burstPoints[i][1] = point.y;
                 burstPoints[i][2] = point.depth;
                 burstScales[i] = point.scaleX * SPARK_DISTANCE_SCALE;
-                if (burstScales[i] > SPARK_MAX_SCALE) {
-                    burstScales[i] = SPARK_MAX_SCALE;
+                if (burstScales[i] > SPARK_SCALE_MAX) {
+                    burstScales[i] = SPARK_SCALE_MAX;
                 }
 
                 halfSize = size * SPARK_IMAGE_HALF_SIZE;
@@ -361,7 +361,7 @@ void DrawSparks(Gfx **displayListHead) {
                 burstShown[i] = SPARK_BURST_HIDDEN;
             }
 
-            if (f_SparkBurstAges[i] < SPARK_BURST_MAX_AGE) {
+            if (f_SparkBurstAges[i] < SPARK_BURST_AGE_MAX) {
                 f_SparkBurstAges[i]++;
             }
         }
@@ -544,7 +544,7 @@ void DrawShotEffectsHud(Gfx **displayListHead UNUSED) {
 }
 
 void StartSwingTrail(s32 kind) {
-    f32 samples[SWING_TRAIL_AXIS_COUNT][SWING_TRAIL_MAX_SAMPLES];
+    f32 samples[SWING_TRAIL_AXIS_COUNT][SWING_TRAIL_SAMPLES_MAX];
     f32 point[3];
     s32 i;
     f32 position;

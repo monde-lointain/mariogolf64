@@ -90,7 +90,7 @@
 
 #define LZ_REFERENCE_LENGTH_MASK 0x1F
 #define LZ_REFERENCE_DISTANCE_SHIFT 5
-#define LZ_MIN_REFERENCE_LENGTH 2
+#define LZ_REFERENCE_LENGTH_MIN 2
 
 #define LZ_CONTROL_BIT_COUNT 16
 #define LZ_CONTROL_END_BIT 0x8000
@@ -226,7 +226,7 @@ s32 DecodeLzChunk(LzStream *stream) {
 
             source = output - (reference >> LZ_REFERENCE_DISTANCE_SHIFT);
             referenceEnd =
-                output + ((reference & LZ_REFERENCE_LENGTH_MASK) + LZ_MIN_REFERENCE_LENGTH);
+                output + ((reference & LZ_REFERENCE_LENGTH_MASK) + LZ_REFERENCE_LENGTH_MIN);
             *output = *source++;
             repeat = output + 1;
             do {

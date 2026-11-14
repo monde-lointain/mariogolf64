@@ -646,7 +646,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                             if (simulation->state == BALL_STATE_ROLLING &&
                                 (f32)Abs(
                                     simulation->position[AXIS_Y] - g_HoleSetup.cupPosition[AXIS_Y]
-                                ) < CUP_PULL_MAX_HEIGHT) {
+                                ) < CUP_PULL_HEIGHT_MAX) {
                                 f32 toCup[3];
                                 f32 direction[3];
                                 f32 alignment;
@@ -707,7 +707,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                                 startZ - g_HoleSetup.cupPosition[AXIS_Z]
                             ) < CUP_PULL_OUTER_RADIUS &&
                             (f32)Abs(startY - g_HoleSetup.cupPosition[AXIS_Y]) <
-                                CUP_PULL_MAX_HEIGHT) {
+                                CUP_PULL_HEIGHT_MAX) {
                             f32 fromCup[3];
                             f32 direction[3];
                             BallSpeed speed;

@@ -40,10 +40,10 @@
 
 #define TRAIL_STRETCH_FRAMES 8
 #define TRAIL_STRETCH_PER_FRAME 0.5f
-#define TRAIL_MAX_STRETCH 4.0f
+#define TRAIL_STRETCH_MAX 4.0f
 #define TRAIL_REGROW_FRAME 64
 #define TRAIL_REGROWTH_PER_FRAME 0.04f
-#define TRAIL_MIN_LENGTH 1.0f
+#define TRAIL_LENGTH_MIN 1.0f
 
 #define PARTICLE_SCALE 0.1f
 #define PARTICLE_DEPTH (-100.0f)
@@ -65,7 +65,7 @@
 #define PARTICLE_VELOCITY_JITTER_STEPS 64
 #define PARTICLE_VELOCITY_JITTER_STEP 0.0005f
 #define PARTICLE_LAUNCH_DOWNWARD_SPEED 0.5
-#define PARTICLE_MIN_LIFE 192
+#define PARTICLE_LIFE_MIN 192
 #define PARTICLE_LIFE_JITTER 128
 
 #define RandomParticleVelocityJitter() \
@@ -218,7 +218,7 @@ void LaunchFirework(Firework *firework, s32 fireworkIndex UNUSED) {
                     (((height / 2) - row) * PARTICLE_SPEED_PER_CELL) -
                     PARTICLE_LAUNCH_DOWNWARD_SPEED + RandomParticleVelocityJitter();
                 firework->particles[particleIndex].life =
-                    (guRandom() % PARTICLE_LIFE_JITTER) + PARTICLE_MIN_LIFE;
+                    (guRandom() % PARTICLE_LIFE_JITTER) + PARTICLE_LIFE_MIN;
                 particleIndex++;
             }
         }
@@ -310,15 +310,15 @@ void UpdateAndDrawFireworks(Gfx **displayListHead) {
                     }
                     else if (trailTimer > TRAIL_REGROW_FRAME) {
                         length = ((trailTimer - TRAIL_REGROW_FRAME) * TRAIL_REGROWTH_PER_FRAME) +
-                            TRAIL_MIN_LENGTH;
+                            TRAIL_LENGTH_MIN;
                     }
                     else {
-                        length *= TRAIL_MAX_STRETCH -
+                        length *= TRAIL_STRETCH_MAX -
                             ((trailTimer - TRAIL_STRETCH_FRAMES) * TRAIL_STRETCH_PER_FRAME);
                     }
 
-                    if (length < TRAIL_MIN_LENGTH) {
-                        length = TRAIL_MIN_LENGTH;
+                    if (length < TRAIL_LENGTH_MIN) {
+                        length = TRAIL_LENGTH_MIN;
                     }
 
                     transform[0][0] = -directionY * PARTICLE_SCALE;

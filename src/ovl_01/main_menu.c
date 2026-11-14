@@ -3759,8 +3759,8 @@ void UpdateUnusedBackToMain(void) {
 #define ERASE_CHOICE_COUNT 2
 #define SOUND_TEST_COARSE_STEP 10
 #define SOUND_TEST_LAST_SOUND 0x214
-#define SOUND_TEST_MAX_REVERB 0x7F
-#define SOUND_TEST_MAX_TEMPO 0xFF
+#define SOUND_TEST_REVERB_MAX 0x7F
+#define SOUND_TEST_TEMPO_MAX 0xFF
 #define SOUND_TEST_FREQUENCY_FINE_STEP 0.1f
 #define SOUND_TEST_FREQUENCY_COARSE_STEP 1.0f
 #define SOUND_TEST_FREQUENCY_LIMIT 12.0f
@@ -4028,8 +4028,8 @@ void UpdateOptionsScreen(void) {
                     f_SoundTestSongReverb = 0;
                 }
 
-                if (f_SoundTestSongReverb > SOUND_TEST_MAX_REVERB) {
-                    f_SoundTestSongReverb = SOUND_TEST_MAX_REVERB;
+                if (f_SoundTestSongReverb > SOUND_TEST_REVERB_MAX) {
+                    f_SoundTestSongReverb = SOUND_TEST_REVERB_MAX;
                 }
 
                 break;
@@ -4065,7 +4065,7 @@ void UpdateOptionsScreen(void) {
                 }
 
                 if ((g_MenuRepeatButtons & R_JPAD) &&
-                    f_SoundTestSongTempo <= SOUND_TEST_MAX_TEMPO) {
+                    f_SoundTestSongTempo <= SOUND_TEST_TEMPO_MAX) {
                     f_SoundTestSongTempo++;
                 }
 
@@ -4074,7 +4074,7 @@ void UpdateOptionsScreen(void) {
                 }
 
                 if ((g_MenuRepeatButtons & R_CBUTTONS) &&
-                    f_SoundTestSongTempo <= SOUND_TEST_MAX_TEMPO) {
+                    f_SoundTestSongTempo <= SOUND_TEST_TEMPO_MAX) {
                     f_SoundTestSongTempo += SOUND_TEST_COARSE_STEP;
                 }
 
@@ -4082,8 +4082,8 @@ void UpdateOptionsScreen(void) {
                     f_SoundTestSongTempo = 0;
                 }
 
-                if (f_SoundTestSongTempo > SOUND_TEST_MAX_TEMPO) {
-                    f_SoundTestSongTempo = SOUND_TEST_MAX_TEMPO;
+                if (f_SoundTestSongTempo > SOUND_TEST_TEMPO_MAX) {
+                    f_SoundTestSongTempo = SOUND_TEST_TEMPO_MAX;
                 }
 
                 break;
@@ -4134,8 +4134,8 @@ void UpdateOptionsScreen(void) {
                     f_SoundTestSoundReverb = 0;
                 }
 
-                if (f_SoundTestSoundReverb > SOUND_TEST_MAX_REVERB) {
-                    f_SoundTestSoundReverb = SOUND_TEST_MAX_REVERB;
+                if (f_SoundTestSoundReverb > SOUND_TEST_REVERB_MAX) {
+                    f_SoundTestSoundReverb = SOUND_TEST_REVERB_MAX;
                 }
 
                 break;

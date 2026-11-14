@@ -121,10 +121,10 @@ static u8 *f_HeapEnd = NULL;
 static u16 f_DrawOrder[BILLBOARD_COUNT] = {0};
 static s8 f_UnusedBytesAfterDrawOrder[2] UNUSED = {1, 1};
 
-#define COURSE_EDGE_MIN_X 256.0f
-#define COURSE_EDGE_MIN_Z 256.0f
-#define COURSE_EDGE_MAX_X 3840.0f
-#define COURSE_EDGE_MAX_Z 7936.0f
+#define COURSE_EDGE_X_MIN 256.0f
+#define COURSE_EDGE_Z_MIN 256.0f
+#define COURSE_EDGE_X_MAX 3840.0f
+#define COURSE_EDGE_Z_MAX 7936.0f
 
 #define GROUND_HEIGHT_SCALE 1024
 
@@ -180,10 +180,10 @@ const BillboardColor g_BillboardEnvColor = {128, 64, 32};
 
 #define IsNearCourseEdge(x, z) \
     (!g_GameState.isMiniGolf && \
-        (((x) <= COURSE_EDGE_MIN_X) || \
-            ((z) <= COURSE_EDGE_MIN_Z) || \
-            ((x) >= COURSE_EDGE_MAX_X) || \
-            ((z) >= COURSE_EDGE_MAX_Z)))
+        (((x) <= COURSE_EDGE_X_MIN) || \
+            ((z) <= COURSE_EDGE_Z_MIN) || \
+            ((x) >= COURSE_EDGE_X_MAX) || \
+            ((z) >= COURSE_EDGE_Z_MAX)))
 
 void PlaceBillboards(void) {
     s32 billboardIndex;

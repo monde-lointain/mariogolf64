@@ -76,21 +76,21 @@
 #define IMPACT_POINT_BUTTONS (Z_TRIG | L_TRIG)
 
 #define DECIMETERS_PER_UNIT (1.0f / 1536)
-#define NEAR_CUP_MAX_DECIMETERS 600.0f
+#define NEAR_CUP_DECIMETERS_MAX 600.0f
 
-#define SHOT_KIND_MAX_COUNT 0xFF
+#define SHOT_KIND_COUNT_MAX 0xFF
 #define RING_SHOT_CLEAR_COUNT_MAX 99
 
 #define HOLE_OUT_CALL_CHANNEL 3
 #define DPAD_STICK_TILT 40
-#define AIM_CAMERA_MAX_X 4347904.0f
-#define AIM_CAMERA_MAX_Z 8542208.0f
+#define AIM_CAMERA_X_MAX 4347904.0f
+#define AIM_CAMERA_Z_MAX 8542208.0f
 #define AIM_LOOK_AT_RISE 17.25f
-#define AIM_CAMERA_MIN_COORDINATE (-0x25800)
-#define AIM_CAMERA_COURSE_MAX_X 0x425800
-#define AIM_CAMERA_COURSE_MAX_Z 0x825800
-#define AIM_CAMERA_MINI_GOLF_MAX_X 0x109600
-#define AIM_CAMERA_MINI_GOLF_MAX_Z 0x104B00
+#define AIM_CAMERA_COORDINATE_MIN (-0x25800)
+#define AIM_CAMERA_COURSE_X_MAX 0x425800
+#define AIM_CAMERA_COURSE_Z_MAX 0x825800
+#define AIM_CAMERA_MINI_GOLF_X_MAX 0x109600
+#define AIM_CAMERA_MINI_GOLF_Z_MAX 0x104B00
 #define AIM_CAMERA_PUSH_STEP 0x25800
 #define AIM_CAMERA_MINI_GOLF_PUSH_STEP 0xB400
 #define DOWN_RANGE_GREEN_OFFSET (-0x10E00)
@@ -104,7 +104,7 @@
 #define AIM_CAMERA_APPROACH_HEIGHT (-0x12C00)
 #define AIM_CAMERA_SHOT_HEIGHT (-0x25800)
 #define AIM_CAMERA_EASE_FRACTION 0.3f
-#define AIM_CAMERA_MAX_EASE_STEP (10 * UNITS_PER_YARD)
+#define AIM_CAMERA_EASE_STEP_MAX (10 * UNITS_PER_YARD)
 #define FREE_LOOK_START_DISTANCE (-0x12C00)
 #define FREE_LOOK_TURN_STEP 200
 #define TURN_RUMBLE_FREQUENCY 0x100
@@ -116,18 +116,18 @@
 #define AMBIENT_SOUND_VOLUME 0x5F
 #define AMBIENT_SOUND_REVERB 15
 #define SOUND_PAN_RANGE 255
-#define HOLE_RECORD_MAX_STROKES 5
-#define RING_SHOT_RECORD_MAX_STROKES 6
+#define HOLE_RECORD_STROKES_MAX 5
+#define RING_SHOT_RECORD_STROKES_MAX 6
 #define IMPACT_SOUND_VOLUME 0x64
 #define LIE_PRIORITY_TEE 2
 #define STROKE_PRIORITY_BASE 200
 #define AIM_STICK_SPEED_DIVISOR 4
 #define LOOK_BACK_STICK_SPEED_DIVISOR 6
-#define AIM_DPAD_MAX_FRAMES 60
+#define AIM_DPAD_FRAMES_MAX 60
 #define AIM_DPAD_SPEED_DIVISOR 6
 #define AIM_DPAD_BASE_SPEED 3
-#define SHOT_PREVIEW_MIN_STEPS 2
-#define SHOT_PREVIEW_MAX_STEPS 20
+#define SHOT_PREVIEW_STEPS_MIN 2
+#define SHOT_PREVIEW_STEPS_MAX 20
 #define SHOT_PREVIEW_SCROLL_STEP 8
 #define INITIAL_SHOT_PREVIEW_STEP_COUNT 10
 #define AIM_CAMERA_DEBUG_TILT_SCALE 30.0f
@@ -153,7 +153,7 @@
 #define SHOT_CAMERA_FIELD_OF_VIEW 45.0f
 #define GIVE_UP_PAR_MULTIPLE 3
 #define GAME_FLAG_SNAP_REPLAY_AIM 0xF
-#define REPLAY_AIM_MIN_STEP 0x80
+#define REPLAY_AIM_STEP_MIN 0x80
 #define REPLAY_AIM_STEP_DIVISOR 128
 #define REPLAY_AIM_SETTLE_FRAMES 6
 #define AIM_RESET_BUTTONS (L_CBUTTONS | R_CBUTTONS)
@@ -165,18 +165,18 @@
 #define IMPACT_POINT_LINGER_FRAMES 3
 #define LOOK_BACK_EXTRA_DISTANCE 53760.0f
 #define LOOK_BACK_START_HEIGHT (-0x1E00)
-#define GREEN_AIM_CAMERA_MIN_HEIGHT (-0x2A00)
-#define AIM_CAMERA_MIN_HEIGHT (-0x3C00)
-#define AIM_CAMERA_MAX_HEIGHT (-0x96000)
-#define LOOK_BACK_MIN_DISTANCE (-0x177000)
-#define LOOK_BACK_MAX_DISTANCE 0x177000
-#define AIM_CAMERA_MIN_DISTANCE (-0xBB800)
-#define AIM_CAMERA_MAX_DISTANCE 0x8CA000
+#define GREEN_AIM_CAMERA_HEIGHT_MIN (-0x2A00)
+#define AIM_CAMERA_HEIGHT_MIN (-0x3C00)
+#define AIM_CAMERA_HEIGHT_MAX (-0x96000)
+#define LOOK_BACK_DISTANCE_MIN (-0x177000)
+#define LOOK_BACK_DISTANCE_MAX 0x177000
+#define AIM_CAMERA_DISTANCE_MIN (-0xBB800)
+#define AIM_CAMERA_DISTANCE_MAX 0x8CA000
 #define AIM_VIEW_TOGGLE_COUNT 2
 #define PUTT_PREVIEW_HALF_WIDTH 10.0f
 #define GAME_FLAG_HIDE_SHOT_PREVIEW 0x4B
 #define GAME_FLAG_TUNE_SHOT_PREVIEW 0x71
-#define STARTING_CLUB_MIN_LIE_RATING 2
+#define STARTING_CLUB_LIE_RATING_MIN 2
 #define GAME_FLAG_AIM_DOWN_RANGE 0x24
 #define RECORDED_STROKE_COUNT_MAX 4
 #define STROKE_COUNT_MAX 99
@@ -214,13 +214,13 @@
 #define PLAN_PREPARING_TIME_BUDGET 10
 #define PLAN_START_TIME_BUDGET 30
 #define PLAN_TIME_BUDGET_GROWTH 1.05f
-#define PLAN_MAX_TIME_BUDGET 0x800
+#define PLAN_TIME_BUDGET_MAX 0x800
 #define INITIAL_PLAN_TIME_BUDGET 10
-#define PREPARED_SHOT_MIN_AIM_FRAMES 30
+#define PREPARED_SHOT_AIM_FRAMES_MIN 30
 #define SKIPPED_SWING_IMPACT_FRAME 15
 #define FIRST_REPLAY_SWING_COUNT 2
 #define IsReplayingShot() (f_SwingCount >= FIRST_REPLAY_SWING_COUNT)
-#define REPLAY_MIN_SWING_FRAMES 40
+#define REPLAY_SWING_FRAMES_MIN 40
 
 #define WOOD_SWING_TRAIL_LEAD_FRAMES 3
 #define FAST_FLIGHT_LAUNCH_FRAME 4
@@ -337,8 +337,8 @@ static s32 f_UnusedDebugHoleIndex;
 static s32 f_SkippedSwingFrames;
 static s32 f_ShotSource;
 static s32 f_TurnTimerStart;
-static Mtx f_ShotPreviewMatrices[DRAW_BUFFER_COUNT][SHOT_PREVIEW_MAX_STEPS];
-static f32 f_ShotPreviewPoints[SHOT_PREVIEW_MAX_STEPS][AXIS_COUNT];
+static Mtx f_ShotPreviewMatrices[DRAW_BUFFER_COUNT][SHOT_PREVIEW_STEPS_MAX];
+static f32 f_ShotPreviewPoints[SHOT_PREVIEW_STEPS_MAX][AXIS_COUNT];
 
 s32 f_AimFrameCount;
 
@@ -357,19 +357,19 @@ void KeepAimCameraOnCourse(void) {
     f32 overshoot;
 
     if (g_GameState.isMiniGolf) {
-        xMax = AIM_CAMERA_MINI_GOLF_MAX_X;
-        zMax = AIM_CAMERA_MINI_GOLF_MAX_Z;
+        xMax = AIM_CAMERA_MINI_GOLF_X_MAX;
+        zMax = AIM_CAMERA_MINI_GOLF_Z_MAX;
     }
     else {
-        xMax = AIM_CAMERA_COURSE_MAX_X;
-        zMax = AIM_CAMERA_COURSE_MAX_Z;
+        xMax = AIM_CAMERA_COURSE_X_MAX;
+        zMax = AIM_CAMERA_COURSE_Z_MAX;
     }
 
     heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
     overshoot = 0.0f;
     offset = cosf(heading) * g_CurrentShot.aimCameraDistance;
     eye[AXIS_X] = offset + g_CurrentShot.ballPosition[AXIS_X];
-    coordinateMin = AIM_CAMERA_MIN_COORDINATE;
+    coordinateMin = AIM_CAMERA_COORDINATE_MIN;
     if (eye[AXIS_X] < coordinateMin) {
         overshoot = coordinateMin - eye[AXIS_X];
     }
@@ -503,20 +503,20 @@ void PlaceShotCamera(void) {
             (cosf(heading) * g_CurrentShot.aimCameraDistance) + g_CurrentShot.ballPosition[AXIS_X];
         point[AXIS_Z] =
             (sinf(heading) * g_CurrentShot.aimCameraDistance) + g_CurrentShot.ballPosition[AXIS_Z];
-        if (point[AXIS_X] < AIM_CAMERA_MIN_COORDINATE) {
-            point[AXIS_X] = AIM_CAMERA_MIN_COORDINATE;
+        if (point[AXIS_X] < AIM_CAMERA_COORDINATE_MIN) {
+            point[AXIS_X] = AIM_CAMERA_COORDINATE_MIN;
         }
-        else if (point[AXIS_X] > AIM_CAMERA_MAX_X) {
-            point[AXIS_X] = AIM_CAMERA_MAX_X;
+        else if (point[AXIS_X] > AIM_CAMERA_X_MAX) {
+            point[AXIS_X] = AIM_CAMERA_X_MAX;
             g_IsAimCameraEasing = 0;
         }
 
-        if (point[AXIS_Z] < AIM_CAMERA_MIN_COORDINATE) {
-            point[AXIS_Z] = AIM_CAMERA_MIN_COORDINATE;
+        if (point[AXIS_Z] < AIM_CAMERA_COORDINATE_MIN) {
+            point[AXIS_Z] = AIM_CAMERA_COORDINATE_MIN;
             g_IsAimCameraEasing = 0;
         }
-        else if (point[AXIS_Z] > AIM_CAMERA_MAX_Z) {
-            point[AXIS_Z] = AIM_CAMERA_MAX_Z;
+        else if (point[AXIS_Z] > AIM_CAMERA_Z_MAX) {
+            point[AXIS_Z] = AIM_CAMERA_Z_MAX;
             g_IsAimCameraEasing = 0;
         }
 
@@ -643,8 +643,8 @@ void AimDownRange(void) {
     if (lookAt[AXIS_X] < 0.0f) {
         lookAt[AXIS_X] = 0.0f;
     }
-    else if (lookAt[AXIS_X] >= AIM_CAMERA_MAX_X) {
-        lookAt[AXIS_X] = AIM_CAMERA_MAX_X - 1.0f;
+    else if (lookAt[AXIS_X] >= AIM_CAMERA_X_MAX) {
+        lookAt[AXIS_X] = AIM_CAMERA_X_MAX - 1.0f;
     }
 
     lookAt[AXIS_Z] =
@@ -652,8 +652,8 @@ void AimDownRange(void) {
     if (lookAt[AXIS_Z] < 0.0f) {
         lookAt[AXIS_Z] = 0.0f;
     }
-    else if (lookAt[AXIS_Z] >= AIM_CAMERA_MAX_Z) {
-        lookAt[AXIS_Z] = AIM_CAMERA_MAX_Z - 1.0f;
+    else if (lookAt[AXIS_Z] >= AIM_CAMERA_Z_MAX) {
+        lookAt[AXIS_Z] = AIM_CAMERA_Z_MAX - 1.0f;
     }
 
     lookAt[AXIS_X] = (cosf(heading) * (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)) +
@@ -679,8 +679,8 @@ void PlaceAimCamera(void) {
     if (eye[AXIS_X] < 0.0f) {
         eye[AXIS_X] = 0.0f;
     }
-    else if (eye[AXIS_X] >= AIM_CAMERA_MAX_X) {
-        eye[AXIS_X] = AIM_CAMERA_MAX_X - 1.0f;
+    else if (eye[AXIS_X] >= AIM_CAMERA_X_MAX) {
+        eye[AXIS_X] = AIM_CAMERA_X_MAX - 1.0f;
     }
 
     eye[AXIS_Z] =
@@ -688,8 +688,8 @@ void PlaceAimCamera(void) {
     if (eye[AXIS_Z] < 0.0f) {
         eye[AXIS_Z] = 0.0f;
     }
-    else if (eye[AXIS_Z] >= AIM_CAMERA_MAX_Z) {
-        eye[AXIS_Z] = AIM_CAMERA_MAX_Z - 1.0f;
+    else if (eye[AXIS_Z] >= AIM_CAMERA_Z_MAX) {
+        eye[AXIS_Z] = AIM_CAMERA_Z_MAX - 1.0f;
     }
 
     eye[AXIS_Y] = GetGroundHeight(eye[AXIS_X], eye[AXIS_Z]);
@@ -791,12 +791,12 @@ void EaseAimCamera(void) {
         targetHeight = AIM_CAMERA_SHOT_HEIGHT;
     }
 
-    if (fabsf(g_CurrentShot.aimCameraDistance - targetDistance) > AIM_CAMERA_MAX_EASE_STEP) {
+    if (fabsf(g_CurrentShot.aimCameraDistance - targetDistance) > AIM_CAMERA_EASE_STEP_MAX) {
         if (g_CurrentShot.aimCameraDistance > targetDistance) {
-            g_CurrentShot.aimCameraDistance -= AIM_CAMERA_MAX_EASE_STEP;
+            g_CurrentShot.aimCameraDistance -= AIM_CAMERA_EASE_STEP_MAX;
         }
         else {
-            g_CurrentShot.aimCameraDistance += AIM_CAMERA_MAX_EASE_STEP;
+            g_CurrentShot.aimCameraDistance += AIM_CAMERA_EASE_STEP_MAX;
         }
     }
     else {
@@ -984,8 +984,8 @@ void TurnAim(s32 turnsLookBackHeading) {
             *dpadFrames = 0;
         }
 
-        if (++*dpadFrames > AIM_DPAD_MAX_FRAMES) {
-            *dpadFrames = AIM_DPAD_MAX_FRAMES;
+        if (++*dpadFrames > AIM_DPAD_FRAMES_MAX) {
+            *dpadFrames = AIM_DPAD_FRAMES_MAX;
         }
     }
     else {
@@ -995,8 +995,8 @@ void TurnAim(s32 turnsLookBackHeading) {
             *dpadFrames = 0;
         }
 
-        if (--*dpadFrames < -AIM_DPAD_MAX_FRAMES) {
-            *dpadFrames = -AIM_DPAD_MAX_FRAMES;
+        if (--*dpadFrames < -AIM_DPAD_FRAMES_MAX) {
+            *dpadFrames = -AIM_DPAD_FRAMES_MAX;
         }
     }
 
@@ -1037,8 +1037,8 @@ void TurnAim(s32 turnsLookBackHeading) {
         if (g_CurrentShot.aimCameraHeight > (heightMin)) { \
             g_CurrentShot.aimCameraHeight = (heightMin); \
         } \
-        if (g_CurrentShot.aimCameraHeight < AIM_CAMERA_MAX_HEIGHT) { \
-            g_CurrentShot.aimCameraHeight = AIM_CAMERA_MAX_HEIGHT; \
+        if (g_CurrentShot.aimCameraHeight < AIM_CAMERA_HEIGHT_MAX) { \
+            g_CurrentShot.aimCameraHeight = AIM_CAMERA_HEIGHT_MAX; \
         } \
         if (g_CurrentShot.aimCameraDistance < (distanceMin)) { \
             g_CurrentShot.aimCameraDistance = (distanceMin); \
@@ -1057,7 +1057,7 @@ s32 UpdateAimControls(void) {
 
     if (f_ShotSource != SHOT_SOURCE_PLAYER) {
         headingLeft = (s16)(g_ScriptedShot.heading - g_CurrentShot.heading);
-        if (IsGameFlagSet(GAME_FLAG_SNAP_REPLAY_AIM) || Abs(headingLeft) < REPLAY_AIM_MIN_STEP) {
+        if (IsGameFlagSet(GAME_FLAG_SNAP_REPLAY_AIM) || Abs(headingLeft) < REPLAY_AIM_STEP_MIN) {
             g_CurrentShot.heading = g_ScriptedShot.heading;
             if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
                 SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
@@ -1068,7 +1068,7 @@ s32 UpdateAimControls(void) {
         }
 
         step = headingLeft / REPLAY_AIM_STEP_DIVISOR;
-        turn = Abs(step) + REPLAY_AIM_MIN_STEP;
+        turn = Abs(step) + REPLAY_AIM_STEP_MIN;
         heading = g_CurrentShot.heading;
         g_CurrentShot.heading = (headingLeft < 0) ? heading - turn : heading + turn;
         if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
@@ -1381,17 +1381,17 @@ s32 UpdateAimControls(void) {
     }
 
     if (g_LetterboxState == LETTERBOX_STATE_LOOKING_BACK) {
-        ClampAimCamera(GREEN_AIM_CAMERA_MIN_HEIGHT, LOOK_BACK_MIN_DISTANCE, LOOK_BACK_MAX_DISTANCE);
+        ClampAimCamera(GREEN_AIM_CAMERA_HEIGHT_MIN, LOOK_BACK_DISTANCE_MIN, LOOK_BACK_DISTANCE_MAX);
     }
     else if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
         ClampAimCamera(
-            GREEN_AIM_CAMERA_MIN_HEIGHT,
-            AIM_CAMERA_MIN_DISTANCE,
-            AIM_CAMERA_MAX_DISTANCE
+            GREEN_AIM_CAMERA_HEIGHT_MIN,
+            AIM_CAMERA_DISTANCE_MIN,
+            AIM_CAMERA_DISTANCE_MAX
         );
     }
     else {
-        ClampAimCamera(AIM_CAMERA_MIN_HEIGHT, AIM_CAMERA_MIN_DISTANCE, AIM_CAMERA_MAX_DISTANCE);
+        ClampAimCamera(AIM_CAMERA_HEIGHT_MIN, AIM_CAMERA_DISTANCE_MIN, AIM_CAMERA_DISTANCE_MAX);
     }
 
     g_Cameras[1].view.eye[AXIS_X] = g_Cameras[0].view.eye[AXIS_X];
@@ -1430,7 +1430,7 @@ void UpdateShotFlags(void) {
         g_ShotFlags |= SHOT_FLAG_APPROACH;
     }
 
-    if (g_CurrentShot.cupDistance * DECIMETERS_PER_UNIT <= NEAR_CUP_MAX_DECIMETERS) {
+    if (g_CurrentShot.cupDistance * DECIMETERS_PER_UNIT <= NEAR_CUP_DECIMETERS_MAX) {
         g_ShotFlags |= SHOT_FLAG_NEAR_CUP;
     }
 }
@@ -1510,13 +1510,13 @@ void PickStartingClub(HoleSetup *hole) {
                 ratingMin = rating;
             }
 
-            if (rating >= STARTING_CLUB_MIN_LIE_RATING) {
+            if (rating >= STARTING_CLUB_LIE_RATING_MIN) {
                 break;
             }
         }
 
-        if (ratingMin > STARTING_CLUB_MIN_LIE_RATING) {
-            ratingMin = STARTING_CLUB_MIN_LIE_RATING;
+        if (ratingMin > STARTING_CLUB_LIE_RATING_MIN) {
+            ratingMin = STARTING_CLUB_LIE_RATING_MIN;
         }
 
         for (clubSlot = 0; clubSlot < clubCount; clubSlot++) {
@@ -1604,7 +1604,7 @@ void CountNotableShot(s32 playerIndex, s32 shotKind) {
     }
 
     count = (u8 *)&g_Players[playerIndex].notableShotCounts[shotKind];
-    if (*count < SHOT_KIND_MAX_COUNT) {
+    if (*count < SHOT_KIND_COUNT_MAX) {
         osSyncPrintf("EXP GET type %d\n", shotKind);
         (*count)++;
     }
@@ -1733,22 +1733,22 @@ void BuildShotPreview(ShotLaunch *shot, s32 playerState) {
     if (IsGameFlagSet(GAME_FLAG_TUNE_SHOT_PREVIEW)) {
         PrintDebugText("               ", 10, 10);
         if ((g_ControllerStates[0].pressedButtons & U_JPAD) &&
-            f_ShotPreviewStepCount < SHOT_PREVIEW_MAX_STEPS) {
+            f_ShotPreviewStepCount < SHOT_PREVIEW_STEPS_MAX) {
             f_ShotPreviewStepCount++;
         }
 
         if ((g_ControllerStates[0].pressedButtons & D_JPAD) &&
-            f_ShotPreviewStepCount > SHOT_PREVIEW_MIN_STEPS) {
+            f_ShotPreviewStepCount > SHOT_PREVIEW_STEPS_MIN) {
             f_ShotPreviewStepCount--;
         }
 
         if ((g_ControllerStates[0].buttons & L_JPAD) &&
-            f_ShotPreviewStepCount < SHOT_PREVIEW_MAX_STEPS) {
+            f_ShotPreviewStepCount < SHOT_PREVIEW_STEPS_MAX) {
             f_ShotPreviewStepCount++;
         }
 
         if ((g_ControllerStates[0].buttons & R_JPAD) &&
-            f_ShotPreviewStepCount > SHOT_PREVIEW_MIN_STEPS) {
+            f_ShotPreviewStepCount > SHOT_PREVIEW_STEPS_MIN) {
             f_ShotPreviewStepCount--;
         }
 
@@ -1805,7 +1805,7 @@ void BuildShotPreview(ShotLaunch *shot, s32 playerState) {
         f_ShotPreviewPoints[step][AXIS_X] = simulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
         f_ShotPreviewPoints[step][AXIS_Y] = simulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
         f_ShotPreviewPoints[step][AXIS_Z] = simulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-        if (length != 0 && length <= SHOT_PREVIEW_MAX_DASH_LENGTH) {
+        if (length != 0 && length <= SHOT_PREVIEW_DASH_LENGTH_MAX) {
             guScaleF(dash, 1.0f, 1.0f, length * COURSE_TO_WORLD_SCALE);
             guAlignF(
                 align,
@@ -2102,7 +2102,7 @@ Boolean IsRingShotRound(void) {
 void RecordHoleOut(s32 playerIndex) {
     u32 shotIndex = g_Players[playerIndex].strokeCount - 1;
 
-    if (shotIndex < HOLE_RECORD_MAX_STROKES) {
+    if (shotIndex < HOLE_RECORD_STROKES_MAX) {
         PlayRecord *record = &g_PlayRecords[playerIndex];
 
         record->gameMode = g_GameState.gameMode;
@@ -2128,7 +2128,7 @@ void RecordHoleOut(s32 playerIndex) {
 void RecordRingShotHole(s32 playerIndex) {
     u32 shotIndex = g_Players[playerIndex].strokeCount - 1;
 
-    if (shotIndex < RING_SHOT_RECORD_MAX_STROKES) {
+    if (shotIndex < RING_SHOT_RECORD_STROKES_MAX) {
         RingShotRecord *record = &g_RingShotRecords[playerIndex];
 
         record->courseIndex = g_GameState.courseIndex;
@@ -2851,16 +2851,16 @@ void UpdateTurns(void) {
             g_Players[playerIndex].stopwatchFrameCount++;
             g_GameState.stopwatchFrameCount++;
             g_HoleTimeFrames[g_GameState.holeIndex]++;
-            if (g_Players[playerIndex].stopwatchFrameCount > STOPWATCH_MAX_FRAMES) {
-                g_Players[playerIndex].stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
+            if (g_Players[playerIndex].stopwatchFrameCount > STOPWATCH_FRAMES_MAX) {
+                g_Players[playerIndex].stopwatchFrameCount = STOPWATCH_FRAMES_MAX;
             }
 
-            if (g_GameState.stopwatchFrameCount > STOPWATCH_MAX_FRAMES) {
-                g_GameState.stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
+            if (g_GameState.stopwatchFrameCount > STOPWATCH_FRAMES_MAX) {
+                g_GameState.stopwatchFrameCount = STOPWATCH_FRAMES_MAX;
             }
 
-            if (g_HoleTimeFrames[g_GameState.holeIndex] > STOPWATCH_MAX_FRAMES) {
-                g_HoleTimeFrames[g_GameState.holeIndex] = STOPWATCH_MAX_FRAMES;
+            if (g_HoleTimeFrames[g_GameState.holeIndex] > STOPWATCH_FRAMES_MAX) {
+                g_HoleTimeFrames[g_GameState.holeIndex] = STOPWATCH_FRAMES_MAX;
             }
         }
     }
@@ -3556,8 +3556,8 @@ void UpdateTurns(void) {
                         }
 
                         f_PlanTimeBudget *= PLAN_TIME_BUDGET_GROWTH;
-                        if (f_PlanTimeBudget > PLAN_MAX_TIME_BUDGET) {
-                            f_PlanTimeBudget = PLAN_MAX_TIME_BUDGET;
+                        if (f_PlanTimeBudget > PLAN_TIME_BUDGET_MAX) {
+                            f_PlanTimeBudget = PLAN_TIME_BUDGET_MAX;
                         }
 
                         if (f_ShotSource == SHOT_SOURCE_PLANNING) {
@@ -3566,7 +3566,7 @@ void UpdateTurns(void) {
                     }
 
                     if (f_ShotSource != SHOT_SOURCE_PLAYER &&
-                        f_AimFrameCount < PREPARED_SHOT_MIN_AIM_FRAMES) {
+                        f_AimFrameCount < PREPARED_SHOT_AIM_FRAMES_MIN) {
                         break;
                     }
 
@@ -4149,7 +4149,7 @@ void UpdateTurns(void) {
                 }
 
                 if (IsReplayingShot() &&
-                    f_StateFrameCounts[playerIndex] >= REPLAY_MIN_SWING_FRAMES &&
+                    f_StateFrameCounts[playerIndex] >= REPLAY_SWING_FRAMES_MIN &&
                     f_IsReplayRequested) {
                     nextState = PLAYER_STATE_STARTING_SWING;
                 }
@@ -4446,18 +4446,18 @@ void UpdateTurns(void) {
                                 g_HoleTimeFrames[g_GameState.holeIndex] +=
                                     STROKE_LIMIT_PENALTY_MINUTES * FRAMES_PER_MINUTE;
                                 if (g_Players[playerIndex].stopwatchFrameCount >
-                                    STOPWATCH_MAX_FRAMES) {
+                                    STOPWATCH_FRAMES_MAX) {
                                     g_Players[playerIndex].stopwatchFrameCount =
-                                        STOPWATCH_MAX_FRAMES;
+                                        STOPWATCH_FRAMES_MAX;
                                 }
 
-                                if (g_GameState.stopwatchFrameCount > STOPWATCH_MAX_FRAMES) {
-                                    g_GameState.stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
+                                if (g_GameState.stopwatchFrameCount > STOPWATCH_FRAMES_MAX) {
+                                    g_GameState.stopwatchFrameCount = STOPWATCH_FRAMES_MAX;
                                 }
 
                                 if (g_HoleTimeFrames[g_GameState.holeIndex] >
-                                    STOPWATCH_MAX_FRAMES) {
-                                    g_HoleTimeFrames[g_GameState.holeIndex] = STOPWATCH_MAX_FRAMES;
+                                    STOPWATCH_FRAMES_MAX) {
+                                    g_HoleTimeFrames[g_GameState.holeIndex] = STOPWATCH_FRAMES_MAX;
                                 }
                             }
 

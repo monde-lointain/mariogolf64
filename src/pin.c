@@ -48,8 +48,8 @@
 #define SMALL_CUP_TEXTURE_SIZE 8
 #define FLAGSTICK_TEXTURE_SIZE 16
 
-#define CUP_MAX_HALF_HEIGHT 5.0f
-#define CUP_MIN_HALF_HEIGHT 1.0f
+#define CUP_HALF_HEIGHT_MAX 5.0f
+#define CUP_HALF_HEIGHT_MIN 1.0f
 #define STICK_FOOT_HALF_DISTANCE 614.4f
 
 #define PART_DEPTH_BIAS 120
@@ -61,9 +61,9 @@
 #define FLAGSTICK_DEPTH_OFFSET 40.0f
 
 #define CUP_SCREEN_RADIUS 1.7999999999999998
-#define SCREEN_CUP_MAX_SIZE 10.0f
+#define SCREEN_CUP_SIZE_MAX 10.0f
 #define FLAGSTICK_SCREEN_RADIUS 0.6000000000000001
-#define SCREEN_FLAGSTICK_MAX_SIZE 2.0f
+#define SCREEN_FLAGSTICK_SIZE_MAX 2.0f
 #define SCREEN_CUP_LEFT (-4)
 #define SCREEN_CUP_RIGHT 5
 #define SCREEN_CUP_WALL_HEIGHT 6
@@ -355,9 +355,9 @@ void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex)
                         offset[AXIS_Y],
                         sqrtf((offset[AXIS_X] * offset[AXIS_X]) + (offset[AXIS_Z] * offset[AXIS_Z]))
                     )) *
-        CUP_MAX_HALF_HEIGHT;
-    if (cupHalfHeight < CUP_MIN_HALF_HEIGHT) {
-        cupHalfHeight = CUP_MIN_HALF_HEIGHT;
+        CUP_HALF_HEIGHT_MAX;
+    if (cupHalfHeight < CUP_HALF_HEIGHT_MIN) {
+        cupHalfHeight = CUP_HALF_HEIGHT_MIN;
     }
 
     offset[AXIS_X] = view->lookAt[AXIS_X] - view->eye[AXIS_X];
@@ -572,7 +572,7 @@ void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex)
             }
 
             if ((f32)(cupScreenScale * (CUP_SCREEN_RADIUS * g_PinVertexScale)) <
-                SCREEN_CUP_MAX_SIZE) {
+                SCREEN_CUP_SIZE_MAX) {
                 gSPModifyVertex(
                     g_DisplayListHead++,
                     0,
@@ -693,7 +693,7 @@ void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex)
                 stickScreenScale = -stickScreenScale;
             }
 
-            if ((f32)(stickScreenScale * FLAGSTICK_SCREEN_RADIUS) < SCREEN_FLAGSTICK_MAX_SIZE) {
+            if ((f32)(stickScreenScale * FLAGSTICK_SCREEN_RADIUS) < SCREEN_FLAGSTICK_SIZE_MAX) {
                 gSPModifyVertex(
                     g_DisplayListHead++,
                     11,

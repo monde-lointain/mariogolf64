@@ -82,7 +82,7 @@ enum PauseValueText {
 
 #define PAUSE_OPTION_GIVE_UP 2
 
-#define PAUSE_LAYOUT_MAX_OPTIONS 9
+#define PAUSE_LAYOUT_OPTIONS_MAX 9
 #define PAUSE_OPTION_MESSAGE_BASE 0x77
 
 enum PauseMessage {
@@ -110,7 +110,7 @@ typedef struct PauseOption {
     u16 kind;
 } PauseOption;
 
-#define CHOICE_BOX_MAX_OPTIONS 4
+#define CHOICE_BOX_OPTIONS_MAX 4
 #define MENU_SOUND_VOLUME 100
 
 enum ChoiceBoxState {
@@ -135,8 +135,8 @@ typedef struct ChoiceBox {
     s32 optionCount;
     s32 halfWidth;
     Boolean isVertical;
-    u8 labels[CHOICE_BOX_MAX_OPTIONS];
-    u8 results[CHOICE_BOX_MAX_OPTIONS];
+    u8 labels[CHOICE_BOX_OPTIONS_MAX];
+    u8 results[CHOICE_BOX_OPTIONS_MAX];
 } ChoiceBox;
 
 #define CHOICE_BOX_CENTER_X (SCREEN_WIDTH / 2)
@@ -222,7 +222,7 @@ static PauseOption f_PauseOptions[] = {
 
 static char *f_PauseValueTexts[] = {"Clear", "Rain", "Black", "White"};
 
-static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_MAX_OPTIONS] = {
+static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
     {
         PAUSE_ACTION_FREE_LOOK,
         PAUSE_ACTION_SCORECARD,

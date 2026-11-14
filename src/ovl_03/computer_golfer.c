@@ -299,7 +299,7 @@ Boolean IsStrokeLimitReached(void) {
     return g_Players[f_Shot.playerIndex].strokeCount >= g_HoleSetup.par + f_HoleTargetToPar - 1;
 }
 
-#define SIDE_SLOPE_MIN_DISTANCE 15360.0f
+#define SIDE_SLOPE_DISTANCE_MIN 15360.0f
 #define SIDE_SLOPE_SAMPLE_SPACING 7680.0f
 #define SIDE_SLOPE_SAMPLE_REACH 1536.0f
 #define SIDE_SLOPE_STEP 64
@@ -323,7 +323,7 @@ s32 GetSideSlope(void) {
     direction[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] - f_Shot.ballPosition[AXIS_Z];
     distance = Length2D(direction[AXIS_X], direction[AXIS_Z]);
     sideSlope = 0;
-    if (distance < SIDE_SLOPE_MIN_DISTANCE) {
+    if (distance < SIDE_SLOPE_DISTANCE_MIN) {
         return 0;
     }
 
@@ -831,7 +831,7 @@ s32 GetBallCupDistance(void) {
     );
 }
 
-#define WIND_ALLOWANCE_MIN_DISTANCE 153600.0f
+#define WIND_ALLOWANCE_DISTANCE_MIN 153600.0f
 #define WIND_PUSH_UNIT 0x10000
 #define WIND_SPEED_SCALE (1.0f / WIND_PUSH_UNIT)
 #define WIND_FOLLOW_FRACTION 0.01f
@@ -858,7 +858,7 @@ s32 PlanCupDistance(ShotMode shotMode UNUSED) {
     cupZ = g_HoleSetup.cupPosition[AXIS_Z] - f_Shot.ballPosition[AXIS_Z];
     length = sqrtf((cupX * cupX) + (cupZ * cupZ));
     windAngle = g_HoleSetup.conditions.windDirection * WIND_DIRECTION_TO_RADIANS;
-    if (length >= WIND_ALLOWANCE_MIN_DISTANCE) {
+    if (length >= WIND_ALLOWANCE_DISTANCE_MIN) {
         inverseLength = 1.0f / length;
         cupX *= inverseLength;
         cupZ *= inverseLength;

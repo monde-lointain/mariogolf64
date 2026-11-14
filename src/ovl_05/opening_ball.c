@@ -236,18 +236,18 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
 
 #define OPENING_LIFT_ANGLE_DEGREES 90.0f
 #define OPENING_CUP_SEARCH_SPAN 0xC00
-#define OPENING_MAX_CUP_IN_SOUND_SPEED 268.8f
-#define OPENING_MAX_CUP_IN_SOUND_FALL_SPEED KilometersPerHour(5)
+#define OPENING_CUP_IN_SOUND_SPEED_MAX 268.8f
+#define OPENING_CUP_IN_SOUND_FALL_SPEED_MAX KilometersPerHour(5)
 #define OPENING_CUP_PULL_DIRECTION_TILT 8384.0f
-#define OPENING_MAX_LIP_OUT_HEIGHT 307.2f
-#define OPENING_MAX_LIP_OUT_SPEED 4300.8f
+#define OPENING_LIP_OUT_HEIGHT_MAX 307.2f
+#define OPENING_LIP_OUT_SPEED_MAX 4300.8f
 #define OPENING_WATER_STOP_DEPTH 0x12C00
 #define OPENING_CUP_FLOOR_BOUNCE_DIVISOR 2
 #define OPENING_BILLBOARD_HIT_SPEED_DIVISOR 2
 #define OPENING_FOLIAGE_RISE_SCALE 1.2f
 #define OPENING_WALL_BACK_OFF 614.4f
 #define OPENING_WALL_HIT_STEP_SHARE 0.99f
-#define OPENING_MIN_SKIP_IMPACT_SPEED KilometersPerHour(10)
+#define OPENING_SKIP_IMPACT_SPEED_MIN KilometersPerHour(10)
 #define OPENING_SKIP_SPEED_RATIO 0.5f
 #define OPENING_EARLY_BOUNCE_STEP_COUNT 3
 #define OPENING_WATER_STOP_IMPACT_SPEED KilometersPerHour(20)
@@ -256,15 +256,15 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
 #define OPENING_SPINLESS_LANDING_SPEED KilometersPerHour(10)
 #define OPENING_LANDING_SPIN_SPEED_RANGE KilometersPerHour(200)
 #define OPENING_GROUND_SPIN_DRIFT_GRIP 0.25f
-#define OPENING_MAX_SPIN_DRIFT_SHARE 0.2f
+#define OPENING_SPIN_DRIFT_SHARE_MAX 0.2f
 #define OPENING_ROLL_JUMP_SPEED KilometersPerHour(10)
-#define OPENING_MIN_SLOW_ROLL_SLOPE_SCALE 0.0625f
+#define OPENING_SLOW_ROLL_SLOPE_SCALE_MIN 0.0625f
 #define OPENING_SLOW_ROLL_SLOPE_SCALE_PER_SPEED 0.0030517578f
 #define OPENING_SPIN_SPEED_SCALE 8.0f
 #define OPENING_SPIN_MISMATCH_FALLOFF 0.8f
 #define OPENING_LIFT_SPIN_SCALE 10
 #define OPENING_LIFT_PER_SPIN 0.0061035156f
-#define OPENING_MAX_LIFT_SPEED_RATIO 200.0f
+#define OPENING_LIFT_SPEED_RATIO_MAX 200.0f
 #define OPENING_SPIN_DECAY 0.995f
 #define OPENING_WIND_SCALE_PER_HEIGHT (1.0f / (160 * UNITS_PER_YARD))
 
@@ -691,9 +691,9 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                                 }
 
                                 simulation->state = BALL_STATE_IN_CUP;
-                                if (speed < OPENING_MAX_CUP_IN_SOUND_SPEED &&
+                                if (speed < OPENING_CUP_IN_SOUND_SPEED_MAX &&
                                     (f32)simulation->velocity[AXIS_Y] <=
-                                        OPENING_MAX_CUP_IN_SOUND_FALL_SPEED) {
+                                        OPENING_CUP_IN_SOUND_FALL_SPEED_MAX) {
                                     simulation->soundStates[BALL_SOUND_CUP_IN] = CUP_IN_SOUND_DUE;
                                 }
                             }
@@ -702,7 +702,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                         if (simulation->state == BALL_STATE_ROLLING &&
                             (f32)Abs(
                                 simulation->position[AXIS_Y] - g_HoleSetup.cupPosition[AXIS_Y]
-                            ) < CUP_PULL_MAX_HEIGHT) {
+                            ) < CUP_PULL_HEIGHT_MAX) {
                             if ((f32)cupDistance < CUP_PULL_OUTER_RADIUS &&
                                 (f32)cupDistance >= CUP_PULL_INNER_RADIUS) {
                                 f32 toCup[3];
@@ -768,13 +768,13 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                                     startZ - g_HoleSetup.cupPosition[AXIS_Z]
                                 ) < CUP_RADIUS &&
                                 (f32)Abs(startY - g_HoleSetup.cupPosition[AXIS_Y]) <
-                                    OPENING_MAX_LIP_OUT_HEIGHT) {
+                                    OPENING_LIP_OUT_HEIGHT_MAX) {
                                 s32 speed = IntLength2D(
                                     simulation->velocity[AXIS_X],
                                     simulation->velocity[AXIS_Z]
                                 );
 
-                                if (!((f32)speed >= OPENING_MAX_LIP_OUT_SPEED) &&
+                                if (!((f32)speed >= OPENING_LIP_OUT_SPEED_MAX) &&
                                     simulation->state == BALL_STATE_ROLLING) {
                                     f32 keep = speed * (1.0f / LIP_OUT_FULL_SPEED);
                                     BallSpeed fallSpeed;
@@ -1105,7 +1105,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             }
             else if (simulation->surface == SURFACE_WATER_HAZARD) {
                 if (simulation->state == BALL_STATE_ROLLING ||
-                    (impactSpeed <= OPENING_MIN_SKIP_IMPACT_SPEED ||
+                    (impactSpeed <= OPENING_SKIP_IMPACT_SPEED_MIN ||
                         impactSpeed >=
                             GetOpeningLength2D(
                                 simulation->velocity[AXIS_X],
@@ -1360,7 +1360,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                 driftZ = (spinVelocityZ - simulation->velocity[AXIS_Z]) * grip *
                     AbsFloat(plane.normal[AXIS_Y]) * OPENING_GROUND_SPIN_DRIFT_GRIP;
                 drift = (s32)IntLength2D(driftX, driftZ);
-                driftLimit = impactSpeed * OPENING_MAX_SPIN_DRIFT_SHARE;
+                driftLimit = impactSpeed * OPENING_SPIN_DRIFT_SHARE_MAX;
                 if (driftLimit < drift && impactSpeed > 1.0f) {
                     f32 scale = driftLimit / drift;
 
@@ -1513,7 +1513,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             else {
                 if ((f32)rollSpeed < SLOW_ROLL_SPEED) {
                     f32 scale = (rollSpeed * OPENING_SLOW_ROLL_SLOPE_SCALE_PER_SPEED) +
-                        OPENING_MIN_SLOW_ROLL_SLOPE_SCALE;
+                        OPENING_SLOW_ROLL_SLOPE_SCALE_MIN;
 
                     slopeX = slopeX * scale;
                     slopeZ = slopeZ * scale;
@@ -1677,8 +1677,8 @@ ROLLED:
                     &turned[AXIS_Y],
                     &turned[AXIS_Z]
                 );
-                if (airSpeed < AbsFloat(lift) * OPENING_MAX_LIFT_SPEED_RATIO) {
-                    lift = airSpeed * (1.0f / OPENING_MAX_LIFT_SPEED_RATIO);
+                if (airSpeed < AbsFloat(lift) * OPENING_LIFT_SPEED_RATIO_MAX) {
+                    lift = airSpeed * (1.0f / OPENING_LIFT_SPEED_RATIO_MAX);
                 }
 
                 ScaleToOpeningLength(lift, &turned[AXIS_X], &turned[AXIS_Y], &turned[AXIS_Z]);

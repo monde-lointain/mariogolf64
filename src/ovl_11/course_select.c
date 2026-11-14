@@ -116,7 +116,7 @@ enum PlanksState {
 #define PLANK_STRIP_COUNT 38
 #define PLANK_LAST_STRIP_HEIGHT 2
 #define PLANKS_MIDDLE (SCREEN_WIDTH / 2)
-#define PLANKS_MIN_SLIDE SCREEN_BORDER
+#define PLANKS_SLIDE_MIN SCREEN_BORDER
 #define PLANK_GROUP_STRIP_COUNT 7
 #define PLANK_LAST_GROUP 4
 #define PLANK_GROUP_LAG 64
@@ -642,8 +642,8 @@ void DrawPlanks(Gfx **displayListHead) {
                 slide = PLANKS_MIDDLE;
             }
 
-            if (slide < PLANKS_MIN_SLIDE) {
-                slide = PLANKS_MIN_SLIDE;
+            if (slide < PLANKS_SLIDE_MIN) {
+                slide = PLANKS_SLIDE_MIN;
             }
         }
 

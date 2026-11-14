@@ -527,7 +527,7 @@ HALVED:
             break;
         case SCORECARD_LAYOUT_SPEED_GOLF:
             if (IsGameFlagSet(GAME_FLAG_STOPWATCH_HOUR)) {
-                g_GameState.stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
+                g_GameState.stopwatchFrameCount = STOPWATCH_FRAMES_MAX;
             }
 
             for (i = 0, timedHoleCount = 0; i != COURSE_HOLE_COUNT; i++) {

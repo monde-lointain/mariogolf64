@@ -302,7 +302,7 @@ Boolean IsShotModeChangeDone(void) {
 #define GAUGE_FULL_X 56
 #define GAUGE_LENGTH 140
 #define GAUGE_EMPTY_X (GAUGE_FULL_X + GAUGE_LENGTH)
-#define GAUGE_MAX_VALUE 30
+#define GAUGE_VALUE_MAX 30
 #define GAUGE_TOP 210
 #define GAUGE_BOTTOM 218
 #define GAUGE_TICK_SPACING 7
@@ -320,7 +320,7 @@ Boolean IsShotModeChangeDone(void) {
 #define GAUGE_FILL_IMAGE_WIDTH 64
 #define GAUGE_FILL_IMAGE_HEIGHT 16
 #define GAUGE_FILL_SPAN_PER_VALUE 5
-#define GAUGE_FILL_SPAN (GAUGE_MAX_VALUE * GAUGE_FILL_SPAN_PER_VALUE)
+#define GAUGE_FILL_SPAN (GAUGE_VALUE_MAX * GAUGE_FILL_SPAN_PER_VALUE)
 #define GAUGE_TICK_IMAGE_WIDTH 16
 #define GAUGE_TICK_IMAGE_HEIGHT 12
 
@@ -528,7 +528,7 @@ void DrawClubPanel(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     if (playerState != PLAYER_STATE_AIMING) {
         emptyLeft =
-            QuarterPixels(GAUGE_EMPTY_X - f_ChosenPowerFill * GAUGE_LENGTH / GAUGE_MAX_VALUE);
+            QuarterPixels(GAUGE_EMPTY_X - f_ChosenPowerFill * GAUGE_LENGTH / GAUGE_VALUE_MAX);
         gSPTextureRectangle(
             gfx++,
             emptyLeft,
@@ -600,10 +600,10 @@ void DrawClubPanel(Gfx **displayListHead) {
         TEXEL_STEP_ONE
     );
     if (isPutter) {
-        markerOffset = f_ChosenPowerFill * GAUGE_LENGTH / GAUGE_MAX_VALUE;
+        markerOffset = f_ChosenPowerFill * GAUGE_LENGTH / GAUGE_VALUE_MAX;
     }
     else {
-        markerOffset = fill * GAUGE_LENGTH / GAUGE_MAX_VALUE;
+        markerOffset = fill * GAUGE_LENGTH / GAUGE_VALUE_MAX;
     }
 
     f_MarkerPulseAngle += MARKER_PULSE_STEP;
@@ -674,8 +674,8 @@ void DrawClubPanel(Gfx **displayListHead) {
         default:
             if (!isPutter) {
                 gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, OPAQUE_ALPHA);
-                markerOffset = f_ChosenPowerFill * GAUGE_LENGTH / GAUGE_MAX_VALUE;
-                if (f_ChosenPowerFill == GAUGE_MAX_VALUE) {
+                markerOffset = f_ChosenPowerFill * GAUGE_LENGTH / GAUGE_VALUE_MAX;
+                if (f_ChosenPowerFill == GAUGE_VALUE_MAX) {
                     gDPSetEnvColor(gfx++, pulse, pulse, pulse, OPAQUE_ALPHA);
                 }
                 else {

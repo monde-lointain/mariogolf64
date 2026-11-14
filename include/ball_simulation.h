@@ -65,7 +65,7 @@ enum BallState {
 #define IMPACT_TIMING_ENTRY_LIMIT 5
 #define IMPACT_TIMING_ENTRY_COUNT ((IMPACT_TIMING_ENTRY_LIMIT * 2) + 1)
 
-#define DROP_MAX_SLOPE_SQUARED 0.25f
+#define DROP_SLOPE_SQUARED_MAX 0.25f
 #define IsDropKind(kind) \
     ((kind) != SURFACE_KIND_WATER_HAZARD && \
         (kind) != SURFACE_KIND_OUT_OF_BOUNDS && \
@@ -74,7 +74,7 @@ enum BallState {
 #define IsDropSlope(plane) \
     (((plane).normal[AXIS_X] * (plane).normal[AXIS_X]) + \
             ((plane).normal[AXIS_Z] * (plane).normal[AXIS_Z]) < \
-        (plane).normal[AXIS_Y] * (plane).normal[AXIS_Y] * DROP_MAX_SLOPE_SQUARED)
+        (plane).normal[AXIS_Y] * (plane).normal[AXIS_Y] * DROP_SLOPE_SQUARED_MAX)
 
 typedef struct ImpactEffect {
     s8 speedChange;
@@ -156,7 +156,7 @@ typedef struct BallSimulation {
     s8 isOverCup;
 } BallSimulation;
 
-#define SHOT_PREVIEW_MAX_DASH_LENGTH 0x4AFFF
+#define SHOT_PREVIEW_DASH_LENGTH_MAX 0x4AFFF
 #define SHOT_PREVIEW_DROP 0x133
 
 extern BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT];

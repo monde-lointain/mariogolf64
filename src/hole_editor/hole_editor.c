@@ -60,8 +60,8 @@
 #define ROUGH_INNER_OFFSET 120
 #define ROUGH_INNER_NOISE_MASK 0x1F
 #define SHAPED_POINT_SHADE 0xFF
-#define TREE_MIN_DISTANCE 8
-#define TREE_MAX_DISTANCE 10
+#define TREE_DISTANCE_MIN 8
+#define TREE_DISTANCE_MAX 10
 #define TREE_SPACING 0x100
 #define TREE_TEXTURE_INDEX 2
 #define TREE_NEAR_EDGE 0x100
@@ -229,7 +229,7 @@ enum TriangleEdit {
 #define CURSOR_ZOOM_MAX 10.0f
 #define CURSOR_ZOOM_MIN 0.1f
 
-#define DIAGONAL_MIN_DISTANCE 3.0f
+#define DIAGONAL_DISTANCE_MIN 3.0f
 #define DIAGONAL_SIDE_COUNT 4
 #define SIDE_CODE_COUNT 2
 #define HasTwoSideCodes(codes) ((codes)[SIDE_CODE_COUNT - 1] != NO_TERRAIN_CODE)
@@ -2587,7 +2587,7 @@ s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
         for (columnOffset = 0; columnOffset < width; columnOffset++) {
             code = GetTerrainCode(column + columnOffset, row + rowOffset);
             distance = ((width * (rowOffset - height)) + (columnOffset * height)) * inverseLength;
-            if (AbsFloat(distance) >= DIAGONAL_MIN_DISTANCE) {
+            if (AbsFloat(distance) >= DIAGONAL_DISTANCE_MIN) {
                 if (distance >= 0.0f) {
                     AddSideCode(sideCodes[2], code);
                 }
@@ -2597,7 +2597,7 @@ s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
             }
 
             distance = ((-height * columnOffset) + (rowOffset * width)) * inverseLength;
-            if (AbsFloat(distance) >= DIAGONAL_MIN_DISTANCE) {
+            if (AbsFloat(distance) >= DIAGONAL_DISTANCE_MIN) {
                 if (distance >= 0.0f) {
                     AddSideCode(sideCodes[0], code);
                 }
@@ -2851,13 +2851,13 @@ void ShapeGroundFromCodes(void) {
                             row + offsets[offsetIndex].row
                         ) != TERRAIN_CODE_ROUGH ||
                         offsets[offsetIndex].distance >=
-                            TREE_MAX_DISTANCE * OFFSET_DISTANCE_SCALE) {
+                            TREE_DISTANCE_MAX * OFFSET_DISTANCE_SCALE) {
                         break;
                     }
                 }
 
-                if (offsets[offsetIndex].distance >= TREE_MIN_DISTANCE * OFFSET_DISTANCE_SCALE &&
-                    offsets[offsetIndex].distance < TREE_MAX_DISTANCE * OFFSET_DISTANCE_SCALE) {
+                if (offsets[offsetIndex].distance >= TREE_DISTANCE_MIN * OFFSET_DISTANCE_SCALE &&
+                    offsets[offsetIndex].distance < TREE_DISTANCE_MAX * OFFSET_DISTANCE_SCALE) {
                     x = column * VERTEX_UNITS_PER_CODE;
                     z = row * VERTEX_UNITS_PER_CODE;
                     for (treeIndex = 0; treeIndex < treeCount; treeIndex++) {
@@ -4362,7 +4362,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                             );
                             gSPVertex(gfx++, &vertices[12], 5, 20);
                             vertices += FINE_TILE_BUILT_VERTEX_COUNT;
-                            for (finePass = 0; finePass < GROUND_TILE_MAX_PASSES; finePass++) {
+                            for (finePass = 0; finePass < GROUND_TILE_PASSES_MAX; finePass++) {
                                 LoadEditorTileTexture(
                                     tileIndex,
                                     firstTileS,
@@ -4678,7 +4678,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                             1,
                             8
                         );
-                        for (mediumPass = 0; mediumPass < GROUND_TILE_MAX_PASSES; mediumPass++) {
+                        for (mediumPass = 0; mediumPass < GROUND_TILE_PASSES_MAX; mediumPass++) {
                             LoadEditorTileTexture(
                                 tileIndex,
                                 firstTileS,
@@ -4771,7 +4771,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                 for (groupTileIndex = 0; groupTileIndex < GROUND_TILE_GROUP_SIZE;
                     groupTileIndex++) {
                     if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
-                        for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+                        for (pass = 0; pass < GROUND_TILE_PASSES_MAX; pass++) {
                             LoadEditorTileTexture(
                                 tileIndex,
                                 firstTileS,
@@ -4830,7 +4830,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                 );
                 for (groupOffset = 0; groupOffset < GROUND_TILE_GROUP_SIZE; groupOffset++) {
                     if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
-                        for (coarsePass = 0; coarsePass < GROUND_TILE_MAX_PASSES; coarsePass++) {
+                        for (coarsePass = 0; coarsePass < GROUND_TILE_PASSES_MAX; coarsePass++) {
                             LoadEditorTileTexture(
                                 tileIndex,
                                 firstTileS,

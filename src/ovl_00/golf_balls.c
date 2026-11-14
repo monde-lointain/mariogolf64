@@ -29,7 +29,7 @@
 #include "terrain.h"
 
 #define GOLF_BALL_COUNT 32
-#define AFTERIMAGE_MAX_LENGTH 60
+#define AFTERIMAGE_LENGTH_MAX 60
 #define AFTERIMAGE_FAST_LENGTH 10
 
 #define BALL_HIDDEN (-1)
@@ -361,13 +361,13 @@ static Vtx f_PikaBallVertices[] = {
     {{{2, 1, 5}, 0, {0x800, 0}, {0xFF, 0x80, 0x00, 0xFF}}},
 };
 static GolfBall f_GolfBalls[GOLF_BALL_COUNT] = {0};
-static BallAfterimage f_BallAfterimages[AFTERIMAGE_MAX_LENGTH] = {0};
+static BallAfterimage f_BallAfterimages[AFTERIMAGE_LENGTH_MAX] = {0};
 static s32 f_BallAfterimageHead = 0;
 static Boolean f_IsBallAfterimageShown = FALSE;
 static s32 f_BallAfterimageFrameCount = 0;
 static Boolean f_IsBallAfterimageZoomed = FALSE;
 static Boolean f_IsBallAfterimageFast = FALSE;
-static s32 f_BallAfterimageLength = AFTERIMAGE_MAX_LENGTH;
+static s32 f_BallAfterimageLength = AFTERIMAGE_LENGTH_MAX;
 static s32 f_UnusedBallFrame = 0;
 static s32 f_BallRollFrame = 0;
 
@@ -460,7 +460,7 @@ void RollGolfBall(GolfBall *ball UNUSED, BallSimulation *simulation) {
 void ResetBallAfterimage(void) {
     s32 afterimageIndex;
 
-    for (afterimageIndex = 0; afterimageIndex != AFTERIMAGE_MAX_LENGTH; afterimageIndex++) {
+    for (afterimageIndex = 0; afterimageIndex != AFTERIMAGE_LENGTH_MAX; afterimageIndex++) {
         f_BallAfterimages[afterimageIndex].alpha = AFTERIMAGE_UNUSED;
         f_BallAfterimages[afterimageIndex].isInCup = FALSE;
     }
@@ -471,15 +471,15 @@ void ResetBallAfterimage(void) {
         f_GolfBalls[g_GameState.currentPlayerIndex].position[AXIS_Y];
     f_BallAfterimages[0].position[AXIS_Z] =
         f_GolfBalls[g_GameState.currentPlayerIndex].position[AXIS_Z];
-    f_BallAfterimages[AFTERIMAGE_MAX_LENGTH - 1].position[AXIS_X] =
+    f_BallAfterimages[AFTERIMAGE_LENGTH_MAX - 1].position[AXIS_X] =
         f_GolfBalls[g_GameState.currentPlayerIndex].position[AXIS_X];
-    f_BallAfterimages[AFTERIMAGE_MAX_LENGTH - 1].position[AXIS_Y] =
+    f_BallAfterimages[AFTERIMAGE_LENGTH_MAX - 1].position[AXIS_Y] =
         f_GolfBalls[g_GameState.currentPlayerIndex].position[AXIS_Y];
     f_BallAfterimageHead = 0;
     f_IsBallAfterimageShown = FALSE;
     f_BallAfterimageFrameCount = 0;
     f_IsBallAfterimageZoomed = FALSE;
-    f_BallAfterimages[AFTERIMAGE_MAX_LENGTH - 1].position[AXIS_Z] =
+    f_BallAfterimages[AFTERIMAGE_LENGTH_MAX - 1].position[AXIS_Z] =
         f_GolfBalls[g_GameState.currentPlayerIndex].position[AXIS_Z];
 }
 

@@ -2318,7 +2318,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                             1,
                             8
                         );
-                        for (mediumPass = 0; mediumPass < GROUND_TILE_MAX_PASSES; mediumPass++) {
+                        for (mediumPass = 0; mediumPass < GROUND_TILE_PASSES_MAX; mediumPass++) {
                             LoadTileTexture(tileIndex, firstTileS, groupOffset, row);
                             gSP2Triangles(gfx++, 0, 2, 3, 0, 2, 5, 3, 0);
                             gSP2Triangles(gfx++, 2, 1, 5, 0, 1, 4, 5, 0);
@@ -2397,7 +2397,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
 
                 for (groupOffset = 0; groupOffset < GROUND_TILE_GROUP_SIZE; groupOffset++) {
                     if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
-                        for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+                        for (pass = 0; pass < GROUND_TILE_PASSES_MAX; pass++) {
                             LoadTileTexture(tileIndex, firstTileS, groupOffset, row);
                             DrawTileQuads(
                                 topSlot,
@@ -2449,7 +2449,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                 for (groupTileIndex = 0; groupTileIndex < GROUND_TILE_GROUP_SIZE;
                     groupTileIndex++) {
                     if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
-                        for (passIndex = 0; passIndex < GROUND_TILE_MAX_PASSES; passIndex++) {
+                        for (passIndex = 0; passIndex < GROUND_TILE_PASSES_MAX; passIndex++) {
                             LoadTileTexture(tileIndex, firstTileS, groupTileIndex, row);
                             gSP2Triangles(
                                 gfx++,

@@ -43,7 +43,7 @@ enum HoleCreatureKind {
 #define CHEEP_CHEEP_DEPTH 0x7800
 #define CHEEP_CHEEP_LEAP_SPEED 9216.0f
 #define CHEEP_CHEEP_GRAVITY (GRAVITY * 2)
-#define CHEEP_CHEEP_MIN_SPEED 0x600
+#define CHEEP_CHEEP_SPEED_MIN 0x600
 #define CHEEP_CHEEP_SPEED_RANGE 0x600
 #define CHEEP_CHEEP_PITCH_EASING 0.7f
 #define CHEEP_CHEEP_FADE_DEPTH 46080
@@ -228,7 +228,7 @@ void StartCheepCheepLeap(s32 startValue) {
             creature->position[AXIS_X] = g_TurnBallSimulation.position[AXIS_X];
             creature->position[AXIS_Y] = g_TurnBallSimulation.position[AXIS_Y] + CHEEP_CHEEP_DEPTH;
             creature->position[AXIS_Z] = g_TurnBallSimulation.position[AXIS_Z];
-            speed = (random % CHEEP_CHEEP_SPEED_RANGE) + CHEEP_CHEEP_MIN_SPEED;
+            speed = (random % CHEEP_CHEEP_SPEED_RANGE) + CHEEP_CHEEP_SPEED_MIN;
             creature->groundHeight = GetGroundOrWaterHeight(
                 g_TurnBallSimulation.position[AXIS_X],
                 g_TurnBallSimulation.position[AXIS_Z]

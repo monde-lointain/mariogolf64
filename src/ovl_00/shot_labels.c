@@ -71,8 +71,8 @@ typedef struct ShotLabel {
 #define OUT_OF_BOUNDS_TEXT_Y 31
 #define SIGN_FADE_START_DEPTH (-2000)
 #define SIGN_FADE_END_DEPTH (-149)
-#define SIGN_MIN_ALPHA 64
-#define SIGN_FADE_ALPHA_RANGE (255 - SIGN_MIN_ALPHA)
+#define SIGN_ALPHA_MIN 64
+#define SIGN_FADE_ALPHA_RANGE (255 - SIGN_ALPHA_MIN)
 #define SIGN_FADE_DEPTH_RANGE 1850
 #define HEIGHT_YARDS_MAX 99
 #define TINT_YARDS_MAX 25
@@ -628,7 +628,7 @@ void DrawAimGuides(CameraMatrices *matrices) {
                 alpha = OPAQUE_ALPHA;
             }
             else {
-                alpha = SIGN_MIN_ALPHA;
+                alpha = SIGN_ALPHA_MIN;
                 if (depth >= SIGN_FADE_START_DEPTH) {
                     if (depth >= SIGN_FADE_END_DEPTH) {
                         alpha = OPAQUE_ALPHA;
@@ -636,7 +636,7 @@ void DrawAimGuides(CameraMatrices *matrices) {
                     else {
                         alpha = ((depth - SIGN_FADE_START_DEPTH) * SIGN_FADE_ALPHA_RANGE /
                                     SIGN_FADE_DEPTH_RANGE) +
-                            SIGN_MIN_ALPHA;
+                            SIGN_ALPHA_MIN;
                     }
                 }
             }

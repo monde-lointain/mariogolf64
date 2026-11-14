@@ -383,7 +383,7 @@ void StopEditorMoves(void) {
 
 #define EDITOR_BRAKING_RATE 0.63979524f
 #define EDITOR_PITCH_LIMIT 1.5f
-#define EDITOR_MIN_DISTANCE 1.0f
+#define EDITOR_DISTANCE_MIN 1.0f
 
 #define KeepTopSpeed(topSpeed, acceleration) \
     do { \
@@ -629,8 +629,8 @@ void UpdateCameraEditor(void) {
             g_CameraEditor.flags[index] ^= EDITOR_FLAG_ZOOMING;
         }
 
-        if (g_CameraEditor.distance < EDITOR_MIN_DISTANCE) {
-            g_CameraEditor.distance = EDITOR_MIN_DISTANCE;
+        if (g_CameraEditor.distance < EDITOR_DISTANCE_MIN) {
+            g_CameraEditor.distance = EDITOR_DISTANCE_MIN;
         }
 
         hasMoved = TRUE;

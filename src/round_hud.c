@@ -113,17 +113,17 @@ enum SceneryState {
 
 #define HOLE_FLAG_SKEW 0.0f
 #define HOLE_FLAG_ROW_SKEW_SCALE 5.0f
-#define HOLE_FLAG_MIN_WIND_SPEED 1.5f
+#define HOLE_FLAG_WIND_SPEED_MIN 1.5f
 #define HOLE_FLAG_GALE_WIND_SPEED 9.0f
 #define HOLE_FLAG_CALM_SPREAD 0.01f
 #define HOLE_FLAG_SPREAD_STEP 0.1f
 #define HOLE_FLAG_SPREAD_STEP_COUNT 10.0f
 #define HOLE_FLAG_SWING_DEGREES_PER_SPEED 2.0f
-#define HOLE_FLAG_MIN_SWING_DEGREES 2.0f
+#define HOLE_FLAG_SWING_DEGREES_MIN 2.0f
 #define HOLE_FLAG_SWING_JITTER_RANGE 16
 #define HOLE_FLAG_ROW_JITTER_PER_SPEED 4.0f
 #define HOLE_FLAG_BULGE_PER_SPEED 0.03f
-#define HOLE_FLAG_MIN_BULGE 3.5f
+#define HOLE_FLAG_BULGE_MIN 3.5f
 #define HOLE_FLAG_BULGE_SCALE 0.1f
 #define HOLE_FLAG_BULGE_COLUMN_BASE 8
 #define HOLE_FLAG_BULGE_ROW_BASE 10
@@ -151,7 +151,7 @@ typedef struct ArrowShape {
 } ArrowShape;
 
 #define SHOT_OFFSET_MARKER_COUNT 5
-#define SHOT_OFFSET_MAX_RADIUS 56.0f
+#define SHOT_OFFSET_RADIUS_MAX 56.0f
 #define SHOT_OFFSET_UNITS_PER_PIXEL 4
 
 #define SHOT_OFFSET_MARKER_SIZE 16
@@ -245,7 +245,7 @@ enum LandingGlyphGroup {
 #define HUD_MARGIN 8
 
 #define LETTERBOX_GROWTH_STEP 2
-#define LETTERBOX_MAX_HEIGHT 16
+#define LETTERBOX_HEIGHT_MAX 16
 
 #define HOLE_IMAGE_MODEL_X (-240.0f)
 #define HOLE_IMAGE_MODEL_Y 180.0f
@@ -646,8 +646,8 @@ static u16 f_WhiteDistancePalette[] = {
 static s32 f_LoadedHoleIntroImages = 0;
 
 #define GREEN_GRID_COLUMN_COUNT 8
-#define GREEN_GRID_MAX_ROW_COUNT 32
-#define GREEN_GRID_POINT_COUNT (GREEN_GRID_MAX_ROW_COUNT * GREEN_GRID_COLUMN_COUNT)
+#define GREEN_GRID_ROW_COUNT_MAX 32
+#define GREEN_GRID_POINT_COUNT (GREEN_GRID_ROW_COUNT_MAX * GREEN_GRID_COLUMN_COUNT)
 
 typedef struct TrailPoint {
     s32 x;
@@ -1550,7 +1550,7 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
 #define GREEN_GRID_SHORT_ROW_COUNT 8
 #define GREEN_GRID_LANDING_ROW_COUNT 16
 #define GREEN_GRID_FIRST_FULL_ROW 30
-#define GREEN_GRID_MAX_PUTT_DISTANCE 30
+#define GREEN_GRID_PUTT_DISTANCE_MAX 30
 #define GREEN_GRID_LANDING_DISTANCE 61
 #define GREEN_GRID_PUTT_ROW_SHIFT 2.2f
 #define GREEN_GRID_LANDING_ROW_SHIFT 12.0f
@@ -1562,7 +1562,7 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
 #define GREEN_GRID_LANDING_ROW_SPACING 28800.0f
 #define GREEN_GRID_SCROLL_STEP 0.025f
 #define GREEN_GRID_SLOPE_SCALE 1.5f
-#define GREEN_GRID_MAX_SLOPE 255
+#define GREEN_GRID_SLOPE_MAX 255
 #define GREEN_GRID_LINE_HALF_WIDTH 4.5f
 #define GREEN_GRID_DEPTH_BIAS 15.0f
 #define GREEN_GRID_DIM_ALPHA 0x3F
@@ -1680,7 +1680,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     distance = GetSelectedShotDistance();
     worldDistance = GetSelectedShotWorldDistance();
     if (club->surfaceMask & CLUB_SURFACE_GREEN) {
-        puttDistanceMax = GREEN_GRID_MAX_PUTT_DISTANCE;
+        puttDistanceMax = GREEN_GRID_PUTT_DISTANCE_MAX;
         if (distance == puttDistanceMax) {
             rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
             columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
@@ -1693,7 +1693,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
         else {
             rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
             columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
-            rowCount = GREEN_GRID_MAX_ROW_COUNT;
+            rowCount = GREEN_GRID_ROW_COUNT_MAX;
             center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
             center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
             center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
@@ -1703,11 +1703,11 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     else if (distance < GREEN_GRID_LANDING_DISTANCE) {
         rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
         columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
-        rowCount = GREEN_GRID_MAX_ROW_COUNT;
+        rowCount = GREEN_GRID_ROW_COUNT_MAX;
         center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
         center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
         center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
-        puttDistanceMax = GREEN_GRID_MAX_PUTT_DISTANCE;
+        puttDistanceMax = GREEN_GRID_PUTT_DISTANCE_MAX;
         rowSpacing = distance * GREEN_GRID_ROW_SPACING / puttDistanceMax;
     }
     else {
@@ -1734,7 +1734,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     forwardZ = -sinf(yaw) * rowSpacing;
     if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
         f_GreenGridScroll -= GREEN_GRID_SCROLL_STEP;
-        if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
+        if (rowCount != GREEN_GRID_ROW_COUNT_MAX) {
             if (f_GreenGridScroll < 0.0f) {
                 f_GreenGridScroll += 1.0f;
             }
@@ -1784,7 +1784,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
             }
         }
 
-        if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
+        if (rowCount != GREEN_GRID_ROW_COUNT_MAX) {
             row++;
         }
         else if (row >= GREEN_GRID_FIRST_FULL_ROW) {
@@ -1795,7 +1795,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
         }
     }
 
-    if (rowCount == GREEN_GRID_MAX_ROW_COUNT) {
+    if (rowCount == GREEN_GRID_ROW_COUNT_MAX) {
         for (row = 1; row != rowCount - 1; row += 2) {
             for (column = 0; column != columnCount; column++) {
                 points[GridPointIndex(row, column)][AXIS_X] =
@@ -1845,12 +1845,12 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                 slopes[GridPointIndex(row, column)] = 0;
             }
 
-            if (slopes[GridPointIndex(row, column)] > GREEN_GRID_MAX_SLOPE) {
-                slopes[GridPointIndex(row, column)] = GREEN_GRID_MAX_SLOPE;
+            if (slopes[GridPointIndex(row, column)] > GREEN_GRID_SLOPE_MAX) {
+                slopes[GridPointIndex(row, column)] = GREEN_GRID_SLOPE_MAX;
             }
 
-            if (slopes[GridPointIndex(row, column)] < -GREEN_GRID_MAX_SLOPE) {
-                slopes[GridPointIndex(row, column)] = -GREEN_GRID_MAX_SLOPE;
+            if (slopes[GridPointIndex(row, column)] < -GREEN_GRID_SLOPE_MAX) {
+                slopes[GridPointIndex(row, column)] = -GREEN_GRID_SLOPE_MAX;
             }
         }
     }
@@ -2036,7 +2036,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                 }
             }
 
-            if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
+            if (rowCount != GREEN_GRID_ROW_COUNT_MAX) {
                 drawnRow++;
             }
             else if (drawnRow >= GREEN_GRID_FIRST_FULL_ROW) {
@@ -3416,8 +3416,8 @@ void WaveHoleFlag(void) {
         }
     }
 
-    if (windSpeed > 0.0f && windSpeed < HOLE_FLAG_MIN_WIND_SPEED) {
-        windSpeed = HOLE_FLAG_MIN_WIND_SPEED;
+    if (windSpeed > 0.0f && windSpeed < HOLE_FLAG_WIND_SPEED_MIN) {
+        windSpeed = HOLE_FLAG_WIND_SPEED_MIN;
     }
 
     if (windSpeed < 1.0f) {
@@ -3443,7 +3443,7 @@ void WaveHoleFlag(void) {
     }
 
     f_HoleFlagWavePhase +=
-        ((HOLE_FLAG_SWING_DEGREES_PER_SPEED * windSpeed) + HOLE_FLAG_MIN_SWING_DEGREES) *
+        ((HOLE_FLAG_SWING_DEGREES_PER_SPEED * windSpeed) + HOLE_FLAG_SWING_DEGREES_MIN) *
         DegreesToRadians(1);
     if (f_HoleFlagWavePhase > FULL_TURN_RADIANS) {
         f_HoleFlagWavePhase -= FULL_TURN_RADIANS;
@@ -3475,7 +3475,7 @@ void WaveHoleFlag(void) {
         }
     }
 
-    factor = (windSpeed * HOLE_FLAG_BULGE_PER_SPEED) + HOLE_FLAG_MIN_BULGE;
+    factor = (windSpeed * HOLE_FLAG_BULGE_PER_SPEED) + HOLE_FLAG_BULGE_MIN;
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
         for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
             bulge = (f32)(HOLE_FLAG_VERTEX(row, column).v.cn[0] - HOLE_FLAG_START_SHADE) /
@@ -3520,8 +3520,8 @@ void SetShotOffsetMarker(s32 x, s32 y) {
         length = 0.0f;
     }
 
-    if (length > SHOT_OFFSET_MAX_RADIUS) {
-        scale = SHOT_OFFSET_MAX_RADIUS / length;
+    if (length > SHOT_OFFSET_RADIUS_MAX) {
+        scale = SHOT_OFFSET_RADIUS_MAX / length;
         x = x * scale;
         y = y * scale;
     }
@@ -3739,8 +3739,8 @@ s32 DrawLetterbox(Gfx **displayListHead, s32 height) {
 
             gDPPipeSync(gfx++);
             height += LETTERBOX_GROWTH_STEP;
-            if (height > LETTERBOX_MAX_HEIGHT) {
-                height = LETTERBOX_MAX_HEIGHT;
+            if (height > LETTERBOX_HEIGHT_MAX) {
+                height = LETTERBOX_HEIGHT_MAX;
             }
         }
         else {

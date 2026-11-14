@@ -61,7 +61,7 @@
 #define PUTT_CONTACT_IMAGE_WIDTH 16
 #define PUTT_CONTACT_IMAGE_HEIGHT 100
 
-#define BANNER_MAX_LETTERS 11
+#define BANNER_LETTERS_MAX 11
 #define BANNER_LETTER_SLOT_COUNT 10
 
 #define CAPTION_MEET_DRAW 25
@@ -72,7 +72,7 @@
 #define CAPTION_TURN_PER_FRAME (M_PI / 12)
 #define CAPTION_START_SLIDE 600
 #define CAPTION_SLIDE_PER_FRAME 24
-#define CAPTION_MAX_GROWTH 48
+#define CAPTION_GROWTH_MAX 48
 #define CAPTION_COPY_ALPHA 127
 #define CAPTION_COPY_TOP \
     (SHRINKING_IMAGE_CENTER_Y - (MOVIE_IMAGE_STRIP_HEIGHT * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER))
@@ -109,7 +109,7 @@ enum BannerAnimation {
     BANNER_ANIMATION_ZOOM_STAY
 };
 
-typedef s16 BannerLayout[BANNER_LAYOUT_FIRST_LETTER + BANNER_MAX_LETTERS];
+typedef s16 BannerLayout[BANNER_LAYOUT_FIRST_LETTER + BANNER_LETTERS_MAX];
 
 typedef struct LakituFlight {
     f32 x;
@@ -719,7 +719,7 @@ void DrawLetterBannerExtras(Gfx **displayListHead) {
 #define BANNER_WOBBLE_DEPTH_LOSS 0.05f
 #define BANNER_WOBBLE_SMALLEST_DEPTH 0.1f
 #define BANNER_WOBBLE_TURN_PER_FRAME (M_PI / 10)
-#define BANNER_MAX_ALPHA 255
+#define BANNER_ALPHA_MAX 255
 #define BANNER_BLEND_ALPHA 1
 
 void DrawBanner(Gfx **displayListHead) {
@@ -737,7 +737,7 @@ void DrawBanner(Gfx **displayListHead) {
 
     angle = 0.0f;
 #ifdef AVOID_UB
-    alpha = BANNER_MAX_ALPHA;
+    alpha = BANNER_ALPHA_MAX;
 #endif
     if (IsGameFlagSet(GAME_FLAG_TEST_BANNERS)) {
         if ((g_ControllerStates[0].pressedButtons & L_JPAD) && f_TestBanner > 0) {
@@ -774,8 +774,8 @@ void DrawBanner(Gfx **displayListHead) {
             }
 
             alpha = f_BannerFrame * f_BannerFrame;
-            if (alpha > BANNER_MAX_ALPHA) {
-                alpha = BANNER_MAX_ALPHA;
+            if (alpha > BANNER_ALPHA_MAX) {
+                alpha = BANNER_ALPHA_MAX;
             }
 
             if (f_BannerFrame == BANNER_END_FRAME) {
@@ -801,8 +801,8 @@ void DrawBanner(Gfx **displayListHead) {
             }
 
             alpha = f_BannerFrame * f_BannerFrame;
-            if (alpha > BANNER_MAX_ALPHA) {
-                alpha = BANNER_MAX_ALPHA;
+            if (alpha > BANNER_ALPHA_MAX) {
+                alpha = BANNER_ALPHA_MAX;
             }
 
             angle = f_BannerFrame * BANNER_SPIN_GROWTH_PER_FRAME * FULL_TURN_RADIANS;
@@ -874,8 +874,8 @@ void DrawBanner(Gfx **displayListHead) {
             }
 
             alpha = f_BannerFrame * f_BannerFrame;
-            if (alpha > BANNER_MAX_ALPHA) {
-                alpha = BANNER_MAX_ALPHA;
+            if (alpha > BANNER_ALPHA_MAX) {
+                alpha = BANNER_ALPHA_MAX;
             }
 
             rotation[AXIS_X] = 0;
@@ -969,7 +969,7 @@ void DrawBanner(Gfx **displayListHead) {
                 TEXEL0,
                 0
             );
-            if (alpha == BANNER_MAX_ALPHA) {
+            if (alpha == BANNER_ALPHA_MAX) {
                 gDPPipeSync(gfx++);
                 gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
             }
@@ -1321,7 +1321,7 @@ void DrawMovie(Gfx **displayListHead) {
 #define WINNER_PLAQUE_MARGIN 8
 #define WINNER_CENTER_X 160
 #define WINNER_CENTER_Y 128
-#define WINNER_MAX_GROWTH 4
+#define WINNER_GROWTH_MAX 4
 #define WINNER_GROWTH_STEP 5
 #define WINNER_SHRINK_FRAME 31
 #define CONTEST_SLIDE_DRAW 20
@@ -1563,8 +1563,8 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
                 frame = 1;
             }
         }
-        else if (frame > WINNER_MAX_GROWTH) {
-            frame = WINNER_MAX_GROWTH;
+        else if (frame > WINNER_GROWTH_MAX) {
+            frame = WINNER_GROWTH_MAX;
         }
 
         growth = frame * WINNER_GROWTH_STEP;
@@ -1710,7 +1710,7 @@ void DrawDriveRecord(Gfx **displayListHead) {
         angle = (f_MovieDrawCount - CAPTION_GROW_DRAW) * CAPTION_TURN_PER_FRAME;
         fade = sinf(angle) * CAPTION_FLASH_DEPTH;
         halfWidth = cosf(angle) * halfWidth;
-        stripHeight = ((1.0f - cosf(angle)) * CAPTION_MAX_GROWTH) + MOVIE_IMAGE_STRIP_HEIGHT;
+        stripHeight = ((1.0f - cosf(angle)) * CAPTION_GROWTH_MAX) + MOVIE_IMAGE_STRIP_HEIGHT;
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255.0f - fade);
         gDPSetEnvColor(gfx++, 255, 255, 255, 255.0f - fade);
     }
@@ -1874,7 +1874,7 @@ void DrawPuttCaption(Gfx **displayListHead) {
         angle = (f_MovieDrawCount - CAPTION_GROW_DRAW) * CAPTION_TURN_PER_FRAME;
         fade = sinf(angle) * CAPTION_FLASH_DEPTH;
         halfWidth = cosf(angle) * halfWidth;
-        stripHeight = ((1.0f - cosf(angle)) * CAPTION_MAX_GROWTH) + MOVIE_IMAGE_STRIP_HEIGHT;
+        stripHeight = ((1.0f - cosf(angle)) * CAPTION_GROWTH_MAX) + MOVIE_IMAGE_STRIP_HEIGHT;
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255.0f - fade);
         gDPSetEnvColor(gfx++, 255, 255, 255, 255.0f - fade);
     }
@@ -2902,7 +2902,7 @@ void LoadContactImages(Player *player) {
 
 #define CONTACT_AGE_MAX 255
 #define CONTACT_FADE_STEP 4
-#define CONTACT_MIN_ALPHA 4
+#define CONTACT_ALPHA_MIN 4
 #define CONTACT_WARIO_ALPHA 200
 #define CONTACT_WARIO_HOLD_AGE 8
 #define CONTACT_WARIO_FADE_PER_AGE 30
@@ -3073,7 +3073,7 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
             (CONTACT_SHARED_FADE_PER_AGE * (g_ContactEffect - CONTACT_HOLD_AGE));
     }
 
-    if (alpha < CONTACT_MIN_ALPHA) {
+    if (alpha < CONTACT_ALPHA_MIN) {
         g_ContactEffect = CONTACT_EFFECT_NONE;
     }
 

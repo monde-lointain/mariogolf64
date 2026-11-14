@@ -99,7 +99,7 @@
 #define START_LAST_STRIP_HEIGHT 4
 #define START_SHOWN_HEIGHT 50
 #define START_ANGLE_STEP DegreesToRadians(20)
-#define START_MAX_ANGLE DegreesToRadians(120)
+#define START_ANGLE_MAX DegreesToRadians(120)
 
 #define FACE_SIZE 32
 #define FACE_BUFFER_COUNT 2
@@ -903,8 +903,8 @@ void DrawClubSlots(Gfx **displayListHead) {
 
     if (f_ClubSlotsState == CLUB_SLOTS_SPEEDING) {
         f_StartAngle += START_ANGLE_STEP;
-        if (f_StartAngle > START_MAX_ANGLE) {
-            f_StartAngle = START_MAX_ANGLE;
+        if (f_StartAngle > START_ANGLE_MAX) {
+            f_StartAngle = START_ANGLE_MAX;
         }
 
         gDPPipeSync(gfx++);

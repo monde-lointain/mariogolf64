@@ -196,7 +196,7 @@ typedef enum LogoLetterState {
     LOGO_LETTER_LANDED = 9
 } LogoLetterState;
 
-#define OPENING_SHOT_MAX_DASH_COUNT 200
+#define OPENING_SHOT_DASH_COUNT_MAX 200
 
 void DrawNameLogos(Gfx **displayListHead);
 void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices);
@@ -277,7 +277,7 @@ typedef enum LogoFadeStage {
 #define LAKITU_TRAIL_START_ALPHA 220
 #define LOOK_AT_START_EASE_RATE 0.05f
 #define LOGO_FADE_FIRST_FRAMES_LEFT 63
-#define LOGO_CLUB_MIN_SPIN_FRAMES 40
+#define LOGO_CLUB_SPIN_FRAMES_MIN 40
 #define LOGO_CLUB_START_ORBIT_RADIUS 240.0f
 #define LOGO_CLUB_START_ORBIT_ANGLE 330.0f
 #define LOGO_CLUB_START_UNUSED_ANGLE 180.0f
@@ -357,7 +357,7 @@ static Vtx f_OpeningShotDashVertices[QUAD_VERTEX_COUNT] = {
     {{{-15, 0, -1}, 0, {2048, 0}, {0xFF, 0x00, 0x00, 0x00}}},
 };
 static Boolean f_IsOpeningShotPathShown = FALSE;
-static s32 f_OpeningShotDashCount = OPENING_SHOT_MAX_DASH_COUNT;
+static s32 f_OpeningShotDashCount = OPENING_SHOT_DASH_COUNT_MAX;
 static s32 f_OpeningShotPathDashCount = 198;
 static s8 f_IsOpeningShotPathRed = FALSE;
 static s32 f_OpeningShotPathScroll = 0;
@@ -465,7 +465,7 @@ static f32 f_LookAtEaseRate = LOOK_AT_START_EASE_RATE;
 static s32 f_LogoLettersAlpha = OPAQUE_ALPHA;
 static s32 f_LogoClubAlpha = OPAQUE_ALPHA;
 static s32 f_LogoShineFrame = LOGO_SHINE_FIRST_FRAME;
-static s32 f_LogoClubSpinFramesLeft = LOGO_CLUB_MIN_SPIN_FRAMES;
+static s32 f_LogoClubSpinFramesLeft = LOGO_CLUB_SPIN_FRAMES_MIN;
 static s32 f_LogoState = LOGO_DROPPING_LETTERS;
 static s32 f_LogoFadeStage = LOGO_FADE_NONE;
 static s32 f_LogoFadeFramesLeft = LOGO_FADE_FIRST_FRAMES_LEFT;
@@ -624,7 +624,7 @@ static u8 f_UnusedBufferAfterSparksOrigin[12] UNUSED;
 static u8 *f_OpeningCharacterBuffers[2];
 static u8 f_UnusedBytesAfterCharacterBuffers[4] UNUSED;
 static void *f_OpeningBillboardHeap;
-static Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT][OPENING_SHOT_MAX_DASH_COUNT];
+static Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT][OPENING_SHOT_DASH_COUNT_MAX];
 
 CameraEditor g_CameraEditor;
 s32 f_OpeningCue;
@@ -846,7 +846,7 @@ void BuildOpeningShotPath(void) {
             (start[AXIS_Y] - SHOT_PREVIEW_DROP) * COURSE_TO_WORLD_SCALE,
             start[AXIS_Z] * COURSE_TO_WORLD_SCALE
         );
-        if (length != 0 && length <= SHOT_PREVIEW_MAX_DASH_LENGTH) {
+        if (length != 0 && length <= SHOT_PREVIEW_DASH_LENGTH_MAX) {
             guScaleF(dash, 1.0f, 1.0f, length * COURSE_TO_WORLD_SCALE);
             guAlignF(
                 transform,
@@ -3469,7 +3469,7 @@ void LoadOpeningBall(OpeningBallImage image, s32 slot) {
 #define PROJECTED_LOGO_BALL_MARIO_OFFSET_Y (-0.38f)
 
 #define PROJECTED_BALL_WIDTH_PER_SCALE 1.5f
-#define PROJECTED_BALL_MIN_HALF_SIZE 2
+#define PROJECTED_BALL_HALF_SIZE_MIN 2
 #define PROJECTED_BALL_HALF_SIZE_LIMIT 256
 #define PROJECTED_BALL_DROP 2
 
@@ -3898,8 +3898,8 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                     f_ProjectedBallLeft = ballPoint.x - halfSize;
                     f_ProjectedBallRight = ballPoint.x + halfSize;
                     if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
-                        if (halfSize < PROJECTED_BALL_MIN_HALF_SIZE) {
-                            halfSize = PROJECTED_BALL_MIN_HALF_SIZE;
+                        if (halfSize < PROJECTED_BALL_HALF_SIZE_MIN) {
+                            halfSize = PROJECTED_BALL_HALF_SIZE_MIN;
                         }
                     }
 
@@ -5081,7 +5081,7 @@ void LoadOpeningLogo(void) {
 #define LOGO_LETTER_GROUND_Y 125
 #define LOGO_LETTER_L_GROUND_Y 122
 #define LOGO_LETTER_BOUNCINESS 0.2f
-#define LOGO_LETTER_MIN_BOUNCE_SPEED 1.0f
+#define LOGO_LETTER_BOUNCE_SPEED_MIN 1.0f
 #define LOGO_LETTER_GRAVITY 0.5f
 #define LOGO_LETTER_GROWTH 0.04f
 #define LOGO_LETTER_SQUASH_FRAMES 10
@@ -5607,7 +5607,7 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
                         LOGO_LETTER_GROUND_Y) {
                         f_LogoLetterSpeeds[logoLetter] *= LOGO_LETTER_BOUNCINESS;
                         f_LogoLetters[logoLetter].y = LOGO_LETTER_GROUND_Y - 1;
-                        if (f_LogoLetterSpeeds[logoLetter] <= LOGO_LETTER_MIN_BOUNCE_SPEED) {
+                        if (f_LogoLetterSpeeds[logoLetter] <= LOGO_LETTER_BOUNCE_SPEED_MIN) {
                             f_LogoLetterSpeeds[logoLetter] = 0.0f;
                             f_LogoLetterStates[logoLetter] = LOGO_LETTER_LANDED;
                             continue;
@@ -5623,7 +5623,7 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
                         LOGO_LETTER_L_GROUND_Y) {
                         f_LogoLetterSpeeds[logoLetter] *= LOGO_LETTER_BOUNCINESS;
                         f_LogoLetters[logoLetter].y = LOGO_LETTER_L_GROUND_Y - 1;
-                        if (f_LogoLetterSpeeds[logoLetter] <= LOGO_LETTER_MIN_BOUNCE_SPEED) {
+                        if (f_LogoLetterSpeeds[logoLetter] <= LOGO_LETTER_BOUNCE_SPEED_MIN) {
                             f_LogoLetterSpeeds[logoLetter] = 0.0f;
                             f_LogoLetterStates[logoLetter] = LOGO_LETTER_LANDED;
                             continue;
@@ -5779,7 +5779,7 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
 #define SPARK_SCALE_DEPTH 48.0f
 #define SPARK_ANGLE_STEP (M_PI * (2.0f / SPARK_COUNT))
 #define SPARK_ANGLE_JITTER_RANGE 20
-#define SPARK_MIN_SPEED 10.0f
+#define SPARK_SPEED_MIN 10.0f
 #define SPARK_SPEED_RANGE 16
 #define SPARK_DRAG 0.98
 #define SPARK_DEPTH (-100.0f)
@@ -5813,7 +5813,7 @@ void DrawOpeningSparks(Gfx **displayListHead) {
                     (f32)DegreesToRadians(
                         (guRandom() % SPARK_ANGLE_JITTER_RANGE) - (SPARK_ANGLE_JITTER_RANGE / 2)
                     );
-                speed = ((guRandom() % SPARK_SPEED_RANGE) * f_OpeningSparkScale) + SPARK_MIN_SPEED;
+                speed = ((guRandom() % SPARK_SPEED_RANGE) * f_OpeningSparkScale) + SPARK_SPEED_MIN;
                 f_OpeningSparkVelocities[sparkIndex][AXIS_X] =
                     sinf(f_OpeningSparkAngles[sparkIndex]) * speed * f_OpeningSparkScale;
                 f_OpeningSparkVelocities[sparkIndex][AXIS_Y] =
