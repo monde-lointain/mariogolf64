@@ -870,8 +870,8 @@ void PlayFlightSounds(s32 step) {
     SurfaceTraits *surfaceTraits;
     Player *player;
     s32 *greenSoundCount;
-    s32 *isPlayed;
-    s32 *isStillPlayed;
+    Boolean *isPlayed;
+    Boolean *isStillPlayed;
 
     scoreToPar = g_Players[g_CurrentShot.playerIndex].strokeCount - g_HoleSetup.par;
     shownRingCount = 0;

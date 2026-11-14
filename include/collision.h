@@ -5,6 +5,7 @@
 
 #include "ball_simulation.h"
 #include "course_space.h"
+#include "language.h"
 #include "terrain.h"
 
 enum PinHit {
@@ -97,7 +98,7 @@ s32 FindPinHit(
     s32 endZ,
     CoursePoint velocity,
     f32 *fraction,
-    s32 hasHitFlag,
+    Boolean hasHitFlag,
     BallSimulation *simulation
 );
 s32 FindWallHit(

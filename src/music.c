@@ -6,6 +6,7 @@
 
 #include "address.h"
 #include "compiler.h"
+#include "language.h"
 #include "sound.h"
 
 typedef void (*AudioEventCallback)(NUScMsg message, s32 resetFrame);
@@ -202,10 +203,10 @@ musHandle StartSoundEffectWith(
     SoundId soundId,
     SoundVolume volume,
     SoundPan pan,
-    s32 restartFlag,
+    Boolean restarts,
     s32 priority
 ) {
-    return MusStartEffect2(soundId, volume, pan, restartFlag, priority);
+    return MusStartEffect2(soundId, volume, pan, restarts, priority);
 }
 
 void LoadSoundEffectBank(u8 *bankRom, u32 bankSize) {

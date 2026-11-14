@@ -1606,7 +1606,7 @@ s32 FindPinHit(
     s32 endZ,
     CoursePoint velocity,
     f32 *fraction,
-    s32 hasHitFlag,
+    Boolean hasHitFlag,
     BallSimulation *simulation
 ) {
     s32 pinIndex;

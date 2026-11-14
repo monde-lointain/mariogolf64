@@ -1118,7 +1118,7 @@ static f32 f_MenuCharacterPositions[MENU_CHARACTER_LAYOUT_COUNT][MENU_CHARACTER_
 static s32 f_MarkedCharacters[CHARACTER_COUNT] =
     {0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
 static s32 f_ViewerLoadedCharacter = NO_VIEWER_CHARACTER;
-static s32 f_IsViewerAnimationChanged = FALSE;
+static Boolean f_IsViewerAnimationChanged = FALSE;
 static f32 f_ViewerPitch = 0.0f;
 static f32 f_ViewerYaw = 0.0f;
 static f32 f_ViewerScaleOffset = 0.0f;
