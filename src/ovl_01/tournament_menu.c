@@ -2244,7 +2244,7 @@ void DrawCodePrompt(Gfx **displayListHead) {
     s32 x = 0;
     Gfx *gfx = *displayListHead;
     s32 messageOffset;
-    s32 flags;
+    TextFlags flags;
 
     switch (f_ClubCodeState) {
         case CLUB_CODE_STATE_ENTERING:
