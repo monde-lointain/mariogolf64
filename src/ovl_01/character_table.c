@@ -121,7 +121,7 @@ static s32 f_TablePopupCorner = TABLE_POPUP_TOP_LEFT;
 static s32 f_TableArrowFrame = 0;
 static s32 f_TableArrowTimer = 0;
 static s32 f_UnreadTableArrowState = 0;
-static CharacterIndex f_TableCharacters[CHARACTER_COUNT] = {
+static CharacterIndex f_ChoiceCharacters[CHARACTER_COUNT] = {
     CHARACTER_PLUM,
     CHARACTER_CHARLIE,
     CHARACTER_PEACH,
@@ -398,7 +398,7 @@ void DrawCharacterTable(Gfx **displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     row = memory->tableFirstRow;
     for (shownRow = 0; shownRow != TABLE_SHOWN_ROW_COUNT; shownRow++) {
-        rowCharacter = f_TableCharacters[row];
+        rowCharacter = f_ChoiceCharacters[row];
         drawMode = FACE_DARKENED;
         if (f_TableCharacterVisibility[row] == TABLE_CHARACTER_SHOWN) {
             drawMode = FACE_PLAIN;
@@ -415,7 +415,7 @@ void DrawCharacterTable(Gfx **displayListHead) {
         );
         column = memory->tableFirstColumn;
         for (shownColumn = 0; shownColumn != TABLE_SHOWN_COLUMN_COUNT; shownColumn++) {
-            columnCharacter = f_TableCharacters[column];
+            columnCharacter = f_ChoiceCharacters[column];
             drawMode = FACE_DARKENED;
             if (f_TableCharacterVisibility[column] != TABLE_CHARACTER_HIDDEN) {
                 drawMode = FACE_PLAIN;
@@ -736,8 +736,8 @@ void DrawTablePopup(Gfx **displayListHead) {
     }
 
     row = memory->tableFirstRow + memory->tableRow;
-    rowCharacter = f_TableCharacters[row];
-    columnCharacter = f_TableCharacters[memory->tableFirstColumn + memory->tableColumn];
+    rowCharacter = f_ChoiceCharacters[row];
+    columnCharacter = f_ChoiceCharacters[memory->tableFirstColumn + memory->tableColumn];
     columnWins =
         save->records.awards.matchups[rowCharacter][columnCharacter].lossCount & WIN_COUNT_MASK;
     rowWins = save->records.awards.matchups[rowCharacter][columnCharacter].winBits & WIN_COUNT_MASK;

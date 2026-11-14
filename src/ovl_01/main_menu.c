@@ -1062,7 +1062,7 @@ static u8 f_MiniGolfDiscBufferIndex = 0;
 static s32 f_CameraOrbitUpdateCount = 0;
 static u8 f_PlayerSoundPans[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX] =
     {{127, 0, 0, 0}, {15, 240, 0, 0}, {15, 127, 240, 0}, {15, 85, 170, 240}};
-static s32 f_MenuCharacterChoices[CHARACTER_COUNT] = {
+static s32 f_CharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_CHARLIE,
     CHARACTER_CHOICE_MAPLE,
@@ -2235,7 +2235,7 @@ void SetUpChosenGame(void) {
         sprintf(
             player->name,
             f_NameFormat,
-            g_MenuCharacterNames[f_MenuCharacterChoices[g_ChosenCharacters[index]]]
+            g_MenuCharacterNames[f_CharacterChoices[g_ChosenCharacters[index]]]
         );
         if (g_ChosenCharacters[index] >= CHARACTER_KID) {
             row = g_MenuMemory.characterRows[index];
@@ -2255,7 +2255,7 @@ void SetUpChosenGame(void) {
             sprintf(
                 player->name,
                 f_NameFormat,
-                g_MenuCharacterNames[f_MenuCharacterChoices[g_ChosenCharacters[index]]]
+                g_MenuCharacterNames[f_CharacterChoices[g_ChosenCharacters[index]]]
             );
         }
 

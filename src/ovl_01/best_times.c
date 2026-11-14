@@ -64,7 +64,7 @@ void DrawStopwatchTime(Gfx **displayListHead, s32 left, s32 top, s32 frameCount)
 static s32 f_BestTimesArrowFrame = 0;
 static s32 f_BestTimesArrowTimer = 0;
 static s32 f_UnusedBestTimesArrowWord = 0;
-static s32 f_BestTimesCharacterChoices[CHARACTER_COUNT] = {
+static s32 f_CharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_CHARLIE,
     CHARACTER_CHOICE_MAPLE,
@@ -504,7 +504,7 @@ void DrawBestTimeFace(
         gfx++,
         TextureAddress(
             LargeImageTexels(f_CharacterFaceStrip) +
-            (f_BestTimesCharacterChoices[characterIndex] * FACE_WIDTH * FACE_HEIGHT)
+            (f_CharacterChoices[characterIndex] * FACE_WIDTH * FACE_HEIGHT)
         ),
         G_IM_FMT_CI,
         G_IM_SIZ_8b,
@@ -535,11 +535,7 @@ void DrawBestTimeFace(
     if (drawMode == FACE_WITH_NAME) {
         SetUpTextDrawing(&gfx);
         SetTextColor(&gfx, 255, 255, 255);
-        sprintf(
-            g_PrintBuffer,
-            "%s",
-            g_MenuCharacterNames[f_BestTimesCharacterChoices[characterIndex]]
-        );
+        sprintf(g_PrintBuffer, "%s", g_MenuCharacterNames[f_CharacterChoices[characterIndex]]);
         DrawLargeText(&gfx, left + FACE_NAME_OFFSET_X, top + FACE_NAME_OFFSET_Y, g_PrintBuffer);
         gDPPipeSync(gfx++);
     }

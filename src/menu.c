@@ -1020,7 +1020,7 @@ static s16 f_RecordGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] =
         EMPTY_GRID_SLOT,
     },
 };
-static s16 f_RecordCharacters[CHARACTER_COUNT] = {
+static s16 f_CharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_CHARLIE,
     CHARACTER_CHOICE_MAPLE,
@@ -2069,7 +2069,7 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
             for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
                 for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
                     if (f_RecordGrid[row][column] == index) {
-                        g_CharacterGrid[row][column] = f_RecordCharacters[index];
+                        g_CharacterGrid[row][column] = f_CharacterChoices[index];
                     }
                 }
             }

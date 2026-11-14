@@ -323,7 +323,7 @@ static Vtx f_BestShotsCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
 };
 static s32 f_UnusedWordsAfterBestShotsCursor[2] UNUSED = {0, 0};
 static f32 f_BestShotsCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {0.0f, 2.0f, 4.0f, 6.0f};
-static s32 f_StatsCharacterChoices[CHARACTER_COUNT] = {
+static s32 f_CharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_CHARLIE,
     CHARACTER_CHOICE_MAPLE,
@@ -3051,11 +3051,7 @@ void DrawCharacterFace(
         if (characterIndex < NAMED_CHARACTER_COUNT) {
             SetUpTextDrawing(&gfx);
             SetTextColor(&gfx, 255, 255, 255);
-            sprintf(
-                g_PrintBuffer,
-                "%s",
-                g_MenuCharacterNames[f_StatsCharacterChoices[characterIndex]]
-            );
+            sprintf(g_PrintBuffer, "%s", g_MenuCharacterNames[f_CharacterChoices[characterIndex]]);
             DrawLargeText(&gfx, left + FACE_NAME_OFFSET_X, top + FACE_NAME_OFFSET_Y, g_PrintBuffer);
             gDPPipeSync(gfx++);
         }
