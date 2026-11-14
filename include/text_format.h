@@ -4,6 +4,9 @@
 #include <ultra64.h>
 
 typedef s32 MessageId;
+// A MessageId in a signed halfword, as the original keeps its message
+// tables.
+typedef s16 MessageId16;
 #define NO_MESSAGE (-1)
 
 typedef s32 TextFlags;

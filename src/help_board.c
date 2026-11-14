@@ -87,7 +87,7 @@ static TopicPageTable f_TopicPages = {
     {0x11, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01},
     {1, 4, 4, 4, 4, 3, 4, 5, 4, 4, 3, 5, 4, 4, 4, 4, 3, 6},
 };
-static s16 f_TopicTitleMessages[HELP_TOPIC_COUNT + 1] = {
+static MessageId16 f_TopicTitleMessages[HELP_TOPIC_COUNT + 1] = {
     0x0D6,
     0x0E7,
     0x0EC,
