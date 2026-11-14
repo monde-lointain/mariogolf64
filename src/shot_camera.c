@@ -2264,11 +2264,11 @@ void PlaceFlightCamera(s32 step) {
         (info)->kind == SURFACE_KIND_OUT_OF_BOUNDS)
 
 void ChooseFlightCameraKind(void) {
-    s32 animation;
+    s32 animationId;
     s32 kind;
     s32 pick;
 
-    animation = HUD_ANIMATION_NONE;
+    animationId = HUD_ANIMATION_NONE;
     f_HasFlightPhaseChanged = FALSE;
     kind = FLIGHT_CAMERA_UNCHANGED;
     if (g_SimulatedShot.startsOnGreen) {
@@ -2399,7 +2399,7 @@ void ChooseFlightCameraKind(void) {
                 break;
             case FLIGHT_PHASE_EARLY_CLIMB:
                 if (f_FlightCameraKind == FLIGHT_CAMERA_NEAR_LAUNCH) {
-                    animation = HUD_ANIMATION_TILES;
+                    animationId = HUD_ANIMATION_TILES;
                     kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                 }
                 else if (f_FlightCameraKind == FLIGHT_CAMERA_AIM_VIEW) {
@@ -2474,7 +2474,7 @@ void ChooseFlightCameraKind(void) {
                     }
                     else if (RandomBelow(8) == 0) {
                         kind = FLIGHT_CAMERA_AROUND_END;
-                        animation = HUD_ANIMATION_TILES;
+                        animationId = HUD_ANIMATION_TILES;
                     }
                     else if (RandomBelow(8) < 4) {
                         kind = FLIGHT_CAMERA_AROUND_END;
@@ -2572,7 +2572,7 @@ void ChooseFlightCameraKind(void) {
     if (f_FlightCameraKind < kind) {
         f_IsCameraKindNew = TRUE;
         StartHudAnimation(HUD_ANIMATION_NONE);
-        if (animation == HUD_ANIMATION_NONE) {
+        if (animationId == HUD_ANIMATION_NONE) {
             if (f_FlightPhase >= FLIGHT_PHASE_FALL &&
                 !g_SimulatedShot.startsOnGreen &&
                 f_ShotLength > SHORT_SHOT_MAX_LENGTH) {
@@ -2591,7 +2591,7 @@ void ChooseFlightCameraKind(void) {
             }
         }
         else if (f_ShotLength > SHORT_SHOT_MAX_LENGTH) {
-            StartHudAnimation(animation);
+            StartHudAnimation(animationId);
         }
 
         f_FlightCameraKind = kind;

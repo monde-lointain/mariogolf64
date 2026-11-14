@@ -113,7 +113,7 @@ extern s32 g_CapturedSliceCount;
 void SetUpTitleHole(void);
 void UsePrimitiveDepth(Boolean isPrimitiveDepthSet);
 void SetMenuBackdrop(s32 backdrop);
-void StartHudAnimation(s32 animation);
+void StartHudAnimation(s32 animationId);
 Boolean IsHudAnimationDone(void);
 void DrawHudAnimation(void);
 void ResetHudScissor(void);

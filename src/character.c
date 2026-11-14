@@ -1073,7 +1073,7 @@ void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 kind) {
     }
 }
 
-s32 GetAnimationIndex(u32 slotIndex, s32 id) {
+s32 GetAnimationIndex(u32 slotIndex, s32 animationId) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     s32 foundIndex = 0;
     CharacterAnimation *animation;
@@ -1082,7 +1082,7 @@ s32 GetAnimationIndex(u32 slotIndex, s32 id) {
     if (slot != NULL) {
         i = 0;
         for (animation = ModelAnimations(slot->model); animation->events != NULL; animation++) {
-            if (animation->id == id) {
+            if (animation->id == animationId) {
                 foundIndex = i;
                 break;
             }
@@ -1094,29 +1094,31 @@ s32 GetAnimationIndex(u32 slotIndex, s32 id) {
     return foundIndex;
 }
 
-CharacterAnimation *FindAnimation(u32 slotIndex, s32 id) {
+CharacterAnimation *FindAnimation(u32 slotIndex, s32 animationId) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
         MapModelBuffer(slot);
-        id = GetAnimationIndex(slotIndex, id);
-        if (ModelAnimations(slot->model)[id].events == NULL) {
+        // animationId is reused for the animation's index; a separate
+        // variable breaks the match.
+        animationId = GetAnimationIndex(slotIndex, animationId);
+        if (ModelAnimations(slot->model)[animationId].events == NULL) {
             return NULL;
         }
 
-        return &ModelAnimations(slot->model)[id];
+        return &ModelAnimations(slot->model)[animationId];
     }
 
     return NULL;
 }
 
-void SetCharacterAnimation(u32 slotIndex, s32 id) {
+void SetCharacterAnimation(u32 slotIndex, s32 animationId) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     JointAnimation *joint;
 
     if (slot != NULL) {
         MapModelBuffer(slot);
-        slot->animationIndex = GetAnimationIndex(slotIndex, id);
+        slot->animationIndex = GetAnimationIndex(slotIndex, animationId);
         if (ModelAnimations(slot->model)[slot->animationIndex].events == NULL) {
             slot->animationIndex = 0;
         }
@@ -1223,8 +1225,8 @@ s32 GetCurrentAnimationEndFrame(u32 slotIndex) {
     return endFrame;
 }
 
-s32 GetAnimationEndFrame(u32 slotIndex, s32 id) {
-    CharacterAnimation *animation = FindAnimation(slotIndex, id);
+s32 GetAnimationEndFrame(u32 slotIndex, s32 animationId) {
+    CharacterAnimation *animation = FindAnimation(slotIndex, animationId);
 
     if (animation != NULL) {
         return animation->startFrame + animation->frameCount;
@@ -1233,8 +1235,8 @@ s32 GetAnimationEndFrame(u32 slotIndex, s32 id) {
     return -1;
 }
 
-s32 GetAnimationStartFrame(u32 slotIndex, s32 id) {
-    CharacterAnimation *animation = FindAnimation(slotIndex, id);
+s32 GetAnimationStartFrame(u32 slotIndex, s32 animationId) {
+    CharacterAnimation *animation = FindAnimation(slotIndex, animationId);
 
     if (animation != NULL) {
         return animation->startFrame;
@@ -1243,8 +1245,8 @@ s32 GetAnimationStartFrame(u32 slotIndex, s32 id) {
     return -1;
 }
 
-s32 GetAnimationFrameCount(u32 slotIndex, s32 id) {
-    CharacterAnimation *animation = FindAnimation(slotIndex, id);
+s32 GetAnimationFrameCount(u32 slotIndex, s32 animationId) {
+    CharacterAnimation *animation = FindAnimation(slotIndex, animationId);
 
     if (animation != NULL) {
         return animation->frameCount;

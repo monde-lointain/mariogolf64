@@ -3030,18 +3030,18 @@ void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
     *displayListHead = gfx;
 }
 
-void StartHudAnimation(s32 animation) {
-    if (animation == HUD_ANIMATION_NONE) {
+void StartHudAnimation(s32 animationId) {
+    if (animationId == HUD_ANIMATION_NONE) {
         f_IsFrameCapturePending = FALSE;
         f_HudAnimationFramesLeft = 0;
         return;
     }
 
-    if (animation != HUD_ANIMATION_SLICE_CAPTURE && animation != HUD_ANIMATION_SLICES) {
+    if (animationId != HUD_ANIMATION_SLICE_CAPTURE && animationId != HUD_ANIMATION_SLICES) {
         g_CapturedSliceCount = 0;
     }
 
-    switch (animation) {
+    switch (animationId) {
         case HUD_ANIMATION_UNUSED:
             f_HudAnimationFramesLeft = 352;
             break;
@@ -3070,7 +3070,7 @@ void StartHudAnimation(s32 animation) {
             break;
     }
 
-    f_HudAnimation = animation;
+    f_HudAnimation = animationId;
     f_IsFrameCapturePending = TRUE;
     f_HudAnimationFrame = 0;
 }

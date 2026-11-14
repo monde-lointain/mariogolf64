@@ -911,8 +911,8 @@ void FreeRoundResults(void) {
     }
 }
 
-void StartPortraitAnimation(s32 animation, s32 playerIndex) {
-    f_PortraitAnimations[playerIndex] = animation;
+void StartPortraitAnimation(s32 animationId, s32 playerIndex) {
+    f_PortraitAnimations[playerIndex] = animationId;
     f_PortraitFrames[playerIndex] = 0;
     f_PortraitTimers[playerIndex] = 0;
 }

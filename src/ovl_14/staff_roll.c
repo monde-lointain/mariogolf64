@@ -497,51 +497,51 @@ void EaseStaffRollView(f32 *eye, f32 *lookAt, f32 rate, s32 easedParts) {
 }
 
 s32 GetStanceAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode UNUSED) {
-    s32 animation;
+    s32 animationId;
 
     switch (GetCharacterClubKind(slotIndex, clubIndex)) {
         case CLUB_KIND_WOOD:
-            animation = WOOD_ANIMATIONS;
+            animationId = WOOD_ANIMATIONS;
             break;
         case CLUB_KIND_IRON:
-            animation = IRON_ANIMATIONS;
+            animationId = IRON_ANIMATIONS;
             break;
         case CLUB_KIND_WEDGE:
-            animation = WEDGE_ANIMATIONS;
+            animationId = WEDGE_ANIMATIONS;
             break;
         case CLUB_KIND_PUTTER:
-            animation = PUTTER_ANIMATIONS;
+            animationId = PUTTER_ANIMATIONS;
             break;
         default:
-            animation = WOOD_ANIMATIONS;
+            animationId = WOOD_ANIMATIONS;
             break;
     }
 
-    return animation;
+    return animationId;
 }
 
 s32 GetSwingAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
-    s32 animation;
+    s32 animationId;
 
     switch (GetCharacterClubKind(slotIndex, clubIndex)) {
         case CLUB_KIND_WOOD:
-            animation = WOOD_ANIMATIONS + SWING_ANIMATION;
+            animationId = WOOD_ANIMATIONS + SWING_ANIMATION;
             break;
         case CLUB_KIND_IRON:
-            animation = IRON_ANIMATIONS + SWING_ANIMATION;
+            animationId = IRON_ANIMATIONS + SWING_ANIMATION;
             break;
         case CLUB_KIND_WEDGE:
-            animation = WEDGE_ANIMATIONS + SWING_ANIMATION;
+            animationId = WEDGE_ANIMATIONS + SWING_ANIMATION;
             break;
         case CLUB_KIND_PUTTER:
-            animation = PUTTER_ANIMATIONS + SWING_ANIMATION;
+            animationId = PUTTER_ANIMATIONS + SWING_ANIMATION;
             break;
         default:
-            animation = 0;
+            animationId = 0;
             break;
     }
 
-    return animation + (shotMode == SHOT_MODE_APPROACH);
+    return animationId + (shotMode == SHOT_MODE_APPROACH);
 }
 
 void SetStanceAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
