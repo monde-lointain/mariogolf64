@@ -734,7 +734,7 @@ void DrawRingShotRecords(Gfx **displayListHead) {
     s32 red;
     s32 green;
     s32 blue;
-    s16 replayCourse;
+    CourseIndex16 replayCourse;
     s16 replayHole;
 
     DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);

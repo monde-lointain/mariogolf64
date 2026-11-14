@@ -55,7 +55,8 @@ typedef struct MenuMemory {
     // The bet settings screen's chosen column of the bet set
     s8 betColumn;
     s8 betStakeLevels[BET_STAKE_SLOT_COUNT]; // Set from one of ApplyBetPreset's presets
-    s8 courseChoice; // The course select's course: an open one, or the next one still shut
+    // The course select's course: an open one, or the next one still shut
+    CourseIndex8 courseChoice;
     s8 courseSpin; // How far the courses still have to turn to reach it
     HolesChoice holesChoice; // HOLES_CHOICE_*
     s8 caddyChoice; // The debug caddy select's caddy
@@ -120,7 +121,7 @@ extern TakenCharacters g_TakenCharacters;
 
 // The character each player has chosen, or NO_CHOSEN_CHARACTER
 #define NO_CHOSEN_CHARACTER (-1)
-extern s32 g_ChosenCharacters[PLAYER_COUNT_MAX];
+extern CharacterIndex g_ChosenCharacters[PLAYER_COUNT_MAX];
 
 // Whether each player swings left-handed, which becomes g_Players[].isLefty
 extern Boolean8 g_ChosenLefties[PLAYER_COUNT_MAX];

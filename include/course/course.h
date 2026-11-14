@@ -35,6 +35,7 @@ enum CourseRecordIndex {
 
 // An enum CourseRecordIndex value
 typedef s32 CourseRecordIndex;
+typedef u8 UCourseRecordIndex8;
 
 // The main courses, which keep their records' order
 enum Course {
@@ -63,6 +64,7 @@ enum Course {
 // A course as GameState.courseIndex numbers it; the main courses are its enum Course values
 typedef s32 CourseIndex;
 typedef s8 CourseIndex8;
+typedef s16 CourseIndex16;
 
 // The colors of each course's name, which gradients from the first to the
 // second
@@ -99,7 +101,7 @@ typedef struct CourseRecord {
 
 // A Ring Shot hole is one of the holes of a course record
 typedef struct RingShotHole {
-    u8 courseRecordIndex;
+    UCourseRecordIndex8 courseRecordIndex;
     u8 holeIndex;
 } RingShotHole;
 
@@ -112,7 +114,7 @@ s32 GetHoleRadius(CourseRecordIndex courseRecordIndex, s32 holeIndex);
 CourseRecordIndex GetCourseRecordIndex();
 s32 GetHoleRecordIndex(void);
 s32 GetHoleIndexInRecord(void);
-Boolean IsMarkedParFive(s32 courseRecordIndex, s32 holeIndex);
-Boolean IsParThree(s32 courseRecordIndex, s32 holeIndex);
+Boolean IsMarkedParFive(CourseRecordIndex courseRecordIndex, s32 holeIndex);
+Boolean IsParThree(CourseRecordIndex courseRecordIndex, s32 holeIndex);
 
 #endif

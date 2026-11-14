@@ -2033,7 +2033,7 @@ void DrawSpeedGolfPage(Gfx **displayListHead) {
     s32 minutes;
     s32 seconds;
     s32 hundredths;
-    s32 scoreToPar;
+    ScoreToPar scoreToPar;
 
     shownHoleCount = g_Scorecard.content.holeIndex;
     if (g_Players[0].holeStatus != HOLE_STATUS_PLAYING) {

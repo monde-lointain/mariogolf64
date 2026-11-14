@@ -7,6 +7,7 @@
 
 #include <ultra64.h>
 
+#include "course/course.h"
 #include "system/asset.h"
 
 // The buffers that LoadCourseMenuBuffer keeps, by the kind its caller gives
@@ -38,6 +39,6 @@ void LoadCourseTrophyImages(ImageAsset **buffers, CourseBuffer requestedKind);
 void LoadCourseMenuBuffer(void *buffer, CourseMenuBuffer bufferKind);
 void UpdateCourseStats(void);
 void DrawCourseStats(Gfx **displayListHead);
-void DrawCourseBanner(Gfx **displayListHead, u8 useCourseNames, s32 courseIndex);
+void DrawCourseBanner(Gfx **displayListHead, u8 useCourseNames, CourseIndex courseIndex);
 
 #endif

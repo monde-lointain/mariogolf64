@@ -2877,7 +2877,7 @@ void ReadBestShots(void) {
     s32 eagleCount;
     s32 albatrossCount;
     s32 holeInOneCount;
-    s32 scoreKind;
+    ScoreKind scoreKind;
     BestShotRow row;
     s32 column;
     MenuMemory *memory;
@@ -3331,7 +3331,7 @@ void DrawCharacterFace(
     PaletteColor *palette,
     s32 left,
     s32 top,
-    s16 characterIndex,
+    CharacterIndex16 characterIndex,
     u8 drawMode
 ) {
     Gfx *gfx = *displayListHead;

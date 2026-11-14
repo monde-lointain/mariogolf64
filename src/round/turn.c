@@ -1763,7 +1763,7 @@ Boolean UpdateAimControls(void) {
 }
 
 void UpdateShotFlags(void) {
-    s32 surfaceMask = GetSelectedClub()->surfaceMask;
+    ClubSurfaceMask surfaceMask = GetSelectedClub()->surfaceMask;
     Boolean8 *isMiniGolf;
 
     g_ShotFlags = 0;
@@ -1862,7 +1862,7 @@ void ChooseStartingClub(HoleSetup *hole) {
         LieRating ratingMin = NO_LIE_RATING;
         s32 bestGap = S32_MAX;
         Boolean reaches = FALSE;
-        s32 bestSlot = 0;
+        ClubSlot bestSlot = 0;
         s32 distance;
         s32 gap;
 
@@ -2097,7 +2097,7 @@ void PrintCoursePoints(void) {
 #define PREVIEW_STEP_TEXT_COLUMN 10
 #define PREVIEW_STEP_TEXT_ROW 3
 
-void BuildShotPreview(ShotLaunch *shot, s32 playerState) {
+void BuildShotPreview(ShotLaunch *shot, PlayerState playerState) {
     BallSimulation simulation;
     ShotLaunch previewShot;
     CoursePoint start;

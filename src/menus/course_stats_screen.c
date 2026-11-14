@@ -649,7 +649,7 @@ void DrawCourseStats(Gfx **displayListHead) {
 // Draws the name plate banner squeezed under the screen's title, with the
 // course's number and its tournament's name, or with the course's own name if
 // useCourseNames is set. The totals, after the last course, get no number.
-void DrawCourseBanner(Gfx **displayListHead, u8 useCourseNames, s32 courseIndex) {
+void DrawCourseBanner(Gfx **displayListHead, u8 useCourseNames, CourseIndex courseIndex) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
     s32 stripTop;
@@ -778,7 +778,7 @@ void DrawYardMark(Gfx **displayListHead, s16 x, s16 y);
 void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory;
-    s32 courseIndex;
+    CourseIndex courseIndex;
     s32 bestScore;
     s32 openCourseCount;
 

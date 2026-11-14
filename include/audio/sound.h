@@ -31,6 +31,7 @@ typedef s32 SoundChannel;
 typedef s32 SoundVolume;
 // Where a sound plays, from 0 at the left to SOUND_FULL_SCALE at the right
 typedef s32 SoundPan;
+typedef s8 SoundPan8;
 // How much echo a sound gets, from 0 to SOUND_FULL_SCALE
 typedef s32 SoundReverb;
 

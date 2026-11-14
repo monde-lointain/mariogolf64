@@ -107,7 +107,7 @@ typedef struct Scorecard {
     // The last hole's result is already on the scorecard
     Boolean isTallied;
     s32 holeWinnerIndex; // The player who won the last hole, or a HOLE_WINNER_* value
-    s32 layout;
+    ScorecardLayout layout;
     s32 pageCount;
     Boolean hasBets;
     SkinsCarryover skinsCarryover;

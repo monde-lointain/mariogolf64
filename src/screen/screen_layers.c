@@ -253,7 +253,7 @@ static Prompt f_Prompts[] = {
     // PROMPT_OVERWRITE_RECORDS
     {0x36, PROMPT_CHOICE_NO, {PROMPT_RESULT_YES, PROMPT_RESULT_NO}},
 };
-static s32 f_PromptIndex = 0;
+static PromptId f_PromptIndex = 0;
 static s32 f_PromptFrame = 0;
 static PromptState f_PromptState = PROMPT_STATE_CLOSED;
 static PromptChoice f_PromptChoice = PROMPT_CHOICE_YES;

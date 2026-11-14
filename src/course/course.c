@@ -401,7 +401,7 @@ s32 GetHoleIndexInRecord(void) {
 }
 
 // With g_IsDebugEnabled set, the first hole counts too
-Boolean IsMarkedParFive(s32 courseRecordIndex, s32 holeIndex) {
+Boolean IsMarkedParFive(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
     if (g_GameState.isMiniGolf) {
         return FALSE;
     }
@@ -413,7 +413,7 @@ Boolean IsMarkedParFive(s32 courseRecordIndex, s32 holeIndex) {
     return g_CourseRecords[courseRecordIndex].holes[holeIndex].flags & HOLE_FLAG_MARKED_PAR_FIVE;
 }
 
-Boolean IsParThree(s32 courseRecordIndex, s32 holeIndex) {
+Boolean IsParThree(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
     if (g_GameState.isMiniGolf) {
         return FALSE;
     }

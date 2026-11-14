@@ -12,6 +12,7 @@
 #include "course/course.h"
 #include "menus/password.h"
 #include "round/player.h"
+#include "round/scoring.h"
 #include "save/play_record.h"
 #include "system/asset.h"
 #include "system/c_language.h"
@@ -57,12 +58,14 @@ enum MenuScreen {
 };
 
 typedef s32 MenuScreen;
+typedef s8 MenuScreen8;
+typedef s16 MenuScreen16;
 
 #define MENU_SCREEN_COUNT 29
 // g_LoadedMenuScreen's value before any screen's assets are read
 #define NO_MENU_SCREEN (-1)
 // The screen whose assets UpdateMenus last read
-extern s8 g_LoadedMenuScreen;
+extern MenuScreen8 g_LoadedMenuScreen;
 // Each screen's title, which its banner shows
 extern AssetId g_MenuScreenImageAssets[MENU_SCREEN_COUNT];
 extern MenuScreen g_MenuScreen;
@@ -351,7 +354,7 @@ Boolean HasEveryRingShotStar(void);
 void InsertBestTime(
     CourseIndex courseIndex,
     s32 time,
-    s32 scoreToPar,
+    ScoreToPar scoreToPar,
     CharacterIndex characterIndex,
     CButtonPalette paletteIndex
 );
@@ -401,7 +404,7 @@ extern s32 g_ClubTournamentNameIndex;
 extern s32 g_ClubTournamentNumber;
 // The code of the tournament whose password was entered
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
-extern s16 g_LastMenuScreen;
+extern MenuScreen16 g_LastMenuScreen;
 // The menu screen's course or mode icons, whose buffers other screens reuse
 // for their own images
 extern ImageAsset *g_MenuIconImages[MENU_ICON_COUNT];

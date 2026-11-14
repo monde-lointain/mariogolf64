@@ -153,7 +153,7 @@ void StopFireworks(void) {
 
 // Loads the shape for the course, picked by its record index, and allocates
 // the fireworks' particles
-void LoadFireworks(s32 courseRecordIndex) {
+void LoadFireworks(CourseRecordIndex courseRecordIndex) {
     EncodedAsset asset;
     s32 index;
     Firework *firework;

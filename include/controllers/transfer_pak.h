@@ -143,6 +143,27 @@ enum PressingHand {
 
 typedef s32 PressingHand;
 
+// How reading or writing a controller's Transfer Pak went
+enum PakResult {
+    PAK_RESULT_STILL_READING = -1,
+    PAK_RESULT_UNKNOWN_ERROR = PAK_RESULT_STILL_READING,
+    PAK_RESULT_CONNECTOR_PROBLEM,
+    PAK_RESULT_OK,
+    PAK_RESULT_NO_CHARACTERS,
+    PAK_RESULT_NO_PAK,
+    PAK_RESULT_NO_CARTRIDGE,
+    PAK_RESULT_WRONG_CARTRIDGE,
+    PAK_RESULT_OTHER_PAK,
+    PAK_RESULT_LOOSE_PAK,
+    PAK_RESULT_REMOVED_RETRYING,
+    PAK_RESULT_CARTRIDGE_REMOVED,
+    PAK_RESULT_CORRUPTED,
+    PAK_RESULT_CARTRIDGE_REPLACED,
+    PAK_RESULT_UNINITIALIZED
+};
+
+typedef s32 PakResult;
+
 // What the Game Boy transfer keeps while its overlay is loaded and between
 // visits
 typedef struct GameBoyTransfer {
@@ -175,7 +196,7 @@ typedef struct GameBoyTransfer {
     s32 listedCharacterCount;
     // Each controller's cartridge is opened, then its saves read, a step each
     s32 readStep;
-    s32 transferResult;
+    PakResult transferResult;
     s32 screenStep;
     s32 bringingFrame;
     s32 listedCharacterIndex;

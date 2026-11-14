@@ -7,6 +7,7 @@
 
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "characters/character.h"
 #include "course/course.h"
 #include "course/course_space.h"
@@ -178,7 +179,7 @@ typedef struct Player {
     s8 controllerIndex; // Into g_PlayerControllerPorts, when below MAXCONTROLLERS
     s8 powerShotCount; // Left in the round; POWER_SHOTS_UNLIMITED in training and replays
     s8 handicap; // Gives strokes on the holes it ranks within
-    s8 soundPan;
+    SoundPan8 soundPan;
     PlayerHole holes[COURSE_HOLE_COUNT];
     u8 unusedAfterHoles[0x52 - 0x4F];
     ClubIndex16 clubs[CLUB_SLOT_COUNT]; // Indices into g_Clubs, by bag slot

@@ -44,6 +44,8 @@ enum ScoreKind {
 };
 
 typedef s32 ScoreKind;
+typedef s8 ScoreKind8;
+typedef u8 UScoreKind8;
 
 // A hole that a player finished in few strokes, kept to be replayed
 typedef struct PlayRecord {
@@ -51,7 +53,7 @@ typedef struct PlayRecord {
     GameMode gameMode;
     CourseIndex8 courseIndex;
     s8 holeIndex;
-    u8 scoreKind; // What GetRecordedScoreKind returns for the strokes
+    UScoreKind8 scoreKind; // What GetRecordedScoreKind returns for the strokes
     CharacterIndex8 characterIndex;
     UBoolean8 isLefty;
     CButtonPalette8 paletteIndex;
@@ -69,7 +71,7 @@ typedef struct RingShotRecord {
     HoleSetup hole;
     CourseIndex8 courseIndex;
     s8 holeIndex;
-    s8 scoreKind; // What GetRecordedScoreKind returns for the strokes
+    ScoreKind8 scoreKind; // What GetRecordedScoreKind returns for the strokes
     CharacterIndex8 characterIndex;
     UBoolean8 isLefty;
     CButtonPalette8 paletteIndex;

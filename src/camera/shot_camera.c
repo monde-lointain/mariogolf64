@@ -1043,7 +1043,7 @@ static inline void QueueOnlookerSounds(CharacterSoundKind kind) {
 // g_BallFlightStep, which the caller clamps to the recorded path.
 void PlayFlightSounds(s32 step) {
     s32 shownRingCount;
-    s32 scoreToPar;
+    ScoreToPar scoreToPar;
     s32 i;
     SurfaceTraits *surfaceTraits;
     Player *player;

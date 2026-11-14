@@ -7,6 +7,7 @@
 
 #include <ultra64.h>
 
+#include "course/course.h"
 #include "system/c_language.h"
 
 // How many fireworks f_Fireworks has room for
@@ -31,7 +32,7 @@ typedef struct Firework {
 
 void StartFireworks(void);
 void StopFireworks(void);
-void LoadFireworks(s32 courseRecordIndex);
+void LoadFireworks(CourseRecordIndex courseRecordIndex);
 void FreeFireworks(void);
 void UpdateAndDrawFireworks(Gfx **displayListHead);
 

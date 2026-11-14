@@ -259,7 +259,7 @@ volatile u32 nuGfxTaskSpool BSS = {0};
 u8 g_UnreadMenuBuffer[0x1218] BSS = {0};
 // Its address is only 4-byte aligned, so it keeps its type's alignment
 u8 g_UnreadPlayBuffer[0xDEC] BSS = {0};
-s32 g_ChosenCharacters[PLAYER_COUNT_MAX] BSS ALIGNED(8) = {0};
+CharacterIndex g_ChosenCharacters[PLAYER_COUNT_MAX] BSS ALIGNED(8) = {0};
 OSTimer __osGbpakTimer BSS ALIGNED(8) = {0};
 ImageAsset *g_ModeIconImages[MENU_ICON_COUNT] BSS ALIGNED(8) = {0};
 u8 __osContLastCmd BSS = {0};
@@ -328,7 +328,7 @@ UBoolean8 g_IsMenuCharacterLoaded[MAXCONTROLLERS] BSS = {0};
 OSMesgQueue __osGbpakTimerQ BSS ALIGNED(0x8) = {0};
 u16 **nuGfxCfb BSS = {0};
 TournamentStanding g_TournamentStandings[TOURNAMENT_CONTESTANT_COUNT] BSS ALIGNED(8) = {{0}};
-s16 g_LastMenuScreen BSS = {0};
+MenuScreen16 g_LastMenuScreen BSS = {0};
 Player g_Players[PLAYER_COUNT_MAX] BSS ALIGNED(8) = {{{0}}};
 REVERB_MEM gReverbFx BSS ALIGNED(8) = {0};
 u32 __osFinalrom BSS = {0};

@@ -269,7 +269,7 @@ void DrawBestTimes(Gfx **displayListHead) {
     s32 time;
     CharacterIndex16 characterIndex;
     s16 dashIndex;
-    s16 holderCourse;
+    CourseIndex16 holderCourse;
 
     DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
     guPerspectiveF(

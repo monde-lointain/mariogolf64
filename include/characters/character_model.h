@@ -415,7 +415,7 @@ void GetCharacterShadowPoint(u32 slotIndex, f32 *position);
 
 // Defined in character.c
 s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode shotMode);
-void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 modelKind);
+void LoadCharacter(u32 slotIndex, CharacterIndex characterIndex, s32 modelKind);
 void SetCharacterAnimation(u32 slotIndex, AnimationId animationId);
 void SetAnimationLooping(u32 slotIndex, Boolean isLooping);
 void SetNextAnimation(u32 slotIndex, AnimationId nextAnimationId);

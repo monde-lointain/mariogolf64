@@ -60,6 +60,7 @@
 #include "round/player.h"
 #include "round/round_hud.h"
 #include "round/round_stats.h"
+#include "round/scorecard.h"
 #include "round/scoring.h"
 #include "save/course_stats.h"
 #include "save/save.h"
@@ -386,8 +387,8 @@ static f32 f_MenuBobPhase = 0.0f;
 // The sound test's sound, song and settings
 static SoundId f_SoundTestSound = 0;
 static SongId f_SoundTestSong = 0;
-static s32 f_SoundTestSoundReverb = 0;
-static s32 f_SoundTestSongReverb = 0;
+static SoundReverb f_SoundTestSoundReverb = 0;
+static SoundReverb f_SoundTestSongReverb = 0;
 static f32 f_SoundTestSoundFrequency = 0.0f;
 static f32 f_SoundTestSongFrequency = 0.0f;
 static s32 f_SoundTestSongTempo = NORMAL_SONG_TEMPO;
@@ -6674,7 +6675,7 @@ void DrawMenuCharacters(Gfx **displayListHead) {
     s32 characterCount;
     s32 row;
     s32 column;
-    s32 layout;
+    ScorecardLayout layout;
     CharacterIndex characterIndex;
     CButtonPalette paletteIndex;
     s32 raise;

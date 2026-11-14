@@ -81,7 +81,7 @@ Boolean g_IsNintendoClubTournament;
 s32 g_ClubTournamentNameIndex;
 s32 g_ClubTournamentNumber;
 u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
-s16 g_LastMenuScreen;
+MenuScreen16 g_LastMenuScreen;
 ImageAsset *g_BrickWallImage;
 ImageAsset *g_ModeIconImages[MENU_ICON_COUNT];
 ImageAsset *g_MenuIconImages[MENU_ICON_COUNT];
@@ -103,7 +103,7 @@ BetSet g_BetSet;
 ImageAsset *g_CharacterFaceImages[CHARACTER_COUNT];
 PaletteColor *g_CharacterFacePalettes[CHARACTER_COUNT];
 s32 g_ChoosingPlayerIndex;
-s32 g_ChosenCharacters[PLAYER_COUNT_MAX];
+CharacterIndex g_ChosenCharacters[PLAYER_COUNT_MAX];
 s16 g_ChosenLabelGrowth;
 LabelGrowthDirection g_ChosenLabelGrowthDirection;
 Boolean8 g_ChosenLefties[PLAYER_COUNT_MAX];
@@ -160,7 +160,7 @@ typedef struct GridCell {
 SaveReadResult ReadSaveCopies(SaveData *save, UBoolean8 isInSram);
 Boolean WriteSaveCopies(SaveData *save, UBoolean8 isInSram);
 
-s8 g_LoadedMenuScreen = NO_MENU_SCREEN;
+MenuScreen8 g_LoadedMenuScreen = NO_MENU_SCREEN;
 s8 g_PlayerControllerIndices[PLAYER_COUNT_MAX] =
     {UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER};
 s8 g_ChoosingControllerIndices[PLAYER_COUNT_MAX] =
@@ -1478,7 +1478,7 @@ s32 GetCoursePointsNeeded(CourseIndex courseIndex) {
 // not worth keeping, or a par, ranks 0.
 s32 GetRecordPriority(PlayRecord *record) {
     s32 priority;
-    s32 flaggedScoreKind;
+    ScoreKind flaggedScoreKind;
     s32 par;
     ScoreKind kind;
     s32 priorityMax;
@@ -1860,7 +1860,7 @@ void RecordDisplayListLength(u32 commandCount) {
 void InsertBestTime(
     CourseIndex courseIndex,
     s32 time,
-    s32 scoreToPar,
+    ScoreToPar scoreToPar,
     CharacterIndex characterIndex,
     CButtonPalette paletteIndex
 ) {
@@ -2395,8 +2395,8 @@ void InvalidateBrokenRingShotRecords(void) {
     SaveData *save;
     Boolean isInvalid[RING_SHOT_RECORD_COUNT];
     s32 recordIndex;
-    s32 scoreKind;
-    s32 flaggedScoreKind;
+    ScoreKind scoreKind;
+    ScoreKind flaggedScoreKind;
     // The original frame has room for this; without it 8 words differ
     s32 unused[2] UNUSED;
 

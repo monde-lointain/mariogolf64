@@ -794,7 +794,7 @@ static Radians f_TreeCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedTreeAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static WideBinaryAngle f_TreeCameraYawAngle = 0;
 static s32 f_EditedTreeIndex = 0;
-static s32 f_LastTreeEditKind = 0; // A TRIANGLE_EDIT_*; nothing reads it
+static TriangleEdit f_LastTreeEditKind = 0; // Nothing reads it
 
 static s32 f_EditorClipRatio = 1;
 static s32 f_UnusedClipRatioValue UNUSED = 0;

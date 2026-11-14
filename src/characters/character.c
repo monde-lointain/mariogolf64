@@ -1056,7 +1056,7 @@ static const char f_UnusedCompleteText[] = "complete\n";
 
 // Loads the model of the character of the kind into the slot, sets up its
 // frame data copies, and starts its first animation
-void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 modelKind) {
+void LoadCharacter(u32 slotIndex, CharacterIndex characterIndex, s32 modelKind) {
     Boolean isPatched = FALSE;
     CharacterSlot *slot = &g_CharacterSlots[slotIndex];
     JointAnimation *joint;
