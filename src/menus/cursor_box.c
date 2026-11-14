@@ -2,7 +2,7 @@
 
 #include <ultra64.h>
 
-#include "game.h"
+#include "game/game.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "screen/display_list.h"

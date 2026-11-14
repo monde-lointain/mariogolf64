@@ -7,7 +7,7 @@
 #include "course/course_space.h"
 #include "course/work_area.h"
 #include "debug/game_flags.h"
-#include "game.h"
+#include "game/game.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "round/game_state.h"

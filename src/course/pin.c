@@ -11,7 +11,7 @@
 #include "course/hole_setup.h"
 #include "course/surface.h"
 #include "course/terrain.h"
-#include "game.h"
+#include "game/game.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "round/game_state.h"

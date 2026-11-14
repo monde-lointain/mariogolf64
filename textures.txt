@@ -1,8 +1,8 @@
 # Textures that C files hold in their data, for tools/extract_textures.py:
 # ROM offset, format, width, height and the PNG that the C file includes
 # as build/assets/.../NAME.FORMAT.inc.c.
-0x91F28 i8     32 32 assets/game/noise_texture.i8.png
-0x92328 rgba16 32 32 assets/game/flame_gradient_texture.rgba16.png
+0x91F28 i8     32 32 assets/game/game/noise_texture.i8.png
+0x92328 rgba16 32 32 assets/game/game/flame_gradient_texture.rgba16.png
 0x99AE0 ia4   256 24 assets/debug/debug_text/debug_font.ia4.png
 0x9C110 ia4    64  8 assets/debug/performance_meter/digit_texture.ia4.png
 0xA0DF8 i4     16  3 assets/round/round_hud/inset_frame_texture.i4.png

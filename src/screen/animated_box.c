@@ -2,7 +2,7 @@
 
 #include <ultra64.h>
 
-#include "game.h"
+#include "game/game.h"
 #include "screen/screen.h"
 #include "system/compiler.h"
 

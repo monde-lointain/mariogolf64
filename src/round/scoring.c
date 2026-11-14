@@ -4,11 +4,11 @@
 
 #include "course/course.h"
 #include "debug/game_flags.h"
+#include "game/scene.h"
 #include "math/math_util.h"
 #include "menus/menu.h"
 #include "round/game_state.h"
 #include "round/player.h"
-#include "scene.h"
 #include "system/c_language.h"
 
 #define DEBUG_ROUND_HOLE_COUNT 2

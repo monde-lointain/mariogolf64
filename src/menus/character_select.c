@@ -10,7 +10,7 @@
 #include "controllers/transfer_pak.h"
 #include "debug/debug_text.h"
 #include "debug/game_flags.h"
-#include "game.h"
+#include "game/game.h"
 #include "menus/main_menu.h"
 #include "menus/menu.h"
 #include "menus/menu_memory.h"

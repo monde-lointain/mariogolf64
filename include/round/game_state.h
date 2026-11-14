@@ -4,9 +4,9 @@
 #include <ultra64.h>
 
 #include "course/course.h"
+#include "game/scene.h"
 #include "round/bets.h"
 #include "round/player.h"
-#include "scene.h"
 #include "system/c_language.h"
 
 #define HOLE_SELECTION_ALL 0

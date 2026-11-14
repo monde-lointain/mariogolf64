@@ -1,4 +1,4 @@
-#include "game.h"
+#include "game/game.h"
 
 #define READS_LOADER_FLAG_VOLATILE
 #define READS_CURRENT_SHOT_VOLATILE
@@ -29,6 +29,7 @@
 #include "debug/game_flags.h"
 #include "debug/hole_editor.h"
 #include "debug/performance_meter.h"
+#include "game/scene.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "menus/confirm_wait.h"
@@ -45,7 +46,6 @@
 #include "round/save_menu.h"
 #include "round/scorecard.h"
 #include "save/save.h"
-#include "scene.h"
 #include "screen/animated_box.h"
 #include "screen/display_list.h"
 #include "screen/rcp_init.h"
@@ -152,10 +152,10 @@ static Gfx f_UnreadPaletteLoads[] = {
 };
 
 static u8 f_NoiseTexture[] = {
-#include "assets/game/noise_texture.i8.inc.c"
+#include "assets/game/game/noise_texture.i8.inc.c"
 };
 static u16 f_FlameGradientTexture[] = {
-#include "assets/game/flame_gradient_texture.rgba16.inc.c"
+#include "assets/game/game/flame_gradient_texture.rgba16.inc.c"
 };
 
 s32 g_HorizonRow = 0;

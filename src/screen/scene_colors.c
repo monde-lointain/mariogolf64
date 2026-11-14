@@ -3,7 +3,7 @@
 #include <ultra64.h>
 
 #include "course/hole_setup.h"
-#include "game.h"
+#include "game/game.h"
 #include "round/play.h"
 #include "screen/display_list.h"
 #include "screen/sky_and_hud_animations.h"

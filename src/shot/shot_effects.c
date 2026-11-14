@@ -8,7 +8,7 @@
 #include "characters/character_model.h"
 #include "course/course_space.h"
 #include "course/hole_creatures.h"
-#include "game.h"
+#include "game/game.h"
 #include "math/curve.h"
 #include "math/geometry.h"
 #include "math/math_util.h"

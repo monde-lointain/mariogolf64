@@ -8,7 +8,7 @@
 #include "characters/character.h"
 #include "controllers/controller.h"
 #include "debug/game_flags.h"
-#include "game.h"
+#include "game/game.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "menus/menu.h"

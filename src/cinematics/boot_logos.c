@@ -8,7 +8,7 @@
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
 #include "course/hole_loader.h"
-#include "scene.h"
+#include "game/scene.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"

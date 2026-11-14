@@ -6,9 +6,9 @@
 #include "characters/character.h"
 #include "course/course.h"
 #include "course/hole_setup.h"
+#include "game/scene.h"
 #include "math/math_util.h"
 #include "round/player.h"
-#include "scene.h"
 #include "shot/club.h"
 #include "system/c_language.h"
 

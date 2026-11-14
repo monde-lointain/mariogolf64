@@ -3,9 +3,9 @@
 #define DEFINES_SET_TEXT_SLOT
 
 #include "audio/sound.h"
+#include "game/scene.h"
 #include "round/game_state.h"
 #include "round/round_hud.h"
-#include "scene.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"

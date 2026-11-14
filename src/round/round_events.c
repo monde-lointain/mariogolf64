@@ -13,7 +13,7 @@
 #include "course/course_space.h"
 #include "course/pin.h"
 #include "debug/game_flags.h"
-#include "game.h"
+#include "game/game.h"
 #include "math/curve.h"
 #include "math/geometry.h"
 #include "math/math_util.h"

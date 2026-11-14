@@ -3,13 +3,13 @@
 #include <ultra64.h>
 
 #include "course/course.h"
+#include "game/scene.h"
 #include "round/game_state.h"
 #include "round/round_stats.h"
 #include "round/scoring.h"
 #include "round/tournament.h"
 #include "save/course_stats.h"
 #include "save/save.h"
-#include "scene.h"
 #include "shot/particle_effects.h"
 #include "system/c_language.h"
 

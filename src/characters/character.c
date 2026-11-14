@@ -17,7 +17,7 @@
 #include "course/terrain.h"
 #include "debug/debug_text.h"
 #include "debug/game_flags.h"
-#include "game.h"
+#include "game/game.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "round/play.h"

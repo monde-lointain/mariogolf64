@@ -83,7 +83,7 @@ segments:
       - [0x4650, c, ../lib/libnusys/src/nugfxsetcfb]
       - [0x4840, c, ../lib/libnusys/src/nugfxtaskmgr]
       - [0x4CE0, c, system/main]
-      - [0x5A40, c, game]
+      - [0x5A40, c, game/game]
       - [0xDCE0, c, screen/rcp_init]
       - [0xE260, c, shot/ball_simulation]
       - [0x142B0, c, course/collision]
@@ -360,7 +360,7 @@ segments:
       - [0x91BA0, .data, ../lib/libnusys/src/nugfxsetcfb]
       - [0x91BB0, .data, ../lib/libnusys/src/nugfxtaskmgr]
       - [0x91BC0, .data, system/main]
-      - [0x91C00, .data, game]
+      - [0x91C00, .data, game/game]
       - [0x92BF0, .data, screen/rcp_init]
       - [0x92C50, .data, shot/ball_simulation]
       - [0x931B0, .data, course/collision]
@@ -449,7 +449,7 @@ segments:
       - [0xA5360, .rodata, system/overlay_manager]
       - [0xA54D0, .rodata, course/billboard]
       - [0xA5584, .rodata, system/main]
-      - [0xA5600, .rodata, game]
+      - [0xA5600, .rodata, game/game]
       - [0xA5760, .rodata, shot/ball_simulation]
       - [0xA5B10, .rodata, course/collision]
       - [0xA5CE0, .rodata, course/pin]
@@ -517,7 +517,7 @@ segments:
       - { start: 0xADD30, type: .bss, vram: 0x800D2930, name: system/overlay_manager }
       - { type: .bss, vram: 0x800D2970, name: ../lib/libnusys/src/nusched }
       - { type: .bss, vram: 0x800D8980, name: ../lib/libnusys/src/nugfxtaskmgr }
-      - { type: .bss, vram: 0x800DAB60, name: game }
+      - { type: .bss, vram: 0x800DAB60, name: game/game }
       - { type: .bss, vram: 0x800DAC40, name: course/pin }
       - { type: .bss, vram: 0x800DAED0, name: course/terrain }
       - { type: .bss, vram: 0x800DAEE0, name: camera/shot_camera }

@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "camera/view_projection.h"
-#include "game.h"
+#include "game/game.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "system/memory_address.h"

@@ -18,7 +18,7 @@
 #include "course/terrain.h"
 #include "course/work_area.h"
 #include "debug/game_flags.h"
-#include "game.h"
+#include "game/game.h"
 #include "math/geometry.h"
 #include "menus/main_menu.h"
 #include "menus/menu.h"

@@ -7,7 +7,7 @@
 #include "characters/character.h"
 #include "course/course.h"
 #include "course/work_area.h"
-#include "game.h"
+#include "game/game.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "menus/course_stats_screen.h"

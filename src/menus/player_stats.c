@@ -9,7 +9,7 @@
 #include "course/course.h"
 #include "course/hole_loader.h"
 #include "debug/game_flags.h"
-#include "game.h"
+#include "game/game.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "menus/main_menu.h"

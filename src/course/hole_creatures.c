@@ -10,7 +10,7 @@
 #include "course/hole_setup.h"
 #include "course/terrain.h"
 #include "debug/game_flags.h"
-#include "game.h"
+#include "game/game.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "round/round_hud.h"
