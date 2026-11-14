@@ -1712,9 +1712,9 @@ void PrintCoursePoints(void) {
         (state) == PLAYER_STATE_SETTING_IMPACT || \
         (state) == PLAYER_STATE_UNUSED_AIMING)
 
-void BuildShotPreview(ShotLaunch *swing, s32 playerState) {
+void BuildShotPreview(ShotLaunch *shot, s32 playerState) {
     BallSimulation simulation;
-    ShotLaunch shot;
+    ShotLaunch previewShot;
     CoursePoint start;
     f32 dash[4][4];
     f32 align[4][4];
@@ -1728,8 +1728,8 @@ void BuildShotPreview(ShotLaunch *swing, s32 playerState) {
     }
 
     f_IsShotPreviewBuilt = TRUE;
-    shot.heading = g_CurrentShot.heading;
-    shot.clubSlot = g_CurrentShot.clubSlot;
+    previewShot.heading = g_CurrentShot.heading;
+    previewShot.clubSlot = g_CurrentShot.clubSlot;
     if (IsGameFlagSet(GAME_FLAG_TUNE_SHOT_PREVIEW)) {
         PrintDebugText("               ", 10, 10);
         if ((g_ControllerStates[0].pressedButtons & U_JPAD) &&
@@ -1757,29 +1757,29 @@ void BuildShotPreview(ShotLaunch *swing, s32 playerState) {
     }
 
     if (IsBeforePowerSet(playerState)) {
-        shot.power = LAUNCH_POWER_MAX;
+        previewShot.power = LAUNCH_POWER_MAX;
     }
     else {
-        shot.power = swing->power;
+        previewShot.power = shot->power;
     }
 
-    shot.impactTiming = 0;
+    previewShot.impactTiming = 0;
     if (IsBeforeImpactSet(playerState)) {
-        shot.offsetX = swing->offsetX;
-        shot.offsetY = swing->offsetY;
+        previewShot.offsetX = shot->offsetX;
+        previewShot.offsetY = shot->offsetY;
     }
     else {
-        shot.offsetX = 0;
-        shot.offsetY = 0;
+        previewShot.offsetX = 0;
+        previewShot.offsetY = 0;
     }
 
-    shot.playerIndex = g_CurrentShot.playerIndex;
-    shot.shotMode = g_CurrentShot.shotMode;
+    previewShot.playerIndex = g_CurrentShot.playerIndex;
+    previewShot.shotMode = g_CurrentShot.shotMode;
     simulation.position[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
     simulation.position[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
     simulation.position[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
     simulation.surface = g_CurrentShot.surface;
-    LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_SHOT_PREVIEW, &shot);
+    LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_SHOT_PREVIEW, &previewShot);
     f_ShotPreviewDotScroll += SHOT_PREVIEW_SCROLL_STEP;
     for (step = 0; step < f_ShotPreviewStepCount; step++) {
         isMiniGolf = &g_GameState.isMiniGolf;
