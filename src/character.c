@@ -525,7 +525,7 @@ s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode sh
         ModelCharacter(slot->modelIndex) < CHARACTER_COUNT) {
         distance = f_BallDistances[ModelCharacter(slot->modelIndex)][column];
     }
-    else if (GetCharacterPointModelPosition(slotIndex, pointId, position) == 0) {
+    else if (GetCharacterPointModelPosition(slotIndex, pointId, position) == POINT_LOOKUP_FOUND) {
         sprintf(text, "pres %f,%f,%f", position[AXIS_X], position[AXIS_Y], position[AXIS_Z]);
         PrintDebugText(text, POINT_POSITION_TEXT_COLUMN, POINT_POSITION_TEXT_ROW);
         depth = position[AXIS_Z] * POINT_DEPTH_TO_BALL_DISTANCE;

@@ -328,7 +328,7 @@ void SpawnSpreadingCircle(u32 slotIndex, s32 pointId) {
     s32 index;
     Effect *effect;
 
-    if (GetCharacterPointPosition(slotIndex, pointId, point) == 0) {
+    if (GetCharacterPointPosition(slotIndex, pointId, point) == POINT_LOOKUP_FOUND) {
         f_SpawnGroundHeight = (f32)GetGroundHeight(
             point[AXIS_X] * WORLD_TO_COURSE_SCALE,
             point[AXIS_Z] * WORLD_TO_COURSE_SCALE
@@ -381,7 +381,7 @@ void SpawnTear(u32 slotIndex, s32 pointId, Radians heading) {
     s32 index;
     Effect *effect;
 
-    if (GetCharacterPointPosition(slotIndex, pointId, point) == 0) {
+    if (GetCharacterPointPosition(slotIndex, pointId, point) == POINT_LOOKUP_FOUND) {
         f_SpawnGroundHeight = (f32)GetGroundHeight(
             point[AXIS_X] * WORLD_TO_COURSE_SCALE,
             point[AXIS_Z] * WORLD_TO_COURSE_SCALE
@@ -437,7 +437,7 @@ void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId) {
     s32 index;
     Effect *effect;
 
-    if (GetCharacterPointPosition(slotIndex, pointId, point) == 0) {
+    if (GetCharacterPointPosition(slotIndex, pointId, point) == POINT_LOOKUP_FOUND) {
         f_SpawnGroundHeight = (f32)GetGroundHeight(
             point[AXIS_X] * WORLD_TO_COURSE_SCALE,
             point[AXIS_Z] * WORLD_TO_COURSE_SCALE
@@ -594,7 +594,7 @@ void SpawnCharacterSmokePuff(u32 slotIndex, s32 pointId) {
     s16 riseScale;
     Effect *effect;
 
-    if (GetCharacterPointPosition(slotIndex, pointId, point) == 0) {
+    if (GetCharacterPointPosition(slotIndex, pointId, point) == POINT_LOOKUP_FOUND) {
         riseScale = 1;
         for (index = 0; index != EFFECT_COUNT; index++) {
             effect = &f_Effects[index];

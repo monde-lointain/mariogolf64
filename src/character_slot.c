@@ -4672,7 +4672,7 @@ ClubCategory GetCharacterClubCategory(u32 slotIndex, s32 clubIndex) {
     return category;
 }
 
-s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *position) {
+PointLookup GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *position) {
     Mtx pointMatrix;
     Mtx offsetMatrix;
     CharacterSlot *slot;
@@ -4719,15 +4719,15 @@ s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *position) {
             position[AXIS_X] *= MODEL_TO_WORLD_SCALE;
             position[AXIS_Y] *= MODEL_TO_WORLD_SCALE;
             position[AXIS_Z] *= MODEL_TO_WORLD_SCALE;
-            return 0;
+            return POINT_LOOKUP_FOUND;
         }
 
         position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
-        return 1;
+        return POINT_LOOKUP_NO_POINT;
     }
 
     position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
-    return -1;
+    return POINT_LOOKUP_NO_SLOT;
 }
 
 void GetCharacterSlotMatrix(CharacterSlot *slot, Mat4 matrix) {
@@ -4751,13 +4751,13 @@ void GetCharacterSlotMatrix(CharacterSlot *slot, Mat4 matrix) {
     guMtxCatF(transform, translation, matrix);
 }
 
-s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position) {
+PointLookup GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position) {
     Mat4 matrix;
     f32 modelPosition[3];
-    s32 result;
+    PointLookup result;
 
     result = GetCharacterPointModelPosition(slotIndex, pointId, modelPosition);
-    if (result < 0) {
+    if (result < POINT_LOOKUP_FOUND) {
         position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
     }
     else {

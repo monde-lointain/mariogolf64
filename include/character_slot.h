@@ -79,6 +79,14 @@ typedef struct CharacterPoint {
 
 #define CHARACTER_POINT_SHADOW 2
 
+enum PointLookup {
+    POINT_LOOKUP_NO_SLOT = -1,
+    POINT_LOOKUP_FOUND,
+    POINT_LOOKUP_NO_POINT
+};
+
+typedef s32 PointLookup;
+
 #define ROLL_ORIGIN_DEGREES 180
 
 typedef struct KeyframeSpan {
@@ -309,9 +317,9 @@ s32 SetMultiTlb(
 );
 s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex);
 ClubCategory GetCharacterClubCategory(u32 slotIndex, s32 clubIndex);
-s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *position);
+PointLookup GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *position);
 void GetCharacterSlotMatrix(CharacterSlot *slot, Mat4 matrix);
-s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position);
+PointLookup GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position);
 void GetCharacterShadowPoint(u32 slotIndex, f32 *position);
 
 s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode shotMode);
