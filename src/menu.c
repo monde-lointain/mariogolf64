@@ -2426,11 +2426,11 @@ MessageId GetClubTournamentModeMessage(void) {
     MessageId messageId;
 
     switch (g_ClubTournamentRules.isSpeedGolf) {
-        case 0:
+        case FALSE:
         default:
             messageId = MESSAGE_STROKE_PLAY;
             break;
-        case 1:
+        case TRUE:
             messageId = MESSAGE_SPEED_GOLF;
             break;
     }
