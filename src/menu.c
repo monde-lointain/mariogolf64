@@ -2478,7 +2478,7 @@ void ComputeRoundStatistics(void) {
     CourseStats *allCourseStats;
     CourseStats *courseStats;
     f32 reciprocal;
-    s32 sum;
+    s32 sandSaveAttemptCount;
     CourseIndex courseIndex;
     Boolean hasPlayedCourse;
     f32 strokeSum;
@@ -2527,13 +2527,13 @@ void ComputeRoundStatistics(void) {
                 courseStats->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND);
             g_CourseStatFigures[courseIndex].parOnPercent =
                 courseStats->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND);
-            sum = courseStats->sandSaveCount + courseStats->missedSandSaveCount;
-            if (sum <= 0) {
+            sandSaveAttemptCount = courseStats->sandSaveCount + courseStats->missedSandSaveCount;
+            if (sandSaveAttemptCount <= 0) {
                 g_CourseStatFigures[courseIndex].sandSavePercent = 0.0f;
             }
             else {
                 g_CourseStatFigures[courseIndex].sandSavePercent =
-                    ((f32)courseStats->sandSaveCount / (f32)sum) * 100.0f;
+                    ((f32)courseStats->sandSaveCount / (f32)sandSaveAttemptCount) * 100.0f;
             }
 
             g_CourseStatFigures[courseIndex].hasPlace[THIRD_PLACE_INDEX] =

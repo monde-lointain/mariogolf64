@@ -3876,7 +3876,8 @@ void BuildStatusData(StatusData *status) {
     CourseStats *scannedStats;
     f32 reciprocal;
     s32 figure;
-    s32 sum;
+    s32 sandSaveAttemptCount;
+    s32 roundedDrive;
     CourseIndex courseIndex;
     s32 index;
     s32 bits[2];
@@ -3916,13 +3917,15 @@ void BuildStatusData(StatusData *status) {
                 course->parOnPercent = RoundedWholePart(
                     courseStats->parOnCount * reciprocal * (PERCENTS_PER_ONE / HOLES_PER_ROUND)
                 );
-                sum = courseStats->sandSaveCount + courseStats->missedSandSaveCount;
-                if (sum == 0) {
+                sandSaveAttemptCount =
+                    courseStats->sandSaveCount + courseStats->missedSandSaveCount;
+                if (sandSaveAttemptCount == 0) {
                     course->sandSavePercent = 0;
                 }
                 else {
                     course->sandSavePercent = RoundedWholePart(
-                        ((f32)courseStats->sandSaveCount / (f32)sum) * PERCENTS_PER_ONE
+                        ((f32)courseStats->sandSaveCount / (f32)sandSaveAttemptCount) *
+                        PERCENTS_PER_ONE
                     );
                 }
 
@@ -4007,12 +4010,12 @@ void BuildStatusData(StatusData *status) {
         course->roundCount[1] = figure >> BITS_PER_BYTE;
         course->bestScore = (s32)g_CourseStatFigures[COURSE_COUNT].bestScore + STATUS_SCORE_BIAS;
         course->scoreAverage = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].scoreAverage);
-        sum = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].bestDrive);
-        course->longestDrive[0] = sum;
-        course->longestDrive[1] = sum >> BITS_PER_BYTE;
-        sum = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].driveAverage);
-        course->driveAverage[0] = sum;
-        course->driveAverage[1] = sum >> BITS_PER_BYTE;
+        roundedDrive = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].bestDrive);
+        course->longestDrive[0] = roundedDrive;
+        course->longestDrive[1] = roundedDrive >> BITS_PER_BYTE;
+        roundedDrive = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].driveAverage);
+        course->driveAverage[0] = roundedDrive;
+        course->driveAverage[1] = roundedDrive >> BITS_PER_BYTE;
         course->fairwayPercent = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].fairwayPercent);
         course->puttAverage = PackTenths(g_CourseStatFigures[COURSE_COUNT].puttAverage);
         course->parSavePercent = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].parSavePercent);
