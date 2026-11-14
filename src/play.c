@@ -402,7 +402,7 @@ void InitPlay(PlayKind kind) {
 
 void PlacePlayersOnTee(void) {
     s32 playerIndex;
-    s32 ring;
+    s32 ringIndex;
     f32 teeHeight;
 
     g_HasShotComeToRest = 0;
@@ -429,8 +429,8 @@ void PlacePlayersOnTee(void) {
             g_Players[playerIndex].driveDistance = UNMEASURED_DISTANCE;
             g_Players[playerIndex].pinDistance = UNMEASURED_DISTANCE;
             g_Players[playerIndex].hasBeenInBunker = FALSE;
-            for (ring = RING_COUNT - 1; ring >= 0; ring--) {
-                g_Players[playerIndex].ringStates[ring] = 0;
+            for (ringIndex = RING_COUNT - 1; ringIndex >= 0; ringIndex--) {
+                g_Players[playerIndex].ringStates[ringIndex] = 0;
             }
 
             if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
@@ -1805,7 +1805,7 @@ void RebuildGroundTextureCoordinates(void) {
     Vtx_t point;
     s32 row;
     s32 column;
-    s32 tile;
+    s32 tileIndex;
     s32 offset;
     s32 coordinate;
 
@@ -1815,8 +1815,8 @@ void RebuildGroundTextureCoordinates(void) {
             point = GetGroundPoint(column, row)->v;
             coordinate = point.ob[AXIS_X];
             offset = coordinate % TEST_TEXTURE_TILE_SIZE;
-            tile = coordinate / TEST_TEXTURE_TILE_SIZE;
-            if (tile % 2) {
+            tileIndex = coordinate / TEST_TEXTURE_TILE_SIZE;
+            if (tileIndex % 2) {
                 offset = TEST_TEXTURE_TILE_SIZE - offset;
             }
 
@@ -1830,8 +1830,8 @@ void RebuildGroundTextureCoordinates(void) {
             point.tc[TEXTURE_AXIS_S] += 0x100;
             coordinate = point.ob[AXIS_Z];
             offset = coordinate % TEST_TEXTURE_TILE_SIZE;
-            tile = coordinate / TEST_TEXTURE_TILE_SIZE;
-            if (tile % 2) {
+            tileIndex = coordinate / TEST_TEXTURE_TILE_SIZE;
+            if (tileIndex % 2) {
                 offset = TEST_TEXTURE_TILE_SIZE - offset;
             }
 

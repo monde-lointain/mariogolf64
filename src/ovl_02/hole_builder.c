@@ -2597,7 +2597,7 @@ void InitTileMidpoints(void) {
     s16 offsets[TILE_MIDPOINT_COUNT][2];
     s16 x;
     s16 z;
-    s32 tile;
+    s32 tileIndex;
     s32 midpointIndex;
 
     offsets[0][0] = QuarterTileSpans(1);
@@ -2634,22 +2634,22 @@ void InitTileMidpoints(void) {
     offsets[15][1] = QuarterTileSpans(3);
     x = 0;
     z = 0;
-    for (tile = 0; tile < GROUND_TILE_COUNT; tile++) {
+    for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
         for (midpointIndex = 0; midpointIndex < TILE_MIDPOINT_COUNT; midpointIndex++) {
-            g_WorkArea.hole.midpoints[tile][midpointIndex].v.ob[AXIS_X] =
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.ob[AXIS_X] =
                 x + offsets[midpointIndex][0];
-            g_WorkArea.hole.midpoints[tile][midpointIndex].v.ob[AXIS_Y] = 0;
-            g_WorkArea.hole.midpoints[tile][midpointIndex].v.ob[AXIS_Z] =
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.ob[AXIS_Y] = 0;
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.ob[AXIS_Z] =
                 z + offsets[midpointIndex][1];
-            g_WorkArea.hole.midpoints[tile][midpointIndex].v.flag = 0;
-            g_WorkArea.hole.midpoints[tile][midpointIndex].v.tc[TEXTURE_AXIS_S] =
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.flag = 0;
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.tc[TEXTURE_AXIS_S] =
                 ((x + offsets[midpointIndex][0]) * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
-            g_WorkArea.hole.midpoints[tile][midpointIndex].v.tc[TEXTURE_AXIS_T] =
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.tc[TEXTURE_AXIS_T] =
                 ((z + offsets[midpointIndex][1]) * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
-            g_WorkArea.hole.midpoints[tile][midpointIndex].v.cn[0] = 0;
-            g_WorkArea.hole.midpoints[tile][midpointIndex].v.cn[1] = 0;
-            g_WorkArea.hole.midpoints[tile][midpointIndex].v.cn[2] = 0;
-            g_WorkArea.hole.midpoints[tile][midpointIndex].v.cn[3] = 0;
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.cn[0] = 0;
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.cn[1] = 0;
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.cn[2] = 0;
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.cn[3] = 0;
         }
 
         x += TILE_SPAN;
@@ -2801,10 +2801,10 @@ void ReadTileMidpoints(void) {
     s16 y;
     s16 z;
     s32 midpoint;
-    s32 tile;
+    s32 tileIndex;
 
     midpoint = 0;
-    tile = 0;
+    tileIndex = 0;
     while (TRUE) {
         ReadFileBytes(&flags, sizeof(flags));
         if (flags == VERTEX_LIST_END) {
@@ -2813,24 +2813,24 @@ void ReadTileMidpoints(void) {
 
         if (!(flags & VERTEX_FLAG_SAME_X)) {
             ReadVertexX(&x, flags);
-            g_WorkArea.hole.midpoints[tile][midpoint].v.ob[AXIS_X] = x;
-            g_WorkArea.hole.midpoints[tile][midpoint].v.tc[TEXTURE_AXIS_S] =
+            g_WorkArea.hole.midpoints[tileIndex][midpoint].v.ob[AXIS_X] = x;
+            g_WorkArea.hole.midpoints[tileIndex][midpoint].v.tc[TEXTURE_AXIS_S] =
                 (x * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
         }
 
         ReadVertexY(&y, flags);
-        g_WorkArea.hole.midpoints[tile][midpoint].v.ob[AXIS_Y] = y;
+        g_WorkArea.hole.midpoints[tileIndex][midpoint].v.ob[AXIS_Y] = y;
         if (!(flags & VERTEX_FLAG_SAME_Z)) {
             ReadVertexZ(&z, flags);
-            g_WorkArea.hole.midpoints[tile][midpoint].v.ob[AXIS_Z] = z;
-            g_WorkArea.hole.midpoints[tile][midpoint].v.tc[TEXTURE_AXIS_T] =
+            g_WorkArea.hole.midpoints[tileIndex][midpoint].v.ob[AXIS_Z] = z;
+            g_WorkArea.hole.midpoints[tileIndex][midpoint].v.tc[TEXTURE_AXIS_T] =
                 (z * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
         }
 
         midpoint++;
         if (midpoint >= TILE_MIDPOINT_COUNT) {
             midpoint = 0;
-            tile++;
+            tileIndex++;
         }
     }
 }
