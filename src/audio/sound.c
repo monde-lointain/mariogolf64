@@ -25,7 +25,7 @@
 #include "text/text.h"
 
 // A channel's or the song's handle when there is nothing to control
-#define NO_HANDLE (-1)
+#define NO_HANDLE ((musHandle)-1)
 // Sound IDs are below this
 #define SOUND_COUNT 0x215
 // Song IDs above this play the last song
@@ -294,7 +294,7 @@ s32 ChangeCustomEffect(s32 type);
 // Replaces the sound on a channel that has a handle, at its own pan and pitch,
 // and gives it its reverb: an echo for the few sounds that echo
 void PlaySound(SoundId soundId, SoundChannel channel, SoundVolume volume) {
-    s32 *handle;
+    musHandle *handle;
     OSIntMask mask;
     s32 index;
 
@@ -357,7 +357,7 @@ void PlaySoundWithEffects(
     SoundReverb reverb,
     SoundPan pan
 ) {
-    s32 *handle;
+    musHandle *handle;
     OSIntMask mask;
     s32 index;
 
