@@ -784,18 +784,18 @@ void InitRoundHud(void) {
         SCREEN_EFFECT_FAR_PLANE,
         1.0f
     );
-    g_SkyState.viewedWindAngles[0] = 0.0f;
-    g_SkyState.horizonLevels[0] = 0.0f;
-    g_SkyState.lookAtLevels[0] = 0.0f;
-    g_SkyState.pitches[0] = 0.0f;
-    g_SkyState.yaws[0] = 0.0f;
-    g_SkyState.screenHeights[0] = 0.0f;
-    g_SkyState.viewedWindAngles[1] = 0.0f;
-    g_SkyState.horizonLevels[1] = 0.0f;
-    g_SkyState.lookAtLevels[1] = 0.0f;
-    g_SkyState.pitches[1] = 0.0f;
-    g_SkyState.yaws[1] = 0.0f;
-    g_SkyState.screenHeights[1] = 0.0f;
+    g_SkyState.viewedWindAngles[MAIN_CAMERA] = 0.0f;
+    g_SkyState.horizonLevels[MAIN_CAMERA] = 0.0f;
+    g_SkyState.lookAtLevels[MAIN_CAMERA] = 0.0f;
+    g_SkyState.pitches[MAIN_CAMERA] = 0.0f;
+    g_SkyState.yaws[MAIN_CAMERA] = 0.0f;
+    g_SkyState.screenHeights[MAIN_CAMERA] = 0.0f;
+    g_SkyState.viewedWindAngles[INSET_CAMERA] = 0.0f;
+    g_SkyState.horizonLevels[INSET_CAMERA] = 0.0f;
+    g_SkyState.lookAtLevels[INSET_CAMERA] = 0.0f;
+    g_SkyState.pitches[INSET_CAMERA] = 0.0f;
+    g_SkyState.yaws[INSET_CAMERA] = 0.0f;
+    g_SkyState.screenHeights[INSET_CAMERA] = 0.0f;
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;
 }
@@ -2419,16 +2419,16 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     textureT = HALF_TEXEL - ((halfHeightRounded - halfHeight) * HALF_TEXEL);
 
     if (speed >= WIND_SPEED_TWO_DIGITS) {
-        centerX = (-sinf(g_SkyState.viewedWindAngles[0]) * WIND_WIDE_LEAN_X) + (x + WIND_OFFSET_X) +
-            WIND_POSITIVE_BIAS;
+        centerX = (-sinf(g_SkyState.viewedWindAngles[MAIN_CAMERA]) * WIND_WIDE_LEAN_X) +
+            (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
     }
     else {
-        centerX = (-sinf(g_SkyState.viewedWindAngles[0]) * WIND_NARROW_LEAN_X) +
+        centerX = (-sinf(g_SkyState.viewedWindAngles[MAIN_CAMERA]) * WIND_NARROW_LEAN_X) +
             (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
     }
 
-    centerY = (-cosf(g_SkyState.viewedWindAngles[0]) * WIND_LEAN_Y) + ((SCREEN_HEIGHT / 2) - y) -
-        WIND_OFFSET_Y + WIND_POSITIVE_BIAS;
+    centerY = (-cosf(g_SkyState.viewedWindAngles[MAIN_CAMERA]) * WIND_LEAN_Y) +
+        ((SCREEN_HEIGHT / 2) - y) - WIND_OFFSET_Y + WIND_POSITIVE_BIAS;
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
@@ -2602,15 +2602,16 @@ void DrawWindIndicator(Gfx **displayListHead, f32 x, f32 y) {
         transform,
         0.0f,
         WIND_INDICATOR_FACING_DEGREES -
-            (g_SkyState.viewedWindAngles[0] * DEGREES_PER_TURN * (1.0 / FULL_TURN_RADIANS)),
+            (g_SkyState.viewedWindAngles[MAIN_CAMERA] * DEGREES_PER_TURN *
+                (1.0 / FULL_TURN_RADIANS)),
         0.0f
     );
     guMtxCatF(transform, matrix, matrix);
     guScaleF(transform, WIND_INDICATOR_SCALE, WIND_INDICATOR_SCALE, WIND_INDICATOR_SCALE);
     guMtxCatF(transform, matrix, matrix);
     guMtxF2L(matrix, &f_WindIndicatorMatrices[g_MatrixBufferIndex]);
-    if (!(g_SkyState.viewedWindAngles[0] > M_PI / 2 &&
-            g_SkyState.viewedWindAngles[0] < 3 * M_PI / 2)) {
+    if (!(g_SkyState.viewedWindAngles[MAIN_CAMERA] > M_PI / 2 &&
+            g_SkyState.viewedWindAngles[MAIN_CAMERA] < 3 * M_PI / 2)) {
         DrawWindSpeed(&gfx, x, y);
     }
 
@@ -2633,8 +2634,8 @@ void DrawWindIndicator(Gfx **displayListHead, f32 x, f32 y) {
         gSPDisplayList(gfx++, g_BooDisplayList);
     }
 
-    if (g_SkyState.viewedWindAngles[0] > M_PI / 2 &&
-        g_SkyState.viewedWindAngles[0] < 3 * M_PI / 2) {
+    if (g_SkyState.viewedWindAngles[MAIN_CAMERA] > M_PI / 2 &&
+        g_SkyState.viewedWindAngles[MAIN_CAMERA] < 3 * M_PI / 2) {
         DrawWindSpeed(&gfx, x, y);
     }
 

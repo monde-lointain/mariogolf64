@@ -1258,14 +1258,14 @@ void UpdateStaffRoll(void) {
         sprintf(g_PrintBuffer, "MAX:%d    ", (int)lineCount);
         PrintDebugText(g_PrintBuffer, LINE_COUNT_TEXT_COLUMN, LINE_COUNT_TEXT_ROW);
         StepNoiseTexture();
-        g_SkyState.viewedWindAngles[0] =
+        g_SkyState.viewedWindAngles[MAIN_CAMERA] =
             ViewedWindAngle(g_HoleSetup.conditions.windDirection, &g_Cameras[MAIN_CAMERA].view);
-        if (g_SkyState.viewedWindAngles[0] > FULL_TURN_RADIANS) {
-            g_SkyState.viewedWindAngles[0] -= FULL_TURN_RADIANS;
+        if (g_SkyState.viewedWindAngles[MAIN_CAMERA] > FULL_TURN_RADIANS) {
+            g_SkyState.viewedWindAngles[MAIN_CAMERA] -= FULL_TURN_RADIANS;
         }
 
-        if (g_SkyState.viewedWindAngles[0] < 0.0f) {
-            g_SkyState.viewedWindAngles[0] += FULL_TURN_RADIANS;
+        if (g_SkyState.viewedWindAngles[MAIN_CAMERA] < 0.0f) {
+            g_SkyState.viewedWindAngles[MAIN_CAMERA] += FULL_TURN_RADIANS;
         }
     }
 }

@@ -3147,14 +3147,14 @@ void UpdateGame(void) {
 
     if (g_Scene == SCENE_OPENING) {
         StepNoiseTexture();
-        g_SkyState.viewedWindAngles[0] =
+        g_SkyState.viewedWindAngles[MAIN_CAMERA] =
             ViewedWindAngle(g_HoleSetup.conditions.windDirection, &g_Cameras[MAIN_CAMERA].view);
-        if (g_SkyState.viewedWindAngles[0] > FULL_TURN_RADIANS) {
-            g_SkyState.viewedWindAngles[0] -= FULL_TURN_RADIANS;
+        if (g_SkyState.viewedWindAngles[MAIN_CAMERA] > FULL_TURN_RADIANS) {
+            g_SkyState.viewedWindAngles[MAIN_CAMERA] -= FULL_TURN_RADIANS;
         }
 
-        if (g_SkyState.viewedWindAngles[0] < 0.0f) {
-            g_SkyState.viewedWindAngles[0] += FULL_TURN_RADIANS;
+        if (g_SkyState.viewedWindAngles[MAIN_CAMERA] < 0.0f) {
+            g_SkyState.viewedWindAngles[MAIN_CAMERA] += FULL_TURN_RADIANS;
         }
 
         UpdateOpening();
@@ -3193,24 +3193,24 @@ void UpdateGame(void) {
         UpdateEffects();
         UpdatePlay();
         windDirection = &g_HoleSetup.conditions.windDirection;
-        g_SkyState.viewedWindAngles[0] =
+        g_SkyState.viewedWindAngles[MAIN_CAMERA] =
             ViewedWindAngle(*windDirection, &g_Cameras[MAIN_CAMERA].view);
-        g_SkyState.viewedWindAngles[1] =
+        g_SkyState.viewedWindAngles[INSET_CAMERA] =
             ViewedWindAngle(*windDirection, &g_Cameras[INSET_CAMERA].view);
-        if (g_SkyState.viewedWindAngles[0] > FULL_TURN_RADIANS) {
-            g_SkyState.viewedWindAngles[0] -= FULL_TURN_RADIANS;
+        if (g_SkyState.viewedWindAngles[MAIN_CAMERA] > FULL_TURN_RADIANS) {
+            g_SkyState.viewedWindAngles[MAIN_CAMERA] -= FULL_TURN_RADIANS;
         }
 
-        if (g_SkyState.viewedWindAngles[0] < 0.0f) {
-            g_SkyState.viewedWindAngles[0] += FULL_TURN_RADIANS;
+        if (g_SkyState.viewedWindAngles[MAIN_CAMERA] < 0.0f) {
+            g_SkyState.viewedWindAngles[MAIN_CAMERA] += FULL_TURN_RADIANS;
         }
 
-        if (g_SkyState.viewedWindAngles[1] > FULL_TURN_RADIANS) {
-            g_SkyState.viewedWindAngles[1] -= FULL_TURN_RADIANS;
+        if (g_SkyState.viewedWindAngles[INSET_CAMERA] > FULL_TURN_RADIANS) {
+            g_SkyState.viewedWindAngles[INSET_CAMERA] -= FULL_TURN_RADIANS;
         }
 
-        if (g_SkyState.viewedWindAngles[1] < 0.0f) {
-            g_SkyState.viewedWindAngles[1] += FULL_TURN_RADIANS;
+        if (g_SkyState.viewedWindAngles[INSET_CAMERA] < 0.0f) {
+            g_SkyState.viewedWindAngles[INSET_CAMERA] += FULL_TURN_RADIANS;
         }
     }
     else if (g_Scene == SCENE_MENU) {

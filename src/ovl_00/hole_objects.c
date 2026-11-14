@@ -246,7 +246,7 @@ void StartCheepCheepLeap(s32 startValue) {
                 ReadEncodedAsset(f_CheepCheepImages[1], &asset);
             }
 
-            creature->yaw = g_SkyState.yaws[0];
+            creature->yaw = g_SkyState.yaws[MAIN_CAMERA];
             if (creature->isFacingBack) {
                 creature->velocity[AXIS_X] = cosf(creature->yaw) * -speed;
                 creature->velocity[AXIS_Z] = -sinf(creature->yaw) * -speed;

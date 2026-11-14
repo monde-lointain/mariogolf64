@@ -105,6 +105,7 @@ extern MenuBackdropState g_MenuBackdropState;
 extern ImageAsset *g_SkyImage;
 extern ImageAsset *g_CourseSkyImage;
 
+// The sky keeps a view for each of MAIN_CAMERA and INSET_CAMERA.
 #define SKY_VIEW_COUNT 2
 
 typedef struct SkyState {
