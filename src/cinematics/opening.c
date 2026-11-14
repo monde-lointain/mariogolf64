@@ -410,6 +410,7 @@ static OpeningNameLogo f_OpeningNameLogos[OPENING_NAME_LOGO_COUNT] = {
 };
 static Boolean f_AreImpactLinesShown = FALSE;
 static Boolean f_IsBurstShown = FALSE;
+// How many times its size the shot's ball is drawn, with 0 hiding it
 static s32 f_ShotBallScale = 0;
 static LookAtEase f_LookAtEaseMode = LOOK_AT_EASE_NONE;
 static s32 f_UnusedWordAfterEaseMode UNUSED = 0;
@@ -563,6 +564,7 @@ static Vtx f_LakituTrailVertices[2] = {
     {{{-10, 0, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
     {{{10, 0, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
 };
+// How far Lakitu has looped, in degrees
 static s32 f_LakituAngle = 0;
 static s32 f_BurstFrame = BURST_NOT_STARTED;
 static s32 f_ShotBallAlpha = OPAQUE_ALPHA;

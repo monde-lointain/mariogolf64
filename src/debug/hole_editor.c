@@ -796,6 +796,8 @@ static WideBinaryAngle f_TreeCameraYawAngle = 0;
 static s32 f_EditedTreeIndex = 0;
 static TriangleEdit f_LastTreeEditKind = 0; // Nothing reads it
 
+// The clip ratio, from 1 to CLIP_RATIO_COUNT, which the second controller's A
+// button cycles under GAME_FLAG_CYCLE_CLIP_RATIO
 static s32 f_EditorClipRatio = 1;
 static s32 f_UnusedClipRatioValue UNUSED = 0;
 static s8 f_FineTilePointSlots[FINE_TILE_POINT_SPAN][FINE_TILE_POINT_SPAN] = {
