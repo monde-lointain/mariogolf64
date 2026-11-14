@@ -38,22 +38,22 @@
 #define MOVIE_BUFFER_SIZE 0x6270
 #define MOVIE_CUE_FRAME 12
 
-#define FLY_GUY_IMAGE_ASSET 0x6CF
+#define ASSET_FLY_GUY_IMAGE 0x6CF
 #define FLY_GUY_IMAGE_SIZE 0x808
 
 #define CONTACT_IMAGE_OFFSET 0x970
 #define CONTACT_SECOND_IMAGE_OFFSET 0x1578
-#define MARIO_CONTACT_IMAGE_ASSET 0x6BE
+#define ASSET_MARIO_CONTACT_IMAGE 0x6BE
 #define MARIO_CONTACT_IMAGE_WIDTH 32
 #define MARIO_CONTACT_IMAGE_HEIGHT 32
-#define BOWSER_CONTACT_IMAGE_ASSET 0x6AE
+#define ASSET_BOWSER_CONTACT_IMAGE 0x6AE
 #define BOWSER_CONTACT_IMAGE_WIDTH 16
 #define BOWSER_CONTACT_IMAGE_HEIGHT 100
-#define WARIO_CONTACT_IMAGE_ASSET 0x6A7
-#define WARIO_CONTACT_SECOND_IMAGE_ASSET 0x6A8
+#define ASSET_WARIO_CONTACT_IMAGE 0x6A7
+#define ASSET_WARIO_CONTACT_SECOND_IMAGE 0x6A8
 #define WARIO_CONTACT_IMAGE_WIDTH 48
 #define WARIO_CONTACT_IMAGE_HEIGHT 128
-#define RAINBOW_CONTACT_IMAGE_ASSET 0x6A6
+#define ASSET_RAINBOW_CONTACT_IMAGE 0x6A6
 #define RAINBOW_CONTACT_IMAGE_WIDTH 64
 #define RAINBOW_CONTACT_IMAGE_HEIGHT 8
 #define PLAIN_CONTACT_IMAGE_WIDTH 32
@@ -469,7 +469,7 @@ static PathPoint f_WindFlyGuyPath[] = {
 };
 static PathPoint f_WindFlyGuyExit = {3.8e+02f, 1.7e+02f, 0.0f};
 static s32 f_WindFlyGuyFrame = FLY_GUY_HIDDEN;
-static s32 f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
+static s32 f_WindFlyGuyAsset = ASSET_FLY_GUY_IMAGE;
 static s32 f_UnusedWordAfterFlyGuyAsset UNUSED = 0;
 static s32 f_WindStreakHead = 0;
 
@@ -2880,21 +2880,21 @@ void LoadContactImages(Player *player) {
     switch (GetContactStyle(player)) {
         case CONTACT_STYLE_WARIO:
         case CONTACT_STYLE_GAME_BOY_BALL_7:
-            OpenEncodedAsset(WARIO_CONTACT_IMAGE_ASSET, &asset);
+            OpenEncodedAsset(ASSET_WARIO_CONTACT_IMAGE, &asset);
             ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
-            OpenEncodedAsset(WARIO_CONTACT_SECOND_IMAGE_ASSET, &asset);
+            OpenEncodedAsset(ASSET_WARIO_CONTACT_SECOND_IMAGE, &asset);
             ReadEncodedAsset(g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET, &asset);
             break;
         case CONTACT_STYLE_RAINBOW:
-            OpenEncodedAsset(RAINBOW_CONTACT_IMAGE_ASSET, &asset);
+            OpenEncodedAsset(ASSET_RAINBOW_CONTACT_IMAGE, &asset);
             ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
             break;
         case CONTACT_STYLE_MARIO:
-            OpenEncodedAsset(MARIO_CONTACT_IMAGE_ASSET, &asset);
+            OpenEncodedAsset(ASSET_MARIO_CONTACT_IMAGE, &asset);
             ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
             break;
         case CONTACT_STYLE_BOWSER:
-            OpenEncodedAsset(BOWSER_CONTACT_IMAGE_ASSET, &asset);
+            OpenEncodedAsset(ASSET_BOWSER_CONTACT_IMAGE, &asset);
             ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
             break;
     }
@@ -3439,8 +3439,8 @@ void ShowWindFlyGuy(s32 show) {
         }
 
         f_WindFlyGuyFrame = 0;
-        f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
-        OpenEncodedAsset(FLY_GUY_IMAGE_ASSET, &asset);
+        f_WindFlyGuyAsset = ASSET_FLY_GUY_IMAGE;
+        OpenEncodedAsset(ASSET_FLY_GUY_IMAGE, &asset);
         ReadEncodedAsset(f_MovieBuffer, &asset);
         OpenEncodedAsset(ASSET_STREAK_IMAGE, &asset);
         ReadEncodedAsset(f_MovieBuffer + FLY_GUY_IMAGE_SIZE, &asset);
@@ -3491,8 +3491,8 @@ void DrawWindFlyGuy(Gfx **displayListHead) {
     }
 
     f_WindFlyGuyAsset++;
-    if (f_WindFlyGuyAsset == FLY_GUY_IMAGE_ASSET + WIND_FLY_GUY_FRAME_COUNT) {
-        f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
+    if (f_WindFlyGuyAsset == ASSET_FLY_GUY_IMAGE + WIND_FLY_GUY_FRAME_COUNT) {
+        f_WindFlyGuyAsset = ASSET_FLY_GUY_IMAGE;
     }
 
     OpenEncodedAsset(f_WindFlyGuyAsset, &asset);

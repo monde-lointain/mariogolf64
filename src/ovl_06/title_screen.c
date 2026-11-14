@@ -33,10 +33,10 @@ enum TitleState {
 #define TITLE_ENTERING_COUNTDOWN 8
 #define LEAVING_COUNTDOWN 16
 
-#define TITLE_IMAGE_ASSET 0x6F4
-#define NO_CONTROLLER_IMAGE_ASSET 0x948
-#define JAPANESE_LOGO_ASSET 0x6F5
-#define PRESS_START_TEXT_ASSET 0x943
+#define ASSET_TITLE_IMAGE 0x6F4
+#define ASSET_NO_CONTROLLER_IMAGE 0x948
+#define ASSET_JAPANESE_LOGO 0x6F5
+#define ASSET_PRESS_START_TEXT 0x943
 
 #define TITLE_IMAGE_WIDTH (SCREEN_WIDTH - (2 * SCREEN_BORDER))
 #define TITLE_IMAGE_HEIGHT (SCREEN_HEIGHT - (2 * SCREEN_BORDER))
@@ -225,19 +225,19 @@ void LoadTitleScreen(void) {
     ForceStopRumble();
     EnterMenuAtTitle();
     if (g_ControllerCount == 0) {
-        OpenEncodedAsset(NO_CONTROLLER_IMAGE_ASSET, &asset);
+        OpenEncodedAsset(ASSET_NO_CONTROLLER_IMAGE, &asset);
         ReadEncodedAsset(&f_TitleImage, &asset);
         PlaySong(SONG_HOLE_OUT_OVER_BOGEY, SONG_FLAG_RESTART);
     }
     else {
-        OpenEncodedAsset(TITLE_IMAGE_ASSET, &asset);
+        OpenEncodedAsset(ASSET_TITLE_IMAGE, &asset);
         ReadEncodedAsset(&f_TitleImage, &asset);
         PlaySong(SONG_ATTRACT_TITLE, SONG_FLAG_RESTART);
     }
 
-    OpenEncodedAsset(JAPANESE_LOGO_ASSET, &asset);
+    OpenEncodedAsset(ASSET_JAPANESE_LOGO, &asset);
     ReadEncodedAsset(&f_JapaneseLogo, &asset);
-    OpenEncodedAsset(PRESS_START_TEXT_ASSET, &asset);
+    OpenEncodedAsset(ASSET_PRESS_START_TEXT, &asset);
     ReadEncodedAsset(&f_PressStartText, &asset);
     f_TitleStage = TITLE_SHOWING;
 }

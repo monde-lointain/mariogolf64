@@ -46,11 +46,11 @@ enum SparkKind {
 
 #define IMPACT_FLASH_FULL_LEVEL 255
 
-#define SPARK_IMAGE_ASSET 0x561
-#define SWING_TRAIL_IMAGE_ASSET 0x973
+#define ASSET_SPARK_IMAGE 0x561
+#define ASSET_SWING_TRAIL_IMAGE 0x973
 #define SHARED_EFFECT_IMAGES_SIZE 0x2180
-#define SHARED_EFFECT_IMAGE_ASSET 0x6AD
-#define SHARED_EFFECT_SECOND_IMAGE_ASSET 0x969
+#define ASSET_SHARED_EFFECT_IMAGE 0x6AD
+#define ASSET_SHARED_EFFECT_SECOND_IMAGE 0x969
 #define SHARED_EFFECT_SECOND_IMAGE_OFFSET 0x648
 
 enum SwingTrailState {
@@ -224,14 +224,14 @@ void StartImpactSparks(void) {
 void LoadShotEffectImages(void) {
     EncodedAsset asset;
 
-    f_SparkImage = AllocMemory(OpenEncodedAsset(SPARK_IMAGE_ASSET, &asset));
+    f_SparkImage = AllocMemory(OpenEncodedAsset(ASSET_SPARK_IMAGE, &asset));
     ReadEncodedAsset(f_SparkImage, &asset);
-    f_SwingTrailImage = AllocMemory(OpenEncodedAsset(SWING_TRAIL_IMAGE_ASSET, &asset));
+    f_SwingTrailImage = AllocMemory(OpenEncodedAsset(ASSET_SWING_TRAIL_IMAGE, &asset));
     ReadEncodedAsset(f_SwingTrailImage, &asset);
     g_SharedEffectImages = AllocMemory(SHARED_EFFECT_IMAGES_SIZE);
-    OpenEncodedAsset(SHARED_EFFECT_IMAGE_ASSET, &asset);
+    OpenEncodedAsset(ASSET_SHARED_EFFECT_IMAGE, &asset);
     ReadEncodedAsset(g_SharedEffectImages, &asset);
-    OpenEncodedAsset(SHARED_EFFECT_SECOND_IMAGE_ASSET, &asset);
+    OpenEncodedAsset(ASSET_SHARED_EFFECT_SECOND_IMAGE, &asset);
     ReadEncodedAsset(g_SharedEffectImages + SHARED_EFFECT_SECOND_IMAGE_OFFSET, &asset);
 }
 

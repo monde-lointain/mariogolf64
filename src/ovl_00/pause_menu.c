@@ -33,7 +33,7 @@
 #include "transfer_pak.h"
 #include "turn.h"
 
-#define CHOICE_BOX_CLOUD_IMAGE_ASSET 0x71F
+#define ASSET_CHOICE_BOX_CLOUD_IMAGE 0x71F
 
 enum PauseMenuRequest {
     PAUSE_MENU_REQUEST_FREE = -1,
@@ -1207,7 +1207,7 @@ void LoadChoiceBoxImages(void) {
 
     f_ChoiceBoxCursorImage = AllocMemory(OpenEncodedAsset(ASSET_POINTING_HAND, &asset));
     ReadEncodedAsset(f_ChoiceBoxCursorImage, &asset);
-    f_MenuCloudImage = AllocMemory(OpenEncodedAsset(CHOICE_BOX_CLOUD_IMAGE_ASSET, &asset));
+    f_MenuCloudImage = AllocMemory(OpenEncodedAsset(ASSET_CHOICE_BOX_CLOUD_IMAGE, &asset));
     ReadEncodedAsset(f_MenuCloudImage, &asset);
 }
 

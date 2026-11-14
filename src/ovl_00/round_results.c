@@ -129,17 +129,17 @@ enum PrizeBracket {
     PRIZE_BRACKET_COUNT
 };
 
-#define RESULTS_BACKDROP_ASSET 0x6A0
-#define CLUB_TOURNAMENT_BACKDROP_ASSET 0x947
-#define FINAL_RESULTS_TITLE_ASSET 0x69F
-#define COURSE_NOTICE_TITLE_ASSET 0x55F
-#define CHARACTER_NOTICE_TITLE_ASSET 0x560
-#define RESULTS_GLOW_IMAGE_ASSET 0x72C
-#define RESULTS_GLOW_PALETTE_ASSET 0x72D
-#define MATCH_WIN_BANNER_ASSET 0x6A2
-#define MATCH_LOSE_BANNER_ASSET 0x6A3
-#define MATCH_STANDING_WORDS_ASSET 0x8FE
-#define TOURNAMENT_PLACE_DIGITS_ASSET 0x6A1
+#define ASSET_RESULTS_BACKDROP 0x6A0
+#define ASSET_CLUB_TOURNAMENT_BACKDROP 0x947
+#define ASSET_FINAL_RESULTS_TITLE 0x69F
+#define ASSET_COURSE_NOTICE_TITLE 0x55F
+#define ASSET_CHARACTER_NOTICE_TITLE 0x560
+#define ASSET_RESULTS_GLOW_IMAGE 0x72C
+#define ASSET_RESULTS_GLOW_PALETTE 0x72D
+#define ASSET_MATCH_WIN_BANNER 0x6A2
+#define ASSET_MATCH_LOSE_BANNER 0x6A3
+#define ASSET_MATCH_STANDING_WORDS 0x8FE
+#define ASSET_TOURNAMENT_PLACE_DIGITS 0x6A1
 
 #define RANK_AS_PLACE 0x1000
 #define NOTICE_TITLE_STRIP_HEIGHT 8
@@ -414,11 +414,11 @@ void LoadRoundResults(void) {
 
     if (g_GameState.isClubTournament) {
         f_ResultsBackdropImage =
-            AllocMemory(OpenEncodedAsset(CLUB_TOURNAMENT_BACKDROP_ASSET, &asset));
+            AllocMemory(OpenEncodedAsset(ASSET_CLUB_TOURNAMENT_BACKDROP, &asset));
         ReadEncodedAsset(f_ResultsBackdropImage, &asset);
     }
     else {
-        f_ResultsBackdropImage = AllocMemory(OpenEncodedAsset(RESULTS_BACKDROP_ASSET, &asset));
+        f_ResultsBackdropImage = AllocMemory(OpenEncodedAsset(ASSET_RESULTS_BACKDROP, &asset));
         ReadEncodedAsset(f_ResultsBackdropImage, &asset);
     }
     f_ResultsHandImage = AllocMemory(OpenEncodedAsset(ASSET_PRESSING_HAND, &asset));
@@ -436,7 +436,7 @@ void LoadRoundResults(void) {
         ReadEncodedAsset(f_ResultsCourseImage, &asset);
     }
     else {
-        f_FinalResultsTitleImage = AllocMemory(OpenEncodedAsset(FINAL_RESULTS_TITLE_ASSET, &asset));
+        f_FinalResultsTitleImage = AllocMemory(OpenEncodedAsset(ASSET_FINAL_RESULTS_TITLE, &asset));
         ReadEncodedAsset(f_FinalResultsTitleImage, &asset);
         f_ResultsLabelsImage = AllocMemory(OpenEncodedAsset(ASSET_SCORE_LABELS, &asset));
         ReadEncodedAsset(f_ResultsLabelsImage, &asset);
@@ -446,13 +446,13 @@ void LoadRoundResults(void) {
         ReadEncodedAsset(f_ResultsCloudImage, &asset);
         f_ResultsCourseImage = AllocMemory(OpenEncodedAsset(g_TournamentIconAssets[0], &asset));
         ReadEncodedAsset(f_ResultsCourseImage, &asset);
-        f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset));
+        f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(ASSET_COURSE_NOTICE_TITLE, &asset));
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
         f_ResultsShineImage = AllocMemory(OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset));
         ReadEncodedAsset(f_ResultsShineImage, &asset);
-        f_UnusedResultsImage = AllocMemory(OpenEncodedAsset(RESULTS_GLOW_IMAGE_ASSET, &asset));
+        f_UnusedResultsImage = AllocMemory(OpenEncodedAsset(ASSET_RESULTS_GLOW_IMAGE, &asset));
         ReadEncodedAsset(f_UnusedResultsImage, &asset);
-        OpenAssetFile(RESULTS_GLOW_PALETTE_ASSET, &file);
+        OpenAssetFile(ASSET_RESULTS_GLOW_PALETTE, &file);
         size = GetAssetFileSize(&file);
         f_UnusedResultsPalette = AllocMemory(size);
         ReadAssetFile(f_UnusedResultsPalette, size, &file);
@@ -485,14 +485,14 @@ void LoadRoundResults(void) {
 
     if (!g_GameState.isClubTournament) {
         if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
-            f_ResultsPlacesImage = AllocMemory(OpenEncodedAsset(MATCH_WIN_BANNER_ASSET, &asset));
+            f_ResultsPlacesImage = AllocMemory(OpenEncodedAsset(ASSET_MATCH_WIN_BANNER, &asset));
             ReadEncodedAsset(f_ResultsPlacesImage, &asset);
-            f_SecondBannerImage = AllocMemory(OpenEncodedAsset(MATCH_LOSE_BANNER_ASSET, &asset));
+            f_SecondBannerImage = AllocMemory(OpenEncodedAsset(ASSET_MATCH_LOSE_BANNER, &asset));
             ReadEncodedAsset(f_SecondBannerImage, &asset);
             f_PlaqueImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
             ReadEncodedAsset(f_PlaqueImage, &asset);
             f_MatchStandingWordsImage =
-                AllocMemory(OpenEncodedAsset(MATCH_STANDING_WORDS_ASSET, &asset));
+                AllocMemory(OpenEncodedAsset(ASSET_MATCH_STANDING_WORDS, &asset));
             ReadEncodedAsset(f_MatchStandingWordsImage, &asset);
             f_FaceCharacterIndex = g_Players[1].characterIndex;
         }
@@ -605,7 +605,7 @@ void LoadRoundResults(void) {
                 break;
             case GAME_MODE_TOURNAMENT:
                 f_SecondBannerImage =
-                    AllocMemory(OpenEncodedAsset(TOURNAMENT_PLACE_DIGITS_ASSET, &asset));
+                    AllocMemory(OpenEncodedAsset(ASSET_TOURNAMENT_PLACE_DIGITS, &asset));
                 ReadEncodedAsset(f_SecondBannerImage, &asset);
                 f_PlayerResults[0] = GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), 0);
                 RankTournament(COURSE_HOLE_COUNT, 0, f_PlayerResults[0], g_GameState.roundSeed);
@@ -738,7 +738,7 @@ void LoadUnlockNotice(s32 unlock) {
     f_ResultsShineImage = AllocMemory(OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset));
     ReadEncodedAsset(f_ResultsShineImage, &asset);
     if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
-        f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset));
+        f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(ASSET_COURSE_NOTICE_TITLE, &asset));
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
         f_ResultsCourseImage =
             AllocMemory(OpenEncodedAsset(f_CourseNoticeAssets[courseIndex], &asset));
@@ -746,7 +746,7 @@ void LoadUnlockNotice(s32 unlock) {
     }
 
     if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
-        f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &asset));
+        f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(ASSET_CHARACTER_NOTICE_TITLE, &asset));
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
         f_PlaqueImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
         ReadEncodedAsset(f_PlaqueImage, &asset);
@@ -2715,7 +2715,7 @@ s32 UpdateTournamentResults(ControllerState *controller) {
                 StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
                 OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
                 ReadEncodedAsset(f_ResultsCourseImage, &asset);
-                OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset);
+                OpenEncodedAsset(ASSET_COURSE_NOTICE_TITLE, &asset);
                 ReadEncodedAsset(f_NoticeTitleImage, &asset);
                 return FALSE;
             }
@@ -2984,7 +2984,7 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
                 StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
                 OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
                 ReadEncodedAsset(f_ResultsCourseImage, &asset);
-                OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset);
+                OpenEncodedAsset(ASSET_COURSE_NOTICE_TITLE, &asset);
                 ReadEncodedAsset(f_NoticeTitleImage, &asset);
                 return FALSE;
             }
@@ -3142,7 +3142,7 @@ s32 UpdateMatchResults(ControllerState *controller) {
                 StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
                 OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
                 ReadEncodedAsset(f_ResultsCourseImage, &asset);
-                OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset);
+                OpenEncodedAsset(ASSET_COURSE_NOTICE_TITLE, &asset);
                 ReadEncodedAsset(f_NoticeTitleImage, &asset);
                 return FALSE;
             }
@@ -3249,7 +3249,7 @@ s32 UpdateMatchResults(ControllerState *controller) {
                     EncodedAsset titleAsset;
 
                     StartResultsNotice(UNLOCK_NOTICE_KIND_CHARACTER);
-                    OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &titleAsset);
+                    OpenEncodedAsset(ASSET_CHARACTER_NOTICE_TITLE, &titleAsset);
                     ReadEncodedAsset(f_NoticeTitleImage, &titleAsset);
                     f_ResultsStep = MATCH_STEP_START_NOTICE_WAIT;
                     break;
@@ -3302,7 +3302,7 @@ s32 UpdateMatchResults(ControllerState *controller) {
                                 &file
                             );
                             ReadAssetFile(f_FacePalette, GetAssetFileSize(&file), &file);
-                            OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &faceAsset);
+                            OpenEncodedAsset(ASSET_CHARACTER_NOTICE_TITLE, &faceAsset);
                             ReadEncodedAsset(f_NoticeTitleImage, &faceAsset);
                             f_ResultsStep = MATCH_STEP_SLIDING_OUT_TALLY;
                         }

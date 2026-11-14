@@ -370,14 +370,14 @@ enum ExperienceWriteResult {
     EXPERIENCE_WRITE_PAK_ERROR
 };
 
-#define WOOD_PANEL_ASSET 0x8FD
-#define CONTROLLER_ICONS_ASSET 0x900
-#define TITLE_ASSET 0x93F
-#define CURVE_SEGMENTS_ASSET 0x8EE
-#define STAT_BARS_ASSET 0x95D
-#define SHOT_TYPES_ASSET 0x979
-#define ACCESSING_ASSET 0x96B
-#define STAT_LABELS_ASSET 0x978
+#define ASSET_WOOD_PANEL 0x8FD
+#define ASSET_TRANSFER_PAK_ICONS 0x900
+#define ASSET_TITLE 0x93F
+#define ASSET_CURVE_SEGMENTS 0x8EE
+#define ASSET_STAT_BARS 0x95D
+#define ASSET_SHOT_TYPES 0x979
+#define ASSET_ACCESSING 0x96B
+#define ASSET_STAT_LABELS 0x978
 
 #define FIRST_GAME_BOY_GOLFER CHARACTER_KID
 
@@ -461,7 +461,7 @@ void LoadTransmitMenu(void) {
     s32 size;
 
     ReadEncodedAsset(
-        g_GameBoyTransfer.woodPanelImage = AllocMemory(OpenEncodedAsset(WOOD_PANEL_ASSET, &asset)),
+        g_GameBoyTransfer.woodPanelImage = AllocMemory(OpenEncodedAsset(ASSET_WOOD_PANEL, &asset)),
         &asset
     );
     ReadEncodedAsset(
@@ -479,11 +479,11 @@ void LoadTransmitMenu(void) {
     );
     ReadEncodedAsset(
         g_GameBoyTransfer.controllerIconsImage =
-            AllocMemory(OpenEncodedAsset(CONTROLLER_ICONS_ASSET, &asset)),
+            AllocMemory(OpenEncodedAsset(ASSET_TRANSFER_PAK_ICONS, &asset)),
         &asset
     );
     ReadEncodedAsset(
-        g_GameBoyTransfer.titleImage = AllocMemory(OpenEncodedAsset(TITLE_ASSET, &asset)),
+        g_GameBoyTransfer.titleImage = AllocMemory(OpenEncodedAsset(ASSET_TITLE, &asset)),
         &asset
     );
     ReadEncodedAsset(
@@ -492,7 +492,7 @@ void LoadTransmitMenu(void) {
     );
     ReadEncodedAsset(
         g_GameBoyTransfer.curveSegmentsImage =
-            AllocMemory(OpenEncodedAsset(CURVE_SEGMENTS_ASSET, &asset)),
+            AllocMemory(OpenEncodedAsset(ASSET_CURVE_SEGMENTS, &asset)),
         &asset
     );
     ReadEncodedAsset(
@@ -501,11 +501,11 @@ void LoadTransmitMenu(void) {
         &asset
     );
     ReadEncodedAsset(
-        g_GameBoyTransfer.statBarsImage = AllocMemory(OpenEncodedAsset(STAT_BARS_ASSET, &asset)),
+        g_GameBoyTransfer.statBarsImage = AllocMemory(OpenEncodedAsset(ASSET_STAT_BARS, &asset)),
         &asset
     );
     ReadEncodedAsset(
-        g_GameBoyTransfer.shotTypesImage = AllocMemory(OpenEncodedAsset(SHOT_TYPES_ASSET, &asset)),
+        g_GameBoyTransfer.shotTypesImage = AllocMemory(OpenEncodedAsset(ASSET_SHOT_TYPES, &asset)),
         &asset
     );
     ReadEncodedAsset(
@@ -514,12 +514,12 @@ void LoadTransmitMenu(void) {
         &asset
     );
     ReadEncodedAsset(
-        g_GameBoyTransfer.accessingImage = AllocMemory(OpenEncodedAsset(ACCESSING_ASSET, &asset)),
+        g_GameBoyTransfer.accessingImage = AllocMemory(OpenEncodedAsset(ASSET_ACCESSING, &asset)),
         &asset
     );
     ReadEncodedAsset(
         g_GameBoyTransfer.statLabelsImage =
-            AllocMemory(OpenEncodedAsset(STAT_LABELS_ASSET, &asset)),
+            AllocMemory(OpenEncodedAsset(ASSET_STAT_LABELS, &asset)),
         &asset
     );
     g_GameBoyTransfer.pressingHandPosition = PRESSING_HAND_HIDDEN;

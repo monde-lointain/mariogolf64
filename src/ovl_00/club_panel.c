@@ -38,7 +38,7 @@ enum ClubPanelState {
 
 #define CLUB_PANEL_BUFFER_SLOT 12
 
-#define CLUB_PANEL_IMAGE_ASSET 0x4FF
+#define ASSET_CLUB_PANEL_IMAGE 0x4FF
 #define SHOT_MODE_IMAGE_SIZE 0x808
 
 #define PANEL_ASSET_POWER 0x56C
@@ -124,7 +124,7 @@ void UpdateClubPanelDebugValue(void) {
 void LoadClubPanelImages(void) {
     EncodedAsset asset;
 
-    f_ClubPanelImage = AllocMemory(OpenEncodedAsset(CLUB_PANEL_IMAGE_ASSET, &asset));
+    f_ClubPanelImage = AllocMemory(OpenEncodedAsset(ASSET_CLUB_PANEL_IMAGE, &asset));
     ReadEncodedAsset(f_ClubPanelImage, &asset);
     g_ImageSlots[CLUB_PANEL_BUFFER_SLOT] = AllocMemory(OpenEncodedAsset(PANEL_ASSET_POWER, &asset));
     ReadEncodedAsset(g_ImageSlots[CLUB_PANEL_BUFFER_SLOT], &asset);

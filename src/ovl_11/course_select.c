@@ -46,11 +46,11 @@ enum PlanksState {
 #define STARS_PER_OPENED_COURSE 4
 #define StarsToOpen(courseCount) (((courseCount) - 1) * STARS_PER_OPENED_COURSE)
 
-#define HOLE_SIGN_ASSET 0x739
-#define PLANKS_ASSET 0x8ED
-#define COURSE_IMAGE_PALETTE_ASSET 0x876
-#define BLANK_COURSE_IMAGE_ASSET 0x834
-#define SPINNING_EMPTY_STAR_ASSET 0x5E5
+#define ASSET_HOLE_SIGN 0x739
+#define ASSET_PLANKS 0x8ED
+#define ASSET_COURSE_IMAGE_PALETTE 0x876
+#define ASSET_BLANK_COURSE_IMAGE 0x834
+#define ASSET_SPINNING_EMPTY_STAR 0x5E5
 
 #define STAR_FRAME_DURATION 2
 #define STAR_BUFFER_COUNT 2
@@ -274,20 +274,20 @@ void LoadCourseSelect(Boolean isHoleSelect) {
         ReadEncodedAsset(f_StarImages[1], &asset);
         f_StarImages[STILL_STAR_IMAGE] = AllocMemory(OpenEncodedAsset(ASSET_SPINNING_STAR, &asset));
         ReadEncodedAsset(f_StarImages[STILL_STAR_IMAGE], &asset);
-        f_EmptyStarImages[0] = AllocMemory(OpenEncodedAsset(SPINNING_EMPTY_STAR_ASSET, &asset));
+        f_EmptyStarImages[0] = AllocMemory(OpenEncodedAsset(ASSET_SPINNING_EMPTY_STAR, &asset));
         ReadEncodedAsset(f_EmptyStarImages[0], &asset);
-        f_EmptyStarImages[1] = AllocMemory(OpenEncodedAsset(SPINNING_EMPTY_STAR_ASSET, &asset));
+        f_EmptyStarImages[1] = AllocMemory(OpenEncodedAsset(ASSET_SPINNING_EMPTY_STAR, &asset));
         ReadEncodedAsset(f_EmptyStarImages[1], &asset);
         f_EmptyStarImages[STILL_STAR_IMAGE] =
-            AllocMemory(OpenEncodedAsset(SPINNING_EMPTY_STAR_ASSET, &asset));
+            AllocMemory(OpenEncodedAsset(ASSET_SPINNING_EMPTY_STAR, &asset));
         ReadEncodedAsset(f_EmptyStarImages[STILL_STAR_IMAGE], &asset);
-        f_PlanksImage = AllocMemory(OpenEncodedAsset(PLANKS_ASSET, &asset));
+        f_PlanksImage = AllocMemory(OpenEncodedAsset(ASSET_PLANKS, &asset));
         ReadEncodedAsset(f_PlanksImage, &asset);
     }
     else {
         f_LoadedScreen = COURSE_SELECT_HOLES;
         f_SlideOffset = HOLE_SELECT_SLIDE_START;
-        f_BoardImage = AllocMemory(OpenEncodedAsset(HOLE_SIGN_ASSET, &asset));
+        f_BoardImage = AllocMemory(OpenEncodedAsset(ASSET_HOLE_SIGN, &asset));
         ReadEncodedAsset(f_BoardImage, &asset);
     }
 
@@ -305,7 +305,7 @@ void LoadCourseSelect(Boolean isHoleSelect) {
         OpenEncodedAsset(f_CourseImageAssets[g_GameState.courseIndex] + COURSE_IMAGE_FRONT, &asset)
     );
     ReadEncodedAsset(f_CourseImage, &asset);
-    OpenAssetFile(COURSE_IMAGE_PALETTE_ASSET, &file);
+    OpenAssetFile(ASSET_COURSE_IMAGE_PALETTE, &file);
     size = GetAssetFileSize(&file);
     f_CourseImagePalette = AllocMemory(size);
     ReadAssetFile(f_CourseImagePalette, size, &file);
@@ -323,7 +323,7 @@ void TurnCourseImage(void) {
     if (f_CourseTurnStep != 0) {
         frame = f_CourseTurnFrames[f_CourseTurnIndex];
         if (frame == COURSE_IMAGE_BLANK) {
-            OpenEncodedAsset(BLANK_COURSE_IMAGE_ASSET, &asset);
+            OpenEncodedAsset(ASSET_BLANK_COURSE_IMAGE, &asset);
         }
         else {
             if (f_CourseTurnIndex < COURSE_TURN_MIDDLE) {

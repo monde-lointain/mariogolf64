@@ -33,11 +33,11 @@ enum HoleCreatureKind {
     HOLE_CREATURE_MONKEY
 };
 
-#define CHEEP_CHEEP_ASSET 0x6E0
-#define CHEEP_CHEEP_FIRST_VIEW_ASSET 0x6DE
+#define ASSET_CHEEP_CHEEP 0x6E0
+#define ASSET_CHEEP_CHEEP_FIRST_VIEW 0x6DE
 #define CHEEP_CHEEP_VIEW_COUNT 5
-#define GOLD_CHEEP_CHEEP_ASSET 0x6E5
-#define MONKEY_ASSET 0x6F0
+#define ASSET_GOLD_CHEEP_CHEEP 0x6E5
+#define ASSET_MONKEY 0x6F0
 #define MONKEY_FRAME_COUNT 4
 
 #define CHEEP_CHEEP_DEPTH 0x7800
@@ -72,14 +72,14 @@ typedef struct HoleCreature {
 } HoleCreature;
 
 static AssetId f_CheepCheepViewAssets[CHEEP_CHEEP_VIEW_COUNT] UNUSED = {
-    CHEEP_CHEEP_FIRST_VIEW_ASSET,
-    CHEEP_CHEEP_FIRST_VIEW_ASSET + 1,
-    CHEEP_CHEEP_FIRST_VIEW_ASSET + 2,
-    CHEEP_CHEEP_FIRST_VIEW_ASSET + 3,
-    CHEEP_CHEEP_FIRST_VIEW_ASSET + 4,
+    ASSET_CHEEP_CHEEP_FIRST_VIEW,
+    ASSET_CHEEP_CHEEP_FIRST_VIEW + 1,
+    ASSET_CHEEP_CHEEP_FIRST_VIEW + 2,
+    ASSET_CHEEP_CHEEP_FIRST_VIEW + 3,
+    ASSET_CHEEP_CHEEP_FIRST_VIEW + 4,
 };
 static AssetId f_MonkeyFrameAssets[MONKEY_FRAME_COUNT] =
-    {MONKEY_ASSET, MONKEY_ASSET + 1, MONKEY_ASSET + 2, MONKEY_ASSET + 3};
+    {ASSET_MONKEY, ASSET_MONKEY + 1, ASSET_MONKEY + 2, ASSET_MONKEY + 3};
 static Boolean f_AreCheepCheepsLeaping = FALSE;
 static s32 f_UnusedLeapStartValue = 0;
 static s32 f_UnusedLeapValue = 0;
@@ -110,11 +110,11 @@ HoleCreature f_HoleCreatures[HOLE_CREATURE_COUNT];
 void LoadHoleCreatureImages(void) {
     EncodedAsset asset;
 
-    f_CheepCheepImages[0] = AllocMemory(OpenEncodedAsset(CHEEP_CHEEP_ASSET, &asset));
+    f_CheepCheepImages[0] = AllocMemory(OpenEncodedAsset(ASSET_CHEEP_CHEEP, &asset));
     ReadEncodedAsset(f_CheepCheepImages[0], &asset);
-    f_CheepCheepImages[1] = AllocMemory(OpenEncodedAsset(GOLD_CHEEP_CHEEP_ASSET, &asset));
+    f_CheepCheepImages[1] = AllocMemory(OpenEncodedAsset(ASSET_GOLD_CHEEP_CHEEP, &asset));
     ReadEncodedAsset(f_CheepCheepImages[1], &asset);
-    f_MonkeyImage = AllocMemory(OpenEncodedAsset(MONKEY_ASSET, &asset));
+    f_MonkeyImage = AllocMemory(OpenEncodedAsset(ASSET_MONKEY, &asset));
     ReadEncodedAsset(f_MonkeyImage, &asset);
     f_AreCheepCheepsLeaping = FALSE;
 }
@@ -236,11 +236,11 @@ void StartCheepCheepLeap(s32 startValue) {
             creature->isFacingBack = guRandom() % 2;
             creature->isGold = guRandom() % 2;
             if (!creature->isGold) {
-                OpenEncodedAsset(CHEEP_CHEEP_ASSET, &asset);
+                OpenEncodedAsset(ASSET_CHEEP_CHEEP, &asset);
                 ReadEncodedAsset(f_CheepCheepImages[0], &asset);
             }
             else {
-                OpenEncodedAsset(GOLD_CHEEP_CHEEP_ASSET, &asset);
+                OpenEncodedAsset(ASSET_GOLD_CHEEP_CHEEP, &asset);
                 ReadEncodedAsset(f_CheepCheepImages[1], &asset);
             }
 

@@ -66,13 +66,13 @@ enum VertexEncoding {
 #define HOLE_ASSET_TREES 3
 #define HOLE_ASSET_TRIANGLES 4
 #define HOLE_ASSET_ATTRIBUTES 5
-#define TITLE_HOLE_VERTICES_ASSET 0x3F0
-#define TITLE_HOLE_MIDPOINTS_ASSET 0x3F1
-#define TITLE_HOLE_TREES_ASSET 0x3F2
-#define TITLE_HOLE_SETUP_ASSET 0x3F3
-#define TITLE_HOLE_POINTS_ASSET 0x3F4
-#define TITLE_HOLE_TRIANGLES_ASSET 0x3F5
-#define TITLE_HOLE_ATTRIBUTES_ASSET 0x3F6
+#define ASSET_TITLE_HOLE_VERTICES 0x3F0
+#define ASSET_TITLE_HOLE_MIDPOINTS 0x3F1
+#define ASSET_TITLE_HOLE_TREES 0x3F2
+#define ASSET_TITLE_HOLE_SETUP 0x3F3
+#define ASSET_TITLE_HOLE_POINTS 0x3F4
+#define ASSET_TITLE_HOLE_TRIANGLES 0x3F5
+#define ASSET_TITLE_HOLE_ATTRIBUTES 0x3F6
 #define LAST_MINI_GOLF_PAINT_LOGIC PAINT_LOGIC_PEACHS_CASTLE_THIRD
 
 #define TERRAIN_CODE_BLOCK_WORD_COUNT (TERRAIN_CODE_BLOCK_SIZE / 4)
@@ -2311,7 +2311,7 @@ void BuildHole(s32 courseRecordIndex, s32 holeIndex) {
         ReadBillboards();
         if (!g_GameState.isRoundContinued && g_Scene != SCENE_STAFF_ROLL) {
             if (g_GameState.gameMode == GAME_MODE_TITLE_HOLE) {
-                OpenAssetFile(TITLE_HOLE_SETUP_ASSET, &asset);
+                OpenAssetFile(ASSET_TITLE_HOLE_SETUP, &asset);
             }
             else {
                 OpenAssetFile(f_HoleAssetIds[courseRecordIndex][holeIndex].setup, &asset);
@@ -2321,7 +2321,7 @@ void BuildHole(s32 courseRecordIndex, s32 holeIndex) {
         }
 
         if (g_GameState.gameMode == GAME_MODE_TITLE_HOLE) {
-            OpenAssetFile(TITLE_HOLE_POINTS_ASSET, &asset);
+            OpenAssetFile(ASSET_TITLE_HOLE_POINTS, &asset);
         }
         else {
             OpenAssetFile(f_HoleAssetIds[courseRecordIndex][holeIndex].points, &asset);
@@ -2903,7 +2903,7 @@ void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 kind) 
     switch (kind) {
         case HOLE_ASSET_VERTICES:
             if (g_GameState.gameMode == GAME_MODE_TITLE_HOLE) {
-                OpenAssetFile(TITLE_HOLE_VERTICES_ASSET, &f_HoleAsset);
+                OpenAssetFile(ASSET_TITLE_HOLE_VERTICES, &f_HoleAsset);
             }
             else {
                 OpenAssetFile(f_HoleAssetIds[courseRecordIndex][holeIndex].vertices, &f_HoleAsset);
@@ -2912,7 +2912,7 @@ void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 kind) 
             break;
         case HOLE_ASSET_MIDPOINTS:
             if (g_GameState.gameMode == GAME_MODE_TITLE_HOLE) {
-                OpenAssetFile(TITLE_HOLE_MIDPOINTS_ASSET, &f_HoleAsset);
+                OpenAssetFile(ASSET_TITLE_HOLE_MIDPOINTS, &f_HoleAsset);
             }
             else {
                 OpenAssetFile(f_HoleAssetIds[courseRecordIndex][holeIndex].midpoints, &f_HoleAsset);
@@ -2921,7 +2921,7 @@ void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 kind) 
             break;
         case HOLE_ASSET_TREES:
             if (g_GameState.gameMode == GAME_MODE_TITLE_HOLE) {
-                OpenAssetFile(TITLE_HOLE_TREES_ASSET, &f_HoleAsset);
+                OpenAssetFile(ASSET_TITLE_HOLE_TREES, &f_HoleAsset);
             }
             else {
                 OpenAssetFile(f_HoleAssetIds[courseRecordIndex][holeIndex].trees, &f_HoleAsset);
@@ -2930,7 +2930,7 @@ void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 kind) 
             break;
         case HOLE_ASSET_TRIANGLES:
             if (g_GameState.gameMode == GAME_MODE_TITLE_HOLE) {
-                OpenAssetFile(TITLE_HOLE_TRIANGLES_ASSET, &f_HoleAsset);
+                OpenAssetFile(ASSET_TITLE_HOLE_TRIANGLES, &f_HoleAsset);
             }
             else {
                 OpenAssetFile(f_HoleAssetIds[courseRecordIndex][holeIndex].triangles, &f_HoleAsset);
@@ -2939,7 +2939,7 @@ void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 kind) 
             break;
         case HOLE_ASSET_ATTRIBUTES:
             if (g_GameState.gameMode == GAME_MODE_TITLE_HOLE) {
-                OpenAssetFile(TITLE_HOLE_ATTRIBUTES_ASSET, &f_HoleAsset);
+                OpenAssetFile(ASSET_TITLE_HOLE_ATTRIBUTES, &f_HoleAsset);
             }
             else {
                 OpenAssetFile(

@@ -131,10 +131,10 @@
 #define REEL_CLICK_CHANNEL 13
 #define REEL_STOP_PAN_STEP 127
 
-#define MACHINE_ASSET 0x95B
-#define BUTTONS_ASSET 0x971
-#define START_ASSET 0x590
-#define LOGO_ASSET 0x95A
+#define ASSET_MACHINE 0x95B
+#define ASSET_BUTTONS 0x971
+#define ASSET_START 0x590
+#define ASSET_LOGO 0x95A
 
 typedef struct ClubSlots {
     s32 reelPositions[REEL_COUNT];
@@ -238,11 +238,11 @@ void LoadClubSlots(void) {
         );
     }
 
-    f_Slots->machineImage = AllocMemory(OpenEncodedAsset(MACHINE_ASSET, &asset));
+    f_Slots->machineImage = AllocMemory(OpenEncodedAsset(ASSET_MACHINE, &asset));
     ReadEncodedAsset(f_Slots->machineImage, &asset);
-    f_Slots->buttonsImage = AllocMemory(OpenEncodedAsset(BUTTONS_ASSET, &asset));
+    f_Slots->buttonsImage = AllocMemory(OpenEncodedAsset(ASSET_BUTTONS, &asset));
     ReadEncodedAsset(f_Slots->buttonsImage, &asset);
-    f_Slots->startImage = AllocMemory(OpenEncodedAsset(START_ASSET, &asset));
+    f_Slots->startImage = AllocMemory(OpenEncodedAsset(ASSET_START, &asset));
     ReadEncodedAsset(f_Slots->startImage, &asset);
     for (index = 0; index != g_GameState.playerCount; index++) {
         row = f_CharacterFaceRows[g_Players[index].characterIndex];
@@ -260,7 +260,7 @@ void LoadClubSlots(void) {
     f_FaceHoldCount = 0;
     f_IsShowingResult = FALSE;
     f_StarCount = 0;
-    OpenEncodedAsset(LOGO_ASSET, &asset);
+    OpenEncodedAsset(ASSET_LOGO, &asset);
     ReadEncodedAsset(f_LogoImage, &asset);
     OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset);
     ReadEncodedAsset(f_ShineImage, &asset);

@@ -44,11 +44,11 @@
 #define HEAP_BALL_IMAGES 2
 #define BALL_IMAGE_HEAP_SIZE 0x1800
 
-#define SMALL_BALL_IMAGE_ASSET 0x4C7
-#define ROLLING_BALL_IMAGE_ASSET 0x4C8
-#define BALL_SHADOW_IMAGE_ASSET 0x4DA
-#define BALL_MARKER_IMAGE_ASSET 0x4C6
-#define BALL_AFTERIMAGE_IMAGE_ASSET 0x6BB
+#define ASSET_SMALL_BALL_IMAGE 0x4C7
+#define ASSET_ROLLING_BALL_IMAGE 0x4C8
+#define ASSET_BALL_SHADOW_IMAGE 0x4DA
+#define ASSET_BALL_MARKER_IMAGE 0x4C6
+#define ASSET_BALL_AFTERIMAGE_IMAGE 0x6BB
 
 #define PIKA_TEXTURE_WIDTH 32
 #define PIKA_TEXTURE_HEIGHT 8
@@ -393,19 +393,19 @@ void LoadGolfBallImages(void) {
     ResetHeap(HEAP_BALL_IMAGES);
     AddHeapRegion(HEAP_BALL_IMAGES, f_BallImageHeap, f_BallImageHeap + BALL_IMAGE_HEAP_SIZE);
     f_SmallBallImage =
-        AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(SMALL_BALL_IMAGE_ASSET, &asset));
+        AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(ASSET_SMALL_BALL_IMAGE, &asset));
     ReadEncodedAsset(f_SmallBallImage, &asset);
     f_RollingBallImage =
-        AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(ROLLING_BALL_IMAGE_ASSET, &asset));
+        AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(ASSET_ROLLING_BALL_IMAGE, &asset));
     ReadEncodedAsset(f_RollingBallImage, &asset);
     f_BallShadowImage =
-        AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(BALL_SHADOW_IMAGE_ASSET, &asset));
+        AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(ASSET_BALL_SHADOW_IMAGE, &asset));
     ReadEncodedAsset(f_BallShadowImage, &asset);
     f_BallMarkerImage =
-        AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(BALL_MARKER_IMAGE_ASSET, &asset));
+        AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(ASSET_BALL_MARKER_IMAGE, &asset));
     ReadEncodedAsset(f_BallMarkerImage, &asset);
     f_BallAfterimageImage =
-        AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(BALL_AFTERIMAGE_IMAGE_ASSET, &asset));
+        AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(ASSET_BALL_AFTERIMAGE_IMAGE, &asset));
     ReadEncodedAsset(f_BallAfterimageImage, &asset);
     osSyncPrintf("HEAP_BALLTEX LEFT%d\n", GetHeapFreeSize(HEAP_BALL_IMAGES));
     DrawPikaBallTexture();

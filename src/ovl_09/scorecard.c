@@ -66,33 +66,33 @@ void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 pageIndex);
 
 void SetScorecardState(s32 state);
 
-#define TABLE_IMAGE_ASSET 0x68F
-#define PLACE_ARROW_IMAGE_ASSET 0x682
-#define RAISED_PANEL_IMAGE_ASSET 0x690
-#define SCORES_PANEL_IMAGE_ASSET 0x691
-#define BET_SUBTITLES_IMAGE_ASSET 0x97A
-#define TOTAL_LABELS_IMAGE_ASSET 0x693
-#define MATCH_PANEL_IMAGE_ASSET 0x68E
-#define WIN_MARK_IMAGE_ASSET 0x68C
-#define WINS_NEEDED_IMAGE_ASSET 0x68D
-#define WINNER_ARROW_IMAGE_ASSET 0x694
-#define SKIN_ICON_IMAGE_ASSET 0x68B
-#define FLAP_NAME_IMAGES_ASSET 0x695
-#define LEADERBOARD_ROW_IMAGE_ASSET 0x692
-#define TOTAL_HEADING_IMAGE_ASSET 0x696
-#define GRID_IMAGE_ASSET 0x69D
-#define SCORECARD_TITLE_ASSET 0x683
-#define LEADERBOARD_TITLE_ASSET 0x684
-#define SPEED_GOLF_TITLE_ASSET 0x685
-#define VERSUS_BOARD_TITLE_ASSET 0x686
-#define BET_TITLE_ASSET 0x687
-#define LAS_VEGAS_IMAGE_ASSET 0x672
-#define LONGEST_DRIVE_IMAGE_ASSET 0x674
-#define MATCH_POT_IMAGE_ASSET 0x676
-#define NEAREST_PIN_IMAGE_ASSET 0x678
-#define STROKES_IMAGE_ASSET 0x67A
-#define SKINS_IMAGE_ASSET 0x67C
-#define NASSAU_IMAGE_ASSET 0x67E
+#define ASSET_TABLE_IMAGE 0x68F
+#define ASSET_PLACE_ARROW_IMAGE 0x682
+#define ASSET_RAISED_PANEL_IMAGE 0x690
+#define ASSET_SCORES_PANEL_IMAGE 0x691
+#define ASSET_BET_SUBTITLES_IMAGE 0x97A
+#define ASSET_TOTAL_LABELS_IMAGE 0x693
+#define ASSET_MATCH_PANEL_IMAGE 0x68E
+#define ASSET_WIN_MARK_IMAGE 0x68C
+#define ASSET_WINS_NEEDED_IMAGE 0x68D
+#define ASSET_WINNER_ARROW_IMAGE 0x694
+#define ASSET_SKIN_ICON_IMAGE 0x68B
+#define ASSET_FLAP_NAME_IMAGES 0x695
+#define ASSET_LEADERBOARD_ROW_IMAGE 0x692
+#define ASSET_TOTAL_HEADING_IMAGE 0x696
+#define ASSET_GRID_IMAGE 0x69D
+#define ASSET_SCORECARD_TITLE 0x683
+#define ASSET_LEADERBOARD_TITLE 0x684
+#define ASSET_SPEED_GOLF_TITLE 0x685
+#define ASSET_VERSUS_BOARD_TITLE 0x686
+#define ASSET_BET_TITLE 0x687
+#define ASSET_LAS_VEGAS_BET_IMAGE 0x672
+#define ASSET_LONGEST_DRIVE_BET_IMAGE 0x674
+#define ASSET_MATCH_POT_BET_IMAGE 0x676
+#define ASSET_NEAREST_PIN_BET_IMAGE 0x678
+#define ASSET_STROKES_BET_IMAGE 0x67A
+#define ASSET_SKINS_BET_IMAGE 0x67C
+#define ASSET_NASSAU_BET_IMAGE 0x67E
 
 #define PAGE_TITLES_SPEED_GOLF 0
 #define PAGE_TITLES_SOLO 1
@@ -104,20 +104,20 @@ void SetScorecardState(s32 state);
 
 static s32 f_UnusedWordsBeforePageTitles[] UNUSED = {0, 1, 2, 3, 5, 10};
 static AssetId f_PageTitleAssets[PAGE_TITLES_ROW_COUNT][PAGE_TITLE_COUNT] = {
-    {SPEED_GOLF_TITLE_ASSET, SCORECARD_TITLE_ASSET, SCORECARD_TITLE_ASSET},
-    {SCORECARD_TITLE_ASSET, BET_TITLE_ASSET, BET_TITLE_ASSET},
-    {VERSUS_BOARD_TITLE_ASSET, SCORECARD_TITLE_ASSET, BET_TITLE_ASSET},
-    {VERSUS_BOARD_TITLE_ASSET, SCORECARD_TITLE_ASSET, BET_TITLE_ASSET},
-    {LEADERBOARD_TITLE_ASSET, SCORECARD_TITLE_ASSET, SCORECARD_TITLE_ASSET},
+    {ASSET_SPEED_GOLF_TITLE, ASSET_SCORECARD_TITLE, ASSET_SCORECARD_TITLE},
+    {ASSET_SCORECARD_TITLE, ASSET_BET_TITLE, ASSET_BET_TITLE},
+    {ASSET_VERSUS_BOARD_TITLE, ASSET_SCORECARD_TITLE, ASSET_BET_TITLE},
+    {ASSET_VERSUS_BOARD_TITLE, ASSET_SCORECARD_TITLE, ASSET_BET_TITLE},
+    {ASSET_LEADERBOARD_TITLE, ASSET_SCORECARD_TITLE, ASSET_SCORECARD_TITLE},
 };
 static AssetId f_BetImageAssets[BET_COUNT][2] = {
-    {LONGEST_DRIVE_IMAGE_ASSET, LONGEST_DRIVE_IMAGE_ASSET + 1},
-    {NEAREST_PIN_IMAGE_ASSET, NEAREST_PIN_IMAGE_ASSET + 1},
-    {STROKES_IMAGE_ASSET, STROKES_IMAGE_ASSET + 1},
-    {NASSAU_IMAGE_ASSET, NASSAU_IMAGE_ASSET + 1},
-    {SKINS_IMAGE_ASSET, SKINS_IMAGE_ASSET + 1},
-    {MATCH_POT_IMAGE_ASSET, MATCH_POT_IMAGE_ASSET + 1},
-    {LAS_VEGAS_IMAGE_ASSET, LAS_VEGAS_IMAGE_ASSET + 1},
+    {ASSET_LONGEST_DRIVE_BET_IMAGE, ASSET_LONGEST_DRIVE_BET_IMAGE + 1},
+    {ASSET_NEAREST_PIN_BET_IMAGE, ASSET_NEAREST_PIN_BET_IMAGE + 1},
+    {ASSET_STROKES_BET_IMAGE, ASSET_STROKES_BET_IMAGE + 1},
+    {ASSET_NASSAU_BET_IMAGE, ASSET_NASSAU_BET_IMAGE + 1},
+    {ASSET_SKINS_BET_IMAGE, ASSET_SKINS_BET_IMAGE + 1},
+    {ASSET_MATCH_POT_BET_IMAGE, ASSET_MATCH_POT_BET_IMAGE + 1},
+    {ASSET_LAS_VEGAS_BET_IMAGE, ASSET_LAS_VEGAS_BET_IMAGE + 1},
 };
 s32 f_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
 
@@ -139,20 +139,20 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     g_Scorecard.content.holeIndex = holeIndex;
     g_Scorecard.content.isSuddenDeath = g_GameState.isSuddenDeath;
     osSyncPrintf("SP Address = %x\n", stackPointer);
-    g_Scorecard.tableImage = AllocMemory(OpenEncodedAsset(TABLE_IMAGE_ASSET, &asset));
+    g_Scorecard.tableImage = AllocMemory(OpenEncodedAsset(ASSET_TABLE_IMAGE, &asset));
     ReadEncodedAsset(g_Scorecard.tableImage, &asset);
-    g_Scorecard.raisedPanelImage = AllocMemory(OpenEncodedAsset(RAISED_PANEL_IMAGE_ASSET, &asset));
+    g_Scorecard.raisedPanelImage = AllocMemory(OpenEncodedAsset(ASSET_RAISED_PANEL_IMAGE, &asset));
     ReadEncodedAsset(g_Scorecard.raisedPanelImage, &asset);
-    g_Scorecard.scoresPanelImage = AllocMemory(OpenEncodedAsset(SCORES_PANEL_IMAGE_ASSET, &asset));
+    g_Scorecard.scoresPanelImage = AllocMemory(OpenEncodedAsset(ASSET_SCORES_PANEL_IMAGE, &asset));
     ReadEncodedAsset(g_Scorecard.scoresPanelImage, &asset);
     g_Scorecard.digitsImage = AllocMemory(OpenEncodedAsset(ASSET_LARGE_DIGITS, &asset));
     ReadEncodedAsset(g_Scorecard.digitsImage, &asset);
     g_Scorecard.betSubtitlesImage =
-        AllocMemory(OpenEncodedAsset(BET_SUBTITLES_IMAGE_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(ASSET_BET_SUBTITLES_IMAGE, &asset));
     ReadEncodedAsset(g_Scorecard.betSubtitlesImage, &asset);
     g_Scorecard.labelsImage = AllocMemory(OpenEncodedAsset(ASSET_SCORE_LABELS, &asset));
     ReadEncodedAsset(g_Scorecard.labelsImage, &asset);
-    g_Scorecard.totalLabelsImage = AllocMemory(OpenEncodedAsset(TOTAL_LABELS_IMAGE_ASSET, &asset));
+    g_Scorecard.totalLabelsImage = AllocMemory(OpenEncodedAsset(ASSET_TOTAL_LABELS_IMAGE, &asset));
     ReadEncodedAsset(g_Scorecard.totalLabelsImage, &asset);
 
     g_Scorecard.hasBets = FALSE;
@@ -225,15 +225,15 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
             }
 
             g_Scorecard.matchPanelImage =
-                AllocMemory(OpenEncodedAsset(MATCH_PANEL_IMAGE_ASSET, &asset));
+                AllocMemory(OpenEncodedAsset(ASSET_MATCH_PANEL_IMAGE, &asset));
             ReadEncodedAsset(g_Scorecard.matchPanelImage, &asset);
-            g_Scorecard.winMarkImage = AllocMemory(OpenEncodedAsset(WIN_MARK_IMAGE_ASSET, &asset));
+            g_Scorecard.winMarkImage = AllocMemory(OpenEncodedAsset(ASSET_WIN_MARK_IMAGE, &asset));
             ReadEncodedAsset(g_Scorecard.winMarkImage, &asset);
             g_Scorecard.winsNeededImage =
-                AllocMemory(OpenEncodedAsset(WINS_NEEDED_IMAGE_ASSET, &asset));
+                AllocMemory(OpenEncodedAsset(ASSET_WINS_NEEDED_IMAGE, &asset));
             ReadEncodedAsset(g_Scorecard.winsNeededImage, &asset);
             g_Scorecard.winnerArrowImage =
-                AllocMemory(OpenEncodedAsset(WINNER_ARROW_IMAGE_ASSET, &asset));
+                AllocMemory(OpenEncodedAsset(ASSET_WINNER_ARROW_IMAGE, &asset));
             ReadEncodedAsset(g_Scorecard.winnerArrowImage, &asset);
             break;
         case GAME_MODE_SKINS_MATCH:
@@ -249,20 +249,20 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
 
             g_Scorecard.placesImage = AllocMemory(OpenEncodedAsset(ASSET_PLACES, &asset));
             ReadEncodedAsset(g_Scorecard.placesImage, &asset);
-            g_Scorecard.winMarkImage = AllocMemory(OpenEncodedAsset(SKIN_ICON_IMAGE_ASSET, &asset));
+            g_Scorecard.winMarkImage = AllocMemory(OpenEncodedAsset(ASSET_SKIN_ICON_IMAGE, &asset));
             ReadEncodedAsset(g_Scorecard.winMarkImage, &asset);
             break;
         case GAME_MODE_TOURNAMENT:
             shownHoleCount = g_Scorecard.content.holeIndex;
             g_Scorecard.pageCount = 2;
             g_Scorecard.flapNameImages =
-                AllocMemory(OpenEncodedAsset(FLAP_NAME_IMAGES_ASSET, &asset));
+                AllocMemory(OpenEncodedAsset(ASSET_FLAP_NAME_IMAGES, &asset));
             ReadEncodedAsset(g_Scorecard.flapNameImages, &asset);
             g_Scorecard.leaderboardRowImage =
-                AllocMemory(OpenEncodedAsset(LEADERBOARD_ROW_IMAGE_ASSET, &asset));
+                AllocMemory(OpenEncodedAsset(ASSET_LEADERBOARD_ROW_IMAGE, &asset));
             ReadEncodedAsset(g_Scorecard.leaderboardRowImage, &asset);
             g_Scorecard.placeArrowImage =
-                AllocMemory(OpenEncodedAsset(PLACE_ARROW_IMAGE_ASSET, &asset));
+                AllocMemory(OpenEncodedAsset(ASSET_PLACE_ARROW_IMAGE, &asset));
             ReadEncodedAsset(g_Scorecard.placeArrowImage, &asset);
             shownHoleCount += g_Players[0].holeStatus != HOLE_STATUS_PLAYING;
             pageTitlesRow = PAGE_TITLES_TOURNAMENT;
@@ -349,9 +349,9 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     }
 
     g_Scorecard.totalHeadingImage =
-        AllocMemory(OpenEncodedAsset(TOTAL_HEADING_IMAGE_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(ASSET_TOTAL_HEADING_IMAGE, &asset));
     ReadEncodedAsset(g_Scorecard.totalHeadingImage, &asset);
-    g_Scorecard.gridImage = AllocMemory(OpenEncodedAsset(GRID_IMAGE_ASSET, &asset));
+    g_Scorecard.gridImage = AllocMemory(OpenEncodedAsset(ASSET_GRID_IMAGE, &asset));
     ReadEncodedAsset(g_Scorecard.gridImage, &asset);
     SetScorecardState(SCORECARD_OPENING);
     ForceStopRumble();

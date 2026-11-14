@@ -191,18 +191,18 @@ static Boolean f_IsBadgeCountShown = FALSE;
 static s32 f_BadgeCountFrame = 0;
 void StartRain(void);
 
-#define RIPPLE_IMAGE_ASSET 0x6B0
-#define DROP_IMAGE_ASSET 0x6B2
-#define GRASS_IMAGE_ASSET 0x6B6
-#define CLOUD_IMAGE_ASSET 0x6B5
-#define CLUMP_IMAGE_ASSET 0x6B8
-#define DIVOT_IMAGE_ASSET 0x6C0
-#define PLUME_IMAGE_ASSET 0x6C1
-#define SPLASH_IMAGE_ASSET 0x6C2
-#define STAR_IMAGE_ASSET 0x69E
-#define SPECKLE_IMAGE_ASSET 0x71D
-#define ARC_IMAGE_ASSET 0x8EC
-#define DROPLET_IMAGE_ASSET 0x93B
+#define ASSET_RIPPLE_IMAGE 0x6B0
+#define ASSET_DROP_IMAGE 0x6B2
+#define ASSET_GRASS_IMAGE 0x6B6
+#define ASSET_CLOUD_IMAGE 0x6B5
+#define ASSET_CLUMP_IMAGE 0x6B8
+#define ASSET_DIVOT_IMAGE 0x6C0
+#define ASSET_PLUME_IMAGE 0x6C1
+#define ASSET_SPLASH_IMAGE 0x6C2
+#define ASSET_STAR_IMAGE 0x69E
+#define ASSET_SPECKLE_IMAGE 0x71D
+#define ASSET_ARC_IMAGE 0x8EC
+#define ASSET_DROPLET_IMAGE 0x93B
 
 void FreeEffectImages(void) {
     if (f_AreEffectImagesLoaded) {
@@ -228,29 +228,29 @@ void LoadEffectImages(void) {
     FreeEffectImages();
     if (!f_AreEffectImagesLoaded) {
         f_AreEffectImagesLoaded = TRUE;
-        f_DebrisImage = AllocMemory(OpenEncodedAsset(CLOUD_IMAGE_ASSET, &asset));
+        f_DebrisImage = AllocMemory(OpenEncodedAsset(ASSET_CLOUD_IMAGE, &asset));
         ReadEncodedAsset(f_DebrisImage, &asset);
-        f_CloudImage = AllocMemory(OpenEncodedAsset(CLOUD_IMAGE_ASSET, &asset));
+        f_CloudImage = AllocMemory(OpenEncodedAsset(ASSET_CLOUD_IMAGE, &asset));
         ReadEncodedAsset(f_CloudImage, &asset);
-        f_ClumpImage = AllocMemory(OpenEncodedAsset(CLUMP_IMAGE_ASSET, &asset));
+        f_ClumpImage = AllocMemory(OpenEncodedAsset(ASSET_CLUMP_IMAGE, &asset));
         ReadEncodedAsset(f_ClumpImage, &asset);
-        f_RippleImage = AllocMemory(OpenEncodedAsset(RIPPLE_IMAGE_ASSET, &asset));
+        f_RippleImage = AllocMemory(OpenEncodedAsset(ASSET_RIPPLE_IMAGE, &asset));
         ReadEncodedAsset(f_RippleImage, &asset);
-        f_ArcImage = AllocMemory(OpenEncodedAsset(ARC_IMAGE_ASSET, &asset));
+        f_ArcImage = AllocMemory(OpenEncodedAsset(ASSET_ARC_IMAGE, &asset));
         ReadEncodedAsset(f_ArcImage, &asset);
-        f_DropImage = AllocMemory(OpenEncodedAsset(DROP_IMAGE_ASSET, &asset));
+        f_DropImage = AllocMemory(OpenEncodedAsset(ASSET_DROP_IMAGE, &asset));
         ReadEncodedAsset(f_DropImage, &asset);
-        f_DivotImage = AllocMemory(OpenEncodedAsset(DIVOT_IMAGE_ASSET, &asset));
+        f_DivotImage = AllocMemory(OpenEncodedAsset(ASSET_DIVOT_IMAGE, &asset));
         ReadEncodedAsset(f_DivotImage, &asset);
-        f_PlumeImage = AllocMemory(OpenEncodedAsset(PLUME_IMAGE_ASSET, &asset));
+        f_PlumeImage = AllocMemory(OpenEncodedAsset(ASSET_PLUME_IMAGE, &asset));
         ReadEncodedAsset(f_PlumeImage, &asset);
-        f_SpeckleImage = AllocMemory(OpenEncodedAsset(SPECKLE_IMAGE_ASSET, &asset));
+        f_SpeckleImage = AllocMemory(OpenEncodedAsset(ASSET_SPECKLE_IMAGE, &asset));
         ReadEncodedAsset(f_SpeckleImage, &asset);
-        f_SplashImage = AllocMemory(OpenEncodedAsset(SPLASH_IMAGE_ASSET, &asset));
+        f_SplashImage = AllocMemory(OpenEncodedAsset(ASSET_SPLASH_IMAGE, &asset));
         ReadEncodedAsset(f_SplashImage, &asset);
-        f_StarImage = AllocMemory(OpenEncodedAsset(STAR_IMAGE_ASSET, &asset));
+        f_StarImage = AllocMemory(OpenEncodedAsset(ASSET_STAR_IMAGE, &asset));
         ReadEncodedAsset(f_StarImage, &asset);
-        f_DropletImage = AllocMemory(OpenEncodedAsset(DROPLET_IMAGE_ASSET, &asset));
+        f_DropletImage = AllocMemory(OpenEncodedAsset(ASSET_DROPLET_IMAGE, &asset));
         ReadEncodedAsset(f_DropletImage, &asset);
     }
 }
@@ -260,15 +260,15 @@ void PrepareShotEffects(BallSimulation *simulation) {
     s32 index;
     Effect *effect;
 
-    OpenEncodedAsset(CLOUD_IMAGE_ASSET, &asset);
+    OpenEncodedAsset(ASSET_CLOUD_IMAGE, &asset);
     ReadEncodedAsset(f_CloudImage, &asset);
-    OpenEncodedAsset(CLUMP_IMAGE_ASSET, &asset);
+    OpenEncodedAsset(ASSET_CLUMP_IMAGE, &asset);
     ReadEncodedAsset(f_ClumpImage, &asset);
-    OpenEncodedAsset(RIPPLE_IMAGE_ASSET, &asset);
+    OpenEncodedAsset(ASSET_RIPPLE_IMAGE, &asset);
     ReadEncodedAsset(f_RippleImage, &asset);
-    OpenEncodedAsset(DROP_IMAGE_ASSET, &asset);
+    OpenEncodedAsset(ASSET_DROP_IMAGE, &asset);
     ReadEncodedAsset(f_DropImage, &asset);
-    OpenEncodedAsset(DIVOT_IMAGE_ASSET, &asset);
+    OpenEncodedAsset(ASSET_DIVOT_IMAGE, &asset);
     ReadEncodedAsset(f_DivotImage, &asset);
 
     for (index = 0; index != EFFECT_COUNT; index++) {
@@ -280,7 +280,7 @@ void PrepareShotEffects(BallSimulation *simulation) {
         GetGroundHeight(g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Z]);
     if (simulation->surface == SURFACE_TEE_UP) {
         f_DebrisKind = DEBRIS_KIND_TEE_UP;
-        OpenEncodedAsset(GRASS_IMAGE_ASSET, &asset);
+        OpenEncodedAsset(ASSET_GRASS_IMAGE, &asset);
         ReadEncodedAsset(f_DebrisImage, &asset);
     }
     else {
@@ -291,7 +291,7 @@ void PrepareShotEffects(BallSimulation *simulation) {
             case SURFACE_KIND_TEE_GROUND:
             case SURFACE_KIND_SEMI_ROUGH:
                 f_DebrisKind = DEBRIS_KIND_GRASS;
-                OpenEncodedAsset(GRASS_IMAGE_ASSET, &asset);
+                OpenEncodedAsset(ASSET_GRASS_IMAGE, &asset);
                 ReadEncodedAsset(f_DebrisImage, &asset);
                 break;
             case SURFACE_KIND_ROUGH:
@@ -299,20 +299,20 @@ void PrepareShotEffects(BallSimulation *simulation) {
             case SURFACE_KIND_ROUGH_UNUSED_LIE:
             case SURFACE_KIND_DEEP_ROUGH:
                 f_DebrisKind = DEBRIS_KIND_ROUGH;
-                OpenEncodedAsset(CLUMP_IMAGE_ASSET, &asset);
+                OpenEncodedAsset(ASSET_CLUMP_IMAGE, &asset);
                 ReadEncodedAsset(f_DebrisImage, &asset);
                 break;
             case SURFACE_KIND_BUNKER:
             case SURFACE_KIND_BARE_GROUND:
                 f_DebrisKind = DEBRIS_KIND_DUST;
-                OpenEncodedAsset(CLOUD_IMAGE_ASSET, &asset);
+                OpenEncodedAsset(ASSET_CLOUD_IMAGE, &asset);
                 ReadEncodedAsset(f_DebrisImage, &asset);
                 break;
             case SURFACE_KIND_BUNKER_FAIR_LIE:
             case SURFACE_KIND_BUNKER_POOR_LIE:
             case SURFACE_KIND_BUNKER_UNUSED_LIE:
                 f_DebrisKind = DEBRIS_KIND_BURIED;
-                OpenEncodedAsset(CLOUD_IMAGE_ASSET, &asset);
+                OpenEncodedAsset(ASSET_CLOUD_IMAGE, &asset);
                 ReadEncodedAsset(f_DebrisImage, &asset);
                 break;
             default:
@@ -2213,13 +2213,13 @@ void StartRingPassRumble(Player *player) {
     }
 }
 
-#define RAIN_SPLASH_IMAGE_ASSET 0x6BC
+#define ASSET_RAIN_SPLASH_IMAGE 0x6BC
 
 void StartWeather(s32 weather) {
     EncodedAsset asset;
 
     if (weather == WEATHER_RAIN) {
-        f_RainSplashImage = AllocMemory(OpenEncodedAsset(RAIN_SPLASH_IMAGE_ASSET, &asset));
+        f_RainSplashImage = AllocMemory(OpenEncodedAsset(ASSET_RAIN_SPLASH_IMAGE, &asset));
         ReadEncodedAsset(f_RainSplashImage, &asset);
         f_Raindrops = AllocMemory(RAINDROP_COUNT * sizeof(Raindrop));
         f_RainSplashes = AllocMemory(RAIN_SPLASH_COUNT * sizeof(RainSplash));

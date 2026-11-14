@@ -45,8 +45,8 @@ enum GridMove {
 #define STICK_HOLD_FRAME_COUNT 4
 
 #define CHARACTER_SELECT_FIRST_IMAGE_SIZE 0x628
-#define TRAJECTORY_LABELS_IMAGE_ASSET 0x979
-#define STAT_LABELS_IMAGE_ASSET 0x978
+#define ASSET_TRAJECTORY_LABELS_IMAGE 0x979
+#define ASSET_STAT_LABELS_IMAGE 0x978
 
 #define BOARD_WIDTH 288
 #define BOARD_STRIP_HEIGHT 11
@@ -1327,9 +1327,9 @@ void LoadCharacterFaces(void) {
     s32 slotIndex;
     AssetId faceAsset;
 
-    OpenEncodedAsset(TRAJECTORY_LABELS_IMAGE_ASSET, &asset);
+    OpenEncodedAsset(ASSET_TRAJECTORY_LABELS_IMAGE, &asset);
     ReadEncodedAsset(images, &asset);
-    OpenEncodedAsset(STAT_LABELS_IMAGE_ASSET, &asset);
+    OpenEncodedAsset(ASSET_STAT_LABELS_IMAGE, &asset);
     ReadEncodedAsset(images + CHARACTER_SELECT_FIRST_IMAGE_SIZE, &asset);
     for (slotIndex = 0; slotIndex != CHARACTER_COUNT; slotIndex++) {
         void *faceImage = g_CharacterFaceImages[slotIndex];

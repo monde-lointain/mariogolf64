@@ -53,11 +53,11 @@
 #define CAST_BUFFER_CAPACITY 3
 #define FIRST_CAST_SLOT 1
 
-#define PAINTING_ASSET 0x959
-#define STAFF_FONT_ASSET 0x94C
+#define ASSET_PAINTING 0x959
+#define ASSET_STAFF_FONT 0x94C
 #define STAFF_ROLL_IMAGE_SIZE 0x2AC00
 #define BILLBOARD_HEAP_SIZE 0x7038
-#define CLOSING_PICTURE_ASSET 0x967
+#define ASSET_CLOSING_PICTURE 0x967
 
 #define STAFF_TEXT_HEADER_SIZE 8
 #define STAFF_GLYPH_WIDTH 12
@@ -363,9 +363,9 @@ void LoadStaffRoll(void) {
         SetCharacterBuffer(index + FIRST_CAST_SLOT, f_CastBuffers[index]);
     }
 
-    OpenEncodedAsset(PAINTING_ASSET, &asset);
+    OpenEncodedAsset(ASSET_PAINTING, &asset);
     ReadEncodedAsset(&f_StaffRollImage, &asset);
-    f_StaffFont = AllocMemory(OpenEncodedAsset(STAFF_FONT_ASSET, &asset));
+    f_StaffFont = AllocMemory(OpenEncodedAsset(ASSET_STAFF_FONT, &asset));
     ReadEncodedAsset(f_StaffFont, &asset);
     header = AllocMemory(STAFF_TEXT_HEADER_SIZE);
     nuPiReadRom((u32)g_StaffTextRomStart, header, STAFF_TEXT_HEADER_SIZE);
@@ -1205,7 +1205,7 @@ void UpdateStaffRoll(void) {
         }
 
         if (f_StaffRollFrame == CLOSING_PICTURE_READ_FRAME) {
-            OpenEncodedAsset(CLOSING_PICTURE_ASSET, &asset);
+            OpenEncodedAsset(ASSET_CLOSING_PICTURE, &asset);
             ReadEncodedAsset(&f_StaffRollImage, &asset);
         }
 
@@ -1228,7 +1228,7 @@ void UpdateStaffRoll(void) {
 
         if (g_IsDebugEnabled) {
             if (pressedButtons & B_BUTTON) {
-                OpenEncodedAsset(PAINTING_ASSET, &asset);
+                OpenEncodedAsset(ASSET_PAINTING, &asset);
                 ReadEncodedAsset(&f_StaffRollImage, &asset);
                 g_Players[0].characterIndex = (g_Players[0].characterIndex + 1) % CHARACTER_COUNT;
                 ShuffleCastOrder(g_Players[0].characterIndex);

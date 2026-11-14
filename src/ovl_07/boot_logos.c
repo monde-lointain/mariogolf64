@@ -79,9 +79,9 @@ typedef struct N64Logo {
     u16 texels[0x7008 / 2];
 } N64Logo;
 
-#define CAMELOT_LOGO_ASSET 0x702
-#define NINTENDO_LOGO_ASSET 0x6F6
-#define N64_LOGO_ASSET 0x97F
+#define ASSET_CAMELOT_LOGO 0x702
+#define ASSET_NINTENDO_LOGO 0x6F6
+#define ASSET_N64_LOGO 0x97F
 
 static s32 f_BootLogoFrame = 0;
 static s32 f_BootLogoStage = BOOT_LOGO_N64;
@@ -96,11 +96,11 @@ static N64Logo f_N64Logo;
 void LoadBootLogos(void) {
     EncodedAsset asset;
 
-    OpenEncodedAsset(CAMELOT_LOGO_ASSET, &asset);
+    OpenEncodedAsset(ASSET_CAMELOT_LOGO, &asset);
     ReadEncodedAsset(&f_CamelotLogo, &asset);
-    OpenEncodedAsset(NINTENDO_LOGO_ASSET, &asset);
+    OpenEncodedAsset(ASSET_NINTENDO_LOGO, &asset);
     ReadEncodedAsset(&f_NintendoLogo, &asset);
-    OpenEncodedAsset(N64_LOGO_ASSET, &asset);
+    OpenEncodedAsset(ASSET_N64_LOGO, &asset);
     ReadEncodedAsset(&f_N64Logo, &asset);
     RequestSongStop();
     g_Cameras[0].view.scissorX = SCREEN_BORDER;
