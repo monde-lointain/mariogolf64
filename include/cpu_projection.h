@@ -40,6 +40,8 @@ enum SphereVisibility {
     SPHERE_PAST_TOP_OR_BOTTOM
 };
 
+// Returns a SphereVisibility when the sphere is out of view, or else its
+// negative view depth.
 s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius);
 s32 GetViewDepth(f32 x, f32 y, f32 z);
 s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint *point);
