@@ -30,4 +30,20 @@ typedef union WorkArea {
 
 extern WorkArea g_WorkArea;
 
+/*
+ * Returns the grid vertex at a vertex column and row, as GetGridVertex finds
+ * it, without checking that they are on the grid. Each row holds its even
+ * columns' vertices and then its odd columns'.
+ *
+ * It is an inline function that returns a local, to match: see DrawGround.
+ */
+static inline Vtx *GridVertex(u32 column, u32 row) {
+    Vtx *vertex;
+
+    vertex = &g_WorkArea.hole.gridVertices
+                  [(row * GROUND_GRID_COLUMN_COUNT) + (column >> 1) +
+                      ((column & 1) * GROUND_GRID_EVEN_COLUMN_COUNT)];
+    return vertex;
+}
+
 #endif

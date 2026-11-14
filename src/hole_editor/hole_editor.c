@@ -3944,9 +3944,6 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
     FreeMemory(&buffer);
 }
 
-/* The first vertex column of one of the ground's halves */
-#define HalfFirstColumn(half) ((half) * GROUND_HALF_VERTEX_COLUMNS)
-
 /*
  * The hole editor's copy of DrawGround, which DrawGround hands off to while
  * GAME_FLAG_READ_HOST_HOLE is set. It draws into a display list of its own,

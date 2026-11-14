@@ -236,6 +236,8 @@ typedef struct IntegerPlane {
 #define GROUND_TILE_GROUP_SIZE 4
 #define GROUND_HALF_COUNT 2
 #define GROUND_HALF_VERTEX_COLUMNS (GROUND_TILE_GROUP_SIZE * 2)
+/* The first vertex column of one of the ground's halves */
+#define HalfFirstColumn(half) ((half) * GROUND_HALF_VERTEX_COLUMNS)
 
 /*
  * A visible tile is drawn finely when its view depth times this is under its
@@ -285,16 +287,6 @@ enum TerrainStyle {
 #define GROUND_TIMING_TICKS 3000
 #define GROUND_TIMING_COLUMN 5
 #define GROUND_TIMING_ROW 11
-
-/* The grid vertex at a vertex column, given the column's parity, and row: each
- * row holds its even columns' vertices and then its odd columns' */
-#define GridVertexOfParity(column, parity, row) \
-    (&g_WorkArea.hole.gridVertices \
-            [((row) * GROUND_GRID_COLUMN_COUNT) + ((u32)(column) >> 1) + \
-                ((parity) * GROUND_GRID_EVEN_COLUMN_COUNT)])
-
-/* The grid vertex at a vertex column and row, as GetGridVertex finds it */
-#define GridVertex(column, row) GridVertexOfParity(column, (u32)(column) & 1, row)
 
 /* Whether a fine tile's neighbor makes it snap the vertices of their shared
  * edge's middle */

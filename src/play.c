@@ -36,7 +36,6 @@
 #include "hole_editor.h"
 #include "hole_loader.h"
 #include "hole_triangles.h"
-#include "include_asm.h"
 #include "language.h"
 #include "main.h"
 #include "math_util.h"
@@ -2085,266 +2084,139 @@ void RebuildGroundTextureCoordinates(void) {
     }
 }
 
-#ifdef NON_MATCHING
 /* Whether the neighbor makes it snap the edge's midpoints */
-#    define IsCoarserThanFine(tileIndex) \
-        (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE || \
-            g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_MEDIUM)
+#define IsCoarserThanFine(tileIndex) \
+    (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE || \
+        g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_MEDIUM)
 
 /* Sets a vertex halfway between two others */
-#    define SetAverageVertex(midpoint, from, to) \
-        { \
-            (midpoint)->v.ob[AXIS_X] = ((from)->v.ob[AXIS_X] + (to)->v.ob[AXIS_X]) / 2; \
-            (midpoint)->v.ob[AXIS_Y] = ((from)->v.ob[AXIS_Y] + (to)->v.ob[AXIS_Y]) / 2; \
-            (midpoint)->v.ob[AXIS_Z] = ((from)->v.ob[AXIS_Z] + (to)->v.ob[AXIS_Z]) / 2; \
-            (midpoint)->v.flag = 0; \
-            (midpoint)->v.tc[TEXTURE_AXIS_S] = \
-                ((from)->v.tc[TEXTURE_AXIS_S] + (to)->v.tc[TEXTURE_AXIS_S]) / 2; \
-            (midpoint)->v.tc[TEXTURE_AXIS_T] = \
-                ((from)->v.tc[TEXTURE_AXIS_T] + (to)->v.tc[TEXTURE_AXIS_T]) / 2; \
-        }
+#define SetAverageVertex(midpoint, from, to) \
+    { \
+        (midpoint)->v.ob[AXIS_X] = ((from)->v.ob[AXIS_X] + (to)->v.ob[AXIS_X]) / 2; \
+        (midpoint)->v.ob[AXIS_Y] = ((from)->v.ob[AXIS_Y] + (to)->v.ob[AXIS_Y]) / 2; \
+        (midpoint)->v.ob[AXIS_Z] = ((from)->v.ob[AXIS_Z] + (to)->v.ob[AXIS_Z]) / 2; \
+        (midpoint)->v.flag = 0; \
+        (midpoint)->v.tc[TEXTURE_AXIS_S] = \
+            ((from)->v.tc[TEXTURE_AXIS_S] + (to)->v.tc[TEXTURE_AXIS_S]) / 2; \
+        (midpoint)->v.tc[TEXTURE_AXIS_T] = \
+            ((from)->v.tc[TEXTURE_AXIS_T] + (to)->v.tc[TEXTURE_AXIS_T]) / 2; \
+    }
 
 /* Loads a row's odd vertices as averages of its even ones, so that they line up
  * with a coarse row */
-#    define LoadAveragedRow(row, slot) \
-        { \
-            Vtx *even = (row); \
-            SetAverageVertex(&vertices[0], &even[0], &even[1]); \
-            SetAverageVertex(&vertices[1], &even[1], &even[2]); \
-            SetAverageVertex(&vertices[2], &even[2], &even[3]); \
-            SetAverageVertex(&vertices[3], &even[3], &even[4]); \
-            gSPVertex(gfx++, vertices, 4, slot); \
-            vertices += 4; \
-        }
+#define LoadAveragedRow(row, slot) \
+    { \
+        Vtx *even = (row); \
+        SetAverageVertex(&vertices[0], &even[0], &even[1]); \
+        SetAverageVertex(&vertices[1], &even[1], &even[2]); \
+        SetAverageVertex(&vertices[2], &even[2], &even[3]); \
+        SetAverageVertex(&vertices[3], &even[3], &even[4]); \
+        gSPVertex(gfx++, vertices, 4, slot); \
+        vertices += 4; \
+    }
 
 /*
  * Loads a tile's texture, skipping its one-texel border. The tile is the
  * groupColumn-th from the one whose S starts at firstS.
  */
-#    define LoadTileTexture(tileIndex, firstS, groupColumn, row) \
-        { \
-            gDPLoadMultiBlock( \
-                gfx++, \
-                TextureAddress(&g_WorkArea.hole.tiles[tileIndex]), \
-                0, \
-                1, \
-                G_IM_FMT_RGBA, \
-                G_IM_SIZ_16b, \
-                GROUND_TILE_TEXEL_ROW_LENGTH, \
-                GROUND_TILE_TEXEL_ROW_COUNT, \
-                0, \
-                G_TX_MIRROR | G_TX_WRAP, \
-                G_TX_NOMIRROR | G_TX_CLAMP, \
-                6, \
-                G_TX_NOMASK, \
-                G_TX_NOLOD, \
-                G_TX_NOLOD \
-            ); \
-            gDPSetTileSize( \
-                gfx++, \
-                1, \
-                (firstS) + ((groupColumn) * TILE_COORDINATE_SPAN) + \
-                    BORDERED_TILE_FIRST_COORDINATE, \
-                ((row) * TILE_COORDINATE_SPAN) + BORDERED_TILE_FIRST_COORDINATE, \
-                (firstS) + (((groupColumn) + 1) * TILE_COORDINATE_SPAN) + \
-                    BORDERED_TILE_S_PAST_NEXT, \
-                (((row) + 1) * TILE_COORDINATE_SPAN) + BORDERED_TILE_T_PAST_NEXT \
-            ); \
-        }
-
-/* Loads the noise texture that DrawGround blends over the tiles */
-#    define LoadNoiseTexture(shiftS, shiftT) \
+#define LoadTileTexture(tileIndex, firstS, groupColumn, row) \
+    { \
         gDPLoadMultiBlock( \
             gfx++, \
-            TextureAddress(f_GroundNoiseTexels), \
-            NOISE_TMEM, \
-            G_TX_RENDERTILE, \
-            G_IM_FMT_I, \
-            G_IM_SIZ_8b, \
-            GROUND_NOISE_SIZE, \
-            GROUND_NOISE_SIZE, \
+            TextureAddress(&g_WorkArea.hole.tiles[tileIndex]), \
             0, \
-            G_TX_MIRROR, \
-            G_TX_MIRROR, \
-            TextureMask(GROUND_NOISE_SIZE), \
-            TextureMask(GROUND_NOISE_SIZE), \
-            shiftS, \
-            shiftT \
-        )
+            1, \
+            G_IM_FMT_RGBA, \
+            G_IM_SIZ_16b, \
+            GROUND_TILE_TEXEL_ROW_LENGTH, \
+            GROUND_TILE_TEXEL_ROW_COUNT, \
+            0, \
+            G_TX_MIRROR | G_TX_WRAP, \
+            G_TX_NOMIRROR | G_TX_CLAMP, \
+            6, \
+            G_TX_NOMASK, \
+            G_TX_NOLOD, \
+            G_TX_NOLOD \
+        ); \
+        gDPSetTileSize( \
+            gfx++, \
+            1, \
+            (firstS) + ((groupColumn) * TILE_COORDINATE_SPAN) + BORDERED_TILE_FIRST_COORDINATE, \
+            ((row) * TILE_COORDINATE_SPAN) + BORDERED_TILE_FIRST_COORDINATE, \
+            (firstS) + (((groupColumn) + 1) * TILE_COORDINATE_SPAN) + BORDERED_TILE_S_PAST_NEXT, \
+            (((row) + 1) * TILE_COORDINATE_SPAN) + BORDERED_TILE_T_PAST_NEXT \
+        ); \
+    }
+
+/* Loads the noise texture that DrawGround blends over the tiles */
+#define LoadNoiseTexture(shiftS, shiftT) \
+    gDPLoadMultiBlock( \
+        gfx++, \
+        TextureAddress(f_GroundNoiseTexels), \
+        NOISE_TMEM, \
+        G_TX_RENDERTILE, \
+        G_IM_FMT_I, \
+        G_IM_SIZ_8b, \
+        GROUND_NOISE_SIZE, \
+        GROUND_NOISE_SIZE, \
+        0, \
+        G_TX_MIRROR, \
+        G_TX_MIRROR, \
+        TextureMask(GROUND_NOISE_SIZE), \
+        TextureMask(GROUND_NOISE_SIZE), \
+        shiftS, \
+        shiftT \
+    )
 
 /*
  * Draws the ground's tiles, each at a detail that its distance picks. The
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
  *
- * Doesn't match: the original's frame is 0x10 bytes larger (0x260
- * against 0x250; it was 0x38 when first measured), so most stack offsets
- * differ, and terrainStyle and the locals take other saved registers.
- * The original works out column + 1's parity once per half, where ours
- * did at each GridVertex, with three more andi: loop.c finds moving them
- * out of the row loop not desirable, since the six invariants it moved
- * out of the inner tile loops come first and each doubles the row loop's
- * count. A nextColumnParity local set once per half, as a permuter run's
- * temp suggested, gives the original's andi count and took the function
- * from 1179 words, 283 in shape, to 950 (244); an s32 parity gives the
- * same. A nextColumn local set once per half kept the andi (1214 words,
- * 322 in shape), and with the parity local it gives 1073 (261); the next
- * column's offset within a row as a local gives 1457 (291). Earlier,
- * writing the tile column out where it is used, and giving the medium
- * tiles' pass loop its own counter, took it from 1194 words differing,
- * 352 in shape, to 1160 (348). Naming the half's first tile column, as a
- * permuter run's copy of half * 4 suggested, then brought the shape to
- * 283, with words at 1179; declaring it first gave 1185 (283). That
- * run's other changes, a char for the slot after the top one and a flag
- * for the detail test, changed the shape by at most one. The fine tiles
- * count their column in tileColumn, stepped with tileIndex, which took
- * the function from 950 words to 945 and the shape from 244 to 233;
- * counting the medium tiles' column the same way gave 988 (252) alone
- * and 1133 (253) with the fine tiles', the coarse tiles' 1131 (285)
- * alone, and all three 1213 (277). Declaring vertices after current, and
- * column after middleSlot, then took it from 945 words to 911, 233 in
- * shape either way; a greedy search over single declaration moves found
- * no further gain. The original sets the fine detail once, in the delay
- * slot of the nearby flag's branch, and that branch and the fine depth
- * test's both go straight past the medium test, as if the fine detail
- * were the detail test's else arm. Writing it as the else arm, or as a
- * default that the medium and coarse details override, gives those
- * branches, but as branch-likelies, and moves the tile loop's registers:
- * 967 to 972 words, 231 to 236 in shape. Setting the fine detail first
- * and testing for the medium and coarse ones only when the tile is
- * neither nearby nor fine by depth gives the original's plain branches,
- * but takes the current draft from 580 words (94 in shape) to 636 (92).
- * Testing the nearby flag and the fine depth in two else-if arms left
- * 911. Setting the slots in DrawHoleEditorGround's order, the bottom
- * before the top and the middle after the tile index, then took it to
- * 909; the register oracle gets to 896 words forcing 70 pseudos either
- * way. A u16 or u8 groupTileIndex gives 908 words (236 in shape) against
- * 909 (233), but adds two 16- or 8-bit shifts or masks to the 23 that
- * the draft and the original have. The medium groups rewind their slots
- * top, bottom and middle: in DrawHoleEditorGround's order, middle,
- * bottom and top, 915 words differ (237 in shape), and top, middle and
- * bottom 913 (245); stepping them after each tile in its order, middle,
- * bottom, tile index and top, gives 935 (267), and with its rewind too
- * 937 (267).
+ * To match, with the words that differ from the original's otherwise and how
+ * many of them differ in shape:
+ * - GridVertex is an inline function that returns a local, so the compiler
+ *   works out a half's first column, the column after it and that column's
+ *   parity once per half, and keeps each on the stack, as the original does.
+ *   As a macro it gives 843 words (97 in shape) and a frame 0x48 bytes
+ *   smaller, and returning the address without the local 712 (12).
+ * - The half's first column is written out at each use. In a local set once
+ *   per half it gives 1100 words (68) and a frame 0x10 bytes smaller.
+ * - The fine tiles work out their column at each test for the ground's left
+ *   and right edges: in a local, 602 words (12).
+ * - The fine and the medium groups each declare their own k: one declared for
+ *   the row, or with the routine's locals, gives 272 words (50).
+ * - The loop over a fine tile's vertex segments has a counter of its own and
+ *   sets the segment's offset into a local. Counted in j it gives 64 words
+ *   and in segmentIndex 44; with the offset written as gSPSegment's argument,
+ *   53 (21).
+ * - vertices, start and current are declared in that order, and firstTileS
+ *   with them rather than in the half's block, so their stack slots fall in
+ *   the original's order: start and current first gives 46 words, and
+ *   firstTileS in the half's block 52.
+ * - The culling loop takes the tile's address into a local (10 words, 2 in
+ *   shape, without it) and sets the hidden detail in the visibility test's
+ *   else arm (6, all in shape, when set ahead of the test).
+ * - A medium tile among fine ones draws its quads a row at a time, where
+ *   DrawTileQuads goes down the columns: with DrawTileQuads, 16 words.
+ * - That tile's vertex columns add the tile's offset to the half's first
+ *   column: the other way round, 2 words.
  *
- * Each half declares its own nextColumnParity, the only place it is used, as
- * a search over rewrites suggested: that takes the draft from 909 words to
- * 897, 233 in shape either way, and the register oracle's closest result
- * from 896 words to 886, forcing 70 pseudos for each. Declaring row in the
- * half's block too gives 923, and a u16 or u8 groupTileIndex now 896 words
- * but 236 in shape. The register oracle's split search finds j in different
- * registers in its two loops, but a counter of its own for either gives 903
- * words.
- *
- * Setting the bottom row's odd slot, bottomSlot + ODD_SLOT, into a local
- * before DrawTileQuads gives 870 words, 224 in shape, but naming that one
- * slot of the nine has no reason, and the natural forms do worse:
- * DrawTileQuads setting all nine slots into locals gives 1243 words, 295 in
- * shape, its three odd slots 1194 (238), and the middle and bottom odd slots
- * 1212 words, 254 in shape; in DrawHoleEditorGround, which also uses it,
- * they give 2490 to 2499 words. 897 words differ, 233 in shape.
- *
- * Of the rewrites a search scored, the bottom odd slot's local is the only
- * one that both cuts the words differing and gives the original's 0x260-byte
- * frame, with the saved registers at the original's offsets; the differing
- * lines that address the stack fall from 370 to 301. Reading the neighboring
- * tile's detail in the group's maximum once, into a local declared for the
- * row, gives that frame too, but 911 words (253 in shape); declared in the
- * loop that finds the maximum, as an s32 it gives 897 words (233) and as an
- * s8 899 (235), with the frame still 8 bytes short. So the original may keep
- * one more value on the stack, though which one isn't shown. 897 words
- * differ, 233 in shape.
- *
- * The register oracle lines j up with different registers in the tile
- * groups' loop and the vertex segments' loop. A counter of its own for
- * the segments, declared before or after j, gives 903 words (233 in
- * shape).
- *
- * A natural permuter run's best, 814 words, reads column into an unsigned
- * temporary before the middle grid row and uses it in place of the grid
- * macros' cast at some of the later indices, for the halving at some and the
- * parity at others. Working out the column's parity once per half, beside
- * nextColumnParity, and passing it to GridVertexOfParity in the middle and
- * bottom rows gives 933 to 1047 words, and declaring column a u32 leaves 897.
- *
- * Each half starts its middle slot after the first tile's S, before the
- * row log's test, as editsearch found: that takes the draft from 580 words
- * (94 in shape) to 574 (92), where after the test, beside the column, it
- * had taken it from 897 words (233 in shape) to 893 (231). Beside the
- * other slots, after the top slot or between the bottom and top, gives
- * 580 (92). The bottom slot is set after the tile index, as in
- * DrawHoleEditorGround, where that does better; before the top slot, as it
- * was, it gives the same 574 words (92 in shape).
- *
- * In each tile loop the original steps two registers by 0x80: one starts at
- * half << 9, which it keeps in a stack slot, and gives the tile's left S; the
- * other starts at 0x80, and it adds the first to it and 6 for the right S. So
- * LoadTileTexture adds the tile's place in its group to firstTileS, the half's
- * first S, and takes the right S and the bottom T past the next tile's start.
- * Written as (firstTileColumn + k) * 128, as the draft had it, loop.c can't
- * make the shift a giv, since simplify_giv_expr gives up on an invariant times
- * a constant. The new form took the draft from 893 words differing (231 in
- * shape) to 640 (118); the right S alone gave 1022 (232), and the bottom T
- * then 670 (122). Setting firstTileS after tileIndex gives 640 where before it
- * gives 670. The frame is now 0x10 bytes smaller than the original's, against
- * 8 larger before, and forcing the register oracle's pseudos only moves the
- * spills: its closest result is the draft's own 640 words.
- *
- * The original steps the tile index, its column and their givs at the end of
- * a fine tile drawn from its display list too, and from there goes straight
- * to the next tile, so that arm moves on to the next tile itself and
- * continues. That takes the draft from 640 words differing (118 in shape) to
- * 580 (94); stepping only the tile index there gives 585 (93).
- *
- * The original keeps column + 1 in a slot of its own and works out its
- * parity with an andi, where combine folds ours to the constant 1, since
- * column is half * 8 in the same block. Setting column before the row log's
- * test keeps the andi and brings the frame to 8 bytes short, but gives 628
- * words (108 in shape). That left 574 words, 92 in shape.
- *
- * Each half sets its bottom slot last, after the middle slot, where it
- * set it after the tile index, so the zeroing of a slot's register falls
- * where the original has it; a sweep moving each statement found it, and
- * DrawHoleEditorGround now does the same. That takes the draft from 574
- * words differing (92 in shape) to 572 (90); the register oracle forces
- * nothing either way. That left 572 words, 90 in shape.
- *
- * Each half sets its top slot after the tile index, where it set it
- * first, so the top slot's register is set where the original sets it; a
- * sweep moving each statement found it, and DrawHoleEditorGround now
- * does the same. That takes the draft from 572 words differing (90 in
- * shape) to 570 (88); the register oracle forces nothing either way.
- * That left 570 words, 88 in shape.
- *
- * The medium and coarse passes' tile counter k is declared in the row
- * loop, beside groupDetail, where it was declared at the top; a sweep
- * narrowing each local's scope found it. Its stack slot then comes after
- * the others, as the original's does, which moves several spill slots to
- * the original's offsets. That takes the draft from 570 words differing
- * to 556, 88 in shape either way; the register oracle forces nothing
- * either way. Declaring k last at the top gives the same 556, and first
- * 580. That left 556 words, 88 in shape.
- *
- * The frame's 16 bytes are two stack slots that no instruction uses.
- * Both frames use 38 spill slots, but the original leaves seven between
- * them unused, where the draft leaves five. Reload gives the draft's
- * five to temporaries for GridVertex's row index, which combine folds
- * into their use, leaving a dangling use of each behind. So the original
- * keeps no more values on the stack than the draft; its two extra slots
- * are dead too, likely from two more such temporaries. 556 words differ,
- * 88 in shape.
+ * LoadTileTexture adds the tile's place in its group to firstTileS, the
+ * half's first S, since the original steps two registers by 0x80 in each tile
+ * loop: written as the tile's column times 128, loop.c can't make the shift a
+ * giv. A fine tile drawn from its display list steps the tile index itself and
+ * continues, as the original goes straight from there to the next tile.
  */
 void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
                                                    fine tile */
     Gfx *gfx;
     s32 half;
-    /* The column of the half's first tile */
-    s32 firstTileColumn;
-    s32 tileColumn;
+    Vtx *vertices;
     u32 start;
     u8 current;
-    Vtx *vertices;
+    s32 firstTileS;
     f32 fineScale;
     f32 radius;
     s32 visibility;
@@ -2355,6 +2227,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     s32 culledTileIndex;
     s32 j;
     s32 segmentIndex;
+    s32 edgeSegment;
     s32 row;
     s32 groupTileIndex;
     s32 detailTileIndex;
@@ -2364,10 +2237,10 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     s32 tileIndex;
     s32 topSlot;
     s32 middleSlot;
-    s32 column;
     s32 bottomSlot;
     s32 spareSlot;
     GroundTile *tiles;
+    GroundTile *tile;
 
     /*
      * SetGroundCombineMode is a nested function, a GNU C extension. It
@@ -2516,18 +2389,13 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     maxDetail = GROUND_DETAIL_COARSE;
     tiles = g_WorkArea.hole.tiles;
     for (culledTileIndex = 0; culledTileIndex < GROUND_TILE_COUNT; culledTileIndex++) {
+        tile = &tiles[culledTileIndex];
         radius = (g_GroundTileHeightRanges[culledTileIndex] >= MIN_GROUND_TILE_RADIUS) ?
             g_GroundTileHeightRanges[culledTileIndex] :
             MIN_GROUND_TILE_RADIUS;
-        visibility = GetSphereVisibility(
-            tiles[culledTileIndex].center[0],
-            tiles[culledTileIndex].center[1],
-            tiles[culledTileIndex].center[2],
-            radius
-        );
-        detail = GROUND_DETAIL_HIDDEN;
+        visibility = GetSphereVisibility(tile->center[0], tile->center[1], tile->center[2], radius);
         if (visibility < 0) {
-            if (tiles[culledTileIndex].midpointBlockIndex >= 0 &&
+            if (tile->midpointBlockIndex >= 0 &&
                 (g_IsGroundTileNearby[culledTileIndex] ||
                     visibility * fineScale < g_GroundTileHeightRanges[culledTileIndex])) {
                 detail = GROUND_DETAIL_FINE;
@@ -2538,6 +2406,9 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
             else {
                 detail = GROUND_DETAIL_COARSE;
             }
+        }
+        else {
+            detail = GROUND_DETAIL_HIDDEN;
         }
 
         /* The map scenes draw every visible tile finely */
@@ -2551,7 +2422,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
             maxDetail = detail;
         }
 
-        tiles[culledTileIndex].detail = detail;
+        tile->detail = detail;
         if ((culledTileIndex & (GROUND_TILE_GROUP_SIZE - 1)) == GROUND_TILE_GROUP_SIZE - 1) {
             /* Coarse tiles in a group with finer ones are drawn at medium detail */
             if (maxDetail > GROUND_DETAIL_COARSE) {
@@ -2599,14 +2470,10 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     SetGroundCombineMode(0, 0);
     for (half = 0; half < GROUND_HALF_COUNT; half++) {
-        u32 nextColumnParity;
-        s32 firstTileS;
-
         previousDetail = GROUND_DETAIL_HIDDEN;
-        firstTileColumn = half * GROUND_TILE_GROUP_SIZE;
-        tileIndex = firstTileColumn;
+        tileIndex = half * GROUND_TILE_GROUP_SIZE;
         topSlot = FIRST_TOP_SLOT;
-        firstTileS = firstTileColumn * TILE_COORDINATE_SPAN;
+        firstTileS = tileIndex * TILE_COORDINATE_SPAN;
         middleSlot = FIRST_MIDDLE_SLOT;
         bottomSlot = FIRST_BOTTOM_SLOT;
         if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
@@ -2616,10 +2483,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
             }
         }
 
-        column = half * GROUND_HALF_VERTEX_COLUMNS;
-        nextColumnParity = (u32)(column + 1) & 1;
         for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
-            s32 k;
             s32 groupDetail;
 
             groupDetail = GROUND_DETAIL_COARSE;
@@ -2630,7 +2494,8 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
             }
 
             if (groupDetail >= GROUND_DETAIL_FINE) {
-                tileColumn = firstTileColumn;
+                s32 k;
+
                 for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
                     if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
                         osSyncPrintf("%d", g_WorkArea.hole.tiles[tileIndex].detail);
@@ -2638,7 +2503,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                     if (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_FINE &&
                         g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
                         if (IsGameFlagSet(GAME_FLAG_HOLE_LOADED)) {
-                            if (tileColumn != 0) {
+                            if ((half * GROUND_TILE_GROUP_SIZE) + k != 0) {
                                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] =
                                     IsCoarse(tileIndex - 1);
                                 snapsEdge[current][TILE_EDGE_LEFT] =
@@ -2671,7 +2536,8 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                                 snapsEdge[current][TILE_EDGE_BOTTOM] = FALSE;
                             }
 
-                            if (tileColumn != GROUND_TILE_COLUMN_COUNT - 1) {
+                            if ((half * GROUND_TILE_GROUP_SIZE) + k !=
+                                GROUND_TILE_COLUMN_COUNT - 1) {
                                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] =
                                     IsCoarse(tileIndex + 1);
                                 snapsEdge[current][TILE_EDGE_RIGHT] =
@@ -2682,40 +2548,73 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                                 snapsEdge[current][TILE_EDGE_RIGHT] = FALSE;
                             }
 
-                            for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
+                            for (edgeSegment = 0; edgeSegment < TILE_VERTEX_SEGMENT_COUNT;
+                                edgeSegment++) {
                                 /* Moves a snapped edge's vertices, or moves back those snapped
                                  * for the last tile */
-                                if (snapsEdge[current][j] || snapsEdge[current ^ 1][j]) {
-                                    /* Indexing the tile's offsets as a pointer is closer to the
-                                     * original than indexing the array */
-                                    gSPSegment(
-                                        gfx++,
-                                        j + 1,
-                                        snapsEdge[current][j] ?
-                                            ((s32 *)g_CoarseVertexOffsets[tileIndex])[j] :
-                                            0
-                                    );
+                                if (snapsEdge[current][edgeSegment] ||
+                                    snapsEdge[current ^ 1][edgeSegment]) {
+                                    s32 offset;
+
+                                    offset = snapsEdge[current][edgeSegment] ?
+                                        g_CoarseVertexOffsets[tileIndex][edgeSegment] :
+                                        0;
+                                    gSPSegment(gfx++, edgeSegment + 1, offset);
                                 }
                             }
 
                             current ^= 1;
                             gSPDisplayList(gfx++, g_GroundTileDisplayLists[tileIndex]);
                             tileIndex++;
-                            tileColumn++;
                             continue;
                         }
                     }
                     else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
                         /* A medium tile among fine ones loads only its own vertices */
-                        gSPVertex(gfx++, GridVertex(column + (k * 2), row * 2), 2, 0);
-                        gSPVertex(gfx++, GridVertex(column + (k * 2) + 1, row * 2), 1, 2);
-                        gSPVertex(gfx++, GridVertex(column + (k * 2), (row * 2) + 1), 2, 3);
-                        gSPVertex(gfx++, GridVertex(column + (k * 2) + 1, (row * 2) + 1), 1, 5);
-                        gSPVertex(gfx++, GridVertex(column + (k * 2), (row * 2) + 2), 2, 6);
-                        gSPVertex(gfx++, GridVertex(column + (k * 2) + 1, (row * 2) + 2), 1, 8);
+                        gSPVertex(
+                            gfx++,
+                            GridVertex(HalfFirstColumn(half) + (k * 2), row * 2),
+                            2,
+                            0
+                        );
+                        gSPVertex(
+                            gfx++,
+                            GridVertex(HalfFirstColumn(half) + (k * 2) + 1, row * 2),
+                            1,
+                            2
+                        );
+                        gSPVertex(
+                            gfx++,
+                            GridVertex(HalfFirstColumn(half) + (k * 2), (row * 2) + 1),
+                            2,
+                            3
+                        );
+                        gSPVertex(
+                            gfx++,
+                            GridVertex(HalfFirstColumn(half) + (k * 2) + 1, (row * 2) + 1),
+                            1,
+                            5
+                        );
+                        gSPVertex(
+                            gfx++,
+                            GridVertex(HalfFirstColumn(half) + (k * 2), (row * 2) + 2),
+                            2,
+                            6
+                        );
+                        gSPVertex(
+                            gfx++,
+                            GridVertex(HalfFirstColumn(half) + (k * 2) + 1, (row * 2) + 2),
+                            1,
+                            8
+                        );
                         for (mediumPass = 0; mediumPass < GROUND_TILE_MAX_PASSES; mediumPass++) {
                             LoadTileTexture(tileIndex, firstTileS, k, row);
-                            DrawTileQuads(0, 2, 1, 3, 5, 4, 6, 8, 7);
+                            /* The quads go a row at a time, where DrawTileQuads goes
+                             * down the columns */
+                            gSP2Triangles(gfx++, 0, 2, 3, 0, 2, 5, 3, 0);
+                            gSP2Triangles(gfx++, 2, 1, 5, 0, 1, 4, 5, 0);
+                            gSP2Triangles(gfx++, 3, 5, 6, 0, 5, 8, 6, 0);
+                            gSP2Triangles(gfx++, 5, 4, 8, 0, 4, 7, 8, 0);
                             if (g_WorkArea.hole.tiles[tileIndex].extraPassCount <= 0) {
                                 break;
                             }
@@ -2723,10 +2622,11 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                     }
 
                     tileIndex++;
-                    tileColumn++;
                 }
             }
             else if (groupDetail > GROUND_DETAIL_COARSE) {
+                s32 k;
+
                 spareSlot = middleSlot;
                 middleSlot = topSlot;
                 topSlot = bottomSlot;
@@ -2738,48 +2638,51 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                 if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
                     gSPVertex(
                         gfx++,
-                        GridVertex(column, row * 2),
+                        GridVertex(HalfFirstColumn(half), row * 2),
                         GROUND_TILE_GROUP_SIZE + 1,
                         topSlot
                     );
                     gSPVertex(
                         gfx++,
-                        GridVertexOfParity(column + 1, nextColumnParity, row * 2),
+                        GridVertex(HalfFirstColumn(half) + 1, row * 2),
                         GROUND_TILE_GROUP_SIZE,
                         topSlot + ODD_SLOT
                     );
                 }
                 else if (previousDetail == GROUND_DETAIL_COARSE) {
-                    LoadAveragedRow(GridVertex(column, row * 2), topSlot + ODD_SLOT);
+                    LoadAveragedRow(GridVertex(HalfFirstColumn(half), row * 2), topSlot + ODD_SLOT);
                 }
 
                 gSPVertex(
                     gfx++,
-                    GridVertex(column, (row * 2) + 1),
+                    GridVertex(HalfFirstColumn(half), (row * 2) + 1),
                     GROUND_TILE_GROUP_SIZE + 1,
                     middleSlot
                 );
                 gSPVertex(
                     gfx++,
-                    GridVertexOfParity(column + 1, nextColumnParity, (row * 2) + 1),
+                    GridVertex(HalfFirstColumn(half) + 1, (row * 2) + 1),
                     GROUND_TILE_GROUP_SIZE,
                     middleSlot + ODD_SLOT
                 );
                 gSPVertex(
                     gfx++,
-                    GridVertex(column, (row * 2) + 2),
+                    GridVertex(HalfFirstColumn(half), (row * 2) + 2),
                     GROUND_TILE_GROUP_SIZE + 1,
                     bottomSlot
                 );
                 if (row != GROUND_TILE_ROW_COUNT - 1 &&
                     g_WorkArea.hole.tiles[tileIndex + GROUND_TILE_COLUMN_COUNT].detail ==
                         GROUND_DETAIL_COARSE) {
-                    LoadAveragedRow(GridVertex(column, (row * 2) + 2), bottomSlot + ODD_SLOT);
+                    LoadAveragedRow(
+                        GridVertex(HalfFirstColumn(half), (row * 2) + 2),
+                        bottomSlot + ODD_SLOT
+                    );
                 }
                 else {
                     gSPVertex(
                         gfx++,
-                        GridVertexOfParity(column + 1, nextColumnParity, (row * 2) + 2),
+                        GridVertex(HalfFirstColumn(half) + 1, (row * 2) + 2),
                         GROUND_TILE_GROUP_SIZE,
                         bottomSlot + ODD_SLOT
                     );
@@ -2824,7 +2727,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                 if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
                     gSPVertex(
                         gfx++,
-                        GridVertex(column, row * 2),
+                        GridVertex(HalfFirstColumn(half), row * 2),
                         GROUND_TILE_GROUP_SIZE + 1,
                         topSlot
                     );
@@ -2832,7 +2735,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
 
                 gSPVertex(
                     gfx++,
-                    GridVertex(column, (row * 2) + 2),
+                    GridVertex(HalfFirstColumn(half), (row * 2) + 2),
                     GROUND_TILE_GROUP_SIZE + 1,
                     bottomSlot
                 );
@@ -2900,8 +2803,3 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
         f_GroundTimingRow = 1 - f_GroundTimingRow;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/play", SetGroundCombineMode);
-
-INCLUDE_ASM("asm/nonmatchings/play", DrawGround);
-#endif
