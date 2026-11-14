@@ -4346,7 +4346,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
     f32 spanFactor;
     f32 nextFactor;
     f32 sinAngle;
-    s16 isInterpolated;
+    Boolean16 isInterpolated;
     s32 keyIndex;
     s16 spanIndex;
     s16 nextSpanIndex;

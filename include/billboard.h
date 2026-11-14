@@ -17,7 +17,7 @@ typedef struct Billboard {
     s8 textureIndex;
     u8 shapeIndex;
     UBoolean8 isIgnoredEditorMark;
-    u16 isNearCourseEdge;
+    UBoolean16 isNearCourseEdge;
     u16 width;
     u16 height;
 } Billboard;

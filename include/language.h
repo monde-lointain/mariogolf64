@@ -4,8 +4,11 @@
 #include <ultra64.h>
 
 typedef s32 Boolean;
-// TRUE or FALSE kept in a byte, where the original's struct layout or
-// code fixes the width and signedness.
+// TRUE or FALSE kept at another width or signedness, where the original's
+// struct layout or code fixes them.
+typedef u32 UBoolean;
+typedef s16 Boolean16;
+typedef u16 UBoolean16;
 typedef s8 Boolean8;
 typedef u8 UBoolean8;
 

@@ -399,7 +399,7 @@ void NameContestants(void) {
     s32 nameOffset;
     s32 lastName;
     Boolean hasSkipped;
-    u32 isFirstName;
+    UBoolean isFirstName;
     s32 blockEnd;
 
     index = TOURNAMENT_CONTESTANT_COUNT - 2;
