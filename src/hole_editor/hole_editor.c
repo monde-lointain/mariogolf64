@@ -623,7 +623,7 @@ static s8 f_FineTilePointSlots[FINE_TILE_POINT_SPAN][FINE_TILE_POINT_SPAN] = {
 };
 static s32 f_EditorGroundTimingRow = 0;
 
-static s32 f_MapCaptureNumber = 0;
+static s32 f_MapCaptureCount = 0;
 static u8 f_MapCaptureHeader[CAPTURE_HEADER_SIZE] = BMP_HEADER(
     SCREEN_CAPTURE_SIZE,
     MAP_CAPTURE_WIDTH,
@@ -4934,10 +4934,10 @@ void CaptureMapImage(void) {
         }
     }
 
-    sprintf(fileName, "x:\\usgolf64\\capture\\temp%02d.bmp", (int)f_MapCaptureNumber);
+    sprintf(fileName, "x:\\usgolf64\\capture\\temp%02d.bmp", (int)f_MapCaptureCount);
     WriteHostFile(fileName, MAP_CAPTURE_SIZE);
     FreeMemory(&capture);
-    f_MapCaptureNumber++;
+    f_MapCaptureCount++;
 }
 
 void CaptureFrame(void) {
