@@ -14,8 +14,6 @@
 
 #define SHADED_QUAD_START QUAD_VERTEX_COUNT
 
-#define RGB_CHANNEL_COUNT 3
-
 #define PLANE_TILE_SIZE 16
 
 static Vtx f_TexturePlaneVertices[6] = {

@@ -47,6 +47,10 @@ enum TileMidpointSlot {
 #define GROUND_GRID_ROW_COUNT ((GROUND_POINT_ROW_COUNT + 1) / 2)
 #define GROUND_GRID_EVEN_COLUMN_COUNT ((GROUND_GRID_COLUMN_COUNT + 1) / 2)
 #define GROUND_TILE_GRID_SPAN (GROUND_TILE_POINT_SPAN / 2)
+// A tile cell slot with this flag names a grid vertex instead of a
+// midpoint.
+#define GRID_VERTEX_SLOT_FLAG 0x80
+#define GridVertexSlot(index) (GRID_VERTEX_SLOT_FLAG | (index))
 #define MINI_GOLF_TILE_X_SHIFT 17
 #define MINI_GOLF_TILE_Z_SHIFT 16
 #define EDGE_WEIGHT_MAX 16

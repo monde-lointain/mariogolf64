@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#define RGB_CHANNEL_COUNT 3
+
 typedef struct RgbColor {
     s32 red;
     s32 green;

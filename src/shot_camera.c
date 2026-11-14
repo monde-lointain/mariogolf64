@@ -315,7 +315,6 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
 
 #define CROSS_SLOPE_DISTANCE 0x3C00
 #define CROSS_SLOPE_CAPPED_RISE 0x1E00
-#define TEE_HEIGHT 307.2f
 #define AIM_SLOPE_STEP 6144.0f
 #define AIM_SLOPE_RISE_MAX 0x1800
 

@@ -64,8 +64,6 @@
 
 #define GROUND_NOISE_SIZE 32
 
-#define TEE_HEIGHT 307.2f
-
 #define RING_SHOT_POWER_SHOT_COUNT 1
 
 enum HoleEndStep {

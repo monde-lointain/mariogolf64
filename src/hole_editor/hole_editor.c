@@ -38,8 +38,6 @@
 #include "work_area.h"
 
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)
-#define GRID_VERTEX_SLOT_FLAG 0x80
-#define GridVertexSlot(index) (GRID_VERTEX_SLOT_FLAG | (index))
 #define SLOPE_HALF_COUNT 2
 #define SLOPE_BLOCK_COLUMN_COUNT 8
 #define SLOPE_BLOCK_ROW_COUNT 16

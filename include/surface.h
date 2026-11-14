@@ -65,6 +65,9 @@ enum SurfaceKind {
 
 typedef s32 SurfaceKind;
 
+// How far a tee raises the ball off the ground.
+#define TEE_HEIGHT 307.2f
+
 #define IsOutOfBoundsKind(kind) \
     ((kind) == SURFACE_KIND_OUT_OF_BOUNDS || (kind) == SURFACE_KIND_OUT_OF_COURSE)
 #define IsLostBallKind(kind) \
