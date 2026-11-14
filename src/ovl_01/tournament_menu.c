@@ -197,7 +197,7 @@ static SignedAssetId f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT]
                                                  {0x0957, 0x0957, 0x0957, 0x0957},
 };
 static s32 f_UnusedWordAfterPaletteFiles UNUSED = 0;
-static u8 f_IsClubTournamentEntered = 0;
+static UBoolean8 f_IsClubTournamentEntered = FALSE;
 static ImageAsset *f_NamePlateImage = NULL;
 static ImageAsset *f_CodeEntryBarImage = NULL;
 static ImageAsset *f_CodeGlyphsImage = NULL;

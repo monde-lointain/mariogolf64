@@ -129,9 +129,9 @@ FILE_STATIC Boolean8 g_HadEveryRingShotStar;
 FILE_STATIC s8 g_RingShotCourseOpenedAtStart;
 
 static s32 f_UnusedWordsBeforeTrainingHeading[2] UNUSED = {0};
-s8 g_IsTrainingHeadingKept = FALSE;
+Boolean8 g_IsTrainingHeadingKept = FALSE;
 PauseScreen g_PauseScreen = PAUSE_SCREEN_NONE;
-Boolean g_IsAimCameraEasing = 0;
+Boolean g_IsAimCameraEasing = FALSE;
 Boolean g_HasPressedShotButton = FALSE;
 SignedBinaryAngle g_LookBackHeading = 0;
 SignedBinaryAngle g_FreeLookHeading = 0;
@@ -142,15 +142,15 @@ static s32 f_UnusedClearedPlayWord = 0;
 LetterboxState g_LetterboxState = LETTERBOX_STATE_NONE;
 ImpactPointState g_ImpactPointState = IMPACT_POINT_OFF;
 Boolean g_HasShotComeToRest = TRUE;
-s8 g_IsHudTurnAwayRequested = FALSE;
+Boolean8 g_IsHudTurnAwayRequested = FALSE;
 static s32 f_UnusedWordsAfterTurnAwayRequest[2] UNUSED = {0};
-static s8 f_IsRingShotCleared = FALSE;
+static Boolean8 f_IsRingShotCleared = FALSE;
 static PlayExit f_PlayExit = PLAY_EXIT_NONE;
 static HoleEndStep f_HoleEndStep = HOLE_END_STEP_START;
 static HoleResultsKind f_HoleResultsKind = HOLE_RESULTS_STROKE;
 static s32 f_PlayStateFrameCount = 0;
 static s32 f_PlayFrameCount = 0;
-static s8 f_IsPlayStateBackedUp = FALSE;
+static Boolean8 f_IsPlayStateBackedUp = FALSE;
 static s32 f_DebugCupIndex = 0;
 static s32 f_UnusedWordsAfterDebugCup[3] UNUSED = {0};
 static s8 f_UnusedByteBeforeGroundWaves UNUSED = 0;
@@ -170,7 +170,7 @@ s32 IsPlayAdvancingItself(void) {
 
 void ResetShotSetup(void) {
     g_PauseScreen = PAUSE_SCREEN_NONE;
-    g_IsAimCameraEasing = 0;
+    g_IsAimCameraEasing = FALSE;
     g_HasPressedShotButton = FALSE;
     g_LookBackHeading = 0;
     g_ShotFlags = 0;
@@ -419,7 +419,7 @@ void PlacePlayersOnTee(void) {
     s32 ringIndex;
     f32 teeHeight;
 
-    g_HasShotComeToRest = 0;
+    g_HasShotComeToRest = FALSE;
     g_IsHudTurnAwayRequested = FALSE;
     if (g_GameState.isRoundContinued != ROUND_CONTINUED) {
         for (playerIndex = 0; playerIndex < PLAYER_COUNT_MAX; playerIndex++) {

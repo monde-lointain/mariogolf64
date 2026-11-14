@@ -204,7 +204,7 @@ s32 ChooseHoleStrokeTarget(void);
 
 static OSThread f_PlanThread;
 static CurrentShot f_PlannedShot;
-static s8 f_IsDirectionExcluded[DIRECTION_SECTOR_COUNT];
+static Boolean8 f_IsDirectionExcluded[DIRECTION_SECTOR_COUNT];
 static u8 f_UnusedBytesAfterExcludedSectors[8] UNUSED;
 static ShotLaunch *f_TrialLaunch;
 static ShotLaunch f_TrialLaunchValues;
@@ -226,7 +226,7 @@ static s32 f_RouteOrderCount;
 static CoursePoint f_LandingPosition;
 static RouteCoordinates f_Route;
 static CurrentShot f_TrialShot;
-static s8 f_IsClubUsable[CLUB_SLOT_COUNT];
+static Boolean8 f_IsClubUsable[CLUB_SLOT_COUNT];
 static Boolean f_HasLanded;
 static s32 f_TargetCarry;
 static s32 f_ClubCount;

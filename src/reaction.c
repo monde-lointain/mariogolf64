@@ -148,7 +148,7 @@ static s32 f_ReactionSpotRoughness;
 
 static u8 f_UnusedBufferAfterSpotRoughness[32] UNUSED;
 
-static s8 f_HasReactionSpot;
+static Boolean8 f_HasReactionSpot;
 
 #define IsReactionViewLow() \
     (IsGameFlagSet(GAME_FLAG_LOW_REACTION_VIEWS) || \

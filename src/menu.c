@@ -79,7 +79,7 @@ ImageAsset *g_MenuWideSpareImage;
 PlayRecord g_PlayRecords[PLAYER_COUNT_MAX];
 RingShotRecord g_RingShotRecords[PLAYER_COUNT_MAX];
 u8 g_UnreadMenuBuffer[0x1218];
-u8 g_IsMenuCharacterLoaded[MAXCONTROLLERS];
+UBoolean8 g_IsMenuCharacterLoaded[MAXCONTROLLERS];
 ImageAsset *g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
 BetSet g_BetSet;
 ImageAsset *g_CharacterFaceImages[18];
@@ -95,8 +95,8 @@ CourseStatFigures g_CourseStatFigures[COURSE_COUNT + 1];
 GameState g_GameState;
 ImageAsset *g_ImageSlots[IMAGE_SLOT_COUNT];
 Boolean g_IsChosenHoleLoadStarted;
-u8 g_IsMenuWipeOpening;
-u8 g_IsRingShotWipeOpening;
+UBoolean8 g_IsMenuWipeOpening;
+UBoolean8 g_IsRingShotWipeOpening;
 ImageAsset *g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
 ImageAsset *g_MenuCourseSceneImage;
 MenuMemory g_MenuMemory;
@@ -1161,7 +1161,7 @@ static ImportedCharacterCell f_ImportedCharacterCells[IMPORTED_CHARACTER_COUNT] 
 static s16 f_CharacterSlots[] = {0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 0};
 s32 g_MenuCourseCount = COURSE_COUNT;
 static s8 f_UnreadMenuEntryByte = 0;
-u8 g_AreBetPagesBlocked = 0;
+UBoolean8 g_AreBetPagesBlocked = FALSE;
 static s32 f_UnusedWordsAfterBetPagesBlocked[2] UNUSED = {0};
 static SaveCopyLocation f_SaveCopyLocations[SAVE_COPY_COUNT] = {
     SAVE_COPY_LOCATION(0),
@@ -2369,7 +2369,7 @@ s32 GetClubTournamentCourse(void) {
 }
 
 Boolean IsNintendoClubTournament(void) {
-    return g_IsNintendoClubTournament != 0;
+    return g_IsNintendoClubTournament != FALSE;
 }
 
 #define MESSAGE_FIRST_COURSE_NAME 0x1EA
@@ -2705,7 +2705,7 @@ void EnterMenuAtCourseSelect(void) {
                 g_BetSet = BET_SET_STROKE;
             }
 
-            g_AreBetPagesBlocked = 1;
+            g_AreBetPagesBlocked = TRUE;
             break;
         case GAME_MODE_MATCH_GAME:
             g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;

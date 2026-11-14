@@ -270,7 +270,7 @@ static Vtx f_ShotPreviewDashVertices[QUAD_VERTEX_COUNT] = {
 };
 static s32 f_ShotPreviewStepCount = INITIAL_SHOT_PREVIEW_STEP_COUNT;
 static s32 f_ShownShotPreviewPointCount = INITIAL_SHOT_PREVIEW_STEP_COUNT;
-static s8 f_HasShotPreviewEnded = FALSE;
+static Boolean8 f_HasShotPreviewEnded = FALSE;
 static s32 f_ShotPreviewDotScroll = 0;
 static Vtx f_PuttPreviewLineVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -306,14 +306,14 @@ static s32 f_AmbientSounds[COURSE_RECORD_COUNT][AMBIENT_SOUND_CHOICES] = {
     {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
 };
 static s32 f_AmbientSoundIdleFrameCount = 0;
-static s8 f_ShouldReplaySavedShot = FALSE;
+static Boolean8 f_ShouldReplaySavedShot = FALSE;
 static s8 f_UnusedFirstByteAfterReplayFlag UNUSED = 0;
 static s8 f_UnusedSecondByteAfterReplayFlag UNUSED = 0;
 static s8 f_UnusedThirdByteAfterReplayFlag UNUSED = 0;
-static s8 f_HasReactionTestRun = FALSE;
+static Boolean8 f_HasReactionTestRun = FALSE;
 static CharacterIndex8 f_ReactionTestCharacter = 0;
 static ReactionAnimation8 f_ReactionTestAnimation = 0;
-static s8 f_ShouldUpdateReaction = FALSE;
+static Boolean8 f_ShouldUpdateReaction = FALSE;
 static s32 f_SwingCount = 0;
 static Boolean f_IsReplayRequested = FALSE;
 static s32 f_StateEventFrame = 0;
@@ -511,16 +511,16 @@ void PlaceShotCamera(void) {
         }
         else if (point[AXIS_X] > AIM_CAMERA_X_MAX) {
             point[AXIS_X] = AIM_CAMERA_X_MAX;
-            g_IsAimCameraEasing = 0;
+            g_IsAimCameraEasing = FALSE;
         }
 
         if (point[AXIS_Z] < AIM_CAMERA_COORDINATE_MIN) {
             point[AXIS_Z] = AIM_CAMERA_COORDINATE_MIN;
-            g_IsAimCameraEasing = 0;
+            g_IsAimCameraEasing = FALSE;
         }
         else if (point[AXIS_Z] > AIM_CAMERA_Z_MAX) {
             point[AXIS_Z] = AIM_CAMERA_Z_MAX;
-            g_IsAimCameraEasing = 0;
+            g_IsAimCameraEasing = FALSE;
         }
 
         lowestGround = GetAimCameraGround(point[AXIS_X], point[AXIS_Z]);
@@ -721,7 +721,7 @@ void PlaceAimCamera(void) {
 void StartFreeLook(void) {
     g_CurrentShot.aimCameraDistance = FREE_LOOK_START_DISTANCE;
     g_LetterboxState = LETTERBOX_STATE_MOVING_CAMERA;
-    g_IsAimCameraEasing = 0;
+    g_IsAimCameraEasing = FALSE;
     g_ImpactPointState = IMPACT_POINT_OFF;
     g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD | HUD_FLAG_NO_IMPACT_POINT |
         HUD_FLAG_TRANSLUCENT_GAUGE;
@@ -764,7 +764,7 @@ void ResetAimCamera(void) {
 
     g_CurrentShot.aimCameraDistance = AIM_CAMERA_START_DISTANCE;
     g_CurrentShot.aimCameraHeight = AIM_CAMERA_START_HEIGHT;
-    g_IsAimCameraEasing = 0;
+    g_IsAimCameraEasing = FALSE;
     g_ImpactPointLingerFrameCount = 0;
     PlaceAimCamera();
 }
@@ -810,7 +810,7 @@ void EaseAimCamera(void) {
     g_CurrentShot.aimCameraHeight +=
         (targetHeight - g_CurrentShot.aimCameraHeight) * AIM_CAMERA_EASE_FRACTION;
     if (fabsf(g_CurrentShot.aimCameraDistance - targetDistance) < UNITS_PER_YARD) {
-        g_IsAimCameraEasing = 0;
+        g_IsAimCameraEasing = FALSE;
     }
 }
 
@@ -1118,7 +1118,7 @@ s32 UpdateAimControls(void) {
                     }
                     else {
                         g_LetterboxState = LETTERBOX_STATE_LOOKING_DOWN_RANGE;
-                        g_IsAimCameraEasing = 1;
+                        g_IsAimCameraEasing = TRUE;
                     }
                 }
                 else if (g_TurnController.pressedButtons & B_BUTTON) {
@@ -1147,16 +1147,16 @@ s32 UpdateAimControls(void) {
                 TurnAim(0);
                 break;
             case LETTERBOX_STATE_LOOKING_DOWN_RANGE:
-                g_IsAimCameraEasing = 1;
+                g_IsAimCameraEasing = TRUE;
                 if (g_TurnController.pressedButtons & A_BUTTON) {
                     g_LetterboxState = LETTERBOX_STATE_NONE;
-                    g_IsAimCameraEasing = 0;
+                    g_IsAimCameraEasing = FALSE;
                     ResetAimCamera();
                 }
                 else if (g_TurnController.pressedButtons & R_TRIG) {
                     PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
                     g_LetterboxState = LETTERBOX_STATE_NONE;
-                    g_IsAimCameraEasing = 0;
+                    g_IsAimCameraEasing = FALSE;
                     ResetAimCamera();
                 }
                 else if (g_TurnController.pressedButtons & B_BUTTON) {
@@ -1250,7 +1250,7 @@ s32 UpdateAimControls(void) {
                     }
                     else {
                         g_LetterboxState = LETTERBOX_STATE_LOOKING_DOWN_RANGE;
-                        g_IsAimCameraEasing = 1;
+                        g_IsAimCameraEasing = TRUE;
                     }
                 }
 
@@ -1276,11 +1276,11 @@ s32 UpdateAimControls(void) {
                 TurnAim(0);
                 break;
             case LETTERBOX_STATE_LOOKING_DOWN_RANGE:
-                g_IsAimCameraEasing = 1;
+                g_IsAimCameraEasing = TRUE;
                 if (g_TurnController.pressedButtons & A_BUTTON) {
                     g_LetterboxState = LETTERBOX_STATE_NONE;
                     g_ShotSetupFrameCount = 0;
-                    g_IsAimCameraEasing = 0;
+                    g_IsAimCameraEasing = FALSE;
                     ResetAimCamera();
                     PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
                 }
@@ -1288,7 +1288,7 @@ s32 UpdateAimControls(void) {
                     PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
                     g_ShotSetupFrameCount = 0;
                     g_LetterboxState = LETTERBOX_STATE_NONE;
-                    g_IsAimCameraEasing = 0;
+                    g_IsAimCameraEasing = FALSE;
                     ResetAimCamera();
                 }
 
@@ -1341,12 +1341,12 @@ s32 UpdateAimControls(void) {
                 g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING ||
                 g_LetterboxState == LETTERBOX_STATE_LOOKING_DOWN_RANGE) {
                 g_LetterboxState = LETTERBOX_STATE_MOVING_CAMERA;
-                g_IsAimCameraEasing = 0;
+                g_IsAimCameraEasing = FALSE;
             }
 
             if (g_LetterboxState == LETTERBOX_STATE_STARTING_LOOK_BACK) {
                 g_LetterboxState = LETTERBOX_STATE_LOOKING_BACK;
-                g_IsAimCameraEasing = 0;
+                g_IsAimCameraEasing = FALSE;
             }
         }
 
@@ -1358,7 +1358,7 @@ s32 UpdateAimControls(void) {
             PlaySound(SOUND_PROMPT_OPEN, g_NextSoundChannel, AIM_CAMERA_SOUND_VOLUME);
         }
 
-        if (g_IsAimCameraEasing == 1) {
+        if (g_IsAimCameraEasing == TRUE) {
             EaseAimCamera();
         }
         else {
@@ -3001,7 +3001,7 @@ void UpdateTurns(void) {
 
         switch (state) {
             case PLAYER_STATE_STARTING_TURN:
-                f_ShouldUpdateReaction = 0;
+                f_ShouldUpdateReaction = FALSE;
                 UnloadOverlay(GetOverlayOfModule(MODULE_SHOT_SIMULATION));
                 f_ShotFlightCount = 0;
                 f_GreenSongTempo = AIMING_SONG_TEMPO;
@@ -3086,7 +3086,7 @@ void UpdateTurns(void) {
                 else if (f_ShouldReplaySavedShot) {
                     f_ShotSource = SHOT_SOURCE_PREPARED;
                     g_ScriptedShot = g_SavedShots[playerIndex];
-                    f_ShouldReplaySavedShot = 0;
+                    f_ShouldReplaySavedShot = FALSE;
                 }
                 else {
                     f_ShotSource = SHOT_SOURCE_PLAYER;
@@ -3432,7 +3432,7 @@ void UpdateTurns(void) {
                 else if (g_PauseScreen == PAUSE_SCREEN_PROMPT) {
                     switch (UpdatePrompt(&g_TurnController)) {
                         case PROMPT_RESULT_GIVE_UP_HOLE:
-                            g_HasShotComeToRest = 1;
+                            g_HasShotComeToRest = TRUE;
                             SetMenuBackdrop(MENU_BACKDROP_NONE);
                             ResumeRound();
                             nextState = PLAYER_STATE_STARTING_REACTION;
@@ -4228,7 +4228,7 @@ void UpdateTurns(void) {
                 if (g_TurnBallSimulation.state == BALL_STATE_STOPPED) {
                     ClearShotEffects(CLEAR_KIND_EFFECTS);
                     nextState = PLAYER_STATE_BALL_AT_REST;
-                    g_HasShotComeToRest = 1;
+                    g_HasShotComeToRest = TRUE;
                     f_StateFrameCounts[playerIndex] = 0;
                     ForceStopRumble();
                 }
@@ -4564,7 +4564,7 @@ void UpdateTurns(void) {
                 }
 
                 PlaceAndViewCharacter(0);
-                f_ShouldUpdateReaction = 1;
+                f_ShouldUpdateReaction = TRUE;
                 if (g_Players[playerIndex].holeStatus == HOLE_STATUS_HOLED_OUT) {
                     ScoreToPar scoreToPar = g_Players[playerIndex].strokeCount - g_HoleSetup.par;
 
@@ -4597,7 +4597,7 @@ void UpdateTurns(void) {
             case PLAYER_STATE_REACTING:
                 PlaceAndViewCharacter(0);
                 areCallsAllowed = FALSE;
-                f_ShouldUpdateReaction = 1;
+                f_ShouldUpdateReaction = TRUE;
                 if (f_StateFrameCounts[playerIndex] == f_StateEventFrame - REACTION_HOLD_FRAMES) {
                     StartBanner(-1);
                 }
@@ -4929,7 +4929,7 @@ void UpdateTurns(void) {
                     SetCharacterAnimation(0, REACTION_ANIMATION_BOGEY);
                     PlaySong(SONG_HOLE_LOST, 0);
                     PlaceAndViewCharacter(0);
-                    f_ShouldUpdateReaction = 1;
+                    f_ShouldUpdateReaction = TRUE;
                     ShowFlipMessage(0);
                     nextState = PLAYER_STATE_SHOWING_OUT_PLAYER;
                     f_StateFrameCounts[playerIndex] = 0;
@@ -4938,7 +4938,7 @@ void UpdateTurns(void) {
                 break;
             case PLAYER_STATE_SHOWING_OUT_PLAYER:
                 PlaceAndViewCharacter(0);
-                f_ShouldUpdateReaction = 1;
+                f_ShouldUpdateReaction = TRUE;
                 areCallsAllowed = FALSE;
                 if (f_StateFrameCounts[playerIndex] == OUT_PLAYER_FLIP_FRAME) {
                     ShowFlipMessage(-1);

@@ -168,7 +168,7 @@ static u8 f_UnusedBytesAfterCircleAngle[8] UNUSED = {0};
 static s16 f_NoiseRoughness[] = {0x80, 0x60, 0x40, 0x20, 8, 4, 4, 2};
 static s16 f_NoiseGridIndex = 0;
 static s32 f_NoiseBlendStep = 0;
-static s8 f_IsNoiseResetPending = TRUE;
+static Boolean8 f_IsNoiseResetPending = TRUE;
 static s8 f_NoiseRow = 0;
 
 void ChooseFlightCameraKind(void);
@@ -561,7 +561,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
 
     f_PassedPathFlags = 0;
     f_PendingResultSound = RESULT_SOUND_NONE;
-    f_IsFlightHudShown = 1;
+    f_IsFlightHudShown = TRUE;
     if (f_IsLaterFlight) {
         f_IsFlightHudShown = RandomBelow(2);
         g_RoundHud.isClubPanelShown = f_IsFlightHudShown;

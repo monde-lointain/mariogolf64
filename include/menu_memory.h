@@ -99,6 +99,6 @@ extern s32 g_ChosenCharacters[PLAYER_COUNT_MAX];
 
 extern s8 g_ChosenLefties[PLAYER_COUNT_MAX];
 
-extern u8 g_IsMenuCharacterLoaded[MAXCONTROLLERS];
+extern UBoolean8 g_IsMenuCharacterLoaded[MAXCONTROLLERS];
 
 #endif

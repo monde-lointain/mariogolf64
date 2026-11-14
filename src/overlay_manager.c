@@ -36,7 +36,7 @@
         onLoad, \
         onUnload}
 
-s8 g_IsModuleAlive[MODULE_COUNT];
+Boolean8 g_IsModuleAlive[MODULE_COUNT];
 s32 g_ModuleRdpRequestFrames[MODULE_COUNT];
 
 static ModuleId8 f_UnusedModuleIds[] UNUSED = {0x00, MODULE_ID_END};

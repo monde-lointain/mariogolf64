@@ -258,7 +258,7 @@ static Vtx f_TurnedArrowVertices[TURNED_ARROW_VERTEX_COUNT] = {
 static s32 f_UnusedWordsAfterArrowVertices[2] UNUSED = {0, 0};
 static f32 f_UnusedCursorPhases[4] UNUSED = {0.0f, 2.0f, 4.0f, 6.0f};
 static s32 f_UnusedWordsAfterCursorPhases[2] UNUSED = {0, 0};
-static u8 f_HasBestShots = FALSE;
+static UBoolean8 f_HasBestShots = FALSE;
 AssetId g_CharacterFaceAssets[CHARACTER_COUNT] = {
     0x07C5,
     0x0755,
@@ -539,7 +539,7 @@ void UpdateBetSettings(void) {
         g_MenuFidgetDelays[2] = guRandom() % FIDGET_DELAY_RANGE;
         g_MenuFidgetDelays[3] = guRandom() % FIDGET_DELAY_RANGE;
         for (index = 0; index != MAXCONTROLLERS; index++) {
-            g_IsMenuCharacterLoaded[index] = 0;
+            g_IsMenuCharacterLoaded[index] = FALSE;
         }
 
         g_BetPagesPhase = BET_PHASE_CONFIRMED;
@@ -2692,7 +2692,7 @@ void ReadBestShots(void) {
     }
 
     recordIndex = 0;
-    f_HasBestShots = 0;
+    f_HasBestShots = FALSE;
     for (; recordIndex != STATS_GRID_ROW_COUNT; recordIndex++) {
         for (index = 0; index != STATS_GRID_COLUMN_COUNT; index++) {
             if (f_BestShotRecords[recordIndex][index] != STATS_CELL_EMPTY) {

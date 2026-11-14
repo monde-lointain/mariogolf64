@@ -251,8 +251,8 @@ static s32 f_UnusedListChoice = 0;
 static s32 f_StartingHoleSelection = 0;
 static s32 f_UnusedWordAfterHoleSelection UNUSED = 0;
 static s32 f_ViewerAnimation = VIEWER_STARTING_ANIMATION;
-static Boolean f_IsViewerAdjusting = 0;
-static Boolean f_IsChosenAnimationPlaying = 0;
+static Boolean f_IsViewerAdjusting = FALSE;
+static Boolean f_IsChosenAnimationPlaying = FALSE;
 static s32 f_ModeCounts[PLAYER_COUNT_MAX] = {7, 5, 4, 4};
 static s32 f_UnusedModeCounts[4] UNUSED = {3, 5, 4, 4};
 static u16 f_PlayerClubMasks[PLAYER_COUNT_MAX] =
@@ -268,8 +268,8 @@ static s16 f_MenuTitleImageIndex = 0;
 static s16 f_MenuLabelImageIndex = 0;
 static s16 f_ImageSlotIndex = 0;
 static s16 f_MenuBoardImageIndex = 0;
-static UBoolean8 f_IsViewerModelKindChanged = 0;
-static u8 f_IsEraseWindowUp = FALSE;
+static UBoolean8 f_IsViewerModelKindChanged = FALSE;
+static UBoolean8 f_IsEraseWindowUp = FALSE;
 static f32 f_MenuBobOffset = 0.0f;
 static f32 f_MenuBobPhase = 0.0f;
 static SoundId f_SoundTestSound = 0;
@@ -1803,7 +1803,7 @@ void UpdateMenus(void) {
                     g_AnimatedIconFrame = 0;
                     g_AnimatedIconBufferIndex = 0;
                     g_AnimatedIconFrameTime = 0;
-                    f_IsViewerModelKindChanged = 0;
+                    f_IsViewerModelKindChanged = FALSE;
                 }
                 else {
                     LoadHelpBoardImage(MENU_ICON_IMAGE_PAIRS[0][0], HELP_BOARD_IMAGE_HAND);
@@ -2472,7 +2472,7 @@ void ResetViewerCharacter(void) {
 }
 
 s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
-    if (f_IsViewerAdjusting != 0) {
+    if (f_IsViewerAdjusting != FALSE) {
         while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
             g_MenuMemory.viewerCharacter++;
             if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
@@ -2515,9 +2515,9 @@ s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
             }
         }
     }
-    else if (f_IsChosenAnimationPlaying == 1) {
+    else if (f_IsChosenAnimationPlaying == TRUE) {
         if (GetCurrentAnimationEndFrame(0) == GetAnimationFrame(0)) {
-            f_IsChosenAnimationPlaying = 0;
+            f_IsChosenAnimationPlaying = FALSE;
             if (g_ChoosingPlayerIndex == finalPlayerIndex) {
                 return 1;
             }
@@ -2533,7 +2533,7 @@ s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
                 MENU_VOLUME_SOFT,
                 SOUND_FULL_SCALE
             );
-            f_IsChosenAnimationPlaying = 1;
+            f_IsChosenAnimationPlaying = TRUE;
             SetAnimationSpeed(0, 1.0f);
             return 0;
         }
@@ -2635,7 +2635,7 @@ void UpdateModeSelect(void) {
         return;
     }
 
-    g_AreBetPagesBlocked = 0;
+    g_AreBetPagesBlocked = FALSE;
     if (g_MenuPressedButtons & A_BUTTON) {
         if (g_MenuMemory.modeSpin != 0) {
             g_MenuMemory.modeSpin = 0;
@@ -2720,7 +2720,7 @@ void UpdateModeSelect(void) {
                         g_GameState.betRates[i] = UNSET_BET_RATE;
                     }
 
-                    g_AreBetPagesBlocked = 1;
+                    g_AreBetPagesBlocked = TRUE;
                 }
 
                 break;
@@ -2794,7 +2794,7 @@ void UpdateModeSelect(void) {
                         g_GameState.betRates[i] = UNSET_BET_RATE;
                     }
 
-                    g_AreBetPagesBlocked = 1;
+                    g_AreBetPagesBlocked = TRUE;
                 }
 
                 break;
@@ -6346,7 +6346,7 @@ void DrawAnimationViewer(Gfx **displayListHead) {
         f_IsViewerAdjusting ^= 1;
     }
 
-    if (f_IsViewerAdjusting == 0) {
+    if (f_IsViewerAdjusting == FALSE) {
         DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
     }
 
@@ -6406,7 +6406,7 @@ void DrawAnimationViewer(Gfx **displayListHead) {
         DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, "STRAIGHT");
     }
 
-    if (f_IsViewerAdjusting == 0) {
+    if (f_IsViewerAdjusting == FALSE) {
         ClearGameFlag(GAME_FLAG_SHOW_ANIMATION_FRAMES);
     }
     else {
@@ -7000,7 +7000,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
             gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
             gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(g_HoleBadgeImages)));
             for (otherIndex = 0; otherIndex != HOLES_BADGE_COUNT; otherIndex++) {
-                if ((otherIndex == HOLES_BADGE_BET) && (g_AreBetPagesBlocked != 1)) {
+                if ((otherIndex == HOLES_BADGE_BET) && (g_AreBetPagesBlocked != TRUE)) {
                     gDPPipeSync(gfx++);
                     gDPLoadTextureTile_4b(
                         gfx++,

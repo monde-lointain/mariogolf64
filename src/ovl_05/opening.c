@@ -330,7 +330,7 @@ static s32 f_LakituScreenPoint[2] = {0, 230};
 static Boolean f_IsLakituFlying = FALSE;
 static s32 f_LakituTrailNewestIndex = 0;
 static s32 f_UnusedWordAfterTrailIndex UNUSED = 0;
-static u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT] = {FALSE, FALSE};
+static UBoolean8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT] = {FALSE, FALSE};
 static ShotLaunch f_OpeningFirstShot = {-0x3400, 0, 280, 0, 40, -15, 0, SHOT_MODE_NORMAL};
 static ShotLaunch f_OpeningSecondShot =
     {-0x2000, 0, LAUNCH_POWER_MAX, 0, 0, 0, 0, SHOT_MODE_NORMAL};
@@ -351,7 +351,7 @@ static Vtx f_OpeningShotDashVertices[QUAD_VERTEX_COUNT] = {
 static Boolean f_IsOpeningShotPathShown = FALSE;
 static s32 f_OpeningShotDashCount = OPENING_SHOT_DASH_COUNT_MAX;
 static s32 f_OpeningShotPathDashCount = 198;
-static s8 f_IsOpeningShotPathRed = FALSE;
+static Boolean8 f_IsOpeningShotPathRed = FALSE;
 static s32 f_OpeningShotPathScroll = 0;
 static f32 f_UnusedStickOffsetX = 0.0f;
 static f32 f_UnusedStickOffsetY = 0.0f;
@@ -1491,7 +1491,7 @@ void UpdateOpening(void) {
                 break;
             case OPENING_SCENE_MARIO_DRIVE + 2:
                 if (f_OpeningSceneFramesLeft == 0) {
-                    f_IsNameSlotShown[0] = 1;
+                    f_IsNameSlotShown[0] = TRUE;
                     PlaySong(SONG_OPENING, 0);
                 }
 
@@ -1540,7 +1540,7 @@ void UpdateOpening(void) {
                 PlaceEditorCamera(679.6445f, -98.28f, 4736.7f, 642.835f, -99.0f, 4746.187f);
                 ZoomEditorCamera(1, 18.469883f, 0x1E);
                 MoveEditorCamera(1, 642.835f, -100.5f, 4746.187f, 0x1E);
-                f_IsNameSlotShown[0] = 0;
+                f_IsNameSlotShown[0] = FALSE;
                 f_OpeningShotState = 0;
                 f_ShotBallScale = 0;
                 f_OpeningSceneFramesLeft = 30;
@@ -1697,7 +1697,7 @@ void UpdateOpening(void) {
                 }
 
                 if (f_OpeningSceneFramesLeft == 90) {
-                    f_IsNameSlotShown[0] = 1;
+                    f_IsNameSlotShown[0] = TRUE;
                 }
 
                 if (f_OpeningSceneFramesLeft == 0) {
@@ -1712,7 +1712,7 @@ void UpdateOpening(void) {
                 f_OpeningSceneFramesLeft = 40;
                 f_OpeningScene = OPENING_SCENE_PEACH_DRIVE_FLIGHT;
                 f_OpeningCue = OPENING_CUE_PLUM_CHEER;
-                f_IsNameSlotShown[0] = 0;
+                f_IsNameSlotShown[0] = FALSE;
                 f_OpeningShotState = 0;
                 f_ShotBallScale = 0;
                 PlaySoundWithEffects(
@@ -1840,7 +1840,7 @@ void UpdateOpening(void) {
                 }
 
                 if (f_OpeningSceneFramesLeft == 90) {
-                    f_IsNameSlotShown[0] = 1;
+                    f_IsNameSlotShown[0] = TRUE;
                 }
 
                 if (f_OpeningSceneFramesLeft == 0) {
@@ -1856,7 +1856,7 @@ void UpdateOpening(void) {
                 ZoomEditorCamera(1, 47.392056f, 0x1E);
                 f_OpeningSceneFramesLeft = 50;
                 f_OpeningScene = OPENING_SCENE_MARIO_CHEER;
-                f_IsNameSlotShown[0] = 0;
+                f_IsNameSlotShown[0] = FALSE;
                 f_OpeningShotState = 0;
                 f_ShotBallScale = 0;
                 ClearEffects();
@@ -1929,7 +1929,7 @@ void UpdateOpening(void) {
                 break;
             case OPENING_SCENE_LUIGI_DRIVE:
                 if (f_OpeningSceneFramesLeft == 0) {
-                    f_IsNameSlotShown[0] = 1;
+                    f_IsNameSlotShown[0] = TRUE;
                     f_OpeningScene = OPENING_SCENE_LUIGI_DRIVE + 1;
                     f_OpeningSceneFramesLeft = 55;
                 }
@@ -1978,7 +1978,7 @@ void UpdateOpening(void) {
                     );
                     f_LookAtEaseMode = 2;
                     f_OpeningSceneFramesLeft = 140;
-                    f_IsNameSlotShown[0] = 0;
+                    f_IsNameSlotShown[0] = FALSE;
                     f_OpeningScene++;
                     ClearEffects();
                 }
@@ -2436,7 +2436,7 @@ void UpdateOpening(void) {
                     logoBallPoint[AXIS_Z],
                     0x28
                 );
-                f_IsLogoBallSlot[1] = 1;
+                f_IsLogoBallSlot[1] = TRUE;
                 f_OpeningScene++;
                 f_LogoBallFollowRate = 1.0f;
                 break;
@@ -2529,7 +2529,7 @@ void UpdateOpening(void) {
                     }
 
                     f_OpeningBallStates[1] = OPENING_BALL_HIDDEN;
-                    f_IsLogoBallSlot[1] = 0;
+                    f_IsLogoBallSlot[1] = FALSE;
                     f_ShotBallScale = 0;
                     f_LookAtEaseMode = 0;
                     PlaySound(SOUND_LOOK_AT_CUP, f_OpeningSoundChannel, 0x50);
@@ -2570,8 +2570,8 @@ void UpdateOpening(void) {
                 }
 
                 if (AreEditorMovesDone()) {
-                    f_IsNameSlotShown[0] = 1;
-                    f_IsNameSlotShown[1] = 1;
+                    f_IsNameSlotShown[0] = TRUE;
+                    f_IsNameSlotShown[1] = TRUE;
                 }
 
                 if (f_OpeningSceneFramesLeft == 0) {
@@ -2726,8 +2726,8 @@ void UpdateOpening(void) {
                     );
                     f_OpeningCue = OPENING_CUE_MARIO_PUZZLED;
                     f_OpeningSceneFramesLeft = 70;
-                    f_IsNameSlotShown[0] = 0;
-                    f_IsNameSlotShown[1] = 0;
+                    f_IsNameSlotShown[0] = FALSE;
+                    f_IsNameSlotShown[1] = FALSE;
                     f_OpeningScene++;
                     LoadWipeShape(0xC);
                 }
@@ -3301,7 +3301,7 @@ void LoadNameLogo(s32 logoIndex, s32 slot) {
     ReadEncodedAsset(f_NameSlotImages[slot], &asset);
     f_NameSlotLogoIndices[slot] = logoIndex;
     f_NameSlotSteps[slot] = 0;
-    f_IsNameSlotShown[slot] = 0;
+    f_IsNameSlotShown[slot] = FALSE;
 }
 
 #define SLOT_LOGO f_OpeningNameLogos[f_NameSlotLogoIndices[slot]]
@@ -3552,7 +3552,7 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 screenScale;
     f32 rollAngle;
 
-    if (f_IsLogoBallSlot[LOGO_BALL_SLOT] == 0) {
+    if (f_IsLogoBallSlot[LOGO_BALL_SLOT] == FALSE) {
         gfx = *displayListHead;
         for (slot = 0; slot < OPENING_BALL_SLOT_COUNT; slot++) {
             if (f_OpeningBallStates[slot] != OPENING_BALL_HIDDEN) {
@@ -3775,7 +3775,7 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
 
                     if (f_ShouldResetLogoBallRoll) {
                         guMtxIdentF(f_LogoBallRoll);
-                        f_ShouldResetLogoBallRoll = 0;
+                        f_ShouldResetLogoBallRoll = FALSE;
                         guRotateRPYF(
                             f_LogoBallRoll,
                             LOGO_BALL_START_ROLL,
@@ -4203,7 +4203,7 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                     if (f_IsLogoBallSlot[slot]) {
                         if (f_ShouldResetProjectedLogoBallRoll) {
                             guMtxIdentF(f_ProjectedLogoBallRoll);
-                            f_ShouldResetProjectedLogoBallRoll = 0;
+                            f_ShouldResetProjectedLogoBallRoll = FALSE;
                             guRotateRPYF(
                                 f_ProjectedLogoBallRoll,
                                 LOGO_BALL_START_ROLL,

@@ -60,7 +60,7 @@ typedef s32 LetterboxState;
 extern LetterboxState g_LetterboxState;
 extern PauseScreen g_PauseScreen;
 
-extern s8 g_IsTrainingHeadingKept;
+extern Boolean8 g_IsTrainingHeadingKept;
 extern Boolean g_IsAimCameraEasing;
 extern Boolean g_HasPressedShotButton;
 extern SignedBinaryAngle g_LookBackHeading;
@@ -69,7 +69,7 @@ extern s32 g_ShotSetupFrameCount;
 extern s32 g_ImpactPointLingerFrameCount;
 extern s32 g_ShotFlags;
 extern Boolean g_HasShotComeToRest;
-extern s8 g_IsHudTurnAwayRequested;
+extern Boolean8 g_IsHudTurnAwayRequested;
 extern CurrentShot g_ScriptedShot;
 extern s8 g_ReplayStrokeCount;
 

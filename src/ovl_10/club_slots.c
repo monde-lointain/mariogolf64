@@ -161,7 +161,7 @@ static u8 f_FaceBufferIndex = 0;
 static u8 f_FaceFrame = 0;
 static u8 f_FaceFrameTime = 0;
 static u8 f_FaceHoldCount = 0;
-static u8 f_IsShowingResult = FALSE;
+static UBoolean8 f_IsShowingResult = FALSE;
 static s16 f_StarCount = 0;
 static s16 f_CharacterFaceRows[CLUB_SET_COUNT] = {
     0,

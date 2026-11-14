@@ -161,36 +161,36 @@ static ScreenCorner f_TableLineCorners[TABLE_LINE_COUNT * 2] = {
     {267, 228},
 };
 static s32 f_UnreadTablePoint[2] UNUSED = {64, 84};
-static u8 f_DoesTablePopupCoverCell[TABLE_POPUP_CORNER_COUNT][TABLE_SHOWN_ROW_COUNT]
-                                   [TABLE_SHOWN_COLUMN_COUNT] = {
-                                       {
-                                           {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
-                                           {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                       },
-                                       {
-                                           {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
-                                           {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                       },
-                                       {
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                           {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
-                                           {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
-                                       },
-                                       {
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                           {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
-                                           {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
-                                       },
+static UBoolean8 f_DoesTablePopupCoverCell[TABLE_POPUP_CORNER_COUNT][TABLE_SHOWN_ROW_COUNT]
+                                          [TABLE_SHOWN_COLUMN_COUNT] = {
+                                              {
+                                                  {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
+                                                  {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
+                                                  {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                                  {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                                  {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                              },
+                                              {
+                                                  {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
+                                                  {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
+                                                  {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                                  {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                                  {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                              },
+                                              {
+                                                  {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                                  {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                                  {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                                  {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
+                                                  {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
+                                              },
+                                              {
+                                                  {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                                  {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                                  {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                                  {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
+                                                  {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
+                                              },
 };
 
 static Mtx f_TableCursorProjection;

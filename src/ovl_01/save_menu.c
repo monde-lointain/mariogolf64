@@ -179,8 +179,8 @@ static s16 f_SavedPlayerControllers[PLAYER_COUNT_MAX] =
     {NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER};
 static s16 f_AssignedHumanCount = 0;
 static s16 f_HumanPlayerCount = PLAYER_COUNT_MAX;
-static u8 f_IsGameChosen = 0;
-static u8 f_AreControllersAssigned = 0;
+static UBoolean8 f_IsGameChosen = FALSE;
+static UBoolean8 f_AreControllersAssigned = FALSE;
 static u8 f_ShownCourseBufferIndex = 0;
 static SaveMenuMode f_SavedGameModes[SAVED_GAME_COUNT] =
     {NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE};
@@ -1347,7 +1347,7 @@ void ReadSavedGames(void) {
         f_SavedGameModes[gameIndex] = NO_SAVE_MENU_MODE;
     }
 
-    f_AreControllersAssigned = 0;
+    f_AreControllersAssigned = FALSE;
     InitSram();
     TransferSaveData(save, FALSE);
     for (gameIndex = 0; gameIndex != SAVED_GAME_COUNT; gameIndex++) {
@@ -1419,9 +1419,9 @@ void ResetSavedGameControllers(void) {
     }
 
     f_AssignedHumanCount = 0;
-    f_IsGameChosen = 0;
+    f_IsGameChosen = FALSE;
     for (playerIndex = 0; playerIndex != MAXCONTROLLERS; playerIndex++) {
-        g_IsMenuCharacterLoaded[playerIndex] = 0;
+        g_IsMenuCharacterLoaded[playerIndex] = FALSE;
     }
 }
 
