@@ -178,46 +178,36 @@ s32 GetCupDistance(s32 x, s32 z) {
 
 void BuildPinShadow(void) {
     s32 points[PIN_SHADOW_VERTEX_COUNT][AXIS_COUNT];
-    /* Counts rows and vertices in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
+    s32 i;
     Radians heading = (g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2);
     f32 rowSpacing = PIN_SHADOW_ROW_SPACING;
 
-    for (sharedIndex = 0; sharedIndex != PIN_SHADOW_ROW_COUNT; sharedIndex++) {
-        points[sharedIndex * 2][AXIS_X] = (sinf(heading) * sharedIndex * rowSpacing) +
-            (sinf(heading - (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - sharedIndex) *
-                PIN_SHADOW_WIDTH_STEP);
-        points[sharedIndex * 2][AXIS_Z] = (-cosf(heading) * sharedIndex * rowSpacing) -
-            (cosf(heading - (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - sharedIndex) *
-                PIN_SHADOW_WIDTH_STEP);
-        points[(sharedIndex * 2) + 1][AXIS_X] = (sinf(heading) * sharedIndex * rowSpacing) +
-            (sinf(heading + (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - sharedIndex) *
-                PIN_SHADOW_WIDTH_STEP);
-        points[(sharedIndex * 2) + 1][AXIS_Z] = (-cosf(heading) * sharedIndex * rowSpacing) -
-            (cosf(heading + (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - sharedIndex) *
-                PIN_SHADOW_WIDTH_STEP);
-        points[sharedIndex * 2][AXIS_Y] =
-            GetGroundHeight(
-                g_HoleSetup.cupPosition[AXIS_X] + points[sharedIndex * 2][AXIS_X],
-                g_HoleSetup.cupPosition[AXIS_Z] + points[sharedIndex * 2][AXIS_Z]
-            ) -
+    for (i = 0; i != PIN_SHADOW_ROW_COUNT; i++) {
+        points[i * 2][AXIS_X] = (sinf(heading) * i * rowSpacing) +
+            (sinf(heading - (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - i) * PIN_SHADOW_WIDTH_STEP);
+        points[i * 2][AXIS_Z] = (-cosf(heading) * i * rowSpacing) -
+            (cosf(heading - (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - i) * PIN_SHADOW_WIDTH_STEP);
+        points[(i * 2) + 1][AXIS_X] = (sinf(heading) * i * rowSpacing) +
+            (sinf(heading + (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - i) * PIN_SHADOW_WIDTH_STEP);
+        points[(i * 2) + 1][AXIS_Z] = (-cosf(heading) * i * rowSpacing) -
+            (cosf(heading + (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - i) * PIN_SHADOW_WIDTH_STEP);
+        points[i * 2][AXIS_Y] = GetGroundHeight(
+                                    g_HoleSetup.cupPosition[AXIS_X] + points[i * 2][AXIS_X],
+                                    g_HoleSetup.cupPosition[AXIS_Z] + points[i * 2][AXIS_Z]
+                                ) -
             g_HoleSetup.cupPosition[AXIS_Y];
-        points[(sharedIndex * 2) + 1][AXIS_Y] =
+        points[(i * 2) + 1][AXIS_Y] =
             GetGroundHeight(
-                g_HoleSetup.cupPosition[AXIS_X] + points[(sharedIndex * 2) + 1][AXIS_X],
-                g_HoleSetup.cupPosition[AXIS_Z] + points[(sharedIndex * 2) + 1][AXIS_Z]
+                g_HoleSetup.cupPosition[AXIS_X] + points[(i * 2) + 1][AXIS_X],
+                g_HoleSetup.cupPosition[AXIS_Z] + points[(i * 2) + 1][AXIS_Z]
             ) -
             g_HoleSetup.cupPosition[AXIS_Y];
     }
 
-    for (sharedIndex = 0; sharedIndex != PIN_SHADOW_VERTEX_COUNT; sharedIndex++) {
-        f_PinShadowVertices[sharedIndex].v.ob[AXIS_X] =
-            points[sharedIndex][AXIS_X] / COURSE_UNITS_PER_VERTEX_UNIT;
-        f_PinShadowVertices[sharedIndex].v.ob[AXIS_Y] =
-            points[sharedIndex][AXIS_Y] / COURSE_UNITS_PER_VERTEX_UNIT;
-        f_PinShadowVertices[sharedIndex].v.ob[AXIS_Z] =
-            points[sharedIndex][AXIS_Z] / COURSE_UNITS_PER_VERTEX_UNIT;
+    for (i = 0; i != PIN_SHADOW_VERTEX_COUNT; i++) {
+        f_PinShadowVertices[i].v.ob[AXIS_X] = points[i][AXIS_X] / COURSE_UNITS_PER_VERTEX_UNIT;
+        f_PinShadowVertices[i].v.ob[AXIS_Y] = points[i][AXIS_Y] / COURSE_UNITS_PER_VERTEX_UNIT;
+        f_PinShadowVertices[i].v.ob[AXIS_Z] = points[i][AXIS_Z] / COURSE_UNITS_PER_VERTEX_UNIT;
     }
 }
 

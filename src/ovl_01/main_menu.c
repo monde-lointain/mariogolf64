@@ -2648,9 +2648,7 @@ void UpdateModeSelect(void) {
     EncodedAsset asset;
     Boolean isDone = IsHudAnimationDone();
     s32 direction;
-    /* Counts players and stake slots in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
+    s32 i;
     u32 step;
     s16 slot;
     s32 mode;
@@ -2711,12 +2709,12 @@ void UpdateModeSelect(void) {
                 COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_PLAIN;
                 g_BetSet = BET_SET_NONE;
                 ApplyBetPreset(BET_PRESET_NONE);
-                for (sharedIndex = 0; sharedIndex != MAX_PLAYER_COUNT; sharedIndex++) {
-                    g_ChosenHandicaps[sharedIndex] = 0;
+                for (i = 0; i != MAX_PLAYER_COUNT; i++) {
+                    g_ChosenHandicaps[i] = 0;
                 }
 
-                for (sharedIndex = 0; sharedIndex != BET_STAKE_SLOT_COUNT - 1; sharedIndex++) {
-                    g_GameState.betRates[sharedIndex] = UNSET_BET_RATE;
+                for (i = 0; i != BET_STAKE_SLOT_COUNT - 1; i++) {
+                    g_GameState.betRates[i] = UNSET_BET_RATE;
                 }
 
                 break;
@@ -2737,12 +2735,12 @@ void UpdateModeSelect(void) {
 
                 ApplyBetPreset(BET_PRESET_STROKE);
                 if (g_ChosenPlayerCount == 1) {
-                    for (sharedIndex = 0; sharedIndex != MAX_PLAYER_COUNT; sharedIndex++) {
-                        g_ChosenHandicaps[sharedIndex] = 0;
+                    for (i = 0; i != MAX_PLAYER_COUNT; i++) {
+                        g_ChosenHandicaps[i] = 0;
                     }
 
-                    for (sharedIndex = 0; sharedIndex != BET_STAKE_SLOT_COUNT - 1; sharedIndex++) {
-                        g_GameState.betRates[sharedIndex] = UNSET_BET_RATE;
+                    for (i = 0; i != BET_STAKE_SLOT_COUNT - 1; i++) {
+                        g_GameState.betRates[i] = UNSET_BET_RATE;
                     }
 
                     g_AreBetPagesBlocked = 1;
@@ -2783,13 +2781,13 @@ void UpdateModeSelect(void) {
                 ApplyBetPreset(BET_PRESET_NONE);
                 break;
             case MODE_ICON_MINI_GOLF:
-                for (sharedIndex = 0; sharedIndex != g_ChosenPlayerCount; sharedIndex++) {
-                    if (g_PlayerControllerIndices[sharedIndex] == NO_CONTROLLER_INDEX) {
+                for (i = 0; i != g_ChosenPlayerCount; i++) {
+                    if (g_PlayerControllerIndices[i] == NO_CONTROLLER_INDEX) {
                         break;
                     }
                 }
 
-                if (sharedIndex < g_ChosenPlayerCount) {
+                if (i < g_ChosenPlayerCount) {
                     PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
                     return;
                 }
@@ -2811,12 +2809,12 @@ void UpdateModeSelect(void) {
 
                 ApplyBetPreset(BET_PRESET_MINI_GOLF);
                 if (g_ChosenPlayerCount == 1) {
-                    for (sharedIndex = 0; sharedIndex != MAX_PLAYER_COUNT; sharedIndex++) {
-                        g_ChosenHandicaps[sharedIndex] = 0;
+                    for (i = 0; i != MAX_PLAYER_COUNT; i++) {
+                        g_ChosenHandicaps[i] = 0;
                     }
 
-                    for (sharedIndex = 0; sharedIndex != BET_STAKE_SLOT_COUNT - 1; sharedIndex++) {
-                        g_GameState.betRates[sharedIndex] = UNSET_BET_RATE;
+                    for (i = 0; i != BET_STAKE_SLOT_COUNT - 1; i++) {
+                        g_GameState.betRates[i] = UNSET_BET_RATE;
                     }
 
                     g_AreBetPagesBlocked = 1;
@@ -2858,13 +2856,13 @@ void UpdateModeSelect(void) {
                 ApplyBetPreset(BET_PRESET_NONE);
                 break;
             case MODE_ICON_CLUB_SLOTS:
-                for (sharedIndex = 0; sharedIndex != g_ChosenPlayerCount; sharedIndex++) {
-                    if (g_PlayerControllerIndices[sharedIndex] == NO_CONTROLLER_INDEX) {
+                for (i = 0; i != g_ChosenPlayerCount; i++) {
+                    if (g_PlayerControllerIndices[i] == NO_CONTROLLER_INDEX) {
                         break;
                     }
                 }
 
-                if (sharedIndex < g_ChosenPlayerCount) {
+                if (i < g_ChosenPlayerCount) {
                     PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
                     return;
                 }
@@ -2986,14 +2984,14 @@ void UpdateModeSelect(void) {
     }
 
     chosenIcon = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
-    for (sharedIndex = 0; sharedIndex != g_ChosenPlayerCount; sharedIndex++) {
-        if (g_PlayerControllerIndices[sharedIndex] == NO_CONTROLLER_INDEX) {
+    for (i = 0; i != g_ChosenPlayerCount; i++) {
+        if (g_PlayerControllerIndices[i] == NO_CONTROLLER_INDEX) {
             break;
         }
     }
 
     if (((chosenIcon == MODE_ICON_CLUB_SLOTS) | (chosenIcon == MODE_ICON_MINI_GOLF)) &&
-        sharedIndex < g_ChosenPlayerCount) {
+        i < g_ChosenPlayerCount) {
         SetTextSlot(
             MODE_TEXT_X,
             MODE_TEXT_Y,
@@ -5495,9 +5493,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     s32 labelIndex;
     s32 labelX;
     void *image;
-    /* Counts modes, strips and players, then holds a digit offset; a
-       variable for each allocates registers differently. */
-    s32 sharedIndex;
+    s32 i;
     s32 courseIndex;
     s32 holeIndex;
 
@@ -5573,14 +5569,13 @@ void DrawModeSelect(Gfx **displayListHead) {
         }
     }
 
-    for (sharedIndex = 0; sharedIndex != modeCount; sharedIndex++) {
-        drawOrder[sharedIndex] = sharedIndex;
+    for (i = 0; i != modeCount; i++) {
+        drawOrder[i] = i;
     }
 
-    for (sharedIndex = 1; sharedIndex != modeCount; sharedIndex++) {
-        key = drawOrder[sharedIndex];
-        for (index = sharedIndex - 1; (index >= 0) && (boardY[drawOrder[index]] > boardY[key]);
-            index--) {
+    for (i = 1; i != modeCount; i++) {
+        key = drawOrder[i];
+        for (index = i - 1; (index >= 0) && (boardY[drawOrder[index]] > boardY[key]); index--) {
             drawOrder[index + 1] = drawOrder[index];
         }
 
@@ -5675,12 +5670,12 @@ void DrawModeSelect(Gfx **displayListHead) {
                 );
             }
 
-            for (sharedIndex = 0; sharedIndex != MODE_ICON_STRIP_COUNT; sharedIndex++) {
+            for (i = 0; i != MODE_ICON_STRIP_COUNT; i++) {
                 gDPLoadTextureBlock(
                     gfx++,
                     TextureAddress(
                         LargeImageTexels(g_ModeIconImages[slot]) +
-                        (sharedIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)
+                        (i * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)
                     ),
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
@@ -5698,9 +5693,9 @@ void DrawModeSelect(Gfx **displayListHead) {
                 gSPScisTextureRectangle(
                     gfx++,
                     QuarterPixels(wheelShiftX + (s32)(boardX[slot] - halfSize)),
-                    QuarterPixels((s32)(boardY[slot] - halfSize + (sharedIndex * halfSize) + bob)),
+                    QuarterPixels((s32)(boardY[slot] - halfSize + (i * halfSize) + bob)),
                     QuarterPixels(wheelShiftX + (s32)(boardX[slot] + halfSize)),
-                    QuarterPixels((s32)(boardY[slot] + (sharedIndex * halfSize) + bob)),
+                    QuarterPixels((s32)(boardY[slot] + (i * halfSize) + bob)),
                     G_TX_RENDERTILE,
                     0,
                     0,
@@ -5730,12 +5725,12 @@ void DrawModeSelect(Gfx **displayListHead) {
 
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
     if (g_ChosenPlayerCount == 1) {
-        for (sharedIndex = 0; sharedIndex != MENU_BANNER_STRIP_COUNT; sharedIndex++) {
+        for (i = 0; i != MENU_BANNER_STRIP_COUNT; i++) {
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(
                     LargeImageTexels(g_NamePlateImage) +
-                    (sharedIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                    (i * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
                 ),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
@@ -5753,11 +5748,10 @@ void DrawModeSelect(Gfx **displayListHead) {
             gSPScisTextureRectangle(
                 gfx++,
                 QuarterPixels(MODE_BANNER_LEFT),
-                QuarterPixels(MODE_BANNER_TOP + (sharedIndex * MENU_BANNER_STRIP_HEIGHT)),
+                QuarterPixels(MODE_BANNER_TOP + (i * MENU_BANNER_STRIP_HEIGHT)),
                 QuarterPixels(MODE_BANNER_LEFT + SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH),
                 QuarterPixels(
-                    MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
-                    (sharedIndex * MENU_BANNER_STRIP_HEIGHT)
+                    MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT + (i * MENU_BANNER_STRIP_HEIGHT)
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -5769,12 +5763,12 @@ void DrawModeSelect(Gfx **displayListHead) {
         }
     }
     else {
-        for (sharedIndex = 0; sharedIndex != MENU_BANNER_STRIP_COUNT; sharedIndex++) {
+        for (i = 0; i != MENU_BANNER_STRIP_COUNT; i++) {
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(
                     LargeImageTexels(g_NamePlateImage) +
-                    (sharedIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                    (i * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
                 ),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
@@ -5792,11 +5786,10 @@ void DrawModeSelect(Gfx **displayListHead) {
             gSPScisTextureRectangle(
                 gfx++,
                 QuarterPixels(MODE_BANNER_LEFT),
-                QuarterPixels(MODE_BANNER_TOP + (sharedIndex * MENU_BANNER_STRIP_HEIGHT)),
+                QuarterPixels(MODE_BANNER_TOP + (i * MENU_BANNER_STRIP_HEIGHT)),
                 QuarterPixels(MODE_BANNER_LEFT + MODE_BANNER_SHOWN_WIDTH),
                 QuarterPixels(
-                    MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
-                    (sharedIndex * MENU_BANNER_STRIP_HEIGHT)
+                    MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT + (i * MENU_BANNER_STRIP_HEIGHT)
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -5808,9 +5801,9 @@ void DrawModeSelect(Gfx **displayListHead) {
         }
     }
 
-    sharedIndex = g_MenuMemory.modeChoice;
+    i = g_MenuMemory.modeChoice;
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ImageSlots[f_ImageSlotIndex])));
-    labelIndex = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][sharedIndex];
+    labelIndex = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][i];
     gDPLoadTextureBlock_4b(
         gfx++,
         TextureAddress(
@@ -5857,17 +5850,15 @@ void DrawModeSelect(Gfx **displayListHead) {
 
     image = g_SecondAnimatedIconImages[0];
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
-    for (sharedIndex = 0; sharedIndex != g_ChosenPlayerCount; sharedIndex++) {
-        if (g_PlayerControllerIndices[sharedIndex] != NO_CONTROLLER_INDEX) {
-            position[AXIS_X] =
-                f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][sharedIndex][0];
-            position[AXIS_Y] =
-                f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][sharedIndex][1];
+    for (i = 0; i != g_ChosenPlayerCount; i++) {
+        if (g_PlayerControllerIndices[i] != NO_CONTROLLER_INDEX) {
+            position[AXIS_X] = f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][0];
+            position[AXIS_Y] = f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][1];
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(
                     LargeImageTexels(image) +
-                    (g_ChoosingControllerIndices[sharedIndex] * CONTROLLER_ICON_IMAGE_SIZE)
+                    (g_ChoosingControllerIndices[i] * CONTROLLER_ICON_IMAGE_SIZE)
                 ),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
@@ -5900,17 +5891,15 @@ void DrawModeSelect(Gfx **displayListHead) {
 
     image = g_SecondAnimatedIconImages[1];
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
-    for (sharedIndex = 0; sharedIndex != g_ChosenPlayerCount; sharedIndex++) {
-        position[AXIS_X] =
-            f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][sharedIndex][0];
-        position[AXIS_Y] =
-            f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][sharedIndex][1];
-        if (g_PlayerControllerIndices[sharedIndex] == NO_CONTROLLER_INDEX) {
+    for (i = 0; i != g_ChosenPlayerCount; i++) {
+        position[AXIS_X] = f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][0];
+        position[AXIS_Y] = f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][1];
+        if (g_PlayerControllerIndices[i] == NO_CONTROLLER_INDEX) {
             gDPLoadTextureBlock_4b(
                 gfx++,
                 TextureAddress(
                     ImageTexels(image) + (PLAYER_LABEL_COMPUTER_FIRST * PLAYER_LABEL_IMAGE_SIZE) +
-                    (sharedIndex * PLAYER_LABEL_IMAGE_SIZE)
+                    (i * PLAYER_LABEL_IMAGE_SIZE)
                 ),
                 G_IM_FMT_CI,
                 PLAYER_LABEL_WIDTH,
@@ -5927,7 +5916,7 @@ void DrawModeSelect(Gfx **displayListHead) {
         else {
             gDPLoadTextureBlock_4b(
                 gfx++,
-                TextureAddress(ImageTexels(image) + (sharedIndex * PLAYER_LABEL_IMAGE_SIZE)),
+                TextureAddress(ImageTexels(image) + (i * PLAYER_LABEL_IMAGE_SIZE)),
                 G_IM_FMT_CI,
                 PLAYER_LABEL_WIDTH,
                 PLAYER_LABEL_HEIGHT,
@@ -5970,33 +5959,22 @@ void DrawModeSelect(Gfx **displayListHead) {
             }
         }
 
-        sharedIndex = 0;
+        i = 0;
         if (badgeCount < MIN_TWO_DIGIT_WON_COUNT) {
-            sharedIndex = WON_COUNT_DIGIT_WIDTH;
+            i = WON_COUNT_DIGIT_WIDTH;
         }
 
         if ((badgeCount >= MIN_TWO_DIGIT_WON_COUNT) && (badgeCount < MIN_THREE_DIGIT_WON_COUNT)) {
-            sharedIndex = 0;
+            i = 0;
         }
 
         if (badgeCount >= MIN_THREE_DIGIT_WON_COUNT) {
-            sharedIndex = -WON_COUNT_DIGIT_WIDTH;
+            i = -WON_COUNT_DIGIT_WIDTH;
         }
 
-        DrawSpinningBadge(
-            &gfx,
-            g_SpinningBadgeImage,
-            WON_COUNT_ICON_X + sharedIndex,
-            WON_COUNT_ICON_Y
-        );
+        DrawSpinningBadge(&gfx, g_SpinningBadgeImage, WON_COUNT_ICON_X + i, WON_COUNT_ICON_Y);
         gDPPipeSync(gfx++);
-        DrawUnalignedMenuNumber(
-            &gfx,
-            WON_COUNT_X + sharedIndex,
-            WON_COUNT_Y,
-            badgeCount,
-            MENU_NUMBER_TIMES
-        );
+        DrawUnalignedMenuNumber(&gfx, WON_COUNT_X + i, WON_COUNT_Y, badgeCount, MENU_NUMBER_TIMES);
         gDPPipeSync(gfx++);
     }
 
@@ -6010,28 +5988,22 @@ void DrawModeSelect(Gfx **displayListHead) {
             }
         }
 
-        sharedIndex = 0;
+        i = 0;
         if (starCount < MIN_TWO_DIGIT_WON_COUNT) {
-            sharedIndex = WON_COUNT_DIGIT_WIDTH;
+            i = WON_COUNT_DIGIT_WIDTH;
         }
 
         if ((starCount >= MIN_TWO_DIGIT_WON_COUNT) && (badgeCount < MIN_THREE_DIGIT_WON_COUNT)) {
-            sharedIndex = 0;
+            i = 0;
         }
 
         if (starCount >= MIN_THREE_DIGIT_WON_COUNT) {
-            sharedIndex = -WON_COUNT_DIGIT_WIDTH;
+            i = -WON_COUNT_DIGIT_WIDTH;
         }
 
-        DrawSpinningStars(&gfx, WON_COUNT_ICON_X + sharedIndex, WON_COUNT_ICON_Y, 1, FALSE);
+        DrawSpinningStars(&gfx, WON_COUNT_ICON_X + i, WON_COUNT_ICON_Y, 1, FALSE);
         gDPPipeSync(gfx++);
-        DrawUnalignedMenuNumber(
-            &gfx,
-            WON_COUNT_X + sharedIndex,
-            WON_COUNT_Y,
-            starCount,
-            MENU_NUMBER_TIMES
-        );
+        DrawUnalignedMenuNumber(&gfx, WON_COUNT_X + i, WON_COUNT_Y, starCount, MENU_NUMBER_TIMES);
         gDPPipeSync(gfx++);
     }
 

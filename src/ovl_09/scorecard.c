@@ -129,9 +129,7 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     s32 oldPlace;
     s32 newPlace;
     s32 size;
-    /* Counts bets, players and page titles in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
+    s32 i;
     s32 imageIndex;
     s32 standingIndex;
     TournamentStanding *standing;
@@ -158,26 +156,25 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     ReadEncodedAsset(g_Scorecard.totalLabelsImage, &asset);
 
     g_Scorecard.hasBets = FALSE;
-    for (sharedIndex = 0; sharedIndex != BET_COUNT; sharedIndex++) {
-        if (g_GameState.betRates[sharedIndex] > 0) {
+    for (i = 0; i != BET_COUNT; i++) {
+        if (g_GameState.betRates[i] > 0) {
             g_Scorecard.hasBets = TRUE;
             break;
         }
     }
 
-    for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-        g_Scorecard.faceImages[sharedIndex] = AllocMemory(
-            OpenEncodedAsset(g_CharacterImageAssets[g_Players[sharedIndex].characterIndex], &asset)
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        g_Scorecard.faceImages[i] = AllocMemory(
+            OpenEncodedAsset(g_CharacterImageAssets[g_Players[i].characterIndex], &asset)
         );
-        ReadEncodedAsset(g_Scorecard.faceImages[sharedIndex], &asset);
+        ReadEncodedAsset(g_Scorecard.faceImages[i], &asset);
         OpenAssetFile(
-            g_CharacterPaletteAssets[g_Players[sharedIndex].characterIndex] +
-                g_Players[sharedIndex].paletteIndex,
+            g_CharacterPaletteAssets[g_Players[i].characterIndex] + g_Players[i].paletteIndex,
             &file
         );
         size = GetAssetFileSize(&file);
-        g_Scorecard.facePalettes[sharedIndex] = AllocMemory(size);
-        ReadAssetFile(g_Scorecard.facePalettes[sharedIndex], size, &file);
+        g_Scorecard.facePalettes[i] = AllocMemory(size);
+        ReadAssetFile(g_Scorecard.facePalettes[i], size, &file);
     }
 
     g_Scorecard.isOddFaceStep = FALSE;
@@ -332,20 +329,20 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
             break;
     }
 
-    for (sharedIndex = 0; sharedIndex != PAGE_TITLE_COUNT; sharedIndex++) {
-        g_Scorecard.pageTitleImages[sharedIndex] =
-            AllocMemory(OpenEncodedAsset(f_PageTitleAssets[pageTitlesRow][sharedIndex], &asset));
-        ReadEncodedAsset(g_Scorecard.pageTitleImages[sharedIndex], &asset);
+    for (i = 0; i != PAGE_TITLE_COUNT; i++) {
+        g_Scorecard.pageTitleImages[i] =
+            AllocMemory(OpenEncodedAsset(f_PageTitleAssets[pageTitlesRow][i], &asset));
+        ReadEncodedAsset(g_Scorecard.pageTitleImages[i], &asset);
     }
 
     imageIndex = 0;
-    for (sharedIndex = 0; sharedIndex != BET_COUNT; sharedIndex++) {
-        if (g_GameState.betRates[sharedIndex] != UNSET_BET_RATE) {
+    for (i = 0; i != BET_COUNT; i++) {
+        if (g_GameState.betRates[i] != UNSET_BET_RATE) {
             g_Scorecard.betImages[imageIndex][0] =
-                AllocMemory(OpenEncodedAsset(f_BetImageAssets[sharedIndex][0], &asset));
+                AllocMemory(OpenEncodedAsset(f_BetImageAssets[i][0], &asset));
             ReadEncodedAsset(g_Scorecard.betImages[imageIndex][0], &asset);
             g_Scorecard.betImages[imageIndex][1] =
-                AllocMemory(OpenEncodedAsset(f_BetImageAssets[sharedIndex][1], &asset));
+                AllocMemory(OpenEncodedAsset(f_BetImageAssets[i][1], &asset));
             ReadEncodedAsset(g_Scorecard.betImages[imageIndex][1], &asset);
             imageIndex++;
         }
@@ -364,9 +361,7 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     (MemberOffset(Scorecard, member) - MemberOffset(Scorecard, tableImage))
 
 void FreeScorecard(void) {
-    /* Counts bets, glyph groups and players in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
+    s32 i;
     s32 imageIndex;
     u8 **image;
     u8 **tableImage;
@@ -378,8 +373,8 @@ void FreeScorecard(void) {
         g_RoundHud.otherUnusedScorecardValue = 0;
 
         imageIndex = 0;
-        for (sharedIndex = 0; sharedIndex != BET_COUNT; sharedIndex++) {
-            if (g_GameState.betRates[sharedIndex] != UNSET_BET_RATE) {
+        for (i = 0; i != BET_COUNT; i++) {
+            if (g_GameState.betRates[i] != UNSET_BET_RATE) {
                 FreeMemory(&g_Scorecard.betImages[imageIndex][0]);
                 FreeMemory(&g_Scorecard.betImages[imageIndex][1]);
                 imageIndex++;
@@ -416,8 +411,8 @@ void FreeScorecard(void) {
                 FreeMemory(&g_Scorecard.placeArrowImage);
                 FreeMemory(&g_Scorecard.flapNameImages);
                 FreeMemory(&g_Scorecard.leaderboardRowImage);
-                for (sharedIndex = 0; sharedIndex != LEADERBOARD_GLYPH_GROUP_COUNT; sharedIndex++) {
-                    PlaceGlyphGroup(sharedIndex, NO_FONT_SIZE, 0, 0, 0, g_PrintBuffer);
+                for (i = 0; i != LEADERBOARD_GLYPH_GROUP_COUNT; i++) {
+                    PlaceGlyphGroup(i, NO_FONT_SIZE, 0, 0, 0, g_PrintBuffer);
                 }
 
                 break;
@@ -433,12 +428,12 @@ void FreeScorecard(void) {
         tableImage = &g_Scorecard.tableImage;
         image = tableImage;
         FreeMemory(image);
-        for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
+        for (i = 0; i != g_GameState.playerCount; i++) {
             u8 **faceImages = (u8 **)AddressPast(tableImage, BytesPastTableImage(faceImages));
             u16 **facePalettes = (u16 **)AddressPast(tableImage, BytesPastTableImage(facePalettes));
 
-            FreeMemory(&faceImages[sharedIndex]);
-            FreeMemory(&facePalettes[sharedIndex]);
+            FreeMemory(&faceImages[i]);
+            FreeMemory(&facePalettes[i]);
         }
 
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0, 0, 0, 0);
@@ -456,10 +451,8 @@ void StartScorecardTally(s32 layout) {
     s32 holeIndex;
     SongId song;
     s32 timedHoleCount;
-    /* Counts players, rows and holes in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
-    s32 otherIndex;
+    s32 i;
+    s32 j;
 
     g_Scorecard.layout = layout;
     SettleHoleBets();
@@ -509,9 +502,9 @@ HALVED:
             break;
         case SCORECARD_LAYOUT_SKINS:
             g_Scorecard.holeWinnerIndex = HOLE_WINNER_HALVED;
-            for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-                if (g_Players[sharedIndex].holes[g_Scorecard.content.holeIndex - 1].strokes != 0) {
-                    g_Scorecard.holeWinnerIndex = sharedIndex;
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokes != 0) {
+                    g_Scorecard.holeWinnerIndex = i;
                 }
             }
 
@@ -524,9 +517,9 @@ HALVED:
             break;
         case SCORECARD_LAYOUT_TOURNAMENT:
             g_Scorecard.content.flipTime = 0;
-            for (sharedIndex = 0; sharedIndex != LEADERBOARD_ROW_COUNT; sharedIndex++) {
-                g_Scorecard.content.rowFlipAngles[sharedIndex] = 0;
-                g_Scorecard.content.isRowFlipping[sharedIndex] = TRUE;
+            for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
+                g_Scorecard.content.rowFlipAngles[i] = 0;
+                g_Scorecard.content.isRowFlipping[i] = TRUE;
             }
 
             break;
@@ -535,9 +528,8 @@ HALVED:
                 g_GameState.stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
             }
 
-            for (sharedIndex = 0, timedHoleCount = 0; sharedIndex != COURSE_HOLE_COUNT;
-                sharedIndex++) {
-                timedHoleCount += g_HoleTimeFrames[sharedIndex] != 0;
+            for (i = 0, timedHoleCount = 0; i != COURSE_HOLE_COUNT; i++) {
+                timedHoleCount += g_HoleTimeFrames[i] != 0;
             }
 
             if (timedHoleCount > 0) {
@@ -556,29 +548,28 @@ HALVED:
                     g_HoleTimeHundredths[0] = -1;
                 }
 
-                for (sharedIndex = 0; sharedIndex < timedHoleCount - 1; sharedIndex++) {
+                for (i = 0; i < timedHoleCount - 1; i++) {
                     if (g_HoleTimeMinutes[timedHoleCount - 1] < 0 ||
                         g_HoleTimeMinutes[timedHoleCount - 1] >= SHOWN_MINUTE_LIMIT ||
-                        g_HoleTimeMinutes[sharedIndex] < 0) {
+                        g_HoleTimeMinutes[i] < 0) {
                         g_HoleTimeMinutes[timedHoleCount - 1] = -1;
                         g_HoleTimeSeconds[timedHoleCount - 1] = -1;
                         g_HoleTimeHundredths[timedHoleCount - 1] = -1;
                         break;
                     }
 
-                    g_HoleTimeFrames[timedHoleCount - 1] -= g_HoleTimeFrames[sharedIndex];
-                    g_HoleTimeMinutes[timedHoleCount - 1] -= g_HoleTimeMinutes[sharedIndex];
-                    if (g_HoleTimeSeconds[timedHoleCount - 1] < g_HoleTimeSeconds[sharedIndex]) {
+                    g_HoleTimeFrames[timedHoleCount - 1] -= g_HoleTimeFrames[i];
+                    g_HoleTimeMinutes[timedHoleCount - 1] -= g_HoleTimeMinutes[i];
+                    if (g_HoleTimeSeconds[timedHoleCount - 1] < g_HoleTimeSeconds[i]) {
                         g_HoleTimeMinutes[timedHoleCount - 1]--;
                         g_HoleTimeSeconds[timedHoleCount - 1] +=
-                            SECONDS_PER_MINUTE - g_HoleTimeSeconds[sharedIndex];
+                            SECONDS_PER_MINUTE - g_HoleTimeSeconds[i];
                     }
                     else {
-                        g_HoleTimeSeconds[timedHoleCount - 1] -= g_HoleTimeSeconds[sharedIndex];
+                        g_HoleTimeSeconds[timedHoleCount - 1] -= g_HoleTimeSeconds[i];
                     }
 
-                    if (g_HoleTimeHundredths[timedHoleCount - 1] <
-                        g_HoleTimeHundredths[sharedIndex]) {
+                    if (g_HoleTimeHundredths[timedHoleCount - 1] < g_HoleTimeHundredths[i]) {
                         if (g_HoleTimeSeconds[timedHoleCount - 1] > 0) {
                             g_HoleTimeSeconds[timedHoleCount - 1]--;
                         }
@@ -588,11 +579,10 @@ HALVED:
                         }
 
                         g_HoleTimeHundredths[timedHoleCount - 1] +=
-                            HUNDREDTHS_PER_SECOND - g_HoleTimeHundredths[sharedIndex];
+                            HUNDREDTHS_PER_SECOND - g_HoleTimeHundredths[i];
                     }
                     else {
-                        g_HoleTimeHundredths[timedHoleCount - 1] -=
-                            g_HoleTimeHundredths[sharedIndex];
+                        g_HoleTimeHundredths[timedHoleCount - 1] -= g_HoleTimeHundredths[i];
                     }
                 }
             }
@@ -609,42 +599,40 @@ HALVED:
         case GAME_MODE_SPEED_GOLF:
         case GAME_MODE_RECORD_REPLAY:
         case GAME_MODE_RING_SHOT:
-            for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-                g_Scorecard.content.faceImageOffsets[sharedIndex] = 0;
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                g_Scorecard.content.faceImageOffsets[i] = 0;
             }
 
             break;
         case GAME_MODE_STROKE:
-            for (sharedIndex = 0; sharedIndex < g_GameState.playerCount; sharedIndex++) {
-                scoresToPar[sharedIndex] =
-                    GetNetScoreToPar(g_Scorecard.content.holeIndex, sharedIndex);
+            for (i = 0; i < g_GameState.playerCount; i++) {
+                scoresToPar[i] = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
             }
 
-            for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-                ranks[sharedIndex] = 0;
-                for (otherIndex = 0; otherIndex != g_GameState.playerCount; otherIndex++) {
-                    if (sharedIndex != otherIndex &&
-                        scoresToPar[sharedIndex] > scoresToPar[otherIndex]) {
-                        ranks[sharedIndex]++;
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                ranks[i] = 0;
+                for (j = 0; j != g_GameState.playerCount; j++) {
+                    if (i != j && scoresToPar[i] > scoresToPar[j]) {
+                        ranks[i]++;
                     }
                 }
             }
 
-            for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
+            for (i = 0; i != g_GameState.playerCount; i++) {
                 CourseRecord *course = &g_CourseRecords[GetCourseRecordIndex()];
 
-                if (g_Players[sharedIndex].holes[g_Scorecard.content.holeIndex - 1].strokes -
+                if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokes -
                         course->holes[g_Scorecard.content.holeIndex - 1].par +
                         GetHandicapOffset(
                             g_GameState.courseIndex,
                             g_Scorecard.content.holeIndex - 1,
-                            g_Players[sharedIndex].handicap
+                            g_Players[i].handicap
                         ) <=
                     0) {
-                    g_Scorecard.content.faceImageOffsets[sharedIndex] = 0;
+                    g_Scorecard.content.faceImageOffsets[i] = 0;
                 }
                 else {
-                    g_Scorecard.content.faceImageOffsets[sharedIndex] = BEHIND_FACE_IMAGE_OFFSET;
+                    g_Scorecard.content.faceImageOffsets[i] = BEHIND_FACE_IMAGE_OFFSET;
                 }
             }
 
@@ -669,13 +657,12 @@ HALVED:
             break;
         case GAME_MODE_SKINS_MATCH:
         case GAME_MODE_CLUB_SLOTS:
-            for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-                g_Scorecard.content.faceImageOffsets[sharedIndex] = 0;
-                for (otherIndex = 0; otherIndex != g_GameState.playerCount; otherIndex++) {
-                    if (g_Players[sharedIndex].holes[g_Scorecard.content.holeIndex - 1].strokes <
-                        g_Players[otherIndex].holes[g_Scorecard.content.holeIndex - 1].strokes) {
-                        g_Scorecard.content.faceImageOffsets[sharedIndex] =
-                            BEHIND_FACE_IMAGE_OFFSET;
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                g_Scorecard.content.faceImageOffsets[i] = 0;
+                for (j = 0; j != g_GameState.playerCount; j++) {
+                    if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokes <
+                        g_Players[j].holes[g_Scorecard.content.holeIndex - 1].strokes) {
+                        g_Scorecard.content.faceImageOffsets[i] = BEHIND_FACE_IMAGE_OFFSET;
                     }
                 }
             }
@@ -690,10 +677,8 @@ void SetScorecardLayout(s32 layout) {
     s32 holesWon[MATCH_PLAYER_COUNT];
     s32 skinsRanks[MAX_PLAYER_COUNT];
     s32 unused[4] UNUSED;
-    /* Counts rows, players and holes in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
-    s32 otherIndex;
+    s32 i;
+    s32 j;
 
     g_Scorecard.isTallied = TRUE;
     g_Scorecard.layout = layout;
@@ -713,9 +698,9 @@ void SetScorecardLayout(s32 layout) {
             break;
         case SCORECARD_LAYOUT_TOURNAMENT:
             g_Scorecard.content.flipTime = ROW_FLIP_TIME;
-            for (sharedIndex = 0; sharedIndex != LEADERBOARD_ROW_COUNT; sharedIndex++) {
-                g_Scorecard.content.rowFlipAngles[sharedIndex] = 0;
-                g_Scorecard.content.isRowFlipping[sharedIndex] = FALSE;
+            for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
+                g_Scorecard.content.rowFlipAngles[i] = 0;
+                g_Scorecard.content.isRowFlipping[i] = FALSE;
             }
 
             break;
@@ -730,33 +715,31 @@ void SetScorecardLayout(s32 layout) {
         case GAME_MODE_SPEED_GOLF:
         case GAME_MODE_RECORD_REPLAY:
         case GAME_MODE_RING_SHOT:
-            for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-                g_Scorecard.content.faceImageOffsets[sharedIndex] = 0;
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                g_Scorecard.content.faceImageOffsets[i] = 0;
             }
 
             break;
         case GAME_MODE_STROKE:
-            for (sharedIndex = 0; sharedIndex < g_GameState.playerCount; sharedIndex++) {
-                scoresToPar[sharedIndex] =
-                    GetNetScoreToPar(g_Scorecard.content.holeIndex, sharedIndex);
+            for (i = 0; i < g_GameState.playerCount; i++) {
+                scoresToPar[i] = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
             }
 
-            for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-                ranks[sharedIndex] = 0;
-                for (otherIndex = 0; otherIndex != g_GameState.playerCount; otherIndex++) {
-                    if (sharedIndex != otherIndex &&
-                        scoresToPar[sharedIndex] > scoresToPar[otherIndex]) {
-                        ranks[sharedIndex]++;
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                ranks[i] = 0;
+                for (j = 0; j != g_GameState.playerCount; j++) {
+                    if (i != j && scoresToPar[i] > scoresToPar[j]) {
+                        ranks[i]++;
                     }
                 }
             }
 
-            for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-                if (ranks[sharedIndex] < g_GameState.playerCount + 1) {
-                    g_Scorecard.content.faceImageOffsets[sharedIndex] = 0;
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                if (ranks[i] < g_GameState.playerCount + 1) {
+                    g_Scorecard.content.faceImageOffsets[i] = 0;
                 }
                 else {
-                    g_Scorecard.content.faceImageOffsets[sharedIndex] = BEHIND_FACE_IMAGE_OFFSET;
+                    g_Scorecard.content.faceImageOffsets[i] = BEHIND_FACE_IMAGE_OFFSET;
                 }
             }
 
@@ -765,14 +748,11 @@ void SetScorecardLayout(s32 layout) {
         case GAME_MODE_GET_CHARACTER:
             holesWon[0] = 0;
             holesWon[1] = 0;
-            for (sharedIndex = GetFirstHoleIndex(); sharedIndex != g_Scorecard.content.holeIndex;
-                sharedIndex++) {
-                if (g_Players[0].holes[sharedIndex].strokes <
-                    g_Players[1].holes[sharedIndex].strokes) {
+            for (i = GetFirstHoleIndex(); i != g_Scorecard.content.holeIndex; i++) {
+                if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
                     holesWon[0]++;
                 }
-                else if (g_Players[1].holes[sharedIndex].strokes <
-                    g_Players[0].holes[sharedIndex].strokes) {
+                else if (g_Players[1].holes[i].strokes < g_Players[0].holes[i].strokes) {
                     holesWon[1]++;
                 }
             }
@@ -793,22 +773,21 @@ void SetScorecardLayout(s32 layout) {
             break;
         case GAME_MODE_SKINS_MATCH:
         case GAME_MODE_CLUB_SLOTS:
-            for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-                skinsRanks[sharedIndex] = 0;
-                for (otherIndex = 0; otherIndex != g_GameState.playerCount; otherIndex++) {
-                    if (sharedIndex != otherIndex &&
-                        g_RoundHud.skinsTotals[sharedIndex] > g_RoundHud.skinsTotals[otherIndex]) {
-                        skinsRanks[sharedIndex]++;
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                skinsRanks[i] = 0;
+                for (j = 0; j != g_GameState.playerCount; j++) {
+                    if (i != j && g_RoundHud.skinsTotals[i] > g_RoundHud.skinsTotals[j]) {
+                        skinsRanks[i]++;
                     }
                 }
             }
 
-            for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-                if (skinsRanks[sharedIndex] < g_GameState.playerCount + 1) {
-                    g_Scorecard.content.faceImageOffsets[sharedIndex] = 0;
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                if (skinsRanks[i] < g_GameState.playerCount + 1) {
+                    g_Scorecard.content.faceImageOffsets[i] = 0;
                 }
                 else {
-                    g_Scorecard.content.faceImageOffsets[sharedIndex] = BEHIND_FACE_IMAGE_OFFSET;
+                    g_Scorecard.content.faceImageOffsets[i] = BEHIND_FACE_IMAGE_OFFSET;
                 }
             }
 

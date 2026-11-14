@@ -1111,9 +1111,7 @@ void StartShotPanel(void) {
 void LoadRoundHud(void) {
     AssetFile file;
     EncodedAsset asset;
-    /* Counts markers and players in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
+    s32 i;
     u32 paletteSize;
 
     g_CourseSkyImage = AllocMemory(OpenEncodedAsset(ASSET_COURSE_SKY_IMAGE_0, &asset));
@@ -1128,9 +1126,9 @@ void LoadRoundHud(void) {
     ReadEncodedAsset(f_DistanceFont, &asset);
     g_RingTexels = AllocMemory(RING_TEXTURE_SIZE * RING_TEXTURE_SIZE);
     BuildRingTexels(g_RingTexels, RING_TEXTURE_SIZE, RING_TEXTURE_SIZE, RING_TEXTURE_OUTER_RADIUS);
-    for (sharedIndex = 0; sharedIndex != SHOT_OFFSET_MARKER_COUNT; sharedIndex++) {
-        f_ShotOffsetMarkerXs[sharedIndex] = 0;
-        f_ShotOffsetMarkerYs[sharedIndex] = 0;
+    for (i = 0; i != SHOT_OFFSET_MARKER_COUNT; i++) {
+        f_ShotOffsetMarkerXs[i] = 0;
+        f_ShotOffsetMarkerYs[i] = 0;
     }
 
     g_HudScissor.left = HUD_MARGIN;
@@ -1145,16 +1143,15 @@ void LoadRoundHud(void) {
     g_BlendedTextureStillLayer =
         AllocMemory(OpenEncodedAsset(ASSET_BLENDED_TEXTURE_STILL_LAYER, &asset));
     ReadEncodedAsset(g_BlendedTextureStillLayer, &asset);
-    for (sharedIndex = 0; sharedIndex != MAX_PLAYER_COUNT; sharedIndex++) {
-        g_PlayerFaceImages[sharedIndex] = AllocMemory(OpenEncodedAsset(
-            g_CharacterImageAssets[sharedIndex] + CHARACTER_FACE_IMAGE_OFFSET,
-            &asset
-        ));
-        ReadEncodedAsset(g_PlayerFaceImages[sharedIndex], &asset);
-        OpenAssetFile(g_CharacterPaletteAssets[sharedIndex], &file);
+    for (i = 0; i != MAX_PLAYER_COUNT; i++) {
+        g_PlayerFaceImages[i] = AllocMemory(
+            OpenEncodedAsset(g_CharacterImageAssets[i] + CHARACTER_FACE_IMAGE_OFFSET, &asset)
+        );
+        ReadEncodedAsset(g_PlayerFaceImages[i], &asset);
+        OpenAssetFile(g_CharacterPaletteAssets[i], &file);
         paletteSize = GetAssetFileSize(&file);
-        g_PlayerFacePalettes[sharedIndex] = AllocMemory(paletteSize);
-        ReadAssetFile(g_PlayerFacePalettes[sharedIndex], paletteSize, &file);
+        g_PlayerFacePalettes[i] = AllocMemory(paletteSize);
+        ReadAssetFile(g_PlayerFacePalettes[i], paletteSize, &file);
     }
 
     InitScreenLayers();
@@ -3133,9 +3130,7 @@ void DrawShotEffect(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 contactStyle;
     f32 scale;
-    /* Counts groups and quads in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
+    s32 i;
 
     if (f_ShotEffectTime < 0.0f) {
         return;
@@ -3220,38 +3215,38 @@ void DrawShotEffect(Gfx **displayListHead) {
             G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
         );
         gSPVertex(gfx++, f_LongShotVertices, LONG_SHOT_GROUP_COUNT * 8, 0);
-        for (sharedIndex = 0; sharedIndex != LONG_SHOT_GROUP_COUNT; sharedIndex++) {
+        for (i = 0; i != LONG_SHOT_GROUP_COUNT; i++) {
             gSP2Triangles(
                 gfx++,
-                sharedIndex * 8,
-                (sharedIndex * 8) + 1,
-                (sharedIndex * 8) + 2,
+                i * 8,
+                (i * 8) + 1,
+                (i * 8) + 2,
                 0,
-                sharedIndex * 8,
-                (sharedIndex * 8) + 2,
-                (sharedIndex * 8) + 3,
+                i * 8,
+                (i * 8) + 2,
+                (i * 8) + 3,
                 0
             );
             gSP2Triangles(
                 gfx++,
-                (sharedIndex * 8) + 1,
-                (sharedIndex * 8) + 4,
-                (sharedIndex * 8) + 5,
+                (i * 8) + 1,
+                (i * 8) + 4,
+                (i * 8) + 5,
                 0,
-                (sharedIndex * 8) + 1,
-                (sharedIndex * 8) + 5,
-                (sharedIndex * 8) + 2,
+                (i * 8) + 1,
+                (i * 8) + 5,
+                (i * 8) + 2,
                 0
             );
             gSP2Triangles(
                 gfx++,
-                (sharedIndex * 8) + 4,
-                (sharedIndex * 8) + 6,
-                (sharedIndex * 8) + 7,
+                (i * 8) + 4,
+                (i * 8) + 6,
+                (i * 8) + 7,
                 0,
-                (sharedIndex * 8) + 4,
-                (sharedIndex * 8) + 7,
-                (sharedIndex * 8) + 5,
+                (i * 8) + 4,
+                (i * 8) + 7,
+                (i * 8) + 5,
                 0
             );
         }
@@ -3336,16 +3331,16 @@ void DrawShotEffect(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        for (sharedIndex = 0; sharedIndex != SPARK_TRAIL_QUAD_COUNT; sharedIndex++) {
+        for (i = 0; i != SPARK_TRAIL_QUAD_COUNT; i++) {
             gSP2Triangles(
                 gfx++,
-                sharedIndex * QUAD_VERTEX_COUNT,
-                (sharedIndex * QUAD_VERTEX_COUNT) + 1,
-                (sharedIndex * QUAD_VERTEX_COUNT) + 2,
+                i * QUAD_VERTEX_COUNT,
+                (i * QUAD_VERTEX_COUNT) + 1,
+                (i * QUAD_VERTEX_COUNT) + 2,
                 0,
-                sharedIndex * QUAD_VERTEX_COUNT,
-                (sharedIndex * QUAD_VERTEX_COUNT) + 2,
-                (sharedIndex * QUAD_VERTEX_COUNT) + 3,
+                i * QUAD_VERTEX_COUNT,
+                (i * QUAD_VERTEX_COUNT) + 2,
+                (i * QUAD_VERTEX_COUNT) + 3,
                 0
             );
         }
@@ -3368,16 +3363,16 @@ void DrawShotEffect(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        for (sharedIndex = 0; sharedIndex != SPARK_TRAIL_QUAD_COUNT; sharedIndex++) {
+        for (i = 0; i != SPARK_TRAIL_QUAD_COUNT; i++) {
             gSP2Triangles(
                 gfx++,
-                sharedIndex * QUAD_VERTEX_COUNT,
-                (sharedIndex * QUAD_VERTEX_COUNT) + 1,
-                (sharedIndex * QUAD_VERTEX_COUNT) + 2,
+                i * QUAD_VERTEX_COUNT,
+                (i * QUAD_VERTEX_COUNT) + 1,
+                (i * QUAD_VERTEX_COUNT) + 2,
                 0,
-                sharedIndex * QUAD_VERTEX_COUNT,
-                (sharedIndex * QUAD_VERTEX_COUNT) + 2,
-                (sharedIndex * QUAD_VERTEX_COUNT) + 3,
+                i * QUAD_VERTEX_COUNT,
+                (i * QUAD_VERTEX_COUNT) + 2,
+                (i * QUAD_VERTEX_COUNT) + 3,
                 0
             );
         }
@@ -4018,9 +4013,7 @@ void DrawRoundHud(CameraView *view) {
     Club *club;
     s32 scoreboardX;
     Boolean hasHandicap;
-    /* Counts players and rings in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
+    s32 i;
     s32 ringCount;
     s32 height;
     Player *shooter;
@@ -4049,8 +4042,8 @@ void DrawRoundHud(CameraView *view) {
 
     scoreboardX =
         (f_LetterboxHeight * SCOREBOARD_LETTERBOX_SHIFT) + SCOREBOARD_X + g_ShotPanelOffsetX;
-    for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-        if (g_Players[sharedIndex].handicap > 0) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        if (g_Players[i].handicap > 0) {
             hasHandicap = TRUE;
             scoreboardX -= SCOREBOARD_HANDICAP_SHIFT;
             break;
@@ -4096,14 +4089,11 @@ void DrawRoundHud(CameraView *view) {
             G_CC_MODULATEIDECALA_PRIM,
             G_CC_MODULATEIDECALA_PRIM
         );
-        for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-            gDPLoadTLUT_pal256(
-                g_DisplayListHead++,
-                TextureAddress(g_PlayerFacePalettes[sharedIndex])
-            );
+        for (i = 0; i != g_GameState.playerCount; i++) {
+            gDPLoadTLUT_pal256(g_DisplayListHead++, TextureAddress(g_PlayerFacePalettes[i]));
             gDPLoadTextureBlock(
                 g_DisplayListHead++,
-                TextureAddress(g_PlayerFaceImages[sharedIndex]),
+                TextureAddress(g_PlayerFaceImages[i]),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 FACE_WIDTH,
@@ -4116,7 +4106,7 @@ void DrawRoundHud(CameraView *view) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            if (sharedIndex == g_CurrentShot.playerIndex) {
+            if (i == g_CurrentShot.playerIndex) {
                 gDPPipeSync(g_DisplayListHead++);
                 gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
                 gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
@@ -4124,13 +4114,10 @@ void DrawRoundHud(CameraView *view) {
                 gSPScisTextureRectangle(
                     g_DisplayListHead++,
                     QuarterPixels(scoreboardX - FACE_INSET_X),
-                    QuarterPixels(
-                        SCOREBOARD_Y - FACE_INSET_Y + sharedIndex * SCOREBOARD_ROW_HEIGHT
-                    ),
+                    QuarterPixels(SCOREBOARD_Y - FACE_INSET_Y + i * SCOREBOARD_ROW_HEIGHT),
                     QuarterPixels(scoreboardX - FACE_INSET_X + FACE_WIDTH),
                     QuarterPixels(
-                        SCOREBOARD_Y - FACE_INSET_Y + FACE_HEIGHT +
-                        sharedIndex * SCOREBOARD_ROW_HEIGHT
+                        SCOREBOARD_Y - FACE_INSET_Y + FACE_HEIGHT + i * SCOREBOARD_ROW_HEIGHT
                     ),
                     G_TX_RENDERTILE,
                     0,
@@ -4147,11 +4134,9 @@ void DrawRoundHud(CameraView *view) {
                 gSPScisTextureRectangle(
                     g_DisplayListHead++,
                     QuarterPixels(scoreboardX),
-                    QuarterPixels(SCOREBOARD_Y + sharedIndex * SCOREBOARD_ROW_HEIGHT),
+                    QuarterPixels(SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT),
                     QuarterPixels(scoreboardX + SMALL_FACE_WIDTH),
-                    QuarterPixels(
-                        SCOREBOARD_Y + SMALL_FACE_HEIGHT + sharedIndex * SCOREBOARD_ROW_HEIGHT
-                    ),
+                    QuarterPixels(SCOREBOARD_Y + SMALL_FACE_HEIGHT + i * SCOREBOARD_ROW_HEIGHT),
                     G_TX_RENDERTILE,
                     0,
                     0,
@@ -4352,8 +4337,8 @@ void DrawRoundHud(CameraView *view) {
         ringCount = 0;
         if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
             shooter = &g_Players[g_RoundHud.shooterIndex];
-            for (sharedIndex = 0; sharedIndex != RING_COUNT; sharedIndex++) {
-                ringCount += shooter->ringStates[sharedIndex] == RING_STATE_SHOWN;
+            for (i = 0; i != RING_COUNT; i++) {
+                ringCount += shooter->ringStates[i] == RING_STATE_SHOWN;
             }
 
             sprintf(g_PrintBuffer, "%d", ringCount);
@@ -4368,8 +4353,8 @@ void DrawRoundHud(CameraView *view) {
         if (g_IsDebugEnabled &&
             (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & D_CBUTTONS)) {
             shooter = &g_Players[g_RoundHud.shooterIndex];
-            for (sharedIndex = 0; sharedIndex != RING_COUNT; sharedIndex++) {
-                shooter->ringStates[sharedIndex] = RING_STATE_NONE;
+            for (i = 0; i != RING_COUNT; i++) {
+                shooter->ringStates[i] = RING_STATE_NONE;
             }
         }
 
@@ -4648,20 +4633,20 @@ void DrawRoundHud(CameraView *view) {
     }
 
     if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
-        for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
+        for (i = 0; i != g_GameState.playerCount; i++) {
             SetTextColor(&g_DisplayListHead, 255, 255, 255);
-            sprintf(g_PrintBuffer, "%d", g_Players[sharedIndex].strokeCount);
+            sprintf(g_PrintBuffer, "%d", g_Players[i].strokeCount);
             DrawShadowedText(
                 &g_DisplayListHead,
                 scoreboardX + SCOREBOARD_TEXT_X,
-                SCOREBOARD_Y + (sharedIndex * SCOREBOARD_ROW_HEIGHT),
+                SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT),
                 g_PrintBuffer
             );
             if (hasHandicap) {
                 DrawShadowedText(
                     &g_DisplayListHead,
                     scoreboardX + HANDICAP_COLON_X,
-                    SCOREBOARD_Y + (sharedIndex * SCOREBOARD_ROW_HEIGHT),
+                    SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT),
                     ":"
                 );
                 sprintf(
@@ -4670,13 +4655,13 @@ void DrawRoundHud(CameraView *view) {
                     GetHandicapOffset(
                         GetCourseRecordIndex(),
                         g_GameState.holeIndex,
-                        g_Players[sharedIndex].handicap
+                        g_Players[i].handicap
                     )
                 );
                 DrawShadowedText(
                     &g_DisplayListHead,
                     scoreboardX + HANDICAP_X,
-                    SCOREBOARD_Y + (sharedIndex * SCOREBOARD_ROW_HEIGHT),
+                    SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT),
                     g_PrintBuffer
                 );
             }
@@ -4691,30 +4676,30 @@ void DrawRoundHud(CameraView *view) {
                     case GAME_MODE_UNLISTED_STROKE:
                     case GAME_MODE_TOURNAMENT:
                     case GAME_MODE_SPEED_GOLF:
-                        if (g_RoundHud.skinsTotals[sharedIndex] == 0) {
+                        if (g_RoundHud.skinsTotals[i] == 0) {
                             sprintf(g_PrintBuffer, "#0");
                         }
                         else {
-                            sprintf(g_PrintBuffer, "%+d", g_RoundHud.skinsTotals[sharedIndex]);
+                            sprintf(g_PrintBuffer, "%+d", g_RoundHud.skinsTotals[i]);
                         }
 
                         break;
                     case GAME_MODE_MATCH_GAME:
                     case GAME_MODE_GET_CHARACTER:
-                        if (g_RoundHud.skinsTotals[sharedIndex] == 0) {
+                        if (g_RoundHud.skinsTotals[i] == 0) {
                             sprintf(g_PrintBuffer, "EVEN");
                         }
-                        else if (g_RoundHud.skinsTotals[sharedIndex] < 0) {
-                            sprintf(g_PrintBuffer, "%dUP", -g_RoundHud.skinsTotals[sharedIndex]);
+                        else if (g_RoundHud.skinsTotals[i] < 0) {
+                            sprintf(g_PrintBuffer, "%dUP", -g_RoundHud.skinsTotals[i]);
                         }
                         else {
-                            sprintf(g_PrintBuffer, "%dDW", g_RoundHud.skinsTotals[sharedIndex]);
+                            sprintf(g_PrintBuffer, "%dDW", g_RoundHud.skinsTotals[i]);
                         }
 
                         break;
                     case GAME_MODE_SKINS_MATCH:
                     case GAME_MODE_CLUB_SLOTS:
-                        sprintf(g_PrintBuffer, "%dP", g_RoundHud.skinsTotals[sharedIndex]);
+                        sprintf(g_PrintBuffer, "%dP", g_RoundHud.skinsTotals[i]);
                         break;
                     case GAME_MODE_TRAINING:
                     case GAME_MODE_RECORD_REPLAY:
@@ -4727,13 +4712,13 @@ void DrawRoundHud(CameraView *view) {
             DrawShadowedText(
                 &g_DisplayListHead,
                 scoreboardX + SCOREBOARD_TEXT_X,
-                SCOREBOARD_SCORE_Y + (sharedIndex * SCOREBOARD_ROW_HEIGHT),
+                SCOREBOARD_SCORE_Y + (i * SCOREBOARD_ROW_HEIGHT),
                 g_PrintBuffer
             );
             SetTextColor(&g_DisplayListHead, 255, 255, 255);
             if (g_GameState.betRates[BET_LONGEST_DRIVE] != UNSET_BET_RATE &&
                 IsMarkedParFive(GetCourseRecordIndex(), g_GameState.holeIndex)) {
-                contestDistance = g_Players[sharedIndex].driveDistance;
+                contestDistance = g_Players[i].driveDistance;
                 if (contestDistance != UNMEASURED_DISTANCE) {
                     if (contestDistance == UNCOUNTED_DISTANCE) {
                         sprintf(g_PrintBuffer, "miss");
@@ -4745,7 +4730,7 @@ void DrawRoundHud(CameraView *view) {
                     DrawShadowedText(
                         &g_DisplayListHead,
                         scoreboardX + DRIVE_DISTANCE_X,
-                        SCOREBOARD_CONTEST_Y + (sharedIndex * SCOREBOARD_ROW_HEIGHT),
+                        SCOREBOARD_CONTEST_Y + (i * SCOREBOARD_ROW_HEIGHT),
                         g_PrintBuffer
                     );
                 }
@@ -4753,7 +4738,7 @@ void DrawRoundHud(CameraView *view) {
 
             if (g_GameState.betRates[BET_NEAREST_PIN] != UNSET_BET_RATE &&
                 IsParThree(GetCourseRecordIndex(), g_GameState.holeIndex)) {
-                contestDistance = g_Players[sharedIndex].pinDistance;
+                contestDistance = g_Players[i].pinDistance;
                 if (contestDistance != UNMEASURED_DISTANCE) {
                     if (contestDistance == UNCOUNTED_DISTANCE) {
                         sprintf(g_PrintBuffer, "miss");
@@ -4774,7 +4759,7 @@ void DrawRoundHud(CameraView *view) {
                     DrawShadowedText(
                         &g_DisplayListHead,
                         scoreboardX + PIN_DISTANCE_X,
-                        SCOREBOARD_CONTEST_Y + (sharedIndex * SCOREBOARD_ROW_HEIGHT),
+                        SCOREBOARD_CONTEST_Y + (i * SCOREBOARD_ROW_HEIGHT),
                         g_PrintBuffer
                     );
                 }

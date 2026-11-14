@@ -918,9 +918,7 @@ s32 FindMiniGolfGroundHit(
     s32 firstRow;
     s32 column;
     s32 triangleCount;
-    /* Counts triangles and search steps in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
+    s32 i;
     s32 hitIndex;
     s32 startSide;
     s32 endSide;
@@ -1044,8 +1042,8 @@ s32 FindMiniGolfGroundHit(
         }
 
         nearestFraction = NO_PLANE_HIT_FRACTION;
-        for (sharedIndex = 0; sharedIndex < triangleCount; sharedIndex++) {
-            GetTrianglePlane(&triangles[sharedIndex], &plane);
+        for (i = 0; i < triangleCount; i++) {
+            GetTrianglePlane(&triangles[i], &plane);
             planeOffset = plane.distance * WORLD_TO_COURSE_SCALE;
             startSide = (plane.normal[AXIS_X] * startX) + (plane.normal[AXIS_Y] * startY) +
                 (plane.normal[AXIS_Z] * startZ) + planeOffset;
@@ -1064,41 +1062,34 @@ s32 FindMiniGolfGroundHit(
                 if (hitFraction < nearestFraction) {
                     hitX = (s32)((endX - startX) * hitFraction) + startX;
                     hitZ = (s32)((endZ - startZ) * hitFraction) + startZ;
-                    if (((triangles[sharedIndex].corners[AXIS_X][1] -
-                             triangles[sharedIndex].corners[AXIS_X][0]) *
-                            (hitZ -
-                                (triangles[sharedIndex].corners[AXIS_Z][0]
-                                    << WORLD_TO_COURSE_SHIFT))) -
-                            ((triangles[sharedIndex].corners[AXIS_Z][1] -
-                                 triangles[sharedIndex].corners[AXIS_Z][0]) *
+                    if (((triangles[i].corners[AXIS_X][1] - triangles[i].corners[AXIS_X][0]) *
+                            (hitZ - (triangles[i].corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT))) -
+                            ((triangles[i].corners[AXIS_Z][1] - triangles[i].corners[AXIS_Z][0]) *
                                 (hitX -
-                                    (triangles[sharedIndex].corners[AXIS_X][0]
-                                        << WORLD_TO_COURSE_SHIFT))) >=
+                                    (triangles[i].corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT))) >=
                         0) {
-                        if (((triangles[sharedIndex].corners[AXIS_X][2] -
-                                 triangles[sharedIndex].corners[AXIS_X][1]) *
+                        if (((triangles[i].corners[AXIS_X][2] - triangles[i].corners[AXIS_X][1]) *
                                 (hitZ -
-                                    (triangles[sharedIndex].corners[AXIS_Z][1]
-                                        << WORLD_TO_COURSE_SHIFT))) -
-                                ((triangles[sharedIndex].corners[AXIS_Z][2] -
-                                     triangles[sharedIndex].corners[AXIS_Z][1]) *
+                                    (triangles[i].corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT))) -
+                                ((triangles[i].corners[AXIS_Z][2] -
+                                     triangles[i].corners[AXIS_Z][1]) *
                                     (hitX -
-                                        (triangles[sharedIndex].corners[AXIS_X][1]
+                                        (triangles[i].corners[AXIS_X][1]
                                             << WORLD_TO_COURSE_SHIFT))) >=
                             0) {
-                            if (((triangles[sharedIndex].corners[AXIS_X][0] -
-                                     triangles[sharedIndex].corners[AXIS_X][2]) *
+                            if (((triangles[i].corners[AXIS_X][0] -
+                                     triangles[i].corners[AXIS_X][2]) *
                                     (hitZ -
-                                        (triangles[sharedIndex].corners[AXIS_Z][2]
+                                        (triangles[i].corners[AXIS_Z][2]
                                             << WORLD_TO_COURSE_SHIFT))) -
-                                    ((triangles[sharedIndex].corners[AXIS_Z][0] -
-                                         triangles[sharedIndex].corners[AXIS_Z][2]) *
+                                    ((triangles[i].corners[AXIS_Z][0] -
+                                         triangles[i].corners[AXIS_Z][2]) *
                                         (hitX -
-                                            (triangles[sharedIndex].corners[AXIS_X][2]
+                                            (triangles[i].corners[AXIS_X][2]
                                                 << WORLD_TO_COURSE_SHIFT))) >=
                                 0) {
                                 nearestFraction = hitFraction;
-                                hitIndex = sharedIndex;
+                                hitIndex = i;
                             }
                         }
                     }
@@ -1120,7 +1111,7 @@ s32 FindMiniGolfGroundHit(
         if ((tileX != endTileX) | (tileZ != endTileZ)) {
             step = (1.0f - tileFraction) * 0.5f;
             hitFraction = tileFraction + step;
-            for (sharedIndex = 0; sharedIndex < TILE_SEARCH_STEP_COUNT; sharedIndex++) {
+            for (i = 0; i < TILE_SEARCH_STEP_COUNT; i++) {
                 nextTileX =
                     (s32)(((endX - startX) * hitFraction) + startX) >> MINI_GOLF_TILE_X_SHIFT;
                 nextTileZ =
@@ -1140,7 +1131,7 @@ s32 FindMiniGolfGroundHit(
             }
 
             tileX = nextTileX;
-            if (sharedIndex != TILE_SEARCH_STEP_COUNT) {
+            if (i != TILE_SEARCH_STEP_COUNT) {
                 tileZ = nextTileZ;
                 tileFraction = hitFraction;
             }
@@ -1182,9 +1173,7 @@ s32 FindGroundHit(
     s32 firstRow;
     s32 column;
     s32 triangleCount;
-    /* Counts triangles and search steps in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
+    s32 i;
     s32 hitIndex;
     s32 startSide;
     s32 endSide;
@@ -1308,8 +1297,8 @@ s32 FindGroundHit(
         }
 
         nearestFraction = NO_PLANE_HIT_FRACTION;
-        for (sharedIndex = 0; sharedIndex < triangleCount; sharedIndex++) {
-            GetTrianglePlane(&triangles[sharedIndex], &plane);
+        for (i = 0; i < triangleCount; i++) {
+            GetTrianglePlane(&triangles[i], &plane);
             planeOffset = plane.distance * WORLD_TO_COURSE_SCALE;
             endSide = (plane.normal[AXIS_X] * endX) + (plane.normal[AXIS_Y] * endY) +
                 (plane.normal[AXIS_Z] * endZ) + planeOffset;
@@ -1326,41 +1315,34 @@ s32 FindGroundHit(
                 if (hitFraction < nearestFraction) {
                     hitX = ((endX - startX) * hitFraction) + startX;
                     hitZ = ((endZ - startZ) * hitFraction) + startZ;
-                    if (((triangles[sharedIndex].corners[AXIS_X][1] -
-                             triangles[sharedIndex].corners[AXIS_X][0]) *
-                            (hitZ -
-                                (triangles[sharedIndex].corners[AXIS_Z][0]
-                                    << WORLD_TO_COURSE_SHIFT))) -
-                            ((triangles[sharedIndex].corners[AXIS_Z][1] -
-                                 triangles[sharedIndex].corners[AXIS_Z][0]) *
+                    if (((triangles[i].corners[AXIS_X][1] - triangles[i].corners[AXIS_X][0]) *
+                            (hitZ - (triangles[i].corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT))) -
+                            ((triangles[i].corners[AXIS_Z][1] - triangles[i].corners[AXIS_Z][0]) *
                                 (hitX -
-                                    (triangles[sharedIndex].corners[AXIS_X][0]
-                                        << WORLD_TO_COURSE_SHIFT))) >=
+                                    (triangles[i].corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT))) >=
                         0) {
-                        if (((triangles[sharedIndex].corners[AXIS_X][2] -
-                                 triangles[sharedIndex].corners[AXIS_X][1]) *
+                        if (((triangles[i].corners[AXIS_X][2] - triangles[i].corners[AXIS_X][1]) *
                                 (hitZ -
-                                    (triangles[sharedIndex].corners[AXIS_Z][1]
-                                        << WORLD_TO_COURSE_SHIFT))) -
-                                ((triangles[sharedIndex].corners[AXIS_Z][2] -
-                                     triangles[sharedIndex].corners[AXIS_Z][1]) *
+                                    (triangles[i].corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT))) -
+                                ((triangles[i].corners[AXIS_Z][2] -
+                                     triangles[i].corners[AXIS_Z][1]) *
                                     (hitX -
-                                        (triangles[sharedIndex].corners[AXIS_X][1]
+                                        (triangles[i].corners[AXIS_X][1]
                                             << WORLD_TO_COURSE_SHIFT))) >=
                             0) {
-                            if (((triangles[sharedIndex].corners[AXIS_X][0] -
-                                     triangles[sharedIndex].corners[AXIS_X][2]) *
+                            if (((triangles[i].corners[AXIS_X][0] -
+                                     triangles[i].corners[AXIS_X][2]) *
                                     (hitZ -
-                                        (triangles[sharedIndex].corners[AXIS_Z][2]
+                                        (triangles[i].corners[AXIS_Z][2]
                                             << WORLD_TO_COURSE_SHIFT))) -
-                                    ((triangles[sharedIndex].corners[AXIS_Z][0] -
-                                         triangles[sharedIndex].corners[AXIS_Z][2]) *
+                                    ((triangles[i].corners[AXIS_Z][0] -
+                                         triangles[i].corners[AXIS_Z][2]) *
                                         (hitX -
-                                            (triangles[sharedIndex].corners[AXIS_X][2]
+                                            (triangles[i].corners[AXIS_X][2]
                                                 << WORLD_TO_COURSE_SHIFT))) >=
                                 0) {
                                 nearestFraction = hitFraction;
-                                hitIndex = sharedIndex;
+                                hitIndex = i;
                             }
                         }
                     }
@@ -1382,7 +1364,7 @@ s32 FindGroundHit(
         if ((tileX != endTileX) | (tileZ != endTileZ)) {
             step = (1.0f - tileFraction) * 0.5f;
             hitFraction = tileFraction + step;
-            for (sharedIndex = 0; sharedIndex < TILE_SEARCH_STEP_COUNT; sharedIndex++) {
+            for (i = 0; i < TILE_SEARCH_STEP_COUNT; i++) {
                 nextTileX = (s32)(((endX - startX) * hitFraction) + startX) >> GROUND_TILE_SHIFT;
                 nextTileZ = (s32)(((endZ - startZ) * hitFraction) + startZ) >> GROUND_TILE_SHIFT;
                 tileDistance = Abs(nextTileX - tileX) + Abs(nextTileZ - tileZ);
@@ -1400,7 +1382,7 @@ s32 FindGroundHit(
             }
 
             tileX = nextTileX;
-            if (sharedIndex != TILE_SEARCH_STEP_COUNT) {
+            if (i != TILE_SEARCH_STEP_COUNT) {
                 tileZ = nextTileZ;
                 tileFraction = hitFraction;
             }

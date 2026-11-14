@@ -2451,7 +2451,7 @@ void ClearHoleBuild(void) {
 }
 
 void ClearHolePoints(void) {
-    s32 pointIndex;
+    s32 i;
 
     if (!g_GameState.isRoundContinued) {
         g_HoleSetup.cupPosition[AXIS_X] = 0;
@@ -2462,22 +2462,22 @@ void ClearHolePoints(void) {
         g_HoleSetup.teePosition[AXIS_Z] = 0;
     }
 
-    for (pointIndex = 0; pointIndex < CUP_POSITION_COUNT; pointIndex++) {
-        g_HolePoints.cupPositions[pointIndex][AXIS_X] = 0;
-        g_HolePoints.cupPositions[pointIndex][AXIS_Y] = 0;
-        g_HolePoints.cupPositions[pointIndex][AXIS_Z] = 0;
-        g_HolePoints.teePositions[pointIndex][AXIS_X] = 0;
-        g_HolePoints.teePositions[pointIndex][AXIS_Y] = 0;
-        g_HolePoints.teePositions[pointIndex][AXIS_Z] = 0;
+    for (i = 0; i < CUP_POSITION_COUNT; i++) {
+        g_HolePoints.cupPositions[i][AXIS_X] = 0;
+        g_HolePoints.cupPositions[i][AXIS_Y] = 0;
+        g_HolePoints.cupPositions[i][AXIS_Z] = 0;
+        g_HolePoints.teePositions[i][AXIS_X] = 0;
+        g_HolePoints.teePositions[i][AXIS_Y] = 0;
+        g_HolePoints.teePositions[i][AXIS_Z] = 0;
     }
 
-    for (pointIndex = 0; pointIndex < ARRAY_COUNT(g_HolePoints.aimPoints); pointIndex++) {
-        g_HolePoints.aimPoints[pointIndex][AXIS_X] = 0;
-        g_HolePoints.aimPoints[pointIndex][AXIS_Y] = 0;
-        g_HolePoints.aimPoints[pointIndex][AXIS_Z] = 0;
+    for (i = 0; i < ARRAY_COUNT(g_HolePoints.aimPoints); i++) {
+        g_HolePoints.aimPoints[i][AXIS_X] = 0;
+        g_HolePoints.aimPoints[i][AXIS_Y] = 0;
+        g_HolePoints.aimPoints[i][AXIS_Z] = 0;
 
-        *g_HolePoints.routePoints[pointIndex] = 0;
-        g_HolePoints.routePoints[pointIndex][AXIS_Z] = 0;
+        *g_HolePoints.routePoints[i] = 0;
+        g_HolePoints.routePoints[i][AXIS_Z] = 0;
     }
 }
 

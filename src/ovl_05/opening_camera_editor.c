@@ -875,7 +875,7 @@ void UpdateCameraEditor(void) {
 void EditOpeningCamera(void) {
     Vec3 offset;
     u32 fileSize;
-    s32 snapshotIndex;
+    s32 i;
 
     MeasureEditorCamera();
     PrintDebugText("<< ACTIVE >>", EDITOR_MENU_COLUMN, EDITOR_MENU_TITLE_ROW);
@@ -1120,31 +1120,23 @@ void EditOpeningCamera(void) {
         }
     }
 
-    for (snapshotIndex = 0; snapshotIndex != SNAPSHOT_COUNT; snapshotIndex++) {
-        if (snapshotIndex < SNAPSHOT_ROW_LENGTH) {
-            if (f_IsSnapshotSaved[snapshotIndex]) {
+    for (i = 0; i != SNAPSHOT_COUNT; i++) {
+        if (i < SNAPSHOT_ROW_LENGTH) {
+            if (f_IsSnapshotSaved[i]) {
                 SetDebugTextHighlight(TRUE);
-                PrintDebugText("*", SNAPSHOT_COLUMN + snapshotIndex, FIRST_SNAPSHOT_ROW);
+                PrintDebugText("*", SNAPSHOT_COLUMN + i, FIRST_SNAPSHOT_ROW);
             }
             else {
-                PrintDebugText("*", SNAPSHOT_COLUMN + snapshotIndex, FIRST_SNAPSHOT_ROW);
+                PrintDebugText("*", SNAPSHOT_COLUMN + i, FIRST_SNAPSHOT_ROW);
             }
         }
         else {
-            if (f_IsSnapshotSaved[snapshotIndex]) {
+            if (f_IsSnapshotSaved[i]) {
                 SetDebugTextHighlight(TRUE);
-                PrintDebugText(
-                    "*",
-                    SNAPSHOT_COLUMN + snapshotIndex - SNAPSHOT_ROW_LENGTH,
-                    SECOND_SNAPSHOT_ROW
-                );
+                PrintDebugText("*", SNAPSHOT_COLUMN + i - SNAPSHOT_ROW_LENGTH, SECOND_SNAPSHOT_ROW);
             }
             else {
-                PrintDebugText(
-                    "*",
-                    SNAPSHOT_COLUMN + snapshotIndex - SNAPSHOT_ROW_LENGTH,
-                    SECOND_SNAPSHOT_ROW
-                );
+                PrintDebugText("*", SNAPSHOT_COLUMN + i - SNAPSHOT_ROW_LENGTH, SECOND_SNAPSHOT_ROW);
             }
         }
     }

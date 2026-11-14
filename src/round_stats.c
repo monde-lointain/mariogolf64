@@ -548,9 +548,7 @@ s32 RecordDrive(void) {
 
 void SettleHoleBets(void) {
     s32 playerIndex;
-    /* Counts holes, other players and bets in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
+    s32 j;
     s32 lastHole = g_GameState.holeIndex - 1;
     s32 teamScore;
     s32 rivalTeamScore;
@@ -567,23 +565,19 @@ void SettleHoleBets(void) {
 
         for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             totals[playerIndex] = 0;
-            for (sharedIndex = startHole; sharedIndex != endHole; sharedIndex++) {
-                totals[playerIndex] += g_Players[playerIndex].holes[sharedIndex].strokes +
-                    GetHandicapOffset(
-                        GetCourseRecordIndex(),
-                        sharedIndex,
-                        g_Players[playerIndex].handicap
-                    );
+            for (j = startHole; j != endHole; j++) {
+                totals[playerIndex] += g_Players[playerIndex].holes[j].strokes +
+                    GetHandicapOffset(GetCourseRecordIndex(), j, g_Players[playerIndex].handicap);
             }
         }
 
         for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-            for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-                if (playerIndex != sharedIndex) {
-                    if (totals[playerIndex] < totals[sharedIndex]) {
+            for (j = 0; j != g_GameState.playerCount; j++) {
+                if (playerIndex != j) {
+                    if (totals[playerIndex] < totals[j]) {
                         g_BetTallies[playerIndex][BET_NASSAU] += g_GameState.betRates[BET_NASSAU];
                     }
-                    else if (totals[sharedIndex] < totals[playerIndex]) {
+                    else if (totals[j] < totals[playerIndex]) {
                         g_BetTallies[playerIndex][BET_NASSAU] -= g_GameState.betRates[BET_NASSAU];
                     }
                 }
@@ -596,8 +590,8 @@ void SettleHoleBets(void) {
 
     if (g_GameState.betRates[BET_STROKES] > 0) {
         for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-            for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
-                s32 rivalIndex = sharedIndex;
+            for (j = 0; j != g_GameState.playerCount; j++) {
+                s32 rivalIndex = j;
                 if (playerIndex != rivalIndex) {
                     score = g_Players[playerIndex].strokeCount +
                         GetHandicapOffset(
@@ -605,14 +599,13 @@ void SettleHoleBets(void) {
                             lastHole,
                             g_Players[playerIndex].handicap
                         );
-                    g_BetTallies[playerIndex][BET_STROKES] +=
-                        (g_Players[sharedIndex].strokeCount +
-                            GetHandicapOffset(
-                                GetCourseRecordIndex(),
-                                lastHole,
-                                g_Players[sharedIndex].handicap
-                            ) -
-                            score) *
+                    g_BetTallies[playerIndex][BET_STROKES] += (g_Players[j].strokeCount +
+                                                                  GetHandicapOffset(
+                                                                      GetCourseRecordIndex(),
+                                                                      lastHole,
+                                                                      g_Players[j].handicap
+                                                                  ) -
+                                                                  score) *
                         g_GameState.betRates[BET_STROKES];
                 }
             }
@@ -756,8 +749,8 @@ void SettleHoleBets(void) {
     g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN] = g_NearestPinPot;
     g_GameState.carriedPots[CARRIED_POT_HOLE] = g_HolePot;
     for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
-        for (sharedIndex = 0; sharedIndex != BET_COUNT; sharedIndex++) {
-            g_Players[playerIndex].betTallies[sharedIndex] = g_BetTallies[playerIndex][sharedIndex];
+        for (j = 0; j != BET_COUNT; j++) {
+            g_Players[playerIndex].betTallies[j] = g_BetTallies[playerIndex][j];
         }
     }
 

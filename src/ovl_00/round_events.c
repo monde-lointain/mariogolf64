@@ -3481,9 +3481,7 @@ void DrawWindFlyGuy(Gfx **displayListHead) {
     Mat4 matrix;
     Gfx *gfx = *displayListHead;
     s32 alpha;
-    /* Counts matrices and quads in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
+    s32 i;
     s32 slotsBack;
     s32 streakSlot;
 
@@ -3528,9 +3526,9 @@ void DrawWindFlyGuy(Gfx **displayListHead) {
         f_WindFlyGuyLastPosition = f_WindFlyGuyPath[0];
         f_WindStreakHead = 0;
         SetContactHalfWidth(WIND_STREAK_HALF_WIDTH);
-        for (sharedIndex = 0; sharedIndex != CONTACT_MATRIX_COUNT; sharedIndex++) {
+        for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
             guTranslate(
-                &f_ContactMatrices[sharedIndex],
+                &f_ContactMatrices[i],
                 position.x - (SCREEN_WIDTH / 2),
                 (SCREEN_HEIGHT / 2) - position.y,
                 WIND_STREAK_DEPTH
@@ -3602,46 +3600,40 @@ void DrawWindFlyGuy(Gfx **displayListHead) {
         G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH
     );
     gDPPipeSync(gfx++);
-    for (sharedIndex = 0; sharedIndex != WIND_STREAK_FIRST_RUN; sharedIndex++) {
-        streakSlot = (f_WindStreakHead + sharedIndex) % WIND_STREAK_LENGTH;
+    for (i = 0; i != WIND_STREAK_FIRST_RUN; i++) {
+        streakSlot = (f_WindStreakHead + i) % WIND_STREAK_LENGTH;
         gSPMatrix(
             gfx++,
             PhysicalAddress(&f_ContactMatrices[streakSlot]),
             G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
         );
-        gSPVertex(gfx++, f_ContactVertices, 2, sharedIndex * 2);
+        gSPVertex(gfx++, f_ContactVertices, 2, i * 2);
+        gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, i << WIND_STREAK_TEXTURE_T_SHIFT);
         gSPModifyVertex(
             gfx++,
-            sharedIndex * 2,
+            (i * 2) + 1,
             G_MWO_POINT_ST,
-            sharedIndex << WIND_STREAK_TEXTURE_T_SHIFT
-        );
-        gSPModifyVertex(
-            gfx++,
-            (sharedIndex * 2) + 1,
-            G_MWO_POINT_ST,
-            TexcoordWord(WIND_STREAK_TEXTURE_S, sharedIndex << WIND_STREAK_TEXTURE_T_SHIFT)
+            TexcoordWord(WIND_STREAK_TEXTURE_S, i << WIND_STREAK_TEXTURE_T_SHIFT)
         );
     }
 
-    for (sharedIndex = 0; sharedIndex != WIND_STREAK_QUADS_PER_RUN; sharedIndex++) {
+    for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {
         gSP2Triangles(
             gfx++,
-            (sharedIndex * 2) + 1,
-            sharedIndex * 2,
-            (sharedIndex * 2) + 2,
+            (i * 2) + 1,
+            i * 2,
+            (i * 2) + 2,
             0,
-            (sharedIndex * 2) + 1,
-            (sharedIndex * 2) + 2,
-            (sharedIndex * 2) + 3,
+            (i * 2) + 1,
+            (i * 2) + 2,
+            (i * 2) + 3,
             0
         );
     }
 
-    for (sharedIndex = WIND_STREAK_FIRST_RUN; sharedIndex != WIND_STREAK_SECOND_RUN_END;
-        sharedIndex++) {
-        slotsBack = (sharedIndex - WIND_STREAK_FIRST_RUN) * 2;
-        streakSlot = (f_WindStreakHead + sharedIndex) % WIND_STREAK_LENGTH;
+    for (i = WIND_STREAK_FIRST_RUN; i != WIND_STREAK_SECOND_RUN_END; i++) {
+        slotsBack = (i - WIND_STREAK_FIRST_RUN) * 2;
+        streakSlot = (f_WindStreakHead + i) % WIND_STREAK_LENGTH;
         gSPMatrix(
             gfx++,
             PhysicalAddress(&f_ContactMatrices[streakSlot]),
@@ -3652,26 +3644,26 @@ void DrawWindFlyGuy(Gfx **displayListHead) {
             gfx++,
             WIND_STREAK_LAST_SLOT - slotsBack,
             G_MWO_POINT_ST,
-            sharedIndex << WIND_STREAK_TEXTURE_T_SHIFT
+            i << WIND_STREAK_TEXTURE_T_SHIFT
         );
         gSPModifyVertex(
             gfx++,
             WIND_STREAK_LAST_SLOT + 1 - slotsBack,
             G_MWO_POINT_ST,
-            TexcoordWord(WIND_STREAK_TEXTURE_S, sharedIndex << WIND_STREAK_TEXTURE_T_SHIFT)
+            TexcoordWord(WIND_STREAK_TEXTURE_S, i << WIND_STREAK_TEXTURE_T_SHIFT)
         );
     }
 
-    for (sharedIndex = 0; sharedIndex != WIND_STREAK_QUADS_PER_RUN; sharedIndex++) {
+    for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {
         gSP2Triangles(
             gfx++,
-            (sharedIndex * 2) + 1,
-            sharedIndex * 2,
-            (sharedIndex * 2) + 2,
+            (i * 2) + 1,
+            i * 2,
+            (i * 2) + 2,
             0,
-            (sharedIndex * 2) + 1,
-            (sharedIndex * 2) + 2,
-            (sharedIndex * 2) + 3,
+            (i * 2) + 1,
+            (i * 2) + 2,
+            (i * 2) + 3,
             0
         );
     }

@@ -508,9 +508,7 @@ void ResetGolfBalls(void) {
 
 void UpdateGolfBalls(void) {
     s32 currentIndex;
-    /* Counts players, simulations and afterimages in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
+    s32 i;
     Player *player;
     GolfBall *ball;
     BallSimulation *simulation;
@@ -531,22 +529,22 @@ void UpdateGolfBalls(void) {
         currentIndex = 0;
     }
 
-    for (sharedIndex = 0; sharedIndex < g_GameState.playerCount; sharedIndex++) {
-        GolfBall *ball = &f_GolfBalls[sharedIndex];
+    for (i = 0; i < g_GameState.playerCount; i++) {
+        GolfBall *ball = &f_GolfBalls[i];
 
-        player = &g_Players[sharedIndex];
+        player = &g_Players[i];
         if (player->holeStatus != HOLE_STATUS_PLAYING || player->strokeCount == 0) {
             ball->alpha = BALL_HIDDEN;
         }
 
-        if (currentIndex != sharedIndex) {
+        if (currentIndex != i) {
             ball->state = BALL_STATE_STOPPED;
             if (GetSurfaceInfo(player->ballSurface)->kind != SURFACE_KIND_GREEN &&
                 !g_GameState.isMiniGolf) {
                 ball->markerPlayerIndex = BALL_NO_MARKER;
             }
             else {
-                ball->markerPlayerIndex = sharedIndex;
+                ball->markerPlayerIndex = i;
             }
         }
     }
@@ -554,10 +552,8 @@ void UpdateGolfBalls(void) {
     if (IsTurnTakingStep(g_GameState.step)) {
         GolfBall *ball;
 
-        for (sharedIndex = 0, ball = &f_GolfBalls[currentIndex];
-            sharedIndex < BALL_SIMULATION_COUNT;
-            sharedIndex++) {
-            simulation = &g_BallSimulations[sharedIndex];
+        for (i = 0, ball = &f_GolfBalls[currentIndex]; i < BALL_SIMULATION_COUNT; i++) {
+            simulation = &g_BallSimulations[i];
             ball->isInCup = FALSE;
             if (simulation->playerIndex >= 0 &&
                 g_Players[currentIndex].holeStatus == HOLE_STATUS_PLAYING) {
@@ -635,8 +631,8 @@ void UpdateGolfBalls(void) {
         if (g_IsCupViewShown == TRUE) {
             if (!f_IsBallAfterimageZoomed) {
                 f_IsBallAfterimageZoomed = TRUE;
-                for (sharedIndex = 0; sharedIndex != f_BallAfterimageLength; sharedIndex++) {
-                    afterimage = &f_BallAfterimages[sharedIndex];
+                for (i = 0; i != f_BallAfterimageLength; i++) {
+                    afterimage = &f_BallAfterimages[i];
                     if (afterimage->alpha != AFTERIMAGE_UNUSED) {
                         s32 coursePosition[3] UNUSED;
 
@@ -658,8 +654,8 @@ void UpdateGolfBalls(void) {
         }
         else if (f_IsBallAfterimageZoomed == TRUE) {
             f_IsBallAfterimageZoomed = FALSE;
-            for (sharedIndex = 0; sharedIndex != f_BallAfterimageLength; sharedIndex++) {
-                pulledAfterimage = &f_BallAfterimages[sharedIndex];
+            for (i = 0; i != f_BallAfterimageLength; i++) {
+                pulledAfterimage = &f_BallAfterimages[i];
                 if (pulledAfterimage->alpha != AFTERIMAGE_UNUSED) {
                     pulledAfterimage->position[AXIS_X] -=
                         (pulledAfterimage->position[AXIS_X] -
@@ -715,9 +711,9 @@ void UpdateGolfBalls(void) {
                 }
             }
 
-            for (sharedIndex = 0; sharedIndex != f_BallAfterimageLength; sharedIndex++) {
-                if (f_BallAfterimages[sharedIndex].alpha > 0) {
-                    f_BallAfterimages[sharedIndex].alpha -= AFTERIMAGE_FAST_FADE;
+            for (i = 0; i != f_BallAfterimageLength; i++) {
+                if (f_BallAfterimages[i].alpha > 0) {
+                    f_BallAfterimages[i].alpha -= AFTERIMAGE_FAST_FADE;
                 }
             }
         }
@@ -741,9 +737,9 @@ void UpdateGolfBalls(void) {
             }
 
             if (f_BallAfterimageFrameCount % AFTERIMAGE_SLOW_FADE_PERIOD == 0) {
-                for (sharedIndex = 0; sharedIndex != f_BallAfterimageLength; sharedIndex++) {
-                    if (f_BallAfterimages[sharedIndex].alpha > 0) {
-                        f_BallAfterimages[sharedIndex].alpha -= 1;
+                for (i = 0; i != f_BallAfterimageLength; i++) {
+                    if (f_BallAfterimages[i].alpha > 0) {
+                        f_BallAfterimages[i].alpha -= 1;
                     }
                 }
             }
@@ -838,9 +834,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     Gfx *gfx = g_DisplayListHead;
     ScreenPoint ballPoint;
     ScreenPoint shadowPoint;
-    /* Counts balls, afterimages and route points in turn; a variable for each
-       allocates registers differently. */
-    s32 sharedIndex;
+    s32 i;
     Boolean isCurrentBallAboveGround = FALSE;
     GolfBall *ball;
     BallAfterimage *afterimage;
@@ -990,8 +984,8 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
     gDPPipeSync(gfx++);
-    for (sharedIndex = 0; sharedIndex < GOLF_BALL_COUNT; sharedIndex++) {
-        ball = &f_GolfBalls[sharedIndex];
+    for (i = 0; i < GOLF_BALL_COUNT; i++) {
+        ball = &f_GolfBalls[i];
         if (ball->alpha > 0) {
 #ifndef AVOID_UB
             s32 primDepth;
@@ -1114,7 +1108,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                     }
 
                     primDepth &= ~3;
-                    if (g_GameState.currentPlayerIndex == sharedIndex) {
+                    if (g_GameState.currentPlayerIndex == i) {
                         isCurrentBallAboveGround = isAboveGround;
                         f_CurrentBallScreenPoint.depth = primDepth;
                         f_CurrentBallScreenPoint.x = ballPoint.x;
@@ -1437,8 +1431,8 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
         0
     );
     gDPSetEnvColor(gfx++, 0x00, 0x00, 0x80, 0x1E);
-    for (sharedIndex = 0; sharedIndex != f_BallAfterimageLength; sharedIndex++) {
-        BallAfterimage *afterimage = &f_BallAfterimages[sharedIndex];
+    for (i = 0; i != f_BallAfterimageLength; i++) {
+        BallAfterimage *afterimage = &f_BallAfterimages[i];
 
         if (afterimage->alpha > 0) {
             afterimageProjectedDepth = ProjectPoint(
@@ -1535,13 +1529,13 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     }
 
     if (IsGameFlagSet(GAME_FLAG_SHOW_ROUTE_POINTS)) {
-        for (sharedIndex = 0; sharedIndex != ROUTE_POINT_COUNT; sharedIndex++) {
-            afterimage = &f_BallAfterimages[sharedIndex];
+        for (i = 0; i != ROUTE_POINT_COUNT; i++) {
+            afterimage = &f_BallAfterimages[i];
             routePointDepth = ProjectPoint(
-                g_HolePoints.routePoints[sharedIndex][0] * COURSE_TO_WORLD_SCALE,
-                (g_HolePoints.routePoints[sharedIndex][1] * COURSE_TO_WORLD_SCALE) -
+                g_HolePoints.routePoints[i][0] * COURSE_TO_WORLD_SCALE,
+                (g_HolePoints.routePoints[i][1] * COURSE_TO_WORLD_SCALE) -
                     (g_PinVertexScale * 0.27f),
-                g_HolePoints.routePoints[sharedIndex][2] * COURSE_TO_WORLD_SCALE,
+                g_HolePoints.routePoints[i][2] * COURSE_TO_WORLD_SCALE,
                 &shadowPoint
             );
             if (routePointDepth < BALL_NEAREST_DEPTH) {
@@ -1669,10 +1663,10 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
     gDPSetPrimDepth(gfx++, f_CurrentBallScreenPoint.depth - 4, 0);
     if (f_CurrentBallScreenPoint.depth < PIKA_BALL_DEPTH) {
-        for (sharedIndex = 0; sharedIndex < GOLF_BALL_COUNT; sharedIndex++) {
-            ball = &f_GolfBalls[sharedIndex];
+        for (i = 0; i < GOLF_BALL_COUNT; i++) {
+            ball = &f_GolfBalls[i];
             if (ball->markerPlayerIndex == BALL_NO_MARKER &&
-                f_GolfBalls[sharedIndex].alpha == BALL_SHOWN &&
+                f_GolfBalls[i].alpha == BALL_SHOWN &&
                 (g_IsCupViewShown || ball->isInCup != TRUE)) {
                 pikaBallSurface = ball->surface;
                 if ((!isCurrentBallAboveGround || pikaBallSurface->sinkDepth == SINK_DEPTH_NONE) &&
