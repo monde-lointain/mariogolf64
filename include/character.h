@@ -7,6 +7,12 @@
 #include "compiler.h"
 #include "language.h"
 
+// Identifies an animation within a character model; each model numbers its
+// own animations.
+typedef s32 AnimationId;
+typedef s8 AnimationId8;
+typedef u8 UAnimationId8;
+
 enum CharacterIndex {
     CHARACTER_PLUM,
     CHARACTER_CHARLIE,
@@ -105,7 +111,7 @@ void ResetCharacterSlots(void);
 s32 GetCharacterBufferSize(void);
 void SetCharacterBuffer(s32 slotIndex, u8 *buffer);
 
-s32 GetAnimationFrameCount(u32 slotIndex, s32 animationId);
+s32 GetAnimationFrameCount(u32 slotIndex, AnimationId animationId);
 void SetCharacterTranslucent(u32 slotIndex, Boolean isTranslucent);
 void WriteBallDistancesIfEnabled(void);
 

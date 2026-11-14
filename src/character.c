@@ -559,7 +559,7 @@ void WriteBallDistances(void) {
     char *source;
     s32 modelIndex;
     s32 column;
-    s32 animationId;
+    AnimationId animationId;
     ClubCategory clubCategory;
 
     void AppendDistanceText(char *text) {
@@ -1072,7 +1072,7 @@ void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 modelKind) {
     }
 }
 
-s32 GetAnimationIndex(u32 slotIndex, s32 animationId) {
+s32 GetAnimationIndex(u32 slotIndex, AnimationId animationId) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     s32 foundIndex = 0;
     CharacterAnimation *animation;
@@ -1093,7 +1093,7 @@ s32 GetAnimationIndex(u32 slotIndex, s32 animationId) {
     return foundIndex;
 }
 
-CharacterAnimation *FindAnimation(u32 slotIndex, s32 animationId) {
+CharacterAnimation *FindAnimation(u32 slotIndex, AnimationId animationId) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
@@ -1111,7 +1111,7 @@ CharacterAnimation *FindAnimation(u32 slotIndex, s32 animationId) {
     return NULL;
 }
 
-void SetCharacterAnimation(u32 slotIndex, s32 animationId) {
+void SetCharacterAnimation(u32 slotIndex, AnimationId animationId) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     JointAnimation *joint;
 
@@ -1181,7 +1181,7 @@ void SetAnimationLooping(u32 slotIndex, Boolean isLooping) {
     }
 }
 
-void SetNextAnimation(u32 slotIndex, s32 nextAnimationId) {
+void SetNextAnimation(u32 slotIndex, AnimationId nextAnimationId) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
@@ -1224,7 +1224,7 @@ s32 GetCurrentAnimationEndFrame(u32 slotIndex) {
     return endFrame;
 }
 
-s32 GetAnimationEndFrame(u32 slotIndex, s32 animationId) {
+s32 GetAnimationEndFrame(u32 slotIndex, AnimationId animationId) {
     CharacterAnimation *animation = FindAnimation(slotIndex, animationId);
 
     if (animation != NULL) {
@@ -1234,7 +1234,7 @@ s32 GetAnimationEndFrame(u32 slotIndex, s32 animationId) {
     return -1;
 }
 
-s32 GetAnimationStartFrame(u32 slotIndex, s32 animationId) {
+s32 GetAnimationStartFrame(u32 slotIndex, AnimationId animationId) {
     CharacterAnimation *animation = FindAnimation(slotIndex, animationId);
 
     if (animation != NULL) {
@@ -1244,7 +1244,7 @@ s32 GetAnimationStartFrame(u32 slotIndex, s32 animationId) {
     return -1;
 }
 
-s32 GetAnimationFrameCount(u32 slotIndex, s32 animationId) {
+s32 GetAnimationFrameCount(u32 slotIndex, AnimationId animationId) {
     CharacterAnimation *animation = FindAnimation(slotIndex, animationId);
 
     if (animation != NULL) {

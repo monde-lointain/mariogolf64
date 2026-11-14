@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "camera.h"
+#include "character.h"
 #include "club.h"
 #include "compiler.h"
 #include "course_space.h"
@@ -186,7 +187,7 @@ typedef struct CharacterAnimation {
     AnimationEvent *events;
     s16 startFrame;
     s16 frameCount;
-    u8 id;
+    UAnimationId8 id;
 } CharacterAnimation;
 
 typedef struct TextureAnimation {
@@ -269,7 +270,7 @@ typedef struct CharacterSlot {
     s16 shadowScale;
     CharacterLighting8 lighting;
     Boolean8 isLooping;
-    s8 nextAnimationId;
+    AnimationId8 nextAnimationId;
     Boolean8 playsRandomTextureAnimation;
     s8 randomTextureAnimationDelay;
     TextureAnimationState textureAnimations[TEXTURE_ANIMATION_COUNT];
@@ -327,11 +328,11 @@ void GetCharacterShadowPoint(u32 slotIndex, f32 *position);
 
 s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode shotMode);
 void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 modelKind);
-void SetCharacterAnimation(u32 slotIndex, s32 animationId);
+void SetCharacterAnimation(u32 slotIndex, AnimationId animationId);
 void SetAnimationLooping(u32 slotIndex, Boolean isLooping);
-void SetNextAnimation(u32 slotIndex, s32 nextAnimationId);
+void SetNextAnimation(u32 slotIndex, AnimationId nextAnimationId);
 s32 GetCurrentAnimationEndFrame(u32 slotIndex);
-s32 GetAnimationEndFrame(u32 slotIndex, s32 animationId);
+s32 GetAnimationEndFrame(u32 slotIndex, AnimationId animationId);
 s32 GetAnimationFrame(u32 slotIndex);
 void SkipToAnimationEnd(u32 slotIndex);
 void SetAnimationSpeed(u32 slotIndex, f32 speed);
@@ -340,7 +341,7 @@ void AnimateCharacterInSameCopy(u32 slotIndex);
 void SetCharacterLights(void);
 void SetCharacterClub(u32 slotIndex, ClubIndex clubIndex);
 s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, AnimationEventKind kind);
-s32 GetAnimationIndex(u32 slotIndex, s32 animationId);
+s32 GetAnimationIndex(u32 slotIndex, AnimationId animationId);
 void AdvanceAnimation(u32 slotIndex, s32 frameCount);
 void SetCharacterLighting(u32 slotIndex, CharacterLighting lighting);
 void AnimateAllCharacters(void);

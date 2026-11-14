@@ -479,8 +479,8 @@ void EaseStaffRollView(f32 *eye, f32 *lookAt, f32 rate, s32 easedParts) {
     }
 }
 
-s32 GetStanceAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode UNUSED) {
-    s32 animationId;
+AnimationId GetStanceAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode UNUSED) {
+    AnimationId animationId;
 
     switch (GetCharacterClubCategory(slotIndex, clubIndex)) {
         case CLUB_CATEGORY_WOOD:
@@ -503,8 +503,8 @@ s32 GetStanceAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode UNU
     return animationId;
 }
 
-s32 GetSwingAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode) {
-    s32 animationId;
+AnimationId GetSwingAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode) {
+    AnimationId animationId;
 
     switch (GetCharacterClubCategory(slotIndex, clubIndex)) {
         case CLUB_CATEGORY_WOOD:

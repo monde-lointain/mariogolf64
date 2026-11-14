@@ -2213,8 +2213,12 @@ void CheckRingShotClear(s32 playerIndex) {
     }
 }
 
-static s32 GetStanceAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode UNUSED) {
-    s32 animationId;
+static AnimationId GetStanceAnimation(
+    u32 slotIndex,
+    ClubIndex clubIndex,
+    ShotMode shotMode UNUSED
+) {
+    AnimationId animationId;
 
     switch (GetCharacterClubCategory(slotIndex, clubIndex)) {
         case CLUB_CATEGORY_WOOD:
@@ -2237,8 +2241,8 @@ static s32 GetStanceAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotM
     return animationId;
 }
 
-static s32 GetSwingAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode) {
-    s32 animationId;
+static AnimationId GetSwingAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode) {
+    AnimationId animationId;
 
     switch (GetCharacterClubCategory(slotIndex, clubIndex)) {
         case CLUB_CATEGORY_WOOD:
