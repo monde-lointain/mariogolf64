@@ -481,7 +481,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
     s16 gridMark;
     s32 controllerIndex;
     u16 button;
-    s32 palette;
+    s32 paletteIndex;
     u16 column;
     s8 chosenColumn;
     u16 row;
@@ -826,19 +826,19 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
         }
 
         if (g_MenuRepeatButtons & U_CBUTTONS) {
-            palette = UP_C_PALETTE;
+            paletteIndex = UP_C_PALETTE;
         }
         else if (g_MenuRepeatButtons & D_CBUTTONS) {
-            palette = DOWN_C_PALETTE;
+            paletteIndex = DOWN_C_PALETTE;
         }
         else if (g_MenuRepeatButtons & L_CBUTTONS) {
-            palette = LEFT_C_PALETTE;
+            paletteIndex = LEFT_C_PALETTE;
         }
         else if (g_MenuRepeatButtons & R_CBUTTONS) {
-            palette = RIGHT_C_PALETTE;
+            paletteIndex = RIGHT_C_PALETTE;
         }
         else {
-            palette = UP_C_PALETTE;
+            paletteIndex = UP_C_PALETTE;
         }
 
         for (index = 0, sameCharacterCount = 0; index != playerIndex; index++) {
@@ -849,13 +849,13 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
         }
 
         for (index = 0; index != sameCharacterCount; index++) {
-            if (g_Players[sameCharacterPlayers[index]].paletteIndex == palette) {
+            if (g_Players[sameCharacterPlayers[index]].paletteIndex == paletteIndex) {
                 break;
             }
         }
 
         if (index == sameCharacterCount) {
-            g_Players[playerIndex].paletteIndex = palette;
+            g_Players[playerIndex].paletteIndex = paletteIndex;
         }
         else {
             for (index = 0; index != CHARACTER_PALETTE_COUNT; index++) {
@@ -1132,22 +1132,22 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             (g_ControllerStates[2].buttons |
                 (g_ControllerStates[0].buttons | g_ControllerStates[1].buttons));
         if (button & U_CBUTTONS) {
-            palette = UP_C_PALETTE;
+            paletteIndex = UP_C_PALETTE;
         }
         else if (button & D_CBUTTONS) {
-            palette = DOWN_C_PALETTE;
+            paletteIndex = DOWN_C_PALETTE;
         }
         else if (button & L_CBUTTONS) {
-            palette = LEFT_C_PALETTE;
+            paletteIndex = LEFT_C_PALETTE;
         }
         else if (button & R_CBUTTONS) {
-            palette = RIGHT_C_PALETTE;
+            paletteIndex = RIGHT_C_PALETTE;
         }
         else {
-            palette = NO_PALETTE;
+            paletteIndex = NO_PALETTE;
         }
 
-        if (palette != NO_PALETTE) {
+        if (paletteIndex != NO_PALETTE) {
             chosenColumn = memory->characterColumns[playerIndex];
             character = g_CharacterGrid[memory->characterRows[playerIndex]][chosenColumn];
             if (((u8)canChooseMarked == TRUE) & (character < CHOOSABLE_MARK_LIMIT)) {
@@ -1179,13 +1179,13 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             }
 
             for (index = 0; index != sameCharacterCount; index++) {
-                if (g_Players[sameCharacterPlayers[index]].paletteIndex == palette) {
+                if (g_Players[sameCharacterPlayers[index]].paletteIndex == paletteIndex) {
                     break;
                 }
             }
 
             if (index == sameCharacterCount) {
-                f_PreviewedPalette = palette;
+                f_PreviewedPalette = paletteIndex;
             }
             else {
                 for (index = 0; index != CHARACTER_PALETTE_COUNT; index++) {

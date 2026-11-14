@@ -227,10 +227,10 @@ void DrawTextureRect(
     *displayListHead = gfx;
 }
 
-void LoadSmallPalette(Gfx **displayListHead, s32 palette, void *tlut) {
+void LoadSmallPalette(Gfx **displayListHead, s32 paletteIndex, void *tlut) {
     Gfx *gfx = *displayListHead;
 
-    gDPLoadTLUT_pal16(gfx++, palette, TextureAddress(tlut));
+    gDPLoadTLUT_pal16(gfx++, paletteIndex, TextureAddress(tlut));
     *displayListHead = gfx;
 }
 
@@ -247,7 +247,7 @@ void LoadNibbleTextureBlock(
     s32 format,
     s32 width,
     s32 height,
-    s32 palette,
+    s32 paletteIndex,
     s32 cms,
     s32 cmt,
     s32 masks,
@@ -263,7 +263,7 @@ void LoadNibbleTextureBlock(
         format,
         width,
         height,
-        palette,
+        paletteIndex,
         cms,
         cmt,
         masks,
@@ -349,7 +349,7 @@ void LoadTextureBlock(
     s32 size,
     s32 width,
     s32 height,
-    s32 palette,
+    s32 paletteIndex,
     s32 cms,
     s32 cmt,
     s32 masks,
@@ -368,7 +368,7 @@ void LoadTextureBlock(
             size,
             width,
             height,
-            palette,
+            paletteIndex,
             cms,
             cmt,
             masks,
@@ -386,7 +386,7 @@ void LoadTextureBlock(
             size,
             width,
             height,
-            palette,
+            paletteIndex,
             cms,
             cmt,
             masks,

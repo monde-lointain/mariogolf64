@@ -759,7 +759,7 @@ void LoadBestTimesFaces(void) {
     CourseIndex courseIndex;
     s32 rank;
     CharacterId character;
-    s32 palette;
+    s32 paletteIndex;
 
     for (characterIndex = 0; characterIndex != CHARACTER_COUNT; characterIndex++) {
         OpenEncodedAsset(g_CharacterFaceAssets[characterIndex], &asset);
@@ -778,14 +778,14 @@ void LoadBestTimesFaces(void) {
                     character = CHARACTER_COUNT - 1;
                 }
 
-                palette = save->records.bestTimePalettes[courseIndex][rank];
+                paletteIndex = save->records.bestTimePalettes[courseIndex][rank];
             }
             else {
                 character = 0;
-                palette = 0;
+                paletteIndex = 0;
             }
 
-            OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
+            OpenAssetFile(g_CharacterPaletteFiles[character][paletteIndex], &file);
             ReadAssetFile(
                 g_MenuCharacterPalettes[(courseIndex * BEST_TIME_COUNT) + rank],
                 GetAssetFileSize(&file),

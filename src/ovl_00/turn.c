@@ -4478,7 +4478,7 @@ void UpdateTurns(void) {
             }
             case PLAYER_STATE_STARTING_REACTION: {
                 CharacterId character;
-                s32 palette;
+                s32 paletteIndex;
                 s32 reaction;
 
                 if (IsCharacterSlotBusy(0)) {
@@ -4497,13 +4497,13 @@ void UpdateTurns(void) {
                 ClearShotEffects(CLEAR_KIND_EFFECTS);
                 EndFlightCamera();
                 if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) && f_HasGutsTestRun) {
-                    palette = 0;
-                    LoadCharacter(0, f_GutsTestCharacter + CHARACTER_COUNT, palette);
+                    paletteIndex = 0;
+                    LoadCharacter(0, f_GutsTestCharacter + CHARACTER_COUNT, paletteIndex);
                 }
                 else {
                     character = g_Players[playerIndex].characterIndex;
-                    palette = g_Players[playerIndex].paletteIndex;
-                    LoadCharacter(0, character + CHARACTER_COUNT, palette);
+                    paletteIndex = g_Players[playerIndex].paletteIndex;
+                    LoadCharacter(0, character + CHARACTER_COUNT, paletteIndex);
                 }
 
                 SetCharacterLighting(0, 1);

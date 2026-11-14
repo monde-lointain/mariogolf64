@@ -972,7 +972,7 @@ void LoadRingShotRecordFaces(void) {
     SaveData *save = GetSaveData();
     s32 index;
     CharacterId character;
-    s32 palette;
+    s32 paletteIndex;
 
     for (index = 0; index != CHARACTER_COUNT; index++) {
         OpenEncodedAsset(g_CharacterFaceAssets[index], &asset);
@@ -984,7 +984,7 @@ void LoadRingShotRecordFaces(void) {
     for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
         if (f_RecordedReplaySlots[index] != -1) {
             character = save->ringShotRecords[f_RecordedReplaySlots[index]].characterIndex;
-            palette = save->ringShotRecords[f_RecordedReplaySlots[index]].paletteIndex;
+            paletteIndex = save->ringShotRecords[f_RecordedReplaySlots[index]].paletteIndex;
             if (character < 0) {
                 character = 0;
             }
@@ -993,20 +993,20 @@ void LoadRingShotRecordFaces(void) {
                 character = CHARACTER_COUNT - 1;
             }
 
-            if (palette < 0) {
-                palette = 0;
+            if (paletteIndex < 0) {
+                paletteIndex = 0;
             }
 
-            if (palette >= CHARACTER_PALETTE_COUNT) {
-                palette = CHARACTER_PALETTE_COUNT - 1;
+            if (paletteIndex >= CHARACTER_PALETTE_COUNT) {
+                paletteIndex = CHARACTER_PALETTE_COUNT - 1;
             }
         }
         else {
-            palette = 0;
+            paletteIndex = 0;
             character = 0;
         }
 
-        OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
+        OpenAssetFile(g_CharacterPaletteFiles[character][paletteIndex], &file);
         ReadAssetFile(g_ReplayFacePalettes[index], GetAssetFileSize(&file), &file);
     }
 }

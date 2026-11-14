@@ -199,7 +199,13 @@ s32 GetClubTournamentNameMessage(void);
 s32 GetClubTournamentNumber(void);
 s32 GetRingShotCourseOpenedAtStarCount(void);
 Boolean HasEveryRingShotStar(void);
-void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar, CharacterId character, s32 palette);
+void InsertBestTime(
+    s32 courseIndex,
+    s32 time,
+    s32 scoreToPar,
+    CharacterId character,
+    s32 paletteIndex
+);
 void InsertRankedRecord(PlayRecord *record);
 Boolean IsDonkeyKongUnlocked(void);
 Boolean IsMapleUnlocked(void);

@@ -6164,7 +6164,7 @@ void DrawMenuCharacters(Gfx **displayListHead) {
     s32 column;
     s32 layout;
     CharacterId character;
-    s32 palette;
+    s32 paletteIndex;
     s32 raise;
     u16 slot;
     Vec3 translation;
@@ -6245,11 +6245,11 @@ void DrawMenuCharacters(Gfx **displayListHead) {
 
         if (IsRivalSlot(characterCount, rival, slot)) {
             character = rival;
-            palette = 1;
+            paletteIndex = 1;
         }
         else {
             character = g_Players[slot].characterIndex;
-            palette = g_Players[slot].paletteIndex;
+            paletteIndex = g_Players[slot].paletteIndex;
         }
 
         if (!g_IsMenuCharacterLoaded[slot]) {
@@ -6257,7 +6257,7 @@ void DrawMenuCharacters(Gfx **displayListHead) {
                 FreeCharacterSlot(slot);
             }
             else {
-                LoadCharacter(slot, character + CHARACTER_COUNT, palette);
+                LoadCharacter(slot, character + CHARACTER_COUNT, paletteIndex);
                 g_IsMenuCharacterLoaded[slot] = TRUE;
                 SetCharacterAnimation(slot, MENU_ANIMATION_STANDING);
                 SetAnimationSpeed(slot, 1.0f);

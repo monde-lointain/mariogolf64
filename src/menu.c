@@ -1795,7 +1795,13 @@ void RecordDisplayListLength(u32 commandCount) {
     }
 }
 
-void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar, CharacterId character, s32 palette) {
+void InsertBestTime(
+    s32 courseIndex,
+    s32 time,
+    s32 scoreToPar,
+    CharacterId character,
+    s32 paletteIndex
+) {
     SaveData *save;
     s32 count;
     s32 index;
@@ -1815,12 +1821,12 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar, CharacterId chara
 
     if (time >= 0) {
         if (time <= STOPWATCH_MAX_FRAMES) {
-            if (palette < 0) {
-                palette = 0;
+            if (paletteIndex < 0) {
+                paletteIndex = 0;
             }
 
-            if (palette > CHARACTER_PALETTE_COUNT - 1) {
-                palette = CHARACTER_PALETTE_COUNT - 1;
+            if (paletteIndex > CHARACTER_PALETTE_COUNT - 1) {
+                paletteIndex = CHARACTER_PALETTE_COUNT - 1;
             }
 
             count = 0;
@@ -1898,14 +1904,14 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar, CharacterId chara
                     save->records.bestTimes[courseIndex][index] = time;
                     save->records.bestTimeCharacters[courseIndex][index] = character;
                     save->records.bestTimeScoresToPar[courseIndex][index] = scoreToPar;
-                    save->records.bestTimePalettes[courseIndex][index] = palette;
+                    save->records.bestTimePalettes[courseIndex][index] = paletteIndex;
                 }
             }
             else {
                 save->records.bestTimes[courseIndex][0] = time;
                 save->records.bestTimeCharacters[courseIndex][0] = character;
                 save->records.bestTimeScoresToPar[courseIndex][0] = scoreToPar;
-                save->records.bestTimePalettes[courseIndex][0] = palette;
+                save->records.bestTimePalettes[courseIndex][0] = paletteIndex;
             }
 
             TransferSaveData(save, TRUE);

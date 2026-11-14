@@ -2931,7 +2931,7 @@ void LoadBestShotFaces(void) {
     s32 index;
     s32 row;
     s32 column;
-    s32 palette;
+    s32 paletteIndex;
     CharacterId character;
 
     for (index = 0; index != CHARACTER_COUNT; index++) {
@@ -2943,7 +2943,7 @@ void LoadBestShotFaces(void) {
         for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++) {
             if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
                 character = save->rankedRecords[f_BestShotRecords[row][column]].characterIndex;
-                palette = save->rankedRecords[f_BestShotRecords[row][column]].paletteIndex;
+                paletteIndex = save->rankedRecords[f_BestShotRecords[row][column]].paletteIndex;
 
                 if (character < 0) {
                     character = 0;
@@ -2953,12 +2953,12 @@ void LoadBestShotFaces(void) {
                     character = CHARACTER_COUNT - 1;
                 }
 
-                if (palette < 0) {
-                    palette = 0;
+                if (paletteIndex < 0) {
+                    paletteIndex = 0;
                 }
 
-                if (palette >= CHARACTER_PALETTE_COUNT) {
-                    palette = CHARACTER_PALETTE_COUNT - 1;
+                if (paletteIndex >= CHARACTER_PALETTE_COUNT) {
+                    paletteIndex = CHARACTER_PALETTE_COUNT - 1;
                 }
 
                 f_BestShotFaces[row][column] =
@@ -2966,12 +2966,12 @@ void LoadBestShotFaces(void) {
             }
             else {
                 character = 0;
-                palette = 0;
+                paletteIndex = 0;
                 f_BestShotFaces[row][column] =
                     g_MenuCharacterPalettes[(row * STATS_GRID_COLUMN_COUNT) + column];
             }
 
-            OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
+            OpenAssetFile(g_CharacterPaletteFiles[character][paletteIndex], &file);
             ReadAssetFile(f_BestShotFaces[row][column], GetAssetFileSize(&file), &file);
         }
     }
