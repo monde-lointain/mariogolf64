@@ -80,6 +80,7 @@ enum CButtonPalette {
 };
 
 typedef s32 CButtonPalette;
+typedef s8 CButtonPalette8;
 
 typedef struct Player {
     char name[PLAYER_NAME_SIZE];

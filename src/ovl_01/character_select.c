@@ -115,7 +115,7 @@ static u8 f_UnreadFaceToggle = 0;
 static s8 f_FaceFrameTime = 0;
 static Boolean8 f_IsComputerButtonHeld = FALSE;
 static Boolean8 f_IsLeftyButtonHeld = FALSE;
-static s8 f_PreviewedPalette = NO_PALETTE;
+static CButtonPalette8 f_PreviewedPalette = NO_PALETTE;
 static s32 f_UnreadSelectWords[4] UNUSED = {-1, -1, -1, -1};
 static s32 f_SavedGameBoySlots[GAME_BOY_CHARACTER_COUNT] =
     {EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT};

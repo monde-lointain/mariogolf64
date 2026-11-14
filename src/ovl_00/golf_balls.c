@@ -74,7 +74,7 @@ typedef struct GolfBall {
     UBoolean8 isInCup;
     BallState state;
     s8 markerPlayerIndex;
-    s8 purpose;
+    LaunchPurpose8 purpose;
     Boolean8 hasEnteredWater;
 } GolfBall;
 

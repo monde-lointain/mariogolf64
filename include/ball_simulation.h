@@ -124,6 +124,7 @@ enum LaunchPurpose {
 };
 
 typedef s32 LaunchPurpose;
+typedef s8 LaunchPurpose8;
 
 #define IsStrokeOrTrialLaunch(purpose) \
     ((purpose) == LAUNCH_PURPOSE_STROKE || (purpose) == LAUNCH_PURPOSE_TRIAL)

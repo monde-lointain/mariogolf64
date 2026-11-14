@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "character.h"
+#include "club.h"
 #include "game_state.h"
 #include "language.h"
 #include "math_util.h"
@@ -13,7 +14,7 @@ typedef struct RecordedShot {
     BinaryAngle heading;
     s8 powerGaugeFrame;
     s8 impactGaugeFrame;
-    s8 shotMode;
+    ShotMode8 shotMode;
     s8 clubSlot;
     s8 offsetX;
     s8 offsetY;
