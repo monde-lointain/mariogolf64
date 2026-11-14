@@ -126,7 +126,7 @@ Boolean FindWallHit(
     PlaneTriangle *hit,
     f32 *fraction
 );
-s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight);
+s32 PushBallOutOfWalls(BallSimulation *simulation, Boolean checksHeight);
 s32 FindRingHit(
     s32 startX,
     s32 startY,

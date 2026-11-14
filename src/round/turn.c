@@ -480,7 +480,7 @@ static Radians f_DebugFramingPitch = 0.0f;
 static s32 f_UnusedWordAfterFramingAngles UNUSED = 0;
 
 void PlaceShotCamera(void);
-void TurnAim(s32 turnsLookBackHeading);
+void TurnAim(Boolean turnsLookBackHeading);
 
 static Mtx f_PuttPreviewIdentity; // An identity matrix for the putt preview
 // The launch of the shot being taken, which the shot preview and the ball
@@ -1293,7 +1293,7 @@ void MoveAimCameraDistance(void) {
 // before its step; the frame count copied to a local for the D-pad's turn; the
 // D-pad's speed as a conditional expression; and the shot's heading cast to s16
 // in the test of whether it held still.
-void TurnAim(s32 turnsLookBackHeading) {
+void TurnAim(Boolean turnsLookBackHeading) {
     s32 stickX = g_TurnController.stickX;
     SignedBinaryAngle heading = g_CurrentShot.heading;
     s32 dpad;
@@ -1483,7 +1483,7 @@ Boolean UpdateAimControls(void) {
                 }
 
                 if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
-                    TurnAim(0);
+                    TurnAim(FALSE);
                 }
 
                 break;
@@ -1500,7 +1500,7 @@ Boolean UpdateAimControls(void) {
                     g_RoundHud.greenGridState++;
                 }
 
-                TurnAim(0);
+                TurnAim(FALSE);
                 break;
             case LETTERBOX_STATE_LOOKING_DOWN_RANGE:
                 g_IsAimCameraEasing = TRUE;
@@ -1519,7 +1519,7 @@ Boolean UpdateAimControls(void) {
                     g_RoundHud.greenGridState++;
                 }
 
-                TurnAim(0);
+                TurnAim(FALSE);
                 break;
             case LETTERBOX_STATE_STARTING_LOOK_BACK:
             case LETTERBOX_STATE_LOOKING_BACK:
@@ -1536,7 +1536,7 @@ Boolean UpdateAimControls(void) {
                     g_RoundHud.greenGridState++;
                 }
 
-                TurnAim(0);
+                TurnAim(FALSE);
                 break;
         }
 
@@ -1611,7 +1611,7 @@ Boolean UpdateAimControls(void) {
                 }
 
                 if (g_LetterboxState == LETTERBOX_STATE_NONE) {
-                    TurnAim(0);
+                    TurnAim(FALSE);
                 }
 
                 break;
@@ -1629,7 +1629,7 @@ Boolean UpdateAimControls(void) {
                     ResetAimCamera();
                 }
 
-                TurnAim(0);
+                TurnAim(FALSE);
                 break;
             case LETTERBOX_STATE_LOOKING_DOWN_RANGE:
                 g_IsAimCameraEasing = TRUE;
@@ -1648,7 +1648,7 @@ Boolean UpdateAimControls(void) {
                     ResetAimCamera();
                 }
 
-                TurnAim(0);
+                TurnAim(FALSE);
                 break;
             case LETTERBOX_STATE_STARTING_LOOK_BACK:
                 if (g_TurnController.pressedButtons & A_BUTTON) {
@@ -1664,7 +1664,7 @@ Boolean UpdateAimControls(void) {
                     ResetAimCamera();
                 }
 
-                TurnAim(0);
+                TurnAim(FALSE);
                 g_LookBackHeading = g_CurrentShot.heading;
                 break;
             case LETTERBOX_STATE_LOOKING_BACK:
@@ -1681,7 +1681,7 @@ Boolean UpdateAimControls(void) {
                     g_ShotSetupFrameCount = 0;
                 }
 
-                TurnAim(0);
+                TurnAim(FALSE);
                 g_LookBackHeading = g_CurrentShot.heading;
                 break;
         }
@@ -3874,7 +3874,7 @@ void UpdateTurns(void) {
                     nextState = PLAYER_STATE_AIMING;
                 }
 
-                TurnAim(0);
+                TurnAim(FALSE);
                 PlaceCharacterForShot(0);
                 if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
                     SetFramebufferCount(TRIPLE_BUFFERING);

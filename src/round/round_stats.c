@@ -579,7 +579,7 @@ void RecordHoleStats(void) {
 }
 
 // Returns whether the drive is the longest yet
-s32 RecordDrive(void) {
+Boolean RecordDrive(void) {
     // Reading g_RoundStats through a pointer is there to match: reading it
     // directly gives 20 words differing, 14 in shape
     RoundStats *stats = &g_RoundStats;

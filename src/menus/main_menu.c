@@ -5921,7 +5921,7 @@ void DrawSpinningStars(
     s32 left,
     s32 top,
     u8 starCount,
-    u8 enlargesChosenHole
+    UBoolean8 enlargesChosenHole
 );
 
 // Draws the mode select of screens 5, 23 and 26: the characters, the modes'
@@ -9373,7 +9373,7 @@ void DrawSpinningStars(
     s32 left,
     s32 top,
     u8 starCount,
-    u8 enlargesChosenHole
+    UBoolean8 enlargesChosenHole
 ) {
     Gfx *gfx = *displayListHead;
     EncodedAsset asset;

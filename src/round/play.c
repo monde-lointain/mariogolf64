@@ -137,7 +137,7 @@ ShotLaunch g_LastShotLaunch;
 // address less a row of tiles after the nearest symbol
 FILE_STATIC u8 g_UnreadPlayBuffer[0xDEC] UNUSED;
 
-FILE_STATIC u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
+FILE_STATIC UBoolean8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
 FILE_STATIC PlayRecord f_BestShotReplayRecord;
 FILE_STATIC Boolean8 g_WasDonkeyKongUnlocked;
 FILE_STATIC Boolean8 g_WasMapleUnlocked;

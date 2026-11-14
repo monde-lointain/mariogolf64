@@ -2938,7 +2938,7 @@ Boolean FindWallHit(
 // 43 words differ (3 in shape). The corner push sets y between x and z,
 // which puts its store after the corner's load as in the original; set
 // first, 2 words differ (2 in shape), and set last, 4 (4).
-s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
+s32 PushBallOutOfWalls(BallSimulation *simulation, Boolean checksHeight) {
     PlaneTriangle wall;
     TrianglePlane plane;
     f32 cornerXs[TRIANGLE_CORNER_COUNT];

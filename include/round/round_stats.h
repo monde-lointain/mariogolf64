@@ -56,7 +56,7 @@ void UpdateContest(Boolean isHoleOver);
 void StartRoundStats(void);
 void RestartRoundStats(void);
 void RecordHoleStats(void);
-s32 RecordDrive(void);
+Boolean RecordDrive(void);
 void RecordCourseRound(void);
 
 #endif
