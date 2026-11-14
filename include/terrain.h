@@ -196,12 +196,32 @@ enum TerrainStyle {
 
 #define IsCoarse(tileIndex) (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE)
 
-#define DrawTileQuads(top, topOdd, top1, middle, middleOdd, middle1, bottom, bottomOdd, bottom1) \
+#define DrawTileQuads( \
+    top, \
+    topOdd, \
+    topNext, \
+    middle, \
+    middleOdd, \
+    middleNext, \
+    bottom, \
+    bottomOdd, \
+    bottomNext \
+) \
     { \
         gSP2Triangles(gfx++, top, topOdd, middle, 0, topOdd, middleOdd, middle, 0); \
         gSP2Triangles(gfx++, middle, middleOdd, bottom, 0, middleOdd, bottomOdd, bottom, 0); \
-        gSP2Triangles(gfx++, topOdd, top1, middleOdd, 0, top1, middle1, middleOdd, 0); \
-        gSP2Triangles(gfx++, middleOdd, middle1, bottomOdd, 0, middle1, bottom1, bottomOdd, 0); \
+        gSP2Triangles(gfx++, topOdd, topNext, middleOdd, 0, topNext, middleNext, middleOdd, 0); \
+        gSP2Triangles( \
+            gfx++, \
+            middleOdd, \
+            middleNext, \
+            bottomOdd, \
+            0, \
+            middleNext, \
+            bottomNext, \
+            bottomOdd, \
+            0 \
+        ); \
     }
 
 extern Vtx *g_VertexListHead;
