@@ -272,19 +272,20 @@ static u8 ReverseBits(u8 bits) {
 
 s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 variant) {
     s32 symbolIndex;
-    char **entry;
+    char **spellings;
 
     for (symbolIndex = 0; symbolIndex < symbolCount; symbolIndex++) {
         if (symbols[symbolIndex] >= PASSWORD_SYMBOL_COUNT) {
             return -1;
         }
 
-        entry = &f_PasswordAlphabet[(symbols[symbolIndex] + symbolIndex) % PASSWORD_SYMBOL_COUNT];
+        spellings =
+            &f_PasswordAlphabet[(symbols[symbolIndex] + symbolIndex) % PASSWORD_SYMBOL_COUNT];
         if (variant) {
-            password[symbolIndex] = (*entry)[0];
+            password[symbolIndex] = (*spellings)[0];
         }
         else {
-            password[symbolIndex] = (*entry)[0];
+            password[symbolIndex] = (*spellings)[0];
         }
     }
 
@@ -298,11 +299,11 @@ static s32 ReadPasswordSymbols(u8 *symbols, char *password, s32 symbolCount) {
 
     for (symbolIndex = 0; symbolIndex < symbolCount; symbolIndex++) {
         for (symbol = 0; symbol < PASSWORD_SYMBOL_COUNT; symbol++) {
-            char *characters = f_PasswordAlphabet[symbol];
+            char *spellings = f_PasswordAlphabet[symbol];
             Boolean isFound = FALSE;
 
-            for (characterIndex = 0; characters[characterIndex] != '\0'; characterIndex++) {
-                if (characters[characterIndex] == password[symbolIndex]) {
+            for (characterIndex = 0; spellings[characterIndex] != '\0'; characterIndex++) {
+                if (spellings[characterIndex] == password[symbolIndex]) {
                     isFound = TRUE;
                     break;
                 }
