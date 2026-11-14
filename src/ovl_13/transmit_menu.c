@@ -171,9 +171,9 @@ enum ListingState {
 #define ARROWS_TOP 92
 #define LEFT_ARROW_LEFT 16
 #define RIGHT_ARROW_LEFT 288
-#define CONTROLLER_ICONS_LEFT 60
-#define CONTROLLER_ICONS_TOP 72
-#define CONTROLLER_ICON_SPACING 56
+#define TRANSFER_PAK_ICONS_LEFT 60
+#define TRANSFER_PAK_ICONS_TOP 72
+#define TRANSFER_PAK_ICON_SPACING 56
 #define CONTROLLER_CURSOR_MARGIN 8
 #define POINTER_TOP 76
 #define POINTER_SWING_STEP DegreesToRadians(10)
@@ -372,6 +372,7 @@ enum ExperienceWriteResult {
 
 #define ASSET_WOOD_PANEL 0x8FD
 #define ASSET_TRANSFER_PAK_ICONS 0x900
+#define TRANSFER_PAK_ICON_SIZE 32
 #define ASSET_TITLE 0x93F
 #define ASSET_CURVE_SEGMENTS 0x8EE
 #define ASSET_STAT_BARS 0x95D
@@ -476,7 +477,7 @@ void LoadTransmitMenu(void) {
         &asset
     );
     ReadEncodedAsset(
-        g_GameBoyTransfer.controllerIconsImage =
+        g_GameBoyTransfer.transferPakIconsImage =
             AllocMemory(OpenEncodedAsset(ASSET_TRANSFER_PAK_ICONS, &asset)),
         &asset
     );
@@ -546,7 +547,7 @@ void FreeTransmitMenu(void) {
     FreeMemory(&g_GameBoyTransfer.courseSceneImage);
     FreeMemory(&g_GameBoyTransfer.pointerImage);
     FreeMemory(&g_GameBoyTransfer.arrowsImage);
-    FreeMemory(&g_GameBoyTransfer.controllerIconsImage);
+    FreeMemory(&g_GameBoyTransfer.transferPakIconsImage);
     FreeMemory(&g_GameBoyTransfer.titleImage);
     FreeMemory(&g_GameBoyTransfer.cursorBoxImage);
     FreeMemory(&g_GameBoyTransfer.curveSegmentsImage);
@@ -1909,13 +1910,13 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-    LoadSmallPalette(&gfx, 0, ImageBody(transfer->controllerIconsImage));
+    LoadSmallPalette(&gfx, 0, ImageBody(transfer->transferPakIconsImage));
     LoadNibbleTextureBlock(
         &gfx,
-        ImageTexels(transfer->controllerIconsImage),
+        ImageTexels(transfer->transferPakIconsImage),
         G_IM_FMT_CI,
-        CONTROLLER_ICON_SIZE,
-        CONTROLLER_ICON_SIZE * MAXCONTROLLERS,
+        TRANSFER_PAK_ICON_SIZE,
+        TRANSFER_PAK_ICON_SIZE * MAXCONTROLLERS,
         0,
         0,
         0,
@@ -1936,15 +1937,16 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
 
         DrawTextureRect(
             &gfx,
-            QuarterPixels(CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING)),
-            QuarterPixels(CONTROLLER_ICONS_TOP),
+            QuarterPixels(TRANSFER_PAK_ICONS_LEFT + (slot * TRANSFER_PAK_ICON_SPACING)),
+            QuarterPixels(TRANSFER_PAK_ICONS_TOP),
             QuarterPixels(
-                CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING) + CONTROLLER_ICON_SIZE
+                TRANSFER_PAK_ICONS_LEFT + (slot * TRANSFER_PAK_ICON_SPACING) +
+                TRANSFER_PAK_ICON_SIZE
             ),
-            QuarterPixels(CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE),
+            QuarterPixels(TRANSFER_PAK_ICONS_TOP + TRANSFER_PAK_ICON_SIZE),
             G_TX_RENDERTILE,
             0,
-            TexelCoordinate(transfer->taggedControllers[index] * CONTROLLER_ICON_SIZE),
+            TexelCoordinate(transfer->taggedControllers[index] * TRANSFER_PAK_ICON_SIZE),
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
@@ -1965,10 +1967,10 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
             LoadSmallPalette(&gfx, 0, ImageBody(transfer->pointerImage));
             LoadNibbleTextureBlock(
                 &gfx,
-                ImageTexels(transfer->controllerIconsImage),
+                ImageTexels(transfer->transferPakIconsImage),
                 G_IM_FMT_CI,
-                CONTROLLER_ICON_SIZE,
-                CONTROLLER_ICON_SIZE * MAXCONTROLLERS,
+                TRANSFER_PAK_ICON_SIZE,
+                TRANSFER_PAK_ICON_SIZE * MAXCONTROLLERS,
                 0,
                 0,
                 0,
@@ -1995,8 +1997,8 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            pointerRestLeft = (transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING) +
-                (CONTROLLER_ICONS_LEFT - POINTING_HAND_SIZE);
+            pointerRestLeft = (transfer->chosenCartridgeIndex * TRANSFER_PAK_ICON_SPACING) +
+                (TRANSFER_PAK_ICONS_LEFT - POINTING_HAND_SIZE);
             pointerLeft = pointerRestLeft - pointerSwing;
             DrawTextureRect(
                 &gfx,
@@ -2014,9 +2016,9 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
         else if (transfer->screenStep == SEND_STATUS_READY) {
             DrawCursorBox(
                 &gfx,
-                CONTROLLER_ICONS_LEFT - CONTROLLER_CURSOR_MARGIN +
-                    (transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING),
-                CONTROLLER_ICONS_TOP - CONTROLLER_CURSOR_MARGIN
+                TRANSFER_PAK_ICONS_LEFT - CONTROLLER_CURSOR_MARGIN +
+                    (transfer->chosenCartridgeIndex * TRANSFER_PAK_ICON_SPACING),
+                TRANSFER_PAK_ICONS_TOP - CONTROLLER_CURSOR_MARGIN
             );
         }
     }
@@ -2096,13 +2098,13 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     DrawImportedFaces(&gfx, transfer);
-    LoadSmallPalette(&gfx, 0, ImageBody(transfer->controllerIconsImage));
+    LoadSmallPalette(&gfx, 0, ImageBody(transfer->transferPakIconsImage));
     LoadNibbleTextureBlock(
         &gfx,
-        ImageTexels(transfer->controllerIconsImage),
+        ImageTexels(transfer->transferPakIconsImage),
         G_IM_FMT_CI,
-        CONTROLLER_ICON_SIZE,
-        CONTROLLER_ICON_SIZE * MAXCONTROLLERS,
+        TRANSFER_PAK_ICON_SIZE,
+        TRANSFER_PAK_ICON_SIZE * MAXCONTROLLERS,
         0,
         0,
         0,
@@ -2121,13 +2123,14 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
                 QuarterPixels(LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING)),
                 QuarterPixels(LISTED_ICONS_TOP),
                 QuarterPixels(
-                    LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING) + CONTROLLER_ICON_SIZE
+                    LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING) + TRANSFER_PAK_ICON_SIZE
                 ),
-                QuarterPixels(LISTED_ICONS_TOP + CONTROLLER_ICON_SIZE),
+                QuarterPixels(LISTED_ICONS_TOP + TRANSFER_PAK_ICON_SIZE),
                 G_TX_RENDERTILE,
                 0,
                 TexelCoordinate(
-                    transfer->listedCharacters[index] / CARTRIDGE_SAVE_COUNT * CONTROLLER_ICON_SIZE
+                    transfer->listedCharacters[index] / CARTRIDGE_SAVE_COUNT *
+                    TRANSFER_PAK_ICON_SIZE
                 ),
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
@@ -2317,13 +2320,13 @@ void DrawSendExperienceScreen(Gfx **displayListHead, GameBoyTransfer *transfer) 
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     }
 
-    LoadSmallPalette(&gfx, 0, ImageBody(transfer->controllerIconsImage));
+    LoadSmallPalette(&gfx, 0, ImageBody(transfer->transferPakIconsImage));
     LoadNibbleTextureBlock(
         &gfx,
-        ImageTexels(transfer->controllerIconsImage),
+        ImageTexels(transfer->transferPakIconsImage),
         G_IM_FMT_CI,
-        CONTROLLER_ICON_SIZE,
-        CONTROLLER_ICON_SIZE * MAXCONTROLLERS,
+        TRANSFER_PAK_ICON_SIZE,
+        TRANSFER_PAK_ICON_SIZE * MAXCONTROLLERS,
         0,
         0,
         0,
@@ -2345,15 +2348,16 @@ void DrawSendExperienceScreen(Gfx **displayListHead, GameBoyTransfer *transfer) 
 
         DrawTextureRect(
             &gfx,
-            QuarterPixels(CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING)),
-            QuarterPixels(CONTROLLER_ICONS_TOP),
+            QuarterPixels(TRANSFER_PAK_ICONS_LEFT + (slot * TRANSFER_PAK_ICON_SPACING)),
+            QuarterPixels(TRANSFER_PAK_ICONS_TOP),
             QuarterPixels(
-                CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING) + CONTROLLER_ICON_SIZE
+                TRANSFER_PAK_ICONS_LEFT + (slot * TRANSFER_PAK_ICON_SPACING) +
+                TRANSFER_PAK_ICON_SIZE
             ),
-            QuarterPixels(CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE),
+            QuarterPixels(TRANSFER_PAK_ICONS_TOP + TRANSFER_PAK_ICON_SIZE),
             G_TX_RENDERTILE,
             0,
-            TexelCoordinate(transfer->taggedControllers[index] * CONTROLLER_ICON_SIZE),
+            TexelCoordinate(transfer->taggedControllers[index] * TRANSFER_PAK_ICON_SIZE),
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
