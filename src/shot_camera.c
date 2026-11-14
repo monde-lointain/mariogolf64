@@ -2972,7 +2972,9 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
             StartFastBallAfterimage();
         }
 
-        if ((g_SimulatedShot.pathFlags[step] & 0x100) ||
+        // The path flags are signed bytes, so 0x100 is set by sign extension
+        // whenever STEP_FLAG_CUP_PULL is.
+        if ((g_SimulatedShot.pathFlags[step] & (STEP_FLAG_CUP_PULL << 1)) ||
             (g_SimulatedShot.pathFlags[step] & STEP_FLAG_LIPPED_OUT)) {
             StartContactEffect(CONTACT_EFFECT_NONE);
         }
