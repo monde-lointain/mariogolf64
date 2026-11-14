@@ -716,7 +716,7 @@ void DrawBandHeights(s16 *heights, s32 band) {
             s32 longHeightStep;
             s32 shortXStep;
             s32 shortHeightStep;
-            s32 z;
+            s32 offsetZ;
 
             if (cachedSpan != span) {
                 cachedSpan = span;
@@ -734,13 +734,13 @@ void DrawBandHeights(s16 *heights, s32 band) {
             longX = shortX;
             shortHeight = corners[0]->v.ob[AXIS_Y] << HEIGHT_FRACTION_BITS;
             longHeight = shortHeight;
-            for (z = 0; z < span + HEIGHT_ROW_SPAN / 2; z += HEIGHT_ROW_SPAN) {
+            for (offsetZ = 0; offsetZ < span + HEIGHT_ROW_SPAN / 2; offsetZ += HEIGHT_ROW_SPAN) {
                 DrawHeightRow(
                     longX >> HEIGHT_FRACTION_BITS,
                     longHeight >> HEIGHT_FRACTION_BITS,
                     shortX >> HEIGHT_FRACTION_BITS,
                     shortHeight >> HEIGHT_FRACTION_BITS,
-                    z + corners[0]->v.ob[AXIS_Z]
+                    offsetZ + corners[0]->v.ob[AXIS_Z]
                 );
                 longX += longXStep;
                 shortX += shortXStep;
@@ -761,7 +761,7 @@ void DrawBandHeights(s16 *heights, s32 band) {
             s32 longHeightStep;
             s32 shortXStep;
             s32 shortHeightStep;
-            s32 z;
+            s32 offsetZ;
 
             if (cachedSpan != lowerSpan) {
                 cachedSpan = lowerSpan;
@@ -780,13 +780,14 @@ void DrawBandHeights(s16 *heights, s32 band) {
             shortHeightStep = shortSlopeHeight * HEIGHT_ROW_STEP_SCALE;
             shortX = corners[1]->v.ob[AXIS_X] << HEIGHT_FRACTION_BITS;
             shortHeight = corners[1]->v.ob[AXIS_Y] << HEIGHT_FRACTION_BITS;
-            for (z = 0; z < lowerSpan + HEIGHT_ROW_SPAN / 2; z += HEIGHT_ROW_SPAN) {
+            for (offsetZ = 0; offsetZ < lowerSpan + HEIGHT_ROW_SPAN / 2;
+                offsetZ += HEIGHT_ROW_SPAN) {
                 DrawHeightRow(
                     longX >> HEIGHT_FRACTION_BITS,
                     longHeight >> HEIGHT_FRACTION_BITS,
                     shortX >> HEIGHT_FRACTION_BITS,
                     shortHeight >> HEIGHT_FRACTION_BITS,
-                    z + corners[1]->v.ob[AXIS_Z]
+                    offsetZ + corners[1]->v.ob[AXIS_Z]
                 );
                 longX += longXStep;
                 shortX += shortXStep;
