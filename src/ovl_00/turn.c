@@ -3355,7 +3355,7 @@ void UpdateTurns(void) {
                 }
 
                 if (g_PauseScreen == PAUSE_SCREEN_PAUSE_MENU) {
-                    s32 choice = UpdatePauseMenu(&g_TurnController);
+                    PauseAction choice = UpdatePauseMenu(&g_TurnController);
 
                     if (choice == PAUSE_ACTION_RETURN_TO_MENU) {
                         RequestPauseMenu(0, -1);

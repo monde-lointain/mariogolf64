@@ -66,6 +66,8 @@ enum PauseOptionKind {
     PAUSE_OPTION_KIND_GIVE_UP = 7
 };
 
+typedef u16 PauseOptionKind;
+
 #define IsValueOptionKind(kind) \
     ((kind) == PAUSE_OPTION_KIND_WEATHER || \
         (kind) == PAUSE_OPTION_KIND_GRID_COLOR || \
@@ -104,10 +106,15 @@ enum PauseMessage {
     PAUSE_MESSAGE_BASIC_CONTROLS
 };
 
+// A pause option's message, counted from MESSAGE_FIRST_PAUSE_OPTION.
+typedef s32 PauseMessage;
+// A PauseMessage in a signed halfword, as the pause options table keeps it.
+typedef s16 PauseMessage16;
+
 typedef struct PauseOption {
-    s16 message;
-    s16 action;
-    u16 kind;
+    PauseMessage16 message;
+    PauseAction16 action;
+    PauseOptionKind kind;
 } PauseOption;
 
 #define CHOICE_BOX_OPTIONS_MAX 4
@@ -503,9 +510,9 @@ void FreePauseMenu(void) {
 #define PAUSE_BUNKER_LIES_OFFSET_X 0x2D000
 #define PAUSE_TEE_UP_HEIGHT 307.2f
 
-s32 UpdatePauseMenu(ControllerState *controller) {
-    s32 action;
-    u16 kind;
+PauseAction UpdatePauseMenu(ControllerState *controller) {
+    PauseAction action;
+    PauseOptionKind kind;
     s32 lie;
     Boolean hasLieChanged;
     Surface surface;
@@ -917,9 +924,9 @@ void DrawPauseMenu(Gfx **displayListHead) {
     s32 green;
     s32 blue;
     s32 optionIndex;
-    s32 message;
-    u16 kind;
-    u16 selectedKind;
+    PauseMessage message;
+    PauseOptionKind kind;
+    PauseOptionKind selectedKind;
     s32 sway;
     s32 teeFrame;
 

@@ -32,6 +32,10 @@ enum PauseAction {
     PAUSE_ACTION_NONE = -1
 };
 
+typedef s32 PauseAction;
+// A PauseAction in a signed halfword, as the pause options table keeps it.
+typedef s16 PauseAction16;
+
 enum ChoiceBoxId {
     CHOICE_BOX_ID_TRAINING_SHOT,
     CHOICE_BOX_ID_TRAINING_HOLE_END,
@@ -54,7 +58,7 @@ extern f32 g_WindPanelPosition[2];
 
 void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap);
 void RequestPauseMenu(Boolean canGiveUp, Boolean isClosing);
-s32 UpdatePauseMenu(ControllerState *controller);
+PauseAction UpdatePauseMenu(ControllerState *controller);
 void OpenChoiceBox(s32 choiceBoxIndex);
 s32 UpdateChoiceBox(ControllerState *controller);
 void CloseSaveMenu(void);
