@@ -180,7 +180,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
     f32 fraction;
     s32 previousVelocityX;
     s32 previousVelocityZ;
-    s32 flags = 0;
+    s32 stepFlags = 0;
     s32 substep;
     s32 substepCount = 1;
     s32 printsDebugText = FALSE;
@@ -501,7 +501,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 }
             }
 
-            flags |= contact;
+            stepFlags |= contact;
             if (printsDebugText) {
                 PrintDebugPaddedHex(contact, CONTACT_DEBUG_TEXT_COLUMN, CONTACT_DEBUG_TEXT_ROW);
                 osSyncPrintf("col%d\n", contact);
@@ -601,7 +601,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                             simulation->position[AXIS_Z] + (rest * velocity[AXIS_Z]);
                     }
 
-                    flags |= STEP_FLAG_PIN_HIT;
+                    stepFlags |= STEP_FLAG_PIN_HIT;
                     MoveBallToCupEdge(simulation);
                     BuildLiftRotation();
                 }
@@ -697,7 +697,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                                 velocity[AXIS_Z] *= CUP_PULL_DRAG;
                                 velocity[AXIS_X] += cosf(angle) * pull;
                                 velocity[AXIS_Z] += sinf(angle) * pull;
-                                flags |= STEP_FLAG_CUP_PULL;
+                                stepFlags |= STEP_FLAG_CUP_PULL;
                             }
                         }
 
@@ -764,7 +764,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                                     LIP_OUT_SPIN_SCALE;
                                 BuildLiftRotation();
                                 contact = 0;
-                                flags |= STEP_FLAG_LIPPED_OUT;
+                                stepFlags |= STEP_FLAG_LIPPED_OUT;
                                 if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
                                     StartFlagstickSparks(simulation->position);
                                 }
@@ -1185,7 +1185,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     break;
             }
 
-            flags |= STEP_FLAG_HOLE_TRIANGLE_BOUNCE;
+            stepFlags |= STEP_FLAG_HOLE_TRIANGLE_BOUNCE;
             if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
                 SpawnImpactEffects(&impact);
                 StartCheepCheepLeap(0);
@@ -2022,7 +2022,7 @@ ROLLED:
             }
 
             if (isOutside) {
-                flags |= STEP_FLAG_OUTSIDE_COURSE;
+                stepFlags |= STEP_FLAG_OUTSIDE_COURSE;
             }
         }
 
@@ -2103,7 +2103,7 @@ SETTLE:
             }
         }
 
-        simulation->stepFlags = flags;
+        simulation->stepFlags = stepFlags;
     }
 
     simulation->velocity[AXIS_X] = velocity[AXIS_X];
@@ -2146,7 +2146,7 @@ SETTLE:
         }
     }
 
-    return flags;
+    return stepFlags;
 }
 
 ImpactEffect *GetImpactTimingEntry(

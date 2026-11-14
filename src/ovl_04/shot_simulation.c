@@ -22,7 +22,7 @@ void SimulateShot(ShotLaunch *shot) {
     s32 step;
     Boolean hasGroundHit;
     Boolean hasHoleTriangleBounce;
-    s32 flags;
+    s32 stepFlags;
     s32 firstBounceKind;
     u8 isWaterCut;
 
@@ -65,9 +65,9 @@ void SimulateShot(ShotLaunch *shot) {
         g_GameState.isMiniGolf || GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
     step = 0;
     while (simulation->state != BALL_STATE_STOPPED) {
-        flags = StepBallSimulation(simulation);
+        stepFlags = StepBallSimulation(simulation);
         if (step < PATH_STEP_COUNT) {
-            g_SimulatedShot.pathFlags[step] = flags;
+            g_SimulatedShot.pathFlags[step] = stepFlags;
             g_SimulatedShot.path[step][0] = simulation->position[AXIS_X];
             g_SimulatedShot.path[step][1] = simulation->position[AXIS_Y];
             g_SimulatedShot.path[step][2] = simulation->position[AXIS_Z];
@@ -77,11 +77,11 @@ void SimulateShot(ShotLaunch *shot) {
             g_SimulatedShot.flagHitStep = step;
         }
 
-        if (flags & STEP_FLAG_GROUND_HIT & !hasGroundHit) {
+        if (stepFlags & STEP_FLAG_GROUND_HIT & !hasGroundHit) {
             hasGroundHit = TRUE;
         }
 
-        if (flags & STEP_FLAG_HOLE_TRIANGLE_BOUNCE) {
+        if (stepFlags & STEP_FLAG_HOLE_TRIANGLE_BOUNCE) {
             hasHoleTriangleBounce = TRUE;
         }
 

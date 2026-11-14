@@ -2002,9 +2002,11 @@ static const char f_SimFaultText[] = "AI Sim Fault!";
 s32 StepTrialShot(void) {
     PlaneTriangle hit;
     f32 fraction;
-    s32 flags;
-    s32 ballState;
     s32 stepFlags;
+    s32 ballState;
+    // Holds the same flags as stepFlags; reading them from a copy is needed
+    // for the match.
+    s32 stepFlagsCopy;
     s32 velocityY;
     s32 bounceCount;
     s32 heightMiss;
@@ -2022,7 +2024,7 @@ s32 StepTrialShot(void) {
     s32 launchPower;
     s32 index;
 
-    flags = 0;
+    stepFlags = 0;
     if (f_PlanStage != PLAN_STAGE_TRIAL_RUNNING) {
         f_IsTrialLost = FALSE;
         f_TrialEvaluation = 0;
@@ -2070,20 +2072,20 @@ s32 StepTrialShot(void) {
             velocityY = f_TrialSimulation.velocity[AXIS_Y];
             bounceCount = f_TrialSimulation.bounceCount;
             f_TrialStepCount++;
-            flags = StepBallSimulation(&f_TrialSimulation);
-            stepFlags = flags;
+            stepFlags = StepBallSimulation(&f_TrialSimulation);
+            stepFlagsCopy = stepFlags;
             if (f_TrialStepCount >= STEP_COUNT_MAX) {
                 SetDebugTextHighlight(TRUE);
                 PrintDebugText(f_SimFaultText, 10, 12);
                 break;
             }
 
-            if (flags & STEP_FLAG_OUTSIDE_COURSE) {
+            if (stepFlags & STEP_FLAG_OUTSIDE_COURSE) {
                 break;
             }
 
             if (bounceCount == 0 &&
-                (flags & (STEP_FLAG_GROUND_HIT | STEP_FLAG_BILLBOARD_HIT)) &&
+                (stepFlags & (STEP_FLAG_GROUND_HIT | STEP_FLAG_BILLBOARD_HIT)) &&
                 velocityY < 0 &&
                 ballState == BALL_STATE_FLYING) {
                 if (f_HasBestEvaluation || f_TrialLevel < 2) {
@@ -2107,14 +2109,14 @@ s32 StepTrialShot(void) {
                     f_TrialEndPoint[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
                 }
 
-                if (stepFlags & STEP_FLAG_LIPPED_OUT) {
+                if (stepFlagsCopy & STEP_FLAG_LIPPED_OUT) {
                     f_TrialEvaluation += LIP_OUT_EVALUATION;
                     if (IsStrokeLimitReached()) {
                         f_TrialEvaluation += POOR_LANDING_EVALUATION;
                     }
                 }
             }
-            else if ((stepFlags & STEP_FLAG_GROUND_HIT) &&
+            else if ((stepFlagsCopy & STEP_FLAG_GROUND_HIT) &&
                 f_TrialSimulation.state == BALL_STATE_FLYING &&
                 !f_HasLanded) {
                 f_HasLanded = f_TrialSimulation.state;
@@ -2423,7 +2425,7 @@ EVALUATE:
                 RADIANS_TO_BINARY_ANGLE);
     }
     else {
-        if (flags & STEP_FLAG_GROUND_HIT) {
+        if (stepFlags & STEP_FLAG_GROUND_HIT) {
             if (!(GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])->surfaceMask &
                     CLUB_SURFACE_GREEN)) {
                 f_Shot.clubSlot++;
@@ -2719,7 +2721,7 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
 
 Boolean IsTrialShotSafe(void) {
     u32 kind;
-    s32 flags;
+    s32 stepFlags;
     s32 velocityY UNUSED;
 
     f_TrialLaunch->heading = f_TrialShot.heading;
@@ -2739,14 +2741,14 @@ Boolean IsTrialShotSafe(void) {
     while (f_TrialSimulation.state != BALL_STATE_STOPPED) {
         velocityY = f_TrialSimulation.velocity[AXIS_Y];
         f_TrialStepCount++;
-        flags = StepBallSimulation(&f_TrialSimulation);
+        stepFlags = StepBallSimulation(&f_TrialSimulation);
         if (f_TrialStepCount >= STEP_COUNT_MAX) {
             SetDebugTextHighlight(TRUE);
             PrintDebugText(f_SimFaultText, 10, 12);
             break;
         }
 
-        if (flags & STEP_FLAG_OUTSIDE_COURSE) {
+        if (stepFlags & STEP_FLAG_OUTSIDE_COURSE) {
             break;
         }
     }

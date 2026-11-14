@@ -333,7 +333,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
     s32 previousVelocityX;
     s32 previousVelocityZ;
     s32 contact;
-    s32 flags = 0;
+    s32 stepFlags = 0;
     s32 printsDebugText;
     s32 substep;
     s32 substepCount;
@@ -560,7 +560,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                 }
             }
 
-            flags |= contact;
+            stepFlags |= contact;
             if (printsDebugText) {
                 PrintDebugPaddedHex(contact, CONTACT_DEBUG_TEXT_COLUMN, CONTACT_DEBUG_TEXT_ROW);
                 osSyncPrintf("col%d\n", contact);
@@ -647,7 +647,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
 
                         simulation->velocity[AXIS_X] = pinVelocity[AXIS_X];
                         simulation->velocity[AXIS_Z] = pinVelocity[AXIS_Z];
-                        flags |= STEP_FLAG_PIN_HIT;
+                        stepFlags |= STEP_FLAG_PIN_HIT;
                         simulation->position[AXIS_X] =
                             simulation->position[AXIS_X] + (rest * simulation->velocity[AXIS_X]);
                         simulation->position[AXIS_Y] =
@@ -803,7 +803,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                                                                 simulation->velocity[AXIS_Z]
                                                             ) *
                                         LIP_OUT_SPIN_SCALE;
-                                    flags |= STEP_FLAG_LIPPED_OUT;
+                                    stepFlags |= STEP_FLAG_LIPPED_OUT;
                                     BuildOpeningLiftRotation();
                                     contact = 0;
                                 }
@@ -1723,7 +1723,7 @@ ROLLED:
             }
 
             if (isOutside) {
-                flags |= STEP_FLAG_OUTSIDE_COURSE;
+                stepFlags |= STEP_FLAG_OUTSIDE_COURSE;
             }
         }
 
@@ -1802,11 +1802,11 @@ SETTLE:
             }
         }
 
-        simulation->stepFlags = flags;
+        simulation->stepFlags = stepFlags;
     }
     while (++substep < substepCount);
 
-    return flags;
+    return stepFlags;
 }
 
 #define OPENING_OFFSET_SIDE_SPIN_SCALE 2
