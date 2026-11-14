@@ -165,11 +165,11 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
 
     for (i = 0; i != g_GameState.playerCount; i++) {
         g_Scorecard.faceImages[i] = AllocMemory(
-            OpenEncodedAsset(g_CharacterImageAssets[g_Players[i].characterIndex], &asset)
+            OpenEncodedAsset(g_CharacterFirstFaceAssets[g_Players[i].characterIndex], &asset)
         );
         ReadEncodedAsset(g_Scorecard.faceImages[i], &asset);
         OpenAssetFile(
-            g_CharacterPaletteAssets[g_Players[i].characterIndex] + g_Players[i].paletteIndex,
+            g_CharacterFirstPaletteFiles[g_Players[i].characterIndex] + g_Players[i].paletteIndex,
             &file
         );
         size = GetAssetFileSize(&file);
@@ -915,7 +915,7 @@ void AnimateScorecard(void) {
                 if (g_Scorecard.faceFrame < FACE_FRAME_COUNT) {
                     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
                         OpenEncodedAsset(
-                            g_CharacterImageAssets[g_Players[playerIndex].characterIndex] +
+                            g_CharacterFirstFaceAssets[g_Players[playerIndex].characterIndex] +
                                 g_Scorecard.faceFrame +
                                 g_Scorecard.content.faceImageOffsets[playerIndex],
                             &asset

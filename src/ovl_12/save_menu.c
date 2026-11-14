@@ -354,12 +354,12 @@ void OpenSaveMenu(s32 kind) {
     for (slot = 0; slot != FACE_IMAGE_COUNT; slot++) {
         ReadEncodedAsset(
             f_FaceImages[slot] = AllocMemory(OpenEncodedAsset(
-                g_CharacterImageAssets[CHARACTER_PLUM] + CHARACTER_FACE_IMAGE_OFFSET,
+                g_CharacterFirstFaceAssets[CHARACTER_PLUM] + CHARACTER_FACE_IMAGE_OFFSET,
                 &encodedAsset
             )),
             &encodedAsset
         );
-        OpenAssetFile(g_CharacterPaletteAssets[CHARACTER_PLUM], &file);
+        OpenAssetFile(g_CharacterFirstPaletteFiles[CHARACTER_PLUM], &file);
         fileSize = GetAssetFileSize(&file);
         ReadAssetFile(f_FacePalettes[slot] = AllocMemory(fileSize), fileSize, &file);
     }
@@ -422,7 +422,7 @@ void OpenSaveMenu(s32 kind) {
                 for (playerIndex = 0; playerIndex != state->playerCount; playerIndex++) {
                     player = &save->savedPlayers[slot][playerIndex];
                     OpenEncodedAsset(
-                        g_CharacterImageAssets[player->characterIndex] +
+                        g_CharacterFirstFaceAssets[player->characterIndex] +
                             CHARACTER_FACE_IMAGE_OFFSET,
                         &encodedAsset
                     );
@@ -431,7 +431,7 @@ void OpenSaveMenu(s32 kind) {
                         &encodedAsset
                     );
                     OpenAssetFile(
-                        g_CharacterPaletteAssets[player->characterIndex] + player->paletteIndex,
+                        g_CharacterFirstPaletteFiles[player->characterIndex] + player->paletteIndex,
                         &file
                     );
                     ReadAssetFile(
@@ -448,12 +448,13 @@ void OpenSaveMenu(s32 kind) {
             record = &save->ringShotRecords[slot];
             if (record->scoreKind & SCORE_KIND_RECORDED) {
                 OpenEncodedAsset(
-                    g_CharacterImageAssets[record->characterIndex] + CHARACTER_FACE_IMAGE_OFFSET,
+                    g_CharacterFirstFaceAssets[record->characterIndex] +
+                        CHARACTER_FACE_IMAGE_OFFSET,
                     &encodedAsset
                 );
                 ReadEncodedAsset(f_FaceImages[slot], &encodedAsset);
                 OpenAssetFile(
-                    g_CharacterPaletteAssets[record->characterIndex] + record->paletteIndex,
+                    g_CharacterFirstPaletteFiles[record->characterIndex] + record->paletteIndex,
                     &file
                 );
                 ReadAssetFile(f_FacePalettes[slot], GetAssetFileSize(&file), &file);
@@ -1282,7 +1283,7 @@ void SaveGameToSlot(void) {
         for (playerIndex = 0; playerIndex != state->playerCount; playerIndex++) {
             player = &save->savedPlayers[f_CursorIndex][playerIndex];
             OpenEncodedAsset(
-                g_CharacterImageAssets[player->characterIndex] + CHARACTER_FACE_IMAGE_OFFSET,
+                g_CharacterFirstFaceAssets[player->characterIndex] + CHARACTER_FACE_IMAGE_OFFSET,
                 &encodedAsset
             );
             ReadEncodedAsset(
@@ -1290,7 +1291,7 @@ void SaveGameToSlot(void) {
                 &encodedAsset
             );
             OpenAssetFile(
-                g_CharacterPaletteAssets[player->characterIndex] + player->paletteIndex,
+                g_CharacterFirstPaletteFiles[player->characterIndex] + player->paletteIndex,
                 &file
             );
             ReadAssetFile(
@@ -1323,12 +1324,12 @@ void SaveReplayToSlot(void) {
     InvalidateBrokenRingShotRecords();
     if (record->scoreKind & SCORE_KIND_RECORDED) {
         OpenEncodedAsset(
-            g_CharacterImageAssets[record->characterIndex] + CHARACTER_FACE_IMAGE_OFFSET,
+            g_CharacterFirstFaceAssets[record->characterIndex] + CHARACTER_FACE_IMAGE_OFFSET,
             &encodedAsset
         );
         ReadEncodedAsset(f_FaceImages[f_CursorIndex], &encodedAsset);
         OpenAssetFile(
-            g_CharacterPaletteAssets[record->characterIndex] + record->paletteIndex,
+            g_CharacterFirstPaletteFiles[record->characterIndex] + record->paletteIndex,
             &file
         );
         ReadAssetFile(f_FacePalettes[f_CursorIndex], GetAssetFileSize(&file), &file);

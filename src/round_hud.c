@@ -349,7 +349,7 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y);
 static void *f_SceneryBillboardHeap = NULL;
 static s32 f_ClubNameImageIndex = 0;
 static s32 f_UnusedHudInitWord = 0;
-AssetId g_CharacterImageAssets[CHARACTER_COUNT] = {
+AssetId g_CharacterFirstFaceAssets[CHARACTER_COUNT] = {
     0x7BC,
     0x74C,
     0x7A0,
@@ -369,7 +369,7 @@ AssetId g_CharacterImageAssets[CHARACTER_COUNT] = {
     0x810,
     0x81E,
 };
-s16 g_CharacterPaletteAssets[CHARACTER_COUNT] = {
+s16 g_CharacterFirstPaletteFiles[CHARACTER_COUNT] = {
     0x7B8,
     0x748,
     0x79C,
@@ -811,9 +811,12 @@ void LoadPlayerFace(s32 playerIndex, CharacterIndex characterIndex, s32 paletteI
     EncodedAsset asset;
     AssetFile file;
 
-    OpenEncodedAsset(g_CharacterImageAssets[characterIndex] + CHARACTER_FACE_IMAGE_OFFSET, &asset);
+    OpenEncodedAsset(
+        g_CharacterFirstFaceAssets[characterIndex] + CHARACTER_FACE_IMAGE_OFFSET,
+        &asset
+    );
     ReadEncodedAsset(g_PlayerFaceImages[playerIndex], &asset);
-    OpenAssetFile(g_CharacterPaletteAssets[characterIndex] + paletteIndex, &file);
+    OpenAssetFile(g_CharacterFirstPaletteFiles[characterIndex] + paletteIndex, &file);
     ReadAssetFile(g_PlayerFacePalettes[playerIndex], GetAssetFileSize(&file), &file);
 }
 
@@ -1145,10 +1148,10 @@ void LoadRoundHud(void) {
     ReadEncodedAsset(g_BlendedTextureStillLayer, &asset);
     for (i = 0; i != PLAYER_COUNT_MAX; i++) {
         g_PlayerFaceImages[i] = AllocMemory(
-            OpenEncodedAsset(g_CharacterImageAssets[i] + CHARACTER_FACE_IMAGE_OFFSET, &asset)
+            OpenEncodedAsset(g_CharacterFirstFaceAssets[i] + CHARACTER_FACE_IMAGE_OFFSET, &asset)
         );
         ReadEncodedAsset(g_PlayerFaceImages[i], &asset);
-        OpenAssetFile(g_CharacterPaletteAssets[i], &file);
+        OpenAssetFile(g_CharacterFirstPaletteFiles[i], &file);
         paletteSize = GetAssetFileSize(&file);
         g_PlayerFacePalettes[i] = AllocMemory(paletteSize);
         ReadAssetFile(g_PlayerFacePalettes[i], paletteSize, &file);

@@ -1352,7 +1352,8 @@ void DrawMovie(Gfx **displayListHead) {
 #define LoadWinnerFace(asset, frameIndex) \
     { \
         OpenEncodedAsset( \
-            g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex] + (frameIndex), \
+            g_CharacterFirstFaceAssets[g_Players[GetContestWinner()].characterIndex] + \
+                (frameIndex), \
             (asset) \
         ); \
         ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, (asset)); \
@@ -1451,7 +1452,7 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
         gDPSetEnvColor(gfx++, 255, 255, 255, CONTEST_COPY_ALPHA);
         if (f_MovieDrawCount == 0) {
             OpenAssetFile(
-                g_CharacterPaletteAssets[g_Players[GetContestWinner()].characterIndex] +
+                g_CharacterFirstPaletteFiles[g_Players[GetContestWinner()].characterIndex] +
                     g_Players[GetContestWinner()].paletteIndex,
                 &file
             );

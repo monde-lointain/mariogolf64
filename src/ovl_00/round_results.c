@@ -462,11 +462,11 @@ void LoadRoundResults(void) {
 
     for (i = 0; i != g_GameState.playerCount; i++) {
         f_PlayerFaceImages[i] = AllocMemory(
-            OpenEncodedAsset(g_CharacterImageAssets[g_Players[i].characterIndex], &asset)
+            OpenEncodedAsset(g_CharacterFirstFaceAssets[g_Players[i].characterIndex], &asset)
         );
         ReadEncodedAsset(f_PlayerFaceImages[i], &asset);
         OpenAssetFile(
-            g_CharacterPaletteAssets[g_Players[i].characterIndex] + g_Players[i].paletteIndex,
+            g_CharacterFirstPaletteFiles[g_Players[i].characterIndex] + g_Players[i].paletteIndex,
             &file
         );
         size = GetAssetFileSize(&file);
@@ -567,12 +567,13 @@ void LoadRoundResults(void) {
                     f_PlayerRanks[1] = MATCH_RANK_WON;
                 }
 
-                f_FaceImage = AllocMemory(
-                    OpenEncodedAsset(g_CharacterImageAssets[g_Players[1].characterIndex], &asset)
-                );
+                f_FaceImage = AllocMemory(OpenEncodedAsset(
+                    g_CharacterFirstFaceAssets[g_Players[1].characterIndex],
+                    &asset
+                ));
                 ReadEncodedAsset(f_FaceImage, &asset);
                 OpenAssetFile(
-                    g_CharacterPaletteAssets[g_Players[1].characterIndex] +
+                    g_CharacterFirstPaletteFiles[g_Players[1].characterIndex] +
                         g_Players[1].paletteIndex,
                     &file
                 );
@@ -752,9 +753,9 @@ void LoadUnlockNotice(s32 unlock) {
         f_NamePlateImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
         ReadEncodedAsset(f_NamePlateImage, &asset);
         f_FaceImage =
-            AllocMemory(OpenEncodedAsset(g_CharacterImageAssets[f_FaceCharacterIndex], &asset));
+            AllocMemory(OpenEncodedAsset(g_CharacterFirstFaceAssets[f_FaceCharacterIndex], &asset));
         ReadEncodedAsset(f_FaceImage, &asset);
-        OpenAssetFile(g_CharacterPaletteAssets[f_FaceCharacterIndex], &file);
+        OpenAssetFile(g_CharacterFirstPaletteFiles[f_FaceCharacterIndex], &file);
         size = GetAssetFileSize(&file);
         f_FacePalette = AllocMemory(size);
         ReadAssetFile(f_FacePalette, size, &file);
@@ -817,7 +818,7 @@ s32 UpdateUnlockNotice(void) {
             f_NoticeFaceFrame < NOTICE_LAST_FACE_FRAME) {
             f_NoticeFaceFrame++;
             OpenEncodedAsset(
-                g_CharacterImageAssets[f_FaceCharacterIndex] + f_NoticeFaceFrame,
+                g_CharacterFirstFaceAssets[f_FaceCharacterIndex] + f_NoticeFaceFrame,
                 &asset
             );
             ReadEncodedAsset(f_FaceImage, &asset);
@@ -1711,7 +1712,7 @@ void UpdateCharacterResultsNotice(void) {
         f_NoticeFaceFrame < NOTICE_LAST_FACE_FRAME) {
         f_NoticeFaceFrame++;
         OpenEncodedAsset(
-            g_CharacterImageAssets[g_Players[1].characterIndex] + f_NoticeFaceFrame,
+            g_CharacterFirstFaceAssets[g_Players[1].characterIndex] + f_NoticeFaceFrame,
             &asset
         );
         ReadEncodedAsset(f_FaceImage, &asset);
@@ -3296,12 +3297,12 @@ s32 UpdateMatchResults(ControllerState *controller) {
                             g_Players[1].characterIndex = f_DebugUnlockCharacter;
                             f_FaceCharacterIndex = (s8)f_DebugUnlockCharacter;
                             OpenEncodedAsset(
-                                g_CharacterImageAssets[(s8)f_DebugUnlockCharacter],
+                                g_CharacterFirstFaceAssets[(s8)f_DebugUnlockCharacter],
                                 &faceAsset
                             );
                             ReadEncodedAsset(f_FaceImage, &faceAsset);
                             OpenAssetFile(
-                                g_CharacterPaletteAssets[g_Players[1].characterIndex] +
+                                g_CharacterFirstPaletteFiles[g_Players[1].characterIndex] +
                                     g_Players[1].paletteIndex,
                                 &file
                             );
@@ -4753,7 +4754,7 @@ void DrawRoundResults(Gfx **displayListHead) {
                 switch (f_FaceAnimations[i]) {
                     case FACE_ANIMATION_REST:
                         OpenEncodedAsset(
-                            g_CharacterImageAssets[g_Players[i].characterIndex],
+                            g_CharacterFirstFaceAssets[g_Players[i].characterIndex],
                             &asset
                         );
                         ReadEncodedAsset(f_PlayerFaceImages[i], &asset);
@@ -4761,7 +4762,8 @@ void DrawRoundResults(Gfx **displayListHead) {
                         break;
                     case FACE_ANIMATION_PLEASED:
                         OpenEncodedAsset(
-                            g_CharacterImageAssets[g_Players[i].characterIndex] + f_FaceFrames[i],
+                            g_CharacterFirstFaceAssets[g_Players[i].characterIndex] +
+                                f_FaceFrames[i],
                             &asset
                         );
                         ReadEncodedAsset(f_PlayerFaceImages[i], &asset);
@@ -4775,7 +4777,7 @@ void DrawRoundResults(Gfx **displayListHead) {
                         s32 beatenFrames[RESULTS_FACE_ANIMATION_FRAME_COUNT] = {0, 5, 6, 7, 8};
 
                         OpenEncodedAsset(
-                            g_CharacterImageAssets[g_Players[i].characterIndex] +
+                            g_CharacterFirstFaceAssets[g_Players[i].characterIndex] +
                                 beatenFrames[f_FaceFrames[i]],
                             &asset
                         );

@@ -52,9 +52,9 @@ enum CharacterChoice {
 
 #define CHARACTER_COUNT 18
 
-extern AssetId g_CharacterImageAssets[CHARACTER_COUNT];
+extern AssetId g_CharacterFirstFaceAssets[CHARACTER_COUNT];
 #define CHARACTER_FACE_IMAGE_OFFSET 9
-extern s16 g_CharacterPaletteAssets[CHARACTER_COUNT];
+extern s16 g_CharacterFirstPaletteFiles[CHARACTER_COUNT];
 #define CHARACTER_PALETTE_COUNT 4
 extern AssetId g_CharacterFaceAssets[CHARACTER_COUNT];
 extern s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];

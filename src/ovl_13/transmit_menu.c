@@ -537,11 +537,11 @@ void LoadTransmitMenu(void) {
     for (index = 0; index != GAME_BOY_GOLFER_COUNT; index++) {
         ReadEncodedAsset(
             g_GameBoyTransfer.faceImages[index] = AllocMemory(
-                OpenEncodedAsset(g_CharacterImageAssets[FIRST_GAME_BOY_GOLFER + index], &asset)
+                OpenEncodedAsset(g_CharacterFirstFaceAssets[FIRST_GAME_BOY_GOLFER + index], &asset)
             ),
             &asset
         );
-        OpenAssetFile(g_CharacterPaletteAssets[FIRST_GAME_BOY_GOLFER + index], &file);
+        OpenAssetFile(g_CharacterFirstPaletteFiles[FIRST_GAME_BOY_GOLFER + index], &file);
         size = GetAssetFileSize(&file);
         ReadAssetFile(g_GameBoyTransfer.facePalettes[index] = AllocMemory(size), size, &file);
     }
