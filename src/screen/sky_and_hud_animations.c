@@ -2514,6 +2514,24 @@ static u8 f_UnusedBufferAfterSkyMatrix[0x88] UNUSED;
 
 static Mtx f_TileMatrices[MATRIX_BUFFER_COUNT][FRAME_TILE_COUNT];
 
+#ifdef AVOID_UB
+// StepNoiseTexture rewrites the noise texture every frame, while the task
+// drawing the previous frame, queued before, may not have loaded it yet; the
+// RDP then sees some of the new rows, depending on timing. Each matrix
+// buffer's frame loads a copy taken while it is drawn instead.
+static u8 f_DrawnNoiseTexels[MATRIX_BUFFER_COUNT][SKY_NOISE_IMAGE_SIZE * SKY_NOISE_IMAGE_SIZE]
+    RCP_ALIGNED;
+
+static u8 *NoiseTexelsToDraw(void) {
+    u8 *texels = f_DrawnNoiseTexels[g_MatrixBufferIndex];
+
+    memcpy(texels, g_NoiseTexels, sizeof(f_DrawnNoiseTexels[0]));
+    return texels;
+}
+#else
+#define NoiseTexelsToDraw() g_NoiseTexels
+#endif
+
 // Draws the sky dome around the camera and, when the scene has one, the sun.
 // The sun is a textured rectangle placed from the camera's yaw against the
 // light's, and the dome's height above the horizon.
@@ -2620,7 +2638,7 @@ void DrawSky(Gfx **displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED, s
     );
     gDPLoadTextureBlock(
         gfx++,
-        TextureAddress(g_NoiseTexels),
+        TextureAddress(NoiseTexelsToDraw()),
         G_IM_FMT_I,
         G_IM_SIZ_8b,
         SKY_NOISE_IMAGE_SIZE,
