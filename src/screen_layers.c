@@ -704,16 +704,16 @@ Boolean IsPromptClosed(void) {
     return f_PromptState == PROMPT_STATE_CLOSED;
 }
 
-void OpenPrompt(s32 prompt) {
-    Prompt *entry;
+void OpenPrompt(s32 promptIndex) {
+    Prompt *prompt;
 
-    if (prompt != NO_PROMPT) {
-        entry = &f_Prompts[prompt];
+    if (promptIndex != NO_PROMPT) {
+        prompt = &f_Prompts[promptIndex];
         f_PromptFrame = 0;
-        f_PromptIndex = prompt;
+        f_PromptIndex = promptIndex;
         LoadPromptImages();
         f_PromptState = PROMPT_STATE_OPENING;
-        f_PromptChoice = entry->defaultChoice;
+        f_PromptChoice = prompt->defaultChoice;
         PlaySound(SOUND_PROMPT_OPEN, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
     }
 }
