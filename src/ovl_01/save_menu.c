@@ -1,6 +1,9 @@
 #include <string.h>
 #include <ultra64.h>
 
+// The original passes DrawCharacterFace's draw mode here as s32; see player_stats.h.
+#define WIDENS_FACE_DRAW_MODE
+
 #include "address.h"
 #include "asset.h"
 #include "character.h"
@@ -24,6 +27,7 @@
 #include "menu_number.h"
 #include "play_record.h"
 #include "player.h"
+#include "player_stats.h"
 #include "round_hud.h"
 #include "round_stats.h"
 #include "save.h"
@@ -98,27 +102,6 @@ void ResetSavedGameControllers(void);
 s16 FindNextReplaySlot(s8 startSlot, u8 isForward);
 s16 GetChosenReplaySlot(void);
 s32 GetOpenRingShotCourseCount(void);
-#ifdef AVOID_UB
-void DrawCharacterFace(
-    Gfx **displayListHead,
-    void *texels,
-    void *palette,
-    s32 left,
-    s32 top,
-    s16 characterIndex,
-    u8 drawMode
-);
-#else
-void DrawCharacterFace(
-    Gfx **displayListHead,
-    void *texels,
-    void *palette,
-    s32 left,
-    s32 top,
-    s16 characterIndex,
-    s32 drawMode
-);
-#endif
 void DrawCourseLabel(Gfx **displayListHead, s32 courseIndex, s32 left, s32 top, u8 showsCourseWord);
 void DrawRingShotRowIcon(Gfx **displayListHead, s32 imageIndex, s32 left, s32 top);
 

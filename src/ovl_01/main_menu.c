@@ -7,6 +7,8 @@
 
 // The original reads the chosen options here as s32; see save.h.
 #define WIDENS_CHOSEN_OPTIONS
+// The original reads GetChosenBestShot's result here as s32; see player_stats.h.
+#define WIDENS_CHOSEN_BEST_SHOT
 
 #include "address.h"
 #include "asset.h"
@@ -229,11 +231,6 @@ void LeaveMenuWithWipe(void);
 void LeaveMenuWithCourseWipe(void);
 void UpdateBirdieBadges(void);
 void UpdateBlankScreen(void);
-#ifdef AVOID_UB
-s16 GetChosenBestShot(void);
-#else
-s32 GetChosenBestShot(void);
-#endif
 void DrawNarrowMenuBoard(Gfx **displayListHead);
 void DrawLargeMenuBanner(Gfx **displayListHead);
 void DrawMenuTitleScreen(Gfx **displayListHead);

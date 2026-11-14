@@ -2,6 +2,9 @@
 
 #include <ultra64.h>
 
+// The original passes DrawCharacterFace's character index here as s32; see player_stats.h.
+#define WIDENS_FACE_CHARACTER_INDEX
+
 #include "address.h"
 #include "asset.h"
 #include "character.h"
@@ -13,6 +16,7 @@
 #include "menu_arrows.h"
 #include "menu_memory.h"
 #include "menu_number.h"
+#include "player_stats.h"
 #include "save.h"
 #include "save_screens.h"
 #include "screen.h"
@@ -89,27 +93,6 @@ typedef struct TableCell {
 #define TABLE_RIGHT_ARROW_X 296
 #define TABLE_ARROW_BLINK_FRAMES 4
 
-#ifdef AVOID_UB
-void DrawCharacterFace(
-    Gfx **displayListHead,
-    void *texels,
-    void *palette,
-    s32 left,
-    s32 top,
-    s16 characterIndex,
-    u8 drawMode
-);
-#else
-void DrawCharacterFace(
-    Gfx **displayListHead,
-    void *texels,
-    void *palette,
-    s32 left,
-    s32 top,
-    CharacterIndex characterIndex,
-    u8 drawMode
-);
-#endif
 void DrawTableCursor(Gfx **displayListHead, s32 x, s32 y);
 void DrawTableLines(Gfx **displayListHead);
 void DrawTablePopup(Gfx **displayListHead);

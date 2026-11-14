@@ -20,6 +20,7 @@
 #include "menu_arrows.h"
 #include "menu_memory.h"
 #include "menu_number.h"
+#include "player_stats.h"
 #include "save.h"
 #include "save_screens.h"
 #include "screen.h"
@@ -49,15 +50,6 @@
 #define TIME_SEPARATOR_SHIFT_LEFT 4
 #define TIME_SEPARATOR_SPACING 6
 
-void DrawCharacterFace(
-    Gfx **displayListHead,
-    void *texels,
-    void *palette,
-    s32 left,
-    s32 top,
-    s16 characterIndex,
-    u8 drawMode
-);
 void DrawPlaceLabel(Gfx **displayListHead, s32 left, s32 top, s32 place);
 void DrawStopwatchTime(Gfx **displayListHead, s32 left, s32 top, s32 frameCount);
 

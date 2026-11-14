@@ -48,4 +48,33 @@ void DrawBestShots(Gfx **displayListHead);
 void ReadBestShots(void);
 void LoadBestShotFaces(void);
 
+// The original passes some callers' arguments, or reads some callers'
+// results, wider than these routines take or give them. A file that
+// defines WIDENS_FACE_CHARACTER_INDEX, WIDENS_FACE_DRAW_MODE or
+// WIDENS_CHOSEN_BEST_SHOT gets that wider form.
+#if !defined(AVOID_UB) && defined(WIDENS_FACE_CHARACTER_INDEX)
+typedef s32 FaceCharacterIndexArgument;
+#else
+typedef s16 FaceCharacterIndexArgument;
+#endif
+#if !defined(AVOID_UB) && defined(WIDENS_FACE_DRAW_MODE)
+typedef s32 FaceDrawModeArgument;
+#else
+typedef u8 FaceDrawModeArgument;
+#endif
+void DrawCharacterFace(
+    Gfx **displayListHead,
+    void *texels,
+    void *palette,
+    s32 left,
+    s32 top,
+    FaceCharacterIndexArgument characterIndex,
+    FaceDrawModeArgument drawMode
+);
+#if !defined(AVOID_UB) && defined(WIDENS_CHOSEN_BEST_SHOT)
+s32 GetChosenBestShot(void);
+#else
+s16 GetChosenBestShot(void);
+#endif
+
 #endif

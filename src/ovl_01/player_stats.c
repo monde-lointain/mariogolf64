@@ -143,17 +143,7 @@ typedef struct GridStep {
 
 void DrawBrickWallRows(Gfx **displayListHead, u8 slide);
 
-s16 GetChosenBestShot(void);
 void DrawBestShotsCursor(Gfx **displayListHead);
-void DrawCharacterFace(
-    Gfx **displayListHead,
-    void *texels,
-    void *palette,
-    s32 left,
-    s32 top,
-    s16 characterIndex,
-    u8 drawMode
-);
 void DrawBetIcon(Gfx **displayListHead, s32 left, s32 top, s32 size, s32 textureStep);
 void DrawBetLabel(Gfx **displayListHead, s32 centerX, s32 top, u8 labelIndex);
 
