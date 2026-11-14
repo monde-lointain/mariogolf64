@@ -706,14 +706,14 @@ void DrawClubSlots(Gfx **displayListHead) {
                 gfx++,
                 (quadIndex * 2) + 1,
                 G_MWO_POINT_ST,
-                TexcoordWord(SYMBOL_ST_END, 0)
+                TextureCoordinateWord(SYMBOL_ST_END, 0)
             );
             gSPModifyVertex(gfx++, (quadIndex * 2) + 2, G_MWO_POINT_ST, SYMBOL_ST_END);
             gSPModifyVertex(
                 gfx++,
                 (quadIndex * 2) + 3,
                 G_MWO_POINT_ST,
-                TexcoordWord(SYMBOL_ST_END, SYMBOL_ST_END)
+                TextureCoordinateWord(SYMBOL_ST_END, SYMBOL_ST_END)
             );
             gSP2Triangles(
                 gfx++,

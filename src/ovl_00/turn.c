@@ -86,7 +86,7 @@
 #define AIM_CAMERA_MAX_X 4347904.0f
 #define AIM_CAMERA_MAX_Z 8542208.0f
 #define AIM_LOOK_AT_RISE 17.25f
-#define AIM_CAMERA_MIN_COORD (-0x25800)
+#define AIM_CAMERA_MIN_COORDINATE (-0x25800)
 #define AIM_CAMERA_COURSE_MAX_X 0x425800
 #define AIM_CAMERA_COURSE_MAX_Z 0x825800
 #define AIM_CAMERA_MINI_GOLF_MAX_X 0x109600
@@ -349,7 +349,7 @@ void EndRumbleForceStop(void) {
 void KeepAimCameraOnCourse(void) {
     Vec3 eye;
     s32 oldDistance = g_CurrentShot.aimCameraDistance;
-    s32 minCoord;
+    s32 minCoordinate;
     s32 maxX;
     s32 maxZ;
     Radians heading;
@@ -369,9 +369,9 @@ void KeepAimCameraOnCourse(void) {
     overshoot = 0.0f;
     offset = cosf(heading) * g_CurrentShot.aimCameraDistance;
     eye[AXIS_X] = offset + g_CurrentShot.ballPosition[AXIS_X];
-    minCoord = AIM_CAMERA_MIN_COORD;
-    if (eye[AXIS_X] < minCoord) {
-        overshoot = minCoord - eye[AXIS_X];
+    minCoordinate = AIM_CAMERA_MIN_COORDINATE;
+    if (eye[AXIS_X] < minCoordinate) {
+        overshoot = minCoordinate - eye[AXIS_X];
     }
     else if (eye[AXIS_X] > maxX) {
         overshoot = eye[AXIS_X] - maxX;
@@ -384,9 +384,9 @@ void KeepAimCameraOnCourse(void) {
     offset = sinf(heading) * g_CurrentShot.aimCameraDistance;
     eye[AXIS_Z] = offset + g_CurrentShot.ballPosition[AXIS_Z];
     overshoot = 0.0f;
-    if (eye[AXIS_Z] < minCoord) {
+    if (eye[AXIS_Z] < minCoordinate) {
         g_IsAimCameraEasing = FALSE;
-        overshoot = minCoord - eye[AXIS_Z];
+        overshoot = minCoordinate - eye[AXIS_Z];
     }
     else if (eye[AXIS_Z] > maxZ) {
         g_IsAimCameraEasing = FALSE;
@@ -503,16 +503,16 @@ void PlaceShotCamera(void) {
             (cosf(heading) * g_CurrentShot.aimCameraDistance) + g_CurrentShot.ballPosition[AXIS_X];
         point[AXIS_Z] =
             (sinf(heading) * g_CurrentShot.aimCameraDistance) + g_CurrentShot.ballPosition[AXIS_Z];
-        if (point[AXIS_X] < AIM_CAMERA_MIN_COORD) {
-            point[AXIS_X] = AIM_CAMERA_MIN_COORD;
+        if (point[AXIS_X] < AIM_CAMERA_MIN_COORDINATE) {
+            point[AXIS_X] = AIM_CAMERA_MIN_COORDINATE;
         }
         else if (point[AXIS_X] > AIM_CAMERA_MAX_X) {
             point[AXIS_X] = AIM_CAMERA_MAX_X;
             g_IsAimCameraEasing = 0;
         }
 
-        if (point[AXIS_Z] < AIM_CAMERA_MIN_COORD) {
-            point[AXIS_Z] = AIM_CAMERA_MIN_COORD;
+        if (point[AXIS_Z] < AIM_CAMERA_MIN_COORDINATE) {
+            point[AXIS_Z] = AIM_CAMERA_MIN_COORDINATE;
             g_IsAimCameraEasing = 0;
         }
         else if (point[AXIS_Z] > AIM_CAMERA_MAX_Z) {

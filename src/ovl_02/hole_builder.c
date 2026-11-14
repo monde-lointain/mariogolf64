@@ -2710,9 +2710,9 @@ void ReadTileMirroredCells(void) {
     }
 }
 
-void ReadVertexX(s16 *coord, s32 flags);
-void ReadVertexY(s16 *coord, s32 flags);
-void ReadVertexZ(s16 *coord, s32 flags);
+void ReadVertexX(s16 *coordinate, s32 flags);
+void ReadVertexY(s16 *coordinate, s32 flags);
+void ReadVertexZ(s16 *coordinate, s32 flags);
 
 void ReadGridVertices(void) {
     s8 flags;
@@ -2790,65 +2790,65 @@ void ReadTileMidpoints(void) {
     }
 }
 
-void ReadVertexX(s16 *coord, s32 flags) {
-    *coord = 0;
+void ReadVertexX(s16 *coordinate, s32 flags) {
+    *coordinate = 0;
     switch (flags & VERTEX_FLAG_X_ENCODING) {
         case VERTEX_ENCODING_BYTE:
-            ReadFileBytes(coord, 1);
-            *coord = (u16)*coord >> BITS_PER_BYTE;
+            ReadFileBytes(coordinate, 1);
+            *coordinate = (u16)*coordinate >> BITS_PER_BYTE;
             break;
         case VERTEX_ENCODING_FINE_BYTE:
-            ReadFileBytes(coord, 1);
-            *coord = ((u16)*coord >> BITS_PER_BYTE) << VERTEX_FINE_HORIZONTAL_SHIFT;
+            ReadFileBytes(coordinate, 1);
+            *coordinate = ((u16)*coordinate >> BITS_PER_BYTE) << VERTEX_FINE_HORIZONTAL_SHIFT;
             break;
         case VERTEX_ENCODING_COARSE_BYTE:
-            ReadFileBytes(coord, 1);
-            *coord = ((u16)*coord >> BITS_PER_BYTE) << VERTEX_COARSE_HORIZONTAL_SHIFT;
+            ReadFileBytes(coordinate, 1);
+            *coordinate = ((u16)*coordinate >> BITS_PER_BYTE) << VERTEX_COARSE_HORIZONTAL_SHIFT;
             break;
         case VERTEX_ENCODING_TWO_BYTES:
-            ReadFileBytes(coord, 2);
+            ReadFileBytes(coordinate, 2);
             break;
     }
 }
 
-void ReadVertexY(s16 *coord, s32 flags) {
-    *coord = 0;
+void ReadVertexY(s16 *coordinate, s32 flags) {
+    *coordinate = 0;
     switch ((u8)(flags & VERTEX_FLAG_Y_ENCODING) >> VERTEX_FLAG_Y_ENCODING_SHIFT) {
         case VERTEX_ENCODING_BYTE:
-            ReadFileBytes(coord, 1);
-            *coord = (u16)*coord >> BITS_PER_BYTE;
+            ReadFileBytes(coordinate, 1);
+            *coordinate = (u16)*coordinate >> BITS_PER_BYTE;
             break;
         case VERTEX_ENCODING_FINE_BYTE:
-            ReadFileBytes(coord, 1);
-            *coord = ((u16)*coord >> BITS_PER_BYTE) << VERTEX_FINE_HEIGHT_SHIFT;
+            ReadFileBytes(coordinate, 1);
+            *coordinate = ((u16)*coordinate >> BITS_PER_BYTE) << VERTEX_FINE_HEIGHT_SHIFT;
             break;
         case VERTEX_ENCODING_COARSE_BYTE:
-            ReadFileBytes(coord, 1);
-            *coord = ((u16)*coord >> BITS_PER_BYTE) << VERTEX_COARSE_HEIGHT_SHIFT;
+            ReadFileBytes(coordinate, 1);
+            *coordinate = ((u16)*coordinate >> BITS_PER_BYTE) << VERTEX_COARSE_HEIGHT_SHIFT;
             break;
         case VERTEX_ENCODING_TWO_BYTES:
-            ReadFileBytes(coord, 2);
+            ReadFileBytes(coordinate, 2);
             break;
     }
 }
 
-void ReadVertexZ(s16 *coord, s32 flags) {
-    *coord = 0;
+void ReadVertexZ(s16 *coordinate, s32 flags) {
+    *coordinate = 0;
     switch ((u8)(flags & VERTEX_FLAG_Z_ENCODING) >> VERTEX_FLAG_Z_ENCODING_SHIFT) {
         case VERTEX_ENCODING_BYTE:
-            ReadFileBytes(coord, 1);
-            *coord = (u16)*coord >> BITS_PER_BYTE;
+            ReadFileBytes(coordinate, 1);
+            *coordinate = (u16)*coordinate >> BITS_PER_BYTE;
             break;
         case VERTEX_ENCODING_FINE_BYTE:
-            ReadFileBytes(coord, 1);
-            *coord = ((u16)*coord >> BITS_PER_BYTE) << VERTEX_FINE_HORIZONTAL_SHIFT;
+            ReadFileBytes(coordinate, 1);
+            *coordinate = ((u16)*coordinate >> BITS_PER_BYTE) << VERTEX_FINE_HORIZONTAL_SHIFT;
             break;
         case VERTEX_ENCODING_COARSE_BYTE:
-            ReadFileBytes(coord, 1);
-            *coord = ((u16)*coord >> BITS_PER_BYTE) << VERTEX_COARSE_HORIZONTAL_SHIFT;
+            ReadFileBytes(coordinate, 1);
+            *coordinate = ((u16)*coordinate >> BITS_PER_BYTE) << VERTEX_COARSE_HORIZONTAL_SHIFT;
             break;
         case VERTEX_ENCODING_TWO_BYTES:
-            ReadFileBytes(coord, 2);
+            ReadFileBytes(coordinate, 2);
             break;
     }
 }
@@ -3716,38 +3716,39 @@ void ToggleGroundTileBorders(void) {
     }
 }
 
-void SetMiniGolfTileTextureCoords(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
+void SetMiniGolfTileTextureCoordinates(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
     Vtx_t *vertex;
-    s32 coord;
+    s32 coordinate;
 
     for (vertex = start; vertex < end; vertex++) {
-        coord = TexelCoordinate(
-                    (vertex->ob[AXIS_X] * MINI_GOLF_TEXTURE_SCALE_X) - (column << TILE_ORIGIN_SHIFT)
-                ) +
+        coordinate =
+            TexelCoordinate(
+                (vertex->ob[AXIS_X] * MINI_GOLF_TEXTURE_SCALE_X) - (column << TILE_ORIGIN_SHIFT)
+            ) +
             TILE_TEXTURE_ORIGIN;
-        vertex->tc[TEXTURE_AXIS_S] = coord;
+        vertex->tc[TEXTURE_AXIS_S] = coordinate;
 
-        coord = (vertex->ob[AXIS_Z] * MINI_GOLF_TEXTURE_SCALE_Z) - (row << TILE_ORIGIN_SHIFT);
-        vertex->tc[TEXTURE_AXIS_T] = TexelCoordinate(coord) + TILE_TEXTURE_ORIGIN;
+        coordinate = (vertex->ob[AXIS_Z] * MINI_GOLF_TEXTURE_SCALE_Z) - (row << TILE_ORIGIN_SHIFT);
+        vertex->tc[TEXTURE_AXIS_T] = TexelCoordinate(coordinate) + TILE_TEXTURE_ORIGIN;
     }
 }
 
-void SetTileTextureCoords(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
+void SetTileTextureCoordinates(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
     Vtx_t *vertex;
-    s32 coord;
+    s32 coordinate;
 
     if (g_GameState.isMiniGolf) {
-        SetMiniGolfTileTextureCoords(column, row, start, end);
+        SetMiniGolfTileTextureCoordinates(column, row, start, end);
         return;
     }
 
     for (vertex = start; vertex < end; vertex++) {
-        coord = TexelCoordinate(vertex->ob[AXIS_X] - (column << TILE_ORIGIN_SHIFT)) +
+        coordinate = TexelCoordinate(vertex->ob[AXIS_X] - (column << TILE_ORIGIN_SHIFT)) +
             TILE_TEXTURE_ORIGIN;
-        vertex->tc[TEXTURE_AXIS_S] = coord;
+        vertex->tc[TEXTURE_AXIS_S] = coordinate;
 
-        coord = vertex->ob[AXIS_Z] - (row << TILE_ORIGIN_SHIFT);
-        vertex->tc[TEXTURE_AXIS_T] = TexelCoordinate(coord) + TILE_TEXTURE_ORIGIN;
+        coordinate = vertex->ob[AXIS_Z] - (row << TILE_ORIGIN_SHIFT);
+        vertex->tc[TEXTURE_AXIS_T] = TexelCoordinate(coordinate) + TILE_TEXTURE_ORIGIN;
     }
 }
 
@@ -3987,8 +3988,8 @@ void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **displayListHead, Vtx 
     }
 
     gSPEndDisplayList(gfx++);
-    SetTileTextureCoords(column, row, &(*vertexCursor)->v, &vertex->v);
-    SetTileTextureCoords(column, row, &midpoints->v, &midpoints[TILE_MIDPOINT_COUNT].v);
+    SetTileTextureCoordinates(column, row, &(*vertexCursor)->v, &vertex->v);
+    SetTileTextureCoordinates(column, row, &midpoints->v, &midpoints[TILE_MIDPOINT_COUNT].v);
     *displayListHead = gfx;
     *vertexCursor = vertex;
 }

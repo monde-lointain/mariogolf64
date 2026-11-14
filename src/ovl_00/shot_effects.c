@@ -78,9 +78,9 @@ enum SwingTrailState {
 #define SPARK_DRAG 0.98f
 #define SPARK_MODEL_Z (-100.0f)
 #define SPARK_MODEL_SCALE 0.1f
-#define SPARK_MAX_SCREEN_COORD 511
-#define IsSparkCoordInRange(coord) \
-    ((coord) >= -SPARK_MAX_SCREEN_COORD && (coord) <= SPARK_MAX_SCREEN_COORD)
+#define SPARK_MAX_SCREEN_COORDINATE 511
+#define IsSparkCoordinateInRange(coordinate) \
+    ((coordinate) >= -SPARK_MAX_SCREEN_COORDINATE && (coordinate) <= SPARK_MAX_SCREEN_COORDINATE)
 
 static s32 f_ImpactFrameCount = 0;
 static Vtx f_SparkVertices[3] = {
@@ -445,8 +445,8 @@ void DrawSparks(Gfx **displayListHead) {
                 }
 
                 if (f_SparkKinds[i] == SPARK_KIND_FLAGSTICK &&
-                    IsSparkCoordInRange(burstPoints[burst][0]) &&
-                    IsSparkCoordInRange(burstPoints[burst][1])) {
+                    IsSparkCoordinateInRange(burstPoints[burst][0]) &&
+                    IsSparkCoordinateInRange(burstPoints[burst][1])) {
                     left = (f_SparkOffsets[i][AXIS_X] * burstScales[burst]) + burstPoints[burst][0];
                     top = (f_SparkOffsets[i][AXIS_Y] * burstScales[burst]) + burstPoints[burst][1];
                     gSPScisTextureRectangle(
@@ -658,13 +658,13 @@ void DrawSwingTrail(Gfx **displayListHead, CameraMatrices *matrices) {
                 gfx++,
                 step * 2,
                 G_MWO_POINT_ST,
-                TexcoordWord(textureStep * segment - 1, 0x400)
+                TextureCoordinateWord(textureStep * segment - 1, 0x400)
             );
             gSPModifyVertex(
                 gfx++,
                 step * 2 + 1,
                 G_MWO_POINT_ST,
-                TexcoordWord(textureStep * segment - 1, 0)
+                TextureCoordinateWord(textureStep * segment - 1, 0)
             );
             segment++;
         }

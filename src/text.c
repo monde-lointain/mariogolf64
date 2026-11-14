@@ -2521,7 +2521,7 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
     return PackHalfSize(width, height);
 }
 
-#define PackTextureCoords(s, t) ((TexelCoordinate(s) << 16) | TexelCoordinate(t))
+#define PackTextureCoordinates(s, t) ((TexelCoordinate(s) << 16) | TexelCoordinate(t))
 
 void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
     Gfx *gfx = *displayListHead;
@@ -2788,10 +2788,20 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
                 gSPVertex(gfx++, f_SmallGlyphVertices, QUAD_VERTEX_COUNT, 0);
             }
 
-            gSPModifyVertex(gfx++, 0, G_MWO_POINT_ST, PackTextureCoords(left + s, top + t));
-            gSPModifyVertex(gfx++, 1, G_MWO_POINT_ST, PackTextureCoords(left + s, bottom + t));
-            gSPModifyVertex(gfx++, 2, G_MWO_POINT_ST, PackTextureCoords(fontSize + s, bottom + t));
-            gSPModifyVertex(gfx++, 3, G_MWO_POINT_ST, PackTextureCoords(fontSize + s, top + t));
+            gSPModifyVertex(gfx++, 0, G_MWO_POINT_ST, PackTextureCoordinates(left + s, top + t));
+            gSPModifyVertex(gfx++, 1, G_MWO_POINT_ST, PackTextureCoordinates(left + s, bottom + t));
+            gSPModifyVertex(
+                gfx++,
+                2,
+                G_MWO_POINT_ST,
+                PackTextureCoordinates(fontSize + s, bottom + t)
+            );
+            gSPModifyVertex(
+                gfx++,
+                3,
+                G_MWO_POINT_ST,
+                PackTextureCoordinates(fontSize + s, top + t)
+            );
             gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
             gDPPipeSync(gfx++);
             gSPPopMatrix(gfx++, G_MTX_MODELVIEW);

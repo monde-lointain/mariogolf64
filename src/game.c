@@ -564,25 +564,25 @@ void DrawSpinMesh(Gfx **displayListHead) {
                 gfx++,
                 stripIndex * 2,
                 G_MWO_POINT_ST,
-                TexcoordWord(TexelCoordinate(SCREEN_BORDER), 0)
+                TextureCoordinateWord(TexelCoordinate(SCREEN_BORDER), 0)
             );
             gSPModifyVertex(
                 gfx++,
                 (stripIndex * 2) + 1,
                 G_MWO_POINT_ST,
-                TexcoordWord(TexelCoordinate(SCREEN_WIDTH - SCREEN_BORDER), 0)
+                TextureCoordinateWord(TexelCoordinate(SCREEN_WIDTH - SCREEN_BORDER), 0)
             );
             gSPModifyVertex(
                 gfx++,
                 (stripIndex * 2) + 2,
                 G_MWO_POINT_ST,
-                TexcoordWord(TexelCoordinate(SCREEN_BORDER), TexelCoordinate(stripHeight))
+                TextureCoordinateWord(TexelCoordinate(SCREEN_BORDER), TexelCoordinate(stripHeight))
             );
             gSPModifyVertex(
                 gfx++,
                 (stripIndex * 2) + 3,
                 G_MWO_POINT_ST,
-                TexcoordWord(
+                TextureCoordinateWord(
                     TexelCoordinate(SCREEN_WIDTH - SCREEN_BORDER),
                     TexelCoordinate(stripHeight)
                 )

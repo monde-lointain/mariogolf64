@@ -3906,7 +3906,7 @@ void DrawTileAnimation(void) {
 #define TURN_AWAY_UPPER_ROW_COUNT 4
 #define TURN_AWAY_LOWER_ROW_COUNT (FRAME_TILE_ROW_COUNT - TURN_AWAY_UPPER_ROW_COUNT)
 #define LAST_TILE_TEXEL_WIDTH 47
-#define LOWER_TILE_TEXCOORD_INSET 8
+#define LOWER_TILE_TEXTURE_COORDINATE_INSET 8
 #define GridVertex(row, column) ((column) + ((row) * TILE_GRID_COLUMN_COUNT))
 #define TileUpperLeft(row, column) GridVertex(row, column)
 #define TileUpperRight(row, column) GridVertex(row, (column) + 1)
@@ -4004,13 +4004,13 @@ void DrawTurnAwayAnimation(void) {
                     g_DisplayListHead++,
                     TileLowerRight(row, column),
                     G_MWO_POINT_ST,
-                    TexcoordWord(TexelCoordinate(width), TexelCoordinate(FRAME_TILE_ROWS))
+                    TextureCoordinateWord(TexelCoordinate(width), TexelCoordinate(FRAME_TILE_ROWS))
                 );
                 gSPModifyVertex(
                     g_DisplayListHead++,
                     TileUpperRight(row, column),
                     G_MWO_POINT_ST,
-                    TexcoordWord(TexelCoordinate(width), 0)
+                    TextureCoordinateWord(TexelCoordinate(width), 0)
                 );
                 gDPPipeSync(g_DisplayListHead++);
                 gSP2Triangles(
@@ -4088,22 +4088,25 @@ void DrawTurnAwayAnimation(void) {
                     g_DisplayListHead++,
                     TileLowerLeft(row, column),
                     G_MWO_POINT_ST,
-                    TexelCoordinate(FRAME_TILE_ROWS) - LOWER_TILE_TEXCOORD_INSET
+                    TexelCoordinate(FRAME_TILE_ROWS) - LOWER_TILE_TEXTURE_COORDINATE_INSET
                 );
                 gSPModifyVertex(
                     g_DisplayListHead++,
                     TileLowerRight(row, column),
                     G_MWO_POINT_ST,
-                    TexcoordWord(
-                        TexelCoordinate(width) - LOWER_TILE_TEXCOORD_INSET,
-                        TexelCoordinate(FRAME_TILE_ROWS) - LOWER_TILE_TEXCOORD_INSET
+                    TextureCoordinateWord(
+                        TexelCoordinate(width) - LOWER_TILE_TEXTURE_COORDINATE_INSET,
+                        TexelCoordinate(FRAME_TILE_ROWS) - LOWER_TILE_TEXTURE_COORDINATE_INSET
                     )
                 );
                 gSPModifyVertex(
                     g_DisplayListHead++,
                     TileUpperRight(row, column),
                     G_MWO_POINT_ST,
-                    TexcoordWord(TexelCoordinate(width) - LOWER_TILE_TEXCOORD_INSET, 0)
+                    TextureCoordinateWord(
+                        TexelCoordinate(width) - LOWER_TILE_TEXTURE_COORDINATE_INSET,
+                        0
+                    )
                 );
                 gSP2Triangles(
                     g_DisplayListHead++,

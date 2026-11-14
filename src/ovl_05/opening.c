@@ -4562,7 +4562,7 @@ void DrawLakitu(Gfx **displayListHead) {
                 gfx++,
                 (drawnIndex * 2) + 1,
                 G_MWO_POINT_ST,
-                TexcoordWord(LAKITU_TRAIL_RIGHT_S, LakituTrailT(drawnIndex))
+                TextureCoordinateWord(LAKITU_TRAIL_RIGHT_S, LakituTrailT(drawnIndex))
             );
             segmentIndex--;
             if (segmentIndex < 0) {
@@ -4603,7 +4603,7 @@ void DrawLakitu(Gfx **displayListHead) {
                 gfx++,
                 LakituTrailSecondBatchSlot(drawnIndex) + 1,
                 G_MWO_POINT_ST,
-                TexcoordWord(LAKITU_TRAIL_RIGHT_S, LakituTrailT(drawnIndex))
+                TextureCoordinateWord(LAKITU_TRAIL_RIGHT_S, LakituTrailT(drawnIndex))
             );
             segmentIndex--;
             if (segmentIndex < 0) {

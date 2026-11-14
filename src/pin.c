@@ -89,7 +89,8 @@
 #define LARGE_CUP_WALL_PRIM_DEPTH 0x4010
 #define LARGE_FLAGSTICK_PRIM_DEPTH 0x4027
 
-#define SmallCupTexcoords(s, t) TexcoordWord(TexelCoordinate(s), TexelCoordinate(t))
+#define SmallCupTextureCoordinates(s, t) \
+    TextureCoordinateWord(TexelCoordinate(s), TexelCoordinate(t))
 #define ScreenXY(x, y) \
     ScreenPointWord((x) * QUARTER_PIXELS_PER_PIXEL, (s32)((y) * QUARTER_PIXELS_PER_PIXEL))
 #define SCREEN_FLAGSTICK_HALF_WIDTH 2
@@ -528,9 +529,24 @@ void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex)
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            gSPModifyVertex(g_DisplayListHead++, 1, G_MWO_POINT_ST, SmallCupTexcoords(0, 4));
-            gSPModifyVertex(g_DisplayListHead++, 2, G_MWO_POINT_ST, SmallCupTexcoords(8, 4));
-            gSPModifyVertex(g_DisplayListHead++, 3, G_MWO_POINT_ST, SmallCupTexcoords(8, 0));
+            gSPModifyVertex(
+                g_DisplayListHead++,
+                1,
+                G_MWO_POINT_ST,
+                SmallCupTextureCoordinates(0, 4)
+            );
+            gSPModifyVertex(
+                g_DisplayListHead++,
+                2,
+                G_MWO_POINT_ST,
+                SmallCupTextureCoordinates(8, 4)
+            );
+            gSPModifyVertex(
+                g_DisplayListHead++,
+                3,
+                G_MWO_POINT_ST,
+                SmallCupTextureCoordinates(8, 0)
+            );
         }
         else {
             gDPLoadTextureBlock(

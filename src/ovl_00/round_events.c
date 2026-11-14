@@ -2134,7 +2134,7 @@ void DrawReadyGoMovie(Gfx **displayListHead) {
                 gfx++,
                 (stripIndex * 2) + 1,
                 G_MWO_POINT_ST,
-                TexcoordWord(TexelCoordinate(READY_WIDTH) - 1, 0)
+                TextureCoordinateWord(TexelCoordinate(READY_WIDTH) - 1, 0)
             );
             gSPModifyVertex(
                 gfx++,
@@ -2146,7 +2146,10 @@ void DrawReadyGoMovie(Gfx **displayListHead) {
                 gfx++,
                 (stripIndex * 2) + 3,
                 G_MWO_POINT_ST,
-                TexcoordWord(TexelCoordinate(READY_WIDTH) - 1, TexelCoordinate(stripHeight))
+                TextureCoordinateWord(
+                    TexelCoordinate(READY_WIDTH) - 1,
+                    TexelCoordinate(stripHeight)
+                )
             );
         }
         else {
@@ -2180,7 +2183,7 @@ void DrawReadyGoMovie(Gfx **displayListHead) {
                 gfx++,
                 (stripIndex * 2) + 1,
                 G_MWO_POINT_ST,
-                TexcoordWord(TexelCoordinate(GO_WIDTH) - 1, 0)
+                TextureCoordinateWord(TexelCoordinate(GO_WIDTH) - 1, 0)
             );
             gSPModifyVertex(
                 gfx++,
@@ -2192,7 +2195,7 @@ void DrawReadyGoMovie(Gfx **displayListHead) {
                 gfx++,
                 (stripIndex * 2) + 3,
                 G_MWO_POINT_ST,
-                TexcoordWord(TexelCoordinate(GO_WIDTH) - 1, TexelCoordinate(stripHeight))
+                TextureCoordinateWord(TexelCoordinate(GO_WIDTH) - 1, TexelCoordinate(stripHeight))
             );
         }
 
@@ -2939,7 +2942,7 @@ void LoadContactImages(Player *player) {
             gfx++, \
             (firstVertex) + 1, \
             G_MWO_POINT_ST, \
-            TexcoordWord(f_ContactTextureS, f_ContactTextureT * (segment)) \
+            TextureCoordinateWord(f_ContactTextureS, f_ContactTextureT * (segment)) \
         ); \
     }
 
@@ -3613,7 +3616,7 @@ void DrawWindFlyGuy(Gfx **displayListHead) {
             gfx++,
             (i * 2) + 1,
             G_MWO_POINT_ST,
-            TexcoordWord(WIND_STREAK_TEXTURE_S, i << WIND_STREAK_TEXTURE_T_SHIFT)
+            TextureCoordinateWord(WIND_STREAK_TEXTURE_S, i << WIND_STREAK_TEXTURE_T_SHIFT)
         );
     }
 
@@ -3650,7 +3653,7 @@ void DrawWindFlyGuy(Gfx **displayListHead) {
             gfx++,
             WIND_STREAK_LAST_SLOT + 1 - slotsBack,
             G_MWO_POINT_ST,
-            TexcoordWord(WIND_STREAK_TEXTURE_S, i << WIND_STREAK_TEXTURE_T_SHIFT)
+            TextureCoordinateWord(WIND_STREAK_TEXTURE_S, i << WIND_STREAK_TEXTURE_T_SHIFT)
         );
     }
 

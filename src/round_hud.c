@@ -2995,7 +2995,7 @@ void DrawHoleFlag(Boolean isBackDrawn) {
                     g_DisplayListHead++,
                     vertexIndex,
                     G_MWO_POINT_ST,
-                    TexcoordWord(
+                    TextureCoordinateWord(
                         (HOLE_FLAG_BACK_TEXEL_START / 2) -
                             (column * (HOLE_FLAG_TEXEL_COLUMN_STEP / 2)),
                         row * (HOLE_FLAG_TEXEL_ROW_STEP / 2)

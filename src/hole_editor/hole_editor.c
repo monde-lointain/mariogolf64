@@ -4416,12 +4416,12 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                                 (row * FINE_TILE_CELL_SPAN) +
                                                                     cellRow + pointRow
                                                             );
-                                                            s32 packedTextureCoords;
+                                                            s32 packedTextureCoordinates;
 
                                                             if (IsGameFlagSet(
                                                                     GAME_FLAG_TEST_GROUND_TEXTURE
                                                                 )) {
-                                                                packedTextureCoords =
+                                                                packedTextureCoordinates =
                                                                     ((
                                                                          MIRRORED_TEST_S -
                                                                          (point->v.tc
@@ -4441,7 +4441,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                                 );
                                                             }
                                                             else {
-                                                                packedTextureCoords =
+                                                                packedTextureCoordinates =
                                                                     ((
                                                                          mirroredS -
                                                                          (point->v.tc
@@ -4458,7 +4458,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                                     [cellRow + pointRow]
                                                                     [cellColumn + pointColumn],
                                                                 G_MWO_POINT_ST,
-                                                                packedTextureCoords
+                                                                packedTextureCoordinates
                                                             );
                                                         }
                                                     }
@@ -4599,7 +4599,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                                 (row * FINE_TILE_CELL_SPAN) +
                                                                     cellRow + pointRow
                                                             );
-                                                            s32 packedTextureCoords =
+                                                            s32 packedTextureCoordinates =
                                                                 ((point->v.tc[TEXTURE_AXIS_S] / 2)
                                                                     << 16) |
                                                                 (point->v.tc[TEXTURE_AXIS_T] / 2);
@@ -4623,7 +4623,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                                     [cellRow + pointRow]
                                                                     [cellColumn + pointColumn],
                                                                 G_MWO_POINT_ST,
-                                                                packedTextureCoords
+                                                                packedTextureCoordinates
                                                             );
                                                         }
                                                     }

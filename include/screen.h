@@ -22,7 +22,7 @@
 #define COPY_MODE_TEXEL_STEP (COPY_MODE_TEXELS_PER_CYCLE * TEXEL_STEP_ONE)
 #define TexelCoordinate(texel) ((texel) << 5)
 #define ScreenPointWord(x, y) (((x) << 16) + (y))
-#define TexcoordWord(s, t) (((s) << 16) + (t))
+#define TextureCoordinateWord(s, t) (((s) << 16) + (t))
 
 #define RGBA16_RED_SHIFT 11
 #define RGBA16_GREEN_SHIFT 6
