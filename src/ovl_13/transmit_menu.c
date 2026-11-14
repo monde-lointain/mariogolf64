@@ -3846,8 +3846,8 @@ void BuildStatusData(StatusData *status) {
     StatusProgress *progress;
 
     SaveRecords *records = &save->records;
-    CourseStats *entry;
-    CourseStats *scores;
+    CourseStats *courseStats;
+    CourseStats *scannedStats;
     f32 reciprocal;
     s32 figure;
     s32 sum;
@@ -3859,62 +3859,65 @@ void BuildStatusData(StatusData *status) {
 
     memset(status, 0, STATUS_CLEARED_SIZE);
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-        entry = &save->records.courseStats[courseIndex];
+        courseStats = &save->records.courseStats[courseIndex];
         course = &status->courses[courseIndex];
 
-        if (entry->roundCount != 0) {
-            if (entry->roundCount > 0) {
-                reciprocal = 1.0f / entry->roundCount;
+        if (courseStats->roundCount != 0) {
+            if (courseStats->roundCount > 0) {
+                reciprocal = 1.0f / courseStats->roundCount;
 
-                figure = entry->roundCount;
+                figure = courseStats->roundCount;
                 course->roundCount[0] = figure;
                 course->roundCount[1] = figure >> BITS_PER_BYTE;
-                course->bestScore = entry->bestScore + STATUS_SCORE_BIAS;
-                course->strokesAverage = RoundedWholePart(entry->strokeTotal * reciprocal);
-                figure = RoundedWholePart(entry->longestDrive * YARDS_PER_UNIT);
+                course->bestScore = courseStats->bestScore + STATUS_SCORE_BIAS;
+                course->strokesAverage = RoundedWholePart(courseStats->strokeTotal * reciprocal);
+                figure = RoundedWholePart(courseStats->longestDrive * YARDS_PER_UNIT);
                 course->longestDrive[0] = figure;
                 course->longestDrive[1] = figure >> BITS_PER_BYTE;
-                figure = RoundedWholePart(entry->driveAverage * YARDS_PER_UNIT);
+                figure = RoundedWholePart(courseStats->driveAverage * YARDS_PER_UNIT);
                 course->driveAverage[0] = figure;
                 course->driveAverage[1] = figure >> BITS_PER_BYTE;
                 course->fairwayRate = RoundedWholePart(
-                    entry->measuredDriveTotal * reciprocal * (PERCENTS_PER_ONE / HOLES_PER_ROUND)
+                    courseStats->measuredDriveTotal * reciprocal *
+                    (PERCENTS_PER_ONE / HOLES_PER_ROUND)
                 );
                 course->puttsAverage =
-                    PackTenths(entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND));
+                    PackTenths(courseStats->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND));
                 course->parOrBetterRate = RoundedWholePart(
-                    entry->parOrBetterCount * reciprocal * (PERCENTS_PER_ONE / HOLES_PER_ROUND)
+                    courseStats->parOrBetterCount * reciprocal *
+                    (PERCENTS_PER_ONE / HOLES_PER_ROUND)
                 );
                 course->parOnRate = RoundedWholePart(
-                    entry->parOnCount * reciprocal * (PERCENTS_PER_ONE / HOLES_PER_ROUND)
+                    courseStats->parOnCount * reciprocal * (PERCENTS_PER_ONE / HOLES_PER_ROUND)
                 );
-                sum = entry->sandSaveCount + entry->missedSandSaveCount;
+                sum = courseStats->sandSaveCount + courseStats->missedSandSaveCount;
                 if (sum == 0) {
                     course->sandSaveRate = 0;
                 }
                 else {
-                    course->sandSaveRate =
-                        RoundedWholePart(((f32)entry->sandSaveCount / (f32)sum) * PERCENTS_PER_ONE);
+                    course->sandSaveRate = RoundedWholePart(
+                        ((f32)courseStats->sandSaveCount / (f32)sum) * PERCENTS_PER_ONE
+                    );
                 }
 
                 course->places = 0;
 
-                if (entry->hasPlace[THIRD_PLACE_INDEX] > 0) {
+                if (courseStats->hasPlace[THIRD_PLACE_INDEX] > 0) {
                     course->places |= STATUS_THIRD_PLACE;
                 }
 
-                if (entry->hasPlace[SECOND_PLACE_INDEX] > 0) {
+                if (courseStats->hasPlace[SECOND_PLACE_INDEX] > 0) {
                     course->places |= STATUS_SECOND_PLACE;
                 }
 
-                if (entry->hasPlace[FIRST_PLACE_INDEX] > 0) {
+                if (courseStats->hasPlace[FIRST_PLACE_INDEX] > 0) {
                     course->places |= STATUS_FIRST_PLACE;
                 }
 
                 for (index = 0; index != CHARACTER_COUNT; index++) {
-                    if (entry->hasCharacterBestScore[index] == TRUE) {
+                    if (courseStats->hasCharacterBestScore[index] == TRUE) {
                         course->characterBestScores[index] =
-                            entry->characterBestScores[index] + STATUS_SCORE_BIAS;
+                            courseStats->characterBestScores[index] + STATUS_SCORE_BIAS;
                     }
                     else {
                         course->characterBestScores[index] = 0;
@@ -3993,22 +3996,22 @@ void BuildStatusData(StatusData *status) {
         course->places = 0;
         for (index = 0; index != CHARACTER_COUNT; index++) {
             for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-                scores = &save->records.courseStats[courseIndex];
-                if (scores->hasCharacterBestScore[index] == TRUE) {
+                scannedStats = &save->records.courseStats[courseIndex];
+                if (scannedStats->hasCharacterBestScore[index] == TRUE) {
                     course->characterBestScores[index] =
-                        scores->characterBestScores[index] + STATUS_SCORE_BIAS;
+                        scannedStats->characterBestScores[index] + STATUS_SCORE_BIAS;
                     break;
                 }
             }
 
             if (courseIndex < COURSE_COUNT) {
                 for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-                    scores = &save->records.courseStats[courseIndex];
-                    if (scores->hasCharacterBestScore[index] == TRUE &&
+                    scannedStats = &save->records.courseStats[courseIndex];
+                    if (scannedStats->hasCharacterBestScore[index] == TRUE &&
                         course->characterBestScores[index] >
-                            scores->characterBestScores[index] + STATUS_SCORE_BIAS) {
+                            scannedStats->characterBestScores[index] + STATUS_SCORE_BIAS) {
                         course->characterBestScores[index] =
-                            scores->characterBestScores[index] + STATUS_SCORE_BIAS;
+                            scannedStats->characterBestScores[index] + STATUS_SCORE_BIAS;
                     }
                 }
             }

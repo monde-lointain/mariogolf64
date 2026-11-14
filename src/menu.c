@@ -2471,8 +2471,8 @@ void ClearImportedCharacters(void) {
 }
 
 void ComputeRoundStatistics(void) {
-    CourseStats *saved;
-    CourseStats *entry;
+    CourseStats *allCourseStats;
+    CourseStats *courseStats;
     f32 reciprocal;
     s32 sum;
     CourseIndex courseIndex;
@@ -2490,10 +2490,10 @@ void ComputeRoundStatistics(void) {
     f32 emptyCount;
     f32 holeCount;
 
-    saved = GetSaveData()->records.courseStats;
+    allCourseStats = GetSaveData()->records.courseStats;
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-        entry = &saved[courseIndex];
-        g_CourseStatFigures[courseIndex].roundCount = entry->roundCount;
+        courseStats = &allCourseStats[courseIndex];
+        g_CourseStatFigures[courseIndex].roundCount = courseStats->roundCount;
         if (g_CourseStatFigures[courseIndex].roundCount == 0.0f) {
             g_CourseStatFigures[courseIndex].bestScore = 0.0f;
             g_CourseStatFigures[courseIndex].scoreAverage = 0.0f;
@@ -2509,34 +2509,35 @@ void ComputeRoundStatistics(void) {
             g_CourseStatFigures[courseIndex].hasPlace[FIRST_PLACE_INDEX] = FALSE;
         }
         else {
-            reciprocal = 1.0f / entry->roundCount;
-            g_CourseStatFigures[courseIndex].bestScore = entry->bestScore;
-            g_CourseStatFigures[courseIndex].scoreAverage = entry->strokeTotal * reciprocal;
-            g_CourseStatFigures[courseIndex].bestDrive = entry->longestDrive * YARDS_PER_UNIT;
-            g_CourseStatFigures[courseIndex].driveAverage = entry->driveAverage * YARDS_PER_UNIT;
+            reciprocal = 1.0f / courseStats->roundCount;
+            g_CourseStatFigures[courseIndex].bestScore = courseStats->bestScore;
+            g_CourseStatFigures[courseIndex].scoreAverage = courseStats->strokeTotal * reciprocal;
+            g_CourseStatFigures[courseIndex].bestDrive = courseStats->longestDrive * YARDS_PER_UNIT;
+            g_CourseStatFigures[courseIndex].driveAverage =
+                courseStats->driveAverage * YARDS_PER_UNIT;
             g_CourseStatFigures[courseIndex].fairwayPercent =
-                entry->measuredDriveTotal * reciprocal * (100.0f / HOLES_PER_ROUND);
+                courseStats->measuredDriveTotal * reciprocal * (100.0f / HOLES_PER_ROUND);
             g_CourseStatFigures[courseIndex].puttsAverage =
-                entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND);
+                courseStats->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND);
             g_CourseStatFigures[courseIndex].parSavePercent =
-                entry->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND);
+                courseStats->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND);
             g_CourseStatFigures[courseIndex].parOnPercent =
-                entry->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND);
-            sum = entry->sandSaveCount + entry->missedSandSaveCount;
+                courseStats->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND);
+            sum = courseStats->sandSaveCount + courseStats->missedSandSaveCount;
             if (sum <= 0) {
                 g_CourseStatFigures[courseIndex].sandSavePercent = 0.0f;
             }
             else {
                 g_CourseStatFigures[courseIndex].sandSavePercent =
-                    ((f32)entry->sandSaveCount / (f32)sum) * 100.0f;
+                    ((f32)courseStats->sandSaveCount / (f32)sum) * 100.0f;
             }
 
             g_CourseStatFigures[courseIndex].hasPlace[THIRD_PLACE_INDEX] =
-                entry->hasPlace[THIRD_PLACE_INDEX];
+                courseStats->hasPlace[THIRD_PLACE_INDEX];
             g_CourseStatFigures[courseIndex].hasPlace[SECOND_PLACE_INDEX] =
-                entry->hasPlace[SECOND_PLACE_INDEX];
+                courseStats->hasPlace[SECOND_PLACE_INDEX];
             g_CourseStatFigures[courseIndex].hasPlace[FIRST_PLACE_INDEX] =
-                entry->hasPlace[FIRST_PLACE_INDEX];
+                courseStats->hasPlace[FIRST_PLACE_INDEX];
         }
     }
 
@@ -2598,17 +2599,18 @@ void ComputeRoundStatistics(void) {
     strokeSum = 0.0f;
     emptyCount = 0.0f;
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-        entry = &saved[courseIndex];
+        courseStats = &allCourseStats[courseIndex];
         if (emptyCount < g_CourseStatFigures[courseIndex].roundCount) {
-            measuredDriveSum += entry->measuredDriveTotal;
-            puttSum += entry->puttTotal;
-            parOrBetterSum += entry->parOrBetterCount;
-            parOnSum += entry->parOnCount;
-            strokeSum += entry->strokeTotal;
-            sandSaveSum += entry->sandSaveCount;
-            sandSaveChanceSum += entry->sandSaveCount + entry->missedSandSaveCount;
-            driveCountSum += entry->averagedDriveCount;
-            driveYardSum += entry->driveAverage * YARDS_PER_UNIT * entry->averagedDriveCount;
+            measuredDriveSum += courseStats->measuredDriveTotal;
+            puttSum += courseStats->puttTotal;
+            parOrBetterSum += courseStats->parOrBetterCount;
+            parOnSum += courseStats->parOnCount;
+            strokeSum += courseStats->strokeTotal;
+            sandSaveSum += courseStats->sandSaveCount;
+            sandSaveChanceSum += courseStats->sandSaveCount + courseStats->missedSandSaveCount;
+            driveCountSum += courseStats->averagedDriveCount;
+            driveYardSum +=
+                courseStats->driveAverage * YARDS_PER_UNIT * courseStats->averagedDriveCount;
         }
     }
 

@@ -2702,7 +2702,7 @@ enum TournamentStep {
 
 s32 UpdateTournamentResults(ControllerState *controller) {
     EncodedAsset asset;
-    CourseStats *record;
+    CourseStats *courseStats;
     s32 overshoot;
 
     GetSaveData();
@@ -2726,9 +2726,10 @@ s32 UpdateTournamentResults(ControllerState *controller) {
 
             switch (f_ResultsStep) {
                 case TOURNAMENT_STEP_START:
-                    record = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
+                    courseStats = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
                     f_ResultsStep = TOURNAMENT_STEP_SHOWN;
-                    if (record->roundCount <= 0 || record->bestScore >= f_PlayerResults[0]) {
+                    if (courseStats->roundCount <= 0 ||
+                        courseStats->bestScore >= f_PlayerResults[0]) {
                         PlaySound(
                             SOUND_NEW_BEST_SCORE,
                             NEW_BEST_SCORE_SOUND_CHANNEL,

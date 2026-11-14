@@ -90,14 +90,14 @@ void ReportBirdieBadgeCount(void) {
 }
 
 void RecordTournamentPlace(void) {
-    CourseStats *stats;
+    CourseStats *courseStats;
     s32 *placeEntry;
     Boolean hasPlace;
     s32 place;
     s32 index;
     TournamentStanding *standing;
 
-    stats = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
+    courseStats = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
     hasPlace = FALSE;
     if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
         RankTournament(
@@ -117,19 +117,19 @@ void RecordTournamentPlace(void) {
 
         switch (place) {
             case 1:
-                placeEntry = &stats->hasPlace[FIRST_PLACE_INDEX];
+                placeEntry = &courseStats->hasPlace[FIRST_PLACE_INDEX];
                 hasPlace = TRUE;
                 break;
             case 2:
-                placeEntry = &stats->hasPlace[SECOND_PLACE_INDEX];
+                placeEntry = &courseStats->hasPlace[SECOND_PLACE_INDEX];
                 hasPlace = TRUE;
                 break;
             case 3:
-                placeEntry = &stats->hasPlace[THIRD_PLACE_INDEX];
+                placeEntry = &courseStats->hasPlace[THIRD_PLACE_INDEX];
                 hasPlace = TRUE;
                 break;
             default:
-                placeEntry = &stats->hasPlace[THIRD_PLACE_INDEX];
+                placeEntry = &courseStats->hasPlace[THIRD_PLACE_INDEX];
                 break;
         }
 

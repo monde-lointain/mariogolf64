@@ -310,7 +310,7 @@ void UpdateContest(Boolean isHoleOver) {
 }
 
 void RecordCourseRound(void) {
-    CourseStats *record = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
+    CourseStats *courseStats = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
     RoundStats *stats = &g_RoundStats;
     CourseRecord *course = &g_CourseRecords[g_GameState.courseIndex];
     Boolean isAtRoundLimit;
@@ -320,24 +320,24 @@ void RecordCourseRound(void) {
     s32 sum;
     s32 shotsToGreen;
 
-    if (record->roundCount <= 0) {
-        record->roundCount = 0;
-        record->bestScore = NO_BEST_SCORE;
-        record->strokeTotal = 0;
-        record->longestDrive = 0;
-        record->driveAverage = 0;
-        record->averagedDriveCount = 0;
-        record->measuredDriveTotal = 0;
-        record->puttTotal = 0;
-        record->parOrBetterCount = 0;
-        record->parOnCount = 0;
-        record->sandSaveCount = 0;
-        record->missedSandSaveCount = 0;
+    if (courseStats->roundCount <= 0) {
+        courseStats->roundCount = 0;
+        courseStats->bestScore = NO_BEST_SCORE;
+        courseStats->strokeTotal = 0;
+        courseStats->longestDrive = 0;
+        courseStats->driveAverage = 0;
+        courseStats->averagedDriveCount = 0;
+        courseStats->measuredDriveTotal = 0;
+        courseStats->puttTotal = 0;
+        courseStats->parOrBetterCount = 0;
+        courseStats->parOnCount = 0;
+        courseStats->sandSaveCount = 0;
+        courseStats->missedSandSaveCount = 0;
     }
 
     isAtRoundLimit = FALSE;
-    if (record->roundCount < ROUND_COUNT_LIMIT) {
-        record->roundCount++;
+    if (courseStats->roundCount < ROUND_COUNT_LIMIT) {
+        courseStats->roundCount++;
     }
     else {
         isAtRoundLimit = TRUE;
@@ -345,19 +345,19 @@ void RecordCourseRound(void) {
 
     g_Players[0].holeStatus = HOLE_STATUS_PLAYING;
     score = GetNetScoreToPar(COURSE_HOLE_COUNT, 0);
-    if (score < record->bestScore) {
-        record->bestScore = score;
+    if (score < courseStats->bestScore) {
+        courseStats->bestScore = score;
     }
 
-    if (record->bestScore < LOWEST_SCORE_TO_PAR) {
-        record->bestScore = LOWEST_SCORE_TO_PAR;
+    if (courseStats->bestScore < LOWEST_SCORE_TO_PAR) {
+        courseStats->bestScore = LOWEST_SCORE_TO_PAR;
     }
 
-    if (score < record->characterBestScores[g_Players[0].characterIndex]) {
-        record->characterBestScores[g_Players[0].characterIndex] = score;
-        record->hasCharacterBestScore[g_Players[0].characterIndex] = TRUE;
-        if (record->characterBestScores[g_Players[0].characterIndex] < LOWEST_SCORE_TO_PAR) {
-            record->characterBestScores[g_Players[0].characterIndex] = LOWEST_SCORE_TO_PAR;
+    if (score < courseStats->characterBestScores[g_Players[0].characterIndex]) {
+        courseStats->characterBestScores[g_Players[0].characterIndex] = score;
+        courseStats->hasCharacterBestScore[g_Players[0].characterIndex] = TRUE;
+        if (courseStats->characterBestScores[g_Players[0].characterIndex] < LOWEST_SCORE_TO_PAR) {
+            courseStats->characterBestScores[g_Players[0].characterIndex] = LOWEST_SCORE_TO_PAR;
         }
     }
 
@@ -366,7 +366,7 @@ void RecordCourseRound(void) {
         total += g_Players[0].holes[hole].strokeCount;
     }
 
-    total += record->strokeTotal;
+    total += courseStats->strokeTotal;
     if (isAtRoundLimit == TRUE) {
         total = total * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
     }
@@ -375,42 +375,42 @@ void RecordCourseRound(void) {
         total = RECORD_TOTAL_LIMIT;
     }
 
-    record->strokeTotal = total;
+    courseStats->strokeTotal = total;
 
-    if (record->longestDrive < stats->longestDrive) {
-        record->longestDrive = stats->longestDrive;
+    if (courseStats->longestDrive < stats->longestDrive) {
+        courseStats->longestDrive = stats->longestDrive;
     }
 
-    if (record->averagedDriveCount == 0) {
+    if (courseStats->averagedDriveCount == 0) {
         if (stats->averagedDriveCount == 0) {
-            record->driveAverage = 0;
+            courseStats->driveAverage = 0;
         }
         else if (stats->averagedDriveCount > 0) {
-            record->driveAverage = stats->averagedDriveTotal / stats->averagedDriveCount;
-            record->averagedDriveCount = 1;
+            courseStats->driveAverage = stats->averagedDriveTotal / stats->averagedDriveCount;
+            courseStats->averagedDriveCount = 1;
         }
         else {
-            record->driveAverage = 0;
+            courseStats->driveAverage = 0;
         }
     }
     else if (stats->averagedDriveCount > 0) {
-        record->driveAverage =
-            ((record->driveAverage * record->averagedDriveCount) + stats->averagedDriveTotal) /
-            (record->averagedDriveCount + stats->averagedDriveCount);
-        record->averagedDriveCount += stats->averagedDriveCount;
+        courseStats->driveAverage = ((courseStats->driveAverage * courseStats->averagedDriveCount) +
+                                        stats->averagedDriveTotal) /
+            (courseStats->averagedDriveCount + stats->averagedDriveCount);
+        courseStats->averagedDriveCount += stats->averagedDriveCount;
     }
 
-    sum = record->measuredDriveTotal + stats->measuredDriveCount;
+    sum = courseStats->measuredDriveTotal + stats->measuredDriveCount;
     if (sum > RECORD_TOTAL_LIMIT) {
-        record->measuredDriveTotal = RECORD_TOTAL_LIMIT;
+        courseStats->measuredDriveTotal = RECORD_TOTAL_LIMIT;
     }
     else {
-        record->measuredDriveTotal = sum;
+        courseStats->measuredDriveTotal = sum;
     }
 
     if (isAtRoundLimit == TRUE) {
-        record->measuredDriveTotal =
-            record->measuredDriveTotal * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+        courseStats->measuredDriveTotal =
+            courseStats->measuredDriveTotal * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
     }
 
     total = 0;
@@ -420,7 +420,7 @@ void RecordCourseRound(void) {
         }
     }
 
-    total += record->puttTotal;
+    total += courseStats->puttTotal;
     if (isAtRoundLimit == TRUE) {
         total = total * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
     }
@@ -429,17 +429,17 @@ void RecordCourseRound(void) {
         total = RECORD_TOTAL_LIMIT;
     }
 
-    record->puttTotal = total;
+    courseStats->puttTotal = total;
 
     for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
         if (g_Players[0].holes[hole].strokeCount <= course->holes[hole].par) {
-            if (record->parOrBetterCount < RECORD_TOTAL_LIMIT) {
-                record->parOrBetterCount++;
+            if (courseStats->parOrBetterCount < RECORD_TOTAL_LIMIT) {
+                courseStats->parOrBetterCount++;
             }
 
             if (isAtRoundLimit == TRUE) {
-                record->parOrBetterCount =
-                    record->parOrBetterCount * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+                courseStats->parOrBetterCount =
+                    courseStats->parOrBetterCount * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
             }
         }
     }
@@ -447,31 +447,31 @@ void RecordCourseRound(void) {
     for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
         shotsToGreen = g_Players[0].holes[hole].strokeCount - g_Players[0].holes[hole].puttCount;
         if (course->holes[hole].par - shotsToGreen >= PAR_ON_SPARE_STROKES) {
-            if (record->parOnCount < RECORD_TOTAL_LIMIT) {
-                record->parOnCount++;
+            if (courseStats->parOnCount < RECORD_TOTAL_LIMIT) {
+                courseStats->parOnCount++;
             }
 
             if (isAtRoundLimit == TRUE) {
-                record->parOnCount =
-                    record->parOnCount * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+                courseStats->parOnCount =
+                    courseStats->parOnCount * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
             }
         }
     }
 
-    sum = record->sandSaveCount + stats->sandSaveCount;
+    sum = courseStats->sandSaveCount + stats->sandSaveCount;
     if (sum > RECORD_TOTAL_LIMIT) {
-        record->sandSaveCount = RECORD_TOTAL_LIMIT;
+        courseStats->sandSaveCount = RECORD_TOTAL_LIMIT;
     }
     else {
-        record->sandSaveCount = sum;
+        courseStats->sandSaveCount = sum;
     }
 
-    sum = record->missedSandSaveCount + stats->missedSandSaveCount;
+    sum = courseStats->missedSandSaveCount + stats->missedSandSaveCount;
     if (sum > RECORD_TOTAL_LIMIT) {
-        record->missedSandSaveCount = RECORD_TOTAL_LIMIT;
+        courseStats->missedSandSaveCount = RECORD_TOTAL_LIMIT;
     }
     else {
-        record->missedSandSaveCount = sum;
+        courseStats->missedSandSaveCount = sum;
     }
 
     WriteSaveData();
