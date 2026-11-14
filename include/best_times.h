@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
+
 enum BestTimesBuffer {
     BEST_TIMES_BUFFER_FACE_STRIP = 1,
     BEST_TIMES_BUFFER_UNREAD,
@@ -10,7 +12,7 @@ enum BestTimesBuffer {
     BEST_TIMES_BUFFER_GREEN_ARROWS
 };
 
-void LoadBestTimesCourseIcons(void **buffers);
+void LoadBestTimesCourseIcons(ImageAsset **buffers);
 void LoadCharacterFaceStrip(void *buffer);
 void LoadBestTimesBuffer(void *buffer, s16 bufferKind);
 void UpdateBestTimes(void);

@@ -88,7 +88,7 @@ static ImageAsset *f_BestTimesGreenArrows;
 static u8 f_UnusedBytesAfterGreenArrows[0x4] UNUSED;
 static u8 f_UnusedBufferAfterGreenArrows[0x88] UNUSED;
 
-void LoadBestTimesCourseIcons(void **buffers) {
+void LoadBestTimesCourseIcons(ImageAsset **buffers) {
     EncodedAsset asset;
 
     s16 imageIndex;

@@ -53,7 +53,7 @@ void DrawHandicaps(
     UBoolean8 canShowPrompt
 );
 s32 SlideBrickWall(Gfx **displayListHead, u8 slide);
-void LoadBestShotsCourseIcons(void **buffers);
+void LoadBestShotsCourseIcons(ImageAsset **buffers);
 void LoadScoreLabelBuffer(void *buffer, s16 bufferKind);
 void UpdateBestShots(void);
 void DrawBestShots(Gfx **displayListHead);

@@ -140,9 +140,9 @@ static TrophyPosition f_StatsTrophyPositions[COURSE_COUNT] =
 static Mat4 f_WheelProjection;
 static Mat4 f_WheelView;
 static ImageAsset *f_CourseStatsBadge;
-static void **f_StatsTrophyBuffers;
-static void **f_UnreadSecondTrophyBuffers;
-static void **f_UnreadLastTrophyBuffers;
+static ImageAsset **f_StatsTrophyBuffers;
+static ImageAsset **f_UnreadSecondTrophyBuffers;
+static ImageAsset **f_UnreadLastTrophyBuffers;
 static ImageAsset **f_CourseStatsIcons;
 static ImageAsset *f_CourseStatsNamePlate;
 static ImageAsset *f_CourseStatsDigitsAndArrows;
@@ -152,7 +152,7 @@ static ImageAsset *f_CourseStatsGreenArrows;
 static u8 f_UnreadStatsBytes[0x4] UNUSED;
 static u8 f_UnreadStatsBlock[0x188] UNUSED;
 
-void LoadCourseStatsIcons(void **buffers) {
+void LoadCourseStatsIcons(ImageAsset **buffers) {
     EncodedAsset asset;
     s32 unused[4] UNUSED;
     s16 imageIndex;
@@ -164,7 +164,7 @@ void LoadCourseStatsIcons(void **buffers) {
     }
 }
 
-void LoadCourseTrophyImages(void **buffers, s32 requestedKind) {
+void LoadCourseTrophyImages(ImageAsset **buffers, s32 requestedKind) {
     EncodedAsset asset;
     AssetFile file;
     s8 bufferKind = requestedKind;

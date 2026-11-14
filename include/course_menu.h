@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
+
 enum CourseMenuBuffer {
     COURSE_MENU_BUFFER_UNUSED = 1,
     COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE,
@@ -19,8 +21,8 @@ enum CourseBuffer {
     COURSE_BUFFER_LAST
 };
 
-void LoadCourseStatsIcons(void **buffers);
-void LoadCourseTrophyImages(void **buffers, s32 requestedKind);
+void LoadCourseStatsIcons(ImageAsset **buffers);
+void LoadCourseTrophyImages(ImageAsset **buffers, s32 requestedKind);
 void LoadCourseMenuBuffer(void *buffer, s16 bufferKind);
 void UpdateCourseStats(void);
 void DrawCourseStats(Gfx **displayListHead);

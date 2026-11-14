@@ -107,7 +107,7 @@ PaletteColor *g_PlayerFacePalettes[PLAYER_COUNT_MAX];
 Player g_Players[PLAYER_COUNT_MAX];
 ImageAsset *g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
 TakenCharacters g_TakenCharacters;
-void *g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
+ImageAsset *g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
 PaletteColor *g_TrophyPalettes[TROPHY_PALETTE_COUNT];
 
 FILE_STATIC SaveData g_SaveData;

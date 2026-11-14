@@ -63,7 +63,7 @@ extern AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT];
 extern SignedAssetId g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT];
 extern PaletteColor *g_TrophyPalettes[TROPHY_PALETTE_COUNT];
 #define TROPHY_FRAME_BUFFER_COUNT 2
-extern void *g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
+extern ImageAsset *g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
 extern ImageAsset *g_MenuCourseSceneImage;
 
 #define PLAYER_COUNT_ASSET_ROW_LENGTH 12

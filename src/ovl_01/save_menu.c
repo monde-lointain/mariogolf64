@@ -261,7 +261,7 @@ static Mtx f_SavedGolfersProjection;
 static f32 f_SavedGolferScales[PLAYER_COUNT_MAX];
 static LookAt f_SavedGolfersLookAts[DRAW_BUFFER_COUNT];
 static ImageAsset **f_SavedGameModeImages;
-static void **f_ChosenModeIconBuffers;
+static ImageAsset **f_ChosenModeIconBuffers;
 static ImageAsset *f_SavedGamesNamePlate;
 static ImageAsset *f_GameModeLabels;
 static ImageAsset *f_ControllerIcons;
@@ -312,7 +312,7 @@ void LoadRingShotRecordBuffer(void *buffer, s16 bufferKind) {
     }
 }
 
-void LoadRingShotCourseIcons(void **buffers) {
+void LoadRingShotCourseIcons(ImageAsset **buffers) {
     EncodedAsset asset;
     s16 imageIndex;
 
@@ -1391,7 +1391,7 @@ void ResetSavedGameControllers(void) {
     }
 }
 
-void LoadSaveMenuBuffers(void **buffers, u8 bufferKind) {
+void LoadSaveMenuBuffers(ImageAsset **buffers, u8 bufferKind) {
     EncodedAsset asset;
     MenuMemory *memory = GetMenuMemory();
     s32 imageIndex;

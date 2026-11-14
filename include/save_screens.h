@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
 #include "character.h"
 
 #define MENU_PALETTE_FILE_SIZE 0x200
@@ -36,14 +37,14 @@ enum RingShotRecordBuffer {
 };
 
 void LoadRingShotRecordBuffer(void *buffer, s16 bufferKind);
-void LoadRingShotCourseIcons(void **buffers);
+void LoadRingShotCourseIcons(ImageAsset **buffers);
 void UpdateRingShotRecords(void);
 void DrawRingShotRecords(Gfx **displayListHead);
 void ReadRingShotReplays(void);
 void LoadRingShotRecordFaces(void);
 void LoadSaveGameBuffer(void *buffer, u8 bufferKind);
 void ReadSavedGames(void);
-void LoadSaveMenuBuffers(void **buffers, u8 bufferKind);
+void LoadSaveMenuBuffers(ImageAsset **buffers, u8 bufferKind);
 void LoadGameModeLabelBuffer(void *buffer, u8 bufferKind);
 void UpdateSavedGames(void);
 void DrawSavedGames(Gfx **displayListHead);

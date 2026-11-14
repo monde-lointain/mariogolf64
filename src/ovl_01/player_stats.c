@@ -2149,7 +2149,7 @@ void DrawUpDownArrows(Gfx **displayListHead, s32 centerY) {
     *displayListHead = gfx;
 }
 
-void LoadBestShotsCourseIcons(void **buffers) {
+void LoadBestShotsCourseIcons(ImageAsset **buffers) {
     EncodedAsset asset;
     s16 imageIndex;
 
