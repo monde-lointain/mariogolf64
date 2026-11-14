@@ -5478,7 +5478,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     s32 angleStep;
     Radians angle;
     f32 circleX;
-    s32 slot;
+    s32 drawnIndex;
     s32 halfSize;
     s32 texelStep;
     f32 bobOffset;
@@ -5583,8 +5583,8 @@ void DrawModeSelect(Gfx **displayListHead) {
     areCharactersDrawn = FALSE;
     f_ModeBoardBobPhase += MODE_BOARD_BOB_PHASE_STEP;
     for (index = 0; index != modeCount; index++) {
-        slot = drawOrder[index];
-        halfSize = boardScale[slot] * MODE_BOARD_HALF_SIZE;
+        drawnIndex = drawOrder[index];
+        halfSize = boardScale[drawnIndex] * MODE_BOARD_HALF_SIZE;
         texelStep = (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
         if (index == modeCount) {
             bobOffset = sinf(f_ModeBoardBobPhase) * MODE_BOARD_BOB_HEIGHT;
@@ -5593,10 +5593,10 @@ void DrawModeSelect(Gfx **displayListHead) {
             bobOffset = 0.0f;
         }
 
-        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_ModeIconImages[slot])));
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_ModeIconImages[drawnIndex])));
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-        if ((g_MenuMemory.modeChoice == slot) && (g_MenuMemory.modeSpin == 0)) {
+        if ((g_MenuMemory.modeChoice == drawnIndex) && (g_MenuMemory.modeSpin == 0)) {
             if (!areCharactersDrawn) {
                 DrawMenuCharacters(&gfx);
                 areCharactersDrawn = TRUE;
@@ -5617,14 +5617,14 @@ void DrawModeSelect(Gfx **displayListHead) {
             gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
             DrawScaledModeIcon(
                 &gfx,
-                wheelShiftX + (s32)(boardX[slot] - halfSize),
-                boardY[slot] - halfSize + bobOffset,
+                wheelShiftX + (s32)(boardX[drawnIndex] - halfSize),
+                boardY[drawnIndex] - halfSize + bobOffset,
                 halfSize,
                 texelStep
             );
         }
         else {
-            if (g_MenuMemory.modeChoice == slot) {
+            if (g_MenuMemory.modeChoice == drawnIndex) {
                 if (!areCharactersDrawn) {
                     DrawMenuCharacters(&gfx);
                     gDPPipeSync(gfx++);
@@ -5647,7 +5647,10 @@ void DrawModeSelect(Gfx **displayListHead) {
                     gDPPipeSync(gfx++);
                     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
                     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_ModeIconImages[slot])));
+                    gDPLoadTLUT_pal256(
+                        gfx++,
+                        TextureAddress(ImageBody(g_ModeIconImages[drawnIndex]))
+                    );
                     areCharactersDrawn = TRUE;
                 }
             }
@@ -5668,7 +5671,7 @@ void DrawModeSelect(Gfx **displayListHead) {
                 gDPLoadTextureBlock(
                     gfx++,
                     TextureAddress(
-                        LargeImageTexels(g_ModeIconImages[slot]) +
+                        LargeImageTexels(g_ModeIconImages[drawnIndex]) +
                         (i * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)
                     ),
                     G_IM_FMT_CI,
@@ -5686,10 +5689,11 @@ void DrawModeSelect(Gfx **displayListHead) {
                 gDPPipeSync(gfx++);
                 gSPScisTextureRectangle(
                     gfx++,
-                    QuarterPixels(wheelShiftX + (s32)(boardX[slot] - halfSize)),
-                    QuarterPixels((s32)(boardY[slot] - halfSize + (i * halfSize) + bobOffset)),
-                    QuarterPixels(wheelShiftX + (s32)(boardX[slot] + halfSize)),
-                    QuarterPixels((s32)(boardY[slot] + (i * halfSize) + bobOffset)),
+                    QuarterPixels(wheelShiftX + (s32)(boardX[drawnIndex] - halfSize)),
+                    QuarterPixels((s32)(boardY[drawnIndex] - halfSize + (i * halfSize) +
+                        bobOffset)),
+                    QuarterPixels(wheelShiftX + (s32)(boardX[drawnIndex] + halfSize)),
+                    QuarterPixels((s32)(boardY[drawnIndex] + (i * halfSize) + bobOffset)),
                     G_TX_RENDERTILE,
                     0,
                     0,
@@ -6636,14 +6640,14 @@ void DrawCourseSelect(Gfx **displayListHead) {
     SaveData *save;
     s32 courseCount;
     s32 choice;
-    s32 chosenSlot;
+    s32 chosenIndex;
     s32 spin;
     s32 texelsOffset;
     s32 angleStep;
     s32 index;
     s32 otherIndex;
     s32 key;
-    s32 slot;
+    s32 drawnIndex;
     s32 halfSize;
     s32 texelStep;
     s32 stripTop;
@@ -6870,8 +6874,8 @@ void DrawCourseSelect(Gfx **displayListHead) {
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         f_FrontCourseBobPhase += FRONT_COURSE_BOB_PHASE_STEP;
         for (index = 0; index != courseCount; index++) {
-            slot = drawOrder[index];
-            halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
+            drawnIndex = drawOrder[index];
+            halfSize = iconScale[drawnIndex] * COURSE_ICON_HALF_SIZE;
             texelStep = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
             if (index == (courseCount - 1)) {
                 bobOffset = sinf(f_FrontCourseBobPhase) * FRONT_COURSE_BOB_HEIGHT;
@@ -6880,21 +6884,21 @@ void DrawCourseSelect(Gfx **displayListHead) {
                 bobOffset = 0.0f;
             }
 
-            chosenSlot = choice;
+            chosenIndex = choice;
             if (g_GameState.isMiniGolf == TRUE) {
-                palette = g_MiniGolfDiscImages[slot];
+                palette = g_MiniGolfDiscImages[drawnIndex];
                 texels =
                     MENU_ICON_IMAGE_PAIRS[0]
                                          [(f_MiniGolfDiscBufferIndex * MINI_GOLF_DISC_IMAGE_COUNT) +
-                                             slot];
+                                             drawnIndex];
             }
             else {
-                palette = ImageBody(MENU_ICON_IMAGE_PAIRS[0][slot]);
-                texels = MENU_ICON_IMAGE_PAIRS[0][slot];
+                palette = ImageBody(MENU_ICON_IMAGE_PAIRS[0][drawnIndex]);
+                texels = MENU_ICON_IMAGE_PAIRS[0][drawnIndex];
             }
 
             gDPLoadTLUT_pal256(gfx++, TextureAddress(palette));
-            if (chosenSlot == slot) {
+            if (chosenIndex == drawnIndex) {
                 gDPPipeSync(gfx++);
                 gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE | Z_UPD, G_RM_AA_TEX_EDGE2 | Z_UPD);
                 gDPSetPrimDepth(gfx++, CHOSEN_COURSE_DEPTH, 0);
@@ -6905,7 +6909,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
             }
 
             if (!g_GameState.isMiniGolf) {
-                if ((slot == (courseCount - 1)) && (GetOpenCourseCount() < COURSE_COUNT)) {
+                if ((drawnIndex == (courseCount - 1)) && (GetOpenCourseCount() < COURSE_COUNT)) {
                     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     gDPSetPrimColor(
                         gfx++,
@@ -6944,10 +6948,10 @@ void DrawCourseSelect(Gfx **displayListHead) {
                 gDPPipeSync(gfx++);
                 gSPScisTextureRectangle(
                     gfx++,
-                    QuarterPixels((s32)(iconX[slot] - halfSize)),
-                    QuarterPixels((s32)((iconY[slot] - halfSize) + stripTop + bobOffset)),
-                    QuarterPixels((s32)(iconX[slot] + halfSize)),
-                    QuarterPixels((s32)(iconY[slot] + stripTop + bobOffset)),
+                    QuarterPixels((s32)(iconX[drawnIndex] - halfSize)),
+                    QuarterPixels((s32)((iconY[drawnIndex] - halfSize) + stripTop + bobOffset)),
+                    QuarterPixels((s32)(iconX[drawnIndex] + halfSize)),
+                    QuarterPixels((s32)(iconY[drawnIndex] + stripTop + bobOffset)),
                     G_TX_RENDERTILE,
                     0,
                     0,
@@ -6957,12 +6961,13 @@ void DrawCourseSelect(Gfx **displayListHead) {
                 gDPPipeSync(gfx++);
             }
 
-            if ((g_GameState.isMiniGolf == TRUE) && (g_MenuMemory.miniGolfRecordChoice == slot)) {
+            if ((g_GameState.isMiniGolf == TRUE) &&
+                (g_MenuMemory.miniGolfRecordChoice == drawnIndex)) {
                 if (spin == 0) {
-                    f_MiniGolfChoiceCenterY = iconY[slot];
+                    f_MiniGolfChoiceCenterY = iconY[drawnIndex];
                 }
                 else if (f_MiniGolfChoiceCenterY == 0.0f) {
-                    f_MiniGolfChoiceCenterY = iconY[slot];
+                    f_MiniGolfChoiceCenterY = iconY[drawnIndex];
                 }
 
                 DrawUpDownArrows(&gfx, f_MiniGolfChoiceCenterY + bobOffset);

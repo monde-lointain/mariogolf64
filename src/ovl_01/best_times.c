@@ -237,7 +237,7 @@ void DrawBestTimes(Gfx **displayListHead) {
     s32 angleStep;
     Radians angle;
     f32 wheelX;
-    s32 slot;
+    s32 drawnIndex;
     s32 halfSize;
     s32 texelStep;
     s32 time;
@@ -324,17 +324,17 @@ void DrawBestTimes(Gfx **displayListHead) {
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     for (index = 0; index != courseCount; index++) {
-        slot = drawOrder[index];
-        halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
+        drawnIndex = drawOrder[index];
+        halfSize = iconScale[drawnIndex] * COURSE_ICON_HALF_SIZE;
         texelStep = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
-        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_BestTimesCourseIcons[slot])));
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_BestTimesCourseIcons[drawnIndex])));
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         for (otherIndex = 0; otherIndex != COURSE_ICON_STRIP_COUNT; otherIndex++) {
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(
-                    LargeImageTexels(f_BestTimesCourseIcons[slot]) +
+                    LargeImageTexels(f_BestTimesCourseIcons[drawnIndex]) +
                     otherIndex * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT
                 ),
                 G_IM_FMT_CI,
@@ -352,12 +352,14 @@ void DrawBestTimes(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
             gSPScisTextureRectangle(
                 gfx++,
-                QuarterPixels((s32)(iconX[slot] - halfSize)),
+                QuarterPixels((s32)(iconX[drawnIndex] - halfSize)),
                 QuarterPixels(
-                    (s32)(iconY[slot] - halfSize + (otherIndex * halfSize)) - WHEEL_ICON_RAISE
+                    (s32)(iconY[drawnIndex] - halfSize + (otherIndex * halfSize)) - WHEEL_ICON_RAISE
                 ),
-                QuarterPixels((s32)(iconX[slot] + halfSize)),
-                QuarterPixels((s32)(iconY[slot] + (otherIndex * halfSize)) - WHEEL_ICON_RAISE),
+                QuarterPixels((s32)(iconX[drawnIndex] + halfSize)),
+                QuarterPixels(
+                    (s32)(iconY[drawnIndex] + (otherIndex * halfSize)) - WHEEL_ICON_RAISE
+                ),
                 G_TX_RENDERTILE,
                 0,
                 0,

@@ -2028,7 +2028,7 @@ void DrawSavedGames(Gfx **displayListHead) {
     s32 key;
     Radians angle;
     f32 circleX;
-    s32 slot;
+    s32 drawnIndex;
     s32 halfSize;
     s32 texelStep;
     s32 iconHalfSize;
@@ -2125,10 +2125,10 @@ void DrawSavedGames(Gfx **displayListHead) {
 
     f_BoardBobPhase += BOARD_BOB_PHASE_STEP;
     for (boardIndex = 0; boardIndex != SAVED_GAME_COUNT; boardIndex++) {
-        slot = drawOrder[boardIndex];
-        halfSize = boardScale[slot] * GAME_BOARD_HALF_SIZE;
+        drawnIndex = drawOrder[boardIndex];
+        halfSize = boardScale[drawnIndex] * GAME_BOARD_HALF_SIZE;
         texelStep = (f32)(GAME_BOARD_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
-        f_ChosenModeIconHalfSize = boardScale[slot] * MODE_ICON_HALF_SIZE;
+        f_ChosenModeIconHalfSize = boardScale[drawnIndex] * MODE_ICON_HALF_SIZE;
         f_ChosenModeIconScale =
             (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / f_ChosenModeIconHalfSize;
         iconHalfSize = f_ChosenModeIconHalfSize;
@@ -2142,8 +2142,8 @@ void DrawSavedGames(Gfx **displayListHead) {
 
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-        if ((memory->savedGameIndex != slot) || (memory->savedGameTurn != 0)) {
-            if (memory->savedGameIndex == slot) {
+        if ((memory->savedGameIndex != drawnIndex) || (memory->savedGameTurn != 0)) {
+            if (memory->savedGameIndex == drawnIndex) {
                 gDPPipeSync(gfx++);
                 gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
                 gDPPipeSync(gfx++);
@@ -2163,12 +2163,12 @@ void DrawSavedGames(Gfx **displayListHead) {
                 );
             }
 
-            gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_GameBoards[slot])));
+            gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_GameBoards[drawnIndex])));
             for (index = 0; index != GAME_BOARD_STRIP_COUNT; index++) {
                 gDPLoadTextureBlock(
                     gfx++,
                     TextureAddress(
-                        LargeImageTexels(f_GameBoards[slot]) +
+                        LargeImageTexels(f_GameBoards[drawnIndex]) +
                         (index * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT)
                     ),
                     G_IM_FMT_CI,
@@ -2186,10 +2186,11 @@ void DrawSavedGames(Gfx **displayListHead) {
                 gDPPipeSync(gfx++);
                 gSPScisTextureRectangle(
                     gfx++,
-                    QuarterPixels((s32)(boardX[slot] - halfSize)),
-                    QuarterPixels((s32)(boardY[slot] - halfSize + (index * halfSize) + bobOffset)),
-                    QuarterPixels((s32)(boardX[slot] + halfSize)),
-                    QuarterPixels((s32)(boardY[slot] + (index * halfSize) + bobOffset)),
+                    QuarterPixels((s32)(boardX[drawnIndex] - halfSize)),
+                    QuarterPixels((s32)(boardY[drawnIndex] - halfSize + (index * halfSize) +
+                        bobOffset)),
+                    QuarterPixels((s32)(boardX[drawnIndex] + halfSize)),
+                    QuarterPixels((s32)(boardY[drawnIndex] + (index * halfSize) + bobOffset)),
                     G_TX_RENDERTILE,
                     0,
                     0,
@@ -2199,8 +2200,8 @@ void DrawSavedGames(Gfx **displayListHead) {
                 gDPPipeSync(gfx++);
             }
 
-            if (f_SavedGameModes[slot] != NO_SAVE_MENU_MODE) {
-                u8 *modeImage = f_SavedGameModeImages[slot];
+            if (f_SavedGameModes[drawnIndex] != NO_SAVE_MENU_MODE) {
+                u8 *modeImage = f_SavedGameModeImages[drawnIndex];
 
                 gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(modeImage)));
                 for (index = 0; index != MODE_ICON_STRIP_COUNT; index++) {
@@ -2225,15 +2226,15 @@ void DrawSavedGames(Gfx **displayListHead) {
                     gDPPipeSync(gfx++);
                     gSPScisTextureRectangle(
                         gfx++,
-                        QuarterPixels((s32)(boardX[slot] - iconHalfSize)),
+                        QuarterPixels((s32)(boardX[drawnIndex] - iconHalfSize)),
                         QuarterPixels(
-                            (s32)(boardY[slot] - iconHalfSize + (index * iconHalfSize) +
+                            (s32)(boardY[drawnIndex] - iconHalfSize + (index * iconHalfSize) +
                                 bobOffset) +
                             MODE_ICON_DROP
                         ),
-                        QuarterPixels((s32)(boardX[slot] + iconHalfSize)),
+                        QuarterPixels((s32)(boardX[drawnIndex] + iconHalfSize)),
                         QuarterPixels(
-                            (s32)(boardY[slot] + (index * iconHalfSize) + bobOffset) +
+                            (s32)(boardY[drawnIndex] + (index * iconHalfSize) + bobOffset) +
                             MODE_ICON_DROP
                         ),
                         G_TX_RENDERTILE,
@@ -2250,8 +2251,8 @@ void DrawSavedGames(Gfx **displayListHead) {
             gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
             DrawChosenGameBoard(
                 &gfx,
-                boardX[slot] - halfSize,
-                boardY[slot] - halfSize + bobOffset,
+                boardX[drawnIndex] - halfSize,
+                boardY[drawnIndex] - halfSize + bobOffset,
                 halfSize,
                 texelStep
             );

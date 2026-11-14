@@ -410,7 +410,7 @@ void DrawCourseStats(Gfx **displayListHead) {
     Radians angle;
     f32 wheelX;
     s32 image;
-    s32 slot;
+    s32 drawnIndex;
     s32 halfSize;
     s32 texelStep;
 
@@ -495,9 +495,9 @@ void DrawCourseStats(Gfx **displayListHead) {
 
     f_UnreadStatsDrawTime += 0.1f;
     for (index = 0; index != courseCount + 1; index++) {
-        slot = drawOrder[index];
-        image = (slot == courseCount) ? COURSE_TOTALS_IMAGE : slot;
-        halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
+        drawnIndex = drawOrder[index];
+        image = (drawnIndex == courseCount) ? COURSE_TOTALS_IMAGE : drawnIndex;
+        halfSize = iconScale[drawnIndex] * COURSE_ICON_HALF_SIZE;
         texelStep = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
         gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_CourseStatsIcons[image])));
         gDPPipeSync(gfx++);
@@ -524,12 +524,12 @@ void DrawCourseStats(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
             gSPScisTextureRectangle(
                 gfx++,
-                QuarterPixels((s32)(iconX[slot] - halfSize)),
+                QuarterPixels((s32)(iconX[drawnIndex] - halfSize)),
                 QuarterPixels(
-                    (s32)(iconY[slot] - halfSize + (sortIndex * halfSize)) - WHEEL_ICON_RAISE
+                    (s32)(iconY[drawnIndex] - halfSize + (sortIndex * halfSize)) - WHEEL_ICON_RAISE
                 ),
-                QuarterPixels((s32)(iconX[slot] + halfSize)),
-                QuarterPixels((s32)(iconY[slot] + (sortIndex * halfSize)) - WHEEL_ICON_RAISE),
+                QuarterPixels((s32)(iconX[drawnIndex] + halfSize)),
+                QuarterPixels((s32)(iconY[drawnIndex] + (sortIndex * halfSize)) - WHEEL_ICON_RAISE),
                 G_TX_RENDERTILE,
                 0,
                 0,
