@@ -7,7 +7,7 @@
 #include "asset.h"
 #include "character.h"
 #include "compiler.h"
-#include "gbi_helpers.h"
+#include "display_list.h"
 #include "main_menu.h"
 #include "memory_address.h"
 #include "menu.h"

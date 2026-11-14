@@ -3,8 +3,8 @@
 #include <nusys.h>
 #include <ultra64.h>
 
+#include "display_list.h"
 #include "game.h"
-#include "gbi_helpers.h"
 #include "memory_address.h"
 #include "screen.h"
 #include "view_projection.h"

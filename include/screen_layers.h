@@ -7,7 +7,7 @@
 #include "c_language.h"
 #include "controller.h"
 #include "course.h"
-#include "gbi_helpers.h"
+#include "display_list.h"
 
 enum WipeState {
     WIPE_NONE,

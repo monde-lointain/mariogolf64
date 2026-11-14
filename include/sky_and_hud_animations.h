@@ -6,7 +6,7 @@
 #include "asset.h"
 #include "c_language.h"
 #include "camera.h"
-#include "gbi_helpers.h"
+#include "display_list.h"
 #include "math_util.h"
 
 enum MenuBackdrop {

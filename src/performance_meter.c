@@ -5,7 +5,7 @@
 
 #include "c_language.h"
 #include "compiler.h"
-#include "gbi_helpers.h"
+#include "display_list.h"
 #include "geometry.h"
 #include "heap.h"
 #include "memory_address.h"

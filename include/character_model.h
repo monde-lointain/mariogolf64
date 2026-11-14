@@ -9,7 +9,7 @@
 #include "club.h"
 #include "compiler.h"
 #include "course_space.h"
-#include "gbi_helpers.h"
+#include "display_list.h"
 #include "geometry.h"
 #include "math_util.h"
 

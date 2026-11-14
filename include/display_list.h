@@ -1,5 +1,5 @@
-#ifndef GBI_HELPERS_H
-#define GBI_HELPERS_H
+#ifndef DISPLAY_LIST_H
+#define DISPLAY_LIST_H
 
 #include <ultra64.h>
 

@@ -5,7 +5,7 @@
 #include "asset.h"
 #include "c_language.h"
 #include "compiler.h"
-#include "gbi_helpers.h"
+#include "display_list.h"
 #include "geometry.h"
 #include "heap.h"
 #include "math_util.h"

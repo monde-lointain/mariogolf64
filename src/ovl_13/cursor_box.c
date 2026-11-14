@@ -4,8 +4,8 @@
 
 #include "asset.h"
 #include "compiler.h"
+#include "display_list.h"
 #include "game.h"
-#include "gbi_helpers.h"
 #include "geometry.h"
 #include "math_util.h"
 #include "memory_address.h"

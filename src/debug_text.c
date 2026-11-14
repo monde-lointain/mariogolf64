@@ -4,8 +4,8 @@
 
 #include "c_language.h"
 #include "compiler.h"
+#include "display_list.h"
 #include "game_flags.h"
-#include "gbi_helpers.h"
 #include "main.h"
 #include "memory_address.h"
 #include "screen.h"

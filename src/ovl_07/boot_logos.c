@@ -8,7 +8,7 @@
 #include "character_model.h"
 #include "compiler.h"
 #include "controller.h"
-#include "gbi_helpers.h"
+#include "display_list.h"
 #include "hole_loader.h"
 #include "main.h"
 #include "memory_address.h"

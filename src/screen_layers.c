@@ -7,7 +7,7 @@
 #include "compiler.h"
 #include "controller.h"
 #include "debug_text.h"
-#include "gbi_helpers.h"
+#include "display_list.h"
 #include "heap.h"
 #include "main.h"
 #include "math_util.h"
