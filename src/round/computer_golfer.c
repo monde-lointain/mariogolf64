@@ -287,7 +287,7 @@ static ShotLaunch f_TrialLaunchValues;
 // The best evaluation so far
 static s32 f_BestEvaluation;
 static s32 f_AimChangeCount;
-static u8 f_PlanThreadStack[PLAN_THREAD_STACK_SIZE];
+static u8 f_PlanThreadStack[PLAN_THREAD_STACK_SIZE] STACK_ALIGNED;
 static u8 f_UnusedBufferAfterPlanStack[8192] UNUSED;
 // f_HoleStrokeTarget less the hole's par
 static s32 f_HoleTargetToPar;

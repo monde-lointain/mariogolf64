@@ -647,7 +647,7 @@ static u8 *f_ReadCursor ORDERED_BSS = NULL;
 static AssetFile f_HoleAsset ORDERED_BSS __attribute__((aligned(8))) = {0};
 
 static u8 f_UnusedBytesAfterHoleAsset[8] ORDERED_BSS UNUSED = {0};
-u8 g_LoaderThreadStack[LOADER_THREAD_STACK_SIZE] ORDERED_BSS __attribute__((aligned(8))) = {0};
+u8 g_LoaderThreadStack[LOADER_THREAD_STACK_SIZE] ORDERED_BSS STACK_ALIGNED = {0};
 
 static u8 *f_BuildBuffer;
 static u8 *f_BuildCursor;
