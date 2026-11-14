@@ -41,13 +41,13 @@ enum ClubPanelState {
 #define ASSET_CLUB_PANEL_IMAGE 0x4FF
 #define SHOT_MODE_IMAGE_SIZE 0x808
 
-#define PANEL_ASSET_POWER 0x56C
-#define PANEL_ASSET_POWER_TRAINING 0x56D
-#define PANEL_ASSET_NORMAL 0x56E
-#define PANEL_ASSET_APPROACH 0x56F
-#define PANEL_ASSET_PUTT_LONG 0x570
-#define PANEL_ASSET_PUTT_MIDDLE 0x571
-#define PANEL_ASSET_PUTT_SHORT 0x572
+#define ASSET_PANEL_POWER 0x56C
+#define ASSET_PANEL_POWER_TRAINING 0x56D
+#define ASSET_PANEL_NORMAL 0x56E
+#define ASSET_PANEL_APPROACH 0x56F
+#define ASSET_PANEL_PUTT_LONG 0x570
+#define ASSET_PANEL_PUTT_MIDDLE 0x571
+#define ASSET_PANEL_PUTT_SHORT 0x572
 
 #define PANEL_NOT_SHOWN 0xFF
 #define INITIAL_CLUB_PANEL_DEBUG_VALUE (-2)
@@ -59,9 +59,9 @@ enum ClubPanelState {
 #define SPAN_BAR_THICKNESS 0.1f
 #define SPAN_BAR_VERTEX_COUNT 8
 
-#define SHOT_MODE_ASSET_POWER 0x52F
-#define SHOT_MODE_ASSET_NORMAL 0x52D
-#define SHOT_MODE_ASSET_APPROACH 0x52E
+#define ASSET_SHOT_MODE_POWER 0x52F
+#define ASSET_SHOT_MODE_NORMAL 0x52D
+#define ASSET_SHOT_MODE_APPROACH 0x52E
 
 static u8 f_ShownShotMode = PANEL_NOT_SHOWN;
 static u8 f_PanelShotMode = PANEL_NOT_SHOWN;
@@ -88,16 +88,16 @@ static Gfx f_SpanBarDisplayList[] = {
 };
 static s32 f_ClubPanelDebugValue = INITIAL_CLUB_PANEL_DEBUG_VALUE;
 static u16 f_ApproachToNormalFrames[SHOT_MODE_CHANGE_FRAME_COUNT] =
-    {0x578, 0x577, 0x576, PANEL_ASSET_NORMAL};
+    {0x578, 0x577, 0x576, ASSET_PANEL_NORMAL};
 static u16 f_PowerToNormalFrames[SHOT_MODE_CHANGE_FRAME_COUNT] =
-    {0x573, 0x574, 0x575, PANEL_ASSET_NORMAL};
+    {0x573, 0x574, 0x575, ASSET_PANEL_NORMAL};
 static u16 f_NormalToApproachFrames[SHOT_MODE_CHANGE_FRAME_COUNT] =
-    {0x576, 0x577, 0x578, PANEL_ASSET_APPROACH};
+    {0x576, 0x577, 0x578, ASSET_PANEL_APPROACH};
 static u16 f_PowerToApproachFrames[SHOT_MODE_CHANGE_FRAME_COUNT] =
-    {0x57B, 0x57A, 0x579, PANEL_ASSET_APPROACH};
-static u16 f_ToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT] = {0x575, 0x574, 0x573, PANEL_ASSET_POWER};
+    {0x57B, 0x57A, 0x579, ASSET_PANEL_APPROACH};
+static u16 f_ToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT] = {0x575, 0x574, 0x573, ASSET_PANEL_POWER};
 static u16 f_ApproachToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT] UNUSED =
-    {0x579, 0x57A, 0x57B, PANEL_ASSET_POWER};
+    {0x579, 0x57A, 0x57B, ASSET_PANEL_POWER};
 static Radians f_MarkerPulseAngle = 0.0f;
 
 static Mtx f_SpanBarTranslation;
@@ -126,10 +126,10 @@ void LoadClubPanelImages(void) {
 
     f_ClubPanelImage = AllocMemory(OpenEncodedAsset(ASSET_CLUB_PANEL_IMAGE, &asset));
     ReadEncodedAsset(f_ClubPanelImage, &asset);
-    g_ImageSlots[CLUB_PANEL_BUFFER_SLOT] = AllocMemory(OpenEncodedAsset(PANEL_ASSET_POWER, &asset));
+    g_ImageSlots[CLUB_PANEL_BUFFER_SLOT] = AllocMemory(OpenEncodedAsset(ASSET_PANEL_POWER, &asset));
     ReadEncodedAsset(g_ImageSlots[CLUB_PANEL_BUFFER_SLOT], &asset);
     g_ImageSlots[CLUB_PANEL_BUFFER_SLOT + 1] =
-        AllocMemory(OpenEncodedAsset(PANEL_ASSET_POWER, &asset));
+        AllocMemory(OpenEncodedAsset(ASSET_PANEL_POWER, &asset));
     ReadEncodedAsset(g_ImageSlots[CLUB_PANEL_BUFFER_SLOT + 1], &asset);
     f_ShotModeImage = AllocMemory(SHOT_MODE_IMAGE_SIZE);
     f_ShownShotMode = PANEL_NOT_SHOWN;
@@ -169,32 +169,32 @@ void UpdateClubPanelImages(void) {
         if (isPutter) {
             switch ((u32)g_CurrentShot.shotMode) {
                 case PUTT_MODE_MIDDLE:
-                    OpenEncodedAsset(PANEL_ASSET_PUTT_MIDDLE, &panelAsset);
+                    OpenEncodedAsset(ASSET_PANEL_PUTT_MIDDLE, &panelAsset);
                     break;
                 case PUTT_MODE_LONG:
-                    OpenEncodedAsset(PANEL_ASSET_PUTT_LONG, &panelAsset);
+                    OpenEncodedAsset(ASSET_PANEL_PUTT_LONG, &panelAsset);
                     break;
                 case PUTT_MODE_SHORT:
-                    OpenEncodedAsset(PANEL_ASSET_PUTT_SHORT, &panelAsset);
+                    OpenEncodedAsset(ASSET_PANEL_PUTT_SHORT, &panelAsset);
                     break;
             }
         }
         else {
             switch ((u32)g_CurrentShot.shotMode) {
                 case SHOT_MODE_NORMAL:
-                    OpenEncodedAsset(PANEL_ASSET_NORMAL, &panelAsset);
+                    OpenEncodedAsset(ASSET_PANEL_NORMAL, &panelAsset);
                     break;
                 case SHOT_MODE_POWER:
                     if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-                        OpenEncodedAsset(PANEL_ASSET_POWER_TRAINING, &panelAsset);
+                        OpenEncodedAsset(ASSET_PANEL_POWER_TRAINING, &panelAsset);
                     }
                     else {
-                        OpenEncodedAsset(PANEL_ASSET_POWER, &panelAsset);
+                        OpenEncodedAsset(ASSET_PANEL_POWER, &panelAsset);
                     }
 
                     break;
                 case SHOT_MODE_APPROACH:
-                    OpenEncodedAsset(PANEL_ASSET_APPROACH, &panelAsset);
+                    OpenEncodedAsset(ASSET_PANEL_APPROACH, &panelAsset);
                     break;
             }
         }
@@ -207,14 +207,14 @@ void UpdateClubPanelImages(void) {
         f_ShownShotMode = g_CurrentShot.shotMode;
         if (g_CurrentShot.shotMode != SHOT_MODE_POWER) {
             if (g_CurrentShot.shotMode == SHOT_MODE_NORMAL) {
-                assetId = SHOT_MODE_ASSET_NORMAL;
+                assetId = ASSET_SHOT_MODE_NORMAL;
             }
             else {
-                assetId = SHOT_MODE_ASSET_APPROACH;
+                assetId = ASSET_SHOT_MODE_APPROACH;
             }
         }
         else {
-            assetId = SHOT_MODE_ASSET_POWER;
+            assetId = ASSET_SHOT_MODE_POWER;
         }
 
         OpenEncodedAsset(assetId, &nameAsset);
@@ -227,32 +227,32 @@ void UpdateClubPanelImages(void) {
             if (isPutter) {
                 switch ((u32)g_CurrentShot.shotMode) {
                     case PUTT_MODE_MIDDLE:
-                        OpenEncodedAsset(PANEL_ASSET_PUTT_MIDDLE, &frameAsset);
+                        OpenEncodedAsset(ASSET_PANEL_PUTT_MIDDLE, &frameAsset);
                         break;
                     case PUTT_MODE_LONG:
-                        OpenEncodedAsset(PANEL_ASSET_PUTT_LONG, &frameAsset);
+                        OpenEncodedAsset(ASSET_PANEL_PUTT_LONG, &frameAsset);
                         break;
                     case PUTT_MODE_SHORT:
-                        OpenEncodedAsset(PANEL_ASSET_PUTT_SHORT, &frameAsset);
+                        OpenEncodedAsset(ASSET_PANEL_PUTT_SHORT, &frameAsset);
                         break;
                 }
             }
             else {
                 switch ((u32)g_CurrentShot.shotMode) {
                     case SHOT_MODE_NORMAL:
-                        OpenEncodedAsset(PANEL_ASSET_NORMAL, &frameAsset);
+                        OpenEncodedAsset(ASSET_PANEL_NORMAL, &frameAsset);
                         break;
                     case SHOT_MODE_POWER:
                         if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-                            OpenEncodedAsset(PANEL_ASSET_POWER_TRAINING, &frameAsset);
+                            OpenEncodedAsset(ASSET_PANEL_POWER_TRAINING, &frameAsset);
                         }
                         else {
-                            OpenEncodedAsset(PANEL_ASSET_POWER, &frameAsset);
+                            OpenEncodedAsset(ASSET_PANEL_POWER, &frameAsset);
                         }
 
                         break;
                     case SHOT_MODE_APPROACH:
-                        OpenEncodedAsset(PANEL_ASSET_APPROACH, &frameAsset);
+                        OpenEncodedAsset(ASSET_PANEL_APPROACH, &frameAsset);
                         break;
                 }
             }

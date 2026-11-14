@@ -42,8 +42,8 @@ enum SaveMenuState {
 #define GAME_MODE_ICON_COUNT 12
 #define MODE_NAME_COUNT 7
 
-#define CONTROLS_PICTURE 0x92A
-#define MINI_GOLF_CONTROLS_PICTURE 0x96A
+#define ASSET_CONTROLS_PICTURE 0x92A
+#define ASSET_MINI_GOLF_CONTROLS_PICTURE 0x96A
 #define CONTROLS_PICTURE_WIDTH 288
 #define CONTROLS_PICTURE_LEFT ((SCREEN_WIDTH - CONTROLS_PICTURE_WIDTH) / 2)
 #define CONTROLS_STRIP_HEIGHT 7
@@ -62,7 +62,7 @@ enum SaveMenuState {
 #define SAVE_MENU_SONG_VOLUME 0x60
 #define SAVE_MENU_SOUND_PAN 0xFF
 
-#define SAVE_MENU_TITLE_IMAGE 0x6A5
+#define ASSET_SAVE_MENU_TITLE_IMAGE 0x6A5
 #define MESSAGE_CENTER_X (SCREEN_WIDTH / 2)
 #define MESSAGE_CENTER_Y 114
 #define NO_TEXT (-1)
@@ -330,7 +330,8 @@ void OpenSaveMenu(s32 kind) {
         &encodedAsset
     );
     ReadEncodedAsset(
-        f_SaveMenuTitleImage = AllocMemory(OpenEncodedAsset(SAVE_MENU_TITLE_IMAGE, &encodedAsset)),
+        f_SaveMenuTitleImage =
+            AllocMemory(OpenEncodedAsset(ASSET_SAVE_MENU_TITLE_IMAGE, &encodedAsset)),
         &encodedAsset
     );
     PlaySoundWithEffects(
@@ -2176,11 +2177,11 @@ void OpenControlsScreen(void) {
     void *picture;
 
     if (g_GameState.isMiniGolf) {
-        picture = AllocMemory(OpenEncodedAsset(MINI_GOLF_CONTROLS_PICTURE, &encodedAsset));
+        picture = AllocMemory(OpenEncodedAsset(ASSET_MINI_GOLF_CONTROLS_PICTURE, &encodedAsset));
         f_NamePlateImage = picture;
     }
     else {
-        picture = AllocMemory(OpenEncodedAsset(CONTROLS_PICTURE, &encodedAsset));
+        picture = AllocMemory(OpenEncodedAsset(ASSET_CONTROLS_PICTURE, &encodedAsset));
         f_NamePlateImage = picture;
     }
 

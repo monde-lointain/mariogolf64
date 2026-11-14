@@ -16,7 +16,7 @@
 #include "sound.h"
 #include "text.h"
 
-#define DEFAULT_WIPE_SHAPE 0x63F
+#define ASSET_DEFAULT_WIPE_SHAPE 0x63F
 #define WIPE_SHAPE_COUNT 14
 #define WIPE_CLOSE_START_PROGRESS 12.0f
 #define WIPE_OPEN_START_PROGRESS (-2.0f)
@@ -33,7 +33,7 @@
 #define WIPE_SQUARE_LEFT SCREEN_BORDER
 #define WIPE_SQUARE_TOP ((SCREEN_HEIGHT / 2) - (WIPE_SQUARE_SIZE / 2))
 
-#define HALF_TURN_IMAGE 0x955
+#define ASSET_HALF_TURN_IMAGE 0x955
 #define HALF_TURN_FRAMES 144
 #define HALF_TURN_WIDTH 304
 #define HALF_TURN_CENTER_COLUMN (HALF_TURN_PAIRS_PER_ROW / 2)
@@ -173,7 +173,7 @@ static s32 f_WipeShapeIds[WIPE_SHAPE_COUNT] = {
     0x90E,
     0x90E,
     0x90E,
-    DEFAULT_WIPE_SHAPE,
+    ASSET_DEFAULT_WIPE_SHAPE,
     0x640,
 };
 static s32 f_UnusedWordAfterWipeShapeIds UNUSED = 0x63E;
@@ -398,7 +398,7 @@ void LoadTextureBlock(
 void InitScreenLayers(void) {
     EncodedAsset asset;
 
-    f_WipeShapeImage = AllocMemory(OpenEncodedAsset(DEFAULT_WIPE_SHAPE, &asset));
+    f_WipeShapeImage = AllocMemory(OpenEncodedAsset(ASSET_DEFAULT_WIPE_SHAPE, &asset));
     ReadEncodedAsset(f_WipeShapeImage, &asset);
     StopScreenFade();
 }
@@ -964,7 +964,7 @@ void ShowHalfTurn(void) {
     EncodedAsset asset;
 
     if (!f_IsHalfTurnShown) {
-        f_HalfTurnImage = AllocMemory(OpenEncodedAsset(HALF_TURN_IMAGE, &asset));
+        f_HalfTurnImage = AllocMemory(OpenEncodedAsset(ASSET_HALF_TURN_IMAGE, &asset));
         ReadEncodedAsset(f_HalfTurnImage, &asset);
     }
 

@@ -25,13 +25,13 @@ typedef struct MessageTable {
 
 #define MessageSpanAt(id) (f_Messages->messages + (id))
 
-#define TEXT_ASSET_SMALL_FONT 0x4B3
-#define TEXT_ASSET_MEDIUM_FONT 0x4B5
-#define TEXT_ASSET_LARGE_FONT 0x4B6
-#define TEXT_ASSET_ICONS 0x4B0
-#define TEXT_ASSET_SHADOWED_FONT 0x4B2
-#define TEXT_ASSET_BANDED_GRADIENT 0x4B8
-#define TEXT_ASSET_FADING_GRADIENT 0x4B9
+#define ASSET_TEXT_SMALL_FONT 0x4B3
+#define ASSET_TEXT_MEDIUM_FONT 0x4B5
+#define ASSET_TEXT_LARGE_FONT 0x4B6
+#define ASSET_TEXT_ICONS 0x4B0
+#define ASSET_TEXT_SHADOWED_FONT 0x4B2
+#define ASSET_TEXT_BANDED_GRADIENT 0x4B8
+#define ASSET_TEXT_FADING_GRADIENT 0x4B9
 #define GRADIENT_WIDTH 16
 #define GRADIENT_HEIGHT 12
 #define GRADIENT_HEIGHT_MASK 4
@@ -236,19 +236,19 @@ void LoadTextAssets(void) {
     u8 *header;
     s32 size;
 
-    g_ShadowedFontImage = AllocMemory(OpenEncodedAsset(TEXT_ASSET_SHADOWED_FONT, &asset));
+    g_ShadowedFontImage = AllocMemory(OpenEncodedAsset(ASSET_TEXT_SHADOWED_FONT, &asset));
     ReadEncodedAsset(g_ShadowedFontImage, &asset);
-    f_SmallFontImage = AllocMemory(OpenEncodedAsset(TEXT_ASSET_SMALL_FONT, &asset));
+    f_SmallFontImage = AllocMemory(OpenEncodedAsset(ASSET_TEXT_SMALL_FONT, &asset));
     ReadEncodedAsset(f_SmallFontImage, &asset);
-    f_MediumFontImage = AllocMemory(OpenEncodedAsset(TEXT_ASSET_MEDIUM_FONT, &asset));
+    f_MediumFontImage = AllocMemory(OpenEncodedAsset(ASSET_TEXT_MEDIUM_FONT, &asset));
     ReadEncodedAsset(f_MediumFontImage, &asset);
-    f_LargeFontImage = AllocMemory(OpenEncodedAsset(TEXT_ASSET_LARGE_FONT, &asset));
+    f_LargeFontImage = AllocMemory(OpenEncodedAsset(ASSET_TEXT_LARGE_FONT, &asset));
     ReadEncodedAsset(f_LargeFontImage, &asset);
-    f_TextIconImage = AllocMemory(OpenEncodedAsset(TEXT_ASSET_ICONS, &asset));
+    f_TextIconImage = AllocMemory(OpenEncodedAsset(ASSET_TEXT_ICONS, &asset));
     ReadEncodedAsset(f_TextIconImage, &asset);
-    f_TextGradientImages[0] = AllocMemory(OpenEncodedAsset(TEXT_ASSET_FADING_GRADIENT, &asset));
+    f_TextGradientImages[0] = AllocMemory(OpenEncodedAsset(ASSET_TEXT_FADING_GRADIENT, &asset));
     ReadEncodedAsset(f_TextGradientImages[0], &asset);
-    f_TextGradientImages[1] = AllocMemory(OpenEncodedAsset(TEXT_ASSET_BANDED_GRADIENT, &asset));
+    f_TextGradientImages[1] = AllocMemory(OpenEncodedAsset(ASSET_TEXT_BANDED_GRADIENT, &asset));
     ReadEncodedAsset(f_TextGradientImages[1], &asset);
     header = AllocMemory(FILE_HEADER_SIZE);
     nuPiReadRom((u32)g_GlyphFileRomStart, header, FILE_HEADER_SIZE);
