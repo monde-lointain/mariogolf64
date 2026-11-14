@@ -2588,6 +2588,10 @@ void ClearImportedCharacters(void) {
     }
 }
 
+// Works out g_CourseStatFigures from the saved course stats: each course's
+// figures, then those of all the courses in the last entry. Its counts are
+// floats, as the averages divide by them and the original compares them as
+// floats.
 void ComputeRoundStatistics(void) {
     CourseStats *allCourseStats;
     CourseStats *courseStats;

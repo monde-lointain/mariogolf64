@@ -42,7 +42,7 @@ typedef struct CourseStats {
 // The statistics that the menus show, worked out from CourseStats: for
 // each course, then for all of them
 typedef struct CourseStatFigures {
-    f32 roundCount;
+    f32 roundCount; // A float, as the averages divide by it
     f32 bestScore;
     f32 scoreAverage;
     f32 bestDrive;
