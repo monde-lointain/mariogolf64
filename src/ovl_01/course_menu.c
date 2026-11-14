@@ -108,7 +108,7 @@
 #define ALL_COURSES_OPEN_X 190
 #define ALL_COURSES_OPEN_Y 180
 #define MESSAGE_POINTS_TO_NEXT_COURSE 0x163
-#define MESSAGE_ALL_COURSES_OPEN 0x164
+#define MESSAGE_ALL_COURSES_OPEN_TWO_LINES 0x164
 
 typedef struct TrophyPosition {
     s32 x;
@@ -1057,7 +1057,7 @@ void DrawCourseTrophies(Gfx **displayListHead) {
             SetTextSlot(
                 ALL_COURSES_OPEN_X,
                 ALL_COURSES_OPEN_Y,
-                MESSAGE_ALL_COURSES_OPEN,
+                MESSAGE_ALL_COURSES_OPEN_TWO_LINES,
                 TEXT_SLOT_LARGE_FONT,
                 0,
                 0,
