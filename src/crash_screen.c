@@ -1,4 +1,4 @@
-#include "fault.h"
+#include "crash_screen.h"
 
 #include <ultra64.h>
 

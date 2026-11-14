@@ -103,7 +103,7 @@ segments:
       - [0x2FD00, c, character]
       - [0x34FA0, c, math_library]
       - [0x35980, c, menu]
-      - [0x396C0, c, fault]
+      - [0x396C0, c, crash_screen]
       - [0x3A010, c, music]
       - [0x3A580, c, play]
       - [0x40180, c, view_projection]
@@ -375,7 +375,7 @@ segments:
       - [0x9C770, .data, course]
       - [0x9CF70, .data, character]
       - [0x9D3F0, .data, menu]
-      - [0x9E010, .data, fault]
+      - [0x9E010, .data, crash_screen]
       - [0x9E3F0, .data, music]
       - [0x9E460, .data, play]
       - [0x9E500, .data, hole_triangles]
@@ -465,7 +465,7 @@ segments:
       - [0xAB8A0, .rodata, character]
       - [0xABC50, .rodata, math_library]
       - [0xABCF0, .rodata, menu]
-      - [0xABEC0, .rodata, fault]
+      - [0xABEC0, .rodata, crash_screen]
       - [0xAC5F4, .rodata, music]
       - [0xAC638, .rodata, play]
       - [0xAC760, .rodata, hole_triangles]
@@ -528,7 +528,7 @@ segments:
       - { type: .bss, vram: 0x800DE900, name: sound }
       - { type: .bss, vram: 0x800DE910, name: character_model }
       - { type: .bss, vram: 0x800DE970, name: character }
-      - { type: .bss, vram: 0x800DF0B0, name: fault }
+      - { type: .bss, vram: 0x800DF0B0, name: crash_screen }
       - { type: .bss, vram: 0x800E1290, name: music }
       - { type: .bss, vram: 0x800E12B0, name: play }
       - { type: .bss, vram: 0x800E16B0, name: view_projection }

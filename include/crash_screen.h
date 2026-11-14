@@ -1,5 +1,5 @@
-#ifndef FAULT_H
-#define FAULT_H
+#ifndef CRASH_SCREEN_H
+#define CRASH_SCREEN_H
 
 extern const char g_EmptyString[];
 

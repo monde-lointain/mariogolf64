@@ -13,7 +13,7 @@
 #include "course.h"
 #include "course_space.h"
 #include "course_stats.h"
-#include "fault.h"
+#include "crash_screen.h"
 #include "frame_time.h"
 #include "game_flags.h"
 #include "game_state.h"
