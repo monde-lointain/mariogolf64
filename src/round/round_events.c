@@ -113,14 +113,16 @@ enum BannerAnimation {
 
 typedef s8 BannerAnimation;
 
-typedef struct Banner {
+// How a banner is drawn: the asset of its letter images, their count and size,
+// and its animation
+typedef struct BannerDesign {
     s16 unusedBeforeImageAsset;
     AssetId imageAsset;
     s8 letterCount;
     u8 letterWidth;
     u8 letterHeight;
     BannerAnimation animation;
-} Banner;
+} BannerDesign;
 
 // Where a letter of the shown banner is, and its matrix in each matrix buffer
 typedef struct BannerLetter {
@@ -306,13 +308,13 @@ typedef struct LakituVelocity {
 
 // Frames since the banner started, or BANNER_FRAME_NONE
 static s32 f_BannerFrame = BANNER_FRAME_NONE;
-static s32 f_CurrentBanner = BANNER_NONE;
+static Banner f_CurrentBanner = BANNER_NONE;
 // The number that BANNER_STROKES_OVER_PAR's banner shows after its "+"
 static s32 f_BannerNumber = 0;
 // The "+" and the number's digits
 static s32 f_BannerNumberLetterCount = 0;
 // The banner whose images are in f_MovieBuffer
-static s32 f_LoadedBanner = BANNER_NONE;
+static Banner f_LoadedBanner = BANNER_NONE;
 static Boolean f_IsMovieBufferAllocated = FALSE;
 static s32 f_UnusedWordAfterMovieBufferFlag UNUSED = -1;
 static Vtx f_BannerLetterVertices[QUAD_VERTEX_COUNT] = {
@@ -321,7 +323,7 @@ static Vtx f_BannerLetterVertices[QUAD_VERTEX_COUNT] = {
     {{{32, -32, 0}, 0, {0x7FF, 0xFC0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{32, 32, 0}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-static Banner f_Banners[] = {
+static BannerDesign f_Banners[] = {
     // BANNER_NICE_SHOT
     {0, 0x542, 10, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SLIDE},
     // BANNER_NICE_ON
@@ -363,7 +365,7 @@ static Banner f_Banners[] = {
         BANNER_LETTER_IMAGE_HEIGHT,
         BANNER_ANIMATION_ZOOM_STAY,
     },
-    // BANNER_OVER_PAR_NUMBER
+    // BANNER_NUMBERED_OVER_PAR
     {
         0,
         0x553,
@@ -408,10 +410,10 @@ static BannerLayout f_BannerLayouts[] = {
     {-64, 0, 32, 64, 96, 128, 160, 0, 0, 0, 0, 0},
     // BANNER_BOGEY
     {-96, 0, 32, 64, 96, 128, 160, 0, 0, 0, 0, 0},
-    // BANNER_OVER_PAR_NUMBER
+    // BANNER_NUMBERED_OVER_PAR
     {-105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
-static s32 f_TestBanner = 0;
+static Banner f_TestBanner = BANNER_NICE_SHOT;
 static Boolean f_IsFlipMessageLeaving = INITIAL_IS_FLIP_MESSAGE_LEAVING;
 // FLIP_MESSAGE_FRAME_NONE while no message is shown
 static s32 f_FlipMessageFrame = FLIP_MESSAGE_FRAME_NONE;
@@ -626,7 +628,7 @@ void FreeMovieBuffer(void) {
     FreeMemory(&f_MovieBuffer);
 }
 
-void StartBanner(s32 banner) {
+void StartBanner(Banner banner) {
     EncodedAsset asset;
     Vec3 translation;
     Vec3 rotation;

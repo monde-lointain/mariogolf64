@@ -338,7 +338,7 @@
 #define FAST_FLIGHT_EXTRA_STEPS 3
 
 // A reaction lasts this many frames past its animation, whose end calls
-// StartBanner(-1)
+// StartBanner(BANNER_NONE)
 #define REACTION_HOLD_FRAMES 10
 // How long a reaction lasts with GAME_FLAG_FAST_AUTOPLAY set
 #define SHORT_REACTION_FRAMES 15
@@ -3132,7 +3132,7 @@ void PlayHoleOutSong(s32 playerIndex) {
 void ShowHoleOutBanner(s32 playerIndex) {
     s8 strokeCount = g_Players[playerIndex].strokeCount;
     ScoreToPar scoreToPar = strokeCount - g_HoleSetup.par;
-    s32 banner = BANNER_NONE;
+    Banner banner = BANNER_NONE;
 
     if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
         StartBanner(BANNER_FINISH);

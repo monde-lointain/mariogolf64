@@ -67,35 +67,39 @@ typedef s32 ContactStyle;
     (((style) != CONTACT_STYLE_GAME_BOY_BALL_7) & ((style) != CONTACT_STYLE_WARIO))
 
 // The word banners that StartBanner flies in, named after their text
-// Hides the banner only if it is BANNER_NICE_SHOT
-#define BANNER_HIDE_NICE_SHOT (-2)
-#define BANNER_NONE (-1)
-#define BANNER_NICE_SHOT 0
-#define BANNER_NICE_ON 1
-#define BANNER_NICE_APPROACH 2
-#define BANNER_NICE_TOUCH 3
-#define BANNER_CHIP_IN 4
-#define BANNER_PIN_SHOT 5
-#define BANNER_FLAG_SHOT 6
-#define BANNER_EXCELLENT 7
-#define BANNER_GREAT 8
-// Speed Golf's
-#define BANNER_FINISH 9
-// Ring Shot's
-#define BANNER_COMPLETE 10
-#define BANNER_HOLE_IN_ONE 11
-#define BANNER_ALBATROSS 12
-#define BANNER_EAGLE 13
-#define BANNER_BIRDIE 14
-#define BANNER_PAR 15
-#define BANNER_BOGEY 16
-// Plus two or more strokes over par, which the banner shows as "+N"
-#define BANNER_STROKES_OVER_PAR 16
+enum Banner {
+    // Hides the banner only if it is BANNER_NICE_SHOT
+    BANNER_HIDE_NICE_SHOT = -2,
+    BANNER_NONE,
+    BANNER_NICE_SHOT,
+    BANNER_NICE_ON,
+    BANNER_NICE_APPROACH,
+    BANNER_NICE_TOUCH,
+    BANNER_CHIP_IN,
+    BANNER_PIN_SHOT,
+    BANNER_FLAG_SHOT,
+    BANNER_EXCELLENT,
+    BANNER_GREAT,
+    // Speed Golf's
+    BANNER_FINISH,
+    // Ring Shot's
+    BANNER_COMPLETE,
+    BANNER_HOLE_IN_ONE,
+    BANNER_ALBATROSS,
+    BANNER_EAGLE,
+    BANNER_BIRDIE,
+    BANNER_PAR,
+    BANNER_BOGEY,
+    // Plus two or more strokes over par, which the banner shows as "+N"
+    BANNER_STROKES_OVER_PAR = BANNER_BOGEY
+};
+
+typedef s32 Banner;
 
 #define NO_CONTACT_EFFECT_AGE (-1)
 extern s32 g_ContactEffectAge;
 
-void StartBanner(s32 banner);
+void StartBanner(Banner banner);
 // Shows the Fly Guy that warns of a strong wind, or hides it given FLY_GUY_HIDDEN
 void ShowWindFlyGuy(FlyGuyVisibility show);
 ContactStyle GetContactStyle(Player *player);
