@@ -949,6 +949,10 @@ segments:
   - [0xE473F0, bin, asset_archive]
   - [0x151CD40, bin, text/glyphs]
   - [0x151CD50, bin, text/messages]
+  # A second glyph file and table of the same 500 messages, which no routine
+  # reads. Its messages are Japanese, with katakana in JIS X 0201's codes.
+  - [0x1524F40, bin, text/unused_glyphs]
+  - [0x1524F50, bin, text/unused_messages]
   - [0x152A680, bin, text/staff_roll]
   - [0x152B6C0, bin, character_models/opening_model_15]
   - [0x1533380, bin, character_models/mario]
