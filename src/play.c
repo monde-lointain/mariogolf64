@@ -1736,8 +1736,8 @@ void FillGroundNoise(s32 range, s32 base) {
     for (row = 0; row < GROUND_NOISE_SIZE; row++) {
         for (column = 0; column < GROUND_NOISE_SIZE; column++) {
             intensity = (rand() % range) + base;
-            if (intensity > GROUND_NOISE_INTENSITY_MAX) {
-                intensity = GROUND_NOISE_INTENSITY_MAX;
+            if (intensity > COLOR_CHANNEL_MAX) {
+                intensity = COLOR_CHANNEL_MAX;
             }
 
             f_GroundNoiseTexels[texelIndex++] = intensity;

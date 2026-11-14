@@ -93,7 +93,6 @@ extern u8 g_UnreadPlayBuffer[0xDEC];
 #define LIGHT_GROUND_NOISE_BASE 0xC8
 #define MINI_GOLF_GROUND_NOISE_RANGE 0x40
 #define MINI_GOLF_GROUND_NOISE_BASE 0xD2
-#define GROUND_NOISE_INTENSITY_MAX 0xFF
 
 void FillGroundNoise(s32 range, s32 base);
 void CopyDoublePair(f64 *from, f64 *to);

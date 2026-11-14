@@ -20,6 +20,7 @@
 #include "framing.h"
 #include "game_flags.h"
 #include "game_state.h"
+#include "gbi_helpers.h"
 #include "geometry.h"
 #include "golf_balls.h"
 #include "hole_conditions.h"
@@ -3282,7 +3283,6 @@ void BuildRingTexels(u8 *texels, s32 width, s32 height, s32 outerRadius UNUSED) 
 #define NOISE_BLEND_WEIGHT_MAX 0x3F
 #define NOISE_BLEND_STEP_MASK 0x7F
 #define NOISE_INTENSITY_SHIFT 13
-#define NOISE_INTENSITY_MAX 0xFF
 
 static inline s32 RandomNoiseDisplacement(void) {
     return (rand() & NOISE_DISPLACEMENT_MASK) - NOISE_DISPLACEMENT_BIAS;
@@ -3387,8 +3387,8 @@ void StepNoiseTexture(void) {
                             (f_NoiseGrids[f_NoiseGridIndex ^ 1][row][column] * weight)) >>
                     NOISE_INTENSITY_SHIFT;
                 intensity = Abs(blend);
-                if (intensity > NOISE_INTENSITY_MAX) {
-                    intensity = NOISE_INTENSITY_MAX;
+                if (intensity > COLOR_CHANNEL_MAX) {
+                    intensity = COLOR_CHANNEL_MAX;
                 }
 
                 g_NoiseTexels[index++] = intensity;
