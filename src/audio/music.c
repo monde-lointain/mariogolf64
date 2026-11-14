@@ -80,7 +80,7 @@ static musConfig f_DefaultMusicConfig = {
 
 // Sets the routine called on audio events, with interrupts off while it changes
 void SetAudioEventCallback(AudioEventCallback callback) {
-    u32 mask = osSetIntMask(OS_IM_NONE);
+    OSIntMask mask = osSetIntMask(OS_IM_NONE);
 
     f_AudioEventCallback = callback;
     osSetIntMask(mask);

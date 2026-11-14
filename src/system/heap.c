@@ -112,7 +112,7 @@ void *AllocFromHeap(HeapIndex heapIndex, u32 size) {
     u32 callerAddress;
     u32 largestFreeSize;
     Heap *heap;
-    s32 mask;
+    OSIntMask mask;
     u32 bestSize;
     MemoryBlock *block;
     MemoryBlock *bestBlock;
@@ -185,7 +185,7 @@ void *AllocFromHeap(HeapIndex heapIndex, u32 size) {
 // Frees the block that *pointerToBlock points to and clears the pointer
 void FreeFromHeap(HeapIndex heapIndex, void *pointerToBlock) {
     void *pointer;
-    s32 mask;
+    OSIntMask mask;
     MemoryBlock *block;
 
     mask = osSetIntMask(OS_IM_NONE);
@@ -291,7 +291,7 @@ u32 FindLargestFreeMemorySize(void) {
 void *AllocMemory(u32 size) {
     u32 callerAddress;
     u32 largestFreeSize;
-    s32 mask;
+    OSIntMask mask;
     u32 bestSize;
     MemoryBlock *bestBlock;
     MemoryBlock *block;
@@ -363,7 +363,7 @@ void *AllocMemory(u32 size) {
 void FreeMemory(void *pointerToBlock) {
     u32 callerAddress;
     void *pointer;
-    s32 mask;
+    OSIntMask mask;
     MemoryBlock *block;
     MemoryBlock *previous;
 

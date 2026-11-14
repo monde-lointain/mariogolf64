@@ -295,7 +295,7 @@ s32 ChangeCustomEffect(s32 type);
 // and gives it its reverb: an echo for the few sounds that echo
 void PlaySound(SoundId soundId, SoundChannel channel, SoundVolume volume) {
     s32 *handle;
-    s32 mask;
+    OSIntMask mask;
     s32 index;
 
     if (!IsGameFlagSet(GAME_FLAG_SILENCE_SOUND_EFFECTS)) {
@@ -358,7 +358,7 @@ void PlaySoundWithEffects(
     SoundPan pan
 ) {
     s32 *handle;
-    s32 mask;
+    OSIntMask mask;
     s32 index;
 
     if (!IsGameFlagSet(GAME_FLAG_SILENCE_SOUND_EFFECTS)) {
@@ -414,7 +414,7 @@ void PlaySoundWithEffects(
 // These change the sound on a channel, if it has one, with interrupts masked
 // so that the audio thread never sees half a change
 void StopSound(SoundChannel channel) {
-    s32 mask = osSetIntMask(OS_IM_NONE);
+    OSIntMask mask = osSetIntMask(OS_IM_NONE);
 
     if (f_SoundHandles[channel] != NO_HANDLE) {
         MusHandleStop(f_SoundHandles[channel], 0);
@@ -424,7 +424,7 @@ void StopSound(SoundChannel channel) {
 }
 
 void SetSoundPan(SoundChannel channel, SoundPan pan) {
-    s32 mask = osSetIntMask(OS_IM_NONE);
+    OSIntMask mask = osSetIntMask(OS_IM_NONE);
 
     if (f_SoundHandles[channel] != NO_HANDLE) {
         MusHandleSetPan(f_SoundHandles[channel], pan);
@@ -434,7 +434,7 @@ void SetSoundPan(SoundChannel channel, SoundPan pan) {
 }
 
 void SetSoundVolume(SoundChannel channel, SoundVolume volume) {
-    s32 mask = osSetIntMask(OS_IM_NONE);
+    OSIntMask mask = osSetIntMask(OS_IM_NONE);
 
     if (f_SoundHandles[channel] != NO_HANDLE) {
         MusHandleSetVolume(f_SoundHandles[channel], volume);
@@ -444,7 +444,7 @@ void SetSoundVolume(SoundChannel channel, SoundVolume volume) {
 }
 
 void SetSoundReverb(SoundChannel channel, SoundReverb reverb) {
-    s32 mask = osSetIntMask(OS_IM_NONE);
+    OSIntMask mask = osSetIntMask(OS_IM_NONE);
 
     if (f_SoundHandles[channel] != NO_HANDLE) {
         MusHandleSetReverb(f_SoundHandles[channel], reverb);
@@ -459,7 +459,7 @@ void FadeOutSound(SoundChannel channel, u32 frameCount) {
 }
 
 void SetSoundTempo(SoundChannel channel, s32 tempo) {
-    s32 mask = osSetIntMask(OS_IM_NONE);
+    OSIntMask mask = osSetIntMask(OS_IM_NONE);
 
     if (f_SoundHandles[channel] != NO_HANDLE) {
         MusHandleSetTempo(f_SoundHandles[channel], tempo);
@@ -592,7 +592,7 @@ static void UpdateCharacterSounds(void) {
 }
 
 void SetSoundFrequencyOffset(SoundChannel channel, f32 offset) {
-    s32 mask = osSetIntMask(OS_IM_NONE);
+    OSIntMask mask = osSetIntMask(OS_IM_NONE);
 
     if (f_SoundHandles[channel] != NO_HANDLE) {
         MusHandleSetFreqOffset(f_SoundHandles[channel], offset);
@@ -637,7 +637,7 @@ NO_RESULT UpdateAudio(void) {
         --f_PendingSongChange.delay == 0) {
         if (f_PendingSongChange.kind == SONG_CHANGE_SWITCH) {
             if (f_SongHandle != NO_HANDLE) {
-                s32 mask = osSetIntMask(OS_IM_NONE);
+                OSIntMask mask = osSetIntMask(OS_IM_NONE);
                 MusHandleStop(f_SongHandle, 0);
                 osSetIntMask(mask);
                 f_SongHandle = NO_HANDLE;
@@ -652,7 +652,7 @@ NO_RESULT UpdateAudio(void) {
         }
         else if (f_PendingSongChange.kind == SONG_CHANGE_STOP) {
             if (f_SongHandle != NO_HANDLE) {
-                s32 mask = osSetIntMask(OS_IM_NONE);
+                OSIntMask mask = osSetIntMask(OS_IM_NONE);
                 MusHandleStop(f_SongHandle, 0);
                 osSetIntMask(mask);
                 f_SongHandle = NO_HANDLE;
@@ -666,7 +666,7 @@ NO_RESULT UpdateAudio(void) {
 
 // Stops the song at once, fading it out over the frames
 void StopSong(s32 fadeFrameCount) {
-    s32 mask = osSetIntMask(OS_IM_NONE);
+    OSIntMask mask = osSetIntMask(OS_IM_NONE);
 
     if (f_SongHandle != NO_HANDLE) {
         MusHandleStop(f_SongHandle, fadeFrameCount);
@@ -684,7 +684,7 @@ void RequestSongStop(void) {
 
 // These change the song, if one is playing
 void SetSongVolume(SoundVolume volume) {
-    s32 mask;
+    OSIntMask mask;
 
     if (f_SongHandle != NO_HANDLE) {
         mask = osSetIntMask(OS_IM_NONE);
@@ -694,7 +694,7 @@ void SetSongVolume(SoundVolume volume) {
 }
 
 void SetSongReverb(SoundReverb reverb) {
-    s32 mask;
+    OSIntMask mask;
 
     if (f_SongHandle != NO_HANDLE) {
         mask = osSetIntMask(OS_IM_NONE);
@@ -704,7 +704,7 @@ void SetSongReverb(SoundReverb reverb) {
 }
 
 void SetSongTempo(s32 tempo) {
-    s32 mask;
+    OSIntMask mask;
 
     if (f_SongHandle != NO_HANDLE) {
         mask = osSetIntMask(OS_IM_NONE);
@@ -714,7 +714,7 @@ void SetSongTempo(s32 tempo) {
 }
 
 void SetSongFrequencyOffset(f32 offset) {
-    s32 mask;
+    OSIntMask mask;
 
     if (f_SongHandle != NO_HANDLE) {
         mask = osSetIntMask(OS_IM_NONE);
