@@ -1026,7 +1026,7 @@ void LoadRingShotRecordFaces(void) {
             }
         }
         else {
-            paletteIndex = 0;
+            paletteIndex = UP_C_PALETTE;
             characterIndex = 0;
         }
 

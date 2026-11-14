@@ -895,7 +895,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             }
 
             if (index == CHARACTER_PALETTE_COUNT) {
-                g_Players[playerIndex].paletteIndex = 0;
+                g_Players[playerIndex].paletteIndex = UP_C_PALETTE;
             }
         }
 

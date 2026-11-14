@@ -1817,8 +1817,8 @@ void InsertBestTime(
 
     if (time >= 0) {
         if (time <= STOPWATCH_FRAMES_MAX) {
-            if (paletteIndex < 0) {
-                paletteIndex = 0;
+            if (paletteIndex < UP_C_PALETTE) {
+                paletteIndex = UP_C_PALETTE;
             }
 
             if (paletteIndex > CHARACTER_PALETTE_COUNT - 1) {

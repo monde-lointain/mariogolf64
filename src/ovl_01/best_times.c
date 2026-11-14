@@ -773,7 +773,7 @@ void LoadBestTimesFaces(void) {
             }
             else {
                 holderCharacterIndex = 0;
-                paletteIndex = 0;
+                paletteIndex = UP_C_PALETTE;
             }
 
             OpenAssetFile(g_CharacterPaletteFiles[holderCharacterIndex][paletteIndex], &file);

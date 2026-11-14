@@ -2966,7 +2966,7 @@ void LoadBestShotFaces(void) {
             }
             else {
                 characterIndex = 0;
-                paletteIndex = 0;
+                paletteIndex = UP_C_PALETTE;
                 f_BestShotFacePalettes[row][column] =
                     g_MenuCharacterPalettes[(row * STATS_GRID_COLUMN_COUNT) + column];
             }
