@@ -272,8 +272,8 @@ static s32 f_LogoUnusedWord = 0; // Only ever cleared
 static Mtx f_ReelMatrices[REEL_COUNT][DRAW_BUFFER_COUNT];
 static Mtx f_ShadeMatrix;
 static ClubSlots *f_Slots;
-static u8 f_LogoImage[LOGO_IMAGE_BUFFER_SIZE];
-static u8 f_ShineImage[SHINE_IMAGE_BUFFER_SIZE];
+static u8 f_LogoImage[LOGO_IMAGE_BUFFER_SIZE] RCP_ALIGNED;
+static u8 f_ShineImage[SHINE_IMAGE_BUFFER_SIZE] RCP_ALIGNED;
 
 void LoadClubSlots(void) {
     EncodedAsset asset;

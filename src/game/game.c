@@ -177,10 +177,10 @@ static Gfx f_UnreadPaletteLoads[] = {
 };
 
 // The sources of g_FlameTexture
-static u8 f_NoiseTexture[] = {
+static u8 f_NoiseTexture[] RCP_ALIGNED = {
 #include "assets/game/game/noise_texture.i8.inc.c"
 };
-static u16 f_FlameGradientTexture[] = {
+static u16 f_FlameGradientTexture[] RCP_ALIGNED = {
 #include "assets/game/game/flame_gradient_texture.rgba16.inc.c"
 };
 
@@ -342,15 +342,15 @@ static u8 f_UnusedBytesAfterSpinMatrices[16] UNUSED;
 // Indexed by view, then by draw buffer
 FILE_STATIC CameraMatrices f_CameraMatrices[CAMERA_COUNT * DRAW_BUFFER_COUNT];
 Camera g_MapCamera;
-u16 g_BlendedTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE];
+u16 g_BlendedTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE] RCP_ALIGNED;
 u8 *g_BlendedTextureScrollingLayer;
 u8 *g_BlendedTextureStillLayer;
 Camera g_Cameras[CAMERA_COUNT];
 Gfx *g_DisplayListHead;
-u16 g_FlameTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE];
+u16 g_FlameTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE] RCP_ALIGNED;
 ScreenRectangle g_HudScissor;
 InsetView g_InsetView;
-u16 g_MirrorTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE];
+u16 g_MirrorTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE] RCP_ALIGNED;
 u16 g_ScreenEffectPerspectiveNormalization;
 Mtx g_ScreenEffectProjection;
 Mtx g_ScreenOrthoMatrix;

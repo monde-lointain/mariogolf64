@@ -185,7 +185,7 @@ static u8 f_UnusedShuffledIndices[25] UNUSED =
     {0, 5, 7, 10, 20, 1, 12, 13, 14, 21, 2, 15, 8, 16, 22, 3, 17, 18, 19, 23, 4, 6, 9, 11, 24};
 static s32 f_GroundTimingRow = 0;
 
-static u8 f_GroundNoiseTexels[GROUND_NOISE_SIZE * GROUND_NOISE_SIZE];
+static u8 f_GroundNoiseTexels[GROUND_NOISE_SIZE * GROUND_NOISE_SIZE] RCP_ALIGNED;
 
 // Whether play's hole intro, flyover and results move on without A, as under
 // GAME_FLAG_FAST_AUTOPLAY or GAME_FLAG_AUTOPLAY

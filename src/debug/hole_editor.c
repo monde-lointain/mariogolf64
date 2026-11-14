@@ -761,13 +761,13 @@ static CoursePoint f_SavedWallCorners[SAVED_CORNER_COUNT];
 // Places DrawTargetPole's pole at the map camera's target
 static Mtx f_PoleMatrix;
 static s32 f_UnusedEditorWords[2] UNUSED;
-static u8 f_WhiteNoiseTexels[WHITE_TEXTURE_SIZE * WHITE_TEXTURE_SIZE];
+static u8 f_WhiteNoiseTexels[WHITE_TEXTURE_SIZE * WHITE_TEXTURE_SIZE] RCP_ALIGNED;
 static TriangleSlope f_TriangleSlopes[CELL_COLUMN_COUNT * CELL_ROW_COUNT * 2];
 static Gfx f_EditorGroundDisplayLists[DRAW_BUFFER_COUNT][EDITOR_GROUND_LIST_LENGTH];
 // Reached only through GetEditorBuffer, which nothing calls
 static u8 f_EditorBuffer[EDITOR_BUFFER_SIZE];
 // FillWaveTexels's wave pattern
-static u8 f_WaveTexels[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
+static u8 f_WaveTexels[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH] RCP_ALIGNED;
 
 // UpdateHeightEditor's state
 static s32 f_HeightCursorColumn = 0;

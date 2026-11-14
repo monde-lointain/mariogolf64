@@ -598,7 +598,7 @@ static Gfx f_UnusedNoOpDisplayList[] UNUSED = {
     gsDPNoOp(),
     gsSPEndDisplayList(),
 };
-static u8 f_InsetFrameTexture[] = {
+static u8 f_InsetFrameTexture[] RCP_ALIGNED = {
 #include "assets/round/round_hud/inset_frame_texture.i4.inc.c"
 };
 static LandingReaction f_LandingReaction = LANDING_REACTION_NONE;
@@ -733,7 +733,7 @@ static s32 f_RingFrameTime = 0;
 static Gfx f_UnusedEmptyHudDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
 };
-static u16 f_WhiteDistancePalette[] = {
+static u16 f_WhiteDistancePalette[] RCP_ALIGNED = {
 #include "assets/round/round_hud/white_distance_palette.rgba16.inc.c"
 };
 static s32 f_LoadedHoleIntroImages = 0;

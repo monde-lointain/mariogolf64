@@ -1406,7 +1406,7 @@ static Mat4 f_CourseSelectView;
 static s32 f_BetSettingsSlide;
 static s32 f_HandicapsSlide;
 // An image buffer of the menu overlay
-static u8 f_MenuImageBuffer[MENU_IMAGE_BUFFER_SIZE];
+static u8 f_MenuImageBuffer[MENU_IMAGE_BUFFER_SIZE] RCP_ALIGNED;
 
 void *GetMenuImageBuffer(void) {
     return f_MenuImageBuffer;

@@ -148,7 +148,7 @@ MenuRepeatState g_MenuRepeatStates[MAXCONTROLLERS];
 ControllerState g_MergedController;
 s32 g_PlayerControllerPorts[MAXCONTROLLERS];
 NUContData g_PreviousControllerData[MAXCONTROLLERS];
-char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
+char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1] RCP_ALIGNED;
 char g_SaveBuildDate[SAVE_BUILD_DATE_SIZE];
 ControllerState g_TurnController;
 

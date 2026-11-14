@@ -47,7 +47,7 @@
 
 // Its 0x1800 bytes are twice the font's 4-bit texels, and the second half
 // is zero
-static u16 f_DebugFont[FONT_WIDTH * FONT_HEIGHT / 2] = {
+static u16 f_DebugFont[FONT_WIDTH * FONT_HEIGHT / 2] RCP_ALIGNED = {
 #include "assets/debug/debug_text/debug_font.ia4.inc.c"
 };
 u16 *g_MessageFramebuffer = NULL;

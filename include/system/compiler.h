@@ -90,6 +90,18 @@
 #    define READ_ONLY const
 #endif
 
+// Follows the declarator of a buffer of bytes or halfwords that the RCP or a
+// DMA reads or writes: a texture, palette or image, or a DMA's target. Their
+// address registers ignore the low three bits, as does TextureAddress, so the
+// buffer must start on an 8-byte boundary. The original's linker happened to
+// place each one so; other layouts have to ask for it.
+#define RCP_ALIGNED __attribute__((aligned(8)))
+
+// Follows the declarator of a byte array that a thread uses as its stack. The
+// O32 ABI keeps the stack pointer a multiple of 8, so that doubles can be
+// stored with sdc1, and the stack's top is the end of the array.
+#define STACK_ALIGNED __attribute__((aligned(8)))
+
 // Compiles statements in a block of their own, to match. KMC GCC schedules
 // instructions and reuses values only within a basic block, and the
 // original's code shows block boundaries around some statements where its

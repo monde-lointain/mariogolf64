@@ -203,7 +203,7 @@ static Gfx f_UnusedMeterDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
 };
 // The digits, each DIGIT_WIDTH wide, in a 64x8 IA4 texture
-static u16 f_DigitTexture[] = {
+static u16 f_DigitTexture[] RCP_ALIGNED = {
 #include "assets/debug/performance_meter/digit_texture.ia4.inc.c"
 };
 static u32 f_DigitDrawCount = 0;

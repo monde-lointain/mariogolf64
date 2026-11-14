@@ -715,14 +715,14 @@ static Mtx f_OpeningSparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
 // Kong's, when he is shown, and the one the last scene starts
 static SoundChannel f_DonkeyKongSoundChannel;
 static SoundChannel f_ClosingSoundChannel;
-static u8 f_NameSlotImages[OPENING_NAME_SLOT_COUNT][OPENING_NAME_LOGO_SIZE];
+static u8 f_NameSlotImages[OPENING_NAME_SLOT_COUNT][OPENING_NAME_LOGO_SIZE] RCP_ALIGNED;
 static s32 f_NameSlotLogoIndices[OPENING_NAME_SLOT_COUNT];
 static s32 f_NameSlotSteps[OPENING_NAME_SLOT_COUNT];
 static Boolean f_IsNameSlotShown[OPENING_NAME_SLOT_COUNT];
 // The impact lines' image, and later the burst's
-static u8 f_OpeningEffectImage[OPENING_EFFECT_IMAGE_SIZE];
-static u8 f_ShotBallImage[OPENING_BALL_IMAGE_SIZE];
-static u8 f_OpeningBallImages[OPENING_BALL_SLOT_COUNT][OPENING_BALL_IMAGE_SIZE];
+static u8 f_OpeningEffectImage[OPENING_EFFECT_IMAGE_SIZE] RCP_ALIGNED;
+static u8 f_ShotBallImage[OPENING_BALL_IMAGE_SIZE] RCP_ALIGNED;
+static u8 f_OpeningBallImages[OPENING_BALL_SLOT_COUNT][OPENING_BALL_IMAGE_SIZE] RCP_ALIGNED;
 
 static Vec3 f_OpeningBallPositions[OPENING_BALL_SLOT_COUNT];
 // The share of its distance that the logo ball closes each frame
@@ -732,17 +732,17 @@ static f32 f_LogoBallFollowRate;
 static u8 f_UnusedBytesAfterFollowRate[0x4] UNUSED;
 static u8 f_UnusedBufferAfterFollowRate[0x10] UNUSED;
 
-static u8 f_LogoBallImages[LOGO_BALL_IMAGES_BUFFER_SIZE];
+static u8 f_LogoBallImages[LOGO_BALL_IMAGES_BUFFER_SIZE] RCP_ALIGNED;
 // A 32x32 CI8 image with its header and palette
-static u8 f_LakituImage[LAKITU_IMAGE_BUFFER_SIZE];
+static u8 f_LakituImage[LAKITU_IMAGE_BUFFER_SIZE] RCP_ALIGNED;
 // A 48x128 I4 image with its header
-static u8 f_LakituTrailImage[LAKITU_TRAIL_IMAGE_BUFFER_SIZE];
+static u8 f_LakituTrailImage[LAKITU_TRAIL_IMAGE_BUFFER_SIZE] RCP_ALIGNED;
 static Mtx f_LakituTrailMatrices[LAKITU_TRAIL_SEGMENT_COUNT];
 static Vec2 f_LakituTrailStart;
 static u8 f_UnusedBufferAfterTrailStart[24] UNUSED;
-static u8 f_LogoMarioImage[LOGO_MARIO_IMAGE_BUFFER_SIZE];
-static u8 f_LogoLetterImages[LOGO_LETTER_IMAGES_BUFFER_SIZE];
-static u8 f_LogoClubImage[LOGO_CLUB_IMAGE_BUFFER_SIZE];
+static u8 f_LogoMarioImage[LOGO_MARIO_IMAGE_BUFFER_SIZE] RCP_ALIGNED;
+static u8 f_LogoLetterImages[LOGO_LETTER_IMAGES_BUFFER_SIZE] RCP_ALIGNED;
+static u8 f_LogoClubImage[LOGO_CLUB_IMAGE_BUFFER_SIZE] RCP_ALIGNED;
 static ScreenPosition f_LogoLetters[LOGO_LETTER_COUNT];
 static LogoLetterState f_LogoLetterStates[LOGO_LETTER_COUNT];
 static f32 f_LogoLetterSpeeds[LOGO_LETTER_COUNT]; // Down, in pixels a frame
@@ -750,7 +750,7 @@ static f32 f_LogoLetterSpeeds[LOGO_LETTER_COUNT]; // Down, in pixels a frame
 static Vec2 f_LogoLetterScales[LOGO_LETTER_COUNT];
 // Frames left in a letter's squashing, squashed or stretching state
 static s32 f_LogoLetterSquashFrames[LOGO_LETTER_COUNT];
-static u8 f_LogoShineImage[SHINE_IMAGE_BUFFER_SIZE];
+static u8 f_LogoShineImage[SHINE_IMAGE_BUFFER_SIZE] RCP_ALIGNED;
 static Vec3 f_OpeningSparksOrigin;
 static u8 f_UnusedBufferAfterSparksOrigin[12] UNUSED;
 // The buffers of character slots 1 and 2

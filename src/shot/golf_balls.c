@@ -108,11 +108,11 @@ typedef struct BallAfterimage {
 } BallAfterimage;
 
 static Gfx f_UnusedListBeforeBooMouth[] UNUSED = {gsSPEndDisplayList()};
-static u16 f_BooMouthTexture[] = {
+static u16 f_BooMouthTexture[] RCP_ALIGNED = {
 #include "assets/shot/golf_balls/boo_mouth_texture.rgba16.inc.c"
 };
 static Gfx f_UnusedListAfterBooMouth[] UNUSED = {gsSPEndDisplayList()};
-static u16 f_BooEyeTexture[] = {
+static u16 f_BooEyeTexture[] RCP_ALIGNED = {
 #include "assets/shot/golf_balls/boo_eye_texture.rgba16.inc.c"
 };
 static Vtx f_BooEyeVertices[] = {
@@ -409,9 +409,9 @@ static ImageAsset *f_BallAfterimageImage;
 
 static u8 f_UnusedBytesAfterAfterimageImage[16] UNUSED;
 
-static u8 f_BallImageHeap[BALL_IMAGE_HEAP_SIZE];
+static u8 f_BallImageHeap[BALL_IMAGE_HEAP_SIZE] RCP_ALIGNED;
 // "PIKA" in 4-bit texels, four to a u16
-static u16 f_PikaBallTexture[PIKA_TEXTURE_WIDTH * PIKA_TEXTURE_HEIGHT / 4];
+static u16 f_PikaBallTexture[PIKA_TEXTURE_WIDTH * PIKA_TEXTURE_HEIGHT / 4] RCP_ALIGNED;
 // How the ball has turned as it rolled
 static Mat4 f_BallRotation;
 // ResetGolfBalls clears it, and nothing reads it

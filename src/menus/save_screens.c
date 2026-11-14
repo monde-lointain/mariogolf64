@@ -389,9 +389,9 @@ static u8 f_UnusedBytesAfterModeIconSize[0x4] UNUSED;
 static u8 f_UnusedBufferAfterModeIconSize[0x88] UNUSED;
 
 // Not static: the original left these to the linker's common block
-PaletteColor g_MenuCharacterPalettes[CHARACTER_COUNT][LARGE_PALETTE_COLOR_COUNT];
+PaletteColor g_MenuCharacterPalettes[CHARACTER_COUNT][LARGE_PALETTE_COLOR_COUNT] RCP_ALIGNED;
 // The face palette of each Ring Shot record's replay character
-PaletteColor g_ReplayFacePalettes[SAVE_MENU_SLOT_COUNT][LARGE_PALETTE_COLOR_COUNT];
+PaletteColor g_ReplayFacePalettes[SAVE_MENU_SLOT_COUNT][LARGE_PALETTE_COLOR_COUNT] RCP_ALIGNED;
 
 void LoadRingShotRecordBuffer(void *buffer, RingShotRecordBuffer bufferKind) {
     EncodedAsset asset;
