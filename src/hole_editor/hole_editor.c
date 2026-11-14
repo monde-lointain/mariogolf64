@@ -211,7 +211,7 @@ enum TriangleEdit {
 #define HOLE_POINT_MODE_ROUTE 2
 #define HOLE_POINT_MODE_COUNT 3
 #define HOLE_POINT_STEP_LENGTH 10.0
-#define HEADING_RADIANS ((u16)f_HolePointCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS)
+#define HEADING_RADIANS ((u16)f_HolePointCameraYawAngle * BINARY_ANGLE_TO_RADIANS)
 #define CURSOR_TEXT_COLUMN 3
 #define CURSOR_TEXT_ROW 5
 #define SURFACE_TEXT_COLUMN 2
@@ -514,36 +514,36 @@ static s32 f_PointCursorRow = 0;
 static s32 f_PointEditorFirstSetting = 0;
 static s32 f_PointEditorSecondSetting = 0;
 static Radians f_HolePointCameraPitch = -EDITOR_CAMERA_START_ANGLE;
-static Radians f_HolePointCameraHeading = EDITOR_CAMERA_START_ANGLE;
+static Radians f_HolePointCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedHolePointAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
-static s32 f_HolePointCameraHeadingAngle = 0;
+static s32 f_HolePointCameraYawAngle = 0;
 static s32 f_HolePointEditMode = -1;
 static s32 f_PinTeeIndex = 0;
 static s32 f_AimPointIndex = 0;
 static s32 f_RoutePointIndex = 0;
 
 static Radians f_TriangleCameraPitch = -EDITOR_CAMERA_START_ANGLE;
-static Radians f_TriangleCameraHeading = EDITOR_CAMERA_START_ANGLE;
+static Radians f_TriangleCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedTriangleAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
-static s32 f_TriangleCameraHeadingAngle = 0;
+static s32 f_TriangleCameraYawAngle = 0;
 static s32 f_EditedTriangleIndex = 0;
 static s32 f_EditedCornerIndex = 0;
 static s32 f_SavedCornerIndex = 0;
 static s32 f_LastTriangleEditKind = 0;
 
 static Radians f_RingCameraPitch = -EDITOR_CAMERA_START_ANGLE;
-static Radians f_RingCameraHeading = EDITOR_CAMERA_START_ANGLE;
+static Radians f_RingCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedRingAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
-static s32 f_RingCameraHeadingAngle = 0;
+static s32 f_RingCameraYawAngle = 0;
 static s32 f_RingTriangleIndex = 0x9D;
 static s32 f_RingCornerIndex = 0;
 static s32 f_UnusedRingIndex UNUSED = 0;
 static s32 f_LastRingEditKind = 0;
 
 static Radians f_WallCameraPitch = -EDITOR_CAMERA_START_ANGLE;
-static Radians f_WallCameraHeading = EDITOR_CAMERA_START_ANGLE;
+static Radians f_WallCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedWallAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
-static s32 f_WallCameraHeadingAngle = 0;
+static s32 f_WallCameraYawAngle = 0;
 static s32 f_FirstWallTriangle = 0x19;
 static s32 f_WallTriangleIndex = 0x19;
 static s32 f_WallCornerIndex = 0;
@@ -577,9 +577,9 @@ static s32 f_HeightCursorColumn = 0;
 static s32 f_HeightCursorRow = 0;
 static s32 f_UnusedHeightSettings[] UNUSED = {6, 0};
 static Radians f_HeightCameraPitch = -EDITOR_CAMERA_START_ANGLE;
-static Radians f_HeightCameraHeading = EDITOR_CAMERA_START_ANGLE;
+static Radians f_HeightCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedHeightAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
-static s32 f_HeightCameraHeadingAngle = 0;
+static s32 f_HeightCameraYawAngle = 0;
 static s32 f_LastSetHeight = 0;
 static Boolean f_ShowsGroundWaves = TRUE;
 static s32 f_CLeftPickedHeight = 0;
@@ -600,9 +600,9 @@ static s32 f_HoleFileCourseNumber = 1;
 static s32 f_HoleFilePromptFrames = 0;
 
 static Radians f_TreeCameraPitch = -EDITOR_CAMERA_START_ANGLE;
-static Radians f_TreeCameraHeading = EDITOR_CAMERA_START_ANGLE;
+static Radians f_TreeCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedTreeAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
-static s32 f_TreeCameraHeadingAngle = 0;
+static s32 f_TreeCameraYawAngle = 0;
 static s32 f_EditedTreeIndex = 0;
 static s32 f_LastTreeEditKind = 0;
 
@@ -1312,7 +1312,7 @@ void UpdateHolePointEditor(void) {
     }
 
     if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
-        f_HolePointCameraHeadingAngle -=
+        f_HolePointCameraYawAngle -=
             g_MenuControllerData[EDITOR_CONTROLLER].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
         f_HolePointCameraPitch -=
             g_MenuControllerData[EDITOR_CONTROLLER].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
@@ -1326,7 +1326,7 @@ void UpdateHolePointEditor(void) {
         f_HolePointCameraPitch = EDITOR_PITCH_MIN;
     }
 
-    f_HolePointCameraHeading = f_HolePointCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
+    f_HolePointCameraYaw = f_HolePointCameraYawAngle * EDITOR_ANGLE_TO_RADIANS;
     g_MapCamera.view.lookAt[AXIS_X] = f_HolePointCursor[0];
     g_MapCamera.view.lookAt[AXIS_Z] = f_HolePointCursor[1];
     g_MapCamera.view.lookAt[AXIS_Y] = GetGroundHeight(
@@ -1335,10 +1335,10 @@ void UpdateHolePointEditor(void) {
                                       ) *
         (1.0f / (1 << WORLD_TO_COURSE_SHIFT));
     cameraDistance = EDITOR_CAMERA_DISTANCE;
-    g_MapCamera.view.eye[AXIS_X] = (cos(f_HolePointCameraPitch) * cos(f_HolePointCameraHeading) *
+    g_MapCamera.view.eye[AXIS_X] = (cos(f_HolePointCameraPitch) * cos(f_HolePointCameraYaw) *
                                        (g_MapCamera.view.zoom * cameraDistance)) +
         g_MapCamera.view.lookAt[AXIS_X];
-    g_MapCamera.view.eye[AXIS_Z] = (cos(f_HolePointCameraPitch) * sin(f_HolePointCameraHeading) *
+    g_MapCamera.view.eye[AXIS_Z] = (cos(f_HolePointCameraPitch) * sin(f_HolePointCameraYaw) *
                                        (g_MapCamera.view.zoom * cameraDistance)) +
         g_MapCamera.view.lookAt[AXIS_Z];
     g_MapCamera.view.eye[AXIS_Y] =
@@ -1402,10 +1402,10 @@ void UpdateTriangleEditor(void) {
 
     PrintDebugHex(editKind, TRIANGLE_TEXT_COLUMN, EDIT_KIND_TEXT_ROW);
     if (editKind == TRIANGLE_EDIT_MOVE) {
-        stepX = (-cos((u16)f_TriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) -
-            (sin((u16)f_TriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
-        stepZ = (-sin((u16)f_TriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) +
-            (cos((u16)f_TriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
+        stepX = (-cos((u16)f_TriangleCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) -
+            (sin((u16)f_TriangleCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
+        stepZ = (-sin((u16)f_TriangleCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) +
+            (cos((u16)f_TriangleCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
         {
             f32 scaledX = stepX * CORNER_STEP_SCALE;
             f32 scaledY = stepY * CORNER_STEP_SCALE;
@@ -1512,7 +1512,7 @@ void UpdateTriangleEditor(void) {
     }
 
     if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
-        f_TriangleCameraHeadingAngle -=
+        f_TriangleCameraYawAngle -=
             g_MenuControllerData[EDITOR_CONTROLLER].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
         f_TriangleCameraPitch -=
             g_MenuControllerData[EDITOR_CONTROLLER].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
@@ -1526,7 +1526,7 @@ void UpdateTriangleEditor(void) {
         f_TriangleCameraPitch = EDITOR_PITCH_MIN;
     }
 
-    f_TriangleCameraHeading = f_TriangleCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
+    f_TriangleCameraYaw = f_TriangleCameraYawAngle * EDITOR_ANGLE_TO_RADIANS;
     if ((f_LastTriangleEditKind != TRIANGLE_EDIT_NONE) & (editKind == TRIANGLE_EDIT_NONE)) {
         UpdateTriangleSlopes();
     }
@@ -1538,10 +1538,10 @@ void UpdateTriangleEditor(void) {
     g_MapCamera.view.lookAt[AXIS_Y] = lookAtVertex->ob[AXIS_Y];
     f_LastTriangleEditKind = editKind;
     g_MapCamera.view.lookAt[AXIS_Z] = lookAtVertex->ob[AXIS_Z];
-    g_MapCamera.view.eye[AXIS_X] = (cos(f_TriangleCameraPitch) * cos(f_TriangleCameraHeading) *
+    g_MapCamera.view.eye[AXIS_X] = (cos(f_TriangleCameraPitch) * cos(f_TriangleCameraYaw) *
                                        (g_MapCamera.view.zoom * cameraDistance)) +
         g_MapCamera.view.lookAt[AXIS_X];
-    g_MapCamera.view.eye[AXIS_Z] = (cos(f_TriangleCameraPitch) * sin(f_TriangleCameraHeading) *
+    g_MapCamera.view.eye[AXIS_Z] = (cos(f_TriangleCameraPitch) * sin(f_TriangleCameraYaw) *
                                        (g_MapCamera.view.zoom * cameraDistance)) +
         g_MapCamera.view.lookAt[AXIS_Z];
     g_MapCamera.view.eye[AXIS_Y] =
@@ -1625,10 +1625,10 @@ void UpdateRingEditor(void) {
 
     PrintDebugHex(editKind, TRIANGLE_TEXT_COLUMN, EDIT_KIND_TEXT_ROW);
     if (editKind == TRIANGLE_EDIT_MOVE) {
-        stepX = (-cos((u16)f_RingCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) -
-            (sin((u16)f_RingCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
-        stepZ = (-sin((u16)f_RingCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) +
-            (cos((u16)f_RingCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
+        stepX = (-cos((u16)f_RingCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) -
+            (sin((u16)f_RingCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
+        stepZ = (-sin((u16)f_RingCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) +
+            (cos((u16)f_RingCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
         {
             f32 scaledX = stepX * CORNER_STEP_SCALE;
             f32 scaledY = stepY * CORNER_STEP_SCALE;
@@ -1753,7 +1753,7 @@ void UpdateRingEditor(void) {
     }
 
     if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
-        f_RingCameraHeadingAngle -=
+        f_RingCameraYawAngle -=
             g_MenuControllerData[EDITOR_CONTROLLER].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
         f_RingCameraPitch -=
             g_MenuControllerData[EDITOR_CONTROLLER].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
@@ -1767,7 +1767,7 @@ void UpdateRingEditor(void) {
         f_RingCameraPitch = EDITOR_PITCH_MIN;
     }
 
-    f_RingCameraHeading = f_RingCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
+    f_RingCameraYaw = f_RingCameraYawAngle * EDITOR_ANGLE_TO_RADIANS;
 
     if ((f_LastRingEditKind != TRIANGLE_EDIT_NONE) & (editKind == TRIANGLE_EDIT_NONE)) {
         UpdateTriangleSlopes();
@@ -1779,11 +1779,11 @@ void UpdateRingEditor(void) {
     g_MapCamera.view.lookAt[AXIS_Y] = lookAtVertex->ob[AXIS_Y];
     f_LastRingEditKind = editKind;
     g_MapCamera.view.lookAt[AXIS_Z] = lookAtVertex->ob[AXIS_Z];
-    g_MapCamera.view.eye[AXIS_X] = (cos(f_RingCameraPitch) * cos(f_RingCameraHeading) *
-                                       (g_MapCamera.view.zoom * cameraDistance)) +
+    g_MapCamera.view.eye[AXIS_X] =
+        (cos(f_RingCameraPitch) * cos(f_RingCameraYaw) * (g_MapCamera.view.zoom * cameraDistance)) +
         g_MapCamera.view.lookAt[AXIS_X];
-    g_MapCamera.view.eye[AXIS_Z] = (cos(f_RingCameraPitch) * sin(f_RingCameraHeading) *
-                                       (g_MapCamera.view.zoom * cameraDistance)) +
+    g_MapCamera.view.eye[AXIS_Z] =
+        (cos(f_RingCameraPitch) * sin(f_RingCameraYaw) * (g_MapCamera.view.zoom * cameraDistance)) +
         g_MapCamera.view.lookAt[AXIS_Z];
     g_MapCamera.view.eye[AXIS_Y] =
         (sin(f_RingCameraPitch) * (g_MapCamera.view.zoom * cameraDistance)) +
@@ -1856,10 +1856,10 @@ void UpdateWallEditor(void) {
     PrintDebugText(text, WALL_TEXT_COLUMN, WALL_TEXT_ROW);
     if ((editKind == TRIANGLE_EDIT_MOVE) | (isDropping == TRUE)) {
         stepZ = stepUp;
-        stepX = (-cos((u16)f_WallCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) -
-            (sin((u16)f_WallCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
-        stepX = (-sin((u16)f_WallCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) +
-            (cos((u16)f_WallCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
+        stepX = (-cos((u16)f_WallCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) -
+            (sin((u16)f_WallCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
+        stepX = (-sin((u16)f_WallCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) +
+            (cos((u16)f_WallCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
 
         {
             f32 scaledX = stepRight * CORNER_STEP_SCALE;
@@ -2007,7 +2007,7 @@ void UpdateWallEditor(void) {
     }
 
     if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
-        f_WallCameraHeadingAngle -=
+        f_WallCameraYawAngle -=
             g_MenuControllerData[EDITOR_CONTROLLER].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
         f_WallCameraPitch -=
             g_MenuControllerData[EDITOR_CONTROLLER].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
@@ -2021,7 +2021,7 @@ void UpdateWallEditor(void) {
         f_WallCameraPitch = EDITOR_PITCH_MIN;
     }
 
-    f_WallCameraHeading = f_WallCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
+    f_WallCameraYaw = f_WallCameraYawAngle * EDITOR_ANGLE_TO_RADIANS;
 
     if ((f_LastWallEditKind != TRIANGLE_EDIT_NONE) & (editKind == TRIANGLE_EDIT_NONE)) {
         UpdateTriangleSlopes();
@@ -2033,11 +2033,11 @@ void UpdateWallEditor(void) {
     g_MapCamera.view.lookAt[AXIS_Y] = lookAtVertex->ob[AXIS_Y];
     f_LastWallEditKind = editKind;
     g_MapCamera.view.lookAt[AXIS_Z] = lookAtVertex->ob[AXIS_Z];
-    g_MapCamera.view.eye[AXIS_X] = (cos(f_WallCameraPitch) * cos(f_WallCameraHeading) *
-                                       (g_MapCamera.view.zoom * cameraDistance)) +
+    g_MapCamera.view.eye[AXIS_X] =
+        (cos(f_WallCameraPitch) * cos(f_WallCameraYaw) * (g_MapCamera.view.zoom * cameraDistance)) +
         g_MapCamera.view.lookAt[AXIS_X];
-    g_MapCamera.view.eye[AXIS_Z] = (cos(f_WallCameraPitch) * sin(f_WallCameraHeading) *
-                                       (g_MapCamera.view.zoom * cameraDistance)) +
+    g_MapCamera.view.eye[AXIS_Z] =
+        (cos(f_WallCameraPitch) * sin(f_WallCameraYaw) * (g_MapCamera.view.zoom * cameraDistance)) +
         g_MapCamera.view.lookAt[AXIS_Z];
     g_MapCamera.view.eye[AXIS_Y] =
         (sin(f_WallCameraPitch) * (g_MapCamera.view.zoom * cameraDistance)) +
@@ -2433,10 +2433,10 @@ void UpdateHeightEditor(void) {
     }
 
     if (direction != CURSOR_DIRECTION_NONE) {
-        columnStep = cos(((direction * BINARY_ANGLE_EIGHTH_TURN) + f_HeightCameraHeadingAngle) *
+        columnStep = cos(((direction * BINARY_ANGLE_EIGHTH_TURN) + f_HeightCameraYawAngle) *
                          EDITOR_ANGLE_TO_RADIANS) *
             CURSOR_STEP_LENGTH;
-        rowStep = sin(((direction * BINARY_ANGLE_EIGHTH_TURN) + f_HeightCameraHeadingAngle) *
+        rowStep = sin(((direction * BINARY_ANGLE_EIGHTH_TURN) + f_HeightCameraYawAngle) *
                       EDITOR_ANGLE_TO_RADIANS) *
             CURSOR_STEP_LENGTH;
         f_HeightCursorColumn += columnStep;
@@ -2474,7 +2474,7 @@ void UpdateHeightEditor(void) {
     }
 
     if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
-        f_HeightCameraHeadingAngle -=
+        f_HeightCameraYawAngle -=
             g_MenuControllerData[EDITOR_CONTROLLER].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
         f_HeightCameraPitch -=
             g_MenuControllerData[EDITOR_CONTROLLER].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
@@ -2497,7 +2497,7 @@ void UpdateHeightEditor(void) {
     }
 
     if (g_ControllerData[SECOND_EDITOR_CONTROLLER].button & Z_TRIG) {
-        f_HeightCameraHeadingAngle -= g_MenuControllerData[SECOND_EDITOR_CONTROLLER].stick_x /
+        f_HeightCameraYawAngle -= g_MenuControllerData[SECOND_EDITOR_CONTROLLER].stick_x /
             STICK_STEP_SIZE * HEADING_STICK_SPEED;
         f_HeightCameraPitch -= g_MenuControllerData[SECOND_EDITOR_CONTROLLER].stick_y /
             STICK_STEP_SIZE * PITCH_STICK_SPEED;
@@ -2511,7 +2511,7 @@ void UpdateHeightEditor(void) {
         f_HeightCameraPitch = EDITOR_PITCH_MIN;
     }
 
-    f_HeightCameraHeading = f_HeightCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
+    f_HeightCameraYaw = f_HeightCameraYawAngle * EDITOR_ANGLE_TO_RADIANS;
     if (f_LastHeightEditKind != HEIGHT_EDIT_NONE && editKind == HEIGHT_EDIT_NONE) {
         UpdateTriangleSlopes();
     }
@@ -2524,10 +2524,10 @@ void UpdateHeightEditor(void) {
         GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)->v.ob[AXIS_Y];
     g_MapCamera.view.lookAt[AXIS_Z] =
         GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)->v.ob[AXIS_Z];
-    g_MapCamera.view.eye[AXIS_X] = (cos(f_HeightCameraPitch) * cos(f_HeightCameraHeading) *
+    g_MapCamera.view.eye[AXIS_X] = (cos(f_HeightCameraPitch) * cos(f_HeightCameraYaw) *
                                        (g_MapCamera.view.zoom * cameraDistance)) +
         g_MapCamera.view.lookAt[AXIS_X];
-    g_MapCamera.view.eye[AXIS_Z] = (cos(f_HeightCameraPitch) * sin(f_HeightCameraHeading) *
+    g_MapCamera.view.eye[AXIS_Z] = (cos(f_HeightCameraPitch) * sin(f_HeightCameraYaw) *
                                        (g_MapCamera.view.zoom * cameraDistance)) +
         g_MapCamera.view.lookAt[AXIS_Z];
     g_MapCamera.view.eye[AXIS_Y] =
@@ -3241,13 +3241,13 @@ void UpdateTreeEditor(void) {
 
     if (!(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) &&
         *(u16 *)&g_MenuControllerData[EDITOR_CONTROLLER].stick_x != 0) {
-        s32 moveX = (-cos((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
+        s32 moveX = (-cos((u16)f_TreeCameraYawAngle * BINARY_ANGLE_TO_RADIANS) *
                         g_MenuControllerData[EDITOR_CONTROLLER].stick_y) -
-            (sin((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
+            (sin((u16)f_TreeCameraYawAngle * BINARY_ANGLE_TO_RADIANS) *
                 g_MenuControllerData[EDITOR_CONTROLLER].stick_x);
-        s32 moveZ = (-sin((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
+        s32 moveZ = (-sin((u16)f_TreeCameraYawAngle * BINARY_ANGLE_TO_RADIANS) *
                         g_MenuControllerData[EDITOR_CONTROLLER].stick_y) +
-            (cos((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
+            (cos((u16)f_TreeCameraYawAngle * BINARY_ANGLE_TO_RADIANS) *
                 g_MenuControllerData[EDITOR_CONTROLLER].stick_x);
 
         editKind = TRIANGLE_EDIT_MOVE;
@@ -3291,7 +3291,7 @@ void UpdateTreeEditor(void) {
     }
 
     if (g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) {
-        f_TreeCameraHeadingAngle -=
+        f_TreeCameraYawAngle -=
             g_MenuControllerData[EDITOR_CONTROLLER].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
         f_TreeCameraPitch -=
             g_MenuControllerData[EDITOR_CONTROLLER].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
@@ -3310,12 +3310,12 @@ void UpdateTreeEditor(void) {
     g_MapCamera.view.lookAt[AXIS_Y] = g_Billboards[f_EditedTreeIndex].y;
     f_LastTreeEditKind = editKind;
     g_MapCamera.view.lookAt[AXIS_Z] = g_Billboards[f_EditedTreeIndex].z;
-    f_TreeCameraHeading = f_TreeCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
-    g_MapCamera.view.eye[AXIS_X] = (cos(f_TreeCameraPitch) * cos(f_TreeCameraHeading) *
-                                       (g_MapCamera.view.zoom * cameraDistance)) +
+    f_TreeCameraYaw = f_TreeCameraYawAngle * EDITOR_ANGLE_TO_RADIANS;
+    g_MapCamera.view.eye[AXIS_X] =
+        (cos(f_TreeCameraPitch) * cos(f_TreeCameraYaw) * (g_MapCamera.view.zoom * cameraDistance)) +
         g_MapCamera.view.lookAt[AXIS_X];
-    g_MapCamera.view.eye[AXIS_Z] = (cos(f_TreeCameraPitch) * sin(f_TreeCameraHeading) *
-                                       (g_MapCamera.view.zoom * cameraDistance)) +
+    g_MapCamera.view.eye[AXIS_Z] =
+        (cos(f_TreeCameraPitch) * sin(f_TreeCameraYaw) * (g_MapCamera.view.zoom * cameraDistance)) +
         g_MapCamera.view.lookAt[AXIS_Z];
     g_MapCamera.view.eye[AXIS_Y] =
         (sin(f_TreeCameraPitch) * (g_MapCamera.view.zoom * cameraDistance)) +
