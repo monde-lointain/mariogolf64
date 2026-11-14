@@ -107,7 +107,6 @@
 #define AIM_CAMERA_EASE_STEP_MAX (10 * UNITS_PER_YARD)
 #define FREE_LOOK_START_DISTANCE (-0x12C00)
 #define FREE_LOOK_TURN_STEP 200
-#define TURN_RUMBLE_FREQUENCY 0x100
 #define TURN_RUMBLE_FRAME_COUNT 8
 #define AMBIENT_SOUND_INTERVAL 240
 #define AMBIENT_SOUND_CHOICES 7
@@ -2520,7 +2519,7 @@ void StartTurnRumble(s32 playerIndex) {
                 case 0:
                     nuContRmbStart(
                         g_PlayerControllerPorts[controllerIndex],
-                        TURN_RUMBLE_FREQUENCY,
+                        RUMBLE_FREQUENCY,
                         TURN_RUMBLE_FRAME_COUNT
                     );
                     break;

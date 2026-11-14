@@ -8,6 +8,8 @@
 #define BUTTON_REPEAT_DELAY_FIRST 15
 #define BUTTON_REPEAT_DELAY_NEXT 3
 
+#define RUMBLE_FREQUENCY 0x100
+
 // The debug editors read their controls from these ports.
 #define EDITOR_CONTROLLER 0
 #define OPTION_CONTROLLER 1
