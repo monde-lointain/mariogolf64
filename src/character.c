@@ -1137,11 +1137,11 @@ void SetCharacterAnimation(u32 slotIndex, s32 id) {
     }
 }
 
-void SetPlaysRandomTextureAnimation(u32 slotIndex, s32 value) {
+void SetPlaysRandomTextureAnimation(u32 slotIndex, s32 playsRandomTextureAnimation) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
-        slot->playsRandomTextureAnimation = value;
+        slot->playsRandomTextureAnimation = playsRandomTextureAnimation;
     }
 }
 
@@ -1172,43 +1172,43 @@ void SetAnimationSpeed(u32 slotIndex, f32 speed) {
     }
 }
 
-void SetAnimationLooping(u32 slotIndex, s32 value) {
+void SetAnimationLooping(u32 slotIndex, s32 isLooping) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
-        slot->isLooping = value;
+        slot->isLooping = isLooping;
     }
 }
 
-void SetNextAnimation(u32 slotIndex, s32 value) {
+void SetNextAnimation(u32 slotIndex, s32 nextAnimationId) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
-        slot->nextAnimationId = value;
+        slot->nextAnimationId = nextAnimationId;
     }
 }
 
-void SetCharacterTranslucent(u32 slotIndex, s32 value) {
+void SetCharacterTranslucent(u32 slotIndex, s32 isTranslucent) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
-        slot->isTranslucent = value;
+        slot->isTranslucent = isTranslucent;
     }
 }
 
-void SetCharacterLighting(u32 slotIndex, s32 value) {
+void SetCharacterLighting(u32 slotIndex, s32 lighting) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
-        slot->lighting = value;
+        slot->lighting = lighting;
     }
 }
 
-void SetCharacterSlotAlpha(u32 slotIndex, s32 value) {
+void SetCharacterSlotAlpha(u32 slotIndex, s32 alpha) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
-        slot->alpha = value;
+        slot->alpha = alpha;
     }
 }
 
@@ -1253,11 +1253,11 @@ s32 GetAnimationFrameCount(u32 slotIndex, s32 id) {
     return -1;
 }
 
-void SetCharacterFrontCulling(u32 slotIndex, s32 value) {
+void SetCharacterFrontCulling(u32 slotIndex, s32 usesFrontCulling) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
-        slot->usesFrontCulling = value;
+        slot->usesFrontCulling = usesFrontCulling;
     }
 }
 
