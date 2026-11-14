@@ -521,7 +521,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
 
     if (!g_SimulatedShot.startsOnGreen) {
-        if (earlierFlightCount != 0 && g_ContactEffect == CONTACT_EFFECT_NONE) {
+        if (earlierFlightCount != 0 && g_ContactEffectAge == NO_CONTACT_EFFECT_AGE) {
             g_RoundHud.isBallTrailShown = TRUE;
         }
         else {

@@ -131,7 +131,7 @@ void ResetShotEffects(void) {
 
     f_ImpactFrameCount = 0;
     g_ImpactFlashState = IMPACT_FLASH_NONE;
-    g_ContactEffect = CONTACT_EFFECT_NONE;
+    g_ContactEffectAge = NO_CONTACT_EFFECT_AGE;
     for (i = 0; i != SPARK_BURST_COUNT; i++) {
         f_SparkBurstAges[i] = NO_SPARK_BURST;
     }

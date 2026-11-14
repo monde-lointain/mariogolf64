@@ -432,7 +432,7 @@ static Vtx f_ContactVertices[2] = {
     {{{-12, 0, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
     {{{12, 0, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
 };
-ContactEffect g_ContactEffect = CONTACT_EFFECT_NONE;
+ContactEffect g_ContactEffectAge = NO_CONTACT_EFFECT_AGE;
 static Boolean f_IsContactEffectFading = FALSE;
 static ContactStyle f_ContactStyle = 0;
 #define CONTACT_RIBBON_FIRST_SEGMENTS 16
@@ -2717,7 +2717,7 @@ void DrawToadMovie(Gfx **displayListHead) {
 }
 
 Boolean IsContactEffectShown(void) {
-    return g_ContactEffect != CONTACT_EFFECT_NONE;
+    return g_ContactEffectAge != NO_CONTACT_EFFECT_AGE;
 }
 
 ContactStyle GetContactStyle(Player *player) {
@@ -2782,7 +2782,7 @@ void StartContactEffect(ContactEffect effect) {
     s32 matrixIndex;
 
     if (effect == CONTACT_EFFECT_NONE) {
-        g_ContactEffect = effect;
+        g_ContactEffectAge = NO_CONTACT_EFFECT_AGE;
     }
     else if (IsShownContactEffect(effect)) {
         for (matrixIndex = 0; matrixIndex != CONTACT_MATRIX_COUNT; matrixIndex++) {
@@ -2795,7 +2795,7 @@ void StartContactEffect(ContactEffect effect) {
             );
         }
 
-        g_ContactEffect = 0;
+        g_ContactEffectAge = 0;
         f_IsContactEffectFading = FALSE;
         f_ContactVertices[0].v.ob[AXIS_Y] = 0;
         f_ContactVertices[1].v.ob[AXIS_Y] = 0;
@@ -2902,6 +2902,7 @@ void LoadContactImages(Player *player) {
     }
 }
 
+#define CONTACT_FIRST_AGE 1
 #define CONTACT_AGE_MAX 255
 #define CONTACT_FADE_STEP 4
 #define CONTACT_ALPHA_MIN 4
@@ -3010,18 +3011,18 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
     s32 sharedIndex;
     s32 pass;
 
-    if (g_ContactEffect == CONTACT_EFFECT_NONE) {
+    if (g_ContactEffectAge == NO_CONTACT_EFFECT_AGE) {
         return;
     }
 
     if (f_IsContactEffectFading == TRUE) {
-        g_ContactEffect += CONTACT_FADE_STEP;
-        if (g_ContactEffect > CONTACT_AGE_MAX) {
-            g_ContactEffect = CONTACT_AGE_MAX;
+        g_ContactEffectAge += CONTACT_FADE_STEP;
+        if (g_ContactEffectAge > CONTACT_AGE_MAX) {
+            g_ContactEffectAge = CONTACT_AGE_MAX;
         }
     }
-    else if (g_ContactEffect < CONTACT_AGE_MAX) {
-        g_ContactEffect++;
+    else if (g_ContactEffectAge < CONTACT_AGE_MAX) {
+        g_ContactEffectAge++;
     }
 
     if (g_IsCupViewShown == TRUE) {
@@ -3029,58 +3030,58 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
     }
 
     if (f_ContactStyle == CONTACT_STYLE_WARIO || f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
-        if (g_ContactEffect < CONTACT_WARIO_HOLD_AGE) {
+        if (g_ContactEffectAge < CONTACT_WARIO_HOLD_AGE) {
             alpha = CONTACT_WARIO_ALPHA;
         }
         else {
             alpha = CONTACT_WARIO_ALPHA -
-                ((g_ContactEffect - CONTACT_WARIO_HOLD_AGE) * CONTACT_WARIO_FADE_PER_AGE);
+                ((g_ContactEffectAge - CONTACT_WARIO_HOLD_AGE) * CONTACT_WARIO_FADE_PER_AGE);
         }
     }
     else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
-        alpha = CONTACT_WARIO_ALPHA - g_ContactEffect;
+        alpha = CONTACT_WARIO_ALPHA - g_ContactEffectAge;
     }
     else if (f_ContactStyle == CONTACT_STYLE_RAINBOW) {
-        if (g_ContactEffect < CONTACT_HOLD_AGE) {
+        if (g_ContactEffectAge < CONTACT_HOLD_AGE) {
             alpha = CONTACT_CHARACTER_ALPHA;
         }
         else {
             alpha = CONTACT_CHARACTER_ALPHA -
-                ((g_ContactEffect - CONTACT_HOLD_AGE) * CONTACT_CHARACTER_FADE_PER_AGE);
+                ((g_ContactEffectAge - CONTACT_HOLD_AGE) * CONTACT_CHARACTER_FADE_PER_AGE);
         }
     }
     else if (f_ContactStyle == CONTACT_STYLE_PLAIN) {
-        if (g_ContactEffect < CONTACT_HOLD_AGE) {
+        if (g_ContactEffectAge < CONTACT_HOLD_AGE) {
             alpha = CONTACT_CHARACTER_ALPHA;
         }
         else {
             alpha = CONTACT_CHARACTER_ALPHA -
-                ((g_ContactEffect - CONTACT_HOLD_AGE) * CONTACT_CHARACTER_FADE_PER_AGE);
+                ((g_ContactEffectAge - CONTACT_HOLD_AGE) * CONTACT_CHARACTER_FADE_PER_AGE);
         }
     }
     else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
-        if (g_ContactEffect < CONTACT_HOLD_AGE) {
+        if (g_ContactEffectAge < CONTACT_HOLD_AGE) {
             alpha = CONTACT_CHARACTER_ALPHA;
         }
         else {
             alpha = CONTACT_CHARACTER_ALPHA -
-                ((g_ContactEffect - CONTACT_HOLD_AGE) * CONTACT_CHARACTER_FADE_PER_AGE);
+                ((g_ContactEffectAge - CONTACT_HOLD_AGE) * CONTACT_CHARACTER_FADE_PER_AGE);
         }
     }
-    else if (g_ContactEffect < CONTACT_HOLD_AGE) {
+    else if (g_ContactEffectAge < CONTACT_HOLD_AGE) {
         alpha = CONTACT_SHARED_ALPHA;
     }
     else {
         alpha = CONTACT_SHARED_ALPHA -
-            (CONTACT_SHARED_FADE_PER_AGE * (g_ContactEffect - CONTACT_HOLD_AGE));
+            (CONTACT_SHARED_FADE_PER_AGE * (g_ContactEffectAge - CONTACT_HOLD_AGE));
     }
 
     if (alpha < CONTACT_ALPHA_MIN) {
-        g_ContactEffect = CONTACT_EFFECT_NONE;
+        g_ContactEffectAge = NO_CONTACT_EFFECT_AGE;
     }
 
     if (alpha > 0) {
-        if (g_ContactEffect == 1) {
+        if (g_ContactEffectAge == CONTACT_FIRST_AGE) {
             f_ContactTrailHead = 0;
             for (sharedIndex = 0; sharedIndex != CONTACT_MATRIX_COUNT; sharedIndex++) {
                 guTranslate(
