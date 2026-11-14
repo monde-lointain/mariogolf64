@@ -2641,7 +2641,7 @@ void UpdateModeSelect(void) {
     s32 i;
     u32 step;
     s16 gridMark;
-    s32 mode;
+    s32 iconIndex;
     s32 chosenIcon;
 
     if (isDone != TRUE || GetWipeKind() != WIPE_NONE) {
@@ -2676,9 +2676,9 @@ void UpdateModeSelect(void) {
         f_BetSettingsSlide = 0;
         f_HandicapsSlide = 0;
         g_GameState.isMiniGolf = FALSE;
-        mode = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
+        iconIndex = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
         g_GameState.roundSeed = rand();
-        switch (mode) {
+        switch (iconIndex) {
             case MODE_ICON_TOURNAMENT:
                 PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
                 StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
