@@ -2842,8 +2842,8 @@ ClubType ChooseClubForDistance(s32 distance) {
 }
 
 // Returns how far apart two binary angles are, up to half a turn
-s32 GetAngleDifference(s32 angle, s32 otherAngle) {
-    s32 difference = (s16)(angle - otherAngle);
+WideBinaryAngle GetAngleDifference(WideBinaryAngle angle, WideBinaryAngle otherAngle) {
+    WideBinaryAngle difference = (s16)(angle - otherAngle);
 
     if (difference < 0) {
         difference = -difference;
@@ -2870,7 +2870,7 @@ Boolean RollClubCategoryChance(ClubChanceSet chanceSet);
 s32 ChooseShotOffset(void) {
     WindPlay windPlay;
     WideBinaryAngle aimYaw;
-    s32 windDirection;
+    WideBinaryAngle windDirection;
 
     switch (GetSurfaceTraits(f_Shot.surface)->kind) {
         case SURFACE_KIND_BUNKER:

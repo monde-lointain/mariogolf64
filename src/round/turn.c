@@ -1409,9 +1409,9 @@ void TurnAim(Boolean turnsLookBackHeading) {
 // it has settled there for a while.
 Boolean UpdateAimControls(void) {
     Vec3 toCup;
-    s32 headingLeft;
-    s32 step;
-    s32 turn;
+    WideBinaryAngle headingLeft;
+    WideBinaryAngle step;
+    WideBinaryAngle turn;
     WideBinaryAngle heading;
 
     if (f_ShotSource != SHOT_SOURCE_PLAYER) {

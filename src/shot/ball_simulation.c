@@ -2303,7 +2303,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, LaunchPurpose purpose, Shot
     s32 sideSign;
     s32 slopeSpin;
     s32 rumbles;
-    s16 crossSlope;
+    SignedBinaryAngle crossSlope;
     s32 crossSlopeSize;
     WideBinaryAngle yaw;
     Radians pitch;
