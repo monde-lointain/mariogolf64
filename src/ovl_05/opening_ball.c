@@ -643,17 +643,17 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                     }
 
                     {
-                        f32 rest = PIN_HIT_STEP_SHARE - pinFraction;
+                        f32 remainingShare = PIN_HIT_STEP_SHARE - pinFraction;
 
                         simulation->velocity[AXIS_X] = pinVelocity[AXIS_X];
                         simulation->velocity[AXIS_Z] = pinVelocity[AXIS_Z];
                         stepFlags |= STEP_FLAG_PIN_HIT;
-                        simulation->position[AXIS_X] =
-                            simulation->position[AXIS_X] + (rest * simulation->velocity[AXIS_X]);
-                        simulation->position[AXIS_Y] =
-                            simulation->position[AXIS_Y] + (rest * simulation->velocity[AXIS_Y]);
-                        simulation->position[AXIS_Z] =
-                            simulation->position[AXIS_Z] + (rest * simulation->velocity[AXIS_Z]);
+                        simulation->position[AXIS_X] = simulation->position[AXIS_X] +
+                            (remainingShare * simulation->velocity[AXIS_X]);
+                        simulation->position[AXIS_Y] = simulation->position[AXIS_Y] +
+                            (remainingShare * simulation->velocity[AXIS_Y]);
+                        simulation->position[AXIS_Z] = simulation->position[AXIS_Z] +
+                            (remainingShare * simulation->velocity[AXIS_Z]);
                     }
 
                     MoveBallToCupEdge(simulation);
@@ -776,23 +776,24 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
 
                                 if (!((f32)speed >= OPENING_LIP_OUT_SPEED_MAX) &&
                                     simulation->state == BALL_STATE_ROLLING) {
-                                    f32 keep = speed * (1.0f / LIP_OUT_FULL_SPEED);
+                                    f32 keptFraction = speed * (1.0f / LIP_OUT_FULL_SPEED);
                                     BallSpeed fallSpeed;
 
-                                    if (keep < 0.0f) {
-                                        keep = 0.0f;
+                                    if (keptFraction < 0.0f) {
+                                        keptFraction = 0.0f;
                                     }
 
-                                    if (keep > 1.0f) {
-                                        keep = 1.0f;
+                                    if (keptFraction > 1.0f) {
+                                        keptFraction = 1.0f;
                                     }
 
-                                    fallSpeed = -speed * sqrtf(1.0f - (keep * keep));
+                                    fallSpeed =
+                                        -speed * sqrtf(1.0f - (keptFraction * keptFraction));
                                     simulation->state = BALL_STATE_FLYING;
                                     simulation->velocity[AXIS_X] =
-                                        simulation->velocity[AXIS_X] * keep;
+                                        simulation->velocity[AXIS_X] * keptFraction;
                                     simulation->velocity[AXIS_Z] =
-                                        simulation->velocity[AXIS_Z] * keep;
+                                        simulation->velocity[AXIS_Z] * keptFraction;
                                     simulation->velocity[AXIS_Y] = fallSpeed;
                                     simulation->spinHeading = atan2(
                                         simulation->velocity[AXIS_Z],
@@ -1029,7 +1030,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             f32 softness;
             f32 bounce;
             f32 push;
-            f32 keep;
+            f32 keptFraction;
 
             simulation->bounceCount++;
             GetTrianglePlane(&triangle, &plane);
@@ -1119,11 +1120,11 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
 
             softness =
                 THOUSANDTHS_PER_ONE - GetOpeningSurfaceTraits(simulation->surface)->bounciness;
-            keep = ((f32)THOUSANDTHS_PER_ONE -
-                       (SOFTNESS_SPEED_LOSS_SCALE * softness * steepness * steepness)) *
+            keptFraction = ((f32)THOUSANDTHS_PER_ONE -
+                               (SOFTNESS_SPEED_LOSS_SCALE * softness * steepness * steepness)) *
                 ONE_PER_THOUSANDTH;
             if (simulation->stepCount < OPENING_EARLY_BOUNCE_STEP_COUNT) {
-                keep *= EARLY_BOUNCE_SPEED_SCALE;
+                keptFraction *= EARLY_BOUNCE_SPEED_SCALE;
             }
 
             bounce = 1.0f - (softness * steepness * ONE_PER_THOUSANDTH);
@@ -1131,9 +1132,9 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             bounced[AXIS_X] = simulation->velocity[AXIS_X] - (plane.normal[AXIS_X] * push);
             bounced[AXIS_Y] = simulation->velocity[AXIS_Y] - (plane.normal[AXIS_Y] * push);
             bounced[AXIS_Z] = simulation->velocity[AXIS_Z] - (plane.normal[AXIS_Z] * push);
-            simulation->velocity[AXIS_X] = bounced[AXIS_X] * keep;
-            simulation->velocity[AXIS_Y] = bounced[AXIS_Y] * keep;
-            simulation->velocity[AXIS_Z] = bounced[AXIS_Z] * keep;
+            simulation->velocity[AXIS_X] = bounced[AXIS_X] * keptFraction;
+            simulation->velocity[AXIS_Y] = bounced[AXIS_Y] * keptFraction;
+            simulation->velocity[AXIS_Z] = bounced[AXIS_Z] * keptFraction;
             simulation->lastBounceStep = simulation->stepCount;
             if (simulation->state == BALL_STATE_FLYING) {
                 s32 spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
@@ -1321,7 +1322,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                 simulation->spinSpeed = 0;
             }
             else {
-                f32 keep = 1.0f - spin;
+                f32 keptFraction = 1.0f - spin;
                 s32 bounced[3];
                 f32 push;
                 s32 spinVelocityX;
@@ -1332,16 +1333,16 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                 f32 driftLimit;
                 f32 drift;
 
-                if (keep <= BOUNCE_SPEED_KEPT_MIN) {
-                    keep = BOUNCE_SPEED_KEPT_MIN;
+                if (keptFraction <= BOUNCE_SPEED_KEPT_MIN) {
+                    keptFraction = BOUNCE_SPEED_KEPT_MIN;
                 }
 
-                if (keep > 1.0f) {
-                    keep = 1.0f;
+                if (keptFraction > 1.0f) {
+                    keptFraction = 1.0f;
                 }
 
                 if (simulation->stepCount < EARLY_BOUNCE_STEP_COUNT && !g_GameState.isMiniGolf) {
-                    keep *= EARLY_BOUNCE_SPEED_SCALE;
+                    keptFraction *= EARLY_BOUNCE_SPEED_SCALE;
                     osSyncPrintf("Ouch! %d, %d\n", startY, simulation->position[AXIS_Y]);
                 }
 
@@ -1349,9 +1350,9 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                 bounced[AXIS_X] = simulation->velocity[AXIS_X] - (plane.normal[AXIS_X] * push);
                 bounced[AXIS_Y] = simulation->velocity[AXIS_Y] - (plane.normal[AXIS_Y] * push);
                 bounced[AXIS_Z] = simulation->velocity[AXIS_Z] - (plane.normal[AXIS_Z] * push);
-                simulation->velocity[AXIS_X] = bounced[AXIS_X] * keep;
-                simulation->velocity[AXIS_Y] = bounced[AXIS_Y] * keep;
-                simulation->velocity[AXIS_Z] = bounced[AXIS_Z] * keep;
+                simulation->velocity[AXIS_X] = bounced[AXIS_X] * keptFraction;
+                simulation->velocity[AXIS_Y] = bounced[AXIS_Y] * keptFraction;
+                simulation->velocity[AXIS_Z] = bounced[AXIS_Z] * keptFraction;
                 simulation->lastBounceStep = simulation->stepCount;
                 spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
                 spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
@@ -1731,18 +1732,20 @@ ROLLED:
 SETTLE:
 
         {
-            s32 floor;
+            s32 floorHeight;
 
             if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
-                floor = 0;
+                floorHeight = 0;
             }
             else if (simulation->state == BALL_STATE_IN_WATER) {
-                floor = GetGroundHeight(simulation->position[AXIS_X], simulation->position[AXIS_Z]);
+                floorHeight =
+                    GetGroundHeight(simulation->position[AXIS_X], simulation->position[AXIS_Z]);
             }
             else {
-                floor = GetGroundHeight(simulation->position[AXIS_X], simulation->position[AXIS_Z]);
+                floorHeight =
+                    GetGroundHeight(simulation->position[AXIS_X], simulation->position[AXIS_Z]);
                 if (simulation->state == BALL_STATE_IN_CUP || simulation->isHoledOut) {
-                    floor += IN_CUP_FLOOR_DEPTH;
+                    floorHeight += IN_CUP_FLOOR_DEPTH;
                 }
                 else if (simulation->state == BALL_STATE_ROLLING) {
                     s32 cupOffsetX = simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X];
@@ -1755,16 +1758,17 @@ SETTLE:
                             f32 cupDistance = (s32)IntLength2D(cupOffsetX, cupOffsetZ);
 
                             if (cupDistance < CUP_DROP_RADIUS) {
-                                floor += CUP_DEPTH;
+                                floorHeight += CUP_DEPTH;
                             }
                             else if (cupDistance < CUP_RIM_OUTER_RADIUS) {
                                 f32 rimDistance = CUP_RIM_OUTER_RADIUS - cupDistance;
-                                f32 rest = (CUP_RIM_CURVE_RADIUS * CUP_RIM_CURVE_RADIUS) -
+                                f32 remainingShare = (CUP_RIM_CURVE_RADIUS * CUP_RIM_CURVE_RADIUS) -
                                     (rimDistance * rimDistance);
 
-                                if (rest > 0.0f) {
-                                    floor = floor +
-                                        ((CUP_RIM_CURVE_RADIUS - sqrtf(rest)) * CUP_RIM_SINK_SCALE);
+                                if (remainingShare > 0.0f) {
+                                    floorHeight = floorHeight +
+                                        ((CUP_RIM_CURVE_RADIUS - sqrtf(remainingShare)) *
+                                            CUP_RIM_SINK_SCALE);
                                 }
                             }
                         }
@@ -1772,8 +1776,8 @@ SETTLE:
                 }
             }
 
-            if (floor < simulation->position[AXIS_Y]) {
-                simulation->position[AXIS_Y] = floor;
+            if (floorHeight < simulation->position[AXIS_Y]) {
+                simulation->position[AXIS_Y] = floorHeight;
             }
 
             if (simulation->position[AXIS_Y] < -BALL_ALTITUDE_MAX) {
