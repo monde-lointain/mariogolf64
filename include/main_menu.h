@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "character.h"
 #include "language.h"
+#include "menu.h"
 #include "player.h"
 
 #define COURSE_SELECT_LAYOUT (*(u8 *)&g_MapCamera.mode)
@@ -39,7 +40,7 @@ typedef s32 CourseSelectLayout;
 #define CAROUSEL_BOB_PHASE_STEP 0.1f
 #define CAROUSEL_BOB_HEIGHT 8.0f
 
-extern ImageAsset *g_MenuLabelImages[2];
+extern ImageAsset *g_MenuLabelImages[MENU_IMAGE_BUFFER_COUNT];
 extern s16 g_ChosenLabelGrowth;
 extern Boolean g_IsHoleShownInMenuInset;
 

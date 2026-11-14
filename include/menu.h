@@ -93,6 +93,11 @@ extern ImageAsset *g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
 extern ImageAsset *g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
 
 #define MINI_GOLF_DISC_IMAGE_COUNT 2
+// The menus double-buffer their boards, labels, titles and trophies so
+// that one image can load while the other shows.
+#define MENU_IMAGE_BUFFER_COUNT 2
+// The course icons, or a player count's first mode icons.
+#define MENU_ICON_COUNT 7
 #define MINI_GOLF_TURN_FRAME_COUNT 5
 #define MINI_GOLF_FACING_FRAME 2
 extern AssetId g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD * MINI_GOLF_DISC_IMAGE_COUNT]
@@ -293,17 +298,17 @@ extern s32 g_ClubTournamentNameIndex;
 extern s32 g_ClubTournamentNumber;
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 extern s16 g_LastMenuScreen;
-extern ImageAsset *g_MenuIconImages[7];
+extern ImageAsset *g_MenuIconImages[MENU_ICON_COUNT];
 #define MENU_ICON_IMAGE_PAIRS ((void *(*)[MINI_GOLF_DISC_IMAGE_COUNT])g_MenuIconImages)
-extern ImageAsset *g_MenuBoardImages[2];
-extern ImageAsset *g_MenuTitleImages[2];
+extern ImageAsset *g_MenuBoardImages[MENU_IMAGE_BUFFER_COUNT];
+extern ImageAsset *g_MenuTitleImages[MENU_IMAGE_BUFFER_COUNT];
 extern ImageAsset *g_MenuWideSpareImage;
 extern ImageAsset *g_SpinningBadgeImage;
-extern ImageAsset *g_CourseTrophyImages[2];
-extern ImageAsset *g_MiniGolfDiscImages[2];
+extern ImageAsset *g_CourseTrophyImages[MENU_IMAGE_BUFFER_COUNT];
+extern ImageAsset *g_MiniGolfDiscImages[MINI_GOLF_DISC_IMAGE_COUNT];
 extern ImageAsset *g_HoleBadgeImages;
 extern ImageAsset *g_BrickWallImage;
-extern ImageAsset *g_ModeIconImages[7];
+extern ImageAsset *g_ModeIconImages[MENU_ICON_COUNT];
 
 extern u8 g_UnreadMenuBuffer[0x1218];
 
