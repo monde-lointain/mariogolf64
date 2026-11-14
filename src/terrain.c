@@ -1660,8 +1660,8 @@ void UpdateDebugScenes(void) {
             ToggleGroundTileBorders();
         }
 
-        g_MapCamera.view.eye[0] = f_MapOverviewControls.cameraX * MAP_OVERVIEW_CAMERA_SCALE;
-        g_MapCamera.view.eye[2] = f_MapOverviewControls.cameraZ * MAP_OVERVIEW_CAMERA_SCALE;
+        g_MapCamera.view.eye[AXIS_X] = f_MapOverviewControls.cameraX * MAP_OVERVIEW_CAMERA_SCALE;
+        g_MapCamera.view.eye[AXIS_Z] = f_MapOverviewControls.cameraZ * MAP_OVERVIEW_CAMERA_SCALE;
     }
 
     if (g_Scene == SCENE_HEIGHTS) {

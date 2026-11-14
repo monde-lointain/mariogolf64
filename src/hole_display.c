@@ -2152,9 +2152,9 @@ void UpdateSky(CameraView *view, s32 viewIndex) {
         BlendSkyColors();
     }
 
-    direction[AXIS_X] = view->lookAt[0] - view->eye[0];
-    direction[AXIS_Y] = view->lookAt[1] - view->eye[1];
-    direction[AXIS_Z] = view->lookAt[2] - view->eye[2];
+    direction[AXIS_X] = view->lookAt[AXIS_X] - view->eye[AXIS_X];
+    direction[AXIS_Y] = view->lookAt[AXIS_Y] - view->eye[AXIS_Y];
+    direction[AXIS_Z] = view->lookAt[AXIS_Z] - view->eye[AXIS_Z];
     vertices = f_SkyVertices[g_MatrixBufferIndex + (viewIndex * MATRIX_BUFFER_COUNT)];
     g_SkyState.yaws[viewIndex] = atan2(direction[AXIS_X], direction[AXIS_Z]);
     g_SkyState.pitches[viewIndex] = -atan2(
@@ -2169,21 +2169,21 @@ void UpdateSky(CameraView *view, s32 viewIndex) {
         g_SkyState.pitches[viewIndex] = SKY_PITCH_LIMIT;
     }
 
-    slope = (view->lookAt[1] - view->eye[1]) *
+    slope = (view->lookAt[AXIS_Y] - view->eye[AXIS_Y]) *
         (SKY_SLOPE_DISTANCE /
             sqrtf(
                 (direction[AXIS_X] * direction[AXIS_X]) + (direction[AXIS_Z] * direction[AXIS_Z])
             ));
     pitchScale = SKY_REFERENCE_FIELD_OF_VIEW / view->fieldOfView * SCREEN_HEIGHT;
     g_SkyState.horizonLevels[viewIndex] =
-        (-g_SkyState.pitches[viewIndex] * pitchScale) + (view->eye[1] * SKY_EYE_HEIGHT_SCALE);
+        (-g_SkyState.pitches[viewIndex] * pitchScale) + (view->eye[AXIS_Y] * SKY_EYE_HEIGHT_SCALE);
     if (g_SkyState.horizonLevels[viewIndex] < SKY_HORIZON_LEVEL_MIN) {
         g_SkyState.horizonLevels[viewIndex] = SKY_HORIZON_LEVEL_MIN;
     }
 
     g_SkyState.screenHeights[viewIndex] = SCREEN_HEIGHT;
     g_SkyState.lookAtLevels[viewIndex] = g_SkyState.horizonLevels[viewIndex] -
-        (((view->lookAt[1] * slope) - view->eye[1]) * SKY_EYE_HEIGHT_SCALE);
+        (((view->lookAt[AXIS_Y] * slope) - view->eye[AXIS_Y]) * SKY_EYE_HEIGHT_SCALE);
 
     if (IsGameFlagSet(GAME_FLAG_CYCLE_SKY_CONDITIONS)) {
         if (g_ControllerStates[0].pressedButtons & U_CBUTTONS) {
@@ -2716,7 +2716,7 @@ void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetColorDither(gfx++, G_CD_BAYER);
-    DrawSky(&gfx, view->eye[1], 1, cameraIndex);
+    DrawSky(&gfx, view->eye[AXIS_Y], 1, cameraIndex);
     isNibbleImage = FALSE;
     gDPPipeSync(gfx++);
     gDPSetColorDither(gfx++, G_CD_DISABLE);

@@ -296,12 +296,12 @@ FILE_STATIC Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH];
 #define START_INSET_HEIGHT 64
 
 void StartGame(void) {
-    g_MapCamera.view.eye[0] = 0.0f;
-    g_MapCamera.view.eye[1] = 0.0f;
-    g_MapCamera.view.eye[2] = 0.0f;
-    g_MapCamera.view.lookAt[0] = 0.0f;
-    g_MapCamera.view.lookAt[1] = 0.0f;
-    g_MapCamera.view.lookAt[2] = 1.0f;
+    g_MapCamera.view.eye[AXIS_X] = 0.0f;
+    g_MapCamera.view.eye[AXIS_Y] = 0.0f;
+    g_MapCamera.view.eye[AXIS_Z] = 0.0f;
+    g_MapCamera.view.lookAt[AXIS_X] = 0.0f;
+    g_MapCamera.view.lookAt[AXIS_Y] = 0.0f;
+    g_MapCamera.view.lookAt[AXIS_Z] = 1.0f;
     g_MapCamera.view.heading = 0.0f;
     g_MapCamera.view.scissorX = SCREEN_BORDER;
     g_MapCamera.view.scissorY = SCREEN_BORDER;
@@ -312,12 +312,12 @@ void StartGame(void) {
     g_MapCamera.view.viewportCenterX = SCREEN_WIDTH;
     g_MapCamera.view.viewportCenterY = SCREEN_HEIGHT;
     g_MapCamera.view.zoom = 1.0f;
-    g_SpareCameraView.eye[0] = 0.0f;
-    g_SpareCameraView.eye[1] = 0.0f;
-    g_SpareCameraView.eye[2] = 0.0f;
-    g_SpareCameraView.lookAt[0] = 0.0f;
-    g_SpareCameraView.lookAt[1] = 0.0f;
-    g_SpareCameraView.lookAt[2] = 1.0f;
+    g_SpareCameraView.eye[AXIS_X] = 0.0f;
+    g_SpareCameraView.eye[AXIS_Y] = 0.0f;
+    g_SpareCameraView.eye[AXIS_Z] = 0.0f;
+    g_SpareCameraView.lookAt[AXIS_X] = 0.0f;
+    g_SpareCameraView.lookAt[AXIS_Y] = 0.0f;
+    g_SpareCameraView.lookAt[AXIS_Z] = 1.0f;
     g_SpareCameraView.heading = 0.0f;
     g_SpareCameraView.scissorX = SPARE_VIEW_LEFT;
     g_SpareCameraView.scissorY = SPARE_VIEW_TOP;
@@ -329,12 +329,12 @@ void StartGame(void) {
     g_SpareCameraView.viewportCenterY = ViewportCenter(SPARE_VIEW_TOP, SPARE_VIEW_HEIGHT);
     g_SpareCameraView.zoom = 0.5f;
     g_Cameras[MAIN_CAMERA].mode = CAMERA_MODE_BEHIND_GOLFER;
-    g_Cameras[MAIN_CAMERA].view.eye[0] = 0.0f;
-    g_Cameras[MAIN_CAMERA].view.eye[1] = 0.0f;
-    g_Cameras[MAIN_CAMERA].view.eye[2] = 0.0f;
-    g_Cameras[MAIN_CAMERA].view.lookAt[0] = 0.0f;
-    g_Cameras[MAIN_CAMERA].view.lookAt[1] = 0.0f;
-    g_Cameras[MAIN_CAMERA].view.lookAt[2] = -100.0f;
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = -100.0f;
     g_Cameras[MAIN_CAMERA].view.scissorX = SCREEN_BORDER;
     g_Cameras[MAIN_CAMERA].view.scissorY = SCREEN_BORDER;
     g_Cameras[MAIN_CAMERA].view.scissorWidth = SCREEN_WIDTH - (2 * SCREEN_BORDER);
@@ -347,12 +347,12 @@ void StartGame(void) {
     g_Cameras[MAIN_CAMERA].view.drawFlags = CAMERA_DRAW_SCENE;
     g_Cameras[MAIN_CAMERA].view.fieldOfView = 45.0f;
     g_Cameras[INSET_CAMERA].mode = CAMERA_MODE_BEHIND_GOLFER;
-    g_Cameras[INSET_CAMERA].view.eye[0] = 0.0f;
-    g_Cameras[INSET_CAMERA].view.eye[1] = 0.0f;
-    g_Cameras[INSET_CAMERA].view.eye[2] = 0.0f;
-    g_Cameras[INSET_CAMERA].view.lookAt[0] = 0.0f;
-    g_Cameras[INSET_CAMERA].view.lookAt[1] = 0.0f;
-    g_Cameras[INSET_CAMERA].view.lookAt[2] = -100.0f;
+    g_Cameras[INSET_CAMERA].view.eye[AXIS_X] = 0.0f;
+    g_Cameras[INSET_CAMERA].view.eye[AXIS_Y] = 0.0f;
+    g_Cameras[INSET_CAMERA].view.eye[AXIS_Z] = 0.0f;
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] = 0.0f;
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] = 0.0f;
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] = -100.0f;
     g_Cameras[INSET_CAMERA].view.scissorX = START_INSET_LEFT;
     g_Cameras[INSET_CAMERA].view.scissorY = START_INSET_TOP;
     g_Cameras[INSET_CAMERA].view.scissorWidth = START_INSET_WIDTH;
@@ -1772,12 +1772,12 @@ s32 DrawGame(void) {
 
                 guLookAt(
                     &matrices->viewing,
-                    g_MapCamera.view.eye[0],
-                    g_MapCamera.view.eye[1],
-                    g_MapCamera.view.eye[2],
-                    g_MapCamera.view.lookAt[0],
-                    g_MapCamera.view.lookAt[1],
-                    g_MapCamera.view.lookAt[2],
+                    g_MapCamera.view.eye[AXIS_X],
+                    g_MapCamera.view.eye[AXIS_Y],
+                    g_MapCamera.view.eye[AXIS_Z],
+                    g_MapCamera.view.lookAt[AXIS_X],
+                    g_MapCamera.view.lookAt[AXIS_Y],
+                    g_MapCamera.view.lookAt[AXIS_Z],
                     0.0f,
                     -1.0f,
                     0.0f
@@ -1785,16 +1785,16 @@ s32 DrawGame(void) {
                 guAlign(
                     &matrices->billboard,
                     0.0f,
-                    g_MapCamera.view.lookAt[0] - g_MapCamera.view.eye[0],
-                    g_MapCamera.view.lookAt[1] - g_MapCamera.view.eye[1],
-                    g_MapCamera.view.lookAt[2] - g_MapCamera.view.eye[2]
+                    g_MapCamera.view.lookAt[AXIS_X] - g_MapCamera.view.eye[AXIS_X],
+                    g_MapCamera.view.lookAt[AXIS_Y] - g_MapCamera.view.eye[AXIS_Y],
+                    g_MapCamera.view.lookAt[AXIS_Z] - g_MapCamera.view.eye[AXIS_Z]
                 );
                 guAlign(
                     &matrices->antiBillboard,
                     M_PI,
-                    -(g_MapCamera.view.lookAt[0] - g_MapCamera.view.eye[0]),
-                    -(g_MapCamera.view.lookAt[1] - g_MapCamera.view.eye[1]),
-                    -(g_MapCamera.view.lookAt[2] - g_MapCamera.view.eye[2])
+                    -(g_MapCamera.view.lookAt[AXIS_X] - g_MapCamera.view.eye[AXIS_X]),
+                    -(g_MapCamera.view.lookAt[AXIS_Y] - g_MapCamera.view.eye[AXIS_Y]),
+                    -(g_MapCamera.view.lookAt[AXIS_Z] - g_MapCamera.view.eye[AXIS_Z])
                 );
                 terrainStyle = TERRAIN_STYLE_MAP;
                 guPerspective(
@@ -1817,12 +1817,12 @@ s32 DrawGame(void) {
 
                 guLookAt(
                     &matrices->viewing,
-                    eyeX = g_MapCamera.view.eye[0] - MAP_ISOMETRIC_OFFSET_X,
-                    eyeY = g_MapCamera.view.eye[1] - MAP_ISOMETRIC_OFFSET_Y,
-                    eyeZ = g_MapCamera.view.eye[2] - MAP_ISOMETRIC_OFFSET_X,
-                    g_MapCamera.view.eye[0],
-                    g_MapCamera.view.eye[1],
-                    g_MapCamera.view.eye[2],
+                    eyeX = g_MapCamera.view.eye[AXIS_X] - MAP_ISOMETRIC_OFFSET_X,
+                    eyeY = g_MapCamera.view.eye[AXIS_Y] - MAP_ISOMETRIC_OFFSET_Y,
+                    eyeZ = g_MapCamera.view.eye[AXIS_Z] - MAP_ISOMETRIC_OFFSET_X,
+                    g_MapCamera.view.eye[AXIS_X],
+                    g_MapCamera.view.eye[AXIS_Y],
+                    g_MapCamera.view.eye[AXIS_Z],
                     0.0f,
                     -1.0f,
                     0.0f
@@ -1830,16 +1830,16 @@ s32 DrawGame(void) {
                 guAlign(
                     &matrices->billboard,
                     0.0f,
-                    g_MapCamera.view.eye[0] - eyeX,
-                    g_MapCamera.view.eye[1] - eyeY,
-                    g_MapCamera.view.eye[2] - eyeZ
+                    g_MapCamera.view.eye[AXIS_X] - eyeX,
+                    g_MapCamera.view.eye[AXIS_Y] - eyeY,
+                    g_MapCamera.view.eye[AXIS_Z] - eyeZ
                 );
                 guAlign(
                     &matrices->antiBillboard,
                     M_PI,
-                    eyeX - g_MapCamera.view.eye[0],
-                    eyeY - g_MapCamera.view.eye[1],
-                    eyeZ - g_MapCamera.view.eye[2]
+                    eyeX - g_MapCamera.view.eye[AXIS_X],
+                    eyeY - g_MapCamera.view.eye[AXIS_Y],
+                    eyeZ - g_MapCamera.view.eye[AXIS_Z]
                 );
                 guOrtho(
                     &matrices->perspective,
@@ -1861,19 +1861,19 @@ s32 DrawGame(void) {
                     ClearBuffers(BUFFER_CLEAR_BY_LINE);
                 }
 
-                topDownEyeX = g_MapCamera.view.eye[0];
+                topDownEyeX = g_MapCamera.view.eye[AXIS_X];
                 terrainStyle =
                     (g_Scene == SCENE_CELL_EDITOR) ? TERRAIN_STYLE_TOP_DOWN_MAP : TERRAIN_STYLE_MAP;
-                topDownEyeY = g_MapCamera.view.eye[1] - MAP_TOP_DOWN_HEIGHT;
-                topDownEyeZ = g_MapCamera.view.eye[2] - MAP_TOP_DOWN_TILT;
+                topDownEyeY = g_MapCamera.view.eye[AXIS_Y] - MAP_TOP_DOWN_HEIGHT;
+                topDownEyeZ = g_MapCamera.view.eye[AXIS_Z] - MAP_TOP_DOWN_TILT;
                 guLookAt(
                     &matrices->viewing,
                     topDownEyeX,
                     topDownEyeY,
                     topDownEyeZ,
                     topDownEyeX,
-                    g_MapCamera.view.eye[1],
-                    g_MapCamera.view.eye[2],
+                    g_MapCamera.view.eye[AXIS_Y],
+                    g_MapCamera.view.eye[AXIS_Z],
                     0.0f,
                     -1.0f,
                     0.0f
@@ -1881,16 +1881,16 @@ s32 DrawGame(void) {
                 guAlign(
                     &matrices->billboard,
                     0.0f,
-                    g_MapCamera.view.eye[0] - topDownEyeX,
-                    g_MapCamera.view.eye[1] - topDownEyeY,
-                    g_MapCamera.view.eye[2] - topDownEyeZ
+                    g_MapCamera.view.eye[AXIS_X] - topDownEyeX,
+                    g_MapCamera.view.eye[AXIS_Y] - topDownEyeY,
+                    g_MapCamera.view.eye[AXIS_Z] - topDownEyeZ
                 );
                 guAlign(
                     &matrices->antiBillboard,
                     M_PI,
-                    topDownEyeX - g_MapCamera.view.eye[0],
-                    topDownEyeY - g_MapCamera.view.eye[1],
-                    topDownEyeZ - g_MapCamera.view.eye[2]
+                    topDownEyeX - g_MapCamera.view.eye[AXIS_X],
+                    topDownEyeY - g_MapCamera.view.eye[AXIS_Y],
+                    topDownEyeZ - g_MapCamera.view.eye[AXIS_Z]
                 );
                 guOrtho(
                     &matrices->perspective,
@@ -1915,12 +1915,12 @@ s32 DrawGame(void) {
 
                 guLookAt(
                     &matrices->viewing,
-                    g_MapCamera.view.eye[0],
-                    g_MapCamera.view.eye[1],
-                    g_MapCamera.view.eye[2],
-                    lookAtX = g_MapCamera.view.eye[0] + 10.0f,
-                    lookAtY = g_MapCamera.view.eye[1] + 1000.0f,
-                    lookAtZ = g_MapCamera.view.eye[2],
+                    g_MapCamera.view.eye[AXIS_X],
+                    g_MapCamera.view.eye[AXIS_Y],
+                    g_MapCamera.view.eye[AXIS_Z],
+                    lookAtX = g_MapCamera.view.eye[AXIS_X] + 10.0f,
+                    lookAtY = g_MapCamera.view.eye[AXIS_Y] + 1000.0f,
+                    lookAtZ = g_MapCamera.view.eye[AXIS_Z],
                     0.0f,
                     -1.0f,
                     0.0f
@@ -1928,16 +1928,16 @@ s32 DrawGame(void) {
                 guAlign(
                     &matrices->billboard,
                     0.0f,
-                    lookAtX - g_MapCamera.view.eye[0],
-                    lookAtY - g_MapCamera.view.eye[1],
-                    lookAtZ - g_MapCamera.view.eye[2]
+                    lookAtX - g_MapCamera.view.eye[AXIS_X],
+                    lookAtY - g_MapCamera.view.eye[AXIS_Y],
+                    lookAtZ - g_MapCamera.view.eye[AXIS_Z]
                 );
                 guAlign(
                     &matrices->antiBillboard,
                     M_PI,
-                    g_MapCamera.view.eye[0] - lookAtX,
-                    g_MapCamera.view.eye[1] - lookAtY,
-                    g_MapCamera.view.eye[2] - lookAtZ
+                    g_MapCamera.view.eye[AXIS_X] - lookAtX,
+                    g_MapCamera.view.eye[AXIS_Y] - lookAtY,
+                    g_MapCamera.view.eye[AXIS_Z] - lookAtZ
                 );
                 guOrtho(
                     &matrices->perspective,
@@ -2021,12 +2021,12 @@ s32 DrawGame(void) {
                     gDPPipeSync(g_DisplayListHead++);
                     SetCameraScissor(g_Cameras[MAIN_CAMERA].view);
                     DrawMenuScreen(&g_DisplayListHead);
-                    g_Cameras[MAIN_CAMERA].view.eye[0] = 0.0f;
-                    g_Cameras[MAIN_CAMERA].view.lookAt[0] = 0.0f;
-                    g_Cameras[MAIN_CAMERA].view.lookAt[1] = 0.0f;
-                    g_Cameras[MAIN_CAMERA].view.lookAt[2] = 0.0f;
-                    g_Cameras[MAIN_CAMERA].view.eye[1] = 10.0f;
-                    g_Cameras[MAIN_CAMERA].view.eye[2] = 60.0f;
+                    g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = 0.0f;
+                    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] = 0.0f;
+                    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = 0.0f;
+                    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = 0.0f;
+                    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = 10.0f;
+                    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = 60.0f;
                     SetCharacterHighlight(matrices);
                 }
                 else if (g_IsHoleShownInMenuInset && g_HasLoaderFinished == TRUE) {
@@ -2045,12 +2045,12 @@ s32 DrawGame(void) {
                     insetView = &g_Cameras[cameraIndex].view;
                     guLookAtF(
                         matrices->viewingF,
-                        insetView->eye[0],
-                        insetView->eye[1],
-                        insetView->eye[2],
-                        insetView->lookAt[0],
-                        insetView->lookAt[1],
-                        insetView->lookAt[2],
+                        insetView->eye[AXIS_X],
+                        insetView->eye[AXIS_Y],
+                        insetView->eye[AXIS_Z],
+                        insetView->lookAt[AXIS_X],
+                        insetView->lookAt[AXIS_Y],
+                        insetView->lookAt[AXIS_Z],
                         0.0f,
                         -1.0f,
                         0.0f
@@ -2059,16 +2059,16 @@ s32 DrawGame(void) {
                     guAlign(
                         &matrices->billboard,
                         0.0f,
-                        insetView->lookAt[0] - insetView->eye[0],
-                        insetView->lookAt[1] - insetView->eye[1],
-                        insetView->lookAt[2] - insetView->eye[2]
+                        insetView->lookAt[AXIS_X] - insetView->eye[AXIS_X],
+                        insetView->lookAt[AXIS_Y] - insetView->eye[AXIS_Y],
+                        insetView->lookAt[AXIS_Z] - insetView->eye[AXIS_Z]
                     );
                     guAlign(
                         &matrices->antiBillboard,
                         0.0f,
-                        -(insetView->lookAt[0] - insetView->eye[0]),
-                        -(insetView->lookAt[1] - insetView->eye[1]),
-                        -(insetView->lookAt[2] - insetView->eye[2])
+                        -(insetView->lookAt[AXIS_X] - insetView->eye[AXIS_X]),
+                        -(insetView->lookAt[AXIS_Y] - insetView->eye[AXIS_Y]),
+                        -(insetView->lookAt[AXIS_Z] - insetView->eye[AXIS_Z])
                     );
                     LoadProjection();
                     gSPPerspNormalize(g_DisplayListHead++, insetPerspNorm);
@@ -2137,12 +2137,12 @@ s32 DrawGame(void) {
                         guLookAtReflectF(
                             matrices->viewingF,
                             &matrices->lookAt,
-                            courseView->eye[0],
-                            courseView->eye[1],
-                            courseView->eye[2],
-                            courseView->lookAt[0],
-                            courseView->lookAt[1],
-                            courseView->lookAt[2],
+                            courseView->eye[AXIS_X],
+                            courseView->eye[AXIS_Y],
+                            courseView->eye[AXIS_Z],
+                            courseView->lookAt[AXIS_X],
+                            courseView->lookAt[AXIS_Y],
+                            courseView->lookAt[AXIS_Z],
                             0.0f,
                             -1.0f,
                             0.0f
@@ -2152,32 +2152,34 @@ s32 DrawGame(void) {
                         ConvertMatrixToFixed(matrices->viewingF, &matrices->viewing);
                         lookAt = courseView->lookAt;
                         if (g_GameState.isMiniGolf) {
-                            billboardRise = (courseView->lookAt[1] - courseView->eye[1]) * 0.125f;
+                            billboardRise =
+                                (courseView->lookAt[AXIS_Y] - courseView->eye[AXIS_Y]) * 0.125f;
                             guAlign(
                                 &matrices->billboard,
                                 0.0f,
-                                courseView->lookAt[0] - courseView->eye[0],
+                                courseView->lookAt[AXIS_X] - courseView->eye[AXIS_X],
                                 billboardRise,
-                                courseView->lookAt[2] - courseView->eye[2]
+                                courseView->lookAt[AXIS_Z] - courseView->eye[AXIS_Z]
                             );
                         }
                         else {
-                            billboardRise = (courseView->lookAt[1] - courseView->eye[1]) * 0.5f;
+                            billboardRise =
+                                (courseView->lookAt[AXIS_Y] - courseView->eye[AXIS_Y]) * 0.5f;
                             guAlign(
                                 &matrices->billboard,
                                 0.0f,
-                                courseView->lookAt[0] - courseView->eye[0],
+                                courseView->lookAt[AXIS_X] - courseView->eye[AXIS_X],
                                 billboardRise,
-                                courseView->lookAt[2] - courseView->eye[2]
+                                courseView->lookAt[AXIS_Z] - courseView->eye[AXIS_Z]
                             );
                         }
 
                         guAlign(
                             &matrices->antiBillboard,
                             0.0f,
-                            -(lookAt[0] - courseView->eye[0]),
-                            -(lookAt[1] - courseView->eye[1]),
-                            -(lookAt[2] - courseView->eye[2])
+                            -(lookAt[AXIS_X] - courseView->eye[AXIS_X]),
+                            -(lookAt[AXIS_Y] - courseView->eye[AXIS_Y]),
+                            -(lookAt[AXIS_Z] - courseView->eye[AXIS_Z])
                         );
                         LoadProjection();
                     }
@@ -3095,33 +3097,33 @@ void UpdateGame(void) {
     f_UpdateStartTime = OS_CYCLES_TO_USEC(osGetTime());
     if (g_Scene == SCENE_GROUND_CAMERA) {
         if (g_ControllerData[0].button & U_CBUTTONS) {
-            g_MapCamera.view.eye[2] += MAP_CAMERA_STEP;
+            g_MapCamera.view.eye[AXIS_Z] += MAP_CAMERA_STEP;
         }
 
         if (g_ControllerData[0].button & D_CBUTTONS) {
-            g_MapCamera.view.eye[2] -= MAP_CAMERA_STEP;
+            g_MapCamera.view.eye[AXIS_Z] -= MAP_CAMERA_STEP;
         }
 
         if (g_ControllerData[0].button & L_CBUTTONS) {
-            g_MapCamera.view.eye[0] -= MAP_CAMERA_STEP;
+            g_MapCamera.view.eye[AXIS_X] -= MAP_CAMERA_STEP;
         }
 
         if (g_ControllerData[0].button & R_CBUTTONS) {
-            g_MapCamera.view.eye[0] += MAP_CAMERA_STEP;
+            g_MapCamera.view.eye[AXIS_X] += MAP_CAMERA_STEP;
         }
 
         g_MapCamera.view.heading -= g_ControllerData[0].stick_x / MAP_CAMERA_TURN_PER_STICK;
-        g_MapCamera.view.eye[1] = (f32)(-g_ControllerData[0].stick_y * MAP_CAMERA_LIFT_PER_STICK) -
-            MAP_CAMERA_HEIGHT +
+        g_MapCamera.view.eye[AXIS_Y] =
+            (f32)(-g_ControllerData[0].stick_y * MAP_CAMERA_LIFT_PER_STICK) - MAP_CAMERA_HEIGHT +
             ((f32)GetGroundHeight(
-                 g_MapCamera.view.eye[0] * GROUND_UNITS_PER_UNIT,
-                 g_MapCamera.view.eye[2] * GROUND_UNITS_PER_UNIT
+                 g_MapCamera.view.eye[AXIS_X] * GROUND_UNITS_PER_UNIT,
+                 g_MapCamera.view.eye[AXIS_Z] * GROUND_UNITS_PER_UNIT
              ) / GROUND_UNITS_PER_UNIT);
-        g_MapCamera.view.lookAt[0] =
-            g_MapCamera.view.eye[0] + (cosf(g_MapCamera.view.heading) * MAP_CAMERA_LOOK_DISTANCE);
-        g_MapCamera.view.lookAt[1] = 0.0f;
-        g_MapCamera.view.lookAt[2] =
-            g_MapCamera.view.eye[2] + (sinf(g_MapCamera.view.heading) * MAP_CAMERA_LOOK_DISTANCE);
+        g_MapCamera.view.lookAt[AXIS_X] = g_MapCamera.view.eye[AXIS_X] +
+            (cosf(g_MapCamera.view.heading) * MAP_CAMERA_LOOK_DISTANCE);
+        g_MapCamera.view.lookAt[AXIS_Y] = 0.0f;
+        g_MapCamera.view.lookAt[AXIS_Z] = g_MapCamera.view.eye[AXIS_Z] +
+            (sinf(g_MapCamera.view.heading) * MAP_CAMERA_LOOK_DISTANCE);
     }
 
     if (g_Scene == SCENE_OPENING) {

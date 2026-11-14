@@ -2471,13 +2471,13 @@ void UpdateOpening(void) {
                 break;
             case OPENING_SCENE_INCOMING_BALL + 1:
                 f_OpeningBallPositions[AXIS_Y][AXIS_X] +=
-                    (g_CameraEditor.points[1][0] - f_OpeningBallPositions[AXIS_Y][AXIS_X]) *
+                    (g_CameraEditor.points[1][AXIS_X] - f_OpeningBallPositions[AXIS_Y][AXIS_X]) *
                     f_LogoBallFollowRate;
                 f_OpeningBallPositions[AXIS_Y][AXIS_Y] +=
-                    (g_CameraEditor.points[1][1] - f_OpeningBallPositions[AXIS_Y][AXIS_Y]) *
+                    (g_CameraEditor.points[1][AXIS_Y] - f_OpeningBallPositions[AXIS_Y][AXIS_Y]) *
                     f_LogoBallFollowRate;
                 f_OpeningBallPositions[AXIS_Y][AXIS_Z] +=
-                    (g_CameraEditor.points[1][2] - f_OpeningBallPositions[AXIS_Y][AXIS_Z]) *
+                    (g_CameraEditor.points[1][AXIS_Z] - f_OpeningBallPositions[AXIS_Y][AXIS_Z]) *
                     f_LogoBallFollowRate;
                 f_LogoBallFollowRate -= 0.02f;
                 if (f_LogoBallFollowRate < 0.1f) {
@@ -3184,12 +3184,12 @@ void UpdateOpening(void) {
     UpdateCameraEditor();
     EaseOpeningLookAt();
     g_Cameras[MAIN_CAMERA].mode = CAMERA_MODE_BEHIND_GOLFER;
-    g_Cameras[MAIN_CAMERA].view.eye[0] = g_CameraEditor.points[0][0];
-    g_Cameras[MAIN_CAMERA].view.eye[1] = g_CameraEditor.points[0][1];
-    g_Cameras[MAIN_CAMERA].view.eye[2] = g_CameraEditor.points[0][2];
-    g_Cameras[MAIN_CAMERA].view.lookAt[0] = g_CameraEditor.points[1][0];
-    g_Cameras[MAIN_CAMERA].view.lookAt[1] = g_CameraEditor.points[1][1];
-    g_Cameras[MAIN_CAMERA].view.lookAt[2] = g_CameraEditor.points[1][2];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = g_CameraEditor.points[0][AXIS_X];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = g_CameraEditor.points[0][AXIS_Y];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = g_CameraEditor.points[0][AXIS_Z];
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] = g_CameraEditor.points[1][AXIS_X];
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = g_CameraEditor.points[1][AXIS_Y];
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = g_CameraEditor.points[1][AXIS_Z];
     g_Cameras[MAIN_CAMERA].view.fieldOfView = g_CameraEditor.fieldOfView;
     if (f_OpeningShotState == 1) {
         f_UnusedStickOffsetX += g_ControllerStates[1].stickX * 0.002f;
@@ -3266,9 +3266,9 @@ void DrawOpening(CameraMatrices *matrices, Gfx **displayListHead) {
     if (f_IsLookAtMarkerShown) {
         guTranslate(
             &f_LookAtMarkerTranslation,
-            g_Cameras[MAIN_CAMERA].view.lookAt[0],
-            g_Cameras[MAIN_CAMERA].view.lookAt[1],
-            g_Cameras[MAIN_CAMERA].view.lookAt[2]
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X],
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y],
+            g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z]
         );
         guScale(
             &f_LookAtMarkerScaling,
@@ -5081,47 +5081,47 @@ void DrawOpeningShotBall(Gfx **displayListHead) {
 void EaseOpeningLookAt(void) {
     switch (f_LookAtEaseMode) {
         case LOOK_AT_EASE_FAST:
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] +=
                 ((f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE) -
-                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X]) *
                 0.1f;
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y] +=
                 ((f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
-                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y]) *
                 0.1f;
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z] +=
                 ((f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE) -
-                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z]) *
                 0.1f;
             MeasureEditorCamera();
             break;
         case LOOK_AT_EASE_SLOW:
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] +=
                 ((f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE) -
-                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X]) *
                 0.01f;
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y] +=
                 ((f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
-                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y]) *
                 0.01f;
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z] +=
                 ((f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE) -
-                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z]) *
                 0.01f;
             MeasureEditorCamera();
             break;
         case LOOK_AT_EASE_SPEEDING_UP:
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] +=
                 ((f_OpeningBallPositions[AXIS_Y][AXIS_X] + 38.1f) -
-                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X]) *
                 f_LookAtEaseRate;
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y] +=
                 ((f_OpeningBallPositions[AXIS_Y][AXIS_Y] - 4.5f) -
-                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y]) *
                 f_LookAtEaseRate;
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z] +=
                 ((f_OpeningBallPositions[AXIS_Y][AXIS_Z] - 4.795f) -
-                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z]) *
                 f_LookAtEaseRate;
             MeasureEditorCamera();
             f_LookAtEaseRate += 0.002f;

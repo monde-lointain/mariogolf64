@@ -37,12 +37,12 @@ Vec3 f_CameraSnapshots[SNAPSHOT_COUNT][SNAPSHOT_POINT_COUNT];
 void ResetCameraEditor(void) {
     s32 pointIndex;
 
-    g_CameraEditor.points[EDITOR_POINT_EYE][0] = 0.0f;
-    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] = 0.0f;
-    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] = 0.0f;
-    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] = 0.0f;
-    g_CameraEditor.points[EDITOR_POINT_EYE][1] = -100.0f;
-    g_CameraEditor.points[EDITOR_POINT_EYE][2] = 100.0f;
+    g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X] = 0.0f;
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] = 0.0f;
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y] = 0.0f;
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z] = 0.0f;
+    g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y] = -100.0f;
+    g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z] = 100.0f;
     g_CameraEditor.fieldOfView = 45.0f;
     for (pointIndex = 0; pointIndex != EDITOR_POINT_COUNT; pointIndex++) {
         g_CameraEditor.targets[pointIndex][AXIS_X] = 0.0f;
@@ -76,12 +76,12 @@ void ResetCameraEditor(void) {
 }
 
 void PlaceEditorCamera(f32 eyeX, f32 eyeY, f32 eyeZ, f32 lookAtX, f32 lookAtY, f32 lookAtZ) {
-    g_CameraEditor.points[EDITOR_POINT_EYE][0] = eyeX;
-    g_CameraEditor.points[EDITOR_POINT_EYE][1] = eyeY;
-    g_CameraEditor.points[EDITOR_POINT_EYE][2] = eyeZ;
-    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] = lookAtX;
-    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] = lookAtY;
-    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] = lookAtZ;
+    g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X] = eyeX;
+    g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y] = eyeY;
+    g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z] = eyeZ;
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] = lookAtX;
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y] = lookAtY;
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z] = lookAtZ;
     MeasureEditorCamera();
 }
 
@@ -110,31 +110,34 @@ void MeasureEditorCamera(void) {
     f32 offsetY;
     f32 offsetZ;
 
-    offsetX =
-        g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] - g_CameraEditor.points[EDITOR_POINT_EYE][0];
+    offsetX = g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] -
+        g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X];
     g_CameraEditor.pitch = atan2f(
-        g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] - g_CameraEditor.points[EDITOR_POINT_EYE][1],
+        g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y] -
+            g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y],
         sqrtf(
             (offsetX * offsetX) +
-            ((g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
-                 g_CameraEditor.points[EDITOR_POINT_EYE][2]) *
-                (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
-                    g_CameraEditor.points[EDITOR_POINT_EYE][2]))
+            ((g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z] -
+                 g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z]) *
+                (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z] -
+                    g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z]))
         )
     );
     g_CameraEditor.heading = atan2f(
-        g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] - g_CameraEditor.points[EDITOR_POINT_EYE][2],
-        g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] - g_CameraEditor.points[EDITOR_POINT_EYE][0]
+        g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z] -
+            g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z],
+        g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] -
+            g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X]
     );
-    offsetY =
-        g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] - g_CameraEditor.points[EDITOR_POINT_EYE][1];
-    offsetZ =
-        g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] - g_CameraEditor.points[EDITOR_POINT_EYE][2];
+    offsetY = g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y] -
+        g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y];
+    offsetZ = g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z] -
+        g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z];
     g_CameraEditor.distance = sqrtf(
-        ((g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] -
-             g_CameraEditor.points[EDITOR_POINT_EYE][0]) *
-            (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] -
-                g_CameraEditor.points[EDITOR_POINT_EYE][0])) +
+        ((g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] -
+             g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X]) *
+            (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] -
+                g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X])) +
         (offsetY * offsetY) + (offsetZ * offsetZ)
     );
 }
@@ -149,14 +152,17 @@ void MoveEditorPoint(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
     f32 speed;
 
     distance = sqrtf(
-        ((x - g_CameraEditor.points[pointIndex][0]) * (x - g_CameraEditor.points[pointIndex][0])) +
-        ((y - g_CameraEditor.points[pointIndex][1]) * (y - g_CameraEditor.points[pointIndex][1])) +
-        ((z - g_CameraEditor.points[pointIndex][2]) * (z - g_CameraEditor.points[pointIndex][2]))
+        ((x - g_CameraEditor.points[pointIndex][AXIS_X]) *
+            (x - g_CameraEditor.points[pointIndex][AXIS_X])) +
+        ((y - g_CameraEditor.points[pointIndex][AXIS_Y]) *
+            (y - g_CameraEditor.points[pointIndex][AXIS_Y])) +
+        ((z - g_CameraEditor.points[pointIndex][AXIS_Z]) *
+            (z - g_CameraEditor.points[pointIndex][AXIS_Z]))
     );
     if (distance < EDITOR_ARRIVAL_DISTANCE) {
-        g_CameraEditor.points[pointIndex][0] = x;
-        g_CameraEditor.points[pointIndex][1] = y;
-        g_CameraEditor.points[pointIndex][2] = z;
+        g_CameraEditor.points[pointIndex][AXIS_X] = x;
+        g_CameraEditor.points[pointIndex][AXIS_Y] = y;
+        g_CameraEditor.points[pointIndex][AXIS_Z] = z;
         return;
     }
 
@@ -190,9 +196,9 @@ void MoveEditorPoint(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
     g_CameraEditor.targets[pointIndex][AXIS_Y] = y;
     g_CameraEditor.targets[pointIndex][AXIS_Z] = z;
 
-    x -= g_CameraEditor.points[pointIndex][0];
-    y -= g_CameraEditor.points[pointIndex][1];
-    z -= g_CameraEditor.points[pointIndex][2];
+    x -= g_CameraEditor.points[pointIndex][AXIS_X];
+    y -= g_CameraEditor.points[pointIndex][AXIS_Y];
+    z -= g_CameraEditor.points[pointIndex][AXIS_Z];
     g_CameraEditor.moveAxes[pointIndex] = EDITOR_MOVE_AXIS_X;
     if ((f32)fabs(x) < (f32)fabs(z)) {
         g_CameraEditor.moveAxes[pointIndex] = EDITOR_MOVE_AXIS_Z;
@@ -440,9 +446,9 @@ void UpdateCameraEditor(void) {
             continue;
         }
 
-        x = g_CameraEditor.points[pointIndex][0];
-        y = g_CameraEditor.points[pointIndex][1];
-        z = g_CameraEditor.points[pointIndex][2];
+        x = g_CameraEditor.points[pointIndex][AXIS_X];
+        y = g_CameraEditor.points[pointIndex][AXIS_Y];
+        z = g_CameraEditor.points[pointIndex][AXIS_Z];
         if (g_CameraEditor.targets[pointIndex][AXIS_X] != 0.0f ||
             g_CameraEditor.targets[pointIndex][AXIS_Y] != 0.0f ||
             g_CameraEditor.targets[pointIndex][AXIS_Z] != 0.0f) {
@@ -498,7 +504,7 @@ void UpdateCameraEditor(void) {
             case EDITOR_MOVE_AXIS_X:
                 if (fabsf(x - g_CameraEditor.targets[pointIndex][AXIS_X]) <
                         EDITOR_ARRIVAL_DISTANCE ||
-                    (g_CameraEditor.points[pointIndex][0] -
+                    (g_CameraEditor.points[pointIndex][AXIS_X] -
                         g_CameraEditor.targets[pointIndex][AXIS_X]) *
                             (x - g_CameraEditor.targets[pointIndex][AXIS_X]) <
                         0.0f) {
@@ -509,7 +515,7 @@ void UpdateCameraEditor(void) {
             case EDITOR_MOVE_AXIS_Y:
                 if (fabsf(y - g_CameraEditor.targets[pointIndex][AXIS_Y]) <
                         EDITOR_ARRIVAL_DISTANCE ||
-                    (g_CameraEditor.points[pointIndex][1] -
+                    (g_CameraEditor.points[pointIndex][AXIS_Y] -
                         g_CameraEditor.targets[pointIndex][AXIS_Y]) *
                             (x - g_CameraEditor.targets[pointIndex][AXIS_Y]) <
                         0.0f) {
@@ -520,7 +526,7 @@ void UpdateCameraEditor(void) {
             case EDITOR_MOVE_AXIS_Z:
                 if (fabsf(z - g_CameraEditor.targets[pointIndex][AXIS_Z]) <
                         EDITOR_ARRIVAL_DISTANCE ||
-                    (g_CameraEditor.points[pointIndex][2] -
+                    (g_CameraEditor.points[pointIndex][AXIS_Z] -
                         g_CameraEditor.targets[pointIndex][AXIS_Z]) *
                             (z - g_CameraEditor.targets[pointIndex][AXIS_Z]) <
                         0.0f) {
@@ -551,9 +557,9 @@ void UpdateCameraEditor(void) {
             g_CameraEditor.moveAxes[pointIndex] = EDITOR_MOVE_AXIS_NONE;
         }
 
-        g_CameraEditor.points[pointIndex][0] = x;
-        g_CameraEditor.points[pointIndex][1] = y;
-        g_CameraEditor.points[pointIndex][2] = z;
+        g_CameraEditor.points[pointIndex][AXIS_X] = x;
+        g_CameraEditor.points[pointIndex][AXIS_Y] = y;
+        g_CameraEditor.points[pointIndex][AXIS_Z] = z;
         if (hasLeader) {
             hasMoved = TRUE;
             break;
@@ -576,12 +582,12 @@ void UpdateCameraEditor(void) {
             z = -z;
         }
 
-        g_CameraEditor.points[pointIndex ^ 1][0] =
-            g_CameraEditor.points[pointIndex][0] + (x * g_CameraEditor.distance);
-        g_CameraEditor.points[pointIndex ^ 1][1] =
-            g_CameraEditor.points[pointIndex][1] + (y * g_CameraEditor.distance);
-        g_CameraEditor.points[pointIndex ^ 1][2] =
-            g_CameraEditor.points[pointIndex][2] + (z * g_CameraEditor.distance);
+        g_CameraEditor.points[pointIndex ^ 1][AXIS_X] =
+            g_CameraEditor.points[pointIndex][AXIS_X] + (x * g_CameraEditor.distance);
+        g_CameraEditor.points[pointIndex ^ 1][AXIS_Y] =
+            g_CameraEditor.points[pointIndex][AXIS_Y] + (y * g_CameraEditor.distance);
+        g_CameraEditor.points[pointIndex ^ 1][AXIS_Z] =
+            g_CameraEditor.points[pointIndex][AXIS_Z] + (z * g_CameraEditor.distance);
     }
 
     if (g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_PIVOT) {
@@ -790,12 +796,12 @@ void UpdateCameraEditor(void) {
             z = -z;
         }
 
-        g_CameraEditor.points[pointIndex][0] =
-            g_CameraEditor.points[pointIndex ^ 1][0] + (x * g_CameraEditor.distance);
-        g_CameraEditor.points[pointIndex][1] =
-            g_CameraEditor.points[pointIndex ^ 1][1] + (y * g_CameraEditor.distance);
-        g_CameraEditor.points[pointIndex][2] =
-            g_CameraEditor.points[pointIndex ^ 1][2] + (z * g_CameraEditor.distance);
+        g_CameraEditor.points[pointIndex][AXIS_X] =
+            g_CameraEditor.points[pointIndex ^ 1][AXIS_X] + (x * g_CameraEditor.distance);
+        g_CameraEditor.points[pointIndex][AXIS_Y] =
+            g_CameraEditor.points[pointIndex ^ 1][AXIS_Y] + (y * g_CameraEditor.distance);
+        g_CameraEditor.points[pointIndex][AXIS_Z] =
+            g_CameraEditor.points[pointIndex ^ 1][AXIS_Z] + (z * g_CameraEditor.distance);
     }
 
     MeasureEditorCamera();
@@ -838,21 +844,21 @@ void UpdateCameraEditor(void) {
 
 #define ZoomEditorEye(scale) \
     { \
-        g_CameraEditor.points[EDITOR_POINT_EYE][0] = \
-            ((g_CameraEditor.points[EDITOR_POINT_EYE][0] - \
-                 g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) * \
+        g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X] = \
+            ((g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X] - \
+                 g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X]) * \
                 (scale)) + \
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]; \
-        g_CameraEditor.points[EDITOR_POINT_EYE][1] = \
-            ((g_CameraEditor.points[EDITOR_POINT_EYE][1] - \
-                 g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) * \
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X]; \
+        g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y] = \
+            ((g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y] - \
+                 g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y]) * \
                 (scale)) + \
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]; \
-        g_CameraEditor.points[EDITOR_POINT_EYE][2] = \
-            ((g_CameraEditor.points[EDITOR_POINT_EYE][2] - \
-                 g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) * \
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y]; \
+        g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z] = \
+            ((g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z] - \
+                 g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z]) * \
                 (scale)) + \
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]; \
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z]; \
     }
 
 #define StepEditorCoordinate(button, point, axis, step) \
@@ -913,19 +919,19 @@ void EditOpeningCamera(void) {
     PrintDebugText("<< POSITION >>", CAMERA_PANEL_COLUMN, CAMERA_PANEL_TITLE_ROW);
     SetDebugTextHighlight(TRUE);
     PrintDebugText("[TRG]", CAMERA_PANEL_LABEL_COLUMN, LOOK_AT_LABEL_ROW);
-    sprintf(g_PrintBuffer, "  %f", g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]);
+    sprintf(g_PrintBuffer, "  %f", g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X]);
     PrintDebugText(g_PrintBuffer, CAMERA_PANEL_COLUMN, LOOK_AT_LABEL_ROW + 1);
-    sprintf(g_PrintBuffer, "  %f", g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]);
+    sprintf(g_PrintBuffer, "  %f", g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y]);
     PrintDebugText(g_PrintBuffer, CAMERA_PANEL_COLUMN, LOOK_AT_LABEL_ROW + 2);
-    sprintf(g_PrintBuffer, "  %f", g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]);
+    sprintf(g_PrintBuffer, "  %f", g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z]);
     PrintDebugText(g_PrintBuffer, CAMERA_PANEL_COLUMN, LOOK_AT_LABEL_ROW + 3);
     SetDebugTextHighlight(TRUE);
     PrintDebugText("[POS]", CAMERA_PANEL_LABEL_COLUMN, EYE_LABEL_ROW);
-    sprintf(g_PrintBuffer, "  %f", g_CameraEditor.points[EDITOR_POINT_EYE][0]);
+    sprintf(g_PrintBuffer, "  %f", g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X]);
     PrintDebugText(g_PrintBuffer, CAMERA_PANEL_COLUMN, EYE_LABEL_ROW + 1);
-    sprintf(g_PrintBuffer, "  %f", g_CameraEditor.points[EDITOR_POINT_EYE][1]);
+    sprintf(g_PrintBuffer, "  %f", g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y]);
     PrintDebugText(g_PrintBuffer, CAMERA_PANEL_COLUMN, EYE_LABEL_ROW + 2);
-    sprintf(g_PrintBuffer, "  %f", g_CameraEditor.points[EDITOR_POINT_EYE][2]);
+    sprintf(g_PrintBuffer, "  %f", g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z]);
     PrintDebugText(g_PrintBuffer, CAMERA_PANEL_COLUMN, EYE_LABEL_ROW + 3);
     SetDebugTextHighlight(TRUE);
     PrintDebugText("[ANGLE] (X,Y)", CAMERA_PANEL_COLUMN, ANGLE_LABEL_ROW);
@@ -997,8 +1003,8 @@ void EditOpeningCamera(void) {
                 offset[AXIS_Z] *= SLOW_SLIDE_SCALE;
             }
 
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] += offset[AXIS_X];
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] += offset[AXIS_Z];
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] += offset[AXIS_X];
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z] += offset[AXIS_Z];
         }
 
         if (g_ControllerStates[EDITOR_CONTROLLER].buttons & U_CBUTTONS) {
@@ -1009,7 +1015,7 @@ void EditOpeningCamera(void) {
                 offset[AXIS_Y] = -SLOW_HEIGHT_STEP;
             }
 
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] += offset[AXIS_Y];
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y] += offset[AXIS_Y];
         }
 
         if (g_ControllerStates[EDITOR_CONTROLLER].buttons & D_CBUTTONS) {
@@ -1020,7 +1026,7 @@ void EditOpeningCamera(void) {
                 offset[AXIS_Y] = SLOW_HEIGHT_STEP;
             }
 
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] += offset[AXIS_Y];
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y] += offset[AXIS_Y];
         }
     }
 
@@ -1037,8 +1043,8 @@ void EditOpeningCamera(void) {
                 offset[AXIS_Z] *= SLOW_SLIDE_SCALE;
             }
 
-            g_CameraEditor.points[EDITOR_POINT_EYE][0] += offset[AXIS_X];
-            g_CameraEditor.points[EDITOR_POINT_EYE][2] += offset[AXIS_Z];
+            g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X] += offset[AXIS_X];
+            g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z] += offset[AXIS_Z];
         }
 
         if (g_ControllerStates[EDITOR_CONTROLLER].buttons & U_CBUTTONS) {
@@ -1049,7 +1055,7 @@ void EditOpeningCamera(void) {
                 offset[AXIS_Y] = -SLOW_HEIGHT_STEP;
             }
 
-            g_CameraEditor.points[EDITOR_POINT_EYE][1] += offset[AXIS_Y];
+            g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y] += offset[AXIS_Y];
         }
 
         if (g_ControllerStates[EDITOR_CONTROLLER].buttons & D_CBUTTONS) {
@@ -1060,7 +1066,7 @@ void EditOpeningCamera(void) {
                 offset[AXIS_Y] = SLOW_HEIGHT_STEP;
             }
 
-            g_CameraEditor.points[EDITOR_POINT_EYE][1] += offset[AXIS_Y];
+            g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y] += offset[AXIS_Y];
         }
     }
 
@@ -1193,17 +1199,17 @@ void EditOpeningCamera(void) {
             PlaySound(SOUND_IMPACT_ON_MARK, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
             f_IsSnapshotSaved[f_SnapshotIndex] = TRUE;
             f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_LOOK_AT][0] =
-                g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0];
+                g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X];
             f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_LOOK_AT][1] =
-                g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1];
+                g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y];
             f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_LOOK_AT][2] =
-                g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2];
+                g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z];
             f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_EYE][0] =
-                g_CameraEditor.points[EDITOR_POINT_EYE][0];
+                g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X];
             f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_EYE][1] =
-                g_CameraEditor.points[EDITOR_POINT_EYE][1];
+                g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y];
             f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_EYE][2] =
-                g_CameraEditor.points[EDITOR_POINT_EYE][2];
+                g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z];
         }
     }
 
@@ -1211,17 +1217,17 @@ void EditOpeningCamera(void) {
         !(g_ControllerStates[EDITOR_CONTROLLER].buttons & START_BUTTON)) {
         if (f_IsSnapshotSaved[f_SnapshotIndex]) {
             PlaySound(SOUND_SNAPSHOT_LOAD, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] =
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] =
                 f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_LOOK_AT][0];
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] =
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y] =
                 f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_LOOK_AT][1];
-            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] =
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z] =
                 f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_LOOK_AT][2];
-            g_CameraEditor.points[EDITOR_POINT_EYE][0] =
+            g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X] =
                 f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_EYE][0];
-            g_CameraEditor.points[EDITOR_POINT_EYE][1] =
+            g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y] =
                 f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_EYE][1];
-            g_CameraEditor.points[EDITOR_POINT_EYE][2] =
+            g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z] =
                 f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_EYE][2];
         }
         else {
@@ -1289,12 +1295,12 @@ void EditOpeningCamera(void) {
 }
 
 void ShiftEditorCamera(Vec3 offset) {
-    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] += offset[AXIS_X];
-    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] += offset[AXIS_Y];
-    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] += offset[AXIS_Z];
-    g_CameraEditor.points[EDITOR_POINT_EYE][0] += offset[AXIS_X];
-    g_CameraEditor.points[EDITOR_POINT_EYE][1] += offset[AXIS_Y];
-    g_CameraEditor.points[EDITOR_POINT_EYE][2] += offset[AXIS_Z];
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] += offset[AXIS_X];
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y] += offset[AXIS_Y];
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z] += offset[AXIS_Z];
+    g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X] += offset[AXIS_X];
+    g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y] += offset[AXIS_Y];
+    g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z] += offset[AXIS_Z];
 }
 
 const char f_UnusedCameraEditorEmptyText[] = "";

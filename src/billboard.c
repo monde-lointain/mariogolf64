@@ -356,10 +356,10 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
     lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
     lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
     viewDirection[AXIS_X] =
-        g_Cameras[MAIN_CAMERA].view.lookAt[0] - g_Cameras[MAIN_CAMERA].view.eye[0];
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] - g_Cameras[MAIN_CAMERA].view.eye[AXIS_X];
     viewDirection[AXIS_Y] = 0.0f;
     viewDirection[AXIS_Z] =
-        g_Cameras[MAIN_CAMERA].view.lookAt[2] - g_Cameras[MAIN_CAMERA].view.eye[2];
+        g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] - g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z];
     lightDirection[AXIS_X] = cosf(lightPitch) * cosf(lightYaw);
     lightDirection[AXIS_Z] = cosf(lightPitch) * sinf(lightYaw);
     lightDirection[AXIS_Y] = sinf(lightPitch);

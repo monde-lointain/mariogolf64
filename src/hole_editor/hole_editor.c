@@ -742,8 +742,8 @@ void UpdateCellEditor(void) {
 
     corner = GetGroundPoint(f_CellCursorColumn, f_CellCursorRow);
     oppositeCorner = GetGroundPoint(f_CellCursorColumn + 1, f_CellCursorRow + 1);
-    g_MapCamera.view.eye[0] = (corner->v.ob[AXIS_X] + oppositeCorner->v.ob[AXIS_X]) / 2;
-    g_MapCamera.view.eye[2] = (corner->v.ob[AXIS_Z] + oppositeCorner->v.ob[AXIS_Z]) / 2;
+    g_MapCamera.view.eye[AXIS_X] = (corner->v.ob[AXIS_X] + oppositeCorner->v.ob[AXIS_X]) / 2;
+    g_MapCamera.view.eye[AXIS_Z] = (corner->v.ob[AXIS_Z] + oppositeCorner->v.ob[AXIS_Z]) / 2;
 }
 
 Boolean HasDeadTriangleNearPoint(s32 column, s32 row);
@@ -5035,9 +5035,9 @@ void DrawTargetPole(CameraMatrices *matrices UNUSED, Gfx **displayListHead) {
 
     guTranslate(
         &f_PoleMatrix,
-        g_MapCamera.view.lookAt[0],
-        g_MapCamera.view.lookAt[1],
-        g_MapCamera.view.lookAt[2]
+        g_MapCamera.view.lookAt[AXIS_X],
+        g_MapCamera.view.lookAt[AXIS_Y],
+        g_MapCamera.view.lookAt[AXIS_Z]
     );
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);

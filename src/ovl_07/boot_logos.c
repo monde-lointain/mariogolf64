@@ -113,13 +113,13 @@ void LoadBootLogos(void) {
     g_Cameras[MAIN_CAMERA].view.unreadSettings[1] = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
     g_Cameras[MAIN_CAMERA].view.viewportCenterX = SCREEN_WIDTH;
     g_Cameras[MAIN_CAMERA].view.viewportCenterY = SCREEN_HEIGHT;
-    g_Cameras[MAIN_CAMERA].view.eye[0] = 0.0f;
-    g_Cameras[MAIN_CAMERA].view.eye[1] = 0.0f;
-    g_Cameras[MAIN_CAMERA].view.eye[2] = 0.0f;
-    g_Cameras[MAIN_CAMERA].view.lookAt[0] = 0.0f;
-    g_Cameras[MAIN_CAMERA].view.lookAt[1] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] = 0.0f;
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = 0.0f;
     g_Cameras[MAIN_CAMERA].view.drawFlags = CAMERA_DRAW_SCENE;
-    g_Cameras[MAIN_CAMERA].view.lookAt[2] = -100.0f;
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = -100.0f;
     g_Cameras[MAIN_CAMERA].view.zoom = 1.0f;
     g_Cameras[MAIN_CAMERA].view.fieldOfView = 45.0f;
 }
