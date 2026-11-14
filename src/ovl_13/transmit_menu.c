@@ -303,7 +303,7 @@ typedef struct StatusData {
 #define SAVE_HAS_STATUS_OFFSET 0xA0
 #define SAVE_STATUS_ADDRESS_OFFSET 0xA2
 #define SAVE_STATUS_SIZE_OFFSET 0xA4
-#define SAVE_STATUS_SUM_OFFSET 0xA6
+#define SAVE_STATUS_CHECKSUM_OFFSET 0xA6
 #define STATUS_ADDRESS_BIAS 0x6000
 #define STATUS_DATA_SIZE 0x800
 
@@ -312,7 +312,7 @@ typedef struct StatusData {
 #define SAVE_RECORD_SIZE 0x20
 #define RECORD_ADDRESS_OFFSET 2
 #define RECORD_SIZE_OFFSET 4
-#define RECORD_SUM_OFFSET 6
+#define RECORD_CHECKSUM_OFFSET 6
 #define CHARACTER_DATA_SIZE 0x800
 #define DATA_SAVE_KEY_OFFSET 0xB
 #define DATA_CHARACTER_OFFSET 0x10
@@ -2719,8 +2719,8 @@ s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
     s32 recordOffset;
     s32 dataAddress;
     s32 dataSize;
-    s32 storedSum;
-    s32 sum;
+    s32 storedChecksum;
+    s32 checksum;
     s32 experience;
 
     transfer->hasMissingPak = FALSE;
@@ -2815,18 +2815,18 @@ s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
                     continue;
                 }
 
-                sum = 0;
+                checksum = 0;
                 osSyncPrintf("PHASE 7\n");
-                storedSum = save[recordOffset + RECORD_SUM_OFFSET] |
-                    (save[recordOffset + RECORD_SUM_OFFSET + 1] << BITS_PER_BYTE);
+                storedChecksum = save[recordOffset + RECORD_CHECKSUM_OFFSET] |
+                    (save[recordOffset + RECORD_CHECKSUM_OFFSET + 1] << BITS_PER_BYTE);
                 for (index = 0; index != dataSize; index++) {
-                    sum += characterData[index];
+                    checksum += characterData[index];
                 }
 
                 osSyncPrintf("PHASE 8\n");
-                sum &= 0xFFFF;
-                storedSum &= 0xFFFF;
-                if (sum != storedSum) {
+                checksum &= 0xFFFF;
+                storedChecksum &= 0xFFFF;
+                if (checksum != storedChecksum) {
                     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
                     fault = CARTRIDGE_FAULT_CORRUPTED;
                     continue;
@@ -2859,21 +2859,21 @@ s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
                         continue;
                     }
 
-                    sum = 0;
+                    checksum = 0;
                     osSyncPrintf("PHASE 11\n");
                     for (index = 0; index != dataSize; index++) {
-                        sum += characterData[index];
+                        checksum += characterData[index];
                     }
 
-                    sum &= 0xFFFF;
-                    osSyncPrintf("write sum %04x\n", sum);
+                    checksum &= 0xFFFF;
+                    osSyncPrintf("write sum %04x\n", checksum);
                     osSyncPrintf("PHASE 12\n");
-                    save[recordOffset + RECORD_SUM_OFFSET] = sum;
-                    save[recordOffset + RECORD_SUM_OFFSET + 1] = sum >> BITS_PER_BYTE;
+                    save[recordOffset + RECORD_CHECKSUM_OFFSET] = checksum;
+                    save[recordOffset + RECORD_CHECKSUM_OFFSET + 1] = checksum >> BITS_PER_BYTE;
                     result = nuContGBPakFwrite(
                         &transfer->pakFile,
-                        CARTRIDGE_RAM_ADDRESS + recordOffset + RECORD_SUM_OFFSET,
-                        &save[recordOffset + RECORD_SUM_OFFSET],
+                        CARTRIDGE_RAM_ADDRESS + recordOffset + RECORD_CHECKSUM_OFFSET,
+                        &save[recordOffset + RECORD_CHECKSUM_OFFSET],
                         SAVE_HALFWORD_SIZE
                     );
                     if (result != 0) {
@@ -2882,9 +2882,9 @@ s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
                     }
 
                     osSyncPrintf("PHASE 13\n");
-                    sum = ComputeSaveChecksum(save);
-                    save[SAVE_CHECKSUM_OFFSET] = sum;
-                    save[SAVE_CHECKSUM_OFFSET + 1] = sum >> BITS_PER_BYTE;
+                    checksum = ComputeSaveChecksum(save);
+                    save[SAVE_CHECKSUM_OFFSET] = checksum;
+                    save[SAVE_CHECKSUM_OFFSET + 1] = checksum >> BITS_PER_BYTE;
                     result = nuContGBPakFwrite(
                         &transfer->pakFile,
                         CARTRIDGE_RAM_ADDRESS + SAVE_CHECKSUM_OFFSET,
@@ -2952,8 +2952,8 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
     s32 index;
     s32 result;
     s32 readResult;
-    s32 computedSum;
-    s32 storedSum;
+    s32 computedChecksum;
+    s32 storedChecksum;
 
     result = OpenGameBoyPakWithRetries(
         g_PlayerControllerPorts[g_GameBoyTransfer.taggedControllers[cartridgeIndex]],
@@ -2988,11 +2988,11 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
             }
         }
 
-        computedSum = ComputeSaveChecksum(save);
-        storedSum = GetStoredChecksum(save);
-        osSyncPrintf("sum1 %04x\n", computedSum);
-        osSyncPrintf("sum2 %04x\n", storedSum);
-        if (computedSum != storedSum || isSignatureWrong) {
+        computedChecksum = ComputeSaveChecksum(save);
+        storedChecksum = GetStoredChecksum(save);
+        osSyncPrintf("sum1 %04x\n", computedChecksum);
+        osSyncPrintf("sum2 %04x\n", storedChecksum);
+        if (computedChecksum != storedChecksum || isSignatureWrong) {
             osSyncPrintf("sum error  2\n");
             transfer->transferResult = PAK_RESULT_CORRUPTED;
             nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
@@ -3022,7 +3022,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     s32 index;
     s32 statusAddress;
     s32 statusSize;
-    s32 sum;
+    s32 checksum;
 
     transfer->transferResult = OpenGameBoyPakWithRetries(
         g_PlayerControllerPorts[transfer->taggedControllers[cartridgeIndex]],
@@ -3044,7 +3044,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
 #ifdef AVOID_UB
                 osSyncPrintf("ライトマーク違反\n");
 #else
-                osSyncPrintf("ライトマーク違反\n", sum);
+                osSyncPrintf("ライトマーク違反\n", checksum);
 #endif
                 nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
                 transfer->transferResult = PAK_RESULT_CARTRIDGE_REPLACED;
@@ -3052,8 +3052,8 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
             }
         }
 
-        sum = ComputeSaveChecksum(save);
-        if (sum != GetStoredChecksum(save)) {
+        checksum = ComputeSaveChecksum(save);
+        if (checksum != GetStoredChecksum(save)) {
             transfer->transferResult = PAK_RESULT_LOOSE_PAK;
             nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
             return STATUS_WRITE_FAILED;
@@ -3089,19 +3089,19 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
             return STATUS_WRITE_PAK_ERROR;
         }
 
-        sum = 0;
+        checksum = 0;
         for (index = 0; index != statusSize; index++) {
-            sum += status[index];
+            checksum += status[index];
         }
 
-        sum &= 0xFFFF;
-        osSyncPrintf("write sum %04x\n", sum);
-        save[SAVE_STATUS_SUM_OFFSET] = sum;
-        save[SAVE_STATUS_SUM_OFFSET + 1] = sum >> BITS_PER_BYTE;
+        checksum &= 0xFFFF;
+        osSyncPrintf("write sum %04x\n", checksum);
+        save[SAVE_STATUS_CHECKSUM_OFFSET] = checksum;
+        save[SAVE_STATUS_CHECKSUM_OFFSET + 1] = checksum >> BITS_PER_BYTE;
         result = nuContGBPakFwrite(
             &transfer->pakFile,
-            CARTRIDGE_RAM_ADDRESS + SAVE_STATUS_SUM_OFFSET,
-            &save[SAVE_STATUS_SUM_OFFSET],
+            CARTRIDGE_RAM_ADDRESS + SAVE_STATUS_CHECKSUM_OFFSET,
+            &save[SAVE_STATUS_CHECKSUM_OFFSET],
             SAVE_HALFWORD_SIZE
         );
         if (result != 0) {
@@ -3110,10 +3110,10 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
             return STATUS_WRITE_PAK_ERROR;
         }
 
-        sum = ComputeSaveChecksum(save) & 0xFFFF;
-        save[SAVE_CHECKSUM_OFFSET] = sum;
-        save[SAVE_CHECKSUM_OFFSET + 1] = sum >> BITS_PER_BYTE;
-        osSyncPrintf("write sum2 %04x\n", sum);
+        checksum = ComputeSaveChecksum(save) & 0xFFFF;
+        save[SAVE_CHECKSUM_OFFSET] = checksum;
+        save[SAVE_CHECKSUM_OFFSET + 1] = checksum >> BITS_PER_BYTE;
+        osSyncPrintf("write sum2 %04x\n", checksum);
         result = nuContGBPakFwrite(
             &transfer->pakFile,
             CARTRIDGE_RAM_ADDRESS + SAVE_CHECKSUM_OFFSET,
@@ -3147,10 +3147,10 @@ s32 ReadCartridgeCharacters(void) {
     s32 attempt;
     s32 index;
     Boolean isSignatureWrong;
-    s32 storedSum;
+    s32 storedChecksum;
     s32 dataAddress;
     s32 dataSize;
-    s32 sum;
+    s32 checksum;
     Boolean isAlreadyBrought;
     s32 gameBoyCharacterIndex;
 
@@ -3216,8 +3216,8 @@ s32 ReadCartridgeCharacters(void) {
                 CARTRIDGE_SAVE_SIZE
             );
             if (result == 0) {
-                sum = ComputeSaveChecksum(save);
-                storedSum = GetStoredChecksum(save);
+                checksum = ComputeSaveChecksum(save);
+                storedChecksum = GetStoredChecksum(save);
                 isSignatureWrong = FALSE;
                 for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
                     if (save[SAVE_SIGNATURE_OFFSET + index] != f_CartridgeSaveSignature[index]) {
@@ -3226,7 +3226,7 @@ s32 ReadCartridgeCharacters(void) {
                     }
                 }
 
-                if (sum == storedSum && isSignatureWrong == FALSE) {
+                if (checksum == storedChecksum && isSignatureWrong == FALSE) {
                     checkedState = SAVE_CHECKED;
                     osSyncPrintf("checksum1 OK! \n");
                     break;
@@ -3239,12 +3239,12 @@ s32 ReadCartridgeCharacters(void) {
                 if (save[recordOffset] == RECORD_PRESENT) {
                     checkedState = NOT_CHECKED;
 
-                    storedSum = save[recordOffset + RECORD_ADDRESS_OFFSET] +
+                    storedChecksum = save[recordOffset + RECORD_ADDRESS_OFFSET] +
                         (save[recordOffset + RECORD_ADDRESS_OFFSET + 1] << BITS_PER_BYTE) -
                         STATUS_ADDRESS_BIAS;
                     dataSize = save[recordOffset + RECORD_SIZE_OFFSET] +
                         (save[recordOffset + RECORD_SIZE_OFFSET + 1] << BITS_PER_BYTE);
-                    dataAddress = storedSum;
+                    dataAddress = storedChecksum;
                     for (attempt = 0; attempt != DATA_READ_ATTEMPTS; attempt++) {
                         result = nuContGBPakFread(
                             &transfer->pakFile,
@@ -3252,15 +3252,15 @@ s32 ReadCartridgeCharacters(void) {
                             characterData,
                             dataSize
                         );
-                        storedSum = save[recordOffset + RECORD_SUM_OFFSET] |
-                            (save[recordOffset + RECORD_SUM_OFFSET + 1] << BITS_PER_BYTE);
-                        sum = 0;
+                        storedChecksum = save[recordOffset + RECORD_CHECKSUM_OFFSET] |
+                            (save[recordOffset + RECORD_CHECKSUM_OFFSET + 1] << BITS_PER_BYTE);
+                        checksum = 0;
                         for (index = 0; index != dataSize; index++) {
-                            sum += characterData[index];
+                            checksum += characterData[index];
                         }
 
-                        sum &= 0xFFFF;
-                        if (sum == storedSum) {
+                        checksum &= 0xFFFF;
+                        if (checksum == storedChecksum) {
                             checkedState = DATA_CHECKED;
                             osSyncPrintf("checksum2 OK! \n");
                             break;
