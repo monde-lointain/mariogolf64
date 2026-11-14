@@ -360,7 +360,7 @@ static s32 f_UnusedWordsAfterCharacterSounds[2] UNUSED = {0};
 
 void PlayCharacterSound(
     CharacterId characterIndex,
-    s32 slot,
+    s32 voiceSlot,
     s32 soundIndex,
     SoundVolume volume,
     SoundPan pan
@@ -370,7 +370,7 @@ void PlayCharacterSound(
     if (volume == CHARACTER_SOUND_VOLUME) {
         PlaySoundWithEffects(
             f_CharacterSounds[characterIndex][soundIndex],
-            slot + FIRST_CHARACTER_SOUND_CHANNEL,
+            voiceSlot + FIRST_CHARACTER_SOUND_CHANNEL,
             f_CharacterSounds[characterIndex][soundIndex + 1],
             reverb,
             pan
@@ -379,7 +379,7 @@ void PlayCharacterSound(
     else {
         PlaySoundWithEffects(
             f_CharacterSounds[characterIndex][soundIndex],
-            slot + FIRST_CHARACTER_SOUND_CHANNEL,
+            voiceSlot + FIRST_CHARACTER_SOUND_CHANNEL,
             volume,
             reverb,
             pan

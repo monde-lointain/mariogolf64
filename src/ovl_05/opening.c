@@ -1423,7 +1423,7 @@ void UpdateOpening(void) {
     Vec3 point;
     Vec3 logoBallPoint;
     Vec3 handPoint;
-    s32 slot;
+    s32 slotIndex;
     SoundChannel channel;
     s32 controllerIndex;
     s32 pressedButtons;
@@ -3096,9 +3096,9 @@ void UpdateOpening(void) {
     if (f_OpeningShotState == 1) {
         f_UnusedStickOffsetX += g_ControllerStates[1].stickX * 0.002f;
         f_UnusedStickOffsetY += g_ControllerStates[1].stickY * 0.002f;
-        for (slot = 0; slot < 4; slot++) {
-            if (IsCharacterSlotBusy(slot)) {
-                GetCharacterPointPosition(slot, 1, point);
+        for (slotIndex = 0; slotIndex < CHARACTER_SLOT_COUNT; slotIndex++) {
+            if (IsCharacterSlotBusy(slotIndex)) {
+                GetCharacterPointPosition(slotIndex, 1, point);
             }
         }
 

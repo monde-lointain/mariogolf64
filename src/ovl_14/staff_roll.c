@@ -595,7 +595,7 @@ void RunStaffRollTimeline(s32 frame) {
     CoursePoint point;
     Vec3 focus;
     CharacterSlot *character;
-    s32 slot;
+    s32 slotIndex;
     s32 shrink;
     f32 radius;
     s32 swingAnimation;
@@ -649,53 +649,53 @@ void RunStaffRollTimeline(s32 frame) {
         f_CastFramingYaw = (f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
-        slot = f_CastSlot ^ 1;
-        LoadCharacter(slot, f_CastOrder[f_CastIndex++], GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterClub(slot, TEE_CLUB);
-        SetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL);
+        slotIndex = f_CastSlot ^ 1;
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex++], GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slotIndex, TEE_CLUB);
+        SetSwingAnimation(slotIndex, TEE_CLUB, SHOT_MODE_NORMAL);
         swingAnimation =
-            GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL));
+            GetAnimationIndex(slotIndex, GetSwingAnimation(slotIndex, TEE_CLUB, SHOT_MODE_NORMAL));
         AdvanceAnimation(
-            slot,
-            GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_IMPACT) -
+            slotIndex,
+            GetAnimationEventFrame(slotIndex, swingAnimation, ANIMATION_EVENT_IMPACT) -
                 CAST_SWING_LEAD_FRAMES
         );
         point[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
         point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y];
         point[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
-        PlaceCharacter(slot, point, GOLFER_HEADING);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, GOLFER_HEADING);
+        f_CastSlot = slotIndex;
     }
 
     if (IsTeeReactionFrame(frame)) {
         ClearEffects();
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
-        slot = f_CastSlot ^ 1;
+        slotIndex = f_CastSlot ^ 1;
         g_CurrentShot.heading =
             -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F * RADIANS_TO_BINARY_ANGLE;
         if (frame == TEE_REACTIONS_FRAME) {
             f_CastIndex -= SHOTS_PER_STAGE;
         }
 
-        LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterAnimation(slot, REACTION_ANIMATION_PAR);
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slotIndex, REACTION_ANIMATION_PAR);
         GetAnimationEventFrame(
-            slot,
-            GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+            slotIndex,
+            GetAnimationIndex(slotIndex, GetSwingAnimation(slotIndex, TEE_CLUB, SHOT_MODE_NORMAL)),
             ANIMATION_EVENT_IMPACT
         );
         ClearReactionSpot();
         ConsiderReactionSpot(g_HoleSetup.teePosition);
-        StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_PAR);
+        StartReaction(slotIndex, f_CastOrder[f_CastIndex], REACTION_ANIMATION_PAR);
         f_IsReactionShown = TRUE;
         point[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
         point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y];
         point[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
-        PlaceCharacter(slot, point, DegreesToRadians(-(f_CastIndex * CAST_YAW_STEP)));
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, DegreesToRadians(-(f_CastIndex * CAST_YAW_STEP)));
+        f_CastSlot = slotIndex;
         f_CastIndex++;
     }
 
@@ -715,20 +715,22 @@ void RunStaffRollTimeline(s32 frame) {
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
         f_IsReactionShown = FALSE;
-        slot = f_CastSlot ^ 1;
-        LoadCharacter(slot, f_CastOrder[f_CastIndex++], GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterClub(slot, FAIRWAY_CLUB);
+        slotIndex = f_CastSlot ^ 1;
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex++], GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slotIndex, FAIRWAY_CLUB);
         if (frame == FAIRWAY_SHOTS_FRAME) {
-            SetStanceAnimation(slot, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
+            SetStanceAnimation(slotIndex, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
         }
         else {
-            SetSwingAnimation(slot, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
-            swingAnimation =
-                GetAnimationIndex(slot, GetSwingAnimation(slot, FAIRWAY_CLUB, SHOT_MODE_NORMAL));
+            SetSwingAnimation(slotIndex, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
+            swingAnimation = GetAnimationIndex(
+                slotIndex,
+                GetSwingAnimation(slotIndex, FAIRWAY_CLUB, SHOT_MODE_NORMAL)
+            );
             AdvanceAnimation(
-                slot,
-                GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_IMPACT) -
+                slotIndex,
+                GetAnimationEventFrame(slotIndex, swingAnimation, ANIMATION_EVENT_IMPACT) -
                     CAST_SWING_LEAD_FRAMES
             );
         }
@@ -736,8 +738,8 @@ void RunStaffRollTimeline(s32 frame) {
         point[AXIS_X] = g_HolePoints.aimPoints[0][AXIS_X];
         point[AXIS_Y] = g_HolePoints.aimPoints[0][AXIS_Y];
         point[AXIS_Z] = g_HolePoints.aimPoints[0][AXIS_Z];
-        PlaceCharacter(slot, point, GOLFER_HEADING);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, GOLFER_HEADING);
+        f_CastSlot = slotIndex;
     }
 
     if (frame == FAIRWAY_SWING_FRAME) {
@@ -748,30 +750,30 @@ void RunStaffRollTimeline(s32 frame) {
         ClearEffects();
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
-        slot = f_CastSlot ^ 1;
+        slotIndex = f_CastSlot ^ 1;
         g_CurrentShot.heading =
             -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F * RADIANS_TO_BINARY_ANGLE;
         if (frame == FAIRWAY_REACTIONS_FRAME) {
             f_CastIndex -= SHOTS_PER_STAGE;
         }
 
-        LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterAnimation(slot, REACTION_ANIMATION_BOGEY);
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slotIndex, REACTION_ANIMATION_BOGEY);
         GetAnimationEventFrame(
-            slot,
-            GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+            slotIndex,
+            GetAnimationIndex(slotIndex, GetSwingAnimation(slotIndex, TEE_CLUB, SHOT_MODE_NORMAL)),
             ANIMATION_EVENT_IMPACT
         );
         ClearReactionSpot();
         ConsiderReactionSpot(g_HolePoints.aimPoints[0]);
-        StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BOGEY);
+        StartReaction(slotIndex, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BOGEY);
         f_IsReactionShown = TRUE;
         point[AXIS_X] = g_HolePoints.aimPoints[0][AXIS_X];
         point[AXIS_Y] = g_HolePoints.aimPoints[0][AXIS_Y];
         point[AXIS_Z] = g_HolePoints.aimPoints[0][AXIS_Z];
-        PlaceCharacter(slot, point, -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F);
+        f_CastSlot = slotIndex;
         f_CastIndex++;
     }
 
@@ -792,20 +794,22 @@ void RunStaffRollTimeline(s32 frame) {
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
         f_IsReactionShown = FALSE;
-        slot = f_CastSlot ^ 1;
-        LoadCharacter(slot, f_CastOrder[f_CastIndex++], GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterClub(slot, APPROACH_CLUB);
+        slotIndex = f_CastSlot ^ 1;
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex++], GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slotIndex, APPROACH_CLUB);
         if (frame == APPROACH_SHOTS_FRAME) {
-            SetStanceAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL);
+            SetStanceAnimation(slotIndex, APPROACH_CLUB, SHOT_MODE_NORMAL);
         }
         else {
-            SetSwingAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL);
-            swingAnimation =
-                GetAnimationIndex(slot, GetSwingAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL));
+            SetSwingAnimation(slotIndex, APPROACH_CLUB, SHOT_MODE_NORMAL);
+            swingAnimation = GetAnimationIndex(
+                slotIndex,
+                GetSwingAnimation(slotIndex, APPROACH_CLUB, SHOT_MODE_NORMAL)
+            );
             AdvanceAnimation(
-                slot,
-                GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_IMPACT) -
+                slotIndex,
+                GetAnimationEventFrame(slotIndex, swingAnimation, ANIMATION_EVENT_IMPACT) -
                     CAST_SWING_LEAD_FRAMES
             );
         }
@@ -813,8 +817,8 @@ void RunStaffRollTimeline(s32 frame) {
         point[AXIS_X] = g_HolePoints.aimPoints[1][AXIS_X];
         point[AXIS_Y] = g_HolePoints.aimPoints[1][AXIS_Y];
         point[AXIS_Z] = g_HolePoints.aimPoints[1][AXIS_Z];
-        PlaceCharacter(slot, point, GOLFER_HEADING);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, GOLFER_HEADING);
+        f_CastSlot = slotIndex;
     }
 
     if (frame == APPROACH_SWING_FRAME) {
@@ -825,30 +829,30 @@ void RunStaffRollTimeline(s32 frame) {
         ClearEffects();
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
-        slot = f_CastSlot ^ 1;
+        slotIndex = f_CastSlot ^ 1;
         g_CurrentShot.heading =
             -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F * RADIANS_TO_BINARY_ANGLE;
         if (frame == APPROACH_REACTIONS_FRAME) {
             f_CastIndex -= SHOTS_PER_STAGE;
         }
 
-        LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterAnimation(slot, REACTION_ANIMATION_BIRDIE);
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slotIndex, REACTION_ANIMATION_BIRDIE);
         GetAnimationEventFrame(
-            slot,
-            GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+            slotIndex,
+            GetAnimationIndex(slotIndex, GetSwingAnimation(slotIndex, TEE_CLUB, SHOT_MODE_NORMAL)),
             ANIMATION_EVENT_IMPACT
         );
         ClearReactionSpot();
         ConsiderReactionSpot(g_HolePoints.aimPoints[1]);
-        StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BIRDIE);
+        StartReaction(slotIndex, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BIRDIE);
         f_IsReactionShown = TRUE;
         point[AXIS_X] = g_HolePoints.aimPoints[1][AXIS_X];
         point[AXIS_Y] = g_HolePoints.aimPoints[1][AXIS_Y];
         point[AXIS_Z] = g_HolePoints.aimPoints[1][AXIS_Z];
-        PlaceCharacter(slot, point, -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F);
+        f_CastSlot = slotIndex;
         f_CastIndex++;
     }
 
@@ -869,22 +873,22 @@ void RunStaffRollTimeline(s32 frame) {
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
         f_IsReactionShown = FALSE;
-        slot = f_CastSlot ^ 1;
-        LoadCharacter(slot, f_CastOrder[f_CastIndex++], GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterClub(slot, CLUB_TYPE_PUTTER);
+        slotIndex = f_CastSlot ^ 1;
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex++], GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slotIndex, CLUB_TYPE_PUTTER);
         if (frame == PUTT_SHOTS_FRAME) {
-            SetStanceAnimation(slot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
+            SetStanceAnimation(slotIndex, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
         }
         else {
-            SetSwingAnimation(slot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
+            SetSwingAnimation(slotIndex, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
             swingAnimation = GetAnimationIndex(
-                slot,
-                GetSwingAnimation(slot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL)
+                slotIndex,
+                GetSwingAnimation(slotIndex, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL)
             );
             AdvanceAnimation(
-                slot,
-                GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_IMPACT) -
+                slotIndex,
+                GetAnimationEventFrame(slotIndex, swingAnimation, ANIMATION_EVENT_IMPACT) -
                     CAST_SWING_LEAD_FRAMES
             );
         }
@@ -892,8 +896,8 @@ void RunStaffRollTimeline(s32 frame) {
         point[AXIS_X] = f_NearCupPoint[AXIS_X];
         point[AXIS_Y] = f_NearCupPoint[AXIS_Y];
         point[AXIS_Z] = f_NearCupPoint[AXIS_Z];
-        PlaceCharacter(slot, point, GOLFER_HEADING);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, GOLFER_HEADING);
+        f_CastSlot = slotIndex;
     }
 
     if (frame == PUTT_SWING_FRAME) {
@@ -904,30 +908,30 @@ void RunStaffRollTimeline(s32 frame) {
         ClearEffects();
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
-        slot = f_CastSlot ^ 1;
+        slotIndex = f_CastSlot ^ 1;
         g_CurrentShot.heading =
             -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F * RADIANS_TO_BINARY_ANGLE;
         if (frame == PUTT_REACTIONS_FRAME) {
             f_CastIndex -= SHOTS_PER_STAGE;
         }
 
-        LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterAnimation(slot, REACTION_ANIMATION_EAGLE);
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slotIndex, REACTION_ANIMATION_EAGLE);
         GetAnimationEventFrame(
-            slot,
-            GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+            slotIndex,
+            GetAnimationIndex(slotIndex, GetSwingAnimation(slotIndex, TEE_CLUB, SHOT_MODE_NORMAL)),
             ANIMATION_EVENT_IMPACT
         );
         ClearReactionSpot();
         ConsiderReactionSpot(f_NearCupPoint);
-        StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_EAGLE);
+        StartReaction(slotIndex, f_CastOrder[f_CastIndex], REACTION_ANIMATION_EAGLE);
         f_IsReactionShown = TRUE;
         point[AXIS_X] = f_NearCupPoint[AXIS_X];
         point[AXIS_Y] = f_NearCupPoint[AXIS_Y];
         point[AXIS_Z] = f_NearCupPoint[AXIS_Z];
-        PlaceCharacter(slot, point, DegreesToRadians(-(f_CastIndex * CAST_YAW_STEP)));
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, DegreesToRadians(-(f_CastIndex * CAST_YAW_STEP)));
+        f_CastSlot = slotIndex;
         f_CastIndex++;
     }
 
@@ -943,45 +947,45 @@ void RunStaffRollTimeline(s32 frame) {
         f_IsReactionShown = FALSE;
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
-        slot = f_CastSlot ^ 1;
-        LoadCharacter(slot, f_CastOrder[f_CastIndex], GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterClub(slot, TEE_CLUB);
-        SetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL);
+        slotIndex = f_CastSlot ^ 1;
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex], GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slotIndex, TEE_CLUB);
+        SetSwingAnimation(slotIndex, TEE_CLUB, SHOT_MODE_NORMAL);
         GetAnimationEventFrame(
-            slot,
-            GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+            slotIndex,
+            GetAnimationIndex(slotIndex, GetSwingAnimation(slotIndex, TEE_CLUB, SHOT_MODE_NORMAL)),
             ANIMATION_EVENT_IMPACT
         );
         point[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
         point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y];
         point[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
-        PlaceCharacter(slot, point, GOLFER_HEADING);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, GOLFER_HEADING);
+        f_CastSlot = slotIndex;
     }
 
     if (frame == FINALE_PAR_FRAME) {
         ClearEffects();
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
-        slot = f_CastSlot ^ 1;
-        LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterAnimation(slot, REACTION_ANIMATION_PAR);
+        slotIndex = f_CastSlot ^ 1;
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slotIndex, REACTION_ANIMATION_PAR);
         GetAnimationEventFrame(
-            slot,
-            GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+            slotIndex,
+            GetAnimationIndex(slotIndex, GetSwingAnimation(slotIndex, TEE_CLUB, SHOT_MODE_NORMAL)),
             ANIMATION_EVENT_IMPACT
         );
         ClearReactionSpot();
         ConsiderReactionSpot(g_HoleSetup.teePosition);
-        StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_PAR);
+        StartReaction(slotIndex, f_CastOrder[f_CastIndex], REACTION_ANIMATION_PAR);
         f_IsReactionShown = TRUE;
         point[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
         point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y];
         point[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
-        PlaceCharacter(slot, point, GOLFER_HEADING);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, GOLFER_HEADING);
+        f_CastSlot = slotIndex;
     }
 
     if (frame == FINALE_FAIRWAY_FRAME) {
@@ -991,45 +995,48 @@ void RunStaffRollTimeline(s32 frame) {
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
         f_IsReactionShown = FALSE;
-        slot = f_CastSlot ^ 1;
-        LoadCharacter(slot, f_CastOrder[f_CastIndex], GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterClub(slot, FAIRWAY_CLUB);
-        SetSwingAnimation(slot, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
+        slotIndex = f_CastSlot ^ 1;
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex], GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slotIndex, FAIRWAY_CLUB);
+        SetSwingAnimation(slotIndex, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
         GetAnimationEventFrame(
-            slot,
-            GetAnimationIndex(slot, GetSwingAnimation(slot, FAIRWAY_CLUB, SHOT_MODE_NORMAL)),
+            slotIndex,
+            GetAnimationIndex(
+                slotIndex,
+                GetSwingAnimation(slotIndex, FAIRWAY_CLUB, SHOT_MODE_NORMAL)
+            ),
             ANIMATION_EVENT_IMPACT
         );
         point[AXIS_X] = g_HolePoints.aimPoints[0][AXIS_X];
         point[AXIS_Y] = g_HolePoints.aimPoints[0][AXIS_Y];
         point[AXIS_Z] = g_HolePoints.aimPoints[0][AXIS_Z];
-        PlaceCharacter(slot, point, GOLFER_HEADING);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, GOLFER_HEADING);
+        f_CastSlot = slotIndex;
     }
 
     if (frame == FINALE_BOGEY_FRAME) {
         ClearEffects();
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
-        slot = f_CastSlot ^ 1;
-        LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterAnimation(slot, REACTION_ANIMATION_BOGEY);
+        slotIndex = f_CastSlot ^ 1;
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slotIndex, REACTION_ANIMATION_BOGEY);
         GetAnimationEventFrame(
-            slot,
-            GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+            slotIndex,
+            GetAnimationIndex(slotIndex, GetSwingAnimation(slotIndex, TEE_CLUB, SHOT_MODE_NORMAL)),
             ANIMATION_EVENT_IMPACT
         );
         ClearReactionSpot();
         ConsiderReactionSpot(g_HolePoints.aimPoints[0]);
-        StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BOGEY);
+        StartReaction(slotIndex, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BOGEY);
         f_IsReactionShown = TRUE;
         point[AXIS_X] = g_HolePoints.aimPoints[0][AXIS_X];
         point[AXIS_Y] = g_HolePoints.aimPoints[0][AXIS_Y];
         point[AXIS_Z] = g_HolePoints.aimPoints[0][AXIS_Z];
-        PlaceCharacter(slot, point, GOLFER_HEADING);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, GOLFER_HEADING);
+        f_CastSlot = slotIndex;
     }
 
     if (frame == FINALE_APPROACH_FRAME) {
@@ -1039,47 +1046,49 @@ void RunStaffRollTimeline(s32 frame) {
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
         f_IsReactionShown = FALSE;
-        slot = f_CastSlot ^ 1;
-        LoadCharacter(slot, f_CastOrder[f_CastIndex], GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterClub(slot, APPROACH_CLUB);
-        SetSwingAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL);
-        swingAnimation =
-            GetAnimationIndex(slot, GetSwingAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL));
+        slotIndex = f_CastSlot ^ 1;
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex], GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slotIndex, APPROACH_CLUB);
+        SetSwingAnimation(slotIndex, APPROACH_CLUB, SHOT_MODE_NORMAL);
+        swingAnimation = GetAnimationIndex(
+            slotIndex,
+            GetSwingAnimation(slotIndex, APPROACH_CLUB, SHOT_MODE_NORMAL)
+        );
         AdvanceAnimation(
-            slot,
-            GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_IMPACT) -
+            slotIndex,
+            GetAnimationEventFrame(slotIndex, swingAnimation, ANIMATION_EVENT_IMPACT) -
                 (2 * CAST_SWING_LEAD_FRAMES)
         );
         point[AXIS_X] = g_HolePoints.aimPoints[1][AXIS_X];
         point[AXIS_Y] = g_HolePoints.aimPoints[1][AXIS_Y];
         point[AXIS_Z] = g_HolePoints.aimPoints[1][AXIS_Z];
-        PlaceCharacter(slot, point, GOLFER_HEADING);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, GOLFER_HEADING);
+        f_CastSlot = slotIndex;
     }
 
     if (frame == FINALE_BIRDIE_FRAME) {
         ClearEffects();
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
-        slot = f_CastSlot ^ 1;
-        LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterAnimation(slot, REACTION_ANIMATION_BIRDIE);
+        slotIndex = f_CastSlot ^ 1;
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slotIndex, REACTION_ANIMATION_BIRDIE);
         GetAnimationEventFrame(
-            slot,
-            GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+            slotIndex,
+            GetAnimationIndex(slotIndex, GetSwingAnimation(slotIndex, TEE_CLUB, SHOT_MODE_NORMAL)),
             ANIMATION_EVENT_IMPACT
         );
         ClearReactionSpot();
         ConsiderReactionSpot(g_HolePoints.aimPoints[1]);
-        StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BIRDIE);
+        StartReaction(slotIndex, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BIRDIE);
         f_IsReactionShown = TRUE;
         point[AXIS_X] = g_HolePoints.aimPoints[1][AXIS_X];
         point[AXIS_Y] = g_HolePoints.aimPoints[1][AXIS_Y];
         point[AXIS_Z] = g_HolePoints.aimPoints[1][AXIS_Z];
-        PlaceCharacter(slot, point, GOLFER_HEADING);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, GOLFER_HEADING);
+        f_CastSlot = slotIndex;
     }
 
     if (frame == FINALE_PUTT_FRAME) {
@@ -1088,47 +1097,49 @@ void RunStaffRollTimeline(s32 frame) {
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
         f_IsReactionShown = FALSE;
-        slot = f_CastSlot ^ 1;
-        LoadCharacter(slot, f_CastOrder[f_CastIndex], GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterClub(slot, CLUB_TYPE_PUTTER);
-        SetSwingAnimation(slot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
-        swingAnimation =
-            GetAnimationIndex(slot, GetSwingAnimation(slot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL));
+        slotIndex = f_CastSlot ^ 1;
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex], GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slotIndex, CLUB_TYPE_PUTTER);
+        SetSwingAnimation(slotIndex, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
+        swingAnimation = GetAnimationIndex(
+            slotIndex,
+            GetSwingAnimation(slotIndex, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL)
+        );
         AdvanceAnimation(
-            slot,
-            GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_IMPACT) -
+            slotIndex,
+            GetAnimationEventFrame(slotIndex, swingAnimation, ANIMATION_EVENT_IMPACT) -
                 FINAL_PUTT_LEAD_FRAMES
         );
         point[AXIS_X] = f_NearCupPoint[AXIS_X];
         point[AXIS_Y] = f_NearCupPoint[AXIS_Y];
         point[AXIS_Z] = f_NearCupPoint[AXIS_Z];
-        PlaceCharacter(slot, point, GOLFER_HEADING);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, GOLFER_HEADING);
+        f_CastSlot = slotIndex;
     }
 
     if (frame == FINALE_EAGLE_FRAME) {
         ClearEffects();
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
-        slot = f_CastSlot ^ 1;
-        LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
-        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
-        SetCharacterAnimation(slot, REACTION_ANIMATION_EAGLE);
+        slotIndex = f_CastSlot ^ 1;
+        LoadCharacter(slotIndex, f_CastOrder[f_CastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slotIndex, REACTION_ANIMATION_EAGLE);
         GetAnimationEventFrame(
-            slot,
-            GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+            slotIndex,
+            GetAnimationIndex(slotIndex, GetSwingAnimation(slotIndex, TEE_CLUB, SHOT_MODE_NORMAL)),
             ANIMATION_EVENT_IMPACT
         );
         ClearReactionSpot();
         ConsiderReactionSpot(f_NearCupPoint);
-        StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_EAGLE);
+        StartReaction(slotIndex, f_CastOrder[f_CastIndex], REACTION_ANIMATION_EAGLE);
         f_IsReactionShown = TRUE;
         point[AXIS_X] = f_NearCupPoint[AXIS_X];
         point[AXIS_Y] = f_NearCupPoint[AXIS_Y];
         point[AXIS_Z] = f_NearCupPoint[AXIS_Z];
-        PlaceCharacter(slot, point, GOLFER_HEADING);
-        f_CastSlot = slot;
+        PlaceCharacter(slotIndex, point, GOLFER_HEADING);
+        f_CastSlot = slotIndex;
     }
 
     if (frame == LAST_FADE_OUT_FRAME) {
