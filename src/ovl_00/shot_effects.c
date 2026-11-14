@@ -344,9 +344,9 @@ void DrawSparks(Gfx **displayListHead) {
                 ) < 0) {
                 size = (f_SparkBurstAges[i] * SPARK_AGE_GROWTH) + SPARK_START_SIZE;
                 burstShown[i] = SPARK_BURST_SHOWN;
-                burstPoints[i][0] = point.x;
-                burstPoints[i][1] = point.y;
-                burstPoints[i][2] = point.depth;
+                burstPoints[i][AXIS_X] = point.x;
+                burstPoints[i][AXIS_Y] = point.y;
+                burstPoints[i][AXIS_Z] = point.depth;
                 burstScales[i] = point.scaleX * SPARK_DISTANCE_SCALE;
                 if (burstScales[i] > SPARK_SCALE_MAX) {
                     burstScales[i] = SPARK_SCALE_MAX;
@@ -436,9 +436,9 @@ void DrawSparks(Gfx **displayListHead) {
                 rotation[AXIS_Y] = 0;
                 rotation[AXIS_Z] = f_SparkAngles[i];
                 translation[AXIS_X] = (f_SparkOffsets[i][AXIS_X] * burstScales[burstIndex]) +
-                    burstPoints[burstIndex][0] - (SCREEN_WIDTH / 2);
+                    burstPoints[burstIndex][AXIS_X] - (SCREEN_WIDTH / 2);
                 translation[AXIS_Y] = (f_SparkOffsets[i][AXIS_Y] * burstScales[burstIndex]) -
-                    burstPoints[burstIndex][1] + (SCREEN_HEIGHT / 2);
+                    burstPoints[burstIndex][AXIS_Y] + (SCREEN_HEIGHT / 2);
                 translation[AXIS_Z] = SPARK_MODEL_Z;
                 scale[AXIS_X] = burstScales[burstIndex] * SPARK_MODEL_SCALE;
                 scale[AXIS_Y] = burstScales[burstIndex] * SPARK_MODEL_SCALE;
@@ -449,12 +449,12 @@ void DrawSparks(Gfx **displayListHead) {
                 }
 
                 if (f_SparkKinds[i] == SPARK_KIND_FLAGSTICK &&
-                    IsSparkCoordinateInRange(burstPoints[burstIndex][0]) &&
-                    IsSparkCoordinateInRange(burstPoints[burstIndex][1])) {
+                    IsSparkCoordinateInRange(burstPoints[burstIndex][AXIS_X]) &&
+                    IsSparkCoordinateInRange(burstPoints[burstIndex][AXIS_Y])) {
                     left = (f_SparkOffsets[i][AXIS_X] * burstScales[burstIndex]) +
-                        burstPoints[burstIndex][0];
+                        burstPoints[burstIndex][AXIS_X];
                     top = (f_SparkOffsets[i][AXIS_Y] * burstScales[burstIndex]) +
-                        burstPoints[burstIndex][1];
+                        burstPoints[burstIndex][AXIS_Y];
                     gSPScisTextureRectangle(
                         gfx++,
                         QuarterPixels(left - burstHalfSizes[burstIndex]),
@@ -602,15 +602,15 @@ void StartSwingTrail(SwingTrailKind kind) {
         for (i = 0; i != SWING_TRAIL_MATRIX_COUNT; i++) {
             guTranslate(
                 &f_SwingTrailMatrices[i][0],
-                f_SwingTrailOuterPath[0][AXIS_X],
-                f_SwingTrailOuterPath[0][AXIS_Y],
-                f_SwingTrailOuterPath[0][AXIS_Z]
+                f_SwingTrailOuterPath[AXIS_X][AXIS_X],
+                f_SwingTrailOuterPath[AXIS_X][AXIS_Y],
+                f_SwingTrailOuterPath[AXIS_X][AXIS_Z]
             );
             guTranslate(
                 &f_SwingTrailMatrices[i][1],
-                f_SwingTrailInnerPath[0][AXIS_X],
-                f_SwingTrailInnerPath[0][AXIS_Y],
-                f_SwingTrailInnerPath[0][AXIS_Z]
+                f_SwingTrailInnerPath[AXIS_X][AXIS_X],
+                f_SwingTrailInnerPath[AXIS_X][AXIS_Y],
+                f_SwingTrailInnerPath[AXIS_X][AXIS_Z]
             );
         }
     }

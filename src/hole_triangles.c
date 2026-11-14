@@ -444,21 +444,21 @@ void DrawRings(Gfx **displayListHead, CameraMatrices *matrices UNUSED, Camera *c
                             sparkleSection < RING_SECTION_COUNT;
                             sparkleSection += RING_SPARKLE_SPACING) {
                             angle = sparkleTurn + (sparkleSection * RING_SECTION_ANGLE);
-                            ringPoint[0] = cosf(angle) * RING_RADIUS;
-                            ringPoint[1] = sinf(angle) * RING_RADIUS;
-                            ringPoint[2] = 0;
+                            ringPoint[AXIS_X] = cosf(angle) * RING_RADIUS;
+                            ringPoint[AXIS_Y] = sinf(angle) * RING_RADIUS;
+                            ringPoint[AXIS_Z] = 0;
                             guMtxXFMF(
                                 transform,
-                                ringPoint[0],
-                                ringPoint[1],
-                                ringPoint[2],
-                                &worldPoint[0],
-                                &worldPoint[1],
-                                &worldPoint[2]
+                                ringPoint[AXIS_X],
+                                ringPoint[AXIS_Y],
+                                ringPoint[AXIS_Z],
+                                &worldPoint[AXIS_X],
+                                &worldPoint[AXIS_Y],
+                                &worldPoint[AXIS_Z]
                             );
-                            position[AXIS_X] = worldPoint[0] * WORLD_TO_COURSE_SCALE;
-                            position[AXIS_Y] = worldPoint[1] * WORLD_TO_COURSE_SCALE;
-                            position[AXIS_Z] = worldPoint[2] * WORLD_TO_COURSE_SCALE;
+                            position[AXIS_X] = worldPoint[AXIS_X] * WORLD_TO_COURSE_SCALE;
+                            position[AXIS_Y] = worldPoint[AXIS_Y] * WORLD_TO_COURSE_SCALE;
+                            position[AXIS_Z] = worldPoint[AXIS_Z] * WORLD_TO_COURSE_SCALE;
                             SpawnSparkle(position);
                         }
                     }
@@ -606,17 +606,20 @@ static s32 BuildRingMatrices(void) {
         corners.coordinates[2][1] = triangle->vertices[1].v.ob[AXIS_Z];
         corners.coordinates[2][2] = triangle->vertices[2].v.ob[AXIS_Z];
         if (corners.coordinates[0][1] | corners.coordinates[1][1] | corners.coordinates[2][1]) {
-            triangle->ignoredCenter[0] = (corners.coordinates[0][0] + corners.coordinates[0][1] +
-                                             corners.coordinates[0][2]) /
+            triangle->ignoredCenter[AXIS_X] =
+                (corners.coordinates[0][0] + corners.coordinates[0][1] +
+                    corners.coordinates[0][2]) /
                 3;
-            triangle->ignoredCenter[1] = (corners.coordinates[1][0] + corners.coordinates[1][1] +
-                                             corners.coordinates[1][2]) /
+            triangle->ignoredCenter[AXIS_Y] =
+                (corners.coordinates[1][0] + corners.coordinates[1][1] +
+                    corners.coordinates[1][2]) /
                 3;
-            triangle->ignoredCenter[2] = (corners.coordinates[2][0] + corners.coordinates[2][1] +
-                                             corners.coordinates[2][2]) /
+            triangle->ignoredCenter[AXIS_Z] =
+                (corners.coordinates[2][0] + corners.coordinates[2][1] +
+                    corners.coordinates[2][2]) /
                 3;
-            up[0] = up[2] = 0.0f;
-            up[1] = -1.0f;
+            up[AXIS_X] = up[AXIS_Z] = 0.0f;
+            up[AXIS_Y] = -1.0f;
             guAlignF(
                 rotation,
                 0.0f,

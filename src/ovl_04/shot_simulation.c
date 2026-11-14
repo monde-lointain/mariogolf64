@@ -29,12 +29,12 @@ void SimulateShot(ShotLaunch *shot) {
     simulation = &simulationState;
     g_SimulatedShot.shot = *shot;
     g_SimulatedShot.stepCount = 0;
-    g_SimulatedShot.positionStepMax[0] = 0;
-    g_SimulatedShot.positionStepMax[1] = 0;
-    g_SimulatedShot.positionStepMax[2] = 0;
-    g_SimulatedShot.positionStepMin[0] = 0;
-    g_SimulatedShot.positionStepMin[1] = 0;
-    g_SimulatedShot.positionStepMin[2] = 0;
+    g_SimulatedShot.positionStepMax[AXIS_X] = 0;
+    g_SimulatedShot.positionStepMax[AXIS_Y] = 0;
+    g_SimulatedShot.positionStepMax[AXIS_Z] = 0;
+    g_SimulatedShot.positionStepMin[AXIS_X] = 0;
+    g_SimulatedShot.positionStepMin[AXIS_Y] = 0;
+    g_SimulatedShot.positionStepMin[AXIS_Z] = 0;
     g_SimulatedShot.flagHitStep = NO_STEP;
 
     g_SimulatedShot.positionMax[AXIS_X] = g_SimulatedShot.positionMin[AXIS_X] =
@@ -88,32 +88,32 @@ void SimulateShot(ShotLaunch *shot) {
         if (step < PATH_STEP_COUNT) {
             if (simulation->position[AXIS_X] > g_SimulatedShot.positionMax[AXIS_X]) {
                 g_SimulatedShot.positionMax[AXIS_X] = simulation->position[AXIS_X];
-                g_SimulatedShot.positionStepMax[0] = step;
+                g_SimulatedShot.positionStepMax[AXIS_X] = step;
             }
 
             if (simulation->position[AXIS_X] < g_SimulatedShot.positionMin[AXIS_X]) {
                 g_SimulatedShot.positionMin[AXIS_X] = simulation->position[AXIS_X];
-                g_SimulatedShot.positionStepMin[0] = step;
+                g_SimulatedShot.positionStepMin[AXIS_X] = step;
             }
 
             if (simulation->position[AXIS_Y] > g_SimulatedShot.positionMax[AXIS_Y]) {
                 g_SimulatedShot.positionMax[AXIS_Y] = simulation->position[AXIS_Y];
-                g_SimulatedShot.positionStepMax[1] = step;
+                g_SimulatedShot.positionStepMax[AXIS_Y] = step;
             }
 
             if (simulation->position[AXIS_Y] < g_SimulatedShot.positionMin[AXIS_Y]) {
                 g_SimulatedShot.positionMin[AXIS_Y] = simulation->position[AXIS_Y];
-                g_SimulatedShot.positionStepMin[1] = step;
+                g_SimulatedShot.positionStepMin[AXIS_Y] = step;
             }
 
             if (simulation->position[AXIS_Z] > g_SimulatedShot.positionMax[AXIS_Z]) {
                 g_SimulatedShot.positionMax[AXIS_Z] = simulation->position[AXIS_Z];
-                g_SimulatedShot.positionStepMax[2] = step;
+                g_SimulatedShot.positionStepMax[AXIS_Z] = step;
             }
 
             if (simulation->position[AXIS_Z] < g_SimulatedShot.positionMin[AXIS_Z]) {
                 g_SimulatedShot.positionMin[AXIS_Z] = simulation->position[AXIS_Z];
-                g_SimulatedShot.positionStepMin[2] = step;
+                g_SimulatedShot.positionStepMin[AXIS_Z] = step;
             }
         }
 

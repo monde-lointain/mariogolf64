@@ -423,28 +423,28 @@ void RollGolfBall(GolfBall *ball UNUSED, BallSimulation *simulation) {
     }
 
     if (simulation->state == BALL_STATE_FLYING || simulation->state == BALL_STATE_ROLLING) {
-        movement[0] = simulation->position[AXIS_X] - f_LastRolledBallPosition[AXIS_X];
-        movement[1] = simulation->position[AXIS_Y] - f_LastRolledBallPosition[AXIS_Y];
-        movement[2] = simulation->position[AXIS_Z] - f_LastRolledBallPosition[AXIS_Z];
+        movement[AXIS_X] = simulation->position[AXIS_X] - f_LastRolledBallPosition[AXIS_X];
+        movement[AXIS_Y] = simulation->position[AXIS_Y] - f_LastRolledBallPosition[AXIS_Y];
+        movement[AXIS_Z] = simulation->position[AXIS_Z] - f_LastRolledBallPosition[AXIS_Z];
         f_LastRolledBallPosition[AXIS_X] = simulation->position[AXIS_X];
         f_LastRolledBallPosition[AXIS_Y] = simulation->position[AXIS_Y];
         f_LastRolledBallPosition[AXIS_Z] = simulation->position[AXIS_Z];
     }
     else {
-        movement[0] = simulation->velocity[0];
-        movement[1] = simulation->velocity[1];
-        movement[2] = simulation->velocity[2];
+        movement[AXIS_X] = simulation->velocity[0];
+        movement[AXIS_Y] = simulation->velocity[1];
+        movement[AXIS_Z] = simulation->velocity[2];
     }
 
     if (simulation->state != BALL_STATE_STOPPED) {
-        distance = GetLength(movement[0], movement[1], movement[2]);
-        if (movement[2] != 0 || movement[0] != 0) {
+        distance = GetLength(movement[AXIS_X], movement[AXIS_Y], movement[AXIS_Z]);
+        if (movement[AXIS_Z] != 0 || movement[AXIS_X] != 0) {
             guRotateF(
                 rotation,
                 distance * BALL_ROLL_DEGREES_PER_UNIT,
-                -movement[2],
+                -movement[AXIS_Z],
                 0.0f,
-                movement[0]
+                movement[AXIS_X]
             );
             guMtxCatF(f_BallRotation, rotation, f_BallRotation);
         }

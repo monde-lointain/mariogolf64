@@ -1505,11 +1505,11 @@ void UpdateOpening(void) {
                     f_OpeningShotSimulation.position[AXIS_Z] = 0x48CFDC;
                     f_OpeningShotSimulation.position[AXIS_Y] = GetGroundHeight(0xF1B96, 0x48CFDC);
                     f_ShotBallScale = 2;
-                    f_OpeningSparksOrigin[0] =
+                    f_OpeningSparksOrigin[AXIS_X] =
                         f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-                    f_OpeningSparksOrigin[1] =
+                    f_OpeningSparksOrigin[AXIS_Y] =
                         f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-                    f_OpeningSparksOrigin[2] =
+                    f_OpeningSparksOrigin[AXIS_Z] =
                         f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
                     ClearEffects();
                     f_OpeningShotImpactPoint[0] = f_OpeningShotSimulation.position[AXIS_X];
@@ -1690,11 +1690,11 @@ void UpdateOpening(void) {
                 f_OpeningShotImpactPoint[0] = f_OpeningShotSimulation.position[AXIS_X];
                 f_OpeningShotImpactPoint[1] = f_OpeningShotSimulation.position[AXIS_Y];
                 f_OpeningShotImpactPoint[2] = f_OpeningShotSimulation.position[AXIS_Z];
-                f_OpeningSparksOrigin[0] =
+                f_OpeningSparksOrigin[AXIS_X] =
                     f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-                f_OpeningSparksOrigin[1] =
+                f_OpeningSparksOrigin[AXIS_Y] =
                     f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-                f_OpeningSparksOrigin[2] =
+                f_OpeningSparksOrigin[AXIS_Z] =
                     f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
                 break;
             case OPENING_SCENE_PEACH_DRIVE + 1:
@@ -1833,11 +1833,11 @@ void UpdateOpening(void) {
                 f_OpeningShotImpactPoint[0] = f_OpeningShotSimulation.position[AXIS_X];
                 f_OpeningShotImpactPoint[1] = f_OpeningShotSimulation.position[AXIS_Y];
                 f_OpeningShotImpactPoint[2] = f_OpeningShotSimulation.position[AXIS_Z];
-                f_OpeningSparksOrigin[0] =
+                f_OpeningSparksOrigin[AXIS_X] =
                     f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-                f_OpeningSparksOrigin[1] =
+                f_OpeningSparksOrigin[AXIS_Y] =
                     f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-                f_OpeningSparksOrigin[2] =
+                f_OpeningSparksOrigin[AXIS_Z] =
                     f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
                 break;
             case OPENING_SCENE_PLUM_DRIVE + 1:
@@ -1944,11 +1944,11 @@ void UpdateOpening(void) {
                 f_OpeningShotImpactPoint[0] = f_OpeningShotSimulation.position[AXIS_X];
                 f_OpeningShotImpactPoint[1] = f_OpeningShotSimulation.position[AXIS_Y];
                 f_OpeningShotImpactPoint[2] = f_OpeningShotSimulation.position[AXIS_Z];
-                f_OpeningSparksOrigin[0] =
+                f_OpeningSparksOrigin[AXIS_X] =
                     f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-                f_OpeningSparksOrigin[1] =
+                f_OpeningSparksOrigin[AXIS_Y] =
                     f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-                f_OpeningSparksOrigin[2] =
+                f_OpeningSparksOrigin[AXIS_Z] =
                     f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
                 break;
             case OPENING_SCENE_MARIO_CHEER + 2:
@@ -2073,11 +2073,11 @@ void UpdateOpening(void) {
                     f_OpeningScene++;
                     LoadOpeningBall(PLAIN_BALL, 0);
                     LoadOpeningBall(PLAIN_BALL, 1);
-                    f_OpeningBallPositions[0][AXIS_X] = 2709.835f;
-                    f_OpeningBallPositions[0][AXIS_Z] = 2465.858f;
+                    f_OpeningBallPositions[AXIS_X][AXIS_X] = 2709.835f;
+                    f_OpeningBallPositions[AXIS_X][AXIS_Z] = 2465.858f;
                     f_OpeningBallScales[0] = 1.5f;
-                    f_OpeningBallPositions[1][AXIS_X] = 2653.68f;
-                    f_OpeningBallPositions[1][AXIS_Z] = 2478.326f;
+                    f_OpeningBallPositions[AXIS_Y][AXIS_X] = 2653.68f;
+                    f_OpeningBallPositions[AXIS_Y][AXIS_Z] = 2478.326f;
                     f_OpeningBallScales[1] = 1.5f;
                 }
 
@@ -2107,8 +2107,8 @@ void UpdateOpening(void) {
             case OPENING_SCENE_MARIO_LUIGI_WALK:
                 PlaceEditorCamera(2413.141f, -271.41f, 1784.364f, 2503.834f, -245.0f, 1850.029f);
                 f_OpeningBallStates[1] = OPENING_BALL_HIDDEN;
-                f_OpeningBallPositions[0][AXIS_X] = 2483.922f;
-                f_OpeningBallPositions[0][AXIS_Z] = 1800.958f;
+                f_OpeningBallPositions[AXIS_X][AXIS_X] = 2483.922f;
+                f_OpeningBallPositions[AXIS_X][AXIS_Z] = 1800.958f;
                 f_OpeningBallScales[0] = OPENING_BALL_NORMAL_SCALE;
                 MoveEditorCamera(1, 2489.032f, -255.774f, 1840.637f, 0x50);
                 TiltEditorCamera(1, -0.116571f, 0x76);
@@ -2298,8 +2298,8 @@ void UpdateOpening(void) {
                     }
 
                     LoadOpeningBall(PLAIN_BALL, 0);
-                    f_OpeningBallPositions[0][AXIS_X] = 2723.423f;
-                    f_OpeningBallPositions[0][AXIS_Z] = 2246.086f;
+                    f_OpeningBallPositions[AXIS_X][AXIS_X] = 2723.423f;
+                    f_OpeningBallPositions[AXIS_X][AXIS_Z] = 2246.086f;
                 }
 
                 if (f_OpeningSceneFramesLeft == 50) {
@@ -2334,8 +2334,8 @@ void UpdateOpening(void) {
                     f_OpeningCue = OPENING_CUE_PEACH_APPROACH;
                     f_OpeningSceneFramesLeft = 64;
                     f_OpeningScene = OPENING_SCENE_PEACH_APPROACH;
-                    f_OpeningBallPositions[0][AXIS_X] = 2755.104f;
-                    f_OpeningBallPositions[0][AXIS_Z] = 2341.293f;
+                    f_OpeningBallPositions[AXIS_X][AXIS_X] = 2755.104f;
+                    f_OpeningBallPositions[AXIS_X][AXIS_Z] = 2341.293f;
                 }
 
                 break;
@@ -2373,8 +2373,8 @@ void UpdateOpening(void) {
 
                     f_OpeningBallStates[0] = OPENING_BALL_HIDDEN;
                     f_OpeningBallStates[1] = OPENING_BALL_ON_GROUND;
-                    f_OpeningBallPositions[1][AXIS_X] = 2689.998f;
-                    f_OpeningBallPositions[1][AXIS_Z] = 2367.191f;
+                    f_OpeningBallPositions[AXIS_Y][AXIS_X] = 2689.998f;
+                    f_OpeningBallPositions[AXIS_Y][AXIS_Z] = 2367.191f;
                     f_OpeningBallScales[1] = OPENING_BALL_LARGE_SCALE;
                 }
 
@@ -2403,8 +2403,8 @@ void UpdateOpening(void) {
                     LoadOpeningBall(PLAIN_BALL, 0);
                     f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
                     f_OpeningBallStates[1] = OPENING_BALL_HIDDEN;
-                    f_OpeningBallPositions[0][AXIS_X] = 2755.104f;
-                    f_OpeningBallPositions[0][AXIS_Z] = 2341.293f;
+                    f_OpeningBallPositions[AXIS_X][AXIS_X] = 2755.104f;
+                    f_OpeningBallPositions[AXIS_X][AXIS_Z] = 2341.293f;
                     f_OpeningBallScales[0] = OPENING_BALL_NORMAL_SCALE;
                 }
 
@@ -2426,8 +2426,8 @@ void UpdateOpening(void) {
                     f_OpeningSceneFramesLeft = 30;
                     f_OpeningScene++;
                     LoadOpeningBall(PLAIN_BALL, 1);
-                    f_OpeningBallPositions[1][AXIS_X] = 0.0f;
-                    f_OpeningBallPositions[1][AXIS_Z] = 0.0f;
+                    f_OpeningBallPositions[AXIS_Y][AXIS_X] = 0.0f;
+                    f_OpeningBallPositions[AXIS_Y][AXIS_Z] = 0.0f;
                 }
 
                 break;
@@ -2452,9 +2452,9 @@ void UpdateOpening(void) {
             case OPENING_SCENE_INCOMING_BALL:
                 GetCharacterPointPosition(1, 3, logoBallPoint);
                 f_OpeningBallStates[1] = OPENING_BALL_IN_AIR;
-                f_OpeningBallPositions[1][AXIS_X] = 2319.014f;
-                f_OpeningBallPositions[1][AXIS_Y] = -560.0f;
-                f_OpeningBallPositions[1][AXIS_Z] = 342.12f;
+                f_OpeningBallPositions[AXIS_Y][AXIS_X] = 2319.014f;
+                f_OpeningBallPositions[AXIS_Y][AXIS_Y] = -560.0f;
+                f_OpeningBallPositions[AXIS_Y][AXIS_Z] = 342.12f;
                 f_OpeningBallScales[1] = 2.0f;
                 PlaceEditorCamera(2662.345f, -254.25f, 2376.081f, 2493.599f, -910.952f, 665.178f);
                 MoveEditorPoint(0, 2671.388f, -257.489f, 2351.288f, 0x28);
@@ -2470,14 +2470,14 @@ void UpdateOpening(void) {
                 f_LogoBallFollowRate = 1.0f;
                 break;
             case OPENING_SCENE_INCOMING_BALL + 1:
-                f_OpeningBallPositions[1][AXIS_X] +=
-                    (g_CameraEditor.points[1][0] - f_OpeningBallPositions[1][AXIS_X]) *
+                f_OpeningBallPositions[AXIS_Y][AXIS_X] +=
+                    (g_CameraEditor.points[1][0] - f_OpeningBallPositions[AXIS_Y][AXIS_X]) *
                     f_LogoBallFollowRate;
-                f_OpeningBallPositions[1][AXIS_Y] +=
-                    (g_CameraEditor.points[1][1] - f_OpeningBallPositions[1][AXIS_Y]) *
+                f_OpeningBallPositions[AXIS_Y][AXIS_Y] +=
+                    (g_CameraEditor.points[1][1] - f_OpeningBallPositions[AXIS_Y][AXIS_Y]) *
                     f_LogoBallFollowRate;
-                f_OpeningBallPositions[1][AXIS_Z] +=
-                    (g_CameraEditor.points[1][2] - f_OpeningBallPositions[1][AXIS_Z]) *
+                f_OpeningBallPositions[AXIS_Y][AXIS_Z] +=
+                    (g_CameraEditor.points[1][2] - f_OpeningBallPositions[AXIS_Y][AXIS_Z]) *
                     f_LogoBallFollowRate;
                 f_LogoBallFollowRate -= 0.02f;
                 if (f_LogoBallFollowRate < 0.1f) {
@@ -2499,12 +2499,15 @@ void UpdateOpening(void) {
                 }
 
                 GetCharacterPointPosition(1, 3, handPoint);
-                f_OpeningBallPositions[1][AXIS_X] +=
-                    (handPoint[AXIS_X] - f_OpeningBallPositions[1][AXIS_X]) * f_LogoBallFollowRate;
-                f_OpeningBallPositions[1][AXIS_Y] +=
-                    (handPoint[AXIS_Y] - f_OpeningBallPositions[1][AXIS_Y]) * f_LogoBallFollowRate;
-                f_OpeningBallPositions[1][AXIS_Z] +=
-                    (handPoint[AXIS_Z] - f_OpeningBallPositions[1][AXIS_Z]) * f_LogoBallFollowRate;
+                f_OpeningBallPositions[AXIS_Y][AXIS_X] +=
+                    (handPoint[AXIS_X] - f_OpeningBallPositions[AXIS_Y][AXIS_X]) *
+                    f_LogoBallFollowRate;
+                f_OpeningBallPositions[AXIS_Y][AXIS_Y] +=
+                    (handPoint[AXIS_Y] - f_OpeningBallPositions[AXIS_Y][AXIS_Y]) *
+                    f_LogoBallFollowRate;
+                f_OpeningBallPositions[AXIS_Y][AXIS_Z] +=
+                    (handPoint[AXIS_Z] - f_OpeningBallPositions[AXIS_Y][AXIS_Z]) *
+                    f_LogoBallFollowRate;
                 switch (f_OpeningSceneFramesLeft) {
                     case 97:
                         PlaySoundWithEffects(
@@ -2825,8 +2828,8 @@ void UpdateOpening(void) {
                     f_OpeningScene = OPENING_SCENE_OUT_OF_BOUNDS;
                     LoadOpeningBall(LUIGI_FACE_BALL, 0);
                     f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
-                    f_OpeningBallPositions[0][AXIS_X] = 932.978f;
-                    f_OpeningBallPositions[0][AXIS_Z] = 1884.644f;
+                    f_OpeningBallPositions[AXIS_X][AXIS_X] = 932.978f;
+                    f_OpeningBallPositions[AXIS_X][AXIS_Z] = 1884.644f;
                     f_OpeningBallScales[0] = 1.4f;
                 }
 
@@ -3585,8 +3588,8 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
         gfx = *displayListHead;
         for (slot = 0; slot < OPENING_BALL_SLOT_COUNT; slot++) {
             if (f_OpeningBallStates[slot] != OPENING_BALL_HIDDEN) {
-                position[AXIS_X] = f_OpeningBallPositions[slot][0];
-                position[AXIS_Z] = f_OpeningBallPositions[slot][2];
+                position[AXIS_X] = f_OpeningBallPositions[slot][AXIS_X];
+                position[AXIS_Z] = f_OpeningBallPositions[slot][AXIS_Z];
                 position[AXIS_Y] = GetGroundHeight(
                                        position[AXIS_X] * WORLD_TO_COURSE_SCALE,
                                        position[AXIS_Z] * WORLD_TO_COURSE_SCALE
@@ -3694,7 +3697,7 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                 gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
                 gDPPipeSync(gfx++);
                 if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
-                    position[AXIS_Y] = f_OpeningBallPositions[slot][1];
+                    position[AXIS_Y] = f_OpeningBallPositions[slot][AXIS_Y];
                 }
 
                 if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
@@ -3815,11 +3818,11 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
 
                     if (f_HasLogoBallLastPosition) {
                         movement[AXIS_X] =
-                            f_OpeningBallPositions[slot][0] - f_LogoBallLastPosition[AXIS_X];
+                            f_OpeningBallPositions[slot][AXIS_X] - f_LogoBallLastPosition[AXIS_X];
                         movement[AXIS_Y] =
-                            f_OpeningBallPositions[slot][1] - f_LogoBallLastPosition[AXIS_Y];
+                            f_OpeningBallPositions[slot][AXIS_Y] - f_LogoBallLastPosition[AXIS_Y];
                         movement[AXIS_Z] =
-                            f_OpeningBallPositions[slot][2] - f_LogoBallLastPosition[AXIS_Z];
+                            f_OpeningBallPositions[slot][AXIS_Z] - f_LogoBallLastPosition[AXIS_Z];
                     }
                     else {
                         f_HasLogoBallLastPosition = TRUE;
@@ -3834,9 +3837,9 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                         (movement[AXIS_Z] * movement[AXIS_Z])
                     );
                     rollAngle *= (f32)RADIANS_TO_DEGREES;
-                    f_LogoBallLastPosition[AXIS_X] = f_OpeningBallPositions[slot][0];
-                    f_LogoBallLastPosition[AXIS_Y] = f_OpeningBallPositions[slot][1];
-                    f_LogoBallLastPosition[AXIS_Z] = f_OpeningBallPositions[slot][2];
+                    f_LogoBallLastPosition[AXIS_X] = f_OpeningBallPositions[slot][AXIS_X];
+                    f_LogoBallLastPosition[AXIS_Y] = f_OpeningBallPositions[slot][AXIS_Y];
+                    f_LogoBallLastPosition[AXIS_Z] = f_OpeningBallPositions[slot][AXIS_Z];
                     rollAngle = fabs(rollAngle);
                     if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
                         f_LogoBallFrame++;
@@ -3863,9 +3866,9 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                     guTranslate(&f_LogoBallMarioOffset, 0.0f, LOGO_BALL_MARIO_OFFSET_Y, 0.0f);
                     guTranslate(
                         &f_LogoBallMarioTranslations[g_DrawBufferIndex],
-                        f_OpeningBallPositions[slot][0],
-                        f_OpeningBallPositions[slot][1] - LOGO_BALL_MARIO_DROP,
-                        f_OpeningBallPositions[slot][2]
+                        f_OpeningBallPositions[slot][AXIS_X],
+                        f_OpeningBallPositions[slot][AXIS_Y] - LOGO_BALL_MARIO_DROP,
+                        f_OpeningBallPositions[slot][AXIS_Z]
                     );
                     gDPPipeSync(gfx++);
                     cycleTypeCommand = gfx++;
@@ -3958,10 +3961,10 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
         gfx = *displayListHead;
         for (slot = 0; slot != OPENING_BALL_SLOT_COUNT; slot++) {
             if (f_OpeningBallStates[slot] != OPENING_BALL_HIDDEN) {
-                f_ProjectedBallPosition[AXIS_X] = f_OpeningBallPositions[slot][0];
-                f_ProjectedBallPosition[AXIS_Z] = f_OpeningBallPositions[slot][2];
+                f_ProjectedBallPosition[AXIS_X] = f_OpeningBallPositions[slot][AXIS_X];
+                f_ProjectedBallPosition[AXIS_Z] = f_OpeningBallPositions[slot][AXIS_Z];
                 if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
-                    f_ProjectedBallPosition[AXIS_Y] = f_OpeningBallPositions[slot][1];
+                    f_ProjectedBallPosition[AXIS_Y] = f_OpeningBallPositions[slot][AXIS_Y];
                 }
                 else {
                     f_ProjectedBallPosition[AXIS_Y] =
@@ -4242,11 +4245,11 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                         }
 
                         if (f_HasProjectedLogoBallLastPosition) {
-                            movement[AXIS_X] = f_OpeningBallPositions[slot][0] -
+                            movement[AXIS_X] = f_OpeningBallPositions[slot][AXIS_X] -
                                 f_ProjectedLogoBallLastPosition[AXIS_X];
-                            movement[AXIS_Y] = f_OpeningBallPositions[slot][1] -
+                            movement[AXIS_Y] = f_OpeningBallPositions[slot][AXIS_Y] -
                                 f_ProjectedLogoBallLastPosition[AXIS_Y];
-                            movement[AXIS_Z] = f_OpeningBallPositions[slot][2] -
+                            movement[AXIS_Z] = f_OpeningBallPositions[slot][AXIS_Z] -
                                 f_ProjectedLogoBallLastPosition[AXIS_Z];
                         }
                         else {
@@ -4262,9 +4265,12 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                             (movement[AXIS_Z] * movement[AXIS_Z])
                         );
                         rollAngle *= (f32)RADIANS_TO_DEGREES;
-                        f_ProjectedLogoBallLastPosition[AXIS_X] = f_OpeningBallPositions[slot][0];
-                        f_ProjectedLogoBallLastPosition[AXIS_Y] = f_OpeningBallPositions[slot][1];
-                        f_ProjectedLogoBallLastPosition[AXIS_Z] = f_OpeningBallPositions[slot][2];
+                        f_ProjectedLogoBallLastPosition[AXIS_X] =
+                            f_OpeningBallPositions[slot][AXIS_X];
+                        f_ProjectedLogoBallLastPosition[AXIS_Y] =
+                            f_OpeningBallPositions[slot][AXIS_Y];
+                        f_ProjectedLogoBallLastPosition[AXIS_Z] =
+                            f_OpeningBallPositions[slot][AXIS_Z];
                         rollAngle = fabs(rollAngle);
                         if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
                             f_ProjectedLogoBallFrame++;
@@ -4306,9 +4312,9 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                         );
                         guTranslate(
                             &f_ProjectedLogoBallMarioTranslations[g_DrawBufferIndex],
-                            f_OpeningBallPositions[slot][0],
-                            f_OpeningBallPositions[slot][1] - PROJECTED_LOGO_BALL_MARIO_DROP,
-                            f_OpeningBallPositions[slot][2]
+                            f_OpeningBallPositions[slot][AXIS_X],
+                            f_OpeningBallPositions[slot][AXIS_Y] - PROJECTED_LOGO_BALL_MARIO_DROP,
+                            f_OpeningBallPositions[slot][AXIS_Z]
                         );
                         gDPPipeSync(gfx++);
                         gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -5106,15 +5112,15 @@ void EaseOpeningLookAt(void) {
             break;
         case LOOK_AT_EASE_SPEEDING_UP:
             g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
-                ((f_OpeningBallPositions[1][AXIS_X] + 38.1f) -
+                ((f_OpeningBallPositions[AXIS_Y][AXIS_X] + 38.1f) -
                     g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
                 f_LookAtEaseRate;
             g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
-                ((f_OpeningBallPositions[1][AXIS_Y] - 4.5f) -
+                ((f_OpeningBallPositions[AXIS_Y][AXIS_Y] - 4.5f) -
                     g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
                 f_LookAtEaseRate;
             g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
-                ((f_OpeningBallPositions[1][AXIS_Z] - 4.795f) -
+                ((f_OpeningBallPositions[AXIS_Y][AXIS_Z] - 4.795f) -
                     g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
                 f_LookAtEaseRate;
             MeasureEditorCamera();
@@ -5890,9 +5896,9 @@ void DrawOpeningSparks(Gfx **displayListHead) {
 
     if (f_OpeningSparksState == SPARKS_STARTING) {
         depth = ProjectPoint(
-            f_OpeningSparksOrigin[0],
-            f_OpeningSparksOrigin[1],
-            f_OpeningSparksOrigin[2],
+            f_OpeningSparksOrigin[AXIS_X],
+            f_OpeningSparksOrigin[AXIS_Y],
+            f_OpeningSparksOrigin[AXIS_Z],
             &origin
         );
         if (depth < 0) {

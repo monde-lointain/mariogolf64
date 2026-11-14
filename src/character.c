@@ -1779,9 +1779,9 @@ void SetCharacterLights(void) {
 
     lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
     lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
-    lightDirection[0] = -sinf(lightPitch) * cosf(lightYaw) * LIGHT_DIRECTION_SCALE;
-    lightDirection[1] = -cosf(lightPitch) * LIGHT_DIRECTION_SCALE;
-    lightDirection[2] = -sinf(lightPitch) * sinf(lightYaw) * LIGHT_DIRECTION_SCALE;
+    lightDirection[AXIS_X] = -sinf(lightPitch) * cosf(lightYaw) * LIGHT_DIRECTION_SCALE;
+    lightDirection[AXIS_Y] = -cosf(lightPitch) * LIGHT_DIRECTION_SCALE;
+    lightDirection[AXIS_Z] = -sinf(lightPitch) * sinf(lightYaw) * LIGHT_DIRECTION_SCALE;
     f_DryLights[g_DrawBufferIndex] = (Lights2)gdSPDefLights2(
         ambientColor[0],
         ambientColor[1],
@@ -1789,9 +1789,9 @@ void SetCharacterLights(void) {
         lightColor[0],
         lightColor[1],
         lightColor[2],
-        lightDirection[0],
-        lightDirection[1],
-        lightDirection[2],
+        lightDirection[AXIS_X],
+        lightDirection[AXIS_Y],
+        lightDirection[AXIS_Z],
         lightColor[0],
         lightColor[1],
         lightColor[2],
@@ -1806,9 +1806,9 @@ void SetCharacterLights(void) {
         RAIN_LIGHT_RED,
         RAIN_LIGHT_GREEN,
         RAIN_LIGHT_BLUE,
-        lightDirection[0],
-        lightDirection[1],
-        lightDirection[2],
+        lightDirection[AXIS_X],
+        lightDirection[AXIS_Y],
+        lightDirection[AXIS_Z],
         RAIN_SECOND_LIGHT_LEVEL,
         RAIN_SECOND_LIGHT_LEVEL,
         RAIN_SECOND_LIGHT_LEVEL,

@@ -31,12 +31,12 @@ FILE_STATIC Vec3 f_FramedEye;
 FILE_STATIC Vec3 f_FramedLookAt;
 
 void GetFramedView(Vec3 eye, Vec3 lookAt) {
-    eye[AXIS_X] = f_FramedEye[0];
-    eye[AXIS_Y] = f_FramedEye[1];
-    eye[AXIS_Z] = f_FramedEye[2];
-    lookAt[AXIS_X] = f_FramedLookAt[0];
-    lookAt[AXIS_Y] = f_FramedLookAt[1];
-    lookAt[AXIS_Z] = f_FramedLookAt[2];
+    eye[AXIS_X] = f_FramedEye[AXIS_X];
+    eye[AXIS_Y] = f_FramedEye[AXIS_Y];
+    eye[AXIS_Z] = f_FramedEye[AXIS_Z];
+    lookAt[AXIS_X] = f_FramedLookAt[AXIS_X];
+    lookAt[AXIS_Y] = f_FramedLookAt[AXIS_Y];
+    lookAt[AXIS_Z] = f_FramedLookAt[AXIS_Z];
 }
 
 void ClearFramedSpheres(void) {
@@ -45,16 +45,16 @@ void ClearFramedSpheres(void) {
 
 void AddFramedSphere(Vec3 center, f32 radius) {
     if (f_FramedSphereCount < FRAMED_SPHERE_CAPACITY) {
-        f_FramedSphereCenters[f_FramedSphereCount][0] = center[AXIS_X];
-        f_FramedSphereCenters[f_FramedSphereCount][1] = center[AXIS_Y];
-        f_FramedSphereCenters[f_FramedSphereCount][2] = center[AXIS_Z];
+        f_FramedSphereCenters[f_FramedSphereCount][AXIS_X] = center[AXIS_X];
+        f_FramedSphereCenters[f_FramedSphereCount][AXIS_Y] = center[AXIS_Y];
+        f_FramedSphereCenters[f_FramedSphereCount][AXIS_Z] = center[AXIS_Z];
         f_FramedSphereRadii[f_FramedSphereCount] = radius;
         if (g_ControllerData[1].trigger & D_CBUTTONS) {
             osSyncPrintf(
                 "ox %f ox %f oz %f\n",
-                f_FramedSphereCenters[f_FramedSphereCount][0],
-                f_FramedSphereCenters[f_FramedSphereCount][1],
-                f_FramedSphereCenters[f_FramedSphereCount][2]
+                f_FramedSphereCenters[f_FramedSphereCount][AXIS_X],
+                f_FramedSphereCenters[f_FramedSphereCount][AXIS_Y],
+                f_FramedSphereCenters[f_FramedSphereCount][AXIS_Z]
             );
         }
 
@@ -272,24 +272,37 @@ void FrameSpheres(f32 depthOffset) {
     guRotateF(yawRotation, (s32)(f_FramingYaw * RADIANS_TO_DEGREES), 0.0f, 1.0f, 0.0f);
     guMtxCatF(pitchRotation, yawRotation, orientation);
     depth = depthOffset - eyeZ;
-    guMtxXFMF(orientation, eyeX, eyeY, depth, &f_FramedEye[0], &f_FramedEye[1], &f_FramedEye[2]);
+    guMtxXFMF(
+        orientation,
+        eyeX,
+        eyeY,
+        depth,
+        &f_FramedEye[AXIS_X],
+        &f_FramedEye[AXIS_Y],
+        &f_FramedEye[AXIS_Z]
+    );
     guMtxXFMF(
         orientation,
         eyeX,
         eyeY,
         depth + margin,
-        &f_FramedLookAt[0],
-        &f_FramedLookAt[1],
-        &f_FramedLookAt[2]
+        &f_FramedLookAt[AXIS_X],
+        &f_FramedLookAt[AXIS_Y],
+        &f_FramedLookAt[AXIS_Z]
     );
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
-        osSyncPrintf("px %f py %f pz %f\n", f_FramedEye[0], f_FramedEye[1], f_FramedEye[2]);
+        osSyncPrintf(
+            "px %f py %f pz %f\n",
+            f_FramedEye[AXIS_X],
+            f_FramedEye[AXIS_Y],
+            f_FramedEye[AXIS_Z]
+        );
         if (g_ControllerData[1].trigger & D_CBUTTONS) {
             osSyncPrintf(
                 "tx %f ty %f tz %f\n",
-                f_FramedLookAt[0],
-                f_FramedLookAt[1],
-                f_FramedLookAt[2]
+                f_FramedLookAt[AXIS_X],
+                f_FramedLookAt[AXIS_Y],
+                f_FramedLookAt[AXIS_Z]
             );
         }
     }

@@ -126,9 +126,9 @@ void SetCharacterHighlight(CameraMatrices *matrices UNUSED) {
 
     lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
     lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
-    lightDirection[0] = -sinf(lightPitch) * cosf(lightYaw) * LIGHT_DIRECTION_SCALE;
-    lightDirection[1] = -cosf(lightPitch) * LIGHT_DIRECTION_SCALE;
-    lightDirection[2] = -sinf(lightPitch) * sinf(lightYaw) * LIGHT_DIRECTION_SCALE;
+    lightDirection[AXIS_X] = -sinf(lightPitch) * cosf(lightYaw) * LIGHT_DIRECTION_SCALE;
+    lightDirection[AXIS_Y] = -cosf(lightPitch) * LIGHT_DIRECTION_SCALE;
+    lightDirection[AXIS_Z] = -sinf(lightPitch) * sinf(lightYaw) * LIGHT_DIRECTION_SCALE;
     guLookAtHiliteF(
         lookAtMatrix,
         &f_HighlightLookAts[g_DrawBufferIndex],
@@ -142,12 +142,12 @@ void SetCharacterHighlight(CameraMatrices *matrices UNUSED) {
         0.0f,
         -1.0f,
         0.0f,
-        (s8)lightDirection[0],
-        (s8)lightDirection[1],
-        (s8)lightDirection[2],
-        (s8)lightDirection[0],
-        (s8)lightDirection[1],
-        (s8)lightDirection[2],
+        (s8)lightDirection[AXIS_X],
+        (s8)lightDirection[AXIS_Y],
+        (s8)lightDirection[AXIS_Z],
+        (s8)lightDirection[AXIS_X],
+        (s8)lightDirection[AXIS_Y],
+        (s8)lightDirection[AXIS_Z],
         HIGHLIGHT_TEXTURE_SIZE,
         HIGHLIGHT_TEXTURE_SIZE
     );
