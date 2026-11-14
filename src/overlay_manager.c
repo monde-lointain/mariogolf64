@@ -40,7 +40,7 @@ s8 g_IsModuleAlive[MODULE_COUNT];
 s32 g_ModuleRdpRequestFrames[MODULE_COUNT];
 
 static s8 f_UnusedModuleIds[] UNUSED = {0x00, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlays00To02[] = {
+static s8 f_PlayModuleIds[] = {
     MODULE_ROUND_RESULTS,
     MODULE_WIND_BOO,
     MODULE_GOLF_BALLS,
@@ -54,43 +54,43 @@ static s8 f_ModuleIdsOfOverlays00To02[] = {
     MODULE_CLUB_PANEL,
     MODULE_ID_END,
 };
-static s8 f_ModuleIdsOfOverlay03[] = {MODULE_MENU, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay04[] =
+static s8 f_MenuModuleIds[] = {MODULE_MENU, MODULE_ID_END};
+static s8 f_HoleBuilderModuleIds[] =
     {MODULE_HOLE_BUILDER, MODULE_UNUSED_HOLE_BUILDER, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay05[] = {MODULE_COMPUTER_GOLFER, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay06[] = {MODULE_SHOT_SIMULATION, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay07[] =
+static s8 f_ComputerGolferModuleIds[] = {MODULE_COMPUTER_GOLFER, MODULE_ID_END};
+static s8 f_ShotSimulationModuleIds[] = {MODULE_SHOT_SIMULATION, MODULE_ID_END};
+static s8 f_OpeningModuleIds[] =
     {MODULE_OPENING, MODULE_UNUSED_OPENING_A, MODULE_UNUSED_OPENING_B, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay08[] =
+static s8 f_TitleScreenModuleIds[] =
     {MODULE_TITLE_SCREEN, MODULE_UNUSED_TITLE_SCREEN, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay09[] = {MODULE_BOOT_LOGOS, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay10[] = {MODULE_CONFIRM_WAIT, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay11[] = {MODULE_SCORECARD, MODULE_UNUSED_SCORECARD, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay12[] = {MODULE_CLUB_SLOTS, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay13[] = {MODULE_COURSE_SELECT, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay14[] = {MODULE_SAVE_MENU, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay15[] =
+static s8 f_BootLogosModuleIds[] = {MODULE_BOOT_LOGOS, MODULE_ID_END};
+static s8 f_ConfirmWaitModuleIds[] = {MODULE_CONFIRM_WAIT, MODULE_ID_END};
+static s8 f_ScorecardModuleIds[] = {MODULE_SCORECARD, MODULE_UNUSED_SCORECARD, MODULE_ID_END};
+static s8 f_ClubSlotsModuleIds[] = {MODULE_CLUB_SLOTS, MODULE_ID_END};
+static s8 f_CourseSelectModuleIds[] = {MODULE_COURSE_SELECT, MODULE_ID_END};
+static s8 f_SaveMenuModuleIds[] = {MODULE_SAVE_MENU, MODULE_ID_END};
+static s8 f_TransmitModuleIds[] =
     {MODULE_TRANSMIT, MODULE_UNUSED_TRANSMIT_A, MODULE_UNUSED_TRANSMIT_B, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay16[] = {MODULE_STAFF_ROLL, MODULE_ID_END};
+static s8 f_StaffRollModuleIds[] = {MODULE_STAFF_ROLL, MODULE_ID_END};
 
 static Overlay f_Overlays[OVERLAY_COUNT] = {
-    OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, NULL, NULL),
-    OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, NULL, NULL),
-    OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, LoadSceneryResources, FreeScenery),
-    OVERLAY_ENTRY(ovl_01, f_ModuleIdsOfOverlay03, LoadMenuResources, FreeMenuResources),
-    OVERLAY_ENTRY(ovl_02, f_ModuleIdsOfOverlay04, NULL, NULL),
-    OVERLAY_ENTRY(ovl_03, f_ModuleIdsOfOverlay05, NULL, NULL),
-    OVERLAY_ENTRY(ovl_04, f_ModuleIdsOfOverlay06, NULL, NULL),
-    OVERLAY_ENTRY(ovl_05, f_ModuleIdsOfOverlay07, LoadOpeningResources, FreeOpening),
-    OVERLAY_ENTRY(ovl_06, f_ModuleIdsOfOverlay08, LoadTitleScreen, UnloadTitleScreen),
-    OVERLAY_ENTRY(ovl_07, f_ModuleIdsOfOverlay09, LoadBootLogos, NULL),
-    OVERLAY_ENTRY(ovl_08, f_ModuleIdsOfOverlay10, NULL, NULL),
-    OVERLAY_ENTRY(ovl_09, f_ModuleIdsOfOverlay11, NULL, NULL),
-    OVERLAY_ENTRY(ovl_10, f_ModuleIdsOfOverlay12, NULL, NULL),
-    OVERLAY_ENTRY(ovl_11, f_ModuleIdsOfOverlay13, NULL, NULL),
-    OVERLAY_ENTRY(ovl_12, f_ModuleIdsOfOverlay14, NULL, NULL),
-    OVERLAY_ENTRY(ovl_13, f_ModuleIdsOfOverlay15, LoadTransmitMenu, FreeTransmitMenu),
-    OVERLAY_ENTRY(ovl_14, f_ModuleIdsOfOverlay16, LoadStaffRoll, UnloadStaffRoll),
+    OVERLAY_ENTRY(ovl_00, f_PlayModuleIds, NULL, NULL),
+    OVERLAY_ENTRY(ovl_00, f_PlayModuleIds, NULL, NULL),
+    OVERLAY_ENTRY(ovl_00, f_PlayModuleIds, LoadSceneryResources, FreeScenery),
+    OVERLAY_ENTRY(ovl_01, f_MenuModuleIds, LoadMenuResources, FreeMenuResources),
+    OVERLAY_ENTRY(ovl_02, f_HoleBuilderModuleIds, NULL, NULL),
+    OVERLAY_ENTRY(ovl_03, f_ComputerGolferModuleIds, NULL, NULL),
+    OVERLAY_ENTRY(ovl_04, f_ShotSimulationModuleIds, NULL, NULL),
+    OVERLAY_ENTRY(ovl_05, f_OpeningModuleIds, LoadOpeningResources, FreeOpening),
+    OVERLAY_ENTRY(ovl_06, f_TitleScreenModuleIds, LoadTitleScreen, UnloadTitleScreen),
+    OVERLAY_ENTRY(ovl_07, f_BootLogosModuleIds, LoadBootLogos, NULL),
+    OVERLAY_ENTRY(ovl_08, f_ConfirmWaitModuleIds, NULL, NULL),
+    OVERLAY_ENTRY(ovl_09, f_ScorecardModuleIds, NULL, NULL),
+    OVERLAY_ENTRY(ovl_10, f_ClubSlotsModuleIds, NULL, NULL),
+    OVERLAY_ENTRY(ovl_11, f_CourseSelectModuleIds, NULL, NULL),
+    OVERLAY_ENTRY(ovl_12, f_SaveMenuModuleIds, NULL, NULL),
+    OVERLAY_ENTRY(ovl_13, f_TransmitModuleIds, LoadTransmitMenu, FreeTransmitMenu),
+    OVERLAY_ENTRY(ovl_14, f_StaffRollModuleIds, LoadStaffRoll, UnloadStaffRoll),
 };
 
 static s8 f_OverlayIndexOfModule[MODULE_COUNT];
