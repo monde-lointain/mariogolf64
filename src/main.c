@@ -408,78 +408,78 @@ void UpdateMenuController(NUContData *pad, NUContData *previousMenuPad UNUSED, s
     g_MenuRepeatStates[portIndex].repeatDelay = repeatDelay;
 }
 
-void UpdateControllerState(NUContData *pad, ControllerState *state) {
-    s32 repeatDelay = state->repeatDelay;
+void UpdateControllerState(NUContData *pad, ControllerState *controller) {
+    s32 repeatDelay = controller->repeatDelay;
 
-    state->buttons = pad->button;
-    state->stickX = pad->stick_x;
-    state->stickY = pad->stick_y;
+    controller->buttons = pad->button;
+    controller->stickX = pad->stick_x;
+    controller->stickY = pad->stick_y;
 
-    if (state->stickX < 0) {
-        state->stickX += STICK_DEAD_ZONE;
-        if (state->stickX > 0) {
-            state->stickX = 0;
+    if (controller->stickX < 0) {
+        controller->stickX += STICK_DEAD_ZONE;
+        if (controller->stickX > 0) {
+            controller->stickX = 0;
         }
         else {
-            if (state->stickX < -STATE_STICK_MAX) {
-                state->stickX = -STATE_STICK_MAX;
+            if (controller->stickX < -STATE_STICK_MAX) {
+                controller->stickX = -STATE_STICK_MAX;
             }
 
-            if (state->stickX < -STATE_STICK_DIRECTION_MIN) {
-                state->buttons |= L_JPAD;
+            if (controller->stickX < -STATE_STICK_DIRECTION_MIN) {
+                controller->buttons |= L_JPAD;
             }
         }
     }
     else {
-        state->stickX -= STICK_DEAD_ZONE;
-        if (state->stickX < 0) {
-            state->stickX = 0;
+        controller->stickX -= STICK_DEAD_ZONE;
+        if (controller->stickX < 0) {
+            controller->stickX = 0;
         }
         else {
-            if (state->stickX > STATE_STICK_MAX) {
-                state->stickX = STATE_STICK_MAX;
+            if (controller->stickX > STATE_STICK_MAX) {
+                controller->stickX = STATE_STICK_MAX;
             }
 
-            if (state->stickX > STATE_STICK_DIRECTION_MIN) {
-                state->buttons |= R_JPAD;
+            if (controller->stickX > STATE_STICK_DIRECTION_MIN) {
+                controller->buttons |= R_JPAD;
             }
         }
     }
 
-    if (state->stickY < 0) {
-        state->stickY += STICK_DEAD_ZONE;
-        if (state->stickY > 0) {
-            state->stickY = 0;
+    if (controller->stickY < 0) {
+        controller->stickY += STICK_DEAD_ZONE;
+        if (controller->stickY > 0) {
+            controller->stickY = 0;
         }
         else {
-            if (state->stickY < -STATE_STICK_MAX) {
-                state->stickY = -STATE_STICK_MAX;
+            if (controller->stickY < -STATE_STICK_MAX) {
+                controller->stickY = -STATE_STICK_MAX;
             }
 
-            if (state->stickY < -STATE_STICK_DIRECTION_MIN) {
-                state->buttons |= D_JPAD;
+            if (controller->stickY < -STATE_STICK_DIRECTION_MIN) {
+                controller->buttons |= D_JPAD;
             }
         }
     }
     else {
-        state->stickY -= STICK_DEAD_ZONE;
-        if (state->stickY < 0) {
-            state->stickY = 0;
+        controller->stickY -= STICK_DEAD_ZONE;
+        if (controller->stickY < 0) {
+            controller->stickY = 0;
         }
         else {
-            if (state->stickY > STATE_STICK_MAX) {
-                state->stickY = STATE_STICK_MAX;
+            if (controller->stickY > STATE_STICK_MAX) {
+                controller->stickY = STATE_STICK_MAX;
             }
 
-            if (state->stickY > STATE_STICK_DIRECTION_MIN) {
-                state->buttons |= U_JPAD;
+            if (controller->stickY > STATE_STICK_DIRECTION_MIN) {
+                controller->buttons |= U_JPAD;
             }
         }
     }
 
-    state->pressedButtons = pad->button & (state->previousButtons ^ pad->button);
-    state->repeatedButtons = state->buttons;
-    if (state->buttons == state->previousButtons) {
+    controller->pressedButtons = pad->button & (controller->previousButtons ^ pad->button);
+    controller->repeatedButtons = controller->buttons;
+    if (controller->buttons == controller->previousButtons) {
         if (repeatDelay > BUTTON_REPEAT_DELAY_FIRST) {
             repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
         }
@@ -489,23 +489,23 @@ void UpdateControllerState(NUContData *pad, ControllerState *state) {
         }
         else {
             repeatDelay--;
-            state->repeatedButtons = 0;
+            controller->repeatedButtons = 0;
         }
     }
     else {
         repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
     }
 
-    state->repeatDelay = repeatDelay;
-    state->previousButtons = state->buttons;
-    state->heldButtons = state->buttons;
-    state->buttons = pad->button;
+    controller->repeatDelay = repeatDelay;
+    controller->previousButtons = controller->buttons;
+    controller->heldButtons = controller->buttons;
+    controller->buttons = pad->button;
 }
 
 void ReadControllers(void) {
     s32 playerIndex = 0;
     s32 portIndex = 0;
-    ControllerState *state = g_ControllerStates;
+    ControllerState *controller = g_ControllerStates;
     NUContData *previousMenuPad = g_PreviousMenuControllerData;
     NUContData *menuPad = g_MenuControllerData;
     NUContData *previousPad = g_PreviousControllerData;
@@ -517,8 +517,8 @@ void ReadControllers(void) {
             *previousMenuPad = *menuPad;
             nuContDataGetEx(pad, portIndex);
             UpdateMenuController(pad, previousMenuPad, playerIndex);
-            UpdateControllerState(pad, state);
-            state++;
+            UpdateControllerState(pad, controller);
+            controller++;
             previousMenuPad++;
             menuPad++;
             previousPad++;
