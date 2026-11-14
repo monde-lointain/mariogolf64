@@ -355,7 +355,7 @@ static WideAssetId f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT] = {
     ASSET_SHOT_BALL_IMAGE,
 };
 static Boolean f_IsDonkeyKongShown = FALSE;
-static s32 f_LakituScreenPoint[2] = {0, 230};
+static s32 f_LakituScreenPoint[PLANE_AXIS_COUNT] = {0, 230};
 static Boolean f_IsLakituFlying = FALSE;
 static s32 f_LakituTrailNewestIndex = 0;
 static s32 f_UnusedWordAfterTrailIndex UNUSED = 0;
@@ -490,7 +490,7 @@ static s32 f_LogoClubSpinFramesLeft = LOGO_CLUB_SPIN_FRAMES_MIN;
 static LogoState f_LogoState = LOGO_DROPPING_LETTERS;
 static LogoFadeStage f_LogoFadeStage = LOGO_FADE_NONE;
 static s32 f_LogoFadeFramesLeft = LOGO_FADE_FIRST_FRAMES_LEFT;
-static f32 f_LogoClubScale[2] = {1.0f, 1.0f};
+static Vec2 f_LogoClubScale = {1.0f, 1.0f};
 static Degrees f_LogoClubAngle = LOGO_CLUB_START_ANGLE;
 static Degrees f_LogoClubOrbitAngle = LOGO_CLUB_START_ORBIT_ANGLE;
 static f32 f_UnusedFloatAfterClubOrbit UNUSED = 0.0f;
@@ -629,7 +629,7 @@ static u8 f_LogoBallImages[LOGO_BALL_IMAGES_BUFFER_SIZE];
 static u8 f_LakituImage[LAKITU_IMAGE_BUFFER_SIZE];
 static u8 f_LakituTrailImage[LAKITU_TRAIL_IMAGE_BUFFER_SIZE];
 static Mtx f_LakituTrailMatrices[LAKITU_TRAIL_SEGMENT_COUNT];
-static f32 f_LakituTrailStart[2];
+static Vec2 f_LakituTrailStart;
 static u8 f_UnusedBufferAfterTrailStart[24] UNUSED;
 static u8 f_LogoMarioImage[LOGO_MARIO_IMAGE_BUFFER_SIZE];
 static u8 f_LogoLetterImages[LOGO_LETTER_IMAGES_BUFFER_SIZE];

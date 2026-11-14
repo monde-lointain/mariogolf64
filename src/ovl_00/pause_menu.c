@@ -166,8 +166,8 @@ typedef struct ChoiceBox {
 #define COLOR_WAVE_MIDDLE 127
 #define COLOR_WAVE_AMPLITUDE 127.0f
 
-f32 g_LiePanelPosition[2];
-f32 g_WindPanelPosition[2];
+Vec2 g_LiePanelPosition;
+Vec2 g_WindPanelPosition;
 
 static s32 f_PauseMenuDrawnMarker = 0;
 static s32 f_PauseSelection = 0;

@@ -2671,7 +2671,7 @@ void InitGridVertices(void) {
 }
 
 void InitTileMidpoints(void) {
-    s16 offsets[TILE_MIDPOINT_COUNT][2];
+    s16 offsets[TILE_MIDPOINT_COUNT][PLANE_AXIS_COUNT];
     s16 x;
     s16 z;
     s32 tileIndex;

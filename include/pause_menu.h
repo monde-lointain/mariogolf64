@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "controller.h"
+#include "geometry.h"
 #include "language.h"
 
 enum SaveMenuList {
@@ -60,8 +61,8 @@ enum ChoiceResult {
 
 typedef s32 ChoiceResult;
 
-extern f32 g_LiePanelPosition[2];
-extern f32 g_WindPanelPosition[2];
+extern Vec2 g_LiePanelPosition;
+extern Vec2 g_WindPanelPosition;
 
 void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap);
 // A true isClosing for RequestPauseMenu; the original passes -1 rather

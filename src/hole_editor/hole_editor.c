@@ -534,7 +534,7 @@ static u8 f_TileMidpointSlots[EDGE_POINT_COUNT][EDGE_POINT_COUNT] = {
     {4, 13, 14, 15, 5},
     {GridVertexSlot(2), 6, GridVertexSlot(6), 7, GridVertexSlot(10)},
 };
-static s32 f_HolePointCursor[2] = {0, 0};
+static s32 f_HolePointCursor[PLANE_AXIS_COUNT] = {0, 0};
 static s32 f_UnusedHolePointValue UNUSED = -1;
 static s32 f_CellCursorColumn = 0;
 static s32 f_CellCursorRow = 0;
@@ -2702,7 +2702,7 @@ void InterpolateRowPoints(Vtx *vertices, s32 column, s32 row, s32 weight) {
 
 void ShapeGroundFromCodes(void) {
     Vtx *edgePoints[3];
-    s32 treePositions[BILLBOARD_COUNT][2];
+    s32 treePositions[BILLBOARD_COUNT][PLANE_AXIS_COUNT];
     GridOffset *offsets;
     s32 offsetCount;
     s32 offsetIndex;

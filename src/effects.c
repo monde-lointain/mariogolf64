@@ -124,7 +124,7 @@ FILE_STATIC s32 f_SpawnGroundHeight;
 FILE_STATIC ImageAsset *f_RainSplashImage;
 FILE_STATIC Raindrop *f_Raindrops;
 FILE_STATIC RainSplash *f_RainSplashes;
-FILE_STATIC s32 f_RainCenter[2];
+FILE_STATIC s32 f_RainCenter[PLANE_AXIS_COUNT];
 FILE_STATIC f32 f_RainDriftX;
 FILE_STATIC f32 f_RainDriftZ;
 FILE_STATIC Vec3 f_RainVelocity;

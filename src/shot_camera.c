@@ -378,7 +378,7 @@ SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot) {
 
 SignedBinaryAngle GetAimSlopeAngle(Player *player, ShotLaunch *shot) {
     Radians angle;
-    f32 step[2];
+    Vec2 step;
     s32 aheadHeight;
     s32 behindHeight;
 

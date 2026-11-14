@@ -1079,11 +1079,12 @@ static s32 f_UnusedWordAfterCharacterChoices UNUSED = 0;
 static ScreenCorner f_TitleLabelCorners[TITLE_LABEL_COUNT] =
     {{110, 86}, {40, 114}, {90, 114}, {147, 114}, {217, 114}, {96, 142}, {96, 170}};
 static f32 f_ModeBoardBobPhase = 0.0f;
-static s32 f_ModeSelectControllerIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX][2] = {
-    {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
-    {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
-    {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
-    {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
+static s32 f_ModeSelectControllerIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX]
+                                              [PLANE_AXIS_COUNT] = {
+                                                  {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
+                                                  {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
+                                                  {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
+                                                  {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
 };
 static s32 f_UnusedModeIconValues[11] UNUSED = {110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
 static s32 f_ModeSelectModeLabelOffsets[MODE_ICON_COUNT] =
@@ -5457,7 +5458,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     f32 boardScale[WHEEL_SLOT_LIMIT];
     s32 unusedSlots[WHEEL_SLOT_LIMIT] UNUSED;
     s32 drawOrder[WHEEL_SLOT_LIMIT];
-    s32 position[2];
+    s32 position[PLANE_AXIS_COUNT];
     SaveData *save = GetSaveData();
     s16 badgeCount = 0;
     s16 starCount;
@@ -5840,8 +5841,10 @@ void DrawModeSelect(Gfx **displayListHead) {
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImagePalette(image)));
     for (i = 0; i != g_ChosenPlayerCount; i++) {
         if (g_PlayerControllerIndices[i] != NO_CONTROLLER_INDEX) {
-            position[AXIS_X] = f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][0];
-            position[AXIS_Y] = f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][1];
+            position[AXIS_X] =
+                f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][AXIS_X];
+            position[AXIS_Y] =
+                f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][AXIS_Y];
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(
@@ -5880,8 +5883,8 @@ void DrawModeSelect(Gfx **displayListHead) {
     image = g_SecondAnimatedIconImages[1];
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(image)));
     for (i = 0; i != g_ChosenPlayerCount; i++) {
-        position[AXIS_X] = f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][0];
-        position[AXIS_Y] = f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][1];
+        position[AXIS_X] = f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][AXIS_X];
+        position[AXIS_Y] = f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][AXIS_Y];
         if (g_PlayerControllerIndices[i] == NO_CONTROLLER_INDEX) {
             gDPLoadTextureBlock_4b(
                 gfx++,
@@ -8844,7 +8847,7 @@ void DrawMenuRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY) {
     EncodedAsset asset;
     SaveData *save = GetSaveData();
     Gfx *gfx = *displayListHead;
-    f32 starPositions[RING_SHOT_HOLE_COUNT][2] = {
+    Vec2 starPositions[RING_SHOT_HOLE_COUNT] = {
         {0.0f, -1.0f},
         {0.89f, -0.45f},
         {0.89f, 0.45f},
