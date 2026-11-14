@@ -554,7 +554,7 @@ void FreeTransmitMenu(void) {
     FreeMemory(&g_GameBoyTransfer.statLabelsImage);
     FreeMemory(&g_GameBoyTransfer.noticeCloudImage);
     FreeMemory(&g_GameBoyTransfer.accessingImage);
-    for (index = 0; index != GAME_BOY_CHARACTER_COUNT; index++) {
+    for (index = 0; index != GAME_BOY_GOLFER_COUNT; index++) {
         FreeMemory(&g_GameBoyTransfer.faceImages[index]);
         FreeMemory(&g_GameBoyTransfer.facePalettes[index]);
     }
@@ -665,7 +665,7 @@ void UpdateBringCharacters(void) {
                 );
                 SetTextName(g_GameBoyCharacters[transfer->gameBoyCharacterIndex].name);
                 SetTextPaletteColor(255, 255, 0, 0);
-                if (transfer->characterCount < GAME_BOY_GOLFER_COUNT) {
+                if (transfer->characterCount < GAME_BOY_CHARACTER_COUNT) {
                     transfer->characterCount++;
                 }
 
@@ -693,7 +693,7 @@ void UpdateBringCharacters(void) {
                 PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
             }
             else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
-                transfer->gameBoyCharacterIndex < GAME_BOY_GOLFER_COUNT - 1) {
+                transfer->gameBoyCharacterIndex < GAME_BOY_CHARACTER_COUNT - 1) {
                 transfer->gameBoyCharacterIndex++;
                 PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
             }
@@ -702,7 +702,7 @@ void UpdateBringCharacters(void) {
         case BRING_CHOOSING:
             if (f_TransmitController.pressedButtons & A_BUTTON) {
                 PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
-                if (transfer->characterCount == GAME_BOY_GOLFER_COUNT) {
+                if (transfer->characterCount == GAME_BOY_CHARACTER_COUNT) {
                     transfer->screenStep = BRING_CHOOSING_SLOT;
                 }
                 else {
@@ -743,7 +743,7 @@ void UpdateBringCharacters(void) {
             if (f_TransmitController.pressedButtons & A_BUTTON) {
                 transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
                 PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
-                if (transfer->characterCount != GAME_BOY_GOLFER_COUNT) {
+                if (transfer->characterCount != GAME_BOY_CHARACTER_COUNT) {
                     OpenPrompt(PROMPT_BRING_MORE_CHARACTERS);
                     transfer->screenStep = BRING_ASKING;
                 }

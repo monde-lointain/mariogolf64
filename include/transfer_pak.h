@@ -89,8 +89,8 @@ typedef struct GameBoyTransfer {
     void *courseSceneImage;
     void *pointerImage;
     void *arrowsImage;
-    void *facePalettes[GAME_BOY_CHARACTER_COUNT];
-    void *faceImages[GAME_BOY_CHARACTER_COUNT];
+    void *facePalettes[GAME_BOY_GOLFER_COUNT];
+    void *faceImages[GAME_BOY_GOLFER_COUNT];
     void *titleImage;
     void *woodPanelImage;
     void *transferPakIconsImage;
