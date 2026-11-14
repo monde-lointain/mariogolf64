@@ -4194,9 +4194,6 @@ const char f_UnusedModeNamesText[] = "StrokeSpeedGolfMini-Golf";
 #define CLUB_TOURNAMENT_COURSE_STRIP_WIDTH 64
 #define CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT 32
 #define CLUB_TOURNAMENT_COURSE_STRIP_COUNT 2
-#define NINTENDO_BADGE_STRIP_WIDTH 144
-#define NINTENDO_BADGE_STRIP_HEIGHT 10
-#define NINTENDO_BADGE_STRIP_COUNT 2
 #define CLUB_TOURNAMENT_DETAILS_TOP 74
 #define CLUB_TOURNAMENT_LINE_HEIGHT 16
 #define CLUB_TOURNAMENT_UNBADGED_DETAILS_TOP 58
@@ -4311,10 +4308,10 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
             LoadTextureBlock(
                 &gfx,
                 LargeImageTexels(f_NintendoBadgeImage) +
-                    (i * NINTENDO_BADGE_STRIP_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT),
+                    (i * NINTENDO_BADGE_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                NINTENDO_BADGE_STRIP_WIDTH,
+                NINTENDO_BADGE_WIDTH,
                 NINTENDO_BADGE_STRIP_HEIGHT,
                 0,
                 G_TX_MIRROR,
@@ -4328,7 +4325,7 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
                 &gfx,
                 QuarterPixels(f_ResultsSlide + NINTENDO_BADGE_X),
                 QuarterPixels(f_ResultsTop + NINTENDO_BADGE_Y + (i * NINTENDO_BADGE_STRIP_HEIGHT)),
-                QuarterPixels(f_ResultsSlide + NINTENDO_BADGE_X + NINTENDO_BADGE_STRIP_WIDTH),
+                QuarterPixels(f_ResultsSlide + NINTENDO_BADGE_X + NINTENDO_BADGE_WIDTH),
                 QuarterPixels(
                     f_ResultsTop + NINTENDO_BADGE_Y + (i * NINTENDO_BADGE_STRIP_HEIGHT) +
                     NINTENDO_BADGE_STRIP_HEIGHT

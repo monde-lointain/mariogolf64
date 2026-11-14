@@ -11,6 +11,7 @@
 #include "gbi_helpers.h"
 #include "heap.h"
 #include "language.h"
+#include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
 #include "scoring.h"
@@ -51,13 +52,10 @@ enum PlanksState {
 #define BLANK_COURSE_IMAGE_ASSET 0x834
 #define SPINNING_EMPTY_STAR_ASSET 0x5E5
 
-#define STAR_FRAME_COUNT 15
 #define STAR_FRAME_DURATION 2
 #define STAR_BUFFER_COUNT 2
 #define STILL_STAR_IMAGE STAR_BUFFER_COUNT
 #define STAR_IMAGE_COUNT (STAR_BUFFER_COUNT + 1)
-#define STAR_WIDTH 32
-#define STAR_HEIGHT 24
 #define STAR_GROWTH 16
 #define STARS_LEFT 46
 #define STAR_SPACING 38
@@ -68,9 +66,6 @@ enum PlanksState {
 #define TILE_STILL_EMPTY_STAR 3
 #define STAR_TMEM_STEP 0x40
 
-#define COURSE_IMAGE_WIDTH 64
-#define COURSE_IMAGE_STRIP_HEIGHT 32
-#define COURSE_IMAGE_STRIP_COUNT 2
 #define COURSE_IMAGE_STRIP_SIZE (COURSE_IMAGE_WIDTH * COURSE_IMAGE_STRIP_HEIGHT)
 #define COURSE_IMAGE_LEFT 128
 #define RING_SHOT_COURSE_IMAGE_TOP 144
