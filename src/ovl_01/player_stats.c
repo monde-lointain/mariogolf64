@@ -2315,9 +2315,6 @@ void UpdateBestShots(void) {
 #define RECORD_PLACE_X 124
 #define RECORD_PLACE_Y 64
 #define RECORD_LABEL_X 32
-#define RECORD_COURSE_IMAGE_WIDTH 64
-#define RECORD_COURSE_STRIP_HEIGHT 32
-#define RECORD_COURSE_STRIP_COUNT 2
 #define RECORD_COURSE_LEFT 40
 #define RECORD_COURSE_RIGHT 96
 #define RECORD_COURSE_TOP 176
@@ -2464,19 +2461,19 @@ void DrawBestShots(Gfx **displayListHead) {
                 IMAGE_HEADER_SIZE
             )
         );
-        for (index = 0; index != RECORD_COURSE_STRIP_COUNT; index++) {
+        for (index = 0; index != COURSE_ICON_STRIP_COUNT; index++) {
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(
                     (u32)f_BestShotsCourseIcons
                         [save->rankedRecords[f_BestShotRecords[iconRow][iconColumn]].courseIndex] +
                     LARGE_PALETTED_TEXELS_OFFSET +
-                    (index * RECORD_COURSE_IMAGE_WIDTH * RECORD_COURSE_STRIP_HEIGHT)
+                    (index * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT)
                 ),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
-                RECORD_COURSE_IMAGE_WIDTH,
-                RECORD_COURSE_STRIP_HEIGHT,
+                COURSE_ICON_WIDTH,
+                COURSE_ICON_STRIP_HEIGHT,
                 0,
                 G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP,
@@ -2498,8 +2495,8 @@ void DrawBestShots(Gfx **displayListHead) {
                 G_TX_RENDERTILE,
                 0,
                 0,
-                TexelRunStep(RECORD_COURSE_IMAGE_WIDTH, RECORD_COURSE_RIGHT - RECORD_COURSE_LEFT),
-                TexelRunStep(RECORD_COURSE_STRIP_HEIGHT, RECORD_COURSE_STRIP_SPACING)
+                TexelRunStep(COURSE_ICON_WIDTH, RECORD_COURSE_RIGHT - RECORD_COURSE_LEFT),
+                TexelRunStep(COURSE_ICON_STRIP_HEIGHT, RECORD_COURSE_STRIP_SPACING)
             );
             gDPPipeSync(gfx++);
         }
