@@ -6,25 +6,25 @@
 #include "ball_simulation.h"
 #include "camera.h"
 
-enum ShotKind {
-    SHOT_KIND_GREAT,
-    SHOT_KIND_EXCELLENT,
-    SHOT_KIND_PIN_SHOT,
-    SHOT_KIND_CHIP_IN,
-    SHOT_KIND_LONG_CHIP_IN,
-    SHOT_KIND_UNUSED,
-    SHOT_KIND_FLAG_SHOT,
-    SHOT_KIND_HOLE_IN_ONE,
-    SHOT_KIND_ALBATROSS,
-    SHOT_KIND_EAGLE,
-    SHOT_KIND_BIRDIE,
-    SHOT_KIND_WATER_CUT,
-    SHOT_KIND_COUNT
+enum NotableShot {
+    NOTABLE_SHOT_GREAT,
+    NOTABLE_SHOT_EXCELLENT,
+    NOTABLE_SHOT_PIN_SHOT,
+    NOTABLE_SHOT_CHIP_IN,
+    NOTABLE_SHOT_LONG_CHIP_IN,
+    NOTABLE_SHOT_UNUSED,
+    NOTABLE_SHOT_FLAG_SHOT,
+    NOTABLE_SHOT_HOLE_IN_ONE,
+    NOTABLE_SHOT_ALBATROSS,
+    NOTABLE_SHOT_EAGLE,
+    NOTABLE_SHOT_BIRDIE,
+    NOTABLE_SHOT_WATER_CUT,
+    NOTABLE_SHOT_COUNT
 };
 
 extern BallSimulation g_TurnBallSimulation;
 
-void CountNotableShot(s32 playerIndex, s32 shotKind);
+void CountNotableShot(s32 playerIndex, s32 notableShot);
 void StartFreeLook(void);
 void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation);
 

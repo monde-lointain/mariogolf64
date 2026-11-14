@@ -111,7 +111,7 @@ typedef struct Player {
     s32 lastDriveDistance;
     s32 points;
     s16 unusedRestValue;
-    s8 notableShotCounts[SHOT_KIND_COUNT];
+    s8 notableShotCounts[NOTABLE_SHOT_COUNT];
     u8 unusedAfterShotCounts[0xB8 - 0xB6];
 } Player;
 

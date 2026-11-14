@@ -78,7 +78,7 @@
 #define DECIMETERS_PER_UNIT (1.0f / 1536)
 #define NEAR_CUP_DECIMETERS_MAX 600.0f
 
-#define SHOT_KIND_COUNT_MAX 0xFF
+#define NOTABLE_SHOT_COUNT_MAX 0xFF
 #define RING_SHOT_CLEAR_COUNT_MAX 99
 
 #define HOLE_OUT_CALL_CHANNEL 3
@@ -1585,7 +1585,7 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation) {
     }
 }
 
-void CountNotableShot(s32 playerIndex, s32 shotKind) {
+void CountNotableShot(s32 playerIndex, s32 notableShot) {
     u8 *count;
 
     if (g_Players[playerIndex].isComputer ||
@@ -1599,13 +1599,13 @@ void CountNotableShot(s32 playerIndex, s32 shotKind) {
         return;
     }
 
-    if (g_GameState.isMiniGolf && shotKind != SHOT_KIND_HOLE_IN_ONE) {
+    if (g_GameState.isMiniGolf && notableShot != NOTABLE_SHOT_HOLE_IN_ONE) {
         return;
     }
 
-    count = (u8 *)&g_Players[playerIndex].notableShotCounts[shotKind];
-    if (*count < SHOT_KIND_COUNT_MAX) {
-        osSyncPrintf("EXP GET type %d\n", shotKind);
+    count = (u8 *)&g_Players[playerIndex].notableShotCounts[notableShot];
+    if (*count < NOTABLE_SHOT_COUNT_MAX) {
+        osSyncPrintf("EXP GET type %d\n", notableShot);
         (*count)++;
     }
 }
@@ -1619,23 +1619,23 @@ void CountNotableShot(s32 playerIndex, s32 shotKind) {
 #define HOLE_IN_ONE_POINTS 20
 #define MINI_GOLF_HOLE_IN_ONE_POINTS 10
 
-s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
-    s32 count = (u8)g_Players[playerIndex].notableShotCounts[shotKind];
+s32 GetNotableShotPoints(s32 playerIndex, s32 notableShot) {
+    s32 count = (u8)g_Players[playerIndex].notableShotCounts[notableShot];
     s32 points;
 
-    switch (shotKind) {
-        case SHOT_KIND_GREAT:
-        case SHOT_KIND_EXCELLENT:
+    switch (notableShot) {
+        case NOTABLE_SHOT_GREAT:
+        case NOTABLE_SHOT_EXCELLENT:
             points = GREAT_SHOT_POINTS;
             break;
-        case SHOT_KIND_LONG_CHIP_IN:
+        case NOTABLE_SHOT_LONG_CHIP_IN:
             points = LONG_CHIP_IN_POINTS;
             break;
-        case SHOT_KIND_PIN_SHOT:
-        case SHOT_KIND_UNUSED:
+        case NOTABLE_SHOT_PIN_SHOT:
+        case NOTABLE_SHOT_UNUSED:
             points = PIN_SHOT_POINTS;
             break;
-        case SHOT_KIND_HOLE_IN_ONE:
+        case NOTABLE_SHOT_HOLE_IN_ONE:
             if (g_GameState.isMiniGolf) {
                 points = MINI_GOLF_HOLE_IN_ONE_POINTS;
             }
@@ -1644,20 +1644,20 @@ s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
             }
 
             break;
-        case SHOT_KIND_FLAG_SHOT:
-        case SHOT_KIND_EAGLE:
-        case SHOT_KIND_WATER_CUT:
+        case NOTABLE_SHOT_FLAG_SHOT:
+        case NOTABLE_SHOT_EAGLE:
+        case NOTABLE_SHOT_WATER_CUT:
             points = BIG_SHOT_POINTS;
             break;
-        case SHOT_KIND_ALBATROSS:
+        case NOTABLE_SHOT_ALBATROSS:
             points = ALBATROSS_POINTS;
             break;
-        case SHOT_KIND_CHIP_IN:
-        case SHOT_KIND_BIRDIE:
+        case NOTABLE_SHOT_CHIP_IN:
+        case NOTABLE_SHOT_BIRDIE:
             points = CHIP_IN_POINTS;
             break;
         default:
-            osSyncPrintf("Unknown Shot Type%d\n", shotKind);
+            osSyncPrintf("Unknown Shot Type%d\n", notableShot);
             points = 0;
             break;
     }
@@ -1667,15 +1667,15 @@ s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
 
 s32 TallyCoursePoints(void) {
     s32 playerIndex;
-    s32 shotKind;
+    s32 notableShot;
     s32 points;
     s32 total = 0;
 
     for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
         points = 0;
-        for (shotKind = 0; shotKind < SHOT_KIND_COUNT; shotKind++) {
-            points += GetShotKindPoints(playerIndex, shotKind);
-            g_Players[playerIndex].notableShotCounts[shotKind] = 0;
+        for (notableShot = 0; notableShot < NOTABLE_SHOT_COUNT; notableShot++) {
+            points += GetNotableShotPoints(playerIndex, notableShot);
+            g_Players[playerIndex].notableShotCounts[notableShot] = 0;
         }
 
         total += points;
@@ -1688,13 +1688,13 @@ s32 TallyCoursePoints(void) {
 void PrintCoursePoints(void) {
     char text[DEBUG_TEXT_BUFFER_SIZE];
     s32 playerIndex;
-    s32 shotKind;
+    s32 notableShot;
     s32 points;
 
     for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
         points = 0;
-        for (shotKind = 0; shotKind < SHOT_KIND_COUNT; shotKind++) {
-            points += GetShotKindPoints(playerIndex, shotKind);
+        for (notableShot = 0; notableShot < NOTABLE_SHOT_COUNT; notableShot++) {
+            points += GetNotableShotPoints(playerIndex, notableShot);
         }
 
         sprintf(text, "Player%d EXP %d\n", (int)playerIndex, (int)points);
@@ -4566,18 +4566,18 @@ void UpdateTurns(void) {
                     s32 scoreToPar = g_Players[playerIndex].strokeCount - g_HoleSetup.par;
 
                     if (g_Players[playerIndex].strokeCount == 1) {
-                        CountNotableShot(playerIndex, SHOT_KIND_HOLE_IN_ONE);
+                        CountNotableShot(playerIndex, NOTABLE_SHOT_HOLE_IN_ONE);
                     }
                     else {
                         switch (scoreToPar) {
                             case SCORE_TO_PAR_BIRDIE:
-                                CountNotableShot(playerIndex, SHOT_KIND_BIRDIE);
+                                CountNotableShot(playerIndex, NOTABLE_SHOT_BIRDIE);
                                 break;
                             case SCORE_TO_PAR_EAGLE:
-                                CountNotableShot(playerIndex, SHOT_KIND_EAGLE);
+                                CountNotableShot(playerIndex, NOTABLE_SHOT_EAGLE);
                                 break;
                             case SCORE_TO_PAR_ALBATROSS:
-                                CountNotableShot(playerIndex, SHOT_KIND_ALBATROSS);
+                                CountNotableShot(playerIndex, NOTABLE_SHOT_ALBATROSS);
                                 break;
                         }
                     }

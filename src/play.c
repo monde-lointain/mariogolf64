@@ -324,7 +324,7 @@ void SetUpPlayers(void) {
         }
 
         playerIndex = 0;
-        for (slot = SHOT_KIND_COUNT - 1; slot >= 0; slot--) {
+        for (slot = NOTABLE_SHOT_COUNT - 1; slot >= 0; slot--) {
             g_Players[playerIndex].notableShotCounts[slot] = 0;
         }
     }
@@ -341,7 +341,7 @@ void SetUpPlayers(void) {
                 g_Players[playerIndex].holes[holeIndex].puttCount = UNCOUNTED_PUTTS;
             }
 
-            for (slot = SHOT_KIND_COUNT - 1; slot >= 0; slot--) {
+            for (slot = NOTABLE_SHOT_COUNT - 1; slot >= 0; slot--) {
                 g_Players[playerIndex].notableShotCounts[slot] = 0;
             }
 

@@ -468,7 +468,7 @@ void StopFlightCamera(void) {
         osSyncPrintf("\nCheckWater1\n");
         if (g_SimulatedShot.isWaterCut) {
             osSyncPrintf("\nCheckWater2\n");
-            CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_WATER_CUT);
+            CountNotableShot(g_CurrentShot.playerIndex, NOTABLE_SHOT_WATER_CUT);
         }
     }
 }
@@ -972,18 +972,18 @@ void PlayFlightSounds(s32 step) {
         else if (g_SimulatedShot.flagHitStep != NO_STEP) {
             StartBanner(BANNER_FLAG_SHOT);
             PlaySound(SOUND_CALL_FLAG_SHOT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
-            CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_FLAG_SHOT);
+            CountNotableShot(g_CurrentShot.playerIndex, NOTABLE_SHOT_FLAG_SHOT);
             f_PendingResultSound = RESULT_SOUND_SUPERB_SHOT;
         }
         else if (f_PassedPathFlags & STEP_FLAG_PIN_HIT) {
-            CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_PIN_SHOT);
+            CountNotableShot(g_CurrentShot.playerIndex, NOTABLE_SHOT_PIN_SHOT);
             StartBanner(BANNER_PIN_SHOT);
             PlaySound(SOUND_CALL_PIN_SHOT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
             f_PendingResultSound = RESULT_SOUND_SUPERB_SHOT;
         }
         else if (g_SimulatedShot.endsOnGreen) {
             if (IsAlbatrossOrBetter(g_Players[g_CurrentShot.playerIndex].strokeCount)) {
-                CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_GREAT);
+                CountNotableShot(g_CurrentShot.playerIndex, NOTABLE_SHOT_GREAT);
                 StartBanner(BANNER_GREAT);
                 PlaySound(SOUND_CALL_GREAT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
                 QueueOnlookerSounds(CHARACTER_SOUND_KIND_GREAT);
@@ -992,7 +992,7 @@ void PlayFlightSounds(s32 step) {
             else if (g_HoleSetup.par + SCORE_TO_PAR_EAGLE ==
                 g_Players[g_CurrentShot.playerIndex].strokeCount) {
                 if (f_LandingCupDistance <= CLOSE_LANDING_DISTANCE) {
-                    CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_EXCELLENT);
+                    CountNotableShot(g_CurrentShot.playerIndex, NOTABLE_SHOT_EXCELLENT);
                     StartBanner(BANNER_EXCELLENT);
                     PlaySound(SOUND_CALL_EXCELLENT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
                     QueueOnlookerSounds(CHARACTER_SOUND_KIND_EXCELLENT);
@@ -1035,7 +1035,7 @@ void PlayFlightSounds(s32 step) {
             StartBanner(BANNER_FLAG_SHOT);
             PlaySound(SOUND_CALL_FLAG_SHOT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
             QueueOnlookerSounds(CHARACTER_SOUND_KIND_EXCELLENT);
-            CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_FLAG_SHOT);
+            CountNotableShot(g_CurrentShot.playerIndex, NOTABLE_SHOT_FLAG_SHOT);
             f_EndReaction = END_REACTION_ONLOOKERS;
             f_PendingResultSound = RESULT_SOUND_SUPERB_SHOT;
         }
@@ -1084,11 +1084,11 @@ void PlayFlightSounds(s32 step) {
 
             if (!g_SimulatedShot.startsOnGreen) {
                 if (f_StartCupDistance > LONG_LANDING_DISTANCE_MIN) {
-                    CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_LONG_CHIP_IN);
+                    CountNotableShot(g_CurrentShot.playerIndex, NOTABLE_SHOT_LONG_CHIP_IN);
                     f_PendingResultSound = RESULT_SOUND_SUPERB_SHOT;
                 }
                 else {
-                    CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_CHIP_IN);
+                    CountNotableShot(g_CurrentShot.playerIndex, NOTABLE_SHOT_CHIP_IN);
                     f_PendingResultSound = RESULT_SOUND_GOOD_SHOT;
                 }
             }
