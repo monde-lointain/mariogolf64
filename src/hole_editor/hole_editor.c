@@ -42,6 +42,11 @@
 #include "work_area.h"
 
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)
+// A midpoint is leveled between the two ground points beside it.
+#define SEGMENT_POINT_COUNT 3
+#define SEGMENT_START 0
+#define SEGMENT_MIDPOINT 1
+#define SEGMENT_END 2
 #define SLOPE_HALF_COUNT 2
 #define SLOPE_BLOCK_COLUMN_COUNT 8
 #define SLOPE_BLOCK_ROW_COUNT 16
@@ -2706,7 +2711,7 @@ void InterpolateRowPoints(Vtx *vertices, s32 column, s32 row, s32 weight) {
 }
 
 void ShapeGroundFromCodes(void) {
-    Vtx *edgePoints[3];
+    Vtx *segmentPoints[SEGMENT_POINT_COUNT];
     s32 treePositions[BILLBOARD_COUNT][PLANE_AXIS_COUNT];
     GridOffset *offsets;
     s32 offsetCount;
@@ -2830,36 +2835,46 @@ void ShapeGroundFromCodes(void) {
                     }
 
                     if ((edgeRow & 1) == 0) {
-                        edgePoints[0] = GetGroundPoint(
+                        segmentPoints[SEGMENT_START] = GetGroundPoint(
                             (column * GROUND_TILE_POINT_SPAN) + edgeColumn - 1,
                             (row * GROUND_TILE_POINT_SPAN) + edgeRow
                         );
-                        edgePoints[1] = &g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex]
-                                .midpointBlockIndex][f_TileMidpointSlots[edgeRow][edgeColumn]];
-                        edgePoints[2] = GetGroundPoint(
+                        segmentPoints[SEGMENT_MIDPOINT] =
+                            &g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex]
+                                    .midpointBlockIndex][f_TileMidpointSlots[edgeRow][edgeColumn]];
+                        segmentPoints[SEGMENT_END] = GetGroundPoint(
                             (column * GROUND_TILE_POINT_SPAN) + edgeColumn + 1,
                             (row * GROUND_TILE_POINT_SPAN) + edgeRow
                         );
-                        edgePoints[1]->v.ob[AXIS_Y] = edgePoints[0]->v.ob[AXIS_Y] +
-                            ((edgePoints[2]->v.ob[AXIS_Y] - edgePoints[0]->v.ob[AXIS_Y]) *
-                                (edgePoints[1]->v.ob[AXIS_X] - edgePoints[0]->v.ob[AXIS_X]) /
-                                (edgePoints[2]->v.ob[AXIS_X] - edgePoints[0]->v.ob[AXIS_X]));
+                        segmentPoints[SEGMENT_MIDPOINT]->v.ob[AXIS_Y] =
+                            segmentPoints[SEGMENT_START]->v.ob[AXIS_Y] +
+                            ((segmentPoints[SEGMENT_END]->v.ob[AXIS_Y] -
+                                 segmentPoints[SEGMENT_START]->v.ob[AXIS_Y]) *
+                                (segmentPoints[SEGMENT_MIDPOINT]->v.ob[AXIS_X] -
+                                    segmentPoints[SEGMENT_START]->v.ob[AXIS_X]) /
+                                (segmentPoints[SEGMENT_END]->v.ob[AXIS_X] -
+                                    segmentPoints[SEGMENT_START]->v.ob[AXIS_X]));
                     }
                     else {
-                        edgePoints[0] = GetGroundPoint(
+                        segmentPoints[SEGMENT_START] = GetGroundPoint(
                             (column * GROUND_TILE_POINT_SPAN) + edgeColumn,
                             (row * GROUND_TILE_POINT_SPAN) + edgeRow - 1
                         );
-                        edgePoints[1] = &g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex]
-                                .midpointBlockIndex][f_TileMidpointSlots[edgeRow][edgeColumn]];
-                        edgePoints[2] = GetGroundPoint(
+                        segmentPoints[SEGMENT_MIDPOINT] =
+                            &g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex]
+                                    .midpointBlockIndex][f_TileMidpointSlots[edgeRow][edgeColumn]];
+                        segmentPoints[SEGMENT_END] = GetGroundPoint(
                             (column * GROUND_TILE_POINT_SPAN) + edgeColumn,
                             (row * GROUND_TILE_POINT_SPAN) + edgeRow + 1
                         );
-                        edgePoints[1]->v.ob[AXIS_Y] = edgePoints[0]->v.ob[AXIS_Y] +
-                            ((edgePoints[2]->v.ob[AXIS_Y] - edgePoints[0]->v.ob[AXIS_Y]) *
-                                (edgePoints[1]->v.ob[AXIS_Z] - edgePoints[0]->v.ob[AXIS_Z]) /
-                                (edgePoints[2]->v.ob[AXIS_Z] - edgePoints[0]->v.ob[AXIS_Z]));
+                        segmentPoints[SEGMENT_MIDPOINT]->v.ob[AXIS_Y] =
+                            segmentPoints[SEGMENT_START]->v.ob[AXIS_Y] +
+                            ((segmentPoints[SEGMENT_END]->v.ob[AXIS_Y] -
+                                 segmentPoints[SEGMENT_START]->v.ob[AXIS_Y]) *
+                                (segmentPoints[SEGMENT_MIDPOINT]->v.ob[AXIS_Z] -
+                                    segmentPoints[SEGMENT_START]->v.ob[AXIS_Z]) /
+                                (segmentPoints[SEGMENT_END]->v.ob[AXIS_Z] -
+                                    segmentPoints[SEGMENT_START]->v.ob[AXIS_Z]));
                     }
                 }
             }
