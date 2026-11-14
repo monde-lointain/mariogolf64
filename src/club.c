@@ -4157,8 +4157,8 @@ s32 GetSelectedShotWorldDistance(void) {
     return GetShotWorldDistance(GetSelectedClub(), g_CurrentShot.shotMode);
 }
 
-s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceInfo *info) {
-    SurfaceKind kind = info->kind;
+s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceInfo *surfaceInfo) {
+    SurfaceKind kind = surfaceInfo->kind;
     s32 mask;
 
     if (IsGameFlagSet(GAME_FLAG_ANY_CLUB_ANYWHERE)) {

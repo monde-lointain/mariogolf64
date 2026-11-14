@@ -1252,7 +1252,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             s32 cupDistance;
             BallSpeed impactSpeed;
             f32 slide = 0.0f;
-            SurfaceInfo *info;
+            SurfaceInfo *surfaceInfo;
             f32 friction = 1.0f;
             f32 spin;
             f32 restitution;
@@ -1391,8 +1391,8 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 SpawnImpactEffects(simulation);
             }
 
-            info = GetSurfaceInfo(simulation->surface);
-            friction = (THOUSANDTHS_PER_ONE - info->bounciness) * ONE_PER_THOUSANDTH;
+            surfaceInfo = GetSurfaceInfo(simulation->surface);
+            friction = (THOUSANDTHS_PER_ONE - surfaceInfo->bounciness) * ONE_PER_THOUSANDTH;
             if (simulation->surface == SURFACE_BUNKER) {
                 BunkerBurial burial = BUNKER_BURIAL_NONE;
 
@@ -1422,9 +1422,9 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                         break;
                 }
             }
-            else if (info->kind == SURFACE_KIND_OUT_OF_COURSE ||
-                ((info->kind == SURFACE_KIND_OUT_OF_BOUNDS ||
-                     info->kind == SURFACE_KIND_WATER_HAZARD) &&
+            else if (surfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE ||
+                ((surfaceInfo->kind == SURFACE_KIND_OUT_OF_BOUNDS ||
+                     surfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) &&
                     impactSpeed < LOST_BALL_STOP_SPEED)) {
                 simulation->state = BALL_STATE_STOPPED;
             }
@@ -1635,7 +1635,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             !isNearCup &&
             contact == STEP_FLAG_GROUND_HIT) {
             TrianglePlane plane;
-            SurfaceInfo *info;
+            SurfaceInfo *surfaceInfo;
             s32 groundHeight;
             s32 slopeX;
             s32 slopeZ;
@@ -1648,10 +1648,10 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 (velocity[AXIS_X] * velocity[AXIS_X]) + (velocity[AXIS_Z] * velocity[AXIS_Z])
             );
             if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
-                info = &f_SurfaceInfo[SURFACE_GREEN];
+                surfaceInfo = &f_SurfaceInfo[SURFACE_GREEN];
                 SetFlatTriangle(&triangle);
                 if (g_ClubTestMode == CLUB_TEST_SHOT) {
-                    info = &f_SurfaceInfo[SURFACE_FAIRWAY];
+                    surfaceInfo = &f_SurfaceInfo[SURFACE_FAIRWAY];
                 }
 
                 groundHeight = 0;
@@ -1733,8 +1733,8 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                         break;
                 }
 
-                info = GetSurfaceInfo(simulation->surface);
-                if (info->kind == SURFACE_KIND_OUT_OF_COURSE) {
+                surfaceInfo = GetSurfaceInfo(simulation->surface);
+                if (surfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE) {
                     simulation->state = BALL_STATE_STOPPED;
                     goto SETTLE;
                 }
@@ -1783,7 +1783,7 @@ TAKE_OFF:
                 isSteep = TRUE;
             }
 
-            friction = info->rollSpeedKept * ONE_PER_THOUSANDTH;
+            friction = surfaceInfo->rollSpeedKept * ONE_PER_THOUSANDTH;
             if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
                 g_HoleSetup.conditions.isRaining == TRUE) {
                 friction *= RAIN_FRICTION_SCALE;
@@ -1882,7 +1882,7 @@ TAKE_OFF:
             }
 
             if (!isSteep &&
-                info->kind != SURFACE_KIND_GREEN &&
+                surfaceInfo->kind != SURFACE_KIND_GREEN &&
                 simulation->lastBounceStep + OFF_GREEN_STOP_STEPS < simulation->stepCount &&
                 sqrtf(
                     (velocity[AXIS_X] * velocity[AXIS_X]) + (velocity[AXIS_Y] * velocity[AXIS_Y]) +
@@ -2310,10 +2310,10 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
     }
 
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-        SurfaceInfo *info = GetSurfaceInfo(simulation->launchSurface);
+        SurfaceInfo *surfaceInfo = GetSurfaceInfo(simulation->launchSurface);
 
         blend = PickLieBlend();
-        GetSurfacePercentRange(info, club, percentRange);
+        GetSurfacePercentRange(surfaceInfo, club, percentRange);
         speed = ((percentRange[0] * blend) + (percentRange[1] * (1.0f - blend))) * speed *
             ONE_PER_PERCENT;
     }

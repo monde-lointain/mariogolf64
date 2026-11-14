@@ -1390,14 +1390,14 @@ void DrawLandingReaction(Gfx **displayListHead) {
     Vec3 rotation;
     Mat4 matrix;
     Mat4 offset;
-    SurfaceInfo *surface;
+    SurfaceInfo *surfaceInfo;
     s32 distance;
 
     Radians angle;
     f32 size;
 
     if (f_LandingReaction != LANDING_REACTION_NONE) {
-        surface = GetSurfaceInfo(g_TurnBallSimulation.surface);
+        surfaceInfo = GetSurfaceInfo(g_TurnBallSimulation.surface);
         if (f_LandingReactionFrame == 1) {
             PlaceGlyphGroup(
                 LANDING_GLYPH_GROUP_FIRST,
@@ -1405,7 +1405,7 @@ void DrawLandingReaction(Gfx **displayListHead) {
                 0,
                 0,
                 LANDING_NAME_GLYPH_Y,
-                surface->name
+                surfaceInfo->name
             );
         }
 
@@ -1414,7 +1414,7 @@ void DrawLandingReaction(Gfx **displayListHead) {
                 g_TurnBallSimulation.position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
                 g_TurnBallSimulation.position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
             );
-            if (g_GameState.isMiniGolf || surface->kind == SURFACE_KIND_GREEN) {
+            if (g_GameState.isMiniGolf || surfaceInfo->kind == SURFACE_KIND_GREEN) {
                 s32 hundredths = distance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
 
                 sprintf(
@@ -1513,7 +1513,7 @@ void DrawLandingReaction(Gfx **displayListHead) {
         else {
             SetUpTextDrawing(&gfx);
             gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-            DrawCenteredLargeText(&gfx, SCREEN_WIDTH / 2, LANDING_NAME_Y, surface->name);
+            DrawCenteredLargeText(&gfx, SCREEN_WIDTH / 2, LANDING_NAME_Y, surfaceInfo->name);
             if (f_LandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
                 DrawCenteredMediumText(&gfx, SCREEN_WIDTH / 2, LANDING_DISTANCE_Y, g_PrintBuffer);
             }
@@ -4018,7 +4018,7 @@ void DrawRoundHud(CameraView *view) {
     s32 height;
     Player *shooter;
     Club *selectedClub;
-    SurfaceInfo *surface;
+    SurfaceInfo *surfaceInfo;
     f32 shotLength;
     s32 contestDistance;
     s32 secondsTotal;
@@ -4553,8 +4553,8 @@ void DrawRoundHud(CameraView *view) {
     SetTextColor(&g_DisplayListHead, 255, 255, 255);
     SetTextColor(&g_DisplayListHead, 255, 255, 255);
     if (g_RoundHud.isLieIconShown && !g_IsCupViewShown) {
-        surface = GetSurfaceInfo(g_CurrentShot.surface);
-        GetSurfacePercentRange(surface, GetSelectedClub(), percentRange);
+        surfaceInfo = GetSurfaceInfo(g_CurrentShot.surface);
+        GetSurfacePercentRange(surfaceInfo, GetSelectedClub(), percentRange);
         sprintf(g_PrintBuffer, "%3d-%3d", percentRange[0], percentRange[1]);
         DrawShadowedText(
             &g_DisplayListHead,

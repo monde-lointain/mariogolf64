@@ -2462,12 +2462,12 @@ void FreeCharacterAndReactionLight(s32 slotIndex UNUSED) {
 
 void MeasureTeeShot(s32 playerIndex) {
     s32 distance;
-    SurfaceInfo *info;
+    SurfaceInfo *surfaceInfo;
 
     if (g_Players[playerIndex].strokeCount == 1) {
         distance = UNCOUNTED_DISTANCE;
-        info = GetSurfaceInfo(g_SimulatedShot.endSurface);
-        switch ((u32)info->kind) {
+        surfaceInfo = GetSurfaceInfo(g_SimulatedShot.endSurface);
+        switch ((u32)surfaceInfo->kind) {
             case SURFACE_KIND_FAIRWAY:
             case SURFACE_KIND_FAIRWAY_FAIR_LIE:
             case SURFACE_KIND_FAIRWAY_POOR_LIE:
@@ -2485,7 +2485,7 @@ void MeasureTeeShot(s32 playerIndex) {
         if (g_SimulatedShot.endsInCup) {
             distance = 0;
         }
-        else if (info->kind == SURFACE_KIND_GREEN) {
+        else if (surfaceInfo->kind == SURFACE_KIND_GREEN) {
             distance = GetCupDistance(
                 g_HoleSetup.cupPosition[AXIS_X] - g_SimulatedShot.endPosition[AXIS_X],
                 g_HoleSetup.cupPosition[AXIS_Z] - g_SimulatedShot.endPosition[AXIS_Z]

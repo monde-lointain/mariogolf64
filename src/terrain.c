@@ -382,18 +382,18 @@ s32 GetColorTerrainCode(s32 color) {
 
 #define SURFACE_PERCENT_MIN 5
 
-void GetSurfacePercentRange(SurfaceInfo *info, Club *club, s32 *range) {
-    if (club->surfaceMask & GetSurfaceClubMask(TRUE, info)) {
-        range[0] = info->percentMin;
-        range[1] = info->percentMax;
+void GetSurfacePercentRange(SurfaceInfo *surfaceInfo, Club *club, s32 *range) {
+    if (club->surfaceMask & GetSurfaceClubMask(TRUE, surfaceInfo)) {
+        range[0] = surfaceInfo->percentMin;
+        range[1] = surfaceInfo->percentMax;
     }
     else {
-        range[0] = info->percentMin - info->wrongClubPenalty;
+        range[0] = surfaceInfo->percentMin - surfaceInfo->wrongClubPenalty;
         if (range[0] < SURFACE_PERCENT_MIN) {
             range[0] = SURFACE_PERCENT_MIN;
         }
 
-        range[1] = info->percentMax - info->wrongClubPenalty;
+        range[1] = surfaceInfo->percentMax - surfaceInfo->wrongClubPenalty;
         if (range[1] < SURFACE_PERCENT_MIN) {
             range[1] = SURFACE_PERCENT_MIN;
         }

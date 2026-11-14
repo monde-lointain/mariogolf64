@@ -869,7 +869,7 @@ void PlayFlightSounds(s32 step) {
     s32 shownRingCount;
     s32 scoreToPar;
     s32 i;
-    SurfaceInfo *info;
+    SurfaceInfo *surfaceInfo;
     Player *player;
     s32 *greenSoundCount;
     s32 *isPlayed;
@@ -1116,8 +1116,8 @@ void PlayFlightSounds(s32 step) {
             g_BallFlightStep > EARLY_STEP_COUNT &&
             HasHitGroundBefore(step, EARLY_STEP_COUNT) &&
             IsShotBeyond(FULL_SHOT_FRACTION)) {
-            info = GetSurfaceInfo(g_TurnBallSimulation.surface);
-            if (IsFairwayKind(info->kind) &&
+            surfaceInfo = GetSurfaceInfo(g_TurnBallSimulation.surface);
+            if (IsFairwayKind(surfaceInfo->kind) &&
                 !g_GameState.isMiniGolf &&
                 f_StartCupDistance > f_LandingCupDistance &&
                 IsAlbatrossOrBetter(g_Players[g_CurrentShot.playerIndex].strokeCount)) {
