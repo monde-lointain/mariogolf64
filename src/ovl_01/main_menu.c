@@ -5373,15 +5373,7 @@ extern const char g_CaddySelectTitle[];
     (MENU_LAYER_COURSE_SCENE | MENU_LAYER_IGNORED | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER)
 #define MODE_SELECT_LIGHT_YAW 0
 #define MODE_SELECT_LIGHT_PITCH 0x3000
-#define MODE_BOARD_EYE_HEIGHT 70.0f
-#define MODE_BOARD_EYE_DISTANCE 60.0f
-#define MODE_BOARD_RADIUS_X 48.0f
 #define SINGLE_PLAYER_MODE_BOARD_RADIUS_X 64.0f
-#define MODE_BOARD_RADIUS_Z 40.0f
-#define MODE_BOARD_HALF_SIZE 32.0f
-#define UNCHOSEN_MODE_BOARD_SHADE 127
-#define MODE_BOARD_BOB_PHASE_STEP 0.1f
-#define MODE_BOARD_BOB_HEIGHT 8.0f
 #define MODE_BANNER_TOP 152
 #define MODE_BANNER_LEFT 80
 #define MODE_BANNER_SHOWN_WIDTH 160
@@ -5493,8 +5485,8 @@ void DrawModeSelect(Gfx **displayListHead) {
         f_ModeSelectView,
         &f_ModeSelectLookAts[g_DrawBufferIndex],
         0.0f,
-        MODE_BOARD_EYE_HEIGHT,
-        MODE_BOARD_EYE_DISTANCE,
+        CAROUSEL_EYE_HEIGHT,
+        CAROUSEL_EYE_DISTANCE,
         0.0f,
         0.0f,
         0.0f,
@@ -5526,7 +5518,7 @@ void DrawModeSelect(Gfx **displayListHead) {
             radiusX = SINGLE_PLAYER_MODE_BOARD_RADIUS_X;
         }
         else {
-            radiusX = MODE_BOARD_RADIUS_X;
+            radiusX = CAROUSEL_RADIUS_X;
         }
 
         turns = (g_MenuMemory.modeChoice - index) % modeCount;
@@ -5542,7 +5534,7 @@ void DrawModeSelect(Gfx **displayListHead) {
         );
         circleX = sinf(angle) * radiusX;
 
-        if (ProjectPoint(circleX, 0.0f, cosf(angle) * MODE_BOARD_RADIUS_Z, &point) < 0) {
+        if (ProjectPoint(circleX, 0.0f, cosf(angle) * CAROUSEL_RADIUS_Z, &point) < 0) {
             boardX[index] = point.x;
             boardY[index] = point.y - WHEEL_RAISE;
             boardScale[index] = point.scaleX;
@@ -5567,13 +5559,13 @@ void DrawModeSelect(Gfx **displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 
     areCharactersDrawn = FALSE;
-    f_ModeBoardBobPhase += MODE_BOARD_BOB_PHASE_STEP;
+    f_ModeBoardBobPhase += CAROUSEL_BOB_PHASE_STEP;
     for (index = 0; index != modeCount; index++) {
         drawnIndex = drawOrder[index];
-        halfSize = boardScale[drawnIndex] * MODE_BOARD_HALF_SIZE;
+        halfSize = boardScale[drawnIndex] * CAROUSEL_BOARD_HALF_SIZE;
         texelStep = (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
         if (index == modeCount) {
-            bobOffset = sinf(f_ModeBoardBobPhase) * MODE_BOARD_BOB_HEIGHT;
+            bobOffset = sinf(f_ModeBoardBobPhase) * CAROUSEL_BOB_HEIGHT;
         }
         else {
             bobOffset = 0.0f;
@@ -5646,9 +5638,9 @@ void DrawModeSelect(Gfx **displayListHead) {
                     gfx++,
                     0,
                     0,
-                    UNCHOSEN_MODE_BOARD_SHADE,
-                    UNCHOSEN_MODE_BOARD_SHADE,
-                    UNCHOSEN_MODE_BOARD_SHADE,
+                    UNCHOSEN_CAROUSEL_BOARD_SHADE,
+                    UNCHOSEN_CAROUSEL_BOARD_SHADE,
+                    UNCHOSEN_CAROUSEL_BOARD_SHADE,
                     OPAQUE_ALPHA
                 );
             }

@@ -28,6 +28,17 @@ typedef s32 CourseSelectLayout;
 #define MENU_LAYER_TALL_NARROW_BOARD (1 << 7)
 #define PLAIN_BACKDROP_LAYERS (MENU_LAYER_COURSE_SCENE | MENU_LAYER_IGNORED | MENU_LAYER_BANNER)
 
+// The mode select and the game save menu turn their choices on the same
+// carousel of boards.
+#define CAROUSEL_EYE_HEIGHT 70.0f
+#define CAROUSEL_EYE_DISTANCE 60.0f
+#define CAROUSEL_RADIUS_X 48.0f
+#define CAROUSEL_RADIUS_Z 40.0f
+#define CAROUSEL_BOARD_HALF_SIZE 32.0f
+#define UNCHOSEN_CAROUSEL_BOARD_SHADE 127
+#define CAROUSEL_BOB_PHASE_STEP 0.1f
+#define CAROUSEL_BOB_HEIGHT 8.0f
+
 extern ImageAsset *g_MenuLabelImages[2];
 extern s16 g_ChosenLabelGrowth;
 extern Boolean g_IsHoleShownInMenuInset;

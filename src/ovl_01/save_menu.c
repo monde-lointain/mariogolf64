@@ -1957,17 +1957,9 @@ const char f_SaveMenuNameFormat[] = "%s";
 #define MODE_ICON_OFFSET_X 8
 #define MODE_ICON_OFFSET_Y 14
 
-#define BOARD_EYE_HEIGHT 70.0f
-#define BOARD_EYE_DISTANCE 60.0f
-#define BOARD_RADIUS_X 48.0f
-#define BOARD_RADIUS_Z 40.0f
 #define BOARD_TURN_STEP_DEGREES 15
-#define GAME_BOARD_HALF_SIZE 32.0f
 #define MODE_ICON_HALF_SIZE 24.0f
 #define MODE_ICON_DROP 4
-#define UNCHOSEN_BOARD_SHADE 127
-#define BOARD_BOB_PHASE_STEP 0.1f
-#define BOARD_BOB_HEIGHT 8.0f
 #define SAVED_GAME_STRIP_WIDTH 200
 #define SAVED_GAME_STRIP_HEIGHT 10
 #define SAVED_GAME_STRIP_COUNT 3
@@ -2050,8 +2042,8 @@ void DrawSavedGames(Gfx **displayListHead) {
     guLookAtF(
         f_BoardViewing,
         0.0f,
-        BOARD_EYE_HEIGHT,
-        BOARD_EYE_DISTANCE,
+        CAROUSEL_EYE_HEIGHT,
+        CAROUSEL_EYE_DISTANCE,
         0.0f,
         0.0f,
         0.0f,
@@ -2076,7 +2068,7 @@ void DrawSavedGames(Gfx **displayListHead) {
 
     for (boardIndex = 0; boardIndex != SAVED_GAME_COUNT; boardIndex++) {
         ScreenPoint point;
-        f32 radiusX = BOARD_RADIUS_X;
+        f32 radiusX = CAROUSEL_RADIUS_X;
         s32 boardDegrees;
 
         slotOffset = (memory->savedGameIndex - boardIndex) % SAVED_GAME_COUNT;
@@ -2085,7 +2077,7 @@ void DrawSavedGames(Gfx **displayListHead) {
             (slotOffset * boardDegrees) + (memory->savedGameTurn * BOARD_TURN_STEP_DEGREES)
         );
         circleX = sinf(angle) * radiusX;
-        if (ProjectPoint(circleX, 0.0f, cosf(angle) * BOARD_RADIUS_Z, &point) < 0) {
+        if (ProjectPoint(circleX, 0.0f, cosf(angle) * CAROUSEL_RADIUS_Z, &point) < 0) {
             boardX[boardIndex] = point.x;
             boardY[boardIndex] = point.y - WHEEL_RAISE;
             boardScale[boardIndex] = point.scaleX;
@@ -2110,10 +2102,10 @@ void DrawSavedGames(Gfx **displayListHead) {
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 
-    f_BoardBobPhase += BOARD_BOB_PHASE_STEP;
+    f_BoardBobPhase += CAROUSEL_BOB_PHASE_STEP;
     for (boardIndex = 0; boardIndex != SAVED_GAME_COUNT; boardIndex++) {
         drawnIndex = drawOrder[boardIndex];
-        halfSize = boardScale[drawnIndex] * GAME_BOARD_HALF_SIZE;
+        halfSize = boardScale[drawnIndex] * CAROUSEL_BOARD_HALF_SIZE;
         texelStep = (f32)(GAME_BOARD_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
         f_ChosenModeIconHalfSize = boardScale[drawnIndex] * MODE_ICON_HALF_SIZE;
         f_ChosenModeIconScale =
@@ -2121,7 +2113,7 @@ void DrawSavedGames(Gfx **displayListHead) {
         iconHalfSize = f_ChosenModeIconHalfSize;
         iconStep = f_ChosenModeIconScale;
         if (boardIndex == SAVED_GAME_COUNT) {
-            bobOffset = sinf(f_BoardBobPhase) * BOARD_BOB_HEIGHT;
+            bobOffset = sinf(f_BoardBobPhase) * CAROUSEL_BOB_HEIGHT;
         }
         else {
             bobOffset = 0.0f;
@@ -2143,9 +2135,9 @@ void DrawSavedGames(Gfx **displayListHead) {
                     gfx++,
                     0,
                     0,
-                    UNCHOSEN_BOARD_SHADE,
-                    UNCHOSEN_BOARD_SHADE,
-                    UNCHOSEN_BOARD_SHADE,
+                    UNCHOSEN_CAROUSEL_BOARD_SHADE,
+                    UNCHOSEN_CAROUSEL_BOARD_SHADE,
+                    UNCHOSEN_CAROUSEL_BOARD_SHADE,
                     OPAQUE_ALPHA
                 );
             }
