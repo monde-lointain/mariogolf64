@@ -66,6 +66,7 @@
 #define TREE_DISTANCE_MAX 10
 #define TREE_SPACING 0x100
 #define TREE_TEXTURE_INDEX 2
+// The editor marks a tree near the edge with this true value rather than TRUE
 #define TREE_NEAR_EDGE 0x100
 #define TREE_WIDTH 0x80
 #define TREE_HEIGHT 0x100
