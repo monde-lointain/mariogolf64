@@ -146,6 +146,8 @@ DEFINES     := -D_LANGUAGE_C -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI_2 -D
 # object, which only hit what happened to follow it
 ifneq ($(NON_MATCHING),0)
 DEFINES     += -DNON_MATCHING -DAVOID_UB
+# nusys.h sizes the main thread's stack, which the game overruns, for both
+LIB_AVOID_UB := -DAVOID_UB
 endif
 
 # Each compile lists the headers it read in a .d file beside its object, so
@@ -206,7 +208,7 @@ LIBNAUDIO_CFLAGS    = $(LIBMUS_CFLAGS)
 # and a carriage return, so they're compiled from copies without the CRs.
 LIBNUSYS_DIR       := lib/libnusys
 LIBNUSYS_INCLUDES  := -I$(BUILD_DIR)/$(LIBNUSYS_DIR)/include -I$(LIBNUSYS_DIR)/include $(ULTRALIB_INCLUDES)
-LIBNUSYS_DEFINES   := $(LIB_MODERN) -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DUSE_EPI -DBUILD_VERSION=VERSION_J -D_FINALROM
+LIBNUSYS_DEFINES   := $(LIB_MODERN) $(LIB_AVOID_UB) -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DUSE_EPI -DBUILD_VERSION=VERSION_J -D_FINALROM
 LIBNUSYS_CFLAGS     = $(WARNINGS) -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS) $(KMC_ALIGN)
 
 # libkmc, KMC's C library, built like the game's code except without

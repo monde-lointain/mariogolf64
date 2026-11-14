@@ -62,7 +62,14 @@ extern "C" {
 /*--------------------------------------*/
 #define NU_IDLE_STACK_SIZE	0x2000			/* Idle thread */
 #define	NU_RMON_STACK_SIZE	0x2000			/* Rmon thread */
+#ifdef AVOID_UB
+/* Mario Golf decodes assets on the main thread with an 8 KB buffer, which */
+/* overruns the boot stack's size by 0x238 bytes into whatever lies below. */
+/* The boot itself still starts at NU_SPEC_BOOT_STACK, inside the array.   */
+#define NU_MAIN_STACK_SIZE	0x4000			/* Main thread */
+#else
 #define NU_MAIN_STACK_SIZE	NU_SPEC_BOOT_STACK_SIZE	/* Main thread */
+#endif
 
 
 
