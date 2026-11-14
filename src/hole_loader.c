@@ -30,7 +30,7 @@
 #include "turn.h"
 #include "work_area.h"
 
-#define MAX_CUP_ATTEMPT_COUNT 120
+#define CUP_ATTEMPT_COUNT_MAX 120
 #define AreCupAndTeeSet() \
     (g_HoleSetup.cupPosition[AXIS_X] != 0 && \
         g_HoleSetup.cupPosition[AXIS_Z] != 0 && \
@@ -47,7 +47,7 @@
 
 #define WIND_SPEED_STEP 10000
 #define WIND_SPEED_STEP_MASK 0x3F
-#define MIN_WIND_SPEED 0x18000
+#define WIND_SPEED_MIN 0x18000
 #define DRIVING_RANGE_WIND_DIRECTION 0x4000
 
 #define LIGHT_YAW_STEP_PER_HOLE 0x5000
@@ -745,7 +745,7 @@ NO_RESULT ChooseHoleConditions(void) {
 
         do {
             g_HoleSetup.conditions.windSpeed = (rand() & WIND_SPEED_STEP_MASK) * WIND_SPEED_STEP;
-            if (g_HoleSetup.conditions.windSpeed < MIN_WIND_SPEED) {
+            if (g_HoleSetup.conditions.windSpeed < WIND_SPEED_MIN) {
                 g_HoleSetup.conditions.windSpeed = 0;
             }
         }
@@ -842,7 +842,7 @@ NO_RESULT ChooseHoleConditions(void) {
         g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
         attemptCount++;
         cupIndex = (cupIndex + 1) & (CUP_POSITION_COUNT - 1);
-        if (attemptCount >= MAX_CUP_ATTEMPT_COUNT) {
+        if (attemptCount >= CUP_ATTEMPT_COUNT_MAX) {
             break;
         }
 

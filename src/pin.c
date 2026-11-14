@@ -70,15 +70,15 @@
 #define SCREEN_CUP_WALL_HEIGHT 6
 
 #define CUP_BASE_SHADE 0x5C
-#define MIN_CUP_SHADE 0x7F
-#define MAX_CUP_SHADE 0xFF
+#define CUP_SHADE_MIN 0x7F
+#define CUP_SHADE_MAX 0xFF
 #define CUP_SHADE_ALPHA 0xBF
 
 #define FLAG_SCALE 0.01f
 #define FLAG_WAVE_STEP_DEGREES 5
 #define FLAG_WIND_SPEED_UNIT 0x10000
 #define FLAG_WAVE_PER_WIND 0.02f
-#define MIN_FLAG_WAVE 0.05f
+#define FLAG_WAVE_MIN 0.05f
 
 #define PIN_VERTEX_COUNT 12
 #define PIN_VERTEX_SCALE 2
@@ -678,12 +678,12 @@ void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex)
 
         if (!isPinOut) {
             shade = CUP_BASE_SHADE - cupDepth;
-            if (shade < MIN_CUP_SHADE) {
-                shade = MIN_CUP_SHADE;
+            if (shade < CUP_SHADE_MIN) {
+                shade = CUP_SHADE_MIN;
             }
 
-            if (shade > MAX_CUP_SHADE) {
-                shade = MAX_CUP_SHADE;
+            if (shade > CUP_SHADE_MAX) {
+                shade = CUP_SHADE_MAX;
             }
 
             color = RgbaColor(shade, shade, shade, CUP_SHADE_ALPHA);
@@ -812,7 +812,7 @@ void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex)
 
             wave =
                 (((g_HoleSetup.conditions.windSpeed / FLAG_WIND_SPEED_UNIT) * FLAG_WAVE_PER_WIND) +
-                    MIN_FLAG_WAVE) *
+                    FLAG_WAVE_MIN) *
                 sinf(f_FlagWavePhase);
         }
         else {

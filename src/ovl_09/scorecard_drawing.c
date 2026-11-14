@@ -438,8 +438,8 @@ const char f_LoseText[] = "LOSE";
 #define WIDE_BET_TOTAL 1000
 
 void DrawStandingsPage(Gfx **displayListHead) {
-    s32 places[MAX_PLAYER_COUNT];
-    s32 scoresToPar[MAX_PLAYER_COUNT];
+    s32 places[PLAYER_COUNT_MAX];
+    s32 scoresToPar[PLAYER_COUNT_MAX];
     Gfx *gfx;
     s32 holeIndex;
     s32 shift;
@@ -1121,8 +1121,8 @@ const char f_StringFormat[] = "%s";
 #define WIN_COLOR_SWING 127.0f
 
 void DrawSkinsPage(Gfx **displayListHead) {
-    s32 places[MAX_PLAYER_COUNT];
-    s32 skinCounts[MAX_PLAYER_COUNT];
+    s32 places[PLAYER_COUNT_MAX];
+    s32 skinCounts[PLAYER_COUNT_MAX];
     Gfx *gfx;
     s32 holeIndex;
     s32 playerIndex;

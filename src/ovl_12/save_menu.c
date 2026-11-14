@@ -56,7 +56,7 @@ enum SaveMenuState {
 #define SLIDE_OUT_START_OFFSET (-1)
 #define SLIDE_OUT_START_STEP 4
 
-#define CHARACTER_IMAGE_COUNT (SAVED_GAME_COUNT * MAX_PLAYER_COUNT)
+#define CHARACTER_IMAGE_COUNT (SAVED_GAME_COUNT * PLAYER_COUNT_MAX)
 #define REPLAY_LABEL_COUNT 6
 
 #define SAVE_MENU_SONG_VOLUME 0x60
@@ -427,7 +427,7 @@ void OpenSaveMenu(s32 kind) {
                         &encodedAsset
                     );
                     ReadEncodedAsset(
-                        f_CharacterImages[(slot * MAX_PLAYER_COUNT) + playerIndex],
+                        f_CharacterImages[(slot * PLAYER_COUNT_MAX) + playerIndex],
                         &encodedAsset
                     );
                     OpenAssetFile(
@@ -435,7 +435,7 @@ void OpenSaveMenu(s32 kind) {
                         &file
                     );
                     ReadAssetFile(
-                        f_CharacterFiles[(slot * MAX_PLAYER_COUNT) + playerIndex],
+                        f_CharacterFiles[(slot * PLAYER_COUNT_MAX) + playerIndex],
                         GetAssetFileSize(&file),
                         &file
                     );
@@ -947,10 +947,10 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
 
                 gDPPipeSync(gfx++);
                 for (index = 0; index != state->playerCount; index++) {
-                    LoadLargePalette(&gfx, f_CharacterFiles[(row * MAX_PLAYER_COUNT) + index]);
+                    LoadLargePalette(&gfx, f_CharacterFiles[(row * PLAYER_COUNT_MAX) + index]);
                     LoadTextureBlock(
                         &gfx,
-                        f_CharacterImages[(row * MAX_PLAYER_COUNT) + index],
+                        f_CharacterImages[(row * PLAYER_COUNT_MAX) + index],
                         G_IM_FMT_CI,
                         G_IM_SIZ_8b,
                         CHARACTER_IMAGE_WIDTH,
@@ -1288,7 +1288,7 @@ void SaveGameToSlot(void) {
                 &encodedAsset
             );
             ReadEncodedAsset(
-                f_CharacterImages[(f_CursorIndex * MAX_PLAYER_COUNT) + playerIndex],
+                f_CharacterImages[(f_CursorIndex * PLAYER_COUNT_MAX) + playerIndex],
                 &encodedAsset
             );
             OpenAssetFile(
@@ -1296,7 +1296,7 @@ void SaveGameToSlot(void) {
                 &file
             );
             ReadAssetFile(
-                f_CharacterFiles[(f_CursorIndex * MAX_PLAYER_COUNT) + playerIndex],
+                f_CharacterFiles[(f_CursorIndex * PLAYER_COUNT_MAX) + playerIndex],
                 GetAssetFileSize(&file),
                 &file
             );

@@ -61,7 +61,7 @@ typedef struct ImportedCharacterCell {
 
 s16 g_LastMenuPlayerCountChoice;
 GameState g_BackedUpGameState;
-Player g_BackedUpPlayers[MAX_PLAYER_COUNT];
+Player g_BackedUpPlayers[PLAYER_COUNT_MAX];
 s32 g_ChosenPlayerCount;
 s32 g_IsNintendoClubTournament;
 s32 g_ClubTournamentNameIndex;
@@ -80,8 +80,8 @@ void *g_CourseTrophyImages[2];
 void *g_HoleBadgeImages;
 void *g_SpinningBadgeImage;
 void *g_MenuWideSpareImage;
-PlayRecord g_PlayRecords[MAX_PLAYER_COUNT];
-RingShotRecord g_RingShotRecords[MAX_PLAYER_COUNT];
+PlayRecord g_PlayRecords[PLAYER_COUNT_MAX];
+RingShotRecord g_RingShotRecords[PLAYER_COUNT_MAX];
 u8 g_UnreadMenuBuffer[0x1218];
 u8 g_IsMenuCharacterLoaded[MAXCONTROLLERS];
 void *g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
@@ -89,7 +89,7 @@ BetSet g_BetSet;
 void *g_CharacterFaceImages[18];
 void *g_CharacterFacePalettes[18];
 s32 g_ChoosingPlayerIndex;
-s32 g_ChosenCharacters[MAX_PLAYER_COUNT];
+s32 g_ChosenCharacters[PLAYER_COUNT_MAX];
 s16 g_ChosenLabelGrowth;
 LabelGrowthDirection g_ChosenLabelGrowthDirection;
 s8 g_ChosenLefties[4];
@@ -106,9 +106,9 @@ void *g_MenuCourseSceneryAsset;
 MenuMemory g_MenuMemory;
 s32 g_MenuScreen;
 void *g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
-u8 *g_PlayerFaceImages[MAX_PLAYER_COUNT];
-u16 *g_PlayerFacePalettes[MAX_PLAYER_COUNT];
-Player g_Players[MAX_PLAYER_COUNT];
+u8 *g_PlayerFaceImages[PLAYER_COUNT_MAX];
+u16 *g_PlayerFacePalettes[PLAYER_COUNT_MAX];
+Player g_Players[PLAYER_COUNT_MAX];
 void *g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
 TakenCharacters g_TakenCharacters;
 void *g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
@@ -140,15 +140,15 @@ s32 ReadSaveCopies(SaveData *save, u8 isInSram);
 s32 WriteSaveCopies(SaveData *save, u8 isInSram);
 
 s8 g_LoadedMenuScreen = NO_MENU_SCREEN;
-s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT] =
+s8 g_PlayerControllerIndices[PLAYER_COUNT_MAX] =
     {UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER};
-s8 g_ChoosingControllerIndices[MAX_PLAYER_COUNT] =
+s8 g_ChoosingControllerIndices[PLAYER_COUNT_MAX] =
     {UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER};
 u8 g_SoundOptionBits = 0;
 s32 g_MenuRepeatButtons = 0;
 s32 g_MenuPressedButtons = 0;
 static s32 f_UnusedWordAfterPressedButtons UNUSED = 0;
-s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT] =
+s16 g_ImportedCharacterColumns[PLAYER_COUNT_MAX] =
     {NO_IMPORTED_COLUMN, NO_IMPORTED_COLUMN, NO_IMPORTED_COLUMN, NO_IMPORTED_COLUMN};
 static AssetId f_MenuLabelAssets[] =
     {0x0523, 0x0524, 0x0525, 0x0526, 0x0527, 0x0528, 0x0529, 0x052A, 0x052B, 0x052C};
@@ -1438,13 +1438,13 @@ s32 GetRecordPriority(PlayRecord *record) {
     s32 bits;
     s32 par;
     s32 kind;
-    s32 maxPriority;
+    s32 priorityMax;
 
     bits = record->scoreKind;
     kind = bits & SCORE_KIND_MASK;
     priority = 0;
     par = record->hole.par;
-    maxPriority = ALBATROSS_PRIORITY;
+    priorityMax = ALBATROSS_PRIORITY;
     if (bits & SCORE_KIND_RECORDED) {
         switch (kind) {
             case SCORE_KIND_BIRDIE:
@@ -1472,7 +1472,7 @@ s32 GetRecordPriority(PlayRecord *record) {
                 }
 
             case SCORE_KIND_ALBATROSS:
-                priority = maxPriority;
+                priority = priorityMax;
                 break;
         }
     }
@@ -1706,7 +1706,7 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
     return 0;
 }
 
-#define MAX_SAVE_COUNT 99
+#define SAVE_COUNT_MAX 99
 
 s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
     Player *players;
@@ -1715,7 +1715,7 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
     Boolean hasIllegalState;
     s32 index;
 
-    playerCount = MAX_PLAYER_COUNT;
+    playerCount = PLAYER_COUNT_MAX;
     players = g_SaveData.savedPlayers[slotIndex];
     game = &g_SaveData.savedGames[slotIndex];
     if (!isContinuing) {
@@ -1747,7 +1747,7 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
         }
 
         game->state = g_BackedUpGameState;
-        if (game->state.saveCount < MAX_SAVE_COUNT) {
+        if (game->state.saveCount < SAVE_COUNT_MAX) {
             game->state.saveCount++;
         }
 
@@ -2252,7 +2252,7 @@ void InvalidateBrokenSavedGames(void) {
             }
         }
 
-        if (sub->playerCount < 1 || sub->playerCount > MAX_PLAYER_COUNT) {
+        if (sub->playerCount < 1 || sub->playerCount > PLAYER_COUNT_MAX) {
             isInvalid[index] = TRUE;
         }
 
@@ -2490,12 +2490,12 @@ void ComputeRoundStatistics(void) {
         g_CourseStatFigures[courseIndex].roundCount = entry->roundCount;
         if (g_CourseStatFigures[courseIndex].roundCount == 0.0f) {
             g_CourseStatFigures[courseIndex].bestScore = 0.0f;
-            g_CourseStatFigures[courseIndex].averageScore = 0.0f;
+            g_CourseStatFigures[courseIndex].scoreAverage = 0.0f;
             g_CourseStatFigures[courseIndex].bestDrive = 0.0f;
-            g_CourseStatFigures[courseIndex].averageDrive = 0.0f;
+            g_CourseStatFigures[courseIndex].driveAverage = 0.0f;
             g_CourseStatFigures[courseIndex].unusedDriveFigure = 0.0f;
             g_CourseStatFigures[courseIndex].fairwayPercent = 0.0f;
-            g_CourseStatFigures[courseIndex].averagePutts = 0.0f;
+            g_CourseStatFigures[courseIndex].puttsAverage = 0.0f;
             g_CourseStatFigures[courseIndex].parOnPercent = 0.0f;
             g_CourseStatFigures[courseIndex].parSavePercent = 0.0f;
             g_CourseStatFigures[courseIndex].hasPlace[THIRD_PLACE_INDEX] = FALSE;
@@ -2505,12 +2505,12 @@ void ComputeRoundStatistics(void) {
         else {
             reciprocal = 1.0f / entry->roundCount;
             g_CourseStatFigures[courseIndex].bestScore = entry->bestScore;
-            g_CourseStatFigures[courseIndex].averageScore = entry->strokeTotal * reciprocal;
+            g_CourseStatFigures[courseIndex].scoreAverage = entry->strokeTotal * reciprocal;
             g_CourseStatFigures[courseIndex].bestDrive = entry->longestDrive * YARDS_PER_UNIT;
-            g_CourseStatFigures[courseIndex].averageDrive = entry->averageDrive * YARDS_PER_UNIT;
+            g_CourseStatFigures[courseIndex].driveAverage = entry->driveAverage * YARDS_PER_UNIT;
             g_CourseStatFigures[courseIndex].fairwayPercent =
                 entry->measuredDriveTotal * reciprocal * (100.0f / HOLES_PER_ROUND);
-            g_CourseStatFigures[courseIndex].averagePutts =
+            g_CourseStatFigures[courseIndex].puttsAverage =
                 entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND);
             g_CourseStatFigures[courseIndex].parSavePercent =
                 entry->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND);
@@ -2538,11 +2538,11 @@ void ComputeRoundStatistics(void) {
     hasPlayedCourse = FALSE;
     g_CourseStatFigures[COURSE_COUNT].roundCount = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].bestScore = 0.0f;
-    g_CourseStatFigures[COURSE_COUNT].averageScore = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].scoreAverage = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].bestDrive = 0.0f;
-    g_CourseStatFigures[COURSE_COUNT].averageDrive = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].driveAverage = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].fairwayPercent = 0.0f;
-    g_CourseStatFigures[COURSE_COUNT].averagePutts = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].puttsAverage = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].parSavePercent = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].parOnPercent = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].sandSavePercent = 0.0f;
@@ -2602,7 +2602,7 @@ void ComputeRoundStatistics(void) {
             sandSaveSum += entry->sandSaveCount;
             sandSaveChanceSum += entry->sandSaveCount + entry->missedSandSaveCount;
             driveCountSum += entry->averagedDriveCount;
-            driveYardSum += entry->averageDrive * YARDS_PER_UNIT * entry->averagedDriveCount;
+            driveYardSum += entry->driveAverage * YARDS_PER_UNIT * entry->averagedDriveCount;
         }
     }
 
@@ -2616,17 +2616,17 @@ void ComputeRoundStatistics(void) {
         }
 
         holeCount = g_CourseStatFigures[COURSE_COUNT].roundCount * HOLES_PER_ROUND;
-        g_CourseStatFigures[COURSE_COUNT].averagePutts = puttSum / holeCount;
+        g_CourseStatFigures[COURSE_COUNT].puttsAverage = puttSum / holeCount;
         g_CourseStatFigures[COURSE_COUNT].fairwayPercent = (measuredDriveSum / holeCount) * 100.0f;
         g_CourseStatFigures[COURSE_COUNT].parSavePercent = (parOrBetterSum / holeCount) * 100.0f;
         g_CourseStatFigures[COURSE_COUNT].parOnPercent = (parOnSum / holeCount) * 100.0f;
-        g_CourseStatFigures[COURSE_COUNT].averageScore =
+        g_CourseStatFigures[COURSE_COUNT].scoreAverage =
             strokeSum / g_CourseStatFigures[COURSE_COUNT].roundCount;
         if (driveYardSum > 0.0f && driveCountSum > 0) {
-            g_CourseStatFigures[COURSE_COUNT].averageDrive = driveYardSum / driveCountSum;
+            g_CourseStatFigures[COURSE_COUNT].driveAverage = driveYardSum / driveCountSum;
         }
         else {
-            g_CourseStatFigures[COURSE_COUNT].averageDrive = 0.0f;
+            g_CourseStatFigures[COURSE_COUNT].driveAverage = 0.0f;
         }
     }
 }

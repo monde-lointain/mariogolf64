@@ -110,7 +110,7 @@ typedef struct SaveData {
     PlayRecord rankedRecords[RANKED_RECORD_COUNT];
     RingShotRecord ringShotRecords[RING_SHOT_RECORD_COUNT];
     SavedGame savedGames[SAVED_GAME_COUNT];
-    Player savedPlayers[SAVED_GAME_COUNT][MAX_PLAYER_COUNT];
+    Player savedPlayers[SAVED_GAME_COUNT][PLAYER_COUNT_MAX];
 } SaveData;
 
 typedef struct SaveCheck {

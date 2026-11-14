@@ -162,7 +162,7 @@ typedef struct IntegerPlane {
 #define FINE_DEPTH_SCALE (-0.025f)
 #define ZOOMED_FINE_DEPTH_SCALE (-0.0125f)
 #define MEDIUM_DEPTH_SCALE (-0.01f)
-#define MIN_GROUND_TILE_RADIUS 384.0f
+#define GROUND_TILE_RADIUS_MIN 384.0f
 #define NEAR_DEPTH_DIVISOR 8
 #define NO_NEAR_DEPTH (-1000.0f)
 

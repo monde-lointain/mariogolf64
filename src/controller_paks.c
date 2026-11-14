@@ -17,8 +17,8 @@ FILE_STATIC Boolean f_HasRumblePak[MAXCONTROLLERS];
 
 void AddGameBoyExperience(s32 characterIndex, s32 experience) {
     g_GameBoyCharacters[characterIndex].experience += experience;
-    if (g_GameBoyCharacters[characterIndex].experience > MAX_GAME_BOY_EXPERIENCE) {
-        g_GameBoyCharacters[characterIndex].experience = MAX_GAME_BOY_EXPERIENCE;
+    if (g_GameBoyCharacters[characterIndex].experience > GAME_BOY_EXPERIENCE_MAX) {
+        g_GameBoyCharacters[characterIndex].experience = GAME_BOY_EXPERIENCE_MAX;
     }
 }
 

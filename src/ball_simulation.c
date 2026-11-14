@@ -64,7 +64,7 @@ static SurfaceInfo f_SurfaceInfo[SURFACE_COUNT] = {
 
 static ImpactEffect f_EarlyImpactEffect = {-90, -64, -40, -10, 100, 1};
 static ImpactEffect f_LateImpactEffect = {-80, 64, 30, 10, -5, 1};
-static ImpactEffect f_ImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
+static ImpactEffect f_ImpactEffects[LIE_RATING_MAX + 1][IMPACT_TIMING_ENTRY_COUNT] = {
     {
         {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
@@ -196,7 +196,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
     void PlayStrokeImpactSound(SoundId sound, BallSpeed fullSpeed, BallSpeed speed) {
         SoundVolume volume = speed * SOUND_FULL_SCALE / fullSpeed;
 
-        if (volume >= MIN_HIT_SOUND_VOLUME) {
+        if (volume >= HIT_SOUND_VOLUME_MIN) {
             if (volume > SOUND_FULL_SCALE) {
                 volume = SOUND_FULL_SCALE;
             }
@@ -231,7 +231,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
         void PlayImpactSound(SoundId sound, BallSpeed fullSpeed, BallSpeed speed) {
             SoundVolume volume = speed * SOUND_FULL_SCALE / fullSpeed;
 
-            if (volume >= MIN_HIT_SOUND_VOLUME) {
+            if (volume >= HIT_SOUND_VOLUME_MIN) {
                 if (volume > SOUND_FULL_SCALE) {
                     volume = SOUND_FULL_SCALE;
                 }
@@ -267,12 +267,12 @@ s32 StepBallSimulation(BallSimulation *simulation) {
         f32 noise = (u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
                               g_Players[simulation->playerIndex].noiseSeed) &
                         NOISE_BYTE_MASK) /
-            MAX_NOISE_BYTE_PAIR_SUM;
+            NOISE_BYTE_PAIR_SUM_MAX;
 
         noise += (u32)((simulation->position[AXIS_X] - simulation->position[AXIS_Z] +
                            g_Players[simulation->playerIndex].noiseSeed) &
                      NOISE_BYTE_MASK) /
-            MAX_NOISE_BYTE_PAIR_SUM;
+            NOISE_BYTE_PAIR_SUM_MAX;
         return noise;
     }
 
@@ -301,7 +301,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             BuildLiftRotation();
         }
 
-        if (++simulation->stepCount >= MAX_STEP_COUNT) {
+        if (++simulation->stepCount >= STEP_COUNT_MAX) {
             simulation->position[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] + 614.4f;
             simulation->position[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
             simulation->velocity[AXIS_X] = 0;
@@ -562,7 +562,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                             SoundVolume volume = speed * FLAGSTICK_SOUND_VOLUME_PER_SPEED;
 
                             if (volume >= SOUND_FULL_SCALE) {
-                                volume = MAX_KNOCK_VOLUME;
+                                volume = KNOCK_VOLUME_MAX;
                             }
 
                             if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
@@ -618,12 +618,12 @@ s32 StepBallSimulation(BallSimulation *simulation) {
 
                         if (simulation->state != BALL_STATE_IN_CUP &&
                             simulation->position[AXIS_Y] - g_HoleSetup.cupPosition[AXIS_Y] >=
-                                -MAX_CUP_ENTRY_HEIGHT &&
+                                -CUP_ENTRY_HEIGHT_MAX &&
                             (f32)cupDistance < CUP_RADIUS) {
                             s32 speed = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
 
-                            if (speed < MAX_CUP_IN_SPEED &&
-                                velocity[AXIS_Y] >= -MAX_CUP_IN_RISE_SPEED) {
+                            if (speed < CUP_IN_SPEED_MAX &&
+                                velocity[AXIS_Y] >= -CUP_IN_RISE_SPEED_MAX) {
                                 if (printsDebugText) {
                                     SetDebugTextHighlight(1);
                                     PrintDebugText(
@@ -634,7 +634,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                                 }
 
                                 simulation->state = BALL_STATE_IN_CUP;
-                                if (speed < MAX_CUP_IN_SOUND_SPEED) {
+                                if (speed < CUP_IN_SOUND_SPEED_MAX) {
                                     simulation->soundStates[BALL_SOUND_CUP_IN] = CUP_IN_SOUND_DUE;
                                 }
                             }
@@ -691,7 +691,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
 
                                 pull = (sinf(pull * ((f32)M_PI / CUP_PULL_DEPTH_RANGE)) *
                                            CUP_PULL_RISE) +
-                                    MIN_CUP_PULL;
+                                    CUP_PULL_MIN;
                                 pull *= alignment;
                                 velocity[AXIS_X] *= CUP_PULL_DRAG;
                                 velocity[AXIS_Z] *= CUP_PULL_DRAG;
@@ -742,7 +742,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                                 osSyncPrintf("Through Cup\n");
                             }
                             else if (simulation->state == BALL_STATE_ROLLING &&
-                                alignment >= MIN_LIP_OUT_ALIGNMENT) {
+                                alignment >= LIP_OUT_ALIGNMENT_MIN) {
                                 f32 keep = speed * (1.0f / LIP_OUT_FULL_SPEED);
 
                                 if (keep < 0.0f) {
@@ -845,11 +845,11 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 simulation->position[AXIS_Z] =
                     ((simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]) * scale) +
                     g_HoleSetup.cupPosition[AXIS_Z];
-                if (speed >= MIN_CUP_WALL_SOUND_SPEED) {
+                if (speed >= CUP_WALL_SOUND_SPEED_MIN) {
                     SoundVolume volume = speed * CUP_SOUND_VOLUME_PER_SPEED;
 
                     if (volume >= SOUND_FULL_SCALE) {
-                        volume = MAX_KNOCK_VOLUME;
+                        volume = KNOCK_VOLUME_MAX;
                     }
 
                     if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
@@ -860,7 +860,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
 
             if (simulation->position[AXIS_Y] <
                     g_HoleSetup.cupPosition[AXIS_Y] + CUP_CEILING_DEPTH &&
-                velocity[AXIS_Y] < -MIN_CUP_CEILING_SPEED) {
+                velocity[AXIS_Y] < -CUP_CEILING_SPEED_MIN) {
                 s32 toCupX = g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X];
                 s32 toCupZ = g_HoleSetup.cupPosition[AXIS_Z] - simulation->position[AXIS_Z];
 
@@ -894,7 +894,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     simulation->soundStates[BALL_SOUND_CUP_IN] = CUP_IN_SOUND_PLAYED;
                 }
                 else if (simulation->soundStates[BALL_SOUND_CUP_IN] == CUP_IN_SOUND_NONE) {
-                    if (fallSpeed >= MIN_CUP_FLOOR_SOUND_SPEED) {
+                    if (fallSpeed >= CUP_FLOOR_SOUND_SPEED_MIN) {
                         SoundVolume volume = fallSpeed * CUP_SOUND_VOLUME_PER_SPEED;
 
                         if (volume > SOUND_FULL_SCALE) {
@@ -1046,7 +1046,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 simulation->position[AXIS_Y] = hitPosition[AXIS_Y];
                 simulation->position[AXIS_Z] = hitPosition[AXIS_Z];
                 if (simulation->purpose == LAUNCH_PURPOSE_STROKE &&
-                    fabsf(inwardSpeed) > MIN_WALL_SPARK_SPEED) {
+                    fabsf(inwardSpeed) > WALL_SPARK_SPEED_MIN) {
                     StartFlagstickSparks(simulation->position);
                 }
 
@@ -1193,8 +1193,8 @@ s32 StepBallSimulation(BallSimulation *simulation) {
 
             if (simulation->surface == SURFACE_WATER_HAZARD &&
                 (simulation->state == BALL_STATE_ROLLING ||
-                    fabsf(impactSpeed) >= MAX_SKIP_IMPACT_SPEED ||
-                    fabsf(impactSpeed) <= MIN_SKIP_IMPACT_SPEED ||
+                    fabsf(impactSpeed) >= SKIP_IMPACT_SPEED_MAX ||
+                    fabsf(impactSpeed) <= SKIP_IMPACT_SPEED_MIN ||
                     fabsf(impactSpeed) >=
                         sqrtf(
                             (velocity[AXIS_X] * velocity[AXIS_X]) +
@@ -1287,7 +1287,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     sqrtf(
                         (velocity[AXIS_X] * velocity[AXIS_X]) +
                         (velocity[AXIS_Z] * velocity[AXIS_Z])
-                    ) > fabsf(velocity[AXIS_Y]) * MAX_CUP_PULL_SLIDE_RATIO) {
+                    ) > fabsf(velocity[AXIS_Y]) * CUP_PULL_SLIDE_RATIO_MAX) {
                     GetTrianglePlane(&triangle, &plane);
                 }
 
@@ -1309,10 +1309,10 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     f32 tilt = (GetStepNoise() - NOISE_MIDDLE) * LANDING_TILT_NOISE_SCALE;
 
                     if (tilt < 0.0f) {
-                        tilt -= MIN_LANDING_TILT;
+                        tilt -= LANDING_TILT_MIN;
                     }
                     else {
-                        tilt += MIN_LANDING_TILT;
+                        tilt += LANDING_TILT_MIN;
                     }
 
                     guNormalize(&sideX, &sideY, &sideZ);
@@ -1342,7 +1342,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             impactSpeed = (plane.normal[AXIS_X] * velocity[AXIS_X]) +
                 (plane.normal[AXIS_Y] * velocity[AXIS_Y]) +
                 (plane.normal[AXIS_Z] * velocity[AXIS_Z]);
-            if (speed >= MIN_SLIDE_SPEED) {
+            if (speed >= SLIDE_SPEED_MIN) {
                 f32 cosine = fabsf(impactSpeed) / speed;
 
                 if (cosine < 1.0f) {
@@ -1437,13 +1437,13 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                               impactSpeed + (impactSpeed * GetPositionNoise() * LANDING_NOISE_SCALE)
                           ) * GREEN_LANDING_FRICTION_PER_SPEED) +
                             GREEN_LANDING_FRICTION_BASE);
-                    if (friction > MAX_GREEN_LANDING_FRICTION) {
-                        friction = MAX_GREEN_LANDING_FRICTION;
+                    if (friction > GREEN_LANDING_FRICTION_MAX) {
+                        friction = GREEN_LANDING_FRICTION_MAX;
                     }
 
                     friction -= GetStepNoise() * LANDING_NOISE_SCALE;
-                    if (friction < MIN_GREEN_LANDING_FRICTION) {
-                        friction = MIN_GREEN_LANDING_FRICTION;
+                    if (friction < GREEN_LANDING_FRICTION_MIN) {
+                        friction = GREEN_LANDING_FRICTION_MIN;
                     }
 
                     spin = 1.0f -
@@ -1451,12 +1451,12 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                              (speed * speed) -
                              (impactSpeed * (1.0f - friction) * impactSpeed * (1.0f - friction))
                          ) / (speed * slide));
-                    if (spin > MAX_GRASS_LANDING_SPIN) {
-                        spin = MAX_GRASS_LANDING_SPIN;
+                    if (spin > GRASS_LANDING_SPIN_MAX) {
+                        spin = GRASS_LANDING_SPIN_MAX;
                     }
 
-                    if (spin < MIN_GRASS_LANDING_SPIN) {
-                        spin = MIN_GRASS_LANDING_SPIN;
+                    if (spin < GRASS_LANDING_SPIN_MIN) {
+                        spin = GRASS_LANDING_SPIN_MIN;
                     }
 
                     break;
@@ -1478,12 +1478,12 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                              (speed * speed) -
                              (impactSpeed * (1.0f - friction) * impactSpeed * (1.0f - friction))
                          ) / (speed * slide));
-                    if (spin > MAX_GRASS_LANDING_SPIN) {
-                        spin = MAX_GRASS_LANDING_SPIN;
+                    if (spin > GRASS_LANDING_SPIN_MAX) {
+                        spin = GRASS_LANDING_SPIN_MAX;
                     }
 
-                    if (spin < MIN_GRASS_LANDING_SPIN) {
-                        spin = MIN_GRASS_LANDING_SPIN;
+                    if (spin < GRASS_LANDING_SPIN_MIN) {
+                        spin = GRASS_LANDING_SPIN_MIN;
                     }
 
                     break;
@@ -1522,12 +1522,12 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             if (restitution < 0.0f) {
                 restitution = 0.0f;
             }
-            else if (restitution > MAX_RESTITUTION) {
-                restitution = MAX_RESTITUTION;
+            else if (restitution > RESTITUTION_MAX) {
+                restitution = RESTITUTION_MAX;
             }
 
             if (simulation->state != BALL_STATE_ROLLING &&
-                impactSpeed < MAX_ROLL_START_SPEED &&
+                impactSpeed < ROLL_START_SPEED_MAX &&
                 simulation->stepCount - 1 == simulation->lastBounceStep) {
                 s32 spinVelocityX;
                 s32 spinVelocityZ;
@@ -1561,8 +1561,8 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 f32 driftLimit;
                 f32 drift;
 
-                if (keep <= MIN_BOUNCE_SPEED_KEPT) {
-                    keep = MIN_BOUNCE_SPEED_KEPT;
+                if (keep <= BOUNCE_SPEED_KEPT_MIN) {
+                    keep = BOUNCE_SPEED_KEPT_MIN;
                 }
 
                 if (simulation->stepCount < EARLY_BOUNCE_STEP_COUNT && !g_GameState.isMiniGolf) {
@@ -1586,7 +1586,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 driftZ = (spinVelocityZ - velocity[AXIS_Z]) * (1.0f - restitution) *
                     fabsf(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP;
                 drift = (s32)IntLength2D(driftX, driftZ);
-                driftLimit = impactSpeed * MAX_SPIN_DRIFT_SHARE;
+                driftLimit = impactSpeed * SPIN_DRIFT_SHARE_MAX;
                 if (driftLimit < drift && impactSpeed > 1.0f) {
                     f32 scale = driftLimit / drift;
 
@@ -1768,9 +1768,9 @@ TAKE_OFF:
 
             slopeX = (-plane.normal[AXIS_X] * SLOPE_ACCELERATION) / fabsf(plane.normal[AXIS_Y]);
             slopeZ = (-plane.normal[AXIS_Z] * SLOPE_ACCELERATION) / fabsf(plane.normal[AXIS_Y]);
-            if (fabsf((f32)slopeX) + fabsf((f32)slopeZ) >= MAX_SLOPE_ACCELERATION) {
+            if (fabsf((f32)slopeX) + fabsf((f32)slopeZ) >= SLOPE_ACCELERATION_MAX) {
                 f32 scale =
-                    MAX_SLOPE_ACCELERATION / sqrtf(((f32)slopeX * slopeX) + ((f32)slopeZ * slopeZ));
+                    SLOPE_ACCELERATION_MAX / sqrtf(((f32)slopeX * slopeX) + ((f32)slopeZ * slopeZ));
 
                 slopeX = slopeX * scale;
                 slopeZ = slopeZ * scale;
@@ -1798,14 +1798,14 @@ TAKE_OFF:
             else if (isSteep) {
                 slopeX *= STEEP_SLOPE_SCALE;
                 slopeZ *= STEEP_SLOPE_SCALE;
-                if (friction < MIN_STEEP_FRICTION) {
-                    friction = MIN_STEEP_FRICTION;
+                if (friction < STEEP_FRICTION_MIN) {
+                    friction = STEEP_FRICTION_MIN;
                 }
             }
             else {
                 if ((f32)rollSpeed < SLOW_ROLL_SPEED) {
                     f32 scale =
-                        (rollSpeed * SLOW_ROLL_SLOPE_SCALE_PER_SPEED) + MIN_SLOW_ROLL_SLOPE_SCALE;
+                        (rollSpeed * SLOW_ROLL_SLOPE_SCALE_PER_SPEED) + SLOW_ROLL_SLOPE_SCALE_MIN;
 
                     slopeX = slopeX * scale;
                     slopeZ = slopeZ * scale;
@@ -1825,7 +1825,7 @@ TAKE_OFF:
             speed = sqrtf(
                 (velocity[AXIS_X] * velocity[AXIS_X]) + (velocity[AXIS_Z] * velocity[AXIS_Z])
             );
-            if (speed > MIN_SLOPE_STEER_SPEED) {
+            if (speed > SLOPE_STEER_SPEED_MIN) {
                 f32 against = -(
                     (((f32)slopeX * velocity[AXIS_X]) + ((f32)slopeZ * velocity[AXIS_Z])) / speed
                 );
@@ -1867,15 +1867,15 @@ TAKE_OFF:
                 osSyncPrintf("V[1] %d\n", velocity[AXIS_Y]);
             }
 
-            if (simulation->rollFrameCount >= MIN_STOP_ROLL_FRAMES) {
+            if (simulation->rollFrameCount >= STOP_ROLL_FRAMES_MIN) {
                 s32 speed = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
 
                 if (simulation->rollFrameCount >= WATER_STOP_ROLL_FRAMES &&
                     simulation->hasEnteredWater) {
                     simulation->state = BALL_STATE_STOPPED;
                 }
-                else if (speed < MAX_STOP_SPEED) {
-                    if (!isSteep && IntLength2D(slopeX, slopeZ) * friction < MAX_STOP_SLOPE_PULL) {
+                else if (speed < STOP_SPEED_MAX) {
+                    if (!isSteep && IntLength2D(slopeX, slopeZ) * friction < STOP_SLOPE_PULL_MAX) {
                         simulation->state = BALL_STATE_STOPPED;
                     }
                 }
@@ -1887,7 +1887,7 @@ TAKE_OFF:
                 sqrtf(
                     (velocity[AXIS_X] * velocity[AXIS_X]) + (velocity[AXIS_Y] * velocity[AXIS_Y]) +
                     (velocity[AXIS_Z] * velocity[AXIS_Z])
-                ) < MAX_OFF_GREEN_STOP_SPEED) {
+                ) < OFF_GREEN_STOP_SPEED_MAX) {
                 simulation->state = BALL_STATE_STOPPED;
             }
         }
@@ -1919,7 +1919,7 @@ ROLLED:
                     (relative[AXIS_Z] * relative[AXIS_Z])
                 );
                 drag = (sqrtf(airSpeed * AIR_DRAG_SPEED_SCALE) * AIR_DRAG_PER_ROOT_SPEED) +
-                    MIN_AIR_DRAG;
+                    AIR_DRAG_MIN;
                 sideSpin = simulation->sideSpin;
                 horizontalSpeed = sqrtf(
                     (relative[AXIS_X] * relative[AXIS_X]) + (relative[AXIS_Z] * relative[AXIS_Z])
@@ -1938,14 +1938,14 @@ ROLLED:
                 }
 
                 curve = sideSpin * CURVE_PER_SIDE_SPIN * weight;
-                if (horizontalSpeed < fabsf(curve) * MAX_CURVE_SPEED_RATIO) {
-                    curve = horizontalSpeed * (1.0f / MAX_CURVE_SPEED_RATIO);
+                if (horizontalSpeed < fabsf(curve) * CURVE_SPEED_RATIO_MAX) {
+                    curve = horizontalSpeed * (1.0f / CURVE_SPEED_RATIO_MAX);
                     if (simulation->sideSpin < 0) {
                         curve = -curve;
                     }
                 }
 
-                if (horizontalSpeed > MIN_CURVE_SPEED) {
+                if (horizontalSpeed > CURVE_SPEED_MIN) {
                     f32 scale = (1.0f / horizontalSpeed) * curve;
                     f32 curveX = -relative[AXIS_Z] * scale;
                     f32 curveZ = relative[AXIS_X] * scale;
@@ -1956,7 +1956,7 @@ ROLLED:
 
                 simulation->sideSpin = simulation->sideSpin * SIDE_SPIN_DECAY;
                 lift = simulation->spinSpeed * LIFT_PER_SPIN;
-                if (simulation->spinSpeed != 0 && airSpeed > MIN_LIFT_AIR_SPEED) {
+                if (simulation->spinSpeed != 0 && airSpeed > LIFT_AIR_SPEED_MIN) {
                     f32 turned[3];
                     f32 scale;
 
@@ -1969,8 +1969,8 @@ ROLLED:
                         &turned[AXIS_Y],
                         &turned[AXIS_Z]
                     );
-                    if (airSpeed < fabsf(lift) * MAX_LIFT_SPEED_RATIO) {
-                        lift = airSpeed * (1.0f / MAX_LIFT_SPEED_RATIO);
+                    if (airSpeed < fabsf(lift) * LIFT_SPEED_RATIO_MAX) {
+                        lift = airSpeed * (1.0f / LIFT_SPEED_RATIO_MAX);
                     }
 
                     scale = lift /
@@ -2076,8 +2076,8 @@ SETTLE:
                 simulation->position[AXIS_Y] = floor;
             }
 
-            if (simulation->position[AXIS_Y] < -MAX_BALL_ALTITUDE) {
-                simulation->position[AXIS_Y] = -MAX_BALL_ALTITUDE;
+            if (simulation->position[AXIS_Y] < -BALL_ALTITUDE_MAX) {
+                simulation->position[AXIS_Y] = -BALL_ALTITUDE_MAX;
             }
 
             if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
@@ -2133,8 +2133,8 @@ SETTLE:
                              (velocity[AXIS_Z] * velocity[AXIS_Z])
                          ) *
                     (ROLL_VOLUME_PER_SPEED * (rollFrames + 1));
-                if (volume > MAX_ROLL_VOLUME) {
-                    volume = MAX_ROLL_VOLUME;
+                if (volume > ROLL_VOLUME_MAX) {
+                    volume = ROLL_VOLUME_MAX;
                 }
 
                 if (volume < 0) {
@@ -2162,8 +2162,8 @@ ImpactEffect *GetImpactTimingEntry(
         row = 0;
     }
 
-    if (row > MAX_LIE_RATING) {
-        row = MAX_LIE_RATING;
+    if (row > LIE_RATING_MAX) {
+        row = LIE_RATING_MAX;
     }
 
     if (impactTiming < -IMPACT_TIMING_ENTRY_LIMIT) {
@@ -2214,11 +2214,11 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
         return (u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
                          g_Players[simulation->playerIndex].noiseSeed) &
                    NOISE_BYTE_MASK) /
-            MAX_NOISE_BYTE_PAIR_SUM +
+            NOISE_BYTE_PAIR_SUM_MAX +
             (u32)((simulation->position[AXIS_X] - simulation->position[AXIS_Z] +
                       g_Players[simulation->playerIndex].noiseSeed) &
                 NOISE_BYTE_MASK) /
-            MAX_NOISE_BYTE_PAIR_SUM;
+            NOISE_BYTE_PAIR_SUM_MAX;
     }
 
     launchScale = 1.0f;
@@ -2275,8 +2275,8 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
             row = 0;
         }
 
-        if (row > MAX_LIE_RATING) {
-            row = MAX_LIE_RATING;
+        if (row > LIE_RATING_MAX) {
+            row = LIE_RATING_MAX;
         }
 
         if (impactTiming < -IMPACT_TIMING_ENTRY_LIMIT) {
@@ -2303,9 +2303,9 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
                 ((entry->speedChange * (LAUNCH_SCALE_ONE / SPEED_CHANGE_UNITS)) +
                     LAUNCH_SCALE_ONE) /
                 LAUNCH_SCALE_ONE) /
-            MAX_LAUNCH_POWER;
+            LAUNCH_POWER_MAX;
         if (speed <= 0) {
-            speed = MIN_LAUNCH_SPEED;
+            speed = LAUNCH_SPEED_MIN;
         }
     }
 
@@ -2377,7 +2377,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
         slopeSpin = curve;
         yaw = shot->heading + (crossSlope / CROSS_SLOPE_YAW_DIVISOR) +
             (sideSign *
-                ((club->deflection[shot->shotMode] * shot->power / MAX_LAUNCH_POWER) +
+                ((club->deflection[shot->shotMode] * shot->power / LAUNCH_POWER_MAX) +
                     (entry->yawChange * club->mishitScale)));
         yawRadians = (u16)yaw * BINARY_ANGLE_TO_RADIANS;
     }
@@ -2437,7 +2437,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
     }
 
     if (speed <= 0) {
-        speed = MIN_LAUNCH_SPEED;
+        speed = LAUNCH_SPEED_MIN;
     }
 
     simulation->velocity[AXIS_Y] = sinf(pitch) * speed;

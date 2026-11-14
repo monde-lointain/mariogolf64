@@ -54,10 +54,10 @@ extern u8 g_BetPagesWallSlide;
 extern s32 g_AnimatedIconFrameIndex;
 extern u8 g_AnimatedIconBufferIndex;
 extern s8 g_AnimatedIconFrameTime;
-extern s32 g_MenuFidgetDelays[MAX_PLAYER_COUNT];
+extern s32 g_MenuFidgetDelays[PLAYER_COUNT_MAX];
 extern s32 g_CourseBannersSlide;
 #define ABSENT_PLAYER_HANDICAP (-1)
-extern s16 g_ChosenHandicaps[MAX_PLAYER_COUNT];
+extern s16 g_ChosenHandicaps[PLAYER_COUNT_MAX];
 
 enum CourseSelectKind {
     COURSE_SELECT_KIND_NONE,

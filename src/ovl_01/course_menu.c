@@ -72,12 +72,12 @@
 #define OFF_FIRST_GLYPH 16
 #define OFF_GLYPH_COUNT 2
 #define MENU_GLYPH_POINT 18
-#define MAX_ONE_DIGIT_NUMBER (DECIMAL_BASE - 1)
-#define MAX_TWO_DIGIT_NUMBER ((DECIMAL_BASE * DECIMAL_BASE) - 1)
-#define IsOneDigitNumber(n) ((n) >= -MAX_ONE_DIGIT_NUMBER && (n) <= MAX_ONE_DIGIT_NUMBER)
+#define ONE_DIGIT_NUMBER_MAX (DECIMAL_BASE - 1)
+#define TWO_DIGIT_NUMBER_MAX ((DECIMAL_BASE * DECIMAL_BASE) - 1)
+#define IsOneDigitNumber(n) ((n) >= -ONE_DIGIT_NUMBER_MAX && (n) <= ONE_DIGIT_NUMBER_MAX)
 #define IsTwoDigitNumber(n) \
-    (((n) >= DECIMAL_BASE && (n) <= MAX_TWO_DIGIT_NUMBER) || \
-        ((n) >= -MAX_TWO_DIGIT_NUMBER && (n) <= -DECIMAL_BASE))
+    (((n) >= DECIMAL_BASE && (n) <= TWO_DIGIT_NUMBER_MAX) || \
+        ((n) >= -TWO_DIGIT_NUMBER_MAX && (n) <= -DECIMAL_BASE))
 
 #define STATS_FIRST_ARROW_IMAGE 16
 #define STATS_ARROW_WIDTH 16
@@ -773,7 +773,7 @@ void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row) {
                 &gfx,
                 STATS_VALUE_X,
                 STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-                g_CourseStatFigures[courseIndex].averageScore
+                g_CourseStatFigures[courseIndex].scoreAverage
             );
             break;
         case STAT_BEST_DRIVE:
@@ -795,7 +795,7 @@ void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row) {
                 &gfx,
                 STATS_VALUE_X,
                 STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-                g_CourseStatFigures[courseIndex].averageDrive
+                g_CourseStatFigures[courseIndex].driveAverage
             );
             DrawYardMark(
                 &gfx,
@@ -821,7 +821,7 @@ void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row) {
                 &gfx,
                 STATS_VALUE_X,
                 STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-                g_CourseStatFigures[courseIndex].averagePutts
+                g_CourseStatFigures[courseIndex].puttsAverage
             );
             break;
         case STAT_PAR_SAVE_PERCENT:

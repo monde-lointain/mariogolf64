@@ -86,6 +86,6 @@ extern HoleSetup g_HoleSetup;
 extern GameState g_GameState;
 
 extern GameState g_BackedUpGameState;
-extern Player g_BackedUpPlayers[MAX_PLAYER_COUNT];
+extern Player g_BackedUpPlayers[PLAYER_COUNT_MAX];
 
 #endif

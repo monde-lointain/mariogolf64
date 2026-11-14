@@ -357,15 +357,15 @@ s32 GetSideSlope(void) {
     return sideSlope;
 }
 
-#define MIN_POWER_GAUGE_FRAME 3
-#define MIN_TRIAL_LEVEL_COUNT 4
+#define POWER_GAUGE_FRAME_MIN 3
+#define TRIAL_LEVEL_COUNT_MIN 4
 #define POOR_TRIAL_LEVEL_COUNT 8
-#define MAX_TRIAL_LEVEL_COUNT 30
+#define TRIAL_LEVEL_COUNT_MAX 30
 #define POOR_EVALUATION 0x10000
 #define IsTrialLevelLeft() \
-    (f_TrialLevel < MIN_TRIAL_LEVEL_COUNT || \
+    (f_TrialLevel < TRIAL_LEVEL_COUNT_MIN || \
         (f_BestEvaluation > POOR_EVALUATION && f_TrialLevel < POOR_TRIAL_LEVEL_COUNT) || \
-        (!f_HasBestEvaluation && f_TrialLevel < MAX_TRIAL_LEVEL_COUNT))
+        (!f_HasBestEvaluation && f_TrialLevel < TRIAL_LEVEL_COUNT_MAX))
 #define IsTrialStage(stage) \
     ((stage) == PLAN_STAGE_TRIAL_TAKEN || \
         (stage) == PLAN_STAGE_UNUSED || \
@@ -374,14 +374,14 @@ s32 GetSideSlope(void) {
 #define CARRY_SCALE_STEP 0.9f
 #define RAINY_CARRY_SCALE 0.95f
 #define RAINY_DISTANCE_SCALE 1.1f
-#define MIN_CLUB_DOWN_REACH 0x600
+#define CLUB_DOWN_REACH_MIN 0x600
 #define CLUB_DOWN_REACH_COUNT 21
-#define MAX_MISS_DISTANCE 0x25800
+#define MISS_DISTANCE_MAX 0x25800
 #define LEVEL_MISS_DISTANCE 0x1E00
 #define MISS_STRETCH 2.5f
 #define MISS_REPORT_COUNT 40
 #define FULL_PERCENT 100
-#define MIN_PLANNED_POWER_GAUGE_FRAME 2
+#define PLANNED_POWER_GAUGE_FRAME_MIN 2
 #define POWER_GAUGE_FRAME_BOOST 1.2f
 #define LEVEL_TRIAL_COUNT 4
 #define CUP_LEVEL_TRIAL_COUNT 5
@@ -418,7 +418,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
     s32 par;
     s32 strokes;
     s32 mishit;
-    s32 maxMishit;
+    s32 mishitMax;
     s32 mishitDivisor;
     u32 kind;
 
@@ -531,7 +531,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
                         );
                         shortestReach =
                             shortestReach * percentRange[0] / (FULL_PERCENT * GAUGE_FULL_FRAME);
-                        if (shortestReach < MIN_CLUB_DOWN_REACH ||
+                        if (shortestReach < CLUB_DOWN_REACH_MIN ||
                             targetDistance / shortestReach >= CLUB_DOWN_REACH_COUNT) {
                             break;
                         }
@@ -564,8 +564,8 @@ s32 PlanShot(CurrentShot *plannedShot) {
                             3;
                         missAngle = ((rand() * 4) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
                         aimAngle = (u16)f_Shot.heading * BINARY_ANGLE_TO_RADIANS;
-                        if (missDistance >= MAX_MISS_DISTANCE) {
-                            missDistance = MAX_MISS_DISTANCE;
+                        if (missDistance >= MISS_DISTANCE_MAX) {
+                            missDistance = MISS_DISTANCE_MAX;
                         }
 
                         if (strokesOver < -1) {
@@ -631,8 +631,8 @@ s32 PlanShot(CurrentShot *plannedShot) {
                 distance = distance * POWER_GAUGE_FRAME_BOOST;
             }
 
-            if (distance < MIN_PLANNED_POWER_GAUGE_FRAME) {
-                distance = MIN_PLANNED_POWER_GAUGE_FRAME;
+            if (distance < PLANNED_POWER_GAUGE_FRAME_MIN) {
+                distance = PLANNED_POWER_GAUGE_FRAME_MIN;
             }
             else if (distance > GAUGE_FULL_FRAME) {
                 distance = GAUGE_FULL_FRAME;
@@ -768,12 +768,12 @@ s32 PlanShot(CurrentShot *plannedShot) {
         mishit = 0;
         if (GetSurfaceInfo(f_TrialShot.surface)->kind != SURFACE_KIND_GREEN &&
             strokes < par + f_HoleTargetToPar - 1) {
-            maxMishit = GetLieRating(
+            mishitMax = GetLieRating(
                 GetClub(g_Players[f_TrialShot.playerIndex].clubs[f_TrialShot.clubSlot]),
                 f_TrialShot.surface,
                 f_TrialShot.shotMode
             );
-            maxMishit -= maxMishit != 0;
+            mishitMax -= mishitMax != 0;
             if (strokes < par + f_HoleTargetToPar - 2) {
                 switch (
                     f_GolferTraits[g_Players[f_TrialShot.playerIndex].characterIndex].consistency) {
@@ -794,9 +794,9 @@ s32 PlanShot(CurrentShot *plannedShot) {
             }
 
             mishit = rand() % MISHIT_ROLL_RANGE / mishitDivisor;
-            if (maxMishit < Abs(mishit) &&
+            if (mishitMax < Abs(mishit) &&
                 (f_HoleTargetToPar < 0 || strokes >= par + f_HoleTargetToPar - 3)) {
-                mishit = maxMishit;
+                mishit = mishitMax;
             }
 
             if (mishit != 0 && (rand() & MISHIT_SIGN_BIT)) {
@@ -1527,7 +1527,7 @@ s32 GetLandingRating(u32 surfaceKind) {
 #define TARGET_SIDE_SPACING (4 * UNITS_PER_YARD)
 #define TARGET_NEIGHBOR_REACH 2
 #define TARGET_NEIGHBOR_SPACING 4
-#define MIN_TESTED_ROLL (2 * UNITS_PER_YARD)
+#define TESTED_ROLL_MIN (2 * UNITS_PER_YARD)
 
 void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ) {
     u8 order[ROUTE_POINT_COUNT + 1];
@@ -1706,7 +1706,7 @@ void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ)
                 continue;
             }
 
-            if (cupDistance >= MIN_TESTED_ROLL) {
+            if (cupDistance >= TESTED_ROLL_MIN) {
                 if (FindGroundHit(
                         candidateX,
                         height - PATH_GROUND_CLEARANCE,
@@ -2071,7 +2071,7 @@ s32 StepTrialShot(void) {
             f_TrialStepCount++;
             flags = StepBallSimulation(&f_TrialSimulation);
             stepFlags = flags;
-            if (f_TrialStepCount >= MAX_STEP_COUNT) {
+            if (f_TrialStepCount >= STEP_COUNT_MAX) {
                 SetDebugTextHighlight(TRUE);
                 PrintDebugText(f_SimFaultText, 10, 12);
                 break;
@@ -2318,7 +2318,7 @@ EVALUATE:
         if (flyDistance != 0) {
             ratio = (f32)targetDistance / flyDistance;
             launchPower = f_TrialLaunch->power * ratio;
-            if (launchPower > MAX_LAUNCH_POWER) {
+            if (launchPower > LAUNCH_POWER_MAX) {
                 if (f_Shot.shotMode == SHOT_MODE_NORMAL &&
                     f_Shot.powerShotCount > 0 &&
                     ((ShotGolferTraits().powerShotEagerness != 0 &&
@@ -2371,8 +2371,8 @@ EVALUATE:
                 s32 GetPowerGaugeFrame(s32 amount) {
                     s32 value = (amount * POWER_TO_GAUGE_FRAME_SCALE) + 0.5f;
 
-                    if (value < MIN_POWER_GAUGE_FRAME) {
-                        value = MIN_POWER_GAUGE_FRAME;
+                    if (value < POWER_GAUGE_FRAME_MIN) {
+                        value = POWER_GAUGE_FRAME_MIN;
                     }
 
                     if (value > GAUGE_FULL_FRAME - 1) {
@@ -2489,7 +2489,7 @@ ClubType ChooseClubForDistance(s32 distance) {
             carry = carry * RAINY_DISTANCE_FRACTION;
         }
 
-        carry = carry * GetSurfaceInfo(f_Shot.surface)->minPercent / FULL_PERCENT;
+        carry = carry * GetSurfaceInfo(f_Shot.surface)->percentMin / FULL_PERCENT;
         rating = GetLieRating(club, f_Shot.surface, SHOT_MODE_NORMAL);
         if (ShotGolferTraits().clubBoldness < BOLD_CLUB_CHOICE) {
             if (rating == WORST_LIE_RATING) {
@@ -2739,7 +2739,7 @@ Boolean IsTrialShotSafe(void) {
         velocityY = f_TrialSimulation.velocity[AXIS_Y];
         f_TrialStepCount++;
         flags = StepBallSimulation(&f_TrialSimulation);
-        if (f_TrialStepCount >= MAX_STEP_COUNT) {
+        if (f_TrialStepCount >= STEP_COUNT_MAX) {
             SetDebugTextHighlight(TRUE);
             PrintDebugText(f_SimFaultText, 10, 12);
             break;

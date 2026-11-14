@@ -20,7 +20,7 @@ typedef f32 BallSpeed;
 
 #define NOISE_BYTE_MASK 0xFF
 #define NOISE_BYTE_MIDPOINT (NOISE_BYTE_MASK / 2.0f)
-#define MAX_NOISE_BYTE_PAIR_SUM (NOISE_BYTE_MASK * 2.0f)
+#define NOISE_BYTE_PAIR_SUM_MAX (NOISE_BYTE_MASK * 2.0f)
 #define NOISE_MIDDLE 0.5f
 #define MINI_GOLF_ROLL_GRAVITY (GRAVITY * 2)
 
@@ -35,7 +35,7 @@ typedef f32 BallSpeed;
     ((f32)(SECONDS_PER_MINUTE / \
         (SPEED_UNITS_PER_METER_PER_SECOND * (f32)M_PI * BALL_DIAMETER_METERS)))
 
-#define MAX_STEP_COUNT 1801
+#define STEP_COUNT_MAX 1801
 
 #define STEP_FLAG_GROUND_HIT 0x1
 #define STEP_FLAG_BILLBOARD_HIT 0x2
@@ -85,7 +85,7 @@ typedef struct ImpactEffect {
     s8 rumbles;
 } ImpactEffect;
 
-#define MAX_LAUNCH_POWER 256
+#define LAUNCH_POWER_MAX 256
 
 typedef struct ShotLaunch {
     SignedBinaryAngle heading;

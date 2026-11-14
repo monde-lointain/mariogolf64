@@ -9,7 +9,7 @@
 #include "gbi_helpers.h"
 #include "screen.h"
 
-#define MAX_DEPTH 0x3FFF
+#define DEPTH_MAX 0x3FFF
 
 static Gfx f_RdpInitList[] = {
     gsDPPipeSync(),
@@ -95,7 +95,7 @@ void AppendBufferClear(s32 clearMode, Gfx **displayListHead) {
         SCREEN_WIDTH,
         RenderTargetAddress(PhysicalAddress(nuGfxZBuffer))
     );
-    gDPSetFillColor(gfx++, GPACK_ZDZ(MAX_DEPTH, 0) << 16 | GPACK_ZDZ(MAX_DEPTH, 0));
+    gDPSetFillColor(gfx++, GPACK_ZDZ(DEPTH_MAX, 0) << 16 | GPACK_ZDZ(DEPTH_MAX, 0));
     gDPFillRectangle(gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
     gDPPipeSync(gfx++);
     gDPSetColorImage(

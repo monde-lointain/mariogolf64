@@ -148,8 +148,8 @@ static char f_UnreadCurveNames[3][10] UNUSED = {"Straight", "Draw", "Fade"};
 static s16 f_UnreadFaceColumn = 0;
 static s16 f_UnreadFaceRow = 0;
 static s16 f_UnreadSelectHalfword UNUSED = 0;
-static TagOffset f_PlayerTagOffsets[MAX_PLAYER_COUNT] = {{0, 0}, {16, 0}, {0, 24}, {16, 24}};
-static s32 f_LinedUpTagLefts[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] =
+static TagOffset f_PlayerTagOffsets[PLAYER_COUNT_MAX] = {{0, 0}, {16, 0}, {0, 24}, {16, 24}};
+static s32 f_LinedUpTagLefts[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX] =
     {{102, -26, -26, -26}, {22, 182, -26, -26}, {38, 102, 166, 230}, {6, 70, 134, 198}};
 static s16 f_UnreadSelectOrder[16] UNUSED = {1, 4, 5, 6, 3, 2, 7, 9, 12, 10, 13, 15, 14, 11, 8, 0};
 static Vtx f_GridCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
@@ -466,12 +466,12 @@ s32 GetStickDiagonal(void) {
 #define BLANKED_DEBUG_TEXT_COLUMN 15
 #define BLANKED_DEBUG_TEXT_ROW 10
 
-#define MIN_PLAYER_COUNT_WITHOUT_CONTROLLER 2
+#define PLAYER_COUNT_WITHOUT_CONTROLLER_MIN 2
 
 s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
-    s32 sameCharacterPlayers[MAX_PLAYER_COUNT];
+    s32 sameCharacterPlayers[PLAYER_COUNT_MAX];
     MenuMemory *memory = GetMenuMemory();
     s32 playerIndex;
     s32 index;
@@ -765,7 +765,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             if (button & A_BUTTON) {
                 if ((u8)canChooseMarked == FALSE) {
                     if (((button & R_TRIG) != 0) &
-                            (playerCount >= MIN_PLAYER_COUNT_WITHOUT_CONTROLLER) &&
+                            (playerCount >= PLAYER_COUNT_WITHOUT_CONTROLLER_MIN) &&
                         character < FIRST_IMPORTED_CHARACTER) {
                         if (g_ChosenPlayerCount - 1 == playerIndex &&
                             !IsGameFlagSet(GAME_FLAG_ALLOW_ALL_COMPUTER_PLAYERS)) {
@@ -1216,7 +1216,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
                 R_TRIG) &&
             memory->characterRows[playerIndex] != GAME_BOY_CHARACTER_ROW &&
             (u8)canChooseMarked == FALSE) {
-            if (g_ChosenPlayerCount >= MIN_PLAYER_COUNT_WITHOUT_CONTROLLER) {
+            if (g_ChosenPlayerCount >= PLAYER_COUNT_WITHOUT_CONTROLLER_MIN) {
                 if (g_ChoosingPlayerIndex == g_ChosenPlayerCount - 1) {
                     for (index = 0; index != g_ChoosingPlayerIndex; index++) {
                         if (g_PlayerControllerIndices[index] != NO_CONTROLLER_INDEX) {
@@ -1664,7 +1664,7 @@ s32 GetUnusedPalette(s32 choiceIndex) {
     s32 sameCount = 0;
     CharacterId character = f_ChoiceCharacters[choiceIndex];
     s32 unused[4] UNUSED;
-    s32 samePlayers[MAX_PLAYER_COUNT];
+    s32 samePlayers[PLAYER_COUNT_MAX];
     s32 sameIndex;
 
     for (; playerIndex != g_ChoosingPlayerIndex; playerIndex++) {

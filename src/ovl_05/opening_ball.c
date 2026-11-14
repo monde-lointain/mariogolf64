@@ -65,7 +65,7 @@ static SurfaceInfo f_OpeningSurfaceInfo[SURFACE_COUNT] = {
 static s32 f_OpeningSpeedTextRow = 0;
 static ImpactEffect f_OpeningEarlyImpactEffect UNUSED = {-90, -64, -40, -10, 100, 1};
 static ImpactEffect f_OpeningLateImpactEffect UNUSED = {-80, 64, 30, 10, -5, 1};
-static ImpactEffect f_OpeningImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
+static ImpactEffect f_OpeningImpactEffects[LIE_RATING_MAX + 1][IMPACT_TIMING_ENTRY_COUNT] = {
     {
         {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
@@ -275,11 +275,11 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
         return ((u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
                           g_Players[simulation->playerIndex].noiseSeed) &
                     NOISE_BYTE_MASK) *
-                   (1.0f / MAX_NOISE_BYTE_PAIR_SUM)) +
+                   (1.0f / NOISE_BYTE_PAIR_SUM_MAX)) +
             ((u32)((simulation->position[AXIS_X] - simulation->position[AXIS_Z] +
                        g_Players[simulation->playerIndex].noiseSeed) &
                  NOISE_BYTE_MASK) *
-                (1.0f / MAX_NOISE_BYTE_PAIR_SUM));
+                (1.0f / NOISE_BYTE_PAIR_SUM_MAX));
     }
 
     f32 GetOpeningLength3D(f32 x, f32 y, f32 z) {
@@ -620,7 +620,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                             SoundVolume volume = speed * FLAGSTICK_SOUND_VOLUME_PER_SPEED;
 
                             if (volume >= SOUND_FULL_SCALE) {
-                                volume = MAX_KNOCK_VOLUME;
+                                volume = KNOCK_VOLUME_MAX;
                             }
                         }
                     }
@@ -672,15 +672,15 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
 
                         if (simulation->state != BALL_STATE_IN_CUP &&
                             simulation->position[AXIS_Y] - g_HoleSetup.cupPosition[AXIS_Y] >=
-                                -MAX_CUP_ENTRY_HEIGHT &&
+                                -CUP_ENTRY_HEIGHT_MAX &&
                             (f32)cupDistance < CUP_RADIUS) {
                             BallSpeed speed = (s32)IntLength2D(
                                 simulation->velocity[AXIS_X],
                                 simulation->velocity[AXIS_Z]
                             );
 
-                            if (speed < MAX_CUP_IN_SPEED &&
-                                (f32)simulation->velocity[AXIS_Y] >= -MAX_CUP_IN_RISE_SPEED) {
+                            if (speed < CUP_IN_SPEED_MAX &&
+                                (f32)simulation->velocity[AXIS_Y] >= -CUP_IN_RISE_SPEED_MAX) {
                                 if (printsDebugText) {
                                     SetDebugTextHighlight(1);
                                     PrintDebugText(
@@ -750,7 +750,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
 
                                 pull = (sinf(pull * ((f32)M_PI / CUP_PULL_DEPTH_RANGE)) *
                                            CUP_PULL_RISE) +
-                                    MIN_CUP_PULL;
+                                    CUP_PULL_MIN;
                                 pull *= alignment;
                                 simulation->velocity[AXIS_X] =
                                     simulation->velocity[AXIS_X] * CUP_PULL_DRAG;
@@ -869,7 +869,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
 
             if (simulation->position[AXIS_Y] <
                     g_HoleSetup.cupPosition[AXIS_Y] + CUP_CEILING_DEPTH &&
-                simulation->velocity[AXIS_Y] < -MIN_CUP_CEILING_SPEED) {
+                simulation->velocity[AXIS_Y] < -CUP_CEILING_SPEED_MIN) {
                 s32 toCupX = g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X];
                 s32 toCupZ = g_HoleSetup.cupPosition[AXIS_Z] - simulation->position[AXIS_Z];
 
@@ -1290,12 +1290,12 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             if (restitution < 0.0f) {
                 restitution = 0.0f;
             }
-            else if (restitution > MAX_RESTITUTION) {
-                restitution = MAX_RESTITUTION;
+            else if (restitution > RESTITUTION_MAX) {
+                restitution = RESTITUTION_MAX;
             }
 
             if (simulation->state != BALL_STATE_ROLLING &&
-                impactSpeed < MAX_ROLL_START_SPEED &&
+                impactSpeed < ROLL_START_SPEED_MAX &&
                 simulation->stepCount - 1 == simulation->lastBounceStep) {
                 s32 spinVelocityX;
                 s32 spinVelocityZ;
@@ -1331,8 +1331,8 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                 f32 driftLimit;
                 f32 drift;
 
-                if (keep <= MIN_BOUNCE_SPEED_KEPT) {
-                    keep = MIN_BOUNCE_SPEED_KEPT;
+                if (keep <= BOUNCE_SPEED_KEPT_MIN) {
+                    keep = BOUNCE_SPEED_KEPT_MIN;
                 }
 
                 if (keep > 1.0f) {
@@ -1506,8 +1506,8 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             if (isSteep) {
                 slopeX *= STEEP_SLOPE_SCALE;
                 slopeZ *= STEEP_SLOPE_SCALE;
-                if (friction < MIN_STEEP_FRICTION) {
-                    friction = MIN_STEEP_FRICTION;
+                if (friction < STEEP_FRICTION_MIN) {
+                    friction = STEEP_FRICTION_MIN;
                 }
             }
             else {
@@ -1568,16 +1568,16 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             {
                 s32 speed = IntLength2D(simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
 
-                if (speed < MAX_STOP_SPEED) {
-                    if (!isSteep && IntLength2D(slopeX, slopeZ) * friction < MAX_STOP_SLOPE_PULL) {
+                if (speed < STOP_SPEED_MAX) {
+                    if (!isSteep && IntLength2D(slopeX, slopeZ) * friction < STOP_SLOPE_PULL_MAX) {
                         simulation->state = BALL_STATE_STOPPED;
                     }
                 }
                 else {
                     SoundVolume volume = speed * ROLL_VOLUME_PER_SPEED;
 
-                    if (volume > MAX_ROLL_VOLUME) {
-                        volume = MAX_ROLL_VOLUME;
+                    if (volume > ROLL_VOLUME_MAX) {
+                        volume = ROLL_VOLUME_MAX;
                     }
                 }
             }
@@ -1589,7 +1589,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                     simulation->velocity[AXIS_X],
                     simulation->velocity[AXIS_Y],
                     simulation->velocity[AXIS_Z]
-                ) < MAX_OFF_GREEN_STOP_SPEED) {
+                ) < OFF_GREEN_STOP_SPEED_MAX) {
                 simulation->state = BALL_STATE_STOPPED;
             }
         }
@@ -1622,7 +1622,7 @@ ROLLED:
             relative[AXIS_Z] = simulation->velocity[AXIS_Z] - simulation->windVelocityZ;
             airSpeed = GetOpeningLength3D(relative[AXIS_X], relative[AXIS_Y], relative[AXIS_Z]);
             drag =
-                (sqrtf(airSpeed * AIR_DRAG_SPEED_SCALE) * AIR_DRAG_PER_ROOT_SPEED) + MIN_AIR_DRAG;
+                (sqrtf(airSpeed * AIR_DRAG_SPEED_SCALE) * AIR_DRAG_PER_ROOT_SPEED) + AIR_DRAG_MIN;
             horizontalSpeed = GetOpeningLength2D(relative[AXIS_X], relative[AXIS_Z]);
             sideSpin = simulation->sideSpin;
             sideSpinMagnitude = AbsFloat(sideSpin * SIDE_SPIN_SPEED_SCALE);
@@ -1637,14 +1637,14 @@ ROLLED:
             }
 
             curve = sideSpin * CURVE_PER_SIDE_SPIN * curveWeight;
-            if (horizontalSpeed < AbsFloat(curve) * MAX_CURVE_SPEED_RATIO) {
-                curve = horizontalSpeed * (1.0f / MAX_CURVE_SPEED_RATIO);
+            if (horizontalSpeed < AbsFloat(curve) * CURVE_SPEED_RATIO_MAX) {
+                curve = horizontalSpeed * (1.0f / CURVE_SPEED_RATIO_MAX);
                 if (sideSpin < 0) {
                     curve = -curve;
                 }
             }
 
-            if (horizontalSpeed > MIN_CURVE_SPEED) {
+            if (horizontalSpeed > CURVE_SPEED_MIN) {
                 f32 scale = (1.0f / horizontalSpeed) * curve;
                 f32 curveX = -relative[AXIS_Z] * scale;
                 f32 curveZ = relative[AXIS_X] * scale;
@@ -1667,7 +1667,7 @@ ROLLED:
 
             liftPerSpin = liftWeight * OPENING_LIFT_PER_SPIN;
             lift = (simulation->spinSpeed * OPENING_LIFT_SPIN_SCALE) * liftPerSpin;
-            if (simulation->spinSpeed != 0 && airSpeed > MIN_LIFT_AIR_SPEED) {
+            if (simulation->spinSpeed != 0 && airSpeed > LIFT_AIR_SPEED_MIN) {
                 guMtxXFMF(
                     simulation->liftRotation,
                     relative[AXIS_X],
@@ -1775,8 +1775,8 @@ SETTLE:
                 simulation->position[AXIS_Y] = floor;
             }
 
-            if (simulation->position[AXIS_Y] < -MAX_BALL_ALTITUDE) {
-                simulation->position[AXIS_Y] = -MAX_BALL_ALTITUDE;
+            if (simulation->position[AXIS_Y] < -BALL_ALTITUDE_MAX) {
+                simulation->position[AXIS_Y] = -BALL_ALTITUDE_MAX;
             }
 
             if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
@@ -1868,9 +1868,9 @@ s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLau
     else {
         speed = GetClubPower(club, shot->shotMode) *
             (shot->power + (entry->speedChange * (LAUNCH_SCALE_ONE / SPEED_CHANGE_UNITS))) /
-            MAX_LAUNCH_POWER;
+            LAUNCH_POWER_MAX;
         if (speed <= 0) {
-            speed = MIN_LAUNCH_SPEED;
+            speed = LAUNCH_SPEED_MIN;
         }
     }
 
@@ -1924,7 +1924,7 @@ s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLau
     }
 
     if (speed <= 0) {
-        speed = MIN_LAUNCH_SPEED;
+        speed = LAUNCH_SPEED_MIN;
     }
 
     simulation->velocity[AXIS_Y] = sinf(pitch) * speed;

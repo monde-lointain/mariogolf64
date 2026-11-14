@@ -82,7 +82,7 @@
 #define STAFF_SONG_END_FRAME 3688
 #define CLOSING_FRAME 3798
 #define FIRST_LEAVING_FRAME 4300
-#define MAX_STAFF_ROLL_FRAME 0xFFFF
+#define STAFF_ROLL_FRAME_MAX 0xFFFF
 #define SCROLL_END_DELAY 376
 #define STAFF_LINE_HEIGHT 24
 #define FIRST_TOP_LINE_INDEX (-10)
@@ -1256,7 +1256,7 @@ void UpdateStaffRoll(void) {
             RunStaffRollTimeline(f_StaffRollFrame - TIMELINE_START_FRAME);
         }
 
-        if (f_StaffRollFrame < MAX_STAFF_ROLL_FRAME) {
+        if (f_StaffRollFrame < STAFF_ROLL_FRAME_MAX) {
             f_StaffRollFrame++;
         }
 

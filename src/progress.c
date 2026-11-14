@@ -13,7 +13,7 @@
 #include "scoring.h"
 #include "tournament.h"
 
-#define MAX_SAVED_COUNT 99
+#define SAVED_COUNT_MAX 99
 
 #define PLACE_UNPLACED 4
 
@@ -27,7 +27,7 @@ void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
     if (isWin) {
         value = awards->matchups[row][column].winBits;
         count = value & WIN_COUNT_MASK;
-        if (count < MAX_SAVED_COUNT) {
+        if (count < SAVED_COUNT_MAX) {
             count++;
         }
 
@@ -43,8 +43,8 @@ void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
     else {
         tally = awards->matchups[row][column].lossCount + 1;
         awards->matchups[row][column].lossCount = tally;
-        if (awards->matchups[row][column].lossCount > MAX_SAVED_COUNT) {
-            awards->matchups[row][column].lossCount = MAX_SAVED_COUNT;
+        if (awards->matchups[row][column].lossCount > SAVED_COUNT_MAX) {
+            awards->matchups[row][column].lossCount = SAVED_COUNT_MAX;
         }
     }
 
@@ -58,9 +58,9 @@ void AddBirdieBadge(void) {
     if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
         awards->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex]++;
         if (awards->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex] >
-            MAX_SAVED_COUNT) {
+            SAVED_COUNT_MAX) {
             awards->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex] =
-                MAX_SAVED_COUNT;
+                SAVED_COUNT_MAX;
         }
 
         TransferSaveData(GetSaveData(), TRUE);

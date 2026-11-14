@@ -29,19 +29,19 @@ void SimulateShot(ShotLaunch *shot) {
     simulation = &simulationState;
     g_SimulatedShot.shot = *shot;
     g_SimulatedShot.stepCount = 0;
-    g_SimulatedShot.maxPositionStep[0] = 0;
-    g_SimulatedShot.maxPositionStep[1] = 0;
-    g_SimulatedShot.maxPositionStep[2] = 0;
-    g_SimulatedShot.minPositionStep[0] = 0;
-    g_SimulatedShot.minPositionStep[1] = 0;
-    g_SimulatedShot.minPositionStep[2] = 0;
+    g_SimulatedShot.positionStepMax[0] = 0;
+    g_SimulatedShot.positionStepMax[1] = 0;
+    g_SimulatedShot.positionStepMax[2] = 0;
+    g_SimulatedShot.positionStepMin[0] = 0;
+    g_SimulatedShot.positionStepMin[1] = 0;
+    g_SimulatedShot.positionStepMin[2] = 0;
     g_SimulatedShot.flagHitStep = NO_STEP;
 
-    g_SimulatedShot.maxPosition[AXIS_X] = g_SimulatedShot.minPosition[AXIS_X] =
+    g_SimulatedShot.positionMax[AXIS_X] = g_SimulatedShot.positionMin[AXIS_X] =
         g_SimulatedShot.startPosition[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
-    g_SimulatedShot.maxPosition[AXIS_Y] = g_SimulatedShot.minPosition[AXIS_Y] =
+    g_SimulatedShot.positionMax[AXIS_Y] = g_SimulatedShot.positionMin[AXIS_Y] =
         g_SimulatedShot.startPosition[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
-    g_SimulatedShot.maxPosition[AXIS_Z] = g_SimulatedShot.minPosition[AXIS_Z] =
+    g_SimulatedShot.positionMax[AXIS_Z] = g_SimulatedShot.positionMin[AXIS_Z] =
         g_SimulatedShot.startPosition[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
     simulation->position[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
     simulation->position[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
@@ -51,7 +51,7 @@ void SimulateShot(ShotLaunch *shot) {
     hasHoleTriangleBounce = FALSE;
     g_SimulatedShot.usesPutter = GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN;
     g_SimulatedShot.isPerfectSwing = shot->impactTiming == 0 &&
-        shot->power >= MAX_LAUNCH_POWER &&
+        shot->power >= LAUNCH_POWER_MAX &&
         !(GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN);
     g_SimulatedShot.impactRumbles = GetImpactTimingEntry(
         GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]),
@@ -86,39 +86,39 @@ void SimulateShot(ShotLaunch *shot) {
         }
 
         if (step < PATH_STEP_COUNT) {
-            if (simulation->position[AXIS_X] > g_SimulatedShot.maxPosition[AXIS_X]) {
-                g_SimulatedShot.maxPosition[AXIS_X] = simulation->position[AXIS_X];
-                g_SimulatedShot.maxPositionStep[0] = step;
+            if (simulation->position[AXIS_X] > g_SimulatedShot.positionMax[AXIS_X]) {
+                g_SimulatedShot.positionMax[AXIS_X] = simulation->position[AXIS_X];
+                g_SimulatedShot.positionStepMax[0] = step;
             }
 
-            if (simulation->position[AXIS_X] < g_SimulatedShot.minPosition[AXIS_X]) {
-                g_SimulatedShot.minPosition[AXIS_X] = simulation->position[AXIS_X];
-                g_SimulatedShot.minPositionStep[0] = step;
+            if (simulation->position[AXIS_X] < g_SimulatedShot.positionMin[AXIS_X]) {
+                g_SimulatedShot.positionMin[AXIS_X] = simulation->position[AXIS_X];
+                g_SimulatedShot.positionStepMin[0] = step;
             }
 
-            if (simulation->position[AXIS_Y] > g_SimulatedShot.maxPosition[AXIS_Y]) {
-                g_SimulatedShot.maxPosition[AXIS_Y] = simulation->position[AXIS_Y];
-                g_SimulatedShot.maxPositionStep[1] = step;
+            if (simulation->position[AXIS_Y] > g_SimulatedShot.positionMax[AXIS_Y]) {
+                g_SimulatedShot.positionMax[AXIS_Y] = simulation->position[AXIS_Y];
+                g_SimulatedShot.positionStepMax[1] = step;
             }
 
-            if (simulation->position[AXIS_Y] < g_SimulatedShot.minPosition[AXIS_Y]) {
-                g_SimulatedShot.minPosition[AXIS_Y] = simulation->position[AXIS_Y];
-                g_SimulatedShot.minPositionStep[1] = step;
+            if (simulation->position[AXIS_Y] < g_SimulatedShot.positionMin[AXIS_Y]) {
+                g_SimulatedShot.positionMin[AXIS_Y] = simulation->position[AXIS_Y];
+                g_SimulatedShot.positionStepMin[1] = step;
             }
 
-            if (simulation->position[AXIS_Z] > g_SimulatedShot.maxPosition[AXIS_Z]) {
-                g_SimulatedShot.maxPosition[AXIS_Z] = simulation->position[AXIS_Z];
-                g_SimulatedShot.maxPositionStep[2] = step;
+            if (simulation->position[AXIS_Z] > g_SimulatedShot.positionMax[AXIS_Z]) {
+                g_SimulatedShot.positionMax[AXIS_Z] = simulation->position[AXIS_Z];
+                g_SimulatedShot.positionStepMax[2] = step;
             }
 
-            if (simulation->position[AXIS_Z] < g_SimulatedShot.minPosition[AXIS_Z]) {
-                g_SimulatedShot.minPosition[AXIS_Z] = simulation->position[AXIS_Z];
-                g_SimulatedShot.minPositionStep[2] = step;
+            if (simulation->position[AXIS_Z] < g_SimulatedShot.positionMin[AXIS_Z]) {
+                g_SimulatedShot.positionMin[AXIS_Z] = simulation->position[AXIS_Z];
+                g_SimulatedShot.positionStepMin[2] = step;
             }
         }
 
         step++;
-        if (step >= MAX_STEP_COUNT) {
+        if (step >= STEP_COUNT_MAX) {
             SetDebugTextHighlight(1);
             PrintDebugText("Sim Fault!", 10, 12);
             break;

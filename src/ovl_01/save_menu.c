@@ -157,10 +157,10 @@ static s16 f_RingShotIconPositions[RING_SHOT_COURSE_COUNT][RING_SHOT_ROW_COUNT] 
     {22, 60, 102, 144, 186, 228, 268},
 };
 static s32 f_UnusedWordsAfterIconPositions[2] UNUSED = {0, 0};
-static s16 f_SavedPlayerControllers[MAX_PLAYER_COUNT] =
+static s16 f_SavedPlayerControllers[PLAYER_COUNT_MAX] =
     {NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER};
 static s16 f_AssignedHumanCount = 0;
-static s16 f_HumanPlayerCount = MAX_PLAYER_COUNT;
+static s16 f_HumanPlayerCount = PLAYER_COUNT_MAX;
 static u8 f_IsGameChosen = 0;
 static u8 f_AreControllersAssigned = 0;
 static u8 f_ShownCourseBufferIndex = 0;
@@ -215,7 +215,7 @@ static s32 f_SavedGamesCharacterChoices[CHARACTER_COUNT] UNUSED = {
     CHARACTER_CHOICE_JOE,
 };
 static f32 f_BoardBobPhase = 0.0f;
-static s32 f_UnusedSaveMenuIconPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] UNUSED = {
+static s32 f_UnusedSaveMenuIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX][2] UNUSED = {
     {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
     {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
@@ -227,7 +227,7 @@ static char f_UnusedHoleLabel[] UNUSED = "Hole";
 static s32 f_GameModeLabelOffsets[MODE_ICON_COUNT] = {85, 85, 41, 60, 55, 60, 75, 66, 59, 0, 61};
 static f32 f_SavedGolferAngles[3] = {0.0f, 0.0f, 0.0f};
 static s32 f_UnusedWordAfterSavedGolferAngles UNUSED = 0;
-static Vec3 f_SavedGolferPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
+static Vec3 f_SavedGolferPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX] = {
     {
         {-84.0f, -43.0f, -1000.0f},
         {64.0f, 0.0f, -1000.0f},
@@ -253,7 +253,7 @@ static Vec3 f_SavedGolferPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
         {106.0f, -52.0f, -1000.0f},
     },
 };
-static s32 f_ControllerIconPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
+static s32 f_ControllerIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX][2] = {
     {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
     {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
@@ -272,9 +272,9 @@ static u8 f_UnusedBufferBeforeBoardCamera[0x3D0] UNUSED;
 
 static Mat4 f_BoardProjection;
 static Mat4 f_BoardViewing;
-static Mtx f_SavedGolferTransforms[MAX_PLAYER_COUNT][DRAW_BUFFER_COUNT];
+static Mtx f_SavedGolferTransforms[PLAYER_COUNT_MAX][DRAW_BUFFER_COUNT];
 static Mtx f_SavedGolfersProjection;
-static f32 f_SavedGolferScales[MAX_PLAYER_COUNT];
+static f32 f_SavedGolferScales[PLAYER_COUNT_MAX];
 static LookAt f_SavedGolfersLookAts[DRAW_BUFFER_COUNT];
 static void **f_SavedGameModeImages;
 static void **f_ChosenModeIconBuffers;
@@ -290,7 +290,7 @@ static void *f_CourseImageBuffers[COURSE_IMAGE_BUFFER_COUNT];
 static u8 f_UnusedBytesAfterCourseImages[0x4] UNUSED;
 
 static void *f_GameBoards[SAVED_GAME_COUNT];
-static s16 f_HumanPlayerIndices[MAX_PLAYER_COUNT];
+static s16 f_HumanPlayerIndices[PLAYER_COUNT_MAX];
 static s32 f_ChosenModeIconScale;
 static s32 f_ChosenModeIconHalfSize;
 
@@ -1374,7 +1374,7 @@ void ResetSavedGameControllers(void) {
     s8 gameIndex;
     Player *savedPlayers;
 
-    for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
+    for (playerIndex = 0; playerIndex != PLAYER_COUNT_MAX; playerIndex++) {
         f_SavedPlayerControllers[playerIndex] = NO_CONTROLLER;
         f_HumanPlayerIndices[playerIndex] = -1;
     }
@@ -1539,7 +1539,7 @@ void UpdateSavedGames(void) {
             }
 
             g_MenuScreen = MENU_SCREEN_EXIT;
-            for (i = 0; i != MAX_PLAYER_COUNT; i++) {
+            for (i = 0; i != PLAYER_COUNT_MAX; i++) {
                 g_PlayerControllerIndices[i] = f_SavedPlayerControllers[i];
             }
 
@@ -1944,7 +1944,7 @@ s32 ContinueSavedGame(void) {
     }
 
     savedPlayer = save->savedPlayers[memory->savedGameIndex];
-    for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
+    for (playerIndex = 0; playerIndex != PLAYER_COUNT_MAX; playerIndex++) {
         controller = f_SavedPlayerControllers[playerIndex];
         g_PlayerControllerIndices[playerIndex] = controller;
         g_Players[playerIndex].controllerIndex = controller;

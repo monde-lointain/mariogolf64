@@ -16,10 +16,10 @@ typedef struct SimulatedShot {
     s32 path[PATH_STEP_COUNT][3];
     s8 pathFlags[PATH_STEP_COUNT];
     s32 stepCount;
-    s32 maxPosition[3];
-    s32 maxPositionStep[3];
-    s32 minPosition[3];
-    s32 minPositionStep[3];
+    s32 positionMax[3];
+    s32 positionStepMax[3];
+    s32 positionMin[3];
+    s32 positionStepMin[3];
     Boolean isFirstBounceOut;
     s32 endsOnGreen;
     Boolean startsOnGreen;

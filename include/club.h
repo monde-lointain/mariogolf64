@@ -70,7 +70,7 @@ typedef s32 ClubKind;
 #define FAIRWAY_WOOD_SURFACES (~(CLUB_SURFACE_GREEN | CLUB_SURFACE_ROUGH | CLUB_SURFACE_BUNKER))
 #define IRON_SURFACES (~CLUB_SURFACE_GREEN)
 
-#define MAX_LIE_RATING 5
+#define LIE_RATING_MAX 5
 
 typedef struct ClubParameters {
     s32 power[SHOT_MODE_COUNT];

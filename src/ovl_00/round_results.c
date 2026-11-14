@@ -114,7 +114,7 @@ enum PortraitAnimation {
 #define PORTRAIT_SIZE 32
 #define PORTRAIT_SIZE_LOG2 5
 
-#define MAX_COURSE_POINTS S32_MAX
+#define COURSE_POINTS_MAX S32_MAX
 
 #define TROPHY_PLACE_COUNT 3
 #define PRIZE_TOP_TEN 10
@@ -283,8 +283,8 @@ static u8 *f_FinalResultsTitleImage;
 static u8 *f_ResultsCourseImage;
 static u8 *f_PortraitImage;
 static u8 *f_PortraitPalette;
-static u8 *f_PlayerPortraitImages[MAX_PLAYER_COUNT];
-static u8 *f_PlayerPortraitPalettes[MAX_PLAYER_COUNT];
+static u8 *f_PlayerPortraitImages[PLAYER_COUNT_MAX];
+static u8 *f_PlayerPortraitPalettes[PLAYER_COUNT_MAX];
 static u8 *f_ResultsCloudImage;
 static u8 *f_ResultsLabelsImage;
 static u8 *f_ResultsLargeDigitsImage;
@@ -316,16 +316,16 @@ static s32 f_NoticeFaceIndex;
 static s32 f_NoticeLift;
 static s32 f_CharacterNoticeShift;
 static char f_ScorePassword[SCORE_PASSWORD_LENGTH];
-static s32 f_PlayerResults[MAX_PLAYER_COUNT];
-static s32 f_PlayerPoints[MAX_PLAYER_COUNT];
-static s32 f_PlayerBetTotals[MAX_PLAYER_COUNT];
-static s32 f_PlayerRanks[MAX_PLAYER_COUNT];
+static s32 f_PlayerResults[PLAYER_COUNT_MAX];
+static s32 f_PlayerPoints[PLAYER_COUNT_MAX];
+static s32 f_PlayerBetTotals[PLAYER_COUNT_MAX];
+static s32 f_PlayerRanks[PLAYER_COUNT_MAX];
 static s32 f_PrizePoints;
 static s32 f_PrizeShown;
 static CoursePointsTally f_CoursePointsTally;
-static s32 f_PortraitAnimations[MAX_PLAYER_COUNT];
-static s32 f_PortraitFrames[MAX_PLAYER_COUNT];
-static s32 f_PortraitTimers[MAX_PLAYER_COUNT];
+static s32 f_PortraitAnimations[PLAYER_COUNT_MAX];
+static s32 f_PortraitFrames[PLAYER_COUNT_MAX];
+static s32 f_PortraitTimers[PLAYER_COUNT_MAX];
 
 s32 SumCoursePointsNeeded(CourseIndex courseIndex) {
     s32 total = 0;
@@ -375,8 +375,8 @@ void OpenRoundResults(s32 request) {
             f_PointsToNextCourse -= f_CoursePointsTally.earned; \
         } \
         total_ = (save)->coursePoints + f_CoursePointsTally.earned; \
-        if (total_ > MAX_COURSE_POINTS) { \
-            (save)->coursePoints = MAX_COURSE_POINTS; \
+        if (total_ > COURSE_POINTS_MAX) { \
+            (save)->coursePoints = COURSE_POINTS_MAX; \
         } \
         else { \
             (save)->coursePoints = total_; \
@@ -660,8 +660,8 @@ void LoadRoundResults(void) {
                 }
 
                 if (save->coursePoints + f_PrizePoints + f_CoursePointsTally.earned >
-                    MAX_COURSE_POINTS) {
-                    save->coursePoints = MAX_COURSE_POINTS;
+                    COURSE_POINTS_MAX) {
+                    save->coursePoints = COURSE_POINTS_MAX;
                 }
                 else {
                     save->coursePoints += f_PrizePoints + f_CoursePointsTally.earned;
@@ -3864,7 +3864,7 @@ const char f_NoPointsText[] = "  -";
 #define PLAIN_MATCH_STANDING_X 96
 #define PLAIN_MATCH_POINTS_X 218
 #define PLAIN_MATCH_POINTS_ROW_HEIGHT 64
-#define MIN_TWO_DIGIT_HOLE_COUNT 10
+#define TWO_DIGIT_HOLE_COUNT_MIN 10
 #define STANDING_WORDS_SIZE 48
 #define STANDING_WORD_WIDTH 48
 #define STANDING_WORD_HEIGHT 16
@@ -3990,7 +3990,7 @@ void DrawMatchResults(Gfx **displayListHead) {
     );
     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
         if (f_PlayerResults[playerIndex] > 0) {
-            if (f_PlayerResults[playerIndex] >= MIN_TWO_DIGIT_HOLE_COUNT) {
+            if (f_PlayerResults[playerIndex] >= TWO_DIGIT_HOLE_COUNT_MIN) {
                 standingShift[playerIndex] = 0;
             }
             else {
@@ -3998,7 +3998,7 @@ void DrawMatchResults(Gfx **displayListHead) {
             }
         }
         else if (f_PlayerResults[playerIndex] < 0) {
-            if (f_PlayerResults[playerIndex] <= -MIN_TWO_DIGIT_HOLE_COUNT) {
+            if (f_PlayerResults[playerIndex] <= -TWO_DIGIT_HOLE_COUNT_MIN) {
                 standingShift[playerIndex] = STANDING_TWO_DIGIT_DOWN_SHIFT;
             }
             else {

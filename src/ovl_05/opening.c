@@ -341,7 +341,7 @@ static s32 f_UnusedWordAfterTrailIndex UNUSED = 0;
 static u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT] = {FALSE, FALSE};
 static ShotLaunch f_OpeningFirstShot = {-0x3400, 0, 280, 0, 40, -15, 0, SHOT_MODE_NORMAL};
 static ShotLaunch f_OpeningSecondShot =
-    {-0x2000, 0, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
+    {-0x2000, 0, LAUNCH_POWER_MAX, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 static ShotLaunch f_OpeningThirdShot = {-0x2300, 0, 240, 0, 0, 20, 0, SHOT_MODE_NORMAL};
 static ShotLaunch f_OpeningFourthShot = {-0x2B00, 1, 400, 0, -180, -720, 0, SHOT_MODE_NORMAL};
 static s32 f_OpeningSparksState = SPARKS_HIDDEN;
@@ -349,7 +349,7 @@ f32 g_LookAtMarkerScale = 1.0f;
 static Boolean f_IsLookAtMarkerShown = FALSE;
 static s32 f_OpeningShotState = 0;
 static ShotLaunch f_UnusedSecondShotCopy
-    UNUSED = {-0x2000, 0, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
+    UNUSED = {-0x2000, 0, LAUNCH_POWER_MAX, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 static Vtx f_OpeningShotDashVertices[QUAD_VERTEX_COUNT] = {
     {{{-15, 0, 0}, 0, {0, 0}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{15, 0, 0}, 0, {0, 2048}, {0x00, 0x00, 0x00, 0xFF}}},

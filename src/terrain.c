@@ -380,22 +380,22 @@ s32 GetColorTerrainCode(s32 color) {
     return TERRAIN_CODE_OUT_OF_BOUNDS;
 }
 
-#define MIN_SURFACE_PERCENT 5
+#define SURFACE_PERCENT_MIN 5
 
 void GetSurfacePercentRange(SurfaceInfo *info, Club *club, s32 *range) {
     if (club->surfaceMask & GetSurfaceClubMask(TRUE, info)) {
-        range[0] = info->minPercent;
-        range[1] = info->maxPercent;
+        range[0] = info->percentMin;
+        range[1] = info->percentMax;
     }
     else {
-        range[0] = info->minPercent - info->wrongClubPenalty;
-        if (range[0] < MIN_SURFACE_PERCENT) {
-            range[0] = MIN_SURFACE_PERCENT;
+        range[0] = info->percentMin - info->wrongClubPenalty;
+        if (range[0] < SURFACE_PERCENT_MIN) {
+            range[0] = SURFACE_PERCENT_MIN;
         }
 
-        range[1] = info->maxPercent - info->wrongClubPenalty;
-        if (range[1] < MIN_SURFACE_PERCENT) {
-            range[1] = MIN_SURFACE_PERCENT;
+        range[1] = info->percentMax - info->wrongClubPenalty;
+        if (range[1] < SURFACE_PERCENT_MIN) {
+            range[1] = SURFACE_PERCENT_MIN;
         }
     }
 }
@@ -915,7 +915,7 @@ s16 GetGridVertexHeight(s32 column, s32 row) {
 
 #define GRID_VERTEX_WORLD_SHIFT ((GROUND_TILE_SHIFT - WORLD_TO_COURSE_SHIFT) - 1)
 #define GRID_VERTEX_TEXEL_SPAN 32
-#define MAX_TEXTURE_COORDINATE 0x7FFF
+#define TEXTURE_COORDINATE_MAX 0x7FFF
 
 void InitGridVertex(s32 column, s32 row, s32 height, u8 shade) {
     Vtx *vertex = GetGridVertex(column, row);
@@ -929,7 +929,7 @@ void InitGridVertex(s32 column, s32 row, s32 height, u8 shade) {
     vertex->v.tc[TEXTURE_AXIS_T] =
         TexelCoordinate(row * GRID_VERTEX_TEXEL_SPAN) + TexelCoordinate(1);
     if (row == GROUND_GRID_ROW_COUNT - 1) {
-        vertex->v.tc[TEXTURE_AXIS_T] = MAX_TEXTURE_COORDINATE;
+        vertex->v.tc[TEXTURE_AXIS_T] = TEXTURE_COORDINATE_MAX;
     }
 
     vertex->v.cn[0] = shade;
@@ -1802,15 +1802,15 @@ Boolean AreTrianglesDifferent(PlaneTriangle *first, PlaneTriangle *second) {
     return FALSE;
 }
 
-#define MAX_NORMAL_PART 0x4000
+#define NORMAL_PART_MAX 0x4000
 #define NORMAL_REDUCTION 256
 #define NORMAL_ERROR_COLUMN 3
 #define NORMAL_ERROR_ROW 15
 
 #define IsNormalTooLong(normalX, normalY, normalZ) \
-    ((Abs(normalX) > MAX_NORMAL_PART) || \
-        (Abs(normalY) > MAX_NORMAL_PART) || \
-        (Abs(normalZ) > MAX_NORMAL_PART))
+    ((Abs(normalX) > NORMAL_PART_MAX) || \
+        (Abs(normalY) > NORMAL_PART_MAX) || \
+        (Abs(normalZ) > NORMAL_PART_MAX))
 
 s32 GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane) {
     s32 firstX;

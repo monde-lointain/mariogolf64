@@ -74,7 +74,7 @@ typedef struct Sun {
     s32 radius;
     s16 unusedBeforeTexelStep;
     s16 texelStep;
-    f32 maxGlare;
+    f32 glareMax;
     u8 imageKind;
 } Sun;
 

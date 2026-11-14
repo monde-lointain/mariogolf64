@@ -111,8 +111,8 @@ CurrentShot g_ScriptedShot;
 s8 g_ReplayStrokeCount;
 ContestMovieState g_ContestMovieState;
 u32 g_GroundDrawFrame;
-CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
-Player g_SavedPlayers[MAX_PLAYER_COUNT];
+CurrentShot g_SavedShots[PLAYER_COUNT_MAX];
+Player g_SavedPlayers[PLAYER_COUNT_MAX];
 ShotLaunch g_LastShotLaunch;
 u8 g_UnreadPlayBuffer[0xDEC];
 
@@ -197,7 +197,7 @@ s32 GetGaugeFramePower(s32 value) {
         value = 0;
     }
 
-    return (value * MAX_LAUNCH_POWER) / GAUGE_FULL_FRAME;
+    return (value * LAUNCH_POWER_MAX) / GAUGE_FULL_FRAME;
 }
 
 s32 MarkUsableClubs(s32 unused UNUSED, s16 *clubs, s8 *isUsable) {
@@ -331,7 +331,7 @@ void SetUpPlayers(void) {
         }
     }
     else {
-        for (playerIndex = 0; playerIndex < MAX_PLAYER_COUNT; playerIndex++) {
+        for (playerIndex = 0; playerIndex < PLAYER_COUNT_MAX; playerIndex++) {
             FormatDefaultPlayerName(playerIndex, g_Players[playerIndex].name);
             g_Players[playerIndex].characterIndex = playerIndex;
             g_Players[playerIndex].isLefty = 0;
@@ -408,7 +408,7 @@ void PlacePlayersOnTee(void) {
     g_HasShotComeToRest = 0;
     g_IsHudTurnAwayRequested = FALSE;
     if (g_GameState.isRoundContinued != ROUND_CONTINUED) {
-        for (playerIndex = 0; playerIndex < MAX_PLAYER_COUNT; playerIndex++) {
+        for (playerIndex = 0; playerIndex < PLAYER_COUNT_MAX; playerIndex++) {
             g_Players[playerIndex].state = PLAYER_STATE_WAITING;
             g_Players[playerIndex].ballPosition[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
             teeHeight = g_HoleSetup.teePosition[AXIS_Y];
@@ -555,8 +555,8 @@ s32 IsHoleOver(void) {
             g_Players[player].teeOrder > g_Players[other].teeOrder))
 
 void SetNextTeeOrder(void) {
-    s32 orders[MAX_PLAYER_COUNT];
-    s8 results[MAX_PLAYER_COUNT];
+    s32 orders[PLAYER_COUNT_MAX];
+    s8 results[PLAYER_COUNT_MAX];
     s32 playerIndex;
     s32 otherIndex;
 
@@ -684,7 +684,7 @@ void BackUpPlayState(void) {
     s32 playerIndex;
 
     g_BackedUpGameState = g_GameState;
-    for (playerIndex = 0; playerIndex < MAX_PLAYER_COUNT; playerIndex++) {
+    for (playerIndex = 0; playerIndex < PLAYER_COUNT_MAX; playerIndex++) {
         g_BackedUpPlayers[playerIndex] = g_Players[playerIndex];
     }
 }
@@ -1172,7 +1172,7 @@ void UpdatePlay(void) {
                     if (g_GameState.replayKind == REPLAY_KIND_NONE &&
                         (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                             g_GameState.gameMode == GAME_MODE_CLUB_SLOTS)) {
-                        s8 results[MAX_PLAYER_COUNT];
+                        s8 results[PLAYER_COUNT_MAX];
 
                         if (GetGroupHoleResult(results) != TRUE) {
                             for (playerSlot = 0; playerSlot < g_GameState.playerCount;
@@ -1731,8 +1731,8 @@ void FillGroundNoise(s32 range, s32 base) {
     for (row = 0; row < GROUND_NOISE_SIZE; row++) {
         for (column = 0; column < GROUND_NOISE_SIZE; column++) {
             value = (rand() % range) + base;
-            if (value > MAX_GROUND_NOISE_INTENSITY) {
-                value = MAX_GROUND_NOISE_INTENSITY;
+            if (value > GROUND_NOISE_INTENSITY_MAX) {
+                value = GROUND_NOISE_INTENSITY_MAX;
             }
 
             f_GroundNoiseTexels[cell++] = value;
@@ -1934,7 +1934,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     f32 radius;
     s32 visibility;
     s32 detail;
-    s32 maxDetail;
+    s32 detailMax;
     s32 previousDetail;
     s32 edgeIndex;
     s32 culledTileIndex;
@@ -2095,13 +2095,13 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
         fineScale = ZOOMED_FINE_DEPTH_SCALE;
     }
 
-    maxDetail = GROUND_DETAIL_COARSE;
+    detailMax = GROUND_DETAIL_COARSE;
     tiles = g_WorkArea.hole.tiles;
     for (culledTileIndex = 0; culledTileIndex < GROUND_TILE_COUNT; culledTileIndex++) {
         tile = &tiles[culledTileIndex];
-        radius = (g_GroundTileHeightRanges[culledTileIndex] >= MIN_GROUND_TILE_RADIUS) ?
+        radius = (g_GroundTileHeightRanges[culledTileIndex] >= GROUND_TILE_RADIUS_MIN) ?
             g_GroundTileHeightRanges[culledTileIndex] :
-            MIN_GROUND_TILE_RADIUS;
+            GROUND_TILE_RADIUS_MIN;
         visibility = GetSphereVisibility(tile->center[0], tile->center[1], tile->center[2], radius);
         if (visibility < 0) {
             if (tile->midpointBlockIndex >= 0 &&
@@ -2126,13 +2126,13 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
             detail = GROUND_DETAIL_FINE;
         }
 
-        if (maxDetail < detail) {
-            maxDetail = detail;
+        if (detailMax < detail) {
+            detailMax = detail;
         }
 
         tile->detail = detail;
         if ((culledTileIndex & (GROUND_TILE_GROUP_SIZE - 1)) == GROUND_TILE_GROUP_SIZE - 1) {
-            if (maxDetail > GROUND_DETAIL_COARSE) {
+            if (detailMax > GROUND_DETAIL_COARSE) {
                 for (culledOffset = 0; culledOffset < GROUND_TILE_GROUP_SIZE; culledOffset++) {
                     if (tiles[culledTileIndex - culledOffset].detail == GROUND_DETAIL_COARSE) {
                         tiles[culledTileIndex - culledOffset].detail = GROUND_DETAIL_MEDIUM;
@@ -2140,7 +2140,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                 }
             }
 
-            maxDetail = GROUND_DETAIL_COARSE;
+            detailMax = GROUND_DETAIL_COARSE;
         }
 
         if (detail >= 0) {

@@ -218,8 +218,8 @@ static char f_UnusedGameNames[8][10] UNUSED =
     {"ﾄﾞﾗｺﾝ", "ﾆｱﾋﾟﾝ", "ｽｺｱ", "ﾀﾃ", "ﾖｺ", "ｽｷﾝｽﾞ", "ﾏｯﾁ", "ﾀﾞﾌﾞﾙｽ"};
 static f32 f_HandicapGolferAngles[2] = {0.0f, 0.0f};
 static s32 f_UnusedWordsAfterGolferAngles[3] UNUSED = {0, 0, 0};
-static f32 f_HandicapGolferScales[MAX_PLAYER_COUNT] = {4.2f, 4.0f, 4.2f, 4.0f};
-static Vec3 f_HandicapGolferPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
+static f32 f_HandicapGolferScales[PLAYER_COUNT_MAX] = {4.2f, 4.0f, 4.2f, 4.0f};
+static Vec3 f_HandicapGolferPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX] = {
     {
         {0.0f, -44.0f, -1000.0f},
         {64.0f, -44.0f, -1500.0f},
@@ -245,7 +245,7 @@ static Vec3 f_HandicapGolferPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
         {96.0f, -54.0f, -1000.0f},
     },
 };
-static s32 f_HandicapColumnLefts[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] =
+static s32 f_HandicapColumnLefts[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX] =
     {{128, 0, 0, 0}, {96, 160, 0, 0}, {64, 128, 192, 0}, {32, 96, 160, 224}};
 static s32 f_BrickRowStartDelays[STATS_SLIDE_ROW_COUNT] = {0, 2, 4, 6, 8, 10, 12, 14, 16};
 static s32 f_BrickRowDelays[STATS_SLIDE_ROW_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -345,7 +345,7 @@ static s32 f_StatsCharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_JOE,
 };
 
-static Mtx f_HandicapGolferTransforms[MAX_PLAYER_COUNT][DRAW_BUFFER_COUNT];
+static Mtx f_HandicapGolferTransforms[PLAYER_COUNT_MAX][DRAW_BUFFER_COUNT];
 static Mtx f_HandicapGolfersProjection;
 static LookAt f_HandicapGolfersLookAts[DRAW_BUFFER_COUNT];
 
@@ -389,7 +389,7 @@ static void *f_BestShotsCursorBox;
 static u8 *f_ScoreLabels;
 static s16 f_BestShotRecords[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 
-s16 g_ChosenHandicaps[MAX_PLAYER_COUNT];
+s16 g_ChosenHandicaps[PLAYER_COUNT_MAX];
 
 void LoadPlayerStatsBuffer(void *buffer, s16 bufferKind) {
     EncodedAsset asset;
@@ -491,11 +491,11 @@ void ApplyBetPreset(s32 requestedPreset) {
     s16 index;
 
     if ((u8)requestedPreset < BET_PRESET_COUNT) {
-        if ((s8)requestedPreset == BET_PRESET_STROKE && g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
+        if ((s8)requestedPreset == BET_PRESET_STROKE && g_ChosenPlayerCount == PLAYER_COUNT_MAX) {
             presetIndex = BET_PRESET_STROKE_FOUR_PLAYER;
         }
 
-        if (presetIndex == BET_PRESET_MINI_GOLF && g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
+        if (presetIndex == BET_PRESET_MINI_GOLF && g_ChosenPlayerCount == PLAYER_COUNT_MAX) {
             presetIndex = BET_PRESET_MINI_GOLF_FOUR_PLAYER;
         }
 
@@ -512,7 +512,7 @@ void ApplyBetPreset(s32 requestedPreset) {
     }
 
     memory->betColumn = 0;
-    for (index = 0; index != MAX_PLAYER_COUNT; index++) {
+    for (index = 0; index != PLAYER_COUNT_MAX; index++) {
         g_ChosenHandicaps[index] = index < g_ChosenPlayerCount ? 0 : ABSENT_PLAYER_HANDICAP;
     }
 

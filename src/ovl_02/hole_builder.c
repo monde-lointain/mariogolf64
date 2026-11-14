@@ -130,7 +130,7 @@ typedef struct PaintLogic {
 #define PAINT_OFFSET_COUNT 100
 #define PAINT_OFFSET_SPAN 5
 
-#define MAX_OFFSET_SPAN GROUND_POINT_ROW_COUNT
+#define OFFSET_SPAN_MAX GROUND_POINT_ROW_COUNT
 #define LISTED_DISTANCE 0xFFFF
 #define BEYOND_ALL_DISTANCES 0x10000
 
@@ -159,7 +159,7 @@ typedef struct GroundLightColor {
     ((GROUND_TILE_POINT_SPAN + 1) * (GROUND_TILE_POINT_SPAN + 1))
 #define UNMEASURED_LOWEST_HEIGHT 0x40000000
 #define UNMEASURED_HIGHEST_HEIGHT (-0x40000000)
-#define MIN_GROUND_TILE_HEIGHT_RANGE 32
+#define GROUND_TILE_HEIGHT_RANGE_MIN 32
 #define FLAT_GROUND_TILE_HEIGHT_RANGE 30
 #define MAP_TILE_SHIFT 5
 #define MAP_TILE_MASK (GROUND_TILE_TEXEL_SPAN - 1)
@@ -550,8 +550,8 @@ void SetPaintSeed(u32 seed) {
     f_PaintSeed = seed;
 }
 
-s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
-    f32 squares[MAX_OFFSET_SPAN + 1];
+s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 countMax) {
+    f32 squares[OFFSET_SPAN_MAX + 1];
     u16 distances[span * span * 2];
     s32 row;
     s32 column;
@@ -576,7 +576,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
         }
     }
 
-    for (count = 0; count < maxCount;) {
+    for (count = 0; count < countMax;) {
         nearestDistance = BEYOND_ALL_DISTANCES;
         nearestIndex = 0;
         for (column = 0; column < span * span; column++) {
@@ -597,7 +597,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
         offsets[count].column = nearestColumn;
         offsets[count].row = nearestRow;
         count++;
-        if (count >= maxCount) {
+        if (count >= countMax) {
             break;
         }
 
@@ -606,7 +606,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
             offsets[count].row = nearestRow;
             offsets[count].distance = nearestDistance;
             count++;
-            if (count >= maxCount) {
+            if (count >= countMax) {
                 break;
             }
         }
@@ -617,7 +617,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
             offsets[count].row = mirroredRow;
             offsets[count].distance = nearestDistance;
             count++;
-            if (count >= maxCount) {
+            if (count >= countMax) {
                 break;
             }
 
@@ -626,7 +626,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
                 offsets[count].row = mirroredRow;
                 offsets[count].distance = nearestDistance;
                 count++;
-                if (count >= maxCount) {
+                if (count >= countMax) {
                     break;
                 }
             }
@@ -647,7 +647,7 @@ void DrawBandHeights(s16 *heights, s32 band) {
     void DrawTriangleHeights(void) {
         f32 longSlopeX;
         f32 longSlopeHeight;
-        s32 totalSpan;
+        s32 spanTotal;
         s32 span;
         s32 lowerSpan;
 
@@ -696,10 +696,10 @@ void DrawBandHeights(s16 *heights, s32 band) {
             }
         }
 
-        totalSpan = corners[2]->v.ob[AXIS_Z] - corners[0]->v.ob[AXIS_Z];
-        if (cachedSpan != totalSpan) {
-            cachedSpan = totalSpan;
-            cachedReciprocal = 1.0f / totalSpan;
+        spanTotal = corners[2]->v.ob[AXIS_Z] - corners[0]->v.ob[AXIS_Z];
+        if (cachedSpan != spanTotal) {
+            cachedSpan = spanTotal;
+            cachedReciprocal = 1.0f / spanTotal;
         }
 
         longSlopeX = (corners[2]->v.ob[AXIS_X] - corners[0]->v.ob[AXIS_X]) * cachedReciprocal;
@@ -2128,9 +2128,9 @@ f32 MeasureGroundTiles(void) {
     s32 tileIndex;
     s32 pointRow;
     s32 pointColumn;
-    s32 sumX;
-    s32 sumY;
-    s32 sumZ;
+    s32 xSum;
+    s32 ySum;
+    s32 zSum;
     s32 lowest;
     s32 highest;
     s32 heightRange;
@@ -2139,9 +2139,9 @@ f32 MeasureGroundTiles(void) {
     tileIndex = 0;
     for (tileRow = 0; tileRow < GROUND_TILE_ROW_COUNT; tileRow++) {
         for (tileColumn = 0; tileColumn < GROUND_TILE_COLUMN_COUNT; tileColumn++) {
-            sumX = 0;
-            sumY = 0;
-            sumZ = 0;
+            xSum = 0;
+            ySum = 0;
+            zSum = 0;
             lowest = UNMEASURED_LOWEST_HEIGHT;
             highest = UNMEASURED_HIGHEST_HEIGHT;
             for (pointRow = 0; pointRow <= GROUND_TILE_POINT_SPAN; pointRow++) {
@@ -2150,9 +2150,9 @@ f32 MeasureGroundTiles(void) {
                         (tileColumn * GROUND_TILE_POINT_SPAN) + pointColumn,
                         (tileRow * GROUND_TILE_POINT_SPAN) + pointRow
                     );
-                    sumX += point->v.ob[AXIS_X];
-                    sumY += point->v.ob[AXIS_Y];
-                    sumZ += point->v.ob[AXIS_Z];
+                    xSum += point->v.ob[AXIS_X];
+                    ySum += point->v.ob[AXIS_Y];
+                    zSum += point->v.ob[AXIS_Z];
                     if (point->v.ob[AXIS_Y] < lowest) {
                         lowest = point->v.ob[AXIS_Y];
                     }
@@ -2164,8 +2164,8 @@ f32 MeasureGroundTiles(void) {
             }
 
             heightRange = highest - lowest;
-            if (heightRange != 0 && heightRange < MIN_GROUND_TILE_HEIGHT_RANGE) {
-                heightRange = MIN_GROUND_TILE_HEIGHT_RANGE;
+            if (heightRange != 0 && heightRange < GROUND_TILE_HEIGHT_RANGE_MIN) {
+                heightRange = GROUND_TILE_HEIGHT_RANGE_MIN;
             }
 
             if (heightRange == 0) {
@@ -2173,9 +2173,9 @@ f32 MeasureGroundTiles(void) {
             }
 
             g_GroundTileHeightRanges[tileIndex] = heightRange;
-            g_WorkArea.hole.tiles[tileIndex].center[0] = sumX / GROUND_TILE_AVERAGED_POINT_COUNT;
-            g_WorkArea.hole.tiles[tileIndex].center[1] = sumY / GROUND_TILE_AVERAGED_POINT_COUNT;
-            g_WorkArea.hole.tiles[tileIndex].center[2] = sumZ / GROUND_TILE_AVERAGED_POINT_COUNT;
+            g_WorkArea.hole.tiles[tileIndex].center[0] = xSum / GROUND_TILE_AVERAGED_POINT_COUNT;
+            g_WorkArea.hole.tiles[tileIndex].center[1] = ySum / GROUND_TILE_AVERAGED_POINT_COUNT;
+            g_WorkArea.hole.tiles[tileIndex].center[2] = zSum / GROUND_TILE_AVERAGED_POINT_COUNT;
             tileIndex++;
         }
     }

@@ -71,7 +71,7 @@
 #define BLEND_DISTANCE_SCALE 512.0f
 #define BLENDED_POINT_SHADE 0xFF
 
-#define MIN_CELL_CROSS_PRODUCT 16
+#define CELL_CROSS_PRODUCT_MIN 16
 
 #define SLOPE_OFFSET_COUNT 400
 #define SLOPE_OFFSET_SPAN 10
@@ -2978,7 +2978,7 @@ s32 HasDeadTriangleNearPoint(s32 column, s32 row) {
                     corners[1]->v.ob[AXIS_Z],
                     corners[2]->v.ob[AXIS_X],
                     corners[2]->v.ob[AXIS_Z]
-                ) < MIN_CELL_CROSS_PRODUCT ||
+                ) < CELL_CROSS_PRODUCT_MIN ||
                 CrossProductXZ(
                     corners[1]->v.ob[AXIS_X],
                     corners[1]->v.ob[AXIS_Z],
@@ -2986,7 +2986,7 @@ s32 HasDeadTriangleNearPoint(s32 column, s32 row) {
                     corners[3]->v.ob[AXIS_Z],
                     corners[2]->v.ob[AXIS_X],
                     corners[2]->v.ob[AXIS_Z]
-                ) < MIN_CELL_CROSS_PRODUCT) {
+                ) < CELL_CROSS_PRODUCT_MIN) {
                 return -1;
             }
 
@@ -4065,7 +4065,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
             tile->center[0],
             tile->center[1],
             tile->center[2],
-            MIN_GROUND_TILE_RADIUS
+            GROUND_TILE_RADIUS_MIN
         );
         detail = GROUND_DETAIL_HIDDEN;
         if (visibility < 0) {

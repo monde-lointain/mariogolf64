@@ -74,8 +74,8 @@ typedef struct ShotLabel {
 #define SIGN_MIN_ALPHA 64
 #define SIGN_FADE_ALPHA_RANGE (255 - SIGN_MIN_ALPHA)
 #define SIGN_FADE_DEPTH_RANGE 1850
-#define MAX_HEIGHT_YARDS 99
-#define MAX_TINT_YARDS 25
+#define HEIGHT_YARDS_MAX 99
+#define TINT_YARDS_MAX 25
 #define TINT_PER_YARD 10
 #define TEXT_SHADOW_ALPHA 127
 #define OUT_OF_BOUNDS_GREEN 95
@@ -111,9 +111,9 @@ typedef struct ScreenSpot {
     s32 state;
 } ScreenSpot;
 
-static u8 f_PlayerTagColors[MAX_PLAYER_COUNT][3] =
+static u8 f_PlayerTagColors[PLAYER_COUNT_MAX][3] =
     {{0xDC, 0x00, 0x00}, {0x00, 0x00, 0xDC}, {0xF0, 0x7F, 0x00}, {0x00, 0x7F, 0x00}};
-static ShotLabel f_ShotLabels[MAX_PLAYER_COUNT] =
+static ShotLabel f_ShotLabels[PLAYER_COUNT_MAX] =
     {{0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}};
 static s32 f_ShotLabelPlayers = SHOT_LABELS_NONE;
 static s8 f_TagOffsetsX[CORNER_COUNT] = {22, -22, -22, 22};
@@ -242,7 +242,7 @@ void DrawShotLabels(Gfx **displayListHead) {
     }
     else if (g_GameState.step == GAME_STATE_TAKING_TURNS &&
         g_CurrentShot.playerIndex >= 0 &&
-        g_CurrentShot.playerIndex < MAX_PLAYER_COUNT) {
+        g_CurrentShot.playerIndex < PLAYER_COUNT_MAX) {
         if (g_Players[g_CurrentShot.playerIndex].state == PLAYER_STATE_AIMING &&
             IsLetterboxState(g_LetterboxState)) {
             players = SHOT_LABELS_OTHER_BALLS;
@@ -250,7 +250,7 @@ void DrawShotLabels(Gfx **displayListHead) {
     }
 
     if (f_ShotLabelPlayers != players) {
-        for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
+        for (playerIndex = 0; playerIndex != PLAYER_COUNT_MAX; playerIndex++) {
             f_ShotLabels[playerIndex].corner = NO_CORNER;
         }
     }
@@ -607,21 +607,21 @@ void DrawAimGuides(CameraMatrices *matrices) {
         if (depth < 0) {
             heightYards = (g_CurrentShot.ballPosition[AXIS_Y] - g_CurrentShot.targetPoint[AXIS_Y]) *
                 YARDS_PER_UNIT;
-            if (heightYards > MAX_HEIGHT_YARDS) {
-                heightYards = MAX_HEIGHT_YARDS;
+            if (heightYards > HEIGHT_YARDS_MAX) {
+                heightYards = HEIGHT_YARDS_MAX;
             }
 
-            if (heightYards < -MAX_HEIGHT_YARDS) {
-                heightYards = -MAX_HEIGHT_YARDS;
+            if (heightYards < -HEIGHT_YARDS_MAX) {
+                heightYards = -HEIGHT_YARDS_MAX;
             }
 
             tintYards = heightYards;
-            if (tintYards > MAX_TINT_YARDS) {
-                tintYards = MAX_TINT_YARDS;
+            if (tintYards > TINT_YARDS_MAX) {
+                tintYards = TINT_YARDS_MAX;
             }
 
-            if (tintYards < -MAX_TINT_YARDS) {
-                tintYards = -MAX_TINT_YARDS;
+            if (tintYards < -TINT_YARDS_MAX) {
+                tintYards = -TINT_YARDS_MAX;
             }
 
             if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {

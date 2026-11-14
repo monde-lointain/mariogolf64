@@ -1429,7 +1429,7 @@ void UpdateSunGlare(void) {
         (x) > SCREEN_WIDTH + SUN_GLARE_MARGIN)
 #define GLARE_BOTTOM_ROWS 96.0f
 #define GLARE_BASE 16.0f
-#define MIN_VISIBLE_GLARE 8.0f
+#define VISIBLE_GLARE_MIN 8.0f
 #define LENS_FLARE_AXIS_X (SCREEN_WIDTH / 2)
 #define LENS_FLARE_AXIS_Y 96.0f
 #define LENS_FLARE_SIZE_BIAS 16.0f
@@ -1472,12 +1472,12 @@ void DrawLensFlare(Gfx **displayListHead) {
     }
 
     glare = (edgeDistanceX + edgeDistanceY + GLARE_BASE) * f_SunGlareStrength;
-    if (glare < MIN_VISIBLE_GLARE) {
+    if (glare < VISIBLE_GLARE_MIN) {
         return;
     }
 
-    if (glare > colors->sun->maxGlare) {
-        glare = colors->sun->maxGlare;
+    if (glare > colors->sun->glareMax) {
+        glare = colors->sun->glareMax;
     }
 
     gDPPipeSync(gfx++);

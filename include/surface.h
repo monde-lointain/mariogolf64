@@ -87,8 +87,8 @@ typedef s32 SurfaceKind;
 typedef struct SurfaceInfo {
     SurfaceKind kind;
     char *name;
-    s8 minPercent;
-    s8 maxPercent;
+    s8 percentMin;
+    s8 percentMax;
     s8 wrongClubPenalty;
     s16 rollSpeedKept;
     s16 bounciness;

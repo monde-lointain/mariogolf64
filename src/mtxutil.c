@@ -3,8 +3,8 @@
 #define FloatToFixed(value) (s32)((value) * (f32)0x10000)
 #define FixedToFloat(value) ((f32)(value) / (f32)0x10000)
 
-#define MIN_FIXED_ELEMENT (-32768.0f)
-#define MAX_FIXED_ELEMENT 32766.0f
+#define FIXED_ELEMENT_MIN (-32768.0f)
+#define FIXED_ELEMENT_MAX 32766.0f
 
 void guMtxF2L(f32 mf[4][4], Mtx *m) {
     s32 row;
@@ -18,20 +18,20 @@ void guMtxF2L(f32 mf[4][4], Mtx *m) {
     fractionParts = (s32 *)&m->m[2][0];
     for (row = 0; row < 4; row++) {
         for (pair = 0; pair < 2; pair++) {
-            if (mf[row][pair * 2] < MIN_FIXED_ELEMENT) {
-                mf[row][pair * 2] = MIN_FIXED_ELEMENT;
+            if (mf[row][pair * 2] < FIXED_ELEMENT_MIN) {
+                mf[row][pair * 2] = FIXED_ELEMENT_MIN;
             }
 
-            if (mf[row][pair * 2] > MAX_FIXED_ELEMENT) {
-                mf[row][pair * 2] = MAX_FIXED_ELEMENT;
+            if (mf[row][pair * 2] > FIXED_ELEMENT_MAX) {
+                mf[row][pair * 2] = FIXED_ELEMENT_MAX;
             }
 
-            if (mf[row][(pair * 2) + 1] < MIN_FIXED_ELEMENT) {
-                mf[row][(pair * 2) + 1] = MIN_FIXED_ELEMENT;
+            if (mf[row][(pair * 2) + 1] < FIXED_ELEMENT_MIN) {
+                mf[row][(pair * 2) + 1] = FIXED_ELEMENT_MIN;
             }
 
-            if (mf[row][(pair * 2) + 1] > MAX_FIXED_ELEMENT) {
-                mf[row][(pair * 2) + 1] = MAX_FIXED_ELEMENT;
+            if (mf[row][(pair * 2) + 1] > FIXED_ELEMENT_MAX) {
+                mf[row][(pair * 2) + 1] = FIXED_ELEMENT_MAX;
             }
 
             first = FloatToFixed(mf[row][pair * 2]);

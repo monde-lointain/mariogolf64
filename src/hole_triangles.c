@@ -26,10 +26,10 @@
 #define BLENDED_TEXTURE_SIZE 32
 #define TEXTURE_COORDINATE_SCALE 4
 
-#define MIN_SHADED_EDGE_LENGTH 0.01f
+#define SHADED_EDGE_LENGTH_MIN 0.01f
 #define SHADED_ALPHA_SCALE 128.0f
 #define SHADED_ALPHA_BASE 128.0f
-#define MAX_SHADED_ALPHA 0xFF
+#define SHADED_ALPHA_MAX 0xFF
 #define DEFAULT_SHADED_ALPHA 0x80
 #define SHADED_FOG_MIN 700
 #define SHADED_FOG_MAX 1000
@@ -237,7 +237,7 @@ void DrawHoleTriangles(
                     f_HoleTriangles[index].vertices[2].v.ob[AXIS_X];
                 edgeZ = f_HoleTriangles[index].vertices[1].v.ob[AXIS_Z] -
                     f_HoleTriangles[index].vertices[2].v.ob[AXIS_Z];
-                if (fabsf(edgeX) + fabsf(edgeZ) < MIN_SHADED_EDGE_LENGTH) {
+                if (fabsf(edgeX) + fabsf(edgeZ) < SHADED_EDGE_LENGTH_MIN) {
                     break;
                 }
 
@@ -248,8 +248,8 @@ void DrawHoleTriangles(
                 }
 
                 alpha = (along * SHADED_ALPHA_SCALE) + SHADED_ALPHA_BASE;
-                if (alpha > MAX_SHADED_ALPHA) {
-                    alpha = MAX_SHADED_ALPHA;
+                if (alpha > SHADED_ALPHA_MAX) {
+                    alpha = SHADED_ALPHA_MAX;
                 }
 
                 if (alpha < 0) {
@@ -658,7 +658,7 @@ void InitRings(void) {
     }
 
     if (g_GameState.isRoundContinued != ROUND_CONTINUED) {
-        for (playerIndex = 0; playerIndex < MAX_PLAYER_COUNT; playerIndex++) {
+        for (playerIndex = 0; playerIndex < PLAYER_COUNT_MAX; playerIndex++) {
             for (ringIndex = 0; ringIndex < RING_COUNT; ringIndex++) {
                 g_Players[playerIndex].ringStates[ringIndex] = ringIndex < ringCount;
             }

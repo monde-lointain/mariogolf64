@@ -1143,7 +1143,7 @@ void LoadRoundHud(void) {
     g_BlendedTextureStillLayer =
         AllocMemory(OpenEncodedAsset(ASSET_BLENDED_TEXTURE_STILL_LAYER, &asset));
     ReadEncodedAsset(g_BlendedTextureStillLayer, &asset);
-    for (i = 0; i != MAX_PLAYER_COUNT; i++) {
+    for (i = 0; i != PLAYER_COUNT_MAX; i++) {
         g_PlayerFaceImages[i] = AllocMemory(
             OpenEncodedAsset(g_CharacterImageAssets[i] + CHARACTER_FACE_IMAGE_OFFSET, &asset)
         );
@@ -1632,7 +1632,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     s32 worldDistance;
     s32 rowCount;
     s32 columnCount;
-    s32 maxPuttDistance;
+    s32 puttDistanceMax;
     s32 row;
     s32 column;
     s32 drawnRow;
@@ -1680,8 +1680,8 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     distance = GetSelectedShotDistance();
     worldDistance = GetSelectedShotWorldDistance();
     if (club->surfaceMask & CLUB_SURFACE_GREEN) {
-        maxPuttDistance = GREEN_GRID_MAX_PUTT_DISTANCE;
-        if (distance == maxPuttDistance) {
+        puttDistanceMax = GREEN_GRID_MAX_PUTT_DISTANCE;
+        if (distance == puttDistanceMax) {
             rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
             columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
             rowSpacing = GREEN_GRID_SHORT_ROW_SPACING;
@@ -1697,7 +1697,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
             center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
             center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
             center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
-            rowSpacing = distance * GREEN_GRID_PUTT_ROW_SPACING / maxPuttDistance;
+            rowSpacing = distance * GREEN_GRID_PUTT_ROW_SPACING / puttDistanceMax;
         }
     }
     else if (distance < GREEN_GRID_LANDING_DISTANCE) {
@@ -1707,8 +1707,8 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
         center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
         center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
         center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
-        maxPuttDistance = GREEN_GRID_MAX_PUTT_DISTANCE;
-        rowSpacing = distance * GREEN_GRID_ROW_SPACING / maxPuttDistance;
+        puttDistanceMax = GREEN_GRID_MAX_PUTT_DISTANCE;
+        rowSpacing = distance * GREEN_GRID_ROW_SPACING / puttDistanceMax;
     }
     else {
         center[AXIS_X] = (cosf(yaw) * worldDistance) + g_CurrentShot.ballPosition[AXIS_X];
@@ -4021,7 +4021,7 @@ void DrawRoundHud(CameraView *view) {
     SurfaceInfo *surface;
     f32 shotLength;
     s32 contestDistance;
-    s32 totalSeconds;
+    s32 secondsTotal;
 
     club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
     hasHandicap = FALSE;
@@ -4775,12 +4775,12 @@ void DrawRoundHud(CameraView *view) {
                              ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
             HUNDREDTHS_PER_SECOND;
 
-        totalSeconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
+        secondsTotal = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
         sprintf(
             g_PrintBuffer,
             "%02d:%02d:%02d",
-            totalSeconds / SECONDS_PER_MINUTE,
-            totalSeconds % SECONDS_PER_MINUTE,
+            secondsTotal / SECONDS_PER_MINUTE,
+            secondsTotal % SECONDS_PER_MINUTE,
             hundredths
         );
         DrawShadowedText(
@@ -5020,7 +5020,7 @@ void DrawHoleIntroText(Gfx **displayListHead) {
     s32 hundredths;
     s32 minutes;
     s32 seconds;
-    s32 totalSeconds;
+    s32 secondsTotal;
 
     if (g_RoundHud.isHoleIntroTextShown == TRUE) {
         if (g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
@@ -5040,9 +5040,9 @@ void DrawHoleIntroText(Gfx **displayListHead) {
             hundredths = (s32)(g_GameState.stopwatchFrameCount *
                              ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
                 HUNDREDTHS_PER_SECOND;
-            totalSeconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
-            seconds = totalSeconds % SECONDS_PER_MINUTE;
-            minutes = totalSeconds / SECONDS_PER_MINUTE;
+            secondsTotal = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
+            seconds = secondsTotal % SECONDS_PER_MINUTE;
+            minutes = secondsTotal / SECONDS_PER_MINUTE;
             SetUpGradientTextDrawing(&gfx, 0);
             sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes, seconds, hundredths);
             DrawLargeTextWithShadow(

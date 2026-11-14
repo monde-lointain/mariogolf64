@@ -114,7 +114,7 @@
 #define STAR_WIDTH 32
 #define STAR_HEIGHT 24
 #define STAR_FRAME_COUNT 15
-#define MAX_STAR_COUNT 6
+#define STAR_COUNT_MAX 6
 #define CHOSEN_STAR_GROWTH 8
 #define MENU_CHARACTER_LAYOUT_COUNT 4
 #define MENU_CHARACTER_SLOT_COUNT 5
@@ -260,7 +260,7 @@ void DrawNarrowMenuBoard(Gfx **displayListHead);
 void DrawLargeMenuBanner(Gfx **displayListHead);
 void DrawMenuTitleScreen(Gfx **displayListHead);
 
-s32 g_MenuFidgetDelays[MAX_PLAYER_COUNT];
+s32 g_MenuFidgetDelays[PLAYER_COUNT_MAX];
 s32 g_CourseBannersSlide;
 
 extern const char f_PeachsCastleName[];
@@ -277,9 +277,9 @@ static s32 f_UnusedWordAfterHoleSelection UNUSED = 0;
 static s32 f_ViewerAnimation = VIEWER_STARTING_ANIMATION;
 static s32 f_IsViewerAdjusting = 0;
 static s32 f_IsChosenAnimationPlaying = 0;
-static s32 f_ModeCounts[MAX_PLAYER_COUNT] = {7, 5, 4, 4};
+static s32 f_ModeCounts[PLAYER_COUNT_MAX] = {7, 5, 4, 4};
 static s32 f_UnusedModeCounts[4] UNUSED = {3, 5, 4, 4};
-static u16 f_PlayerClubMasks[MAX_PLAYER_COUNT] =
+static u16 f_PlayerClubMasks[PLAYER_COUNT_MAX] =
     {ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS};
 static s32 f_UnusedFlags[10] UNUSED = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
 static u8 f_ShownTrophyBufferIndex = 0;
@@ -303,7 +303,7 @@ static s32 f_SoundTestSongReverb = 0;
 static f32 f_SoundTestSoundFrequency = 0.0f;
 static f32 f_SoundTestSongFrequency = 0.0f;
 static s32 f_SoundTestSongTempo = NORMAL_SONG_TEMPO;
-static u8 f_ModeChoiceIcons[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT] = {
+static u8 f_ModeChoiceIcons[PLAYER_COUNT_MAX][MODE_CHOICE_LIMIT] = {
     {
         MODE_ICON_TOURNAMENT,
         MODE_ICON_GET_CHARACTER,
@@ -1071,7 +1071,7 @@ static s32 f_MiniGolfDiscFrameTime = 0;
 static u8 f_MiniGolfDiscTurn = MINI_GOLF_TURN_NONE;
 static u8 f_MiniGolfDiscBufferIndex = 0;
 static s32 f_CameraOrbitUpdateCount = 0;
-static u8 f_PlayerSoundPans[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] =
+static u8 f_PlayerSoundPans[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX] =
     {{127, 0, 0, 0}, {15, 240, 0, 0}, {15, 127, 240, 0}, {15, 85, 170, 240}};
 static s32 f_MenuCharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_PLUM,
@@ -1097,7 +1097,7 @@ static s32 f_UnusedWordAfterCharacterChoices UNUSED = 0;
 static LabelCorner f_TitleLabelCorners[TITLE_LABEL_COUNT] =
     {{110, 86}, {40, 114}, {90, 114}, {147, 114}, {217, 114}, {96, 142}, {96, 170}};
 static f32 f_ModeBoardBobPhase = 0.0f;
-static s32 f_ModeSelectControllerIconPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
+static s32 f_ModeSelectControllerIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX][2] = {
     {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
     {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
@@ -1252,9 +1252,9 @@ static u8 f_UnusedBufferBeforeMatrices[0x1D0] UNUSED;
 static Mat4 f_ModeSelectProjection;
 static Mat4 f_ModeSelectView;
 static LookAt f_ModeSelectLookAts[DRAW_BUFFER_COUNT];
-static Mtx f_MenuCharacterTransforms[MAX_PLAYER_COUNT][DRAW_BUFFER_COUNT];
+static Mtx f_MenuCharacterTransforms[PLAYER_COUNT_MAX][DRAW_BUFFER_COUNT];
 static Mtx f_MenuCharacterProjection;
-static f32 f_MenuCharacterScales[MAX_PLAYER_COUNT];
+static f32 f_MenuCharacterScales[PLAYER_COUNT_MAX];
 static Mtx f_ViewerTransforms[DRAW_BUFFER_COUNT];
 static Mtx f_ViewerProjection;
 static u8 f_UnusedBufferBeforeWater[0x180] UNUSED;
@@ -2180,7 +2180,7 @@ void SetUpChosenGame(void) {
             g_GameState.betRates[index] = UNSET_BET_RATE;
         }
 
-        for (index = 0; index != MAX_PLAYER_COUNT; index++) {
+        for (index = 0; index != PLAYER_COUNT_MAX; index++) {
             g_ChosenHandicaps[index] = 0;
         }
 
@@ -2357,7 +2357,7 @@ void UpdateMenuTitleScreen(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         titleChoice = g_MenuMemory.titleChoice;
         if (titleChoice == TITLE_CHOICE_NEW_GAME) {
-            for (index = 0; index != MAX_PLAYER_COUNT; index++) {
+            for (index = 0; index != PLAYER_COUNT_MAX; index++) {
                 memory->characterColumns[index] = 0;
                 memory->characterRows[index] = 0;
             }
@@ -2376,7 +2376,7 @@ void UpdateMenuTitleScreen(void) {
             StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
             g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
             g_ChosenPlayerCount = g_MenuMemory.playerCountChoice + 1;
-            for (index = 0; index != MAX_PLAYER_COUNT; index++) {
+            for (index = 0; index != PLAYER_COUNT_MAX; index++) {
                 g_ChosenLefties[index] = 0;
             }
 
@@ -2476,10 +2476,10 @@ void UpdateMenuTitleScreen(void) {
     }
 
     if (g_MenuMemory.playerCountChoice < 0) {
-        g_MenuMemory.playerCountChoice = MAX_PLAYER_COUNT - 1;
+        g_MenuMemory.playerCountChoice = PLAYER_COUNT_MAX - 1;
     }
 
-    if (g_MenuMemory.playerCountChoice >= MAX_PLAYER_COUNT) {
+    if (g_MenuMemory.playerCountChoice >= PLAYER_COUNT_MAX) {
         g_MenuMemory.playerCountChoice = 0;
     }
 }
@@ -2709,7 +2709,7 @@ void UpdateModeSelect(void) {
                 COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_PLAIN;
                 g_BetSet = BET_SET_NONE;
                 ApplyBetPreset(BET_PRESET_NONE);
-                for (i = 0; i != MAX_PLAYER_COUNT; i++) {
+                for (i = 0; i != PLAYER_COUNT_MAX; i++) {
                     g_ChosenHandicaps[i] = 0;
                 }
 
@@ -2726,7 +2726,7 @@ void UpdateModeSelect(void) {
                 g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
                 g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
                 COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
-                if (g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
+                if (g_ChosenPlayerCount == PLAYER_COUNT_MAX) {
                     g_BetSet = BET_SET_STROKE_FOUR_PLAYER;
                 }
                 else {
@@ -2735,7 +2735,7 @@ void UpdateModeSelect(void) {
 
                 ApplyBetPreset(BET_PRESET_STROKE);
                 if (g_ChosenPlayerCount == 1) {
-                    for (i = 0; i != MAX_PLAYER_COUNT; i++) {
+                    for (i = 0; i != PLAYER_COUNT_MAX; i++) {
                         g_ChosenHandicaps[i] = 0;
                     }
 
@@ -2800,7 +2800,7 @@ void UpdateModeSelect(void) {
                 g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
                 g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
                 COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
-                if (g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
+                if (g_ChosenPlayerCount == PLAYER_COUNT_MAX) {
                     g_BetSet = BET_SET_MINI_GOLF_FOUR_PLAYER;
                 }
                 else {
@@ -2809,7 +2809,7 @@ void UpdateModeSelect(void) {
 
                 ApplyBetPreset(BET_PRESET_MINI_GOLF);
                 if (g_ChosenPlayerCount == 1) {
-                    for (i = 0; i != MAX_PLAYER_COUNT; i++) {
+                    for (i = 0; i != PLAYER_COUNT_MAX; i++) {
                         g_ChosenHandicaps[i] = 0;
                     }
 
@@ -5412,8 +5412,8 @@ extern const char g_CaddySelectTitle[];
 #define WON_COUNT_X 250
 #define WON_COUNT_Y 72
 #define WON_COUNT_DIGIT_WIDTH 16
-#define MIN_TWO_DIGIT_WON_COUNT 10
-#define MIN_THREE_DIGIT_WON_COUNT 100
+#define TWO_DIGIT_WON_COUNT_MIN 10
+#define THREE_DIGIT_WON_COUNT_MIN 100
 
 #define WATER_PLANE_DISTANCE 300.0f
 #define WATER_FIELD_OF_VIEW 45.0f
@@ -5960,15 +5960,15 @@ void DrawModeSelect(Gfx **displayListHead) {
         }
 
         i = 0;
-        if (badgeCount < MIN_TWO_DIGIT_WON_COUNT) {
+        if (badgeCount < TWO_DIGIT_WON_COUNT_MIN) {
             i = WON_COUNT_DIGIT_WIDTH;
         }
 
-        if ((badgeCount >= MIN_TWO_DIGIT_WON_COUNT) && (badgeCount < MIN_THREE_DIGIT_WON_COUNT)) {
+        if ((badgeCount >= TWO_DIGIT_WON_COUNT_MIN) && (badgeCount < THREE_DIGIT_WON_COUNT_MIN)) {
             i = 0;
         }
 
-        if (badgeCount >= MIN_THREE_DIGIT_WON_COUNT) {
+        if (badgeCount >= THREE_DIGIT_WON_COUNT_MIN) {
             i = -WON_COUNT_DIGIT_WIDTH;
         }
 
@@ -5989,15 +5989,15 @@ void DrawModeSelect(Gfx **displayListHead) {
         }
 
         i = 0;
-        if (starCount < MIN_TWO_DIGIT_WON_COUNT) {
+        if (starCount < TWO_DIGIT_WON_COUNT_MIN) {
             i = WON_COUNT_DIGIT_WIDTH;
         }
 
-        if ((starCount >= MIN_TWO_DIGIT_WON_COUNT) && (badgeCount < MIN_THREE_DIGIT_WON_COUNT)) {
+        if ((starCount >= TWO_DIGIT_WON_COUNT_MIN) && (badgeCount < THREE_DIGIT_WON_COUNT_MIN)) {
             i = 0;
         }
 
-        if (starCount >= MIN_THREE_DIGIT_WON_COUNT) {
+        if (starCount >= THREE_DIGIT_WON_COUNT_MIN) {
             i = -WON_COUNT_DIGIT_WIDTH;
         }
 
@@ -6992,16 +6992,16 @@ void DrawCourseSelect(Gfx **displayListHead) {
                 }
             }
 
-            if (badgeCount < MIN_TWO_DIGIT_WON_COUNT) {
+            if (badgeCount < TWO_DIGIT_WON_COUNT_MIN) {
                 otherIndex = WON_COUNT_DIGIT_WIDTH;
             }
 
-            if ((badgeCount >= MIN_TWO_DIGIT_WON_COUNT) &&
-                (badgeCount < MIN_THREE_DIGIT_WON_COUNT)) {
+            if ((badgeCount >= TWO_DIGIT_WON_COUNT_MIN) &&
+                (badgeCount < THREE_DIGIT_WON_COUNT_MIN)) {
                 otherIndex = 0;
             }
 
-            if (badgeCount >= MIN_THREE_DIGIT_WON_COUNT) {
+            if (badgeCount >= THREE_DIGIT_WON_COUNT_MIN) {
                 otherIndex = -WON_COUNT_DIGIT_WIDTH;
             }
 
@@ -7203,16 +7203,16 @@ void DrawCourseSelect(Gfx **displayListHead) {
                 }
             }
 
-            if (badgeCount < MIN_TWO_DIGIT_WON_COUNT) {
+            if (badgeCount < TWO_DIGIT_WON_COUNT_MIN) {
                 otherIndex = WON_COUNT_DIGIT_WIDTH;
             }
 
-            if ((badgeCount >= MIN_TWO_DIGIT_WON_COUNT) &&
-                (badgeCount < MIN_THREE_DIGIT_WON_COUNT)) {
+            if ((badgeCount >= TWO_DIGIT_WON_COUNT_MIN) &&
+                (badgeCount < THREE_DIGIT_WON_COUNT_MIN)) {
                 otherIndex = 0;
             }
 
-            if (badgeCount >= MIN_THREE_DIGIT_WON_COUNT) {
+            if (badgeCount >= THREE_DIGIT_WON_COUNT_MIN) {
                 otherIndex = -WON_COUNT_DIGIT_WIDTH;
             }
 
@@ -8794,8 +8794,8 @@ void DrawSpinningStars(
         G_TX_NOLOD
     );
     gDPPipeSync(gfx++);
-    if (starCount > MAX_STAR_COUNT) {
-        starCount = MAX_STAR_COUNT;
+    if (starCount > STAR_COUNT_MAX) {
+        starCount = STAR_COUNT_MAX;
     }
 
     if (starCount == 0) {

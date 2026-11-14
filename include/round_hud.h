@@ -72,7 +72,7 @@ typedef struct RoundHud {
     s32 cupDistance;
     s32 stopwatchFrameCount;
     u8 unusedBeforeSkins[0x78 - 0x30];
-    s16 skinsTotals[MAX_PLAYER_COUNT];
+    s16 skinsTotals[PLAYER_COUNT_MAX];
     BinaryAngle clubHeadTilt;
     BinaryAngle lieTilt;
     u8 isIgnoredTurnPartShown;

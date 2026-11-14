@@ -17,7 +17,7 @@ typedef struct CourseStats {
     s32 bestScore;
     s32 strokeTotal;
     s32 longestDrive;
-    s32 averageDrive;
+    s32 driveAverage;
     s32 averagedDriveCount;
     s32 measuredDriveTotal;
     s32 puttTotal;
@@ -34,12 +34,12 @@ typedef struct CourseStats {
 typedef struct CourseStatFigures {
     f32 roundCount;
     f32 bestScore;
-    f32 averageScore;
+    f32 scoreAverage;
     f32 bestDrive;
-    f32 averageDrive;
+    f32 driveAverage;
     f32 unusedDriveFigure;
     f32 fairwayPercent;
-    f32 averagePutts;
+    f32 puttsAverage;
     f32 parSavePercent;
     f32 parOnPercent;
     f32 sandSavePercent;

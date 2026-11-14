@@ -26,7 +26,7 @@
 #define ECHOING_SOUND_COUNT 34
 
 #define QUEUED_CHARACTER_SOUND_COUNT 4
-#define MAX_CHARACTER_SOUND_DELAY 60
+#define CHARACTER_SOUND_DELAY_MAX 60
 
 #define DELAY_EDITOR_CONTROLLER 1
 #define DELAY_EDITOR_COLUMN 19
@@ -529,7 +529,7 @@ static void UpdateCharacterSounds(void) {
 
     if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & R_JPAD) {
         if (f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter] <
-            MAX_CHARACTER_SOUND_DELAY) {
+            CHARACTER_SOUND_DELAY_MAX) {
             f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter]++;
         }
     }

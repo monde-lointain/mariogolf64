@@ -32,8 +32,8 @@ typedef struct MenuMemory {
     s8 playerCountChoice;
     s8 titleChoice;
     s8 viewerCharacter;
-    s8 characterColumns[MAX_PLAYER_COUNT];
-    s8 characterRows[MAX_PLAYER_COUNT];
+    s8 characterColumns[PLAYER_COUNT_MAX];
+    s8 characterRows[PLAYER_COUNT_MAX];
     s8 modeChoice;
     s8 modeSpin;
     s8 betColumn;
@@ -93,9 +93,9 @@ typedef struct TakenCharacters {
 extern TakenCharacters g_TakenCharacters;
 
 #define NO_CHOSEN_CHARACTER (-1)
-extern s32 g_ChosenCharacters[MAX_PLAYER_COUNT];
+extern s32 g_ChosenCharacters[PLAYER_COUNT_MAX];
 
-extern s8 g_ChosenLefties[MAX_PLAYER_COUNT];
+extern s8 g_ChosenLefties[PLAYER_COUNT_MAX];
 
 extern u8 g_IsMenuCharacterLoaded[MAXCONTROLLERS];
 

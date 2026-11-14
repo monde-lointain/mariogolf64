@@ -98,12 +98,12 @@ void FrameSpheres(f32 depthOffset) {
     Degrees leftAngle;
     Degrees topAngle;
     Degrees bottomAngle;
-    f32 minZ;
-    f32 maxZ;
-    f32 minX;
-    f32 maxX;
-    f32 minY;
-    f32 maxY;
+    f32 zMin;
+    f32 zMax;
+    f32 xMin;
+    f32 xMax;
+    f32 yMin;
+    f32 yMax;
     Radians angle;
     f32 leftDistance;
     f32 rightDistance;
@@ -125,12 +125,12 @@ void FrameSpheres(f32 depthOffset) {
     s32 sphereIndex;
 
     margin = Z_MARGIN;
-    minY = FAR_EXTENT;
-    minX = minY;
-    maxY = -FAR_EXTENT;
-    maxX = maxY;
-    minZ = margin;
-    maxZ = -margin;
+    yMin = FAR_EXTENT;
+    xMin = yMin;
+    yMax = -FAR_EXTENT;
+    xMax = yMax;
+    zMin = margin;
+    zMax = -margin;
     rightAngle = g_Cameras[0].view.fieldOfView * 0.5f;
     leftAngle = -rightAngle;
     topAngle = rightAngle * 0.75f;
@@ -143,8 +143,8 @@ void FrameSpheres(f32 depthOffset) {
     guMtxCatF(f_FramingRotation, rotation, rotation);
     for (sphereIndex = 0; sphereIndex < f_FramedSphereCount; sphereIndex++) {
         TransformPoint(rotation, f_FramedSphereCenters[sphereIndex], point);
-        if (point[AXIS_X] - f_FramedSphereRadii[sphereIndex] < minX) {
-            minX = point[AXIS_X] - f_FramedSphereRadii[sphereIndex];
+        if (point[AXIS_X] - f_FramedSphereRadii[sphereIndex] < xMin) {
+            xMin = point[AXIS_X] - f_FramedSphereRadii[sphereIndex];
         }
     }
 
@@ -152,8 +152,8 @@ void FrameSpheres(f32 depthOffset) {
     guMtxCatF(f_FramingRotation, rotation, rotation);
     for (sphereIndex = 0; sphereIndex < f_FramedSphereCount; sphereIndex++) {
         TransformPoint(rotation, f_FramedSphereCenters[sphereIndex], point);
-        if (maxX < point[AXIS_X] + f_FramedSphereRadii[sphereIndex]) {
-            maxX = point[AXIS_X] + f_FramedSphereRadii[sphereIndex];
+        if (xMax < point[AXIS_X] + f_FramedSphereRadii[sphereIndex]) {
+            xMax = point[AXIS_X] + f_FramedSphereRadii[sphereIndex];
         }
     }
 
@@ -161,8 +161,8 @@ void FrameSpheres(f32 depthOffset) {
     guMtxCatF(f_FramingRotation, rotation, rotation);
     for (sphereIndex = 0; sphereIndex < f_FramedSphereCount; sphereIndex++) {
         TransformPoint(rotation, f_FramedSphereCenters[sphereIndex], point);
-        if (point[AXIS_Y] - f_FramedSphereRadii[sphereIndex] < minY) {
-            minY = point[AXIS_Y] - f_FramedSphereRadii[sphereIndex];
+        if (point[AXIS_Y] - f_FramedSphereRadii[sphereIndex] < yMin) {
+            yMin = point[AXIS_Y] - f_FramedSphereRadii[sphereIndex];
         }
     }
 
@@ -170,28 +170,28 @@ void FrameSpheres(f32 depthOffset) {
     guMtxCatF(f_FramingRotation, rotation, rotation);
     for (sphereIndex = 0; sphereIndex < f_FramedSphereCount; sphereIndex++) {
         TransformPoint(rotation, f_FramedSphereCenters[sphereIndex], point);
-        if (maxY < point[AXIS_Y] + f_FramedSphereRadii[sphereIndex]) {
-            maxY = point[AXIS_Y] + f_FramedSphereRadii[sphereIndex];
+        if (yMax < point[AXIS_Y] + f_FramedSphereRadii[sphereIndex]) {
+            yMax = point[AXIS_Y] + f_FramedSphereRadii[sphereIndex];
         }
     }
 
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
-        osSyncPrintf("maxx %f minx %f maxy %f miny %f\n", maxX, minX, maxY, minY);
+        osSyncPrintf("maxx %f minx %f maxy %f miny %f\n", xMax, xMin, yMax, yMin);
     }
 
     angle = FramingDegreesToRadians(rightAngle - leftAngle) - FramingDegreesToRadians(90);
-    leftDistance = -minX / cosf(angle);
+    leftDistance = -xMin / cosf(angle);
     eyeX = sinf(FramingDegreesToRadians(leftAngle)) * leftDistance;
     horizontalEyeZ = cosf(FramingDegreesToRadians(leftAngle)) * leftDistance;
-    rightDistance = maxX / cosf(angle);
+    rightDistance = xMax / cosf(angle);
     eyeX += sinf(FramingDegreesToRadians(rightAngle)) * rightDistance;
     horizontalEyeZ += cosf(FramingDegreesToRadians(rightAngle)) * rightDistance;
 
     angle = FramingDegreesToRadians(topAngle - bottomAngle) - FramingDegreesToRadians(90);
-    bottomDistance = -minY / cosf(angle);
+    bottomDistance = -yMin / cosf(angle);
     eyeY = sinf(FramingDegreesToRadians(bottomAngle)) * bottomDistance;
     verticalEyeZ = cosf(FramingDegreesToRadians(bottomAngle)) * bottomDistance;
-    topDistance = maxY / cosf(-angle);
+    topDistance = yMax / cosf(-angle);
     eyeY += sinf(FramingDegreesToRadians(topAngle)) * topDistance;
     verticalEyeZ += cosf(FramingDegreesToRadians(topAngle)) * topDistance;
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
@@ -203,48 +203,48 @@ void FrameSpheres(f32 depthOffset) {
     }
 
     guTranslateF(rotation, -eyeX, -eyeY, eyeZ);
-    minY = FAR_EXTENT;
-    minX = minY;
-    maxY = -FAR_EXTENT;
-    maxX = maxY;
+    yMin = FAR_EXTENT;
+    xMin = yMin;
+    yMax = -FAR_EXTENT;
+    xMax = yMax;
     guMtxCatF(f_FramingRotation, rotation, rotation);
     for (sphereIndex = 0; sphereIndex < f_FramedSphereCount; sphereIndex++) {
         TransformPoint(rotation, f_FramedSphereCenters[sphereIndex], point);
         if (g_ControllerData[1].trigger & D_CBUTTONS) {
             osSyncPrintf("rZ %f\n", point[AXIS_Z]);
         }
-        if (point[AXIS_Z] - f_FramedSphereRadii[sphereIndex] < minZ) {
-            minZ = point[AXIS_Z] - f_FramedSphereRadii[sphereIndex];
+        if (point[AXIS_Z] - f_FramedSphereRadii[sphereIndex] < zMin) {
+            zMin = point[AXIS_Z] - f_FramedSphereRadii[sphereIndex];
         }
 
-        if (maxZ < point[AXIS_Z] + f_FramedSphereRadii[sphereIndex]) {
-            maxZ = point[AXIS_Z] + f_FramedSphereRadii[sphereIndex];
+        if (zMax < point[AXIS_Z] + f_FramedSphereRadii[sphereIndex]) {
+            zMax = point[AXIS_Z] + f_FramedSphereRadii[sphereIndex];
         }
 
-        if (point[AXIS_X] - f_FramedSphereRadii[sphereIndex] < minX) {
-            minX = point[AXIS_X] - f_FramedSphereRadii[sphereIndex];
+        if (point[AXIS_X] - f_FramedSphereRadii[sphereIndex] < xMin) {
+            xMin = point[AXIS_X] - f_FramedSphereRadii[sphereIndex];
         }
 
-        if (maxX < point[AXIS_X] + f_FramedSphereRadii[sphereIndex]) {
-            maxX = point[AXIS_X] + f_FramedSphereRadii[sphereIndex];
+        if (xMax < point[AXIS_X] + f_FramedSphereRadii[sphereIndex]) {
+            xMax = point[AXIS_X] + f_FramedSphereRadii[sphereIndex];
         }
 
-        if (point[AXIS_Y] - f_FramedSphereRadii[sphereIndex] < minY) {
-            minY = point[AXIS_Y] - f_FramedSphereRadii[sphereIndex];
+        if (point[AXIS_Y] - f_FramedSphereRadii[sphereIndex] < yMin) {
+            yMin = point[AXIS_Y] - f_FramedSphereRadii[sphereIndex];
         }
 
-        if (maxY < point[AXIS_Y] + f_FramedSphereRadii[sphereIndex]) {
-            maxY = point[AXIS_Y] + f_FramedSphereRadii[sphereIndex];
+        if (yMax < point[AXIS_Y] + f_FramedSphereRadii[sphereIndex]) {
+            yMax = point[AXIS_Y] + f_FramedSphereRadii[sphereIndex];
         }
     }
 
-    clearEyeZ = margin - minZ + eyeZ;
+    clearEyeZ = margin - zMin + eyeZ;
     right = (clearEyeZ - horizontalEyeZ) * tan(FramingDegreesToRadians(rightAngle));
     left = (clearEyeZ - horizontalEyeZ) * tan(FramingDegreesToRadians(leftAngle));
     top = (clearEyeZ - verticalEyeZ) * tan(FramingDegreesToRadians(topAngle));
     bottom = (clearEyeZ - verticalEyeZ) * tan(FramingDegreesToRadians(bottomAngle));
-    centerX = (minX + maxX) * 0.5f;
-    centerY = (minY + maxY) * 0.5f;
+    centerX = (xMin + xMax) * 0.5f;
+    centerY = (yMin + yMax) * 0.5f;
     eyeZ = clearEyeZ;
     if (centerX < left) {
         centerX = left;

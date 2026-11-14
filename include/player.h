@@ -9,10 +9,10 @@
 #include "course_space.h"
 #include "turn.h"
 
-#define MAX_PLAYER_COUNT 4
+#define PLAYER_COUNT_MAX 4
 
-extern u8 *g_PlayerFaceImages[MAX_PLAYER_COUNT];
-extern u16 *g_PlayerFacePalettes[MAX_PLAYER_COUNT];
+extern u8 *g_PlayerFaceImages[PLAYER_COUNT_MAX];
+extern u16 *g_PlayerFacePalettes[PLAYER_COUNT_MAX];
 
 #define RING_COUNT 3
 
@@ -115,6 +115,6 @@ typedef struct Player {
     u8 unusedAfterShotCounts[0xB8 - 0xB6];
 } Player;
 
-extern Player g_Players[MAX_PLAYER_COUNT];
+extern Player g_Players[PLAYER_COUNT_MAX];
 
 #endif

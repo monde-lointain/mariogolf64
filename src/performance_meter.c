@@ -13,7 +13,7 @@
 
 #define FRAME_WIDTH 280
 #define FRAME_MICROSECONDS 16666
-#define MAX_EXTRA_FRAME_COUNT 5
+#define EXTRA_FRAME_COUNT_MAX 5
 
 #define RdpCountToMicroseconds(count) ((count) * 1643 / 100000)
 
@@ -177,7 +177,7 @@ static Gfx f_FrameDisplayList[] = {
     gsSP2Triangles(0, 1, 2, 0, 2, 3, 0, 0),
     gsSPEndDisplayList(),
 };
-static f32 f_FrameScales[MAX_EXTRA_FRAME_COUNT + 1] = {1.0f, 0.5f, 0.3333f, 0.25f, 0.2f, 0.16667f};
+static f32 f_FrameScales[EXTRA_FRAME_COUNT_MAX + 1] = {1.0f, 0.5f, 0.3333f, 0.25f, 0.2f, 0.16667f};
 static u32 f_MeterDisplayListIndex = 0;
 static Gfx f_UnusedMeterDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
@@ -337,8 +337,8 @@ void DrawPerformanceMeter(
         translationY = 0.1f;
     }
 
-    if (extraFrameCount > MAX_EXTRA_FRAME_COUNT) {
-        extraFrameCount = MAX_EXTRA_FRAME_COUNT;
+    if (extraFrameCount > EXTRA_FRAME_COUNT_MAX) {
+        extraFrameCount = EXTRA_FRAME_COUNT_MAX;
     }
 
     guOrtho(

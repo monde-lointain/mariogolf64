@@ -60,7 +60,7 @@ typedef struct RingShotRecord {
     RecordedShot shots[5];
 } RingShotRecord;
 
-extern PlayRecord g_PlayRecords[MAX_PLAYER_COUNT];
-extern RingShotRecord g_RingShotRecords[MAX_PLAYER_COUNT];
+extern PlayRecord g_PlayRecords[PLAYER_COUNT_MAX];
+extern RingShotRecord g_RingShotRecords[PLAYER_COUNT_MAX];
 
 #endif

@@ -33,9 +33,9 @@
 #define SHORT_PUTT_DISTANCE 30
 
 #define GENERATION_TOLERANCE 0.01f
-#define MAX_CLUB_TRY_COUNT 128
-#define MAX_PUTT_TRY_COUNT 64
-#define MAX_TEST_SHOT_STEP_COUNT 900
+#define CLUB_TRY_COUNT_MAX 128
+#define PUTT_TRY_COUNT_MAX 64
+#define TEST_SHOT_STEP_COUNT_MAX 900
 
 #define STOCK_CLUB_SET_COUNT 14
 
@@ -3388,15 +3388,15 @@ static Club f_NoClub = {
     0,
 };
 static ShotLaunch f_ClubTestShot =
-    {STRAIGHT_ANGLE, NO_CLUB, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
-#define MAX_LIE_RATING_LEVEL 4
+    {STRAIGHT_ANGLE, NO_CLUB, LAUNCH_POWER_MAX, 0, 0, 0, 0, SHOT_MODE_NORMAL};
+#define LIE_RATING_LEVEL_MAX 4
 #define DEFAULT_LIE_RATING_PERCENT 100
-static u8 f_LieRatingPercents[(MAX_LIE_RATING_LEVEL * 2) + 1] =
+static u8 f_LieRatingPercents[(LIE_RATING_LEVEL_MAX * 2) + 1] =
     {30, 50, 70, 80, 100, 115, 120, 145, 170};
 static s8 f_StockCurves[CLUB_SET_COUNT] =
     {0, -1, 0, 1, -2, 0, 2, -3, 2, 3, 0, -3, 3, 3, 0, 0, 0, 0};
 static ShotLaunch f_PutterTestShot =
-    {STRAIGHT_ANGLE, NO_CLUB, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
+    {STRAIGHT_ANGLE, NO_CLUB, LAUNCH_POWER_MAX, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 static s32 f_ClubChoiceDelay = CLUB_CHOICE_STEP_DELAY;
 
 static const ClubParameters f_ClubParameters[CLUB_COUNT] = {
@@ -3772,7 +3772,7 @@ void WriteClubParameters(void) {
             sprintf(
                 line,
                 "%d,\n",
-                (int)(GetPuttPower((step * MAX_LAUNCH_POWER) / PUTT_STEP_COUNT, index))
+                (int)(GetPuttPower((step * LAUNCH_POWER_MAX) / PUTT_STEP_COUNT, index))
             );
             AppendText(line);
         }
@@ -3834,12 +3834,12 @@ void GenerateClub(s32 clubIndex) {
         }
 
         osSyncPrintf("Generation Club%d PowerMode%d\n", clubIndex, shotMode);
-        for (tryIndex = 0; tryIndex < MAX_CLUB_TRY_COUNT; tryIndex++) {
+        for (tryIndex = 0; tryIndex < CLUB_TRY_COUNT_MAX; tryIndex++) {
             simulation.position[AXIS_X] = 0;
             simulation.position[AXIS_Y] = 0;
             simulation.position[AXIS_Z] = 0;
             LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_CLUB_TEST, &f_ClubTestShot);
-            for (step = 0; step < MAX_TEST_SHOT_STEP_COUNT; step++) {
+            for (step = 0; step < TEST_SHOT_STEP_COUNT_MAX; step++) {
                 if (simulation.state == BALL_STATE_STOPPED) {
                     break;
                 }
@@ -3904,15 +3904,15 @@ void GenerateClub(s32 clubIndex) {
     g_ClubTestMode = CLUB_TEST_NONE;
 }
 
-#define MAX_CLUB_DISTANCE 400
+#define CLUB_DISTANCE_MAX 400
 #define FLATTEST_CLUB_PITCH (-7)
 #define STEEPEST_CLUB_PITCH (-45)
-#define MAX_CLUB_SIDE_SPIN 100
-#define MAX_CLUB_CURVE 4
+#define CLUB_SIDE_SPIN_MAX 100
+#define CLUB_CURVE_MAX 4
 #define BASE_MISHIT_SCALE 110
 #define MISHIT_SCALE_PER_RESISTANCE 9
-#define MIN_MISHIT_SCALE 70
-#define MAX_MISHIT_SCALE 145
+#define MISHIT_SCALE_MIN 70
+#define MISHIT_SCALE_MAX 145
 
 void GenerateClubSet(s32 setIndex, GameBoyCharacter *character) {
     s32 type;
@@ -3921,8 +3921,8 @@ void GenerateClubSet(s32 setIndex, GameBoyCharacter *character) {
     for (type = 0; type < CLUB_SET_SIZE; type++) {
         club = GetClub((setIndex * CLUB_SET_SIZE) + type);
         club->distance = character->clubs[type].distance;
-        if (club->distance > MAX_CLUB_DISTANCE) {
-            club->distance = MAX_CLUB_DISTANCE;
+        if (club->distance > CLUB_DISTANCE_MAX) {
+            club->distance = CLUB_DISTANCE_MAX;
         }
 
         osSyncPrintf("TargetDist %d\n", club->distance);
@@ -3939,40 +3939,40 @@ void GenerateClubSet(s32 setIndex, GameBoyCharacter *character) {
         }
 
         club->sideSpin = character->clubs[type].sideSpin;
-        if (club->sideSpin > MAX_CLUB_SIDE_SPIN) {
-            club->sideSpin = MAX_CLUB_SIDE_SPIN;
+        if (club->sideSpin > CLUB_SIDE_SPIN_MAX) {
+            club->sideSpin = CLUB_SIDE_SPIN_MAX;
         }
 
-        if (club->sideSpin < -MAX_CLUB_SIDE_SPIN) {
-            club->sideSpin = -MAX_CLUB_SIDE_SPIN;
+        if (club->sideSpin < -CLUB_SIDE_SPIN_MAX) {
+            club->sideSpin = -CLUB_SIDE_SPIN_MAX;
         }
 
-        if ((u8)(character->lieRatingLevel + MAX_LIE_RATING_LEVEL) >=
+        if ((u8)(character->lieRatingLevel + LIE_RATING_LEVEL_MAX) >=
             ARRAY_COUNT(f_LieRatingPercents)) {
             club->lieRatingPercent = DEFAULT_LIE_RATING_PERCENT;
         }
         else {
             club->lieRatingPercent =
-                f_LieRatingPercents[character->lieRatingLevel + MAX_LIE_RATING_LEVEL];
+                f_LieRatingPercents[character->lieRatingLevel + LIE_RATING_LEVEL_MAX];
         }
 
         club->mishitScale =
             BASE_MISHIT_SCALE - (character->mishitResistance * MISHIT_SCALE_PER_RESISTANCE);
         club->curve = character->shotCurve;
-        if (club->curve < -MAX_CLUB_CURVE) {
-            club->curve = -MAX_CLUB_CURVE;
+        if (club->curve < -CLUB_CURVE_MAX) {
+            club->curve = -CLUB_CURVE_MAX;
         }
 
-        if (club->curve > MAX_CLUB_CURVE) {
-            club->curve = MAX_CLUB_CURVE;
+        if (club->curve > CLUB_CURVE_MAX) {
+            club->curve = CLUB_CURVE_MAX;
         }
 
-        if (club->mishitScale > MAX_MISHIT_SCALE) {
-            club->mishitScale = MAX_MISHIT_SCALE;
+        if (club->mishitScale > MISHIT_SCALE_MAX) {
+            club->mishitScale = MISHIT_SCALE_MAX;
         }
 
-        if (club->mishitScale < MIN_MISHIT_SCALE) {
-            club->mishitScale = MIN_MISHIT_SCALE;
+        if (club->mishitScale < MISHIT_SCALE_MIN) {
+            club->mishitScale = MISHIT_SCALE_MIN;
         }
 
         g_GameState.isMiniGolf = FALSE;
@@ -4042,7 +4042,7 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
     }
 
     if (!IsGameFlagSet(GAME_FLAG_GENERATE_CLUBS)) {
-        index = fraction * PUTT_STEP_COUNT / MAX_LAUNCH_POWER;
+        index = fraction * PUTT_STEP_COUNT / LAUNCH_POWER_MAX;
         if (index > PUTT_STEP_COUNT) {
             index = PUTT_STEP_COUNT;
         }
@@ -4060,7 +4060,7 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
     f_PutterTestShot.shotMode = testShotMode;
     putter = &g_Clubs[CLUB_TYPE_PUTTER];
     reach = GetShotDistance(putter, testShotMode);
-    distancePerPower = reach * (UNITS_PER_FOOT / MAX_LAUNCH_POWER);
+    distancePerPower = reach * (UNITS_PER_FOOT / LAUNCH_POWER_MAX);
     initialPowerNumerator = (s32)(reach * PUTT_POWER_ESTIMATE_SCALE);
     shortDistance = 0;
     shortPower = 0;
@@ -4071,13 +4071,13 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
     targetDistance = (s32)(distancePerPower * fraction);
     targetDistance += PUTT_OVERSHOOT;
     putter->power[testShotMode] = initialPowerNumerator / PUTT_POWER_ESTIMATE_DIVISOR;
-    for (; tryIndex < MAX_PUTT_TRY_COUNT; tryIndex++) {
+    for (; tryIndex < PUTT_TRY_COUNT_MAX; tryIndex++) {
         simulation.position[AXIS_X] = 0;
         simulation.position[AXIS_Y] = 0;
         simulation.position[AXIS_Z] = 0;
         simulation.surface = PUTT_TEST_SURFACE;
         LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_CLUB_TEST, &f_PutterTestShot);
-        for (step = 0; step < MAX_TEST_SHOT_STEP_COUNT; step++) {
+        for (step = 0; step < TEST_SHOT_STEP_COUNT_MAX; step++) {
             if (simulation.state == BALL_STATE_STOPPED) {
                 break;
             }
@@ -4312,8 +4312,8 @@ s32 GetLieRating(Club *club, Surface surface, ShotMode shotMode) {
             rating = 1;
         }
 
-        if (rating > MAX_LIE_RATING) {
-            rating = MAX_LIE_RATING;
+        if (rating > LIE_RATING_MAX) {
+            rating = LIE_RATING_MAX;
         }
     }
     else {

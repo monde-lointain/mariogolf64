@@ -247,7 +247,7 @@ enum ListingState {
 #define CartridgeReadPhaseStep(readStep) ((readStep) % CARTRIDGE_READ_PHASE_SIZE)
 #define LastCartridgeReadStep(controllerCount) (((controllerCount) * CARTRIDGE_READ_PHASE_SIZE) - 1)
 
-#define MAX_STATUS_VALUE 999
+#define STATUS_VALUE_MAX 999
 
 #define HUNDREDTHS_PER_ONE 100.0f
 #define HUNDREDTHS_PER_TENTH 10
@@ -276,11 +276,11 @@ typedef struct StatusTime {
 typedef struct StatusCourse {
     u8 roundCount[2];
     u8 bestScore;
-    u8 averageStrokes;
+    u8 strokesAverage;
     u8 longestDrive[2];
-    u8 averageDrive[2];
+    u8 driveAverage[2];
     u8 fairwayRate;
-    u8 averagePutts;
+    u8 puttsAverage;
     u8 parOrBetterRate;
     u8 parOnRate;
     u8 sandSaveRate;
@@ -345,7 +345,7 @@ typedef struct StatusData {
 #define DATA_EXPERIENCE_MARK_OFFSET 0x15E
 #define EXPERIENCE_ADDED_MARK 100
 #define DATA_EXPERIENCE_WRITE_SIZE 3
-#define MAX_EXPERIENCE 0xFFFF
+#define EXPERIENCE_MAX 0xFFFF
 
 enum CartridgeFault {
     CARTRIDGE_FAULT_NONE,
@@ -2830,8 +2830,8 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
                     experience =
                         ((characterData[DATA_EXPERIENCE_OFFSET + 1] << BITS_PER_BYTE) |
                             characterData[DATA_EXPERIENCE_OFFSET]);
-                    if (character->experience + experience > MAX_EXPERIENCE) {
-                        experience = MAX_EXPERIENCE;
+                    if (character->experience + experience > EXPERIENCE_MAX) {
+                        experience = EXPERIENCE_MAX;
                     }
                     else {
                         experience = character->experience + experience;
@@ -3836,8 +3836,8 @@ static inline s32 PackTenths(f32 value) {
     if (fraction >= TENTHS_PER_ONE) {
         wholePart++;
         fraction = 0;
-        if (wholePart >= MAX_STATUS_VALUE + 1) {
-            wholePart = MAX_STATUS_VALUE;
+        if (wholePart >= STATUS_VALUE_MAX + 1) {
+            wholePart = STATUS_VALUE_MAX;
             fraction = TENTHS_PER_ONE - 1;
         }
     }
@@ -3876,17 +3876,17 @@ void BuildStatusData(u8 *status) {
                 course->roundCount[0] = value;
                 course->roundCount[1] = value >> BITS_PER_BYTE;
                 course->bestScore = entry->bestScore + STATUS_SCORE_BIAS;
-                course->averageStrokes = RoundedWholePart(entry->strokeTotal * reciprocal);
+                course->strokesAverage = RoundedWholePart(entry->strokeTotal * reciprocal);
                 value = RoundedWholePart(entry->longestDrive * YARDS_PER_UNIT);
                 course->longestDrive[0] = value;
                 course->longestDrive[1] = value >> BITS_PER_BYTE;
-                value = RoundedWholePart(entry->averageDrive * YARDS_PER_UNIT);
-                course->averageDrive[0] = value;
-                course->averageDrive[1] = value >> BITS_PER_BYTE;
+                value = RoundedWholePart(entry->driveAverage * YARDS_PER_UNIT);
+                course->driveAverage[0] = value;
+                course->driveAverage[1] = value >> BITS_PER_BYTE;
                 course->fairwayRate = RoundedWholePart(
                     entry->measuredDriveTotal * reciprocal * (PERCENTS_PER_ONE / HOLES_PER_ROUND)
                 );
-                course->averagePutts =
+                course->puttsAverage =
                     PackTenths(entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND));
                 course->parOrBetterRate = RoundedWholePart(
                     entry->parOrBetterCount * reciprocal * (PERCENTS_PER_ONE / HOLES_PER_ROUND)
@@ -3983,15 +3983,15 @@ void BuildStatusData(u8 *status) {
         course->roundCount[0] = value;
         course->roundCount[1] = value >> BITS_PER_BYTE;
         course->bestScore = (s32)g_CourseStatFigures[COURSE_COUNT].bestScore + STATUS_SCORE_BIAS;
-        course->averageStrokes = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].averageScore);
+        course->strokesAverage = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].scoreAverage);
         sum = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].bestDrive);
         course->longestDrive[0] = sum;
         course->longestDrive[1] = sum >> BITS_PER_BYTE;
-        sum = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].averageDrive);
-        course->averageDrive[0] = sum;
-        course->averageDrive[1] = sum >> BITS_PER_BYTE;
+        sum = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].driveAverage);
+        course->driveAverage[0] = sum;
+        course->driveAverage[1] = sum >> BITS_PER_BYTE;
         course->fairwayRate = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].fairwayPercent);
-        course->averagePutts = PackTenths(g_CourseStatFigures[COURSE_COUNT].averagePutts);
+        course->puttsAverage = PackTenths(g_CourseStatFigures[COURSE_COUNT].puttsAverage);
         course->parOrBetterRate =
             RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].parSavePercent);
         course->parOnRate = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].parOnPercent);
@@ -4094,8 +4094,8 @@ s32 RoundedWholePart(f32 value) {
     fraction /= HUNDREDTHS_PER_TENTH;
     if (fraction >= TENTHS_PER_ONE) {
         wholePart++;
-        if (wholePart >= MAX_STATUS_VALUE + 1) {
-            wholePart = MAX_STATUS_VALUE;
+        if (wholePart >= STATUS_VALUE_MAX + 1) {
+            wholePart = STATUS_VALUE_MAX;
         }
     }
 

@@ -52,7 +52,7 @@
 
 #define LEADERBOARD_GLYPH_GROUP_COUNT 20
 
-#define MAX_UNSPLIT_IMAGE_WIDTH 96
+#define UNSPLIT_IMAGE_WIDTH_MAX 96
 
 #define LEADERBOARD_LAST_TOP_ROW (TOURNAMENT_CONTESTANT_COUNT - LEADERBOARD_ROW_COUNT)
 #define ROW_FLIP_DEGREES_PER_FRAME 20
@@ -446,8 +446,8 @@ void FreeScorecard(void) {
 #define SHOWN_MINUTE_LIMIT 60
 
 void StartScorecardTally(s32 layout) {
-    s32 ranks[MAX_PLAYER_COUNT];
-    s32 scoresToPar[MAX_PLAYER_COUNT];
+    s32 ranks[PLAYER_COUNT_MAX];
+    s32 scoresToPar[PLAYER_COUNT_MAX];
     s32 holeIndex;
     SongId song;
     s32 timedHoleCount;
@@ -672,10 +672,10 @@ HALVED:
 }
 
 void SetScorecardLayout(s32 layout) {
-    s32 ranks[MAX_PLAYER_COUNT];
-    s32 scoresToPar[MAX_PLAYER_COUNT];
+    s32 ranks[PLAYER_COUNT_MAX];
+    s32 scoresToPar[PLAYER_COUNT_MAX];
     s32 holesWon[MATCH_PLAYER_COUNT];
-    s32 skinsRanks[MAX_PLAYER_COUNT];
+    s32 skinsRanks[PLAYER_COUNT_MAX];
     s32 unused[4] UNUSED;
     s32 i;
     s32 j;
@@ -1064,7 +1064,7 @@ void DrawLargeImage(Gfx **displayListHead, u8 *image, s32 left, s32 top) {
     s32 stripIndex;
 
     stripCount = 1;
-    if (width > MAX_UNSPLIT_IMAGE_WIDTH) {
+    if (width > UNSPLIT_IMAGE_WIDTH_MAX) {
         stripCount = 2;
     }
 

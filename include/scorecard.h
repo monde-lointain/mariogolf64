@@ -37,7 +37,7 @@ typedef struct ScorecardContent {
     Radians rowFlipAngles[LEADERBOARD_ROW_COUNT];
     s8 isRowFlipping[LEADERBOARD_ROW_COUNT];
     s32 flipTime;
-    s32 faceImageOffsets[MAX_PLAYER_COUNT];
+    s32 faceImageOffsets[PLAYER_COUNT_MAX];
     CourseIndex courseIndex;
     s32 holeIndex;
     Boolean isSuddenDeath;
@@ -64,8 +64,8 @@ typedef struct Scorecard {
     u8 *totalLabelsImage;
     u8 *flapNameImages;
     u8 *gridImage;
-    u8 *faceImages[MAX_PLAYER_COUNT];
-    u16 *facePalettes[MAX_PLAYER_COUNT];
+    u8 *faceImages[PLAYER_COUNT_MAX];
+    u16 *facePalettes[PLAYER_COUNT_MAX];
     u8 *betSubtitlesImage;
     u8 isOddFaceStep;
     u8 faceTime;

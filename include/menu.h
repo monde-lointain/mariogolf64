@@ -119,9 +119,9 @@ s32 FindCharacterOnGrid(CharacterId character);
 #define NO_CONTROLLER_INDEX 4
 #define UNCHOSEN_CONTROLLER (-1)
 #define NO_IMPORTED_COLUMN (-1)
-extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
-extern s8 g_ChoosingControllerIndices[MAX_PLAYER_COUNT];
-extern s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT];
+extern s8 g_PlayerControllerIndices[PLAYER_COUNT_MAX];
+extern s8 g_ChoosingControllerIndices[PLAYER_COUNT_MAX];
+extern s16 g_ImportedCharacterColumns[PLAYER_COUNT_MAX];
 
 #define PLAYER_LABEL_WIDTH 16
 #define PLAYER_LABEL_HEIGHT 8

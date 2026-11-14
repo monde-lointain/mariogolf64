@@ -17,7 +17,7 @@ typedef struct RoundStats {
     Boolean isDriveAveraged;
 } RoundStats;
 
-extern s16 g_BetTallies[MAX_PLAYER_COUNT][BET_COUNT];
+extern s16 g_BetTallies[PLAYER_COUNT_MAX][BET_COUNT];
 extern RoundStats g_RoundStats;
 extern s32 g_LongestDrivePot;
 extern s32 g_NearestPinPot;

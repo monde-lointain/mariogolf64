@@ -818,16 +818,16 @@ void UpdateCameraEditor(void) {
 #define FAST_HEIGHT_STEP 10.0f
 #define SLOW_FIELD_OF_VIEW_STEP 0.1f
 #define FAST_FIELD_OF_VIEW_STEP 1.0f
-#define MIN_FIELD_OF_VIEW 10.0f
-#define MAX_FIELD_OF_VIEW 170.0f
+#define FIELD_OF_VIEW_MIN 10.0f
+#define FIELD_OF_VIEW_MAX 170.0f
 #define SLOW_MARKER_SCALE_STEP 0.05f
 #define FAST_MARKER_SCALE_STEP 0.5f
-#define MIN_MARKER_SCALE 0.05f
-#define MAX_MARKER_SCALE 10.0f
+#define MARKER_SCALE_MIN 0.05f
+#define MARKER_SCALE_MAX 10.0f
 #define ZOOM_OUT_SCALE 1.1f
 #define ZOOM_IN_SCALE 0.9f
-#define MAX_ZOOM_OUT_DISTANCE 5000.0f
-#define MIN_ZOOM_IN_DISTANCE 1.0f
+#define ZOOM_OUT_DISTANCE_MAX 5000.0f
+#define ZOOM_IN_DISTANCE_MIN 1.0f
 #define SLOW_PAD_STEP 1.0f
 #define FAST_PAD_STEP 20.0f
 
@@ -1062,8 +1062,8 @@ void EditOpeningCamera(void) {
                 g_CameraEditor.fieldOfView -= SLOW_FIELD_OF_VIEW_STEP;
             }
 
-            if (g_CameraEditor.fieldOfView < MIN_FIELD_OF_VIEW) {
-                g_CameraEditor.fieldOfView = MIN_FIELD_OF_VIEW;
+            if (g_CameraEditor.fieldOfView < FIELD_OF_VIEW_MIN) {
+                g_CameraEditor.fieldOfView = FIELD_OF_VIEW_MIN;
             }
         }
 
@@ -1075,8 +1075,8 @@ void EditOpeningCamera(void) {
                 g_CameraEditor.fieldOfView += SLOW_FIELD_OF_VIEW_STEP;
             }
 
-            if (g_CameraEditor.fieldOfView > MAX_FIELD_OF_VIEW) {
-                g_CameraEditor.fieldOfView = MAX_FIELD_OF_VIEW;
+            if (g_CameraEditor.fieldOfView > FIELD_OF_VIEW_MAX) {
+                g_CameraEditor.fieldOfView = FIELD_OF_VIEW_MAX;
             }
         }
 
@@ -1088,8 +1088,8 @@ void EditOpeningCamera(void) {
                 g_LookAtMarkerScale -= SLOW_MARKER_SCALE_STEP;
             }
 
-            if (g_LookAtMarkerScale < MIN_MARKER_SCALE) {
-                g_LookAtMarkerScale = MIN_MARKER_SCALE;
+            if (g_LookAtMarkerScale < MARKER_SCALE_MIN) {
+                g_LookAtMarkerScale = MARKER_SCALE_MIN;
             }
         }
 
@@ -1101,21 +1101,21 @@ void EditOpeningCamera(void) {
                 g_LookAtMarkerScale += SLOW_MARKER_SCALE_STEP;
             }
 
-            if (g_LookAtMarkerScale > MAX_MARKER_SCALE) {
-                g_LookAtMarkerScale = MAX_MARKER_SCALE;
+            if (g_LookAtMarkerScale > MARKER_SCALE_MAX) {
+                g_LookAtMarkerScale = MARKER_SCALE_MAX;
             }
         }
     }
 
     if ((g_ControllerStates[EDITOR_PAD].buttons & (Z_TRIG | R_TRIG)) == R_TRIG) {
-        if (g_CameraEditor.distance < MAX_ZOOM_OUT_DISTANCE) {
+        if (g_CameraEditor.distance < ZOOM_OUT_DISTANCE_MAX) {
             ZoomEditorEye(ZOOM_OUT_SCALE);
         }
     }
 
     if ((g_ControllerStates[EDITOR_PAD].buttons & L_TRIG) ||
         (g_ControllerStates[EDITOR_PAD].buttons & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
-        if (g_CameraEditor.distance > MIN_ZOOM_IN_DISTANCE) {
+        if (g_CameraEditor.distance > ZOOM_IN_DISTANCE_MIN) {
             ZoomEditorEye(ZOOM_IN_SCALE);
         }
     }

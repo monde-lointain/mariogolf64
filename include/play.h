@@ -79,8 +79,8 @@ typedef s8 ContestMovieState;
 
 extern ContestMovieState g_ContestMovieState;
 extern u32 g_GroundDrawFrame;
-extern CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
-extern Player g_SavedPlayers[MAX_PLAYER_COUNT];
+extern CurrentShot g_SavedShots[PLAYER_COUNT_MAX];
+extern Player g_SavedPlayers[PLAYER_COUNT_MAX];
 extern ShotLaunch g_LastShotLaunch;
 extern u8 g_UnreadPlayBuffer[0xDEC];
 
@@ -89,7 +89,7 @@ extern u8 g_UnreadPlayBuffer[0xDEC];
 #define LIGHT_GROUND_NOISE_BASE 0xC8
 #define MINI_GOLF_GROUND_NOISE_RANGE 0x40
 #define MINI_GOLF_GROUND_NOISE_BASE 0xD2
-#define MAX_GROUND_NOISE_INTENSITY 0xFF
+#define GROUND_NOISE_INTENSITY_MAX 0xFF
 
 void FillGroundNoise(s32 range, s32 base);
 void CopyDoublePair(f64 *from, f64 *to);

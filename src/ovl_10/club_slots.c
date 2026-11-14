@@ -46,7 +46,7 @@
 #define SYMBOL_ANGLE DegreesToRadians(35)
 #define STOPPING_REEL_SPEED DegreesToRadians(2)
 #define REEL_SPEED_STEP 0.5f
-#define MAX_REEL_SPEED DegreesToRadians(18)
+#define REEL_SPEED_MAX DegreesToRadians(18)
 #define REEL_TICK_TIME 8
 
 #define REEL_EDGE_COUNT 7
@@ -154,7 +154,7 @@ typedef struct ClubSlots {
     u8 *buttonsImage;
     u8 *startImage;
     u8 *symbolImages;
-    u8 *faceImages[MAX_PLAYER_COUNT][FACE_BUFFER_COUNT];
+    u8 *faceImages[PLAYER_COUNT_MAX][FACE_BUFFER_COUNT];
 } ClubSlots;
 
 void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scale);
@@ -577,8 +577,8 @@ void DrawClubSlots(Gfx **displayListHead) {
             f_Slots->reelAngles[reelIndex] += f_Slots->reelSpeeds[reelIndex];
             f_Slots->reelSpeeds[reelIndex] +=
                 DegreesToRadians((REEL_COUNT - reelIndex) * REEL_SPEED_STEP);
-            if (f_Slots->reelSpeeds[reelIndex] > MAX_REEL_SPEED) {
-                f_Slots->reelSpeeds[reelIndex] = MAX_REEL_SPEED;
+            if (f_Slots->reelSpeeds[reelIndex] > REEL_SPEED_MAX) {
+                f_Slots->reelSpeeds[reelIndex] = REEL_SPEED_MAX;
             }
 
             if (f_Slots->reelAngles[reelIndex] > SYMBOL_ANGLE) {

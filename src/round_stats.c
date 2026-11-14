@@ -33,7 +33,7 @@
 
 #define DRIVE_COMPARISON_SCALE 7.119878e-05f
 
-s16 g_BetTallies[MAX_PLAYER_COUNT][BET_COUNT];
+s16 g_BetTallies[PLAYER_COUNT_MAX][BET_COUNT];
 RoundStats g_RoundStats;
 Scorecard g_Scorecard;
 
@@ -123,13 +123,13 @@ void StartBets(void) {
     s32 player;
     s32 bet;
 
-    for (player = 0; player != MAX_PLAYER_COUNT; player++) {
+    for (player = 0; player != PLAYER_COUNT_MAX; player++) {
         for (bet = 0; bet != BET_COUNT; bet++) {
             g_BetTallies[player][bet] = 0;
         }
     }
 
-    for (player = 0; player != MAX_PLAYER_COUNT; player++) {
+    for (player = 0; player != PLAYER_COUNT_MAX; player++) {
         for (bet = 0; bet != BET_COUNT; bet++) {
             g_Players[player].betTallies[bet] = g_BetTallies[player][bet];
         }
@@ -156,7 +156,7 @@ void ResumeBets(void) {
     s32 player;
     s32 bet;
 
-    for (player = 0; player != MAX_PLAYER_COUNT; player++) {
+    for (player = 0; player != PLAYER_COUNT_MAX; player++) {
         for (bet = 0; bet != BET_COUNT; bet++) {
             g_BetTallies[player][bet] = g_Players[player].betTallies[bet];
         }
@@ -325,7 +325,7 @@ void RecordCourseRound(void) {
         record->bestScore = NO_BEST_SCORE;
         record->strokeTotal = 0;
         record->longestDrive = 0;
-        record->averageDrive = 0;
+        record->driveAverage = 0;
         record->averagedDriveCount = 0;
         record->measuredDriveTotal = 0;
         record->puttTotal = 0;
@@ -383,19 +383,19 @@ void RecordCourseRound(void) {
 
     if (record->averagedDriveCount == 0) {
         if (stats->averagedDriveCount == 0) {
-            record->averageDrive = 0;
+            record->driveAverage = 0;
         }
         else if (stats->averagedDriveCount > 0) {
-            record->averageDrive = stats->averagedDriveTotal / stats->averagedDriveCount;
+            record->driveAverage = stats->averagedDriveTotal / stats->averagedDriveCount;
             record->averagedDriveCount = 1;
         }
         else {
-            record->averageDrive = 0;
+            record->driveAverage = 0;
         }
     }
     else if (stats->averagedDriveCount > 0) {
-        record->averageDrive =
-            ((record->averageDrive * record->averagedDriveCount) + stats->averagedDriveTotal) /
+        record->driveAverage =
+            ((record->driveAverage * record->averagedDriveCount) + stats->averagedDriveTotal) /
             (record->averagedDriveCount + stats->averagedDriveCount);
         record->averagedDriveCount += stats->averagedDriveCount;
     }
@@ -561,7 +561,7 @@ void SettleHoleBets(void) {
     s16 *lasVegasTally;
 
     void SettleNassau(s32 startHole, s32 endHole) {
-        s32 totals[MAX_PLAYER_COUNT];
+        s32 totals[PLAYER_COUNT_MAX];
 
         for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             totals[playerIndex] = 0;
@@ -585,7 +585,7 @@ void SettleHoleBets(void) {
         }
     }
 
-    s32 scores[MAX_PLAYER_COUNT];
+    s32 scores[PLAYER_COUNT_MAX];
     s32 unused[8] UNUSED;
 
     if (g_GameState.betRates[BET_STROKES] > 0) {
@@ -748,7 +748,7 @@ void SettleHoleBets(void) {
     g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE] = g_LongestDrivePot;
     g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN] = g_NearestPinPot;
     g_GameState.carriedPots[CARRIED_POT_HOLE] = g_HolePot;
-    for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
+    for (playerIndex = 0; playerIndex != PLAYER_COUNT_MAX; playerIndex++) {
         for (j = 0; j != BET_COUNT; j++) {
             g_Players[playerIndex].betTallies[j] = g_BetTallies[playerIndex][j];
         }

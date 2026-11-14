@@ -79,7 +79,7 @@
 #define NEAR_CUP_MAX_DECIMETERS 600.0f
 
 #define SHOT_KIND_MAX_COUNT 0xFF
-#define MAX_RING_SHOT_CLEAR_COUNT 99
+#define RING_SHOT_CLEAR_COUNT_MAX 99
 
 #define HOLE_OUT_CALL_CHANNEL 3
 #define DPAD_STICK_TILT 40
@@ -178,7 +178,7 @@
 #define GAME_FLAG_TUNE_SHOT_PREVIEW 0x71
 #define STARTING_CLUB_MIN_LIE_RATING 2
 #define GAME_FLAG_AIM_DOWN_RANGE 0x24
-#define MAX_RECORDED_STROKE_COUNT 4
+#define RECORDED_STROKE_COUNT_MAX 4
 #define STROKE_COUNT_MAX 99
 #define STROKE_LIMIT_PER_PAR 3
 #define STROKE_LIMIT_PENALTY_MINUTES 10
@@ -195,7 +195,7 @@
 #define AIM_CAMERA_BUTTON_PUTT_STEP 4267.00810546875
 #define LAST_POWER_GAUGE_FRAME (GAUGE_IMPACT_FRAME - 1)
 #define LAST_IMPACT_GAUGE_FRAME (GAUGE_IMPACT_FRAME + 9)
-#define MAX_IMPACT_TIMING 6
+#define IMPACT_TIMING_MAX 6
 #define SWING_TIMING_GAUGE_FRAME 71
 #define STICK_TILT_FRAME_COUNT 10
 #define STICK_HOLD_FRAME_COUNT 10
@@ -208,7 +208,7 @@
 #define LONG_PUTT_DOLLY_STEP_COUNT 20
 #define AIM_CAMERA_CRANE_FORWARD_HEIGHT (-0x5A00)
 #define AIM_CAMERA_CRANE_BACK_HEIGHT (-0x96000)
-#define MAX_COUNTED_FLIGHT_COUNT 2
+#define COUNTED_FLIGHT_COUNT_MAX 2
 #define PLAN_PREPARING_POLL_COUNT 100
 #define PLAN_AIMING_POLL_COUNT 400
 #define PLAN_PREPARING_TIME_BUDGET 10
@@ -226,7 +226,7 @@
 #define FAST_FLIGHT_LAUNCH_FRAME 4
 #define SWING_TRAIL_FADE_DELAY 10
 #define RANDOM_TEXTURE_RESUME_FRAME 30
-#define MAX_ROLL_SKIP_STEPS 4
+#define ROLL_SKIP_STEPS_MAX 4
 #define FAST_FLIGHT_EXTRA_STEPS 3
 
 #define REACTION_HOLD_FRAMES 10
@@ -236,13 +236,13 @@
 #define OUT_PLAYER_SHOWN_FRAMES 90
 #define LONG_PUTT_REACH_SCALE 6
 #define MIDDLE_PUTT_REACH_SCALE 3
-#define MIDDLE_PUTT_SWING_POWER (MAX_LAUNCH_POWER / 2)
-#define SLOW_PUTT_SWING_POWER (MAX_LAUNCH_POWER / 4)
+#define MIDDLE_PUTT_SWING_POWER (LAUNCH_POWER_MAX / 2)
+#define SLOW_PUTT_SWING_POWER (LAUNCH_POWER_MAX / 4)
 #define PUTT_SLOWDOWN_LEAD_FRAMES 3
 
 #define AIMING_SONG_TEMPO 0x7F
 #define GREEN_SONG_TEMPO_STEP 0.04f
-#define MAX_GREEN_SONG_TEMPO 155.0f
+#define GREEN_SONG_TEMPO_MAX 155.0f
 #define AIMING_ALPHA_RATE 0.20933335f
 #define AIMING_ALPHA_SWING 32.0f
 #define AIMING_MEAN_ALPHA 64.0f
@@ -329,7 +329,7 @@ void TurnAim(s32 turnsAltHeading);
 
 static Mtx f_PuttPreviewIdentity;
 static ShotLaunch f_ShotLaunch;
-static s32 f_StateFrameCounts[MAX_PLAYER_COUNT];
+static s32 f_StateFrameCounts[PLAYER_COUNT_MAX];
 static f32 f_PuttSwingSpeed;
 static f32 f_GreenSongTempo;
 static s32 f_UnusedDebugCourseIndex;
@@ -349,32 +349,32 @@ void EndRumbleForceStop(void) {
 void KeepAimCameraOnCourse(void) {
     Vec3 eye;
     s32 oldDistance = g_CurrentShot.aimCameraDistance;
-    s32 minCoordinate;
-    s32 maxX;
-    s32 maxZ;
+    s32 coordinateMin;
+    s32 xMax;
+    s32 zMax;
     Radians heading;
     f32 offset;
     f32 overshoot;
 
     if (g_GameState.isMiniGolf) {
-        maxX = AIM_CAMERA_MINI_GOLF_MAX_X;
-        maxZ = AIM_CAMERA_MINI_GOLF_MAX_Z;
+        xMax = AIM_CAMERA_MINI_GOLF_MAX_X;
+        zMax = AIM_CAMERA_MINI_GOLF_MAX_Z;
     }
     else {
-        maxX = AIM_CAMERA_COURSE_MAX_X;
-        maxZ = AIM_CAMERA_COURSE_MAX_Z;
+        xMax = AIM_CAMERA_COURSE_MAX_X;
+        zMax = AIM_CAMERA_COURSE_MAX_Z;
     }
 
     heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
     overshoot = 0.0f;
     offset = cosf(heading) * g_CurrentShot.aimCameraDistance;
     eye[AXIS_X] = offset + g_CurrentShot.ballPosition[AXIS_X];
-    minCoordinate = AIM_CAMERA_MIN_COORDINATE;
-    if (eye[AXIS_X] < minCoordinate) {
-        overshoot = minCoordinate - eye[AXIS_X];
+    coordinateMin = AIM_CAMERA_MIN_COORDINATE;
+    if (eye[AXIS_X] < coordinateMin) {
+        overshoot = coordinateMin - eye[AXIS_X];
     }
-    else if (eye[AXIS_X] > maxX) {
-        overshoot = eye[AXIS_X] - maxX;
+    else if (eye[AXIS_X] > xMax) {
+        overshoot = eye[AXIS_X] - xMax;
     }
 
     if ((s32)offset != 0) {
@@ -384,13 +384,13 @@ void KeepAimCameraOnCourse(void) {
     offset = sinf(heading) * g_CurrentShot.aimCameraDistance;
     eye[AXIS_Z] = offset + g_CurrentShot.ballPosition[AXIS_Z];
     overshoot = 0.0f;
-    if (eye[AXIS_Z] < minCoordinate) {
+    if (eye[AXIS_Z] < coordinateMin) {
         g_IsAimCameraEasing = FALSE;
-        overshoot = minCoordinate - eye[AXIS_Z];
+        overshoot = coordinateMin - eye[AXIS_Z];
     }
-    else if (eye[AXIS_Z] > maxZ) {
+    else if (eye[AXIS_Z] > zMax) {
         g_IsAimCameraEasing = FALSE;
-        overshoot = eye[AXIS_Z] - maxZ;
+        overshoot = eye[AXIS_Z] - zMax;
     }
 
     if ((s32)offset != 0) {
@@ -493,7 +493,7 @@ void PlaceShotCamera(void) {
         s32 ground;
         s32 probe;
         s32 offset;
-        s32 maxRise;
+        s32 riseMax;
         f32 tilt;
         f32 worldTilt;
 
@@ -543,11 +543,11 @@ void PlaceShotCamera(void) {
             point[AXIS_Y] = lowestGround + g_CurrentShot.aimCameraHeight;
         }
 
-        maxRise = g_CurrentShot.aimCameraDistance / 1000;
-        maxRise *= maxRise;
-        maxRise /= AIM_CAMERA_RISE_DIVISOR;
-        if (g_CurrentShot.ballPosition[AXIS_Y] + maxRise < point[AXIS_Y]) {
-            point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] + maxRise;
+        riseMax = g_CurrentShot.aimCameraDistance / 1000;
+        riseMax *= riseMax;
+        riseMax /= AIM_CAMERA_RISE_DIVISOR;
+        if (g_CurrentShot.ballPosition[AXIS_Y] + riseMax < point[AXIS_Y]) {
+            point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] + riseMax;
         }
 
         g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
@@ -1032,19 +1032,19 @@ void TurnAim(s32 turnsAltHeading) {
     }
 }
 
-#define ClampAimCamera(minHeight, minDistance, maxDistance) \
+#define ClampAimCamera(heightMin, distanceMin, distanceMax) \
     { \
-        if (g_CurrentShot.aimCameraHeight > (minHeight)) { \
-            g_CurrentShot.aimCameraHeight = (minHeight); \
+        if (g_CurrentShot.aimCameraHeight > (heightMin)) { \
+            g_CurrentShot.aimCameraHeight = (heightMin); \
         } \
         if (g_CurrentShot.aimCameraHeight < AIM_CAMERA_MAX_HEIGHT) { \
             g_CurrentShot.aimCameraHeight = AIM_CAMERA_MAX_HEIGHT; \
         } \
-        if (g_CurrentShot.aimCameraDistance < (minDistance)) { \
-            g_CurrentShot.aimCameraDistance = (minDistance); \
+        if (g_CurrentShot.aimCameraDistance < (distanceMin)) { \
+            g_CurrentShot.aimCameraDistance = (distanceMin); \
         } \
-        if (g_CurrentShot.aimCameraDistance > (maxDistance)) { \
-            g_CurrentShot.aimCameraDistance = (maxDistance); \
+        if (g_CurrentShot.aimCameraDistance > (distanceMax)) { \
+            g_CurrentShot.aimCameraDistance = (distanceMax); \
         } \
     }
 
@@ -1493,7 +1493,7 @@ void PickStartingClub(HoleSetup *hole) {
         }
     }
     else {
-        s32 minRating = 0;
+        s32 ratingMin = 0;
         s32 bestGap = S32_MAX;
         s32 reaches = FALSE;
         s32 bestSlot = 0;
@@ -1506,8 +1506,8 @@ void PickStartingClub(HoleSetup *hole) {
                 g_CurrentShot.surface,
                 SHOT_MODE_NORMAL
             );
-            if (minRating < rating) {
-                minRating = rating;
+            if (ratingMin < rating) {
+                ratingMin = rating;
             }
 
             if (rating >= STARTING_CLUB_MIN_LIE_RATING) {
@@ -1515,8 +1515,8 @@ void PickStartingClub(HoleSetup *hole) {
             }
         }
 
-        if (minRating > STARTING_CLUB_MIN_LIE_RATING) {
-            minRating = STARTING_CLUB_MIN_LIE_RATING;
+        if (ratingMin > STARTING_CLUB_MIN_LIE_RATING) {
+            ratingMin = STARTING_CLUB_MIN_LIE_RATING;
         }
 
         for (slot = 0; slot < clubCount; slot++) {
@@ -1531,7 +1531,7 @@ void PickStartingClub(HoleSetup *hole) {
 
             lieRating = GetLieRating(club, g_CurrentShot.surface, SHOT_MODE_NORMAL);
             distance = GetShotDistance(club, SHOT_MODE_NORMAL) * UNITS_PER_YARD;
-            if (lieRating < minRating) {
+            if (lieRating < ratingMin) {
                 continue;
             }
 
@@ -1595,7 +1595,7 @@ void CountNotableShot(s32 playerIndex, s32 shotKind) {
     }
 
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT ||
-        f_ShotFlightCount >= MAX_COUNTED_FLIGHT_COUNT) {
+        f_ShotFlightCount >= COUNTED_FLIGHT_COUNT_MAX) {
         return;
     }
 
@@ -1757,7 +1757,7 @@ void BuildShotPreview(ShotLaunch *swing, s32 playerState) {
     }
 
     if (IsBeforePowerSet(playerState)) {
-        shot.power = MAX_LAUNCH_POWER;
+        shot.power = LAUNCH_POWER_MAX;
     }
     else {
         shot.power = swing->power;
@@ -2060,7 +2060,7 @@ Boolean IsRecordableHoleOut(s32 playerIndex) {
         }
     }
 
-    if (g_Players[playerIndex].strokeCount > MAX_RECORDED_STROKE_COUNT) {
+    if (g_Players[playerIndex].strokeCount > RECORDED_STROKE_COUNT_MAX) {
         return FALSE;
     }
 
@@ -2182,8 +2182,8 @@ void RecordRingShotClear(s32 playerIndex) {
     if (*count < 0) {
         *count = 0;
     }
-    else if (*count > MAX_RING_SHOT_CLEAR_COUNT) {
-        *count = MAX_RING_SHOT_CLEAR_COUNT;
+    else if (*count > RING_SHOT_CLEAR_COUNT_MAX) {
+        *count = RING_SHOT_CLEAR_COUNT_MAX;
     }
 
     if (g_Players[playerIndex].characterIndex < CHARACTER_COUNT) {
@@ -2193,8 +2193,8 @@ void RecordRingShotClear(s32 playerIndex) {
         if (*count < 0) {
             *count = 0;
         }
-        else if (*count > MAX_RING_SHOT_CLEAR_COUNT) {
-            *count = MAX_RING_SHOT_CLEAR_COUNT;
+        else if (*count > RING_SHOT_CLEAR_COUNT_MAX) {
+            *count = RING_SHOT_CLEAR_COUNT_MAX;
         }
     }
 
@@ -2739,7 +2739,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
 #define IsYoshiOrDonkeyKong(character) \
     ((character) == CHARACTER_YOSHI || (character) == CHARACTER_DONKEY_KONG)
 #define IsYoshiAndDonkeyKongRound() \
-    (g_GameState.playerCount == MAX_PLAYER_COUNT && \
+    (g_GameState.playerCount == PLAYER_COUNT_MAX && \
         IsYoshiOrDonkeyKong(g_Players[0].characterIndex) && \
         IsYoshiOrDonkeyKong(g_Players[1].characterIndex) && \
         IsYoshiOrDonkeyKong(g_Players[2].characterIndex) && \
@@ -3516,8 +3516,8 @@ void UpdateTurns(void) {
                     if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN &&
                         !g_GameState.isMiniGolf) {
                         f_GreenSongTempo += GREEN_SONG_TEMPO_STEP;
-                        if (f_GreenSongTempo > MAX_GREEN_SONG_TEMPO) {
-                            f_GreenSongTempo = MAX_GREEN_SONG_TEMPO;
+                        if (f_GreenSongTempo > GREEN_SONG_TEMPO_MAX) {
+                            f_GreenSongTempo = GREEN_SONG_TEMPO_MAX;
                         }
 
                         if (IsGameFlagSet(GAME_FLAG_SHOW_SWING_TEMPO)) {
@@ -3830,7 +3830,7 @@ void UpdateTurns(void) {
                     }
                     else {
                         nextState = PLAYER_STATE_SETTING_IMPACT;
-                        if (f_ShotLaunch.power == MAX_LAUNCH_POWER) {
+                        if (f_ShotLaunch.power == LAUNCH_POWER_MAX) {
                             StartShotEffect(SHOT_EFFECT_MAX_POWER);
                             sound = SOUND_IMPACT_ON_MARK;
                             PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
@@ -3903,19 +3903,19 @@ void UpdateTurns(void) {
                     g_CurrentShot.gaugeFrame >= LAST_IMPACT_GAUGE_FRAME) {
                     g_CurrentShot.impactGaugeFrame = g_CurrentShot.gaugeFrame;
                     f_ShotLaunch.impactTiming = g_CurrentShot.gaugeFrame - GAUGE_IMPACT_FRAME;
-                    if (f_ShotLaunch.impactTiming > MAX_IMPACT_TIMING) {
-                        f_ShotLaunch.impactTiming = MAX_IMPACT_TIMING;
+                    if (f_ShotLaunch.impactTiming > IMPACT_TIMING_MAX) {
+                        f_ShotLaunch.impactTiming = IMPACT_TIMING_MAX;
                     }
 
-                    if (f_ShotLaunch.impactTiming < -MAX_IMPACT_TIMING) {
-                        f_ShotLaunch.impactTiming = -MAX_IMPACT_TIMING;
+                    if (f_ShotLaunch.impactTiming < -IMPACT_TIMING_MAX) {
+                        f_ShotLaunch.impactTiming = -IMPACT_TIMING_MAX;
                     }
 
                     PlayImpactClickSound();
                     StopSound(IMPACT_POINT_SOUND_CHANNEL);
                     nextState = PLAYER_STATE_STARTING_SWING;
                     if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
-                        (f_ShotLaunch.impactTiming != 0 || f_ShotLaunch.power < MAX_LAUNCH_POWER)) {
+                        (f_ShotLaunch.impactTiming != 0 || f_ShotLaunch.power < LAUNCH_POWER_MAX)) {
                         if (g_Players[playerIndex].powerShotCount > 0) {
                             g_Players[playerIndex].powerShotCount--;
                         }
@@ -3948,18 +3948,18 @@ void UpdateTurns(void) {
                     (g_TurnController.pressedButtons & (B_BUTTON | D_CBUTTONS))) {
                     g_CurrentShot.impactGaugeFrame = g_CurrentShot.gaugeFrame;
                     if (g_TurnController.pressedButtons & B_BUTTON) {
-                        f_ShotLaunch.power = MAX_LAUNCH_POWER;
+                        f_ShotLaunch.power = LAUNCH_POWER_MAX;
                         f_ShotLaunch.impactTiming = 0;
                     }
                     else {
                         f_ShotLaunch.impactTiming = 0;
                     }
-                    if (f_ShotLaunch.impactTiming > MAX_IMPACT_TIMING) {
-                        f_ShotLaunch.impactTiming = MAX_IMPACT_TIMING;
+                    if (f_ShotLaunch.impactTiming > IMPACT_TIMING_MAX) {
+                        f_ShotLaunch.impactTiming = IMPACT_TIMING_MAX;
                     }
 
-                    if (f_ShotLaunch.impactTiming < -MAX_IMPACT_TIMING) {
-                        f_ShotLaunch.impactTiming = -MAX_IMPACT_TIMING;
+                    if (f_ShotLaunch.impactTiming < -IMPACT_TIMING_MAX) {
+                        f_ShotLaunch.impactTiming = -IMPACT_TIMING_MAX;
                     }
 
                     PlayImpactClickSound();
@@ -4112,7 +4112,7 @@ void UpdateTurns(void) {
                     LaunchBallSimulation(&g_TurnBallSimulation, 0, &f_ShotLaunch);
                     nextState = PLAYER_STATE_BALL_IN_FLIGHT;
                     if (f_ShotLaunch.impactTiming == 0 &&
-                        f_ShotLaunch.power >= MAX_LAUNCH_POWER &&
+                        f_ShotLaunch.power >= LAUNCH_POWER_MAX &&
                         !(GetClub(f_ShotLaunch.clubIndex)->surfaceMask & CLUB_SURFACE_GREEN) &&
                         RateShotLength() == 1) {
                         StartBanner(0);
@@ -4157,7 +4157,7 @@ void UpdateTurns(void) {
                         previousPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
                     );
 
-                    for (skipStep = 0; skipStep < MAX_ROLL_SKIP_STEPS; skipStep++) {
+                    for (skipStep = 0; skipStep < ROLL_SKIP_STEPS_MAX; skipStep++) {
                         u32 distance = IntLength2D(
                             g_TurnBallSimulation.position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
                             g_TurnBallSimulation.position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
@@ -4404,7 +4404,7 @@ void UpdateTurns(void) {
                         else if (g_GameState.replayKind == REPLAY_KIND_NONE &&
                             (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                                 g_GameState.gameMode == GAME_MODE_CLUB_SLOTS)) {
-                            s8 results[MAX_PLAYER_COUNT];
+                            s8 results[PLAYER_COUNT_MAX];
 
                             if (g_Players[playerIndex].strokeCount >=
                                 g_HoleSetup.par * STROKE_LIMIT_PER_PAR) {
@@ -4786,7 +4786,7 @@ void UpdateTurns(void) {
                     }
                     else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                         g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-                        s8 results[MAX_PLAYER_COUNT];
+                        s8 results[PLAYER_COUNT_MAX];
                         Boolean isAnyOut = FALSE;
                         s32 holeResult = GetGroupHoleResult(results);
 
