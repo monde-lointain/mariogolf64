@@ -2819,7 +2819,7 @@ void SyncSaveOptions(SaveData *save, Boolean isWrite, SaveReadResult readResult)
     if (!isWrite) {
         optionBits = &g_MenuMemory.optionBits;
         *optionBits = 0;
-        if (readResult > 0) {
+        if (readResult >= SAVE_READ_FIRST_COPY) {
             if (options[SAVE_OPTION_MUSIC_OFF]) {
                 *optionBits = OPTION_BIT_MUSIC_OFF;
             }

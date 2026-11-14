@@ -100,6 +100,7 @@ typedef struct GroundTile {
 } GroundTile;
 
 enum TerrainCode {
+    TERRAIN_CODE_NONE = -1,
     TERRAIN_CODE_FAIRWAY,
     TERRAIN_CODE_ROUGH,
     TERRAIN_CODE_BUNKER,

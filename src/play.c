@@ -2148,7 +2148,7 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
             detailMax = GROUND_DETAIL_COARSE;
         }
 
-        if (detail >= 0) {
+        if (detail > GROUND_DETAIL_HIDDEN) {
             if (visibility < g_GroundFarthestDepth) {
                 g_GroundFarthestDepth = visibility;
             }
@@ -2281,7 +2281,7 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
                             continue;
                         }
                     }
-                    else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+                    else if (g_WorkArea.hole.tiles[tileIndex].detail > GROUND_DETAIL_HIDDEN) {
                         gSPVertex(
                             gfx++,
                             GridVertex(HalfFirstColumn(half) + (groupOffset * 2), row * 2),
@@ -2348,7 +2348,8 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
                 bottomSlot = spareSlot;
                 gDPPipeSync(gfx++);
 
-                if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
+                if (previousDetail <= GROUND_DETAIL_HIDDEN ||
+                    previousDetail == GROUND_DETAIL_FINE) {
                     gSPVertex(
                         gfx++,
                         GridVertex(HalfFirstColumn(half), row * 2),
@@ -2402,7 +2403,7 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
                 }
 
                 for (groupOffset = 0; groupOffset < GROUND_TILE_GROUP_SIZE; groupOffset++) {
-                    if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+                    if (g_WorkArea.hole.tiles[tileIndex].detail > GROUND_DETAIL_HIDDEN) {
                         for (pass = 0; pass < GROUND_TILE_PASSES_MAX; pass++) {
                             LoadTileTexture(tileIndex, firstTileS, groupOffset, row);
                             DrawTileQuads(
@@ -2437,7 +2438,8 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
                 middleSlot = topSlot;
                 topSlot = bottomSlot;
                 bottomSlot = spareSlot;
-                if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
+                if (previousDetail <= GROUND_DETAIL_HIDDEN ||
+                    previousDetail == GROUND_DETAIL_FINE) {
                     gSPVertex(
                         gfx++,
                         GridVertex(HalfFirstColumn(half), row * 2),
@@ -2454,7 +2456,7 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
                 );
                 for (groupTileIndex = 0; groupTileIndex < GROUND_TILE_GROUP_SIZE;
                     groupTileIndex++) {
-                    if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+                    if (g_WorkArea.hole.tiles[tileIndex].detail > GROUND_DETAIL_HIDDEN) {
                         for (passIndex = 0; passIndex < GROUND_TILE_PASSES_MAX; passIndex++) {
                             LoadTileTexture(tileIndex, firstTileS, groupTileIndex, row);
                             gSP2Triangles(

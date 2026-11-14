@@ -1447,7 +1447,7 @@ void UpdateOpening(void) {
             case OPENING_SCENE_MARIO_DRIVE:
                 g_ScreenFadeDuration = 1;
                 g_ScreenFadeFramesLeft = 1;
-                g_ScreenFadeKind = 1;
+                g_ScreenFadeKind = FADE_IN;
                 g_ScreenFadeColor.red = 0;
                 g_ScreenFadeColor.green = 0;
                 g_ScreenFadeColor.blue = 0;
@@ -1457,7 +1457,7 @@ void UpdateOpening(void) {
             case OPENING_SCENE_MARIO_DRIVE + 1:
                 g_ScreenFadeDuration = 1;
                 g_ScreenFadeFramesLeft = 1;
-                g_ScreenFadeKind = 1;
+                g_ScreenFadeKind = FADE_IN;
                 g_ScreenFadeColor.red = 0;
                 g_ScreenFadeColor.green = 0;
                 g_ScreenFadeColor.blue = 0;

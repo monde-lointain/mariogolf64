@@ -769,7 +769,7 @@ u16 GetMapColor(s32 x, s32 z) {
 
 s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
     u16 groundColor = GetMapColor(x, z);
-    TerrainCode code = -1;
+    TerrainCode code = TERRAIN_CODE_NONE;
     s32 groundRed;
     s32 groundGreen;
     s32 groundBlue;
@@ -820,7 +820,7 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
             break;
     }
 
-    if (code >= 0) {
+    if (code > TERRAIN_CODE_NONE) {
         groundRed = groundColor >> RGBA16_RED_SHIFT;
         groundGreen = (groundColor >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
         surfaceColor = g_TerrainCodeColors[code];

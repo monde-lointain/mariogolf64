@@ -4104,7 +4104,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
         }
 
         tile->detail = detail;
-        if (detail >= 0) {
+        if (detail > GROUND_DETAIL_HIDDEN) {
             if (visibility < g_GroundFarthestDepth) {
                 g_GroundFarthestDepth = visibility;
             }
@@ -4661,7 +4661,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                             }
                         }
                     }
-                    else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+                    else if (g_WorkArea.hole.tiles[tileIndex].detail > GROUND_DETAIL_HIDDEN) {
                         gSPVertex(
                             gfx++,
                             GridVertex(HalfFirstColumn(half) + (groupTile * 2), row * 2),
@@ -4732,7 +4732,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                 bottomSlot = spareSlot;
                 gDPPipeSync(gfx++);
 
-                if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
+                if (previousDetail <= GROUND_DETAIL_HIDDEN ||
+                    previousDetail == GROUND_DETAIL_FINE) {
                     gSPVertex(
                         gfx++,
                         GridVertex(HalfFirstColumn(half), row * 2),
@@ -4790,7 +4791,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
 
                 for (groupTileIndex = 0; groupTileIndex < GROUND_TILE_GROUP_SIZE;
                     groupTileIndex++) {
-                    if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+                    if (g_WorkArea.hole.tiles[tileIndex].detail > GROUND_DETAIL_HIDDEN) {
                         for (pass = 0; pass < GROUND_TILE_PASSES_MAX; pass++) {
                             LoadEditorTileTexture(
                                 tileIndex,
@@ -4833,7 +4834,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                 middleSlot = topSlot;
                 topSlot = bottomSlot;
                 bottomSlot = spareSlot;
-                if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
+                if (previousDetail <= GROUND_DETAIL_HIDDEN ||
+                    previousDetail == GROUND_DETAIL_FINE) {
                     gSPVertex(
                         gfx++,
                         GridVertex(HalfFirstColumn(half), row * 2),
@@ -4849,7 +4851,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
                     bottomSlot
                 );
                 for (groupOffset = 0; groupOffset < GROUND_TILE_GROUP_SIZE; groupOffset++) {
-                    if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+                    if (g_WorkArea.hole.tiles[tileIndex].detail > GROUND_DETAIL_HIDDEN) {
                         for (coarsePass = 0; coarsePass < GROUND_TILE_PASSES_MAX; coarsePass++) {
                             LoadEditorTileTexture(
                                 tileIndex,
