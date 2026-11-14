@@ -49,15 +49,16 @@ static void *f_UnusedPositionRoutines[6] UNUSED = {NULL, NULL, guPosition, NULL,
 s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
     s32 score = 0;
     CourseRecord *course = &g_CourseRecords[GetCourseRecordIndex()];
-    s32 hole;
+    s32 holeIndex;
 
     if (g_GameState.holeIndex == endHole) {
         endHole += g_Players[playerIndex].holeStatus != HOLE_STATUS_PLAYING;
     }
 
-    for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
-        score += g_Players[playerIndex].holes[hole].strokeCount - course->holes[hole].par +
-            GetHandicapOffset(g_GameState.courseIndex, hole, g_Players[playerIndex].handicap);
+    for (holeIndex = GetFirstHoleIndex(); holeIndex < endHole; holeIndex++) {
+        score += g_Players[playerIndex].holes[holeIndex].strokeCount -
+            course->holes[holeIndex].par +
+            GetHandicapOffset(g_GameState.courseIndex, holeIndex, g_Players[playerIndex].handicap);
     }
 
     return score;
@@ -120,18 +121,18 @@ void TallySkins(s32 endHole) {
 }
 
 void StartBets(void) {
-    s32 player;
+    s32 playerIndex;
     s32 bet;
 
-    for (player = 0; player != PLAYER_COUNT_MAX; player++) {
+    for (playerIndex = 0; playerIndex != PLAYER_COUNT_MAX; playerIndex++) {
         for (bet = 0; bet != BET_COUNT; bet++) {
-            g_BetTallies[player][bet] = 0;
+            g_BetTallies[playerIndex][bet] = 0;
         }
     }
 
-    for (player = 0; player != PLAYER_COUNT_MAX; player++) {
+    for (playerIndex = 0; playerIndex != PLAYER_COUNT_MAX; playerIndex++) {
         for (bet = 0; bet != BET_COUNT; bet++) {
-            g_Players[player].betTallies[bet] = g_BetTallies[player][bet];
+            g_Players[playerIndex].betTallies[bet] = g_BetTallies[playerIndex][bet];
         }
     }
 
@@ -153,12 +154,12 @@ void StartBets(void) {
 }
 
 void ResumeBets(void) {
-    s32 player;
+    s32 playerIndex;
     s32 bet;
 
-    for (player = 0; player != PLAYER_COUNT_MAX; player++) {
+    for (playerIndex = 0; playerIndex != PLAYER_COUNT_MAX; playerIndex++) {
         for (bet = 0; bet != BET_COUNT; bet++) {
-            g_BetTallies[player][bet] = g_Players[player].betTallies[bet];
+            g_BetTallies[playerIndex][bet] = g_Players[playerIndex].betTallies[bet];
         }
     }
 
@@ -179,17 +180,17 @@ void SetContestWinner(s32 playerIndex) {
 
 void SettleLongestDrive(void) {
     s32 longest;
-    s32 player;
+    s32 playerIndex;
     s32 distance;
 
     if (g_GameState.betRates[BET_LONGEST_DRIVE] > 0) {
         longest = -1;
         f_ContestWinner = NO_CONTEST_WINNER;
-        for (player = 0; player != g_GameState.playerCount; player++) {
-            if (g_Players[player].driveDistance != UNCOUNTED_DISTANCE) {
-                distance = g_Players[player].driveDistance * DRIVE_COMPARISON_SCALE;
+        for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+            if (g_Players[playerIndex].driveDistance != UNCOUNTED_DISTANCE) {
+                distance = g_Players[playerIndex].driveDistance * DRIVE_COMPARISON_SCALE;
                 if (longest < distance) {
-                    f_ContestWinner = player;
+                    f_ContestWinner = playerIndex;
                     longest = distance;
                 }
                 else if (distance == longest) {
@@ -204,9 +205,9 @@ void SettleLongestDrive(void) {
         else {
             g_BetTallies[f_ContestWinner][BET_LONGEST_DRIVE] +=
                 g_LongestDrivePot * (g_GameState.playerCount - 1);
-            for (player = 0; player != g_GameState.playerCount; player++) {
-                if (player != f_ContestWinner) {
-                    g_BetTallies[player][BET_LONGEST_DRIVE] -= g_LongestDrivePot;
+            for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+                if (playerIndex != f_ContestWinner) {
+                    g_BetTallies[playerIndex][BET_LONGEST_DRIVE] -= g_LongestDrivePot;
                 }
             }
 
@@ -219,17 +220,17 @@ void SettleLongestDrive(void) {
 
 void SettleNearestPin(void) {
     s32 nearest;
-    s32 player;
+    s32 playerIndex;
     s32 distance;
 
     if (g_GameState.betRates[BET_NEAREST_PIN] > 0) {
         nearest = FARTHER_THAN_ANY_DISTANCE;
         f_ContestWinner = NO_CONTEST_WINNER;
-        for (player = 0; player != g_GameState.playerCount; player++) {
-            distance = g_Players[player].pinDistance;
+        for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+            distance = g_Players[playerIndex].pinDistance;
             if (distance != UNCOUNTED_DISTANCE) {
                 if (distance < nearest) {
-                    f_ContestWinner = player;
+                    f_ContestWinner = playerIndex;
                     nearest = distance;
                 }
                 else if (distance == nearest) {
@@ -244,9 +245,9 @@ void SettleNearestPin(void) {
         else {
             g_BetTallies[f_ContestWinner][BET_NEAREST_PIN] +=
                 g_NearestPinPot * (g_GameState.playerCount - 1);
-            for (player = 0; player != g_GameState.playerCount; player++) {
-                if (player != f_ContestWinner) {
-                    g_BetTallies[player][BET_NEAREST_PIN] -= g_NearestPinPot;
+            for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+                if (playerIndex != f_ContestWinner) {
+                    g_BetTallies[playerIndex][BET_NEAREST_PIN] -= g_NearestPinPot;
                 }
             }
 
@@ -261,22 +262,22 @@ void ClearContestWinner(void) {
 
 void UpdateContest(Boolean isHoleOver) {
     s32 holeIndex = g_GameState.holeIndex;
-    s32 player;
+    s32 playerIndex;
     s32 measuredCount;
 
     if (!f_IsContestDecided) {
         if (IsMarkedParFive(g_GameState.courseIndex, holeIndex)) {
             if (isHoleOver == TRUE) {
-                for (player = 0; player != g_GameState.playerCount; player++) {
-                    if (g_Players[player].driveDistance == UNMEASURED_DISTANCE) {
-                        g_Players[player].driveDistance = UNCOUNTED_DISTANCE;
+                for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+                    if (g_Players[playerIndex].driveDistance == UNMEASURED_DISTANCE) {
+                        g_Players[playerIndex].driveDistance = UNCOUNTED_DISTANCE;
                     }
                 }
             }
 
             measuredCount = 0;
-            for (player = 0; player != g_GameState.playerCount; player++) {
-                measuredCount += g_Players[player].driveDistance != UNMEASURED_DISTANCE;
+            for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+                measuredCount += g_Players[playerIndex].driveDistance != UNMEASURED_DISTANCE;
             }
 
             if (measuredCount == g_GameState.playerCount) {
@@ -286,16 +287,16 @@ void UpdateContest(Boolean isHoleOver) {
         }
         else if (IsParThree(g_GameState.courseIndex, holeIndex)) {
             if (isHoleOver == TRUE) {
-                for (player = 0; player != g_GameState.playerCount; player++) {
-                    if (g_Players[player].pinDistance == UNMEASURED_DISTANCE) {
-                        g_Players[player].pinDistance = UNCOUNTED_DISTANCE;
+                for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+                    if (g_Players[playerIndex].pinDistance == UNMEASURED_DISTANCE) {
+                        g_Players[playerIndex].pinDistance = UNCOUNTED_DISTANCE;
                     }
                 }
             }
 
             measuredCount = 0;
-            for (player = 0; player != g_GameState.playerCount; player++) {
-                measuredCount += g_Players[player].pinDistance != UNMEASURED_DISTANCE;
+            for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+                measuredCount += g_Players[playerIndex].pinDistance != UNMEASURED_DISTANCE;
             }
 
             if (measuredCount == g_GameState.playerCount) {
@@ -314,7 +315,7 @@ void RecordCourseRound(void) {
     RoundStats *stats = &g_RoundStats;
     CourseRecord *course = &g_CourseRecords[g_GameState.courseIndex];
     Boolean isAtRoundLimit;
-    s32 hole;
+    s32 holeIndex;
     s64 score;
     s64 total;
     s32 sum;
@@ -362,8 +363,8 @@ void RecordCourseRound(void) {
     }
 
     total = 0;
-    for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-        total += g_Players[0].holes[hole].strokeCount;
+    for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
+        total += g_Players[0].holes[holeIndex].strokeCount;
     }
 
     total += courseStats->strokeTotal;
@@ -414,9 +415,9 @@ void RecordCourseRound(void) {
     }
 
     total = 0;
-    for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-        if (g_Players[0].holes[hole].puttCount != UNCOUNTED_PUTTS) {
-            total += g_Players[0].holes[hole].puttCount;
+    for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
+        if (g_Players[0].holes[holeIndex].puttCount != UNCOUNTED_PUTTS) {
+            total += g_Players[0].holes[holeIndex].puttCount;
         }
     }
 
@@ -431,8 +432,8 @@ void RecordCourseRound(void) {
 
     courseStats->puttTotal = total;
 
-    for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-        if (g_Players[0].holes[hole].strokeCount <= course->holes[hole].par) {
+    for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
+        if (g_Players[0].holes[holeIndex].strokeCount <= course->holes[holeIndex].par) {
             if (courseStats->parOrBetterCount < RECORD_TOTAL_LIMIT) {
                 courseStats->parOrBetterCount++;
             }
@@ -444,9 +445,10 @@ void RecordCourseRound(void) {
         }
     }
 
-    for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-        shotsToGreen = g_Players[0].holes[hole].strokeCount - g_Players[0].holes[hole].puttCount;
-        if (course->holes[hole].par - shotsToGreen >= PAR_ON_SPARE_STROKES) {
+    for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
+        shotsToGreen =
+            g_Players[0].holes[holeIndex].strokeCount - g_Players[0].holes[holeIndex].puttCount;
+        if (course->holes[holeIndex].par - shotsToGreen >= PAR_ON_SPARE_STROKES) {
             if (courseStats->parOnCount < RECORD_TOTAL_LIMIT) {
                 courseStats->parOnCount++;
             }

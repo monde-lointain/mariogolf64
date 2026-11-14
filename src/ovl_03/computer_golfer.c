@@ -1021,7 +1021,7 @@ void SortByKeys(s32 count, s32 *values, s32 *otherValues, s32 *keys, s32 order) 
 s32 GetScoreToParSoFar(s32 playerIndex) {
     s32 strokeTotal = 0;
     s32 parTotal = 0;
-    s32 hole;
+    s32 holeIndex;
     s32 par;
     s32 strokeCount;
 
@@ -1029,9 +1029,9 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
         return 0;
     }
 
-    for (hole = 0; hole < g_GameState.holeIndex; hole++) {
-        strokeCount = g_Players[playerIndex].holes[hole].strokeCount;
-        par = g_CourseRecords[g_GameState.courseIndex].holes[hole].par;
+    for (holeIndex = 0; holeIndex < g_GameState.holeIndex; holeIndex++) {
+        strokeCount = g_Players[playerIndex].holes[holeIndex].strokeCount;
+        par = g_CourseRecords[g_GameState.courseIndex].holes[holeIndex].par;
         if ((par * 2) + 1 < strokeCount) {
             strokeCount = par - 1;
         }

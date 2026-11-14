@@ -286,7 +286,7 @@ void FormatDefaultPlayerName(s32 index, char *name) {
 
 void SetUpPlayers(void) {
     s32 playerIndex;
-    s32 hole;
+    s32 holeIndex;
     s32 slot;
 
     if (g_Scene == SCENE_PLAY_BEST_SHOT_REPLAY ||
@@ -309,9 +309,9 @@ void SetUpPlayers(void) {
             g_Players[0].noiseSeed = g_PlayRecords->noiseSeed;
         }
 
-        for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
-            g_Players[0].holes[hole].strokeCount = 0;
-            g_Players[0].holes[hole].puttCount = UNCOUNTED_PUTTS;
+        for (holeIndex = 0; holeIndex < COURSE_HOLE_COUNT; holeIndex++) {
+            g_Players[0].holes[holeIndex].strokeCount = 0;
+            g_Players[0].holes[holeIndex].puttCount = UNCOUNTED_PUTTS;
         }
 
         g_Players[0].powerShotCount = POWER_SHOTS_UNLIMITED;
@@ -338,9 +338,9 @@ void SetUpPlayers(void) {
             g_Players[playerIndex].isComputer = FALSE;
             g_Players[playerIndex].teeOrder = 0;
             g_Players[playerIndex].gridColor = GetSaveData()->options[SAVE_OPTION_GRID_COLOR];
-            for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
-                g_Players[playerIndex].holes[hole].strokeCount = 0;
-                g_Players[playerIndex].holes[hole].puttCount = UNCOUNTED_PUTTS;
+            for (holeIndex = 0; holeIndex < COURSE_HOLE_COUNT; holeIndex++) {
+                g_Players[playerIndex].holes[holeIndex].strokeCount = 0;
+                g_Players[playerIndex].holes[holeIndex].puttCount = UNCOUNTED_PUTTS;
             }
 
             for (slot = SHOT_KIND_COUNT - 1; slot >= 0; slot--) {

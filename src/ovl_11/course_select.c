@@ -224,12 +224,12 @@ static u8 f_UnusedBufferAfterRepeatedButtons[0x40] UNUSED;
 s32 CountOpenRingShotCourses(void) {
     SaveData *save = GetSaveData();
     s32 starCount = 0;
-    CourseIndex course;
-    s32 hole;
+    CourseIndex courseIndex;
+    s32 holeIndex;
 
-    for (course = 0; course != RING_SHOT_COURSE_COUNT; course++) {
-        for (hole = 0; hole != RING_SHOT_HOLE_COUNT; hole++) {
-            starCount += save->records.hasRingShotStar[course][hole] > 0;
+    for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
+        for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
+            starCount += save->records.hasRingShotStar[courseIndex][holeIndex] > 0;
         }
     }
 
@@ -1152,13 +1152,13 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
         {-0.89f, 0.45f},
         {-0.89f, -0.45f},
     };
-    u8 hole;
+    u8 holeIndex;
     s32 width;
     s32 height;
     s32 left;
     s32 top;
     s32 tile;
-    s32 course;
+    s32 courseIndex;
     u8 *spinningImage = f_StarImages[f_StarBufferIndex];
 
     LoadSmallPalette(&gfx, TILE_SPINNING_STAR, ImageBody(spinningImage));
@@ -1230,8 +1230,8 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
         G_TX_NOLOD
     );
     gDPPipeSync(gfx++);
-    for (hole = 0; hole < RING_SHOT_HOLE_COUNT; hole++) {
-        if (hole == memory->holeIndex) {
+    for (holeIndex = 0; holeIndex < RING_SHOT_HOLE_COUNT; holeIndex++) {
+        if (holeIndex == memory->holeIndex) {
             width = STAR_GROWTH;
             height = STAR_GROWTH;
         }
@@ -1240,17 +1240,19 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
             height = 0;
         }
 
-        left = (hole * STAR_SPACING) + STARS_LEFT;
+        left = (holeIndex * STAR_SPACING) + STARS_LEFT;
         top = STARS_TOP;
 
-        course = memory->courseIndex;
-        if (hole == memory->holeIndex) {
-            tile = (save->records.hasRingShotStar[course][hole] == 0) ? TILE_SPINNING_EMPTY_STAR :
-                                                                        TILE_SPINNING_STAR;
+        courseIndex = memory->courseIndex;
+        if (holeIndex == memory->holeIndex) {
+            tile = (save->records.hasRingShotStar[courseIndex][holeIndex] == 0) ?
+                TILE_SPINNING_EMPTY_STAR :
+                TILE_SPINNING_STAR;
         }
         else {
-            tile = (save->records.hasRingShotStar[course][hole] == 0) ? TILE_STILL_EMPTY_STAR :
-                                                                        TILE_STILL_STAR;
+            tile = (save->records.hasRingShotStar[courseIndex][holeIndex] == 0) ?
+                TILE_STILL_EMPTY_STAR :
+                TILE_STILL_STAR;
         }
 
         DrawTextureRect(
