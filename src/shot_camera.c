@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
+// The original reads the chosen options here as s32; see save.h.
+#define WIDENS_CHOSEN_OPTIONS
+
 #include "ball_simulation.h"
 #include "camera.h"
 #include "character_slot.h"
@@ -31,6 +34,7 @@
 #include "player.h"
 #include "round_events.h"
 #include "round_hud.h"
+#include "save.h"
 #include "scene.h"
 #include "scoring.h"
 #include "screen_layers.h"
@@ -157,11 +161,6 @@ static s32 f_NoiseBlendStep = 0;
 static s8 f_IsNoiseResetPending = TRUE;
 static s8 f_NoiseRow = 0;
 
-#ifdef AVOID_UB
-s8 IsSimpleCameraChosen(void);
-#else
-s32 IsSimpleCameraChosen();
-#endif
 void ChooseFlightCameraKind(void);
 void PlaceFlightCamera(s32 step);
 

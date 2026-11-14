@@ -3,6 +3,9 @@
 #include <PR/libmus.h>
 #include <ultra64.h>
 
+// The original reads the chosen options here as s32; see save.h.
+#define WIDENS_CHOSEN_OPTIONS
+
 #include "address.h"
 #include "asset.h"
 #include "character.h"
@@ -257,11 +260,6 @@ static u32 f_SongRomBounds[(LAST_SONG_ID + 1) * 2] = {
 static s32 f_UnusedWordsAfterSongRomBounds[10] UNUSED = {5, 0, 5, 5, 0, 5, 5, 5, 0, 0};
 static u32 f_LastAudioFrame;
 
-#ifdef AVOID_UB
-s8 IsMusicOffChosen(void);
-#else
-s32 IsMusicOffChosen(void);
-#endif
 s32 ChangeCustomEffect(s32 type);
 
 void PlaySound(SoundId soundId, SoundChannel channel, SoundVolume volume) {

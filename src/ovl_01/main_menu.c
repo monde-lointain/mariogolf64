@@ -5,6 +5,9 @@
 #include <string.h>
 #include <ultra64.h>
 
+// The original reads the chosen options here as s32; see save.h.
+#define WIDENS_CHOSEN_OPTIONS
+
 #include "address.h"
 #include "asset.h"
 #include "best_times.h"
@@ -210,15 +213,6 @@ void DrawOptionsScreen(Gfx **displayListHead);
 void DrawCaddySelect(Gfx **displayListHead);
 void DrawBlankScreen(Gfx **displayListHead);
 void DrawBirdieBadgeLabel(Gfx **displayListHead);
-#ifdef AVOID_UB
-s8 IsMusicOffChosen(void);
-s8 IsMonoChosen(void);
-s8 IsSimpleCameraChosen(void);
-#else
-s32 IsMusicOffChosen(void);
-s32 IsMonoChosen(void);
-s32 IsSimpleCameraChosen(void);
-#endif
 void OnMenuResourcesLoaded(void);
 void SetUpChosenGame(void);
 void UpdateMenuTitleScreen(void);
