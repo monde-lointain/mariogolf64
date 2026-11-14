@@ -83,7 +83,7 @@ u8 g_IsMenuCharacterLoaded[MAXCONTROLLERS];
 ImageAsset *g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
 BetSet g_BetSet;
 ImageAsset *g_CharacterFaceImages[18];
-void *g_CharacterFacePalettes[18];
+PaletteColor *g_CharacterFacePalettes[18];
 s32 g_ChoosingPlayerIndex;
 s32 g_ChosenCharacters[PLAYER_COUNT_MAX];
 s16 g_ChosenLabelGrowth;
@@ -103,12 +103,12 @@ MenuMemory g_MenuMemory;
 s32 g_MenuScreen;
 ImageAsset *g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
 u8 *g_PlayerFaceImages[PLAYER_COUNT_MAX];
-u16 *g_PlayerFacePalettes[PLAYER_COUNT_MAX];
+PaletteColor *g_PlayerFacePalettes[PLAYER_COUNT_MAX];
 Player g_Players[PLAYER_COUNT_MAX];
 ImageAsset *g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
 TakenCharacters g_TakenCharacters;
 void *g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
-void *g_TrophyPalettes[TROPHY_PALETTE_COUNT];
+PaletteColor *g_TrophyPalettes[TROPHY_PALETTE_COUNT];
 
 FILE_STATIC SaveData g_SaveData;
 

@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
 #include "bets.h"
 #include "course.h"
 #include "language.h"
@@ -65,7 +66,7 @@ typedef struct Scorecard {
     u8 *flapNameImages;
     u8 *gridImage;
     u8 *faceImages[PLAYER_COUNT_MAX];
-    u16 *facePalettes[PLAYER_COUNT_MAX];
+    PaletteColor *facePalettes[PLAYER_COUNT_MAX];
     u8 *betSubtitlesImage;
     UBoolean8 isOddFaceStep;
     u8 faceFrameTime;

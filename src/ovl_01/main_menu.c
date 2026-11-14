@@ -6641,7 +6641,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
     Radians angle;
     f32 wheelX;
     f32 bobOffset;
-    void *palette;
+    PaletteColor *palette;
     u8 *texels;
     s16 badgeCount;
     s32 placeCount;
@@ -6879,7 +6879,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
                                              drawnIndex];
             }
             else {
-                palette = ImageBody(MENU_ICON_IMAGE_PAIRS[0][drawnIndex]);
+                palette = (PaletteColor *)ImageBody(MENU_ICON_IMAGE_PAIRS[0][drawnIndex]);
                 texels = MENU_ICON_IMAGE_PAIRS[0][drawnIndex];
             }
 

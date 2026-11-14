@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
 #include "bets.h"
 #include "character.h"
 #include "club.h"
@@ -14,7 +15,7 @@
 #define PLAYER_COUNT_MAX 4
 
 extern u8 *g_PlayerFaceImages[PLAYER_COUNT_MAX];
-extern u16 *g_PlayerFacePalettes[PLAYER_COUNT_MAX];
+extern PaletteColor *g_PlayerFacePalettes[PLAYER_COUNT_MAX];
 
 #define RING_COUNT 3
 

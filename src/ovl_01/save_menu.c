@@ -2926,7 +2926,7 @@ void DrawSavedMiniGolfImage(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
     s32 stripTop;
-    void *palette;
+    PaletteColor *palette;
 
     GetSaveData();
     GetMenuMemory();

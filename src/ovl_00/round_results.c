@@ -278,7 +278,7 @@ static u8 *f_ResultsCourseImage;
 static u8 *f_FaceImage;
 static u8 *f_FacePalette;
 static u8 *f_PlayerFaceImages[PLAYER_COUNT_MAX];
-static u8 *f_PlayerFacePalettes[PLAYER_COUNT_MAX];
+static PaletteColor *f_PlayerFacePalettes[PLAYER_COUNT_MAX];
 static u8 *f_ResultsCloudImage;
 static u8 *f_ResultsLabelsImage;
 static u8 *f_ResultsLargeDigitsImage;
@@ -386,7 +386,7 @@ void LoadRoundResults(void) {
     s32 j;
     s32 k;
     s32 holeEnd;
-    void *palette;
+    PaletteColor *palette;
     u32 size;
 
     save = GetSaveData();

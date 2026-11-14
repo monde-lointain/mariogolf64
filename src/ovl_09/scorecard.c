@@ -430,7 +430,8 @@ void FreeScorecard(void) {
         FreeMemory(image);
         for (i = 0; i != g_GameState.playerCount; i++) {
             u8 **faceImages = (u8 **)AddressPast(tableImage, BytesPastTableImage(faceImages));
-            u16 **facePalettes = (u16 **)AddressPast(tableImage, BytesPastTableImage(facePalettes));
+            PaletteColor **facePalettes =
+                (u16 **)AddressPast(tableImage, BytesPastTableImage(facePalettes));
 
             FreeMemory(&faceImages[i]);
             FreeMemory(&facePalettes[i]);

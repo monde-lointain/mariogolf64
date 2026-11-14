@@ -1332,7 +1332,7 @@ void LoadCharacterFaces(void) {
     for (slotIndex = 0; slotIndex != CHARACTER_COUNT; slotIndex++) {
         ImageAsset *faceImage = g_CharacterFaceImages[slotIndex];
         AssetFile *paletteFile = &file;
-        void *palette = g_CharacterFacePalettes[slotIndex];
+        PaletteColor *palette = g_CharacterFacePalettes[slotIndex];
 
         if (slotIndex >= FIRST_IMPORTED_CHARACTER) {
             if (g_ImportedCharacters[slotIndex - FIRST_IMPORTED_CHARACTER].characterIndex >= 0) {
@@ -1514,7 +1514,7 @@ void DrawGridFaces(Gfx **displayListHead, UBoolean8 isSinglePlayer) {
     s16 gridMark;
     u16 characterIndex;
     ImageAsset *faceImage;
-    void *facePalette;
+    PaletteColor *facePalette;
 
     for (row = 0; row != CHARACTER_GRID_ROW_COUNT;) {
         for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT;) {

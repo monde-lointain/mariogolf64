@@ -228,7 +228,7 @@ static Radians f_ReplayTitleBobAngle = 0.0f;
 
 static s32 f_SlideOffsets[4];
 static u8 f_UnusedBytesAfterSlideOffsets[8] UNUSED;
-static void *f_FacePalettes[FACE_IMAGE_COUNT];
+static PaletteColor *f_FacePalettes[FACE_IMAGE_COUNT];
 static ImageAsset *f_FaceImages[FACE_IMAGE_COUNT];
 static ImageAsset *f_ModeIconImages[SAVED_GAME_COUNT][2];
 static ImageAsset *f_NamePlateImage;

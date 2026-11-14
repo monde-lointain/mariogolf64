@@ -197,7 +197,7 @@ static s32 f_PlankMotion = PLANKS_SHUT;
 static u8 *f_BoardImage;
 static u8 *f_CourseBadges[COURSE_INDEX_COUNT];
 static u8 *f_CourseImage;
-static u16 *f_CourseImagePalette;
+static PaletteColor *f_CourseImagePalette;
 static u8 *f_ArrowsImage;
 static u8 *f_StarImages[STAR_IMAGE_COUNT];
 static u8 *f_EmptyStarImages[STAR_IMAGE_COUNT];

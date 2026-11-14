@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
 #include "controller.h"
 #include "course.h"
 #include "gbi_helpers.h"

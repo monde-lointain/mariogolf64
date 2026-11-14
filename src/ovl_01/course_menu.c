@@ -1017,7 +1017,7 @@ void DrawCourseTrophies(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
-    void *palette = NULL;
+    PaletteColor *palette = NULL;
     s32 openCourseCount;
     void *texels;
     s16 place;

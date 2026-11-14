@@ -11,6 +11,9 @@ typedef s32 WideAssetId;
 // disc file tables.
 typedef s16 SignedAssetId;
 
+// One RGBA16 color of a loaded palette (TLUT) file.
+typedef u16 PaletteColor;
+
 typedef struct AssetFile {
     u32 cursor;
     s32 size;
