@@ -102,7 +102,7 @@ typedef struct TagOffset {
 void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer);
 void DrawCharacterBoard(Gfx **displayListHead);
 void DrawPlayerTags(Gfx **displayListHead, u8 tagMode);
-void DrawComIcon(Gfx **displayListHead, s32 unused);
+void DrawComputerIcon(Gfx **displayListHead, s32 unused);
 void DrawLeftyIcon(Gfx **displayListHead, s32 unused);
 void DrawCurveMeter(Gfx **displayListHead, s32 clubSet);
 
@@ -113,7 +113,7 @@ static u8 f_UnreadSelectDoneByte = 0;
 static s8 f_FaceFrame = 0;
 static u8 f_UnreadFaceToggle = 0;
 static s8 f_FaceFrameTime = 0;
-static s8 f_IsComButtonHeld = FALSE;
+static s8 f_IsComputerButtonHeld = FALSE;
 static s8 f_IsLeftyButtonHeld = FALSE;
 static s8 f_PreviewedPalette = NO_PALETTE;
 static s32 f_UnreadSelectWords[4] UNUSED = {-1, -1, -1, -1};
@@ -963,7 +963,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
         f_PreviewedPalette = NO_PALETTE;
         g_ChoosingPlayerIndex = playerIndex;
-        f_IsComButtonHeld = FALSE;
+        f_IsComputerButtonHeld = FALSE;
         f_IsLeftyButtonHeld = FALSE;
         if (playerIndex == 1) {
             channel = FIRST_CHARACTER_SOUND_CHANNEL;
@@ -1133,7 +1133,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
         OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
         ReadAssetFile(g_CharacterFacePalettes[(s16)faceSlot], GetAssetFileSize(&file), &file);
         g_ChoosingPlayerIndex = playerIndex;
-        f_IsComButtonHeld = FALSE;
+        f_IsComputerButtonHeld = FALSE;
         f_IsLeftyButtonHeld = FALSE;
         f_PreviewedPalette = NO_PALETTE;
     }
@@ -1237,16 +1237,16 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
                     }
 
                     if (index < g_ChosenPlayerCount - 1) {
-                        f_IsComButtonHeld = TRUE;
+                        f_IsComputerButtonHeld = TRUE;
                     }
                 }
                 else {
-                    f_IsComButtonHeld = TRUE;
+                    f_IsComputerButtonHeld = TRUE;
                 }
             }
         }
         else {
-            f_IsComButtonHeld = FALSE;
+            f_IsComputerButtonHeld = FALSE;
         }
 
         if (((g_ControllerStates[3].buttons |
@@ -1392,8 +1392,8 @@ void DrawCharacterSelect(Gfx **displayListHead, u8 isSinglePlayer) {
         DrawPlayerTags(&gfx, 1);
     }
 
-    if ((f_IsComButtonHeld == TRUE) & (isSinglePlayer == FALSE)) {
-        DrawComIcon(&gfx, 0);
+    if ((f_IsComputerButtonHeld == TRUE) & (isSinglePlayer == FALSE)) {
+        DrawComputerIcon(&gfx, 0);
     }
 
     if (f_IsLeftyButtonHeld == TRUE) {
@@ -1879,7 +1879,7 @@ void DrawPlayerTags(Gfx **displayListHead, u8 tagMode) {
                 G_TX_NOLOD
             );
         }
-        else if (f_IsComButtonHeld == TRUE && playerIndex == g_ChoosingPlayerIndex) {
+        else if (f_IsComputerButtonHeld == TRUE && playerIndex == g_ChoosingPlayerIndex) {
             gDPLoadTextureBlock_4b(
                 gfx++,
                 PlayerTagTexels(PLAYER_TAG_FIRST_COMPUTER, playerIndex),
@@ -2037,7 +2037,7 @@ void DrawCharacterGridCursor(Gfx **displayListHead, s32 x, s32 y) {
     *displayListHead = gfx;
 }
 
-void DrawComIcon(Gfx **displayListHead, s32 unused UNUSED) {
+void DrawComputerIcon(Gfx **displayListHead, s32 unused UNUSED) {
     Gfx *gfx = *displayListHead;
 
     gDPPipeSync(gfx++);
@@ -2054,11 +2054,11 @@ void DrawComIcon(Gfx **displayListHead, s32 unused UNUSED) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ComLeftyIcons)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ComputerLeftyIcons)));
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(
         gfx++,
-        TextureAddress(ImageTexels(g_ComLeftyIcons)),
+        TextureAddress(ImageTexels(g_ComputerLeftyIcons)),
         G_IM_FMT_CI,
         BUTTON_ICON_WIDTH,
         BUTTON_ICON_HEIGHT,
@@ -2104,11 +2104,11 @@ void DrawLeftyIcon(Gfx **displayListHead, s32 unused UNUSED) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ComLeftyIcons)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ComputerLeftyIcons)));
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(
         gfx++,
-        TextureAddress(ImageTexels(g_ComLeftyIcons) + LEFTY_ICON_OFFSET),
+        TextureAddress(ImageTexels(g_ComputerLeftyIcons) + LEFTY_ICON_OFFSET),
         G_IM_FMT_CI,
         BUTTON_ICON_WIDTH,
         BUTTON_ICON_HEIGHT,

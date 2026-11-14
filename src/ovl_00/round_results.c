@@ -3242,7 +3242,7 @@ s32 UpdateMatchResults(ControllerState *controller) {
                             f_ResultsStep = MATCH_STEP_SHOW_CHARACTER_NOTICE;
                         }
 
-                        RecordComCharacterResult(
+                        RecordComputerMatchupResult(
                             g_Players[0].characterIndex,
                             g_Players[1].characterIndex,
                             GetMatchWinner(0, 1) == MATCH_SIDE_PLAYER

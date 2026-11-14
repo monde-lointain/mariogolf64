@@ -93,7 +93,7 @@ extern s16 g_MiniGolfDiscFiles[];
 extern void *g_CharacterFaceImages[CHARACTER_COUNT];
 extern void *g_CharacterFacePalettes[CHARACTER_COUNT];
 
-extern void *g_ComLeftyIcons;
+extern void *g_ComputerLeftyIcons;
 
 #define IMAGE_SLOT_COUNT 14
 extern void *g_ImageSlots[IMAGE_SLOT_COUNT];

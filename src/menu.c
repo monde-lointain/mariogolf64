@@ -43,7 +43,7 @@
 #define TROPHY_ICON_IMAGE_ASSET 0x623
 #define HOLE_BADGES_IMAGE_ASSET 0x65D
 #define SPEECH_BUBBLE_IMAGE_ASSET 0x6F7
-#define COM_LEFTY_ICONS_IMAGE_ASSET 0x709
+#define COMPUTER_LEFTY_ICONS_IMAGE_ASSET 0x709
 
 #define DmaAlignedAddress(address) (((u32)(address) + DMA_ALIGNMENT - 1) & ~(DMA_ALIGNMENT - 1))
 
@@ -93,7 +93,7 @@ s32 g_ChosenCharacters[PLAYER_COUNT_MAX];
 s16 g_ChosenLabelGrowth;
 LabelGrowthDirection g_ChosenLabelGrowthDirection;
 s8 g_ChosenLefties[4];
-void *g_ComLeftyIcons;
+void *g_ComputerLeftyIcons;
 CourseSelectKind g_CourseSelectKind;
 CourseStatFigures g_CourseStatFigures[COURSE_COUNT + 1];
 GameState g_GameState;
@@ -1309,8 +1309,8 @@ void LoadMenuResources(void) {
     ReadEncodedAsset(g_MenuSpareImages[1], &asset);
     g_MenuWideSpareImage = AllocMemory(OpenEncodedAsset(SPEECH_BUBBLE_IMAGE_ASSET, &asset) * 2);
     ReadEncodedAsset(g_MenuWideSpareImage, &asset);
-    g_ComLeftyIcons = AllocMemory(OpenEncodedAsset(COM_LEFTY_ICONS_IMAGE_ASSET, &asset));
-    ReadEncodedAsset(g_ComLeftyIcons, &asset);
+    g_ComputerLeftyIcons = AllocMemory(OpenEncodedAsset(COMPUTER_LEFTY_ICONS_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_ComputerLeftyIcons, &asset);
     PlaySong(SONG_TITLE, 0);
     SetFramebufferCount(TRIPLE_BUFFERING);
     SetScreenEffect(SCREEN_EFFECT_NONE, 0);
@@ -1372,7 +1372,7 @@ void FreeMenuResources(void) {
     FreeMemory(&g_MenuSpareImages[0]);
     FreeMemory(&g_MenuSpareImages[1]);
     FreeMemory(&g_MenuWideSpareImage);
-    FreeMemory(&g_ComLeftyIcons);
+    FreeMemory(&g_ComputerLeftyIcons);
 }
 
 SaveData *GetSaveData(void) {

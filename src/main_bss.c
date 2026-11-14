@@ -291,7 +291,7 @@ u16 g_BlendedTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE] BSS ALIGNED(8)
 volatile u32 nuScRetraceTotal BSS = {0};
 __OSInode __osPfsInodeCache BSS ALIGNED(0x8) = {{{{0}}}};
 u16 *nuGfxCfb_ptr BSS = {0};
-void *g_ComLeftyIcons BSS = {0};
+void *g_ComputerLeftyIcons BSS = {0};
 UNREAD_COMMON(0x680);
 s32 g_ChoosingPlayerIndex BSS = {0};
 __OSEventState __osEventStateTab[OS_NUM_EVENTS] BSS ALIGNED(0x8) = {{0}};

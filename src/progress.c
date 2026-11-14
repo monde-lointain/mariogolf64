@@ -17,7 +17,7 @@
 
 #define PLACE_UNPLACED 4
 
-void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
+void RecordComputerMatchupResult(s32 rowCharacter, s32 columnCharacter, Boolean isWin) {
     Awards *awards;
     u8 winCount;
     s32 winBits;
@@ -27,7 +27,7 @@ void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
 
     awards = &GetSaveData()->records.awards;
     if (isWin) {
-        winBits = awards->matchups[row][column].winBits;
+        winBits = awards->matchups[rowCharacter][columnCharacter].winBits;
         winCount = winBits & WIN_COUNT_MASK;
         if (winCount < MATCHUP_RESULT_COUNT_MAX) {
             winCount++;
@@ -39,14 +39,14 @@ void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
             winBits |= WON_UNSAVED_FLAG;
         }
 
-        awards->matchups[row][column].winBits = winBits;
+        awards->matchups[rowCharacter][columnCharacter].winBits = winBits;
         osSyncPrintf("Win Com Chara[%d]\n", winBits);
     }
     else {
-        tally = awards->matchups[row][column].lossCount + 1;
-        awards->matchups[row][column].lossCount = tally;
-        if (awards->matchups[row][column].lossCount > MATCHUP_RESULT_COUNT_MAX) {
-            awards->matchups[row][column].lossCount = MATCHUP_RESULT_COUNT_MAX;
+        tally = awards->matchups[rowCharacter][columnCharacter].lossCount + 1;
+        awards->matchups[rowCharacter][columnCharacter].lossCount = tally;
+        if (awards->matchups[rowCharacter][columnCharacter].lossCount > MATCHUP_RESULT_COUNT_MAX) {
+            awards->matchups[rowCharacter][columnCharacter].lossCount = MATCHUP_RESULT_COUNT_MAX;
         }
     }
 

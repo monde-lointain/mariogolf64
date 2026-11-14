@@ -9,6 +9,6 @@ void AddBirdieBadge(void);
 void RecordTournamentPlace(void);
 void ReportBirdieBadgeCount(void);
 
-void RecordComCharacterResult(s32 row, s32 column, Boolean isWin);
+void RecordComputerMatchupResult(s32 rowCharacter, s32 columnCharacter, Boolean isWin);
 
 #endif
