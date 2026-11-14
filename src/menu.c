@@ -2026,7 +2026,7 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     s32 row;
     s32 column;
     s32 index;
-    s32 characterIndex;
+    CharacterIndex characterIndex;
 
     save = GetSaveData();
     for (row = 0; row != CHARACTER_GRID_ROW_COUNT; row++) {

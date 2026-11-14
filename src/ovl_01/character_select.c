@@ -483,7 +483,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
     s32 index;
     s32 otherIndex;
     s16 sameCharacterCount;
-    s32 characterIndex;
+    CharacterIndex characterIndex;
     s16 gridMark;
     s32 controllerIndex;
     u16 button;

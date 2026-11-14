@@ -1117,7 +1117,7 @@ static f32 f_MenuCharacterPositions[MENU_CHARACTER_LAYOUT_COUNT][MENU_CHARACTER_
 };
 static s32 f_MarkedCharacters[CHARACTER_COUNT] =
     {0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
-static s32 f_ViewerLoadedCharacter = NO_VIEWER_CHARACTER;
+static CharacterIndex f_ViewerLoadedCharacter = NO_VIEWER_CHARACTER;
 static Boolean f_IsViewerAnimationChanged = FALSE;
 static f32 f_ViewerPitch = 0.0f;
 static f32 f_ViewerYaw = 0.0f;
@@ -2867,7 +2867,7 @@ void UpdateModeSelect(void) {
     }
 
     if (g_MenuPressedButtons & B_BUTTON) {
-        s32 characterIndex;
+        CharacterIndex characterIndex;
         s32 row;
         s32 column;
 
@@ -6342,7 +6342,7 @@ void DrawAnimationViewer(Gfx **displayListHead) {
     s32 index;
     s32 stickX;
     s32 stickY;
-    s32 characterIndex;
+    CharacterIndex characterIndex;
 
     gfx = *displayListHead;
 

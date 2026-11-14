@@ -344,17 +344,17 @@ void SetTextSlotValue(s32 value, s32 slot, s32 valueIndex) {
 }
 
 void SetTextName(char *name) {
-    s32 characterIndex;
+    s32 letterIndex;
     char character;
 
-    for (characterIndex = 0; characterIndex != TEXT_NAME_SIZE - 1; characterIndex++) {
-        character = name[characterIndex];
-        g_TextName[characterIndex] = character;
+    for (letterIndex = 0; letterIndex != TEXT_NAME_SIZE - 1; letterIndex++) {
+        character = name[letterIndex];
+        g_TextName[letterIndex] = character;
         if (character >= 'a' && character <= 'z') {
-            g_TextName[characterIndex] = character + LOWERCASE_CODE_OFFSET;
+            g_TextName[letterIndex] = character + LOWERCASE_CODE_OFFSET;
         }
 
-        if (name[characterIndex] == '\0') {
+        if (name[letterIndex] == '\0') {
             break;
         }
     }
@@ -448,7 +448,7 @@ Boolean IsTextSlotRevealed(s32 slot) {
 void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
     Gfx *gfx = *displayListHead;
     TextSlot *textSlot = &g_TextSlots[slot];
-    s32 characterIndex;
+    s32 codeIndex;
     s32 messageStart;
     s32 length;
     Boolean isIconLoaded;
@@ -486,8 +486,8 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
     advance =
         (textSlot->flags & TEXT_FLAG_WIDE_SPACING) ? WIDE_LARGE_FONT_ADVANCE : FONT_SIZE_LARGE;
     gDPPipeSync(gfx++);
-    for (characterIndex = 0; characterIndex != length; characterIndex++) {
-        code = ((u16 *)f_Messages)[messageStart + characterIndex + g_MessageCodesStart];
+    for (codeIndex = 0; codeIndex != length; codeIndex++) {
+        code = ((u16 *)f_Messages)[messageStart + codeIndex + g_MessageCodesStart];
         if (isIconLoaded == TRUE) {
             gDPSetCombineLERP(
                 gfx++,
@@ -969,7 +969,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
 void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
     Gfx *gfx = *displayListHead;
     TextSlot *textSlot = &g_TextSlots[slot];
-    s32 characterIndex;
+    s32 codeIndex;
     s32 messageStart;
     s32 length;
     Boolean isIconLoaded;
@@ -1005,8 +1005,8 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
     }
 
     gDPPipeSync(gfx++);
-    for (characterIndex = 0; characterIndex != length; characterIndex++) {
-        code = ((u16 *)f_Messages)[messageStart + characterIndex + g_MessageCodesStart];
+    for (codeIndex = 0; codeIndex != length; codeIndex++) {
+        code = ((u16 *)f_Messages)[messageStart + codeIndex + g_MessageCodesStart];
         if (isIconLoaded == TRUE) {
             gDPSetCombineLERP(
                 gfx++,
@@ -1526,7 +1526,7 @@ s32 MeasureText(READ_ONLY char *text, s32 fontSize, TextFlags flags) {
 
 void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, s32 slot) {
     s32 lineWidths[MESSAGE_LINE_COUNT] = {0, 0, 0};
-    s32 characterIndex;
+    s32 codeIndex;
     s32 lineCount;
     s32 line;
     s32 widest;
@@ -1539,8 +1539,8 @@ void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, 
     length = MessageSpanAt(messageId)->length;
     messageStart = MessageSpanAt(messageId)->start;
     line = 0;
-    for (characterIndex = 0; characterIndex != length; characterIndex++) {
-        code = ((u16 *)f_Messages)[g_MessageCodesStart + messageStart + characterIndex];
+    for (codeIndex = 0; codeIndex != length; codeIndex++) {
+        code = ((u16 *)f_Messages)[g_MessageCodesStart + messageStart + codeIndex];
         if (code < MESSAGE_CODE_GLYPH) {
             if (code < CHARACTER_CODE_MARK_FIRST ||
                 code >= CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
@@ -2241,10 +2241,10 @@ void DrawCenteredShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY cha
 
     s32 left = x;
     s16 right = x;
-    s32 characterIndex;
+    s32 letterIndex;
 
-    for (characterIndex = 0; text[characterIndex] != '\0'; characterIndex++) {
-        if (text[characterIndex] == '.') {
+    for (letterIndex = 0; text[letterIndex] != '\0'; letterIndex++) {
+        if (text[letterIndex] == '.') {
             right += SHADOWED_POINT_WIDTH;
         }
         else {

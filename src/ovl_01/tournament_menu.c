@@ -1216,14 +1216,13 @@ void LoadCodeEntryBuffer(void *buffer, s32 bufferKind) {
 
 void ResetCodeEntry(void) {
     MenuMemory *memory = GetMenuMemory();
-    s32 codeCharacterIndex;
+    s32 codeLetterIndex;
 
     memory->codeKeyColumn = 0;
     memory->codeKeyRow = 0;
     f_DecodedNameIndex = 0;
-    for (codeCharacterIndex = 0; codeCharacterIndex != CLUB_TOURNAMENT_CODE_LENGTH;
-        codeCharacterIndex++) {
-        f_EnteredCode[codeCharacterIndex] = CLUB_CODE_NO_CHARACTER;
+    for (codeLetterIndex = 0; codeLetterIndex != CLUB_TOURNAMENT_CODE_LENGTH; codeLetterIndex++) {
+        f_EnteredCode[codeLetterIndex] = CLUB_CODE_NO_CHARACTER;
     }
 
     f_EnteredCodeLength = 0;
@@ -2146,19 +2145,18 @@ void DrawCodeKeys(Gfx **displayListHead) {
 }
 
 void DrawEnteredCode(Gfx **displayListHead) {
-    s32 codeCharacterIndex;
+    s32 codeLetterIndex;
     Gfx *gfx = *displayListHead;
 
     gDPPipeSync(gfx++);
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
-    for (codeCharacterIndex = 0; codeCharacterIndex != CLUB_TOURNAMENT_CODE_LENGTH;
-        codeCharacterIndex++) {
-        if (f_EnteredCode[codeCharacterIndex] != CLUB_CODE_NO_CHARACTER) {
-            sprintf(g_PrintBuffer, "%c", f_EnteredCode[codeCharacterIndex]);
+    for (codeLetterIndex = 0; codeLetterIndex != CLUB_TOURNAMENT_CODE_LENGTH; codeLetterIndex++) {
+        if (f_EnteredCode[codeLetterIndex] != CLUB_CODE_NO_CHARACTER) {
+            sprintf(g_PrintBuffer, "%c", f_EnteredCode[codeLetterIndex]);
             DrawLargeTextWithShadow(
                 &gfx,
-                (codeCharacterIndex * CLUB_CODE_CHARACTER_WIDTH) + CLUB_CODE_FIRST_X,
+                (codeLetterIndex * CLUB_CODE_CHARACTER_WIDTH) + CLUB_CODE_FIRST_X,
                 CLUB_CODE_Y,
                 g_PrintBuffer,
                 -1,
@@ -2290,14 +2288,14 @@ s32 FindEnteredCodeIndex(void) {
     s32 foundIndex = -1;
     s32 codeIndex;
     s32 matchCount;
-    s32 codeCharacterIndex;
+    s32 codeLetterIndex;
 
     for (codeIndex = 0; codeIndex != CLUB_TOURNAMENT_CODE_COUNT; codeIndex++) {
         matchCount = 0;
-        for (codeCharacterIndex = 0; codeCharacterIndex != CLUB_TOURNAMENT_CODE_LENGTH;
-            codeCharacterIndex++) {
-            if (f_EnteredCode[codeCharacterIndex] !=
-                f_ClubTournamentCodes[codeIndex][codeCharacterIndex]) {
+        for (codeLetterIndex = 0; codeLetterIndex != CLUB_TOURNAMENT_CODE_LENGTH;
+            codeLetterIndex++) {
+            if (f_EnteredCode[codeLetterIndex] !=
+                f_ClubTournamentCodes[codeIndex][codeLetterIndex]) {
                 break;
             }
 
@@ -2323,7 +2321,7 @@ void DrawCodeCursor(Gfx **displayListHead) {
     s32 red;
     s32 blue;
     s32 green;
-    s32 codeCharacterIndex;
+    s32 codeLetterIndex;
 
     for (vertexIndex = 0; vertexIndex != MENU_CURSOR_VERTEX_COUNT; vertexIndex++) {
         f_CodeCursorPhases[vertexIndex] += MENU_CURSOR_PHASE_STEP;
@@ -2348,14 +2346,14 @@ void DrawCodeCursor(Gfx **displayListHead) {
         MENU_CURSOR_FAR,
         1.0f
     );
-    codeCharacterIndex = f_EnteredCodeLength;
-    if (codeCharacterIndex >= CLUB_TOURNAMENT_CODE_LENGTH) {
-        codeCharacterIndex = CLUB_TOURNAMENT_CODE_LENGTH - 1;
+    codeLetterIndex = f_EnteredCodeLength;
+    if (codeLetterIndex >= CLUB_TOURNAMENT_CODE_LENGTH) {
+        codeLetterIndex = CLUB_TOURNAMENT_CODE_LENGTH - 1;
     }
 
     guTranslate(
         &f_CodeCursorTranslation,
-        (codeCharacterIndex * CLUB_CODE_CHARACTER_WIDTH) + CODE_CURSOR_FIRST_X,
+        (codeLetterIndex * CLUB_CODE_CHARACTER_WIDTH) + CODE_CURSOR_FIRST_X,
         CODE_CURSOR_Y,
         MENU_CURSOR_Z
     );

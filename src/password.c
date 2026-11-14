@@ -295,15 +295,15 @@ s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 varia
 static s32 ReadPasswordSymbols(u8 *symbols, char *password, s32 symbolCount) {
     s32 symbolIndex;
     s32 symbol;
-    s32 characterIndex;
+    s32 spellingIndex;
 
     for (symbolIndex = 0; symbolIndex < symbolCount; symbolIndex++) {
         for (symbol = 0; symbol < PASSWORD_SYMBOL_COUNT; symbol++) {
             char *spellings = f_PasswordAlphabet[symbol];
             Boolean isFound = FALSE;
 
-            for (characterIndex = 0; spellings[characterIndex] != '\0'; characterIndex++) {
-                if (spellings[characterIndex] == password[symbolIndex]) {
+            for (spellingIndex = 0; spellings[spellingIndex] != '\0'; spellingIndex++) {
+                if (spellings[spellingIndex] == password[symbolIndex]) {
                     isFound = TRUE;
                     break;
                 }
