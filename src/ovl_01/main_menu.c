@@ -8089,7 +8089,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(MARIO_SHADOW_LEFT),
         QuarterPixels(MARIO_SHADOW_TOP),
@@ -8126,7 +8126,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(MARIO_LEFT),
             QuarterPixels(MARIO_TOP + (loopIndex * MARIO_STRIP_HEIGHT)),
@@ -8190,7 +8190,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
                     TEXEL0,
                     0
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(VALUE_BANNER_LEFT),
                     QuarterPixels(
@@ -8209,7 +8209,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
                     TexelRunStep(NAME_PLATE_STRIP_HEIGHT, VALUE_BANNER_STRIP_HEIGHT)
                 );
                 gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(VALUE_BANNER_LEFT - CHOSEN_BANNER_SHIFT),
                     QuarterPixels(
@@ -8256,7 +8256,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
                     DIMMED_COLOR,
                     OPAQUE_ALPHA
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(VALUE_BANNER_LEFT),
                     QuarterPixels(
@@ -8295,7 +8295,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(OPTION_LABEL_LEFT),
                 QuarterPixels(OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)),
@@ -8331,7 +8331,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             gDPPipeSync(gfx++);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(OPTION_LABEL_LEFT),
                 QuarterPixels(OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)),
@@ -8419,7 +8419,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
             gDPSetPrimColor(gfx++, 0, 0, DIMMED_COLOR, DIMMED_COLOR, DIMMED_COLOR, OPAQUE_ALPHA);
         }
 
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(OPTION_VALUE_LEFT),
             QuarterPixels(OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)),
@@ -8493,7 +8493,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
             }
 
             rowTop = g_MenuMemory.optionsChoice * OPTION_ROW_SPACING;
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(LEFT_ARROW_LEFT + shiftX),
                 QuarterPixels(rowTop + ARROW_TOP + shiftY),
@@ -8506,7 +8506,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
                 TEXEL_STEP_ONE
             );
             rowTop = g_MenuMemory.optionsChoice * OPTION_ROW_SPACING;
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(RIGHT_ARROW_LEFT + shiftX),
                 QuarterPixels(rowTop + ARROW_TOP + shiftY),

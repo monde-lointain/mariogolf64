@@ -424,7 +424,7 @@ void DrawTitleScreen(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(PRESS_START_LEFT),
             QuarterPixels(PRESS_START_TOP),

@@ -615,7 +615,7 @@ void DrawYesNoWindow(
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(centerX - halfWidth),
             QuarterPixels(centerY - halfHeight + (index * halfHeight)),
@@ -669,7 +669,7 @@ void DrawYesNoWindow(
             pulse = 0;
         }
 
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(buttonX - buttonHalfWidth - growth),
             QuarterPixels(buttonY - buttonHalfHeight - growth),
@@ -899,7 +899,7 @@ void DrawClubWindow(
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(centerX - halfWidth),
             QuarterPixels(centerY - halfHeight + (index * halfHeight)),
@@ -953,7 +953,7 @@ void DrawClubWindow(
             pulse = 0;
         }
 
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(buttonX - buttonHalfWidth - growth),
             QuarterPixels(buttonY - buttonHalfHeight - growth),
@@ -1017,7 +1017,7 @@ void DrawClubWindow(
                 G_TX_NOLOD
             );
             gDPPipeSync(gfx++);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(badgeX - badgeHalfWidth),
                 QuarterPixels(badgeTop + (index * badgeStripRows)),
@@ -1056,7 +1056,7 @@ void DrawClubWindow(
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(courseX - courseHalfWidth),
             QuarterPixels(courseTop + (index * courseStripRows)),
@@ -1090,7 +1090,7 @@ void DrawClubWindow(
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(pictureX - pictureHalfWidth),
         QuarterPixels(pictureY - pictureHalfHeight),
@@ -1166,7 +1166,7 @@ void DrawUnusedWideCloud(
             G_TX_NOLOD
         );
         filterOrHalfWidth = halfWidth;
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(centerX - halfWidth),
             QuarterPixels(stripTop),

@@ -2794,7 +2794,7 @@ void DrawBirdieBadgeCount(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(BADGE_LEFT),
             QuarterPixels(offsetY + BADGE_RESTING_TOP),

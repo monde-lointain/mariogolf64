@@ -1767,7 +1767,7 @@ void DrawCharacterBoard(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(LABEL_LEFT),
         QuarterPixels(LABEL_TOP),
@@ -2232,7 +2232,7 @@ void DrawCurveMeter(Gfx **displayListHead, s32 clubSet) {
         labelRow = CURVE_LABEL_STRAIGHT;
     }
 
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(CURVE_LABEL_LEFT),
         QuarterPixels(CURVE_LABEL_TOP),

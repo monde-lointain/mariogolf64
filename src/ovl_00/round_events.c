@@ -1502,7 +1502,7 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
             );
             bottom = CONTEST_IMAGE_CENTER_Y + stripIndex * MOVIE_IMAGE_STRIP_HEIGHT;
             centerX = CONTEST_IMAGE_CENTER_X + slide;
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(centerX - halfWidth),
                 QuarterPixels(bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER)),
@@ -1585,7 +1585,7 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
         );
         plaqueHalfSize = growth + WINNER_PLAQUE_MARGIN;
         step = TexelRunStep((WOODEN_PLAQUE_SIZE / 2), plaqueHalfSize);
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(WINNER_CENTER_X - plaqueHalfSize),
             QuarterPixels(WINNER_CENTER_Y - plaqueHalfSize),
@@ -1615,7 +1615,7 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
         );
         step = TexelRunStep((WINNER_FACE_SIZE / 2), growth);
         width = QuarterPixels(WINNER_CENTER_X - growth);
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             width,
             QuarterPixels(WINNER_CENTER_Y - growth),
@@ -1746,7 +1746,7 @@ void DrawDriveRecord(Gfx **displayListHead) {
             );
             centerX = SHRINKING_IMAGE_CENTER_X + slide;
             bottom = SHRINKING_IMAGE_CENTER_Y + (stripIndex * stripHeight);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(centerX - halfWidth),
                 QuarterPixels(bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
@@ -1765,7 +1765,7 @@ void DrawDriveRecord(Gfx **displayListHead) {
             }
 
             copyTop = CAPTION_COPY_TOP + (stripIndex * MOVIE_IMAGE_STRIP_HEIGHT);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(SHRINKING_IMAGE_CENTER_X - (s32)(width >> 1) - slide),
                 QuarterPixels(copyTop),
@@ -1910,7 +1910,7 @@ void DrawPuttCaption(Gfx **displayListHead) {
             );
             centerX = SHRINKING_IMAGE_CENTER_X + slide;
             bottom = SHRINKING_IMAGE_CENTER_Y + (stripIndex * stripHeight);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(centerX - halfWidth),
                 QuarterPixels(bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
@@ -1929,7 +1929,7 @@ void DrawPuttCaption(Gfx **displayListHead) {
             }
 
             copyTop = CAPTION_COPY_TOP + (stripIndex * MOVIE_IMAGE_STRIP_HEIGHT);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(SHRINKING_IMAGE_CENTER_X - (s32)(width >> 1) - slide),
                 QuarterPixels(copyTop),
@@ -2301,7 +2301,7 @@ void DrawShrinkingMovieImage(Gfx **displayListHead) {
                 left = SHRINKING_IMAGE_CENTER_X - halfWidth;
                 texelStep = TexelRunStep((texelWidth >> 1), halfWidth);
                 bottom = SHRINKING_IMAGE_CENTER_Y + (stripIndex * stripHeight);
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(left),
                     QuarterPixels(bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
@@ -2374,7 +2374,7 @@ void DrawMontyMoleMovie(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(MONTY_MOLE_X),
             QuarterPixels(MONTY_MOLE_Y + (stripIndex * MONTY_MOLE_STRIP_HEIGHT)),
@@ -2453,7 +2453,7 @@ void DrawGoombaMovie(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(GOOMBA_X),
             QuarterPixels(GOOMBA_Y + (stripIndex * GOOMBA_STRIP_HEIGHT)),
@@ -2579,7 +2579,7 @@ void DrawLakituMovie(Gfx **displayListHead) {
         left = x - roundedHalfWidth;
         y = f_Lakitu.y;
 
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(left),
             QuarterPixels(y - roundedHalfHeight + (stripIndex * roundedHalfHeight)),
@@ -2688,7 +2688,7 @@ void DrawToadMovie(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(TOAD_X),
             QuarterPixels(TOAD_Y + (stripIndex * TOAD_STRIP_HEIGHT)),
@@ -3697,7 +3697,7 @@ void DrawWindFlyGuy(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels((s32)position.x - (FLY_GUY_IMAGE_WIDTH / 2)),
         QuarterPixels((s32)position.y - (FLY_GUY_IMAGE_HEIGHT / 2)),

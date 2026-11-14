@@ -714,7 +714,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                 }
 
                 stripHeight = GAME_PANEL_STRIP_HEIGHT;
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(f_SlideOffsets[index] + WIDE_PANEL_LEFT),
                     QuarterPixels(
@@ -758,7 +758,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
             }
 
             stripHeight = END_GAME_PANEL_STRIP_HEIGHT;
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(f_SlideOffsets[index] + NARROW_PANEL_LEFT),
                 QuarterPixels(
@@ -887,7 +887,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                         G_TX_NOLOD,
                         G_TX_NOLOD
                     );
-                    DrawTextureRect(
+                    DrawTextureRectangle(
                         &gfx,
                         QuarterPixels(f_SlideOffsets[row] + MODE_ICON_LEFT),
                         QuarterPixels(
@@ -954,7 +954,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                         G_TX_NOLOD,
                         G_TX_NOLOD
                     );
-                    DrawTextureRect(
+                    DrawTextureRectangle(
                         &gfx,
                         QuarterPixels(
                             (index * GOLFER_SPACING) + (f_SlideOffsets[row] + golfersLeft) -
@@ -1002,7 +1002,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
             gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
             gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(
                     f_SlideOffsets[f_CursorIndex] + centerX - rowHalfWidths[f_CursorIndex]
@@ -1018,7 +1018,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(
                     f_SlideOffsets[f_CursorIndex] + centerX - rowHalfWidths[f_CursorIndex]
@@ -1039,7 +1039,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(
                     f_SlideOffsets[f_CursorIndex] + centerX - rowHalfWidths[f_CursorIndex]
@@ -1059,7 +1059,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(
                     rowHalfWidths[f_CursorIndex] + (f_SlideOffsets[f_CursorIndex] + centerX) -
@@ -1686,7 +1686,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                     );
                 }
 
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(rowOffsets[row] + WIDE_PANEL_LEFT),
                     QuarterPixels(
@@ -1730,7 +1730,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 );
             }
 
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(rowOffsets[row] + NARROW_PANEL_LEFT),
                 QuarterPixels(
@@ -1792,7 +1792,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 }
 
                 gDPPipeSync(gfx++);
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(rowOffsets[index] + COURSE_WORD_LEFT),
                     QuarterPixels(COURSE_TOP + (index * REPLAY_ROW_SPACING)),
@@ -1806,7 +1806,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                     TEXEL_STEP_ONE,
                     TEXEL_STEP_ONE
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH),
                     QuarterPixels(COURSE_TOP + (index * REPLAY_ROW_SPACING)),
@@ -1881,7 +1881,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                     G_TX_NOLOD,
                     G_TX_NOLOD
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(rowOffsets[index] + LABEL_LEFT),
                     QuarterPixels(LABEL_TOP + (index * REPLAY_ROW_SPACING)),
@@ -1937,7 +1937,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                     G_TX_NOLOD,
                     G_TX_NOLOD
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(rowOffsets[index] + CHARACTER_LEFT),
                     QuarterPixels(CHARACTER_TOP + (index * REPLAY_ROW_SPACING)),
@@ -1976,7 +1976,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
             gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
             gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(rowOffsets[f_CursorIndex] - (rowHalfWidths[f_CursorIndex] - centerX)),
                 QuarterPixels(FIRST_REPLAY_ROW_TOP + (f_CursorIndex * REPLAY_ROW_SPACING)),
@@ -1991,7 +1991,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(rowOffsets[f_CursorIndex] - (rowHalfWidths[f_CursorIndex] - centerX)),
                 QuarterPixels(
@@ -2009,7 +2009,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(rowOffsets[f_CursorIndex] - (rowHalfWidths[f_CursorIndex] - centerX)),
                 QuarterPixels(FIRST_REPLAY_ROW_TOP + (f_CursorIndex * REPLAY_ROW_SPACING)),
@@ -2027,7 +2027,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(
                     rowOffsets[f_CursorIndex] + (rowHalfWidths[f_CursorIndex] + centerX) -
@@ -2074,7 +2074,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             titleHeight = stripHeight * NAME_PLATE_STRIP_COUNT;
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(rowOffsets[1] + TITLE_PANEL_LEFT),
                 QuarterPixels(titleBob + TITLE_PANEL_TOP + (index * TITLE_PANEL_STRIP_HEIGHT)),
@@ -2240,7 +2240,7 @@ void DrawControlsScreen(Gfx **displayListHead) {
             );
             topRaise = f_SlideOffsets[0] - SCREEN_BORDER;
             bottomRaise = f_SlideOffsets[0] - (SCREEN_BORDER + CONTROLS_STRIP_HEIGHT);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(CONTROLS_PICTURE_LEFT),
                 QuarterPixels((strip * CONTROLS_STRIP_HEIGHT) - topRaise),

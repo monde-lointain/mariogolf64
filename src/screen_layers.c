@@ -203,7 +203,7 @@ static void *f_WipeShapeImage;
 static void *f_PromptCloudImage;
 static void *f_YesNoImage;
 
-void DrawTextureRect(
+void DrawTextureRectangle(
     Gfx **displayListHead,
     s32 xl,
     s32 yl,
@@ -857,7 +857,7 @@ void DrawPrompt(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         bottom = PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight);
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(PROMPT_CENTER_X - halfWidth),
             QuarterPixels(bottom - halfHeight),
@@ -906,7 +906,7 @@ void DrawPrompt(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(YES_CENTER_X - halfWidth),
             QuarterPixels(CHOICES_MIDDLE_Y - halfHeight + (cloudHeight / 4)),
@@ -943,7 +943,7 @@ void DrawPrompt(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(NO_CENTER_X - halfWidth),
             QuarterPixels(CHOICES_MIDDLE_Y - halfHeight + (cloudHeight / 4)),
@@ -1124,7 +1124,7 @@ void DrawHalfTurn(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(SCREEN_BORDER),
             QuarterPixels(SCREEN_BORDER + (i * HALF_TURN_STRIP_ROWS)),

@@ -171,7 +171,7 @@ void DrawScorecardFace(Gfx **displayListHead, s32 left, s32 top, s32 playerIndex
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(left),
         QuarterPixels(top),
@@ -205,7 +205,7 @@ void DrawSmallFace(Gfx **displayListHead, s32 left, s32 top, s32 playerIndex, Bo
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(left),
         QuarterPixels(top),
@@ -242,7 +242,7 @@ void DrawPlace(Gfx **displayListHead, s32 left, s32 top, s32 place) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(left + PLACE_SUFFIX_X),
         QuarterPixels(top),
@@ -269,7 +269,7 @@ void DrawPlace(Gfx **displayListHead, s32 left, s32 top, s32 place) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(left),
         QuarterPixels(top),
@@ -306,7 +306,7 @@ void DrawScorecardLabel(Gfx **displayListHead, s32 left, s32 top, s32 labelIndex
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(left),
         QuarterPixels(top),
@@ -816,7 +816,7 @@ void DrawMatchPage(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(g_Scorecard.x + PANEL_LEFT),
         QuarterPixels(g_Scorecard.y + PANEL_TOP),
@@ -828,7 +828,7 @@ void DrawMatchPage(Gfx **displayListHead) {
         TEXEL_STEP_HALF,
         TEXEL_STEP_HALF
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(g_Scorecard.x + PANEL_LEFT),
         QuarterPixels(g_Scorecard.y + PANEL_SECOND_TOP),
@@ -864,7 +864,7 @@ void DrawMatchPage(Gfx **displayListHead) {
             imageLeft = (j % TILES_PER_IMAGE_ROW) * TILE_PIECE_WIDTH;
             imageTop = (j / TILES_PER_IMAGE_ROW) * TILE_HEIGHT;
             if (j == WIDE_TILE_INDEX) {
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(WIDE_TILE_LEFT + g_Scorecard.x),
                     QuarterPixels((i * MATCH_ROW_SPACING) + TILE_TOP + g_Scorecard.y),
@@ -878,7 +878,7 @@ void DrawMatchPage(Gfx **displayListHead) {
                 );
             }
             else {
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels((j * TILE_SPACING) + TILE_LEFT + g_Scorecard.x),
                     QuarterPixels((i * MATCH_ROW_SPACING) + TILE_TOP + g_Scorecard.y),
@@ -892,7 +892,7 @@ void DrawMatchPage(Gfx **displayListHead) {
                     TEXEL_STEP_ONE,
                     TEXEL_STEP_ONE
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(
                         (j * TILE_SPACING) + TILE_LEFT + TILE_PIECE_WIDTH + g_Scorecard.x
@@ -908,7 +908,7 @@ void DrawMatchPage(Gfx **displayListHead) {
                     TEXEL_STEP_ONE,
                     TEXEL_STEP_ONE
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(
                         (j * TILE_SPACING) + TILE_LEFT + (TILE_PIECE_WIDTH * 2) + g_Scorecard.x
@@ -959,7 +959,7 @@ void DrawMatchPage(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
         for (j = 0; j != wins[i]; j++) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels((j * TILE_SPACING) + TILE_LEFT + g_Scorecard.x),
                 QuarterPixels((i * MATCH_ROW_SPACING) + WIN_MARK_TOP + g_Scorecard.y),
@@ -1001,7 +1001,7 @@ void DrawMatchPage(Gfx **displayListHead) {
         );
         holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
         if (g_Players[0].holes[holeIndex].strokeCount < g_Players[1].holes[holeIndex].strokeCount) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels((wins[0] * TILE_SPACING) + TILE_LEFT + g_Scorecard.x),
                 QuarterPixels(WIN_MARK_TOP + bounce + g_Scorecard.y),
@@ -1018,7 +1018,7 @@ void DrawMatchPage(Gfx **displayListHead) {
         }
         else if (g_Players[1].holes[holeIndex].strokeCount <
             g_Players[0].holes[holeIndex].strokeCount) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels((wins[1] * TILE_SPACING) + TILE_LEFT + g_Scorecard.x),
                 QuarterPixels(MATCH_ROW_SPACING + WIN_MARK_TOP + bounce + g_Scorecard.y),
@@ -1054,7 +1054,7 @@ void DrawMatchPage(Gfx **displayListHead) {
         arrowRise = g_Scorecard.skinsCarryover.onLastHole;
         holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
         if (g_Players[0].holes[holeIndex].strokeCount < g_Players[1].holes[holeIndex].strokeCount) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels((wins[0] * TILE_SPACING) + ARROW_LEFT + g_Scorecard.x),
                 QuarterPixels(-arrowRise + ARROW_TOP + g_Scorecard.y),
@@ -1069,7 +1069,7 @@ void DrawMatchPage(Gfx **displayListHead) {
         }
         else if (g_Players[1].holes[holeIndex].strokeCount <
             g_Players[0].holes[holeIndex].strokeCount) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels((wins[1] * TILE_SPACING) + ARROW_LEFT + g_Scorecard.x),
                 QuarterPixels(-arrowRise + MATCH_ROW_SPACING + ARROW_TOP + g_Scorecard.y),
@@ -1239,7 +1239,7 @@ void DrawSkinsPage(Gfx **displayListHead) {
         G_TX_NOLOD
     );
     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + SKIN_ICON_LEFT),
             QuarterPixels(SKIN_ICON_TOP + (playerIndex * SKINS_ROW_SPACING)),
@@ -1253,7 +1253,7 @@ void DrawSkinsPage(Gfx **displayListHead) {
         );
     }
 
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(g_Scorecard.x + CARRYOVER_ICON_LEFT),
         QuarterPixels(CARRYOVER_ICON_TOP),
@@ -1382,7 +1382,7 @@ void DrawBetsPage(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(g_Scorecard.x + GRID_LEFT),
         QuarterPixels(g_Scorecard.y + GRID_HEADER_LINE_TOP),
@@ -1395,7 +1395,7 @@ void DrawBetsPage(Gfx **displayListHead) {
         TEXEL_STEP_ONE
     );
     for (i = 0; i != GRID_ROW_COUNT; i++) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + GRID_ROW_LINE_LEFT),
             QuarterPixels((i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP + g_Scorecard.y),
@@ -1409,7 +1409,7 @@ void DrawBetsPage(Gfx **displayListHead) {
             GRID_STRETCHED_STEP,
             TEXEL_STEP_ONE
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + GRID_ROW_LINE_LEFT),
             QuarterPixels((i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP + g_Scorecard.y),
@@ -1423,7 +1423,7 @@ void DrawBetsPage(Gfx **displayListHead) {
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + GRID_RIGHT - GRID_LINE_WIDTH),
             QuarterPixels((i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP + g_Scorecard.y),
@@ -1440,7 +1440,7 @@ void DrawBetsPage(Gfx **displayListHead) {
     }
 
     for (i = 0; i != GRID_COLUMN_COUNT; i++) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels((i * BET_COLUMN_SPACING) + GRID_COLUMN_LINE_LEFT + g_Scorecard.x),
             QuarterPixels(g_Scorecard.y + GRID_TOP),
@@ -1454,7 +1454,7 @@ void DrawBetsPage(Gfx **displayListHead) {
             TEXEL_STEP_ONE,
             GRID_COLUMN_STEP
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels((i * BET_COLUMN_SPACING) + GRID_COLUMN_LINE_LEFT + g_Scorecard.x),
             QuarterPixels(g_Scorecard.y + GRID_TOP),
@@ -1468,7 +1468,7 @@ void DrawBetsPage(Gfx **displayListHead) {
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels((i * BET_COLUMN_SPACING) + GRID_COLUMN_LINE_LEFT + g_Scorecard.x),
             QuarterPixels(g_Scorecard.y + GRID_BOTTOM - GRID_LINE_WIDTH),
@@ -1485,7 +1485,7 @@ void DrawBetsPage(Gfx **displayListHead) {
     }
 
     for (i = 0; i != GRID_COLUMN_COUNT; i++) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels((i * BET_COLUMN_SPACING) + GRID_COLUMN_LINE_LEFT + g_Scorecard.x),
             QuarterPixels(g_Scorecard.y + GRID_HEADER_LINE_TOP),
@@ -1500,7 +1500,7 @@ void DrawBetsPage(Gfx **displayListHead) {
             TEXEL_STEP_ONE
         );
         for (j = 0; j != GRID_ROW_COUNT; j++) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels((i * BET_COLUMN_SPACING) + GRID_COLUMN_LINE_LEFT + g_Scorecard.x),
                 QuarterPixels((j * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP + g_Scorecard.y),
@@ -1560,7 +1560,7 @@ void DrawBetsPage(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels((j * BET_COLUMN_SPACING) + BET_IMAGE_LEFT + g_Scorecard.x),
                 QuarterPixels(BET_IMAGE_TOP),
@@ -1598,7 +1598,7 @@ void DrawBetsPage(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels((j * BET_COLUMN_SPACING) + BET_IMAGE_LEFT + g_Scorecard.x),
         QuarterPixels(BET_IMAGE_TOP),
@@ -1637,7 +1637,7 @@ void DrawBetsPage(Gfx **displayListHead) {
                     SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
                 }
 
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(
                         (column * BET_COLUMN_SPACING) + BET_SUBTITLE_LEFT + g_Scorecard.x
@@ -2109,7 +2109,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
         }
 
         gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, OPAQUE_ALPHA);
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + ROW_LEFT),
             QuarterPixels(((row * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
@@ -2147,7 +2147,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT),
                 QuarterPixels(((row * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
@@ -2278,7 +2278,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 bottomFlapShade,
                 OPAQUE_ALPHA
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(g_Scorecard.x + ROW_LEFT),
                 QuarterPixels(
@@ -2327,7 +2327,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT),
                 QuarterPixels(
@@ -2556,7 +2556,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 roundedHalfSize = halfSize + 0.5f;
                 texelStart = (ARROW_IMAGE_SIZE / 2) -
                     (((f32)roundedHalfSize - halfSize) * (ARROW_IMAGE_SIZE / 2));
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(g_Scorecard.x + ARROW_CENTER_X - roundedHalfSize),
                     QuarterPixels(
@@ -2856,7 +2856,7 @@ void DrawScoresPage(Gfx **displayListHead) {
     );
     gDPPipeSync(gfx++);
     if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + LABEL_PANEL_LEFT),
             QuarterPixels(g_Scorecard.y + LABEL_PANEL_TOP),
@@ -2871,7 +2871,7 @@ void DrawScoresPage(Gfx **displayListHead) {
     }
 
     if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + LABEL_PANEL_LEFT),
             QuarterPixels(g_Scorecard.y + LABEL_PANEL_TOP + NINE_SPACING),
@@ -2887,7 +2887,7 @@ void DrawScoresPage(Gfx **displayListHead) {
 
     if (IsMatchPlayMode()) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(g_Scorecard.x + TOTAL_PANEL_LEFT),
                 QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING),
@@ -2901,7 +2901,7 @@ void DrawScoresPage(Gfx **displayListHead) {
             );
         }
         else {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(g_Scorecard.x + TOTAL_PANEL_LEFT),
                 QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP),
@@ -2916,7 +2916,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         }
     }
     else if (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + TOTAL_PANEL_LEFT),
             QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING),
@@ -2930,7 +2930,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         );
     }
     else if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + TOTAL_PANEL_LEFT),
             QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP),
@@ -2944,7 +2944,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         );
     }
     else {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + TOTAL_PANEL_LEFT),
             QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP),
@@ -2956,7 +2956,7 @@ void DrawScoresPage(Gfx **displayListHead) {
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + TOTAL_PANEL_LEFT),
             QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING),
@@ -2979,7 +2979,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         (SCORES_PANEL_IMAGE_HEIGHT - 1) << G_TEXTURE_IMAGE_FRAC
     );
     if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + LABEL_PANEL_RIGHT),
             QuarterPixels(g_Scorecard.y + LABEL_PANEL_TOP),
@@ -2994,7 +2994,7 @@ void DrawScoresPage(Gfx **displayListHead) {
     }
 
     if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + LABEL_PANEL_RIGHT),
             QuarterPixels(g_Scorecard.y + LABEL_PANEL_TOP + NINE_SPACING),
@@ -3010,7 +3010,7 @@ void DrawScoresPage(Gfx **displayListHead) {
 
     if (IsMatchPlayMode()) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT),
                 QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING),
@@ -3024,7 +3024,7 @@ void DrawScoresPage(Gfx **displayListHead) {
             );
         }
         else {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT),
                 QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP),
@@ -3039,7 +3039,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         }
     }
     else if (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT),
             QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING),
@@ -3053,7 +3053,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         );
     }
     else if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT),
             QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP),
@@ -3067,7 +3067,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         );
     }
     else {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + FRONT_TOTAL_PANEL_RIGHT),
             QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP),
@@ -3079,7 +3079,7 @@ void DrawScoresPage(Gfx **displayListHead) {
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + BACK_TOTAL_PANEL_RIGHT),
             QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING),
@@ -3129,7 +3129,7 @@ void DrawScoresPage(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
             if (i & 1) {
                 if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
-                    DrawTextureRect(
+                    DrawTextureRectangle(
                         &gfx,
                         QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
                         QuarterPixels((j * CELL_HEIGHT) + CELL_TOP + g_Scorecard.y),
@@ -3144,7 +3144,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                 }
 
                 if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
-                    DrawTextureRect(
+                    DrawTextureRectangle(
                         &gfx,
                         QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
                         QuarterPixels((j * CELL_HEIGHT) + CELL_TOP + NINE_SPACING + g_Scorecard.y),
@@ -3191,7 +3191,7 @@ void DrawScoresPage(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     if (IsMatchPlayMode() == FALSE &&
         !(g_GameState.holeSelection & (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + NET_PANEL_LEFT),
             QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING),
@@ -3217,7 +3217,7 @@ void DrawScoresPage(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     if (IsMatchPlayMode() == FALSE &&
         !(g_GameState.holeSelection & (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + NET_PANEL_RIGHT),
             QuarterPixels(g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING),
@@ -3242,7 +3242,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         for (i = 0; i != HOLES_PER_NINE; i++) {
             if (!(i & 1)) {
                 if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
-                    DrawTextureRect(
+                    DrawTextureRectangle(
                         &gfx,
                         QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
                         QuarterPixels((j * CELL_HEIGHT) + CELL_TOP + g_Scorecard.y),
@@ -3257,7 +3257,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                 }
 
                 if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
-                    DrawTextureRect(
+                    DrawTextureRectangle(
                         &gfx,
                         QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
                         QuarterPixels((j * CELL_HEIGHT) + CELL_TOP + NINE_SPACING + g_Scorecard.y),
@@ -3300,7 +3300,7 @@ void DrawScoresPage(Gfx **displayListHead) {
     );
     if (IsMatchPlayMode()) {
         if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(g_Scorecard.x + ROUND_LABEL_LEFT),
                 QuarterPixels(g_Scorecard.y + TOTAL_LABEL_TOP),
@@ -3314,7 +3314,7 @@ void DrawScoresPage(Gfx **displayListHead) {
             );
         }
         else {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(g_Scorecard.x + ROUND_LABEL_LEFT),
                 QuarterPixels(g_Scorecard.y + TOTAL_LABEL_TOP + NINE_SPACING),
@@ -3329,7 +3329,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         }
     }
     else if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + ROUND_LABEL_LEFT),
             QuarterPixels(g_Scorecard.y + TOTAL_LABEL_TOP),
@@ -3343,7 +3343,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         );
     }
     else if (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + ROUND_LABEL_LEFT),
             QuarterPixels(g_Scorecard.y + TOTAL_LABEL_TOP + NINE_SPACING),
@@ -3357,7 +3357,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         );
     }
     else {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + FRONT_NINE_LABEL_LEFT),
             QuarterPixels(g_Scorecard.y + TOTAL_LABEL_TOP),
@@ -3369,7 +3369,7 @@ void DrawScoresPage(Gfx **displayListHead) {
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + BACK_NINE_LABEL_LEFT),
             QuarterPixels(g_Scorecard.y + TOTAL_LABEL_TOP + NINE_SPACING),
@@ -3381,7 +3381,7 @@ void DrawScoresPage(Gfx **displayListHead) {
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + NET_ROUND_LABEL_LEFT),
             QuarterPixels(g_Scorecard.y + TOTAL_LABEL_TOP + NINE_SPACING),
@@ -4133,7 +4133,7 @@ void DrawBetTallies(Gfx **displayListHead) {
                         s32 x = column + (digit * DIGIT_GLYPH_SIZE);
 
                         y += BET_TALLY_TOP;
-                        DrawTextureRect(
+                        DrawTextureRectangle(
                             &gfx,
                             QuarterPixels(x + g_Scorecard.x),
                             QuarterPixels(y),
@@ -4158,7 +4158,7 @@ void DrawBetTallies(Gfx **displayListHead) {
             s32 x = BET_TOTAL_LEFT + (digit * DIGIT_GLYPH_SIZE);
 
             y += BET_TALLY_TOP;
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(x + g_Scorecard.x),
                 QuarterPixels(y),

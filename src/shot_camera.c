@@ -1438,7 +1438,7 @@ void StartHoleFlyover(void) {
     g_Cameras[0].view.fieldOfView = FLYOVER_FIELD_OF_VIEW;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT, 0, 0, 0, 0, 0);
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, CHOICE_TEXT_SLOT, 0, 0, 0, 0, 0);
-    SetInsetViewRect(
+    SetInsetViewRectangle(
         FLYOVER_INSET_CENTER_X,
         FLYOVER_INSET_CENTER_Y,
         FLYOVER_INSET_SIZE,

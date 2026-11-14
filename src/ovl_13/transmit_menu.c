@@ -1652,7 +1652,7 @@ void DrawCharacterStats(
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(SHOT_TYPE_LEFT),
         QuarterPixels(SHOT_TYPE_TOP),
@@ -1679,7 +1679,7 @@ void DrawCharacterStats(
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(STATS_LEFT),
         QuarterPixels(STATS_TOP),
@@ -1710,7 +1710,7 @@ void DrawCharacterStats(
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(CURVE_BAR_LEFT),
         QuarterPixels(CURVE_BAR_TOP),
@@ -1764,7 +1764,7 @@ void DrawCharacterStats(
             continue;
         }
 
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(CURVE_BAR_LEFT + (segment * CURVE_SEGMENT_WIDTH)),
             QuarterPixels(CURVE_BAR_TOP),
@@ -1934,7 +1934,7 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
             gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
         }
 
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(TRANSFER_PAK_ICONS_LEFT + (slot * TRANSFER_PAK_ICON_SPACING)),
             QuarterPixels(TRANSFER_PAK_ICONS_TOP),
@@ -1999,7 +1999,7 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
             pointerRestLeft = (transfer->chosenCartridgeIndex * TRANSFER_PAK_ICON_SPACING) +
                 (TRANSFER_PAK_ICONS_LEFT - POINTING_HAND_SIZE);
             pointerLeft = pointerRestLeft - pointerSwing;
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(pointerLeft),
                 QuarterPixels(POINTER_TOP),
@@ -2053,7 +2053,7 @@ void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(FACES_LEFT + (gameBoyCharacterIndex * FACE_SPACING)),
                 QuarterPixels(FACES_TOP),
@@ -2117,7 +2117,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
         if (transfer->cartridgeCharacters[transfer->listedCharacters[index]].status ==
                 GAME_BOY_CHARACTER_STATUS_PRESENT &&
             IsListed(transfer->listingStates[transfer->listedCharacters[index]])) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING)),
                 QuarterPixels(LISTED_ICONS_TOP),
@@ -2160,7 +2160,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(CURVE_BAR_LEFT),
         QuarterPixels(CURVE_BAR_TOP),
@@ -2202,7 +2202,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(left),
                 QuarterPixels(top),
@@ -2267,7 +2267,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
         );
         gDPPipeSync(gfx++);
         if (transfer->firstShownListedIndex > 0) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(LEFT_ARROW_LEFT),
                 QuarterPixels(ARROWS_TOP),
@@ -2282,7 +2282,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
         }
 
         if (transfer->firstShownListedIndex < transfer->listedCharacterCount - SHOWN_LISTED_COUNT) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(RIGHT_ARROW_LEFT),
                 QuarterPixels(ARROWS_TOP),
@@ -2345,7 +2345,7 @@ void DrawSendExperienceScreen(Gfx **displayListHead, GameBoyTransfer *transfer) 
             gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
         }
 
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(TRANSFER_PAK_ICONS_LEFT + (slot * TRANSFER_PAK_ICON_SPACING)),
             QuarterPixels(TRANSFER_PAK_ICONS_TOP),
@@ -2425,7 +2425,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(COURSE_SCENE_LEFT),
                 QuarterPixels(COURSE_SCENE_TOP),
@@ -2455,7 +2455,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(COURSE_SCENE_LEFT),
                 QuarterPixels(COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROW_COUNT * 2)),
@@ -2496,7 +2496,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(TITLE_LEFT),
             QuarterPixels(TITLE_TOP + (index * TITLE_STRIP_ROWS)),
@@ -2536,7 +2536,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(WOOD_PANEL_LEFT),
             QuarterPixels(WOOD_PANEL_TOP + (index * WOOD_PANEL_STRIP_ROWS)),
@@ -2602,7 +2602,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
         );
         pointerLeft =
             OPTIONS_CENTER_X - OPTION_POINTER_GAP - POINTING_HAND_SIZE - (width / 2) - pointerSwing;
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(pointerLeft),
             QuarterPixels(OPTION_POINTER_TOP + (transfer->optionIndex * OPTION_SPACING)),
@@ -3709,7 +3709,7 @@ void DrawNotice(Gfx **displayListHead) {
             );
             stripHeight = halfHeight;
             bottom = (strip * stripHeight) + NOTICE_CENTER_Y;
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(NOTICE_CENTER_X - halfWidth),
                 QuarterPixels(bottom - stripHeight),
@@ -3767,7 +3767,7 @@ void DrawAccessingSign(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(ACCESSING_LEFT),
             QuarterPixels(ACCESSING_TOP + (strip * ACCESSING_STRIP_HEIGHT)),
@@ -3808,7 +3808,7 @@ void DrawPressingHand(Gfx **displayListHead) {
         G_TX_NOLOD
     );
     if (g_GameBoyTransfer.pressingHandPosition == PRESSING_HAND_LOW) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(LOW_PRESSING_HAND_LEFT),
             QuarterPixels(LOW_PRESSING_HAND_TOP),
@@ -3822,7 +3822,7 @@ void DrawPressingHand(Gfx **displayListHead) {
         );
     }
     else {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(NOTICE_PRESSING_HAND_LEFT),
             QuarterPixels(NOTICE_PRESSING_HAND_TOP),

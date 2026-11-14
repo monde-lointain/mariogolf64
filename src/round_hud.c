@@ -1347,7 +1347,7 @@ void StartLandingReaction(s32 reaction) {
             g_InsetView.ignoredSourceCode = LANDING_INSET_SOURCE_CODE;
             f_LandingReaction = previousReaction;
             g_InsetView.ignoredSizeCode = MOVIE_INSET_SIZE_CODE;
-            SetInsetViewRect(
+            SetInsetViewRectangle(
                 MOVIE_INSET_CENTER_X,
                 MOVIE_INSET_CENTER_Y,
                 MOVIE_INSET_SIZE,
@@ -1370,7 +1370,7 @@ void StartLandingReaction(s32 reaction) {
             g_InsetView.ignoredSourceCode = LANDING_INSET_SOURCE_CODE;
             g_InsetView.ignoredSizeCode = LANDING_INSET_SIZE_CODE;
             SetLandingWaitFrameCount(LANDING_WAIT_FRAME_COUNT);
-            SetInsetViewRect(
+            SetInsetViewRectangle(
                 LANDING_INSET_CENTER_X,
                 LANDING_INSET_CENTER_Y,
                 LANDING_INSET_WIDTH,

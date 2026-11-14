@@ -313,7 +313,7 @@ void DrawBootLogos(Gfx **displayListHead) {
                     G_TX_NOLOD,
                     G_TX_NOLOD
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(N64_LOGO_LEFT),
                     QuarterPixels(N64_LOGO_TOP + (stripIndex * N64_LOGO_STRIP_HEIGHT)),
@@ -385,7 +385,7 @@ void DrawBootLogos(Gfx **displayListHead) {
                     G_TX_NOLOD,
                     G_TX_NOLOD
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(NINTENDO_LOGO_LEFT),
                     QuarterPixels(NINTENDO_LOGO_TOP + (stripIndex * NINTENDO_LOGO_STRIP_HEIGHT)),
@@ -453,7 +453,7 @@ void DrawBootLogos(Gfx **displayListHead) {
                     G_TX_NOLOD,
                     G_TX_NOLOD
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(CAMELOT_LOGO_LEFT),
                     QuarterPixels(CAMELOT_LOGO_TOP + (stripIndex * CAMELOT_LOGO_STRIP_HEIGHT)),

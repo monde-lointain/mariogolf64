@@ -1076,7 +1076,7 @@ void DrawPlaceIcon(Gfx **displayListHead, s32 x, s32 y, s32 place) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(x),
         QuarterPixels(y),
@@ -1148,7 +1148,7 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(x + PLACE_GLYPH_SIZE),
             QuarterPixels(y),
@@ -1188,7 +1188,7 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
                     G_TX_NOLOD,
                     G_TX_NOLOD
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(x + digitX),
                     QuarterPixels(y + PLACE_DIGIT_Y),
@@ -1234,7 +1234,7 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(x + RANK_BANNER_X_OFFSET),
                 QuarterPixels(stripY),
@@ -1267,7 +1267,7 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(x + PLACE_GLYPH_SIZE),
             QuarterPixels(y),
@@ -1311,7 +1311,7 @@ void DrawResultsLabel(Gfx **displayListHead, s32 x, s32 y, s32 label) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(x),
         QuarterPixels(y),
@@ -1345,7 +1345,7 @@ void DrawPlayerFace(Gfx **displayListHead, s32 x, s32 y, s32 playerIndex, Boolea
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(x),
         QuarterPixels(y),
@@ -1491,7 +1491,7 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
         );
         top = NOTICE_COURSE_CENTER_Y - size + (i * size);
         centerX = f_NoticeSwing + NOTICE_COURSE_CENTER_X;
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(centerX - size),
             QuarterPixels(top + f_CourseNoticeShift),
@@ -1526,7 +1526,7 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         top = TitleStripTop(lift, i);
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
             QuarterPixels(top + f_CourseNoticeShift),
@@ -1570,7 +1570,7 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         stripBottomOffset = f_CourseNoticeShift + NOTICE_TITLE_STRIP_HEIGHT;
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
             QuarterPixels(TitleStripTop(depthLift, i) + f_CourseNoticeShift),
@@ -1668,7 +1668,7 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
             shineTexelX = TexelCoordinate(
                 SHINE_SIZE - ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
                 QuarterPixels(NOTICE_TITLE_TOP + shineLift + f_CourseNoticeShift),
@@ -1796,7 +1796,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
         );
         centerX = f_NoticeLift + NOTICE_CENTER_X;
         centerY = f_CharacterNoticeShift + NOTICE_CENTER_Y;
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(centerX - size),
             QuarterPixels(centerY - size),
@@ -1834,7 +1834,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
         step = TexelRunStep(NOTICE_FACE_SIZE / 2, size);
         centerX = f_NoticeLift + NOTICE_CENTER_X;
         centerY = f_CharacterNoticeShift + NOTICE_CENTER_Y;
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(centerX - size),
             QuarterPixels(centerY - size),
@@ -1872,7 +1872,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             liftFromCenter = f_NoticeLift - NOTICE_CENTER_X;
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(NOTICE_CENTER_X - width - f_NoticeLift),
                 QuarterPixels(CharacterTitleStripTop(stripIndex, height) + f_CharacterNoticeShift),
@@ -1934,7 +1934,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             titleCenterX = f_NoticeLift + NOTICE_CENTER_X;
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(titleCenterX - width),
                 QuarterPixels(CharacterTitleStripTop(stripIndex, height) + f_CharacterNoticeShift),
@@ -2029,7 +2029,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
                 shineTexelX = TexelCoordinate(
                     SHINE_SIZE - ((f_NoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT),
                     QuarterPixels(f_CharacterNoticeShift + NOTICE_CHARACTER_SHINE_TOP),
@@ -2381,7 +2381,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         if (f_BannerKind == BANNER_KIND_POINTS) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(f_BannerX + BANNER_CLOUD_LEFT),
                 QuarterPixels(f_BannerY + TALL_BANNER_CLOUD_TOP + (i * TALL_BANNER_CLOUD_HEIGHT)),
@@ -2398,7 +2398,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
             );
         }
         else {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(f_BannerX + BANNER_CLOUD_LEFT),
                 QuarterPixels(f_BannerY + BANNER_CLOUD_TOP + (i * BANNER_CLOUD_HEIGHT)),
@@ -2483,7 +2483,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                     G_TX_NOLOD,
                     G_TX_NOLOD
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(
                         TROPHY_CENTER_X + f_BannerX - (f_TrophySizes[courseIndex][TROPHY_WIDTH] / 2)
@@ -2558,7 +2558,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                     G_TX_NOLOD,
                     G_TX_NOLOD
                 );
-                DrawTextureRect(
+                DrawTextureRectangle(
                     &gfx,
                     QuarterPixels(
                         TROPHY_CENTER_X + f_BannerX - (f_TrophySizes[courseIndex][TROPHY_WIDTH] / 2)
@@ -2637,7 +2637,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                 if (f_TrophyShineFrame < TROPHY_SHINE_CYCLE) {
                     trophyHeight = f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS] +
                         f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS + 1];
-                    DrawTextureRect(
+                    DrawTextureRectangle(
                         &gfx,
                         QuarterPixels(
                             TROPHY_CENTER_X + f_BannerX -
@@ -4013,7 +4013,7 @@ void DrawMatchResults(Gfx **displayListHead) {
         }
 
         if (f_HasBets) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(
                     BETTING_MATCH_STANDING_X + f_ResultsSlide + standingShift[playerIndex]
@@ -4035,7 +4035,7 @@ void DrawMatchResults(Gfx **displayListHead) {
             );
         }
         else {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(PLAIN_MATCH_STANDING_X + f_ResultsSlide + standingShift[playerIndex]),
                 QuarterPixels(f_ResultsTop + MATCH_STANDING_Y + (playerIndex * MATCH_ROW_HEIGHT)),
@@ -4265,7 +4265,7 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
         );
         firstStripBottom =
             f_ResultsTop + CLUB_TOURNAMENT_COURSE_Y + CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT;
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X),
             QuarterPixels(
@@ -4311,7 +4311,7 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(f_ResultsSlide + NINTENDO_BADGE_X),
                 QuarterPixels(f_ResultsTop + NINTENDO_BADGE_Y + (i * NINTENDO_BADGE_STRIP_HEIGHT)),
@@ -4555,7 +4555,7 @@ void DrawRoundResults(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(f_ResultsSlide + BACKDROP_X),
                 QuarterPixels(
@@ -4593,7 +4593,7 @@ void DrawRoundResults(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(f_ResultsSlide + BACKDROP_X),
                 QuarterPixels((i * BACKDROP_STRIP_HEIGHT) + BACKDROP_Y + f_ResultsTop),
@@ -4630,7 +4630,7 @@ void DrawRoundResults(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(f_ResultsSlide + PRESSING_HAND_LEFT),
             QuarterPixels(f_ResultsTop + PRESSING_HAND_TOP),

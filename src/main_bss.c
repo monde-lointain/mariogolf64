@@ -308,7 +308,7 @@ u8 *g_ShadowTexture BSS = {0};
 u16 g_ScreenEffectPerspectiveNormalization BSS = {0};
 UNREAD_COMMON(0x8);
 OSPifRam __osPfsPifRam BSS ALIGNED(8) = {{0}};
-ScreenRect g_HudScissor BSS = {0};
+ScreenRectangle g_HudScissor BSS = {0};
 SkyState g_SkyState BSS ALIGNED(8) = {{0}};
 InsetView g_InsetView BSS ALIGNED(8) = {0};
 u8 nuDramStack[SP_DRAM_STACK_SIZE8] BSS ALIGNED(8) = {0};

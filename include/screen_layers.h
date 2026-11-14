@@ -63,7 +63,7 @@ extern s32 g_ScreenFadeKind;
 extern RgbColor g_ScreenFadeColor;
 extern Gfx g_DecalTextureSetup[];
 
-void DrawTextureRect(
+void DrawTextureRectangle(
     Gfx **displayListHead,
     s32 xl,
     s32 yl,

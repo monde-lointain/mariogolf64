@@ -1088,7 +1088,7 @@ void DrawLargeImage(Gfx **displayListHead, u8 *image, s32 left, s32 top) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(left),
             QuarterPixels(top),
@@ -1362,7 +1362,7 @@ void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 pageIndex) {
             );
             tabBottom = g_Scorecard.y + TAB_TOP + TABLE_LOAD_HEIGHT;
             tabTop = g_Scorecard.y + TAB_TOP;
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(g_Scorecard.x + TABLE_LEFT),
                 QuarterPixels(row + tabTop + dropY),
@@ -1399,7 +1399,7 @@ void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 pageIndex) {
             CALC_DXT(TABLE_WIDTH, G_IM_SIZ_8b_BYTES)
         );
         top = g_Scorecard.y + TABLE_BODY_TOP;
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(g_Scorecard.x + TABLE_LEFT),
             QuarterPixels(row + top),

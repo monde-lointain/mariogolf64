@@ -634,7 +634,7 @@ void DrawClubSlots(Gfx **displayListHead) {
     gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, OPAQUE_ALPHA);
     gDPPipeSync(gfx++);
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(REEL_WINDOW_LEFT),
         QuarterPixels(REEL_WINDOW_TOP),
@@ -740,7 +740,7 @@ void DrawClubSlots(Gfx **displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, OPAQUE_ALPHA);
     gDPPipeSync(gfx++);
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(REEL_WINDOW_LEFT),
         QuarterPixels(REEL_CENTER_LINE_TOP),
@@ -814,7 +814,7 @@ void DrawClubSlots(Gfx **displayListHead) {
         }
 
         gDPPipeSync(gfx++);
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(SCREEN_BORDER),
             QuarterPixels(topOrPlayerIndex),
@@ -858,7 +858,7 @@ void DrawClubSlots(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             gDPPipeSync(gfx++);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels((buttonOrStartStripIndex * BUTTON_WIDTH) + BUTTON_LEFT),
                 QuarterPixels(BUTTON_TOP + (stripIndex * BUTTON_STRIP_HEIGHT)),
@@ -985,7 +985,7 @@ void DrawClubSlots(Gfx **displayListHead) {
             );
             gDPPipeSync(gfx++);
             gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(FACE_LEFT),
                 QuarterPixels(FACE_TOP + (topOrPlayerIndex * FACE_SPACING)),
@@ -1076,7 +1076,7 @@ void DrawClubSlots(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 127);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(OTHER_FACE_LEFT),
                 QuarterPixels(OTHER_FACE_TOP + (topOrPlayerIndex * FACE_SPACING)),

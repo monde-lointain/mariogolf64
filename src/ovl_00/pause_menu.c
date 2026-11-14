@@ -854,7 +854,7 @@ void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap) {
     top = QuarterPixels(y - (GREEN_ARROW_SIZE / 2));
     bottom = QuarterPixels(y + (GREEN_ARROW_SIZE / 2));
     gDPPipeSync(gfx++);
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(x - (gap / 2) - (GREEN_ARROW_SIZE / 2)),
         top,
@@ -866,7 +866,7 @@ void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap) {
         TEXEL_STEP_ONE,
         TEXEL_STEP_ONE
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(x + (gap / 2) - (GREEN_ARROW_SIZE / 2)),
         top,
@@ -984,7 +984,7 @@ void DrawPauseMenu(Gfx **displayListHead) {
         G_TX_NOLOD
     );
     cloudMiddle = (labelsHeight + PAUSE_CLOUD_TOP) * 4;
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(PAUSE_CLOUD_LEFT),
         QuarterPixels(PAUSE_CLOUD_TOP),
@@ -1010,7 +1010,7 @@ void DrawPauseMenu(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    DrawTextureRect(
+    DrawTextureRectangle(
         &gfx,
         QuarterPixels(PAUSE_CLOUD_LEFT),
         cloudMiddle,
@@ -1163,7 +1163,7 @@ void DrawPauseMenu(Gfx **displayListHead) {
 
     selectedKind = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection]].kind;
     if (IsValueOptionKind(selectedKind)) {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(PAUSE_TEE_X),
             QuarterPixels((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 8),
@@ -1179,7 +1179,7 @@ void DrawPauseMenu(Gfx **displayListHead) {
         );
     }
     else {
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(PAUSE_TEE_X - sway),
             QuarterPixels((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4),
@@ -1362,7 +1362,7 @@ void DrawChoiceBox(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(CHOICE_BOX_CENTER_X - halfWidth),
                 QuarterPixels(CHOICE_BOX_TOP),
@@ -1438,7 +1438,7 @@ void DrawChoiceBox(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             cursorY = labelsTop + (f_ChoiceBoxSelection * CHOICE_LABEL_SPACING);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(cursorX),
                 QuarterPixels(cursorY - 2),

@@ -2883,7 +2883,7 @@ void DrawDigitText(Gfx **displayListHead, s32 x, s32 y, READ_ONLY char *text) {
 #else
     for (index = 0; g_PrintBuffer[index] != '\0'; index++) {
 #endif
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(x),
             QuarterPixels(y),

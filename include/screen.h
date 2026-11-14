@@ -51,14 +51,14 @@ extern s32 g_ScreenEffect;
 
 extern Mtx g_ScreenOrthoMatrix;
 
-typedef struct ScreenRect {
+typedef struct ScreenRectangle {
     s16 left;
     s16 top;
     s16 right;
     s16 bottom;
-} ScreenRect;
+} ScreenRectangle;
 
-extern ScreenRect g_HudScissor;
+extern ScreenRectangle g_HudScissor;
 
 void SetScreenEffect(s32 effect, s32 frameCount);
 

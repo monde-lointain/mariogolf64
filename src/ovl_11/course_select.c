@@ -651,7 +651,7 @@ void DrawPlanks(Gfx **displayListHead) {
         );
         top = QuarterPixels(SCREEN_BORDER + (stripIndex * PLANK_STRIP_HEIGHT));
         bottom = QuarterPixels(SCREEN_BORDER + (stripIndex * PLANK_STRIP_HEIGHT) + stripHeight);
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(SCREEN_BORDER),
             top,
@@ -663,7 +663,7 @@ void DrawPlanks(Gfx **displayListHead) {
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(SCREEN_WIDTH - slide),
             top,
@@ -716,7 +716,7 @@ void DrawRingShotSelect(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             gDPPipeSync(gfx++);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(COURSE_IMAGE_LEFT),
                 QuarterPixels(
@@ -764,7 +764,7 @@ void DrawRingShotSelect(Gfx **displayListHead) {
             );
             gDPPipeSync(gfx++);
             push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(ARROW_LEFT),
                 QuarterPixels(
@@ -783,7 +783,7 @@ void DrawRingShotSelect(Gfx **displayListHead) {
                 TEXEL_STEP_ONE
             );
             push = (f_RepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(ARROW_LEFT),
                 QuarterPixels(
@@ -875,7 +875,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             gDPPipeSync(gfx++);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(HOLE_SIGN_LEFT),
                 QuarterPixels(
@@ -914,7 +914,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             gDPPipeSync(gfx++);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(COURSE_IMAGE_LEFT),
                 QuarterPixels(
@@ -961,7 +961,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
         );
         gDPPipeSync(gfx++);
         push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(ARROW_LEFT),
             QuarterPixels(
@@ -980,7 +980,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
             TEXEL_STEP_ONE
         );
         push = (f_RepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(ARROW_LEFT),
             QuarterPixels(
@@ -1000,7 +1000,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
         );
         gDPPipeSync(gfx++);
         if (!IsOnDrivingRange()) {
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(
                     f_PressedDirection == DIRECTION_LEFT ? LEFT_ARROW_LEFT - ARROW_STEP :
@@ -1020,7 +1020,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
                 TEXEL_STEP_ONE
             );
             gDPPipeSync(gfx++);
-            DrawTextureRect(
+            DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(
                     f_PressedDirection == DIRECTION_RIGHT ? RIGHT_ARROW_LEFT + ARROW_STEP :
@@ -1108,7 +1108,7 @@ void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY) {
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(centerX - NAME_PLATE_HALF_WIDTH),
             QuarterPixels(NamePlateStripTop(centerY, stripIndex) - 15),
@@ -1243,7 +1243,7 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
                 TILE_STILL_STAR;
         }
 
-        DrawTextureRect(
+        DrawTextureRectangle(
             &gfx,
             QuarterPixels(left - (width / 2)),
             QuarterPixels(top - (height / 2)),
