@@ -5,15 +5,15 @@
 
 splat's script places every segment where the original has it. The overlays
 share three regions of base RAM after main, at fixed addresses, and in ROM
-they lie between main and the assets.
+they lie between main and the build date, which the asset files follow.
 
 The shiftable script packs each region of base RAM after the largest
 overlay of the region before it, the first after main, and defines
 overlay_regions_VRAM_END, where the heap can begin, after the last. In ROM,
-the overlays follow the assets, which stay at their original address, as
-data holds the addresses of files in them, and the padding after the
-assets is dropped. Other segments, such as an overlay of the Expansion
-Pak's memory, keep their addresses.
+each segment follows the one before it, in the original's order, as the
+code takes every ROM address from the script's symbols, and the padding
+after the assets is dropped. Other segments, such as an overlay of the
+Expansion Pak's memory, keep their addresses in RAM.
 
 The routines that the build links from archives, such as the libgcc
 helpers that a modern GCC calls, go at the end of main's code, where
@@ -27,8 +27,6 @@ keeps its commons with its bss instead, as the overlays' objects do.
 import re
 import sys
 
-# The build date's address in the original's ROM, just before the assets
-BUILD_DATE_ROM_START = 0x171770
 # Where the Expansion Pak's memory begins; regions below it are packed
 BASE_RDRAM_END = 0x80400000
 KSEG0_START = 0x80000000
@@ -98,8 +96,8 @@ def lay_out(script: str) -> str:
     main_index = names.index(MAIN)
     place_unlisted_sections(blocks, main_index)
     build_date = blocks[names.index(BUILD_DATE)]
-    # Segments without an address of their own, such as the assets, follow
-    # the build date in ROM
+    # Segments without an address of their own, such as the asset files,
+    # follow the build date in ROM
     rom_only: list[str] = []
     regions: dict[int, list[str]] = {}
     expansion: list[str] = []
@@ -119,12 +117,7 @@ def lay_out(script: str) -> str:
         else:
             expansion.append(block)
 
-    rom_start = f"0x{BUILD_DATE_ROM_START:X}"
-    fixed_rom = (
-        f'    ASSERT(__romPos <= {rom_start}, "main overlaps the assets")\n'
-        f"    __romPos = {rom_start};\n"
-    )
-    out = [*blocks[: main_index + 1], fixed_rom + build_date, *rom_only]
+    out = blocks[: main_index + 1]
     previous_ends = [f"{MAIN}_VRAM_END"]
     for index, vram in enumerate(sorted(regions), start=1):
         symbol = f"overlay_region_{index}_VRAM"
@@ -141,6 +134,8 @@ def lay_out(script: str) -> str:
         f"    overlay_regions_VRAM_END = ALIGN({max_of(previous_ends)}, {ALIGNMENT});"
     )
     out.extend(expansion)
+    out.append(build_date)
+    out.extend(rom_only)
     out.extend(commands)
     return head + separator + "\n\n".join(out) + end_separator + tail
 
