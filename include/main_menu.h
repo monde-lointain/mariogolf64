@@ -51,7 +51,7 @@ extern s32 g_ChosenPlayerCount;
 #define BET_PHASE_CONFIRMED 4
 extern u8 g_BetPagesPhase;
 extern u8 g_BetPagesWallSlide;
-extern s32 g_AnimatedIconFrameIndex;
+extern s32 g_AnimatedIconFrame;
 extern u8 g_AnimatedIconBufferIndex;
 extern s8 g_AnimatedIconFrameTime;
 extern s32 g_MenuFidgetDelays[PLAYER_COUNT_MAX];

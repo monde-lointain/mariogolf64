@@ -158,7 +158,7 @@ void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scal
 
 static s32 f_ClubSlotsState = CLUB_SLOTS_DONE;
 static u8 f_FaceBufferIndex = 0;
-static u8 f_FaceFrameIndex = 0;
+static u8 f_FaceFrame = 0;
 static u8 f_FaceFrameTime = 0;
 static u8 f_FaceHoldCount = 0;
 static u8 f_IsShowingResult = FALSE;
@@ -255,7 +255,7 @@ void LoadClubSlots(void) {
     }
 
     f_FaceBufferIndex = 0;
-    f_FaceFrameIndex = 0;
+    f_FaceFrame = 0;
     f_FaceFrameTime = 0;
     f_FaceHoldCount = 0;
     f_IsShowingResult = FALSE;
@@ -999,7 +999,7 @@ void DrawClubSlots(Gfx **displayListHead) {
             );
             if (f_IsShowingResult == TRUE && ++f_FaceFrameTime >= FACE_FRAME_DURATION) {
                 f_FaceFrameTime = 0;
-                if (++f_FaceFrameIndex >= FACE_LAST_FRAME + 1) {
+                if (++f_FaceFrame >= FACE_LAST_FRAME + 1) {
                     if (++f_FaceHoldCount >= FACE_HOLD_COUNT) {
                         row = f_CharacterFaceRows[g_Players[topOrPlayerIndex].characterIndex];
                         if (f_StarCount == REEL_COUNT) {
@@ -1025,7 +1025,7 @@ void DrawClubSlots(Gfx **displayListHead) {
                         f_StarCount = 0;
                         f_IsShowingResult = FALSE;
                         f_FaceFrameTime = 0;
-                        f_FaceFrameIndex = 0;
+                        f_FaceFrame = 0;
                         f_FaceBufferIndex = 0;
                         f_FaceHoldCount = 0;
                         f_Slots->playerIndex++;
@@ -1034,17 +1034,14 @@ void DrawClubSlots(Gfx **displayListHead) {
                 else {
                     row = f_CharacterFaceRows[g_Players[topOrPlayerIndex].characterIndex];
                     if (f_StarCount == REEL_COUNT) {
-                        OpenEncodedAsset(g_FaceAnimationAssets[row][f_FaceFrameIndex], &asset);
+                        OpenEncodedAsset(g_FaceAnimationAssets[row][f_FaceFrame], &asset);
                         ReadEncodedAsset(
                             f_Slots->faceImages[topOrPlayerIndex][f_FaceBufferIndex ^ 1],
                             &asset
                         );
                     }
                     else {
-                        OpenEncodedAsset(
-                            g_AlternateFaceAnimationAssets[row][f_FaceFrameIndex],
-                            &asset
-                        );
+                        OpenEncodedAsset(g_AlternateFaceAnimationAssets[row][f_FaceFrame], &asset);
                         ReadEncodedAsset(
                             f_Slots->faceImages[topOrPlayerIndex][f_FaceBufferIndex ^ 1],
                             &asset

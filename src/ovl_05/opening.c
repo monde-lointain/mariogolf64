@@ -422,7 +422,7 @@ static Vtx f_LogoBallMarioVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 static Boolean f_ShouldResetLogoBallRoll = TRUE;
-static s32 f_LogoBallFrameIndex = 0;
+static s32 f_LogoBallFrame = 0;
 static Boolean f_HasProjectedLogoBallLastPosition = FALSE;
 static Vtx f_ProjectedShadowVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -437,7 +437,7 @@ static Vtx f_ProjectedLogoBallMarioVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 static Boolean f_ShouldResetProjectedLogoBallRoll = TRUE;
-static s32 f_ProjectedLogoBallFrameIndex = 0;
+static s32 f_ProjectedLogoBallFrame = 0;
 static s32 f_ImpactLinesFrame = 0;
 static s32 f_LakituTrailAlpha = LAKITU_TRAIL_START_ALPHA;
 static Vtx f_LakituTrailVertices[2] = {
@@ -3652,7 +3652,7 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                             TextureAddress(
                                 LargeImageTexels(f_LogoBallImages) +
                                 ((stripIndex * OPENING_BALL_STRIP_SIZE) +
-                                    (f_LogoBallFrameIndex * LOGO_BALL_FRAME_SIZE))
+                                    (f_LogoBallFrame * LOGO_BALL_FRAME_SIZE))
                             ),
                             G_IM_FMT_CI,
                             G_IM_SIZ_8b,
@@ -3733,9 +3733,9 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                     f_LogoBallLastPosition[AXIS_Z] = f_OpeningBallPositions[slot][2];
                     rollAngle = fabs(rollAngle);
                     if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
-                        f_LogoBallFrameIndex++;
-                        if (f_LogoBallFrameIndex == LOGO_BALL_FRAME_COUNT) {
-                            f_LogoBallFrameIndex = 0;
+                        f_LogoBallFrame++;
+                        if (f_LogoBallFrame == LOGO_BALL_FRAME_COUNT) {
+                            f_LogoBallFrame = 0;
                         }
                     }
 
@@ -4044,7 +4044,7 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                                 TextureAddress(
                                     LargeImageTexels(f_LogoBallImages) +
                                     ((stripIndex * OPENING_BALL_STRIP_SIZE) +
-                                        (f_ProjectedLogoBallFrameIndex * LOGO_BALL_FRAME_SIZE))
+                                        (f_ProjectedLogoBallFrame * LOGO_BALL_FRAME_SIZE))
                                 ),
                                 G_IM_FMT_CI,
                                 G_IM_SIZ_8b,
@@ -4161,9 +4161,9 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                         f_ProjectedLogoBallLastPosition[AXIS_Z] = f_OpeningBallPositions[slot][2];
                         rollAngle = fabs(rollAngle);
                         if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
-                            f_ProjectedLogoBallFrameIndex++;
-                            if (f_ProjectedLogoBallFrameIndex == LOGO_BALL_FRAME_COUNT) {
-                                f_ProjectedLogoBallFrameIndex = 0;
+                            f_ProjectedLogoBallFrame++;
+                            if (f_ProjectedLogoBallFrame == LOGO_BALL_FRAME_COUNT) {
+                                f_ProjectedLogoBallFrame = 0;
                             }
                         }
 

@@ -68,7 +68,7 @@ typedef struct Scorecard {
     u16 *facePalettes[PLAYER_COUNT_MAX];
     u8 *betSubtitlesImage;
     u8 isOddFaceStep;
-    u8 faceTime;
+    u8 faceFrameTime;
     u8 faceFrame;
     s8 placeChange;
     s32 topRow;

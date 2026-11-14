@@ -178,7 +178,7 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     }
 
     g_Scorecard.isOddFaceStep = FALSE;
-    g_Scorecard.faceTime = 0;
+    g_Scorecard.faceFrameTime = 0;
     g_Scorecard.faceFrame = 0;
 
     switch (g_GameState.gameMode) {
@@ -909,7 +909,7 @@ void AnimateScorecard(void) {
 
             break;
         case SCORECARD_SHOWN:
-            if (g_Scorecard.faceTime++ % FACE_FRAME_DURATION == 1) {
+            if (g_Scorecard.faceFrameTime++ % FACE_FRAME_DURATION == 1) {
                 g_Scorecard.faceFrame++;
                 g_Scorecard.isOddFaceStep ^= 1;
                 if (g_Scorecard.faceFrame < FACE_FRAME_COUNT) {

@@ -179,7 +179,7 @@ static AssetId f_CourseImageAssets[COURSE_INDEX_COUNT] = {
     0x86C,
     0x871,
 };
-static s32 f_StarFrameIndex = 0;
+static s32 f_StarFrame = 0;
 static u8 f_StarBufferIndex = 0;
 static s8 f_StarFrameTime = 0;
 static s32 f_CourseArrowFrameTime = 0;
@@ -305,7 +305,7 @@ void LoadCourseSelect(Boolean isHoleSelect) {
     ReadAssetFile(f_CourseImagePalette, size, &file);
     f_ArrowsImage = AllocMemory(OpenEncodedAsset(ASSET_GREEN_ARROWS_COPY, &asset));
     ReadEncodedAsset(f_ArrowsImage, &asset);
-    f_StarFrameIndex = 0;
+    f_StarFrame = 0;
     f_StarBufferIndex = 0;
     f_StarFrameTime = 0;
 }
@@ -1261,15 +1261,15 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
     f_StarFrameTime++;
     if (f_StarFrameTime == STAR_FRAME_DURATION) {
         f_StarFrameTime = 0;
-        f_StarFrameIndex++;
-        if (f_StarFrameIndex >= STAR_FRAME_COUNT) {
-            f_StarFrameIndex = 0;
+        f_StarFrame++;
+        if (f_StarFrame >= STAR_FRAME_COUNT) {
+            f_StarFrame = 0;
         }
 
         f_StarBufferIndex = f_StarBufferIndex == 0;
-        OpenEncodedAsset(f_StarFrameAssets[f_StarFrameIndex], &asset);
+        OpenEncodedAsset(f_StarFrameAssets[f_StarFrame], &asset);
         ReadEncodedAsset(f_StarImages[f_StarBufferIndex], &asset);
-        OpenEncodedAsset(f_EmptyStarFrameAssets[f_StarFrameIndex], &asset);
+        OpenEncodedAsset(f_EmptyStarFrameAssets[f_StarFrame], &asset);
         ReadEncodedAsset(f_EmptyStarImages[f_StarBufferIndex], &asset);
     }
 

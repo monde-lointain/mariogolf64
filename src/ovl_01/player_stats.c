@@ -478,7 +478,7 @@ void LoadPlayerStatsBuffer(void *buffer, s16 bufferKind) {
     }
 
     g_AnimatedIconFrameTime = 0;
-    g_AnimatedIconFrameIndex = 0;
+    g_AnimatedIconFrame = 0;
     g_AnimatedIconBufferIndex = 0;
     f_IsBetHelpShown = FALSE;
     f_IsHandicapPromptShown = FALSE;
@@ -639,7 +639,7 @@ void UpdateBetSettings(void) {
             255,
             OPAQUE_ALPHA
         );
-        OpenEncodedAsset(ChosenBetIconFrame(memory, g_AnimatedIconFrameIndex), &asset);
+        OpenEncodedAsset(ChosenBetIconFrame(memory, g_AnimatedIconFrame), &asset);
         ReadEncodedAsset(f_ChosenBetIconFrames[g_AnimatedIconBufferIndex ^ 1], &asset);
         g_AnimatedIconBufferIndex ^= 1;
     }
@@ -662,7 +662,7 @@ void UpdateBetSettings(void) {
             255,
             OPAQUE_ALPHA
         );
-        OpenEncodedAsset(ChosenBetIconFrame(memory, g_AnimatedIconFrameIndex), &asset);
+        OpenEncodedAsset(ChosenBetIconFrame(memory, g_AnimatedIconFrame), &asset);
         ReadEncodedAsset(f_ChosenBetIconFrames[g_AnimatedIconBufferIndex ^ 1], &asset);
         g_AnimatedIconBufferIndex ^= 1;
     }
@@ -1022,14 +1022,14 @@ void DrawBetIcon(Gfx **displayListHead, s32 left, s32 top, s32 size, s32 texture
     gDPPipeSync(gfx++);
     if (g_AnimatedIconFrameTime == BET_ICON_FRAME_DURATION) {
         g_AnimatedIconFrameTime = 0;
-        g_AnimatedIconFrameIndex++;
-        if (g_AnimatedIconFrameIndex >= BET_ICON_FRAME_COUNT) {
-            g_AnimatedIconFrameIndex = 0;
+        g_AnimatedIconFrame++;
+        if (g_AnimatedIconFrame >= BET_ICON_FRAME_COUNT) {
+            g_AnimatedIconFrame = 0;
         }
 
         g_AnimatedIconBufferIndex = !g_AnimatedIconBufferIndex;
         iconIndex = f_BetSetBets[g_BetSet - 1][memory->betColumn];
-        OpenEncodedAsset(f_BetIconFrameAssets[iconIndex][g_AnimatedIconFrameIndex], &asset);
+        OpenEncodedAsset(f_BetIconFrameAssets[iconIndex][g_AnimatedIconFrame], &asset);
         ReadEncodedAsset(f_ChosenBetIconFrames[g_AnimatedIconBufferIndex], &asset);
     }
 

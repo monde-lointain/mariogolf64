@@ -1466,9 +1466,9 @@ s32 ContinueSavedGame(void);
 #define LoadChosenGameImages() \
     { \
         OpenEncodedAsset( \
-            g_ModeIconAnimations[(u8) \
-                    f_SaveMenuModeIcons[f_SavedGameModes[memory->savedGameIndex]]] \
-                                [g_AnimatedIconFrameIndex], \
+            g_ModeIconAnimations[( \
+                u8 \
+            )f_SaveMenuModeIcons[f_SavedGameModes[memory->savedGameIndex]]][g_AnimatedIconFrame], \
             &asset \
         ); \
         ReadEncodedAsset(f_ChosenModeIconBuffers[g_AnimatedIconBufferIndex], &asset); \
@@ -1815,7 +1815,7 @@ void UpdateSavedGames(void) {
                 }
 
                 memory->savedGameTurn = SAVED_GAME_TURN_FRAMES;
-                g_AnimatedIconFrameIndex = 0;
+                g_AnimatedIconFrame = 0;
                 ResetSavedGameControllers();
                 LoadChosenGameImages();
             }
@@ -1843,7 +1843,7 @@ void UpdateSavedGames(void) {
 
                 memory->savedGameTurn = -SAVED_GAME_TURN_FRAMES;
                 ResetSavedGameControllers();
-                g_AnimatedIconFrameIndex = 0;
+                g_AnimatedIconFrame = 0;
                 LoadChosenGameImages();
             }
         }
@@ -2598,17 +2598,17 @@ void DrawChosenGameBoard(Gfx **displayListHead, s32 left, s32 top, s32 halfSize,
         if (g_AnimatedIconFrameTime == MODE_ICON_FRAME_DURATION) {
             iconIndex = f_SaveMenuModeIcons[f_SavedGameModes[memory->savedGameIndex]];
             g_AnimatedIconFrameTime = 0;
-            g_AnimatedIconFrameIndex++;
-            if (g_AnimatedIconFrameIndex >= MODE_ICON_FRAME_COUNT) {
-                g_AnimatedIconFrameIndex = 0;
+            g_AnimatedIconFrame++;
+            if (g_AnimatedIconFrame >= MODE_ICON_FRAME_COUNT) {
+                g_AnimatedIconFrame = 0;
             }
 
-            if (g_ModeIconAnimations[iconIndex][g_AnimatedIconFrameIndex] == END_OF_ICON_FRAMES) {
-                g_AnimatedIconFrameIndex = 0;
+            if (g_ModeIconAnimations[iconIndex][g_AnimatedIconFrame] == END_OF_ICON_FRAMES) {
+                g_AnimatedIconFrame = 0;
             }
 
             g_AnimatedIconBufferIndex = g_AnimatedIconBufferIndex == 0;
-            OpenEncodedAsset(g_ModeIconAnimations[iconIndex][g_AnimatedIconFrameIndex], &asset);
+            OpenEncodedAsset(g_ModeIconAnimations[iconIndex][g_AnimatedIconFrame], &asset);
             ReadEncodedAsset(f_ChosenModeIconBuffers[g_AnimatedIconBufferIndex], &asset);
         }
     }
