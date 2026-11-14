@@ -314,7 +314,7 @@ s32 FindNearestTerrainColor(s32 color) {
     return nearestIndex;
 }
 
-s32 GetTerrainCodeColor(s32 code) {
+s32 GetTerrainCodeColor(TerrainCode code) {
     TerrainColorIndex colorIndex = TERRAIN_COLOR_FAIRWAY;
 
     switch (code) {

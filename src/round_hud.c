@@ -3076,7 +3076,7 @@ void DrawHoleImageModel(void) {
 }
 
 void StartShotEffect(ShotEffect effect) {
-    s32 contactStyle;
+    ContactStyle contactStyle;
 
     if (effect == SHOT_EFFECT_NONE) {
         f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;

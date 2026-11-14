@@ -2629,7 +2629,7 @@ void PlayWaitingPlayersCalls(void) {
 
 void PlayHoleOutSong(s32 playerIndex) {
     s32 strokeCount = g_Players[playerIndex].strokeCount;
-    s32 scoreToPar = strokeCount - g_HoleSetup.par;
+    ScoreToPar scoreToPar = strokeCount - g_HoleSetup.par;
 
     if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
         PlaySong(SONG_HOLE_WON, 0);
@@ -2673,7 +2673,7 @@ void PlayHoleOutSong(s32 playerIndex) {
 
 void ShowHoleOutBanner(s32 playerIndex) {
     s8 strokeCount = g_Players[playerIndex].strokeCount;
-    s32 scoreToPar = strokeCount - g_HoleSetup.par;
+    ScoreToPar scoreToPar = strokeCount - g_HoleSetup.par;
     s32 banner = BANNER_NONE;
 
     if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
@@ -3135,7 +3135,7 @@ void UpdateTurns(void) {
                         }
                         else if (g_GameState.gameMode != GAME_MODE_SPEED_GOLF) {
                             if (g_GameState.gameMode != GAME_MODE_RING_SHOT) {
-                                s32 scoreToPar =
+                                ScoreToPar scoreToPar =
                                     (g_Players[playerIndex].strokeCount + 1) - g_HoleSetup.par;
 
                                 if (scoreToPar > SCORE_TO_PAR_PAR) {
@@ -4524,7 +4524,7 @@ void UpdateTurns(void) {
                     }
                 }
                 else {
-                    s32 scoreToPar = g_Players[playerIndex].strokeCount - g_HoleSetup.par;
+                    ScoreToPar scoreToPar = g_Players[playerIndex].strokeCount - g_HoleSetup.par;
 
                     if (g_Players[playerIndex].strokeCount == 1) {
                         reaction = REACTION_ANIMATION_EAGLE;
@@ -4565,7 +4565,7 @@ void UpdateTurns(void) {
                 PlaceAndViewCharacter(0);
                 f_ShouldUpdateReaction = 1;
                 if (g_Players[playerIndex].holeStatus == HOLE_STATUS_HOLED_OUT) {
-                    s32 scoreToPar = g_Players[playerIndex].strokeCount - g_HoleSetup.par;
+                    ScoreToPar scoreToPar = g_Players[playerIndex].strokeCount - g_HoleSetup.par;
 
                     if (g_Players[playerIndex].strokeCount == 1) {
                         CountNotableShot(playerIndex, NOTABLE_SHOT_HOLE_IN_ONE);

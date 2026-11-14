@@ -2811,7 +2811,7 @@ void WriteSaveData(void) {
     TransferSaveData(GetSaveData(), TRUE);
 }
 
-void SyncSaveOptions(SaveData *save, Boolean isWrite, s32 readResult) {
+void SyncSaveOptions(SaveData *save, Boolean isWrite, SaveReadResult readResult) {
     u8 *optionBits;
     s8 *options;
 

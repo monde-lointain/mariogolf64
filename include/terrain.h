@@ -281,7 +281,7 @@ NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shad
 void PrepareHoleTriangles(void);
 Boolean IsOverlayInExpansionMemory(void);
 void UpdateDebugScenes(void);
-s32 GetTerrainCodeColor(s32 code);
+s32 GetTerrainCodeColor(TerrainCode code);
 s32 GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane);
 TerrainCode GetColorTerrainCode(s32 color);
 s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface);

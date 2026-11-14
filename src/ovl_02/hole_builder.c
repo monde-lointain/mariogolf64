@@ -2103,8 +2103,8 @@ void PaintGroundTiles(void) {
     u32 neighborColumn;
     u32 neighborRow;
     s32 texelIndex;
-    s32 code;
-    s32 nearestCode;
+    TerrainCode code;
+    TerrainCode nearestCode;
     s32 nearestDistance;
     s32 searchDistance;
     u32 painting;
