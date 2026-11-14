@@ -4457,7 +4457,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
             }
             else {
                 f32 rotationProgress;
-                f32 coveredAngle;
+                Radians coveredAngle;
 
                 spanIndex = joint->rotationSpan.startKeyIndex;
                 nextSpanIndex = spanIndex + 1;
