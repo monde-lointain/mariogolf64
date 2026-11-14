@@ -2532,7 +2532,7 @@ void StartTurnRumble(s32 playerIndex) {
 void PlayWaitingPlayersCalls(void) {
     s32 playerIndex;
     s32 controllerIndex;
-    u16 pressed;
+    u16 pressedButtons;
 
     if (g_HasOwnControllers == TRUE) {
         for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
@@ -2547,8 +2547,8 @@ void PlayWaitingPlayersCalls(void) {
                     continue;
                 }
 
-                pressed = g_ControllerStates[controllerIndex].pressedButtons;
-                if (pressed & U_JPAD) {
+                pressedButtons = g_ControllerStates[controllerIndex].pressedButtons;
+                if (pressedButtons & U_JPAD) {
                     PlayCharacterSound(
                         g_Players[playerIndex].characterIndex,
                         playerIndex,
@@ -2557,7 +2557,7 @@ void PlayWaitingPlayersCalls(void) {
                         g_Players[playerIndex].soundPan
                     );
                 }
-                else if (pressed & D_JPAD) {
+                else if (pressedButtons & D_JPAD) {
                     PlayCharacterSound(
                         g_Players[playerIndex].characterIndex,
                         playerIndex,
@@ -2566,7 +2566,7 @@ void PlayWaitingPlayersCalls(void) {
                         g_Players[playerIndex].soundPan
                     );
                 }
-                else if (pressed & L_JPAD) {
+                else if (pressedButtons & L_JPAD) {
                     PlayCharacterSound(
                         g_Players[playerIndex].characterIndex,
                         playerIndex,
@@ -2575,7 +2575,7 @@ void PlayWaitingPlayersCalls(void) {
                         g_Players[playerIndex].soundPan
                     );
                 }
-                else if (pressed & R_JPAD) {
+                else if (pressedButtons & R_JPAD) {
                     PlayCharacterSound(
                         g_Players[playerIndex].characterIndex,
                         playerIndex,
@@ -2584,7 +2584,7 @@ void PlayWaitingPlayersCalls(void) {
                         g_Players[playerIndex].soundPan
                     );
                 }
-                else if (pressed & U_CBUTTONS) {
+                else if (pressedButtons & U_CBUTTONS) {
                     PlayCharacterSound(
                         g_Players[playerIndex].characterIndex,
                         playerIndex,
@@ -2593,7 +2593,7 @@ void PlayWaitingPlayersCalls(void) {
                         g_Players[playerIndex].soundPan
                     );
                 }
-                else if (pressed & D_CBUTTONS) {
+                else if (pressedButtons & D_CBUTTONS) {
                     PlayCharacterSound(
                         g_Players[playerIndex].characterIndex,
                         playerIndex,
@@ -2602,7 +2602,7 @@ void PlayWaitingPlayersCalls(void) {
                         g_Players[playerIndex].soundPan
                     );
                 }
-                else if (pressed & L_CBUTTONS) {
+                else if (pressedButtons & L_CBUTTONS) {
                     PlayCharacterSound(
                         g_Players[playerIndex].characterIndex,
                         playerIndex,
@@ -2611,7 +2611,7 @@ void PlayWaitingPlayersCalls(void) {
                         g_Players[playerIndex].soundPan
                     );
                 }
-                else if (pressed & R_CBUTTONS) {
+                else if (pressedButtons & R_CBUTTONS) {
                     PlayCharacterSound(
                         g_Players[playerIndex].characterIndex,
                         playerIndex,
