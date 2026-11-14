@@ -84,9 +84,9 @@ enum UnlockNoticeKind {
 #define CONFIRM_SOUND_CHANNEL 15
 #define CONFIRM_SOUND_VOLUME 100
 
-enum PortraitAnimation {
-    PORTRAIT_ANIMATION_PLEASED = 1,
-    PORTRAIT_ANIMATION_BEATEN = 4
+enum FaceAnimation {
+    FACE_ANIMATION_PLEASED = 1,
+    FACE_ANIMATION_BEATEN = 4
 };
 
 #define NOTICE_SWING_HEIGHT 160.0f
@@ -97,7 +97,7 @@ enum PortraitAnimation {
 
 #define NOTICE_FACE_DELAY 10
 #define NOTICE_FACE_INTERVAL_MASK 3
-#define NOTICE_LAST_FACE 3
+#define NOTICE_LAST_FACE_FRAME 3
 #define NOTICE_LIFT_DELAY 50
 #define NOTICE_LIFT_START_SPEED 8
 #define NOTICE_LIFT_START_LIMIT (-2)
@@ -111,8 +111,8 @@ enum PortraitAnimation {
 #define RESULTS_LABEL_STORED_WIDTH 80
 #define RESULTS_LABEL_HEIGHT 18
 
-#define PORTRAIT_SIZE 32
-#define PORTRAIT_SIZE_LOG2 5
+#define FACE_SIZE 32
+#define FACE_SIZE_LOG2 5
 
 #define COURSE_POINTS_MAX S32_MAX
 
@@ -281,10 +281,10 @@ static u8 f_UnusedBufferBeforeBackdrop[0x10] UNUSED;
 static u8 *f_ResultsBackdropImage;
 static u8 *f_FinalResultsTitleImage;
 static u8 *f_ResultsCourseImage;
-static u8 *f_PortraitImage;
-static u8 *f_PortraitPalette;
-static u8 *f_PlayerPortraitImages[PLAYER_COUNT_MAX];
-static u8 *f_PlayerPortraitPalettes[PLAYER_COUNT_MAX];
+static u8 *f_FaceImage;
+static u8 *f_FacePalette;
+static u8 *f_PlayerFaceImages[PLAYER_COUNT_MAX];
+static u8 *f_PlayerFacePalettes[PLAYER_COUNT_MAX];
 static u8 *f_ResultsCloudImage;
 static u8 *f_ResultsLabelsImage;
 static u8 *f_ResultsLargeDigitsImage;
@@ -304,7 +304,7 @@ static u8 *f_DigitsImage;
 static u8 *f_PlaceDigitsImage;
 static s32 f_UnlockNoticeKind;
 static Boolean f_HasBets;
-static CharacterIndex f_PortraitCharacterIndex;
+static CharacterIndex f_FaceCharacterIndex;
 static s32 f_NoticeStage;
 static s32 f_NoticeFrameCount;
 static s32 f_NoticeSwing;
@@ -312,7 +312,7 @@ static s32 f_CourseNoticeShift;
 static Radians f_NoticeAngle;
 static Boolean f_IsNoticeHeld;
 static s32 f_NoticeTime;
-static s32 f_NoticeFaceIndex;
+static s32 f_NoticeFaceFrame;
 static s32 f_NoticeLift;
 static s32 f_CharacterNoticeShift;
 static char f_ScorePassword[SCORE_PASSWORD_LENGTH];
@@ -323,9 +323,9 @@ static s32 f_PlayerRanks[PLAYER_COUNT_MAX];
 static s32 f_PrizePoints;
 static s32 f_ShownPrizePoints;
 static CoursePointsTally f_CoursePointsTally;
-static s32 f_PortraitAnimations[PLAYER_COUNT_MAX];
-static s32 f_PortraitFrames[PLAYER_COUNT_MAX];
-static s32 f_PortraitTimers[PLAYER_COUNT_MAX];
+static s32 f_FaceAnimations[PLAYER_COUNT_MAX];
+static s32 f_FaceFrames[PLAYER_COUNT_MAX];
+static s32 f_FaceTimers[PLAYER_COUNT_MAX];
 
 s32 SumCoursePointsNeeded(CourseIndex courseIndex) {
     s32 total = 0;
@@ -461,17 +461,17 @@ void LoadRoundResults(void) {
     }
 
     for (i = 0; i != g_GameState.playerCount; i++) {
-        f_PlayerPortraitImages[i] = AllocMemory(
+        f_PlayerFaceImages[i] = AllocMemory(
             OpenEncodedAsset(g_CharacterImageAssets[g_Players[i].characterIndex], &asset)
         );
-        ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
+        ReadEncodedAsset(f_PlayerFaceImages[i], &asset);
         OpenAssetFile(
             g_CharacterPaletteAssets[g_Players[i].characterIndex] + g_Players[i].paletteIndex,
             &file
         );
         size = GetAssetFileSize(&file);
         palette = AllocMemory(size);
-        f_PlayerPortraitPalettes[i] = palette;
+        f_PlayerFacePalettes[i] = palette;
         ReadAssetFile(palette, size, &file);
         if (g_Players[i].isComputer) {
             f_PlayerPoints[i] = -1;
@@ -496,7 +496,7 @@ void LoadRoundResults(void) {
             f_MatchStandingWordsImage =
                 AllocMemory(OpenEncodedAsset(MATCH_STANDING_WORDS_ASSET, &asset));
             ReadEncodedAsset(f_MatchStandingWordsImage, &asset);
-            f_PortraitCharacterIndex = g_Players[1].characterIndex;
+            f_FaceCharacterIndex = g_Players[1].characterIndex;
         }
         else {
             f_ResultsPlacesImage = AllocMemory(OpenEncodedAsset(ASSET_PLACES, &asset));
@@ -512,9 +512,9 @@ void LoadRoundResults(void) {
     }
 
     for (i = 0; i != g_GameState.playerCount; i++) {
-        f_PortraitAnimations[i] = 0;
-        f_PortraitFrames[i] = -1;
-        f_PortraitTimers[i] = 0;
+        f_FaceAnimations[i] = 0;
+        f_FaceFrames[i] = -1;
+        f_FaceTimers[i] = 0;
     }
 
     if (g_GameState.isClubTournament) {
@@ -567,18 +567,18 @@ void LoadRoundResults(void) {
                     f_PlayerRanks[1] = MATCH_RANK_WON;
                 }
 
-                f_PortraitImage = AllocMemory(
+                f_FaceImage = AllocMemory(
                     OpenEncodedAsset(g_CharacterImageAssets[g_Players[1].characterIndex], &asset)
                 );
-                ReadEncodedAsset(f_PortraitImage, &asset);
+                ReadEncodedAsset(f_FaceImage, &asset);
                 OpenAssetFile(
                     g_CharacterPaletteAssets[g_Players[1].characterIndex] +
                         g_Players[1].paletteIndex,
                     &file
                 );
                 size = GetAssetFileSize(&file);
-                f_PortraitPalette = AllocMemory(size);
-                ReadAssetFile(f_PortraitPalette, size, &file);
+                f_FacePalette = AllocMemory(size);
+                ReadAssetFile(f_FacePalette, size, &file);
                 AddRoundPoints(save, k);
                 break;
             case GAME_MODE_UNLISTED_STROKE:
@@ -710,7 +710,7 @@ void LoadUnlockNotice(s32 unlock) {
     GetSaveData();
     f_IsNoticeHeld = FALSE;
     f_NoticeTime = 0;
-    f_NoticeFaceIndex = 0;
+    f_NoticeFaceFrame = 0;
     f_NoticeLift = 0;
     f_CharacterNoticeShift = 0;
     f_NoticeFrameCount = 0;
@@ -720,15 +720,15 @@ void LoadUnlockNotice(s32 unlock) {
     f_NoticeAngle = 0;
     courseIndex = 0;
     if (unlock == UNLOCK_NOTICE_DONKEY_KONG) {
-        f_PortraitCharacterIndex = CHARACTER_DONKEY_KONG;
+        f_FaceCharacterIndex = CHARACTER_DONKEY_KONG;
         f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
     }
     else if (unlock == UNLOCK_NOTICE_MAPLE) {
-        f_PortraitCharacterIndex = CHARACTER_MAPLE;
+        f_FaceCharacterIndex = CHARACTER_MAPLE;
         f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
     }
     else if (unlock == UNLOCK_NOTICE_METAL_MARIO) {
-        f_PortraitCharacterIndex = CHARACTER_METAL_MARIO;
+        f_FaceCharacterIndex = CHARACTER_METAL_MARIO;
         f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
     }
     else {
@@ -751,13 +751,13 @@ void LoadUnlockNotice(s32 unlock) {
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
         f_NamePlateImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
         ReadEncodedAsset(f_NamePlateImage, &asset);
-        f_PortraitImage =
-            AllocMemory(OpenEncodedAsset(g_CharacterImageAssets[f_PortraitCharacterIndex], &asset));
-        ReadEncodedAsset(f_PortraitImage, &asset);
-        OpenAssetFile(g_CharacterPaletteAssets[f_PortraitCharacterIndex], &file);
+        f_FaceImage =
+            AllocMemory(OpenEncodedAsset(g_CharacterImageAssets[f_FaceCharacterIndex], &asset));
+        ReadEncodedAsset(f_FaceImage, &asset);
+        OpenAssetFile(g_CharacterPaletteAssets[f_FaceCharacterIndex], &file);
         size = GetAssetFileSize(&file);
-        f_PortraitPalette = AllocMemory(size);
-        ReadAssetFile(f_PortraitPalette, size, &file);
+        f_FacePalette = AllocMemory(size);
+        ReadAssetFile(f_FacePalette, size, &file);
     }
 }
 
@@ -770,8 +770,8 @@ void FreeUnlockNotice(void) {
 
     if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
         FreeMemory(&f_NamePlateImage);
-        FreeMemory(&f_PortraitImage);
-        FreeMemory(&f_PortraitPalette);
+        FreeMemory(&f_FaceImage);
+        FreeMemory(&f_FacePalette);
     }
 
     f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
@@ -814,13 +814,13 @@ s32 UpdateUnlockNotice(void) {
 
         if (f_NoticeTime > NOTICE_FACE_DELAY &&
             !(f_NoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
-            f_NoticeFaceIndex < NOTICE_LAST_FACE) {
-            f_NoticeFaceIndex++;
+            f_NoticeFaceFrame < NOTICE_LAST_FACE_FRAME) {
+            f_NoticeFaceFrame++;
             OpenEncodedAsset(
-                g_CharacterImageAssets[f_PortraitCharacterIndex] + f_NoticeFaceIndex,
+                g_CharacterImageAssets[f_FaceCharacterIndex] + f_NoticeFaceFrame,
                 &asset
             );
-            ReadEncodedAsset(f_PortraitImage, &asset);
+            ReadEncodedAsset(f_FaceImage, &asset);
         }
 
         if (f_NoticeTime > NOTICE_LIFT_DELAY) {
@@ -867,8 +867,8 @@ void FreeRoundResults(void) {
         }
 
         for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-            FreeMemory(&f_PlayerPortraitImages[playerIndex]);
-            FreeMemory(&f_PlayerPortraitPalettes[playerIndex]);
+            FreeMemory(&f_PlayerFaceImages[playerIndex]);
+            FreeMemory(&f_PlayerFacePalettes[playerIndex]);
         }
 
         if (!g_GameState.isClubTournament) {
@@ -895,8 +895,8 @@ void FreeRoundResults(void) {
                     break;
                 case GAME_MODE_MATCH_GAME:
                 case GAME_MODE_GET_CHARACTER:
-                    FreeMemory(&f_PortraitImage);
-                    FreeMemory(&f_PortraitPalette);
+                    FreeMemory(&f_FaceImage);
+                    FreeMemory(&f_FacePalette);
                     break;
                 case GAME_MODE_TOURNAMENT:
                     FreeMemory(&f_SecondBannerImage);
@@ -911,10 +911,10 @@ void FreeRoundResults(void) {
     }
 }
 
-void StartPortraitAnimation(s32 animationId, s32 playerIndex) {
-    f_PortraitAnimations[playerIndex] = animationId;
-    f_PortraitFrames[playerIndex] = 0;
-    f_PortraitTimers[playerIndex] = 0;
+void StartFaceAnimation(s32 animationId, s32 playerIndex) {
+    f_FaceAnimations[playerIndex] = animationId;
+    f_FaceFrames[playerIndex] = 0;
+    f_FaceTimers[playerIndex] = 0;
 }
 
 void PlayTallySound(void) {
@@ -1333,21 +1333,21 @@ void DrawResultsLabel(Gfx **displayListHead, s32 x, s32 y, s32 label) {
     *displayListHead = gfx;
 }
 
-void DrawPlayerPortrait(Gfx **displayListHead, s32 x, s32 y, s32 playerIndex, Boolean isMirrored) {
+void DrawPlayerFace(Gfx **displayListHead, s32 x, s32 y, s32 playerIndex, Boolean isMirrored) {
     Gfx *gfx = *displayListHead;
 
-    LoadLargePalette(&gfx, f_PlayerPortraitPalettes[playerIndex]);
+    LoadLargePalette(&gfx, f_PlayerFacePalettes[playerIndex]);
     LoadTextureBlock(
         &gfx,
-        f_PlayerPortraitImages[playerIndex],
+        f_PlayerFaceImages[playerIndex],
         G_IM_FMT_CI,
         G_IM_SIZ_8b,
-        PORTRAIT_SIZE,
-        PORTRAIT_SIZE,
+        FACE_SIZE,
+        FACE_SIZE,
         0,
         G_TX_MIRROR,
         G_TX_NOMIRROR,
-        PORTRAIT_SIZE_LOG2,
+        FACE_SIZE_LOG2,
         G_TX_NOMASK,
         G_TX_NOLOD,
         G_TX_NOLOD
@@ -1356,10 +1356,10 @@ void DrawPlayerPortrait(Gfx **displayListHead, s32 x, s32 y, s32 playerIndex, Bo
         &gfx,
         QuarterPixels(x),
         QuarterPixels(y),
-        QuarterPixels(x + PORTRAIT_SIZE),
-        QuarterPixels(y + PORTRAIT_SIZE),
+        QuarterPixels(x + FACE_SIZE),
+        QuarterPixels(y + FACE_SIZE),
         G_TX_RENDERTILE,
-        isMirrored * TexelCoordinate(PORTRAIT_SIZE),
+        isMirrored * TexelCoordinate(FACE_SIZE),
         0,
         TEXEL_STEP_ONE,
         TEXEL_STEP_ONE
@@ -1382,7 +1382,7 @@ void StartResultsNotice(s32 kind) {
         case UNLOCK_NOTICE_KIND_CHARACTER:
             f_IsNoticeHeld = FALSE;
             f_NoticeTime = 0;
-            f_NoticeFaceIndex = 0;
+            f_NoticeFaceFrame = 0;
             f_NoticeLift = 0;
             f_CharacterNoticeShift = 0;
             break;
@@ -1708,13 +1708,13 @@ void UpdateCharacterResultsNotice(void) {
 
     if (f_NoticeTime > NOTICE_FACE_DELAY &&
         !(f_NoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
-        f_NoticeFaceIndex < NOTICE_LAST_FACE) {
-        f_NoticeFaceIndex++;
+        f_NoticeFaceFrame < NOTICE_LAST_FACE_FRAME) {
+        f_NoticeFaceFrame++;
         OpenEncodedAsset(
-            g_CharacterImageAssets[g_Players[1].characterIndex] + f_NoticeFaceIndex,
+            g_CharacterImageAssets[g_Players[1].characterIndex] + f_NoticeFaceFrame,
             &asset
         );
-        ReadEncodedAsset(f_PortraitImage, &asset);
+        ReadEncodedAsset(f_FaceImage, &asset);
     }
 
     if (f_NoticeTime > NOTICE_LIFT_DELAY) {
@@ -1739,8 +1739,8 @@ void UpdateCharacterResultsNotice(void) {
 #define NOTICE_CENTER_Y 128
 #define NOTICE_NAMEPLATE_SIZE 48
 #define NOTICE_NAMEPLATE_POP_SIZE 36.0f
-#define NOTICE_PORTRAIT_SIZE 32
-#define NOTICE_PORTRAIT_POP_SIZE 24.0f
+#define NOTICE_FACE_SIZE 32
+#define NOTICE_FACE_POP_SIZE 24.0f
 #define NOTICE_CHARACTER_TITLE_WIDTH 144
 #define NOTICE_CHARACTER_TITLE_TOP 80
 #define NOTICE_CHARACTER_TITLE_POP_WIDTH 108.0f
@@ -1820,19 +1820,19 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
         );
     }
 
-    size = popScale * NOTICE_PORTRAIT_POP_SIZE;
+    size = popScale * NOTICE_FACE_POP_SIZE;
     if (size > 0) {
         s32 centerX;
         s32 centerY;
 
-        LoadLargePalette(&gfx, f_PortraitPalette);
+        LoadLargePalette(&gfx, f_FacePalette);
         LoadTextureBlock(
             &gfx,
-            f_PortraitImage,
+            f_FaceImage,
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            NOTICE_PORTRAIT_SIZE,
-            NOTICE_PORTRAIT_SIZE,
+            NOTICE_FACE_SIZE,
+            NOTICE_FACE_SIZE,
             0,
             0,
             0,
@@ -1841,7 +1841,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        step = TexelRunStep(NOTICE_PORTRAIT_SIZE / 2, size);
+        step = TexelRunStep(NOTICE_FACE_SIZE / 2, size);
         centerX = f_NoticeLift + NOTICE_CENTER_X;
         centerY = f_CharacterNoticeShift + NOTICE_CENTER_Y;
         DrawTextureRect(
@@ -2006,7 +2006,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
         );
         if (f_NoticeTime == NOTICE_CHARACTER_VOICE_FRAME) {
             PlayCharacterSound(
-                f_PortraitCharacterIndex,
+                f_FaceCharacterIndex,
                 NOTICE_CHARACTER_VOICE_SLOT,
                 CHARACTER_SOUND_NOTICE,
                 SOUND_FULL_SCALE,
@@ -2715,7 +2715,7 @@ s32 UpdateTournamentResults(ControllerState *controller) {
         case UNLOCK_NOTICE_KIND_NONE:
             if (f_OpenCourseCount < COURSE_COUNT &&
                 f_PointsToNextCourse + f_PrizePoints + f_CoursePointsTally.earned == 0) {
-                StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
+                StartFaceAnimation(FACE_ANIMATION_PLEASED, 0);
                 StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
                 OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
                 ReadEncodedAsset(f_ResultsCourseImage, &asset);
@@ -2752,7 +2752,7 @@ s32 UpdateTournamentResults(ControllerState *controller) {
                     if (GetBannerState() == BANNER_SHOWN) {
                         f_ResultsStep = TOURNAMENT_STEP_TALLYING_PRIZE;
                         if (f_PlayerRanks[0] == 1) {
-                            StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
+                            StartFaceAnimation(FACE_ANIMATION_PLEASED, 0);
                             PlayCharacterSound(
                                 g_Players[0].characterIndex,
                                 0,
@@ -2915,7 +2915,7 @@ s32 ShowScorePassword(ControllerState *controller) {
     switch (f_ResultsStep) {
         case SCORE_PASSWORD_STEP_START:
             f_ResultsStep = SCORE_PASSWORD_STEP_SHOWN;
-            StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
+            StartFaceAnimation(FACE_ANIMATION_PLEASED, 0);
             CopyTournamentCode(report.tournamentCode);
             report.characterIndex = g_Players[0].characterIndex;
             report.score = f_PlayerResults[0];
@@ -2982,7 +2982,7 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
             if (f_OpenCourseCount < COURSE_COUNT &&
                 f_PointsToNextCourse + f_CoursePointsTally.earned == 0) {
                 for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-                    StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, playerIndex);
+                    StartFaceAnimation(FACE_ANIMATION_PLEASED, playerIndex);
                 }
 
                 StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
@@ -3020,11 +3020,11 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
                         otherIndex = 0;
                     });
                     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-                        StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, playerIndex);
+                        StartFaceAnimation(FACE_ANIMATION_PLEASED, playerIndex);
                         for (otherIndex = 0; otherIndex != g_GameState.playerCount; otherIndex++) {
                             if (playerIndex != otherIndex &&
                                 f_PlayerRanks[playerIndex] > f_PlayerRanks[otherIndex]) {
-                                StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, playerIndex);
+                                StartFaceAnimation(FACE_ANIMATION_BEATEN, playerIndex);
                             }
                         }
                     }
@@ -3140,7 +3140,7 @@ s32 UpdateMatchResults(ControllerState *controller) {
             if (f_OpenCourseCount < COURSE_COUNT &&
                 f_PointsToNextCourse + f_CoursePointsTally.earned == 0) {
                 for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-                    StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, playerIndex);
+                    StartFaceAnimation(FACE_ANIMATION_PLEASED, playerIndex);
                 }
 
                 StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
@@ -3171,12 +3171,12 @@ s32 UpdateMatchResults(ControllerState *controller) {
                     }
 
                     if (f_PlayerRanks[0] == MATCH_RANK_WON) {
-                        StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
-                        StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, 1);
+                        StartFaceAnimation(FACE_ANIMATION_PLEASED, 0);
+                        StartFaceAnimation(FACE_ANIMATION_BEATEN, 1);
                     }
                     else {
-                        StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 1);
-                        StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, 0);
+                        StartFaceAnimation(FACE_ANIMATION_PLEASED, 1);
+                        StartFaceAnimation(FACE_ANIMATION_BEATEN, 0);
                     }
 
                     break;
@@ -3289,25 +3289,25 @@ s32 UpdateMatchResults(ControllerState *controller) {
                             DEBUG_UNLOCK_CHOICE_ROW
                         );
                         if (controller->pressedButtons & B_BUTTON) {
-                            EncodedAsset portraitAsset;
+                            EncodedAsset faceAsset;
                             AssetFile file;
 
                             StartResultsNotice(UNLOCK_NOTICE_KIND_CHARACTER);
                             g_Players[1].characterIndex = f_DebugUnlockCharacter;
-                            f_PortraitCharacterIndex = (s8)f_DebugUnlockCharacter;
+                            f_FaceCharacterIndex = (s8)f_DebugUnlockCharacter;
                             OpenEncodedAsset(
                                 g_CharacterImageAssets[(s8)f_DebugUnlockCharacter],
-                                &portraitAsset
+                                &faceAsset
                             );
-                            ReadEncodedAsset(f_PortraitImage, &portraitAsset);
+                            ReadEncodedAsset(f_FaceImage, &faceAsset);
                             OpenAssetFile(
                                 g_CharacterPaletteAssets[g_Players[1].characterIndex] +
                                     g_Players[1].paletteIndex,
                                 &file
                             );
-                            ReadAssetFile(f_PortraitPalette, GetAssetFileSize(&file), &file);
-                            OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &portraitAsset);
-                            ReadEncodedAsset(f_NoticeTitleImage, &portraitAsset);
+                            ReadAssetFile(f_FacePalette, GetAssetFileSize(&file), &file);
+                            OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &faceAsset);
+                            ReadEncodedAsset(f_NoticeTitleImage, &faceAsset);
                             f_ResultsStep = MATCH_STEP_SLIDING_OUT_TALLY;
                         }
                     }
@@ -3328,7 +3328,7 @@ s32 UpdateMatchResults(ControllerState *controller) {
 }
 
 #define TOURNAMENT_PLACE_X 40
-#define TOURNAMENT_PORTRAIT_X 100
+#define TOURNAMENT_FACE_X 100
 #define TOURNAMENT_ICON_Y 80
 #define TOURNAMENT_SCORE_LABEL_X 144
 #define TOURNAMENT_POINTS_LABEL_X 232
@@ -3350,9 +3350,9 @@ void DrawTournamentResults(Gfx **displayListHead) {
         f_ResultsTop + TOURNAMENT_ICON_Y,
         (f_PlayerRanks[0] - 1) | RANK_AS_PLACE
     );
-    DrawPlayerPortrait(
+    DrawPlayerFace(
         &gfx,
-        f_ResultsSlide + TOURNAMENT_PORTRAIT_X,
+        f_ResultsSlide + TOURNAMENT_FACE_X,
         f_ResultsTop + TOURNAMENT_ICON_Y,
         0,
         FALSE
@@ -3451,8 +3451,8 @@ const char f_TimeLabel[] = "Time";
 #define RESULTS_HEADING_ENV_COLOR 0xFFFF0000
 #define RESULTS_HEADING_PRIM_COLOR 0x30FF0000
 
-#define SPEED_GOLF_PORTRAIT_X 40
-#define SPEED_GOLF_PORTRAIT_Y 88
+#define SPEED_GOLF_FACE_X 40
+#define SPEED_GOLF_FACE_Y 88
 #define SPEED_GOLF_SCORE_LABEL_X 82
 #define SPEED_GOLF_POINTS_LABEL_X 232
 #define SPEED_GOLF_LABEL_Y 56
@@ -3474,10 +3474,10 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
-    DrawPlayerPortrait(
+    DrawPlayerFace(
         &gfx,
-        f_ResultsSlide + SPEED_GOLF_PORTRAIT_X,
-        f_ResultsTop + SPEED_GOLF_PORTRAIT_Y,
+        f_ResultsSlide + SPEED_GOLF_FACE_X,
+        f_ResultsTop + SPEED_GOLF_FACE_Y,
         0,
         FALSE
     );
@@ -3615,14 +3615,14 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
 #define BETTING_RESULTS_BETS_LABEL_X 192
 #define BETTING_RESULTS_POINTS_LABEL_X 248
 #define BETTING_RESULTS_PLACE_X 18
-#define BETTING_RESULTS_PORTRAIT_X 50
+#define BETTING_RESULTS_FACE_X 50
 #define BETTING_RESULTS_SCORE_X 96
 #define BETTING_RESULTS_BET_TOTAL_X 156
 #define BETTING_RESULTS_POINTS_X 242
 #define PLAIN_RESULTS_SCORE_LABEL_X 144
 #define PLAIN_RESULTS_POINTS_LABEL_X 234
 #define PLAIN_RESULTS_RANK_X 32
-#define PLAIN_RESULTS_PORTRAIT_X 96
+#define PLAIN_RESULTS_FACE_X 96
 #define PLAIN_RESULTS_SCORE_X 152
 #define PLAIN_RESULTS_POINTS_X 232
 
@@ -3674,9 +3674,9 @@ void DrawPlayersResults(Gfx **displayListHead) {
                 );
             }
 
-            DrawPlayerPortrait(
+            DrawPlayerFace(
                 &gfx,
-                f_ResultsSlide + BETTING_RESULTS_PORTRAIT_X,
+                f_ResultsSlide + BETTING_RESULTS_FACE_X,
                 f_ResultsTop + RESULTS_ICON_ROW_Y + (playerIndex * RESULTS_ROW_HEIGHT),
                 playerIndex,
                 FALSE
@@ -3706,9 +3706,9 @@ void DrawPlayersResults(Gfx **displayListHead) {
                 );
             }
 
-            DrawPlayerPortrait(
+            DrawPlayerFace(
                 &gfx,
-                f_ResultsSlide + PLAIN_RESULTS_PORTRAIT_X,
+                f_ResultsSlide + PLAIN_RESULTS_FACE_X,
                 f_ResultsTop + RESULTS_ICON_ROW_Y + (playerIndex * RESULTS_ROW_HEIGHT),
                 playerIndex,
                 FALSE
@@ -3850,20 +3850,20 @@ const char f_NoPointsText[] = "  -";
 #define MATCH_ROW_HEIGHT 72
 #define MATCH_HEADING_Y 62
 #define MATCH_RANK_Y 48
-#define MATCH_PORTRAIT_Y 76
+#define MATCH_FACE_Y 76
 #define MATCH_NUMBER_Y 92
 #define MATCH_STANDING_Y 108
 #define BETTING_MATCH_BETS_LABEL_X 152
 #define BETTING_MATCH_POINTS_LABEL_X 240
 #define BETTING_MATCH_RANK_X 40
-#define BETTING_MATCH_PORTRAIT_X 62
+#define BETTING_MATCH_FACE_X 62
 #define BETTING_MATCH_HOLE_COUNT_X 48
 #define BETTING_MATCH_STANDING_X 80
 #define BETTING_MATCH_BET_TOTAL_X 128
 #define BETTING_MATCH_POINTS_X 234
 #define PLAIN_MATCH_POINTS_LABEL_X 220
 #define PLAIN_MATCH_RANK_X 56
-#define PLAIN_MATCH_PORTRAIT_X 78
+#define PLAIN_MATCH_FACE_X 78
 #define PLAIN_MATCH_HOLE_COUNT_X 64
 #define PLAIN_MATCH_STANDING_X 96
 #define PLAIN_MATCH_POINTS_X 218
@@ -3927,17 +3927,17 @@ void DrawMatchResults(Gfx **displayListHead) {
             f_ResultsTop + MATCH_RANK_Y + MATCH_ROW_HEIGHT,
             f_PlayerRanks[1]
         );
-        DrawPlayerPortrait(
+        DrawPlayerFace(
             &gfx,
-            f_ResultsSlide + BETTING_MATCH_PORTRAIT_X,
-            f_ResultsTop + MATCH_PORTRAIT_Y,
+            f_ResultsSlide + BETTING_MATCH_FACE_X,
+            f_ResultsTop + MATCH_FACE_Y,
             0,
             FALSE
         );
-        DrawPlayerPortrait(
+        DrawPlayerFace(
             &gfx,
-            f_ResultsSlide + BETTING_MATCH_PORTRAIT_X,
-            f_ResultsTop + MATCH_PORTRAIT_Y + MATCH_ROW_HEIGHT,
+            f_ResultsSlide + BETTING_MATCH_FACE_X,
+            f_ResultsTop + MATCH_FACE_Y + MATCH_ROW_HEIGHT,
             1,
             FALSE
         );
@@ -3961,17 +3961,17 @@ void DrawMatchResults(Gfx **displayListHead) {
             f_ResultsTop + MATCH_RANK_Y + MATCH_ROW_HEIGHT,
             f_PlayerRanks[1]
         );
-        DrawPlayerPortrait(
+        DrawPlayerFace(
             &gfx,
-            f_ResultsSlide + PLAIN_MATCH_PORTRAIT_X,
-            f_ResultsTop + MATCH_PORTRAIT_Y,
+            f_ResultsSlide + PLAIN_MATCH_FACE_X,
+            f_ResultsTop + MATCH_FACE_Y,
             0,
             FALSE
         );
-        DrawPlayerPortrait(
+        DrawPlayerFace(
             &gfx,
-            f_ResultsSlide + PLAIN_MATCH_PORTRAIT_X,
-            f_ResultsTop + MATCH_PORTRAIT_Y + MATCH_ROW_HEIGHT,
+            f_ResultsSlide + PLAIN_MATCH_FACE_X,
+            f_ResultsTop + MATCH_FACE_Y + MATCH_ROW_HEIGHT,
             1,
             FALSE
         );
@@ -4207,9 +4207,9 @@ const char f_UnusedModeNamesText[] = "StrokeSpeedGolfMini-Golf";
 #define CLUB_TOURNAMENT_TEXT_FLAGS (TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER)
 #define CLUB_TOURNAMENT_COURSE_X 28
 #define CLUB_TOURNAMENT_COURSE_Y 104
-#define CLUB_TOURNAMENT_PORTRAIT_X 96
-#define BADGED_PORTRAIT_Y 136
-#define UNBADGED_PORTRAIT_Y 128
+#define CLUB_TOURNAMENT_FACE_X 96
+#define BADGED_FACE_Y 136
+#define UNBADGED_FACE_Y 128
 #define NINTENDO_BADGE_X 88
 #define NINTENDO_BADGE_Y 54
 #define CLUB_TOURNAMENT_DETAILS_X 160
@@ -4299,10 +4299,10 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
     detailsTop = CLUB_TOURNAMENT_DETAILS_TOP;
     if (isNintendo) {
         lineHeight = CLUB_TOURNAMENT_LINE_HEIGHT;
-        DrawPlayerPortrait(
+        DrawPlayerFace(
             &gfx,
-            f_ResultsSlide + CLUB_TOURNAMENT_PORTRAIT_X,
-            f_ResultsTop + BADGED_PORTRAIT_Y,
+            f_ResultsSlide + CLUB_TOURNAMENT_FACE_X,
+            f_ResultsTop + BADGED_FACE_Y,
             0,
             TRUE
         );
@@ -4344,10 +4344,10 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
     else {
         detailsTop = CLUB_TOURNAMENT_UNBADGED_DETAILS_TOP;
         lineHeight = CLUB_TOURNAMENT_UNBADGED_LINE_HEIGHT;
-        DrawPlayerPortrait(
+        DrawPlayerFace(
             &gfx,
-            f_ResultsSlide + CLUB_TOURNAMENT_PORTRAIT_X,
-            f_ResultsTop + UNBADGED_PORTRAIT_Y,
+            f_ResultsSlide + CLUB_TOURNAMENT_FACE_X,
+            f_ResultsTop + UNBADGED_FACE_Y,
             0,
             TRUE
         );
@@ -4523,10 +4523,10 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
 #define FINAL_RESULTS_TITLE_BOB_STEP (M_PI / 18)
 #define TEXEL_UNITS 32
 #define SUBTEXEL_STEPS 16.0f
-#define PORTRAIT_FRAME_DRAWS_MASK 3
-#define PORTRAIT_ANIMATION_FRAME_COUNT 5
-#define PORTRAIT_ANIMATION_REST 0
-#define NO_PORTRAIT_FRAME (-1)
+#define FACE_FRAME_DRAWS_MASK 3
+#define RESULTS_FACE_ANIMATION_FRAME_COUNT 5
+#define FACE_ANIMATION_REST 0
+#define NO_FACE_FRAME (-1)
 
 void DrawRoundResults(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
@@ -4748,42 +4748,41 @@ void DrawRoundResults(Gfx **displayListHead) {
     for (i = 0; i != g_GameState.playerCount; i++) {
         EncodedAsset asset;
 
-        if (f_PortraitFrames[i] != NO_PORTRAIT_FRAME) {
-            if (!(f_PortraitTimers[i] & PORTRAIT_FRAME_DRAWS_MASK)) {
-                switch (f_PortraitAnimations[i]) {
-                    case PORTRAIT_ANIMATION_REST:
+        if (f_FaceFrames[i] != NO_FACE_FRAME) {
+            if (!(f_FaceTimers[i] & FACE_FRAME_DRAWS_MASK)) {
+                switch (f_FaceAnimations[i]) {
+                    case FACE_ANIMATION_REST:
                         OpenEncodedAsset(
                             g_CharacterImageAssets[g_Players[i].characterIndex],
                             &asset
                         );
-                        ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
-                        f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
+                        ReadEncodedAsset(f_PlayerFaceImages[i], &asset);
+                        f_FaceFrames[i] = NO_FACE_FRAME;
                         break;
-                    case PORTRAIT_ANIMATION_PLEASED:
+                    case FACE_ANIMATION_PLEASED:
                         OpenEncodedAsset(
-                            g_CharacterImageAssets[g_Players[i].characterIndex] +
-                                f_PortraitFrames[i],
+                            g_CharacterImageAssets[g_Players[i].characterIndex] + f_FaceFrames[i],
                             &asset
                         );
-                        ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
-                        f_PortraitFrames[i]++;
-                        if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
-                            f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
+                        ReadEncodedAsset(f_PlayerFaceImages[i], &asset);
+                        f_FaceFrames[i]++;
+                        if (f_FaceFrames[i] == RESULTS_FACE_ANIMATION_FRAME_COUNT) {
+                            f_FaceFrames[i] = NO_FACE_FRAME;
                         }
 
                         break;
-                    case PORTRAIT_ANIMATION_BEATEN: {
-                        s32 beatenFaces[PORTRAIT_ANIMATION_FRAME_COUNT] = {0, 5, 6, 7, 8};
+                    case FACE_ANIMATION_BEATEN: {
+                        s32 beatenFrames[RESULTS_FACE_ANIMATION_FRAME_COUNT] = {0, 5, 6, 7, 8};
 
                         OpenEncodedAsset(
                             g_CharacterImageAssets[g_Players[i].characterIndex] +
-                                beatenFaces[f_PortraitFrames[i]],
+                                beatenFrames[f_FaceFrames[i]],
                             &asset
                         );
-                        ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
-                        f_PortraitFrames[i]++;
-                        if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
-                            f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
+                        ReadEncodedAsset(f_PlayerFaceImages[i], &asset);
+                        f_FaceFrames[i]++;
+                        if (f_FaceFrames[i] == RESULTS_FACE_ANIMATION_FRAME_COUNT) {
+                            f_FaceFrames[i] = NO_FACE_FRAME;
                         }
 
                         break;
@@ -4791,7 +4790,7 @@ void DrawRoundResults(Gfx **displayListHead) {
                 }
             }
 
-            f_PortraitTimers[i]++;
+            f_FaceTimers[i]++;
         }
     }
 
