@@ -32,7 +32,7 @@
 #define ARROW_LEFT 152
 #define ARROW_UP_TOP 54
 #define ARROW_DOWN_TOP 200
-#define ARROW_FRAME_TIME 4
+#define ARROW_FRAME_DURATION 4
 #define LIST_LEFT 160
 
 #define CHALKBOARD_PALETTE_SIZE (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)
@@ -424,7 +424,7 @@ void DrawHelpBoard(Gfx **displayListHead) {
         );
         gDPPipeSync(gfx++);
         f_ArrowFrameTime++;
-        if (f_ArrowFrameTime == ARROW_FRAME_TIME) {
+        if (f_ArrowFrameTime == ARROW_FRAME_DURATION) {
             f_ArrowFrameTime = 0;
             f_ArrowFrame ^= 1;
         }

@@ -3580,7 +3580,7 @@ void DrawShotOffsetMarker(void) {
     );
 }
 
-#define ANIMATED_ICON_FRAME_LENGTH 4
+#define ANIMATED_ICON_FRAME_DURATION 4
 #define ANIMATED_ICON_SIZE 32
 #define ANIMATED_ICON_X 96.0f
 #define ANIMATED_ICON_Y 24.0f
@@ -3607,7 +3607,7 @@ void DrawAnimatedIcon(Gfx **displayListHead, s32 letterboxHeight) {
             f_AnimatedIconY += (ANIMATED_ICON_Y - f_AnimatedIconY) * ANIMATED_ICON_EASING;
         }
 
-        if (++f_AnimatedIconFrameTime == ANIMATED_ICON_FRAME_LENGTH) {
+        if (++f_AnimatedIconFrameTime == ANIMATED_ICON_FRAME_DURATION) {
             f_AnimatedIconFrameTime = 0;
             f_AnimatedIconFrame = (f_AnimatedIconFrame + 1) % ANIMATED_ICON_FRAME_COUNT;
             OpenEncodedAsset(f_AnimatedIconFrameAssets[f_AnimatedIconFrame], &asset);
@@ -3933,7 +3933,7 @@ void DrawColorTest(Gfx **displayListHead) {
 #define SMALL_FACE_HEIGHT 16
 #define SMALL_FACE_STEP (TEXEL_STEP_ONE * 3 / 2)
 #define PIN_FLAG_TIME_COUNT 16
-#define PIN_FLAG_FRAME_LENGTH 4
+#define PIN_FLAG_FRAME_DURATION 4
 #define PIN_FLAG_IMAGES_SIDE 32
 #define PIN_FLAG_FRAMES_T 16
 #define PIN_FLAG_X 24
@@ -3947,7 +3947,7 @@ void DrawColorTest(Gfx **displayListHead) {
 #define HEIGHT_LABEL_Y 80
 #define SHOT_PANEL_DISTANCE_X 64
 #define RING_FRAME_COUNT 3
-#define RING_FRAME_LENGTH 6
+#define RING_FRAME_DURATION 6
 #define RING_IMAGE_SIZE 32
 #define RING_FRAME_SIZE (RING_IMAGE_SIZE * RING_IMAGE_SIZE / 2)
 #define RING_ICON_X 18
@@ -4196,7 +4196,7 @@ void DrawRoundHud(CameraView *view) {
             QuarterPixels(PIN_FLAG_X + PIN_FLAG_WIDTH - g_ShotPanelOffsetX),
             QuarterPixels(PIN_FLAG_Y + PIN_FLAG_HEIGHT),
             G_TX_RENDERTILE,
-            (f_PinFlagTime / PIN_FLAG_FRAME_LENGTH) * TexelCoordinate(PIN_FLAG_WIDTH),
+            (f_PinFlagTime / PIN_FLAG_FRAME_DURATION) * TexelCoordinate(PIN_FLAG_WIDTH),
             TexelCoordinate(PIN_FLAG_FRAMES_T),
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
@@ -4259,7 +4259,7 @@ void DrawRoundHud(CameraView *view) {
         );
         gDPPipeSync(g_DisplayListHead++);
         if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-            if (f_RingFrameTime++ % RING_FRAME_LENGTH == 0) {
+            if (f_RingFrameTime++ % RING_FRAME_DURATION == 0) {
                 f_RingFrame = (f_RingFrame + 1) % RING_FRAME_COUNT;
             }
 

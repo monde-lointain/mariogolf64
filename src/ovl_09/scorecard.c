@@ -43,7 +43,7 @@
 #define SCORECARD_SLIDE_SPEED 32
 #define SCORECARD_CLOSE_ACCELERATION 8
 #define FACE_FRAME_COUNT 5
-#define FACE_FRAME_TIME 3
+#define FACE_FRAME_DURATION 3
 
 #define SCORECARD_SLIDE_SOUND_REVERB 20
 #define SCORECARD_OPEN_SOUND_PAN 0xDF
@@ -909,7 +909,7 @@ void AnimateScorecard(void) {
 
             break;
         case SCORECARD_SHOWN:
-            if (g_Scorecard.faceTime++ % FACE_FRAME_TIME == 1) {
+            if (g_Scorecard.faceTime++ % FACE_FRAME_DURATION == 1) {
                 g_Scorecard.faceFrame++;
                 g_Scorecard.isOddFaceStep ^= 1;
                 if (g_Scorecard.faceFrame < FACE_FRAME_COUNT) {

@@ -614,7 +614,7 @@ const char f_CompactHoleFormat[] = "Hole%d";
 #define WIN_MARK_SIZE (WIN_MARK_WIDTH * WIN_MARK_HEIGHT)
 #define WIN_MARK_START_TIME 2
 #define WIN_MARK_ANIMATION_TIME 18
-#define WIN_MARK_FRAME_TIME 2
+#define WIN_MARK_FRAME_DURATION 2
 #define WIN_MARK_BOUNCE_HEIGHT 24.0f
 #define WIN_MARK_BOUNCE_STEP (M_PI / 12)
 #define ARROW_WIDTH 16
@@ -985,7 +985,7 @@ void DrawMatchPage(Gfx **displayListHead) {
     if ((u8)(g_Scorecard.skinsCarryover.onLastHole - WIN_MARK_START_TIME) <
         WIN_MARK_ANIMATION_TIME) {
         frame = g_Scorecard.skinsCarryover.onLastHole - WIN_MARK_START_TIME;
-        markImage = f_WinMarkFrames[frame / WIN_MARK_FRAME_TIME];
+        markImage = f_WinMarkFrames[frame / WIN_MARK_FRAME_DURATION];
         bounce = -(s32)(sinf((f32)frame * WIN_MARK_BOUNCE_STEP) * WIN_MARK_BOUNCE_HEIGHT);
         bounce = (bounce <= 0) ? bounce : 0;
         LoadTextureBlock(

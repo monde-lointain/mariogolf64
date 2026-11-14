@@ -52,7 +52,7 @@ enum PlanksState {
 #define SPINNING_EMPTY_STAR_ASSET 0x5E5
 
 #define STAR_FRAME_COUNT 15
-#define STAR_FRAME_TIME 2
+#define STAR_FRAME_DURATION 2
 #define STAR_BUFFER_COUNT 2
 #define STILL_STAR_IMAGE STAR_BUFFER_COUNT
 #define STAR_IMAGE_COUNT (STAR_BUFFER_COUNT + 1)
@@ -83,7 +83,7 @@ enum PlanksState {
 #define ARROWS_WIDTH 16
 #define ARROWS_HEIGHT 64
 #define ARROWS_FRAME_SIZE (ARROWS_WIDTH * ARROWS_HEIGHT / 2)
-#define ARROW_FRAME_TIME 4
+#define ARROW_FRAME_DURATION 4
 #define ARROW_LEFT 152
 #define ARROW_SIZE 16
 #define ARROW_PUSH_UP (-6)
@@ -760,7 +760,8 @@ void DrawRingShotSelect(Gfx **displayListHead) {
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         LoadSmallPalette(&gfx, 0, ImageBody(f_ArrowsImage));
         if (g_GameState.replayKind == REPLAY_KIND_NONE && CountOpenRingShotCourses() >= 2) {
-            arrowFrame = f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME;
+            arrowFrame =
+                f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_DURATION) >= ARROW_FRAME_DURATION;
             LoadNibbleTextureBlock(
                 &gfx,
                 ImageTexels(f_ArrowsImage) + (arrowFrame * ARROWS_FRAME_SIZE),
@@ -947,7 +948,8 @@ void DrawHoleSelect(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
         }
 
-        arrowFrame = (f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME) *
+        arrowFrame =
+            (f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_DURATION) >= ARROW_FRAME_DURATION) *
             ARROWS_FRAME_SIZE;
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         gDPPipeSync(gfx++);
@@ -1271,7 +1273,7 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
     }
 
     f_StarFrameTime++;
-    if (f_StarFrameTime == STAR_FRAME_TIME) {
+    if (f_StarFrameTime == STAR_FRAME_DURATION) {
         f_StarFrameTime = 0;
         f_StarFrameIndex++;
         if (f_StarFrameIndex >= STAR_FRAME_COUNT) {

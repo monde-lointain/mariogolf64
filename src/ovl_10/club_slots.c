@@ -107,7 +107,7 @@
 #define FACE_SPACING 34
 #define OTHER_FACE_LEFT 264
 #define OTHER_FACE_TOP 76
-#define FACE_FRAME_TIME 3
+#define FACE_FRAME_DURATION 3
 #define FACE_LAST_FRAME 4
 #define FACE_HOLD_COUNT 9
 
@@ -998,7 +998,7 @@ void DrawClubSlots(Gfx **displayListHead) {
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
-            if (f_IsShowingResult == TRUE && ++f_FaceFrameTime >= FACE_FRAME_TIME) {
+            if (f_IsShowingResult == TRUE && ++f_FaceFrameTime >= FACE_FRAME_DURATION) {
                 f_FaceFrameTime = 0;
                 if (++f_FaceFrameIndex >= FACE_LAST_FRAME + 1) {
                     if (++f_FaceHoldCount >= FACE_HOLD_COUNT) {
