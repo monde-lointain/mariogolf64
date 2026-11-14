@@ -74,6 +74,25 @@ static Vtx f_BillboardVertices[][SHAPE_VERTEX_COUNT] = {
         {{{-1, 1, 0}, 0, {0, 0}, {0x3F, 0x3F, 0x7F, 0x00}}},
     },
 };
+#ifdef AVOID_UB
+// DrawBillboards relights the shapes every frame, while the task drawing the
+// previous frame, queued before, may not have read them yet. Each draw
+// buffer's frame loads copies of the shapes instead.
+static Vtx f_DrawnBillboardVertices[DRAW_BUFFER_COUNT][ARRAY_COUNT(f_BillboardVertices)]
+                                   [QUAD_VERTEX_COUNT];
+
+// Returns this frame's copy of the shape's vertices, taken now; a later copy
+// in the frame overwrites it before the frame's task is queued.
+static Vtx *DrawnShapeVertices(s32 shapeIndex) {
+    Vtx *vertices = f_DrawnBillboardVertices[g_DrawBufferIndex][shapeIndex];
+
+    memcpy(vertices, f_BillboardVertices[shapeIndex], sizeof(f_DrawnBillboardVertices[0][0]));
+    return vertices;
+}
+#else
+#define DrawnShapeVertices(shapeIndex) f_BillboardVertices[shapeIndex]
+#endif
+
 static s32 f_LoadedTextureIndex = NO_TEXTURE_LOADED;
 static BillboardTexture f_BillboardTextures[BILLBOARD_TEXTURE_COUNT] = {
     BILLBOARD_TEXTURE(0x3F7),
@@ -351,7 +370,7 @@ void DrawBillboard(
     gSPMatrix(gfx++, &matrices->billboard, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &transform->scale, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
     gDPPipeSync(gfx++);
-    gSPVertex(gfx++, f_BillboardVertices[billboard->shapeIndex], QUAD_VERTEX_COUNT, 0);
+    gSPVertex(gfx++, DrawnShapeVertices(billboard->shapeIndex), QUAD_VERTEX_COUNT, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     gDPPipeSync(gfx++);
     gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
