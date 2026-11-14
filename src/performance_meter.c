@@ -287,7 +287,9 @@ void DrawPerformanceMeter(
     s32 taskFlags,
     s32 readoutMode
 ) {
-    u32 i;
+    /* Counts frames and tasks in turn; a variable for each
+       allocates registers differently. */
+    u32 sharedIndex;
     s64 taskTime;
     s16 startX;
     s16 barLength;
@@ -376,8 +378,8 @@ void DrawPerformanceMeter(
     gSPDisplayList(gfx++, PhysicalAddress(f_FrameDisplayList));
     f_FrameVertices[1].v.ob[AXIS_X] = (FRAME_WIDTH * (extraFrameCount + 1)) + 2;
     f_FrameVertices[2].v.ob[AXIS_X] = (FRAME_WIDTH * (extraFrameCount + 1)) + 2;
-    for (i = 0; i < extraFrameCount + 1; i++) {
-        vertexIndex = (i * QUAD_VERTEX_COUNT) + QUAD_VERTEX_COUNT;
+    for (sharedIndex = 0; sharedIndex < extraFrameCount + 1; sharedIndex++) {
+        vertexIndex = (sharedIndex * QUAD_VERTEX_COUNT) + QUAD_VERTEX_COUNT;
         gSP2Triangles(
             gfx++,
             vertexIndex + 0,
@@ -406,10 +408,10 @@ void DrawPerformanceMeter(
 
     gSPVertex(gfx++, f_AudioBarVertices, ARRAY_COUNT(f_AudioBarVertices), 0);
     startX = BAR_START_X;
-    for (i = 0; i < nuDebTaskPerfPtr->auTaskCnt; i++) {
-        vertexIndex = i * QUAD_VERTEX_COUNT;
-        taskTime =
-            nuDebTaskPerfPtr->auTaskTime[i].rspEnd - nuDebTaskPerfPtr->auTaskTime[i].rspStart;
+    for (sharedIndex = 0; sharedIndex < nuDebTaskPerfPtr->auTaskCnt; sharedIndex++) {
+        vertexIndex = sharedIndex * QUAD_VERTEX_COUNT;
+        taskTime = nuDebTaskPerfPtr->auTaskTime[sharedIndex].rspEnd -
+            nuDebTaskPerfPtr->auTaskTime[sharedIndex].rspStart;
         barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
         audioBarLength = barLength;
         KeepBarStats(f_AudioBarAverage, f_AudioBarMaximum, barLength);
@@ -434,10 +436,10 @@ void DrawPerformanceMeter(
 
     gSPVertex(gfx++, f_RspBarVertices, ARRAY_COUNT(f_RspBarVertices), 0);
     startX = BAR_START_X;
-    for (i = 0; i < nuDebTaskPerfPtr->gfxTaskCnt; i++) {
-        vertexIndex = i * QUAD_VERTEX_COUNT;
-        taskTime =
-            nuDebTaskPerfPtr->gfxTaskTime[i].rspEnd - nuDebTaskPerfPtr->gfxTaskTime[i].rspStart;
+    for (sharedIndex = 0; sharedIndex < nuDebTaskPerfPtr->gfxTaskCnt; sharedIndex++) {
+        vertexIndex = sharedIndex * QUAD_VERTEX_COUNT;
+        taskTime = nuDebTaskPerfPtr->gfxTaskTime[sharedIndex].rspEnd -
+            nuDebTaskPerfPtr->gfxTaskTime[sharedIndex].rspStart;
         barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
         rspBarLength = barLength;
         KeepBarStats(f_RspBarAverage, f_RspBarMaximum, barLength);
@@ -462,10 +464,10 @@ void DrawPerformanceMeter(
 
     gSPVertex(gfx++, f_RdpBarVertices, ARRAY_COUNT(f_RdpBarVertices), 0);
     startX = BAR_START_X;
-    for (i = 0; i < nuDebTaskPerfPtr->gfxTaskCnt; i++) {
-        vertexIndex = i * QUAD_VERTEX_COUNT;
-        taskTime =
-            nuDebTaskPerfPtr->gfxTaskTime[i].rdpEnd - nuDebTaskPerfPtr->gfxTaskTime[i].rspStart;
+    for (sharedIndex = 0; sharedIndex < nuDebTaskPerfPtr->gfxTaskCnt; sharedIndex++) {
+        vertexIndex = sharedIndex * QUAD_VERTEX_COUNT;
+        taskTime = nuDebTaskPerfPtr->gfxTaskTime[sharedIndex].rdpEnd -
+            nuDebTaskPerfPtr->gfxTaskTime[sharedIndex].rspStart;
         barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
         rdpBarLength = barLength;
         KeepBarStats(f_RdpBarAverage, f_RdpBarMaximum, barLength);
@@ -490,9 +492,9 @@ void DrawPerformanceMeter(
 
     gSPVertex(gfx++, f_RdpCommandBarVertices, ARRAY_COUNT(f_RdpCommandBarVertices), 0);
     startX = BAR_START_X;
-    for (i = 0; i < nuDebTaskPerfPtr->gfxTaskCnt; i++) {
-        vertexIndex = i * QUAD_VERTEX_COUNT;
-        taskTime = nuDebTaskPerfPtr->gfxTaskTime[i].dpCnt[NU_DEB_DP_CMD_CTR];
+    for (sharedIndex = 0; sharedIndex < nuDebTaskPerfPtr->gfxTaskCnt; sharedIndex++) {
+        vertexIndex = sharedIndex * QUAD_VERTEX_COUNT;
+        taskTime = nuDebTaskPerfPtr->gfxTaskTime[sharedIndex].dpCnt[NU_DEB_DP_CMD_CTR];
         taskTime = RdpCountToMicroseconds(taskTime);
         barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
         rdpCommandBarLength = barLength;
@@ -518,9 +520,9 @@ void DrawPerformanceMeter(
 
     gSPVertex(gfx++, f_RdpPipeBarVertices, ARRAY_COUNT(f_RdpPipeBarVertices), 0);
     startX = BAR_START_X;
-    for (i = 0; i < nuDebTaskPerfPtr->gfxTaskCnt; i++) {
-        vertexIndex = i * QUAD_VERTEX_COUNT;
-        taskTime = nuDebTaskPerfPtr->gfxTaskTime[i].dpCnt[NU_DEB_DP_PIPE_CTR];
+    for (sharedIndex = 0; sharedIndex < nuDebTaskPerfPtr->gfxTaskCnt; sharedIndex++) {
+        vertexIndex = sharedIndex * QUAD_VERTEX_COUNT;
+        taskTime = nuDebTaskPerfPtr->gfxTaskTime[sharedIndex].dpCnt[NU_DEB_DP_PIPE_CTR];
         taskTime = RdpCountToMicroseconds(taskTime);
         barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
         rdpPipeBarLength = barLength;
@@ -546,9 +548,9 @@ void DrawPerformanceMeter(
 
     gSPVertex(gfx++, f_RdpTmemBarVertices, ARRAY_COUNT(f_RdpTmemBarVertices), 0);
     startX = BAR_START_X;
-    for (i = 0; i < nuDebTaskPerfPtr->gfxTaskCnt; i++) {
-        vertexIndex = i * QUAD_VERTEX_COUNT;
-        taskTime = nuDebTaskPerfPtr->gfxTaskTime[i].dpCnt[NU_DEB_DP_TMEM_CTR];
+    for (sharedIndex = 0; sharedIndex < nuDebTaskPerfPtr->gfxTaskCnt; sharedIndex++) {
+        vertexIndex = sharedIndex * QUAD_VERTEX_COUNT;
+        taskTime = nuDebTaskPerfPtr->gfxTaskTime[sharedIndex].dpCnt[NU_DEB_DP_TMEM_CTR];
         taskTime = RdpCountToMicroseconds(taskTime);
         barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
         rdpTmemBarLength = barLength;

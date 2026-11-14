@@ -2052,33 +2052,41 @@ void PutObjectsOnGround(void) {
     Mat4 translation;
     Mat4 unusedMatrix UNUSED;
     s32 height;
-    s32 i;
+    s32 billboardIndex;
+    s32 cupIndex;
+    s32 routePointIndex;
 
     PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    for (i = 0; i < BILLBOARD_COUNT; i++) {
-        if (!g_Billboards[i].isNearCourseEdge) {
-            g_Billboards[i].y =
-                GetGroundHeight(g_Billboards[i].x, g_Billboards[i].z) * COURSE_TO_WORLD_SCALE;
+    for (billboardIndex = 0; billboardIndex < BILLBOARD_COUNT; billboardIndex++) {
+        if (!g_Billboards[billboardIndex].isNearCourseEdge) {
+            g_Billboards[billboardIndex].y =
+                GetGroundHeight(g_Billboards[billboardIndex].x, g_Billboards[billboardIndex].z) *
+                COURSE_TO_WORLD_SCALE;
             height = GetGroundHeight(
-                         g_Billboards[i].x << WORLD_TO_COURSE_SHIFT,
-                         g_Billboards[i].z << WORLD_TO_COURSE_SHIFT
+                         g_Billboards[billboardIndex].x << WORLD_TO_COURSE_SHIFT,
+                         g_Billboards[billboardIndex].z << WORLD_TO_COURSE_SHIFT
                      ) /
                 (1 << WORLD_TO_COURSE_SHIFT);
-            guTranslateF(translation, g_Billboards[i].x, height + 1, g_Billboards[i].z);
+            guTranslateF(
+                translation,
+                g_Billboards[billboardIndex].x,
+                height + 1,
+                g_Billboards[billboardIndex].z
+            );
             PlaceBillboards();
         }
     }
 
-    for (i = 0; i < CUP_POSITION_COUNT; i++) {
-        if (g_HolePoints.cupPositions[i][AXIS_X] != 0 &&
-            g_HolePoints.cupPositions[i][AXIS_Z] != 0) {
-            g_HolePoints.cupPositions[i][AXIS_Y] = GetGroundHeight(
-                g_HolePoints.cupPositions[i][AXIS_X],
-                g_HolePoints.cupPositions[i][AXIS_Z]
+    for (cupIndex = 0; cupIndex < CUP_POSITION_COUNT; cupIndex++) {
+        if (g_HolePoints.cupPositions[cupIndex][AXIS_X] != 0 &&
+            g_HolePoints.cupPositions[cupIndex][AXIS_Z] != 0) {
+            g_HolePoints.cupPositions[cupIndex][AXIS_Y] = GetGroundHeight(
+                g_HolePoints.cupPositions[cupIndex][AXIS_X],
+                g_HolePoints.cupPositions[cupIndex][AXIS_Z]
             );
-            g_HolePoints.teePositions[i][AXIS_Y] = GetGroundHeight(
-                g_HolePoints.teePositions[i][AXIS_X],
-                g_HolePoints.teePositions[i][AXIS_Z]
+            g_HolePoints.teePositions[cupIndex][AXIS_Y] = GetGroundHeight(
+                g_HolePoints.teePositions[cupIndex][AXIS_X],
+                g_HolePoints.teePositions[cupIndex][AXIS_Z]
             );
         }
     }
@@ -2089,18 +2097,20 @@ void PutObjectsOnGround(void) {
     g_HoleSetup.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
     g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
     g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
-    for (i = 0; i < ROUTE_POINT_COUNT; i++) {
-        if (g_HolePoints.aimPoints[i][AXIS_X] != 0 && g_HolePoints.aimPoints[i][AXIS_Z] != 0) {
-            g_HolePoints.aimPoints[i][AXIS_Y] = GetGroundHeight(
-                g_HolePoints.aimPoints[i][AXIS_X],
-                g_HolePoints.aimPoints[i][AXIS_Z]
+    for (routePointIndex = 0; routePointIndex < ROUTE_POINT_COUNT; routePointIndex++) {
+        if (g_HolePoints.aimPoints[routePointIndex][AXIS_X] != 0 &&
+            g_HolePoints.aimPoints[routePointIndex][AXIS_Z] != 0) {
+            g_HolePoints.aimPoints[routePointIndex][AXIS_Y] = GetGroundHeight(
+                g_HolePoints.aimPoints[routePointIndex][AXIS_X],
+                g_HolePoints.aimPoints[routePointIndex][AXIS_Z]
             );
         }
 
-        if (g_HolePoints.routePoints[i][AXIS_X] != 0 && g_HolePoints.routePoints[i][AXIS_Z] != 0) {
-            g_HolePoints.routePoints[i][AXIS_Y] = GetGroundHeight(
-                g_HolePoints.routePoints[i][AXIS_X],
-                g_HolePoints.routePoints[i][AXIS_Z]
+        if (g_HolePoints.routePoints[routePointIndex][AXIS_X] != 0 &&
+            g_HolePoints.routePoints[routePointIndex][AXIS_Z] != 0) {
+            g_HolePoints.routePoints[routePointIndex][AXIS_Y] = GetGroundHeight(
+                g_HolePoints.routePoints[routePointIndex][AXIS_X],
+                g_HolePoints.routePoints[routePointIndex][AXIS_Z]
             );
         }
     }

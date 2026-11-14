@@ -489,7 +489,8 @@ s32 RandomBelow(s32 limit);
 
 void StartFlightCamera(s32 earlierFlightCount) {
     CoursePoint probe;
-    s32 i;
+    s32 stepIndex;
+    s32 probeIndex;
     Radians yaw;
     f32 degrees;
 
@@ -610,14 +611,14 @@ void StartFlightCamera(s32 earlierFlightCount) {
     );
     f_ComingFlightEvents = 0;
 
-    for (i = 0; i != SCANNED_STEP_COUNT; i++) {
-        if (i < g_SimulatedShot.stepCount &&
+    for (stepIndex = 0; stepIndex != SCANNED_STEP_COUNT; stepIndex++) {
+        if (stepIndex < g_SimulatedShot.stepCount &&
             IsCupPassPoint(
                 IntLength2D(
-                    g_SimulatedShot.path[i][AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
-                    g_SimulatedShot.path[i][AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
+                    g_SimulatedShot.path[stepIndex][AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
+                    g_SimulatedShot.path[stepIndex][AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
                 ),
-                g_SimulatedShot.path[i][AXIS_Y]
+                g_SimulatedShot.path[stepIndex][AXIS_Y]
             )) {
             f_ComingFlightEvents |= FLIGHT_EVENT_CUP_PASS;
         }
@@ -626,27 +627,27 @@ void StartFlightCamera(s32 earlierFlightCount) {
     f_HitsBillboardEarly = FALSE;
     f_BillboardHitStep = NO_STEP;
     f_BillboardHitCountdown = -1;
-    for (i = 0; i != SCANNED_STEP_COUNT; i++) {
-        if (i < g_SimulatedShot.stepCount &&
-            (g_SimulatedShot.pathFlags[i] & STEP_FLAG_BILLBOARD_HIT)) {
+    for (stepIndex = 0; stepIndex != SCANNED_STEP_COUNT; stepIndex++) {
+        if (stepIndex < g_SimulatedShot.stepCount &&
+            (g_SimulatedShot.pathFlags[stepIndex] & STEP_FLAG_BILLBOARD_HIT)) {
             f_HitsBillboardEarly = TRUE;
             f_ComingFlightEvents |= FLIGHT_EVENT_BILLBOARD_HIT;
             if (f_BillboardHitStep == NO_STEP) {
-                f_BillboardHitStep = i;
+                f_BillboardHitStep = stepIndex;
                 f_BillboardHitCountdown = EARLY_BILLBOARD_HIT_COUNTDOWN;
             }
         }
     }
 
     f_IsBallGroundLevel = TRUE;
-    for (i = 0; i != GROUND_PROBE_COUNT; i++) {
+    for (probeIndex = 0; probeIndex != GROUND_PROBE_COUNT; probeIndex++) {
         if (g_Players[g_CurrentShot.playerIndex].isLefty == 1) {
             yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
-                ((f32)i * GROUND_PROBE_ANGLE_STEP);
+                ((f32)probeIndex * GROUND_PROBE_ANGLE_STEP);
         }
         else {
             yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) -
-                ((f32)i * GROUND_PROBE_ANGLE_STEP);
+                ((f32)probeIndex * GROUND_PROBE_ANGLE_STEP);
         }
 
         probe[AXIS_X] = (cosf(yaw) * GROUND_PROBE_DISTANCE) + g_CurrentShot.ballPosition[AXIS_X];
@@ -868,7 +869,9 @@ static inline void QueueOnlookerSounds(s32 kind) {
 void PlayFlightSounds(s32 step) {
     s32 shownRingCount;
     s32 scoreToPar;
-    s32 i;
+    /* Counts rings and players in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
     SurfaceInfo *info;
     Player *player;
     s32 *greenSoundCount;
@@ -879,8 +882,8 @@ void PlayFlightSounds(s32 step) {
     shownRingCount = 0;
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
         player = &g_Players[g_RoundHud.shooterIndex];
-        for (i = 0; i != RING_COUNT; i++) {
-            shownRingCount += player->ringStates[i] == RING_STATE_SHOWN;
+        for (sharedIndex = 0; sharedIndex != RING_COUNT; sharedIndex++) {
+            shownRingCount += player->ringStates[sharedIndex] == RING_STATE_SHOWN;
         }
     }
 
@@ -906,15 +909,15 @@ void PlayFlightSounds(s32 step) {
     }
 
     if (step == RUMBLE_REACTION_STEP && g_SimulatedShot.impactRumbles) {
-        for (i = 0; i != g_GameState.playerCount; i++) {
+        for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
             PlaySound(SOUND_RUMBLING_MISHIT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
-            if (i != g_CurrentShot.playerIndex) {
+            if (sharedIndex != g_CurrentShot.playerIndex) {
                 QueueCharacterSound(
-                    g_Players[i].characterIndex,
-                    i,
+                    g_Players[sharedIndex].characterIndex,
+                    sharedIndex,
                     CHARACTER_SOUND_KIND_TROUBLE,
                     SOUND_FULL_SCALE,
-                    g_Players[i].soundPan
+                    g_Players[sharedIndex].soundPan
                 );
             }
         }

@@ -387,9 +387,13 @@ void LoadRoundResults(void) {
     EncodedAsset asset;
     AssetFile file;
     SaveData *save;
-    s32 i;
-    s32 j;
-    s32 k;
+    /* Counts players, bets and holes in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
+    /* Counts bets and other players in turn; a variable for each
+       allocates registers differently. */
+    s32 innerIndex;
+    s32 standingIndex;
     s32 holeEnd;
     void *palette;
     u32 size;
@@ -460,28 +464,29 @@ void LoadRoundResults(void) {
         ReadAssetFile(f_UnusedResultsPalette, size, &file);
     }
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
-        f_PlayerPortraitImages[i] = AllocMemory(
-            OpenEncodedAsset(g_CharacterImageAssets[g_Players[i].characterIndex], &asset)
+    for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
+        f_PlayerPortraitImages[sharedIndex] = AllocMemory(
+            OpenEncodedAsset(g_CharacterImageAssets[g_Players[sharedIndex].characterIndex], &asset)
         );
-        ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
+        ReadEncodedAsset(f_PlayerPortraitImages[sharedIndex], &asset);
         OpenAssetFile(
-            g_CharacterPaletteAssets[g_Players[i].characterIndex] + g_Players[i].paletteIndex,
+            g_CharacterPaletteAssets[g_Players[sharedIndex].characterIndex] +
+                g_Players[sharedIndex].paletteIndex,
             &file
         );
         size = GetAssetFileSize(&file);
         palette = AllocMemory(size);
-        f_PlayerPortraitPalettes[i] = palette;
+        f_PlayerPortraitPalettes[sharedIndex] = palette;
         ReadAssetFile(palette, size, &file);
-        if (g_Players[i].isComputer) {
-            f_PlayerPoints[i] = -1;
+        if (g_Players[sharedIndex].isComputer) {
+            f_PlayerPoints[sharedIndex] = -1;
         }
         else {
-            f_PlayerPoints[i] = g_Players[i].points;
+            f_PlayerPoints[sharedIndex] = g_Players[sharedIndex].points;
         }
-        f_PlayerBetTotals[i] = 0;
-        for (j = 0; j != BET_COUNT; j++) {
-            f_PlayerBetTotals[i] += g_Players[i].betTallies[j];
+        f_PlayerBetTotals[sharedIndex] = 0;
+        for (innerIndex = 0; innerIndex != BET_COUNT; innerIndex++) {
+            f_PlayerBetTotals[sharedIndex] += g_Players[sharedIndex].betTallies[innerIndex];
         }
     }
 
@@ -505,53 +510,59 @@ void LoadRoundResults(void) {
     }
 
     f_HasBets = FALSE;
-    for (i = 0; i != BET_COUNT; i++) {
-        if (g_GameState.betRates[i] > 0) {
+    for (sharedIndex = 0; sharedIndex != BET_COUNT; sharedIndex++) {
+        if (g_GameState.betRates[sharedIndex] > 0) {
             f_HasBets = TRUE;
         }
     }
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
-        f_PortraitAnimations[i] = 0;
-        f_PortraitFrames[i] = -1;
-        f_PortraitTimers[i] = 0;
+    for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
+        f_PortraitAnimations[sharedIndex] = 0;
+        f_PortraitFrames[sharedIndex] = -1;
+        f_PortraitTimers[sharedIndex] = 0;
     }
 
     if (g_GameState.isClubTournament) {
-        IN_OWN_BLOCK(for (k = 0; k != g_GameState.playerCount; k++) {
-            f_PlayerResults[k] = GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), k);
-        });
+        IN_OWN_BLOCK(
+            for (standingIndex = 0; standingIndex != g_GameState.playerCount; standingIndex++) {
+                f_PlayerResults[standingIndex] =
+                    GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), standingIndex);
+            }
+        );
     }
     else {
         switch (g_GameState.gameMode) {
             case GAME_MODE_STROKE:
             case GAME_MODE_SPEED_GOLF:
-                for (i = 0; i != g_GameState.playerCount; i++) {
-                    f_PlayerResults[i] =
-                        GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), i);
+                for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
+                    f_PlayerResults[sharedIndex] =
+                        GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), sharedIndex);
                 }
 
-                for (i = 0; i != g_GameState.playerCount; i++) {
-                    f_PlayerRanks[i] = 0;
-                    for (j = 0; j != g_GameState.playerCount; j++) {
-                        if (i != j && f_PlayerResults[i] > f_PlayerResults[j]) {
-                            f_PlayerRanks[i]++;
+                for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
+                    f_PlayerRanks[sharedIndex] = 0;
+                    for (innerIndex = 0; innerIndex != g_GameState.playerCount; innerIndex++) {
+                        if (sharedIndex != innerIndex &&
+                            f_PlayerResults[sharedIndex] > f_PlayerResults[innerIndex]) {
+                            f_PlayerRanks[sharedIndex]++;
                         }
                     }
                 }
 
-                AddRoundPoints(save, k);
+                AddRoundPoints(save, standingIndex);
                 break;
             case GAME_MODE_MATCH_GAME:
             case GAME_MODE_GET_CHARACTER:
                 holeEnd = g_GameState.holeIndex;
                 f_PlayerResults[0] = f_PlayerResults[1] = 0;
-                for (i = GetFirstHoleIndex(); i != holeEnd; i++) {
-                    if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
+                for (sharedIndex = GetFirstHoleIndex(); sharedIndex != holeEnd; sharedIndex++) {
+                    if (g_Players[0].holes[sharedIndex].strokes <
+                        g_Players[1].holes[sharedIndex].strokes) {
                         f_PlayerResults[0]++;
                         f_PlayerResults[1]--;
                     }
-                    else if (g_Players[1].holes[i].strokes < g_Players[0].holes[i].strokes) {
+                    else if (g_Players[1].holes[sharedIndex].strokes <
+                        g_Players[0].holes[sharedIndex].strokes) {
                         f_PlayerResults[0]--;
                         f_PlayerResults[1]++;
                     }
@@ -578,7 +589,7 @@ void LoadRoundResults(void) {
                 size = GetAssetFileSize(&file);
                 f_PortraitPalette = AllocMemory(size);
                 ReadAssetFile(f_PortraitPalette, size, &file);
-                AddRoundPoints(save, k);
+                AddRoundPoints(save, standingIndex);
                 break;
             case GAME_MODE_UNLISTED_STROKE:
             case GAME_MODE_TRAINING:
@@ -588,20 +599,21 @@ void LoadRoundResults(void) {
             case GAME_MODE_SKINS_MATCH:
             case GAME_MODE_CLUB_SLOTS:
                 TallySkins(GetFirstHoleIndex() + GetRoundHoleCount());
-                for (k = 0; k != g_GameState.playerCount; k++) {
-                    f_PlayerResults[k] = g_RoundHud.skinsTotals[k];
+                for (standingIndex = 0; standingIndex != g_GameState.playerCount; standingIndex++) {
+                    f_PlayerResults[standingIndex] = g_RoundHud.skinsTotals[standingIndex];
                 }
 
-                for (k = 0; k != g_GameState.playerCount; k++) {
-                    f_PlayerRanks[k] = 0;
-                    for (j = 0; j != g_GameState.playerCount; j++) {
-                        if (k != j && f_PlayerResults[k] < f_PlayerResults[j]) {
-                            f_PlayerRanks[k]++;
+                for (standingIndex = 0; standingIndex != g_GameState.playerCount; standingIndex++) {
+                    f_PlayerRanks[standingIndex] = 0;
+                    for (innerIndex = 0; innerIndex != g_GameState.playerCount; innerIndex++) {
+                        if (standingIndex != innerIndex &&
+                            f_PlayerResults[standingIndex] < f_PlayerResults[innerIndex]) {
+                            f_PlayerRanks[standingIndex]++;
                         }
                     }
                 }
 
-                AddRoundPoints(save, k);
+                AddRoundPoints(save, standingIndex);
                 break;
             case GAME_MODE_TOURNAMENT:
                 f_SecondBannerImage =
@@ -609,8 +621,9 @@ void LoadRoundResults(void) {
                 ReadEncodedAsset(f_SecondBannerImage, &asset);
                 f_PlayerResults[0] = GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), 0);
                 RankTournament(COURSE_HOLE_COUNT, 0, f_PlayerResults[0], g_GameState.roundSeed);
-                for (k = 0; k != TOURNAMENT_CONTESTANT_COUNT; k++) {
-                    TournamentStanding *standing = &g_TournamentStandings[k];
+                for (standingIndex = 0; standingIndex != TOURNAMENT_CONTESTANT_COUNT;
+                    standingIndex++) {
+                    TournamentStanding *standing = &g_TournamentStandings[standingIndex];
 
                     if (standing->contestantId == -1) {
                         f_PlayerRanks[0] = standing->place & PLACE_MASK;
@@ -671,9 +684,13 @@ void LoadRoundResults(void) {
         }
     }
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
-        if (g_Players[i].characterIndex >= CHARACTER_KID && f_PlayerPoints[i] > 0) {
-            AddGameBoyExperience(g_Players[i].gameBoyCharacterIndex, f_PlayerPoints[i]);
+    for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
+        if (g_Players[sharedIndex].characterIndex >= CHARACTER_KID &&
+            f_PlayerPoints[sharedIndex] > 0) {
+            AddGameBoyExperience(
+                g_Players[sharedIndex].gameBoyCharacterIndex,
+                f_PlayerPoints[sharedIndex]
+            );
         }
     }
 
@@ -1117,7 +1134,8 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
     s32 digitX;
     s32 digit;
     u8 *image;
-    s32 i;
+    s32 digitIndex;
+    s32 stripIndex;
     s32 stripY;
     s32 offset;
 
@@ -1173,9 +1191,9 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
                 x -= PLACE_TWO_DIGIT_SHIFT;
             }
 
-            for (i = 0; g_PrintBuffer[i] != '\0'; i++) {
-                digit = g_PrintBuffer[i] - '0';
-                digitX = (i * PLACE_DIGIT_SPACING) + PLACE_DIGIT_X;
+            for (digitIndex = 0; g_PrintBuffer[digitIndex] != '\0'; digitIndex++) {
+                digit = g_PrintBuffer[digitIndex] - '0';
+                digitX = (digitIndex * PLACE_DIGIT_SPACING) + PLACE_DIGIT_X;
                 gDPLoadTextureTile_4b(
                     gfx++,
                     TextureAddress(ImageTexels(f_SecondBannerImage)),
@@ -1221,10 +1239,10 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
         }
 
         LoadLargePalette(&gfx, ImageBody(image));
-        for (i = 0; i != RANK_BANNER_STRIP_COUNT; i++) {
-            offset =
-                LARGE_PALETTED_TEXELS_OFFSET + (i * RANK_BANNER_WIDTH * RANK_BANNER_STRIP_HEIGHT);
-            stripY = y + (i * RANK_BANNER_STRIP_HEIGHT);
+        for (stripIndex = 0; stripIndex != RANK_BANNER_STRIP_COUNT; stripIndex++) {
+            offset = LARGE_PALETTED_TEXELS_OFFSET +
+                (stripIndex * RANK_BANNER_WIDTH * RANK_BANNER_STRIP_HEIGHT);
+            stripY = y + (stripIndex * RANK_BANNER_STRIP_HEIGHT);
             LoadTextureBlock(
                 &gfx,
                 image + offset,
@@ -1454,7 +1472,7 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
     s32 depthLift;
     SoundPan pan;
     s32 centerX;
-    s32 i;
+    s32 stripIndex;
     s32 shineTexelX;
     s32 stripBottomOffset;
 
@@ -1475,14 +1493,14 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
     }
 
     LoadLargePalette(&gfx, ImageBody(f_ResultsCourseImage));
-    for (i = 0; i != NOTICE_COURSE_STRIP_COUNT; i++) {
+    for (stripIndex = 0; stripIndex != NOTICE_COURSE_STRIP_COUNT; stripIndex++) {
         s32 top;
         size = (cosf(f_NoticeAngle) + NOTICE_COURSE_SCALE_BIAS) * NOTICE_COURSE_STRIP_HEIGHT;
         step = TexelRunStep(NOTICE_COURSE_STRIP_HEIGHT, size);
         LoadTextureBlock(
             &gfx,
             LargeImageTexels(f_ResultsCourseImage) +
-                (i * NOTICE_COURSE_STRIP_WIDTH * NOTICE_COURSE_STRIP_HEIGHT),
+                (stripIndex * NOTICE_COURSE_STRIP_WIDTH * NOTICE_COURSE_STRIP_HEIGHT),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
             NOTICE_COURSE_STRIP_WIDTH,
@@ -1495,7 +1513,7 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        top = NOTICE_COURSE_CENTER_Y - size + (i * size);
+        top = NOTICE_COURSE_CENTER_Y - size + (stripIndex * size);
         centerX = f_NoticeSwing + NOTICE_COURSE_CENTER_X;
         DrawTextureRect(
             &gfx,
@@ -1512,13 +1530,13 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
     }
 
     LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
-    for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
+    for (stripIndex = 0; stripIndex != NOTICE_TITLE_STRIP_COUNT; stripIndex++) {
         s32 top;
         lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT) - (s32)NOTICE_TITLE_LIFT;
         LoadTextureBlock(
             &gfx,
             LargeImageTexels(f_NoticeTitleImage) +
-                (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
+                (stripIndex * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
             NOTICE_TITLE_STRIP_WIDTH,
@@ -1531,7 +1549,7 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        top = TitleStripTop(lift, i);
+        top = TitleStripTop(lift, stripIndex);
         DrawTextureRect(
             &gfx,
             QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
@@ -1557,12 +1575,12 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
         G_RM_AA_ZB_TEX_EDGE2
     );
     LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
-    for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
+    for (stripIndex = 0; stripIndex != NOTICE_TITLE_STRIP_COUNT; stripIndex++) {
         depthLift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT) - (s32)NOTICE_TITLE_LIFT;
         LoadTextureBlock(
             &gfx,
             LargeImageTexels(f_NoticeTitleImage) +
-                (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
+                (stripIndex * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
             NOTICE_TITLE_STRIP_WIDTH,
@@ -1579,9 +1597,9 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
         DrawTextureRect(
             &gfx,
             QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
-            QuarterPixels(TitleStripTop(depthLift, i) + f_CourseNoticeShift),
+            QuarterPixels(TitleStripTop(depthLift, stripIndex) + f_CourseNoticeShift),
             QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
-            QuarterPixels(TitleStripTop(depthLift, i) + stripBottomOffset),
+            QuarterPixels(TitleStripTop(depthLift, stripIndex) + stripBottomOffset),
             G_TX_RENDERTILE,
             0,
             0,
@@ -2187,7 +2205,8 @@ void SetResultsBanner(s32 state, s32 kind) {
 
 void DrawResultsBanner(Gfx **displayListHead) {
     Gfx *gfx;
-    s32 i;
+    s32 stripIndex;
+    s32 partIndex;
     s32 rank;
     s32 place;
     s32 course;
@@ -2374,10 +2393,10 @@ void DrawResultsBanner(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, BANNER_CLOUD_ALPHA);
-    for (i = 0; i != BANNER_CLOUD_STRIP_COUNT; i++) {
+    for (stripIndex = 0; stripIndex != BANNER_CLOUD_STRIP_COUNT; stripIndex++) {
         LoadNibbleTextureBlock(
             &gfx,
-            ImageBody(f_ResultsCloudImage) + (i * BANNER_CLOUD_STRIP_SIZE),
+            ImageBody(f_ResultsCloudImage) + (stripIndex * BANNER_CLOUD_STRIP_SIZE),
             G_IM_FMT_I,
             BANNER_CLOUD_WIDTH,
             BANNER_CLOUD_HEIGHT,
@@ -2393,10 +2412,12 @@ void DrawResultsBanner(Gfx **displayListHead) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels(f_BannerX + BANNER_CLOUD_LEFT),
-                QuarterPixels(f_BannerY + TALL_BANNER_CLOUD_TOP + (i * TALL_BANNER_CLOUD_HEIGHT)),
+                QuarterPixels(
+                    f_BannerY + TALL_BANNER_CLOUD_TOP + (stripIndex * TALL_BANNER_CLOUD_HEIGHT)
+                ),
                 QuarterPixels(f_BannerX + BANNER_CLOUD_RIGHT),
                 QuarterPixels(
-                    f_BannerY + TALL_BANNER_CLOUD_TOP + (i * TALL_BANNER_CLOUD_HEIGHT) +
+                    f_BannerY + TALL_BANNER_CLOUD_TOP + (stripIndex * TALL_BANNER_CLOUD_HEIGHT) +
                     TALL_BANNER_CLOUD_HEIGHT
                 ),
                 G_TX_RENDERTILE,
@@ -2410,10 +2431,11 @@ void DrawResultsBanner(Gfx **displayListHead) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels(f_BannerX + BANNER_CLOUD_LEFT),
-                QuarterPixels(f_BannerY + BANNER_CLOUD_TOP + (i * BANNER_CLOUD_HEIGHT)),
+                QuarterPixels(f_BannerY + BANNER_CLOUD_TOP + (stripIndex * BANNER_CLOUD_HEIGHT)),
                 QuarterPixels(f_BannerX + BANNER_CLOUD_RIGHT),
                 QuarterPixels(
-                    f_BannerY + BANNER_CLOUD_TOP + (i * BANNER_CLOUD_HEIGHT) + BANNER_CLOUD_HEIGHT
+                    f_BannerY + BANNER_CLOUD_TOP + (stripIndex * BANNER_CLOUD_HEIGHT) +
+                    BANNER_CLOUD_HEIGHT
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -2468,22 +2490,22 @@ void DrawResultsBanner(Gfx **displayListHead) {
             LoadLargePalette(&gfx, f_TrophyPalette);
             top = -f_TrophySizes[course][TROPHY_PART_HEIGHTS] -
                 f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
-            for (i = 0; i != TROPHY_PART_COUNT; i++) {
+            for (partIndex = 0; partIndex != TROPHY_PART_COUNT; partIndex++) {
                 gDPLoadTextureTile(
                     gfx++,
                     TextureAddress(
                         (u32)f_TrophyImage +
-                        (i * f_TrophySizes[course][TROPHY_WIDTH] *
+                        (partIndex * f_TrophySizes[course][TROPHY_WIDTH] *
                             f_TrophySizes[course][TROPHY_PART_HEIGHTS])
                     ),
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
                     f_TrophySizes[course][TROPHY_WIDTH],
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + i],
+                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + partIndex],
                     0,
                     0,
                     f_TrophySizes[course][TROPHY_WIDTH] - 1,
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1,
+                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + partIndex] - 1,
                     0,
                     0,
                     0,
@@ -2502,7 +2524,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                         TROPHY_CENTER_X + f_BannerX + (f_TrophySizes[course][TROPHY_WIDTH] / 2)
                     ),
                     QuarterPixels(
-                        TROPHY_BOTTOM + top + f_TrophySizes[course][TROPHY_PART_HEIGHTS + i]
+                        TROPHY_BOTTOM + top + f_TrophySizes[course][TROPHY_PART_HEIGHTS + partIndex]
                     ),
                     G_TX_RENDERTILE,
                     0,
@@ -2510,7 +2532,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                     TEXEL_STEP_ONE,
                     TEXEL_STEP_ONE
                 );
-                top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
+                top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + partIndex];
             }
 
             gDPPipeSync(gfx++);
@@ -2543,22 +2565,22 @@ void DrawResultsBanner(Gfx **displayListHead) {
             );
             top = -f_TrophySizes[course][TROPHY_PART_HEIGHTS] -
                 f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
-            for (i = 0; i != TROPHY_PART_COUNT; i++) {
+            for (partIndex = 0; partIndex != TROPHY_PART_COUNT; partIndex++) {
                 gDPLoadTextureTile(
                     gfx++,
                     TextureAddress(
                         (u32)f_TrophyImage +
-                        (i * f_TrophySizes[course][TROPHY_WIDTH] *
+                        (partIndex * f_TrophySizes[course][TROPHY_WIDTH] *
                             f_TrophySizes[course][TROPHY_PART_HEIGHTS])
                     ),
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
                     f_TrophySizes[course][TROPHY_WIDTH],
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + i],
+                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + partIndex],
                     0,
                     0,
                     f_TrophySizes[course][TROPHY_WIDTH] - 1,
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1,
+                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + partIndex] - 1,
                     0,
                     0,
                     0,
@@ -2577,7 +2599,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                         TROPHY_CENTER_X + f_BannerX + (f_TrophySizes[course][TROPHY_WIDTH] / 2)
                     ),
                     QuarterPixels(
-                        TROPHY_BOTTOM + top + f_TrophySizes[course][TROPHY_PART_HEIGHTS + i]
+                        TROPHY_BOTTOM + top + f_TrophySizes[course][TROPHY_PART_HEIGHTS + partIndex]
                     ),
                     G_TX_RENDERTILE,
                     0,
@@ -2585,7 +2607,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                     TEXEL_STEP_ONE,
                     TEXEL_STEP_ONE
                 );
-                top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
+                top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + partIndex];
             }
 
             gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
@@ -4246,7 +4268,9 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
     s32 seconds;
     s32 minutes;
     s32 hundredths;
-    s32 i;
+    /* Counts strips, text slots and characters in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
     s32 firstStripBottom;
 
     isNintendo = IsNintendoClubTournament();
@@ -4256,11 +4280,12 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_POINT);
     gameMode = GetClubTournamentGameMode();
     LoadLargePalette(&gfx, ImageBody(f_ResultsCourseImage));
-    for (i = 0; i != CLUB_TOURNAMENT_COURSE_STRIP_COUNT; i++) {
+    for (sharedIndex = 0; sharedIndex != CLUB_TOURNAMENT_COURSE_STRIP_COUNT; sharedIndex++) {
         LoadTextureBlock(
             &gfx,
             LargeImageTexels(f_ResultsCourseImage) +
-                (i * CLUB_TOURNAMENT_COURSE_STRIP_WIDTH * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT),
+                (sharedIndex * CLUB_TOURNAMENT_COURSE_STRIP_WIDTH *
+                    CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
             CLUB_TOURNAMENT_COURSE_STRIP_WIDTH,
@@ -4279,12 +4304,13 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
             &gfx,
             QuarterPixels(f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X),
             QuarterPixels(
-                (i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) + CLUB_TOURNAMENT_COURSE_Y + f_ResultsTop
+                (sharedIndex * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) + CLUB_TOURNAMENT_COURSE_Y +
+                f_ResultsTop
             ),
             QuarterPixels(
                 f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X + CLUB_TOURNAMENT_COURSE_STRIP_WIDTH
             ),
-            QuarterPixels((i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) + firstStripBottom),
+            QuarterPixels((sharedIndex * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) + firstStripBottom),
             G_TX_RENDERTILE,
             0,
             0,
@@ -4304,11 +4330,11 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
             TRUE
         );
         LoadLargePalette(&gfx, ImageBody(f_NintendoBadgeImage));
-        for (i = 0; i != NINTENDO_BADGE_STRIP_COUNT; i++) {
+        for (sharedIndex = 0; sharedIndex != NINTENDO_BADGE_STRIP_COUNT; sharedIndex++) {
             LoadTextureBlock(
                 &gfx,
                 LargeImageTexels(f_NintendoBadgeImage) +
-                    (i * NINTENDO_BADGE_STRIP_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT),
+                    (sharedIndex * NINTENDO_BADGE_STRIP_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 NINTENDO_BADGE_STRIP_WIDTH,
@@ -4324,10 +4350,12 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels(f_ResultsSlide + NINTENDO_BADGE_X),
-                QuarterPixels(f_ResultsTop + NINTENDO_BADGE_Y + (i * NINTENDO_BADGE_STRIP_HEIGHT)),
+                QuarterPixels(
+                    f_ResultsTop + NINTENDO_BADGE_Y + (sharedIndex * NINTENDO_BADGE_STRIP_HEIGHT)
+                ),
                 QuarterPixels(f_ResultsSlide + NINTENDO_BADGE_X + NINTENDO_BADGE_STRIP_WIDTH),
                 QuarterPixels(
-                    f_ResultsTop + NINTENDO_BADGE_Y + (i * NINTENDO_BADGE_STRIP_HEIGHT) +
+                    f_ResultsTop + NINTENDO_BADGE_Y + (sharedIndex * NINTENDO_BADGE_STRIP_HEIGHT) +
                     NINTENDO_BADGE_STRIP_HEIGHT
                 ),
                 G_TX_RENDERTILE,
@@ -4396,17 +4424,18 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
         127,
         OPAQUE_ALPHA
     );
-    for (i = CLUB_TOURNAMENT_NAME_SLOT; i != CLUB_TOURNAMENT_MODE_SLOT + 1; i++) {
+    for (sharedIndex = CLUB_TOURNAMENT_NAME_SLOT; sharedIndex != CLUB_TOURNAMENT_MODE_SLOT + 1;
+        sharedIndex++) {
         gDPSetPrimColor(
             gfx++,
             0,
             0,
-            f_TextSlotColors[i - 1][0],
-            f_TextSlotColors[i - 1][1],
-            f_TextSlotColors[i - 1][2],
+            f_TextSlotColors[sharedIndex - 1][0],
+            f_TextSlotColors[sharedIndex - 1][1],
+            f_TextSlotColors[sharedIndex - 1][2],
             OPAQUE_ALPHA
         );
-        DrawLargeTextSlot(&gfx, i);
+        DrawLargeTextSlot(&gfx, sharedIndex);
     }
 
     SetUpGradientTextDrawing(&gfx, 0);
@@ -4465,8 +4494,8 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
         );
     }
 
-    for (i = 0; i != SCORE_PASSWORD_LINE_LENGTH; i++) {
-        g_PrintBuffer[i] = f_ScorePassword[i];
+    for (sharedIndex = 0; sharedIndex != SCORE_PASSWORD_LINE_LENGTH; sharedIndex++) {
+        g_PrintBuffer[sharedIndex] = f_ScorePassword[sharedIndex];
     }
 
     g_PrintBuffer[SCORE_PASSWORD_LINE_LENGTH] = '\0';
@@ -4479,8 +4508,8 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
         SCORE_PASSWORD_PRIM_COLOR,
         TEXT_FLAG_FIXED_WIDTH
     );
-    for (i = 0; i != SCORE_PASSWORD_LINE_LENGTH; i++) {
-        g_PrintBuffer[i] = f_ScorePassword[SCORE_PASSWORD_LINE_LENGTH + i];
+    for (sharedIndex = 0; sharedIndex != SCORE_PASSWORD_LINE_LENGTH; sharedIndex++) {
+        g_PrintBuffer[sharedIndex] = f_ScorePassword[SCORE_PASSWORD_LINE_LENGTH + sharedIndex];
     }
 
     g_PrintBuffer[SCORE_PASSWORD_LINE_LENGTH] = '\0';
@@ -4537,7 +4566,9 @@ void DrawRoundResults(Gfx **displayListHead) {
     s32 titleSubtexelT;
     s32 textureS;
     s32 textureT;
-    s32 i;
+    /* Counts strips and players in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
 
     if (!f_AreResultsLoaded) {
         return;
@@ -4551,11 +4582,11 @@ void DrawRoundResults(Gfx **displayListHead) {
     LoadLargePalette(&gfx, ImageBody(f_ResultsBackdropImage));
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     if (g_GameState.isClubTournament) {
-        for (i = 0; i != CLUB_TOURNAMENT_BACKDROP_STRIP_COUNT; i++) {
+        for (sharedIndex = 0; sharedIndex != CLUB_TOURNAMENT_BACKDROP_STRIP_COUNT; sharedIndex++) {
             LoadTextureBlock(
                 &gfx,
                 LargeImageTexels(f_ResultsBackdropImage) +
-                    (i * BACKDROP_STRIP_WIDTH * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT),
+                    (sharedIndex * BACKDROP_STRIP_WIDTH * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 BACKDROP_STRIP_WIDTH,
@@ -4572,13 +4603,14 @@ void DrawRoundResults(Gfx **displayListHead) {
                 &gfx,
                 QuarterPixels(f_ResultsSlide + BACKDROP_X),
                 QuarterPixels(
-                    (i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) + CLUB_TOURNAMENT_BACKDROP_Y +
-                    f_ResultsTop
+                    (sharedIndex * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) +
+                    CLUB_TOURNAMENT_BACKDROP_Y + f_ResultsTop
                 ),
                 QuarterPixels(f_ResultsSlide + BACKDROP_X + BACKDROP_STRIP_WIDTH),
                 QuarterPixels(
-                    (i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) + CLUB_TOURNAMENT_BACKDROP_Y +
-                    CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT + f_ResultsTop
+                    (sharedIndex * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) +
+                    CLUB_TOURNAMENT_BACKDROP_Y + CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT +
+                    f_ResultsTop
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -4589,11 +4621,11 @@ void DrawRoundResults(Gfx **displayListHead) {
         }
     }
     else {
-        for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
+        for (sharedIndex = 0; sharedIndex != BACKDROP_STRIP_COUNT; sharedIndex++) {
             LoadTextureBlock(
                 &gfx,
                 LargeImageTexels(f_ResultsBackdropImage) +
-                    (i * BACKDROP_STRIP_WIDTH * BACKDROP_STRIP_HEIGHT),
+                    (sharedIndex * BACKDROP_STRIP_WIDTH * BACKDROP_STRIP_HEIGHT),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 BACKDROP_STRIP_WIDTH,
@@ -4609,10 +4641,11 @@ void DrawRoundResults(Gfx **displayListHead) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels(f_ResultsSlide + BACKDROP_X),
-                QuarterPixels((i * BACKDROP_STRIP_HEIGHT) + BACKDROP_Y + f_ResultsTop),
+                QuarterPixels((sharedIndex * BACKDROP_STRIP_HEIGHT) + BACKDROP_Y + f_ResultsTop),
                 QuarterPixels(f_ResultsSlide + BACKDROP_X + BACKDROP_STRIP_WIDTH),
                 QuarterPixels(
-                    (i * BACKDROP_STRIP_HEIGHT) + BACKDROP_Y + BACKDROP_STRIP_HEIGHT + f_ResultsTop
+                    (sharedIndex * BACKDROP_STRIP_HEIGHT) + BACKDROP_Y + BACKDROP_STRIP_HEIGHT +
+                    f_ResultsTop
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -4700,8 +4733,8 @@ void DrawRoundResults(Gfx **displayListHead) {
         textureT = titleSubtexelT * 2;
         f_TitleBobAngle += FINAL_RESULTS_TITLE_BOB_STEP;
         LoadLargePalette(&gfx, ImageBody(f_FinalResultsTitleImage));
-        for (i = 0; i != FINAL_RESULTS_TITLE_STRIP_COUNT; i++) {
-            if (i == FINAL_RESULTS_TITLE_STRIP_COUNT - 1) {
+        for (sharedIndex = 0; sharedIndex != FINAL_RESULTS_TITLE_STRIP_COUNT; sharedIndex++) {
+            if (sharedIndex == FINAL_RESULTS_TITLE_STRIP_COUNT - 1) {
                 stripHeight = FINAL_RESULTS_TITLE_LAST_STRIP_HEIGHT;
             }
             else {
@@ -4712,7 +4745,7 @@ void DrawRoundResults(Gfx **displayListHead) {
             LoadTextureBlock(
                 &gfx,
                 LargeImageTexels(f_FinalResultsTitleImage) +
-                    (i * FINAL_RESULTS_TITLE_WIDTH * FINAL_RESULTS_TITLE_STRIP_HEIGHT),
+                    (sharedIndex * FINAL_RESULTS_TITLE_WIDTH * FINAL_RESULTS_TITLE_STRIP_HEIGHT),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 FINAL_RESULTS_TITLE_WIDTH,
@@ -4728,10 +4761,11 @@ void DrawRoundResults(Gfx **displayListHead) {
             gSPTextureRectangle(
                 gfx++,
                 QuarterPixels(left - f_ResultsSlide),
-                QuarterPixels(i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + f_ResultsTop + top),
+                QuarterPixels(sharedIndex * FINAL_RESULTS_TITLE_STRIP_HEIGHT + f_ResultsTop + top),
                 QuarterPixels(right - f_ResultsSlide),
                 QuarterPixels(
-                    i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + stripHeight + f_ResultsTop + top
+                    sharedIndex * FINAL_RESULTS_TITLE_STRIP_HEIGHT + stripHeight + f_ResultsTop +
+                    top
                 ),
                 G_TX_RENDERTILE,
                 textureS,
@@ -4742,30 +4776,30 @@ void DrawRoundResults(Gfx **displayListHead) {
         }
     }
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
+    for (sharedIndex = 0; sharedIndex != g_GameState.playerCount; sharedIndex++) {
         EncodedAsset asset;
 
-        if (f_PortraitFrames[i] != NO_PORTRAIT_FRAME) {
-            if (!(f_PortraitTimers[i] & PORTRAIT_FRAME_DRAWS_MASK)) {
-                switch (f_PortraitAnimations[i]) {
+        if (f_PortraitFrames[sharedIndex] != NO_PORTRAIT_FRAME) {
+            if (!(f_PortraitTimers[sharedIndex] & PORTRAIT_FRAME_DRAWS_MASK)) {
+                switch (f_PortraitAnimations[sharedIndex]) {
                     case PORTRAIT_ANIMATION_REST:
                         OpenEncodedAsset(
-                            g_CharacterImageAssets[g_Players[i].characterIndex],
+                            g_CharacterImageAssets[g_Players[sharedIndex].characterIndex],
                             &asset
                         );
-                        ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
-                        f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
+                        ReadEncodedAsset(f_PlayerPortraitImages[sharedIndex], &asset);
+                        f_PortraitFrames[sharedIndex] = NO_PORTRAIT_FRAME;
                         break;
                     case PORTRAIT_ANIMATION_PLEASED:
                         OpenEncodedAsset(
-                            g_CharacterImageAssets[g_Players[i].characterIndex] +
-                                f_PortraitFrames[i],
+                            g_CharacterImageAssets[g_Players[sharedIndex].characterIndex] +
+                                f_PortraitFrames[sharedIndex],
                             &asset
                         );
-                        ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
-                        f_PortraitFrames[i]++;
-                        if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
-                            f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
+                        ReadEncodedAsset(f_PlayerPortraitImages[sharedIndex], &asset);
+                        f_PortraitFrames[sharedIndex]++;
+                        if (f_PortraitFrames[sharedIndex] == PORTRAIT_ANIMATION_FRAME_COUNT) {
+                            f_PortraitFrames[sharedIndex] = NO_PORTRAIT_FRAME;
                         }
 
                         break;
@@ -4773,14 +4807,14 @@ void DrawRoundResults(Gfx **displayListHead) {
                         s32 beatenFaces[PORTRAIT_ANIMATION_FRAME_COUNT] = {0, 5, 6, 7, 8};
 
                         OpenEncodedAsset(
-                            g_CharacterImageAssets[g_Players[i].characterIndex] +
-                                beatenFaces[f_PortraitFrames[i]],
+                            g_CharacterImageAssets[g_Players[sharedIndex].characterIndex] +
+                                beatenFaces[f_PortraitFrames[sharedIndex]],
                             &asset
                         );
-                        ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
-                        f_PortraitFrames[i]++;
-                        if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
-                            f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
+                        ReadEncodedAsset(f_PlayerPortraitImages[sharedIndex], &asset);
+                        f_PortraitFrames[sharedIndex]++;
+                        if (f_PortraitFrames[sharedIndex] == PORTRAIT_ANIMATION_FRAME_COUNT) {
+                            f_PortraitFrames[sharedIndex] = NO_PORTRAIT_FRAME;
                         }
 
                         break;
@@ -4788,7 +4822,7 @@ void DrawRoundResults(Gfx **displayListHead) {
                 }
             }
 
-            f_PortraitTimers[i]++;
+            f_PortraitTimers[sharedIndex]++;
         }
     }
 

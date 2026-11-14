@@ -123,17 +123,19 @@ static f32 f_SwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH][3];
 u8 g_UnusedBytesAfterInnerTrailPath[0x18];
 
 void ResetShotEffects(void) {
-    s32 i;
+    /* Counts spark bursts and sparks in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
 
     f_ImpactFrameCount = 0;
     g_ImpactFlashState = IMPACT_FLASH_NONE;
     g_ContactEffect = CONTACT_EFFECT_NONE;
-    for (i = 0; i != SPARK_BURST_COUNT; i++) {
-        f_SparkBurstAges[i] = NO_SPARK_BURST;
+    for (sharedIndex = 0; sharedIndex != SPARK_BURST_COUNT; sharedIndex++) {
+        f_SparkBurstAges[sharedIndex] = NO_SPARK_BURST;
     }
 
-    for (i = 0; i != SPARK_COUNT; i++) {
-        f_SparkLives[i] = 0;
+    for (sharedIndex = 0; sharedIndex != SPARK_COUNT; sharedIndex++) {
+        f_SparkLives[sharedIndex] = 0;
     }
 }
 
@@ -307,7 +309,9 @@ void DrawSparks(Gfx **displayListHead) {
     s32 burst;
     s32 left;
     s32 top;
-    s32 i;
+    /* Counts spark bursts and sparks in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
 
     if (f_ImpactFrameCount != 0) {
         if (++f_ImpactFrameCount == IMPACT_FRAME_COUNT_END) {
@@ -330,43 +334,44 @@ void DrawSparks(Gfx **displayListHead) {
         }
     }
 
-    for (i = 0; i != SPARK_BURST_COUNT; i++) {
-        if (f_SparkBurstAges[i] != NO_SPARK_BURST) {
+    for (sharedIndex = 0; sharedIndex != SPARK_BURST_COUNT; sharedIndex++) {
+        if (f_SparkBurstAges[sharedIndex] != NO_SPARK_BURST) {
             if (ProjectPoint(
-                    f_SparkBurstPoints[i][AXIS_X] * COURSE_TO_WORLD_SCALE,
-                    f_SparkBurstPoints[i][AXIS_Y] * COURSE_TO_WORLD_SCALE,
-                    f_SparkBurstPoints[i][AXIS_Z] * COURSE_TO_WORLD_SCALE,
+                    f_SparkBurstPoints[sharedIndex][AXIS_X] * COURSE_TO_WORLD_SCALE,
+                    f_SparkBurstPoints[sharedIndex][AXIS_Y] * COURSE_TO_WORLD_SCALE,
+                    f_SparkBurstPoints[sharedIndex][AXIS_Z] * COURSE_TO_WORLD_SCALE,
                     &point
                 ) < 0) {
-                size = (f_SparkBurstAges[i] * SPARK_AGE_GROWTH) + SPARK_START_SIZE;
-                burstShown[i] = SPARK_BURST_SHOWN;
-                burstPoints[i][0] = point.x;
-                burstPoints[i][1] = point.y;
-                burstPoints[i][2] = point.depth;
-                burstScales[i] = point.scaleX * SPARK_DISTANCE_SCALE;
-                if (burstScales[i] > SPARK_MAX_SCALE) {
-                    burstScales[i] = SPARK_MAX_SCALE;
+                size = (f_SparkBurstAges[sharedIndex] * SPARK_AGE_GROWTH) + SPARK_START_SIZE;
+                burstShown[sharedIndex] = SPARK_BURST_SHOWN;
+                burstPoints[sharedIndex][0] = point.x;
+                burstPoints[sharedIndex][1] = point.y;
+                burstPoints[sharedIndex][2] = point.depth;
+                burstScales[sharedIndex] = point.scaleX * SPARK_DISTANCE_SCALE;
+                if (burstScales[sharedIndex] > SPARK_MAX_SCALE) {
+                    burstScales[sharedIndex] = SPARK_MAX_SCALE;
                 }
 
                 halfSize = size * SPARK_IMAGE_HALF_SIZE;
-                burstHalfSizes[i] = burstScales[i] * halfSize;
-                if (burstHalfSizes[i] > 0) {
-                    burstTextureSteps[i] = SPARK_TEXTURE_STEP_SCALE / (burstScales[i] * size);
+                burstHalfSizes[sharedIndex] = burstScales[sharedIndex] * halfSize;
+                if (burstHalfSizes[sharedIndex] > 0) {
+                    burstTextureSteps[sharedIndex] =
+                        SPARK_TEXTURE_STEP_SCALE / (burstScales[sharedIndex] * size);
                 }
                 else {
-                    burstTextureSteps[i] = SPARK_NO_TEXTURE_STEP;
+                    burstTextureSteps[sharedIndex] = SPARK_NO_TEXTURE_STEP;
                 }
             }
             else {
-                burstShown[i] = SPARK_BURST_HIDDEN;
+                burstShown[sharedIndex] = SPARK_BURST_HIDDEN;
             }
 
-            if (f_SparkBurstAges[i] < SPARK_BURST_MAX_AGE) {
-                f_SparkBurstAges[i]++;
+            if (f_SparkBurstAges[sharedIndex] < SPARK_BURST_MAX_AGE) {
+                f_SparkBurstAges[sharedIndex]++;
             }
         }
         else {
-            burstShown[i] = SPARK_BURST_HIDDEN;
+            burstShown[sharedIndex] = SPARK_BURST_HIDDEN;
         }
     }
 
@@ -419,36 +424,41 @@ void DrawSparks(Gfx **displayListHead) {
         G_TX_NOLOD
     );
     gDPPipeSync(gfx++);
-    for (i = 0; i != SPARK_COUNT; i++) {
-        if (f_SparkLives[i] != 0) {
-            burst = f_SparkBursts[i];
-            f_SparkOffsets[i][AXIS_X] += f_SparkVelocities[i][AXIS_X];
-            f_SparkOffsets[i][AXIS_Y] += f_SparkVelocities[i][AXIS_Y];
-            f_SparkVelocities[i][AXIS_X] *= SPARK_DRAG;
-            f_SparkVelocities[i][AXIS_Y] *= SPARK_DRAG;
-            f_SparkLives[i]--;
+    for (sharedIndex = 0; sharedIndex != SPARK_COUNT; sharedIndex++) {
+        if (f_SparkLives[sharedIndex] != 0) {
+            burst = f_SparkBursts[sharedIndex];
+            f_SparkOffsets[sharedIndex][AXIS_X] += f_SparkVelocities[sharedIndex][AXIS_X];
+            f_SparkOffsets[sharedIndex][AXIS_Y] += f_SparkVelocities[sharedIndex][AXIS_Y];
+            f_SparkVelocities[sharedIndex][AXIS_X] *= SPARK_DRAG;
+            f_SparkVelocities[sharedIndex][AXIS_Y] *= SPARK_DRAG;
+            f_SparkLives[sharedIndex]--;
             if (burstShown[burst] == SPARK_BURST_SHOWN) {
                 rotation[AXIS_X] = 0;
                 rotation[AXIS_Y] = 0;
-                rotation[AXIS_Z] = f_SparkAngles[i];
-                translation[AXIS_X] = (f_SparkOffsets[i][AXIS_X] * burstScales[burst]) +
+                rotation[AXIS_Z] = f_SparkAngles[sharedIndex];
+                translation[AXIS_X] = (f_SparkOffsets[sharedIndex][AXIS_X] * burstScales[burst]) +
                     burstPoints[burst][0] - (SCREEN_WIDTH / 2);
-                translation[AXIS_Y] = (f_SparkOffsets[i][AXIS_Y] * burstScales[burst]) -
+                translation[AXIS_Y] = (f_SparkOffsets[sharedIndex][AXIS_Y] * burstScales[burst]) -
                     burstPoints[burst][1] + (SCREEN_HEIGHT / 2);
                 translation[AXIS_Z] = SPARK_MODEL_Z;
                 scale[AXIS_X] = burstScales[burst] * SPARK_MODEL_SCALE;
                 scale[AXIS_Y] = burstScales[burst] * SPARK_MODEL_SCALE;
                 scale[AXIS_Z] = burstScales[burst] * SPARK_MODEL_SCALE;
-                if (f_SparkKinds[i] == SPARK_KIND_IMPACT) {
+                if (f_SparkKinds[sharedIndex] == SPARK_KIND_IMPACT) {
                     BuildTransformMatrix(matrix, rotation, translation, scale);
-                    ConvertMatrixToFixed(matrix, &f_SparkMatrices[g_MatrixBufferIndex][i]);
+                    ConvertMatrixToFixed(
+                        matrix,
+                        &f_SparkMatrices[g_MatrixBufferIndex][sharedIndex]
+                    );
                 }
 
-                if (f_SparkKinds[i] == SPARK_KIND_FLAGSTICK &&
+                if (f_SparkKinds[sharedIndex] == SPARK_KIND_FLAGSTICK &&
                     IsSparkCoordInRange(burstPoints[burst][0]) &&
                     IsSparkCoordInRange(burstPoints[burst][1])) {
-                    left = (f_SparkOffsets[i][AXIS_X] * burstScales[burst]) + burstPoints[burst][0];
-                    top = (f_SparkOffsets[i][AXIS_Y] * burstScales[burst]) + burstPoints[burst][1];
+                    left = (f_SparkOffsets[sharedIndex][AXIS_X] * burstScales[burst]) +
+                        burstPoints[burst][0];
+                    top = (f_SparkOffsets[sharedIndex][AXIS_Y] * burstScales[burst]) +
+                        burstPoints[burst][1];
                     gSPScisTextureRectangle(
                         gfx++,
                         QuarterPixels(left - burstHalfSizes[burst]),
@@ -502,14 +512,14 @@ void DrawSparks(Gfx **displayListHead) {
         PhysicalAddress(&g_ScreenOrthoMatrix),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
     );
-    for (i = 0; i != SPARK_COUNT; i++) {
-        if (f_SparkKinds[i] == SPARK_KIND_IMPACT &&
-            burstShown[f_SparkBursts[i]] == SPARK_BURST_SHOWN) {
-            gDPSetPrimDepth(gfx++, burstPoints[f_SparkBursts[i]][2], 0);
-            if (f_SparkLives[i] != 0) {
+    for (sharedIndex = 0; sharedIndex != SPARK_COUNT; sharedIndex++) {
+        if (f_SparkKinds[sharedIndex] == SPARK_KIND_IMPACT &&
+            burstShown[f_SparkBursts[sharedIndex]] == SPARK_BURST_SHOWN) {
+            gDPSetPrimDepth(gfx++, burstPoints[f_SparkBursts[sharedIndex]][2], 0);
+            if (f_SparkLives[sharedIndex] != 0) {
                 gSPMatrix(
                     gfx++,
-                    PhysicalAddress(&f_SparkMatrices[g_MatrixBufferIndex][i]),
+                    PhysicalAddress(&f_SparkMatrices[g_MatrixBufferIndex][sharedIndex]),
                     G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
                 );
                 gSPVertex(gfx++, f_SparkVertices, 3, 0);
@@ -522,12 +532,12 @@ void DrawSparks(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PIXEL);
     gDPPipeSync(gfx++);
-    for (i = 0; i != SPARK_BURST_COUNT; i++) {
-        if (f_SparkBurstTimers[i] == 0) {
-            f_SparkBurstAges[i] = NO_SPARK_BURST;
+    for (sharedIndex = 0; sharedIndex != SPARK_BURST_COUNT; sharedIndex++) {
+        if (f_SparkBurstTimers[sharedIndex] == 0) {
+            f_SparkBurstAges[sharedIndex] = NO_SPARK_BURST;
         }
         else {
-            f_SparkBurstTimers[i]--;
+            f_SparkBurstTimers[sharedIndex]--;
         }
     }
 
@@ -546,7 +556,9 @@ void DrawShotEffectsHud(Gfx **displayListHead UNUSED) {
 void StartSwingTrail(s32 kind) {
     f32 samples[SWING_TRAIL_AXIS_COUNT][SWING_TRAIL_MAX_SAMPLES];
     f32 point[3];
-    s32 i;
+    /* Counts samples, path points and matrices in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
     f32 position;
 
     if (kind == SWING_TRAIL_KIND_CLEAR) {
@@ -566,15 +578,15 @@ void StartSwingTrail(s32 kind) {
             f_SwingTrailSampleCount = NORMAL_SHOT_SWING_TRAIL_SAMPLES;
         }
 
-        for (i = 0; i != f_SwingTrailSampleCount; i++) {
+        for (sharedIndex = 0; sharedIndex != f_SwingTrailSampleCount; sharedIndex++) {
             GetCharacterPointPosition(0, SWING_TRAIL_OUTER_POINT, point);
-            samples[0][i] = point[AXIS_X];
-            samples[1][i] = point[AXIS_Y];
-            samples[2][i] = point[AXIS_Z];
+            samples[0][sharedIndex] = point[AXIS_X];
+            samples[1][sharedIndex] = point[AXIS_Y];
+            samples[2][sharedIndex] = point[AXIS_Z];
             GetCharacterPointPosition(0, SWING_TRAIL_INNER_POINT, point);
-            samples[3][i] = point[AXIS_X];
-            samples[4][i] = point[AXIS_Y];
-            samples[5][i] = point[AXIS_Z];
+            samples[3][sharedIndex] = point[AXIS_X];
+            samples[4][sharedIndex] = point[AXIS_Y];
+            samples[5][sharedIndex] = point[AXIS_Z];
             AnimateCharacterInSameCopy(0);
         }
 
@@ -583,25 +595,25 @@ void StartSwingTrail(s32 kind) {
         SetAnimationSpeed(0, 1.0f);
         position = 0.0f;
         f_SwingTrailPathLength = (f_SwingTrailSampleCount * 2) - 4;
-        for (i = 0; i != f_SwingTrailPathLength; i++) {
-            f_SwingTrailOuterPath[i][AXIS_X] = InterpolateHermite(samples[0], position);
-            f_SwingTrailOuterPath[i][AXIS_Y] = InterpolateHermite(samples[1], position);
-            f_SwingTrailOuterPath[i][AXIS_Z] = InterpolateHermite(samples[2], position);
-            f_SwingTrailInnerPath[i][AXIS_X] = InterpolateHermite(samples[3], position);
-            f_SwingTrailInnerPath[i][AXIS_Y] = InterpolateHermite(samples[4], position);
-            f_SwingTrailInnerPath[i][AXIS_Z] = InterpolateHermite(samples[5], position);
+        for (sharedIndex = 0; sharedIndex != f_SwingTrailPathLength; sharedIndex++) {
+            f_SwingTrailOuterPath[sharedIndex][AXIS_X] = InterpolateHermite(samples[0], position);
+            f_SwingTrailOuterPath[sharedIndex][AXIS_Y] = InterpolateHermite(samples[1], position);
+            f_SwingTrailOuterPath[sharedIndex][AXIS_Z] = InterpolateHermite(samples[2], position);
+            f_SwingTrailInnerPath[sharedIndex][AXIS_X] = InterpolateHermite(samples[3], position);
+            f_SwingTrailInnerPath[sharedIndex][AXIS_Y] = InterpolateHermite(samples[4], position);
+            f_SwingTrailInnerPath[sharedIndex][AXIS_Z] = InterpolateHermite(samples[5], position);
             position += 0.5f;
         }
 
-        for (i = 0; i != SWING_TRAIL_MATRIX_COUNT; i++) {
+        for (sharedIndex = 0; sharedIndex != SWING_TRAIL_MATRIX_COUNT; sharedIndex++) {
             guTranslate(
-                &f_SwingTrailMatrices[i][0],
+                &f_SwingTrailMatrices[sharedIndex][0],
                 f_SwingTrailOuterPath[0][AXIS_X],
                 f_SwingTrailOuterPath[0][AXIS_Y],
                 f_SwingTrailOuterPath[0][AXIS_Z]
             );
             guTranslate(
-                &f_SwingTrailMatrices[i][1],
+                &f_SwingTrailMatrices[sharedIndex][1],
                 f_SwingTrailInnerPath[0][AXIS_X],
                 f_SwingTrailInnerPath[0][AXIS_Y],
                 f_SwingTrailInnerPath[0][AXIS_Z]

@@ -110,18 +110,20 @@ s32 GetOverlayOfModule(s32 moduleId) {
 }
 
 void InitOverlayManager(void) {
-    s32 i;
+    /* Counts modules and overlays in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
     s8 *moduleIds;
     s32 moduleIndex;
 
-    for (i = 0; i < MODULE_COUNT; i++) {
-        f_OverlayIndexOfModule[i] = -1;
-        g_IsModuleAlive[i] = FALSE;
-        g_ModuleRdpRequestFrames[i] = RDP_REQUEST_FRAME_NEVER;
+    for (sharedIndex = 0; sharedIndex < MODULE_COUNT; sharedIndex++) {
+        f_OverlayIndexOfModule[sharedIndex] = -1;
+        g_IsModuleAlive[sharedIndex] = FALSE;
+        g_ModuleRdpRequestFrames[sharedIndex] = RDP_REQUEST_FRAME_NEVER;
     }
 
-    for (i = 0; (u32)i < OVERLAY_COUNT; i++) {
-        moduleIds = f_Overlays[i].moduleIds;
+    for (sharedIndex = 0; (u32)sharedIndex < OVERLAY_COUNT; sharedIndex++) {
+        moduleIds = f_Overlays[sharedIndex].moduleIds;
         moduleIndex = 0;
         while (moduleIds[moduleIndex] != MODULE_ID_END) {
             if (f_OverlayIndexOfModule[moduleIds[moduleIndex]] != -1 &&
@@ -129,13 +131,13 @@ void InitOverlayManager(void) {
                 osSyncPrintf("OverlayManager\n");
             }
 
-            f_OverlayIndexOfModule[moduleIds[moduleIndex++]] = i;
+            f_OverlayIndexOfModule[moduleIds[moduleIndex++]] = sharedIndex;
         }
     }
 
-    for (i = 0; i < MODULE_COUNT; i++) {
-        if (f_OverlayIndexOfModule[i] == -1) {
-            g_IsModuleAlive[i] = TRUE;
+    for (sharedIndex = 0; sharedIndex < MODULE_COUNT; sharedIndex++) {
+        if (f_OverlayIndexOfModule[sharedIndex] == -1) {
+            g_IsModuleAlive[sharedIndex] = TRUE;
         }
     }
 }

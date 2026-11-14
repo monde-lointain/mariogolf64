@@ -230,7 +230,9 @@ void UpdateAndDrawFireworks(Gfx **displayListHead) {
     s32 unused[12] UNUSED;
     Mat4 transform;
     s32 unusedAfter[6] UNUSED;
-    s32 i;
+    /* Counts fireworks and particles in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
     s32 index;
     FireworkParticle *particle;
     FireworkParticle *drawnParticle;
@@ -252,16 +254,16 @@ void UpdateAndDrawFireworks(Gfx **displayListHead) {
         return;
     }
 
-    for (i = 0; i != f_FireworkCount; i++) {
-        if (f_Fireworks[i].isActive == TRUE) {
-            timer = f_Fireworks[i].timer + 1;
-            f_Fireworks[i].timer = timer;
+    for (sharedIndex = 0; sharedIndex != f_FireworkCount; sharedIndex++) {
+        if (f_Fireworks[sharedIndex].isActive == TRUE) {
+            timer = f_Fireworks[sharedIndex].timer + 1;
+            f_Fireworks[sharedIndex].timer = timer;
             if (timer == FIREWORK_SOUND_FRAME) {
                 PlaySound(SOUND_FIREWORK_LEAD_IN, FIREWORK_SOUND_CHANNEL, SOUND_FULL_SCALE);
             }
             else if (timer == FIREWORK_LAUNCH_FRAME) {
-                f_Fireworks[i].timer = 0;
-                LaunchFirework(&f_Fireworks[i], i);
+                f_Fireworks[sharedIndex].timer = 0;
+                LaunchFirework(&f_Fireworks[sharedIndex], sharedIndex);
                 PlaySound(SOUND_FIREWORK_LAUNCH, FIREWORK_SOUND_CHANNEL, SOUND_FULL_SCALE);
             }
         }
@@ -278,8 +280,8 @@ void UpdateAndDrawFireworks(Gfx **displayListHead) {
     transform[3][3] = 1.0f;
     for (index = 0; index != f_FireworkCount; index++) {
         if (f_Fireworks[index].isActive == TRUE) {
-            for (i = 0; i != f_Fireworks[index].particleCount; i++) {
-                particle = &f_Fireworks[index].particles[i];
+            for (sharedIndex = 0; sharedIndex != f_Fireworks[index].particleCount; sharedIndex++) {
+                particle = &f_Fireworks[index].particles[sharedIndex];
                 if (particle->life > 0) {
                     particle->x += particle->velocityX;
                     particle->y += particle->velocityY;
@@ -401,8 +403,8 @@ void UpdateAndDrawFireworks(Gfx **displayListHead) {
             }
 
             gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
-            for (i = 0; i != f_Fireworks[index].particleCount; i++) {
-                drawnParticle = &f_Fireworks[index].particles[i];
+            for (sharedIndex = 0; sharedIndex != f_Fireworks[index].particleCount; sharedIndex++) {
+                drawnParticle = &f_Fireworks[index].particles[sharedIndex];
                 if (drawnParticle->life > 0) {
                     gDPPipeSync(gfx++);
                     gSPMatrix(

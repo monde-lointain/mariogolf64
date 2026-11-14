@@ -1021,7 +1021,8 @@ Boolean IsHalfTurnDismissed(ControllerState *controller) {
 
 void DrawHalfTurn(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    s32 i;
+    s32 stepIndex;
+    s32 stripIndex;
     s32 stripRows;
 
     if (!f_IsHalfTurnShown) {
@@ -1030,7 +1031,7 @@ void DrawHalfTurn(Gfx **displayListHead) {
 
     if (f_HalfTurnState == HALF_TURN_STATE_SHOWING) {
         if (f_HalfTurnTimer > 0) {
-            for (i = 0; i != HALF_TURN_SHOW_STEPS; i++) {
+            for (stepIndex = 0; stepIndex != HALF_TURN_SHOW_STEPS; stepIndex++) {
                 MarkHalfTurnCircle(
                     (u32 *)(ImageBody(f_HalfTurnImage)),
                     HALF_TURN_CENTER_COLUMN,
@@ -1063,7 +1064,7 @@ void DrawHalfTurn(Gfx **displayListHead) {
             f_HalfTurnTimer++;
         }
         else if (f_HalfTurnTimer < HALF_TURN_FRAMES) {
-            for (i = 0; i != HALF_TURN_HIDE_STEPS; i++) {
+            for (stepIndex = 0; stepIndex != HALF_TURN_HIDE_STEPS; stepIndex++) {
                 MarkHalfTurnCircle(
                     (u32 *)(ImageBody(f_HalfTurnImage)),
                     HALF_TURN_CENTER_COLUMN,
@@ -1106,12 +1107,12 @@ void DrawHalfTurn(Gfx **displayListHead) {
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-    for (i = 0; i != HALF_TURN_STRIP_COUNT; i++) {
-        stripRows =
-            (i == HALF_TURN_STRIP_COUNT - 1) ? HALF_TURN_LAST_STRIP_ROWS : HALF_TURN_STRIP_ROWS;
+    for (stripIndex = 0; stripIndex != HALF_TURN_STRIP_COUNT; stripIndex++) {
+        stripRows = (stripIndex == HALF_TURN_STRIP_COUNT - 1) ? HALF_TURN_LAST_STRIP_ROWS :
+                                                                HALF_TURN_STRIP_ROWS;
         gDPLoadTextureTile(
             gfx++,
-            TextureAddress(ImageBody(f_HalfTurnImage) + (i * HALF_TURN_STRIP_SIZE)),
+            TextureAddress(ImageBody(f_HalfTurnImage) + (stripIndex * HALF_TURN_STRIP_SIZE)),
             G_IM_FMT_RGBA,
             G_IM_SIZ_16b,
             HALF_TURN_WIDTH,
@@ -1131,9 +1132,9 @@ void DrawHalfTurn(Gfx **displayListHead) {
         DrawTextureRect(
             &gfx,
             QuarterPixels(SCREEN_BORDER),
-            QuarterPixels(SCREEN_BORDER + (i * HALF_TURN_STRIP_ROWS)),
+            QuarterPixels(SCREEN_BORDER + (stripIndex * HALF_TURN_STRIP_ROWS)),
             QuarterPixels(SCREEN_BORDER + HALF_TURN_WIDTH),
-            QuarterPixels(SCREEN_BORDER + (i * HALF_TURN_STRIP_ROWS) + stripRows),
+            QuarterPixels(SCREEN_BORDER + (stripIndex * HALF_TURN_STRIP_ROWS) + stripRows),
             G_TX_RENDERTILE,
             0,
             0,

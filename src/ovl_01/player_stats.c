@@ -698,7 +698,9 @@ void UpdateBetSettings(void) {
 void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
-    s16 i;
+    /* Counts columns and strips in turn; a variable for each
+       allocates registers differently. */
+    s16 sharedIndex;
     s16 stakeLevel;
     s16 betIndex;
     s16 markGrowth;
@@ -719,16 +721,16 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
 
-    for (i = 0; i != f_BetSetColumnCounts[g_BetSet - 1]; i++) {
-        betIndex = f_BetSetBets[g_BetSet - 1][i];
+    for (sharedIndex = 0; sharedIndex != f_BetSetColumnCounts[g_BetSet - 1]; sharedIndex++) {
+        betIndex = f_BetSetBets[g_BetSet - 1][sharedIndex];
         if (betIndex == -1) {
             break;
         }
 
-        if (i != memory->betColumn) {
+        if (sharedIndex != memory->betColumn) {
             icon = ImageAt(f_BetIcons, betIndex * BET_ICON_SLOT_SIZE);
             gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(icon)));
-            if (memory->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][i]] == 0) {
+            if (memory->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][sharedIndex]] == 0) {
                 gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
                 gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
             }
@@ -757,9 +759,9 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
             gDPPipeSync(gfx++);
             gSPScisTextureRectangle(
                 gfx++,
-                QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][i] + slide),
+                QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][sharedIndex] + slide),
                 QuarterPixels(BET_ICON_TOP),
-                QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][i] + slide + BET_ICON_SIZE),
+                QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][sharedIndex] + slide + BET_ICON_SIZE),
                 QuarterPixels(BET_ICON_TOP + BET_ICON_SIZE),
                 G_TX_RENDERTILE,
                 0,
@@ -770,11 +772,11 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
             gDPPipeSync(gfx++);
         }
 
-        stakeAmount =
-            f_BetStakeAmounts[memory->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][i]]];
+        stakeAmount = f_BetStakeAmounts[memory
+                ->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][sharedIndex]]];
         DrawUnalignedMenuNumber(
             &gfx,
-            f_BetSetColumnXs[g_BetSet - 1][i] + slide + BET_AMOUNT_OFFSET_X,
+            f_BetSetColumnXs[g_BetSet - 1][sharedIndex] + slide + BET_AMOUNT_OFFSET_X,
             BET_AMOUNT_Y,
             stakeAmount,
             0
@@ -830,8 +832,9 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
             markRaise = LARGEST_STAKE_RAISE;
         }
 
-        for (i = 0; i != f_BetSetColumnCounts[g_BetSet - 1]; i++) {
-            if (stakeLevel >= memory->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][i]]) {
+        for (sharedIndex = 0; sharedIndex != f_BetSetColumnCounts[g_BetSet - 1]; sharedIndex++) {
+            if (stakeLevel >=
+                memory->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][sharedIndex]]) {
                 gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
                 gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
             }
@@ -844,7 +847,7 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
             gSPScisTextureRectangle(
                 gfx++,
                 QuarterPixels(
-                    f_BetSetColumnXs[g_BetSet - 1][i] + STAKE_MARK_OFFSET_X + slide -
+                    f_BetSetColumnXs[g_BetSet - 1][sharedIndex] + STAKE_MARK_OFFSET_X + slide -
                     (markGrowth / 2)
                 ),
                 QuarterPixels(
@@ -852,7 +855,7 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
                     markGrowth - markRaise
                 ),
                 QuarterPixels(
-                    f_BetSetColumnXs[g_BetSet - 1][i] + STAKE_MARK_OFFSET_X + slide +
+                    f_BetSetColumnXs[g_BetSet - 1][sharedIndex] + STAKE_MARK_OFFSET_X + slide +
                     STAKE_MARK_SIZE + (markGrowth / 2)
                 ),
                 QuarterPixels(STAKE_MARK_BOTTOM - (stakeLevel * STAKE_MARK_SPACING) - markRaise),
@@ -882,12 +885,12 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
         bannerShift = -slide;
     }
 
-    for (i = 0; i != MENU_BANNER_STRIP_COUNT; i++) {
+    for (sharedIndex = 0; sharedIndex != MENU_BANNER_STRIP_COUNT; sharedIndex++) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
                 LargeImageTexels(f_StatsNamePlate) +
-                (i * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                (sharedIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
             ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
@@ -902,7 +905,7 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        wideStripTop = (i * WIDE_BANNER_STRIP_SPACING) + WIDE_BANNER_TOP;
+        wideStripTop = (sharedIndex * WIDE_BANNER_STRIP_SPACING) + WIDE_BANNER_TOP;
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(WIDE_BANNER_LEFT),
@@ -920,12 +923,12 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
         gDPPipeSync(gfx++);
     }
 
-    for (i = 0; i != MENU_BANNER_STRIP_COUNT; i++) {
+    for (sharedIndex = 0; sharedIndex != MENU_BANNER_STRIP_COUNT; sharedIndex++) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
                 LargeImageTexels(f_StatsNamePlate) +
-                (i * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
+                (sharedIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
             ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
@@ -940,7 +943,7 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        stripTop = (i * MENU_BANNER_STRIP_HEIGHT) + BET_BANNER_TOP;
+        stripTop = (sharedIndex * MENU_BANNER_STRIP_HEIGHT) + BET_BANNER_TOP;
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(BET_BANNER_LEFT),
@@ -1173,7 +1176,9 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
     MenuMemory *memory = GetMenuMemory();
     u16 playerIndex;
     s32 columnIndex;
-    s32 i;
+    /* Counts strips, arrows and players in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
     u16 textureLeft;
     s32 labelIndex;
     s32 offsetY;
@@ -1326,10 +1331,12 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
         offsetY = -slide;
     }
 
-    for (i = 0; i != HANDICAP_BANNER_STRIP_COUNT; i++) {
+    for (sharedIndex = 0; sharedIndex != HANDICAP_BANNER_STRIP_COUNT; sharedIndex++) {
         gDPLoadTextureBlock(
             gfx++,
-            TextureAddress(LargeImageTexels(f_StatsNamePlate) + (i * HANDICAP_BANNER_STRIP_SIZE)),
+            TextureAddress(
+                LargeImageTexels(f_StatsNamePlate) + (sharedIndex * HANDICAP_BANNER_STRIP_SIZE)
+            ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
             HANDICAP_BANNER_WIDTH,
@@ -1346,10 +1353,12 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(HANDICAP_BANNER_LEFT),
-            QuarterPixels(offsetY + HANDICAP_BANNER_TOP + (i * HANDICAP_BANNER_STRIP_HEIGHT)),
+            QuarterPixels(
+                offsetY + HANDICAP_BANNER_TOP + (sharedIndex * HANDICAP_BANNER_STRIP_HEIGHT)
+            ),
             QuarterPixels(HANDICAP_BANNER_RIGHT),
             QuarterPixels(
-                offsetY + HANDICAP_BANNER_TOP + (i * HANDICAP_BANNER_STRIP_HEIGHT) +
+                offsetY + HANDICAP_BANNER_TOP + (sharedIndex * HANDICAP_BANNER_STRIP_HEIGHT) +
                 HANDICAP_BANNER_STRIP_HEIGHT
             ),
             G_TX_RENDERTILE,
@@ -1384,10 +1393,12 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
             );
         }
 
-        for (i = 0; i != HANDICAP_COLUMN_STRIP_COUNT; i++) {
+        for (sharedIndex = 0; sharedIndex != HANDICAP_COLUMN_STRIP_COUNT; sharedIndex++) {
             gDPLoadTextureBlock_4b(
                 gfx++,
-                TextureAddress(ImageTexels(f_HandicapPlaque) + (i * HANDICAP_COLUMN_STRIP_SIZE)),
+                TextureAddress(
+                    ImageTexels(f_HandicapPlaque) + (sharedIndex * HANDICAP_COLUMN_STRIP_SIZE)
+                ),
                 G_IM_FMT_CI,
                 HANDICAP_COLUMN_WIDTH,
                 HANDICAP_COLUMN_STRIP_HEIGHT,
@@ -1403,13 +1414,13 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
             gSPScisTextureRectangle(
                 gfx++,
                 QuarterPixels(f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] + slide),
-                QuarterPixels(HANDICAP_COLUMN_TOP + (i * HANDICAP_COLUMN_STRIP_HEIGHT)),
+                QuarterPixels(HANDICAP_COLUMN_TOP + (sharedIndex * HANDICAP_COLUMN_STRIP_HEIGHT)),
                 QuarterPixels(
                     f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] + slide +
                     HANDICAP_COLUMN_WIDTH
                 ),
                 QuarterPixels(
-                    HANDICAP_COLUMN_TOP + (i * HANDICAP_COLUMN_STRIP_HEIGHT) +
+                    HANDICAP_COLUMN_TOP + (sharedIndex * HANDICAP_COLUMN_STRIP_HEIGHT) +
                     HANDICAP_COLUMN_STRIP_HEIGHT
                 ),
                 G_TX_RENDERTILE,
@@ -1479,8 +1490,8 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StatsGreenArrows)));
     arrowTop = HANDICAP_COLUMN_TOP;
-    for (i = 0; i != MENU_ARROW_COUNT; i++) {
-        if (i == MENU_ARROW_LEFT) {
+    for (sharedIndex = 0; sharedIndex != MENU_ARROW_COUNT; sharedIndex++) {
+        if (sharedIndex == MENU_ARROW_LEFT) {
             gDPLoadTextureTile_4b(
                 gfx++,
                 TextureAddress(ImageTexelsAt(
@@ -1509,7 +1520,7 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
                 gfx++,
                 TextureAddress(
                     (u32)f_StatsGreenArrows +
-                    ((i * GREEN_ARROW_IMAGE_SIZE) + PALETTED_TEXELS_OFFSET +
+                    ((sharedIndex * GREEN_ARROW_IMAGE_SIZE) + PALETTED_TEXELS_OFFSET +
                         (f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE))
                 ),
                 G_IM_FMT_CI,
@@ -1530,31 +1541,31 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
         }
 
         gDPPipeSync(gfx++);
-        if (i == MENU_ARROW_UP) {
+        if (sharedIndex == MENU_ARROW_UP) {
             arrowX = HANDICAP_ARROW_MIDDLE_X;
             arrowY = (g_MenuRepeatButtons & U_JPAD) ? (HANDICAP_ARROW_UP_Y - HANDICAP_ARROW_PUSH) :
                                                       HANDICAP_ARROW_UP_Y;
         }
-        else if (i == MENU_ARROW_DOWN) {
+        else if (sharedIndex == MENU_ARROW_DOWN) {
             arrowX = HANDICAP_ARROW_MIDDLE_X;
             arrowY = (g_MenuRepeatButtons & D_JPAD) ?
                 (HANDICAP_ARROW_DOWN_Y + HANDICAP_ARROW_PUSH) :
                 HANDICAP_ARROW_DOWN_Y;
         }
-        else if (i == MENU_ARROW_RIGHT) {
+        else if (sharedIndex == MENU_ARROW_RIGHT) {
             arrowY = HANDICAP_ARROW_MIDDLE_Y;
             arrowX = (g_MenuRepeatButtons & R_JPAD) ?
                 (HANDICAP_ARROW_RIGHT_X + HANDICAP_ARROW_PUSH) :
                 HANDICAP_ARROW_RIGHT_X;
         }
-        else if (i == MENU_ARROW_LEFT) {
+        else if (sharedIndex == MENU_ARROW_LEFT) {
             arrowY = HANDICAP_ARROW_MIDDLE_Y;
             arrowX = (g_MenuRepeatButtons & L_JPAD) ?
                 (HANDICAP_ARROW_LEFT_X - HANDICAP_ARROW_PUSH) :
                 HANDICAP_ARROW_LEFT_X;
         }
 
-        textureLeft = (i == MENU_ARROW_LEFT) ? TexelCoordinate(GREEN_ARROW_SIZE) : 0;
+        textureLeft = (sharedIndex == MENU_ARROW_LEFT) ? TexelCoordinate(GREEN_ARROW_SIZE) : 0;
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(
@@ -1576,14 +1587,14 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
         gDPPipeSync(gfx++);
     }
 
-    for (i = 0; i != g_ChosenPlayerCount; i++) {
-        columnLeft = f_HandicapColumnLefts[g_ChosenPlayerCount - 1][i];
+    for (sharedIndex = 0; sharedIndex != g_ChosenPlayerCount; sharedIndex++) {
+        columnLeft = f_HandicapColumnLefts[g_ChosenPlayerCount - 1][sharedIndex];
         numberOffsetX = slide + HANDICAP_NUMBER_OFFSET_X;
         DrawTwoDigitMenuNumber(
             &gfx,
             columnLeft + numberOffsetX,
             HANDICAP_NUMBER_Y,
-            g_ChosenHandicaps[i],
+            g_ChosenHandicaps[sharedIndex],
             MENU_NUMBER_PLAIN
         );
     }

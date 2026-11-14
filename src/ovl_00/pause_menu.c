@@ -1303,7 +1303,9 @@ void DrawChoiceBox(Gfx **displayListHead) {
     s32 textWidth;
     s32 labelWidth;
     s32 chosenWidth;
-    s32 i;
+    /* Counts options and cloud parts in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
     s32 cursorX;
     s32 cursorY;
     s32 labelsTop;
@@ -1341,9 +1343,9 @@ void DrawChoiceBox(Gfx **displayListHead) {
         );
         gDPPipeSync(gfx++);
         gDPSetTextureFilter(gfx++, G_TF_BILERP);
-        for (i = 0; i != box->optionCount; i++) {
+        for (sharedIndex = 0; sharedIndex != box->optionCount; sharedIndex++) {
             labelWidth = MeasureText(
-                f_ChoiceBoxLabels[box->labels[i]],
+                f_ChoiceBoxLabels[box->labels[sharedIndex]],
                 FONT_SIZE_LARGE,
                 MEASURE_TEXT_PROPORTIONAL
             );
@@ -1354,10 +1356,10 @@ void DrawChoiceBox(Gfx **displayListHead) {
             halfWidth = (textWidth / 2) + CHOICE_BOX_MARGIN;
         }
 
-        for (i = 0; i != CHOICE_BOX_CLOUD_PART_COUNT; i++) {
+        for (sharedIndex = 0; sharedIndex != CHOICE_BOX_CLOUD_PART_COUNT; sharedIndex++) {
             LoadNibbleTextureBlock(
                 &gfx,
-                ImageBody(f_MenuCloudImage) + (i * CHOICE_BOX_CLOUD_PART_SIZE),
+                ImageBody(f_MenuCloudImage) + (sharedIndex * CHOICE_BOX_CLOUD_PART_SIZE),
                 G_IM_FMT_I,
                 CHOICE_BOX_CLOUD_WIDTH,
                 CHOICE_BOX_CLOUD_HEIGHT,
@@ -1388,8 +1390,8 @@ void DrawChoiceBox(Gfx **displayListHead) {
         if (box->isVertical) {
             labelsTop =
                 CHOICE_LABELS_MIDDLE_Y - ((box->optionCount - 1) * (CHOICE_LABEL_SPACING / 2));
-            for (i = 0; i != box->optionCount; i++) {
-                if (i == f_ChoiceBoxSelection) {
+            for (sharedIndex = 0; sharedIndex != box->optionCount; sharedIndex++) {
+                if (sharedIndex == f_ChoiceBoxSelection) {
                     gDPPipeSync(gfx++);
                     gDPSetPrimColor(gfx++, 0, 0, red, green, blue, OPAQUE_ALPHA);
                     gDPPipeSync(gfx++);
@@ -1403,8 +1405,8 @@ void DrawChoiceBox(Gfx **displayListHead) {
                 DrawCenteredLargeText(
                     &gfx,
                     CHOICE_BOX_CENTER_X,
-                    labelsTop + (i * CHOICE_LABEL_SPACING),
-                    f_ChoiceBoxLabels[box->labels[i]]
+                    labelsTop + (sharedIndex * CHOICE_LABEL_SPACING),
+                    f_ChoiceBoxLabels[box->labels[sharedIndex]]
                 );
             }
 

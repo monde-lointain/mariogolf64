@@ -328,7 +328,9 @@ s32 DecodeTournamentPassword(u8 *code, char *password) {
     u8 bytes[TOURNAMENT_CODE_SIZE];
     u8 symbols[TOURNAMENT_PASSWORD_LENGTH];
     u32 number;
-    s32 i;
+    /* Counts symbols and bytes in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
 
     if (ReadPasswordSymbols(symbols, password, TOURNAMENT_PASSWORD_LENGTH) != 0) {
         return -1;
@@ -352,16 +354,16 @@ s32 DecodeTournamentPassword(u8 *code, char *password) {
     }
 
     number = 0;
-    for (i = NUMBER_SYMBOL_COUNT - 1; i >= 0; i--) {
+    for (sharedIndex = NUMBER_SYMBOL_COUNT - 1; sharedIndex >= 0; sharedIndex--) {
         number *= PASSWORD_SYMBOL_COUNT;
-        number += symbols[i];
+        number += symbols[sharedIndex];
     }
 
     bytes[0] = number >> 16;
     bytes[1] = number >> 8;
     bytes[2] = number;
-    for (i = 0; i < TOURNAMENT_CODE_SIZE; i++) {
-        code[i] = ReverseBits(bytes[i] ^ f_TournamentKey[i]);
+    for (sharedIndex = 0; sharedIndex < TOURNAMENT_CODE_SIZE; sharedIndex++) {
+        code[sharedIndex] = ReverseBits(bytes[sharedIndex] ^ f_TournamentKey[sharedIndex]);
     }
 
     return 0;

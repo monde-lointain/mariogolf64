@@ -1504,17 +1504,19 @@ void UpdateSavedGames(void) {
     EncodedAsset asset;
     AssetFile file;
     u8 unusedStack[0xA0] UNUSED;
-    s32 i;
+    /* Counts text slots, players and controllers in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
     s32 miniGolfIndex;
 
     if (GetWipeKind() != WIPE_NONE) {
-        for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
+        for (sharedIndex = 0; sharedIndex != SAVED_GAME_TEXT_SLOT_COUNT; sharedIndex++) {
             SetTextSlot(
                 0,
                 0,
                 NO_MESSAGE,
                 TEXT_SLOT_LARGE_FONT,
-                i,
+                sharedIndex,
                 0,
                 0xFF,
                 0xFF,
@@ -1527,13 +1529,13 @@ void UpdateSavedGames(void) {
             StopLoaderThread();
             FreeAllCharacterSlots();
             g_IsChosenHoleLoadStarted = FALSE;
-            for (i = 1; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
+            for (sharedIndex = 1; sharedIndex != SAVED_GAME_TEXT_SLOT_COUNT; sharedIndex++) {
                 SetTextSlot(
                     0,
                     0,
                     NO_MESSAGE,
                     TEXT_SLOT_LARGE_FONT,
-                    i,
+                    sharedIndex,
                     0,
                     0xFF,
                     0xFF,
@@ -1543,8 +1545,8 @@ void UpdateSavedGames(void) {
             }
 
             g_MenuScreen = MENU_SCREEN_EXIT;
-            for (i = 0; i != MAX_PLAYER_COUNT; i++) {
-                g_PlayerControllerIndices[i] = f_SavedPlayerControllers[i];
+            for (sharedIndex = 0; sharedIndex != MAX_PLAYER_COUNT; sharedIndex++) {
+                g_PlayerControllerIndices[sharedIndex] = f_SavedPlayerControllers[sharedIndex];
             }
 
             CheckControllersAndSetPans();
@@ -1564,13 +1566,13 @@ void UpdateSavedGames(void) {
                 LoadWipeShape(save->savedGames[memory->savedGameIndex].state.courseIndex);
                 StartWipe(WIPE_CLOSING);
                 ContinueSavedGame();
-                for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
+                for (sharedIndex = 0; sharedIndex != SAVED_GAME_TEXT_SLOT_COUNT; sharedIndex++) {
                     SetTextSlot(
                         0,
                         0,
                         NO_MESSAGE,
                         TEXT_SLOT_LARGE_FONT,
-                        i,
+                        sharedIndex,
                         0,
                         0xFF,
                         0xFF,
@@ -1590,13 +1592,13 @@ void UpdateSavedGames(void) {
 
                 f_AreControllersAssigned = FALSE;
                 PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-                for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
+                for (sharedIndex = 0; sharedIndex != SAVED_GAME_TEXT_SLOT_COUNT; sharedIndex++) {
                     SetTextSlot(
                         0,
                         0,
                         NO_MESSAGE,
                         TEXT_SLOT_LARGE_FONT,
-                        i,
+                        sharedIndex,
                         0,
                         0xFF,
                         0xFF,
@@ -1607,17 +1609,18 @@ void UpdateSavedGames(void) {
 
                 if (f_HumanPlayerCount == 1 || g_ControllerCount == 1) {
                     f_AssignedHumanCount = 0;
-                    for (i = 0; i != f_HumanPlayerCount; i++) {
-                        f_SavedPlayerControllers[f_HumanPlayerIndices[i]] = NO_CONTROLLER;
+                    for (sharedIndex = 0; sharedIndex != f_HumanPlayerCount; sharedIndex++) {
+                        f_SavedPlayerControllers[f_HumanPlayerIndices[sharedIndex]] = NO_CONTROLLER;
                     }
 
-                    for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
+                    for (sharedIndex = 0; sharedIndex != SAVED_GAME_TEXT_SLOT_COUNT;
+                        sharedIndex++) {
                         SetTextSlot(
                             0,
                             0,
                             NO_MESSAGE,
                             TEXT_SLOT_LARGE_FONT,
-                            i,
+                            sharedIndex,
                             0,
                             0xFF,
                             0xFF,
@@ -1653,19 +1656,20 @@ void UpdateSavedGames(void) {
                 if (!f_IsGameChosen) {
                     f_IsGameChosen = TRUE;
                     if (f_HumanPlayerCount == 1) {
-                        for (i = 0; i != g_ControllerCount; i++) {
-                            if (g_MenuControllerData[i].button & A_BUTTON) {
+                        for (sharedIndex = 0; sharedIndex != g_ControllerCount; sharedIndex++) {
+                            if (g_MenuControllerData[sharedIndex].button & A_BUTTON) {
                                 f_SavedPlayerControllers
-                                    [f_HumanPlayerIndices[f_AssignedHumanCount]] = i;
+                                    [f_HumanPlayerIndices[f_AssignedHumanCount]] = sharedIndex;
                                 f_AssignedHumanCount++;
                                 f_AreControllersAssigned = TRUE;
-                                for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
+                                for (sharedIndex = 0; sharedIndex != SAVED_GAME_TEXT_SLOT_COUNT;
+                                    sharedIndex++) {
                                     SetTextSlot(
                                         0,
                                         0,
                                         NO_MESSAGE,
                                         TEXT_SLOT_LARGE_FONT,
-                                        i,
+                                        sharedIndex,
                                         0,
                                         0xFF,
                                         0xFF,
@@ -1679,20 +1683,22 @@ void UpdateSavedGames(void) {
                         }
                     }
                     else if (g_ControllerCount == 1) {
-                        for (i = f_AssignedHumanCount; i != f_HumanPlayerCount; i++) {
+                        for (sharedIndex = f_AssignedHumanCount; sharedIndex != f_HumanPlayerCount;
+                            sharedIndex++) {
                             f_SavedPlayerControllers[f_HumanPlayerIndices[f_AssignedHumanCount]] =
                                 0;
                             f_AssignedHumanCount++;
                         }
 
                         f_AreControllersAssigned = TRUE;
-                        for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
+                        for (sharedIndex = 0; sharedIndex != SAVED_GAME_TEXT_SLOT_COUNT;
+                            sharedIndex++) {
                             SetTextSlot(
                                 0,
                                 0,
                                 NO_MESSAGE,
                                 TEXT_SLOT_LARGE_FONT,
-                                i,
+                                sharedIndex,
                                 0,
                                 0xFF,
                                 0xFF,
@@ -1702,13 +1708,14 @@ void UpdateSavedGames(void) {
                         }
                     }
 
-                    for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
+                    for (sharedIndex = 0; sharedIndex != SAVED_GAME_TEXT_SLOT_COUNT;
+                        sharedIndex++) {
                         SetTextSlot(
                             0,
                             0,
                             NO_MESSAGE,
                             TEXT_SLOT_LARGE_FONT,
-                            i,
+                            sharedIndex,
                             0,
                             0xFF,
                             0xFF,
@@ -1720,9 +1727,10 @@ void UpdateSavedGames(void) {
                     return;
                 }
 
-                for (i = 0; i != g_ControllerCount; i++) {
-                    if (g_MenuControllerData[i].button & A_BUTTON) {
-                        f_SavedPlayerControllers[f_HumanPlayerIndices[f_AssignedHumanCount]] = i;
+                for (sharedIndex = 0; sharedIndex != g_ControllerCount; sharedIndex++) {
+                    if (g_MenuControllerData[sharedIndex].button & A_BUTTON) {
+                        f_SavedPlayerControllers[f_HumanPlayerIndices[f_AssignedHumanCount]] =
+                            sharedIndex;
                         f_AssignedHumanCount++;
                         break;
                     }
@@ -1730,13 +1738,14 @@ void UpdateSavedGames(void) {
 
                 if (f_AssignedHumanCount == f_HumanPlayerCount) {
                     f_AreControllersAssigned = TRUE;
-                    for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
+                    for (sharedIndex = 0; sharedIndex != SAVED_GAME_TEXT_SLOT_COUNT;
+                        sharedIndex++) {
                         SetTextSlot(
                             0,
                             0,
                             NO_MESSAGE,
                             TEXT_SLOT_LARGE_FONT,
-                            i,
+                            sharedIndex,
                             0,
                             0xFF,
                             0xFF,
@@ -1758,13 +1767,13 @@ void UpdateSavedGames(void) {
 
             if (f_AssignedHumanCount <= 0) {
                 StartHudAnimation(HUD_ANIMATION_FADE_OUT);
-                for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
+                for (sharedIndex = 0; sharedIndex != SAVED_GAME_TEXT_SLOT_COUNT; sharedIndex++) {
                     SetTextSlot(
                         0,
                         0,
                         NO_MESSAGE,
                         TEXT_SLOT_LARGE_FONT,
-                        i,
+                        sharedIndex,
                         0,
                         0xFF,
                         0xFF,
@@ -1783,13 +1792,13 @@ void UpdateSavedGames(void) {
             f_SavedPlayerControllers[f_HumanPlayerIndices[f_AssignedHumanCount]] = NO_CONTROLLER;
             if (f_AssignedHumanCount <= 0) {
                 f_IsGameChosen = FALSE;
-                for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
+                for (sharedIndex = 0; sharedIndex != SAVED_GAME_TEXT_SLOT_COUNT; sharedIndex++) {
                     SetTextSlot(
                         0,
                         0,
                         NO_MESSAGE,
                         TEXT_SLOT_LARGE_FONT,
-                        i,
+                        sharedIndex,
                         0,
                         0xFF,
                         0xFF,
@@ -1801,13 +1810,13 @@ void UpdateSavedGames(void) {
         }
         else if (memory->savedGameTurn == 0) {
             if (g_MenuRepeatButtons & L_JPAD) {
-                for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
+                for (sharedIndex = 0; sharedIndex != SAVED_GAME_TEXT_SLOT_COUNT; sharedIndex++) {
                     SetTextSlot(
                         0,
                         0,
                         NO_MESSAGE,
                         TEXT_SLOT_LARGE_FONT,
-                        i,
+                        sharedIndex,
                         0,
                         0xFF,
                         0xFF,
@@ -1828,13 +1837,13 @@ void UpdateSavedGames(void) {
                 LoadChosenGameImages();
             }
             else if (g_MenuRepeatButtons & R_JPAD) {
-                for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
+                for (sharedIndex = 0; sharedIndex != SAVED_GAME_TEXT_SLOT_COUNT; sharedIndex++) {
                     SetTextSlot(
                         0,
                         0,
                         NO_MESSAGE,
                         TEXT_SLOT_LARGE_FONT,
-                        i,
+                        sharedIndex,
                         0,
                         0xFF,
                         0xFF,

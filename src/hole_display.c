@@ -1632,7 +1632,9 @@ void InitSkyColors(void) {
     SkyColors *colors;
     SkyColors *from;
     SkyColors *to;
-    s32 i;
+    /* Counts vertices and colors in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
     s32 channel;
     u16 color;
     s32 red;
@@ -1669,21 +1671,21 @@ void InitSkyColors(void) {
 
     g_SkyState.scrollX = 0.0f;
     g_SkyState.scrollY = 0.0f;
-    for (i = 0; i != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; i++) {
+    for (sharedIndex = 0; sharedIndex != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; sharedIndex++) {
         for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
-            f_SkyVertices[i][0].v.cn[channel] = colors->topColor[channel];
-            f_SkyVertices[i][1].v.cn[channel] = colors->horizonColor[channel];
-            f_SkyVertices[i][2].v.cn[channel] = colors->horizonColor[channel];
-            f_SkyVertices[i][3].v.cn[channel] = colors->topColor[channel];
-            f_SkyVertices[i][4].v.cn[channel] = colors->topColor[channel];
+            f_SkyVertices[sharedIndex][0].v.cn[channel] = colors->topColor[channel];
+            f_SkyVertices[sharedIndex][1].v.cn[channel] = colors->horizonColor[channel];
+            f_SkyVertices[sharedIndex][2].v.cn[channel] = colors->horizonColor[channel];
+            f_SkyVertices[sharedIndex][3].v.cn[channel] = colors->topColor[channel];
+            f_SkyVertices[sharedIndex][4].v.cn[channel] = colors->topColor[channel];
             outerMix = (colors->topColor[channel] + f_SkyHorizonColor[channel]) * 0.5f;
             innerMix = (colors->horizonColor[channel] + colors->topColor[channel]) * 0.5f;
             innerMix = (innerMix + f_SkyHorizonColor[channel]) * 0.5f;
-            f_SkyVertices[i][5].v.cn[channel] = outerMix;
-            f_SkyVertices[i][6].v.cn[channel] = innerMix;
-            f_SkyVertices[i][7].v.cn[channel] = innerMix;
-            f_SkyVertices[i][8].v.cn[channel] = outerMix;
-            f_SkyVertices[i][9].v.cn[channel] = outerMix;
+            f_SkyVertices[sharedIndex][5].v.cn[channel] = outerMix;
+            f_SkyVertices[sharedIndex][6].v.cn[channel] = innerMix;
+            f_SkyVertices[sharedIndex][7].v.cn[channel] = innerMix;
+            f_SkyVertices[sharedIndex][8].v.cn[channel] = outerMix;
+            f_SkyVertices[sharedIndex][9].v.cn[channel] = outerMix;
         }
     }
 
@@ -1704,8 +1706,8 @@ void InitSkyColors(void) {
 
     OpenEncodedAsset(f_CourseSkyImageAssets[GetCourseRecordIndex()], &asset);
     ReadEncodedAsset(g_CourseSkyImage, &asset);
-    for (i = 0; i != LARGE_PALETTE_COLOR_COUNT; i++) {
-        color = ((u16 *)g_CourseSkyImage)[PALETTE_START + i];
+    for (sharedIndex = 0; sharedIndex != LARGE_PALETTE_COLOR_COUNT; sharedIndex++) {
+        color = ((u16 *)g_CourseSkyImage)[PALETTE_START + sharedIndex];
         red = (color >> 11) & SKY_IMAGE_CHANNEL_MAX;
         green = (color >> 6) & SKY_IMAGE_CHANNEL_MAX;
         blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
@@ -1763,7 +1765,7 @@ void InitSkyColors(void) {
             blue = SKY_IMAGE_CHANNEL_MAX;
         }
 
-        ((u16 *)g_CourseSkyImage)[PALETTE_START + i] = (red << RGBA16_RED_SHIFT) |
+        ((u16 *)g_CourseSkyImage)[PALETTE_START + sharedIndex] = (red << RGBA16_RED_SHIFT) |
             (green << RGBA16_GREEN_SHIFT) | (blue << RGBA16_BLUE_SHIFT) | alpha;
     }
 
@@ -3162,7 +3164,9 @@ void DrawFadeAnimation(Gfx **displayListHead) {
     u16 *frame = (u16 *)f_CapturedFrame;
     Gfx *gfx = *displayListHead;
     Boolean isTileSet;
-    s32 i;
+    /* Counts strips and strip rows in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
     s32 strip;
 
     if (f_HudAnimationFramesLeft > 0) {
@@ -3202,12 +3206,12 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                 gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
                 gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
                 frame = f_LastFrameBuffer;
-                for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
-                    s32 height = StripHeight(i);
+                for (sharedIndex = 0; sharedIndex != BACKDROP_STRIP_COUNT; sharedIndex++) {
+                    s32 height = StripHeight(sharedIndex);
 
                     gDPLoadTextureTile(
                         gfx++,
-                        TextureAddress(&frame[i * BACKDROP_STRIP_STEP * SCREEN_WIDTH]),
+                        TextureAddress(&frame[sharedIndex * BACKDROP_STRIP_STEP * SCREEN_WIDTH]),
                         G_IM_FMT_RGBA,
                         G_IM_SIZ_16b,
                         SCREEN_WIDTH,
@@ -3227,9 +3231,9 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                     gSPScisTextureRectangle(
                         gfx++,
                         QuarterPixels(BACKDROP_BORDER),
-                        QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+                        QuarterPixels(sharedIndex * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
                         QuarterPixels(BACKDROP_RIGHT + 1),
-                        QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
+                        QuarterPixels(sharedIndex * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
                         G_TX_RENDERTILE,
                         TexelCoordinate(BACKDROP_BORDER),
                         TexelCoordinate(BACKDROP_BORDER),
@@ -3249,8 +3253,8 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                 gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
                 gDPPipeSync(gfx++);
                 strip = 0;
-                for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
-                    s32 height = StripHeight(i);
+                for (sharedIndex = 0; sharedIndex != BACKDROP_STRIP_COUNT; sharedIndex++) {
+                    s32 height = StripHeight(sharedIndex);
                     s32 framesLeft;
 
                     LoadFadeFrameStrip(
@@ -3264,9 +3268,9 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                     gSPScisTextureRectangle(
                         gfx++,
                         QuarterPixels(BACKDROP_BORDER),
-                        QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+                        QuarterPixels(sharedIndex * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
                         QuarterPixels(framesLeft),
-                        QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
+                        QuarterPixels(sharedIndex * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
                         G_TX_RENDERTILE,
                         TexelCoordinate((SCREEN_WIDTH / 2) - framesLeft),
                         0,
@@ -3276,9 +3280,9 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                     gSPScisTextureRectangle(
                         gfx++,
                         QuarterPixels(SCREEN_WIDTH - framesLeft),
-                        QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+                        QuarterPixels(sharedIndex * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
                         QuarterPixels(BACKDROP_RIGHT + 1),
-                        QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
+                        QuarterPixels(sharedIndex * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
                         G_TX_RENDERTILE,
                         TexelCoordinate(FADE_FRAME_WIDTH / 2),
                         0,
@@ -3299,9 +3303,10 @@ void DrawFadeAnimation(Gfx **displayListHead) {
         gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
         gDPPipeSync(gfx++);
         strip = 0;
-        for (i = BACKDROP_BORDER; i < SCREEN_HEIGHT - BACKDROP_BORDER; i += BACKDROP_STRIP_STEP) {
+        for (sharedIndex = BACKDROP_BORDER; sharedIndex < SCREEN_HEIGHT - BACKDROP_BORDER;
+            sharedIndex += BACKDROP_STRIP_STEP) {
             s32 height = BACKDROP_LAST_STRIP_HEIGHT |
-                ((i + BACKDROP_STRIP_STEP <= SCREEN_HEIGHT - BACKDROP_BORDER) ?
+                ((sharedIndex + BACKDROP_STRIP_STEP <= SCREEN_HEIGHT - BACKDROP_BORDER) ?
                         (BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT) :
                         0);
 
@@ -3314,9 +3319,9 @@ void DrawFadeAnimation(Gfx **displayListHead) {
             gSPTextureRectangle(
                 gfx++,
                 QuarterPixels(BACKDROP_BORDER),
-                QuarterPixels(i),
+                QuarterPixels(sharedIndex),
                 QuarterPixels(BACKDROP_RIGHT + 1),
-                QuarterPixels(i + height),
+                QuarterPixels(sharedIndex + height),
                 G_TX_RENDERTILE,
                 0,
                 0,

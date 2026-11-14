@@ -5140,7 +5140,9 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
     s32 letterTexelsOffset;
     s32 logoLetter;
     s32 letterIndex;
-    s32 j;
+    /* Counts letter halves and strips in turn; a variable for each
+       allocates registers differently. */
+    s32 sharedIndex;
     Radians angle;
     Radians orbitAngle;
     f32 wobble;
@@ -5352,8 +5354,8 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
         gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
         gDPPipeSync(gfx++);
         for (logoLetter = 0; logoLetter < LOGO_LETTER_COUNT; logoLetter++) {
-            for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
-                letterTexelsOffset = ((j + (logoLetter * LOGO_LETTER_HALF_COUNT)) *
+            for (sharedIndex = 0; sharedIndex < LOGO_LETTER_HALF_COUNT; sharedIndex++) {
+                letterTexelsOffset = ((sharedIndex + (logoLetter * LOGO_LETTER_HALF_COUNT)) *
                                          LOGO_LETTER_WIDTH * LOGO_LETTER_HALF_HEIGHT) +
                     LARGE_PALETTED_TEXELS_OFFSET;
                 gDPLoadTextureBlock(
@@ -5392,7 +5394,7 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
                     0
                 );
                 gDPPipeSync(gfx++);
-                gSPVertex(gfx++, f_LogoLetterVertices[j], QUAD_VERTEX_COUNT, 0);
+                gSPVertex(gfx++, f_LogoLetterVertices[sharedIndex], QUAD_VERTEX_COUNT, 0);
                 gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
                 gDPPipeSync(gfx++);
             }
@@ -5401,9 +5403,9 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoClubAlpha);
         gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoClubImage)));
         gDPPipeSync(gfx++);
-        for (j = 0; j < LOGO_CLUB_STRIP_COUNT; j++) {
-            texelsOffset =
-                (j * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT) + LARGE_PALETTED_TEXELS_OFFSET;
+        for (sharedIndex = 0; sharedIndex < LOGO_CLUB_STRIP_COUNT; sharedIndex++) {
+            texelsOffset = (sharedIndex * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT) +
+                LARGE_PALETTED_TEXELS_OFFSET;
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(f_LogoClubImage + texelsOffset),
@@ -5441,7 +5443,7 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
             );
             gDPSetPrimDepth(gfx++, LOGO_CLUB_DEPTH, 0);
             gDPPipeSync(gfx++);
-            gSPVertex(gfx++, f_LogoClubVertices[j], QUAD_VERTEX_COUNT, 0);
+            gSPVertex(gfx++, f_LogoClubVertices[sharedIndex], QUAD_VERTEX_COUNT, 0);
             gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
             gDPPipeSync(gfx++);
         }
@@ -5482,9 +5484,9 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
         );
         gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
         for (logoLetter = 0; logoLetter < LOGO_LETTER_COUNT; logoLetter++) {
-            for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
-                texelsOffset = ((j + (logoLetter * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
-                                   LOGO_LETTER_HALF_HEIGHT) +
+            for (sharedIndex = 0; sharedIndex < LOGO_LETTER_HALF_COUNT; sharedIndex++) {
+                texelsOffset = ((sharedIndex + (logoLetter * LOGO_LETTER_HALF_COUNT)) *
+                                   LOGO_LETTER_WIDTH * LOGO_LETTER_HALF_HEIGHT) +
                     LARGE_PALETTED_TEXELS_OFFSET;
                 gDPLoadTextureBlock(
                     gfx++,
@@ -5518,7 +5520,7 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
                     G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH
                 );
                 gDPPipeSync(gfx++);
-                gSPVertex(gfx++, f_LogoLetterVertices[j], QUAD_VERTEX_COUNT, 0);
+                gSPVertex(gfx++, f_LogoLetterVertices[sharedIndex], QUAD_VERTEX_COUNT, 0);
                 gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
                 gDPPipeSync(gfx++);
             }
