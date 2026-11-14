@@ -58,42 +58,6 @@ typedef struct MessageTable {
 // Reads the big-endian halfword at offset in a file header
 #define ReadHeaderHalfword(header, offset) (((header)[offset] << 8) | (header)[(offset) + 1])
 
-// Character codes
-enum MessageCode {
-    // The first that draws a glyph of the glyph file
-    MESSAGE_CODE_GLYPH = 0x100,
-    // The first that controls the text instead of drawing a glyph
-    MESSAGE_CODE_CONTROL = 0x8000,
-    // The codes up to MESSAGE_CODE_R_BUTTON draw an icon of TEXT_ASSET_ICONS
-    MESSAGE_CODE_A_BUTTON = MESSAGE_CODE_CONTROL,
-    MESSAGE_CODE_B_BUTTON,
-    // The five codes from here all draw the Z button. Only the last appears in
-    // the message file, in message 58's list of buttons.
-    MESSAGE_CODE_UNUSED_Z_BUTTON_A,
-    MESSAGE_CODE_UNUSED_Z_BUTTON_B,
-    MESSAGE_CODE_UNUSED_Z_BUTTON_C,
-    MESSAGE_CODE_UNUSED_Z_BUTTON_D,
-    MESSAGE_CODE_Z_BUTTON,
-    MESSAGE_CODE_C_UP,
-    MESSAGE_CODE_C_DOWN,
-    MESSAGE_CODE_C_LEFT,
-    MESSAGE_CODE_C_RIGHT,
-    // Drawn as nothing, and in no message
-    MESSAGE_CODE_UNUSED_BLANK,
-    MESSAGE_CODE_START_BUTTON,
-    MESSAGE_CODE_L_BUTTON,
-    MESSAGE_CODE_R_BUTTON,
-    MESSAGE_CODE_NAME,
-    // Then one for each of the slot's values
-    MESSAGE_CODE_VALUE = 0x8014,
-    // The current player's score, as the game mode counts it
-    MESSAGE_CODE_SCORE = 0x8018,
-    MESSAGE_CODE_LINE_BREAK,
-    // Then one for each of f_TextPalette's colors
-    MESSAGE_CODE_PALETTE_COLOR = 0x8022,
-    MESSAGE_CODE_SLOT_COLOR = 0x8026
-};
-
 // The icons of TEXT_ASSET_ICONS, in their order in the image
 enum TextIcon {
     TEXT_ICON_A_BUTTON,
@@ -277,11 +241,11 @@ FILE_STATIC GlyphSprite f_GlyphSprites[GLYPH_SPRITE_COUNT];
 FILE_STATIC u8 f_GlyphGroupSizes[GLYPH_GROUP_COUNT];
 
 // Where a character's glyph is in the shadowed font's image, in pixels
-static inline s16 GetShadowedGlyphLeft(s32 code) {
+static inline s16 GetShadowedGlyphLeft(MessageCode code) {
     return (code - SHADOWED_GLYPH_FIRST) % SHADOWED_GLYPHS_PER_ROW * SHADOWED_GLYPH_SIZE;
 }
 
-static inline s16 GetShadowedGlyphTop(s32 code) {
+static inline s16 GetShadowedGlyphTop(MessageCode code) {
     return (code - SHADOWED_GLYPH_FIRST) / SHADOWED_GLYPHS_PER_ROW * SHADOWED_GLYPH_SIZE;
 }
 
@@ -527,7 +491,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
     s32 x;
     s32 y;
     s32 advance;
-    s32 code;
+    MessageCode code;
     Boolean isPrinted;
     s32 iconOffset;
     s32 score;
@@ -1050,7 +1014,7 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
     s32 x;
     s32 y;
     s32 advance;
-    s32 code;
+    MessageCode code;
     Boolean isPrinted;
     s32 iconOffset;
     s32 score;
@@ -1543,7 +1507,7 @@ void SetUpGradientTextDrawing(Gfx **displayListHead, s32 gradient) {
 // font can be proportional. The two loops differ in form to match.
 s32 MeasureText(READ_ONLY char *text, s32 fontSize, TextFlags flags) {
     s32 width = 0;
-    s32 code;
+    MessageCode code;
 
     if (fontSize == FONT_SIZE_LARGE) {
         if (*text != '\0') {
@@ -1612,7 +1576,7 @@ void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, 
     s32 lineCount;
     s32 line;
     s32 widest;
-    s32 code;
+    MessageCode code;
     s32 length;
     s32 messageStart;
 
@@ -1706,7 +1670,7 @@ s32 GetTextLength(READ_ONLY char *text) {
 // the glyph before it.
 void DrawFixedWidthLargeText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
-    s32 code;
+    MessageCode code;
     s32 character;
     s32 left;
     s32 top;
@@ -1834,7 +1798,7 @@ void DrawFixedWidthLargeText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char
 // mark is drawn over the glyph before it.
 void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
-    s32 code;
+    MessageCode code;
     s32 character;
     s32 left;
     s32 top;
@@ -1960,7 +1924,7 @@ void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
 void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
     s32 character;
-    s32 code;
+    MessageCode code;
     s32 left;
     s32 top;
     s32 glyphLeft;
@@ -2080,7 +2044,7 @@ void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
 void DrawSmallText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
     s32 character;
-    s32 code;
+    MessageCode code;
     s32 left;
     s32 top;
     s32 glyphLeft;
@@ -2299,7 +2263,7 @@ void SetTextColor(Gfx **displayListHead, u8 red, u8 green, u8 blue) {
 // stop is drawn narrower, over the end of the glyph before it.
 void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
-    s32 code;
+    MessageCode code;
     s16 glyphLeft;
     s16 glyphTop;
 
@@ -2367,7 +2331,7 @@ void DrawCenteredShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY cha
 void DrawCenteredNarrowText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
     s32 length;
-    s32 code;
+    MessageCode code;
     s16 glyphLeft;
 
     gDPPipeSync(gfx++);
@@ -2402,7 +2366,7 @@ void DrawCenteredNarrowText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char 
 // Draws text in the shadowed font with its glyphs closer together
 void DrawCondensedShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
-    s32 code;
+    MessageCode code;
     s16 glyphLeft;
     s16 glyphTop;
 
@@ -2549,7 +2513,7 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
     s32 length;
     s32 codeIndex;
     s32 advance;
-    s32 code;
+    MessageCode code;
 
     if (fontSize == NO_FONT_SIZE) {
         for (spriteIndex = 0; spriteIndex != GLYPH_SPRITE_COUNT; spriteIndex++) {
@@ -2648,7 +2612,7 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
     s32 spriteIndex;
     Boolean isIconLoaded;
     s32 iconOffset;
-    u32 code;
+    UMessageCode code;
     s32 fontSize;
     s32 s;
     s32 t;

@@ -47,11 +47,53 @@ typedef struct TextSpan {
 #define LOWERCASE_CODE_OFFSET 0x80
 #define TEXT_PALETTE_COLOR_COUNT 4
 
+// The character codes of messages. Codes below MESSAGE_CODE_GLYPH draw a
+// character of the font, and codes below MESSAGE_CODE_CONTROL a glyph of the
+// glyph file.
+enum MessageCode {
+    // The first that draws a glyph of the glyph file
+    MESSAGE_CODE_GLYPH = 0x100,
+    // The first that controls the text instead of drawing a glyph
+    MESSAGE_CODE_CONTROL = 0x8000,
+    // The codes up to MESSAGE_CODE_R_BUTTON draw an icon of TEXT_ASSET_ICONS
+    MESSAGE_CODE_A_BUTTON = MESSAGE_CODE_CONTROL,
+    MESSAGE_CODE_B_BUTTON,
+    // The five codes from here all draw the Z button. Only the last appears in
+    // the message file, in message 58's list of buttons.
+    MESSAGE_CODE_UNUSED_Z_BUTTON_A,
+    MESSAGE_CODE_UNUSED_Z_BUTTON_B,
+    MESSAGE_CODE_UNUSED_Z_BUTTON_C,
+    MESSAGE_CODE_UNUSED_Z_BUTTON_D,
+    MESSAGE_CODE_Z_BUTTON,
+    MESSAGE_CODE_C_UP,
+    MESSAGE_CODE_C_DOWN,
+    MESSAGE_CODE_C_LEFT,
+    MESSAGE_CODE_C_RIGHT,
+    // Drawn as nothing, and in no message
+    MESSAGE_CODE_UNUSED_BLANK,
+    MESSAGE_CODE_START_BUTTON,
+    MESSAGE_CODE_L_BUTTON,
+    MESSAGE_CODE_R_BUTTON,
+    MESSAGE_CODE_NAME,
+    // Then one for each of the slot's values
+    MESSAGE_CODE_VALUE = 0x8014,
+    // The current player's score, as the game mode counts it
+    MESSAGE_CODE_SCORE = 0x8018,
+    MESSAGE_CODE_LINE_BREAK,
+    // Then one for each of the text palette's colors
+    MESSAGE_CODE_PALETTE_COLOR = 0x8022,
+    MESSAGE_CODE_SLOT_COLOR = 0x8026
+};
+
+typedef s32 MessageCode;
+typedef u32 UMessageCode;
+typedef u16 UMessageCode16;
+
 // A glyph drawn with its own matrix, so text can be moved a glyph at a
 // time. Glyphs are placed in groups.
 typedef struct GlyphSprite {
     Mtx matrix;
-    u16 code;
+    UMessageCode16 code;
     u8 fontSize;
     s8 group; // NO_GLYPH_GROUP when the sprite is free
     UTextFlags8 flags;
