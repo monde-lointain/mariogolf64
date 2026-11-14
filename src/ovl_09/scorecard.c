@@ -335,7 +335,8 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
         ReadEncodedAsset(g_Scorecard.pageTitleImages[i], &asset);
     }
 
-    for (i = 0, imageIndex = 0; i != BET_COUNT; i++) {
+    imageIndex = 0;
+    for (i = 0; i != BET_COUNT; i++) {
         if (g_GameState.betRates[i] != UNSET_BET_RATE) {
             g_Scorecard.betImages[imageIndex][0] =
                 AllocMemory(OpenEncodedAsset(f_BetImageAssets[i][0], &asset));
@@ -371,7 +372,8 @@ void FreeScorecard(void) {
         g_RoundHud.unusedScorecardValue = 0;
         g_RoundHud.otherUnusedScorecardValue = 0;
 
-        for (i = 0, imageIndex = 0; i != BET_COUNT; i++) {
+        imageIndex = 0;
+        for (i = 0; i != BET_COUNT; i++) {
             if (g_GameState.betRates[i] != UNSET_BET_RATE) {
                 FreeMemory(&g_Scorecard.betImages[imageIndex][0]);
                 FreeMemory(&g_Scorecard.betImages[imageIndex][1]);

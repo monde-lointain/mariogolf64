@@ -242,7 +242,7 @@ static void DrawDigits(Gfx **gfxP, u16 x, u16 y, char *text) {
     f_DigitDrawCount = (f_DigitDrawCount + 1) & 0x3FF;
     gDPPipeSync(gfx++);
 
-    for (; (character = *text) != '\0'; text++, x += DIGIT_SPACING) {
+    for (; (character = *text) != '\0'; text++) {
         if (character != ' ') {
             gSPTextureRectangle(
                 gfx++,
@@ -257,6 +257,8 @@ static void DrawDigits(Gfx **gfxP, u16 x, u16 y, char *text) {
                 TEXEL_STEP_ONE
             );
         }
+
+        x += DIGIT_SPACING;
     }
 
     gDPPipeSync(gfx++);

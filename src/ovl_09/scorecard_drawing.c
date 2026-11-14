@@ -343,7 +343,8 @@ void DrawMatchResult(Gfx **displayListHead) {
     DrawLargeText(&gfx, MATCH_HOLE_X, MATCH_HOLE_Y, g_PrintBuffer);
     holeIndex = holeNumber - 1;
     ownHole = holeIndex;
-    for (i = 0, x = MATCH_RESULT_LEFT; i != MATCH_PLAYER_COUNT; i++) {
+    x = MATCH_RESULT_LEFT;
+    for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
         if (g_Players[i].holes[ownHole].strokes == g_Players[i ^ 1].holes[holeIndex].strokes) {
             SetTextColor(&gfx, 0xFF, 0xFF, 0);
             DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char *)f_DrawText);
@@ -1521,7 +1522,8 @@ void DrawBetsPage(Gfx **displayListHead) {
     }
 
     gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-    for (j = 0, i = 0; i != BET_COUNT; i++) {
+    j = 0;
+    for (i = 0; i != BET_COUNT; i++) {
         if (g_GameState.betRates[i] != UNSET_BET_RATE) {
             frame = 0;
             if (g_GameState.betRates[i] == 0) {
@@ -1625,7 +1627,8 @@ void DrawBetsPage(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    for (column = 0, i = 0; i != BET_COUNT; i++) {
+    column = 0;
+    for (i = 0; i != BET_COUNT; i++) {
         if (g_GameState.betRates[i] != UNSET_BET_RATE) {
             if (f_BetSubtitleRows[i] != NO_BET_SUBTITLE) {
                 if (g_GameState.betRates[i] == 0) {
@@ -1672,7 +1675,8 @@ void DrawBetsPage(Gfx **displayListHead) {
     }
 
     BeginShadowedText(&gfx);
-    for (column = 0, i = 0; i != BET_COUNT; i++) {
+    column = 0;
+    for (i = 0; i != BET_COUNT; i++) {
         if (g_GameState.betRates[i] != UNSET_BET_RATE) {
             if (g_GameState.betRates[i] == 0) {
                 SetTextColor(&gfx, UNPLAYED_BET_GRAY, UNPLAYED_BET_GRAY, UNPLAYED_BET_GRAY);
@@ -1702,7 +1706,8 @@ void DrawBetsPage(Gfx **displayListHead) {
     DrawSmallText(&gfx, g_Scorecard.x + 31, g_Scorecard.y + CARRY_OVER_SECOND_TOP, "v");
     DrawSmallText(&gfx, g_Scorecard.x + 39, g_Scorecard.y + CARRY_OVER_SECOND_TOP, "e");
     DrawSmallText(&gfx, g_Scorecard.x + 45, g_Scorecard.y + CARRY_OVER_SECOND_TOP, "r");
-    for (j = 0, i = 0; i != BET_COUNT; i++) {
+    j = 0;
+    for (i = 0; i != BET_COUNT; i++) {
         if (g_GameState.betRates[i] > 0) {
             if (i == BET_LONGEST_DRIVE) {
                 sprintf(
@@ -1762,7 +1767,8 @@ void DrawBetsPage(Gfx **displayListHead) {
 
     BeginShadowedText(&gfx);
     SetTextColor(&gfx, BET_RATE_RED, BET_RATE_GREEN, 0);
-    for (column = 0, i = 0; i != BET_COUNT; i++) {
+    column = 0;
+    for (i = 0; i != BET_COUNT; i++) {
         if (g_GameState.betRates[i] != UNSET_BET_RATE) {
             if (g_GameState.betRates[i] != 0) {
                 sprintf(g_PrintBuffer, f_TwoDigitFormat, g_GameState.betRates[i]);

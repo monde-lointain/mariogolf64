@@ -1063,12 +1063,14 @@ s32 GetAnimationIndex(u32 slotIndex, s32 id) {
     s32 i;
 
     if (slot != NULL) {
-        animation = ModelAnimations(slot->model);
-        for (i = 0; animation->events != NULL; i++, animation++) {
+        i = 0;
+        for (animation = ModelAnimations(slot->model); animation->events != NULL; animation++) {
             if (animation->id == id) {
                 foundIndex = i;
                 break;
             }
+
+            i++;
         }
     }
 

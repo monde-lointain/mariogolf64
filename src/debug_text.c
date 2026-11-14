@@ -97,7 +97,7 @@ void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
     s32 character;
     s32 glyphFontIndex;
 
-    for (index = 0; index < length; index++, text++) {
+    for (index = 0; index < length; index++) {
         character = (s8)*text;
         if (character == '\0') {
             break;
@@ -129,6 +129,8 @@ void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
             fontIndex += FONT_ROW_WORD_COUNT;
             textureIndex += length;
         }
+
+        text++;
     }
 }
 

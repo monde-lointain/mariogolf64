@@ -773,9 +773,8 @@ void DrawClubSlots(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     LoadLargePalette(&gfx, ImageBody(f_Slots->machineImage));
-    for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, topOrPlayerIndex = SCREEN_BORDER;
-        topOrPlayerIndex < MACHINE_BOTTOM;
-        texelOffset += MACHINE_STRIP_HEIGHT * MACHINE_WIDTH,
+    texelOffset = LARGE_PALETTED_TEXELS_OFFSET;
+    for (topOrPlayerIndex = SCREEN_BORDER; topOrPlayerIndex < MACHINE_BOTTOM;
         topOrPlayerIndex += MACHINE_STRIP_HEIGHT) {
         stripHeight = (topOrPlayerIndex + MACHINE_STRIP_HEIGHT <= MACHINE_BOTTOM) ?
             MACHINE_STRIP_HEIGHT :
@@ -831,6 +830,8 @@ void DrawClubSlots(Gfx **displayListHead) {
             TEXEL_STEP_ONE
         );
         gDPPipeSync(gfx++);
+
+        texelOffset += MACHINE_STRIP_HEIGHT * MACHINE_WIDTH;
     }
 
     LoadLargePalette(&gfx, ImageBody(f_Slots->buttonsImage));
@@ -908,9 +909,9 @@ void DrawClubSlots(Gfx **displayListHead) {
 
         gDPPipeSync(gfx++);
         LoadLargePalette(&gfx, ImageBody(f_Slots->startImage));
-        for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, buttonOrStartStripIndex = 0;
-            buttonOrStartStripIndex != START_STRIP_COUNT;
-            buttonOrStartStripIndex++, texelOffset += START_STRIP_SPACING * START_WIDTH) {
+        texelOffset = LARGE_PALETTED_TEXELS_OFFSET;
+        for (buttonOrStartStripIndex = 0; buttonOrStartStripIndex != START_STRIP_COUNT;
+            buttonOrStartStripIndex++) {
             loadedStripHeight = (buttonOrStartStripIndex != START_STRIP_COUNT - 1) ?
                 START_STRIP_HEIGHT :
                 START_LAST_STRIP_HEIGHT;
@@ -948,6 +949,8 @@ void DrawClubSlots(Gfx **displayListHead) {
                 dsdx,
                 dtdy
             );
+
+            texelOffset += START_STRIP_SPACING * START_WIDTH;
         }
     }
 

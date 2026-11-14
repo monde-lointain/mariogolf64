@@ -474,7 +474,8 @@ void DrawClubPanel(Gfx **displayListHead) {
         );
     }
 
-    for (group = 0, tick = 1; group != GAUGE_MEDIUM_TICK_COUNT; tick++, group++) {
+    tick = 1;
+    for (group = 0; group != GAUGE_MEDIUM_TICK_COUNT; group++) {
         gSPTextureRectangle(
             gfx++,
             QuarterPixels(GAUGE_FULL_X + tick * GAUGE_TICKS_PER_GROUP * GAUGE_TICK_SPACING),
@@ -489,6 +490,8 @@ void DrawClubPanel(Gfx **displayListHead) {
             TEXEL_STEP_ONE,
             TexelRunStep(GAUGE_TICK_IMAGE_HEIGHT, GAUGE_MEDIUM_TICK_BOTTOM - GAUGE_MEDIUM_TICK_TOP)
         );
+
+        tick++;
     }
 
     gDPPipeSync(gfx++);

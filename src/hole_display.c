@@ -3246,7 +3246,8 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                 gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
                 gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
                 gDPPipeSync(gfx++);
-                for (i = 0, strip = 0; i != BACKDROP_STRIP_COUNT; strip++, i++) {
+                strip = 0;
+                for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
                     s32 height = StripHeight(i);
                     s32 framesLeft;
 
@@ -3283,6 +3284,8 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                         TEXEL_STEP_ONE
                     );
                     gDPPipeSync(gfx++);
+
+                    strip++;
                 }
 
                 f_HudAnimationFramesLeft -= FADE_STEP;
@@ -3293,8 +3296,8 @@ void DrawFadeAnimation(Gfx **displayListHead) {
 
         gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
         gDPPipeSync(gfx++);
-        for (i = BACKDROP_BORDER, strip = 0; i < SCREEN_HEIGHT - BACKDROP_BORDER;
-            strip++, i += BACKDROP_STRIP_STEP) {
+        strip = 0;
+        for (i = BACKDROP_BORDER; i < SCREEN_HEIGHT - BACKDROP_BORDER; i += BACKDROP_STRIP_STEP) {
             s32 height = BACKDROP_LAST_STRIP_HEIGHT |
                 ((i + BACKDROP_STRIP_STEP <= SCREEN_HEIGHT - BACKDROP_BORDER) ?
                         (BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT) :
@@ -3318,6 +3321,8 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
+
+            strip++;
         }
 
         if (f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT) {

@@ -368,7 +368,7 @@ void OpenSaveMenu(s32 kind) {
         s16 *defaultFrames = g_ModeIconAnimations[0];
         void **second = &f_ModeIconImages[0][1];
 
-        for (slot = 0; slot != SAVED_GAME_COUNT; second += 2, slot++) {
+        for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
             if (save->savedGames[slot].isValid &&
                 (iconIndex = GetModeIconIndex(&save->savedGames[slot].state)) != NO_MODE_ICON) {
                 ReadEncodedAsset(
@@ -395,6 +395,8 @@ void OpenSaveMenu(s32 kind) {
                     &encodedAsset
                 );
             }
+
+            second += 2;
         }
     }
     else {
