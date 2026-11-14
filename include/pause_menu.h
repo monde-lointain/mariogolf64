@@ -57,6 +57,10 @@ extern f32 g_LiePanelPosition[2];
 extern f32 g_WindPanelPosition[2];
 
 void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap);
+// A true isClosing for RequestPauseMenu; the original passes -1 rather
+// than TRUE.
+#define CLOSING_PAUSE_MENU (-1)
+
 void RequestPauseMenu(Boolean canGiveUp, Boolean isClosing);
 PauseAction UpdatePauseMenu(ControllerState *controller);
 void OpenChoiceBox(s32 choiceBoxIndex);

@@ -3338,7 +3338,7 @@ void UpdateTurns(void) {
                         PlaySound(SOUND_PAUSE, PAUSE_SOUND_CHANNEL, SOUND_FULL_SCALE);
                         g_PauseScreen = PAUSE_SCREEN_PAUSE_MENU;
                         SetMenuBackdrop(MENU_BACKDROP_DIMMING);
-                        RequestPauseMenu(g_Players[playerIndex].strokeCount != 0, 0);
+                        RequestPauseMenu(g_Players[playerIndex].strokeCount != 0, FALSE);
                         HideRoundHud();
                     }
                 }

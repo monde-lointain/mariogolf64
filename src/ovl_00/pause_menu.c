@@ -522,32 +522,32 @@ PauseAction UpdatePauseMenu(ControllerState *controller) {
         switch (action) {
             case PAUSE_ACTION_QUIT_GAME:
                 PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
-                RequestPauseMenu(0, -1);
+                RequestPauseMenu(FALSE, CLOSING_PAUSE_MENU);
                 g_PauseScreen = PAUSE_SCREEN_PROMPT;
                 OpenPrompt(PROMPT_QUIT_GAME);
                 break;
             case PAUSE_ACTION_QUIT_BROUGHT_OVER_GAME:
                 PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
-                RequestPauseMenu(0, -1);
+                RequestPauseMenu(FALSE, CLOSING_PAUSE_MENU);
                 g_PauseScreen = PAUSE_SCREEN_PROMPT;
                 OpenPrompt(PROMPT_QUIT_BROUGHT_OVER_GAME);
                 break;
             case PAUSE_ACTION_QUIT_CLUB_TOURNAMENT:
                 PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
-                RequestPauseMenu(0, -1);
+                RequestPauseMenu(FALSE, CLOSING_PAUSE_MENU);
                 g_PauseScreen = PAUSE_SCREEN_PROMPT;
                 OpenPrompt(PROMPT_QUIT_CLUB_TOURNAMENT);
                 break;
             case PAUSE_ACTION_SAVE_AND_QUIT:
                 PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
-                RequestPauseMenu(0, -1);
+                RequestPauseMenu(FALSE, CLOSING_PAUSE_MENU);
                 g_PauseScreen = PAUSE_SCREEN_LOADING_SAVE_MENU;
                 g_SubModuleState = SUB_MODULE_SWAP_PENDING;
                 g_PendingSubModuleId = MODULE_SAVE_MENU;
                 break;
             case PAUSE_ACTION_CONTROLS:
                 PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
-                RequestPauseMenu(0, -1);
+                RequestPauseMenu(FALSE, CLOSING_PAUSE_MENU);
                 g_PauseScreen = PAUSE_SCREEN_LOADING_CONTROLS;
                 g_SubModuleState = SUB_MODULE_SWAP_PENDING;
                 g_PendingSubModuleId = MODULE_SAVE_MENU;
@@ -555,20 +555,20 @@ PauseAction UpdatePauseMenu(ControllerState *controller) {
             case PAUSE_ACTION_GIVE_UP:
                 if (g_IsDebugEnabled || f_IsGiveUpAllowed) {
                     PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
-                    RequestPauseMenu(0, -1);
+                    RequestPauseMenu(FALSE, CLOSING_PAUSE_MENU);
                     g_PauseScreen = PAUSE_SCREEN_PROMPT;
                     OpenPrompt(PROMPT_GIVE_UP);
                 }
 
                 break;
             case PAUSE_ACTION_SCORECARD:
-                RequestPauseMenu(0, -1);
+                RequestPauseMenu(FALSE, CLOSING_PAUSE_MENU);
                 g_PauseScreen = PAUSE_SCREEN_LOADING_SCORECARD;
                 g_SubModuleState = SUB_MODULE_SWAP_PENDING;
                 g_PendingSubModuleId = MODULE_SCORECARD;
                 break;
             case PAUSE_ACTION_FREE_LOOK:
-                RequestPauseMenu(0, -1);
+                RequestPauseMenu(FALSE, CLOSING_PAUSE_MENU);
                 PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
                 StartFreeLook();
                 break;
