@@ -147,7 +147,7 @@ void TallySkins(s32 endHole) {
 
 void StartBets(void) {
     s32 playerIndex;
-    s32 bet;
+    Bet bet;
 
     for (playerIndex = 0; playerIndex != PLAYER_COUNT_MAX; playerIndex++) {
         for (bet = 0; bet != BET_COUNT; bet++) {
@@ -181,7 +181,7 @@ void StartBets(void) {
 // Takes the tallies and pots back from a continued game
 void ResumeBets(void) {
     s32 playerIndex;
-    s32 bet;
+    Bet bet;
 
     for (playerIndex = 0; playerIndex != PLAYER_COUNT_MAX; playerIndex++) {
         for (bet = 0; bet != BET_COUNT; bet++) {
@@ -605,7 +605,7 @@ void SettleHoleBets(void) {
     s32 lastHole = g_GameState.holeIndex - 1;
     s32 teamScore;
     s32 rivalTeamScore;
-    s32 bet;
+    Bet bet;
     s32 bestScore;
     s32 count;
     s32 score;

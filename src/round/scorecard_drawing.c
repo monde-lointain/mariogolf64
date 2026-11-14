@@ -4522,8 +4522,7 @@ void DrawScoresPage(Gfx **displayListHead) {
 //   The edges as sums of a row offset, x stepped (the old
 //   draft)                                                  22 (12)
 //   One if with both of the bet rate's tests                18 (10)
-//   The column stepped in its loop's header, after the
-//   bet index                                                8 (0)
+//   The column stepped in its loop's header, after the bet   8 (0)
 //   The column set before its loop                          16 (2)
 //   The total summed after the ifs                         117 (29), frame +8
 //   The player loop testing < the player count              57 (5), frame -8
@@ -4533,12 +4532,12 @@ void DrawScoresPage(Gfx **displayListHead) {
 // or after y; x and y declared without values and set in the same order;
 // x and y declared in the function under different names for each loop; x's
 // product before the column; y or x as a u32; the bottom edge with the glyph's
-// size first; the column stepped in its loop's header before the bet index;
+// size first; the column stepped in its loop's header before the bet;
 // and the total zeroed in the bet loop's header.
 void DrawBetTallies(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 playerIndex;
-    s32 betIndex;
+    Bet bet;
     s32 total;
     s32 column;
     s32 digit;
@@ -4560,8 +4559,8 @@ void DrawBetTallies(Gfx **displayListHead) {
     );
     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
         total = 0;
-        for (betIndex = 0, column = BET_TALLY_LEFT; betIndex != BET_COUNT; betIndex++) {
-            total += g_BetTallies[playerIndex][betIndex];
+        for (bet = 0, column = BET_TALLY_LEFT; bet != BET_COUNT; bet++) {
+            total += g_BetTallies[playerIndex][bet];
             if (g_GameState.betRates[playerIndex] != 0) {
                 if (g_GameState.betRates[playerIndex] != UNSET_BET_RATE) {
                     for (digit = 0; g_PrintBuffer[digit] != '\0'; digit++) {
