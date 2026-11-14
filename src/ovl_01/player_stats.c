@@ -2192,7 +2192,7 @@ void UpdateBestShots(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s32 slot;
-    s32 moved;
+    s32 nextCell;
     s32 column;
 
     if (IsHudAnimationDone() == TRUE) {
@@ -2252,47 +2252,47 @@ void UpdateBestShots(void) {
                 }
             }
             else if (g_MenuRepeatButtons & U_JPAD) {
-                moved = FindNextBestShotCell(
+                nextCell = FindNextBestShotCell(
                     memory->bestShotColumn,
                     memory->bestShotRow,
                     STATS_DIRECTION_UP
                 );
-                if ((s16)moved != STATS_CELL_EMPTY) {
+                if ((s16)nextCell != STATS_CELL_EMPTY) {
                     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-                    memory->bestShotRow = moved;
+                    memory->bestShotRow = nextCell;
                 }
             }
             else if (g_MenuRepeatButtons & D_JPAD) {
-                moved = FindNextBestShotCell(
+                nextCell = FindNextBestShotCell(
                     memory->bestShotColumn,
                     memory->bestShotRow,
                     STATS_DIRECTION_DOWN
                 );
-                if ((s16)moved != STATS_CELL_EMPTY) {
+                if ((s16)nextCell != STATS_CELL_EMPTY) {
                     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-                    memory->bestShotRow = moved;
+                    memory->bestShotRow = nextCell;
                 }
             }
             else if (g_MenuRepeatButtons & L_JPAD) {
-                moved = FindNextBestShotCell(
+                nextCell = FindNextBestShotCell(
                     memory->bestShotColumn,
                     memory->bestShotRow,
                     STATS_DIRECTION_LEFT
                 );
-                if ((s16)moved != STATS_CELL_EMPTY) {
+                if ((s16)nextCell != STATS_CELL_EMPTY) {
                     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-                    memory->bestShotColumn = moved;
+                    memory->bestShotColumn = nextCell;
                 }
             }
             else if (g_MenuRepeatButtons & R_JPAD) {
-                moved = FindNextBestShotCell(
+                nextCell = FindNextBestShotCell(
                     memory->bestShotColumn,
                     memory->bestShotRow,
                     STATS_DIRECTION_RIGHT
                 );
-                if ((s16)moved != STATS_CELL_EMPTY) {
+                if ((s16)nextCell != STATS_CELL_EMPTY) {
                     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-                    memory->bestShotColumn = moved;
+                    memory->bestShotColumn = nextCell;
                 }
             }
         }
