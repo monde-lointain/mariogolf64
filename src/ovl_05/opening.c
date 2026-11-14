@@ -766,6 +766,11 @@ void PlayOpeningAmbientSounds(void) {
 
 void LoadOpeningLogo(void);
 
+// Slot 0 keeps the default character buffer; the slots after it get the
+// opening's own buffers, and the last borrows the depth buffer.
+#define FIRST_ALLOCATED_CHARACTER_SLOT 1
+#define DEPTH_BUFFER_CHARACTER_SLOT 3
+
 void LoadOpening(void) {
     EncodedAsset asset;
     s32 bufferIndex;
@@ -776,10 +781,13 @@ void LoadOpening(void) {
     f_OpeningCue = OPENING_CUE_DONE;
     for (bufferIndex = 0; bufferIndex < ARRAY_COUNT(f_OpeningCharacterBuffers); bufferIndex++) {
         f_OpeningCharacterBuffers[bufferIndex] = AllocMemory(GetCharacterBufferSize());
-        SetCharacterBuffer(bufferIndex + 1, f_OpeningCharacterBuffers[bufferIndex]);
+        SetCharacterBuffer(
+            bufferIndex + FIRST_ALLOCATED_CHARACTER_SLOT,
+            f_OpeningCharacterBuffers[bufferIndex]
+        );
     }
 
-    SetCharacterBuffer(3, (u8 *)g_DepthBuffer);
+    SetCharacterBuffer(DEPTH_BUFFER_CHARACTER_SLOT, (u8 *)g_DepthBuffer);
     g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
     ReadEncodedAsset(g_ShadowTexture, &asset);
     f_AreAmbientSoundsOn = FALSE;
