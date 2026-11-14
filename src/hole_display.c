@@ -2472,7 +2472,7 @@ void DrawSky(Gfx **displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED, s
         PhysicalAddress(&f_SkyModelMatrix),
         G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
     );
-    gSPPerspNormalize(gfx++, g_ScreenEffectPerspNorm);
+    gSPPerspNormalize(gfx++, g_ScreenEffectPerspectiveNormalization);
     gSPVertex(
         gfx++,
         f_SkyVertices[g_MatrixBufferIndex + (cameraIndex * MATRIX_BUFFER_COUNT)],
@@ -3829,7 +3829,7 @@ void DrawTileAnimation(void) {
         gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
         gDPPipeSync(g_DisplayListHead++);
         gDPSetRenderMode(g_DisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-        gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspNorm);
+        gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspectiveNormalization);
         gDPPipeSync(g_DisplayListHead++);
         gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
         gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
@@ -3944,7 +3944,7 @@ void DrawTurnAwayAnimation(void) {
         gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
         gDPPipeSync(g_DisplayListHead++);
         gDPSetRenderMode(g_DisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-        gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspNorm);
+        gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspectiveNormalization);
         gDPPipeSync(g_DisplayListHead++);
         gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
         gDPPipeSync(g_DisplayListHead++);

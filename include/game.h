@@ -35,7 +35,7 @@ extern u16 *g_DepthBuffer;
 #define DRAW_BUFFER_COUNT 2
 
 extern Mtx g_ScreenEffectProjection;
-extern u16 g_ScreenEffectPerspNorm;
+extern u16 g_ScreenEffectPerspectiveNormalization;
 
 #define DISPLAY_LIST_LENGTH 14000
 

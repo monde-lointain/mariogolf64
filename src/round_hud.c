@@ -775,7 +775,7 @@ void InitRoundHud(void) {
     );
     guPerspective(
         &f_UnusedNarrowProjection,
-        &g_ScreenEffectPerspNorm,
+        &g_ScreenEffectPerspectiveNormalization,
         NARROW_FIELD_OF_VIEW,
         SCREEN_ASPECT_RATIO,
         SCREEN_EFFECT_NEAR_PLANE,
@@ -784,7 +784,7 @@ void InitRoundHud(void) {
     );
     guPerspective(
         &g_ScreenEffectProjection,
-        &g_ScreenEffectPerspNorm,
+        &g_ScreenEffectPerspectiveNormalization,
         SCREEN_EFFECT_FIELD_OF_VIEW,
         SCREEN_ASPECT_RATIO,
         SCREEN_EFFECT_NEAR_PLANE,
@@ -3058,7 +3058,7 @@ void DrawHoleImageModel(void) {
     gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
-    gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspNorm);
+    gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspectiveNormalization);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
     gSPMatrix(

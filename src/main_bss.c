@@ -305,7 +305,7 @@ REVERB_MEM gReverbFx BSS ALIGNED(8) = {0};
 u32 __osFinalrom BSS = {0};
 Effect f_Effects[EFFECT_COUNT] BSS ALIGNED(8) = {{{0}}};
 u8 *g_ShadowTexture BSS = {0};
-u16 g_ScreenEffectPerspNorm BSS = {0};
+u16 g_ScreenEffectPerspectiveNormalization BSS = {0};
 UNREAD_COMMON(0x8);
 OSPifRam __osPfsPifRam BSS ALIGNED(8) = {{0}};
 ScreenRect g_HudScissor BSS = {0};

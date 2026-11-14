@@ -277,7 +277,7 @@ u16 g_FlameTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE];
 ScreenRect g_HudScissor;
 InsetView g_InsetView;
 u16 g_MirrorTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE];
-u16 g_ScreenEffectPerspNorm;
+u16 g_ScreenEffectPerspectiveNormalization;
 Mtx g_ScreenEffectProjection;
 Mtx g_ScreenOrthoMatrix;
 

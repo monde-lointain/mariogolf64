@@ -290,7 +290,7 @@ static u8 *f_ResultsLabelsImage;
 static u8 *f_ResultsLargeDigitsImage;
 static u8 *f_ResultsPlacesImage;
 static u8 *f_SecondBannerImage;
-static u8 *f_NameplateImage;
+static u8 *f_NamePlateImage;
 static u8 *f_NoticeTitleImage;
 static u8 *f_ResultsShineImage;
 static u8 *f_UnusedResultsImage;
@@ -491,8 +491,8 @@ void LoadRoundResults(void) {
             ReadEncodedAsset(f_ResultsPlacesImage, &asset);
             f_SecondBannerImage = AllocMemory(OpenEncodedAsset(MATCH_LOSE_BANNER_ASSET, &asset));
             ReadEncodedAsset(f_SecondBannerImage, &asset);
-            f_NameplateImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
-            ReadEncodedAsset(f_NameplateImage, &asset);
+            f_NamePlateImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
+            ReadEncodedAsset(f_NamePlateImage, &asset);
             f_MatchStandingWordsImage =
                 AllocMemory(OpenEncodedAsset(MATCH_STANDING_WORDS_ASSET, &asset));
             ReadEncodedAsset(f_MatchStandingWordsImage, &asset);
@@ -749,8 +749,8 @@ void LoadUnlockNotice(s32 unlock) {
     if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
         f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &asset));
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
-        f_NameplateImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
-        ReadEncodedAsset(f_NameplateImage, &asset);
+        f_NamePlateImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
+        ReadEncodedAsset(f_NamePlateImage, &asset);
         f_PortraitImage =
             AllocMemory(OpenEncodedAsset(g_CharacterImageAssets[f_PortraitCharacterIndex], &asset));
         ReadEncodedAsset(f_PortraitImage, &asset);
@@ -769,7 +769,7 @@ void FreeUnlockNotice(void) {
     }
 
     if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
-        FreeMemory(&f_NameplateImage);
+        FreeMemory(&f_NamePlateImage);
         FreeMemory(&f_PortraitImage);
         FreeMemory(&f_PortraitPalette);
     }
@@ -875,7 +875,7 @@ void FreeRoundResults(void) {
             if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
                 FreeMemory(&f_ResultsPlacesImage);
                 FreeMemory(&f_SecondBannerImage);
-                FreeMemory(&f_NameplateImage);
+                FreeMemory(&f_NamePlateImage);
                 FreeMemory(&f_MatchStandingWordsImage);
             }
             else {
@@ -1789,10 +1789,10 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
         s32 centerX;
         s32 centerY;
 
-        LoadSmallPalette(&gfx, 0, ImageBody(f_NameplateImage));
+        LoadSmallPalette(&gfx, 0, ImageBody(f_NamePlateImage));
         LoadNibbleTextureBlock(
             &gfx,
-            ImageTexels(f_NameplateImage),
+            ImageTexels(f_NamePlateImage),
             G_IM_FMT_CI,
             NOTICE_NAMEPLATE_SIZE,
             NOTICE_NAMEPLATE_SIZE,
