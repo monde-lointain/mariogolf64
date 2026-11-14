@@ -150,7 +150,11 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group);
 void SetUpPerspectiveTextDrawing(Gfx **displayListHead);
 void RevealTextSlot(s32 slot);
 Boolean IsTextSlotRevealed(s32 slot);
+#if defined(AVOID_UB) || !defined(OMITS_MEASURE_TEXT_FLAGS)
 s32 MeasureText(READ_ONLY char *text, s32 fontSize, TextFlags flags);
+#else
+s32 MeasureText(READ_ONLY char *text, s32 fontSize);
+#endif
 void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, s32 slot);
 void DrawSmallText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
 void SetUpShadowedTextDrawing(Gfx **displayListHead);

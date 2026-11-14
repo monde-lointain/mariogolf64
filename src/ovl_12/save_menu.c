@@ -3,6 +3,9 @@
 #include <framebuffer_count.h>
 #include <ultra64.h>
 
+// The original calls MeasureText here without its flags; see text.h.
+#define OMITS_MEASURE_TEXT_FLAGS
+
 #include "address.h"
 #include "asset.h"
 #include "character.h"
@@ -26,6 +29,7 @@
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "text.h"
 #include "text_format.h"
 
 enum SaveMenuState {
@@ -179,39 +183,6 @@ enum ModeName {
 #define REPLAY_LABEL_BIRDIE 3
 #define REPLAY_LABEL_PAR 4
 #define NO_REPLAY_LABEL (-1)
-
-void SetTextSlot(
-    s32 x,
-    s32 y,
-    s32 messageId,
-    s32 fontSize,
-    s32 slot,
-    TextFlags flags,
-    u8 red,
-    u8 green,
-    u8 blue,
-    u8 alpha
-);
-void SetUpTextDrawing(Gfx **displayListHead);
-void DrawLargeTextSlot(Gfx **displayListHead, s32 slot);
-void SetUpGradientTextDrawing(Gfx **displayListHead, s32 gradient);
-void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawLargeTextWithShadow(
-    Gfx **displayListHead,
-    s32 x,
-    s32 y,
-    char *text,
-    s32 envColor,
-    s32 primColor,
-    TextFlags flags
-);
-#ifdef AVOID_UB
-s32 MeasureText(char *text, s32 fontSize, TextFlags flags);
-#else
-s32 MeasureText(char *text, s32 fontSize);
-#endif
-extern char g_PrintBuffer[];
-void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
 
 static s8 f_ModeIcons[GAME_MODE_ICON_COUNT] = {
     MODE_ICON_STROKE,
