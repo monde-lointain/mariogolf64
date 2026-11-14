@@ -465,7 +465,7 @@ s32 GetStickDiagonal(void) {
 }
 
 #define CHARACTER_SELECT_TEXT_SLOT_COUNT 4
-#define PROMPT_TEXT_SLOT 0
+#define CHARACTER_SELECT_PROMPT_SLOT 0
 
 #define Z_OR_L_BUTTONS (Z_TRIG | L_TRIG)
 
@@ -806,7 +806,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
                     0,
                     NO_MESSAGE,
                     TEXT_SLOT_LARGE_FONT,
-                    PROMPT_TEXT_SLOT,
+                    CHARACTER_SELECT_PROMPT_SLOT,
                     TEXT_FLAG_TYPED,
                     255,
                     255,
@@ -944,7 +944,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
                 0,
                 NO_MESSAGE,
                 TEXT_SLOT_LARGE_FONT,
-                PROMPT_TEXT_SLOT,
+                CHARACTER_SELECT_PROMPT_SLOT,
                 TEXT_FLAG_TYPED,
                 255,
                 255,
@@ -1053,7 +1053,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
                 0,
                 NO_MESSAGE,
                 TEXT_SLOT_LARGE_FONT,
-                PROMPT_TEXT_SLOT,
+                CHARACTER_SELECT_PROMPT_SLOT,
                 TEXT_FLAG_TYPED,
                 255,
                 255,
@@ -1091,7 +1091,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
                 0,
                 NO_MESSAGE,
                 TEXT_SLOT_LARGE_FONT,
-                PROMPT_TEXT_SLOT,
+                CHARACTER_SELECT_PROMPT_SLOT,
                 TEXT_FLAG_TYPED,
                 255,
                 255,
