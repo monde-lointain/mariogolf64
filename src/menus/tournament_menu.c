@@ -193,14 +193,11 @@ typedef s32 CodeKeyResult;
 #define CLUB_MODE_SLOT 5
 #define CLUB_TEXT_SLOT_COUNT 11
 
-// How the club tournament's window is drawn: plain, with the Nintendo badge,
-// or with a picture
-enum ClubWindowStyle {
-    CLUB_WINDOW_STYLE_PLAIN,
-    CLUB_WINDOW_STYLE_NINTENDO,
-    CLUB_WINDOW_STYLE_PICTURE
-};
-
+// The bits of how the club tournament's window is drawn: with the Nintendo
+// badge, a picture, both, or neither
+#define CLUB_WINDOW_STYLE_PLAIN 0
+#define CLUB_WINDOW_STYLE_NINTENDO (1 << 0)
+#define CLUB_WINDOW_STYLE_PICTURE (1 << 1)
 typedef s32 ClubWindowStyle;
 
 // The window's choice in f_ClubWindowChoice, which left and right toggle
@@ -408,7 +405,7 @@ void DrawClubWindow(
     s32 centerY,
     s32 okTextShown,
     s32 chosenButton,
-    s32 windowStyle
+    ClubWindowStyle windowStyle
 );
 void DrawCodePanels(Gfx **displayListHead);
 void DrawCodeHand(Gfx **displayListHead);
@@ -930,7 +927,7 @@ void DrawClubWindow(
     s32 centerY,
     s32 okTextShown UNUSED,
     s32 chosenButton,
-    s32 windowStyle
+    ClubWindowStyle windowStyle
 ) {
     Gfx *gfx = *displayListHead;
     f32 windowWidth;
