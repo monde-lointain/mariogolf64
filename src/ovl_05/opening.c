@@ -1015,36 +1015,36 @@ enum OpeningModel {
     }
 
 s32 UpdateOpeningCharacters(void) {
-    CoursePoint point0;
-    CoursePoint point1;
-    CoursePoint point2;
-    CoursePoint point3;
-    CoursePoint point4;
-    CoursePoint point5;
-    CoursePoint point6;
-    CoursePoint point7;
-    CoursePoint point8;
-    CoursePoint point9;
-    CoursePoint point10;
-    CoursePoint point11;
-    CoursePoint point12;
-    CoursePoint point13;
-    CoursePoint point14;
-    CoursePoint point15;
-    CoursePoint point16;
-    CoursePoint point17;
-    CoursePoint point18;
-    CoursePoint point19;
-    CoursePoint point20;
-    CoursePoint point21;
-    CoursePoint point22;
-    CoursePoint point23;
-    CoursePoint point24;
-    CoursePoint point25;
-    CoursePoint point26;
-    CoursePoint point27;
-    CoursePoint point28;
-    CoursePoint point29;
+    CoursePoint marioTeeShotPoint;
+    CoursePoint peachCheerPoint;
+    CoursePoint luigiCheerPoint;
+    CoursePoint peachTeeShotPoint;
+    CoursePoint plumCheerPoint;
+    CoursePoint plumTeeShotPoint;
+    CoursePoint marioCheerPoint;
+    CoursePoint luigiTeeShotPoint;
+    CoursePoint plumWalkPoint;
+    CoursePoint peachWalkPoint;
+    CoursePoint marioWalkPoint;
+    CoursePoint luigiWalkPoint;
+    CoursePoint marioReachBallPoint;
+    CoursePoint peachWavePoint;
+    CoursePoint marioRunPoint;
+    CoursePoint peachApproachPoint;
+    CoursePoint marioInspectBallPoint;
+    CoursePoint peachInspectBallPoint;
+    CoursePoint marioStandAtBallPoint;
+    CoursePoint marioLookUpPoint;
+    CoursePoint carrierArrivalPoint;
+    CoursePoint babyMarioArrivalPoint;
+    CoursePoint peachCoverMouthPoint;
+    CoursePoint marioScratchHeadPoint;
+    CoursePoint luigiSearchPoint;
+    CoursePoint toadWaveFlagPoint;
+    CoursePoint luigiDismayPoint;
+    CoursePoint peachGatherPoint;
+    CoursePoint marioGatherPoint;
+    CoursePoint plumGatherPoint;
 
     switch (f_OpeningCue) {
         case OPENING_CUE_MARIO_TEE_SHOT:
@@ -1052,7 +1052,7 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 0;
             if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
                 SetCharacterAnimation(f_CueSlotIndex, MARIO_TEE_SHOT_ANIMATION);
-                PlaceCueCharacter(point0, 0xF3400, 0x490000, -30);
+                PlaceCueCharacter(marioTeeShotPoint, 0xF3400, 0x490000, -30);
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
 
@@ -1062,7 +1062,7 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 1;
             if (ToggleOpeningCharacter(1, OPENING_MODEL_PEACH)) {
                 SetCharacterAnimation(f_CueSlotIndex, PEACH_CHEER_ANIMATION);
-                PlaceCueCharacter(point1, 0xA0B58, 0x4A28BF, 80);
+                PlaceCueCharacter(peachCheerPoint, 0xA0B58, 0x4A28BF, 80);
                 f_OpeningCue = OPENING_CUE_DONE;
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
@@ -1073,7 +1073,7 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 2;
             if (ToggleOpeningCharacter(2, OPENING_MODEL_LUIGI)) {
                 SetCharacterAnimation(f_CueSlotIndex, LUIGI_CHEER_ANIMATION);
-                PlaceCueCharacter(point2, 0x1368A0, 0x49D208, 0);
+                PlaceCueCharacter(luigiCheerPoint, 0x1368A0, 0x49D208, 0);
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
 
@@ -1086,7 +1086,7 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 3;
             if (ToggleOpeningCharacter(3, OPENING_MODEL_PEACH)) {
                 SetCharacterAnimation(f_CueSlotIndex, PEACH_TEE_SHOT_ANIMATION);
-                PlaceCueCharacter(point3, 0xF3400, 0x490000, -30);
+                PlaceCueCharacter(peachTeeShotPoint, 0xF3400, 0x490000, -30);
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
 
@@ -1096,7 +1096,7 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 0;
             if (ToggleOpeningCharacter(0, OPENING_MODEL_PLUM)) {
                 SetCharacterAnimation(f_CueSlotIndex, PLUM_CHEER_ANIMATION);
-                PlaceCueCharacter(point4, 0xB2A34, 0x4F9800, 10);
+                PlaceCueCharacter(plumCheerPoint, 0xB2A34, 0x4F9800, 10);
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
 
@@ -1108,7 +1108,7 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 1;
             if (ToggleOpeningCharacter(1, OPENING_MODEL_PLUM)) {
                 SetCharacterAnimation(f_CueSlotIndex, PLUM_TEE_SHOT_ANIMATION);
-                PlaceCueCharacter(point5, 0xF3400, 0x490000, 0);
+                PlaceCueCharacter(plumTeeShotPoint, 0xF3400, 0x490000, 0);
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
 
@@ -1118,7 +1118,7 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 2;
             if (ToggleOpeningCharacter(2, OPENING_MODEL_MARIO)) {
                 SetCharacterAnimation(f_CueSlotIndex, MARIO_CHEER_ANIMATION);
-                PlaceCueCharacter(point6, 0x1610CF, 0x4AFA34, 0);
+                PlaceCueCharacter(marioCheerPoint, 0x1610CF, 0x4AFA34, 0);
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
 
@@ -1130,7 +1130,7 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 0;
             if (ToggleOpeningCharacter(0, OPENING_MODEL_LUIGI)) {
                 SetCharacterAnimation(f_CueSlotIndex, LUIGI_TEE_SHOT_ANIMATION);
-                PlaceCueCharacter(point7, 0xF3400, 0x490000, -45);
+                PlaceCueCharacter(luigiTeeShotPoint, 0xF3400, 0x490000, -45);
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
 
@@ -1141,13 +1141,13 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 1;
             if (ToggleOpeningCharacter(1, OPENING_MODEL_PLUM)) {
                 SetCharacterAnimation(f_CueSlotIndex, PLUM_WALK_ANIMATION);
-                PlaceCueCharacter(point8, 0x29EB94, 0x26DDDA, 0);
+                PlaceCueCharacter(plumWalkPoint, 0x29EB94, 0x26DDDA, 0);
             }
 
             f_CueSlotIndex = 2;
             if (ToggleOpeningCharacter(2, OPENING_MODEL_PEACH)) {
                 SetCharacterAnimation(f_CueSlotIndex, PEACH_WALK_ANIMATION);
-                PlaceCueCharacter(point9, 0x29EB94, 0x26DDDA, 0);
+                PlaceCueCharacter(peachWalkPoint, 0x29EB94, 0x26DDDA, 0);
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
 
@@ -1159,13 +1159,13 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 0;
             if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
                 SetCharacterAnimation(f_CueSlotIndex, MARIO_WALK_ANIMATION);
-                PlaceCueCharacter(point10, 0x2709F8, 0x1CF4B4, 10);
+                PlaceCueCharacter(marioWalkPoint, 0x2709F8, 0x1CF4B4, 10);
             }
 
             f_CueSlotIndex = 3;
             if (ToggleOpeningCharacter(3, OPENING_MODEL_LUIGI)) {
                 SetCharacterAnimation(f_CueSlotIndex, LUIGI_WALK_ANIMATION);
-                PlaceCueCharacter(point11, 0x2709F8, 0x1CF4B4, 55);
+                PlaceCueCharacter(luigiWalkPoint, 0x2709F8, 0x1CF4B4, 55);
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
 
@@ -1176,7 +1176,7 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 1;
             if (ToggleOpeningCharacter(1, OPENING_MODEL_MARIO)) {
                 SetCharacterAnimation(f_CueSlotIndex, MARIO_REACH_BALL_ANIMATION);
-                PlaceCueCharacter(point12, 0x2709F8, 0x1CF4B4, 10);
+                PlaceCueCharacter(marioReachBallPoint, 0x2709F8, 0x1CF4B4, 10);
             }
 
             f_OpeningCue = OPENING_CUE_DONE;
@@ -1187,13 +1187,13 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 0;
             if (ToggleOpeningCharacter(0, OPENING_MODEL_PEACH)) {
                 SetCharacterAnimation(f_CueSlotIndex, PEACH_WAVE_ANIMATION);
-                PlaceCueCharacter(point13, 0x2CA5D3, 0x22A928, -98);
+                PlaceCueCharacter(peachWavePoint, 0x2CA5D3, 0x22A928, -98);
             }
 
             f_CueSlotIndex = 2;
             if (ToggleOpeningCharacter(2, OPENING_MODEL_MARIO)) {
                 SetCharacterAnimation(f_CueSlotIndex, MARIO_RUN_ANIMATION);
-                PlaceCueCharacter(point14, 0x2C42D6, 0x22A832, -98);
+                PlaceCueCharacter(marioRunPoint, 0x2C42D6, 0x22A832, -98);
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
 
@@ -1205,13 +1205,13 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 1;
             if (ToggleOpeningCharacter(1, OPENING_MODEL_PEACH)) {
                 SetCharacterAnimation(f_CueSlotIndex, PEACH_APPROACH_ANIMATION);
-                PlaceCueCharacter(point15, 0x2B1194, 0x249320, -98);
+                PlaceCueCharacter(peachApproachPoint, 0x2B1194, 0x249320, -98);
             }
 
             f_CueSlotIndex = 3;
             if (ToggleOpeningCharacter(3, OPENING_MODEL_MARIO)) {
                 SetCharacterAnimation(f_CueSlotIndex, MARIO_INSPECT_BALL_ANIMATION);
-                PlaceCueCharacter(point16, 0x2B1194, 0x249320, -98);
+                PlaceCueCharacter(marioInspectBallPoint, 0x2B1194, 0x249320, -98);
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
 
@@ -1223,13 +1223,13 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 0;
             if (ToggleOpeningCharacter(0, OPENING_MODEL_PEACH)) {
                 SetCharacterAnimation(f_CueSlotIndex, PEACH_INSPECT_BALL_ANIMATION);
-                PlaceCueCharacter(point17, 0x2B1194, 0x249320, -98);
+                PlaceCueCharacter(peachInspectBallPoint, 0x2B1194, 0x249320, -98);
             }
 
             f_CueSlotIndex = 2;
             if (ToggleOpeningCharacter(2, OPENING_MODEL_MARIO)) {
                 SetCharacterAnimation(f_CueSlotIndex, MARIO_STAND_AT_BALL_ANIMATION);
-                PlaceCueCharacter(point18, 0x2B1194, 0x249320, -98);
+                PlaceCueCharacter(marioStandAtBallPoint, 0x2B1194, 0x249320, -98);
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
 
@@ -1240,7 +1240,7 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 1;
             ToggleOpeningCharacter(1, OPENING_MODEL_MARIO);
             SetCharacterAnimation(f_CueSlotIndex, MARIO_LOOK_UP_ANIMATION);
-            PlaceCueCharacter(point19, 0x2B1194, 0x249320, -98);
+            PlaceCueCharacter(marioLookUpPoint, 0x2B1194, 0x249320, -98);
             f_OpeningCue = OPENING_CUE_DONE;
             f_LastPlacedSlotIndex = f_CueSlotIndex;
             break;
@@ -1273,7 +1273,7 @@ s32 UpdateOpeningCharacters(void) {
                 SetCharacterAnimation(f_CueSlotIndex, YOSHI_CARRY_ANIMATION);
             }
 
-            PlaceCueCharacter(point20, 0x202B29, 0xCE7DA, -165);
+            PlaceCueCharacter(carrierArrivalPoint, 0x202B29, 0xCE7DA, -165);
             f_CueSlotIndex = 3;
             ToggleOpeningCharacter(3, OPENING_MODEL_BABY_MARIO);
             SetAnimationSpeed(3, 0.0f);
@@ -1284,7 +1284,7 @@ s32 UpdateOpeningCharacters(void) {
                 SetCharacterAnimation(f_CueSlotIndex, BABY_MARIO_RIDE_YOSHI_ANIMATION);
             }
 
-            PlaceCueCharacter(point21, 0x202B29, 0xCE7DA, -165);
+            PlaceCueCharacter(babyMarioArrivalPoint, 0x202B29, 0xCE7DA, -165);
             f_OpeningCue = OPENING_CUE_DONE;
             f_LastPlacedSlotIndex = f_CueSlotIndex;
             break;
@@ -1296,11 +1296,11 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 0;
             ToggleOpeningCharacter(0, OPENING_MODEL_PEACH);
             SetCharacterAnimation(f_CueSlotIndex, PEACH_COVER_MOUTH_ANIMATION);
-            PlaceCueCharacter(point22, 0x2B1194, 0x249320, -98);
+            PlaceCueCharacter(peachCoverMouthPoint, 0x2B1194, 0x249320, -98);
             f_CueSlotIndex = 1;
             ToggleOpeningCharacter(1, OPENING_MODEL_MARIO);
             SetCharacterAnimation(f_CueSlotIndex, MARIO_SCRATCH_HEAD_ANIMATION);
-            PlaceCueCharacter(point23, 0x2B1194, 0x249320, -98);
+            PlaceCueCharacter(marioScratchHeadPoint, 0x2B1194, 0x249320, -98);
             f_OpeningCue = OPENING_CUE_DONE;
             f_LastPlacedSlotIndex = f_CueSlotIndex;
             break;
@@ -1312,7 +1312,7 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 0;
             ToggleOpeningCharacter(0, OPENING_MODEL_LUIGI);
             SetCharacterAnimation(f_CueSlotIndex, LUIGI_SEARCH_ANIMATION);
-            PlaceCueCharacter(point24, 0x16308C, 0x183EDA, 170);
+            PlaceCueCharacter(luigiSearchPoint, 0x16308C, 0x183EDA, 170);
             f_OpeningCue = OPENING_CUE_DONE;
             f_LastPlacedSlotIndex = f_CueSlotIndex;
             break;
@@ -1320,7 +1320,7 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 1;
             ToggleOpeningCharacter(1, OPENING_MODEL_TOAD);
             SetCharacterAnimation(f_CueSlotIndex, TOAD_WAVE_FLAG_ANIMATION);
-            PlaceCueCharacter(point25, 0xE3F2C, 0x1D98E6, 70);
+            PlaceCueCharacter(toadWaveFlagPoint, 0xE3F2C, 0x1D98E6, 70);
             f_OpeningCue = OPENING_CUE_DONE;
             f_LastPlacedSlotIndex = f_CueSlotIndex;
             break;
@@ -1330,12 +1330,12 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 2;
             ToggleOpeningCharacter(2, OPENING_MODEL_LUIGI);
             SetCharacterAnimation(f_CueSlotIndex, LUIGI_DISMAY_ANIMATION);
-            PlaceCueCharacter(point26, 0x16308C, 0x183EDA, 185);
+            PlaceCueCharacter(luigiDismayPoint, 0x16308C, 0x183EDA, 185);
             f_LastPlacedSlotIndex = f_CueSlotIndex;
             f_CueSlotIndex = 3;
             if (ToggleOpeningCharacter(3, OPENING_MODEL_PEACH)) {
                 SetCharacterAnimation(f_CueSlotIndex, PEACH_GATHER_ANIMATION);
-                PlaceCueCharacter(point27, 0x16806D, 0x17E632, 200);
+                PlaceCueCharacter(peachGatherPoint, 0x16806D, 0x17E632, 200);
             }
 
             f_OpeningCue++;
@@ -1344,13 +1344,13 @@ s32 UpdateOpeningCharacters(void) {
             f_CueSlotIndex = 0;
             if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
                 SetCharacterAnimation(f_CueSlotIndex, MARIO_GATHER_ANIMATION);
-                PlaceCueCharacter(point28, 0x15E14D, 0x18155C, 170);
+                PlaceCueCharacter(marioGatherPoint, 0x15E14D, 0x18155C, 170);
             }
 
             f_CueSlotIndex = 1;
             if (ToggleOpeningCharacter(1, OPENING_MODEL_PLUM)) {
                 SetCharacterAnimation(f_CueSlotIndex, PLUM_GATHER_ANIMATION);
-                PlaceCueCharacter(point29, 0x166EDF, 0x1838C7, 200);
+                PlaceCueCharacter(plumGatherPoint, 0x166EDF, 0x1838C7, 200);
                 f_LastPlacedSlotIndex = f_CueSlotIndex;
             }
 
