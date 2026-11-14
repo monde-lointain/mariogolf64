@@ -1,7 +1,9 @@
 /*
- * The shot being set up, defined volatile as the original's; see current_shot.h.
+ * The shot being set up, defined volatile under KMC as the original's; see
+ * current_shot.h.
  */
 
+#define READS_CURRENT_SHOT_VOLATILE
 #include "shot/current_shot.h"
 
-volatile CurrentShot g_CurrentShot;
+CURRENT_SHOT_VOLATILE CurrentShot g_CurrentShot;
