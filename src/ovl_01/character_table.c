@@ -25,10 +25,8 @@
 
 #define ASSET_TABLE_ARROWS 0x94A
 
-#define TABLE_STAR_IMAGE_WIDTH 32
-#define TABLE_STAR_IMAGE_HEIGHT 24
-#define TABLE_STAR_WIDTH 24
-#define TABLE_STAR_HEIGHT 20
+#define TABLE_STAR_SHOWN_WIDTH 24
+#define TABLE_STAR_SHOWN_HEIGHT 20
 
 enum TablePopupCorner {
     TABLE_POPUP_TOP_LEFT,
@@ -918,8 +916,8 @@ void DrawTableStar(Gfx **displayListHead, s32 left, s32 top) {
         gfx++,
         TextureAddress(ImageTexels(f_TableStar)),
         G_IM_FMT_CI,
-        TABLE_STAR_IMAGE_WIDTH,
-        TABLE_STAR_IMAGE_HEIGHT,
+        STAR_WIDTH,
+        STAR_HEIGHT,
         0,
         G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP,
@@ -932,13 +930,13 @@ void DrawTableStar(Gfx **displayListHead, s32 left, s32 top) {
         gfx++,
         QuarterPixels(left),
         QuarterPixels(top),
-        QuarterPixels(left + TABLE_STAR_WIDTH),
-        QuarterPixels(top + TABLE_STAR_HEIGHT),
+        QuarterPixels(left + TABLE_STAR_SHOWN_WIDTH),
+        QuarterPixels(top + TABLE_STAR_SHOWN_HEIGHT),
         G_TX_RENDERTILE,
         0,
         0,
-        TexelRunStep(TABLE_STAR_IMAGE_WIDTH, TABLE_STAR_WIDTH),
-        TexelRunStep(TABLE_STAR_IMAGE_HEIGHT, TABLE_STAR_HEIGHT)
+        TexelRunStep(STAR_WIDTH, TABLE_STAR_SHOWN_WIDTH),
+        TexelRunStep(STAR_HEIGHT, TABLE_STAR_SHOWN_HEIGHT)
     );
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
