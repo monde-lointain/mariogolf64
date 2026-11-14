@@ -1554,11 +1554,10 @@ DIM_BACKDROP:
 
                         break;
                     case HOLE_END_STEP_PROMPT:
-                        result = UpdatePrompt(&g_TurnController);
-                        switch (result) {
+                        switch (UpdatePrompt(&g_TurnController)) {
                             case PROMPT_RESULT_SKIP_REPLAY:
                                 LeaveReplaySaveMenu();
-                                f_HoleEndStep = result;
+                                f_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
                                 OpenPrompt(NO_PROMPT);
                                 break;
                             case PROMPT_RESULT_SAVE_REPLAY:
