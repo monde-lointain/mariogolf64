@@ -33,6 +33,8 @@ enum ScoreKind {
     SCORE_KIND_COUNT
 };
 
+typedef s32 ScoreKind;
+
 typedef struct PlayRecord {
     HoleSetup hole;
     GameMode gameMode;

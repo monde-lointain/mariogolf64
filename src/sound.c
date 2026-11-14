@@ -45,7 +45,7 @@
 typedef struct QueuedCharacterSound {
     CharacterIndex characterIndex;
     s32 delay;
-    s32 kind;
+    CharacterSoundKind kind;
     SoundVolume volume;
     SoundPan pan;
 } QueuedCharacterSound;

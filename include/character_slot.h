@@ -141,12 +141,6 @@ static inline void QuaternionToMatrix(f32 quaternion[4], Mat4 matrix) {
     matrix[3][3] = 1.0f;
 }
 
-typedef struct AnimationEvent {
-    s16 frame;
-    u8 kind;
-    u8 value;
-} AnimationEvent;
-
 #define END_OF_ANIMATION_EVENTS (-1)
 
 enum AnimationEventKind {
@@ -157,9 +151,16 @@ enum AnimationEventKind {
 };
 
 typedef s32 AnimationEventKind;
+typedef u8 AnimationEventKind8;
+
+typedef struct AnimationEvent {
+    s16 frame;
+    AnimationEventKind8 kind;
+    u8 value;
+} AnimationEvent;
 
 typedef struct AnimationEventAction {
-    u8 kind;
+    AnimationEventKind8 kind;
     u8 value;
 } AnimationEventAction;
 

@@ -23,6 +23,27 @@ typedef s32 Weather;
 #define RAIN_SOUND 0
 #define RAIN_SOUND_START_VOLUME 100
 
+enum EffectKind {
+    EFFECT_KIND_NONE = -1,
+    EFFECT_KIND_HIGH_PUFF,
+    EFFECT_KIND_LOW_PUFF,
+    EFFECT_KIND_LOW_GRASS,
+    EFFECT_KIND_HIGH_ROUGH,
+    EFFECT_KIND_LOW_ROUGH,
+    EFFECT_KIND_DROP,
+    EFFECT_KIND_DIVOT,
+    EFFECT_KIND_DIVOT_MARK,
+    EFFECT_KIND_SPARKLE,
+    EFFECT_KIND_RIPPLE = 0xC,
+    EFFECT_KIND_SMOKE_PUFF = 0xE,
+    EFFECT_KIND_SPREADING_CIRCLE = 0x13,
+    EFFECT_KIND_RISING_CLUMP = 0x10,
+    EFFECT_KIND_TEAR = 0x14
+};
+
+typedef s32 EffectKind;
+typedef s8 EffectKind8;
+
 typedef struct Effect {
     Vec3 position;
     Vec3 velocity;
@@ -33,7 +54,7 @@ typedef struct Effect {
     f32 scale;
     f32 scaleStep;
     s16 color;
-    s8 kind;
+    EffectKind8 kind;
     s8 frame;
     s8 matrixIndex;
 } Effect;

@@ -1433,7 +1433,7 @@ s32 GetRecordPriority(PlayRecord *record) {
     s32 priority;
     s32 flaggedScoreKind;
     s32 par;
-    s32 kind;
+    ScoreKind kind;
     s32 priorityMax;
 
     flaggedScoreKind = record->scoreKind;
