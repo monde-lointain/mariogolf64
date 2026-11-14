@@ -25,7 +25,7 @@
 #include "text.h"
 #include "turn.h"
 
-enum ShotLabels {
+enum ShotLabelMode {
     SHOT_LABELS_NONE = -1,
     SHOT_LABELS_OVERHEAD,
     SHOT_LABELS_OTHER_BALLS
@@ -116,7 +116,7 @@ static u8 f_PlayerTagColors[PLAYER_COUNT_MAX][3] =
     {{0xDC, 0x00, 0x00}, {0x00, 0x00, 0xDC}, {0xF0, 0x7F, 0x00}, {0x00, 0x7F, 0x00}};
 static ShotLabel f_ShotLabels[PLAYER_COUNT_MAX] =
     {{0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}};
-static s32 f_ShotLabelPlayers = SHOT_LABELS_NONE;
+static s32 f_ShotLabelMode = SHOT_LABELS_NONE;
 static s8 f_TagOffsetsX[CORNER_COUNT] = {22, -22, -22, 22};
 static s8 f_TagOffsetsY[CORNER_COUNT] = {12, 12, -12, -12};
 static Radians f_OutOfBoundsPulseAngle = 0.0f;
@@ -132,7 +132,7 @@ void DrawShotLabels(Gfx **displayListHead) {
     ScreenPoint point;
     ScreenSpot cup;
     Gfx *gfx = *displayListHead;
-    s32 players;
+    s32 labelMode;
     s32 corner;
     s32 tries;
 
@@ -235,27 +235,27 @@ void DrawShotLabels(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
     }
 
-    players = SHOT_LABELS_NONE;
+    labelMode = SHOT_LABELS_NONE;
     if (g_Cameras[0].mode == CAMERA_MODE_FREE_LOOK) {
-        players = SHOT_LABELS_OVERHEAD;
+        labelMode = SHOT_LABELS_OVERHEAD;
     }
     else if (g_GameState.step == GAME_STATE_TAKING_TURNS &&
         g_CurrentShot.playerIndex >= 0 &&
         g_CurrentShot.playerIndex < PLAYER_COUNT_MAX) {
         if (g_Players[g_CurrentShot.playerIndex].state == PLAYER_STATE_AIMING &&
             IsLetterboxState(g_LetterboxState)) {
-            players = SHOT_LABELS_OTHER_BALLS;
+            labelMode = SHOT_LABELS_OTHER_BALLS;
         }
     }
 
-    if (f_ShotLabelPlayers != players) {
+    if (f_ShotLabelMode != labelMode) {
         for (playerIndex = 0; playerIndex != PLAYER_COUNT_MAX; playerIndex++) {
             f_ShotLabels[playerIndex].corner = NO_CORNER;
         }
     }
 
-    f_ShotLabelPlayers = players;
-    if (players != SHOT_LABELS_NONE) {
+    f_ShotLabelMode = labelMode;
+    if (labelMode != SHOT_LABELS_NONE) {
         if (ProjectPoint(
                 g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
                 g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
@@ -271,7 +271,7 @@ void DrawShotLabels(Gfx **displayListHead) {
         }
 
         for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-            if (players == SHOT_LABELS_OTHER_BALLS &&
+            if (labelMode == SHOT_LABELS_OTHER_BALLS &&
                 (g_CurrentShot.playerIndex == playerIndex ||
                     g_Players[playerIndex].strokeCount == 0)) {
                 f_ShotLabels[playerIndex].corner = NO_CORNER;
@@ -305,7 +305,7 @@ void DrawShotLabels(Gfx **displayListHead) {
             }
 
             if (f_ShotLabels[playerIndex].corner == NO_CORNER) {
-                if (players == SHOT_LABELS_OTHER_BALLS) {
+                if (labelMode == SHOT_LABELS_OTHER_BALLS) {
                     f_ShotLabels[playerIndex].corner = (playerIndex & 1) + CORNER_UPPER_LEFT;
                 }
                 else {
@@ -316,7 +316,7 @@ void DrawShotLabels(Gfx **displayListHead) {
             f_ShotLabels[playerIndex].x = point.x + f_TagOffsetsX[f_ShotLabels[playerIndex].corner];
             f_ShotLabels[playerIndex].y = point.y + f_TagOffsetsY[f_ShotLabels[playerIndex].corner];
             f_ShotLabels[playerIndex].depth = point.depth;
-            if (players == SHOT_LABELS_OVERHEAD) {
+            if (labelMode == SHOT_LABELS_OVERHEAD) {
                 for (tries = 0; tries != CORNER_COUNT; tries++) {
                     s32 overlaps = FALSE;
 
@@ -393,7 +393,7 @@ NEXT:;
         }
 
         gDPPipeSync(gfx++);
-        if (players == SHOT_LABELS_OTHER_BALLS) {
+        if (labelMode == SHOT_LABELS_OTHER_BALLS) {
             gDPPipeSync(gfx++);
             gDPSetRenderMode(
                 gfx++,
