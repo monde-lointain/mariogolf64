@@ -8,6 +8,7 @@
 
 #include "ball_simulation.h"
 #include "camera.h"
+#include "camera_framing.h"
 #include "character_model.h"
 #include "club.h"
 #include "compiler.h"
@@ -16,7 +17,6 @@
 #include "course_space.h"
 #include "current_shot.h"
 #include "debug_text.h"
-#include "framing.h"
 #include "game_flags.h"
 #include "game_state.h"
 #include "gbi_helpers.h"

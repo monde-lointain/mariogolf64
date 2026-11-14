@@ -1,4 +1,4 @@
-#include "framing.h"
+#include "camera_framing.h"
 
 #include <math.h>
 #include <ultra64.h>

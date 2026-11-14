@@ -1,5 +1,5 @@
-#ifndef FRAMING_H
-#define FRAMING_H
+#ifndef CAMERA_FRAMING_H
+#define CAMERA_FRAMING_H
 
 #include <ultra64.h>
 
