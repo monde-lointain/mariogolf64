@@ -241,7 +241,7 @@ static RingShotHole f_RingShotHoles[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT
 
 s32 GetHoleRadius(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
     switch (courseRecordIndex) {
-        case 0:
+        case COURSE_RECORD_TOAD_HIGHLANDS:
             if (holeIndex == 10) {
                 return 400;
             }
@@ -251,7 +251,7 @@ s32 GetHoleRadius(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
             }
 
             break;
-        case 1:
+        case COURSE_RECORD_KOOPA_PARK:
             if (holeIndex == 1) {
                 return 400;
             }
@@ -269,7 +269,7 @@ s32 GetHoleRadius(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
             }
 
             break;
-        case 2:
+        case COURSE_RECORD_SHY_GUY_DESERT:
             if (holeIndex == 2) {
                 return 300;
             }
@@ -283,7 +283,7 @@ s32 GetHoleRadius(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
             }
 
             break;
-        case 3:
+        case COURSE_RECORD_YOSHIS_ISLAND:
             if (holeIndex == 2) {
                 return 300;
             }
@@ -317,7 +317,7 @@ s32 GetHoleRadius(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
             }
 
             break;
-        case 4:
+        case COURSE_RECORD_BOO_VALLEY:
             if (holeIndex == 10) {
                 return 400;
             }
@@ -327,7 +327,7 @@ s32 GetHoleRadius(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
             }
 
             break;
-        case 5:
+        case COURSE_RECORD_MARIOS_STAR:
             if (holeIndex == 15) {
                 return 400;
             }
