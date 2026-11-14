@@ -4081,6 +4081,8 @@ void BuildStatusData(StatusData *status) {
         }
     }
 
+    // courseIndex is reused here to walk the characters; a separate
+    // characterIndex variable changes register allocation and breaks the match.
     for (courseIndex = 0; courseIndex != CHARACTER_COUNT; courseIndex++) {
         row = f_StatusCharacterOrder[courseIndex];
         bits[1] = 0;
