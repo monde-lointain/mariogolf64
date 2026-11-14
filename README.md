@@ -36,6 +36,30 @@ every routine by state (`functions.svg`), the matched code over time
 drafts that differ in register numbers only. `tools/progress_map.py`, a
 copy of a tool kept elsewhere with this project's settings, draws them.
 
+## Assets
+
+`make extract` cuts the files that the game reads from ROM out of the
+original, into `assets/`, which is never committed:
+
+| Path | Contents |
+| --- | --- |
+| `sound/` | The sound pointer, wave and effect banks |
+| `songs/` | A song for each value of `enum Song` |
+| `asset_archive/` | The asset archive's 2449 assets, named by ID; `tools/asset_archive.py` packs them |
+| `text/` | The messages and the staff roll's lines as text, which `tools/messages.py` encodes |
+| `character_models/` | Each character's models, and the files that patch them to its other palettes |
+
+The code takes each file's ROM address from the linker script, so a
+file can change size. About half of the archive's assets are images
+encoded as runs, which `tools/decode_asset.py` reads. They stay encoded:
+the original's runs split where the decoded bytes give no reason to, as
+if chosen from the image before its colors were reduced, so encoding
+the decoded bytes again does not give the original's.
+
+IPL3 and the RSP's boot, audio and graphics microcode are Nintendo's
+own binaries, cut from the original as they are, and `textures.txt`
+lists the textures that C files hold, which are built from PNGs.
+
 ## Formatting
 
 The sources follow the style in `.clang-format`, based on WebKit's, through
