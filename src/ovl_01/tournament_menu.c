@@ -2069,7 +2069,7 @@ void DrawCodeKeys(Gfx **displayListHead) {
     s32 row;
     s32 column;
     s8 glyph;
-    s32 grow;
+    s32 growth;
     s32 size;
 
     gDPPipeSync(gfx++);
@@ -2089,12 +2089,12 @@ void DrawCodeKeys(Gfx **displayListHead) {
                 gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                 gDPSetPrimColor(gfx++, 0, 0, 255, 255, 0, OPAQUE_ALPHA);
 
-                grow = 0;
+                growth = 0;
                 size = CODE_GLYPH_SIZE;
             }
             else {
                 gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-                grow = 0;
+                growth = 0;
                 size = CODE_GLYPH_SIZE;
             }
 
@@ -2117,13 +2117,13 @@ void DrawCodeKeys(Gfx **displayListHead) {
             );
             gSPScisTextureRectangle(
                 gfx++,
-                QuarterPixels((column * CODE_KEY_SPACING_X) + CODE_GLYPH_FIRST_X - grow),
-                QuarterPixels((row * CODE_KEY_SPACING_Y) + CODE_GLYPH_FIRST_Y - grow),
+                QuarterPixels((column * CODE_KEY_SPACING_X) + CODE_GLYPH_FIRST_X - growth),
+                QuarterPixels((row * CODE_KEY_SPACING_Y) + CODE_GLYPH_FIRST_Y - growth),
                 QuarterPixels(
-                    (column * CODE_KEY_SPACING_X) + CODE_GLYPH_FIRST_X + CODE_GLYPH_SIZE + grow
+                    (column * CODE_KEY_SPACING_X) + CODE_GLYPH_FIRST_X + CODE_GLYPH_SIZE + growth
                 ),
                 QuarterPixels(
-                    (row * CODE_KEY_SPACING_Y) + CODE_GLYPH_FIRST_Y + CODE_GLYPH_SIZE + grow
+                    (row * CODE_KEY_SPACING_Y) + CODE_GLYPH_FIRST_Y + CODE_GLYPH_SIZE + growth
                 ),
                 G_TX_RENDERTILE,
                 0,
