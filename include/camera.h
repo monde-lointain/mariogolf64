@@ -59,6 +59,15 @@ typedef struct CameraMatrices {
     u8 unusedAfterLookAt[0x10];
 } CameraMatrices;
 
+// A camera eye and look-at point that each start easing toward their
+// target once set.
+typedef struct EasedView {
+    f32 eye[AXIS_COUNT];
+    f32 lookAt[AXIS_COUNT];
+    s8 isEyeEased;
+    s8 isLookAtEased;
+} EasedView;
+
 #define INSET_CAMERA 1
 #define OPENING_CAMERA 2
 
