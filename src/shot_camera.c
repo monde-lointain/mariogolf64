@@ -321,7 +321,7 @@ SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot) {
     SurfaceTraits *surfaceTraits;
     s32 sampleDistance;
     SignedBinaryAngle aimYaw;
-    s32 yaw;
+    WideBinaryAngle yaw;
     Radians angle;
     s32 height;
     s32 rise;

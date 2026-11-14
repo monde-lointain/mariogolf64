@@ -21,6 +21,9 @@ typedef f32 Degrees;
 
 typedef u16 BinaryAngle;
 typedef s16 SignedBinaryAngle;
+// A binary angle held in an s32 so that sums and steps can run past a
+// turn before they are masked or truncated back to 16 bits.
+typedef s32 WideBinaryAngle;
 
 #define DegreesToRadians(degrees) ((degrees) * (M_PI / 180))
 #define RADIANS_TO_DEGREES (1.0 / ((f32)M_PI / 180.0))

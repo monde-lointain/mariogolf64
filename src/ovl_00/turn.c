@@ -959,15 +959,15 @@ void TurnAim(s32 turnsLookBackHeading) {
     if (!turnsLookBackHeading) {
         SignedBinaryAngle *shotHeading = &g_CurrentShot.heading;
         s32 step = stickX / 2;
-        s32 oldHeading = heading;
+        WideBinaryAngle oldHeading = heading;
         s32 speed = Abs(stickX / AIM_STICK_SPEED_DIVISOR);
-        s32 newHeading = oldHeading - ((speed != 0) ? step * speed : step);
+        WideBinaryAngle newHeading = oldHeading - ((speed != 0) ? step * speed : step);
 
         *shotHeading = newHeading;
     }
     else {
         s32 step = stickX / 2;
-        s32 oldHeading = g_LookBackHeading;
+        WideBinaryAngle oldHeading = g_LookBackHeading;
         s32 speed = Abs(stickX / LOOK_BACK_STICK_SPEED_DIVISOR);
 
         g_LookBackHeading = oldHeading - ((speed != 0) ? step * speed : step);
@@ -1053,7 +1053,7 @@ s32 UpdateAimControls(void) {
     s32 headingLeft;
     s32 step;
     s32 turn;
-    s32 heading;
+    WideBinaryAngle heading;
 
     if (f_ShotSource != SHOT_SOURCE_PLAYER) {
         headingLeft = (s16)(g_ScriptedShot.heading - g_CurrentShot.heading);

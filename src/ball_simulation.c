@@ -2201,7 +2201,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
     s32 rumbles;
     s16 crossSlope;
     s32 crossSlopeSize;
-    s32 yaw;
+    WideBinaryAngle yaw;
     Radians pitch;
     Radians yawRadians;
     f32 launchScale;

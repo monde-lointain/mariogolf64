@@ -1325,7 +1325,7 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
     f32 absRadius;
     f32 radius = SPOT_PLACE_DISTANCE;
     SignedBinaryAngle shotHeading = g_CurrentShot.heading;
-    s32 sidewaysHeading;
+    WideBinaryAngle sidewaysHeading;
 
     spot[AXIS_X] = f_ReactionSpot[AXIS_X];
     spot[AXIS_Y] = f_ReactionSpot[AXIS_Y];

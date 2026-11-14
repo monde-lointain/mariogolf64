@@ -2537,7 +2537,7 @@ s32 RollClubCategoryChance(s32 chanceSetIndex);
 
 s32 ChooseShotOffset(void) {
     s32 windPlay;
-    s32 aimYaw;
+    WideBinaryAngle aimYaw;
     s32 windDirection;
 
     switch (GetSurfaceTraits(f_Shot.surface)->kind) {
