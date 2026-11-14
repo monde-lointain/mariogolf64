@@ -643,7 +643,7 @@ segments:
       - [0xFD310, c, ovl_01/best_times]
       - [0xFF940, c, ovl_01/character_table]
       - [0x101830, c, ovl_01/player_stats]
-      - [0x109570, c, ovl_01/save_menu]
+      - [0x109570, c, ovl_01/save_screens]
       - [0x110670, c, ovl_01/tournament_menu]
       - [0x115D80, .data, ovl_01/main_menu]
       - [0x119E80, .data, ovl_01/character_select]
@@ -651,7 +651,7 @@ segments:
       - [0x11A0B0, .data, ovl_01/best_times]
       - [0x11A110, .data, ovl_01/character_table]
       - [0x11A320, .data, ovl_01/player_stats]
-      - [0x11AA10, .data, ovl_01/save_menu]
+      - [0x11AA10, .data, ovl_01/save_screens]
       - [0x11ADF0, .data, ovl_01/tournament_menu]
       - [0x11B110, .rodata, ovl_01/main_menu]
       - [0x11B730, .rodata, ovl_01/character_select]
@@ -659,7 +659,7 @@ segments:
       - [0x11B870, .rodata, ovl_01/best_times]
       - [0x11B880, .rodata, ovl_01/character_table]
       - [0x11B920, .rodata, ovl_01/player_stats]
-      - [0x11B980, .rodata, ovl_01/save_menu]
+      - [0x11B980, .rodata, ovl_01/save_screens]
       - [0x11B9D0, .rodata, ovl_01/tournament_menu]
       - { start: 0x11BA50, type: .bss, vram: 0x80231AD0, name: ovl_01/main_menu }
       - { type: .bss, vram: 0x8023A3A0, name: ovl_01/character_select }
@@ -667,12 +667,12 @@ segments:
       - { type: .bss, vram: 0x8023A9C0, name: ovl_01/best_times }
       - { type: .bss, vram: 0x8023AAE0, name: ovl_01/character_table }
       - { type: .bss, vram: 0x8023ACC0, name: ovl_01/player_stats }
-      - { type: .bss, vram: 0x8023B670, name: ovl_01/save_menu }
+      - { type: .bss, vram: 0x8023B670, name: ovl_01/save_screens }
       - { type: .bss, vram: 0x8023BE40, name: ovl_01/tournament_menu }
       - { type: .bss, vram: 0x8023BFC0, name: ovl_01/main_menu, linker_section: COMMON .scommon }
       - { type: .bss, vram: 0x8023BFD4, name: ovl_01/character_select, linker_section: COMMON .scommon }
       - { type: .bss, vram: 0x8023BFDC, name: ovl_01/player_stats, linker_section: COMMON .scommon }
-      - { type: .bss, vram: 0x8023BFF0, name: ovl_01/save_menu, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8023BFF0, name: ovl_01/save_screens, linker_section: COMMON .scommon }
 
   - name: hole_editor
     type: code
