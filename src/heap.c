@@ -24,7 +24,7 @@ typedef struct MemoryBlock {
     u32 size;
     s32 tag;
     struct MemoryBlock *next;
-    struct MemoryBlock *prev;
+    struct MemoryBlock *previous;
 } MemoryBlock;
 
 #define BLOCK_ALIGNMENT 8
@@ -53,9 +53,9 @@ void AddHeapRegion(s32 heapIndex, void *start, void *end) {
     f_Heaps[heapIndex].freeSize += size;
     block->tag = BLOCK_FREE;
     block->next = &f_Heaps[heapIndex].sentinel;
-    block->prev = f_Heaps[heapIndex].sentinel.prev;
-    f_Heaps[heapIndex].sentinel.prev->next = block;
-    f_Heaps[heapIndex].sentinel.prev = block;
+    block->previous = f_Heaps[heapIndex].sentinel.previous;
+    f_Heaps[heapIndex].sentinel.previous->next = block;
+    f_Heaps[heapIndex].sentinel.previous = block;
 }
 
 void ResetHeap(s32 heapIndex) {
@@ -64,7 +64,7 @@ void ResetHeap(s32 heapIndex) {
     f_Heaps[heapIndex].freeSize = 0;
     f_Heaps[heapIndex].sentinel.size = 0;
     f_Heaps[heapIndex].sentinel.tag = BLOCK_SENTINEL;
-    heap->sentinel.prev = &heap->sentinel;
+    heap->sentinel.previous = &heap->sentinel;
     f_Heaps[heapIndex].sentinel.next = &heap->sentinel;
     f_Heaps[heapIndex].largestFreeSize = UNMEASURED_SIZE;
 }
@@ -131,10 +131,10 @@ void *AllocFromHeap(s32 heapIndex, u32 size) {
         rest = BlockAt(bestBlock, size);
         rest->size = bestBlock->size - size;
         rest->tag = BLOCK_FREE;
-        bestBlock->next->prev = rest;
+        bestBlock->next->previous = rest;
         rest->next = bestBlock->next;
         bestBlock->next = rest;
-        rest->prev = bestBlock;
+        rest->previous = bestBlock;
         bestBlock->size = size;
     }
     else {
@@ -163,15 +163,15 @@ void FreeFromHeap(s32 heapIndex, void *pointerToBlock) {
 
     block = BlockOfMemory(pointer);
     f_Heaps[heapIndex].freeSize += block->size;
-    if (block->prev->tag == BLOCK_FREE && IsBlockFollowedBy(block->prev, block)) {
-        block->next->prev = block->prev;
-        block->prev->next = block->next;
-        block->prev->size += block->size;
-        block = block->prev;
+    if (block->previous->tag == BLOCK_FREE && IsBlockFollowedBy(block->previous, block)) {
+        block->next->previous = block->previous;
+        block->previous->next = block->next;
+        block->previous->size += block->size;
+        block = block->previous;
     }
 
     if (block->next->tag == BLOCK_FREE && IsBlockFollowedBy(block, block->next)) {
-        block->next->next->prev = block;
+        block->next->next->previous = block;
         block->size += block->next->size;
         block->next = block->next->next;
     }
@@ -189,15 +189,15 @@ void InitHeapRegions(Boolean hasExpansionPak) {
         block->size = size;
         block->tag = BLOCK_FREE;
         block->next = (MemoryBlock *)&f_MemorySentinel;
-        block->prev = f_MemorySentinel.prev;
+        block->previous = f_MemorySentinel.previous;
         f_FreeMemorySize += size;
-        f_MemorySentinel.prev->next = block;
-        f_MemorySentinel.prev = block;
+        f_MemorySentinel.previous->next = block;
+        f_MemorySentinel.previous = block;
     }
 
     f_MemorySentinel.size = 0;
     f_MemorySentinel.tag = BLOCK_SENTINEL;
-    f_MemorySentinel.next = f_MemorySentinel.prev = (MemoryBlock *)&f_MemorySentinel;
+    f_MemorySentinel.next = f_MemorySentinel.previous = (MemoryBlock *)&f_MemorySentinel;
     f_FreeMemorySize = 0;
     AddMemoryRegion((void *)MAIN_REGION_START, (void *)MAIN_REGION_END);
     if (hasExpansionPak == TRUE) {
@@ -274,10 +274,10 @@ void *AllocMemory(u32 size) {
         rest = BlockAt(bestBlock, size);
         rest->size = bestBlock->size - size;
         rest->tag = BLOCK_FREE;
-        bestBlock->next->prev = rest;
+        bestBlock->next->previous = rest;
         rest->next = bestBlock->next;
         bestBlock->next = rest;
-        rest->prev = bestBlock;
+        rest->previous = bestBlock;
         bestBlock->size = size;
     }
     else {
@@ -296,7 +296,7 @@ void FreeMemory(void *pointerToBlock) {
     void *pointer;
     s32 mask;
     MemoryBlock *block;
-    MemoryBlock *prev;
+    MemoryBlock *previous;
 
     GET_RETURN_ADDRESS(callerAddress);
     mask = osSetIntMask(OS_IM_NONE);
@@ -308,17 +308,17 @@ void FreeMemory(void *pointerToBlock) {
     }
 
     block = BlockOfMemory(pointer);
-    prev = block->prev;
+    previous = block->previous;
     f_FreeMemorySize += block->size;
-    if (prev->tag == BLOCK_FREE && IsBlockFollowedBy(prev, block)) {
-        block->next->prev = prev;
-        block->prev->next = block->next;
-        block->prev->size += block->size;
-        block = block->prev;
+    if (previous->tag == BLOCK_FREE && IsBlockFollowedBy(previous, block)) {
+        block->next->previous = previous;
+        block->previous->next = block->next;
+        block->previous->size += block->size;
+        block = block->previous;
     }
 
     if (block->next->tag == BLOCK_FREE && IsBlockFollowedBy(block, block->next)) {
-        block->next->next->prev = block;
+        block->next->next->previous = block;
         block->size += block->next->size;
         block->next = block->next->next;
     }
