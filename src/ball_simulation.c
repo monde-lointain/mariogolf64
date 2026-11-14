@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
+// The original reads GetAimSlopeAngle's result here as a full s32; see
+// shot_camera.h.
+#define WIDENS_AIM_SLOPE_ANGLE
+
 #include "ball_physics.h"
 #include "club.h"
 #include "collision.h"
@@ -20,6 +24,7 @@
 #include "math_util.h"
 #include "player.h"
 #include "scene.h"
+#include "shot_camera.h"
 #include "shot_effects.h"
 #include "sound.h"
 #include "surface.h"
@@ -2183,13 +2188,6 @@ ImpactEffect *GetImpactTimingEntry(
 
     return &f_LateImpactEffect;
 }
-
-SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot);
-#ifdef AVOID_UB
-SignedBinaryAngle GetAimSlopeAngle(Player *player, ShotLaunch *shot);
-#else
-s32 GetAimSlopeAngle(Player *player, ShotLaunch *shot);
-#endif
 
 s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *shot) {
     s32 percentRange[2];

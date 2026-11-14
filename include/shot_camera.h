@@ -32,7 +32,11 @@ void ClearHoleIntroText(void);
 void StopFlightCamera(void);
 void StopHoleFlyover(void);
 SurfaceTraits *GetBallSurfaceTraits(Player *player, ShotLaunch *shot);
+#if defined(AVOID_UB) || !defined(WIDENS_AIM_SLOPE_ANGLE)
 SignedBinaryAngle GetAimSlopeAngle(Player *player, ShotLaunch *shot);
+#else
+s32 GetAimSlopeAngle(Player *player, ShotLaunch *shot);
+#endif
 SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot);
 s32 GetEndReaction(void);
 s32 RateShotLength(void);
