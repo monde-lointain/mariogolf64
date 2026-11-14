@@ -105,6 +105,8 @@ enum CodeKeyResult {
     CODE_KEY_RESULT_DONE
 };
 
+typedef s32 CodeKeyResult;
+
 #define CLUB_CODE_FIRST_X 97
 #define CLUB_CODE_Y 150
 #define CLUB_CODE_CHARACTER_WIDTH 24
@@ -350,7 +352,7 @@ void CloseMenuWindow(void) {
 }
 
 s32 IsMenuWindowOpen(void) {
-    s32 check;
+    MenuWindowCheck check;
 
     if (f_MenuWindowState == MENU_WINDOW_OPENING) {
         check = MENU_WINDOW_CHECK_MOVING;
@@ -363,7 +365,7 @@ s32 IsMenuWindowOpen(void) {
 }
 
 s32 IsMenuWindowClosed(void) {
-    s32 check;
+    MenuWindowCheck check;
 
     if (f_MenuWindowState == MENU_WINDOW_CLOSING) {
         check = MENU_WINDOW_CHECK_MOVING;
@@ -1249,7 +1251,7 @@ void UpdateClubTournament(void) {
     s32 index;
     s32 row;
     s32 column;
-    s32 keyResult;
+    CodeKeyResult keyResult;
     Boolean isInvalid;
     TournamentRules *rules;
     char debugText[DEBUG_TEXT_BUFFER_SIZE];
@@ -2178,7 +2180,7 @@ void DrawEnteredCode(Gfx **displayListHead) {
 s32 PressCodeKey(void) {
     MenuMemory *memory = GetMenuMemory();
     s32 column = memory->codeKeyColumn;
-    s32 keyResult = CODE_KEY_RESULT_TYPING;
+    CodeKeyResult keyResult = CODE_KEY_RESULT_TYPING;
     u8 key = f_CodeKeys[memory->codeKeyRow][column];
 
     switch (key) {

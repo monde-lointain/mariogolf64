@@ -59,6 +59,8 @@ enum SaveReadResult {
     SAVE_READ_SECOND_COPY
 };
 
+typedef s32 SaveReadResult;
+
 typedef struct SavedGame {
     Boolean isValid;
     u8 unusedBeforeHole[4];

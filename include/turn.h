@@ -26,7 +26,7 @@ typedef s32 NotableShot;
 
 extern BallSimulation g_TurnBallSimulation;
 
-void CountNotableShot(s32 playerIndex, s32 notableShot);
+void CountNotableShot(s32 playerIndex, NotableShot notableShot);
 void StartFreeLook(void);
 void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation);
 

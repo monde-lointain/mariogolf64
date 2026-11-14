@@ -99,6 +99,8 @@ enum EffectKind {
     EFFECT_KIND_TEAR = 0x14
 };
 
+typedef s32 EffectKind;
+
 enum DebrisKind {
     DEBRIS_KIND_NONE,
     DEBRIS_KIND_TEE_UP,
@@ -841,7 +843,7 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
     f32 speed;
     Radians heading;
 
-    s32 SpawnLowDebris(s32 slotCount, s32 debrisCount, s32 kind) {
+    s32 SpawnLowDebris(s32 slotCount, s32 debrisCount, EffectKind kind) {
         Effect *effect;
         s32 speed;
 

@@ -34,6 +34,8 @@ enum SelectResult {
     SELECT_BACK
 };
 
+typedef s32 SelectResult;
+
 #define DIRECTION_UP 1
 #define DIRECTION_DOWN 2
 #define DIRECTION_LEFT 4
@@ -382,7 +384,7 @@ void FreeCourseSelect(void) {
 s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
     MenuMemory *memory = GetMenuMemory();
     s32 openCourseCount = CountOpenRingShotCourses();
-    s32 result = SELECT_IDLE;
+    SelectResult result = SELECT_IDLE;
 
     f_PressedButtons = pressedButtons;
     f_RepeatedButtons = repeatedButtons;
@@ -446,7 +448,7 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
 }
 
 s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
-    s32 result = SELECT_IDLE;
+    SelectResult result = SELECT_IDLE;
     s32 openCourseCount;
 
     GetMenuMemory();

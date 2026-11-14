@@ -20,6 +20,8 @@ enum ClearKind {
     CLEAR_KIND_NICE_SHOT_BANNER
 };
 
+typedef s32 ClearKind;
+
 enum SwingTrailKind {
     SWING_TRAIL_KIND_CLEAR = -1,
     SWING_TRAIL_KIND_FADE,
@@ -33,7 +35,7 @@ extern ImpactFlashState g_ImpactFlashState;
 extern s32 g_ImpactFlashLevel;
 
 void ResetShotEffects(void);
-void ClearShotEffects(s32 kind);
+void ClearShotEffects(ClearKind kind);
 void StopAllSounds(void);
 void StartImpactSparks(void);
 extern u8 *g_SharedEffectImages;
@@ -42,7 +44,7 @@ void LoadShotEffectImages(void);
 void FreeShotEffectImages(void);
 void StartFlagSparks(CoursePoint point);
 void StartFlagstickSparks(CoursePoint point);
-void StartSwingTrail(s32 kind);
+void StartSwingTrail(SwingTrailKind kind);
 void DrawSwingTrail(Gfx **displayListHead, CameraMatrices *matrices);
 
 void DrawShotEffectsHud(Gfx **displayListHead);

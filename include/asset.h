@@ -121,6 +121,8 @@ enum MenuArrow {
     MENU_ARROW_COUNT
 };
 
+typedef s32 MenuArrow;
+
 #define GREEN_ARROW_SIZE 16
 #define GREEN_ARROW_IMAGE_SIZE (GREEN_ARROW_SIZE * GREEN_ARROW_SIZE / 2)
 #define GREEN_ARROW_FRAME_COUNT 2

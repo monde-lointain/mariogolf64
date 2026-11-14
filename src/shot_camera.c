@@ -2264,7 +2264,7 @@ void PlaceFlightCamera(s32 step) {
 
 void ChooseFlightCameraKind(void) {
     HudAnimation animationId;
-    s32 kind;
+    FlightCameraKind kind;
     s32 pick;
 
     animationId = HUD_ANIMATION_NONE;

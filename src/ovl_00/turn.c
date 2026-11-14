@@ -1587,7 +1587,7 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation) {
     }
 }
 
-void CountNotableShot(s32 playerIndex, s32 notableShot) {
+void CountNotableShot(s32 playerIndex, NotableShot notableShot) {
     u8 *count;
 
     if (g_Players[playerIndex].isComputer ||
@@ -3095,7 +3095,7 @@ void UpdateTurns(void) {
                 f_ReplayAimSettledFrameCount = 0;
                 if (g_GameState.replayKind == REPLAY_KIND_NONE &&
                     IsOneOnOneMatchMode(g_GameState.gameMode)) {
-                    s32 scoreToPar = GetNetScoreToPar(g_GameState.holeIndex, playerIndex);
+                    ScoreToPar scoreToPar = GetNetScoreToPar(g_GameState.holeIndex, playerIndex);
 
                     g_RoundHud.skinsTotals[playerIndex] =
                         scoreToPar - GetNetScoreToPar(g_GameState.holeIndex, playerIndex ^ 1);

@@ -7438,7 +7438,7 @@ void DrawCourseSelectBanners(Gfx **displayListHead) {
     s32 stripIndex;
     s32 stripTop;
     s32 squeeze;
-    s32 layout;
+    CourseSelectLayout layout;
 
     if (g_BetPagesPhase == MENU_PHASE_CONFIRMED) {
         slide = -slide;

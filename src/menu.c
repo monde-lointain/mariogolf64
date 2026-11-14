@@ -2861,7 +2861,7 @@ void SyncSaveOptions(SaveData *save, Boolean isWrite, s32 readResult) {
 void TransferSaveData(SaveData *save, UBoolean8 isWrite) {
     UBoolean8 isSramSelected;
     UBoolean8 isInSram;
-    s32 readResult;
+    SaveReadResult readResult;
 
     isSramSelected = !IsGameFlagSet(GAME_FLAG_SAVE_TO_HOST);
     isInSram = isSramSelected;

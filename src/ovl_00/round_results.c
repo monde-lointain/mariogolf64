@@ -1017,7 +1017,7 @@ void DrawPlaceNumber(Gfx **displayListHead, s32 x, s32 y, s32 place) {
     Gfx *gfx = *displayListHead;
     char *digit;
     s32 width;
-    s32 suffix;
+    PlaceSuffix suffix;
     s32 lastDigit;
     u8 character;
     s32 glyph;
@@ -1118,7 +1118,7 @@ void DrawPlaceIcon(Gfx **displayListHead, s32 x, s32 y, s32 place) {
 
 void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
     Gfx *gfx = *displayListHead;
-    s32 suffix;
+    PlaceSuffix suffix;
     s32 digitX;
     s32 digit;
     u8 *image;

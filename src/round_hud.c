@@ -3128,7 +3128,7 @@ void DrawShotEffect(Gfx **displayListHead) {
     ScreenPoint point;
     EncodedAsset asset;
     Gfx *gfx = *displayListHead;
-    s32 contactStyle;
+    ContactStyle contactStyle;
     f32 scale;
     s32 i;
 

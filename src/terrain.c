@@ -125,6 +125,8 @@ enum TerrainColorIndex {
     TERRAIN_COLOR_DEEP_ROUGH
 };
 
+typedef s32 TerrainColorIndex;
+
 #define TERRAIN_COLOR_COUNT 11
 
 #define SLOT_GRID_COLUMN_SHIFT 2
@@ -313,7 +315,7 @@ s32 FindNearestTerrainColor(s32 color) {
 }
 
 s32 GetTerrainCodeColor(s32 code) {
-    s32 colorIndex = TERRAIN_COLOR_FAIRWAY;
+    TerrainColorIndex colorIndex = TERRAIN_COLOR_FAIRWAY;
 
     switch (code) {
         case TERRAIN_CODE_FAIRWAY:
@@ -767,7 +769,7 @@ u16 GetMapColor(s32 x, s32 z) {
 
 s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
     u16 groundColor = GetMapColor(x, z);
-    s32 code = -1;
+    TerrainCode code = -1;
     s32 groundRed;
     s32 groundGreen;
     s32 groundBlue;

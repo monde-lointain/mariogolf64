@@ -49,6 +49,8 @@ enum ScoreToPar {
     SCORE_TO_PAR_TRIPLE_BOGEY
 };
 
+typedef s32 ScoreToPar;
+
 #define IsScoreToParWithin(score, best, worst) ((score) >= (best) && (score) <= (worst))
 
 enum HolingOutStakes {

@@ -76,7 +76,7 @@ void FillScreen(void) {
     gDPPipeSync(g_DisplayListHead++);
 }
 
-void AppendBufferClear(s32 clearMode, Gfx **displayListHead) {
+void AppendBufferClear(BufferClear clearMode, Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 line;
 

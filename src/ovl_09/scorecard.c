@@ -64,7 +64,7 @@
 
 void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 pageIndex);
 
-void SetScorecardState(s32 state);
+void SetScorecardState(ScorecardState state);
 
 #define ASSET_TABLE_IMAGE 0x68F
 #define ASSET_PLACE_ARROW_IMAGE 0x682
@@ -798,7 +798,7 @@ void SetScorecardLayout(s32 layout) {
     }
 }
 
-void SetScorecardState(s32 state) {
+void SetScorecardState(ScorecardState state) {
     if (state == SCORECARD_OPENING) {
         PlaySoundWithEffects(
             SOUND_PANEL_OPEN,

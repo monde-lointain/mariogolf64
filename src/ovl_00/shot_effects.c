@@ -139,7 +139,7 @@ void ResetShotEffects(void) {
     }
 }
 
-void ClearShotEffects(s32 kind) {
+void ClearShotEffects(ClearKind kind) {
     osSyncPrintf("effect Clear!%d\n", kind);
     ShowWindFlyGuy(FLY_GUY_HIDDEN);
     StartShotEffect(SHOT_EFFECT_NONE);
@@ -547,7 +547,7 @@ void SecondUnusedShotEffectsStub(void) {
 void DrawShotEffectsHud(Gfx **displayListHead UNUSED) {
 }
 
-void StartSwingTrail(s32 kind) {
+void StartSwingTrail(SwingTrailKind kind) {
     f32 samples[SWING_TRAIL_AXIS_COUNT][SWING_TRAIL_SAMPLES_MAX];
     f32 point[3];
     s32 i;

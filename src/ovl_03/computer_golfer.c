@@ -1472,8 +1472,10 @@ enum LandingRating {
     LANDING_BEST
 };
 
+typedef s32 LandingRating;
+
 s32 GetLandingRating(SurfaceKind surfaceKind) {
-    s32 rating;
+    LandingRating rating;
 
     if (g_GameState.courseIndex == COURSE_MARIOS_STAR) {
         if (surfaceKind == SURFACE_KIND_ROCK) {

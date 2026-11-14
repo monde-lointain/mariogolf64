@@ -17,6 +17,8 @@ enum CourseSelectLayout {
     COURSE_SELECT_LAYOUT_PLAIN
 };
 
+typedef s32 CourseSelectLayout;
+
 #define MENU_LAYER_COURSE_SCENE (1 << 0)
 #define MENU_LAYER_IGNORED (1 << 1)
 #define MENU_LAYER_BOARD (1 << 2)

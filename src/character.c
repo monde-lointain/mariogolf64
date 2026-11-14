@@ -479,7 +479,7 @@ s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode sh
     char text[DEBUG_LINE_SIZE];
     s32 distance;
     s32 pointId = WOOD_DISTANCE_POINT;
-    s32 column;
+    ClubCategory column;
     CharacterSlot *slot;
     ClubCategory clubCategory;
     f32 depth;

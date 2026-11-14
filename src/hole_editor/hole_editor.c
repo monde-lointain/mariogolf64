@@ -1360,7 +1360,7 @@ void UpdateTriangleEditor(void) {
     f32 stepX;
     f32 stepZ;
     f32 moveY;
-    s32 editKind;
+    TriangleEdit editKind;
     s32 corner;
     f64 cameraDistance;
     Vtx_t *lookAtVertex;
@@ -1561,7 +1561,7 @@ void UpdateRingEditor(void) {
     f32 stepX;
     f32 stepZ;
     f32 moveY;
-    s32 editKind;
+    TriangleEdit editKind;
     s32 corner;
     f64 cameraDistance;
     Vtx_t *lookAtVertex;
@@ -1805,7 +1805,7 @@ void UpdateWallEditor(void) {
     f32 stepX;
     f32 stepZ;
     f32 moveY;
-    s32 editKind;
+    TriangleEdit editKind;
     Boolean isDropping;
     s32 corner;
     f64 cameraDistance;
@@ -2696,7 +2696,7 @@ void ShapeGroundFromCodes(void) {
     s32 codeRow;
     s32 edgeRow;
     s32 edgeColumn;
-    s32 code;
+    TerrainCode code;
     TerrainCode neighborCode;
     s32 height;
     s32 tileIndex;
@@ -3121,7 +3121,7 @@ void UpdateHoleFileMenu(void) {
 void UpdateTreeEditor(void) {
     Mat4 translation;
     Mat4 unusedMatrix UNUSED;
-    s32 editKind;
+    TriangleEdit editKind;
     s32 billboardIndex;
     s32 height;
     f64 cameraDistance;

@@ -102,7 +102,13 @@ enum VertexEncoding {
         (code) != (nearestCode) && \
         (nearestDistance) < TERRAIN_BORDER_DISTANCE)
 
-typedef s32 (*PaintRoutine)(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
+typedef s32 (*PaintRoutine)(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+);
 
 #define PAINTED_COLOR_SHIFT 16
 
@@ -200,14 +206,38 @@ typedef struct HoleAssetIds {
 #define HOLE_ASSET_IDS(first) \
     {(first), (first) + 1, (first) + 2, (first) + 3, (first) + 4, (first) + 5, (first) + 6}
 
-s32 PaintDefaultCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
-s32 PaintShyGuyDesert(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
-s32 PaintYoshisIsland(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
-s32 PaintBooValley(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
-s32 PaintFirstMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
-s32 PaintSecondMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
-s32 PaintThirdMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
-s32 PaintDrivingRange(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
+s32 PaintDefaultCourse(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+);
+s32 PaintShyGuyDesert(TerrainCode code, TerrainCode nearestCode, s32 nearestDistance, s32 x, s32 z);
+s32 PaintYoshisIsland(TerrainCode code, TerrainCode nearestCode, s32 nearestDistance, s32 x, s32 z);
+s32 PaintBooValley(TerrainCode code, TerrainCode nearestCode, s32 nearestDistance, s32 x, s32 z);
+s32 PaintFirstMiniGolfCourse(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+);
+s32 PaintSecondMiniGolfCourse(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+);
+s32 PaintThirdMiniGolfCourse(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+);
+s32 PaintDrivingRange(TerrainCode code, TerrainCode nearestCode, s32 nearestDistance, s32 x, s32 z);
 
 static u32 f_PaintSeed = 0;
 #define PAINT_RANDOM_SHIFT 16
@@ -865,9 +895,15 @@ void ResetTerrainCodeCells(void) {
     }
 }
 
-s32 PaintDefaultCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+s32 PaintDefaultCourse(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+) {
     u32 color;
-    s32 paintedCode;
+    TerrainCode paintedCode;
     s32 random;
     s32 fairwayRandom;
     s32 green;
@@ -970,9 +1006,15 @@ s32 PaintDefaultCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s3
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-s32 PaintPaleRoughCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+s32 PaintPaleRoughCourse(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+) {
     u32 color;
-    s32 paintedCode;
+    TerrainCode paintedCode;
     s32 random;
     s32 fairwayRandom;
 
@@ -1085,9 +1127,15 @@ s32 PaintPaleRoughCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, 
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-s32 PaintShyGuyDesert(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+s32 PaintShyGuyDesert(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+) {
     u32 color;
-    s32 paintedCode;
+    TerrainCode paintedCode;
     s32 random;
     s32 fairwayRandom;
     s32 green;
@@ -1190,9 +1238,9 @@ s32 PaintShyGuyDesert(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-s32 PaintBooValley(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+s32 PaintBooValley(TerrainCode code, TerrainCode nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
-    s32 paintedCode;
+    TerrainCode paintedCode;
     s32 random;
     s32 fairwayRandom;
     s32 green;
@@ -1295,9 +1343,15 @@ s32 PaintBooValley(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z)
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-s32 PaintYoshisIsland(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+s32 PaintYoshisIsland(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+) {
     u32 color;
-    s32 paintedCode;
+    TerrainCode paintedCode;
     s32 random;
     s32 fairwayRandom;
     s32 green;
@@ -1400,9 +1454,15 @@ s32 PaintYoshisIsland(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-s32 PaintUnlistedCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+s32 PaintUnlistedCourse(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+) {
     u32 color;
-    s32 paintedCode;
+    TerrainCode paintedCode;
     s32 random;
     s32 fairwayRandom;
     s32 green;
@@ -1505,9 +1565,15 @@ s32 PaintUnlistedCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-s32 PaintFirstMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+s32 PaintFirstMiniGolfCourse(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+) {
     u32 color;
-    s32 paintedCode;
+    TerrainCode paintedCode;
 
     s32 random;
 
@@ -1555,9 +1621,15 @@ s32 PaintFirstMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-s32 PaintSecondMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+s32 PaintSecondMiniGolfCourse(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+) {
     u32 color;
-    s32 paintedCode;
+    TerrainCode paintedCode;
 
     s32 random;
 
@@ -1605,9 +1677,15 @@ s32 PaintSecondMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s3
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-s32 PaintThirdMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+s32 PaintThirdMiniGolfCourse(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+) {
     u32 color;
-    s32 paintedCode;
+    TerrainCode paintedCode;
     s32 random;
 
     switch (code) {
@@ -1649,9 +1727,15 @@ s32 PaintThirdMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-s32 PaintDrivingRange(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+s32 PaintDrivingRange(
+    TerrainCode code,
+    TerrainCode nearestCode,
+    s32 nearestDistance,
+    s32 x,
+    s32 z
+) {
     u32 color;
-    s32 paintedCode;
+    TerrainCode paintedCode;
     s32 random;
     s32 green;
     u32 red;

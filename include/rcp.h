@@ -9,8 +9,10 @@ enum BufferClear {
     BUFFER_CLEAR_WHOLE
 };
 
+typedef s32 BufferClear;
+
 void AppendRcpInit(s32 viewportIndex, Gfx **displayListHead);
-void AppendBufferClear(s32 clearMode, Gfx **displayListHead);
+void AppendBufferClear(BufferClear clearMode, Gfx **displayListHead);
 void InitRcp(s32 viewportIndex);
 void SetFillColor(s32 red, s32 green, s32 blue);
 void FillScreen(void);
