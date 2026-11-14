@@ -188,32 +188,32 @@ s32 SetMultiTlb(
     }
 
     switch (pageMode) {
-        case 1:
+        case TLB_PAGE_MODE_8K:
             pageSize >>= 1;
             pageCount *= 2;
 
-        case 0:
+        case TLB_PAGE_MODE_4K:
             pageMask = OS_PM_4K;
             break;
-        case 3:
+        case TLB_PAGE_MODE_32K:
             pageSize >>= 1;
             pageCount *= 2;
 
-        case 2:
+        case TLB_PAGE_MODE_16K:
             pageMask = OS_PM_16K;
             break;
-        case 5:
+        case TLB_PAGE_MODE_128K:
             pageSize >>= 1;
             pageCount *= 2;
 
-        case 4:
+        case TLB_PAGE_MODE_64K:
             pageMask = OS_PM_64K;
             break;
-        case 7:
+        case TLB_PAGE_MODE_512K:
             pageSize >>= 1;
             pageCount *= 2;
 
-        case 6:
+        case TLB_PAGE_MODE_256K:
             pageMask = OS_PM_256K;
             break;
         default:

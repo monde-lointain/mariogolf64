@@ -34,7 +34,21 @@
 
 #define CHARACTER_MODEL_ADDRESS 0x02000000
 #define CHARACTER_MODEL_PAGE_COUNT 32
-#define TLB_PAGE_MODE_4K 0
+
+// SetMultiTlb's page size, SMALLEST_PAGE_SIZE shifted left by the mode.
+// Odd sizes have no page mask of their own, so they are mapped as two
+// pages of the next smaller size.
+enum TlbPageMode {
+    TLB_PAGE_MODE_4K,
+    TLB_PAGE_MODE_8K,
+    TLB_PAGE_MODE_16K,
+    TLB_PAGE_MODE_32K,
+    TLB_PAGE_MODE_64K,
+    TLB_PAGE_MODE_128K,
+    TLB_PAGE_MODE_256K,
+    TLB_PAGE_MODE_512K
+};
+
 #define SMALLEST_PAGE_SIZE 0x1000
 
 #define LIGHT_DIRECTION_SCALE 127.0f
