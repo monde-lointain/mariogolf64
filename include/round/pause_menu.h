@@ -82,6 +82,7 @@ enum ChoiceResult {
 };
 
 typedef s32 ChoiceResult;
+typedef u8 UChoiceResult8;
 
 // Where the panels of the lie and of the wind slide to beside the menu
 extern Vec2 g_LiePanelPosition;

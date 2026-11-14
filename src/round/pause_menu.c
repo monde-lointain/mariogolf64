@@ -171,14 +171,16 @@ enum ChoiceLabel {
     CHOICE_LABEL_RETURN_TO_MENU
 };
 
+typedef s32 ChoiceLabel;
+typedef u8 UChoiceLabel8;
+
 typedef struct ChoiceBox {
     s32 optionCount;
     s32 halfWidth; // Widened to fit the longest label
     Boolean isVertical;
-    // CHOICE_LABEL_* values
-    u8 labels[CHOICE_BOX_OPTIONS_MAX];
-    // CHOICE_RESULT_* values, by label
-    u8 results[CHOICE_BOX_OPTIONS_MAX];
+    UChoiceLabel8 labels[CHOICE_BOX_OPTIONS_MAX];
+    // The result of choosing each label
+    UChoiceResult8 results[CHOICE_BOX_OPTIONS_MAX];
 } ChoiceBox;
 
 #define CHOICE_BOX_CENTER_X (SCREEN_WIDTH / 2)
