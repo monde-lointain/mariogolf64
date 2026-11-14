@@ -663,7 +663,7 @@ void WriteBallDistancesIfEnabled(void) {
     }
 }
 
-void SetCharacterClub(u32 slotIndex, s32 clubIndex) {
+void SetCharacterClub(u32 slotIndex, ClubIndex clubIndex) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     s32 choiceIndex;
 

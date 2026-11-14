@@ -479,7 +479,7 @@ void EaseStaffRollView(f32 *eye, f32 *lookAt, f32 rate, s32 easedParts) {
     }
 }
 
-s32 GetStanceAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode UNUSED) {
+s32 GetStanceAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode UNUSED) {
     s32 animationId;
 
     switch (GetCharacterClubCategory(slotIndex, clubIndex)) {
@@ -503,7 +503,7 @@ s32 GetStanceAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode UNUSED) {
     return animationId;
 }
 
-s32 GetSwingAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
+s32 GetSwingAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode) {
     s32 animationId;
 
     switch (GetCharacterClubCategory(slotIndex, clubIndex)) {
@@ -527,11 +527,11 @@ s32 GetSwingAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
     return animationId + (shotMode == SHOT_MODE_APPROACH);
 }
 
-void SetStanceAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
+void SetStanceAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode) {
     SetCharacterAnimation(slotIndex, GetStanceAnimation(slotIndex, clubIndex, shotMode));
 }
 
-void SetSwingAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
+void SetSwingAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotMode) {
     SetCharacterAnimation(slotIndex, GetSwingAnimation(slotIndex, clubIndex, shotMode));
 }
 

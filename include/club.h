@@ -68,6 +68,12 @@ typedef s8 ClubSlot8;
 
 #define NO_CLUB (-1)
 
+// An index into g_Clubs: a club set's index times CLUB_SET_SIZE, plus a
+// ClubType.
+typedef s32 ClubIndex;
+typedef u32 UClubIndex;
+typedef s16 ClubIndex16;
+
 // A set of CLUB_SURFACE_ bits naming the surfaces a club can be used on.
 typedef s32 ClubSurfaceMask;
 
@@ -131,15 +137,15 @@ extern ClubTest g_ClubTestMode;
 struct CurrentShot;
 struct GameBoyCharacter;
 
-const ClubParameters *GetClubParameters(s32 clubIndex);
+const ClubParameters *GetClubParameters(ClubIndex clubIndex);
 s32 GetShotDistance(Club *club, ShotMode shotMode);
 s32 GetShotWorldDistance(Club *club, ShotMode shotMode);
-void GenerateClub(s32 clubIndex);
+void GenerateClub(ClubIndex clubIndex);
 void GenerateClubSet(s32 setIndex, struct GameBoyCharacter *gameBoyCharacter);
 void InitClubs(void);
 s32 GetPuttPower(s32 fraction, ShotMode shotMode);
 s32 GetClubPower(Club *club, ShotMode shotMode);
-Club *GetClub(u32 clubIndex);
+Club *GetClub(UClubIndex clubIndex);
 Club *GetSelectedClub(void);
 s32 GetSelectedShotDistance(void);
 s32 GetSelectedShotWorldDistance(void);

@@ -111,7 +111,7 @@ typedef struct Player {
     s8 soundPan;
     PlayerHole holes[COURSE_HOLE_COUNT];
     u8 unusedAfterHoles[0x52 - 0x4F];
-    s16 clubs[CLUB_SLOT_COUNT];
+    ClubIndex16 clubs[CLUB_SLOT_COUNT];
     u8 unusedAfterClubs[0x74 - 0x72];
     s32 stopwatchFrameCount;
     s8 ringStates[RING_COUNT];

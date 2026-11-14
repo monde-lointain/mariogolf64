@@ -316,7 +316,7 @@ s32 SetMultiTlb(
     u32 physicalAddress
 );
 Outcome SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex);
-ClubCategory GetCharacterClubCategory(u32 slotIndex, s32 clubIndex);
+ClubCategory GetCharacterClubCategory(u32 slotIndex, ClubIndex clubIndex);
 PointLookup GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *position);
 void GetCharacterSlotMatrix(CharacterSlot *slot, Mat4 matrix);
 PointLookup GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position);
@@ -335,7 +335,7 @@ void SetAnimationSpeed(u32 slotIndex, f32 speed);
 void AnimateCharacter(u32 slotIndex);
 void AnimateCharacterInSameCopy(u32 slotIndex);
 void SetCharacterLights(void);
-void SetCharacterClub(u32 slotIndex, s32 clubIndex);
+void SetCharacterClub(u32 slotIndex, ClubIndex clubIndex);
 s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, AnimationEventKind kind);
 s32 GetAnimationIndex(u32 slotIndex, s32 animationId);
 void AdvanceAnimation(u32 slotIndex, s32 frameCount);

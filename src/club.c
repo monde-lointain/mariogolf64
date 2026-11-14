@@ -3666,7 +3666,7 @@ static const ClubParameters f_ClubParameters[CLUB_COUNT] = {
     {{87366, 43749, 13217}, {6, 12, 32}},
 };
 
-const ClubParameters *GetClubParameters(s32 clubIndex) {
+const ClubParameters *GetClubParameters(ClubIndex clubIndex) {
     return &f_ClubParameters[clubIndex];
 }
 
@@ -3802,7 +3802,7 @@ void WriteClubParameters(void) {
     FreeMemory(&source);
 }
 
-void GenerateClub(s32 clubIndex) {
+void GenerateClub(ClubIndex clubIndex) {
     BallSimulation simulation;
     Club *club;
     ShotMode shotMode;
@@ -3994,11 +3994,11 @@ void GenerateClubSet(s32 setIndex, GameBoyCharacter *gameBoyCharacter) {
 }
 
 void InitClubs(void) {
-    s32 clubIndex;
+    ClubIndex clubIndex;
     ClubParameters *parameters;
     Club *club;
 
-    s8 GetStockCurve(s32 clubIndex) {
+    s8 GetStockCurve(ClubIndex clubIndex) {
         u32 setIndex = clubIndex / CLUB_SET_SIZE;
 
         if (setIndex >= CLUB_SET_COUNT) {
@@ -4154,7 +4154,7 @@ s32 GetClubPower(Club *club, ShotMode shotMode) {
     return club->power[shotMode];
 }
 
-Club *GetClub(u32 clubIndex) {
+Club *GetClub(UClubIndex clubIndex) {
     return (clubIndex < CLUB_COUNT) ? &g_Clubs[clubIndex] : &f_NoClub;
 }
 

@@ -4642,7 +4642,7 @@ Outcome SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
     return OUTCOME_FAILED;
 }
 
-ClubCategory GetCharacterClubCategory(u32 slotIndex, s32 clubIndex) {
+ClubCategory GetCharacterClubCategory(u32 slotIndex, ClubIndex clubIndex) {
     CharacterSlot *slot;
     ClubCategory category;
 
