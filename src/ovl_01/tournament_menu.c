@@ -1241,7 +1241,7 @@ void UpdateClubTournament(void) {
     s32 index;
     s32 row;
     s32 column;
-    s32 result;
+    s32 keyResult;
     Boolean isInvalid;
     TournamentRules *rules;
     char debugText[DEBUG_TEXT_BUFFER_SIZE];
@@ -1305,8 +1305,8 @@ void UpdateClubTournament(void) {
 
     if (g_MenuRepeatButtons & A_BUTTON) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-        result = PressCodeKey();
-        if (result == CODE_KEY_RESULT_DONE) {
+        keyResult = PressCodeKey();
+        if (keyResult == CODE_KEY_RESULT_DONE) {
             if (IsGameFlagSet(GAME_FLAG_EDIT_TOURNAMENT_CODE)) {
                 isInvalid = FALSE;
             }
@@ -1351,7 +1351,7 @@ void UpdateClubTournament(void) {
             f_ClubTournamentPhase = CLUB_CODE_PHASE_INCORRECT;
             f_ClubCodeState = CLUB_CODE_STATE_INCORRECT;
         }
-        else if (result == CODE_KEY_RESULT_TOO_SHORT) {
+        else if (keyResult == CODE_KEY_RESULT_TOO_SHORT) {
             PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
             f_ClubTournamentPhase = CLUB_CODE_PHASE_INCORRECT;
             f_ClubCodeState = CLUB_CODE_STATE_INCORRECT;
@@ -2170,7 +2170,7 @@ void DrawEnteredCode(Gfx **displayListHead) {
 s32 PressCodeKey(void) {
     MenuMemory *memory = GetMenuMemory();
     s32 column = memory->codeKeyColumn;
-    s32 result = CODE_KEY_RESULT_TYPING;
+    s32 keyResult = CODE_KEY_RESULT_TYPING;
     u8 key = f_CodeKeys[memory->codeKeyRow][column];
 
     switch (key) {
@@ -2195,7 +2195,7 @@ s32 PressCodeKey(void) {
                 return CODE_KEY_RESULT_TOO_SHORT;
             }
 
-            result = CODE_KEY_RESULT_DONE;
+            keyResult = CODE_KEY_RESULT_DONE;
             break;
         default:
             if (f_EnteredCodeLength < CLUB_TOURNAMENT_CODE_LENGTH) {
@@ -2213,7 +2213,7 @@ s32 PressCodeKey(void) {
             break;
     }
 
-    return result;
+    return keyResult;
 }
 
 s32 DeleteCodeCharacter(void) {

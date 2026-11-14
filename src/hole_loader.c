@@ -400,7 +400,7 @@ s32 LoadLzData(u32 romAddress, void *destination, u32 size) {
     s32 receivedCount;
     s32 otherIndex;
     u32 chunkSize;
-    s32 result;
+    s32 decodedSize;
 
     receivedCount = 0;
     dmaIndex = 0;
@@ -460,17 +460,17 @@ s32 LoadLzData(u32 romAddress, void *destination, u32 size) {
             stream.flags |= LZ_STREAM_FLAG_LAST;
         }
 
-        result = DecodeLzChunk(&stream);
+        decodedSize = DecodeLzChunk(&stream);
         receivedCount--;
-        if (result >= 0) {
+        if (decodedSize >= 0) {
             break;
         }
 
         stream.flags &= ~LZ_STREAM_FLAG_FIRST;
     }
 
-    osWritebackDCache(destination, result);
-    return result;
+    osWritebackDCache(destination, decodedSize);
+    return decodedSize;
 }
 
 s32 LoadPatchedLzData(u32 romAddress, void *destination, u32 size) {
@@ -488,7 +488,7 @@ s32 LoadPatchedLzData(u32 romAddress, void *destination, u32 size) {
     s32 receivedCount;
     s32 otherIndex;
     u32 chunkSize;
-    s32 result;
+    s32 decodedSize;
 
     receivedCount = 0;
     dmaIndex = 0;
@@ -550,17 +550,17 @@ s32 LoadPatchedLzData(u32 romAddress, void *destination, u32 size) {
             stream.flags |= LZ_STREAM_FLAG_LAST;
         }
 
-        result = DecodePatchedLzChunk(&stream);
+        decodedSize = DecodePatchedLzChunk(&stream);
         receivedCount--;
-        if (result >= 0) {
+        if (decodedSize >= 0) {
             break;
         }
 
         stream.flags &= ~LZ_STREAM_FLAG_FIRST;
     }
 
-    osWritebackDCache(destination, result);
-    return result;
+    osWritebackDCache(destination, decodedSize);
+    return decodedSize;
 }
 
 s32 GetHoleRandom(s32 seed, s32 holeIndex) {

@@ -4808,7 +4808,7 @@ void UpdateTurns(void) {
                     }
                     else {
                         if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
-                            s32 result;
+                            s32 matchHoleResult;
 
                             GetHandicapOffset(
                                 g_GameState.courseIndex,
@@ -4820,9 +4820,9 @@ void UpdateTurns(void) {
                                 g_GameState.holeIndex,
                                 g_Players[playerIndex ^ 1].handicap
                             );
-                            result = GetMatchHoleResult(playerIndex, playerIndex ^ 1);
-                            osSyncPrintf("CheckHoltOutMatch %d\n", result);
-                            if (result == MATCH_SIDE_PLAYER) {
+                            matchHoleResult = GetMatchHoleResult(playerIndex, playerIndex ^ 1);
+                            osSyncPrintf("CheckHoltOutMatch %d\n", matchHoleResult);
+                            if (matchHoleResult == MATCH_SIDE_PLAYER) {
                                 g_Players[playerIndex ^ 1]
                                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                                     .strokeCount =
@@ -4841,7 +4841,7 @@ void UpdateTurns(void) {
                                     );
                                 g_Players[playerIndex ^ 1].holeStatus = HOLE_STATUS_OUT;
                             }
-                            else if (result == MATCH_SIDE_OPPONENT) {
+                            else if (matchHoleResult == MATCH_SIDE_OPPONENT) {
                                 g_Players[playerIndex ^ 1]
                                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                                     .strokeCount =
@@ -4859,7 +4859,7 @@ void UpdateTurns(void) {
                                         g_Players[playerIndex ^ 1].handicap
                                     );
                             }
-                            else if (result == MATCH_HOLE_HALVED &&
+                            else if (matchHoleResult == MATCH_HOLE_HALVED &&
                                 g_Players[playerIndex ^ 1].holeStatus == HOLE_STATUS_PLAYING) {
                                 g_Players[playerIndex ^ 1]
                                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]

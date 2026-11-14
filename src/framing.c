@@ -77,14 +77,17 @@ void SetFramingAngles(Radians pitch, Radians yaw) {
     guMtxCatF(yawRotation, pitchRotation, f_FramingRotation);
 }
 
-void TransformPoint(Mat4 matrix, Vec3 point, Vec3 result) {
+void TransformPoint(Mat4 matrix, Vec3 point, Vec3 transformed) {
     f32 x = point[AXIS_X];
     f32 y = point[AXIS_Y];
     f32 z = point[AXIS_Z];
 
-    result[AXIS_X] = (matrix[0][0] * x) + (matrix[1][0] * y) + (matrix[2][0] * z) + matrix[3][0];
-    result[AXIS_Y] = (matrix[0][1] * x) + (matrix[1][1] * y) + (matrix[2][1] * z) + matrix[3][1];
-    result[AXIS_Z] = (matrix[0][2] * x) + (matrix[1][2] * y) + (matrix[2][2] * z) + matrix[3][2];
+    transformed[AXIS_X] =
+        (matrix[0][0] * x) + (matrix[1][0] * y) + (matrix[2][0] * z) + matrix[3][0];
+    transformed[AXIS_Y] =
+        (matrix[0][1] * x) + (matrix[1][1] * y) + (matrix[2][1] * z) + matrix[3][1];
+    transformed[AXIS_Z] =
+        (matrix[0][2] * x) + (matrix[1][2] * y) + (matrix[2][2] * z) + matrix[3][2];
 }
 
 void FrameSpheres(f32 depthOffset) {
