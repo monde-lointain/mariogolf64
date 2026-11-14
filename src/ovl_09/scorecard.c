@@ -6,6 +6,7 @@
 #include "bets.h"
 #include "character.h"
 #include "character_model.h"
+#include "controllers/transfer_pak.h"
 #include "course.h"
 #include "display_list.h"
 #include "game_flags.h"
@@ -30,7 +31,6 @@
 #include "system/memory_address.h"
 #include "text.h"
 #include "tournament.h"
-#include "transfer_pak.h"
 
 #define MATCH_RESULT_SOUND_TIME 1
 #define MATCH_RESULT_TIME 5

@@ -13,7 +13,7 @@
 #include "camera.h"
 #include "character_model.h"
 #include "confirm_wait.h"
-#include "controller.h"
+#include "controllers/controller.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "display_list.h"

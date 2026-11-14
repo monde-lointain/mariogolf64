@@ -8,6 +8,7 @@
 
 #include "character.h"
 #include "club.h"
+#include "controllers/transfer_pak.h"
 #include "course.h"
 #include "course_space.h"
 #include "course_stats.h"
@@ -34,7 +35,6 @@
 #include "system/heap.h"
 #include "system/host_file.h"
 #include "system/main.h"
-#include "transfer_pak.h"
 
 #define GAME_FLAG_SAVE_TO_HOST 0x53
 

@@ -5,7 +5,8 @@
 
 #include "camera.h"
 #include "character.h"
-#include "controller.h"
+#include "controllers/controller.h"
+#include "controllers/transfer_pak.h"
 #include "course_space.h"
 #include "current_shot.h"
 #include "curve.h"
@@ -31,7 +32,6 @@
 #include "system/heap.h"
 #include "system/memory_address.h"
 #include "text.h"
-#include "transfer_pak.h"
 #include "turn.h"
 #include "view_projection.h"
 

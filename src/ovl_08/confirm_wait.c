@@ -2,7 +2,7 @@
 
 #include <ultra64.h>
 
-#include "controller.h"
+#include "controllers/controller.h"
 #include "scene.h"
 #include "sky_and_hud_animations.h"
 #include "sound.h"

@@ -16,7 +16,8 @@
 #include "character_select.h"
 #include "character_table.h"
 #include "club.h"
-#include "controller.h"
+#include "controllers/controller.h"
+#include "controllers/transfer_pak.h"
 #include "course.h"
 #include "course_space.h"
 #include "course_stats.h"
@@ -59,7 +60,6 @@
 #include "system/overlay_manager.h"
 #include "text.h"
 #include "tournament_menu.h"
-#include "transfer_pak.h"
 #include "view_projection.h"
 
 #define MODE_CHOICE_LIMIT 12

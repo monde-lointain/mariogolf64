@@ -9,7 +9,7 @@
 
 #include "billboard.h"
 #include "camera.h"
-#include "controller.h"
+#include "controllers/controller.h"
 #include "course.h"
 #include "course_space.h"
 #include "debug_text.h"

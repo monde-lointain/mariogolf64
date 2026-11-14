@@ -12,7 +12,7 @@
 #include "club.h"
 #include "club_panel.h"
 #include "club_slots.h"
-#include "controller.h"
+#include "controllers/controller.h"
 #include "course.h"
 #include "course_select.h"
 #include "course_space.h"

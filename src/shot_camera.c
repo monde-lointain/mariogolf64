@@ -11,7 +11,7 @@
 #include "camera_framing.h"
 #include "character_model.h"
 #include "club.h"
-#include "controller.h"
+#include "controllers/controller.h"
 #include "course.h"
 #include "course_space.h"
 #include "current_shot.h"

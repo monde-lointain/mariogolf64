@@ -5,7 +5,8 @@
 
 #include "character.h"
 #include "club.h"
-#include "controller.h"
+#include "controllers/controller.h"
+#include "controllers/transfer_pak.h"
 #include "course.h"
 #include "course_space.h"
 #include "course_stats.h"
@@ -29,7 +30,6 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 #include "text.h"
-#include "transfer_pak.h"
 
 #define TRANSFER_MODE_COUNT 2
 #define MODE_OPTION_COUNT 3

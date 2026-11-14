@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "camera.h"
-#include "controller.h"
+#include "controllers/controller.h"
 #include "geometry.h"
 #include "math_util.h"
 #include "system/compiler.h"

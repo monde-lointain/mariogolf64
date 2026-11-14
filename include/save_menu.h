@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "controller.h"
+#include "controllers/controller.h"
 
 enum ReplayMenuState {
     REPLAY_MENU_OPEN,

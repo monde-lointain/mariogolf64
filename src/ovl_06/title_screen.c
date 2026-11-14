@@ -2,7 +2,8 @@
 
 #include <ultra64.h>
 
-#include "controller.h"
+#include "controllers/controller.h"
+#include "controllers/transfer_pak.h"
 #include "display_list.h"
 #include "game_flags.h"
 #include "math_util.h"
@@ -19,7 +20,6 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
-#include "transfer_pak.h"
 #include "unlocks.h"
 
 enum TitleState {

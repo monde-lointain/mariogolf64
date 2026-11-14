@@ -3,7 +3,7 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "controller.h"
+#include "controllers/controller.h"
 #include "debug_text.h"
 #include "geometry.h"
 #include "math_util.h"

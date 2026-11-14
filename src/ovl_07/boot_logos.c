@@ -4,7 +4,8 @@
 
 #include "camera.h"
 #include "character_model.h"
-#include "controller.h"
+#include "controllers/controller.h"
+#include "controllers/transfer_pak.h"
 #include "display_list.h"
 #include "hole_loader.h"
 #include "scene.h"
@@ -19,7 +20,6 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 #include "text.h"
-#include "transfer_pak.h"
 
 enum BootLogo {
     BOOT_LOGO_N64,

@@ -3,7 +3,8 @@
 #include <framebuffer_count.h>
 #include <ultra64.h>
 
-#include "controller.h"
+#include "controllers/controller.h"
+#include "controllers/transfer_pak.h"
 #include "course.h"
 #include "current_shot.h"
 #include "display_list.h"
@@ -31,7 +32,6 @@
 #include "system/overlay_manager.h"
 #include "terrain.h"
 #include "text.h"
-#include "transfer_pak.h"
 #include "turn.h"
 
 #define ASSET_CHOICE_BOX_CLOUD_IMAGE 0x71F

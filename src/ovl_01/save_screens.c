@@ -5,7 +5,7 @@
 
 #include "character.h"
 #include "character_model.h"
-#include "controller.h"
+#include "controllers/controller.h"
 #include "course.h"
 #include "display_list.h"
 #include "game.h"

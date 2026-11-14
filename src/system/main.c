@@ -8,7 +8,8 @@
 #include "character.h"
 #include "character_model.h"
 #include "club.h"
-#include "controller.h"
+#include "controllers/controller.h"
+#include "controllers/transfer_pak.h"
 #include "debug_text.h"
 #include "game.h"
 #include "game_flags.h"
@@ -28,7 +29,6 @@
 #include "system/overlay_manager.h"
 #include "system/segment_symbols.h"
 #include "terrain.h"
-#include "transfer_pak.h"
 #include "work_area.h"
 
 #define AUDIO_FREQUENCY 32000

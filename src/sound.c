@@ -6,7 +6,7 @@
 #define WIDENS_CHOSEN_OPTIONS
 
 #include "character.h"
-#include "controller.h"
+#include "controllers/controller.h"
 #include "debug_text.h"
 #include "game_flags.h"
 #include "music.h"

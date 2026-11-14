@@ -1,10 +1,10 @@
 #include <nusys.h>
 #include <ultra64.h>
 
-#include "controller.h"
+#include "controllers/controller.h"
+#include "controllers/transfer_pak.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
-#include "transfer_pak.h"
 
 Boolean g_HasBroughtOverCharacter = FALSE;
 static Boolean f_IsBootTransmitPending = TRUE;

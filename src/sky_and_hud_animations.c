@@ -7,7 +7,7 @@
 #include <ultra64.h>
 
 #include "camera.h"
-#include "controller.h"
+#include "controllers/controller.h"
 #include "course.h"
 #include "debug_text.h"
 #include "display_list.h"

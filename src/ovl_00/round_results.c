@@ -5,7 +5,8 @@
 #include "awards.h"
 #include "bets.h"
 #include "character.h"
-#include "controller.h"
+#include "controllers/controller.h"
+#include "controllers/transfer_pak.h"
 #include "course.h"
 #include "course_stats.h"
 #include "debug_text.h"
@@ -35,7 +36,6 @@
 #include "system/memory_address.h"
 #include "text.h"
 #include "tournament.h"
-#include "transfer_pak.h"
 
 enum ResultsState {
     RESULTS_SLIDING_IN,

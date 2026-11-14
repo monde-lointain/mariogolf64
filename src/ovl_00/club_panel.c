@@ -3,7 +3,7 @@
 #include <ultra64.h>
 
 #include "club.h"
-#include "controller.h"
+#include "controllers/controller.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "display_list.h"

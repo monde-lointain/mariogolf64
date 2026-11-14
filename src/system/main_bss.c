@@ -13,7 +13,8 @@
 #include "character.h"
 #include "character_model.h"
 #include "club_panel.h"
-#include "controller.h"
+#include "controllers/controller.h"
+#include "controllers/transfer_pak.h"
 #include "course.h"
 #include "course_stats.h"
 #include "current_shot.h"
@@ -49,7 +50,6 @@
 #include "terrain.h"
 #include "text.h"
 #include "tournament.h"
-#include "transfer_pak.h"
 #include "turn.h"
 #include "work_area.h"
 

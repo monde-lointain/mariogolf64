@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "controller.h"
+#include "controllers/controller.h"
 #include "system/c_language.h"
 
 enum UnlockNotice {

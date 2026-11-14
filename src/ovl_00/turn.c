@@ -15,7 +15,8 @@
 #include "club.h"
 #include "club_panel.h"
 #include "computer_golfer.h"
-#include "controller.h"
+#include "controllers/controller.h"
+#include "controllers/transfer_pak.h"
 #include "course.h"
 #include "course_space.h"
 #include "current_shot.h"
@@ -65,7 +66,6 @@
 #include "system/overlay_manager.h"
 #include "terrain.h"
 #include "text.h"
-#include "transfer_pak.h"
 #include "turn.h"
 #include "view_projection.h"
 

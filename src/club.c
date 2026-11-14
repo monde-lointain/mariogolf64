@@ -6,7 +6,8 @@
 #include "ball_simulation.h"
 #include "club.h"
 #include "club_panel.h"
-#include "controller.h"
+#include "controllers/controller.h"
+#include "controllers/transfer_pak.h"
 #include "course_space.h"
 #include "current_shot.h"
 #include "game_flags.h"
@@ -23,7 +24,6 @@
 #include "system/heap.h"
 #include "system/host_file.h"
 #include "system/main.h"
-#include "transfer_pak.h"
 
 #define STRAIGHT_ANGLE 0x1000
 

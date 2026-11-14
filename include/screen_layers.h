@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "controller.h"
+#include "controllers/controller.h"
 #include "course.h"
 #include "display_list.h"
 #include "system/asset.h"

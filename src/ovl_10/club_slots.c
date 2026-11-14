@@ -5,7 +5,7 @@
 
 #include "character.h"
 #include "club.h"
-#include "controller.h"
+#include "controllers/controller.h"
 #include "display_list.h"
 #include "game.h"
 #include "game_flags.h"

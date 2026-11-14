@@ -6,7 +6,8 @@
 #include "character.h"
 #include "character_model.h"
 #include "club.h"
-#include "controller.h"
+#include "controllers/controller.h"
+#include "controllers/transfer_pak.h"
 #include "debug_text.h"
 #include "display_list.h"
 #include "game.h"
@@ -25,7 +26,6 @@
 #include "system/compiler.h"
 #include "system/memory_address.h"
 #include "text.h"
-#include "transfer_pak.h"
 
 #define CHOOSABLE_MARK_LIMIT (-20)
 
