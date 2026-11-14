@@ -2227,8 +2227,8 @@ void InvalidateBrokenSavedGames(void) {
     Boolean isInvalid[SAVED_GAME_COUNT];
     s32 index;
     s32 entryIndex;
-    SavedGame *unk;
-    GameState *sub;
+    SavedGame *game;
+    GameState *state;
     Player *player;
 
     save = GetSaveData();
@@ -2241,10 +2241,10 @@ void InvalidateBrokenSavedGames(void) {
             continue;
         }
 
-        unk = &save->savedGames[index];
-        sub = &unk->state;
-        if (sub->isMiniGolf == FALSE) {
-            switch (sub->gameMode) {
+        game = &save->savedGames[index];
+        state = &game->state;
+        if (state->isMiniGolf == FALSE) {
+            switch (state->gameMode) {
                 case GAME_MODE_STROKE:
                 case GAME_MODE_MATCH_GAME:
                 case GAME_MODE_GET_CHARACTER:
@@ -2258,19 +2258,19 @@ void InvalidateBrokenSavedGames(void) {
             }
         }
 
-        if (sub->playerCount < 1 || sub->playerCount > PLAYER_COUNT_MAX) {
+        if (state->playerCount < 1 || state->playerCount > PLAYER_COUNT_MAX) {
             isInvalid[index] = TRUE;
         }
 
-        if (sub->courseIndex < 0 || sub->courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
+        if (state->courseIndex < 0 || state->courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
             isInvalid[index] = TRUE;
         }
 
-        if (sub->holeIndex < 0 || sub->holeIndex >= COURSE_HOLE_COUNT) {
+        if (state->holeIndex < 0 || state->holeIndex >= COURSE_HOLE_COUNT) {
             isInvalid[index] = TRUE;
         }
 
-        for (entryIndex = 0; entryIndex != sub->playerCount; entryIndex++) {
+        for (entryIndex = 0; entryIndex != state->playerCount; entryIndex++) {
             player = &save->savedPlayers[index][entryIndex];
             if ((u8)player->characterIndex >= CHARACTER_COUNT) {
                 isInvalid[index] = TRUE;
