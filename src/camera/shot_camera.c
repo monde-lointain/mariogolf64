@@ -270,9 +270,6 @@ static const char f_UnusedFloatFormat[] = "            %f";
 // InsetView's ignored codes
 #define FLYOVER_INSET_SOURCE_CODE 100
 #define FLYOVER_INSET_SIZE_CODE 101
-// The second of the text slots that the hole's introduction blanks; see
-// PROMPT_TEXT_SLOT
-#define CHOICE_TEXT_SLOT 1
 
 // How far the camera must be from where it eases to before it moves, and how
 // far it goes

@@ -30,6 +30,7 @@ typedef s32 WipeState;
 // The text slots that the hole's introduction blanks. The menus leave a prompt in the first and a
 // choice in the second, and the round's coin flip and banners use them too.
 #define PROMPT_TEXT_SLOT 0
+#define CHOICE_TEXT_SLOT 1
 
 // The prompts that OpenPrompt opens
 enum PromptId {
