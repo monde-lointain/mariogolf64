@@ -128,6 +128,8 @@ enum TriangleEdit {
     TRIANGLE_EDIT_KIND = 4
 };
 
+typedef s32 TriangleEdit;
+
 #define FIRST_RING_TRIANGLE (HOLE_TRIANGLE_COUNT - RING_COUNT)
 #define HOLE_TRIANGLE_KIND_COUNT 4
 #define CORNER_STEP_SCALE 10.0f
@@ -338,6 +340,8 @@ enum GroundOverlay {
     GROUND_OVERLAY_NONE
 };
 
+typedef s32 GroundOverlay;
+
 enum EditorCombineMode {
     EDITOR_COMBINE_NONE = -1,
     EDITOR_COMBINE_WAVES_ONLY,
@@ -349,6 +353,8 @@ enum EditorCombineMode {
     EDITOR_COMBINE_TILE_ONLY,
     EDITOR_COMBINE_TILE_TWICE
 };
+
+typedef s32 EditorCombineMode;
 
 #define HasTileBorders(tileIndex) \
     (g_WorkArea.hole.tiles[tileIndex] \
@@ -533,7 +539,7 @@ static WideBinaryAngle f_TriangleCameraYawAngle = 0;
 static s32 f_EditedTriangleIndex = 0;
 static s32 f_EditedCornerIndex = 0;
 static s32 f_SavedCornerIndex = 0;
-static s32 f_LastTriangleEditKind = 0;
+static TriangleEdit f_LastTriangleEditKind = 0;
 
 static Radians f_RingCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 static Radians f_RingCameraYaw = EDITOR_CAMERA_START_ANGLE;
@@ -542,7 +548,7 @@ static WideBinaryAngle f_RingCameraYawAngle = 0;
 static s32 f_RingTriangleIndex = 0x9D;
 static s32 f_RingCornerIndex = 0;
 static s32 f_UnusedRingIndex UNUSED = 0;
-static s32 f_LastRingEditKind = 0;
+static TriangleEdit f_LastRingEditKind = 0;
 
 static Radians f_WallCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 static Radians f_WallCameraYaw = EDITOR_CAMERA_START_ANGLE;
@@ -552,7 +558,7 @@ static s32 f_FirstWallTriangle = 0x19;
 static s32 f_WallTriangleIndex = 0x19;
 static s32 f_WallCornerIndex = 0;
 static s32 f_SavedWallCornerIndex = 0;
-static s32 f_LastWallEditKind = 0;
+static TriangleEdit f_LastWallEditKind = 0;
 
 void ToggleCellMirroring(s32 column, s32 row);
 
@@ -2691,7 +2697,7 @@ void ShapeGroundFromCodes(void) {
     s32 edgeRow;
     s32 edgeColumn;
     s32 code;
-    s32 neighborCode;
+    TerrainCode neighborCode;
     s32 height;
     s32 tileIndex;
     s32 treeCount;
@@ -3563,10 +3569,10 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
     FreeMemory(&buffer);
 }
 
-void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
+void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT];
     s32 keepsCombineMode;
-    s32 combineMode;
+    EditorCombineMode combineMode;
     Gfx *gfx;
     s32 half;
     Vtx *vertices;
@@ -3574,8 +3580,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
     u8 currentSnapSet;
     s32 firstTileS;
     s32 visibility;
-    s32 detail;
-    s32 previousDetail;
+    GroundDetail detail;
+    GroundDetail previousDetail;
     s32 slopeIndex;
     s32 row;
     s32 detailTileIndex;
@@ -3614,7 +3620,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
         midpoint->cn[3] = (first->cn[3] + second->cn[3]) / 2;
     }
 
-    void SetEditorCombineMode(s32 tilePass, s32 overlay) {
+    void SetEditorCombineMode(s32 tilePass, GroundOverlay overlay) {
         if (!keepsCombineMode) {
             switch (tilePass) {
                 case TILE_PASS_ONLY:
@@ -4139,7 +4145,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
         gDPPipeSync(gfx++);
 
         for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
-            s32 groupDetail;
+            GroundDetail groupDetail;
 
             groupDetail = GROUND_DETAIL_COARSE;
             for (detailTileIndex = 0; detailTileIndex < GROUND_TILE_GROUP_SIZE; detailTileIndex++) {

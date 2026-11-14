@@ -28,6 +28,8 @@ enum EndReaction {
     END_REACTION_LONG_PUTT
 };
 
+typedef s32 EndReaction;
+
 void ClearHoleIntroText(void);
 void StopFlightCamera(void);
 void StopHoleFlyover(void);

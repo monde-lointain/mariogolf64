@@ -25,8 +25,10 @@ enum EditorChoice {
     EDITOR_CHOICE_COUNT
 };
 
+typedef s32 EditorChoice;
+
 static Boolean f_IsSnapshotSaved[SNAPSHOT_COUNT] = {0};
-static s32 f_EditorChoice = EDITOR_CHOICE_SLIDE;
+static EditorChoice f_EditorChoice = EDITOR_CHOICE_SLIDE;
 static s32 f_SnapshotIndex = 0;
 static Boolean f_IsSecondControllerOnEye = FALSE;
 

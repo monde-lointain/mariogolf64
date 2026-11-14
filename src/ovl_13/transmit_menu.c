@@ -48,6 +48,8 @@ enum TransmitOption {
     TRANSMIT_OPTION_MAIN_MENU
 };
 
+typedef s32 TransmitOption;
+
 #define MESSAGE_FIRST_TRANSMIT_OPTION_HINT 0x143
 
 #define BRING_READING 0
@@ -148,6 +150,8 @@ enum ShotType {
     SHOT_TYPE_COUNT
 };
 
+typedef s32 ShotType;
+
 #define FACES_LEFT 24
 #define FACES_TOP 136
 #define FACE_SPACING 40
@@ -158,6 +162,8 @@ enum ListingState {
     LISTING_SHOWN,
     LISTING_BRINGING
 };
+
+typedef s32 ListingState;
 
 #define LISTED_FACES_LEFT 28
 #define LISTED_FACES_TOP 56
@@ -339,6 +345,8 @@ enum CartridgeFault {
     CARTRIDGE_FAULT_UNINITIALIZED,
     CARTRIDGE_FAULT_CORRUPTED
 };
+
+typedef s32 CartridgeFault;
 
 #define NOT_CHECKED 0
 #define SAVE_CHECKED 1
@@ -1594,7 +1602,7 @@ void DrawCharacterStats(
     Gfx *gfx = *displayListHead;
     s32 segment;
 
-    s32 segmentCurve;
+    ShotType segmentCurve;
 
     SetUpTextDrawing(&gfx);
     DrawLargeText(&gfx, STATS_NAME_LEFT, STATS_NAME_TOP, gameBoyCharacter->name);
@@ -2078,7 +2086,7 @@ void DrawTransmitOptionFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
     *displayListHead = gfx;
 }
 
-static inline Boolean IsListed(s32 listing) {
+static inline Boolean IsListed(ListingState listing) {
     return listing == LISTING_SHOWN || listing == LISTING_BRINGING;
 }
 
@@ -2380,7 +2388,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
     s32 index;
     s32 rowCount;
     s32 panelRowCount;
-    s32 option;
+    TransmitOption option;
     s32 width;
     s32 height;
     s32 pointerLeft;
@@ -2715,7 +2723,7 @@ s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
     u8 characterData[CHARACTER_DATA_SIZE];
     u8 save[CARTRIDGE_SAVE_SIZE];
     GameBoyCharacter *gameBoyCharacter;
-    s32 fault = CARTRIDGE_FAULT_NONE;
+    CartridgeFault fault = CARTRIDGE_FAULT_NONE;
     s32 controllerIndex;
     s32 result;
     Boolean isSignatureWrong;

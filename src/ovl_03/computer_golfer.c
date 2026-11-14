@@ -2007,7 +2007,7 @@ s32 StepTrialShot(void) {
     PlaneTriangle hit;
     f32 fraction;
     s32 stepFlags;
-    s32 ballState;
+    BallState ballState;
     // Holds the same flags as stepFlags; reading them from a copy is needed
     // for the match.
     s32 stepFlagsCopy;

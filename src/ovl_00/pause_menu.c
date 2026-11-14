@@ -41,6 +41,8 @@ enum PauseMenuRequest {
     PAUSE_MENU_REQUEST_LOAD
 };
 
+typedef s32 PauseMenuRequest;
+
 #define PAUSE_LAYOUT_NONE (-1)
 #define PAUSE_LAYOUT_SPEED_GOLF 0
 #define PAUSE_LAYOUT_RING_SHOT 1
@@ -126,6 +128,8 @@ enum ChoiceBoxState {
     CHOICE_BOX_CHOSEN,
     CHOICE_BOX_CLOSING
 };
+
+typedef s32 ChoiceBoxState;
 
 enum ChoiceLabel {
     CHOICE_LABEL_YES,
@@ -326,13 +330,13 @@ static s8 f_PauseLayoutOptionCounts[] = {5, 6, 9, 7, 9, 6, 6, 5, 6, 5, 6};
 
 static s32 f_PauseLayout = PAUSE_LAYOUT_NONE;
 static Boolean f_IsPauseMenuLoaded = FALSE;
-static s32 f_PauseMenuRequest = PAUSE_MENU_REQUEST_NONE;
+static PauseMenuRequest f_PauseMenuRequest = PAUSE_MENU_REQUEST_NONE;
 static s32 f_PauseArrowsTick = 0;
 static Radians f_PauseGlowAngle = 0.0f;
 static Radians f_PauseCursorAngle = 0.0f;
-static s32 f_ChoiceBoxState = CHOICE_BOX_CLOSED;
+static ChoiceBoxState f_ChoiceBoxState = CHOICE_BOX_CLOSED;
 static s32 f_UnusedWordAfterChoiceBoxState UNUSED = 0;
-static s32 f_ChoiceBoxIndex = CHOICE_BOX_CLOSED;
+static ChoiceBoxState f_ChoiceBoxIndex = CHOICE_BOX_CLOSED;
 static s32 f_ChoiceBoxSelection = 0;
 static Radians f_ChoiceGlowAngle = 0.0f;
 static Radians f_ChoiceCursorAngle = 0.0f;
@@ -1220,7 +1224,7 @@ void FreeChoiceBoxImages(void) {
     FreeMemory(&f_MenuCloudImage);
 }
 
-void OpenChoiceBox(s32 choiceBoxIndex) {
+void OpenChoiceBox(ChoiceBoxState choiceBoxIndex) {
     f_ChoiceBoxIndex = choiceBoxIndex;
     if (choiceBoxIndex == CHOICE_BOX_CLOSED) {
         f_ChoiceBoxState = choiceBoxIndex;

@@ -16,11 +16,15 @@ enum MenuBackdrop {
     MENU_BACKDROP_PATTERN
 };
 
+typedef s32 MenuBackdrop;
+
 enum MenuBackdropState {
     MENU_BACKDROP_STATE_NONE,
     MENU_BACKDROP_STATE_CAPTURING,
     MENU_BACKDROP_STATE_SHOWN
 };
+
+typedef s32 MenuBackdropState;
 
 enum HudAnimation {
     HUD_ANIMATION_NONE = -1,
@@ -36,6 +40,8 @@ enum HudAnimation {
     HUD_ANIMATION_FAST_FADE_OUT,
     HUD_ANIMATION_SPIRAL
 };
+
+typedef s32 HudAnimation;
 
 typedef struct Fog {
     s32 color[3];
@@ -79,7 +85,7 @@ typedef struct Sun {
     u8 imageKind;
 } Sun;
 
-extern s32 g_MenuBackdropState;
+extern MenuBackdropState g_MenuBackdropState;
 
 #define ASSET_SKY_IMAGE_0 0x4D4
 #define ASSET_SKY_IMAGE_1 0x4D5

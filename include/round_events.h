@@ -19,6 +19,8 @@ enum ContactEffect {
     CONTACT_EFFECT_FADE = 10
 };
 
+typedef s32 ContactEffect;
+
 #define IsShownContactEffect(effect) \
     ((effect) == CONTACT_EFFECT_POWER_WOOD || \
         (effect) == CONTACT_EFFECT_POWER_IRON || \
@@ -38,6 +40,8 @@ enum ContactStyle {
     CONTACT_STYLE_GAME_BOY_BALL_6,
     CONTACT_STYLE_GAME_BOY_BALL_7
 };
+
+typedef s32 ContactStyle;
 
 #define ShowsLongShotEffect(style) \
     (((style) != CONTACT_STYLE_GAME_BOY_BALL_7) & ((style) != CONTACT_STYLE_WARIO))
@@ -63,7 +67,7 @@ enum ContactStyle {
 #define BANNER_BOGEY 16
 #define BANNER_STROKES_OVER_PAR 16
 
-extern s32 g_ContactEffect;
+extern ContactEffect g_ContactEffect;
 
 void StartBanner(s32 banner);
 void ShowWindFlyGuy(s32 show);

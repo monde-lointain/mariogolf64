@@ -309,7 +309,7 @@ s32 GetGroupHoleResult(s8 *playerResults) {
 }
 
 s32 GetHolingOutStakes(s32 playerIndex) {
-    s32 stakes;
+    HolingOutStakes stakes;
     s32 opponentIndex;
     Boolean hasAnyFinished;
     s32 bestScore;

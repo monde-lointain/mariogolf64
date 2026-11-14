@@ -26,6 +26,8 @@ enum Movie {
     MOVIE_MONTY_MOLE
 };
 
+typedef s32 Movie;
+
 void AllocMovieBuffer(void);
 void FreeMovieBuffer(void);
 Boolean IsMovieDone(void);

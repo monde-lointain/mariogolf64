@@ -333,7 +333,7 @@ static Vtx f_FlipMessageBoardVertices[QUAD_VERTEX_COUNT] = {
 };
 static s32 f_MovieDrawCount = 0;
 static s32 f_MovieTick = 0;
-static s32 f_CurrentMovie = MOVIE_NONE;
+static Movie f_CurrentMovie = MOVIE_NONE;
 static s32 f_MovieBackBuffer = 0;
 static s32 f_MovieFrame = 0;
 static AssetId f_ToadMovieFrameAssets[] =
@@ -430,9 +430,9 @@ static Vtx f_ContactVertices[2] = {
     {{{-12, 0, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
     {{{12, 0, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
 };
-s32 g_ContactEffect = CONTACT_EFFECT_NONE;
+ContactEffect g_ContactEffect = CONTACT_EFFECT_NONE;
 static Boolean f_IsContactEffectFading = FALSE;
-static s32 f_ContactStyle = 0;
+static ContactStyle f_ContactStyle = 0;
 #define CONTACT_RIBBON_FIRST_SEGMENTS 16
 #define CONTACT_RIBBON_RELOAD_SEGMENTS 15
 #define CONTACT_RIBBON_RELOAD_PASSES 2
@@ -1148,7 +1148,7 @@ Boolean IsMovieDone(void) {
     return f_CurrentMovie == MOVIE_NONE;
 }
 
-void StartMovie(s32 movie) {
+void StartMovie(Movie movie) {
     EncodedAsset asset;
     AssetFile file;
 
@@ -2776,7 +2776,7 @@ static inline void SetContactHalfWidth(s16 halfWidth) {
     f_ContactVertices[1].v.ob[AXIS_X] = halfWidth;
 }
 
-void StartContactEffect(s32 effect) {
+void StartContactEffect(ContactEffect effect) {
     s32 matrixIndex;
 
     if (effect == CONTACT_EFFECT_NONE) {

@@ -60,6 +60,8 @@ enum PlayerState {
     PLAYER_STATE_SHOWING_OUT_PLAYER
 };
 
+typedef s32 PlayerState;
+
 enum HoleStatus {
     HOLE_STATUS_PLAYING,
     HOLE_STATUS_HOLED_OUT,
@@ -76,6 +78,8 @@ enum CButtonPalette {
     DOWN_C_PALETTE,
     RIGHT_C_PALETTE
 };
+
+typedef s32 CButtonPalette;
 
 typedef struct Player {
     char name[PLAYER_NAME_SIZE];

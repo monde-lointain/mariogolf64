@@ -14,6 +14,8 @@ enum MatchStanding {
     MATCH_STANDING_DECIDING_HOLE
 };
 
+typedef s32 MatchStanding;
+
 enum MatchSide {
     MATCH_SIDE_NONE,
     MATCH_SIDE_PLAYER,
@@ -21,11 +23,15 @@ enum MatchSide {
     MATCH_HOLE_HALVED
 };
 
+typedef s32 MatchSide;
+
 enum GroupHoleResult {
     GROUP_HOLE_OPEN,
     GROUP_HOLE_WON,
     GROUP_HOLE_NO_WINNER
 };
+
+typedef s32 GroupHoleResult;
 
 enum GroupPlayerMark {
     GROUP_PLAYER_CONTENDING,
@@ -52,6 +58,8 @@ enum HolingOutStakes {
     HOLING_OUT_STAKES_NONE,
     HOLING_OUT_HALVES_HOLE
 };
+
+typedef s32 HolingOutStakes;
 
 s32 GetFirstHoleIndex(void);
 s32 GetRoundHoleCount(void);

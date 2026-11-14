@@ -89,6 +89,8 @@ enum FadeColor {
     FADE_COLOR_BLACK
 };
 
+typedef s32 FadeColor;
+
 #define FADE_NOISE_GRAY 0xBF
 
 #define DEBUG_MENU_VALUE_COUNT 3
@@ -116,7 +118,7 @@ enum FadeColor {
 s8 g_FramePacingMode = PACING_MODE_NORMAL;
 static s32 f_FadeAlpha = 0;
 TitleScreenEntrance g_TitleScreenEntrance = TITLE_ENTRANCE_NONE;
-s32 g_ScreenEffect = SCREEN_EFFECT_NONE;
+ScreenEffect g_ScreenEffect = SCREEN_EFFECT_NONE;
 static s32 f_ScreenEffectFrameCount = 0;
 static u16 *f_SavedFrameBuffer = (u16 *)MAIN_REGION_END;
 static s32 f_UnreadEffectSetting = 0;
@@ -158,7 +160,7 @@ static u32 f_UpdateStartTime = 0;
 static u32 f_UpdateEndTime = 0;
 static f32 f_MapFieldOfView = 60.0f;
 static s8 f_NeedsIdentityMatrix = TRUE;
-static s32 f_FadeColor = FADE_COLOR_WHITE;
+static FadeColor f_FadeColor = FADE_COLOR_WHITE;
 static u16 *f_CopySourceFrame = NULL;
 static u16 *f_PreviousFrame = NULL;
 static s32 f_DebugMenuValues[DEBUG_MENU_VALUE_COUNT] = {
@@ -383,7 +385,7 @@ void ScaleMatrix(Mtx *matrix, f32 x, f32 y, f32 z) {
     guMtxCatL(matrix, &scale, matrix);
 }
 
-void SetScreenEffect(s32 effect, s32 frameCount) {
+void SetScreenEffect(ScreenEffect effect, s32 frameCount) {
     g_ScreenEffect = effect;
     f_ScreenEffectFrameCount = frameCount;
     if (effect == SCREEN_EFFECT_NONE) {
@@ -1574,7 +1576,7 @@ s32 DrawGame(void) {
     u16 insetPerspNorm;
     u16 perspectiveNormalization;
     Boolean drawsScene;
-    s32 terrainStyle;
+    TerrainStyle terrainStyle;
     u32 drawMode;
     s32 viewIndex;
     s32 playerIndex;

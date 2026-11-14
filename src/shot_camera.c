@@ -142,7 +142,7 @@ static s32 f_UnusedFlightStartKind = 0;
 static Boolean f_IsFlightHudShown = FALSE;
 static Boolean f_IsPinHitComing = FALSE;
 static Radians f_CupViewYaw = 0.0f;
-static s32 f_EndReaction = 0;
+static EndReaction f_EndReaction = 0;
 static s32 f_LandingWaitFrameCount = 0;
 static Boolean f_IsBallGroundLevel = TRUE;
 s32 g_HoleFlyoverFrame = 0;
@@ -2263,7 +2263,7 @@ void PlaceFlightCamera(s32 step) {
         (traits)->kind == SURFACE_KIND_OUT_OF_BOUNDS)
 
 void ChooseFlightCameraKind(void) {
-    s32 animationId;
+    HudAnimation animationId;
     s32 kind;
     s32 pick;
 

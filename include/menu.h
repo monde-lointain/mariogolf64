@@ -41,11 +41,13 @@ enum MenuScreen {
     MENU_SCREEN_MAIN_WITHOUT_TRANSMIT
 };
 
+typedef s32 MenuScreen;
+
 #define MENU_SCREEN_COUNT 29
 #define NO_MENU_SCREEN (-1)
 extern s8 g_LoadedMenuScreen;
 extern AssetId g_MenuScreenImageAssets[MENU_SCREEN_COUNT];
-extern s32 g_MenuScreen;
+extern MenuScreen g_MenuScreen;
 
 extern s32 g_MenuRepeatButtons;
 extern s32 g_MenuPressedButtons;

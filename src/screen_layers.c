@@ -100,6 +100,8 @@ enum HalfTurnState {
     HALF_TURN_STATE_DONE
 };
 
+typedef s32 HalfTurnState;
+
 #define FADE_ALPHA_RANGE 256
 
 #define PROMPT_STATE_CLOSED (-1)
@@ -156,10 +158,10 @@ Gfx g_DecalTextureSetup[] = {
     gsSPEndDisplayList(),
 };
 static Boolean f_IsHalfTurnShown = FALSE;
-static s32 f_HalfTurnState = HALF_TURN_STATE_SHOWING;
+static HalfTurnState f_HalfTurnState = HALF_TURN_STATE_SHOWING;
 static s32 f_HalfTurnTimer = 9;
 static f32 f_WipeProgress = 0.0f;
-static s32 f_WipeKind = WIPE_NONE;
+static WipeState f_WipeKind = WIPE_NONE;
 static s32 f_WipeShapeIds[WIPE_SHAPE_COUNT] = {
     0x643,
     0x645,
@@ -179,7 +181,7 @@ static s32 f_WipeShapeIds[WIPE_SHAPE_COUNT] = {
 static s32 f_UnusedWordAfterWipeShapeIds UNUSED = 0x63E;
 s32 g_ScreenFadeDuration = 0;
 s32 g_ScreenFadeFramesLeft = 0;
-s32 g_ScreenFadeKind = FADE_NONE;
+FadeDirection g_ScreenFadeKind = FADE_NONE;
 static Prompt f_Prompts[] = {
     {0x2D, PROMPT_CHOICE_NO, {PROMPT_RESULT_SAVE_GAME, PROMPT_RESULT_STAY_IN_SAVE_MENU}},
     {0x2E, PROMPT_CHOICE_NO, {PROMPT_RESULT_END_GAME, PROMPT_RESULT_STAY_IN_SAVE_MENU}},
@@ -433,7 +435,7 @@ s32 GetWipeProgress(void) {
     }
 }
 
-void StartWipe(s32 kind) {
+void StartWipe(WipeState kind) {
     if (f_IsHalfTurnShown == TRUE) {
         if (kind == WIPE_OPENING || kind == WIPE_OPENING_FAST) {
             f_HalfTurnState = HALF_TURN_STATE_LEAVING;
@@ -700,7 +702,7 @@ Boolean IsPromptClosed(void) {
     return f_PromptState == PROMPT_STATE_CLOSED;
 }
 
-void OpenPrompt(s32 promptIndex) {
+void OpenPrompt(PromptId promptIndex) {
     Prompt *prompt;
 
     if (promptIndex != NO_PROMPT) {

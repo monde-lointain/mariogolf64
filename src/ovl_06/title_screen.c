@@ -28,6 +28,8 @@ enum TitleState {
     TITLE_GOING_TO_LOGOS
 };
 
+typedef s32 TitleState;
+
 #define TITLE_IDLE_FRAME_COUNT 630
 #define TITLE_FRAME_LIMIT 900
 #define TITLE_FADE_IN_FRAMES 8
@@ -81,7 +83,7 @@ void OnUnlockCodeEntered(void);
 void EnableDebug(void);
 
 static s32 f_TitleFrame = 0;
-static s32 f_TitleStage = TITLE_SHOWING;
+static TitleState f_TitleStage = TITLE_SHOWING;
 static ButtonCode f_ButtonCodes[] = {
     {"AABAUUDULRlr", 0, OnUnlockCodeEntered},
     {"DDLLLRRRddlllrrr", 0, OnUnlockCodeEntered},

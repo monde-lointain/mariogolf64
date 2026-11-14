@@ -41,6 +41,8 @@ enum PauseScreen {
     PAUSE_SCREEN_CONTROLS
 };
 
+typedef s32 PauseScreen;
+
 enum LetterboxState {
     LETTERBOX_STATE_NONE,
     LETTERBOX_STATE_MOVING_CAMERA,
@@ -50,11 +52,13 @@ enum LetterboxState {
     LETTERBOX_STATE_UNUSED_AIMING
 };
 
+typedef s32 LetterboxState;
+
 #define IsLetterboxState(state) \
     (((state) != LETTERBOX_STATE_NONE) & ((state) != LETTERBOX_STATE_UNUSED_AIMING))
 
-extern s32 g_LetterboxState;
-extern s32 g_PauseScreen;
+extern LetterboxState g_LetterboxState;
+extern PauseScreen g_PauseScreen;
 
 extern s8 g_IsTrainingHeadingKept;
 extern Boolean g_IsAimCameraEasing;

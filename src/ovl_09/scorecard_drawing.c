@@ -75,6 +75,8 @@ enum ScoresStyle {
     SCORES_STYLE_TINTED
 };
 
+typedef s32 ScoresStyle;
+
 extern const char f_HoleNumberFormat[];
 extern const char f_StringFormat[];
 extern const char f_CompactHoleFormat[];
@@ -136,7 +138,7 @@ static Vtx f_FlapVertices[FLAP_QUAD_COUNT][QUAD_VERTEX_COUNT] = {
 static Lights1 f_FlapLights = gdSPDefLights1(0xFF, 0xFF, 0xFF, 0x1F, 0x1F, 0x1F, 0, 0, -127);
 static Radians f_ArrowPulseAngle = 0.0f;
 static Radians f_ScorePulseAngle = 0.0f;
-static s32 f_ScoresStyle = SCORES_STYLE_OPAQUE;
+static ScoresStyle f_ScoresStyle = SCORES_STYLE_OPAQUE;
 static Radians f_BadgeGlowAngle = 0.0f;
 
 #define MATCH_TITLE_X 32

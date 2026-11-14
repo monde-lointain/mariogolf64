@@ -55,6 +55,8 @@ enum BallState {
     BALL_STATE_IN_WATER
 };
 
+typedef s32 BallState;
+
 #define BALL_SIMULATION_COUNT 1
 
 #define RESET_BALL_X 0x800
@@ -120,6 +122,8 @@ enum LaunchPurpose {
     LAUNCH_PURPOSE_PLACED_AT_REST,
     LAUNCH_PURPOSE_SHOT_PREVIEW = 5
 };
+
+typedef s32 LaunchPurpose;
 
 #define IsStrokeOrTrialLaunch(purpose) \
     ((purpose) == LAUNCH_PURPOSE_STROKE || (purpose) == LAUNCH_PURPOSE_TRIAL)

@@ -100,7 +100,7 @@ u8 g_IsRingShotWipeOpening;
 ImageAsset *g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
 ImageAsset *g_MenuCourseSceneImage;
 MenuMemory g_MenuMemory;
-s32 g_MenuScreen;
+MenuScreen g_MenuScreen;
 ImageAsset *g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
 u8 *g_PlayerFaceImages[PLAYER_COUNT_MAX];
 PaletteColor *g_PlayerFacePalettes[PLAYER_COUNT_MAX];

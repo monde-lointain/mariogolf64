@@ -15,6 +15,8 @@ enum ReactionAnimation {
     REACTION_ANIMATION_BOGEY
 };
 
+typedef s32 ReactionAnimation;
+
 s32 AddReactionLight(Gfx **displayListHead, Lights2 *lights);
 void StartReaction(u32 slotIndex, CharacterIndex characterIndex, s32 animationId);
 void TurnOffReactionLight(void);

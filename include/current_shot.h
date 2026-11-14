@@ -35,6 +35,8 @@ enum ImpactPointState {
     IMPACT_POINT_SETTING
 };
 
+typedef s32 ImpactPointState;
+
 #define GAUGE_FULL_FRAME 30
 #define GAUGE_IMPACT_FRAME (2 * GAUGE_FULL_FRAME)
 
@@ -45,6 +47,6 @@ extern CurrentShot g_CurrentShot;
 #else
 extern volatile CurrentShot g_CurrentShot;
 #endif
-extern s32 g_ImpactPointState;
+extern ImpactPointState g_ImpactPointState;
 
 #endif

@@ -46,13 +46,15 @@ enum SubModuleState {
     SUB_MODULE_UNLOADED = -1
 };
 
+typedef s32 SubModuleState;
+
 extern Scene g_Scene;
 extern Scene g_NextScene;
 extern ModuleId g_SceneModuleToUnload;
 extern ModuleId g_SceneModuleToLoad;
 extern ModuleId g_SubModuleId;
 extern ModuleId g_PendingSubModuleId;
-extern s32 g_SubModuleState;
+extern SubModuleState g_SubModuleState;
 
 enum GameMode {
     GAME_MODE_STROKE = 0,

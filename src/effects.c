@@ -108,6 +108,8 @@ enum DebrisKind {
     DEBRIS_KIND_BURIED = 6
 };
 
+typedef s32 DebrisKind;
+
 static Mtx f_RainModelViewMatrix;
 
 static u8 *f_RippleImage;
@@ -147,7 +149,7 @@ FILE_STATIC f32 f_RainDriftZ;
 FILE_STATIC Vec3 f_RainVelocity;
 FILE_STATIC s32 f_GroundCheckDropIndex;
 
-static s32 f_DebrisKind = 0;
+static DebrisKind f_DebrisKind = 0;
 static s32 f_NextMatrixIndex = 0;
 static Vtx f_UprightQuadVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, -1, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},

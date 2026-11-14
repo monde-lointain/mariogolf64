@@ -147,6 +147,8 @@ enum SpiralDirection {
     SPIRAL_UP
 };
 
+typedef s32 SpiralDirection;
+
 #define FRAME_TILE_COUNT (FRAME_TILE_ROW_COUNT * FRAME_TILE_COLUMN_COUNT)
 #define FRAME_TILE_WIDTH (FRAME_TILE_WORDS * 2)
 #define FRAME_TILE_WORD_COUNT (FRAME_TILE_ROWS * FRAME_TILE_WORDS)
@@ -180,7 +182,7 @@ typedef struct LensFlare {
 
 static u32 *f_CapturedFrame = (u32 *)MAIN_REGION_END;
 static s32 f_HudAnimationFramesLeft = 0;
-static s32 f_HudAnimation = HUD_ANIMATION_UNUSED;
+static HudAnimation f_HudAnimation = HUD_ANIMATION_UNUSED;
 static s32 f_SkyTimeIndex = 0;
 static s32 f_SkyColorTimeIndex = 0;
 static s32 f_SkyBlendStep = 0;
@@ -1338,9 +1340,9 @@ static Vtx f_TileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT] =
 static Boolean f_IsFrameCapturePending = FALSE;
 static s32 f_HudAnimationFrame = 0;
 s32 g_CapturedSliceCount = 0;
-s32 g_MenuBackdropState = MENU_BACKDROP_STATE_NONE;
+MenuBackdropState g_MenuBackdropState = MENU_BACKDROP_STATE_NONE;
 static s32 f_UnusedFadeEndCount = 0;
-static s32 f_MenuBackdrop = MENU_BACKDROP_STILL;
+static MenuBackdrop f_MenuBackdrop = MENU_BACKDROP_STILL;
 static s32 f_BackdropFadeLevel = 0;
 static s32 f_BackdropPatternScroll = 0;
 static Vtx f_TileVertices[TILE_VERTEX_COUNT] = {
@@ -3029,7 +3031,7 @@ void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
     *displayListHead = gfx;
 }
 
-void StartHudAnimation(s32 animationId) {
+void StartHudAnimation(HudAnimation animationId) {
     if (animationId == HUD_ANIMATION_NONE) {
         f_IsFrameCapturePending = FALSE;
         f_HudAnimationFramesLeft = 0;
@@ -3345,7 +3347,7 @@ void DrawSpiralAnimation(Gfx **displayListHead) {
     s32 tileColumn;
     s32 rightColumn;
     s32 topRow;
-    s32 direction;
+    SpiralDirection direction;
     s32 tileRow;
     s32 bottomRow;
     s32 leftColumn;
@@ -3533,7 +3535,7 @@ void DrawSpiralAnimation(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-void SetMenuBackdrop(s32 backdrop) {
+void SetMenuBackdrop(MenuBackdrop backdrop) {
     if (backdrop == MENU_BACKDROP_NONE) {
         g_MenuBackdropState = MENU_BACKDROP_STATE_NONE;
         return;

@@ -16,6 +16,8 @@ enum WipeState {
     WIPE_OPENING_FAST
 };
 
+typedef s32 WipeState;
+
 #define WIPE_CLOSED_PROGRESS 0
 #define WIPE_OPEN_PROGRESS 20
 
@@ -36,6 +38,8 @@ enum PromptId {
     PROMPT_SCORE_PASSWORD,
     PROMPT_OVERWRITE_RECORDS
 };
+
+typedef s32 PromptId;
 
 enum PromptResult {
     NO_PROMPT_RESULT = -1,
@@ -59,9 +63,11 @@ enum FadeDirection {
     FADE_IN
 };
 
+typedef s32 FadeDirection;
+
 extern s32 g_ScreenFadeDuration;
 extern s32 g_ScreenFadeFramesLeft;
-extern s32 g_ScreenFadeKind;
+extern FadeDirection g_ScreenFadeKind;
 extern RgbColor g_ScreenFadeColor;
 extern Gfx g_DecalTextureSetup[];
 

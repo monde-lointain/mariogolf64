@@ -72,7 +72,7 @@ typedef struct GolfBall {
     f32 position[3];
     s32 alpha;
     UBoolean8 isInCup;
-    s32 state;
+    BallState state;
     s8 markerPlayerIndex;
     s8 purpose;
     Boolean8 hasEnteredWater;
@@ -781,6 +781,8 @@ enum BallLie {
     BALL_EXPOSED
 };
 
+typedef s32 BallLie;
+
 enum BallSprite {
     BALL_SPRITE_FULL,
     BALL_SPRITE_SMALL,
@@ -789,6 +791,8 @@ enum BallSprite {
     BALL_SPRITE_DOT_SHADOWED,
     BALL_SPRITE_FAR_DOT_SHADOWED
 };
+
+typedef s32 BallSprite;
 
 #define BALL_NEAREST_DEPTH (-5)
 #define BALL_FULL_SPRITE_DEPTH (-86)
@@ -835,9 +839,9 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     SurfaceTraits *surface;
     SurfaceTraits *pikaBallSurface;
     s32 groundHeight;
-    s32 spriteKind;
+    BallSprite spriteKind;
     Boolean isAboveGround;
-    s32 exposure;
+    BallLie exposure;
     Boolean isAboveCup;
     s32 ballDepth;
     s32 afterimageProjectedDepth;

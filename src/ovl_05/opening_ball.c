@@ -1817,7 +1817,11 @@ SETTLE:
 #define OPENING_OFFSET_SIDE_SPIN_SCALE 2
 #define OPENING_LAUNCH_SPIN_SPEED_LOSS 0.2f
 
-s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *shot) {
+s32 LaunchOpeningBallSimulation(
+    BallSimulation *simulation,
+    LaunchPurpose purpose,
+    ShotLaunch *shot
+) {
     s32 percentRange[2];
     Club *club;
     ImpactEffect *impactEffect;

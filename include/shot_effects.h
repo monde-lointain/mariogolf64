@@ -12,6 +12,8 @@ enum ImpactFlashState {
     IMPACT_FLASH_FADING
 };
 
+typedef s32 ImpactFlashState;
+
 enum ClearKind {
     CLEAR_KIND_EFFECTS,
     CLEAR_KIND_ALL,
@@ -25,7 +27,9 @@ enum SwingTrailKind {
     SWING_TRAIL_KIND_NORMAL_SHOT
 };
 
-extern s32 g_ImpactFlashState;
+typedef s32 SwingTrailKind;
+
+extern ImpactFlashState g_ImpactFlashState;
 extern s32 g_ImpactFlashLevel;
 
 void ResetShotEffects(void);

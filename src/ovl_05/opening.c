@@ -286,8 +286,8 @@ static Boolean f_AreAmbientSoundsOn = FALSE;
 static s32 f_AlternatingSoundTimer = 0;
 static s32 f_RepeatingSoundTimer = 0;
 static s32 f_RandomSoundTimer = 0;
-static s32 f_AlternatingSound = AMBIENT_SOUND_FIRST;
-static s32 f_RandomSound = AMBIENT_SOUND_NONE;
+static AmbientSoundChoice f_AlternatingSound = AMBIENT_SOUND_FIRST;
+static AmbientSoundChoice f_RandomSound = AMBIENT_SOUND_NONE;
 static s32 f_AlternatingSoundFirstLength = 50;
 static s32 f_AlternatingSoundSecondLength = 100;
 static s32 f_RepeatingSoundLength = 60;
@@ -309,7 +309,7 @@ static Boolean f_IsBurstShown = FALSE;
 static s32 f_ShotBallScale = 0;
 static s32 f_LookAtEaseMode = 0;
 static s32 f_UnusedWordAfterEaseMode UNUSED = 0;
-static s32 f_OpeningBallStates[OPENING_BALL_SLOT_COUNT] = {
+static OpeningBallState f_OpeningBallStates[OPENING_BALL_SLOT_COUNT] = {
     OPENING_BALL_HIDDEN,
     OPENING_BALL_HIDDEN,
 };
@@ -336,7 +336,7 @@ static ShotLaunch f_OpeningSecondShot =
     {-0x2000, 0, LAUNCH_POWER_MAX, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 static ShotLaunch f_OpeningThirdShot = {-0x2300, 0, 240, 0, 0, 20, 0, SHOT_MODE_NORMAL};
 static ShotLaunch f_OpeningFourthShot = {-0x2B00, 1, 400, 0, -180, -720, 0, SHOT_MODE_NORMAL};
-static s32 f_OpeningSparksState = SPARKS_HIDDEN;
+static SparksState f_OpeningSparksState = SPARKS_HIDDEN;
 f32 g_LookAtMarkerScale = 1.0f;
 static Boolean f_IsLookAtMarkerShown = FALSE;
 static s32 f_OpeningShotState = 0;
@@ -458,8 +458,8 @@ static s32 f_LogoLettersAlpha = OPAQUE_ALPHA;
 static s32 f_LogoClubAlpha = OPAQUE_ALPHA;
 static s32 f_LogoShineFrame = LOGO_SHINE_FIRST_FRAME;
 static s32 f_LogoClubSpinFramesLeft = LOGO_CLUB_SPIN_FRAMES_MIN;
-static s32 f_LogoState = LOGO_DROPPING_LETTERS;
-static s32 f_LogoFadeStage = LOGO_FADE_NONE;
+static LogoState f_LogoState = LOGO_DROPPING_LETTERS;
+static LogoFadeStage f_LogoFadeStage = LOGO_FADE_NONE;
 static s32 f_LogoFadeFramesLeft = LOGO_FADE_FIRST_FRAMES_LEFT;
 static f32 f_LogoClubScale[2] = {1.0f, 1.0f};
 static Degrees f_LogoClubAngle = LOGO_CLUB_START_ANGLE;
@@ -606,7 +606,7 @@ static u8 f_LogoMarioImage[LOGO_MARIO_IMAGE_BUFFER_SIZE];
 static u8 f_LogoLetterImages[LOGO_LETTER_IMAGES_BUFFER_SIZE];
 static u8 f_LogoClubImage[LOGO_CLUB_IMAGE_BUFFER_SIZE];
 static ScreenPosition f_LogoLetters[LOGO_LETTER_COUNT];
-static s32 f_LogoLetterStates[LOGO_LETTER_COUNT];
+static LogoLetterState f_LogoLetterStates[LOGO_LETTER_COUNT];
 static f32 f_LogoLetterSpeeds[LOGO_LETTER_COUNT];
 static Vec2 f_LogoLetterScales[LOGO_LETTER_COUNT];
 static s32 f_LogoLetterSquashFrames[LOGO_LETTER_COUNT];

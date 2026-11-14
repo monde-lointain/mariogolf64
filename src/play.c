@@ -86,6 +86,8 @@ enum HoleEndStep {
     HOLE_END_STEP_RING_SHOT_COURSE_NOTICE
 };
 
+typedef s32 HoleEndStep;
+
 enum PlayExit {
     PLAY_EXIT_NONE,
     PLAY_EXIT_COURSE_SELECT,
@@ -97,6 +99,8 @@ enum PlayExit {
     PLAY_EXIT_ROUND_OVER
 };
 
+typedef s32 PlayExit;
+
 enum HoleResultsKind {
     HOLE_RESULTS_STROKE,
     HOLE_RESULTS_MATCH,
@@ -104,6 +108,8 @@ enum HoleResultsKind {
     HOLE_RESULTS_TOURNAMENT,
     HOLE_RESULTS_SPEED_GOLF
 };
+
+typedef s32 HoleResultsKind;
 
 CurrentShot g_ScriptedShot;
 s8 g_ReplayStrokeCount;
@@ -124,7 +130,7 @@ FILE_STATIC s8 g_RingShotCourseOpenedAtStart;
 
 static s32 f_UnusedWordsBeforeTrainingHeading[2] UNUSED = {0};
 s8 g_IsTrainingHeadingKept = FALSE;
-s32 g_PauseScreen = PAUSE_SCREEN_NONE;
+PauseScreen g_PauseScreen = PAUSE_SCREEN_NONE;
 Boolean g_IsAimCameraEasing = 0;
 Boolean g_HasPressedShotButton = FALSE;
 SignedBinaryAngle g_LookBackHeading = 0;
@@ -133,15 +139,15 @@ s32 g_ShotSetupFrameCount = 0;
 s32 g_ImpactPointLingerFrameCount = 0;
 s32 g_ShotFlags = 0;
 static s32 f_UnusedClearedPlayWord = 0;
-s32 g_LetterboxState = LETTERBOX_STATE_NONE;
-s32 g_ImpactPointState = IMPACT_POINT_OFF;
+LetterboxState g_LetterboxState = LETTERBOX_STATE_NONE;
+ImpactPointState g_ImpactPointState = IMPACT_POINT_OFF;
 Boolean g_HasShotComeToRest = TRUE;
 s8 g_IsHudTurnAwayRequested = FALSE;
 static s32 f_UnusedWordsAfterTurnAwayRequest[2] UNUSED = {0};
 static s8 f_IsRingShotCleared = FALSE;
-static s32 f_PlayExit = PLAY_EXIT_NONE;
-static s32 f_HoleEndStep = HOLE_END_STEP_START;
-static s32 f_HoleResultsKind = HOLE_RESULTS_STROKE;
+static PlayExit f_PlayExit = PLAY_EXIT_NONE;
+static HoleEndStep f_HoleEndStep = HOLE_END_STEP_START;
+static HoleResultsKind f_HoleResultsKind = HOLE_RESULTS_STROKE;
 static s32 f_PlayStateFrameCount = 0;
 static s32 f_PlayFrameCount = 0;
 static s8 f_IsPlayStateBackedUp = FALSE;
@@ -295,7 +301,7 @@ void FormatDefaultPlayerName(s32 index, char *name) {
 void SetUpPlayers(void) {
     s32 playerIndex;
     s32 holeIndex;
-    s32 slot;
+    NotableShot slot;
 
     if (g_Scene == SCENE_PLAY_BEST_SHOT_REPLAY ||
         g_GameState.gameMode == GAME_MODE_RECORD_REPLAY ||
@@ -739,6 +745,8 @@ enum HoleMenuChoice {
     HOLE_MENU_QUIT
 };
 
+typedef s32 HoleMenuChoice;
+
 #define RING_SHOT_RESULTS_DONE 1
 #define RING_SHOT_RESULTS_SAVE 2
 
@@ -781,9 +789,9 @@ void UpdatePlay(void) {
     s32 anyHuman;
     s32 playerSlot;
     s32 playerIndex;
-    s32 result;
+    HoleMenuChoice result;
     s32 clearHud;
-    s32 nextStep;
+    HoleEndStep nextStep;
 
     repeat = FALSE;
     f_PlayFrameCount++;
@@ -1931,7 +1939,7 @@ void RebuildGroundTextureCoordinates(void) {
         shiftT \
     )
 
-void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
+void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT];
     Gfx *gfx;
     s32 half;
@@ -1942,9 +1950,9 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     f32 fineScale;
     f32 radius;
     s32 visibility;
-    s32 detail;
-    s32 detailMax;
-    s32 previousDetail;
+    GroundDetail detail;
+    GroundDetail detailMax;
+    GroundDetail previousDetail;
     s32 edgeIndex;
     s32 culledTileIndex;
     s32 culledOffset;
@@ -2200,7 +2208,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
         }
 
         for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
-            s32 groupDetail;
+            GroundDetail groupDetail;
 
             groupDetail = GROUND_DETAIL_COARSE;
             for (detailTileIndex = 0; detailTileIndex < GROUND_TILE_GROUP_SIZE; detailTileIndex++) {

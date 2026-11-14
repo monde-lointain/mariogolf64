@@ -97,6 +97,8 @@ enum GroundDetail {
     GROUND_DETAIL_FINE
 };
 
+typedef s32 GroundDetail;
+
 enum TerrainCode {
     TERRAIN_CODE_FAIRWAY,
     TERRAIN_CODE_ROUGH,
@@ -113,6 +115,8 @@ enum TerrainCode {
     TERRAIN_CODE_BARE_GROUND,
     TERRAIN_CODE_WASTE_AREA = 14
 };
+
+typedef s32 TerrainCode;
 
 #define TERRAIN_CODE_COUNT 16
 
@@ -175,6 +179,8 @@ enum TerrainStyle {
     TERRAIN_STYLE_MAP = 2,
     TERRAIN_STYLE_TOP_DOWN_MAP
 };
+
+typedef s32 TerrainStyle;
 
 #define IsMapTerrainStyle(style) \
     ((style) == TERRAIN_STYLE_MAP || (style) == TERRAIN_STYLE_TOP_DOWN_MAP)

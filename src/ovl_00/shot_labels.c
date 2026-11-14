@@ -34,6 +34,8 @@ enum ShotLabelMode {
     SHOT_LABELS_OTHER_BALLS
 };
 
+typedef s32 ShotLabelMode;
+
 #define NO_CORNER (-1)
 #define CORNER_LOWER_RIGHT 0
 #define CORNER_LOWER_LEFT 1
@@ -119,7 +121,7 @@ static u8 f_PlayerTagColors[PLAYER_COUNT_MAX][3] =
     {{0xDC, 0x00, 0x00}, {0x00, 0x00, 0xDC}, {0xF0, 0x7F, 0x00}, {0x00, 0x7F, 0x00}};
 static ShotLabel f_ShotLabels[PLAYER_COUNT_MAX] =
     {{0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}};
-static s32 f_ShotLabelMode = SHOT_LABELS_NONE;
+static ShotLabelMode f_ShotLabelMode = SHOT_LABELS_NONE;
 static s8 f_TagOffsetsX[CORNER_COUNT] = {22, -22, -22, 22};
 static s8 f_TagOffsetsY[CORNER_COUNT] = {12, 12, -12, -12};
 static Radians f_OutOfBoundsPulseAngle = 0.0f;
@@ -131,7 +133,7 @@ void DrawShotLabels(Gfx **displayListHead) {
     ScreenPoint point;
     ScreenSpot cup;
     Gfx *gfx = *displayListHead;
-    s32 labelMode;
+    ShotLabelMode labelMode;
     s32 corner;
     s32 cornerOffset;
 

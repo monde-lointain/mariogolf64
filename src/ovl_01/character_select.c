@@ -487,7 +487,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
     s16 gridMark;
     s32 controllerIndex;
     u16 button;
-    s32 paletteIndex;
+    CButtonPalette paletteIndex;
     u16 column;
     s8 chosenColumn;
     u16 row;

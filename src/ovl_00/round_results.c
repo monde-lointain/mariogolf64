@@ -44,6 +44,8 @@ enum ResultsState {
     RESULTS_CLOSING
 };
 
+typedef s32 ResultsState;
+
 enum BannerKind {
     BANNER_KIND_NONE,
     BANNER_KIND_TOURNAMENT_PLACE,
@@ -53,6 +55,8 @@ enum BannerKind {
     BANNER_KIND_UNUSED_MESSAGE
 };
 
+typedef s32 BannerKind;
+
 enum BannerState {
     BANNER_UNSET = -1,
     BANNER_SLIDING_IN,
@@ -61,6 +65,8 @@ enum BannerState {
     BANNER_SLIDING_OUT
 };
 
+typedef s32 BannerState;
+
 enum UnlockNotice {
     UNLOCK_NOTICE_DONKEY_KONG,
     UNLOCK_NOTICE_MAPLE,
@@ -68,11 +74,15 @@ enum UnlockNotice {
     UNLOCK_NOTICE_COURSES
 };
 
+typedef s32 UnlockNotice;
+
 enum UnlockNoticeKind {
     UNLOCK_NOTICE_KIND_NONE,
     UNLOCK_NOTICE_KIND_COURSE,
     UNLOCK_NOTICE_KIND_CHARACTER
 };
+
+typedef s32 UnlockNoticeKind;
 
 #define NORMAL_TALLY_SPEED 1
 #define FAST_TALLY_SPEED 10
@@ -215,7 +225,7 @@ typedef struct CoursePointsTally {
 extern const char f_UnusedModeNamesText[];
 
 static Boolean f_AreResultsLoaded = FALSE;
-static s32 f_ResultsState = RESULTS_SLIDING_IN;
+static ResultsState f_ResultsState = RESULTS_SLIDING_IN;
 static s32 f_ResultsStep = 0;
 static s32 f_ResultsStepTime = 0;
 static s32 f_ResultsSlide = SCREEN_WIDTH;
@@ -242,8 +252,8 @@ static TrophyAssets f_TrophyAssets[COURSE_COUNT] = {
     {0x8C2, 0x8C5, 16},
     {0x89D, 0x8A0, 15},
 };
-static s32 f_BannerState = BANNER_UNSET;
-static s32 f_BannerKind = BANNER_KIND_NONE;
+static BannerState f_BannerState = BANNER_UNSET;
+static BannerKind f_BannerKind = BANNER_KIND_NONE;
 static s32 f_BannerX = SCREEN_WIDTH;
 static s32 f_BannerY = 0;
 static WideAssetId f_CourseNoticeAssets[] = {0x96C, 0x96D, 0x96E, 0x96F, 0x970};
@@ -296,7 +306,7 @@ static u8 *f_MatchStandingWordsImage;
 static u8 *f_NintendoBadgeImage;
 static u8 *f_DigitsImage;
 static u8 *f_PlaceDigitsImage;
-static s32 f_UnlockNoticeKind;
+static UnlockNoticeKind f_UnlockNoticeKind;
 static Boolean f_HasBets;
 static CharacterIndex f_FaceCharacterIndex;
 static s32 f_NoticeStage;
@@ -697,7 +707,7 @@ void LoadRoundResults(void) {
     }
 }
 
-void LoadUnlockNotice(s32 unlock) {
+void LoadUnlockNotice(UnlockNotice unlock) {
     EncodedAsset asset;
     AssetFile file;
     CourseIndex courseIndex;
@@ -2115,7 +2125,7 @@ s32 GetBannerState(void) {
     return f_BannerState;
 }
 
-void SetResultsBanner(s32 state, s32 kind) {
+void SetResultsBanner(BannerState state, s32 kind) {
     f_BannerState = state;
     f_BannerKind = kind;
     if (state == BANNER_SLIDING_IN) {

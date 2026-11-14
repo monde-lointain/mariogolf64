@@ -89,6 +89,8 @@ enum PlaceSuffix {
     PLACE_SUFFIX_TH
 };
 
+typedef s32 PlaceSuffix;
+
 #define PLACES_PER_HUNDRED 100
 #define PLACE_TEENS_END 20
 

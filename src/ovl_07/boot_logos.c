@@ -29,6 +29,8 @@ enum BootLogo {
     BOOT_LOGO_LEAVING_CAMELOT
 };
 
+typedef s32 BootLogo;
+
 #define LOGO_FRAME_COUNT 40
 #define FADE_IN_FRAME_COUNT 8
 #define FADE_IN_ALPHA_STEP 32
@@ -84,7 +86,7 @@ typedef struct N64Logo {
 #define ASSET_N64_LOGO 0x97F
 
 static s32 f_BootLogoFrame = 0;
-static s32 f_BootLogoStage = BOOT_LOGO_N64;
+static BootLogo f_BootLogoStage = BOOT_LOGO_N64;
 static s32 f_BootLogoUnusedWord UNUSED = 0;
 static Boolean f_HasResetGameState = FALSE;
 

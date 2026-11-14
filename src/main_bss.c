@@ -326,7 +326,7 @@ u8 g_IsMenuWipeOpening BSS = {0};
 Mtx f_DropMatrices[DRAW_BUFFER_COUNT] BSS ALIGNED(8) = {{{{0}}}};
 UNREAD_COMMON(0x8);
 Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH] BSS ALIGNED(8) = {{{{0}}}};
-s32 g_MenuScreen BSS = {0};
+MenuScreen g_MenuScreen BSS = {0};
 u8 *g_CourseSkyImage BSS = {0};
 Raindrop *f_Raindrops BSS = {0};
 OSMesgQueue __osSiAccessQueue BSS ALIGNED(0x8) = {0};

@@ -66,6 +66,8 @@ enum ClubCodeState {
     CLUB_CODE_STATE_INCORRECT
 };
 
+typedef s32 ClubCodeState;
+
 #define MESSAGE_ENTER_CODE 0x165
 
 #define CODE_KEYBOARD_ROW_COUNT 4
@@ -87,6 +89,8 @@ enum ClubCodePhase {
     CLUB_CODE_PHASE_DETAILS,
     CLUB_CODE_PHASE_INCORRECT
 };
+
+typedef s32 ClubCodePhase;
 
 #define CLUB_CODE_NAME_MASK 0x7F
 #define CLUB_CODE_NINTENDO_SHIFT 7
@@ -139,7 +143,7 @@ static ImageAsset *f_NintendoBadge = NULL;
 static ImageAsset *f_ClubCourseIcon = NULL;
 static ImageAsset *f_MenuWindowImage = NULL;
 static PaletteColor *f_MenuWindowPalette = NULL;
-static s32 f_MenuWindowState = MENU_WINDOW_OPENING;
+static MenuWindowState f_MenuWindowState = MENU_WINDOW_OPENING;
 static f32 f_MenuWindowScaleX = 0.0f;
 static f32 f_MenuWindowScaleY = 0.0f;
 static s32 f_UnusedWordsAfterWindowScale[2] UNUSED = {0, 0};
@@ -192,8 +196,8 @@ static s32 f_CodeHandMotion = 0;
 static s32 f_CodeHandReach = 0;
 static s32 f_CodeHandStepTimer = 0;
 static s32 f_EnteredCodeLength = 0;
-static s32 f_ClubCodeState = CLUB_CODE_STATE_ENTERING;
-static s32 f_ClubTournamentPhase = CLUB_CODE_PHASE_TYPING;
+static ClubCodeState f_ClubCodeState = CLUB_CODE_STATE_ENTERING;
+static ClubCodePhase f_ClubTournamentPhase = CLUB_CODE_PHASE_TYPING;
 static s32 f_DecodedNameIndex = 0;
 static s32 f_UnusedDoubledHandReach = 0;
 static s32 f_UnusedCodeEntryWord = 0;
@@ -1613,7 +1617,7 @@ void DrawClubNumber(Gfx **displayListHead, s32 x, s32 top, s32 number) {
     u8 *image = GetMenuImageBuffer();
     char *digit;
     s32 width;
-    s32 suffix;
+    PlaceSuffix suffix;
     s32 glyph;
     u8 character;
     s32 lastDigitSuffix;

@@ -268,6 +268,8 @@ enum CharacterLighting {
     CHARACTER_LIGHTING_BLACK
 };
 
+typedef s32 CharacterLighting;
+
 extern CharacterSlot g_CharacterSlots[CHARACTER_SLOT_COUNT];
 
 extern Gfx g_CharacterRenderModeDisplayList[3];

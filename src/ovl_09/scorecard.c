@@ -119,7 +119,7 @@ static AssetId f_BetImageAssets[BET_COUNT][2] = {
     {ASSET_MATCH_POT_BET_IMAGE, ASSET_MATCH_POT_BET_IMAGE + 1},
     {ASSET_LAS_VEGAS_BET_IMAGE, ASSET_LAS_VEGAS_BET_IMAGE + 1},
 };
-s32 f_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
+ResultCharactersState f_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
 
 void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     EncodedAsset asset;

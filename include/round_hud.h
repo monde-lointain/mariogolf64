@@ -16,11 +16,15 @@ enum ShotEffect {
     SHOT_EFFECT_MAX_POWER
 };
 
+typedef s32 ShotEffect;
+
 enum LandingReaction {
     LANDING_REACTION_NONE = -1,
     LANDING_REACTION_REST = 1,
     LANDING_REACTION_SURFACE_ONLY
 };
+
+typedef s32 LandingReaction;
 
 enum HeightComparison {
     HEIGHT_ABOVE,

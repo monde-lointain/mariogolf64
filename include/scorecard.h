@@ -34,6 +34,8 @@ enum ScorecardState {
     SCORECARD_UNUSED_HIDDEN
 };
 
+typedef s32 ScorecardState;
+
 typedef struct ScorecardContent {
     Radians rowFlipAngles[LEADERBOARD_ROW_COUNT];
     Boolean8 isRowFlipping[LEADERBOARD_ROW_COUNT];
@@ -88,7 +90,7 @@ typedef struct Scorecard {
 } Scorecard;
 
 extern Scorecard g_Scorecard;
-extern s32 g_ScorecardState;
+extern ScorecardState g_ScorecardState;
 
 enum PlaceChange {
     PLACE_HELD = -1,
@@ -109,6 +111,8 @@ enum ResultCharactersState {
     RESULT_CHARACTERS_LOADING = 2,
     RESULT_CHARACTERS_LOADED
 };
+
+typedef s32 ResultCharactersState;
 
 extern s32 f_ResultCharactersLoadStep;
 s32 LoadResultCharacters(void);

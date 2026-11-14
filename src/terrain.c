@@ -162,7 +162,7 @@ ModuleId g_SceneModuleToUnload = MODULE_BOOT_LOGOS;
 ModuleId g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
 ModuleId g_SubModuleId = MODULE_SCORECARD;
 ModuleId g_PendingSubModuleId = MODULE_SCORECARD;
-s32 g_SubModuleState = SUB_MODULE_UNLOADED;
+SubModuleState g_SubModuleState = SUB_MODULE_UNLOADED;
 static TerrainColor f_TerrainColors[TERRAIN_COLOR_COUNT] = {
     {0x05, 0x19, 0x00, 1},
     {0x05, 0x1E, 0x05, 1},
@@ -1483,7 +1483,7 @@ void MarkBillboardsOnMap(void) {
         ((g_ControllerData[0].button & (START_BUTTON | L_TRIG)) == (START_BUTTON | L_TRIG)))
 
 void UpdateDebugScenes(void) {
-    s32 openState = BOX_OPEN;
+    AnimatedBoxState openState = BOX_OPEN;
     s32 stickStep;
 
     if (f_IsFirstDebugUpdate) {

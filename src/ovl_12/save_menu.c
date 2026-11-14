@@ -41,6 +41,8 @@ enum SaveMenuState {
     SAVE_MENU_STATE_LEAVING
 };
 
+typedef s32 SaveMenuState;
+
 #define ICON_FRAME_PERIOD 5
 
 #define GAME_MODE_ICON_COUNT 12
@@ -198,11 +200,11 @@ static s8 f_ModeIcons[GAME_MODE_ICON_COUNT] = {
     MODE_ICON_SKINS_MATCH,
     MODE_ICON_CLUB_SLOTS,
 };
-static s32 f_MenuKind = SAVE_MENU_CLOSED;
+static SaveMenuList f_MenuKind = SAVE_MENU_CLOSED;
 static Boolean f_IsControlsShown = FALSE;
 static s32 f_CursorIndex = 0;
 static s32 f_StateFrameCount = 0;
-static s32 f_MenuState = SAVE_MENU_STATE_OPENING;
+static SaveMenuState f_MenuState = SAVE_MENU_STATE_OPENING;
 static char *f_ModeNames[MODE_NAME_COUNT] = {
     "Tournament",
     "Get Character",
@@ -272,7 +274,7 @@ s32 GetModeIconIndex(GameState *state) {
     return iconIndex;
 }
 
-void OpenSaveMenu(s32 kind) {
+void OpenSaveMenu(SaveMenuList kind) {
     EncodedAsset encodedAsset;
     AssetFile file;
     SaveData *save;

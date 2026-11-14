@@ -12,6 +12,8 @@ enum SaveMenuList {
     SAVE_MENU_REPLAYS
 };
 
+typedef s32 SaveMenuList;
+
 enum PauseAction {
     PAUSE_ACTION_FREE_LOOK,
     PAUSE_ACTION_SCORECARD,

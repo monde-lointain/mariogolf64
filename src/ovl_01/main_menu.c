@@ -3743,7 +3743,7 @@ void UpdateUnusedBackToMain(void) {
 void UpdateOptionsScreen(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
-    s32 closedCheck;
+    MenuWindowCheck closedCheck;
     s32 slot;
     u8 *optionBits;
 

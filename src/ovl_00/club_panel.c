@@ -33,6 +33,8 @@ enum ClubPanelState {
     CLUB_PANEL_LOADED = 1
 };
 
+typedef s32 ClubPanelState;
+
 #define SHOT_MODE_CHANGE_FRAME_COUNT 4
 #define SHOT_MODE_CHANGE_LAST_FRAME (SHOT_MODE_CHANGE_FRAME_COUNT - 1)
 
@@ -69,7 +71,7 @@ static u8 f_PanelIsPutter = PANEL_NOT_SHOWN;
 static u8 f_ShotModeChangeFrame = 0;
 static s32 f_ChosenPowerFill = 0;
 static s32 f_PanelBufferIndex = 0;
-static s32 f_ClubPanelState = CLUB_PANEL_FREED;
+static ClubPanelState f_ClubPanelState = CLUB_PANEL_FREED;
 static Vtx f_SpanBarVertices[SPAN_BAR_VERTEX_COUNT] = {
     {{{-70, 10, -2}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-70, -10, -2}, 0, {0, 0x100}, {0xFF, 0x00, 0x00, 0xFF}}},
@@ -332,7 +334,7 @@ void DrawClubPanel(Gfx **displayListHead) {
     Gfx *gfx;
     Boolean isPutter;
     s32 fill;
-    s32 playerState;
+    PlayerState playerState;
     s32 tick;
     s32 group;
     s32 emptyLeft;

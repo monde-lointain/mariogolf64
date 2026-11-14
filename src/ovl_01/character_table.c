@@ -39,6 +39,8 @@ enum TablePopupCorner {
     TABLE_POPUP_BOTTOM_RIGHT
 };
 
+typedef s32 TablePopupCorner;
+
 #define TABLE_POPUP_CORNER_COUNT 4
 #define TABLE_POPUP_LEFT_X 68
 #define TABLE_POPUP_RIGHT_X 164
@@ -100,7 +102,7 @@ void DrawTableStar(Gfx **displayListHead, s32 left, s32 top);
 
 static s32 f_TablePopupLeft = TABLE_POPUP_LEFT_X;
 static s32 f_TablePopupTop = TABLE_POPUP_TOP_Y;
-static s32 f_TablePopupCorner = TABLE_POPUP_TOP_LEFT;
+static TablePopupCorner f_TablePopupCorner = TABLE_POPUP_TOP_LEFT;
 static s32 f_TableArrowFrame = 0;
 static s32 f_TableArrowTimer = 0;
 static s32 f_UnreadTableArrowState = 0;

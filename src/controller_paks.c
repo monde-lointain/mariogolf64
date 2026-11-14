@@ -34,7 +34,7 @@ char *GetGameBoyCharacterName(s32 gameBoyCharacterIndex) {
     return g_GameBoyCharacters[gameBoyCharacterIndex].name;
 }
 
-void ResetGameBoyTransfer(s32 transferMode) {
+void ResetGameBoyTransfer(TransferMode transferMode) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     s32 index;
 

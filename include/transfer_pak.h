@@ -70,6 +70,8 @@ enum TransferMode {
     TRANSFER_MODE_FROM_MENU
 };
 
+typedef s32 TransferMode;
+
 enum TransmitScreen {
     TRANSMIT_SCREEN_OPTIONS,
     TRANSMIT_SCREEN_UNUSED,

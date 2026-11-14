@@ -10,11 +10,15 @@ enum MenuWindowState {
     MENU_WINDOW_CLOSED
 };
 
+typedef s32 MenuWindowState;
+
 enum MenuWindowCheck {
     MENU_WINDOW_CHECK_MOVING = -1,
     MENU_WINDOW_CHECK_NO,
     MENU_WINDOW_CHECK_YES
 };
+
+typedef s32 MenuWindowCheck;
 
 void ResetMenuWindow(void);
 void ShowMenuWindow(void);

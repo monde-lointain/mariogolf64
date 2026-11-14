@@ -218,7 +218,7 @@ FILE_STATIC s32 g_CurrentAnimationStartFrame;
 #define BALL_DISTANCE_SOURCE_ASSERT_LINE 1525
 #define TEXTURE_ANIMATION_ASSERT_LINE 1956
 
-s32 g_ImpactFlashState = IMPACT_FLASH_NONE;
+ImpactFlashState g_ImpactFlashState = IMPACT_FLASH_NONE;
 s32 g_ImpactFlashLevel = 0;
 static Gfx f_SurfaceRenderMode[] = {
     gsDPPipeSync(),
@@ -1197,7 +1197,7 @@ void SetCharacterTranslucent(u32 slotIndex, Boolean isTranslucent) {
     }
 }
 
-void SetCharacterLighting(u32 slotIndex, s32 lighting) {
+void SetCharacterLighting(u32 slotIndex, CharacterLighting lighting) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {

@@ -53,6 +53,8 @@ enum MainLoopState {
     MAIN_LOOP_RUNNING = -1
 };
 
+typedef s32 MainLoopState;
+
 enum HaltState {
     HALT_STATE_DISALLOWED,
     HALT_STATE_ALLOWED,
@@ -112,7 +114,7 @@ char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
 char g_SaveBuildDate[SAVE_BUILD_DATE_SIZE];
 ControllerState g_TurnController;
 
-FILE_STATIC volatile s32 g_MainLoopState;
+FILE_STATIC volatile MainLoopState g_MainLoopState;
 FILE_STATIC u8 f_GameFlagBits[GAME_FLAG_BYTE_COUNT];
 #define GameFlagByte(flag) (f_GameFlagBits[(flag) / GAME_FLAGS_PER_BYTE])
 #define GameFlagMask(flag) (0x80 >> ((flag) % GAME_FLAGS_PER_BYTE))

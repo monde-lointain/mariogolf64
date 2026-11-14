@@ -59,6 +59,8 @@ enum SwingTrailState {
     SWING_TRAIL_FADING
 };
 
+typedef s32 SwingTrailState;
+
 #define SWING_TRAIL_OUTER_POINT 8
 #define SWING_TRAIL_INNER_POINT 7
 #define SWING_TRAIL_SAMPLES 14
@@ -92,10 +94,10 @@ static s32 f_UnusedWordsAfterSparkVertices[2] UNUSED = {0};
 static s32 f_SwingTrailPathLength = 0;
 static s32 f_SwingTrailSampleCount = SWING_TRAIL_SAMPLES;
 static s32 f_SwingTrailHead = 0;
-static s32 f_SwingTrailKind = 0;
+static SwingTrailKind f_SwingTrailKind = 0;
 static s32 f_SwingTrailPathIndex = 0;
 static s32 f_SwingTrailLength = 0;
-static s32 f_SwingTrailState = SWING_TRAIL_NONE;
+static SwingTrailState f_SwingTrailState = SWING_TRAIL_NONE;
 static s32 f_SwingTrailAlpha = SWING_TRAIL_FULL_ALPHA;
 static Vtx f_SwingTrailVertices[2] = {
     {{{0, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x00}}},

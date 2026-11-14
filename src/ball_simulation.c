@@ -2189,7 +2189,7 @@ ImpactEffect *GetImpactTimingEntry(
     return &f_LateImpactEffect;
 }
 
-s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *shot) {
+s32 LaunchBallSimulation(BallSimulation *simulation, LaunchPurpose purpose, ShotLaunch *shot) {
     s32 percentRange[2];
     Club *club;
     ImpactEffect *impactEffect;

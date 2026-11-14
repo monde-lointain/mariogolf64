@@ -133,7 +133,7 @@ static Lights3 f_ReactionLights = gdSPDefLights3(
 static SoundChannel f_ReactionChannel = FIRST_REACTION_CHANNEL;
 
 static CharacterIndex f_ReactionCharacter;
-static s32 f_ReactionAnimation;
+static ReactionAnimation f_ReactionAnimation;
 static s32 f_ReactionFrameCount;
 static Boolean f_HasReactionLight;
 

@@ -42,12 +42,14 @@ enum ScreenEffect {
     SCREEN_EFFECT_NONE
 };
 
+typedef s32 ScreenEffect;
+
 enum SavedFrameStep {
     SAVED_FRAME_STEP_SHOWING = 1,
     SAVED_FRAME_STEP_SAVING
 };
 
-extern s32 g_ScreenEffect;
+extern ScreenEffect g_ScreenEffect;
 
 extern Mtx g_ScreenOrthoMatrix;
 

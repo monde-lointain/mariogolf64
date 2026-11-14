@@ -253,6 +253,8 @@ enum ShotSource {
     SHOT_SOURCE_PLANNING
 };
 
+typedef s32 ShotSource;
+
 static Boolean f_IsShotPreviewBuilt = FALSE;
 static s32 f_ReplayAimSettledFrameCount = 0;
 static f32 f_DebugAimCameraTilt = 0.0f;
@@ -335,7 +337,7 @@ static f32 f_GreenSongTempo;
 static CourseIndex f_UnusedDebugCourseIndex;
 static s32 f_UnusedDebugHoleIndex;
 static s32 f_SkippedSwingFrames;
-static s32 f_ShotSource;
+static ShotSource f_ShotSource;
 static s32 f_TurnTimerStart;
 static Mtx f_ShotPreviewMatrices[DRAW_BUFFER_COUNT][SHOT_PREVIEW_STEPS_MAX];
 static f32 f_ShotPreviewPoints[SHOT_PREVIEW_STEPS_MAX][AXIS_COUNT];
@@ -2760,7 +2762,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
 void UpdateTurns(void) {
     s32 playerIndex;
     s32 state;
-    s32 nextState;
+    PlayerState nextState;
     Boolean areCallsAllowed;
     s32 skipStep;
     s32 checkedPlayer;
@@ -4479,7 +4481,7 @@ void UpdateTurns(void) {
             case PLAYER_STATE_STARTING_REACTION: {
                 CharacterIndex characterIndex;
                 s32 paletteIndex;
-                s32 reaction;
+                ReactionAnimation reaction;
 
                 if (IsCharacterSlotBusy(0)) {
                     FreeCharacterAndReactionLight(0);
@@ -4791,7 +4793,7 @@ void UpdateTurns(void) {
                         g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
                         s8 results[PLAYER_COUNT_MAX];
                         Boolean isAnyOut = FALSE;
-                        s32 holeResult = GetGroupHoleResult(results);
+                        GroupHoleResult holeResult = GetGroupHoleResult(results);
 
                         for (groupPlayerIndex = 0; groupPlayerIndex < g_GameState.playerCount;
                             groupPlayerIndex++) {
@@ -4808,7 +4810,7 @@ void UpdateTurns(void) {
                     }
                     else {
                         if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
-                            s32 matchHoleResult;
+                            MatchSide matchHoleResult;
 
                             GetHandicapOffset(
                                 g_GameState.courseIndex,

@@ -26,6 +26,8 @@ enum CourseSelectState {
     COURSE_SELECT_HOLES
 };
 
+typedef s32 CourseSelectState;
+
 enum SelectResult {
     SELECT_IDLE,
     SELECT_MOVED,
@@ -42,6 +44,8 @@ enum PlanksState {
     PLANKS_CLOSING,
     PLANKS_OPENING
 };
+
+typedef s32 PlanksState;
 
 #define StarsToOpen(courseCount) (((courseCount) - 1) * RING_SHOT_STARS_PER_OPENED_COURSE)
 
@@ -183,7 +187,7 @@ static u8 f_StarBufferIndex = 0;
 static s8 f_StarFrameTime = 0;
 static s32 f_CourseArrowFrameTime = 0;
 static s32 f_CourseSelectUnusedWord UNUSED = 0;
-static s32 f_LoadedScreen = COURSE_SELECT_UNLOADED;
+static CourseSelectState f_LoadedScreen = COURSE_SELECT_UNLOADED;
 static s32 f_SlideOffset = 0;
 static CourseIndex f_ShownCourse = 0;
 static CourseIndex f_NextCourse = 0;
@@ -192,7 +196,7 @@ static s32 f_CourseTurnStep = 0;
 static u8 f_PressedDirection = 0;
 static s32 f_CourseTurnFrames[COURSE_TURN_FRAME_COUNT] = {2, 3, 4, COURSE_IMAGE_BLANK, 0, 1, 2};
 static s32 f_PlankSlide = 0;
-static s32 f_PlankMotion = PLANKS_SHUT;
+static PlanksState f_PlankMotion = PLANKS_SHUT;
 
 static u8 *f_BoardImage;
 static u8 *f_CourseBadges[COURSE_INDEX_COUNT];

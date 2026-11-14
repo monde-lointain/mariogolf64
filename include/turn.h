@@ -22,6 +22,8 @@ enum NotableShot {
     NOTABLE_SHOT_COUNT
 };
 
+typedef s32 NotableShot;
+
 extern BallSimulation g_TurnBallSimulation;
 
 void CountNotableShot(s32 playerIndex, s32 notableShot);

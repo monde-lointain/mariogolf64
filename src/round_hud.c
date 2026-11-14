@@ -66,6 +66,8 @@ enum SceneryState {
     SCENERY_LOADED
 };
 
+typedef s32 SceneryState;
+
 #define BILLBOARD_HEAP_SIZE 0x7118
 
 #define SCENERY_BUFFER_A_SIZE 0x128
@@ -506,7 +508,7 @@ static Gfx f_UnusedArrowTriangles[] UNUSED = {
 };
 static WideAssetId f_ClubHeadImageAsset = NO_IMAGE_ASSET;
 static WideAssetId f_LieImageAsset = NO_IMAGE_ASSET;
-static s32 f_SceneryState = SCENERY_UNLOADED;
+static SceneryState f_SceneryState = SCENERY_UNLOADED;
 static Boolean f_IsCourseSelectLoaded = FALSE;
 static Gfx f_UnusedNoOpDisplayList[] UNUSED = {
     gsDPNoOp(),
@@ -515,7 +517,7 @@ static Gfx f_UnusedNoOpDisplayList[] UNUSED = {
 static u8 f_InsetFrameTexture[] = {
 #include "assets/round_hud/inset_frame_texture.i4.inc.c"
 };
-static s32 f_LandingReaction = LANDING_REACTION_NONE;
+static LandingReaction f_LandingReaction = LANDING_REACTION_NONE;
 static s32 f_LandingReactionFrame = NO_LANDING_REACTION_FRAME;
 static Vtx f_LandingPanelVertices[4] = {
     {{{-72, 20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -606,7 +608,7 @@ static Vtx f_LongShotVertices[LONG_SHOT_GROUP_COUNT * 8] = {
     {{{-192, 0, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x20}}},
 };
 static f32 f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;
-static s32 f_ShotEffect = SHOT_EFFECT_LONG_SHOT;
+static ShotEffect f_ShotEffect = SHOT_EFFECT_LONG_SHOT;
 static WideAssetId f_SparkTrailFrameAssets[SPARK_TRAIL_FRAME_COUNT] =
     {0x6A7, 0x6A8, 0x6A9, 0x6AA, 0x6AB, 0x6AC};
 static s32 f_SparkTrailFrame = 1;
@@ -1324,8 +1326,8 @@ void ScrollWindArrow(void) {
     }
 }
 
-void StartLandingReaction(s32 reaction) {
-    s32 previousReaction;
+void StartLandingReaction(LandingReaction reaction) {
+    LandingReaction previousReaction;
 
     f_LandingReactionFrame = 0;
     if (reaction == LANDING_REACTION_NONE) {
@@ -3073,7 +3075,7 @@ void DrawHoleImageModel(void) {
     gDPPipeSync(g_DisplayListHead++);
 }
 
-void StartShotEffect(s32 effect) {
+void StartShotEffect(ShotEffect effect) {
     s32 contactStyle;
 
     if (effect == SHOT_EFFECT_NONE) {
@@ -4852,7 +4854,7 @@ void DrawRoundHud(CameraView *view) {
 
 void LoadHoleIntroImages(void) {
     EncodedAsset asset;
-    s32 standing;
+    MatchStanding standing;
 
     f_LoadedHoleIntroImages = 0;
     if (g_GameState.betRates[BET_LONGEST_DRIVE] != UNSET_BET_RATE &&
