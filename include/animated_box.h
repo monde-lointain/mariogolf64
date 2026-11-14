@@ -3,12 +3,14 @@
 
 #include <ultra64.h>
 
-typedef enum AnimatedBoxState {
+enum AnimatedBoxState {
     BOX_OPENING,
     BOX_OPEN,
     BOX_CLOSING,
     BOX_CLOSED
-} AnimatedBoxState;
+};
+
+typedef s32 AnimatedBoxState;
 
 typedef struct AnimatedBox {
     s16 left;
@@ -19,7 +21,7 @@ typedef struct AnimatedBox {
     u8 green;
     u8 blue;
     u8 alpha;
-    s32 state;
+    AnimatedBoxState state;
     s32 frame;
 } AnimatedBox;
 
