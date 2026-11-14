@@ -208,12 +208,12 @@ musHandle StartSoundEffectWith(
     return MusStartEffect2(soundId, volume, pan, restartFlag, priority);
 }
 
-void LoadSoundEffectBank(u8 *rom, u32 size) {
-    size += size & 1;
-    if (size > SOUND_EFFECT_BUFFER_SIZE) {
+void LoadSoundEffectBank(u8 *bankRom, u32 bankSize) {
+    bankSize += bankSize & 1;
+    if (bankSize > SOUND_EFFECT_BUFFER_SIZE) {
         osSyncPrintf("SE Seq. Buffer Over\n");
     }
 
-    nuPiReadRom((u32)rom, f_SoundEffectBuffer, size);
+    nuPiReadRom((u32)bankRom, f_SoundEffectBuffer, bankSize);
     MusFxBankInitialize(f_SoundEffectBuffer);
 }
