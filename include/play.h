@@ -93,7 +93,7 @@ extern u8 g_UnreadPlayBuffer[0xDEC];
 
 void FillGroundNoise(s32 range, s32 base);
 void CopyDoublePair(f64 *from, f64 *to);
-s32 GetGaugeFramePower(s32 value);
+s32 GetGaugeFramePower(s32 gaugeFrame);
 void LoadBestShotReplayInputs(s32 index);
 void LoadRingShotReplayInputs(s32 index);
 void MarkNearbyGroundTiles(u32 x, u32 z);

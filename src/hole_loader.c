@@ -259,17 +259,17 @@ s32 DecodePatchedLzChunk(LzStream *stream) {
 
     inline void ApplyPatchCommand(u16 command) {
         s16 offset;
-        u16 value;
+        u16 copiedWord;
 
         patchCount = (command & LZ_PATCH_COUNT_MASK) + 1;
         if ((command & LZ_PATCH_KIND_MASK) != LZ_PATCH_KIND_LITERALS) {
             offset = (s16)(command & LZ_PATCH_KIND_MASK) >> LZ_PATCH_OFFSET_SHIFT;
             if (offset < 0) {
                 while (patchCount != 0) {
-                    value = history[(historyIndex + offset) & LZ_HISTORY_MASK];
+                    copiedWord = history[(historyIndex + offset) & LZ_HISTORY_MASK];
                     history[historyIndex++] = *output;
                     historyIndex &= LZ_HISTORY_MASK;
-                    *output++ = value;
+                    *output++ = copiedWord;
                     patchCount--;
                 }
             }

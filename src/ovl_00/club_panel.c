@@ -331,7 +331,7 @@ void DrawClubPanel(Gfx **displayListHead) {
     s32 span[2];
     Gfx *gfx;
     Boolean isPutter;
-    s32 value;
+    s32 fill;
     s32 playerState;
     s32 tick;
     s32 group;
@@ -340,7 +340,7 @@ void DrawClubPanel(Gfx **displayListHead) {
     s32 markerOffset;
     s32 pulse;
     s32 alpha;
-    s32 absValue;
+    s32 fillMagnitude;
 
     gfx = *displayListHead;
     isPutter = GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN;
@@ -502,7 +502,7 @@ void DrawClubPanel(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gDPPipeSync(gfx++);
-    value = GetGaugeFill();
+    fill = GetGaugeFill();
     gDPLoadTextureBlock(
         gfx++,
         TextureAddress(ImageBody(f_ShotModeImage)),
@@ -520,7 +520,7 @@ void DrawClubPanel(Gfx **displayListHead) {
     );
     if (playerState != PLAYER_STATE_AIMING) {
         if (playerState == PLAYER_STATE_SETTING_POWER) {
-            f_ChosenPowerFill = value;
+            f_ChosenPowerFill = fill;
         }
     }
 
@@ -603,7 +603,7 @@ void DrawClubPanel(Gfx **displayListHead) {
         markerOffset = f_ChosenPowerFill * GAUGE_LENGTH / GAUGE_MAX_VALUE;
     }
     else {
-        markerOffset = value * GAUGE_LENGTH / GAUGE_MAX_VALUE;
+        markerOffset = fill * GAUGE_LENGTH / GAUGE_MAX_VALUE;
     }
 
     f_MarkerPulseAngle += MARKER_PULSE_STEP;
@@ -616,16 +616,16 @@ void DrawClubPanel(Gfx **displayListHead) {
         isPutter) {
         gDPSetEnvColor(gfx++, 0, 0, 0, OPAQUE_ALPHA);
     }
-    else if (value == 0) {
+    else if (fill == 0) {
         gDPSetEnvColor(gfx++, pulse, pulse, pulse, OPAQUE_ALPHA);
     }
     else {
-        absValue = value;
-        if (absValue < 0) {
-            absValue = -absValue;
+        fillMagnitude = fill;
+        if (fillMagnitude < 0) {
+            fillMagnitude = -fillMagnitude;
         }
 
-        if (absValue <= span[0] / 2) {
+        if (fillMagnitude <= span[0] / 2) {
             gDPSetEnvColor(gfx++, 0, 0, 0, OPAQUE_ALPHA);
         }
         else {

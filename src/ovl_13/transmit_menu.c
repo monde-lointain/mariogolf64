@@ -3850,7 +3850,7 @@ void BuildStatusData(u8 *status) {
     CourseStats *entry;
     CourseStats *scores;
     f32 reciprocal;
-    s32 value;
+    s32 figure;
     s32 sum;
     CourseIndex courseIndex;
     s32 index;
@@ -3867,17 +3867,17 @@ void BuildStatusData(u8 *status) {
             if (entry->roundCount > 0) {
                 reciprocal = 1.0f / entry->roundCount;
 
-                value = entry->roundCount;
-                course->roundCount[0] = value;
-                course->roundCount[1] = value >> BITS_PER_BYTE;
+                figure = entry->roundCount;
+                course->roundCount[0] = figure;
+                course->roundCount[1] = figure >> BITS_PER_BYTE;
                 course->bestScore = entry->bestScore + STATUS_SCORE_BIAS;
                 course->strokesAverage = RoundedWholePart(entry->strokeTotal * reciprocal);
-                value = RoundedWholePart(entry->longestDrive * YARDS_PER_UNIT);
-                course->longestDrive[0] = value;
-                course->longestDrive[1] = value >> BITS_PER_BYTE;
-                value = RoundedWholePart(entry->driveAverage * YARDS_PER_UNIT);
-                course->driveAverage[0] = value;
-                course->driveAverage[1] = value >> BITS_PER_BYTE;
+                figure = RoundedWholePart(entry->longestDrive * YARDS_PER_UNIT);
+                course->longestDrive[0] = figure;
+                course->longestDrive[1] = figure >> BITS_PER_BYTE;
+                figure = RoundedWholePart(entry->driveAverage * YARDS_PER_UNIT);
+                course->driveAverage[0] = figure;
+                course->driveAverage[1] = figure >> BITS_PER_BYTE;
                 course->fairwayRate = RoundedWholePart(
                     entry->measuredDriveTotal * reciprocal * (PERCENTS_PER_ONE / HOLES_PER_ROUND)
                 );
@@ -3926,15 +3926,15 @@ void BuildStatusData(u8 *status) {
 
         for (index = 0; index != BEST_TIME_COUNT; index++) {
             if (records->bestTimes[courseIndex][index] > 0) {
-                value = records->bestTimes[courseIndex][index] / FRAMES_PER_MINUTE;
-                course->bestTimes[index].minutes = value;
-                value =
+                figure = records->bestTimes[courseIndex][index] / FRAMES_PER_MINUTE;
+                course->bestTimes[index].minutes = figure;
+                figure =
                     records->bestTimes[courseIndex][index] / FRAMES_PER_SECOND % SECONDS_PER_MINUTE;
-                course->bestTimes[index].seconds = value;
-                value = (s32)(records->bestTimes[courseIndex][index] *
-                            ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+                course->bestTimes[index].seconds = figure;
+                figure = (s32)(records->bestTimes[courseIndex][index] *
+                             ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
                     HUNDREDTHS_PER_SECOND;
-                course->bestTimes[index].hundredths = value;
+                course->bestTimes[index].hundredths = figure;
                 course->bestTimes[index].character =
                     records->bestTimeCharacters[courseIndex][index];
                 course->bestTimes[index].scoreToPar =
@@ -3973,10 +3973,10 @@ void BuildStatusData(u8 *status) {
 
     ComputeRoundStatistics();
     course = &data->allCourses;
-    value = g_CourseStatFigures[COURSE_COUNT].roundCount;
-    if (value > 0) {
-        course->roundCount[0] = value;
-        course->roundCount[1] = value >> BITS_PER_BYTE;
+    figure = g_CourseStatFigures[COURSE_COUNT].roundCount;
+    if (figure > 0) {
+        course->roundCount[0] = figure;
+        course->roundCount[1] = figure >> BITS_PER_BYTE;
         course->bestScore = (s32)g_CourseStatFigures[COURSE_COUNT].bestScore + STATUS_SCORE_BIAS;
         course->strokesAverage = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].scoreAverage);
         sum = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].bestDrive);

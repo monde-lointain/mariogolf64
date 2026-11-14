@@ -179,25 +179,25 @@ void ResetShotSetup(void) {
 }
 
 s32 GetGaugeFill(void) {
-    s32 value = g_CurrentShot.gaugeFrame;
+    s32 fill = g_CurrentShot.gaugeFrame;
 
-    if (value > GAUGE_FULL_FRAME) {
-        value = GAUGE_IMPACT_FRAME - value;
+    if (fill > GAUGE_FULL_FRAME) {
+        fill = GAUGE_IMPACT_FRAME - fill;
     }
 
-    return value;
+    return fill;
 }
 
-s32 GetGaugeFramePower(s32 value) {
-    if (value > GAUGE_FULL_FRAME) {
-        value = GAUGE_IMPACT_FRAME - value;
+s32 GetGaugeFramePower(s32 gaugeFrame) {
+    if (gaugeFrame > GAUGE_FULL_FRAME) {
+        gaugeFrame = GAUGE_IMPACT_FRAME - gaugeFrame;
     }
 
-    if (value < 0) {
-        value = 0;
+    if (gaugeFrame < 0) {
+        gaugeFrame = 0;
     }
 
-    return (value * LAUNCH_POWER_MAX) / GAUGE_FULL_FRAME;
+    return (gaugeFrame * LAUNCH_POWER_MAX) / GAUGE_FULL_FRAME;
 }
 
 s32 MarkUsableClubs(s32 unused UNUSED, s16 *clubs, s8 *isUsable) {
@@ -1727,16 +1727,16 @@ void FillGroundNoise(s32 range, s32 base) {
     s32 cell = 0;
     s32 row;
     s32 column;
-    s32 value;
+    s32 intensity;
 
     for (row = 0; row < GROUND_NOISE_SIZE; row++) {
         for (column = 0; column < GROUND_NOISE_SIZE; column++) {
-            value = (rand() % range) + base;
-            if (value > GROUND_NOISE_INTENSITY_MAX) {
-                value = GROUND_NOISE_INTENSITY_MAX;
+            intensity = (rand() % range) + base;
+            if (intensity > GROUND_NOISE_INTENSITY_MAX) {
+                intensity = GROUND_NOISE_INTENSITY_MAX;
             }
 
-            f_GroundNoiseTexels[cell++] = value;
+            f_GroundNoiseTexels[cell++] = intensity;
         }
     }
 }

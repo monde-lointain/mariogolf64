@@ -659,7 +659,7 @@ void DrawBandHeights(s16 *heights, s32 band) {
             s32 bandRow;
             s16 *rowTexels;
             s32 texelIndex;
-            s32 value;
+            s32 texelHeight;
 
             width = x - toX;
             if (width < 0) {
@@ -682,12 +682,12 @@ void DrawBandHeights(s16 *heights, s32 band) {
                 rowTexels = &heights[bandRow * MAP_COLUMN_COUNT];
                 for (texelIndex = 0; texelIndex <= count; texelIndex++) {
                     if (x >= 0 && x < MAP_COLUMN_COUNT) {
-                        value = height >> TEXEL_HEIGHT_FRACTION_BITS;
+                        texelHeight = height >> TEXEL_HEIGHT_FRACTION_BITS;
                         if (rowTexels[x] != NO_HEIGHT) {
-                            value = (rowTexels[x] + value) / 2;
+                            texelHeight = (rowTexels[x] + texelHeight) / 2;
                         }
 
-                        rowTexels[x] = value;
+                        rowTexels[x] = texelHeight;
                     }
 
                     x += direction;
@@ -2668,7 +2668,7 @@ void ReadAttributeRuns(void) {
     u16 *attribute;
     u16 *end;
     u16 *runEnd;
-    s32 value;
+    s32 unpacked;
 
     attribute = (u16 *)f_BuildCursor;
     end = (u16 *)(f_BuildCursor + ATTRIBUTE_BUFFER_SIZE);
@@ -2685,9 +2685,9 @@ void ReadAttributeRuns(void) {
             break;
         }
 
-        value = UnpackAttribute(packed);
+        unpacked = UnpackAttribute(packed);
         while (attribute != runEnd) {
-            *attribute++ = value;
+            *attribute++ = unpacked;
         }
     }
 
