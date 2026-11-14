@@ -87,7 +87,7 @@ typedef s32 SwingTrailState;
     ((coordinate) >= -SPARK_SCREEN_COORDINATE_MAX && (coordinate) <= SPARK_SCREEN_COORDINATE_MAX)
 
 static s32 f_ImpactFrameCount = 0;
-static Vtx f_SparkVertices[3] = {
+static Vtx f_SparkVertices[TRIANGLE_VERTEX_COUNT] = {
     {{{0, 160, 0}, 0, {0, 0}, {0xFF, 0x40, 0x00, 0xFF}}},
     {{{-12, -480, 0}, 0, {0, 0}, {0xFF, 0xFA, 0x7F, 0xDC}}},
     {{{12, -480, 0}, 0, {0, 0}, {0xFF, 0xFA, 0x7F, 0xDC}}},
@@ -518,7 +518,7 @@ void DrawSparks(Gfx **displayListHead) {
                     PhysicalAddress(&f_SparkMatrices[g_MatrixBufferIndex][i]),
                     G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
                 );
-                gSPVertex(gfx++, f_SparkVertices, 3, 0);
+                gSPVertex(gfx++, f_SparkVertices, TRIANGLE_VERTEX_COUNT, 0);
                 gSP1Triangle(gfx++, 0, 1, 2, 0);
             }
         }

@@ -94,7 +94,7 @@ struct FireworkParticle {
 
 static s32 f_FireworkCount = 0;
 static s32 f_FireworkState = 0;
-static Vtx f_FireworkParticleVertices[3] = {
+static Vtx f_FireworkParticleVertices[TRIANGLE_VERTEX_COUNT] = {
     {{{0, 32, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0x7F}}},
     {{{-10, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xBF}}},
     {{{10, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xBF}}},

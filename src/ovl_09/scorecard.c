@@ -97,7 +97,6 @@ void SetScorecardState(ScorecardState state);
 #define PAGE_TITLES_SKINS 3
 #define PAGE_TITLES_TOURNAMENT 4
 #define PAGE_TITLES_ROW_COUNT 5
-#define PAGE_TITLE_COUNT 3
 
 static s32 f_UnusedWordsBeforePageTitles[] UNUSED = {0, 1, 2, 3, 5, 10};
 static AssetId f_PageTitleAssets[PAGE_TITLES_ROW_COUNT][PAGE_TITLE_COUNT] = {

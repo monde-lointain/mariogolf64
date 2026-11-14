@@ -56,6 +56,8 @@ enum PlaceChange {
 
 typedef s8 PlaceChange;
 
+#define PAGE_TITLE_COUNT 3
+
 typedef struct Scorecard {
     u8 unusedBeforeTableImage[0xC];
     ImageAsset *tableImage;
@@ -63,7 +65,7 @@ typedef struct Scorecard {
     ImageAsset *raisedPanelImage;
     ImageAsset *scoresPanelImage;
     ImageAsset *labelsImage;
-    ImageAsset *pageTitleImages[3];
+    ImageAsset *pageTitleImages[PAGE_TITLE_COUNT];
     ImageAsset *matchPanelImage;
     ImageAsset *digitsImage;
     ImageAsset *placesImage;

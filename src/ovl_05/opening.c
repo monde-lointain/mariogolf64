@@ -548,7 +548,7 @@ static Vtx f_LogoClubVertices[LOGO_CLUB_STRIP_COUNT][QUAD_VERTEX_COUNT] = {
         {{{76, -26, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     },
 };
-static Vtx f_OpeningSparkVertices[3] = {
+static Vtx f_OpeningSparkVertices[TRIANGLE_VERTEX_COUNT] = {
     {{{0, 16, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
     {{{-1, -48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
     {{{1, -48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
@@ -5990,7 +5990,7 @@ void DrawOpeningSparks(Gfx **displayListHead) {
                 PhysicalAddress(&f_OpeningSparkMatrices[g_DrawBufferIndex][sparkIndex]),
                 G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
             );
-            gSPVertex(gfx++, f_OpeningSparkVertices, 3, 0);
+            gSPVertex(gfx++, f_OpeningSparkVertices, TRIANGLE_VERTEX_COUNT, 0);
             gSP1Triangle(gfx++, 0, 1, 2, 0);
         }
 

@@ -126,6 +126,9 @@ typedef s16 ClubhouseRoom16;
 #define STAR_COUNT_MAX 6
 #define CHOSEN_STAR_GROWTH 8
 #define MENU_CHARACTER_LAYOUT_COUNT 4
+// The layouts are indexed by character count less one; a found rival
+// stands alone.
+#define SOLO_CHARACTER_LAYOUT 0
 #define MENU_CHARACTER_SLOT_COUNT 5
 #define MENU_CHARACTER_SOLO_SCALE 5.0f
 #define MENU_RIVAL_SCALE 4.0f
@@ -1093,7 +1096,7 @@ static Degrees f_CharacterPitch = 0.0f;
 static Degrees f_CharacterYaw = 0.0f;
 static Degrees f_RivalSpinYaw = 0.0f;
 static s32 f_UnusedWordsAfterRivalSpin[2] UNUSED = {0, 0};
-static f32 f_MenuCharacterPositions[MENU_CHARACTER_LAYOUT_COUNT][MENU_CHARACTER_SLOT_COUNT][3] = {
+static Vec3 f_MenuCharacterPositions[MENU_CHARACTER_LAYOUT_COUNT][MENU_CHARACTER_SLOT_COUNT] = {
     {
         {-84.0f, -43.0f, -1000.0f},
         {106.0f, -32.0f, -1000.0f},
@@ -6259,7 +6262,7 @@ void DrawMenuCharacters(Gfx **displayListHead) {
         }
 
         if (IsRivalFound(rival)) {
-            layout = 0;
+            layout = SOLO_CHARACTER_LAYOUT;
         }
         else {
             layout = characterCount - 1;
@@ -6276,10 +6279,10 @@ void DrawMenuCharacters(Gfx **displayListHead) {
         rotation[AXIS_X] = DegreesToRadians(f_CharacterPitch);
         rotation[AXIS_Y] = DegreesToRadians(f_CharacterYaw);
         rotation[AXIS_Z] = 0.0f;
-        translation[AXIS_X] = f_MenuCharacterPositions[layout][slot][0];
+        translation[AXIS_X] = f_MenuCharacterPositions[layout][slot][AXIS_X];
         raise = (characterIndex == CHARACTER_BABY_MARIO) ? BABY_MARIO_RAISE : 0;
-        translation[AXIS_Y] = f_MenuCharacterPositions[layout][slot][1] + raise;
-        translation[AXIS_Z] = f_MenuCharacterPositions[layout][slot][2];
+        translation[AXIS_Y] = f_MenuCharacterPositions[layout][slot][AXIS_Y] + raise;
+        translation[AXIS_Z] = f_MenuCharacterPositions[layout][slot][AXIS_Z];
         scale[AXIS_X] = f_MenuCharacterScales[slot];
         scale[AXIS_Y] = f_MenuCharacterScales[slot];
         scale[AXIS_Z] = f_MenuCharacterScales[slot];

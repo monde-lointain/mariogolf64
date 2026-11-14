@@ -628,7 +628,7 @@ void UpdateGolfBalls(void) {
                 for (i = 0; i != f_BallAfterimageLength; i++) {
                     afterimage = &f_BallAfterimages[i];
                     if (afterimage->alpha != AFTERIMAGE_UNUSED) {
-                        s32 coursePosition[3] UNUSED;
+                        s32 coursePosition[AXIS_COUNT] UNUSED;
 
                         coursePosition[AXIS_X] =
                             afterimage->position[AXIS_X] * WORLD_TO_COURSE_SCALE;

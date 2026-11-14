@@ -1615,7 +1615,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     Vec3 points[GREEN_GRID_POINT_COUNT];
     GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
     s32 slopes[GREEN_GRID_POINT_COUNT];
-    f32 unusedPoints[GREEN_GRID_POINT_COUNT][3] UNUSED;
+    Vec3 unusedPoints[GREEN_GRID_POINT_COUNT] UNUSED;
     CoursePoint center;
     ScreenPoint projected;
     Gfx *gfx = *displayListHead;
