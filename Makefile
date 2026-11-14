@@ -97,7 +97,7 @@ endif
 
 # main_bss.c only pins main's common objects at the original's addresses.
 # Without it, each object is placed with the module that defines it.
-MATCHING_ONLY_O := build/src/main_bss.c.o
+MATCHING_ONLY_O := build/src/system/main_bss.c.o
 # The fixed-address symbols that the original's layout gives the asm
 SYMBOL_SCRIPTS := undefined_syms.txt $(SPLAT_DIR)/undefined_syms_auto.txt \
                   $(SPLAT_DIR)/undefined_funcs_auto.txt
@@ -412,7 +412,7 @@ endif
 
 # main_bss.c defines libmus's bss objects too, whose types only its sources
 # declare. Those include libultra's headers from PR/ by their bare names.
-$(BUILD_DIR)/src/main_bss.c.o: INCLUDES += -I$(LIBMUS_DIR)/src -I$(ULTRALIB_DIR)/include/PR
+$(BUILD_DIR)/src/system/main_bss.c.o: INCLUDES += -I$(LIBMUS_DIR)/src -I$(ULTRALIB_DIR)/include/PR
 
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.c
 	@mkdir -p $(dir $@)

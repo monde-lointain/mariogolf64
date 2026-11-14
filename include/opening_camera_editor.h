@@ -3,9 +3,9 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "geometry.h"
 #include "math_util.h"
+#include "system/c_language.h"
 
 #define EDITOR_POINT_EYE 0
 #define EDITOR_POINT_LOOK_AT 1

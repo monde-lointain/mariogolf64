@@ -2,7 +2,6 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "course.h"
 #include "game_flags.h"
 #include "game_state.h"
@@ -10,6 +9,7 @@
 #include "menu.h"
 #include "player.h"
 #include "scene.h"
+#include "system/c_language.h"
 
 #define DEBUG_ROUND_HOLE_COUNT 2
 #define HIGHER_THAN_ANY_SCORE 0x40000000

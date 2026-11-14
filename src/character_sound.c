@@ -1,8 +1,8 @@
 #include <ultra64.h>
 
 #include "character.h"
-#include "compiler.h"
 #include "sound.h"
+#include "system/compiler.h"
 
 #define CHARACTER_SOUND_VALUE_COUNT 34
 #define SOUND_AT_FULL_SCALE(soundId) (soundId), SOUND_FULL_SCALE

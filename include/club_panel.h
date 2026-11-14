@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
+#include "system/asset.h"
+#include "system/c_language.h"
 
 extern ImageAsset *g_ClubPanelImage;
 

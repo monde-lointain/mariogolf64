@@ -3,9 +3,9 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "camera.h"
 #include "player.h"
+#include "system/c_language.h"
 #include "text.h"
 
 enum FlyGuyVisibility {

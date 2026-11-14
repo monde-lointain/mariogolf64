@@ -1,20 +1,20 @@
-#include "overlay_manager.h"
+#include "system/overlay_manager.h"
 
 #include <nusys.h>
 #include <ultra64.h>
 
 #include "boot_logos.h"
-#include "c_language.h"
-#include "compiler.h"
 #include "game_flags.h"
 #include "golf_balls.h"
-#include "main.h"
 #include "menu.h"
 #include "opening.h"
 #include "opening_camera_editor.h"
 #include "round_hud.h"
-#include "segment_symbols.h"
 #include "staff_roll.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/main.h"
+#include "system/segment_symbols.h"
 #include "title_screen.h"
 #include "transmit_menu.h"
 

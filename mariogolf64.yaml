@@ -74,15 +74,15 @@ segments:
     vram: 0x80025C00
     bss_size: 0x122100
     subsegments:
-      - [0x1000, hasm, entry]
+      - [0x1000, hasm, system/entry]
       - [0x1050, c, ../lib/libnusys/src/nupireadrom]
-      - [0x1130, c, overlay_manager]
+      - [0x1130, c, system/overlay_manager]
       - [0x17B0, c, billboard]
       - [0x3700, c, ../lib/libnusys/src/nugfxinit_ex2]
       - [0x37B0, c, ../lib/libnusys/src/nusched]
       - [0x4650, c, ../lib/libnusys/src/nugfxsetcfb]
       - [0x4840, c, ../lib/libnusys/src/nugfxtaskmgr]
-      - [0x4CE0, c, main]
+      - [0x4CE0, c, system/main]
       - [0x5A40, c, game]
       - [0xDCE0, c, rcp_init]
       - [0xE260, c, ball_simulation]
@@ -92,10 +92,10 @@ segments:
       - [0x1EEF0, c, club]
       - [0x207E0, c, shot_camera]
       - [0x28590, c, debug_text]
-      - [0x29170, c, heap]
+      - [0x29170, c, system/heap]
       - [0x299A0, c, performance_meter]
       - [0x2B4E0, c, animated_box]
-      - [0x2B800, c, asset]
+      - [0x2B800, c, system/asset]
       - [0x2BFF0, c, sound]
       - [0x2D290, c, course]
       - [0x2D5C0, c, scoring]
@@ -103,7 +103,7 @@ segments:
       - [0x2FD00, c, character]
       - [0x34FA0, c, math_library]
       - [0x35980, c, menu]
-      - [0x396C0, c, crash_screen]
+      - [0x396C0, c, system/crash_screen]
       - [0x3A010, c, music]
       - [0x3A580, c, play]
       - [0x40180, c, view_projection]
@@ -353,13 +353,13 @@ segments:
       - [0x8F250, textbin, rspboot_text]
       - [0x8F320, textbin, n_aspMain_text]
       - [0x8FF80, textbin, gspF3DEX2_fifo_text]
-      - [0x91310, .data, overlay_manager]
+      - [0x91310, .data, system/overlay_manager]
       - [0x91600, .data, billboard]
       - [0x91A80, .data, ../lib/libnusys/src/nugfxinit_ex2]
       - [0x91B80, .data, ../lib/libnusys/src/nusched]
       - [0x91BA0, .data, ../lib/libnusys/src/nugfxsetcfb]
       - [0x91BB0, .data, ../lib/libnusys/src/nugfxtaskmgr]
-      - [0x91BC0, .data, main]
+      - [0x91BC0, .data, system/main]
       - [0x91C00, .data, game]
       - [0x92BF0, .data, rcp_init]
       - [0x92C50, .data, ball_simulation]
@@ -375,7 +375,7 @@ segments:
       - [0x9C770, .data, course]
       - [0x9CF70, .data, character]
       - [0x9D3F0, .data, menu]
-      - [0x9E010, .data, crash_screen]
+      - [0x9E010, .data, system/crash_screen]
       - [0x9E3F0, .data, music]
       - [0x9E460, .data, play]
       - [0x9E500, .data, hole_triangles]
@@ -446,9 +446,9 @@ segments:
       - [0xA4A90, .data, ../lib/libkmc/src/atan]
       - [0xA4C90, databin, n_aspMain_data]
       - [0xA4F40, databin, gspF3DEX2_fifo_data]
-      - [0xA5360, .rodata, overlay_manager]
+      - [0xA5360, .rodata, system/overlay_manager]
       - [0xA54D0, .rodata, billboard]
-      - [0xA5584, .rodata, main]
+      - [0xA5584, .rodata, system/main]
       - [0xA5600, .rodata, game]
       - [0xA5760, .rodata, ball_simulation]
       - [0xA5B10, .rodata, collision]
@@ -456,16 +456,16 @@ segments:
       - [0xA5D30, .rodata, terrain]
       - [0xA5FD0, .rodata, club]
       - [0xA7B60, .rodata, shot_camera]
-      - [0xA7E90, .rodata, heap]
+      - [0xA7E90, .rodata, system/heap]
       - [0xA7F08, .rodata, performance_meter]
-      - [0xA7F70, .rodata, asset]
+      - [0xA7F70, .rodata, system/asset]
       - [0xA7FB8, .rodata, sound]
       - [0xA8030, .rodata, course]
       - [0xA8050, .rodata, character_model]
       - [0xAB8A0, .rodata, character]
       - [0xABC50, .rodata, math_library]
       - [0xABCF0, .rodata, menu]
-      - [0xABEC0, .rodata, crash_screen]
+      - [0xABEC0, .rodata, system/crash_screen]
       - [0xAC5F4, .rodata, music]
       - [0xAC638, .rodata, play]
       - [0xAC760, .rodata, hole_triangles]
@@ -514,7 +514,7 @@ segments:
       - [0xADBD0, .rodata, ../lib/ultralib/src/libc/xldtob]
       - [0xADC40, .rodata, ../lib/libkmc/src/atan]
       - [0xADCA0, .rodata, ../lib/libkmc/src/trig]
-      - { start: 0xADD30, type: .bss, vram: 0x800D2930, name: overlay_manager }
+      - { start: 0xADD30, type: .bss, vram: 0x800D2930, name: system/overlay_manager }
       - { type: .bss, vram: 0x800D2970, name: ../lib/libnusys/src/nusched }
       - { type: .bss, vram: 0x800D8980, name: ../lib/libnusys/src/nugfxtaskmgr }
       - { type: .bss, vram: 0x800DAB60, name: game }
@@ -522,13 +522,13 @@ segments:
       - { type: .bss, vram: 0x800DAED0, name: terrain }
       - { type: .bss, vram: 0x800DAEE0, name: shot_camera }
       - { type: .bss, vram: 0x800DAF60, name: debug_text }
-      - { type: .bss, vram: 0x800DC6E0, name: heap }
+      - { type: .bss, vram: 0x800DC6E0, name: system/heap }
       - { type: .bss, vram: 0x800DC740, name: performance_meter }
-      - { type: .bss, vram: 0x800DE8A0, name: asset }
+      - { type: .bss, vram: 0x800DE8A0, name: system/asset }
       - { type: .bss, vram: 0x800DE900, name: sound }
       - { type: .bss, vram: 0x800DE910, name: character_model }
       - { type: .bss, vram: 0x800DE970, name: character }
-      - { type: .bss, vram: 0x800DF0B0, name: crash_screen }
+      - { type: .bss, vram: 0x800DF0B0, name: system/crash_screen }
       - { type: .bss, vram: 0x800E1290, name: music }
       - { type: .bss, vram: 0x800E12B0, name: play }
       - { type: .bss, vram: 0x800E16B0, name: view_projection }
@@ -571,7 +571,7 @@ segments:
       - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/src/nudramstack }
       - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/src/nurdpoutput }
       - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/src/nuyieldbuf }
-      - { type: .bss, vram: 0x800FBD30, name: main_bss }
+      - { type: .bss, vram: 0x800FBD30, name: system/main_bss }
 
   - name: ovl_00
     type: code
@@ -885,7 +885,7 @@ segments:
     vram: 0xB0171770
     exclusive_ram_id: build_date
     subsegments:
-      - [0x171770, hasm, build_date]
+      - [0x171770, hasm, system/build_date]
 
   # The files that the game reads from ROM by the addresses that splat's
   # linker script gives them: the sound banks, the songs in the order of enum

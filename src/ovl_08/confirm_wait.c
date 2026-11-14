@@ -2,12 +2,12 @@
 
 #include <ultra64.h>
 
-#include "compiler.h"
 #include "controller.h"
-#include "overlay_manager.h"
 #include "scene.h"
 #include "sky_and_hud_animations.h"
 #include "sound.h"
+#include "system/compiler.h"
+#include "system/overlay_manager.h"
 #include "text.h"
 
 static u8 f_UnusedConfirmWaitBytes[0x10] UNUSED;

@@ -4,8 +4,8 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "math_util.h"
+#include "system/c_language.h"
 
 typedef struct HoleConditions {
     s32 windSpeed;

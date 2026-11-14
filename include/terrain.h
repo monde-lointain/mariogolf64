@@ -3,10 +3,10 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
-#include "compiler.h"
 #include "geometry.h"
 #include "surface.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 
 #define GROUND_POINT_COLUMN_COUNT 33
 #define GROUND_POINT_ROW_COUNT 65

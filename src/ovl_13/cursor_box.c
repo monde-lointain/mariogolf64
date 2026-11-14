@@ -2,14 +2,14 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "compiler.h"
 #include "display_list.h"
 #include "game.h"
 #include "geometry.h"
 #include "math_util.h"
-#include "memory_address.h"
 #include "screen.h"
+#include "system/asset.h"
+#include "system/compiler.h"
+#include "system/memory_address.h"
 
 #define CURSOR_BOX_CORNER_COUNT 4
 #define CURSOR_BOX_HALF_SIZE 24

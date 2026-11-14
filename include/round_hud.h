@@ -3,12 +3,12 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
 #include "camera.h"
 #include "character.h"
 #include "math_util.h"
 #include "player.h"
+#include "system/asset.h"
+#include "system/c_language.h"
 
 enum ShotEffect {
     SHOT_EFFECT_NONE = -1,

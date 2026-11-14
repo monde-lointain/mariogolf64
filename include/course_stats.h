@@ -3,9 +3,9 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "character.h"
 #include "course.h"
+#include "system/c_language.h"
 
 #define THIRD_PLACE_INDEX 0
 #define SECOND_PLACE_INDEX 1

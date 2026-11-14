@@ -6,11 +6,9 @@
 
 #include "ball_simulation.h"
 #include "bets.h"
-#include "c_language.h"
 #include "character.h"
 #include "club.h"
 #include "collision.h"
-#include "compiler.h"
 #include "course.h"
 #include "course_space.h"
 #include "current_shot.h"
@@ -27,6 +25,8 @@
 #include "save.h"
 #include "scene.h"
 #include "surface.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 #include "terrain.h"
 
 enum PlanThreadState {

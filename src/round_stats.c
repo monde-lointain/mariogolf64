@@ -3,9 +3,7 @@
 #include <ultra64.h>
 
 #include "bets.h"
-#include "c_language.h"
 #include "club.h"
-#include "compiler.h"
 #include "course.h"
 #include "course_stats.h"
 #include "debug_text.h"
@@ -18,6 +16,8 @@
 #include "scene.h"
 #include "scorecard.h"
 #include "scoring.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 #include "text.h"
 
 #define NO_SKINS_WINNER (-1)

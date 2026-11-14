@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
-#include "overlay_manager.h"
+#include "system/c_language.h"
+#include "system/overlay_manager.h"
 
 enum Scene {
     SCENE_MAP_OVERVIEW = 0,

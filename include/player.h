@@ -3,14 +3,14 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
 #include "bets.h"
-#include "c_language.h"
 #include "character.h"
 #include "club.h"
 #include "course.h"
 #include "course_space.h"
 #include "surface.h"
+#include "system/asset.h"
+#include "system/c_language.h"
 
 #define PLAYER_COUNT_MAX 4
 

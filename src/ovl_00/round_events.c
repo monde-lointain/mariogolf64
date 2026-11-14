@@ -3,11 +3,8 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
 #include "camera.h"
 #include "character.h"
-#include "compiler.h"
 #include "controller.h"
 #include "course_space.h"
 #include "current_shot.h"
@@ -16,9 +13,7 @@
 #include "game.h"
 #include "game_flags.h"
 #include "geometry.h"
-#include "heap.h"
 #include "math_util.h"
-#include "memory_address.h"
 #include "movie.h"
 #include "pin.h"
 #include "play.h"
@@ -30,6 +25,11 @@
 #include "shot_camera.h"
 #include "shot_effects.h"
 #include "sound.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/heap.h"
+#include "system/memory_address.h"
 #include "text.h"
 #include "transfer_pak.h"
 #include "turn.h"

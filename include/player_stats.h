@@ -3,9 +3,9 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
-#include "compiler.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 
 enum PlayerStatsBuffer {
     PLAYER_STATS_BUFFER_BET_ICONS = 1,

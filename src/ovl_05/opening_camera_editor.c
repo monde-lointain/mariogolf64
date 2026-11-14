@@ -3,14 +3,14 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "c_language.h"
-#include "compiler.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "geometry.h"
-#include "host_file.h"
 #include "math_util.h"
 #include "sound.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/host_file.h"
 #include "text.h"
 
 #define SNAPSHOT_COUNT 32

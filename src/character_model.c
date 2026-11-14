@@ -2,16 +2,16 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "camera.h"
 #include "club.h"
-#include "compiler.h"
 #include "display_list.h"
 #include "game.h"
 #include "geometry.h"
 #include "hole_setup.h"
-#include "main.h"
 #include "math_util.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/main.h"
 
 #define BUSY_FRAME_COUNT 2
 

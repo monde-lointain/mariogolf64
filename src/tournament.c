@@ -4,13 +4,13 @@
 #include <string.h>
 #include <ultra64.h>
 
-#include "c_language.h"
-#include "compiler.h"
 #include "course.h"
 #include "game_state.h"
 #include "math_util.h"
 #include "menu.h"
 #include "player.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 
 #define FIRST_COMPUTER_CONTESTANT 1
 

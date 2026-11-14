@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
-#include "c_language.h"
+#include "system/c_language.h"
 
 #define PATH_STEP_COUNT 900
 

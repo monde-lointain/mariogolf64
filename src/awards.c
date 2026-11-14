@@ -2,7 +2,6 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "course.h"
 #include "course_stats.h"
 #include "game_state.h"
@@ -11,6 +10,7 @@
 #include "save.h"
 #include "scene.h"
 #include "scoring.h"
+#include "system/c_language.h"
 #include "tournament.h"
 
 #define MATCHUP_RESULT_COUNT_MAX 99

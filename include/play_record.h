@@ -3,7 +3,6 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "character.h"
 #include "club.h"
 #include "course.h"
@@ -11,6 +10,7 @@
 #include "math_util.h"
 #include "player.h"
 #include "scene.h"
+#include "system/c_language.h"
 
 typedef struct RecordedShot {
     BinaryAngle heading;

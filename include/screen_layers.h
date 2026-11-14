@@ -3,11 +3,11 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
 #include "controller.h"
 #include "course.h"
 #include "display_list.h"
+#include "system/asset.h"
+#include "system/c_language.h"
 
 enum WipeState {
     WIPE_NONE,

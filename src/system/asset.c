@@ -1,10 +1,10 @@
-#include "asset.h"
+#include "system/asset.h"
 
 #include <nusys.h>
 #include <ultra64.h>
 
-#include "compiler.h"
 #include "game_flags.h"
+#include "system/compiler.h"
 
 #define ASSET_FILE_POOL_SIZE 2
 

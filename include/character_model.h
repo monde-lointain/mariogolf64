@@ -3,15 +3,15 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "camera.h"
 #include "character.h"
 #include "club.h"
-#include "compiler.h"
 #include "course_space.h"
 #include "display_list.h"
 #include "geometry.h"
 #include "math_util.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 
 #define CHARACTER_MODEL_KIND_COUNT 4
 #define CHARACTER_MODELS_PER_KIND 36

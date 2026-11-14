@@ -4,10 +4,10 @@
 #include <ultra64.h>
 
 #include "camera.h"
-#include "compiler.h"
 #include "controller.h"
 #include "geometry.h"
 #include "math_util.h"
+#include "system/compiler.h"
 
 #define FRAMED_SPHERE_CAPACITY 8
 

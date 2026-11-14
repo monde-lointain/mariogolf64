@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
+#include "system/asset.h"
 
 void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top);
 void LoadCursorBox(ImageAsset *image);

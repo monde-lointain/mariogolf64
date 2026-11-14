@@ -2,15 +2,15 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
-#include "compiler.h"
 #include "display_list.h"
 #include "game.h"
 #include "hole_setup.h"
-#include "memory_address.h"
 #include "play.h"
 #include "sky_and_hud_animations.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/memory_address.h"
 
 #define SHADED_QUAD_START QUAD_VERTEX_COUNT
 

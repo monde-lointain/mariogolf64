@@ -3,15 +3,15 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
-#include "c_language.h"
 #include "club.h"
-#include "compiler.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_state.h"
 #include "geometry.h"
 #include "player.h"
 #include "surface.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 
 static u8 f_UnusedBytesBeforeSimulatedShot[0x10] UNUSED;
 SimulatedShot g_SimulatedShot;

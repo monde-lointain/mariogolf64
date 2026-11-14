@@ -2,10 +2,8 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
 #include "camera.h"
 #include "character_model.h"
-#include "compiler.h"
 #include "course_space.h"
 #include "current_shot.h"
 #include "curve.h"
@@ -13,16 +11,18 @@
 #include "game.h"
 #include "geometry.h"
 #include "golf_balls.h"
-#include "heap.h"
 #include "hole_creatures.h"
 #include "math_util.h"
-#include "memory_address.h"
 #include "movie.h"
 #include "particle_effects.h"
 #include "round_events.h"
 #include "round_hud.h"
 #include "screen.h"
 #include "sound.h"
+#include "system/asset.h"
+#include "system/compiler.h"
+#include "system/heap.h"
+#include "system/memory_address.h"
 #include "view_projection.h"
 
 #define SPARK_COUNT 30

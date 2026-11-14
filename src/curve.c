@@ -2,8 +2,8 @@
 
 #include <ultra64.h>
 
-#include "compiler.h"
 #include "geometry.h"
+#include "system/compiler.h"
 
 #define SPLINE_SEGMENT_COUNT 10
 

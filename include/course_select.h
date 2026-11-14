@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
+#include "system/c_language.h"
 
 enum SelectResult {
     SELECT_IDLE,

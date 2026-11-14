@@ -4,11 +4,9 @@
 #include <ultra64.h>
 
 #include "billboard.h"
-#include "c_language.h"
 #include "camera.h"
 #include "character.h"
 #include "character_model.h"
-#include "compiler.h"
 #include "course_space.h"
 #include "current_shot.h"
 #include "debug_text.h"
@@ -22,6 +20,8 @@
 #include "pin.h"
 #include "scene.h"
 #include "sound.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 #include "terrain.h"
 
 #define FIRST_REACTION_CHANNEL 4

@@ -3,9 +3,9 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "geometry.h"
 #include "math_util.h"
+#include "system/c_language.h"
 
 enum CameraMode {
     CAMERA_MODE_BEHIND_GOLFER = 1,

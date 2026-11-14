@@ -2,25 +2,25 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
 #include "club.h"
-#include "compiler.h"
 #include "controller.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "display_list.h"
 #include "game_flags.h"
 #include "game_state.h"
-#include "heap.h"
 #include "math_util.h"
-#include "memory_address.h"
 #include "menu.h"
 #include "play.h"
 #include "player.h"
 #include "round_hud.h"
 #include "scene.h"
 #include "screen.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/heap.h"
+#include "system/memory_address.h"
 #include "text.h"
 
 #define GAME_FLAG_CLUB_PANEL_DEBUG 0x6E

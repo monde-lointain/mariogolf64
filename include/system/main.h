@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
+#include "system/c_language.h"
 
 #define BASE_RDRAM_END 0x80400000
 

@@ -3,7 +3,7 @@
 
 #include <nusys.h>
 
-#include "c_language.h"
+#include "system/c_language.h"
 
 #define BUTTON_REPEAT_DELAY_FIRST 15
 #define BUTTON_REPEAT_DELAY_NEXT 3

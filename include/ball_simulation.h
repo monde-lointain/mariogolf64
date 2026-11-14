@@ -3,13 +3,13 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "club.h"
 #include "course_space.h"
-#include "frame_time.h"
 #include "geometry.h"
 #include "math_util.h"
 #include "surface.h"
+#include "system/c_language.h"
+#include "system/frame_time.h"
 
 typedef f32 BallSpeed;
 

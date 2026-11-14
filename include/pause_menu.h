@@ -3,9 +3,9 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "controller.h"
 #include "geometry.h"
+#include "system/c_language.h"
 
 enum SaveMenuList {
     SAVE_MENU_CLOSED,

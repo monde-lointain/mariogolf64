@@ -2,9 +2,9 @@
 
 #include <ultra64.h>
 
-#include "compiler.h"
 #include "game.h"
 #include "screen.h"
+#include "system/compiler.h"
 
 #define BOX_ANIMATION_FRAME_COUNT 4
 

@@ -2,17 +2,17 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
-#include "compiler.h"
 #include "display_list.h"
 #include "geometry.h"
-#include "heap.h"
 #include "math_util.h"
-#include "memory_address.h"
 #include "round_hud.h"
 #include "screen.h"
 #include "sound.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/heap.h"
+#include "system/memory_address.h"
 #include "view_projection.h"
 
 #define FIREWORK_COUNT 1

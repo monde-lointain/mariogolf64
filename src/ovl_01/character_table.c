@@ -4,12 +4,9 @@
 
 #define WIDENS_FACE_CHARACTER_INDEX
 
-#include "asset.h"
 #include "character.h"
-#include "compiler.h"
 #include "display_list.h"
 #include "main_menu.h"
-#include "memory_address.h"
 #include "menu.h"
 #include "menu_arrows.h"
 #include "menu_memory.h"
@@ -20,6 +17,9 @@
 #include "screen.h"
 #include "sky_and_hud_animations.h"
 #include "sound.h"
+#include "system/asset.h"
+#include "system/compiler.h"
+#include "system/memory_address.h"
 
 #define TABLE_COLUMN_COUNT 14
 #define TABLE_SHOWN_COLUMN_COUNT 7

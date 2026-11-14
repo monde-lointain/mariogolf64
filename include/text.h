@@ -3,10 +3,10 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
-#include "compiler.h"
 #include "screen.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 #include "text_format.h"
 
 #define TextRenderMode(cycle) \

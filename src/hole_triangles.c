@@ -2,10 +2,7 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
 #include "camera.h"
-#include "compiler.h"
 #include "course_space.h"
 #include "display_list.h"
 #include "game.h"
@@ -13,12 +10,15 @@
 #include "game_state.h"
 #include "geometry.h"
 #include "math_util.h"
-#include "memory_address.h"
 #include "particle_effects.h"
 #include "play.h"
 #include "player.h"
 #include "screen.h"
 #include "shot_camera.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/memory_address.h"
 #include "work_area.h"
 
 #define f_HoleTriangles (g_WorkArea.hole.triangles)

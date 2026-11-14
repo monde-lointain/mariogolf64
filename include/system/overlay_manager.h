@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
+#include "system/c_language.h"
 
 #define MODULE_COUNT 64
 #define OVERLAY_COUNT 17

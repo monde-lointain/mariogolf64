@@ -3,20 +3,15 @@
 #include <framebuffer_count.h>
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
 #include "character.h"
 #include "club.h"
-#include "compiler.h"
 #include "controller.h"
 #include "display_list.h"
 #include "game.h"
 #include "game_flags.h"
 #include "game_state.h"
 #include "geometry.h"
-#include "heap.h"
 #include "math_util.h"
-#include "memory_address.h"
 #include "menu.h"
 #include "player.h"
 #include "round_hud.h"
@@ -24,6 +19,11 @@
 #include "screen_layers.h"
 #include "sky_and_hud_animations.h"
 #include "sound.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/heap.h"
+#include "system/memory_address.h"
 #include "view_projection.h"
 #define CLUB_SLOTS_DONE 0
 #define CLUB_SLOTS_STARTING 1

@@ -1,10 +1,10 @@
-#include "heap.h"
+#include "system/heap.h"
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "math_util.h"
-#include "memory_address.h"
+#include "system/c_language.h"
+#include "system/memory_address.h"
 
 #define HEAP_COUNT 3
 

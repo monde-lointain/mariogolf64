@@ -2,13 +2,13 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
-#include "compiler.h"
 #include "display_list.h"
 #include "game_flags.h"
-#include "main.h"
-#include "memory_address.h"
 #include "screen.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/main.h"
+#include "system/memory_address.h"
 #include "text.h"
 
 #define TEXT_COLUMN_COUNT 40

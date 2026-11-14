@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
+#include "system/asset.h"
 
 enum BestTimesBuffer {
     BEST_TIMES_BUFFER_FACE_STRIP = 1,

@@ -3,12 +3,12 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
 #include "camera.h"
 #include "character.h"
 #include "menu.h"
 #include "player.h"
+#include "system/asset.h"
+#include "system/c_language.h"
 
 #define COURSE_SELECT_LAYOUT (*(u8 *)&g_MapCamera.mode)
 

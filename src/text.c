@@ -2,19 +2,19 @@
 
 #define DEFINES_SET_TEXT_SLOT
 
-#include "asset.h"
-#include "c_language.h"
-#include "compiler.h"
 #include "current_shot.h"
 #include "display_list.h"
 #include "game_state.h"
-#include "heap.h"
-#include "memory_address.h"
 #include "round_hud.h"
 #include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/heap.h"
+#include "system/memory_address.h"
 #include "text.h"
 
 typedef struct MessageTable {

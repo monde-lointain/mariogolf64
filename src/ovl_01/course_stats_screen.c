@@ -2,9 +2,6 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
-#include "compiler.h"
 #include "course.h"
 #include "course_stats.h"
 #include "display_list.h"
@@ -12,7 +9,6 @@
 #include "geometry.h"
 #include "main_menu.h"
 #include "math_util.h"
-#include "memory_address.h"
 #include "menu.h"
 #include "menu_arrows.h"
 #include "menu_memory.h"
@@ -21,6 +17,10 @@
 #include "screen.h"
 #include "sky_and_hud_animations.h"
 #include "sound.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/memory_address.h"
 #include "text.h"
 #include "view_projection.h"
 

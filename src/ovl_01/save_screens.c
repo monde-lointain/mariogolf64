@@ -3,10 +3,8 @@
 
 #define WIDENS_FACE_DRAW_MODE
 
-#include "asset.h"
 #include "character.h"
 #include "character_model.h"
-#include "compiler.h"
 #include "controller.h"
 #include "course.h"
 #include "display_list.h"
@@ -18,7 +16,6 @@
 #include "hole_setup.h"
 #include "main_menu.h"
 #include "math_util.h"
-#include "memory_address.h"
 #include "menu.h"
 #include "menu_arrows.h"
 #include "menu_memory.h"
@@ -36,6 +33,9 @@
 #include "sky_and_hud_animations.h"
 #include "sound.h"
 #include "sram.h"
+#include "system/asset.h"
+#include "system/compiler.h"
+#include "system/memory_address.h"
 #include "text.h"
 #include "view_projection.h"
 

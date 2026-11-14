@@ -2,10 +2,10 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "game_state.h"
-#include "main.h"
 #include "scene.h"
+#include "system/c_language.h"
+#include "system/main.h"
 
 #define DEFAULT_HOLE_RADIUS 200
 #define MINI_GOLF_HOLE_RADIUS 30

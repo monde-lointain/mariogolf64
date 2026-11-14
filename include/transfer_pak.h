@@ -4,9 +4,9 @@
 #include <nusys.h>
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
 #include "math_util.h"
+#include "system/asset.h"
+#include "system/c_language.h"
 
 #define PAK_ACCESS_OK 0
 

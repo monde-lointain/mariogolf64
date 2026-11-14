@@ -4,8 +4,8 @@
 #include <ultra64.h>
 
 #include "bets.h"
-#include "c_language.h"
 #include "player.h"
+#include "system/c_language.h"
 
 typedef struct RoundStats {
     s32 sandSaveCount;

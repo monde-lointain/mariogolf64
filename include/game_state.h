@@ -4,10 +4,10 @@
 #include <ultra64.h>
 
 #include "bets.h"
-#include "c_language.h"
 #include "course.h"
 #include "player.h"
 #include "scene.h"
+#include "system/c_language.h"
 
 #define HOLE_SELECTION_ALL 0
 #define HOLE_SELECTION_BACK_NINE (1 << 1)

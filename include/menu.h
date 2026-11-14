@@ -3,13 +3,13 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
 #include "character.h"
 #include "course.h"
 #include "password.h"
 #include "play_record.h"
 #include "player.h"
+#include "system/asset.h"
+#include "system/c_language.h"
 #include "text_format.h"
 
 enum MenuScreen {

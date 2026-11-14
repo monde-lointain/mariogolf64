@@ -3,9 +3,9 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
-#include "compiler.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 
 typedef s32 AnimationId;
 typedef s8 AnimationId8;

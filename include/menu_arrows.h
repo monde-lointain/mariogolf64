@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
+#include "system/asset.h"
 
 void DrawBlinkingSideArrows(
     Gfx **displayListHead,

@@ -6,22 +6,14 @@
 #include <string.h>
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
 #include "character.h"
 #include "club.h"
-#include "compiler.h"
 #include "course.h"
 #include "course_space.h"
 #include "course_stats.h"
-#include "crash_screen.h"
-#include "frame_time.h"
 #include "game_flags.h"
 #include "game_state.h"
-#include "heap.h"
 #include "hole_setup.h"
-#include "host_file.h"
-#include "main.h"
 #include "main_menu.h"
 #include "math_util.h"
 #include "menu_memory.h"
@@ -34,6 +26,14 @@
 #include "screen.h"
 #include "sound.h"
 #include "sram.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/crash_screen.h"
+#include "system/frame_time.h"
+#include "system/heap.h"
+#include "system/host_file.h"
+#include "system/main.h"
 #include "transfer_pak.h"
 
 #define GAME_FLAG_SAVE_TO_HOST 0x53

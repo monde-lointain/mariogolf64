@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
 #include "character.h"
+#include "system/asset.h"
 
 extern PaletteColor g_MenuCharacterPalettes[CHARACTER_COUNT][LARGE_PALETTE_COLOR_COUNT];
 

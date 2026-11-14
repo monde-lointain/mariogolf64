@@ -3,12 +3,9 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
 #include "character.h"
 #include "character_model.h"
 #include "club.h"
-#include "compiler.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "display_list.h"
@@ -16,7 +13,6 @@
 #include "game_flags.h"
 #include "game_state.h"
 #include "main_menu.h"
-#include "memory_address.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "player.h"
@@ -24,6 +20,10 @@
 #include "screen_layers.h"
 #include "sky_and_hud_animations.h"
 #include "sound.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/memory_address.h"
 #include "text.h"
 #include "transfer_pak.h"
 

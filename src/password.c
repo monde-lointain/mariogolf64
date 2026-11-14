@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "character.h"
-#include "compiler.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 
 #define PASSWORD_SYMBOL_COUNT 28
 

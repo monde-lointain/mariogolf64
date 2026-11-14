@@ -3,9 +3,9 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
 #include "camera.h"
 #include "course_space.h"
+#include "system/asset.h"
 
 enum ImpactFlashState {
     IMPACT_FLASH_NONE,

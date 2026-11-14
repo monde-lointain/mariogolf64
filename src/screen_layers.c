@@ -2,18 +2,18 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
-#include "compiler.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "display_list.h"
-#include "heap.h"
-#include "main.h"
 #include "math_util.h"
-#include "memory_address.h"
 #include "screen.h"
 #include "sound.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/heap.h"
+#include "system/main.h"
+#include "system/memory_address.h"
 #include "text.h"
 
 #define ASSET_DEFAULT_WIPE_SHAPE 0x63F

@@ -3,11 +3,11 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
-#include "c_language.h"
 #include "camera.h"
 #include "display_list.h"
 #include "math_util.h"
+#include "system/asset.h"
+#include "system/c_language.h"
 
 enum MenuBackdrop {
     MENU_BACKDROP_NONE = -1,

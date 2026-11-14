@@ -3,13 +3,13 @@
 #include <nusys.h>
 #include <ultra64.h>
 
-#include "c_language.h"
-#include "compiler.h"
 #include "display_list.h"
 #include "geometry.h"
-#include "heap.h"
-#include "memory_address.h"
 #include "screen.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
+#include "system/heap.h"
+#include "system/memory_address.h"
 
 #define FRAME_WIDTH 280
 #define FRAME_MICROSECONDS 16666

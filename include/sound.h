@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "character.h"
-#include "compiler.h"
+#include "system/compiler.h"
 
 #define SOUND_CHANNEL_COUNT 16
 

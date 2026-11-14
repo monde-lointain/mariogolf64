@@ -3,13 +3,13 @@
 
 #include <ultra64.h>
 
-#include "asset.h"
 #include "bets.h"
-#include "c_language.h"
 #include "course.h"
 #include "math_util.h"
 #include "player.h"
 #include "round_stats.h"
+#include "system/asset.h"
+#include "system/c_language.h"
 
 #define LEADERBOARD_ROW_COUNT 10
 

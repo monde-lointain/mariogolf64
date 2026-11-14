@@ -4,12 +4,12 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
-#include "c_language.h"
 #include "camera.h"
 #include "current_shot.h"
 #include "math_util.h"
 #include "play_record.h"
 #include "player.h"
+#include "system/c_language.h"
 
 #define SHOT_FLAG_ON_GREEN 1
 #define SHOT_FLAG_NO_IMPACT_POINT 2

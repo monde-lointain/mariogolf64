@@ -3,7 +3,6 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "character.h"
 #include "course.h"
 #include "course_stats.h"
@@ -12,6 +11,7 @@
 #include "play_record.h"
 #include "player.h"
 #include "round_stats.h"
+#include "system/c_language.h"
 
 #define SAVE_MAGIC 0x12345678
 

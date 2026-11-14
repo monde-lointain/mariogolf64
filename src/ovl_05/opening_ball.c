@@ -4,14 +4,11 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-#include "asset.h"
 #include "ball_physics.h"
 #include "ball_simulation.h"
-#include "c_language.h"
 #include "character_model.h"
 #include "club.h"
 #include "collision.h"
-#include "compiler.h"
 #include "course_space.h"
 #include "debug_text.h"
 #include "game_flags.h"
@@ -25,6 +22,9 @@
 #include "reaction.h"
 #include "shot_effects.h"
 #include "surface.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 #include "terrain.h"
 
 #define OPENING_CHARACTER_MODEL_KIND CHARACTER_MODEL_KIND_COUNT

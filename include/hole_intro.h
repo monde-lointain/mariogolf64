@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
+#include "system/c_language.h"
 
 Boolean UpdateHoleIntroCamera(void);
 void StartHoleIntroCamera(void);

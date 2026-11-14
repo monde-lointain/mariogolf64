@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
-#include "compiler.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 
 extern u16 *g_MessageFramebuffer;
 

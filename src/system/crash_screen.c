@@ -1,12 +1,12 @@
-#include "crash_screen.h"
+#include "system/crash_screen.h"
 
 #include <ultra64.h>
 
 #include "PR/R4300.h"
-#include "c_language.h"
-#include "compiler.h"
 #include "debug_text.h"
 #include "sound.h"
+#include "system/c_language.h"
+#include "system/compiler.h"
 
 #define FAULT_MESSAGE 0x10
 

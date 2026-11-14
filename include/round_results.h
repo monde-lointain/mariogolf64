@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
-#include "c_language.h"
 #include "controller.h"
+#include "system/c_language.h"
 
 enum UnlockNotice {
     UNLOCK_NOTICE_DONKEY_KONG,

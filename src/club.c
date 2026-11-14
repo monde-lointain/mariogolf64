@@ -3,9 +3,7 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "asset.h"
 #include "ball_simulation.h"
-#include "c_language.h"
 #include "club.h"
 #include "club_panel.h"
 #include "controller.h"
@@ -14,15 +12,17 @@
 #include "game_flags.h"
 #include "game_state.h"
 #include "geometry.h"
-#include "heap.h"
 #include "hole_setup.h"
-#include "host_file.h"
-#include "main.h"
 #include "math_util.h"
 #include "pin.h"
 #include "player.h"
 #include "sound.h"
 #include "surface.h"
+#include "system/asset.h"
+#include "system/c_language.h"
+#include "system/heap.h"
+#include "system/host_file.h"
+#include "system/main.h"
 #include "transfer_pak.h"
 
 #define STRAIGHT_ANGLE 0x1000

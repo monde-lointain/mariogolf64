@@ -5,8 +5,8 @@
 
 #include "display_list.h"
 #include "game.h"
-#include "memory_address.h"
 #include "screen.h"
+#include "system/memory_address.h"
 #include "view_projection.h"
 
 #define DEPTH_MAX 0x3FFF

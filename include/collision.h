@@ -4,8 +4,8 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
-#include "c_language.h"
 #include "course_space.h"
+#include "system/c_language.h"
 #include "terrain.h"
 
 enum PinHit {
