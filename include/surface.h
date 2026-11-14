@@ -87,9 +87,13 @@ typedef s32 SurfaceKind;
         (kind) == SURFACE_KIND_BUNKER_FAIR_LIE || \
         (kind) == SURFACE_KIND_BUNKER_POOR_LIE)
 
-#define SINK_DEPTH_NONE 0
-#define SINK_DEPTH_HALF 1
-#define SINK_DEPTH_BURIED 2
+enum SinkDepth {
+    SINK_DEPTH_NONE,
+    SINK_DEPTH_HALF,
+    SINK_DEPTH_BURIED
+};
+
+typedef s32 SinkDepth;
 
 typedef struct SurfaceTraits {
     SurfaceKind kind;
@@ -100,7 +104,7 @@ typedef struct SurfaceTraits {
     s16 rollSpeedKept;
     s16 bounciness;
     WideAssetId lieImageAsset;
-    s32 sinkDepth;
+    SinkDepth sinkDepth;
     s32 ignoredSurfaceGroup;
 } SurfaceTraits;
 
