@@ -69,7 +69,7 @@ typedef s32 ContactStyle;
 
 // The frames since the contact effect started, or NO_CONTACT_EFFECT_AGE
 // while none is shown
-#define NO_CONTACT_EFFECT_AGE CONTACT_EFFECT_NONE
+#define NO_CONTACT_EFFECT_AGE (-1)
 
 extern s32 g_ContactEffectAge;
 
@@ -78,7 +78,7 @@ void ShowWindFlyGuy(s32 show);
 ContactStyle GetContactStyle(Player *player);
 void LoadContactImages(Player *player);
 Boolean IsContactEffectShown(void);
-void StartContactEffect(s32 effect);
+void StartContactEffect(ContactEffect effect);
 void ShowFlipMessage(MessageId messageId);
 
 void DrawBanner(Gfx **displayListHead);

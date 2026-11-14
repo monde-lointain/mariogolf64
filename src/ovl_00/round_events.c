@@ -432,7 +432,7 @@ static Vtx f_ContactVertices[2] = {
     {{{-12, 0, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
     {{{12, 0, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
 };
-ContactEffect g_ContactEffectAge = NO_CONTACT_EFFECT_AGE;
+s32 g_ContactEffectAge = NO_CONTACT_EFFECT_AGE;
 static Boolean f_IsContactEffectFading = FALSE;
 static ContactStyle f_ContactStyle = CONTACT_STYLE_MARIO;
 #define CONTACT_RIBBON_FIRST_SEGMENTS 16
@@ -2778,6 +2778,9 @@ static inline void SetContactHalfWidth(s16 halfWidth) {
     f_ContactVertices[1].v.ob[AXIS_X] = halfWidth;
 }
 
+#define CONTACT_START_AGE 0
+#define CONTACT_FIRST_AGE 1
+
 void StartContactEffect(ContactEffect effect) {
     s32 matrixIndex;
 
@@ -2795,7 +2798,7 @@ void StartContactEffect(ContactEffect effect) {
             );
         }
 
-        g_ContactEffectAge = 0;
+        g_ContactEffectAge = CONTACT_START_AGE;
         f_IsContactEffectFading = FALSE;
         f_ContactVertices[0].v.ob[AXIS_Y] = 0;
         f_ContactVertices[1].v.ob[AXIS_Y] = 0;
@@ -2902,7 +2905,6 @@ void LoadContactImages(Player *player) {
     }
 }
 
-#define CONTACT_FIRST_AGE 1
 #define CONTACT_AGE_MAX 255
 #define CONTACT_FADE_STEP 4
 #define CONTACT_ALPHA_MIN 4
