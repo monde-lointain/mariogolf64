@@ -216,7 +216,7 @@ typedef struct HoleAssetIds {
 #define HOLE_ASSET_IDS(first) \
     {(first), (first) + 1, (first) + 2, (first) + 3, (first) + 4, (first) + 5, (first) + 6}
 
-s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
+s32 PaintDefaultCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
 s32 PaintShyGuyDesert(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
 s32 PaintYoshisIsland(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
 s32 PaintBooValley(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
@@ -229,12 +229,12 @@ static u32 f_PaintSeed = 0;
 #define PAINT_RANDOM_SHIFT 16
 
 static PaintLogic f_PaintLogics[] = {
-    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintMainCourse},
-    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintMainCourse},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintDefaultCourse},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintDefaultCourse},
     {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintShyGuyDesert},
     {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintYoshisIsland},
     {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintBooValley},
-    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintMainCourse},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintDefaultCourse},
     {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintFirstMiniGolfCourse},
     {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintSecondMiniGolfCourse},
     {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintThirdMiniGolfCourse},
@@ -880,7 +880,7 @@ void ResetTerrainCodeCells(void) {
     }
 }
 
-s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+s32 PaintDefaultCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
     s32 paintedCode;
     s32 random;
