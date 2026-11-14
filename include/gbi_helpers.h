@@ -14,6 +14,8 @@ typedef struct RgbColor {
 #define TEXTURE_SCALE_HALF 0x8000
 #define TEXTURE_SCALE_FULL 0xFFFF
 #define HalfScaleTexelCoordinate(texel) ((texel) << 6)
+// Half a texel in the S10.5 texture coordinates of textured rectangles
+#define HALF_TEXEL 16.0f
 
 #define TextureMask(size) \
     ((size) >= 256        ? 8 : \

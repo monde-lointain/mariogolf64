@@ -50,8 +50,6 @@
 #define SCORECARD_CLOSE_SOUND_PAN 0x20
 #define SOUND_PAN_FULL_RIGHT 0xFF
 
-#define LEADERBOARD_GLYPH_GROUP_COUNT 20
-
 #define UNSPLIT_IMAGE_WIDTH_MAX 96
 
 #define LEADERBOARD_LAST_TOP_ROW (TOURNAMENT_CONTESTANT_COUNT - LEADERBOARD_ROW_COUNT)
@@ -411,7 +409,7 @@ void FreeScorecard(void) {
                 FreeMemory(&g_Scorecard.placeArrowImage);
                 FreeMemory(&g_Scorecard.flapNameImages);
                 FreeMemory(&g_Scorecard.leaderboardRowImage);
-                for (i = 0; i != LEADERBOARD_GLYPH_GROUP_COUNT; i++) {
+                for (i = 0; i != GLYPH_GROUP_COUNT; i++) {
                     PlaceGlyphGroup(i, NO_FONT_SIZE, 0, 0, 0, g_PrintBuffer);
                 }
 

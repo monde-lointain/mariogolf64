@@ -96,7 +96,6 @@ typedef s32 SaveMenuState;
 #define TITLE_SWAY_TOP 18.0f
 #define TITLE_SWAY_DISTANCE 5.0f
 #define TEXEL_COORDINATE_ONE 32
-#define HALF_TEXEL_COORDINATE 16.0f
 #define SWAY_DEGREES_PER_FRAME 10
 #define MODE_ICON_SIZE 64
 #define MODE_ICON_PART_HEIGHT 32
@@ -758,10 +757,8 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
         titleTopExact = (sinf(f_TitleSwayAngle) * TITLE_SWAY_DISTANCE) + TITLE_SWAY_TOP;
         titleLeft = HalfTowardZero(titleLeftExact);
         titleTop = HalfTowardZero(titleTopExact);
-        titleTexelLeft =
-            (s32)(HALF_TEXEL_COORDINATE - ((titleLeftExact - titleLeft) * HALF_TEXEL_COORDINATE));
-        titleTexelTop =
-            (s32)(HALF_TEXEL_COORDINATE - ((titleTopExact - titleTop) * HALF_TEXEL_COORDINATE));
+        titleTexelLeft = (s32)(HALF_TEXEL - ((titleLeftExact - titleLeft) * HALF_TEXEL));
+        titleTexelTop = (s32)(HALF_TEXEL - ((titleTopExact - titleTop) * HALF_TEXEL));
         gDPPipeSync(gfx++);
         gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
         f_TitleSwayAngle += DegreesToRadians(SWAY_DEGREES_PER_FRAME);

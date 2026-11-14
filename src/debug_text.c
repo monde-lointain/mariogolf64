@@ -30,7 +30,6 @@
 #define HIGHLIGHT_BIT 0x80
 #define CHARACTER_MASK 0x7F
 
-#define MESSAGE_SCREEN_WIDTH 320
 #define MESSAGE_INK_COLOR 0x0FFF
 #define MESSAGE_PAPER_COLOR 0x0001
 
@@ -178,7 +177,7 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
                         0xF) == FONT_INK ?
                 MESSAGE_INK_COLOR :
                 MESSAGE_PAPER_COLOR;
-            pixelIndex = (((row * GLYPH_SIZE) + pixelRow) * MESSAGE_SCREEN_WIDTH) +
+            pixelIndex = (((row * GLYPH_SIZE) + pixelRow) * SCREEN_WIDTH) +
                 ((column * GLYPH_SIZE) + pixelColumn);
             currentFramebuffer[pixelIndex] = color;
             nextFramebuffer[pixelIndex] = color;
