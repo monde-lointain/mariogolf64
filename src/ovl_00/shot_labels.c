@@ -99,9 +99,15 @@ typedef struct ShotLabel {
 #define PIN_FLAG_WAVE_HALF 8
 #define PIN_FLAG_TOP_Y 40
 #define PIN_FLAG_DROP 0xB400
-#define PIN_FLAG_GREEN_IMAGE 0
-#define PIN_FLAG_IMAGE 1
-#define PIN_FLAG_HIDDEN 2
+
+enum PinFlagImage {
+    PIN_FLAG_GREEN_IMAGE,
+    PIN_FLAG_IMAGE,
+    PIN_FLAG_HIDDEN
+};
+
+typedef s32 PinFlagImage;
+
 #define PIN_FLAG_FADE_FRAME 114
 #define PIN_FLAG_HIDE_FRAME 120
 #define PIN_FLAG_FADE_STEP 32
@@ -582,7 +588,7 @@ void DrawAimGuides(CameraMatrices *matrices) {
     s32 heightYards;
     s32 tintYards;
     s32 distance;
-    s32 flagImage;
+    PinFlagImage flagImage;
     SurfaceKind surfaceKind;
     Club *club;
     s32 outOfBoundsGreen;

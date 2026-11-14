@@ -28,9 +28,14 @@
 #include "surface.h"
 #include "terrain.h"
 
-#define PLAN_THREAD_RUNNING 0
-#define PLAN_THREAD_COLLECTED 1
-#define PLAN_THREAD_DONE 2
+enum PlanThreadState {
+    PLAN_THREAD_RUNNING,
+    PLAN_THREAD_COLLECTED,
+    PLAN_THREAD_DONE
+};
+
+typedef s32 PlanThreadState;
+
 #define PLAN_THREAD_ID 11
 #define PLAN_THREAD_PRIORITY 20
 #define PLAN_THREAD_STACK_SIZE 0x6000
@@ -160,7 +165,7 @@ static ShotOffset f_ShotOffsets[SHOT_OFFSET_COUNT] = {
     {0, -48},
     {0, 0},
 };
-static s32 f_PlanThreadState = PLAN_THREAD_RUNNING;
+static PlanThreadState f_PlanThreadState = PLAN_THREAD_RUNNING;
 static u32 f_UnusedWordAfterThreadState UNUSED = 0xD24CC5E5;
 static Boolean f_HasBestEvaluation = FALSE;
 static f32 f_ApproachBandLimits[APPROACH_BAND_COUNT][CONSISTENCY_COUNT] = {

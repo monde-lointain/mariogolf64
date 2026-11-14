@@ -92,10 +92,15 @@ enum SendExperienceStep {
     SEND_EXPERIENCE_NOTHING_TO_SEND
 };
 
-#define NOTICE_HIDDEN 0
-#define NOTICE_OPENING 1
-#define NOTICE_CLOSING 2
-#define NOTICE_SHOWN 3
+enum NoticeState {
+    NOTICE_HIDDEN,
+    NOTICE_OPENING,
+    NOTICE_CLOSING,
+    NOTICE_SHOWN
+};
+
+typedef s32 NoticeState;
+
 #define MESSAGE_INSERT_TRANSFER_PAK 0x149
 #define MESSAGE_SWAP_FOR_TRANSFER_PAK 0x148
 #define MESSAGE_LOOSE_TRANSFER_PAK 0x14A
@@ -221,9 +226,6 @@ typedef s32 ListingState;
 #define ACCESSING_STRIP_COUNT 10
 #define ACCESSING_STRIP_SIZE (ACCESSING_WIDTH * ACCESSING_STRIP_HEIGHT)
 
-#define PRESSING_HAND_HIDDEN 0
-#define PRESSING_HAND_LOW 1
-#define PRESSING_HAND_FOR_NOTICE 2
 #define NOTICE_PRESSING_HAND_LEFT 256
 #define NOTICE_PRESSING_HAND_TOP 128
 
@@ -397,8 +399,8 @@ s32 TagCartridges(void);
 StatusCheck CheckStatusCartridge(s32 cartridgeIndex);
 StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex);
 ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex);
-void SetNoticeState(s32 state, MessageId messageId);
-s32 GetNoticeState(void);
+void SetNoticeState(NoticeState state, MessageId messageId);
+NoticeState GetNoticeState(void);
 
 #define PAK_RESULT_STILL_READING (-1)
 #define PAK_RESULT_CONNECTOR_PROBLEM 0
@@ -1494,7 +1496,7 @@ static s32 f_CharacterArrowFrame = 0;
 static Radians f_OptionPointerAngle = 0.0f;
 static char f_GameBoyCartridgeTitle[16] = "MARIO GOLF\0AWXE";
 static char f_CartridgeSaveSignature[16] = "CAMELOT GAMEBOY";
-static s32 f_NoticeState = NOTICE_HIDDEN;
+static NoticeState f_NoticeState = NOTICE_HIDDEN;
 static MessageId f_NoticeMessageId = 0;
 static s32 f_NoticeSize = 0;
 static s32 f_PressingHandFrame = 0;
@@ -2695,7 +2697,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
         DrawAccessingSign(&gfx);
     }
 
-    if (transfer->pressingHandPosition != 0) {
+    if (transfer->pressingHandPosition != PRESSING_HAND_HIDDEN) {
         DrawPressingHand(&gfx);
     }
 
@@ -3630,7 +3632,7 @@ s32 TagCartridges(void) {
     return PAK_RESULT_LOOSE_PAK;
 }
 
-void SetNoticeState(s32 state, MessageId messageId) {
+void SetNoticeState(NoticeState state, MessageId messageId) {
     f_NoticeState = state;
     if (state == NOTICE_OPENING) {
         f_NoticeSize = 0;
@@ -3642,7 +3644,7 @@ void SetNoticeState(s32 state, MessageId messageId) {
     }
 }
 
-s32 GetNoticeState(void) {
+NoticeState GetNoticeState(void) {
     return f_NoticeState;
 }
 

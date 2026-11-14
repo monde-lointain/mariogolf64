@@ -171,12 +171,16 @@ enum ModeName {
 #define HOLE_OUT_TEXT_TOP 212
 #define FIRST_RECORD_TEXT_SLOT 2
 
-#define REPLAY_LABEL_ALBATROSS 0
-#define REPLAY_LABEL_HOLE_IN_ONE 1
-#define REPLAY_LABEL_EAGLE 2
-#define REPLAY_LABEL_BIRDIE 3
-#define REPLAY_LABEL_PAR 4
-#define NO_REPLAY_LABEL (-1)
+enum ReplayLabel {
+    NO_REPLAY_LABEL = -1,
+    REPLAY_LABEL_ALBATROSS,
+    REPLAY_LABEL_HOLE_IN_ONE,
+    REPLAY_LABEL_EAGLE,
+    REPLAY_LABEL_BIRDIE,
+    REPLAY_LABEL_PAR
+};
+
+typedef s32 ReplayLabel;
 
 static s8 f_ModeIcons[GAME_MODE_ICON_COUNT] = {
     MODE_ICON_STROKE,
@@ -1565,7 +1569,7 @@ ReplayMenuState UpdateReplaySaveMenu(ControllerState *controller) {
 }
 
 void DrawReplaySaveMenu(Gfx **displayListHead) {
-    s32 rowLabels[REPLAY_ROW_COUNT];
+    ReplayLabel rowLabels[REPLAY_ROW_COUNT];
     s32 rowOffsets[REPLAY_ROW_COUNT];
     Gfx *gfx;
     SaveData *save;

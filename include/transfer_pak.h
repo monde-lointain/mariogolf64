@@ -95,6 +95,14 @@ typedef s32 TransmitScreen;
 
 #define CARTRIDGE_TAG_SIZE 16
 
+enum PressingHand {
+    PRESSING_HAND_HIDDEN,
+    PRESSING_HAND_LOW,
+    PRESSING_HAND_FOR_NOTICE
+};
+
+typedef s32 PressingHand;
+
 typedef struct GameBoyTransfer {
     ImageAsset *courseSceneImage;
     ImageAsset *pointerImage;
@@ -143,7 +151,7 @@ typedef struct GameBoyTransfer {
     s32 taggedControllers[MAXCONTROLLERS];
     u8 cartridgeTags[MAXCONTROLLERS][CARTRIDGE_TAG_SIZE];
     Boolean isCanceled;
-    s32 pressingHandPosition;
+    PressingHand pressingHandPosition;
     Boolean isAccessing;
 } GameBoyTransfer;
 
