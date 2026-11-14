@@ -1736,7 +1736,7 @@ void DrawBillboardEffect(Gfx **displayListHead, Effect *effect, u16 color) {
     Gfx *gfx = *displayListHead;
     ScreenPoint center;
     s32 halfSize;
-    s32 textureStep;
+    s32 texelStep;
     s32 frameOffset;
     s32 sparkleStep;
     s32 red;
@@ -1762,7 +1762,7 @@ void DrawBillboardEffect(Gfx **displayListHead, Effect *effect, u16 color) {
             gDPSetPrimDepth(gfx++, center.depth, 0);
             gDPPipeSync(gfx++);
 
-            textureStep = TexelRunStep((BILLBOARD_IMAGE_SIZE / 2), halfSize);
+            texelStep = TexelRunStep((BILLBOARD_IMAGE_SIZE / 2), halfSize);
             if (effect->kind == EFFECT_KIND_RISING_CLUMP) {
                 gDPLoadTextureBlock(
                     gfx++,
@@ -1909,8 +1909,8 @@ void DrawBillboardEffect(Gfx **displayListHead, Effect *effect, u16 color) {
                     G_TX_RENDERTILE,
                     (effect->frame & 1) << TEAR_MIRROR_S_SHIFT,
                     0,
-                    textureStep,
-                    textureStep
+                    texelStep,
+                    texelStep
                 );
             }
             else {
@@ -1923,8 +1923,8 @@ void DrawBillboardEffect(Gfx **displayListHead, Effect *effect, u16 color) {
                     G_TX_RENDERTILE,
                     0,
                     0,
-                    textureStep,
-                    textureStep
+                    texelStep,
+                    texelStep
                 );
             }
 
@@ -2031,7 +2031,7 @@ void DrawDivot(Gfx **displayListHead, Effect *effect) {
     Gfx *gfx = *displayListHead;
     ScreenPoint center;
     s32 halfSize;
-    s32 textureStep;
+    s32 texelStep;
     s32 spinStep;
     Radians angle;
 
@@ -2054,7 +2054,7 @@ void DrawDivot(Gfx **displayListHead, Effect *effect) {
         ) < EFFECT_NEAREST_DEPTH) {
         halfSize = center.scaleX * effect->scale;
         if (halfSize > 0) {
-            textureStep = TexelRunStep((DIVOT_IMAGE_SIZE / 2), halfSize);
+            texelStep = TexelRunStep((DIVOT_IMAGE_SIZE / 2), halfSize);
 
             angle = effect->tilt + (M_PI / DIVOT_SPIN_STEP_COUNT);
             if (angle > FULL_TURN_RADIANS) {
@@ -2095,8 +2095,8 @@ void DrawDivot(Gfx **displayListHead, Effect *effect) {
                 G_TX_RENDERTILE,
                 0,
                 0,
-                textureStep,
-                textureStep
+                texelStep,
+                texelStep
             );
             gDPPipeSync(gfx++);
         }
@@ -2478,7 +2478,7 @@ void DrawRain(Gfx **displayListHead, CameraMatrices *matrices) {
     s32 halfSize;
     s32 splashSize;
     s32 splashStep;
-    s32 textureStep;
+    s32 texelStep;
 
     if (g_HoleSetup.conditions.isRaining == TRUE &&
         f_Weather == WEATHER_RAIN
@@ -2656,7 +2656,7 @@ void DrawRain(Gfx **displayListHead, CameraMatrices *matrices) {
                         halfSize = RAIN_SPLASH_LARGEST_HALF_SIZE;
                     }
 
-                    textureStep = TexelRunStep((RAIN_SPLASH_FRAME_SIZE * 2), halfSize);
+                    texelStep = TexelRunStep((RAIN_SPLASH_FRAME_SIZE * 2), halfSize);
                     gSPScisTextureRectangle(
                         gfx++,
                         landedDrop->tailScreenX - halfSize,
@@ -2667,8 +2667,8 @@ void DrawRain(Gfx **displayListHead, CameraMatrices *matrices) {
                         landedDrop->splashColumn << RAIN_SPLASH_FRAME_SHIFT,
                         (landedDrop->landedFrameCount / RAIN_SPLASH_FRAME_DURATION)
                             << RAIN_SPLASH_FRAME_SHIFT,
-                        textureStep,
-                        textureStep
+                        texelStep,
+                        texelStep
                     );
                 }
             }

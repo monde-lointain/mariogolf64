@@ -1374,7 +1374,7 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
     s32 frame;
     s32 growth;
     s32 plaqueHalfSize;
-    s32 step;
+    s32 texelStep;
     f32 alpha;
 
     width = ReadImageWidth(f_MovieBuffer);
@@ -1584,7 +1584,7 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         plaqueHalfSize = growth + WINNER_PLAQUE_MARGIN;
-        step = TexelRunStep((WOODEN_PLAQUE_SIZE / 2), plaqueHalfSize);
+        texelStep = TexelRunStep((WOODEN_PLAQUE_SIZE / 2), plaqueHalfSize);
         DrawTextureRectangle(
             &gfx,
             QuarterPixels(WINNER_CENTER_X - plaqueHalfSize),
@@ -1594,8 +1594,8 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
             G_TX_RENDERTILE,
             0,
             0,
-            step,
-            step
+            texelStep,
+            texelStep
         );
         LoadLargePalette(&gfx, f_MovieBuffer + WINNER_PALETTE_OFFSET);
         LoadTextureBlock(
@@ -1613,7 +1613,7 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        step = TexelRunStep((WINNER_FACE_SIZE / 2), growth);
+        texelStep = TexelRunStep((WINNER_FACE_SIZE / 2), growth);
         width = QuarterPixels(WINNER_CENTER_X - growth);
         DrawTextureRectangle(
             &gfx,
@@ -1624,8 +1624,8 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
             G_TX_RENDERTILE,
             0,
             0,
-            step,
-            step
+            texelStep,
+            texelStep
         );
     }
 

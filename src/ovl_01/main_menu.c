@@ -5480,7 +5480,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     f32 circleX;
     s32 slot;
     s32 halfSize;
-    s32 step;
+    s32 texelStep;
     f32 bobOffset;
     s32 wheelShiftX = 0;
     u8 areCharactersDrawn;
@@ -5585,7 +5585,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     for (index = 0; index != modeCount; index++) {
         slot = drawOrder[index];
         halfSize = boardScale[slot] * MODE_BOARD_HALF_SIZE;
-        step = (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
+        texelStep = (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
         if (index == modeCount) {
             bobOffset = sinf(f_ModeBoardBobPhase) * MODE_BOARD_BOB_HEIGHT;
         }
@@ -5620,7 +5620,7 @@ void DrawModeSelect(Gfx **displayListHead) {
                 wheelShiftX + (s32)(boardX[slot] - halfSize),
                 boardY[slot] - halfSize + bobOffset,
                 halfSize,
-                step
+                texelStep
             );
         }
         else {
@@ -5693,8 +5693,8 @@ void DrawModeSelect(Gfx **displayListHead) {
                     G_TX_RENDERTILE,
                     0,
                     0,
-                    step,
-                    step
+                    texelStep,
+                    texelStep
                 );
                 gDPPipeSync(gfx++);
             }
@@ -6645,7 +6645,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
     s32 key;
     s32 slot;
     s32 halfSize;
-    s32 step;
+    s32 texelStep;
     s32 stripTop;
     s32 stripOffset;
     Radians angle;
@@ -6872,7 +6872,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
         for (index = 0; index != courseCount; index++) {
             slot = drawOrder[index];
             halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
-            step = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
+            texelStep = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
             if (index == (courseCount - 1)) {
                 bobOffset = sinf(f_FrontCourseBobPhase) * FRONT_COURSE_BOB_HEIGHT;
             }
@@ -6951,8 +6951,8 @@ void DrawCourseSelect(Gfx **displayListHead) {
                     G_TX_RENDERTILE,
                     0,
                     0,
-                    step,
-                    step
+                    texelStep,
+                    texelStep
                 );
                 gDPPipeSync(gfx++);
             }

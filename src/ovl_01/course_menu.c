@@ -412,7 +412,7 @@ void DrawCourseStats(Gfx **displayListHead) {
     s32 image;
     s32 slot;
     s32 halfSize;
-    s32 step;
+    s32 texelStep;
 
     DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
     guPerspectiveF(
@@ -498,7 +498,7 @@ void DrawCourseStats(Gfx **displayListHead) {
         slot = drawOrder[index];
         image = (slot == courseCount) ? COURSE_TOTALS_IMAGE : slot;
         halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
-        step = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
+        texelStep = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
         gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_CourseStatsIcons[image])));
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
@@ -533,8 +533,8 @@ void DrawCourseStats(Gfx **displayListHead) {
                 G_TX_RENDERTILE,
                 0,
                 0,
-                step,
-                step
+                texelStep,
+                texelStep
             );
             gDPPipeSync(gfx++);
         }

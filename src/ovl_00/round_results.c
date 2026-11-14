@@ -1443,7 +1443,7 @@ void UpdateCourseResultsNotice(void) {
 void DrawCourseResultsNotice(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 size;
-    s32 step;
+    s32 texelStep;
     s32 lift;
     s32 shineLift;
     s32 depthLift;
@@ -1473,7 +1473,7 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
     for (i = 0; i != NOTICE_COURSE_STRIP_COUNT; i++) {
         s32 top;
         size = (cosf(f_NoticeAngle) + NOTICE_COURSE_SCALE_BIAS) * NOTICE_COURSE_STRIP_HEIGHT;
-        step = TexelRunStep(NOTICE_COURSE_STRIP_HEIGHT, size);
+        texelStep = TexelRunStep(NOTICE_COURSE_STRIP_HEIGHT, size);
         LoadTextureBlock(
             &gfx,
             LargeImageTexels(f_ResultsCourseImage) +
@@ -1501,8 +1501,8 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
             G_TX_RENDERTILE,
             0,
             0,
-            step,
-            step
+            texelStep,
+            texelStep
         );
     }
 
@@ -1753,7 +1753,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
     Radians angle;
     f32 popScale;
     s32 size;
-    s32 step;
+    s32 texelStep;
     s32 width;
     s32 height;
     s32 titleCenterX;
@@ -1832,7 +1832,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        step = TexelRunStep(NOTICE_FACE_SIZE / 2, size);
+        texelStep = TexelRunStep(NOTICE_FACE_SIZE / 2, size);
         centerX = f_NoticeLift + NOTICE_CENTER_X;
         centerY = f_CharacterNoticeShift + NOTICE_CENTER_Y;
         DrawTextureRectangle(
@@ -1844,8 +1844,8 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
             G_TX_RENDERTILE,
             0,
             0,
-            step,
-            step
+            texelStep,
+            texelStep
         );
     }
 

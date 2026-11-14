@@ -2030,7 +2030,7 @@ void DrawSavedGames(Gfx **displayListHead) {
     f32 circleX;
     s32 slot;
     s32 halfSize;
-    s32 step;
+    s32 texelStep;
     s32 iconHalfSize;
     s32 iconStep;
     f32 bobOffset;
@@ -2127,7 +2127,7 @@ void DrawSavedGames(Gfx **displayListHead) {
     for (boardIndex = 0; boardIndex != SAVED_GAME_COUNT; boardIndex++) {
         slot = drawOrder[boardIndex];
         halfSize = boardScale[slot] * GAME_BOARD_HALF_SIZE;
-        step = (f32)(GAME_BOARD_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
+        texelStep = (f32)(GAME_BOARD_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
         f_ChosenModeIconHalfSize = boardScale[slot] * MODE_ICON_HALF_SIZE;
         f_ChosenModeIconScale =
             (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / f_ChosenModeIconHalfSize;
@@ -2193,8 +2193,8 @@ void DrawSavedGames(Gfx **displayListHead) {
                     G_TX_RENDERTILE,
                     0,
                     0,
-                    step,
-                    step
+                    texelStep,
+                    texelStep
                 );
                 gDPPipeSync(gfx++);
             }
@@ -2253,7 +2253,7 @@ void DrawSavedGames(Gfx **displayListHead) {
                 boardX[slot] - halfSize,
                 boardY[slot] - halfSize + bobOffset,
                 halfSize,
-                step
+                texelStep
             );
         }
     }

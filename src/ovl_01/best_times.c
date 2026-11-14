@@ -239,7 +239,7 @@ void DrawBestTimes(Gfx **displayListHead) {
     f32 wheelX;
     s32 slot;
     s32 halfSize;
-    s32 step;
+    s32 texelStep;
     s32 time;
     s16 characterIndex;
     s16 dashIndex;
@@ -326,7 +326,7 @@ void DrawBestTimes(Gfx **displayListHead) {
     for (index = 0; index != courseCount; index++) {
         slot = drawOrder[index];
         halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
-        step = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
+        texelStep = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
         gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_BestTimesCourseIcons[slot])));
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
@@ -361,8 +361,8 @@ void DrawBestTimes(Gfx **displayListHead) {
                 G_TX_RENDERTILE,
                 0,
                 0,
-                step,
-                step
+                texelStep,
+                texelStep
             );
             gDPPipeSync(gfx++);
         }
