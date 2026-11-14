@@ -9,7 +9,9 @@ they lie between main and the build date, which the asset files follow.
 
 The shiftable script packs each region of base RAM after the largest
 overlay of the region before it, the first after main, and defines
-overlay_regions_VRAM_END, where the heap can begin, after the last. In ROM,
+overlay_regions_VRAM_END after the last, which must not pass the start of
+the game's main heap: the heap keeps the original's size and address, so
+that the allocator behaves the same in every layout. In ROM,
 each segment follows the one before it, in the original's order, as the
 code takes every ROM address from the script's symbols. Other segments,
 such as an overlay of the Expansion Pak's memory, keep their addresses in
@@ -31,6 +33,8 @@ import sys
 BASE_RDRAM_END = 0x80400000
 KSEG0_START = 0x80000000
 ALIGNMENT = 16
+# Where the main heap begins: MAIN_REGION_START in include/system/heap.h
+MAIN_REGION_START = 0x8025D800
 
 MAIN = "main"
 BUILD_DATE = "build_date"
@@ -129,8 +133,14 @@ def lay_out(script: str) -> str:
         )
         out.extend(moved)
         previous_ends = [f"{block_name(block)}_VRAM_END" for block in moved]
+    # ld takes an ASSERT among the sections only without a semicolon
+    message = '"The overlays reach into the main heap: see include/system/heap.h"'
+    heap_check = (
+        f"    ASSERT(overlay_regions_VRAM_END <= 0x{MAIN_REGION_START:X}, {message})"
+    )
     out.append(
-        f"    overlay_regions_VRAM_END = ALIGN({max_of(previous_ends)}, {ALIGNMENT});"
+        f"    overlay_regions_VRAM_END = ALIGN({max_of(previous_ends)}, {ALIGNMENT});\n"
+        + heap_check
     )
     out.extend(expansion)
     out.append(build_date)

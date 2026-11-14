@@ -11,17 +11,15 @@
 
 #include "system/c_language.h"
 
-// The memory the game gives the general pool, from the end of the overlays'
-// regions. The original builds the start as a constant, which a symbol's
-// address does not compile to; other builds take it from the link, which
-// packs the regions.
-#ifdef __IS_KMC__
-#    define MAIN_REGION_START 0x8025D800
-#else
-extern u8 overlay_regions_VRAM_END[];
-#    define MAIN_REGION_START ((u32)overlay_regions_VRAM_END)
-#endif
+// The memory the game gives the general pool, which ends where the screen
+// effects keep their captured frames. Every build gives it the original's
+// size, so that the allocator chooses the same blocks and runs out at the
+// same point however the code before it is laid out. The shiftable layout
+// fails to link if the overlays' regions reach into it (see
+// tools/shiftable_ld.py).
 #define MAIN_REGION_END 0x802EA000
+#define MAIN_REGION_SIZE 0x8C800
+#define MAIN_REGION_START (MAIN_REGION_END - MAIN_REGION_SIZE)
 
 // The heaps besides the main memory's, by the index that the heap routines
 // take
