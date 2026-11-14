@@ -34,7 +34,7 @@ enum ScoreKind {
 
 typedef struct PlayRecord {
     HoleSetup hole;
-    s32 gameMode;
+    GameMode gameMode;
     CourseIndex8 courseIndex;
     s8 holeIndex;
     u8 scoreKind;

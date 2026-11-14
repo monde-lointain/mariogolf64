@@ -68,6 +68,8 @@ enum GameMode {
     GAME_MODE_STAFF_ROLL = 13
 };
 
+typedef u32 GameMode;
+
 #define IsOneOnOneMatchMode(mode) \
     ((mode) == GAME_MODE_MATCH_GAME || (mode) == GAME_MODE_GET_CHARACTER)
 

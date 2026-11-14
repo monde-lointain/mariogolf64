@@ -238,7 +238,7 @@ extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT
 
 s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing);
 MessageId GetClubTournamentCourseTitleMessage(void);
-s32 GetClubTournamentGameMode(void);
+GameMode GetClubTournamentGameMode(void);
 MessageId GetClubTournamentModeMessage(void);
 MessageId GetClubTournamentNameMessage(void);
 s32 GetClubTournamentNumber(void);

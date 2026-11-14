@@ -4227,7 +4227,7 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 width;
     s32 height;
-    s32 gameMode;
+    GameMode gameMode;
     Boolean isNintendo;
     s32 detailsTop;
     s32 lineHeight;

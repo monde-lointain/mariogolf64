@@ -9,6 +9,7 @@
 #include "hole_conditions.h"
 #include "language.h"
 #include "player.h"
+#include "scene.h"
 
 #define HOLE_SELECTION_ALL 0
 #define HOLE_SELECTION_BACK_NINE (1 << 1)
@@ -50,7 +51,7 @@ enum ReplayKind {
 
 typedef struct GameState {
     GameStateStep step;
-    u32 gameMode;
+    GameMode gameMode;
     s32 playerCount;
     CourseIndex courseIndex;
     s32 holeIndex;

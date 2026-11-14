@@ -2348,8 +2348,8 @@ void RememberPlayedHole(void) {
     memory->courseIndex = g_GameState.courseIndex;
 }
 
-s32 GetClubTournamentGameMode(void) {
-    s32 gameMode;
+GameMode GetClubTournamentGameMode(void) {
+    GameMode gameMode;
 
     switch (g_ClubTournamentRules.isSpeedGolf) {
         case FALSE:
