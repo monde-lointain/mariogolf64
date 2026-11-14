@@ -799,6 +799,29 @@ typedef s32 BallSprite;
 #define BALL_NEAR_DEPTH (-200)
 #define BALL_DOT_DEPTH (-40000)
 #define BALL_DEPTH_BIAS 60.0f
+// Balls and their shadows are drawn at a fixed depth pulled toward the camera
+// by about a ball's size, so the ground never hides them.
+#define BALL_DEPTH_PULL 10.5f
+#define NEAR_BALL_DEPTH_OFFSET 48.0f
+#define FAR_BALL_DEPTH_OFFSET 8.0f
+#define NEAR_SHADOW_DEPTH_OFFSET 56.0f
+#define SUNK_SHADOW_DEPTH_OFFSET 40.0f
+#define FAR_SHADOW_DEPTH_OFFSET 16.0f
+#define PulledBallDepth(point, offset) \
+    ((point).depth - ((point).depthStep * (BALL_DEPTH_PULL * g_PinVertexScale)) + (offset) - \
+        BALL_DEPTH_BIAS)
+// A shadow shrinks and fades as the ball sinks below the ground, as into the
+// cup, by one shade per this many course units of depth, down to a minimum.
+#define FULL_SHADOW_SHADE 0x7F
+#define SHADOW_FADE_DEPTH 512
+#define SHADOW_SHADE_MIN 0x5F
+#define CUP_VIEW_SHADOW_FADE_DEPTH 128
+#define CUP_VIEW_SHADOW_SHADE_MIN 0x3F
+#define SHADOW_DEPTH_GAP_MIN 8
+// A ball this far below the ground counts as underground, and a ball in the
+// cup this far above it casts no shadow.
+#define UNDERGROUND_BALL_DEPTH 153.6f
+#define SHADOWLESS_CUP_BALL_HEIGHT 768.0f
 #define PIKA_BALL_DEPTH 20000
 #define CUP_VIEW_NEAR_BALL_DEPTH 0x402F
 #define CUP_VIEW_SUNK_BALL_DEPTH 0x401F
@@ -996,7 +1019,8 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
             );
             spriteKind = BALL_SPRITE_FULL;
             isAboveGround = TRUE;
-            if (ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE < groundHeight - 153.6f) {
+            if (ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE <
+                groundHeight - UNDERGROUND_BALL_DEPTH) {
                 isAboveGround = FALSE;
             }
 
@@ -1016,7 +1040,8 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
             }
 
             isAboveCup = FALSE;
-            if (groundHeight + 768.0f < ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE) {
+            if (groundHeight + SHADOWLESS_CUP_BALL_HEIGHT <
+                ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE) {
                 isAboveCup = ball->isInCup == TRUE;
             }
 
@@ -1085,9 +1110,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                             primDepth = ballPoint.depth;
                         }
                         else {
-                            primDepth = ballPoint.depth -
-                                (ballPoint.depthStep * (10.5f * g_PinVertexScale)) + 48.0f -
-                                BALL_DEPTH_BIAS;
+                            primDepth = PulledBallDepth(ballPoint, NEAR_BALL_DEPTH_OFFSET);
                         }
                     }
                     else {
@@ -1099,9 +1122,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                             primDepth = ballPoint.depth;
                         }
                         else {
-                            primDepth = ballPoint.depth -
-                                (ballPoint.depthStep * (10.5f * g_PinVertexScale)) + 8.0f -
-                                BALL_DEPTH_BIAS;
+                            primDepth = PulledBallDepth(ballPoint, FAR_BALL_DEPTH_OFFSET);
                         }
                     }
 
@@ -1263,12 +1284,12 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                             shadowPrimDepth = CUP_VIEW_FAR_BALL_DEPTH + CUP_VIEW_SHADOW_DEPTH_STEP;
                         }
 
-                        shade = 0x7F -
+                        shade = FULL_SHADOW_SHADE -
                             ((s32)(groundHeight -
                                  (ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE)) /
-                                128);
-                        if (shade < 0x3F) {
-                            shade = 0x3F;
+                                CUP_VIEW_SHADOW_FADE_DEPTH);
+                        if (shade < CUP_VIEW_SHADOW_SHADE_MIN) {
+                            shade = CUP_VIEW_SHADOW_SHADE_MIN;
                         }
                     }
                     else {
@@ -1277,36 +1298,33 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                         }
                         else {
                             if (shadowDepth < g_CupViewDepth) {
-                                shadowPrimDepth = shadowPoint.depth -
-                                    (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 56.0f -
-                                    BALL_DEPTH_BIAS;
+                                shadowPrimDepth =
+                                    PulledBallDepth(shadowPoint, NEAR_SHADOW_DEPTH_OFFSET);
                             }
                             else if (ball->isInCup == TRUE) {
-                                shadowPrimDepth = shadowPoint.depth -
-                                    (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 40.0f -
-                                    BALL_DEPTH_BIAS;
+                                shadowPrimDepth =
+                                    PulledBallDepth(shadowPoint, SUNK_SHADOW_DEPTH_OFFSET);
                             }
                             else {
-                                shadowPrimDepth = shadowPoint.depth -
-                                    (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 16.0f -
-                                    BALL_DEPTH_BIAS;
+                                shadowPrimDepth =
+                                    PulledBallDepth(shadowPoint, FAR_SHADOW_DEPTH_OFFSET);
                             }
                         }
 
-                        shade = 0x7F -
+                        shade = FULL_SHADOW_SHADE -
                             ((s32)(groundHeight -
                                  (ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE)) /
-                                512);
-                        if (shade < 0x5F) {
-                            shade = 0x5F;
+                                SHADOW_FADE_DEPTH);
+                        if (shade < SHADOW_SHADE_MIN) {
+                            shade = SHADOW_SHADE_MIN;
                         }
                     }
 
-                    if (shade > 0x7F) {
-                        shade = 0x7F;
+                    if (shade > FULL_SHADOW_SHADE) {
+                        shade = FULL_SHADOW_SHADE;
                     }
 
-                    shadowScale = 1.0f / 0x7F;
+                    shadowScale = 1.0f / FULL_SHADOW_SHADE;
                     shadowScale *= shade;
                     size *= shadowScale;
                     if (size <= 0) {
@@ -1318,8 +1336,8 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                         shadowPrimDepth = 0;
                     }
 
-                    if (shadowPrimDepth < primDepth + 8) {
-                        shadowPrimDepth = primDepth + 8;
+                    if (shadowPrimDepth < primDepth + SHADOW_DEPTH_GAP_MIN) {
+                        shadowPrimDepth = primDepth + SHADOW_DEPTH_GAP_MIN;
                     }
 
                     gDPSetPrimDepth(gfx++, shadowPrimDepth, 0);
@@ -1348,19 +1366,13 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                 size = AbsFloat(shadowPoint.scaleX) * (0.6f * (2.0f * g_PinVertexScale)) * 0.25f;
                 if (g_IsCupViewShown != TRUE) {
                     if (shadowDepth < g_CupViewDepth) {
-                        shadowPrimDepth = shadowPoint.depth -
-                            (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 56.0f -
-                            BALL_DEPTH_BIAS;
+                        shadowPrimDepth = PulledBallDepth(shadowPoint, NEAR_SHADOW_DEPTH_OFFSET);
                     }
                     else if (ball->isInCup == TRUE) {
-                        shadowPrimDepth = shadowPoint.depth -
-                            (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 40.0f -
-                            BALL_DEPTH_BIAS;
+                        shadowPrimDepth = PulledBallDepth(shadowPoint, SUNK_SHADOW_DEPTH_OFFSET);
                     }
                     else {
-                        shadowPrimDepth = shadowPoint.depth -
-                            (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 16.0f -
-                            BALL_DEPTH_BIAS;
+                        shadowPrimDepth = PulledBallDepth(shadowPoint, FAR_SHADOW_DEPTH_OFFSET);
                     }
 
                     if (size <= 0) {
@@ -1451,14 +1463,10 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                 }
                 else {
                     if (afterimageProjectedDepth < g_CupViewDepth) {
-                        afterimageDepth = ballPoint.depth -
-                            (ballPoint.depthStep * (10.5f * g_PinVertexScale)) + 48.0f -
-                            BALL_DEPTH_BIAS;
+                        afterimageDepth = PulledBallDepth(ballPoint, NEAR_BALL_DEPTH_OFFSET);
                     }
                     else if (afterimage->isInCup == FALSE) {
-                        afterimageDepth = ballPoint.depth -
-                            (ballPoint.depthStep * (10.5f * g_PinVertexScale)) + 8.0f -
-                            BALL_DEPTH_BIAS;
+                        afterimageDepth = PulledBallDepth(ballPoint, FAR_BALL_DEPTH_OFFSET);
                     }
                     else {
                         continue;
@@ -1538,14 +1546,10 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
             );
             if (routePointDepth < BALL_NEAREST_DEPTH) {
                 if (routePointDepth < g_CupViewDepth) {
-                    afterimageDepth = shadowPoint.depth -
-                        (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 48.0f -
-                        BALL_DEPTH_BIAS;
+                    afterimageDepth = PulledBallDepth(shadowPoint, NEAR_BALL_DEPTH_OFFSET);
                 }
                 else if (afterimage->isInCup == FALSE) {
-                    afterimageDepth = shadowPoint.depth -
-                        (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 8.0f -
-                        BALL_DEPTH_BIAS;
+                    afterimageDepth = PulledBallDepth(shadowPoint, FAR_BALL_DEPTH_OFFSET);
                 }
                 else {
                     continue;
