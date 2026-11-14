@@ -64,7 +64,7 @@ extern SignedAssetId g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT];
 extern void *g_TrophyPalettes[TROPHY_PALETTE_COUNT];
 #define TROPHY_FRAME_BUFFER_COUNT 2
 extern void *g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
-extern void *g_MenuCourseSceneImage;
+extern ImageAsset *g_MenuCourseSceneImage;
 
 #define PLAYER_COUNT_ASSET_ROW_LENGTH 12
 extern AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH];
@@ -87,7 +87,7 @@ extern TrophySize g_TrophySizes[COURSE_COUNT];
 #define MENU_ARROW_SIZED_IMAGE_COUNT 5
 extern void *g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
 extern void *g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
-extern void *g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
+extern ImageAsset *g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
 extern void *g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
 
 #define MINI_GOLF_DISC_IMAGE_COUNT 2
@@ -101,10 +101,10 @@ extern SignedAssetId g_MiniGolfDiscFiles[];
 extern void *g_CharacterFaceImages[CHARACTER_COUNT];
 extern void *g_CharacterFacePalettes[CHARACTER_COUNT];
 
-extern void *g_ComputerLeftyIcons;
+extern ImageAsset *g_ComputerLeftyIcons;
 
 #define IMAGE_SLOT_COUNT 14
-extern void *g_ImageSlots[IMAGE_SLOT_COUNT];
+extern ImageAsset *g_ImageSlots[IMAGE_SLOT_COUNT];
 
 #define CHARACTER_GRID_ROW_COUNT 3
 #define CHARACTER_GRID_COLUMN_COUNT 7
@@ -291,15 +291,15 @@ extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 extern s16 g_LastMenuScreen;
 extern void *g_MenuIconImages[7];
 #define MENU_ICON_IMAGE_PAIRS ((void *(*)[MINI_GOLF_DISC_IMAGE_COUNT])g_MenuIconImages)
-extern void *g_MenuBoardImages[2];
+extern ImageAsset *g_MenuBoardImages[2];
 extern void *g_MenuTitleImages[2];
 extern void *g_MenuWideSpareImage;
 extern void *g_SpinningBadgeImage;
 extern void *g_CourseTrophyImages[2];
 extern void *g_MiniGolfDiscImages[2];
-extern void *g_HoleBadgeImages;
+extern ImageAsset *g_HoleBadgeImages;
 extern void *g_BrickWallImage;
-extern void *g_ModeIconImages[7];
+extern ImageAsset *g_ModeIconImages[7];
 
 extern u8 g_UnreadMenuBuffer[0x1218];
 

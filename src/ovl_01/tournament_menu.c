@@ -133,10 +133,10 @@ enum CodeKeyResult {
 #define CLUB_CHOICE_YES 0
 #define CLUB_CHOICE_NO 1
 
-static void *f_WideCloudImage = NULL;
-static void *f_YesNoImage = NULL;
-static void *f_NintendoBadge = NULL;
-static void *f_ClubCourseIcon = NULL;
+static ImageAsset *f_WideCloudImage = NULL;
+static ImageAsset *f_YesNoImage = NULL;
+static ImageAsset *f_NintendoBadge = NULL;
+static ImageAsset *f_ClubCourseIcon = NULL;
 static void *f_MenuWindowImage = NULL;
 static void *f_MenuWindowPalette = NULL;
 static s32 f_MenuWindowState = MENU_WINDOW_OPENING;
@@ -182,11 +182,11 @@ static SignedAssetId f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT]
 };
 static s32 f_UnusedWordAfterPaletteFiles UNUSED = 0;
 static u8 f_IsClubTournamentEntered = 0;
-static void *f_NamePlateImage = NULL;
-static void *f_CodeEntryBarImage = NULL;
-static void *f_CodeGlyphsImage = NULL;
-static void *f_PointingHandImage = NULL;
-static void *f_CodeCursorBox = NULL;
+static ImageAsset *f_NamePlateImage = NULL;
+static ImageAsset *f_CodeEntryBarImage = NULL;
+static ImageAsset *f_CodeGlyphsImage = NULL;
+static ImageAsset *f_PointingHandImage = NULL;
+static ImageAsset *f_CodeCursorBox = NULL;
 static s32 f_UnusedWordAfterCursorBox UNUSED = 0;
 static s32 f_CodeHandMotion = 0;
 static s32 f_CodeHandReach = 0;

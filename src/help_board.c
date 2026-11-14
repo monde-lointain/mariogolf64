@@ -69,10 +69,10 @@ typedef struct TopicPageTable {
     s8 counts[HELP_TOPIC_COUNT + 1];
 } TopicPageTable;
 
-static void *f_HandImages;
-static void *f_ArrowImages;
-static void *f_UnusedImage;
-static void *f_ChalkboardImage;
+static ImageAsset *f_HandImages;
+static ImageAsset *f_ArrowImages;
+static ImageAsset *f_UnusedImage;
+static ImageAsset *f_ChalkboardImage;
 static s8 f_OpenTopic = 0;
 static s8 f_TopicPage = 0;
 static s32 f_HandOffset = 0;

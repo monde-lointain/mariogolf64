@@ -409,7 +409,7 @@ s32 GetNoticeState(void);
 #define GAME_BOY_TITLE_CHECKED_LENGTH 14
 #define GAME_BOY_COMPANY_CODE 0x3031
 
-extern void *g_PressingHandImage;
+extern ImageAsset *g_PressingHandImage;
 
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer);
 

@@ -230,11 +230,11 @@ static s32 f_SlideOffsets[4];
 static u8 f_UnusedBytesAfterSlideOffsets[8] UNUSED;
 static void *f_FacePalettes[FACE_IMAGE_COUNT];
 static void *f_FaceImages[FACE_IMAGE_COUNT];
-static void *f_ModeIconImages[SAVED_GAME_COUNT][2];
-static void *f_NamePlateImage;
-static void *f_ReplayLabelImages[REPLAY_LABEL_COUNT];
-static void *f_CourseNumbersImage;
-static void *f_SaveMenuTitleImage;
+static ImageAsset *f_ModeIconImages[SAVED_GAME_COUNT][2];
+static ImageAsset *f_NamePlateImage;
+static ImageAsset *f_ReplayLabelImages[REPLAY_LABEL_COUNT];
+static ImageAsset *f_CourseNumbersImage;
+static ImageAsset *f_SaveMenuTitleImage;
 static s32 f_IconFrames[SAVED_GAME_COUNT];
 
 s32 GetModeIconIndex(GameState *state) {

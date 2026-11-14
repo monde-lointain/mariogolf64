@@ -245,11 +245,11 @@ static s32 f_SavedGameControllerIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX
 };
 static s32 f_UnusedWordsAfterControllerIcons[2] UNUSED = {0, 0};
 
-static void *f_RingShotNamePlate;
+static ImageAsset *f_RingShotNamePlate;
 static void *f_RingShotRainbowBox;
-static void *f_RingShotCourseNumbers;
+static ImageAsset *f_RingShotCourseNumbers;
 static void *f_RingShotGreenArrows;
-static void **f_RingShotCourseIcons;
+static ImageAsset **f_RingShotCourseIcons;
 static s16 f_RecordedReplaySlots[SAVE_MENU_SLOT_COUNT];
 
 static u8 f_UnusedBufferBeforeBoardCamera[0x3D0] UNUSED;
@@ -262,18 +262,18 @@ static f32 f_SavedGolferScales[PLAYER_COUNT_MAX];
 static LookAt f_SavedGolfersLookAts[DRAW_BUFFER_COUNT];
 static void **f_SavedGameModeImages;
 static void **f_ChosenModeIconBuffers;
-static void *f_SavedGamesNamePlate;
-static void *f_GameModeLabels;
+static ImageAsset *f_SavedGamesNamePlate;
+static ImageAsset *f_GameModeLabels;
 static void *f_ControllerIcons;
 static void *f_PlayerLabels;
 
 static u8 f_UnusedBytesAfterPlayerLabels[0x4] UNUSED;
 
-static void *f_CourseImageBuffers[COURSE_IMAGE_BUFFER_COUNT];
+static ImageAsset *f_CourseImageBuffers[COURSE_IMAGE_BUFFER_COUNT];
 
 static u8 f_UnusedBytesAfterCourseImages[0x4] UNUSED;
 
-static void *f_GameBoards[SAVED_GAME_COUNT];
+static ImageAsset *f_GameBoards[SAVED_GAME_COUNT];
 static s16 f_HumanPlayerIndices[PLAYER_COUNT_MAX];
 static s32 f_ChosenModeIconScale;
 static s32 f_ChosenModeIconHalfSize;
@@ -2502,7 +2502,7 @@ void DrawChosenGameBoard(Gfx **displayListHead, s32 left, s32 top, s32 halfSize,
     s32 iconScale = f_ChosenModeIconScale;
     EncodedAsset asset;
     s32 stripIndex;
-    void *image;
+    ImageAsset *image;
     u8 iconIndex;
 
     gDPPipeSync(gfx++);
@@ -2752,7 +2752,7 @@ void DrawPlayerControllers(Gfx **displayListHead) {
     s32 playerIndex;
     s32 labelIndex;
     s16 controllerIndex;
-    void *image;
+    ImageAsset *image;
 
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);

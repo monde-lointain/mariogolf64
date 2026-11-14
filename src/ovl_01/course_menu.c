@@ -143,10 +143,10 @@ static void *f_CourseStatsBadge;
 static void **f_StatsTrophyBuffers;
 static void **f_UnreadSecondTrophyBuffers;
 static void **f_UnreadLastTrophyBuffers;
-static void **f_CourseStatsIcons;
-static void *f_CourseStatsNamePlate;
-static void *f_CourseStatsDigitsAndArrows;
-static void *f_LargeDigitsImage;
+static ImageAsset **f_CourseStatsIcons;
+static ImageAsset *f_CourseStatsNamePlate;
+static ImageAsset *f_CourseStatsDigitsAndArrows;
+static ImageAsset *f_LargeDigitsImage;
 static void *f_CourseStatsGreenArrows;
 
 static u8 f_UnreadStatsBytes[0x4] UNUSED;
@@ -1774,7 +1774,7 @@ void DrawOffLabel(Gfx **displayListHead, s32 x, s32 y) {
 
 void DrawBlinkingSideArrows(
     Gfx **displayListHead,
-    void *image,
+    ImageAsset *image,
     s32 *blinkFrame,
     s32 *blinkTimer,
     s32 width,
@@ -1847,7 +1847,7 @@ void DrawBlinkingSideArrows(
 
 void DrawGreenArrow(
     Gfx **displayListHead,
-    void *image,
+    ImageAsset *image,
     s32 blinkFrame,
     s32 direction,
     s32 centerX,

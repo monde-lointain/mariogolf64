@@ -1356,7 +1356,7 @@ static Vtx f_LastColumnTileVertices[TILE_VERTEX_COUNT] = {
     {{{16, 16, 0}, 0, {0xBC0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
 };
 
-void *g_BackdropPatternImage;
+ImageAsset *g_BackdropPatternImage;
 u8 *g_CourseSkyImage;
 u8 *g_SkyImage;
 SkyState g_SkyState;

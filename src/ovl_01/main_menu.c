@@ -5472,7 +5472,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     UBoolean8 areCharactersDrawn;
     s32 labelIndex;
     s32 labelX;
-    void *image;
+    ImageAsset *image;
     s32 i;
     CourseIndex courseIndex;
     s32 holeIndex;
@@ -5998,7 +5998,7 @@ void DrawModeIcon(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     EncodedAsset asset;
     s32 stripIndex;
-    void *image;
+    ImageAsset *image;
     u8 iconIndex;
 
     gDPPipeSync(gfx++);
@@ -6078,7 +6078,7 @@ void DrawScaledModeIcon(Gfx **displayListHead, s32 left, s32 top, s32 halfSize, 
     Gfx *gfx = *displayListHead;
     EncodedAsset asset;
     s32 stripIndex;
-    void *image;
+    ImageAsset *image;
     u8 iconIndex;
 
     gDPPipeSync(gfx++);
@@ -8693,7 +8693,7 @@ void DrawBlankScreen(Gfx **displayListHead UNUSED) {
 void UnusedMenuStub(void) {
 }
 
-void DrawSpinningBadge(Gfx **displayListHead, void *image, s32 x, s32 y) {
+void DrawSpinningBadge(Gfx **displayListHead, ImageAsset *image, s32 x, s32 y) {
     Gfx *gfx = *displayListHead;
     s32 unused[8] UNUSED;
 
@@ -8753,7 +8753,7 @@ void DrawSpinningStars(
 ) {
     Gfx *gfx = *displayListHead;
     EncodedAsset asset;
-    void *image = g_MenuArrowSizedImages[f_SpinningStarBufferIndex];
+    ImageAsset *image = g_MenuArrowSizedImages[f_SpinningStarBufferIndex];
     u8 starIndex = 0;
     s32 growWidth = 0;
     s32 growHeight = 0;
@@ -8848,7 +8848,7 @@ void DrawMenuRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY) {
         {-0.89f, 0.45f},
         {-0.89f, -0.45f},
     };
-    void *image;
+    ImageAsset *image;
     s32 tile;
     u8 holeIndex;
     s32 growWidth;

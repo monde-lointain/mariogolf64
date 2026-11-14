@@ -48,6 +48,11 @@ AssetFile *OpenPooledAssetFile(WideAssetId assetId);
 void CloseAssetFile(AssetFile *file);
 s32 GetAssetFileSize(AssetFile *file);
 void ReadAssetFile(void *buffer, u32 size, AssetFile *file);
+// An image asset as loaded: an IMAGE_HEADER_SIZE header, then a small or
+// large palette, then the texels. Its size varies, so it is opaque; reach
+// its parts through ImageBody, ImageTexels and LargeImageTexels.
+typedef void ImageAsset;
+
 #define IMAGE_HEADER_SIZE 8
 #define PALETTE_COLOR_SIZE 2
 #define SMALL_PALETTE_COLOR_COUNT 16

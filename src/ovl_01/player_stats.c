@@ -349,15 +349,15 @@ static u8 f_UnusedBufferAfterArrowRotations[0x100] UNUSED;
 static Mtx f_TurnedArrowScales[PAGE_ARROW_COUNT];
 static void *f_BetIcons;
 static void *f_UnusedStatsBuffer;
-static void *f_StakeMark;
-static void *f_StatsNamePlate;
+static ImageAsset *f_StakeMark;
+static ImageAsset *f_StatsNamePlate;
 static void *f_ChosenBetIconFrames[BET_ICON_FRAME_COUNT];
-static void *f_StatsGreenArrows;
-static void *f_PageArrows;
-static void *f_HandicapPlaque;
-static void *f_BetLabels;
-static void *f_StatsPlayerLabels;
-static void *f_BrickWall;
+static ImageAsset *f_StatsGreenArrows;
+static ImageAsset *f_PageArrows;
+static ImageAsset *f_HandicapPlaque;
+static ImageAsset *f_BetLabels;
+static ImageAsset *f_StatsPlayerLabels;
+static ImageAsset *f_BrickWall;
 
 static u8 f_UnusedBufferAfterBrickWall[0xA0] UNUSED;
 
@@ -373,8 +373,8 @@ static u8 f_UnusedBufferAfterBestShotsScale[0x50] UNUSED;
 
 static void *f_BestShotFaces[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 static void **f_BestShotsCourseIcons;
-static void *f_BestShotsNamePlate;
-static void *f_BestShotsCursorBox;
+static ImageAsset *f_BestShotsNamePlate;
+static ImageAsset *f_BestShotsCursorBox;
 static u8 *f_ScoreLabels;
 static s16 f_BestShotRecords[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 
@@ -975,7 +975,7 @@ void DrawBetIcon(Gfx **displayListHead, s32 left, s32 top, s32 size, s32 texture
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
     EncodedAsset asset;
-    void *image;
+    ImageAsset *image;
     u8 iconIndex;
 
     gDPPipeSync(gfx++);

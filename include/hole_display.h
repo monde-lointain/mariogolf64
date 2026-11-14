@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
 #include "camera.h"
 #include "language.h"
 #include "math_util.h"
@@ -107,7 +108,7 @@ extern SkyState g_SkyState;
 void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused);
 void DrawMenuBackdrop(Gfx **displayListHead);
 void DrawLensFlare(Gfx **displayListHead);
-extern void *g_BackdropPatternImage;
+extern ImageAsset *g_BackdropPatternImage;
 extern s32 g_CapturedSliceCount;
 
 void SetUpTitleHole(void);

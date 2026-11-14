@@ -118,13 +118,13 @@ enum TextIcon {
 
 extern u8 g_GlyphFileRomStart[];
 extern u8 g_MessageFileRomStart[];
-static void *f_SmallFontImage;
-static void *f_MediumFontImage;
-static void *f_LargeFontImage;
-static void *f_TextGradientImages[2];
+static ImageAsset *f_SmallFontImage;
+static ImageAsset *f_MediumFontImage;
+static ImageAsset *f_LargeFontImage;
+static ImageAsset *f_TextGradientImages[2];
 static void *f_MessageGlyphs;
 static MessageTable *f_Messages;
-static void *f_TextIconImage;
+static ImageAsset *f_TextIconImage;
 
 #define NO_GLYPH_GROUP (-1)
 #define LARGE_GLYPH_PART_ROW 7
@@ -205,7 +205,7 @@ void ClearGlyphSprites(void);
 s32 GetTextLength(READ_ONLY char *text);
 
 char g_PrintBuffer[PRINT_BUFFER_SIZE];
-void *g_ShadowedFontImage;
+ImageAsset *g_ShadowedFontImage;
 
 FILE_STATIC s32 g_MessageCodesStart;
 FILE_STATIC TextSlot g_TextSlots[TEXT_SLOT_COUNT];

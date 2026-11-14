@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
 #include "compiler.h"
 #include "language.h"
 #include "screen.h"
@@ -96,7 +97,7 @@ enum PlaceSuffix {
 #define GLYPH_FLAG_BOTTOM_PART 0x02
 #define NO_FONT_SIZE (-1)
 
-extern void *g_ShadowedFontImage;
+extern ImageAsset *g_ShadowedFontImage;
 
 #define PRINT_BUFFER_SIZE 40
 extern char g_PrintBuffer[PRINT_BUFFER_SIZE];

@@ -201,10 +201,10 @@ static Mtx f_TableCursorScale;
 
 static u8 f_UnreadTableWord[0x4] UNUSED;
 
-static void *f_TableCursorBox;
-static void *f_TablePopupBanner;
+static ImageAsset *f_TableCursorBox;
+static ImageAsset *f_TablePopupBanner;
 static void *f_TableArrows;
-static void *f_TableStar;
+static ImageAsset *f_TableStar;
 static s32 f_TableCharacterVisibility[CHARACTER_COUNT];
 
 void LoadCharacterTableBuffer(void *buffer, s16 bufferKind) {

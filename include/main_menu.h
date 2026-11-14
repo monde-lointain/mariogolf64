@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
 #include "camera.h"
 #include "character.h"
 #include "language.h"
@@ -25,7 +26,7 @@ enum CourseSelectLayout {
 #define MENU_LAYER_TALL_NARROW_BOARD (1 << 7)
 #define PLAIN_BACKDROP_LAYERS (MENU_LAYER_COURSE_SCENE | MENU_LAYER_IGNORED | MENU_LAYER_BANNER)
 
-extern void *g_MenuLabelImages[2];
+extern ImageAsset *g_MenuLabelImages[2];
 extern s16 g_ChosenLabelGrowth;
 extern Boolean g_IsHoleShownInMenuInset;
 
@@ -38,7 +39,7 @@ typedef u8 LabelGrowthDirection;
 
 extern LabelGrowthDirection g_ChosenLabelGrowthDirection;
 
-extern void *g_NamePlateImage;
+extern ImageAsset *g_NamePlateImage;
 extern s32 g_ChosenPlayerCount;
 
 #define MENU_PHASE_START 0
@@ -85,6 +86,6 @@ void StartLoadingChosenHole(void);
 void DrawMenuScreen(Gfx **displayListHead);
 void DrawMenuCourseScene(Gfx **displayListHead);
 void DrawMenuBanner(Gfx **displayListHead);
-void DrawSpinningBadge(Gfx **displayListHead, void *image, s32 x, s32 y);
+void DrawSpinningBadge(Gfx **displayListHead, ImageAsset *image, s32 x, s32 y);
 
 #endif

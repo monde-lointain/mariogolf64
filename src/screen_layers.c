@@ -198,10 +198,10 @@ static s32 f_PromptFrame = 0;
 static s32 f_PromptState = PROMPT_STATE_CLOSED;
 static s32 f_PromptChoice = PROMPT_CHOICE_YES;
 static Radians f_ChoiceBobAngle = 0.0f;
-static void *f_HalfTurnImage;
-static void *f_WipeShapeImage;
+static ImageAsset *f_HalfTurnImage;
+static ImageAsset *f_WipeShapeImage;
 static void *f_PromptCloudImage;
-static void *f_YesNoImage;
+static ImageAsset *f_YesNoImage;
 
 void DrawTextureRectangle(
     Gfx **displayListHead,

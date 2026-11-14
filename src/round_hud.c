@@ -266,14 +266,14 @@ enum LandingGlyphGroup {
 #define DISTANCE_POINT_WIDTH 4
 
 u8 *g_ClubPanelImage;
-void *g_DistanceSignImage;
-void *g_LeaderLineImage;
-void *g_PinFlagImages;
-void *g_PlayerTagImages;
+ImageAsset *g_DistanceSignImage;
+ImageAsset *g_LeaderLineImage;
+ImageAsset *g_PinFlagImages;
+ImageAsset *g_PlayerTagImages;
 u8 *g_RingTexels;
 RoundHud g_RoundHud;
 u8 *g_SharedEffectImages;
-void *g_ShotPreviewDashImage;
+ImageAsset *g_ShotPreviewDashImage;
 
 FILE_STATIC Mtx f_UnusedNarrowProjection;
 
@@ -661,36 +661,36 @@ static Vec3 f_ShotEffectTranslation;
 static Vec3 f_ShotEffectScale;
 static Vec3 f_ShotEffectRotation;
 static s32 f_ShotOffsetMarkerTexelOffset;
-static void *f_LieImage;
+static ImageAsset *f_LieImage;
 
 static u8 f_UnusedBytesBeforeClubHead[4] UNUSED;
 
-static void *f_ClubHeadImage;
-static void *f_ClubNameImages[2];
-static void *f_AnimatedIconLabelImages[ANIMATED_ICON_LABEL_COUNT];
-static void *f_AnimatedIconImages[2];
-static void *f_DistanceFont;
-static void *f_WindSpeedFont;
-static void *f_RingImages;
-static void *f_RestLabelImage;
+static ImageAsset *f_ClubHeadImage;
+static ImageAsset *f_ClubNameImages[2];
+static ImageAsset *f_AnimatedIconLabelImages[ANIMATED_ICON_LABEL_COUNT];
+static ImageAsset *f_AnimatedIconImages[2];
+static ImageAsset *f_DistanceFont;
+static ImageAsset *f_WindSpeedFont;
+static ImageAsset *f_RingImages;
+static ImageAsset *f_RestLabelImage;
 static void *f_FlatLabelImage;
 static void *f_DownLabelImage;
 static void *f_UnusedRoundImage;
 static void *f_UpLabelImage;
-static void *f_ParImage;
-static void *f_ShotOffsetMarkerImage;
-static void *f_WindIconImage;
+static ImageAsset *f_ParImage;
+static ImageAsset *f_ShotOffsetMarkerImage;
+static ImageAsset *f_WindIconImage;
 static s32 f_ShotOffsetMarkerXs[SHOT_OFFSET_MARKER_COUNT];
 static s32 f_ShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT];
 static s32 f_UnusedHudScissorWord;
-static void *f_HoleImage;
+static ImageAsset *f_HoleImage;
 static Vtx f_HoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT][HOLE_FLAG_VERTEX_COUNT];
 static s8 f_HoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
 static s32 f_GreenGridHeights[GREEN_GRID_POINT_COUNT];
 static ScreenPosition f_BallTrailPoints[BALL_TRAIL_LENGTH];
 static f32 f_BallTrail[BALL_TRAIL_LENGTH][3];
-static void *f_HoleContestImage;
-static void *f_MatchStandingImage;
+static ImageAsset *f_HoleContestImage;
+static ImageAsset *f_MatchStandingImage;
 
 void PrepareHoleDisplay(void) {
     s32 vertexIndex;

@@ -167,16 +167,16 @@ static Mtx f_GridCursorScales[DRAW_BUFFER_COUNT];
 
 static u8 f_UnreadSelectPad[0x8] UNUSED;
 
-static void *f_CharacterBoard;
+static ImageAsset *f_CharacterBoard;
 
 static u8 f_UnreadSelectGap[0x4] UNUSED;
 
-static void *f_PlayerTags;
-static void *f_GridCursorBox;
+static ImageAsset *f_PlayerTags;
+static ImageAsset *f_GridCursorBox;
 static void *f_UnreadNamePlate;
 static void *f_UnreadControllerIcons;
 static void *f_UnreadColorBars;
-static void *f_CurveMeterCells;
+static ImageAsset *f_CurveMeterCells;
 
 static u8 f_UnreadSelectBlock[0x208] UNUSED;
 
@@ -1264,7 +1264,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
 void LoadCharacterSelectBuffer(void *buffer, s16 bufferKind) {
     EncodedAsset asset;
-    void *image = buffer;
+    ImageAsset *image = buffer;
 
     switch (bufferKind) {
         case CHARACTER_SELECT_BUFFER_PLAYER_LABELS:

@@ -20,7 +20,7 @@
 #define CURSOR_ALPHA 191
 #define CURSOR_PHASE_STEP DegreesToRadians(15)
 
-static void *f_CursorBoxImage = NULL;
+static ImageAsset *f_CursorBoxImage = NULL;
 static Vtx f_CursorBoxVertices[] = {
     {{{-24, 24, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-24, -24, 0}, 0, {0, 0xC00}, {0x00, 0xFF, 0x00, 0xFF}}},
@@ -34,7 +34,7 @@ static u8 f_UnusedBufferAfterCornerPhases[0x40] UNUSED;
 static Mtx f_CursorBoxProjection;
 static Mtx f_CursorBoxTranslations[DRAW_BUFFER_COUNT];
 
-void LoadCursorBox(void *image) {
+void LoadCursorBox(ImageAsset *image) {
     EncodedAsset asset;
 
     s32 width;

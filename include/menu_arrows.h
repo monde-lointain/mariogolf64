@@ -3,9 +3,11 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
+
 void DrawBlinkingSideArrows(
     Gfx **displayListHead,
-    void *image,
+    ImageAsset *image,
     s32 *blinkFrame,
     s32 *blinkTimer,
     s32 width,
@@ -14,7 +16,7 @@ void DrawBlinkingSideArrows(
 );
 void DrawGreenArrow(
     Gfx **displayListHead,
-    void *image,
+    ImageAsset *image,
     s32 blinkFrame,
     s32 direction,
     s32 centerX,

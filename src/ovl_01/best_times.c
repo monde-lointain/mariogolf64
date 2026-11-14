@@ -79,10 +79,10 @@ static s32 f_CharacterChoices[CHARACTER_COUNT] = {
 
 static Mat4 f_BestTimesWheelProjection;
 static Mat4 f_BestTimesWheelView;
-static void **f_BestTimesCourseIcons;
-static void *f_CharacterFaceStrip;
-static void *f_StopwatchGlyphs;
-static void *f_PlaceLabels;
+static ImageAsset **f_BestTimesCourseIcons;
+static ImageAsset *f_CharacterFaceStrip;
+static ImageAsset *f_StopwatchGlyphs;
+static ImageAsset *f_PlaceLabels;
 static void *f_BestTimesGreenArrows;
 
 static u8 f_UnusedBytesAfterGreenArrows[0x4] UNUSED;

@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
 #include "camera.h"
 #include "character.h"
 #include "language.h"
@@ -126,12 +127,12 @@ void ScrollWindArrow(void);
 void AdjustHudOffset(void);
 #define RING_TEXTURE_SIZE 64
 extern u8 *g_RingTexels;
-extern void *g_PlayerTagImages;
-extern void *g_LeaderLineImage;
-extern void *g_DistanceSignImage;
-extern void *g_PinFlagImages;
+extern ImageAsset *g_PlayerTagImages;
+extern ImageAsset *g_LeaderLineImage;
+extern ImageAsset *g_DistanceSignImage;
+extern ImageAsset *g_PinFlagImages;
 #define SHOT_PREVIEW_IMAGE_SIZE 32
-extern void *g_ShotPreviewDashImage;
+extern ImageAsset *g_ShotPreviewDashImage;
 
 void StartLandingReaction(s32 reaction);
 void StartShotEffect(s32 effect);
