@@ -168,19 +168,19 @@ void StopAllSounds(void) {
 }
 
 s32 StartSparkBurst(void) {
-    s32 found = NO_SPARK_BURST;
+    s32 startedIndex = NO_SPARK_BURST;
     s32 burstIndex;
 
     for (burstIndex = 0; burstIndex != SPARK_BURST_COUNT; burstIndex++) {
         if (f_SparkBurstAges[burstIndex] == NO_SPARK_BURST) {
-            found = burstIndex;
+            startedIndex = burstIndex;
             f_SparkBurstAges[burstIndex] = 1;
-            f_SparkBurstTimers[found] = SPARK_BURST_TIME;
+            f_SparkBurstTimers[startedIndex] = SPARK_BURST_TIME;
             break;
         }
     }
 
-    return found;
+    return startedIndex;
 }
 
 void StartImpactSparks(void) {
