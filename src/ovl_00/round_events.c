@@ -434,7 +434,7 @@ static Vtx f_ContactVertices[2] = {
 };
 ContactEffect g_ContactEffectAge = NO_CONTACT_EFFECT_AGE;
 static Boolean f_IsContactEffectFading = FALSE;
-static ContactStyle f_ContactStyle = 0;
+static ContactStyle f_ContactStyle = CONTACT_STYLE_MARIO;
 #define CONTACT_RIBBON_FIRST_SEGMENTS 16
 #define CONTACT_RIBBON_RELOAD_SEGMENTS 15
 #define CONTACT_RIBBON_RELOAD_PASSES 2

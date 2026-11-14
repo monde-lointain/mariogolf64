@@ -865,7 +865,7 @@ void InitHoleState(void) {
     }
 
     PlacePlayersOnTee();
-    g_CurrentShot.surface = 0;
+    g_CurrentShot.surface = SURFACE_OUT_OF_BOUNDS;
     osSyncPrintf("mp2sub1\n");
     PrepareHoleDisplay();
     osSyncPrintf("mp2sub2\n");

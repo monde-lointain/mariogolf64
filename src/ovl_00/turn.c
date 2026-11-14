@@ -1574,7 +1574,7 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation) {
     simulation->position[AXIS_Z] = player->ballPosition[AXIS_Z];
     simulation->playerIndex = playerIndex;
     simulation->isHoledOut = 0;
-    simulation->state = FALSE;
+    simulation->state = BALL_STATE_STOPPED;
     groundHeight = GetGroundHeight(simulation->position[AXIS_X], simulation->position[AXIS_Z]);
     if (groundHeight < simulation->position[AXIS_Y]) {
         simulation->position[AXIS_Y] = groundHeight;

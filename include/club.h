@@ -48,6 +48,7 @@ typedef s32 ClubType;
 typedef s16 ClubType16;
 
 enum ClubCategory {
+    CLUB_CATEGORY_NONE = -1,
     CLUB_CATEGORY_WOOD,
     CLUB_CATEGORY_IRON,
     CLUB_CATEGORY_WEDGE,

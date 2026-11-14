@@ -151,7 +151,7 @@ FILE_STATIC f32 f_RainDriftZ;
 FILE_STATIC Vec3 f_RainVelocity;
 FILE_STATIC s32 f_GroundCheckDropIndex;
 
-static DebrisKind f_DebrisKind = 0;
+static DebrisKind f_DebrisKind = DEBRIS_KIND_NONE;
 static s32 f_NextMatrixIndex = 0;
 static Vtx f_UprightQuadVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, -1, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},

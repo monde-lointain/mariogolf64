@@ -4646,7 +4646,7 @@ ClubCategory GetCharacterClubCategory(u32 slotIndex, s32 clubIndex) {
     CharacterSlot *slot;
     ClubCategory category;
 
-    category = -1;
+    category = CLUB_CATEGORY_NONE;
     slot = GetUsedCharacterSlot(slotIndex);
     if (slot != NULL) {
         g_CharacterModelIndex = slot->modelIndex;
@@ -4664,7 +4664,7 @@ ClubCategory GetCharacterClubCategory(u32 slotIndex, s32 clubIndex) {
                 category = CLUB_CATEGORY_PUTTER;
                 break;
             default:
-                category = -1;
+                category = CLUB_CATEGORY_NONE;
                 break;
         }
     }

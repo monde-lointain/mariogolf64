@@ -1214,7 +1214,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
                 }
 
                 if (index == CHARACTER_PALETTE_COUNT) {
-                    f_PreviewedPalette = 0;
+                    f_PreviewedPalette = UP_C_PALETTE;
                 }
             }
         }
@@ -1637,17 +1637,17 @@ void DrawGridFaces(Gfx **displayListHead, UBoolean8 isSinglePlayer) {
 
         faceImage = g_CharacterFaceImages[(s16)faceSlot];
         facePalette = g_CharacterFacePalettes[(s16)faceSlot];
-        if (f_PreviewedPalette == 0) {
-            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][0], &file);
+        if (f_PreviewedPalette == UP_C_PALETTE) {
+            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][UP_C_PALETTE], &file);
         }
-        else if (f_PreviewedPalette == 1) {
-            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][1], &file);
+        else if (f_PreviewedPalette == LEFT_C_PALETTE) {
+            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][LEFT_C_PALETTE], &file);
         }
-        else if (f_PreviewedPalette == 2) {
-            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][2], &file);
+        else if (f_PreviewedPalette == DOWN_C_PALETTE) {
+            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][DOWN_C_PALETTE], &file);
         }
-        else if (f_PreviewedPalette == 3) {
-            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][3], &file);
+        else if (f_PreviewedPalette == RIGHT_C_PALETTE) {
+            OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][RIGHT_C_PALETTE], &file);
         }
         else {
             OpenAssetFile(

@@ -554,7 +554,7 @@ static WideBinaryAngle f_TriangleCameraYawAngle = 0;
 static s32 f_EditedTriangleIndex = 0;
 static s32 f_EditedCornerIndex = 0;
 static s32 f_SavedCornerIndex = 0;
-static TriangleEdit f_LastTriangleEditKind = 0;
+static TriangleEdit f_LastTriangleEditKind = TRIANGLE_EDIT_NONE;
 
 static Radians f_RingCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 static Radians f_RingCameraYaw = EDITOR_CAMERA_START_ANGLE;
@@ -563,7 +563,7 @@ static WideBinaryAngle f_RingCameraYawAngle = 0;
 static s32 f_RingTriangleIndex = 0x9D;
 static s32 f_RingCornerIndex = 0;
 static s32 f_UnusedRingIndex UNUSED = 0;
-static TriangleEdit f_LastRingEditKind = 0;
+static TriangleEdit f_LastRingEditKind = TRIANGLE_EDIT_NONE;
 
 static Radians f_WallCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 static Radians f_WallCameraYaw = EDITOR_CAMERA_START_ANGLE;
@@ -573,7 +573,7 @@ static s32 f_FirstWallTriangle = 0x19;
 static s32 f_WallTriangleIndex = 0x19;
 static s32 f_WallCornerIndex = 0;
 static s32 f_SavedWallCornerIndex = 0;
-static TriangleEdit f_LastWallEditKind = 0;
+static TriangleEdit f_LastWallEditKind = TRIANGLE_EDIT_NONE;
 
 void ToggleCellMirroring(s32 column, s32 row);
 
