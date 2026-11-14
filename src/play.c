@@ -119,7 +119,7 @@ u32 g_GroundDrawFrame;
 CurrentShot g_SavedShots[PLAYER_COUNT_MAX];
 Player g_SavedPlayers[PLAYER_COUNT_MAX];
 ShotLaunch g_LastShotLaunch;
-u8 g_UnreadPlayBuffer[0xDEC];
+FILE_STATIC u8 g_UnreadPlayBuffer[0xDEC] UNUSED;
 
 FILE_STATIC u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
 FILE_STATIC PlayRecord f_BestShotReplayRecord;

@@ -79,7 +79,7 @@ ImageAsset *g_SpinningBadgeImage;
 ImageAsset *g_MenuWideSpareImage;
 PlayRecord g_PlayRecords[PLAYER_COUNT_MAX];
 RingShotRecord g_RingShotRecords[PLAYER_COUNT_MAX];
-u8 g_UnreadMenuBuffer[0x1218];
+FILE_STATIC u8 g_UnreadMenuBuffer[0x1218] UNUSED;
 UBoolean8 g_IsMenuCharacterLoaded[MAXCONTROLLERS];
 ImageAsset *g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
 BetSet g_BetSet;

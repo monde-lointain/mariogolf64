@@ -87,7 +87,6 @@ extern u32 g_GroundDrawFrame;
 extern CurrentShot g_SavedShots[PLAYER_COUNT_MAX];
 extern Player g_SavedPlayers[PLAYER_COUNT_MAX];
 extern ShotLaunch g_LastShotLaunch;
-extern u8 g_UnreadPlayBuffer[0xDEC];
 
 #define GROUND_NOISE_RANGE 0x60
 #define GROUND_NOISE_BASE 0xBE

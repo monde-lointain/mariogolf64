@@ -302,8 +302,6 @@ extern ImageAsset *g_HoleBadgeImages;
 extern ImageAsset *g_BrickWallImage;
 extern ImageAsset *g_ModeIconImages[MENU_ICON_COUNT];
 
-extern u8 g_UnreadMenuBuffer[0x1218];
-
 void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces);
 void ClearImportedCharacters(void);
 void EnterMenuAtBestShots(void);
