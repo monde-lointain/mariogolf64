@@ -2138,9 +2138,9 @@ void SetResultsBanner(s32 state, s32 kind) {
 #define BANNER_GONE_X (-SCREEN_WIDTH)
 #define BANNER_SLIDE_OUT_SPEED 4
 
-#define MESSAGE_TROPHY_PRIZE 0x3C
+#define MESSAGE_GOLD_TROPHY_PRIZE 0x3D
 #define MESSAGE_PLACE_PRIZE 0x40
-#define MESSAGE_TROPHY_PLACE 0x40
+#define MESSAGE_GOLD_TROPHY 0x41
 #define MESSAGE_UNUSED_BANNER 0x48
 #define MESSAGE_PLACE 0x49
 #define MESSAGE_POINTS_EARNED 0x1F3
@@ -2253,7 +2253,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                     SetTextSlot(
                         f_BannerX + PRIZE_TEXT_X,
                         f_BannerY + PRIZE_TEXT_Y,
-                        rank + MESSAGE_TROPHY_PRIZE,
+                        place + MESSAGE_GOLD_TROPHY_PRIZE,
                         TEXT_SLOT_LARGE_FONT,
                         BANNER_TEXT_SLOT,
                         TEXT_FLAG_DRAWN_BY_OWNER,
@@ -2297,7 +2297,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                 SetTextSlot(
                     f_BannerX + BANNER_TEXT_X,
                     f_BannerY + BANNER_TEXT_Y,
-                    rank + MESSAGE_TROPHY_PLACE,
+                    place + MESSAGE_GOLD_TROPHY,
                     TEXT_SLOT_LARGE_FONT,
                     BANNER_TEXT_SLOT,
                     TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED,
