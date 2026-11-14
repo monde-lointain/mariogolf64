@@ -82,7 +82,6 @@ extern const char f_SaveMenuNameFormat[];
 
 void ResetSavedGameControllers(void);
 
-#define RING_SHOT_STARS_PER_LEVEL 4
 
 #define SAVE_MENU_CHOSEN_IMAGE_COUNT 2
 #define ASSET_SAVE_MENU_FRAME 0x70D
@@ -1189,23 +1188,23 @@ s32 GetOpenRingShotCourseCount(void) {
         }
     }
 
-    if (starCount >= RING_SHOT_STARS_PER_LEVEL * 5) {
+    if (starCount >= RING_SHOT_STARS_PER_OPENED_COURSE * 5) {
         return 6;
     }
 
-    if (starCount >= RING_SHOT_STARS_PER_LEVEL * 4) {
+    if (starCount >= RING_SHOT_STARS_PER_OPENED_COURSE * 4) {
         return 5;
     }
 
-    if (starCount >= RING_SHOT_STARS_PER_LEVEL * 3) {
+    if (starCount >= RING_SHOT_STARS_PER_OPENED_COURSE * 3) {
         return 4;
     }
 
-    if (starCount >= RING_SHOT_STARS_PER_LEVEL * 2) {
+    if (starCount >= RING_SHOT_STARS_PER_OPENED_COURSE * 2) {
         return 3;
     }
 
-    if (starCount >= RING_SHOT_STARS_PER_LEVEL) {
+    if (starCount >= RING_SHOT_STARS_PER_OPENED_COURSE) {
         return 2;
     }
 

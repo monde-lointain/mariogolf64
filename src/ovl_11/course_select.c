@@ -43,8 +43,7 @@ enum PlanksState {
     PLANKS_OPENING
 };
 
-#define STARS_PER_OPENED_COURSE 4
-#define StarsToOpen(courseCount) (((courseCount) - 1) * STARS_PER_OPENED_COURSE)
+#define StarsToOpen(courseCount) (((courseCount) - 1) * RING_SHOT_STARS_PER_OPENED_COURSE)
 
 #define ASSET_HOLE_SIGN 0x739
 #define ASSET_PLANKS 0x8ED

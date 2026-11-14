@@ -48,7 +48,6 @@
 #define DONKEY_KONG_STAR_COUNT 30
 #define MAPLE_BADGE_COUNT 50
 
-#define STARS_PER_RING_SHOT_COURSE 4
 
 typedef struct ImportedCharacterCell {
     s16 unusedBeforeColumn;
@@ -1965,19 +1964,19 @@ s32 GetRingShotCourseOpenedAtStarCount(void) {
         }
     }
 
-    if (starCount == STARS_PER_RING_SHOT_COURSE * 1) {
+    if (starCount == RING_SHOT_STARS_PER_OPENED_COURSE * 1) {
         return 1;
     }
-    else if (starCount == STARS_PER_RING_SHOT_COURSE * 2) {
+    else if (starCount == RING_SHOT_STARS_PER_OPENED_COURSE * 2) {
         return 2;
     }
-    else if (starCount == STARS_PER_RING_SHOT_COURSE * 3) {
+    else if (starCount == RING_SHOT_STARS_PER_OPENED_COURSE * 3) {
         return 3;
     }
-    else if (starCount == STARS_PER_RING_SHOT_COURSE * 4) {
+    else if (starCount == RING_SHOT_STARS_PER_OPENED_COURSE * 4) {
         return 4;
     }
-    else if (starCount == STARS_PER_RING_SHOT_COURSE * 5) {
+    else if (starCount == RING_SHOT_STARS_PER_OPENED_COURSE * 5) {
         return 5;
     }
 
