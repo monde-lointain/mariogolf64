@@ -555,7 +555,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 countMax) {
     u16 distances[span * span * 2];
     s32 row;
     s32 column;
-    s32 count;
+    s32 listedCount;
     s32 nearestIndex;
     s32 nearestDistance;
     s32 nearestRow;
@@ -576,7 +576,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 countMax) {
         }
     }
 
-    for (count = 0; count < countMax;) {
+    for (listedCount = 0; listedCount < countMax;) {
         nearestDistance = BEYOND_ALL_DISTANCES;
         nearestIndex = 0;
         for (column = 0; column < span * span; column++) {
@@ -593,47 +593,47 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 countMax) {
         nearestRow = nearestIndex / span;
         nearestColumn = nearestIndex % span;
         distances[nearestIndex] = LISTED_DISTANCE;
-        offsets[count].distance = nearestDistance;
-        offsets[count].column = nearestColumn;
-        offsets[count].row = nearestRow;
-        count++;
-        if (count >= countMax) {
+        offsets[listedCount].distance = nearestDistance;
+        offsets[listedCount].column = nearestColumn;
+        offsets[listedCount].row = nearestRow;
+        listedCount++;
+        if (listedCount >= countMax) {
             break;
         }
 
         if (nearestColumn != 0) {
-            offsets[count].column = -nearestColumn;
-            offsets[count].row = nearestRow;
-            offsets[count].distance = nearestDistance;
-            count++;
-            if (count >= countMax) {
+            offsets[listedCount].column = -nearestColumn;
+            offsets[listedCount].row = nearestRow;
+            offsets[listedCount].distance = nearestDistance;
+            listedCount++;
+            if (listedCount >= countMax) {
                 break;
             }
         }
 
         if (nearestRow != 0) {
             mirroredRow = -nearestRow;
-            offsets[count].column = nearestColumn;
-            offsets[count].row = mirroredRow;
-            offsets[count].distance = nearestDistance;
-            count++;
-            if (count >= countMax) {
+            offsets[listedCount].column = nearestColumn;
+            offsets[listedCount].row = mirroredRow;
+            offsets[listedCount].distance = nearestDistance;
+            listedCount++;
+            if (listedCount >= countMax) {
                 break;
             }
 
             if (nearestColumn != 0) {
-                offsets[count].column = -nearestColumn;
-                offsets[count].row = mirroredRow;
-                offsets[count].distance = nearestDistance;
-                count++;
-                if (count >= countMax) {
+                offsets[listedCount].column = -nearestColumn;
+                offsets[listedCount].row = mirroredRow;
+                offsets[listedCount].distance = nearestDistance;
+                listedCount++;
+                if (listedCount >= countMax) {
                     break;
                 }
             }
         }
     }
 
-    return count;
+    return listedCount;
 }
 
 void DrawBandHeights(s16 *heights, s32 band) {
@@ -653,7 +653,7 @@ void DrawBandHeights(s16 *heights, s32 band) {
 
         inline void DrawHeightRow(s32 x, s32 height, s32 toX, s32 toHeight, s32 rowZ) {
             s32 width;
-            s32 count;
+            s32 rowSpanCount;
             s32 direction;
             s32 texelHeightStep;
             s32 bandRow;
@@ -666,21 +666,22 @@ void DrawBandHeights(s16 *heights, s32 band) {
                 width = -width;
             }
 
-            count = (width + HEIGHT_ROW_SPAN / 2) / HEIGHT_ROW_SPAN;
+            rowSpanCount = (width + HEIGHT_ROW_SPAN / 2) / HEIGHT_ROW_SPAN;
             direction = (x < toX) ? 1 : -1;
             x >>= HEIGHT_ROW_SPAN_SHIFT;
-            if (count < HEIGHT_STEP_SCALE_COUNT) {
-                texelHeightStep = f_HeightStepScales[count] * (toHeight - height);
+            if (rowSpanCount < HEIGHT_STEP_SCALE_COUNT) {
+                texelHeightStep = f_HeightStepScales[rowSpanCount] * (toHeight - height);
             }
             else {
-                texelHeightStep = ((toHeight - height) << TEXEL_HEIGHT_FRACTION_BITS) / count;
+                texelHeightStep =
+                    ((toHeight - height) << TEXEL_HEIGHT_FRACTION_BITS) / rowSpanCount;
             }
 
             bandRow = (rowZ >> HEIGHT_ROW_SPAN_SHIFT) - band * HEIGHT_BAND_ROW_COUNT;
             height <<= TEXEL_HEIGHT_FRACTION_BITS;
             if (bandRow >= 0 && bandRow < HEIGHT_BAND_ROW_COUNT) {
                 rowTexels = &heights[bandRow * MAP_COLUMN_COUNT];
-                for (texelIndex = 0; texelIndex <= count; texelIndex++) {
+                for (texelIndex = 0; texelIndex <= rowSpanCount; texelIndex++) {
                     if (x >= 0 && x < MAP_COLUMN_COUNT) {
                         texelHeight = height >> TEXEL_HEIGHT_FRACTION_BITS;
                         if (rowTexels[x] != NO_HEIGHT) {
@@ -2246,7 +2247,7 @@ s32 GetCoursePaintLogic(CourseRecordIndex courseRecordIndex) {
 }
 
 void ClearHoleBuild(void);
-void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 kind);
+void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 assetKind);
 void ReadBillboards(void);
 void ReadGridVertices(void);
 void ReadHoleTriangles(void);
@@ -2726,14 +2727,14 @@ void ReadBillboards(void) {
 
 void ReadHoleTriangles(void) {
     u8 unused[0x10] UNUSED;
-    u8 count;
+    u8 triangleCount;
     s8 kind;
     u8 triangleIndex;
     HoleTriangle *triangle;
 
-    ReadFileBytes(&count, sizeof(count));
-    for (triangleIndex = 0; triangleIndex < count; triangleIndex++) {
-        if (count >= HOLE_TRIANGLE_COUNT) {
+    ReadFileBytes(&triangleCount, sizeof(triangleCount));
+    for (triangleIndex = 0; triangleIndex < triangleCount; triangleIndex++) {
+        if (triangleCount >= HOLE_TRIANGLE_COUNT) {
             osSyncPrintf("ER3\n");
             return;
         }
@@ -2898,9 +2899,9 @@ void ReadVertexZ(s16 *coordinate, s32 vertexFlags) {
     }
 }
 
-void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 kind) {
+void OpenHoleAsset(CourseRecordIndex courseRecordIndex, s32 holeIndex, s8 assetKind) {
     f_ReadCursor = HOLE_FILE_BUFFER;
-    switch (kind) {
+    switch (assetKind) {
         case HOLE_ASSET_VERTICES:
             if (g_GameState.gameMode == GAME_MODE_TITLE_HOLE) {
                 OpenAssetFile(ASSET_TITLE_HOLE_VERTICES, &f_HoleAsset);
@@ -3346,7 +3347,7 @@ void ShadeGroundTiles(void) {
     s32 row;
     s32 bandRow;
     s32 column;
-    s32 count;
+    s32 texelsLeft;
     Boolean isMapEdge;
     s32 trailingColumn;
     s32 leadingColumn;
@@ -3435,8 +3436,8 @@ void ShadeGroundTiles(void) {
                                      [column + lightColumnOffset];
             }
 
-            for (count = GROUND_TILE_TEXEL_SPAN; count != 0;
-                count--, column++, texel++, heights++) {
+            for (texelsLeft = GROUND_TILE_TEXEL_SPAN; texelsLeft != 0;
+                texelsLeft--, column++, texel++, heights++) {
                 if (isMapEdge) {
                     trailingColumn = column - lightColumnOffset;
                     leadingColumn = column + lightColumnOffset;
