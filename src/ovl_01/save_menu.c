@@ -149,7 +149,7 @@ static u8 f_AreControllersAssigned = 0;
 static u8 f_ShownCourseBufferIndex = 0;
 static s32 f_SavedGameModes[SAVED_GAME_COUNT] =
     {NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE};
-static s32 f_ModeImageAssets[SAVE_MENU_MODE_MINI_GOLF + 1] =
+static WideAssetId f_ModeImageAssets[SAVE_MENU_MODE_MINI_GOLF + 1] =
     {0x0623, 0x0629, 0x0599, 0x05AF, 0x0631, 0x0665, 0x05B7, 0x05DD, 0x065E, 0x0599, 0x06FC};
 static u32 f_SaveMenuGameModes[SAVE_MENU_MODE_COUNT] = {
     GAME_MODE_TOURNAMENT,

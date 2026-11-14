@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
+
 enum Surface {
     SURFACE_OUT_OF_BOUNDS,
     SURFACE_FAIRWAY,
@@ -95,7 +97,7 @@ typedef struct SurfaceTraits {
     s8 wrongClubPenalty;
     s16 rollSpeedKept;
     s16 bounciness;
-    s32 lieImageAsset;
+    WideAssetId lieImageAsset;
     s32 sinkDepth;
     s32 ignoredSurfaceGroup;
 } SurfaceTraits;

@@ -41,7 +41,7 @@ static u8 f_UnusedBufferAfterAssetFilePool[0x40] UNUSED;
 void DecodeByteRuns(u8 *buffer, EncodedAsset *asset);
 void DecodeHalfwordRuns(u8 *buffer, EncodedAsset *asset);
 
-FILE_STATIC s32 f_LastOpenedAssetId;
+FILE_STATIC WideAssetId f_LastOpenedAssetId;
 
 void InitAssetFiles(void) {
     s32 index;
@@ -53,7 +53,7 @@ void InitAssetFiles(void) {
     }
 }
 
-void ReadAssetFileBounds(s32 assetId, AssetFile *file) {
+void ReadAssetFileBounds(WideAssetId assetId, AssetFile *file) {
     u8 rawOffset[0x40];
     u8 rawSize[0x40];
     u32 *offset = AlignedReadBuffer(rawOffset);
@@ -68,11 +68,11 @@ void ReadAssetFileBounds(s32 assetId, AssetFile *file) {
     f_LastOpenedAssetId = assetId;
 }
 
-void OpenAssetFile(s32 assetId, AssetFile *file) {
+void OpenAssetFile(WideAssetId assetId, AssetFile *file) {
     ReadAssetFileBounds(assetId, file);
 }
 
-AssetFile *OpenPooledAssetFile(s32 assetId) {
+AssetFile *OpenPooledAssetFile(WideAssetId assetId) {
     s32 index;
     AssetFile *file;
 

@@ -77,7 +77,7 @@ typedef enum OpeningBallState {
 #define OPENING_NAME_LOGO_SIZE 0x2208
 
 typedef struct OpeningNameLogo {
-    s32 assetId;
+    WideAssetId assetId;
     s32 width;
     s32 height;
     s32 x;
@@ -318,7 +318,7 @@ static f32 f_OpeningBallScales[OPENING_BALL_SLOT_COUNT] = {
     OPENING_BALL_NORMAL_SCALE,
     OPENING_BALL_NORMAL_SCALE,
 };
-static s32 f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT] = {
+static WideAssetId f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT] = {
     ASSET_MARIO_BALL_IMAGE,
     ASSET_DONKEY_KONG_BALL_IMAGE,
     ASSET_YOSHI_BALL_IMAGE,

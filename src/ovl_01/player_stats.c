@@ -153,9 +153,9 @@ static s16 f_GreenArrowFrame = 0;
 static s16 f_GreenArrowTimer = 0;
 static s16 f_PageArrowFrame = 0;
 static s16 f_PageArrowTimer = 0;
-static u32 f_BetIconAssets[BET_ICON_COUNT] =
+static WideAssetId f_BetIconAssets[BET_ICON_COUNT] =
     {0x0674, 0x0678, 0x067A, 0x067E, 0x0680, 0x067C, 0x0676, 0x0672};
-static u32 f_BetIconFrameAssets[BET_ICON_COUNT][BET_ICON_FRAME_COUNT] = {
+static WideAssetId f_BetIconFrameAssets[BET_ICON_COUNT][BET_ICON_FRAME_COUNT] = {
     {0x0674, 0x0675},
     {0x0678, 0x0679},
     {0x067A, 0x067B},

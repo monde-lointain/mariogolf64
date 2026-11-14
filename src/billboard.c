@@ -31,7 +31,7 @@
 #define HOST_FILE_NAME_SIZE_MAX 0x100
 
 typedef struct BillboardTexture {
-    s32 assetId;
+    WideAssetId assetId;
     s16 loadMode;
     s16 width;
     s16 height;

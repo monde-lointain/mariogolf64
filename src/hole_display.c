@@ -1221,7 +1221,7 @@ static s32 f_BackdropStripCount = INITIAL_BACKDROP_STRIP_COUNT;
 static s32 f_BackdropStripHeight = INITIAL_BACKDROP_STRIP_HEIGHT;
 static s32 f_BackdropImageWidth = INITIAL_BACKDROP_IMAGE_WIDTH;
 static s32 f_BackdropWidthMask = BACKDROP_IMAGE_WIDTH_MASK;
-static s32 f_CourseSkyImageAssets[COURSE_RECORD_COUNT] =
+static WideAssetId f_CourseSkyImageAssets[COURSE_RECORD_COUNT] =
     {0x4BA, 0x4BB, 0x4BC, 0x4BE, 0x4BD, 0x4BF, 0x4C0, 0x4C1, 0x4BA};
 Fog g_SceneFog = {{0, 0, 0}, 970, 1024};
 static s32 f_UnusedWordsAfterSceneFog[3] UNUSED = {0, 0, 1};

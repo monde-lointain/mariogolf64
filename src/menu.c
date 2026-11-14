@@ -929,7 +929,7 @@ static AssetId f_ToadImageAssets[] = {
     0x071B,
     0x071C,
 };
-static s32 f_UnusedToadAssetIds[] UNUSED =
+static WideAssetId f_UnusedToadAssetIds[] UNUSED =
     {0x00000710, 0x00000711, 0x00000712, 0x00000713, 0x00000714, 0x00000715};
 s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
     {

@@ -504,8 +504,8 @@ static Gfx f_UnusedArrowTriangles[] UNUSED = {
     gsSP2Triangles(14, 15, 16, 0, 21, 23, 22, 0),
     gsSPEndDisplayList(),
 };
-static s32 f_ClubHeadImageAsset = NO_IMAGE_ASSET;
-static s32 f_LieImageAsset = NO_IMAGE_ASSET;
+static WideAssetId f_ClubHeadImageAsset = NO_IMAGE_ASSET;
+static WideAssetId f_LieImageAsset = NO_IMAGE_ASSET;
 static s32 f_SceneryState = SCENERY_UNLOADED;
 static Boolean f_IsCourseSelectLoaded = FALSE;
 static Gfx f_UnusedNoOpDisplayList[] UNUSED = {
@@ -607,7 +607,7 @@ static Vtx f_LongShotVertices[LONG_SHOT_GROUP_COUNT * 8] = {
 };
 static f32 f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;
 static s32 f_ShotEffect = SHOT_EFFECT_LONG_SHOT;
-static s32 f_SparkTrailFrameAssets[SPARK_TRAIL_FRAME_COUNT] =
+static WideAssetId f_SparkTrailFrameAssets[SPARK_TRAIL_FRAME_COUNT] =
     {0x6A7, 0x6A8, 0x6A9, 0x6AA, 0x6AB, 0x6AC};
 static s32 f_SparkTrailFrame = 1;
 static s32 f_SparkTrailFrameTime = 0;
@@ -615,7 +615,7 @@ static s32 f_SparkTrailBufferIndex = 0;
 static s32 f_UnusedWordAfterSparkTrailIndex UNUSED = 0;
 static f32 f_HoleFlagWavePhase = 0.0f;
 static s32 f_ShotOffsetMarkerFrame = 0;
-static u32 f_AnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT] =
+static WideAssetId f_AnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT] =
     {0x648, 0x649, 0x64A, 0x64B, 0x64C, 0x64B, 0x64A, 0x649};
 static s32 f_AnimatedIconFrameTime = 0;
 static s32 f_AnimatedIconFrame = 0;

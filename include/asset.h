@@ -4,6 +4,9 @@
 #include <ultra64.h>
 
 typedef u16 AssetId;
+// An AssetId held in a word, as the original keeps it in tables, struct
+// fields and some parameters; it can also hold a negative "none" value.
+typedef s32 WideAssetId;
 
 typedef struct AssetFile {
     u32 cursor;
@@ -37,8 +40,8 @@ typedef struct ImageHeader {
 #define ReadImageHeight(image) \
     ((((u8 *)(image))[IMAGE_HEIGHT_OFFSET] << 8) | ((u8 *)(image))[IMAGE_HEIGHT_LOW_BYTE])
 
-void OpenAssetFile(s32 assetId, AssetFile *file);
-AssetFile *OpenPooledAssetFile(s32 assetId);
+void OpenAssetFile(WideAssetId assetId, AssetFile *file);
+AssetFile *OpenPooledAssetFile(WideAssetId assetId);
 void CloseAssetFile(AssetFile *file);
 s32 GetAssetFileSize(AssetFile *file);
 void ReadAssetFile(void *buffer, u32 size, AssetFile *file);

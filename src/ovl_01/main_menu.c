@@ -999,7 +999,7 @@ static Vtx f_UnusedQuadVertices[8] UNUSED = {
     {{{32, -32, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{32, 0, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-static s32 f_StarFrameAssets[STAR_FRAME_COUNT] = {
+static WideAssetId f_StarFrameAssets[STAR_FRAME_COUNT] = {
     0x05BE,
     0x05BF,
     0x05C0,
@@ -1016,7 +1016,7 @@ static s32 f_StarFrameAssets[STAR_FRAME_COUNT] = {
     0x05CB,
     0x05CC,
 };
-static s32 f_MenuEmptyStarFrameAssets[STAR_FRAME_COUNT] = {
+static WideAssetId f_MenuEmptyStarFrameAssets[STAR_FRAME_COUNT] = {
     0x05E5,
     0x05E6,
     0x05E7,

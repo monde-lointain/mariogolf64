@@ -216,7 +216,7 @@ u8 nuRDPOutputBuf[NU_GFX_RDP_OUTPUTBUFF_SIZE] BSS ALIGNED(8) = {0};
 s32 g_ModuleRdpRequestFrames[MODULE_COUNT] BSS ALIGNED(8) = {0};
 UNREAD_COMMON(0x8);
 Player g_BackedUpPlayers[PLAYER_COUNT_MAX] BSS ALIGNED(8) = {{{0}}};
-s32 f_LastOpenedAssetId BSS = {0};
+WideAssetId f_LastOpenedAssetId BSS = {0};
 void *g_BrickWallImage BSS = {0};
 Boolean f_HasRumblePak[MAXCONTROLLERS] BSS ALIGNED(8) = {0};
 u8 *g_SharedEffectImages BSS = {0};

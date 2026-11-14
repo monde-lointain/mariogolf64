@@ -469,7 +469,7 @@ static PathPoint f_WindFlyGuyPath[] = {
 };
 static PathPoint f_WindFlyGuyExit = {3.8e+02f, 1.7e+02f, 0.0f};
 static s32 f_WindFlyGuyFrame = FLY_GUY_HIDDEN;
-static s32 f_WindFlyGuyAsset = ASSET_FLY_GUY_IMAGE;
+static WideAssetId f_WindFlyGuyAsset = ASSET_FLY_GUY_IMAGE;
 static s32 f_UnusedWordAfterFlyGuyAsset UNUSED = 0;
 static s32 f_WindStreakHead = 0;
 
