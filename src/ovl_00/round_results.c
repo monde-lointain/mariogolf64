@@ -4508,8 +4508,6 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
 #define CLUB_TOURNAMENT_BACKDROP_Y 8
 #define CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT 7
 #define CLUB_TOURNAMENT_BACKDROP_STRIP_COUNT 32
-#define PRESSING_HAND_LEFT 272
-#define PRESSING_HAND_TOP 192
 #define FINAL_RESULTS_TITLE_WIDTH 200
 #define FINAL_RESULTS_TITLE_STRIP_HEIGHT 8
 #define FINAL_RESULTS_TITLE_LOADED_HEIGHT 10
@@ -4624,8 +4622,7 @@ void DrawRoundResults(Gfx **displayListHead) {
     }
 
     if (f_IsAwaitingConfirm == TRUE) {
-        f_PressingHandFrame = (f_PressingHandFrame + 1) %
-            (PRESSING_HAND_IMAGE_COUNT * PRESSING_HAND_FRAMES_PER_IMAGE);
+        f_PressingHandFrame = (f_PressingHandFrame + 1) % PRESSING_HAND_FRAME_COUNT;
         LoadLargePalette(&gfx, ImagePalette(f_ResultsHandImage));
         LoadTextureBlock(
             &gfx,
@@ -4645,10 +4642,10 @@ void DrawRoundResults(Gfx **displayListHead) {
         );
         DrawTextureRectangle(
             &gfx,
-            QuarterPixels(f_ResultsSlide + PRESSING_HAND_LEFT),
-            QuarterPixels(f_ResultsTop + PRESSING_HAND_TOP),
-            QuarterPixels(f_ResultsSlide + PRESSING_HAND_LEFT + PRESSING_HAND_SIZE),
-            QuarterPixels(f_ResultsTop + PRESSING_HAND_TOP + PRESSING_HAND_SIZE),
+            QuarterPixels(f_ResultsSlide + CORNER_PRESSING_HAND_LEFT),
+            QuarterPixels(f_ResultsTop + CORNER_PRESSING_HAND_TOP),
+            QuarterPixels(f_ResultsSlide + CORNER_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE),
+            QuarterPixels(f_ResultsTop + CORNER_PRESSING_HAND_TOP + PRESSING_HAND_SIZE),
             G_TX_RENDERTILE,
             0,
             0,

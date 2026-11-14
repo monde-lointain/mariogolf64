@@ -224,11 +224,8 @@ typedef s32 ListingState;
 #define PRESSING_HAND_HIDDEN 0
 #define PRESSING_HAND_LOW 1
 #define PRESSING_HAND_FOR_NOTICE 2
-#define LOW_PRESSING_HAND_LEFT 272
-#define LOW_PRESSING_HAND_TOP 192
 #define NOTICE_PRESSING_HAND_LEFT 256
 #define NOTICE_PRESSING_HAND_TOP 128
-#define PRESSING_HAND_FRAME_COUNT (3 * PRESSING_HAND_FRAMES_PER_IMAGE)
 
 #define CARTRIDGE_RAM_ADDRESS 0xA000
 #define CARTRIDGE_RAM_SIZE 0x2000
@@ -3831,10 +3828,10 @@ void DrawPressingHand(Gfx **displayListHead) {
     if (g_GameBoyTransfer.pressingHandPosition == PRESSING_HAND_LOW) {
         DrawTextureRectangle(
             &gfx,
-            QuarterPixels(LOW_PRESSING_HAND_LEFT),
-            QuarterPixels(LOW_PRESSING_HAND_TOP),
-            QuarterPixels(LOW_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE),
-            QuarterPixels(LOW_PRESSING_HAND_TOP + PRESSING_HAND_SIZE),
+            QuarterPixels(CORNER_PRESSING_HAND_LEFT),
+            QuarterPixels(CORNER_PRESSING_HAND_TOP),
+            QuarterPixels(CORNER_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE),
+            QuarterPixels(CORNER_PRESSING_HAND_TOP + PRESSING_HAND_SIZE),
             G_TX_RENDERTILE,
             0,
             0,
