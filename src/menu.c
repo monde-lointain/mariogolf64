@@ -2295,8 +2295,8 @@ void InvalidateBrokenRingShotRecords(void) {
     SaveData *save;
     Boolean isInvalid[RING_SHOT_RECORD_COUNT];
     s32 recordIndex;
-    s32 kind;
     s32 scoreKind;
+    s32 flaggedScoreKind;
     s32 unused[2] UNUSED;
 
     save = GetSaveData();
@@ -2307,11 +2307,11 @@ void InvalidateBrokenRingShotRecords(void) {
     for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
         RingShotRecord *record = &save->ringShotRecords[recordIndex];
 
-        scoreKind = record->scoreKind;
-        kind = scoreKind;
-        scoreKind &= SCORE_KIND_RECORDED;
-        if (scoreKind != 0) {
-            if ((kind &= SCORE_KIND_MASK) >= SCORE_KIND_COUNT || kind < 0) {
+        flaggedScoreKind = record->scoreKind;
+        scoreKind = flaggedScoreKind;
+        flaggedScoreKind &= SCORE_KIND_RECORDED;
+        if (flaggedScoreKind != 0) {
+            if ((scoreKind &= SCORE_KIND_MASK) >= SCORE_KIND_COUNT || scoreKind < 0) {
                 isInvalid[recordIndex] = TRUE;
             }
         }
