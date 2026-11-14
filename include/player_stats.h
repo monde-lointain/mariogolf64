@@ -80,8 +80,8 @@ typedef u8 FaceDrawModeArgument;
 #endif
 void DrawCharacterFace(
     Gfx **displayListHead,
-    void *texels,
-    void *palette,
+    ImageAsset *texels,
+    PaletteColor *palette,
     s32 left,
     s32 top,
     FaceCharacterIndexArgument characterIndex,

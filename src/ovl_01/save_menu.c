@@ -316,8 +316,8 @@ static s32 f_ChosenModeIconHalfSize;
 static u8 f_UnusedBytesAfterModeIconSize[0x4] UNUSED;
 static u8 f_UnusedBufferAfterModeIconSize[0x88] UNUSED;
 
-u8 g_MenuCharacterPalettes[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
-u8 g_ReplayFacePalettes[SAVE_MENU_SLOT_COUNT][MENU_PALETTE_FILE_SIZE];
+PaletteColor g_MenuCharacterPalettes[CHARACTER_COUNT][LARGE_PALETTE_COLOR_COUNT];
+PaletteColor g_ReplayFacePalettes[SAVE_MENU_SLOT_COUNT][LARGE_PALETTE_COLOR_COUNT];
 
 void LoadRingShotRecordBuffer(void *buffer, RingShotRecordBuffer bufferKind) {
     EncodedAsset asset;

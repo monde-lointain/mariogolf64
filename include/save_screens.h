@@ -6,8 +6,7 @@
 #include "asset.h"
 #include "character.h"
 
-#define MENU_PALETTE_FILE_SIZE 0x200
-extern u8 g_MenuCharacterPalettes[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
+extern PaletteColor g_MenuCharacterPalettes[CHARACTER_COUNT][LARGE_PALETTE_COLOR_COUNT];
 
 enum SaveGameBuffer {
     SAVE_GAME_BUFFER_CONTROLLER_ICONS = 1,

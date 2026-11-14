@@ -322,7 +322,7 @@ void OpenSaveMenu(SaveMenuList kind) {
 
     if (kind == SAVE_MENU_GAMES) {
         s16 *defaultFrames = g_ModeIconAnimations[0];
-        void **second = &f_ModeIconImages[0][1];
+        ImageAsset **second = &f_ModeIconImages[0][1];
 
         for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
             if (save->savedGames[slot].isValid &&
@@ -2138,7 +2138,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
 
 void OpenControlsScreen(void) {
     EncodedAsset encodedAsset;
-    void *picture;
+    ImageAsset *picture;
 
     if (g_GameState.isMiniGolf) {
         picture = AllocMemory(OpenEncodedAsset(ASSET_MINI_GOLF_CONTROLS_PICTURE, &encodedAsset));

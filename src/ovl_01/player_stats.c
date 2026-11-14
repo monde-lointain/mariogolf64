@@ -353,7 +353,7 @@ static ImageAsset *f_BetIcons;
 static void *f_UnusedStatsBuffer;
 static ImageAsset *f_StakeMark;
 static ImageAsset *f_StatsNamePlate;
-static void *f_ChosenBetIconFrames[BET_ICON_FRAME_COUNT];
+static ImageAsset *f_ChosenBetIconFrames[BET_ICON_FRAME_COUNT];
 static ImageAsset *f_StatsGreenArrows;
 static ImageAsset *f_PageArrows;
 static ImageAsset *f_HandicapPlaque;
@@ -373,7 +373,7 @@ static Mtx f_BestShotsCursorScale;
 
 static u8 f_UnusedBufferAfterBestShotsScale[0x50] UNUSED;
 
-static ImageAsset *f_BestShotFaces[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
+static PaletteColor *f_BestShotFacePalettes[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 static ImageAsset **f_BestShotsCourseIcons;
 static ImageAsset *f_BestShotsNamePlate;
 static ImageAsset *f_BestShotsCursorBox;
@@ -388,7 +388,7 @@ void LoadPlayerStatsBuffer(void *buffer, PlayerStatsBuffer bufferKind) {
     s16 iconIndex;
     BetSet betSet;
     AssetId assetId;
-    void **imageSlot;
+    ImageAsset **imageSlot;
 
     switch (bufferKind) {
         case PLAYER_STATS_BUFFER_BET_ICONS:
@@ -2415,7 +2415,7 @@ void DrawBestShots(Gfx **displayListHead) {
                 DrawCharacterFace(
                     &gfx,
                     g_CharacterFaceImages[characterIndex],
-                    f_BestShotFaces[index][column],
+                    f_BestShotFacePalettes[index][column],
                     RECORD_FACE_X + (column * STATS_CURSOR_COLUMN_WIDTH),
                     RECORD_FACE_Y + (index * STATS_CURSOR_ROW_HEIGHT),
                     characterIndex,
@@ -2958,26 +2958,26 @@ void LoadBestShotFaces(void) {
                     paletteIndex = CHARACTER_PALETTE_COUNT - 1;
                 }
 
-                f_BestShotFaces[row][column] =
+                f_BestShotFacePalettes[row][column] =
                     g_MenuCharacterPalettes[(row * STATS_GRID_COLUMN_COUNT) + column];
             }
             else {
                 characterIndex = 0;
                 paletteIndex = 0;
-                f_BestShotFaces[row][column] =
+                f_BestShotFacePalettes[row][column] =
                     g_MenuCharacterPalettes[(row * STATS_GRID_COLUMN_COUNT) + column];
             }
 
             OpenAssetFile(g_CharacterPaletteFiles[characterIndex][paletteIndex], &file);
-            ReadAssetFile(f_BestShotFaces[row][column], GetAssetFileSize(&file), &file);
+            ReadAssetFile(f_BestShotFacePalettes[row][column], GetAssetFileSize(&file), &file);
         }
     }
 }
 
 void DrawCharacterFace(
     Gfx **displayListHead,
-    void *texels,
-    void *palette,
+    ImageAsset *texels,
+    PaletteColor *palette,
     s32 left,
     s32 top,
     s16 characterIndex,
