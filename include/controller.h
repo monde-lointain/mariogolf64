@@ -6,6 +6,11 @@
 #define BUTTON_REPEAT_DELAY_FIRST 15
 #define BUTTON_REPEAT_DELAY_NEXT 3
 
+// The debug editors read their controls from these ports.
+#define EDITOR_CONTROLLER 0
+#define OPTION_CONTROLLER 1
+#define SECOND_EDITOR_CONTROLLER 2
+
 typedef struct ControllerState {
     u16 buttons;
     u16 heldButtons;

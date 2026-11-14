@@ -793,9 +793,6 @@ void UpdateCameraEditor(void) {
     MeasureEditorCamera();
 }
 
-#define EDITOR_CONTROLLER 0
-#define SECOND_EDITOR_CONTROLLER 2
-
 #define SNAPSHOT_ROW_LENGTH 16
 
 #define EDITOR_MENU_COLUMN 4
