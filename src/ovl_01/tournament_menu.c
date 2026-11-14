@@ -104,8 +104,8 @@ enum CodeKeyResult {
 
 #define CLUB_CODE_FIRST_X 97
 #define CLUB_CODE_Y 150
-#define CLUB_CODE_CHAR_WIDTH 24
-#define CLUB_CODE_NO_CHAR 0xFF
+#define CLUB_CODE_CHARACTER_WIDTH 24
+#define CLUB_CODE_NO_CHARACTER 0xFF
 
 #define CODE_CURSOR_FIRST_X (-42)
 #define CODE_CURSOR_Y (-50.0f)
@@ -212,22 +212,36 @@ static s8 f_CodeKeyGlyphs[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT] =
     {30, 31, 32, 33, 34, 35, CODE_GLYPH_NONE, CODE_GLYPH_NONE, 36, 37},
 };
 static u8 f_EnteredCode[CLUB_TOURNAMENT_CODE_LENGTH] = {
-    CLUB_CODE_NO_CHAR,
-    CLUB_CODE_NO_CHAR,
-    CLUB_CODE_NO_CHAR,
-    CLUB_CODE_NO_CHAR,
-    CLUB_CODE_NO_CHAR,
-    CLUB_CODE_NO_CHAR,
-    CLUB_CODE_NO_CHAR,
-    CLUB_CODE_NO_CHAR,
+    CLUB_CODE_NO_CHARACTER,
+    CLUB_CODE_NO_CHARACTER,
+    CLUB_CODE_NO_CHARACTER,
+    CLUB_CODE_NO_CHARACTER,
+    CLUB_CODE_NO_CHARACTER,
+    CLUB_CODE_NO_CHARACTER,
+    CLUB_CODE_NO_CHARACTER,
+    CLUB_CODE_NO_CHARACTER,
 };
 static u8 f_ClubTournamentCodes[CLUB_TOURNAMENT_CODE_COUNT][CLUB_TOURNAMENT_CODE_LENGTH] = {
     {'0', '0', '0', '0', '0', '0', '0', '0'},
-    {'K', 'O', 'D', 'E', 'R', 'A', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR},
+    {'K', 'O', 'D', 'E', 'R', 'A', CLUB_CODE_NO_CHARACTER, CLUB_CODE_NO_CHARACTER},
     {'T', 'A', 'K', 'A', 'M', 'A', 'T', 'U'},
-    {'K', 'A', 'O', 'R', 'U', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR},
+    {'K',
+        'A',
+        'O',
+        'R',
+        'U',
+        CLUB_CODE_NO_CHARACTER,
+        CLUB_CODE_NO_CHARACTER,
+        CLUB_CODE_NO_CHARACTER},
     {'M', 'U', 'R', 'A', 'I', 'S', 'H', 'I'},
-    {'N', 'O', 'R', 'I', 'O', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR},
+    {'N',
+        'O',
+        'R',
+        'I',
+        'O',
+        CLUB_CODE_NO_CHARACTER,
+        CLUB_CODE_NO_CHARACTER,
+        CLUB_CODE_NO_CHARACTER},
     {'6', '6', '6', '6', '6', '6', '6', '6'},
     {'7', '7', '7', '7', '7', '7', '7', '7'},
     {'8', '8', '8', '8', '8', '8', '8', '8'},
@@ -1213,13 +1227,14 @@ void LoadCodeEntryBuffer(void *buffer, s32 bufferKind) {
 
 void ResetCodeEntry(void) {
     MenuMemory *memory = GetMenuMemory();
-    s32 charIndex;
+    s32 codeCharacterIndex;
 
     memory->codeKeyColumn = 0;
     memory->codeKeyRow = 0;
     f_DecodedNameIndex = 0;
-    for (charIndex = 0; charIndex != CLUB_TOURNAMENT_CODE_LENGTH; charIndex++) {
-        f_EnteredCode[charIndex] = CLUB_CODE_NO_CHAR;
+    for (codeCharacterIndex = 0; codeCharacterIndex != CLUB_TOURNAMENT_CODE_LENGTH;
+        codeCharacterIndex++) {
+        f_EnteredCode[codeCharacterIndex] = CLUB_CODE_NO_CHARACTER;
     }
 
     f_EnteredCodeLength = 0;
@@ -2142,18 +2157,19 @@ void DrawCodeKeys(Gfx **displayListHead) {
 }
 
 void DrawEnteredCode(Gfx **displayListHead) {
-    s32 charIndex;
+    s32 codeCharacterIndex;
     Gfx *gfx = *displayListHead;
 
     gDPPipeSync(gfx++);
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
-    for (charIndex = 0; charIndex != CLUB_TOURNAMENT_CODE_LENGTH; charIndex++) {
-        if (f_EnteredCode[charIndex] != CLUB_CODE_NO_CHAR) {
-            sprintf(g_PrintBuffer, "%c", f_EnteredCode[charIndex]);
+    for (codeCharacterIndex = 0; codeCharacterIndex != CLUB_TOURNAMENT_CODE_LENGTH;
+        codeCharacterIndex++) {
+        if (f_EnteredCode[codeCharacterIndex] != CLUB_CODE_NO_CHARACTER) {
+            sprintf(g_PrintBuffer, "%c", f_EnteredCode[codeCharacterIndex]);
             DrawLargeTextWithShadow(
                 &gfx,
-                (charIndex * CLUB_CODE_CHAR_WIDTH) + CLUB_CODE_FIRST_X,
+                (codeCharacterIndex * CLUB_CODE_CHARACTER_WIDTH) + CLUB_CODE_FIRST_X,
                 CLUB_CODE_Y,
                 g_PrintBuffer,
                 -1,
@@ -2180,11 +2196,11 @@ s32 PressCodeKey(void) {
                     f_EnteredCodeLength = CLUB_TOURNAMENT_CODE_LENGTH - 1;
                 }
 
-                f_EnteredCode[f_EnteredCodeLength] = CLUB_CODE_NO_CHAR;
+                f_EnteredCode[f_EnteredCodeLength] = CLUB_CODE_NO_CHARACTER;
                 f_EnteredCodeLength--;
             }
             else {
-                f_EnteredCode[0] = CLUB_CODE_NO_CHAR;
+                f_EnteredCode[0] = CLUB_CODE_NO_CHARACTER;
             }
 
             break;
@@ -2224,12 +2240,12 @@ s32 DeleteCodeCharacter(void) {
             f_EnteredCodeLength = CLUB_TOURNAMENT_CODE_LENGTH - 1;
         }
 
-        f_EnteredCode[f_EnteredCodeLength] = CLUB_CODE_NO_CHAR;
+        f_EnteredCode[f_EnteredCodeLength] = CLUB_CODE_NO_CHARACTER;
         f_EnteredCodeLength--;
         isEmpty = FALSE;
     }
-    else if (f_EnteredCode[0] != CLUB_CODE_NO_CHAR) {
-        f_EnteredCode[0] = CLUB_CODE_NO_CHAR;
+    else if (f_EnteredCode[0] != CLUB_CODE_NO_CHARACTER) {
+        f_EnteredCode[0] = CLUB_CODE_NO_CHARACTER;
         isEmpty = FALSE;
     }
 
@@ -2285,12 +2301,14 @@ s32 FindEnteredCodeIndex(void) {
     s32 foundIndex = -1;
     s32 codeIndex;
     s32 matchCount;
-    s32 charIndex;
+    s32 codeCharacterIndex;
 
     for (codeIndex = 0; codeIndex != CLUB_TOURNAMENT_CODE_COUNT; codeIndex++) {
         matchCount = 0;
-        for (charIndex = 0; charIndex != CLUB_TOURNAMENT_CODE_LENGTH; charIndex++) {
-            if (f_EnteredCode[charIndex] != f_ClubTournamentCodes[codeIndex][charIndex]) {
+        for (codeCharacterIndex = 0; codeCharacterIndex != CLUB_TOURNAMENT_CODE_LENGTH;
+            codeCharacterIndex++) {
+            if (f_EnteredCode[codeCharacterIndex] !=
+                f_ClubTournamentCodes[codeIndex][codeCharacterIndex]) {
                 break;
             }
 
@@ -2316,7 +2334,7 @@ void DrawCodeCursor(Gfx **displayListHead) {
     s32 red;
     s32 blue;
     s32 green;
-    s32 charIndex;
+    s32 codeCharacterIndex;
 
     for (vertexIndex = 0; vertexIndex != MENU_CURSOR_VERTEX_COUNT; vertexIndex++) {
         f_CodeCursorPhases[vertexIndex] += MENU_CURSOR_PHASE_STEP;
@@ -2341,14 +2359,14 @@ void DrawCodeCursor(Gfx **displayListHead) {
         MENU_CURSOR_FAR,
         1.0f
     );
-    charIndex = f_EnteredCodeLength;
-    if (charIndex >= CLUB_TOURNAMENT_CODE_LENGTH) {
-        charIndex = CLUB_TOURNAMENT_CODE_LENGTH - 1;
+    codeCharacterIndex = f_EnteredCodeLength;
+    if (codeCharacterIndex >= CLUB_TOURNAMENT_CODE_LENGTH) {
+        codeCharacterIndex = CLUB_TOURNAMENT_CODE_LENGTH - 1;
     }
 
     guTranslate(
         &f_CodeCursorTranslation,
-        (charIndex * CLUB_CODE_CHAR_WIDTH) + CODE_CURSOR_FIRST_X,
+        (codeCharacterIndex * CLUB_CODE_CHARACTER_WIDTH) + CODE_CURSOR_FIRST_X,
         CODE_CURSOR_Y,
         MENU_CURSOR_Z
     );

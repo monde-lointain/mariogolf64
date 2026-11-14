@@ -152,10 +152,10 @@ static void *f_TextIconImage;
 #define SMALL_FONT_MOVED_CODE 0xB0
 #define SMALL_FONT_MOVED_GLYPH 0x70
 
-#define CHAR_CODE_COUNT 256
+#define CHARACTER_CODE_COUNT 256
 
 /* clang-format off */
-static u8 f_LargeFontWidths[CHAR_CODE_COUNT] = {
+static u8 f_LargeFontWidths[CHARACTER_CODE_COUNT] = {
       12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
       12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,  6, 12,  6, 12,
        5,  6,  7, 10,  8, 12, 10,  6,  6,  6, 12, 10,  6, 10,  6, 12,
