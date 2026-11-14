@@ -484,7 +484,7 @@ void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId) {
     }
 }
 
-void SpawnRipple(CoursePoint position) {
+void SpawnRipple(CoursePoint point) {
     Vec3 translation;
     Vec3 rotation;
     Vec3 scale;
@@ -495,9 +495,9 @@ void SpawnRipple(CoursePoint position) {
     for (index = 0; index != EFFECT_COUNT; index++) {
         effect = &f_Effects[index];
         if (effect->kind == EFFECT_KIND_NONE) {
-            effect->position[AXIS_X] = position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-            effect->position[AXIS_Y] = position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-            effect->position[AXIS_Z] = position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            effect->position[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            effect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            effect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
             effect->kind = EFFECT_KIND_RIPPLE;
             effect->frame = 0;
             effect->matrixIndex = f_NextMatrixIndex;
@@ -576,16 +576,16 @@ void SpawnDrop(CoursePoint point) {
     }
 }
 
-void SpawnSparkle(CoursePoint position) {
+void SpawnSparkle(CoursePoint point) {
     s32 index;
     Effect *effect;
 
     for (index = 0; index != EFFECT_COUNT; index++) {
         effect = &f_Effects[index];
         if (effect->kind == EFFECT_KIND_NONE) {
-            effect->position[AXIS_X] = position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-            effect->position[AXIS_Y] = position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-            effect->position[AXIS_Z] = position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            effect->position[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            effect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            effect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
             effect->velocity[AXIS_X] = 0;
             effect->velocity[AXIS_Y] = SPARKLE_FALL_SPEED;
             effect->velocity[AXIS_Z] = 0;
