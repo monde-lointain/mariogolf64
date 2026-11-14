@@ -237,7 +237,7 @@ static PlaneTriangle f_OpeningContactTriangle;
 static f32 f_OpeningContactFraction;
 
 // Loads one of the other characters into the slot with its birdie animation, or
-// frees a busy slot first
+// frees a busy slot first. Returns whether it loaded the character.
 Boolean ToggleOpeningCharacter(u32 slotIndex, OpeningModel model) {
     if (IsCharacterSlotBusy(slotIndex)) {
         FreeCharacterSlot(slotIndex);

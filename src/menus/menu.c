@@ -3078,6 +3078,9 @@ SaveReadResult ReadSaveCopies(SaveData *save, UBoolean8 isInSram) {
     return (unmarkedCount == SAVE_COPY_COUNT) ? SAVE_READ_NEVER_WRITTEN : SAVE_READ_FAILED;
 }
 
+// Stamps the save data with the inverted build date, then writes each copy
+// with a freshly keyed check: to SRAM, or to the host's files when isInSram
+// is clear. Always returns TRUE.
 Boolean WriteSaveCopies(SaveData *save, UBoolean8 isInSram) {
     u8 checkBuffer[0xC0];
     SaveCheck *check;

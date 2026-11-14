@@ -1158,6 +1158,9 @@ void UpdateScorecard(u16 buttons, u16 pressedButtons) {
     }
 }
 
+// Animates the scorecard and, once it is fully shown, lets the buttons turn its
+// pages and, in a tournament, scroll the leaderboard. Returns whether it is
+// fully shown.
 Boolean UpdateShownScorecard(u16 buttons) {
     AnimateScorecard();
     if (g_ScorecardState != SCORECARD_SHOWN) {
