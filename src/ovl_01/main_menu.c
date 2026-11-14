@@ -2651,7 +2651,7 @@ void UpdateModeSelect(void) {
     s32 direction;
     s32 i;
     u32 step;
-    s16 slot;
+    s16 gridMark;
     s32 mode;
     s32 chosenIcon;
 
@@ -2924,9 +2924,9 @@ void UpdateModeSelect(void) {
         g_TakenCharacters.isCharacterTaken[characterIndex] = 0;
         column = g_MenuMemory.characterColumns[g_ChoosingPlayerIndex];
         row = g_MenuMemory.characterRows[g_ChoosingPlayerIndex];
-        slot = g_CharacterGrid[row][column];
-        if (slot >= FIRST_IMPORTED_CHARACTER) {
-            g_ImportedCharacters[slot - FIRST_IMPORTED_CHARACTER].isChosen = 0;
+        gridMark = g_CharacterGrid[row][column];
+        if (gridMark >= FIRST_IMPORTED_CHARACTER) {
+            g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].isChosen = 0;
             g_ImportedCharacterColumns[g_ChoosingPlayerIndex] = NO_IMPORTED_COLUMN;
         }
 

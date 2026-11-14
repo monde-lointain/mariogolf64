@@ -209,7 +209,7 @@ s32 MoveGridCursor(s32 playerIndex, u8 direction, u8 canChooseMarked) {
     s16 oldRow = memory->characterRows[playerIndex];
     s16 column = oldColumn;
     s16 row = oldRow;
-    u16 slot;
+    u16 faceSlot;
     u16 characterIndex;
     void *faceImage;
     s32 unused[2] UNUSED;
@@ -265,15 +265,15 @@ s32 MoveGridCursor(s32 playerIndex, u8 direction, u8 canChooseMarked) {
         }
 
         if ((s16)characterIndex >= FIRST_IMPORTED_CHARACTER) {
-            slot = characterIndex;
+            faceSlot = characterIndex;
             characterIndex =
-                g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].characterIndex;
+                g_ImportedCharacters[(s16)faceSlot - FIRST_IMPORTED_CHARACTER].characterIndex;
         }
         else {
-            slot = characterIndex;
+            faceSlot = characterIndex;
         }
 
-        faceImage = g_CharacterFaceImages[(s16)slot];
+        faceImage = g_CharacterFaceImages[(s16)faceSlot];
         if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
             OpenEncodedAsset(
                 g_AlternateFaceAnimationAssets[(s16)characterIndex][f_FaceFrame],
@@ -286,7 +286,7 @@ s32 MoveGridCursor(s32 playerIndex, u8 direction, u8 canChooseMarked) {
 
         ReadEncodedAsset(faceImage, &asset);
         OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][0], &file);
-        ReadAssetFile(g_CharacterFacePalettes[(s16)slot], (s16)GetAssetFileSize(&file), &file);
+        ReadAssetFile(g_CharacterFacePalettes[(s16)faceSlot], (s16)GetAssetFileSize(&file), &file);
     }
 
     return -(column == oldColumn && row == oldRow);
@@ -301,7 +301,7 @@ s32 MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, u8 canChooseMarked) {
     s16 oldColumn = memory->characterColumns[playerIndex];
     s32 column = oldColumn;
     s32 row = oldRow;
-    u16 slot;
+    u16 faceSlot;
     u16 characterIndex;
     void *faceImage;
     s32 unused[2] UNUSED;
@@ -378,15 +378,15 @@ s32 MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, u8 canChooseMarked) {
         }
 
         if ((s16)characterIndex >= FIRST_IMPORTED_CHARACTER) {
-            slot = characterIndex;
+            faceSlot = characterIndex;
             characterIndex =
-                g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].characterIndex;
+                g_ImportedCharacters[(s16)faceSlot - FIRST_IMPORTED_CHARACTER].characterIndex;
         }
         else {
-            slot = characterIndex;
+            faceSlot = characterIndex;
         }
 
-        faceImage = g_CharacterFaceImages[(s16)slot];
+        faceImage = g_CharacterFaceImages[(s16)faceSlot];
         if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
             OpenEncodedAsset(
                 g_AlternateFaceAnimationAssets[(s16)characterIndex][f_FaceFrame],
@@ -399,7 +399,7 @@ s32 MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, u8 canChooseMarked) {
 
         ReadEncodedAsset(faceImage, &asset);
         OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][0], &file);
-        ReadAssetFile(g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file);
+        ReadAssetFile(g_CharacterFacePalettes[(s16)faceSlot], GetAssetFileSize(&file), &file);
     }
 
     if (column == oldColumn && row == oldRow) {
@@ -493,7 +493,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
     u16 column;
     s8 chosenColumn;
     u16 row;
-    u16 slot;
+    u16 faceSlot;
     u16 faceCharacter;
     void *faceImage;
     SoundChannel channel;
@@ -894,19 +894,19 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             gridMark = g_CharacterGrid[(s16)row][(s16)column];
             faceCharacter = g_CharacterGrid[(s16)row][(s16)column];
             if (gridMark < CHOOSABLE_MARK_LIMIT) {
-                slot = faceCharacter + MARKED_CHARACTER_OFFSET;
-                faceCharacter = slot;
+                faceSlot = faceCharacter + MARKED_CHARACTER_OFFSET;
+                faceCharacter = faceSlot;
             }
             else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
-                slot = faceCharacter;
+                faceSlot = faceCharacter;
                 faceCharacter =
                     g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].characterIndex;
             }
             else {
-                slot = faceCharacter;
+                faceSlot = faceCharacter;
             }
 
-            faceImage = g_CharacterFaceImages[(s16)slot];
+            faceImage = g_CharacterFaceImages[(s16)faceSlot];
             if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
                 OpenEncodedAsset(
                     g_AlternateFaceAnimationAssets[(s16)faceCharacter][f_FaceFrame],
@@ -919,7 +919,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
             ReadEncodedAsset(faceImage, &asset);
             OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
-            ReadAssetFile(g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file);
+            ReadAssetFile(g_CharacterFacePalettes[(s16)faceSlot], GetAssetFileSize(&file), &file);
         }
 
         if (playerIndex == playerCount) {
@@ -1106,19 +1106,19 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
         gridMark = g_CharacterGrid[(s16)row][(s16)column];
         faceCharacter = g_CharacterGrid[(s16)row][(s16)column];
         if (gridMark < CHOOSABLE_MARK_LIMIT) {
-            slot = faceCharacter + MARKED_CHARACTER_OFFSET;
-            faceCharacter = slot;
+            faceSlot = faceCharacter + MARKED_CHARACTER_OFFSET;
+            faceCharacter = faceSlot;
         }
         else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
-            slot = faceCharacter;
+            faceSlot = faceCharacter;
             faceCharacter =
                 g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].characterIndex;
         }
         else {
-            slot = faceCharacter;
+            faceSlot = faceCharacter;
         }
 
-        faceImage = g_CharacterFaceImages[(s16)slot];
+        faceImage = g_CharacterFaceImages[(s16)faceSlot];
         if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
             OpenEncodedAsset(
                 g_AlternateFaceAnimationAssets[(s16)faceCharacter][f_FaceFrame],
@@ -1131,7 +1131,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
         ReadEncodedAsset(faceImage, &asset);
         OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
-        ReadAssetFile(g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file);
+        ReadAssetFile(g_CharacterFacePalettes[(s16)faceSlot], GetAssetFileSize(&file), &file);
         g_ChoosingPlayerIndex = playerIndex;
         f_IsComButtonHeld = FALSE;
         f_IsLeftyButtonHeld = FALSE;
@@ -1368,7 +1368,7 @@ void DrawCharacterSelect(Gfx **displayListHead, u8 isSinglePlayer) {
     Gfx *gfx = *displayListHead;
     s32 playerIndex;
     s16 column;
-    s16 slot;
+    s16 gridMark;
     s16 choiceIndex;
     s16 clubSet;
 
@@ -1412,13 +1412,13 @@ void DrawCharacterSelect(Gfx **displayListHead, u8 isSinglePlayer) {
     }
 
     column = *(s8 *)(ByteAddress(&GetMenuMemory()->characterColumns[1]) + (s16)playerIndex - 1);
-    slot = g_CharacterGrid[*(s8 *)(ByteAddress(&GetMenuMemory()->characterRows[1]) +
+    gridMark = g_CharacterGrid[*(s8 *)(ByteAddress(&GetMenuMemory()->characterRows[1]) +
         (s16)playerIndex - 1)][column];
-    if (slot < CHOOSABLE_MARK_LIMIT) {
-        choiceIndex = slot + MARKED_CHARACTER_OFFSET;
+    if (gridMark < CHOOSABLE_MARK_LIMIT) {
+        choiceIndex = gridMark + MARKED_CHARACTER_OFFSET;
     }
     else {
-        choiceIndex = slot;
+        choiceIndex = gridMark;
     }
 
     DrawCurveMeter(&gfx, f_ChoiceCharacters[choiceIndex]);
@@ -1513,7 +1513,7 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
     MenuMemory *memory = GetMenuMemory();
     s16 row;
     s16 column;
-    u16 slot;
+    u16 faceSlot;
     s16 gridMark;
     u16 characterIndex;
     void *faceImage;
@@ -1521,21 +1521,21 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
 
     for (row = 0; row != CHARACTER_GRID_ROW_COUNT;) {
         for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT;) {
-            slot = g_CharacterGrid[row][column];
+            faceSlot = g_CharacterGrid[row][column];
             if (g_MenuScreen == MENU_SCREEN_OPPONENT_SELECT &&
                 row == memory->characterRows[0] &&
                 column == memory->characterColumns[0] &&
                 g_Players[0].characterIndex >= FIRST_IMPORTED_CHARACTER) {
-                slot = column + FIRST_IMPORTED_CHARACTER;
+                faceSlot = column + FIRST_IMPORTED_CHARACTER;
             }
 
-            if ((s16)slot >= 0) {
-                if ((s16)slot >= CHARACTER_COUNT) {
-                    slot = CHARACTER_COUNT - 1;
+            if ((s16)faceSlot >= 0) {
+                if ((s16)faceSlot >= CHARACTER_COUNT) {
+                    faceSlot = CHARACTER_COUNT - 1;
                 }
 
-                faceImage = g_CharacterFaceImages[(s16)slot];
-                facePalette = g_CharacterFacePalettes[(s16)slot];
+                faceImage = g_CharacterFaceImages[(s16)faceSlot];
+                facePalette = g_CharacterFacePalettes[(s16)faceSlot];
                 gDPLoadTLUT_pal256(gfx++, TextureAddress(facePalette));
                 gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
                 gDPLoadTextureBlock(
@@ -1569,8 +1569,8 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
                 gDPPipeSync(gfx++);
             }
             else if (isSinglePlayer == TRUE && g_CharacterGrid[row][column] < HIDDEN_MARK_LIMIT) {
-                faceImage = g_CharacterFaceImages[(s16)slot + MARKED_CHARACTER_OFFSET];
-                facePalette = g_CharacterFacePalettes[(s16)slot + MARKED_CHARACTER_OFFSET];
+                faceImage = g_CharacterFaceImages[(s16)faceSlot + MARKED_CHARACTER_OFFSET];
+                facePalette = g_CharacterFacePalettes[(s16)faceSlot + MARKED_CHARACTER_OFFSET];
                 gDPLoadTLUT_pal256(gfx++, TextureAddress(facePalette));
                 gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                 gDPSetPrimColor(gfx++, 0, 0, 10, 10, 10, OPAQUE_ALPHA);
@@ -1625,19 +1625,19 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
                                         [memory->characterColumns[g_ChoosingPlayerIndex]];
         if (gridMark < CHOOSABLE_MARK_LIMIT) {
             characterIndex += MARKED_CHARACTER_OFFSET;
-            slot = characterIndex;
+            faceSlot = characterIndex;
         }
         else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
-            slot = characterIndex;
+            faceSlot = characterIndex;
             characterIndex =
                 g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].characterIndex;
         }
         else {
-            slot = characterIndex;
+            faceSlot = characterIndex;
         }
 
-        faceImage = g_CharacterFaceImages[(s16)slot];
-        facePalette = g_CharacterFacePalettes[(s16)slot];
+        faceImage = g_CharacterFaceImages[(s16)faceSlot];
+        facePalette = g_CharacterFacePalettes[(s16)faceSlot];
         if (f_PreviewedPalette == 0) {
             OpenAssetFile(g_CharacterFacePaletteFiles[(s16)characterIndex][0], &file);
         }
