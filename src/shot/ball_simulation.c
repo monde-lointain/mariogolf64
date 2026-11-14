@@ -1061,7 +1061,7 @@ StepFlags StepBallSimulation(BallSimulation *simulation) {
                 // Nothing reads it, and the compiler drops it, but without it
                 // the registers of the squares and the steps around it differ
                 // from the original's.
-                f32 squareY;
+                f32 squareY UNUSED;
                 f32 squareZ;
                 f32 stepX;
                 f32 stepY;
