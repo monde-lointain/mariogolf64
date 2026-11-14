@@ -1,5 +1,5 @@
-#ifndef RCP_H
-#define RCP_H
+#ifndef RCP_INIT_H
+#define RCP_INIT_H
 
 #include <ultra64.h>
 

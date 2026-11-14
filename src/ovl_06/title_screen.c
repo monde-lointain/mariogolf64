@@ -14,7 +14,7 @@
 #include "math_util.h"
 #include "menu.h"
 #include "overlay_manager.h"
-#include "rcp.h"
+#include "rcp_init.h"
 #include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"

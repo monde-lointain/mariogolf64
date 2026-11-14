@@ -36,7 +36,7 @@
 #include "overlay_manager.h"
 #include "pin.h"
 #include "player.h"
-#include "rcp.h"
+#include "rcp_init.h"
 #include "reaction.h"
 #include "scene.h"
 #include "screen.h"

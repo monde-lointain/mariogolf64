@@ -45,7 +45,7 @@
 #include "performance_meter.h"
 #include "pin.h"
 #include "play.h"
-#include "rcp.h"
+#include "rcp_init.h"
 #include "round_events.h"
 #include "round_hud.h"
 #include "round_results.h"

@@ -135,8 +135,8 @@ PYTHON      := .venv/bin/python3
 # Each library's headers are in its own include directory. NuSystem's is
 # included through its converted copy, as the rule below explains. The
 # game reaches libultra's PR/ headers through <ultra64.h>, so PR/ isn't
-# searched, and a bare "rcp.h" can only name the game's own header, never
-# libultra's PR/rcp.h.
+# searched, and none of its headers, such as PR/rcp.h, can stand in for a
+# game header of the same name.
 INCLUDES    := -Iinclude -Ilib/libkmc/include -Ilib/ultralib/include \
                -Ilib/libmus/include -I$(BUILD_DIR)/lib/libnusys/include -Ilib/libnusys/include -Isrc -I$(BUILD_DIR)
 DEFINES     := -D_LANGUAGE_C -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI_2 -DNDEBUG -D_FINALROM -DBUILD_VERSION=VERSION_J \

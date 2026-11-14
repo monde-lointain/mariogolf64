@@ -1,4 +1,4 @@
-#include "rcp.h"
+#include "rcp_init.h"
 
 #include <nusys.h>
 #include <ultra64.h>

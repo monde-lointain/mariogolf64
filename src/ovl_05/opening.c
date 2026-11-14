@@ -33,7 +33,7 @@
 #include "menu.h"
 #include "opening_ball.h"
 #include "overlay_manager.h"
-#include "rcp.h"
+#include "rcp_init.h"
 #include "round_hud.h"
 #include "scene.h"
 #include "screen.h"
