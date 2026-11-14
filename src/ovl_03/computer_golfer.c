@@ -420,7 +420,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
     s32 mishit;
     s32 mishitMax;
     s32 mishitDivisor;
-    u32 kind;
+    u32 surfaceKind;
 
     if (f_PlanStage == PLAN_STAGE_UNSTARTED) {
         osSyncPrintf("\n------------------AI Start---------------------\n");
@@ -466,8 +466,8 @@ s32 PlanShot(CurrentShot *plannedShot) {
 
         osSyncPrintf("\n");
         PlanClubAndTarget(f_PlanTarget);
-        kind = GetSurfaceTraits(f_Shot.surface)->kind;
-        if (kind == SURFACE_KIND_GREEN || kind == SURFACE_KIND_GREEN_EDGE) {
+        surfaceKind = GetSurfaceTraits(f_Shot.surface)->kind;
+        if (surfaceKind == SURFACE_KIND_GREEN || surfaceKind == SURFACE_KIND_GREEN_EDGE) {
             f_TrialLevel = 0;
         }
 
@@ -895,16 +895,16 @@ void PlanClubAndTarget(CoursePoint target) {
     s32 targetZ;
     ClubType clubType;
     ShotMode shotMode;
-    u32 kind;
+    u32 surfaceKind;
     s32 rest;
     s32 clubSlot;
     Club *club;
 
     clubType = CLUB_TYPE_DRIVER;
-    kind = GetSurfaceTraits(f_Shot.surface)->kind;
+    surfaceKind = GetSurfaceTraits(f_Shot.surface)->kind;
     f_HoleStrokeTarget = ChooseHoleStrokeTarget();
     f_HoleTargetToPar = f_HoleStrokeTarget - g_HoleSetup.par;
-    switch (kind) {
+    switch (surfaceKind) {
         case SURFACE_KIND_GREEN:
         case SURFACE_KIND_GREEN_EDGE:
             rest = GetBallCupDistance();
@@ -1809,7 +1809,7 @@ Boolean IsLineOffFairway(CoursePoint from, CoursePoint to) {
     f32 stepLength;
     s32 x;
     s32 z;
-    u32 kind;
+    u32 surfaceKind;
 
     distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
     angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
@@ -1817,8 +1817,8 @@ Boolean IsLineOffFairway(CoursePoint from, CoursePoint to) {
         stepLength = UNITS_PER_YARD;
         x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
         z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
-        kind = GetSurfaceTraitsAt(x, z)->kind;
-        if (IsOffFairway(kind)) {
+        surfaceKind = GetSurfaceTraitsAt(x, z)->kind;
+        if (IsOffFairway(surfaceKind)) {
             return TRUE;
         }
     }
@@ -2693,7 +2693,7 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
     f32 stepLength;
     s32 x;
     s32 z;
-    u32 kind;
+    u32 surfaceKind;
 
     distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
     angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
@@ -2703,8 +2703,8 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
         stepLength = UNITS_PER_YARD;
         x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
         z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
-        kind = GetSurfaceTraitsAt(x, z)->kind;
-        if (IsLostBallKind(kind)) {
+        surfaceKind = GetSurfaceTraitsAt(x, z)->kind;
+        if (IsLostBallKind(surfaceKind)) {
             lostCount++;
         }
 
@@ -2720,7 +2720,7 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
 }
 
 Boolean IsTrialShotSafe(void) {
-    u32 kind;
+    u32 surfaceKind;
     s32 stepFlags;
     s32 velocityY UNUSED;
 
@@ -2754,8 +2754,8 @@ Boolean IsTrialShotSafe(void) {
     }
 
     if (f_TrialSimulation.state == BALL_STATE_STOPPED) {
-        kind = GetSurfaceTraits(f_TrialSimulation.surface)->kind;
-        if (IsOutOfBoundsKind(kind) || kind == SURFACE_KIND_WATER_HAZARD) {
+        surfaceKind = GetSurfaceTraits(f_TrialSimulation.surface)->kind;
+        if (IsOutOfBoundsKind(surfaceKind) || surfaceKind == SURFACE_KIND_WATER_HAZARD) {
             osSyncPrintf("nmResultCheck: FALSE\n");
             return FALSE;
         }
