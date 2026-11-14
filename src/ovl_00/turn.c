@@ -4124,7 +4124,7 @@ void UpdateTurns(void) {
                     if (f_ShotLaunch.impactTiming == 0 &&
                         f_ShotLaunch.power >= LAUNCH_POWER_MAX &&
                         !(GetClub(f_ShotLaunch.clubSlot)->surfaceMask & CLUB_SURFACE_GREEN) &&
-                        RateShotLength() == 1) {
+                        RateShotLength() == SHOT_LENGTH_FULL) {
                         StartBanner(0);
                     }
                 }

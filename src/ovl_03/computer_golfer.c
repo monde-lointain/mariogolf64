@@ -745,7 +745,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
                             GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
                             f_Shot.surface,
                             f_Shot.shotMode
-                        ) < 2)) {
+                        ) <= LIE_RATING_MIN)) {
                     f_Shot.clubSlot++;
                     f_CarryScale *= CARRY_SCALE_STEP;
                 }

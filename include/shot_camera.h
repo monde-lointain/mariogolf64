@@ -10,6 +10,14 @@
 #include "player.h"
 #include "surface.h"
 
+enum ShotLengthRating {
+    SHOT_LENGTH_UNRATED,
+    SHOT_LENGTH_FULL,
+    SHOT_LENGTH_SHORT
+};
+
+typedef s32 ShotLengthRating;
+
 #define HOLE_FLYOVER_FRAME_COUNT 185
 #define HOLE_FLYOVER_DONE (-1)
 
@@ -41,7 +49,7 @@ s32 GetAimSlopeAngle(Player *player, ShotLaunch *shot);
 #endif
 SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot);
 s32 GetEndReaction(void);
-s32 RateShotLength(void);
+ShotLengthRating RateShotLength(void);
 void StartFlightCamera(s32 earlierFlightCount);
 void StartHoleCamerasAndSong(void);
 void StartHoleFlyover(void);
