@@ -640,7 +640,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
 
     f_IsBallGroundLevel = TRUE;
     for (i = 0; i != GROUND_PROBE_COUNT; i++) {
-        if (g_Players[g_CurrentShot.playerIndex].isLefty == 1) {
+        if (g_Players[g_CurrentShot.playerIndex].isLefty == TRUE) {
             yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
                 ((f32)i * GROUND_PROBE_ANGLE_STEP);
         }

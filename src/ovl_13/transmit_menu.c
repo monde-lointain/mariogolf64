@@ -4085,7 +4085,7 @@ void BuildStatusData(StatusData *status) {
     for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
         progress->ringShotStars[courseIndex] = 0;
         for (index = 0; index != RING_SHOT_HOLE_COUNT; index++) {
-            if (records->hasRingShotStar[courseIndex][index] != 0) {
+            if (records->hasRingShotStar[courseIndex][index]) {
                 progress->ringShotStars[courseIndex] |= 1 << index;
             }
         }

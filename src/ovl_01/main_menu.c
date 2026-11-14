@@ -2463,7 +2463,7 @@ void UpdateMenuTitleScreen(void) {
 
 void ResetViewerCharacter(void) {
     g_MenuMemory.viewerCharacter = 0;
-    while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+    while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
         g_MenuMemory.viewerCharacter++;
         if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
             g_MenuMemory.viewerCharacter = 0;
@@ -2473,7 +2473,7 @@ void ResetViewerCharacter(void) {
 
 s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
     if (f_IsViewerAdjusting != 0) {
-        while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+        while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
             g_MenuMemory.viewerCharacter++;
             if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
                 g_MenuMemory.viewerCharacter = 0;
@@ -2483,7 +2483,7 @@ s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
         if (g_ControllerStates[0].pressedButtons & U_JPAD) {
             g_MenuMemory.viewerCharacter--;
             PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
                 g_MenuMemory.viewerCharacter--;
                 if (g_MenuMemory.viewerCharacter < 0) {
                     g_MenuMemory.viewerCharacter = f_MenuCharacterCount - 1;
@@ -2493,7 +2493,7 @@ s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
         else if (g_ControllerStates[0].pressedButtons & D_JPAD) {
             PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
             g_MenuMemory.viewerCharacter++;
-            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
                 g_MenuMemory.viewerCharacter++;
                 if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
                     g_MenuMemory.viewerCharacter = 0;
@@ -2503,14 +2503,14 @@ s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
 
         if (g_MenuMemory.viewerCharacter < 0) {
             g_MenuMemory.viewerCharacter = f_MenuCharacterCount - 1;
-            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
                 g_MenuMemory.viewerCharacter--;
             }
         }
 
         if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
             g_MenuMemory.viewerCharacter = 0;
-            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
                 g_MenuMemory.viewerCharacter++;
             }
         }
@@ -2525,7 +2525,7 @@ s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
     }
     else if (!(g_ControllerStates[0].buttons & Z_TRIG)) {
         if ((g_MenuPressedButtons & (A_BUTTON | R_TRIG)) &&
-            g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 0) {
+            !g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter]) {
             PlayCharacterSound(
                 g_MenuMemory.viewerCharacter,
                 0,
@@ -2542,7 +2542,7 @@ s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
             PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
             return -1;
         }
-        while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+        while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
             g_MenuMemory.viewerCharacter++;
             if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
                 g_MenuMemory.viewerCharacter = 0;
@@ -2552,7 +2552,7 @@ s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
         if (g_MenuRepeatButtons & U_JPAD) {
             g_MenuMemory.viewerCharacter--;
             PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
                 g_MenuMemory.viewerCharacter--;
                 if (g_MenuMemory.viewerCharacter < 0) {
                     g_MenuMemory.viewerCharacter = f_MenuCharacterCount - 1;
@@ -2562,7 +2562,7 @@ s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
         else if (g_MenuRepeatButtons & D_JPAD) {
             PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
             g_MenuMemory.viewerCharacter++;
-            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
                 g_MenuMemory.viewerCharacter++;
                 if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
                     g_MenuMemory.viewerCharacter = 0;
@@ -2572,14 +2572,14 @@ s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
 
         if (g_MenuMemory.viewerCharacter < 0) {
             g_MenuMemory.viewerCharacter = f_MenuCharacterCount - 1;
-            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
                 g_MenuMemory.viewerCharacter--;
             }
         }
 
         if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
             g_MenuMemory.viewerCharacter = 0;
-            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+            while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == TRUE) {
                 g_MenuMemory.viewerCharacter++;
             }
         }

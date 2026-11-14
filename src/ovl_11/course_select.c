@@ -1234,14 +1234,13 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
 
         courseIndex = memory->courseIndex;
         if (holeIndex == memory->holeIndex) {
-            tile = (save->records.hasRingShotStar[courseIndex][holeIndex] == 0) ?
+            tile = !save->records.hasRingShotStar[courseIndex][holeIndex] ?
                 TILE_SPINNING_EMPTY_STAR :
                 TILE_SPINNING_STAR;
         }
         else {
-            tile = (save->records.hasRingShotStar[courseIndex][holeIndex] == 0) ?
-                TILE_STILL_EMPTY_STAR :
-                TILE_STILL_STAR;
+            tile = !save->records.hasRingShotStar[courseIndex][holeIndex] ? TILE_STILL_EMPTY_STAR :
+                                                                            TILE_STILL_STAR;
         }
 
         DrawTextureRectangle(

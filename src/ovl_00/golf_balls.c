@@ -585,7 +585,7 @@ void UpdateGolfBalls(void) {
                         simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
                     ) == 0 ||
                     simulation->state == BALL_STATE_IN_CUP ||
-                    simulation->isHoledOut != 0) {
+                    simulation->isHoledOut) {
                     ball->isInCup = TRUE;
                 }
                 else {

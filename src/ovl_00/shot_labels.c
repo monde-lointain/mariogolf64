@@ -602,7 +602,7 @@ void DrawAimGuides(CameraMatrices *matrices) {
     gDPPipeSync(g_DisplayListHead++);
     gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     gDPPipeSync(g_DisplayListHead++);
-    if (!(club->surfaceMask & CLUB_SURFACE_GREEN) && g_RoundHud.isDistanceSignShown != 0) {
+    if (!(club->surfaceMask & CLUB_SURFACE_GREEN) && g_RoundHud.isDistanceSignShown) {
         position[AXIS_X] = g_CurrentShot.targetPoint[AXIS_X] * COURSE_TO_WORLD_SCALE;
         position[AXIS_Y] = g_CurrentShot.targetPoint[AXIS_Y] * COURSE_TO_WORLD_SCALE;
         position[AXIS_Z] = g_CurrentShot.targetPoint[AXIS_Z] * COURSE_TO_WORLD_SCALE;
@@ -893,7 +893,7 @@ void DrawAimGuides(CameraMatrices *matrices) {
         g_ShotSetupFrameCount++;
     }
 
-    if (g_RoundHud.isPinFlagShown == 1) {
+    if (g_RoundHud.isPinFlagShown == TRUE) {
         position[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
         position[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
