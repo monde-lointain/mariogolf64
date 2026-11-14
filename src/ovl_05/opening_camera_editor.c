@@ -341,7 +341,8 @@ static const char f_UnusedIntegerFormat[] = "%d  ";
 static const char f_UnusedFloatFormat[] = "%f";
 
 Boolean AreEditorMovesDone(void) {
-    if (g_CameraEditor.flags[0] == 0 && g_CameraEditor.flags[1] == 0) {
+    if (g_CameraEditor.flags[EDITOR_POINT_EYE] == 0 &&
+        g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] == 0) {
         return TRUE;
     }
 
@@ -349,7 +350,8 @@ Boolean AreEditorMovesDone(void) {
 }
 
 Boolean AreEditorFlagsClear(s32 mask) {
-    if (!(g_CameraEditor.flags[0] & mask) && !(g_CameraEditor.flags[1] & mask)) {
+    if (!(g_CameraEditor.flags[EDITOR_POINT_EYE] & mask) &&
+        !(g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] & mask)) {
         return TRUE;
     }
 

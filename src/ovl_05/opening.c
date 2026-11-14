@@ -1496,9 +1496,9 @@ void UpdateOpening(void) {
                     f_OpeningCue = OPENING_CUE_MARIO_TEE_SHOT;
                     StartScreenFadeIn(0, 0, 0, 0x1E);
                     PlaceEditorCamera(997.598f, -160.581f, 4594.014f, 973.0f, -130.0f, 4672.0f);
-                    ZoomEditorCamera(1, 38.01875f, 0x3C);
-                    TurnEditorCamera(1, -0.8528241f, 0x28);
-                    TiltEditorCamera(1, -0.324127f, 0x28);
+                    ZoomEditorCamera(EDITOR_POINT_LOOK_AT, 38.01875f, 0x3C);
+                    TurnEditorCamera(EDITOR_POINT_LOOK_AT, -0.8528241f, 0x28);
+                    TiltEditorCamera(EDITOR_POINT_LOOK_AT, -0.324127f, 0x28);
                     f_OpeningScene++;
                     LoadOpeningShotBall();
                     f_OpeningShotSimulation.position[AXIS_X] = 0xF1B96;
@@ -1567,8 +1567,8 @@ void UpdateOpening(void) {
                 break;
             case OPENING_SCENE_MARIO_DRIVE_CHEERS:
                 PlaceEditorCamera(679.6445f, -98.28f, 4736.7f, 642.835f, -99.0f, 4746.187f);
-                ZoomEditorCamera(1, 18.469883f, 0x1E);
-                MoveEditorCamera(1, 642.835f, -100.5f, 4746.187f, 0x1E);
+                ZoomEditorCamera(EDITOR_POINT_LOOK_AT, 18.469883f, 0x1E);
+                MoveEditorCamera(EDITOR_POINT_LOOK_AT, 642.835f, -100.5f, 4746.187f, 0x1E);
                 f_IsNameSlotShown[0] = FALSE;
                 f_OpeningShotState = 0;
                 f_ShotBallScale = 0;
@@ -1736,8 +1736,8 @@ void UpdateOpening(void) {
                 break;
             case OPENING_SCENE_PLUM_CHEER:
                 PlaceEditorCamera(726.63f, -98.049f, 5063.849f, 713.268f, -96.0f, 5094.7f);
-                MoveEditorPoint(1, 713.268f, -102.0f, 5094.7f, 0x28);
-                MoveEditorPoint(0, 708.085f, -98.243f, 5073.215f, 0x28);
+                MoveEditorPoint(EDITOR_POINT_LOOK_AT, 713.268f, -102.0f, 5094.7f, 0x28);
+                MoveEditorPoint(EDITOR_POINT_EYE, 708.085f, -98.243f, 5073.215f, 0x28);
                 f_OpeningSceneFramesLeft = 40;
                 f_OpeningScene = OPENING_SCENE_PEACH_DRIVE_FLIGHT;
                 f_OpeningCue = OPENING_CUE_PLUM_CHEER;
@@ -1880,9 +1880,9 @@ void UpdateOpening(void) {
                 break;
             case OPENING_SCENE_MARIO_CLOSE_UP:
                 PlaceEditorCamera(1402.165f, -101.306f, 4774.711f, 1412.049f, -107.0f, 4798.309f);
-                TiltEditorCamera(1, 0.183044f, 0x32);
-                TurnEditorCamera(1, 1.1519989f, 0x32);
-                ZoomEditorCamera(1, 47.392056f, 0x1E);
+                TiltEditorCamera(EDITOR_POINT_LOOK_AT, 0.183044f, 0x32);
+                TurnEditorCamera(EDITOR_POINT_LOOK_AT, 1.1519989f, 0x32);
+                ZoomEditorCamera(EDITOR_POINT_LOOK_AT, 47.392056f, 0x1E);
                 f_OpeningSceneFramesLeft = 50;
                 f_OpeningScene = OPENING_SCENE_MARIO_CHEER;
                 f_IsNameSlotShown[0] = FALSE;
@@ -1931,8 +1931,8 @@ void UpdateOpening(void) {
                 break;
             case OPENING_SCENE_MARIO_CHEER + 1:
                 PlaceEditorCamera(957.619f, -131.446f, 4629.353f, 973.561f, -133.0f, 4671.789f);
-                TurnEditorCamera(1, 1.0471976f, 1);
-                TiltEditorCamera(1, 0.34906584f, 1);
+                TurnEditorCamera(EDITOR_POINT_LOOK_AT, 1.0471976f, 1);
+                TiltEditorCamera(EDITOR_POINT_LOOK_AT, 0.34906584f, 1);
                 f_OpeningCue = OPENING_CUE_LUIGI_TEE_SHOT;
                 f_OpeningScene++;
                 LoadNameLogo(1, 0);
@@ -1952,8 +1952,8 @@ void UpdateOpening(void) {
                     f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
                 break;
             case OPENING_SCENE_MARIO_CHEER + 2:
-                TurnEditorCamera(1, -1.0471976f, 0x50);
-                TiltEditorCamera(1, -0.34906584f, 0x50);
+                TurnEditorCamera(EDITOR_POINT_LOOK_AT, -1.0471976f, 0x50);
+                TiltEditorCamera(EDITOR_POINT_LOOK_AT, -0.34906584f, 0x50);
                 f_OpeningScene = OPENING_SCENE_LUIGI_DRIVE;
                 break;
             case OPENING_SCENE_LUIGI_DRIVE:
@@ -1978,7 +1978,7 @@ void UpdateOpening(void) {
                     LaunchOpeningBallSimulation(&f_OpeningShotSimulation, 0, &f_OpeningFourthShot);
                     f_OpeningShotState = 1;
                     f_ShotBallScale = 1;
-                    ZoomEditorCamera(1, 33.056084f, 0x28);
+                    ZoomEditorCamera(EDITOR_POINT_LOOK_AT, 33.056084f, 0x28);
                     f_OpeningSceneFramesLeft = 5;
                     f_OpeningScene++;
                     PlaySoundWithEffects(
@@ -2090,7 +2090,7 @@ void UpdateOpening(void) {
                 f_OpeningScene++;
                 break;
             case OPENING_SCENE_PEACH_PLUM_WALK + 2:
-                TiltEditorCamera(1, -0.22654298f, 0x5A);
+                TiltEditorCamera(EDITOR_POINT_LOOK_AT, -0.22654298f, 0x5A);
                 f_OpeningScene++;
                 break;
             case OPENING_SCENE_PEACH_PLUM_WALK + 3:
@@ -2110,10 +2110,10 @@ void UpdateOpening(void) {
                 f_OpeningBallPositions[0][AXIS_X] = 2483.922f;
                 f_OpeningBallPositions[0][AXIS_Z] = 1800.958f;
                 f_OpeningBallScales[0] = OPENING_BALL_NORMAL_SCALE;
-                MoveEditorCamera(1, 2489.032f, -255.774f, 1840.637f, 0x50);
-                TiltEditorCamera(1, -0.116571f, 0x76);
-                TurnEditorCamera(1, 1.366719f, 0x76);
-                ZoomEditorCamera(1, 87.87598f, 0x76);
+                MoveEditorCamera(EDITOR_POINT_LOOK_AT, 2489.032f, -255.774f, 1840.637f, 0x50);
+                TiltEditorCamera(EDITOR_POINT_LOOK_AT, -0.116571f, 0x76);
+                TurnEditorCamera(EDITOR_POINT_LOOK_AT, 1.366719f, 0x76);
+                ZoomEditorCamera(EDITOR_POINT_LOOK_AT, 87.87598f, 0x76);
                 f_OpeningCue = OPENING_CUE_MARIO_LUIGI_WALK;
                 f_OpeningSceneFramesLeft = 118;
                 f_OpeningScene++;
@@ -2168,10 +2168,10 @@ void UpdateOpening(void) {
                 if (f_OpeningSceneFramesLeft == 0) {
                     f_OpeningCue = OPENING_CUE_MARIO_REACH_BALL;
                     f_OpeningScene++;
-                    MoveEditorCamera(1, 2489.636f, -257.5f, 1811.529f, 0x1E);
-                    TiltEditorCamera(1, -0.070194006f, 0x32);
-                    TurnEditorCamera(1, 0.3807652f, 0x32);
-                    ZoomEditorCamera(1, 34.2068f, 0x32);
+                    MoveEditorCamera(EDITOR_POINT_LOOK_AT, 2489.636f, -257.5f, 1811.529f, 0x1E);
+                    TiltEditorCamera(EDITOR_POINT_LOOK_AT, -0.070194006f, 0x32);
+                    TurnEditorCamera(EDITOR_POINT_LOOK_AT, 0.3807652f, 0x32);
+                    ZoomEditorCamera(EDITOR_POINT_LOOK_AT, 34.2068f, 0x32);
                     if (f_IsDonkeyKongShown) {
                         PlaySoundWithEffects(
                             SOUND_PEACH_LONG_HEY_MARIO,
@@ -2213,8 +2213,8 @@ void UpdateOpening(void) {
                         -256.5f,
                         2177.502f
                     );
-                    MoveEditorPoint(1, 2855.966f, -256.5f, 2213.121f, 0x32);
-                    MoveEditorPoint(0, 2702.606f, -279.683f, 2250.851f, 0x32);
+                    MoveEditorPoint(EDITOR_POINT_LOOK_AT, 2855.966f, -256.5f, 2213.121f, 0x32);
+                    MoveEditorPoint(EDITOR_POINT_EYE, 2702.606f, -279.683f, 2250.851f, 0x32);
                     f_OpeningSceneFramesLeft = 90;
                     f_OpeningCue = OPENING_CUE_PEACH_WAVE;
                     g_HoleSetup.conditions.lightPitch = 0x1000;
@@ -2307,7 +2307,7 @@ void UpdateOpening(void) {
                 }
 
                 if (f_OpeningSceneFramesLeft == 0) {
-                    TiltEditorCamera(1, -0.166897f, 0x32);
+                    TiltEditorCamera(EDITOR_POINT_LOOK_AT, -0.166897f, 0x32);
                     f_OpeningScene++;
                     PlaySound(SOUND_LOOK_AT_CUP, f_OpeningSoundChannel, 0x32);
                     AdvanceOpeningSoundChannel();
@@ -2358,7 +2358,7 @@ void UpdateOpening(void) {
                         -248.0f,
                         2366.292f
                     );
-                    ZoomEditorCamera(1, 16.721228f, 0x28);
+                    ZoomEditorCamera(EDITOR_POINT_LOOK_AT, 16.721228f, 0x28);
                     f_OpeningScene++;
                     PlaySound(SOUND_LOOK_AT_CUP, f_OpeningSoundChannel, 0x3C);
                     AdvanceOpeningSoundChannel();
@@ -2457,9 +2457,9 @@ void UpdateOpening(void) {
                 f_OpeningBallPositions[1][AXIS_Z] = 342.12f;
                 f_OpeningBallScales[1] = 2.0f;
                 PlaceEditorCamera(2662.345f, -254.25f, 2376.081f, 2493.599f, -910.952f, 665.178f);
-                MoveEditorPoint(0, 2671.388f, -257.489f, 2351.288f, 0x28);
+                MoveEditorPoint(EDITOR_POINT_EYE, 2671.388f, -257.489f, 2351.288f, 0x28);
                 MoveEditorPoint(
-                    1,
+                    EDITOR_POINT_LOOK_AT,
                     logoBallPoint[AXIS_X],
                     logoBallPoint[AXIS_Y] - 4.5f,
                     logoBallPoint[AXIS_Z],
@@ -2471,13 +2471,16 @@ void UpdateOpening(void) {
                 break;
             case OPENING_SCENE_INCOMING_BALL + 1:
                 f_OpeningBallPositions[1][AXIS_X] +=
-                    (g_CameraEditor.points[1][AXIS_X] - f_OpeningBallPositions[1][AXIS_X]) *
+                    (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] -
+                        f_OpeningBallPositions[1][AXIS_X]) *
                     f_LogoBallFollowRate;
                 f_OpeningBallPositions[1][AXIS_Y] +=
-                    (g_CameraEditor.points[1][AXIS_Y] - f_OpeningBallPositions[1][AXIS_Y]) *
+                    (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y] -
+                        f_OpeningBallPositions[1][AXIS_Y]) *
                     f_LogoBallFollowRate;
                 f_OpeningBallPositions[1][AXIS_Z] +=
-                    (g_CameraEditor.points[1][AXIS_Z] - f_OpeningBallPositions[1][AXIS_Z]) *
+                    (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z] -
+                        f_OpeningBallPositions[1][AXIS_Z]) *
                     f_LogoBallFollowRate;
                 f_LogoBallFollowRate -= 0.02f;
                 if (f_LogoBallFollowRate < 0.1f) {
@@ -2544,8 +2547,8 @@ void UpdateOpening(void) {
                 if (f_OpeningSceneFramesLeft == 0) {
                     StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
                     PlaceEditorCamera(2878.956f, -391.282f, 2514.85f, 2431.88f, -315.0f, 992.943f);
-                    MoveEditorPoint(0, 2051.33f, -258.127f, 862.423f, 0x28);
-                    MoveEditorPoint(1, 2058.79f, -254.0f, 825.963f, 0x28);
+                    MoveEditorPoint(EDITOR_POINT_EYE, 2051.33f, -258.127f, 862.423f, 0x28);
+                    MoveEditorPoint(EDITOR_POINT_LOOK_AT, 2058.79f, -254.0f, 825.963f, 0x28);
                     f_OpeningCue = OPENING_CUE_BABY_MARIO_ARRIVAL;
                     f_OpeningSceneFramesLeft = 20;
                     f_OpeningScene++;
@@ -2605,12 +2608,12 @@ void UpdateOpening(void) {
 
                 if (f_OpeningSceneFramesLeft == 0) {
                     if (f_IsDonkeyKongShown) {
-                        MoveEditorPoint(1, 2043.766f, -256.5f, 851.89f, 0x5A);
-                        MoveEditorPoint(0, 2032.192f, -262.337f, 875.169f, 0x5A);
+                        MoveEditorPoint(EDITOR_POINT_LOOK_AT, 2043.766f, -256.5f, 851.89f, 0x5A);
+                        MoveEditorPoint(EDITOR_POINT_EYE, 2032.192f, -262.337f, 875.169f, 0x5A);
                     }
                     else {
-                        MoveEditorPoint(1, 2043.767f, -250.0f, 851.891f, 0x5A);
-                        MoveEditorPoint(0, 2025.674f, -258.046f, 888.28f, 0x5A);
+                        MoveEditorPoint(EDITOR_POINT_LOOK_AT, 2043.767f, -250.0f, 851.891f, 0x5A);
+                        MoveEditorPoint(EDITOR_POINT_EYE, 2025.674f, -258.046f, 888.28f, 0x5A);
                     }
 
                     f_OpeningSceneFramesLeft = 90;
@@ -2807,7 +2810,7 @@ void UpdateOpening(void) {
                         -254.0f,
                         1546.087f
                     );
-                    MoveEditorPoint(1, 1420.136f, -250.5f, 1551.713f, 0x32);
+                    MoveEditorPoint(EDITOR_POINT_LOOK_AT, 1420.136f, -250.5f, 1551.713f, 0x32);
                     f_OpeningCue = OPENING_CUE_LUIGI_SEARCH;
                     f_OpeningScene++;
                     StartWipe(2);
@@ -2916,7 +2919,7 @@ void UpdateOpening(void) {
                 }
 
                 if (f_OpeningSceneFramesLeft == 0) {
-                    MoveEditorPoint(1, 933.391f, -250.5f, 1884.391f, 0x3C);
+                    MoveEditorPoint(EDITOR_POINT_LOOK_AT, 933.391f, -250.5f, 1884.391f, 0x3C);
                     f_OpeningSceneFramesLeft = 60;
                     f_OpeningScene++;
                 }
@@ -3026,7 +3029,7 @@ void UpdateOpening(void) {
                 }
 
                 if (f_OpeningSceneFramesLeft == 0) {
-                    MoveEditorPoint(0, 1404.737f, -250.799f, 1633.633f, 0x50);
+                    MoveEditorPoint(EDITOR_POINT_EYE, 1404.737f, -250.799f, 1633.633f, 0x50);
                     f_OpeningScene++;
                     LoadLakitu();
                     f_OpeningSceneFramesLeft = 40;
@@ -3052,7 +3055,7 @@ void UpdateOpening(void) {
                 }
 
                 if (f_OpeningSceneFramesLeft == 0) {
-                    MoveEditorPoint(0, 1409.318f, -400.0f, 1609.259f, 0xDC);
+                    MoveEditorPoint(EDITOR_POINT_EYE, 1409.318f, -400.0f, 1609.259f, 0xDC);
                     f_OpeningSceneFramesLeft = 40;
                     f_OpeningScene++;
                 }
@@ -3181,12 +3184,15 @@ void UpdateOpening(void) {
     UpdateCameraEditor();
     EaseOpeningLookAt();
     g_Cameras[MAIN_CAMERA].mode = CAMERA_MODE_BEHIND_GOLFER;
-    g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = g_CameraEditor.points[0][AXIS_X];
-    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = g_CameraEditor.points[0][AXIS_Y];
-    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = g_CameraEditor.points[0][AXIS_Z];
-    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] = g_CameraEditor.points[1][AXIS_X];
-    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] = g_CameraEditor.points[1][AXIS_Y];
-    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = g_CameraEditor.points[1][AXIS_Z];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Y];
+    g_Cameras[MAIN_CAMERA].view.eye[AXIS_Z] = g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_Z];
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_X] =
+        g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X];
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Y] =
+        g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Y];
+    g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] =
+        g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z];
     g_Cameras[MAIN_CAMERA].view.fieldOfView = g_CameraEditor.fieldOfView;
     if (f_OpeningShotState == 1) {
         f_UnusedStickOffsetX += g_ControllerStates[1].stickX * 0.002f;
