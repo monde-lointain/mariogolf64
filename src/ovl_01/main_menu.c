@@ -1013,7 +1013,7 @@ static Vtx f_UnusedQuadVertices[8] UNUSED = {
     {{{32, -32, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{32, 0, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-static s32 f_MenuStarFrameAssets[STAR_FRAME_COUNT] = {
+static s32 f_StarFrameAssets[STAR_FRAME_COUNT] = {
     0x05BE,
     0x05BF,
     0x05C0,
@@ -1645,7 +1645,7 @@ void UpdateMenus(void) {
                 f_SpinningIconFrameIndex = 0;
                 f_SpinningStarBufferIndex = 0;
                 f_SpinningIconFrameTime = 0;
-                OpenEncodedAsset(f_MenuStarFrameAssets[g_AnimatedIconFrameIndex], &asset);
+                OpenEncodedAsset(f_StarFrameAssets[g_AnimatedIconFrameIndex], &asset);
                 ReadEncodedAsset(g_MenuArrowSizedImages[0], &asset);
                 break;
 
@@ -8827,7 +8827,7 @@ void DrawSpinningStars(
         }
 
         f_SpinningStarBufferIndex = f_SpinningStarBufferIndex == 0;
-        OpenEncodedAsset(f_MenuStarFrameAssets[f_SpinningIconFrameIndex], &asset);
+        OpenEncodedAsset(f_StarFrameAssets[f_SpinningIconFrameIndex], &asset);
         ReadEncodedAsset(g_MenuArrowSizedImages[f_SpinningStarBufferIndex], &asset);
     }
 
@@ -8940,7 +8940,7 @@ void DrawMenuRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY) {
         }
 
         g_AnimatedIconBufferIndex = g_AnimatedIconBufferIndex == 0;
-        OpenEncodedAsset(f_MenuStarFrameAssets[g_AnimatedIconFrameIndex], &asset);
+        OpenEncodedAsset(f_StarFrameAssets[g_AnimatedIconFrameIndex], &asset);
         ReadEncodedAsset(g_AnimatedIconImages[g_AnimatedIconBufferIndex], &asset);
         OpenEncodedAsset(f_MenuEmptyStarFrameAssets[g_AnimatedIconFrameIndex], &asset);
         ReadEncodedAsset(g_SecondAnimatedIconImages[g_AnimatedIconBufferIndex], &asset);
