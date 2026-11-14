@@ -86,15 +86,15 @@ extern u8 g_SoundEffectBankRomStart[];
 extern u8 g_SoundEffectBankRomEnd[];
 
 SoundChannel g_NextSoundChannel = 0;
-static s32 f_SongHandle = NO_HANDLE;
+static musHandle f_SongHandle = NO_HANDLE;
 static s32 f_UnusedWordAfterSongHandle UNUSED = -1;
 // Only the first handle starts as NO_HANDLE
-static s32 f_SoundHandles[SOUND_CHANNEL_COUNT] = {NO_HANDLE};
+static musHandle f_SoundHandles[SOUND_CHANNEL_COUNT] = {NO_HANDLE};
 static u32 f_SoundFadeFramesLeft[SOUND_CHANNEL_COUNT] = {0};
 static f32 f_SoundVolumes[SOUND_CHANNEL_COUNT] = {0.0f};
 // Written with the handles but never read
-static s32 f_SongHandleCopy = NO_HANDLE;
-static s32 f_SoundHandleCopies[SOUND_CHANNEL_COUNT] = {NO_HANDLE};
+static musHandle f_SongHandleCopy = NO_HANDLE;
+static musHandle f_SoundHandleCopies[SOUND_CHANNEL_COUNT] = {NO_HANDLE};
 static SoundId f_EchoingSoundIds[ECHOING_SOUND_COUNT] = {
     0x7B,
     0x7C,
