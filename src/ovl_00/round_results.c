@@ -143,7 +143,6 @@ enum PrizeBracket {
 
 #define RANK_AS_PLACE 0x1000
 #define NOTICE_TITLE_STRIP_HEIGHT 8
-#define NOTICE_SHINE_SIZE 64
 #define NOTICE_SHINE_STEP 18
 #define NOTICE_SHINE_START 16
 #define NOTICE_SHINE_END 40
@@ -1438,7 +1437,7 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_TITLE_TOP 56
 #define TitleStripTop(lift, i) ((lift) + NOTICE_TITLE_TOP + ((i) * NOTICE_TITLE_STRIP_HEIGHT))
 #define NOTICE_TITLE_LIFT 96.0f
-#define NOTICE_SHINE_DSDX TexelRunStep(NOTICE_SHINE_SIZE, NOTICE_TITLE_STRIP_WIDTH)
+#define NOTICE_SHINE_DSDX TexelRunStep(SHINE_SIZE, NOTICE_TITLE_STRIP_WIDTH)
 #define NOTICE_PAN_START 3
 #define NOTICE_PAN_END 60
 #define NOTICE_PAN_MAX 255
@@ -1625,8 +1624,8 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
         ImageBody(f_ResultsShineImage),
         G_IM_FMT_I,
         G_IM_SIZ_8b,
-        NOTICE_SHINE_SIZE,
-        NOTICE_SHINE_SIZE,
+        SHINE_SIZE,
+        SHINE_SIZE,
         0,
         0,
         0,
@@ -1673,16 +1672,14 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
     if (f_NoticeFrameCount >= NOTICE_SHINE_START) {
         if (f_NoticeFrameCount < NOTICE_SHINE_END) {
             shineTexelX = TexelCoordinate(
-                NOTICE_SHINE_SIZE - ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)
+                SHINE_SIZE - ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)
             );
             DrawTextureRect(
                 &gfx,
                 QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
                 QuarterPixels(NOTICE_TITLE_TOP + shineLift + f_CourseNoticeShift),
                 QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
-                QuarterPixels(
-                    NOTICE_TITLE_TOP + shineLift + NOTICE_SHINE_SIZE + f_CourseNoticeShift
-                ),
+                QuarterPixels(NOTICE_TITLE_TOP + shineLift + SHINE_SIZE + f_CourseNoticeShift),
                 G_TX_RENDERTILE,
                 shineTexelX,
                 0,
@@ -1751,8 +1748,8 @@ void UpdateCharacterResultsNotice(void) {
 #define NOTICE_CHARACTER_SHINE_LEFT 88
 #define NOTICE_CHARACTER_SHINE_TOP 52
 #define NOTICE_CHARACTER_SHINE_HEIGHT 56
-#define NOTICE_CHARACTER_SHINE_DSDX TexelRunStep(NOTICE_SHINE_SIZE, 128)
-#define NOTICE_CHARACTER_SHINE_DTDY TexelRunStep(NOTICE_SHINE_SIZE, NOTICE_CHARACTER_SHINE_HEIGHT)
+#define NOTICE_CHARACTER_SHINE_DSDX TexelRunStep(SHINE_SIZE, 128)
+#define NOTICE_CHARACTER_SHINE_DTDY TexelRunStep(SHINE_SIZE, NOTICE_CHARACTER_SHINE_HEIGHT)
 #define NOTICE_CHARACTER_VOICE_FRAME 14
 #define NOTICE_CHARACTER_VOICE_SLOT 1
 
@@ -1993,8 +1990,8 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
             ImageBody(f_ResultsShineImage),
             G_IM_FMT_I,
             G_IM_SIZ_8b,
-            NOTICE_SHINE_SIZE,
-            NOTICE_SHINE_SIZE,
+            SHINE_SIZE,
+            SHINE_SIZE,
             0,
             0,
             0,
@@ -2036,7 +2033,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
         if (f_NoticeTime >= NOTICE_SHINE_START) {
             if (f_NoticeTime < NOTICE_SHINE_END) {
                 shineTexelX = TexelCoordinate(
-                    NOTICE_SHINE_SIZE - ((f_NoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)
+                    SHINE_SIZE - ((f_NoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)
                 );
                 DrawTextureRect(
                     &gfx,
@@ -2622,8 +2619,8 @@ void DrawResultsBanner(Gfx **displayListHead) {
                 ImageBody(f_ResultsShineImage),
                 G_IM_FMT_I,
                 G_IM_SIZ_8b,
-                NOTICE_SHINE_SIZE,
-                NOTICE_SHINE_SIZE,
+                SHINE_SIZE,
+                SHINE_SIZE,
                 0,
                 0,
                 0,
@@ -2663,7 +2660,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                         ),
                         G_TX_RENDERTILE,
                         TexelCoordinate(
-                            NOTICE_SHINE_SIZE -
+                            SHINE_SIZE -
                             ((f_TrophyShineFrame - TROPHY_SHINE_START) * TROPHY_SHINE_SPEED)
                         ),
                         0,

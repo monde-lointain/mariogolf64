@@ -5098,7 +5098,6 @@ void LoadOpeningLogo(void) {
 #define LOGO_SHINE_ORIGIN_FRAME 16
 #define LOGO_SHINE_SPEED 18
 #define LOGO_SHINE_TEXEL_STEP 0x28F
-#define LOGO_SHINE_IMAGE_SIZE 64
 #define LOGO_SHINE_LEFT 10
 #define LOGO_SHINE_TOP 60
 #define LOGO_SHINE_RIGHT 630
@@ -5550,8 +5549,8 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
                 TextureAddress(ImageBody(f_LogoShineImage)),
                 G_IM_FMT_I,
                 G_IM_SIZ_8b,
-                LOGO_SHINE_IMAGE_SIZE,
-                LOGO_SHINE_IMAGE_SIZE,
+                SHINE_SIZE,
+                SHINE_SIZE,
                 0,
                 G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP,

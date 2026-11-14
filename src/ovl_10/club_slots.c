@@ -119,7 +119,6 @@
 #define LOGO_Y 42
 #define LOGO_BOB_STEP 0.2f
 #define LOGO_BOB_HEIGHT 5.0f
-#define SHINE_SIZE 64
 #define SHINE_DELAY 5
 #define SHINE_START_TIME 16
 #define SHINE_SPEED 18
