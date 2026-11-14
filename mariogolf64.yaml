@@ -1107,8 +1107,5 @@ segments:
   - [0x171F500, bin, character_models/metal_mario_palette_3]
   - [0x171F520, bin, character_models/metal_mario_reaction_palette_3]
 
-  - name: padding
-    type: bin
-    start: 0x171F540
-
-  - [0x2000000]
+  # 0xFF fills the rest of the cartridge, which the Makefile's ROM_SIZE pads to
+  - [0x171F540]

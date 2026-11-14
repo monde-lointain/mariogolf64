@@ -118,6 +118,8 @@ LINKED_O_FILTER := $(MATCHING_ONLY_O)
 endif
 
 ROM         := $(BUILD_DIR)/$(TARGET).z64
+# The cartridge's size, which 0xFF fills after the last asset
+ROM_SIZE    := 0x2000000
 ELF         := $(BUILD_DIR)/$(TARGET).elf
 MAP         := $(BUILD_DIR)/$(TARGET).map
 
@@ -338,7 +340,7 @@ $(SHIFTABLE_SYMBOLS): $(SPLAT_YAML) $(SYMBOL_SCRIPTS) tools/fixed_syms.py
 
 # IPL3 boots only a ROM whose header holds the checksum of the code after it
 $(ROM): $(ELF)
-	$(OBJCOPY) -O binary --gap-fill=0xFF $< $@
+	$(OBJCOPY) -O binary --gap-fill=0xFF --pad-to=$(ROM_SIZE) $< $@
 	$(PYTHON) -m ipl3checksum sum --update $@ > /dev/null
 
 $(ELF): $(O_FILES) $(LD_SCRIPTS)

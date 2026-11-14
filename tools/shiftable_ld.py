@@ -11,9 +11,9 @@ The shiftable script packs each region of base RAM after the largest
 overlay of the region before it, the first after main, and defines
 overlay_regions_VRAM_END, where the heap can begin, after the last. In ROM,
 each segment follows the one before it, in the original's order, as the
-code takes every ROM address from the script's symbols, and the padding
-after the assets is dropped. Other segments, such as an overlay of the
-Expansion Pak's memory, keep their addresses in RAM.
+code takes every ROM address from the script's symbols. Other segments,
+such as an overlay of the Expansion Pak's memory, keep their addresses in
+RAM.
 
 The routines that the build links from archives, such as the libgcc
 helpers that a modern GCC calls, go at the end of main's code, where
@@ -34,7 +34,6 @@ ALIGNMENT = 16
 
 MAIN = "main"
 BUILD_DATE = "build_date"
-PADDING = "padding"
 
 MAIN_TEXT_END = f"        {MAIN}_TEXT_END = .;\n"
 ARCHIVE_SECTIONS = "        *.a:*(.text* .rodata* .data*);\n"
@@ -106,7 +105,7 @@ def lay_out(script: str) -> str:
         blocks[main_index + 1 :], names[main_index + 1 :], strict=True
     ):
         vram = block_vram(block)
-        if name in {BUILD_DATE, PADDING}:
+        if name == BUILD_DATE:
             continue
         if name is None:
             commands.append(block)
