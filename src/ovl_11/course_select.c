@@ -123,7 +123,7 @@ enum PlanksState {
 #define PLANK_SLIDE_MAX 480
 #define PLANK_SLIDE_STEP 24
 
-#define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
+#define MESSAGE_FIRST_RING_SHOT_HOLE 0x4B
 
 void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY);
 void DrawRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY);
@@ -825,7 +825,7 @@ void DrawRingShotSelect(Gfx **displayListHead) {
             SCREEN_WIDTH / 2,
             42,
             (memory->courseIndex * RING_SHOT_HOLE_COUNT) + memory->holeIndex +
-                RING_SHOT_TEXT_FIRST_IMAGE,
+                MESSAGE_FIRST_RING_SHOT_HOLE,
             TEXT_SLOT_LARGE_FONT,
             stripIndex,
             TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER,

@@ -180,7 +180,7 @@ enum ModeName {
 #define HOLE_OUT_TEXT_LEFT 128
 #define HOLE_OUT_TEXT_TOP 212
 #define FIRST_RECORD_TEXT_SLOT 2
-#define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
+#define MESSAGE_FIRST_RING_SHOT_HOLE 0x4B
 
 #define REPLAY_LABEL_ALBATROSS 0
 #define REPLAY_LABEL_HOLE_IN_ONE 1
@@ -2139,7 +2139,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 SetTextSlot(
                     rowOffsets[index] + HOLE_TEXT_LEFT,
                     HOLE_TEXT_TOP + (index * REPLAY_ROW_SPACING),
-                    text + RING_SHOT_TEXT_FIRST_IMAGE,
+                    text + MESSAGE_FIRST_RING_SHOT_HOLE,
                     TEXT_SLOT_LARGE_FONT,
                     FIRST_RECORD_TEXT_SLOT + index,
                     TEXT_FLAG_DRAWN_BY_OWNER,
