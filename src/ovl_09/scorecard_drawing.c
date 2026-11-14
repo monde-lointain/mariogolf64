@@ -2695,6 +2695,8 @@ void DrawScoresPage(Gfx **displayListHead) {
     s32 cellAlpha;
     s32 firstHole = GetFirstHoleIndex();
     s32 rowSpacing;
+    // Holes up or down in a match, the stroke total in skins, or a score to
+    // par. Splitting it changes the original's register allocation.
     s32 standing;
     s32 colorIndex;
     s32 extraTop;
