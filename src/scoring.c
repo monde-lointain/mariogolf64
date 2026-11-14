@@ -12,7 +12,7 @@
 #include "scene.h"
 
 #define DEBUG_ROUND_HOLE_COUNT 2
-#define NO_BEST_SCORE 0x40000000
+#define HIGHER_THAN_ANY_SCORE 0x40000000
 
 s32 GetFirstHoleIndex(void) {
     return (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) ? HOLES_PER_NINE : 0;
@@ -233,7 +233,7 @@ s32 GetGroupHoleResult(s8 *playerResults) {
     s32 outCount;
     s32 playerIndex;
 
-    bestScore = NO_BEST_SCORE;
+    bestScore = HIGHER_THAN_ANY_SCORE;
     bestPlayerIndex = -1;
     isDecided = FALSE;
     tieCount = 0;
@@ -343,7 +343,7 @@ s32 GetHolingOutStakes(s32 playerIndex) {
         case GAME_MODE_SKINS_MATCH:
         case GAME_MODE_CLUB_SLOTS:
             hasAnyFinished = FALSE;
-            bestScore = NO_BEST_SCORE;
+            bestScore = HIGHER_THAN_ANY_SCORE;
             stakes = HOLING_OUT_WINS_HOLE;
             for (otherIndex = 0; otherIndex < g_GameState.playerCount; otherIndex++) {
                 if (g_Players[otherIndex].holeStatus == HOLE_STATUS_HOLED_OUT) {
