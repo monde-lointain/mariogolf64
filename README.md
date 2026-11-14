@@ -95,3 +95,27 @@ basedpyright and looks for dead code with vulture, using the settings in
 The game was compiled with KMC GCC 2.7.2 at `-O2`. Code lives in a main
 segment loaded at `0x80025C00` and in overlays (“module sets”) that the
 game's overlay manager loads on demand; see `mariogolf64.yaml`.
+
+The sources are grouped by the part of the game they serve, not by the
+segment they load in; `mariogolf64.yaml` says which segment each file is
+linked into. `include/` has the same directories as `src/`, and a header
+is included by its directory, as in `"course/terrain.h"`.
+
+| Directory | Contents |
+| --- | --- |
+| `system/` | Entry point, boot, threads, heap, overlays, asset archive, crash screen |
+| `controllers/` | Controllers, the Rumble Pak and the Transfer Pak |
+| `math/` | Angles, random numbers, curves, matrices and the C math library |
+| `screen/` | RCP setup, display lists, screen fades and wipes, the sky |
+| `camera/` | The cameras, framing and projection |
+| `text/` | Messages and fonts |
+| `audio/` | Sound effects and music |
+| `characters/` | Character models, animation, voices and reactions |
+| `course/` | Courses and holes: loading, terrain, collision, pins, billboards |
+| `shot/` | Clubs, the ball's flight and the shot's effects |
+| `round/` | Turns, players, scoring, the round's HUD and results, tournaments |
+| `save/` | Saved data, SRAM, awards and records |
+| `menus/` | The title screen and the menus outside of play |
+| `cinematics/` | Boot logos, the opening and the staff roll |
+| `debug/` | Debug text, flags, the performance meter and the hole editor |
+| `game/` | The game loop and its scenes |
