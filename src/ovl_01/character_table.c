@@ -9,7 +9,6 @@
 #include "character.h"
 #include "compiler.h"
 #include "gbi_helpers.h"
-#include "hole_display.h"
 #include "main_menu.h"
 #include "menu.h"
 #include "menu_arrows.h"
@@ -19,6 +18,7 @@
 #include "save.h"
 #include "save_screens.h"
 #include "screen.h"
+#include "sky_and_hud_animations.h"
 #include "sound.h"
 
 #define TABLE_COLUMN_COUNT 14

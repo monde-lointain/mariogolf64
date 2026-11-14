@@ -11,7 +11,6 @@
 #include "game.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
-#include "hole_display.h"
 #include "language.h"
 #include "main_menu.h"
 #include "math_util.h"
@@ -21,6 +20,7 @@
 #include "menu_number.h"
 #include "save.h"
 #include "screen.h"
+#include "sky_and_hud_animations.h"
 #include "sound.h"
 #include "text.h"
 

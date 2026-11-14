@@ -1,5 +1,5 @@
-#ifndef HOLE_DISPLAY_H
-#define HOLE_DISPLAY_H
+#ifndef SKY_AND_HUD_ANIMATIONS_H
+#define SKY_AND_HUD_ANIMATIONS_H
 
 #include <ultra64.h>
 

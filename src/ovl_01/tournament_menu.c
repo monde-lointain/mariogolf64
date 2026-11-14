@@ -11,7 +11,6 @@
 #include "game_flags.h"
 #include "game_state.h"
 #include "gbi_helpers.h"
-#include "hole_display.h"
 #include "language.h"
 #include "main_menu.h"
 #include "menu.h"
@@ -22,6 +21,7 @@
 #include "save.h"
 #include "screen.h"
 #include "screen_layers.h"
+#include "sky_and_hud_animations.h"
 #include "sound.h"
 #include "text.h"
 

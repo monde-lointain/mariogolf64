@@ -125,7 +125,7 @@ segments:
       - [0x52FF0, c, fireworks]
       - [0x53D10, c, effects]
       - [0x5B620, c, round_hud]
-      - [0x68500, c, hole_display]
+      - [0x68500, c, sky_and_hud_animations]
       - [0x70E10, c, reaction]
       - [0x740A0, c, password]
       - [0x74890, c, sram]
@@ -393,7 +393,7 @@ segments:
       - [0x9FA60, .data, fireworks]
       - [0xA06B0, .data, effects]
       - [0xA0870, .data, round_hud]
-      - [0xA12E0, .data, hole_display]
+      - [0xA12E0, .data, sky_and_hud_animations]
       - [0xA27A0, .data, reaction]
       - [0xA27F0, .data, password]
       - [0xA2AB0, .data, ../lib/libmus/src/player]
@@ -483,7 +483,7 @@ segments:
       - [0xACD00, .rodata, fireworks]
       - [0xACD10, .rodata, effects]
       - [0xACEA0, .rodata, round_hud]
-      - [0xAD0E0, .rodata, hole_display]
+      - [0xAD0E0, .rodata, sky_and_hud_animations]
       - [0xAD280, .rodata, reaction]
       - [0xAD340, .rodata, password]
       - [0xAD3B0, .rodata, ../lib/libmus/src/player]
@@ -542,7 +542,7 @@ segments:
       - { type: .bss, vram: 0x800E1D20, name: curve }
       - { type: .bss, vram: 0x800E1D60, name: effects }
       - { type: .bss, vram: 0x800E1DD0, name: round_hud }
-      - { type: .bss, vram: 0x800E3980, name: hole_display }
+      - { type: .bss, vram: 0x800E3980, name: sky_and_hud_animations }
       - { type: .bss, vram: 0x800E4C50, name: reaction }
       - { type: .bss, vram: 0x800E4CD0, name: ../lib/libnusys/src/nuboot }
       - { type: .bss, vram: 0x800E7030, name: ../lib/libmus/src/player }

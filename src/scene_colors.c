@@ -7,10 +7,10 @@
 #include "compiler.h"
 #include "game.h"
 #include "gbi_helpers.h"
-#include "hole_display.h"
 #include "hole_setup.h"
 #include "language.h"
 #include "play.h"
+#include "sky_and_hud_animations.h"
 
 #define SHADED_QUAD_START QUAD_VERTEX_COUNT
 

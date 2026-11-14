@@ -16,7 +16,6 @@
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "heap.h"
-#include "hole_display.h"
 #include "language.h"
 #include "math_util.h"
 #include "menu.h"
@@ -24,6 +23,7 @@
 #include "round_hud.h"
 #include "screen.h"
 #include "screen_layers.h"
+#include "sky_and_hud_animations.h"
 #include "sound.h"
 #define CLUB_SLOTS_DONE 0
 #define CLUB_SLOTS_STARTING 1

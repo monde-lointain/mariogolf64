@@ -4,9 +4,9 @@
 
 #include "compiler.h"
 #include "controller.h"
-#include "hole_display.h"
 #include "overlay_manager.h"
 #include "scene.h"
+#include "sky_and_hud_animations.h"
 #include "sound.h"
 #include "text.h"
 

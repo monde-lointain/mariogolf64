@@ -8,7 +8,6 @@
 #include "character_slot.h"
 #include "compiler.h"
 #include "gbi_helpers.h"
-#include "hole_display.h"
 #include "hole_loader.h"
 #include "language.h"
 #include "main_menu.h"
@@ -16,6 +15,7 @@
 #include "menu.h"
 #include "menu_memory.h"
 #include "screen.h"
+#include "sky_and_hud_animations.h"
 #include "sound.h"
 #include "text.h"
 
