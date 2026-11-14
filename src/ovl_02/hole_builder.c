@@ -2418,22 +2418,22 @@ void BuildHole(s32 courseRecordIndex, s32 holeIndex) {
     osSyncPrintf("Ok!\n");
 }
 
-void SaveHoleFiles(s32 course, s32 hole) {
+void SaveHoleFiles(s32 courseNumber, s32 holeNumber) {
     char path[HOST_PATH_SIZE];
     s32 column;
     s32 row;
 
-    sprintf(path, "bin/course%d/hole%d%2.2d.vtx", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.vtx", courseNumber, courseNumber, holeNumber);
     WriteHostFile(path, HOLE_VERTICES_FILE_SIZE);
-    sprintf(path, "bin/course%d/hole%d%2.2d.dtx", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.dtx", courseNumber, courseNumber, holeNumber);
     WriteHostFile(path, HOLE_MIDPOINTS_FILE_SIZE);
-    sprintf(path, "bin/course%d/hole%d%2.2d.tre", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.tre", courseNumber, courseNumber, holeNumber);
     WriteHostFile(path, HOLE_TREES_FILE_SIZE);
-    sprintf(path, "bin/course%d/hole%d%2.2d.hol", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.hol", courseNumber, courseNumber, holeNumber);
     WriteHostFile(path, HOLE_SETUP_FILE_SIZE);
-    sprintf(path, "bin/course%d/hole%d%2.2d.pnt", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.pnt", courseNumber, courseNumber, holeNumber);
     WriteHostFile(path, HOLE_POINTS_FILE_SIZE);
-    sprintf(path, "bin/course%d/hole%d%2.2d.tri", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.tri", courseNumber, courseNumber, holeNumber);
     WriteHostFile(path, HOLE_TRIANGLES_FILE_SIZE);
     if (f_IsCodeMapCleaned) {
         LoadBackupCodeMap();
@@ -2449,7 +2449,7 @@ void SaveHoleFiles(s32 course, s32 hole) {
         }
     }
 
-    sprintf(path, "bin/course%d/hole%d%2.2d.att", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.att", courseNumber, courseNumber, holeNumber);
     if (WriteHostFile(path, MAP_COLUMN_COUNT * MAP_ROW_COUNT) == HOST_FILE_OK) {
         f_BuildCursor = f_BuildBuffer;
     }

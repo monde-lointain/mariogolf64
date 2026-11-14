@@ -19,7 +19,7 @@ extern u8 g_LoaderThreadStack[LOADER_THREAD_STACK_SIZE];
 s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 countMax);
 f32 MeasureGroundTiles(void);
 void BuildHole(s32 courseRecordIndex, s32 holeIndex);
-void SaveHoleFiles(s32 course, s32 hole);
+void SaveHoleFiles(s32 courseNumber, s32 holeNumber);
 void ToggleGroundTileBorders(void);
 void ShadeGround(s32 shadeVariant);
 
