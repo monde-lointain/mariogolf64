@@ -1176,8 +1176,8 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
 #define OTHER_EFFECT_VELOCITY_KEPT 0.95f
 #define SMOKE_WIND_SHARE 0.1f
 #define PAST_GROUND_FADE_SCALE 4.0f
-#define SPIN_FALL_SPEED 100.0f
-#define SPIN_PER_SPEED (M_PI * 0.001f)
+#define TILT_FALL_SPEED 100.0f
+#define TILT_PER_SPEED (M_PI * 0.001f)
 #define HIGH_DEBRIS_FAST_RISE_SPEED (-1.5f)
 #define HIGH_DEBRIS_SLOW_RISE_SPEED (-0.15f)
 #define OTHER_EFFECT_FAST_RISE_SPEED (-1.5f)
@@ -1285,8 +1285,8 @@ void UpdateEffects(void) {
 
             effect->alpha += effect->alphaStep;
             effect->scale += effect->scaleStep;
-            if (effect->velocity[AXIS_Y] < SPIN_FALL_SPEED) {
-                effect->tilt -= (effect->velocity[AXIS_Y] - SPIN_FALL_SPEED) * SPIN_PER_SPEED;
+            if (effect->velocity[AXIS_Y] < TILT_FALL_SPEED) {
+                effect->tilt -= (effect->velocity[AXIS_Y] - TILT_FALL_SPEED) * TILT_PER_SPEED;
             }
 
             if (effect->tilt > FULL_TURN_RADIANS) {

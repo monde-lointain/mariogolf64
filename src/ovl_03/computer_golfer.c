@@ -1994,7 +1994,7 @@ static const char f_SimFaultText[] = "AI Sim Fault!";
 #define FAR_FROM_TARGET 0x40000000
 #define MISS_EVALUATION_SCALE 0.006535948f
 #define APPROACH_TOLERANCE_SCALE 0.0065104165f
-#define LONG_PUTT_DISTANCE 0x7800
+#define LONG_PUTT_DISTANCE_MIN 0x7800
 #define PUTT_DRIFT_LIMIT 0xF000
 #define AIM_CHANGE_STEP 0x400
 #define EXCLUDED_SECTOR_COUNT 9
@@ -2168,7 +2168,7 @@ s32 StepTrialShot(void) {
                 IntLength2D(
                     f_Shot.ballPosition[AXIS_X] - f_TrialEndPoint[AXIS_X],
                     f_Shot.ballPosition[AXIS_Z] - f_TrialEndPoint[AXIS_Z]
-                ) > LONG_PUTT_DISTANCE) {
+                ) > LONG_PUTT_DISTANCE_MIN) {
                 goto EVALUATE;
             }
         }
