@@ -1816,7 +1816,7 @@ SETTLE:
 s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *shot) {
     s32 percentRange[2];
     Club *club;
-    ImpactEffect *entry;
+    ImpactEffect *impactEffect;
     s32 groundHeight;
     s32 speed;
     s32 sideSign;
@@ -1860,7 +1860,7 @@ s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLau
     }
 
     club = &f_OpeningClubs[shot->clubSlot];
-    entry = &f_OpeningImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT];
+    impactEffect = &f_OpeningImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT];
     rumbles = f_OpeningImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT].rumbles;
     if ((club->surfaceMask & CLUB_SURFACE_GREEN) &&
         simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
@@ -1868,7 +1868,7 @@ s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLau
     }
     else {
         speed = GetClubPower(club, shot->shotMode) *
-            (shot->power + (entry->speedChange * (LAUNCH_SCALE_ONE / SPEED_CHANGE_UNITS))) /
+            (shot->power + (impactEffect->speedChange * (LAUNCH_SCALE_ONE / SPEED_CHANGE_UNITS))) /
             LAUNCH_POWER_MAX;
         if (speed <= 0) {
             speed = LAUNCH_SPEED_MIN;
@@ -1889,7 +1889,7 @@ s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLau
         speed = speed * percent / HALF_PERCENTS_PER_ONE;
     }
 
-    pitch = (club->pitch + entry->pitchChange) * DEGREES_TO_RADIANS;
+    pitch = (club->pitch + impactEffect->pitchChange) * DEGREES_TO_RADIANS;
     if (pitch >= 0.0f) {
         pitch = 0.0f;
     }
@@ -1899,10 +1899,10 @@ s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLau
     yawRadians = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;
     groundHeight = club->sideSpin;
     groundHeight *= CLUB_SIDE_SPIN_SCALE;
-    simulation->sideSpin =
-        (((((sideSign * entry->sideSpinChange) + shot->offsetX) * OPENING_OFFSET_SIDE_SPIN_SCALE) +
-             (sideSign * groundHeight)) *
-            speed) *
+    simulation->sideSpin = (((((sideSign * impactEffect->sideSpinChange) + shot->offsetX) *
+                                 OPENING_OFFSET_SIDE_SPIN_SCALE) +
+                                (sideSign * groundHeight)) *
+                               speed) *
         SIDE_SPIN_PER_SPEED;
     simulation->spinSize = 0.0f;
     spinBase = club->spin * CLUB_SPIN_BASE_SCALE;

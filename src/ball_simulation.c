@@ -2187,7 +2187,7 @@ s32 GetAimSlopeAngle(Player *player, ShotLaunch *shot);
 s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *shot) {
     s32 percentRange[2];
     Club *club;
-    ImpactEffect *entry;
+    ImpactEffect *impactEffect;
     s32 impactTiming;
     s32 groundHeight;
     s32 speed;
@@ -2265,7 +2265,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
     }
 
     if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
-        entry = &f_ImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT];
+        impactEffect = &f_ImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT];
         rumbles = f_ImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT].rumbles;
     }
     else {
@@ -2280,16 +2280,16 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
         }
 
         if (impactTiming < -IMPACT_TIMING_ENTRY_LIMIT) {
-            entry = &f_EarlyImpactEffect;
+            impactEffect = &f_EarlyImpactEffect;
         }
         else if (impactTiming > IMPACT_TIMING_ENTRY_LIMIT) {
-            entry = &f_LateImpactEffect;
+            impactEffect = &f_LateImpactEffect;
         }
         else {
-            entry = &f_ImpactEffects[row][impactTiming + IMPACT_TIMING_ENTRY_LIMIT];
+            impactEffect = &f_ImpactEffects[row][impactTiming + IMPACT_TIMING_ENTRY_LIMIT];
         }
 
-        rumbles = entry->rumbles;
+        rumbles = impactEffect->rumbles;
     }
 
     if ((club->surfaceMask & CLUB_SURFACE_GREEN) &&
@@ -2300,7 +2300,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
         speed = GetClubPower(club, shot->shotMode);
         speed = speed *
             (shot->power *
-                ((entry->speedChange * (LAUNCH_SCALE_ONE / SPEED_CHANGE_UNITS)) +
+                ((impactEffect->speedChange * (LAUNCH_SCALE_ONE / SPEED_CHANGE_UNITS)) +
                     LAUNCH_SCALE_ONE) /
                 LAUNCH_SCALE_ONE) /
             LAUNCH_POWER_MAX;
@@ -2323,7 +2323,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
         speed = speed * percent / HALF_PERCENTS_PER_ONE;
     }
 
-    pitch = (club->pitch + entry->pitchChange) * DEGREES_TO_RADIANS;
+    pitch = (club->pitch + impactEffect->pitchChange) * DEGREES_TO_RADIANS;
     if (pitch >= 0.0f) {
         pitch = 0.0f;
     }
@@ -2378,7 +2378,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
         yaw = shot->heading + (crossSlope / CROSS_SLOPE_YAW_DIVISOR) +
             (sideSign *
                 ((club->deflection[shot->shotMode] * shot->power / LAUNCH_POWER_MAX) +
-                    (entry->yawChange * club->mishitScale)));
+                    (impactEffect->yawChange * club->mishitScale)));
         yawRadians = (u16)yaw * BINARY_ANGLE_TO_RADIANS;
     }
 
@@ -2403,14 +2403,15 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
     else {
         GetSurfaceTraits(simulation->launchSurface);
         simulation->sideSpin =
-            (((sideSign * entry->sideSpinChange * club->mishitScale) / MISHIT_SIDE_SPIN_DIVISOR) +
+            (((sideSign * impactEffect->sideSpinChange * club->mishitScale) /
+                 MISHIT_SIDE_SPIN_DIVISOR) +
                 (shot->offsetX * (club->mishitScale * OFFSET_SIDE_SPIN_PER_MISHIT)) + slopeSpin +
                 (sideSign * CLUB_SIDE_SPIN_SCALE * club->sideSpin)) *
             (speed * launchScale * launchScale) * SIDE_SPIN_PER_SPEED;
         if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
             simulation->spinSpeed =
                 ((((club->spin * STROKE_SPIN_SCALE) + STROKE_SPIN_OFFSET) * STROKE_SPIN_PER_OFFSET *
-                     (entry->spinChange + shot->offsetY)) -
+                     (impactEffect->spinChange + shot->offsetY)) -
                     (club->spin * CLUB_SPIN_BASE_SCALE)) *
                 speed * SPIN_PER_SPEED;
             speed = speed * launchScale;
