@@ -17,12 +17,11 @@
 #define LOG_BOTTOM_MARGIN 3
 #define LOG_SHOWN_LINE_COUNT 10
 
-#define GLYPH_SIZE 8
 #define GLYPHS_PER_FONT_ROW 32
 #define FIRST_GLYPH ' '
 #define LAST_GLYPH 'z'
 #define PIXELS_PER_FONT_WORD 4
-#define FONT_ROW_WORD_COUNT (GLYPHS_PER_FONT_ROW * GLYPH_SIZE / PIXELS_PER_FONT_WORD)
+#define FONT_ROW_WORD_COUNT (GLYPHS_PER_FONT_ROW * DEBUG_GLYPH_SIZE / PIXELS_PER_FONT_WORD)
 #define FONT_WIDTH 256
 #define FONT_HEIGHT 24
 #define FONT_INK 0xF
@@ -112,16 +111,16 @@ void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
 
         character -= FIRST_GLYPH;
         glyphFontIndex =
-            ((character & (GLYPHS_PER_FONT_ROW - 1)) * (GLYPH_SIZE / PIXELS_PER_FONT_WORD)) |
-            ((character / GLYPHS_PER_FONT_ROW) * (GLYPH_SIZE * FONT_ROW_WORD_COUNT));
+            ((character & (GLYPHS_PER_FONT_ROW - 1)) * (DEBUG_GLYPH_SIZE / PIXELS_PER_FONT_WORD)) |
+            ((character / GLYPHS_PER_FONT_ROW) * (DEBUG_GLYPH_SIZE * FONT_ROW_WORD_COUNT));
         pixelRow = 0;
         fontIndex = glyphFontIndex;
         textureIndex = index;
-        for (; pixelRow < GLYPH_SIZE; pixelRow++) {
+        for (; pixelRow < DEBUG_GLYPH_SIZE; pixelRow++) {
             wordColumn = 0;
             row = textureIndex * 2;
             rowFontIndex = fontIndex;
-            for (; wordColumn < GLYPH_SIZE / PIXELS_PER_FONT_WORD; wordColumn++) {
+            for (; wordColumn < DEBUG_GLYPH_SIZE / PIXELS_PER_FONT_WORD; wordColumn++) {
                 texture[row + wordColumn] = f_DebugFont[rowFontIndex + wordColumn];
             }
 
@@ -161,15 +160,16 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
     }
 
     character -= FIRST_GLYPH;
-    glyphStart = ((character & (GLYPHS_PER_FONT_ROW - 1)) * (GLYPH_SIZE / PIXELS_PER_FONT_WORD)) +
-        ((character / GLYPHS_PER_FONT_ROW) * (GLYPH_SIZE * FONT_ROW_WORD_COUNT));
+    glyphStart =
+        ((character & (GLYPHS_PER_FONT_ROW - 1)) * (DEBUG_GLYPH_SIZE / PIXELS_PER_FONT_WORD)) +
+        ((character / GLYPHS_PER_FONT_ROW) * (DEBUG_GLYPH_SIZE * FONT_ROW_WORD_COUNT));
     pixelRow = 0;
     if (column >= TEXT_COLUMN_COUNT || row >= TEXT_ROW_COUNT) {
         return;
     }
 
-    for (; pixelRow < GLYPH_SIZE; pixelRow++) {
-        for (pixelColumn = 0; pixelColumn < GLYPH_SIZE; pixelColumn++) {
+    for (; pixelRow < DEBUG_GLYPH_SIZE; pixelRow++) {
+        for (pixelColumn = 0; pixelColumn < DEBUG_GLYPH_SIZE; pixelColumn++) {
             color = ((f_DebugFont
                              [glyphStart + (pixelRow * FONT_ROW_WORD_COUNT) +
                                  (pixelColumn / PIXELS_PER_FONT_WORD)] >>
@@ -177,8 +177,8 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
                         0xF) == FONT_INK ?
                 MESSAGE_INK_COLOR :
                 MESSAGE_PAPER_COLOR;
-            pixelIndex = (((row * GLYPH_SIZE) + pixelRow) * SCREEN_WIDTH) +
-                ((column * GLYPH_SIZE) + pixelColumn);
+            pixelIndex = (((row * DEBUG_GLYPH_SIZE) + pixelRow) * SCREEN_WIDTH) +
+                ((column * DEBUG_GLYPH_SIZE) + pixelColumn);
             currentFramebuffer[pixelIndex] = color;
             nextFramebuffer[pixelIndex] = color;
         }
@@ -236,13 +236,13 @@ void DrawDebugText(Gfx **displayListHead) {
 
             gSPTextureRectangle(
                 gfx++,
-                QuarterPixels(column * GLYPH_SIZE),
-                QuarterPixels(row * GLYPH_SIZE),
-                QuarterPixels((column * GLYPH_SIZE) + GLYPH_SIZE),
-                QuarterPixels((row * GLYPH_SIZE) + GLYPH_SIZE),
+                QuarterPixels(column * DEBUG_GLYPH_SIZE),
+                QuarterPixels(row * DEBUG_GLYPH_SIZE),
+                QuarterPixels((column * DEBUG_GLYPH_SIZE) + DEBUG_GLYPH_SIZE),
+                QuarterPixels((row * DEBUG_GLYPH_SIZE) + DEBUG_GLYPH_SIZE),
                 G_TX_RENDERTILE,
-                TexelCoordinate((glyph & 0x1F) * GLYPH_SIZE),
-                TexelCoordinate((glyph >> 5) * GLYPH_SIZE),
+                TexelCoordinate((glyph & 0x1F) * DEBUG_GLYPH_SIZE),
+                TexelCoordinate((glyph >> 5) * DEBUG_GLYPH_SIZE),
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
