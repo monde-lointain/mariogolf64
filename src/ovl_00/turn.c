@@ -2788,6 +2788,13 @@ void ShowHoleOutBanner(s32 playerIndex) {
 #define STATE_ERROR_TEXT_COLUMN 20
 #define STATE_ERROR_TEXT_ROW 2
 
+// After a hole out, frames into the state at which the song plays and the
+// banner shows.
+#define HOLE_OUT_SONG_FRAME 1
+#define ONLOOKERS_BANNER_CLEAR_FRAME 29
+#define ONLOOKERS_BANNER_FRAME 30
+#define LONG_PUTT_BANNER_FRAME 29
+
 void UpdateTurns(void) {
     s32 playerIndex;
     PlayerState state;
@@ -4160,7 +4167,7 @@ void UpdateTurns(void) {
                         f_ShotLaunch.power >= LAUNCH_POWER_MAX &&
                         !(GetClub(f_ShotLaunch.clubSlot)->surfaceMask & CLUB_SURFACE_GREEN) &&
                         RateShotLength() == SHOT_LENGTH_FULL) {
-                        StartBanner(0);
+                        StartBanner(BANNER_NICE_SHOT);
                     }
                 }
                 else {
@@ -4279,28 +4286,28 @@ void UpdateTurns(void) {
 
                 if (g_TurnBallSimulation.isHoledOut) {
                     if (GetEndReaction() == END_REACTION_ONLOOKERS) {
-                        if (f_StateFrameCounts[playerIndex] == 1) {
+                        if (f_StateFrameCounts[playerIndex] == HOLE_OUT_SONG_FRAME) {
                             PlayHoleOutSong(playerIndex);
                         }
 
-                        if (f_StateFrameCounts[playerIndex] == 29) {
-                            StartBanner(-1);
+                        if (f_StateFrameCounts[playerIndex] == ONLOOKERS_BANNER_CLEAR_FRAME) {
+                            StartBanner(BANNER_NONE);
                         }
 
-                        if (f_StateFrameCounts[playerIndex] == 30) {
+                        if (f_StateFrameCounts[playerIndex] == ONLOOKERS_BANNER_FRAME) {
                             ShowHoleOutBanner(playerIndex);
                         }
                     }
                     else if (GetEndReaction() == END_REACTION_LONG_PUTT) {
-                        if (f_StateFrameCounts[playerIndex] == 1) {
+                        if (f_StateFrameCounts[playerIndex] == HOLE_OUT_SONG_FRAME) {
                             PlayHoleOutSong(playerIndex);
                         }
 
-                        if (f_StateFrameCounts[playerIndex] == 29) {
+                        if (f_StateFrameCounts[playerIndex] == LONG_PUTT_BANNER_FRAME) {
                             ShowHoleOutBanner(playerIndex);
                         }
                     }
-                    else if (f_StateFrameCounts[playerIndex] == 1) {
+                    else if (f_StateFrameCounts[playerIndex] == HOLE_OUT_SONG_FRAME) {
                         PlayHoleOutSong(playerIndex);
                         ShowHoleOutBanner(playerIndex);
                     }
@@ -4313,7 +4320,7 @@ void UpdateTurns(void) {
                 if (f_IsReplayRequested) {
                     nextState = PLAYER_STATE_STARTING_SWING;
                     StartLandingReaction(-1);
-                    StartBanner(-1);
+                    StartBanner(BANNER_NONE);
                 }
                 else if (isCameraDone) {
                     Player *player;
@@ -4407,7 +4414,7 @@ void UpdateTurns(void) {
                     }
                     else {
                         FreeCharacterAndReactionLight(0);
-                        StartBanner(-1);
+                        StartBanner(BANNER_NONE);
                         if (g_GameState.replayKind != REPLAY_KIND_NONE &&
                             g_Players[playerIndex].strokeCount >= g_ReplayStrokeCount) {
                             nextState = PLAYER_STATE_STARTING_REACTION;
@@ -4638,7 +4645,7 @@ void UpdateTurns(void) {
                 areCallsAllowed = FALSE;
                 f_ShouldUpdateReaction = TRUE;
                 if (f_StateFrameCounts[playerIndex] == f_StateEventFrame - REACTION_HOLD_FRAMES) {
-                    StartBanner(-1);
+                    StartBanner(BANNER_NONE);
                 }
 
                 if (g_HoleSetup.conditions.sceneColorIndex == SCENE_COLOR_INDEX_SUDDEN_DEATH) {
@@ -4824,7 +4831,7 @@ void UpdateTurns(void) {
 
                 CheckRingShotClear(playerIndex);
                 if (f_StateFrameCounts[playerIndex] == 1) {
-                    StartBanner(-1);
+                    StartBanner(BANNER_NONE);
                     g_IsHudTurnAwayRequested = TRUE;
                     if (g_GameState.replayKind != REPLAY_KIND_NONE) {
                         nextState = PLAYER_STATE_HOLE_DONE;
@@ -4984,7 +4991,7 @@ void UpdateTurns(void) {
                 }
 
                 if (f_StateFrameCounts[playerIndex] == OUT_PLAYER_SHOWN_FRAMES) {
-                    StartBanner(-1);
+                    StartBanner(BANNER_NONE);
                     nextState = PLAYER_STATE_FINDING_OUT_PLAYER;
                     ClearDebugText();
                     f_StateFrameCounts[playerIndex] = 0;
