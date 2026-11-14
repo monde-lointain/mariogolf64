@@ -2761,7 +2761,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
 
 void UpdateTurns(void) {
     s32 playerIndex;
-    s32 state;
+    PlayerState state;
     PlayerState nextState;
     Boolean areCallsAllowed;
     s32 skipStep;
