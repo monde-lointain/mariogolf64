@@ -377,7 +377,7 @@ static ImageAsset *f_BestShotFaces[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT
 static ImageAsset **f_BestShotsCourseIcons;
 static ImageAsset *f_BestShotsNamePlate;
 static ImageAsset *f_BestShotsCursorBox;
-static u8 *f_ScoreLabels;
+static ImageAsset *f_ScoreLabels;
 static s16 f_BestShotRecords[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 
 s16 g_ChosenHandicaps[PLAYER_COUNT_MAX];
@@ -2790,8 +2790,8 @@ void DrawScoreLabel(Gfx **displayListHead, s32 left, s32 top, s32 labelIndex) {
     }
 
     image = f_ScoreLabels + (labelIndex * PLAYER_STATS_IMAGE_SIZE);
-    width = image[IMAGE_WIDTH_LOW_BYTE];
-    height = image[IMAGE_HEIGHT_LOW_BYTE];
+    width = ReadSmallImageWidth(image);
+    height = ReadSmallImageHeight(image);
 
     gDPLoadTLUT_pal16(gfx++, 0, image[IMAGE_HEADER_SIZE] & ~7);
     gDPPipeSync(gfx++);

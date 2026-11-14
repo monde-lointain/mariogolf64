@@ -104,8 +104,8 @@ static Vtx f_MonkeyVertices[8] = {
     {{{1, -6, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 
-static u8 *f_CheepCheepImages[2];
-static u8 *f_MonkeyImage;
+static ImageAsset *f_CheepCheepImages[2];
+static ImageAsset *f_MonkeyImage;
 
 HoleCreature f_HoleCreatures[HOLE_CREATURE_COUNT];
 

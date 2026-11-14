@@ -147,11 +147,11 @@ typedef struct ClubSlots {
     s32 resultTime;
     Vtx *reelVertices;
     Vtx *shadeVertices;
-    u8 *machineImage;
-    u8 *buttonsImage;
-    u8 *startImage;
-    u8 *symbolImages;
-    u8 *faceImages[PLAYER_COUNT_MAX][FACE_BUFFER_COUNT];
+    ImageAsset *machineImage;
+    ImageAsset *buttonsImage;
+    ImageAsset *startImage;
+    ImageAsset *symbolImages;
+    ImageAsset *faceImages[PLAYER_COUNT_MAX][FACE_BUFFER_COUNT];
 } ClubSlots;
 
 void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scale);
@@ -966,7 +966,7 @@ void DrawClubSlots(Gfx **displayListHead) {
     for (topOrPlayerIndex = 0; topOrPlayerIndex != g_GameState.playerCount; topOrPlayerIndex++) {
         LoadLargePalette(&gfx, g_PlayerFacePalettes[topOrPlayerIndex]);
         if (topOrPlayerIndex == f_Slots->playerIndex) {
-            u8 *faceImage = f_Slots->faceImages[topOrPlayerIndex][f_FaceBufferIndex];
+            ImageAsset *faceImage = f_Slots->faceImages[topOrPlayerIndex][f_FaceBufferIndex];
 
             LoadTextureBlock(
                 &gfx,
@@ -1053,7 +1053,7 @@ void DrawClubSlots(Gfx **displayListHead) {
             }
         }
         else {
-            u8 *faceImage = g_PlayerFaceImages[topOrPlayerIndex];
+            ImageAsset *faceImage = g_PlayerFaceImages[topOrPlayerIndex];
 
             // The still face is only FACE_HEIGHT rows, but the game loads
             // a frame-sized block and draws just the face's rows.

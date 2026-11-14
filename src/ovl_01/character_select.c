@@ -1714,7 +1714,7 @@ void DrawCharacterBoard(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
     s32 stripTop;
-    u8 *labelImage;
+    ImageAsset *labelImage;
 
     GetMenuImageBuffer();
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_CharacterBoard)));
@@ -2142,7 +2142,7 @@ void DrawCurveMeter(Gfx **displayListHead, s32 clubSet) {
     s32 firstCell;
     s32 cellIndex;
     s32 endCell;
-    u8 *labelImage;
+    ImageAsset *labelImage;
     s32 labelRow;
 
     if (curve < 0) {

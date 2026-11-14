@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
 #include "camera.h"
 #include "course_space.h"
 
@@ -38,7 +39,7 @@ void ResetShotEffects(void);
 void ClearShotEffects(ClearKind kind);
 void StopAllSounds(void);
 void StartImpactSparks(void);
-extern u8 *g_SharedEffectImages;
+extern ImageAsset *g_SharedEffectImages;
 
 void LoadShotEffectImages(void);
 void FreeShotEffectImages(void);

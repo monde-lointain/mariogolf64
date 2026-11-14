@@ -264,14 +264,14 @@ enum LandingGlyphGroup {
 #define DISTANCE_POINT_S 112
 #define DISTANCE_POINT_WIDTH 4
 
-u8 *g_ClubPanelImage;
+ImageAsset *g_ClubPanelImage;
 ImageAsset *g_DistanceSignImage;
 ImageAsset *g_LeaderLineImage;
 ImageAsset *g_PinFlagImages;
 ImageAsset *g_PlayerTagImages;
 u8 *g_RingTexels;
 RoundHud g_RoundHud;
-u8 *g_SharedEffectImages;
+ImageAsset *g_SharedEffectImages;
 ImageAsset *g_ShotPreviewDashImage;
 
 FILE_STATIC Mtx f_UnusedNarrowProjection;

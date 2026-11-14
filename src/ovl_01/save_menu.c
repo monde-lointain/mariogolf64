@@ -2180,7 +2180,7 @@ void DrawSavedGames(Gfx **displayListHead) {
             }
 
             if (f_SavedGameModes[drawnIndex] != NO_SAVE_MENU_MODE) {
-                u8 *modeImage = f_SavedGameModeImages[drawnIndex];
+                ImageAsset *modeImage = f_SavedGameModeImages[drawnIndex];
 
                 gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(modeImage)));
                 for (index = 0; index != MODE_ICON_STRIP_COUNT; index++) {

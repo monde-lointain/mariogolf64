@@ -361,8 +361,8 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
 void FreeScorecard(void) {
     s32 i;
     s32 imageIndex;
-    u8 **image;
-    u8 **tableImage;
+    ImageAsset **image;
+    ImageAsset **tableImage;
 
     if (g_ScorecardState != SCORECARD_CLOSED) {
         g_ScorecardState = SCORECARD_CLOSED;
@@ -427,9 +427,10 @@ void FreeScorecard(void) {
         image = tableImage;
         FreeMemory(image);
         for (i = 0; i != g_GameState.playerCount; i++) {
-            u8 **faceImages = (u8 **)AddressPast(tableImage, BytesPastTableImage(faceImages));
+            ImageAsset **faceImages =
+                (ImageAsset **)AddressPast(tableImage, BytesPastTableImage(faceImages));
             PaletteColor **facePalettes =
-                (u16 **)AddressPast(tableImage, BytesPastTableImage(facePalettes));
+                (PaletteColor **)AddressPast(tableImage, BytesPastTableImage(facePalettes));
 
             FreeMemory(&faceImages[i]);
             FreeMemory(&facePalettes[i]);

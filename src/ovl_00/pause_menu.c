@@ -341,10 +341,10 @@ static s32 f_ChoiceBoxSelection = 0;
 static Radians f_ChoiceGlowAngle = 0.0f;
 static Radians f_ChoiceCursorAngle = 0.0f;
 
-static u8 *f_PauseCursorImage;
-static u8 *f_MenuCloudImage;
-static u8 *f_PauseArrowsImage;
-static u8 *f_ChoiceBoxCursorImage;
+static ImageAsset *f_PauseCursorImage;
+static ImageAsset *f_MenuCloudImage;
+static ImageAsset *f_PauseArrowsImage;
+static ImageAsset *f_ChoiceBoxCursorImage;
 
 Boolean f_IsGiveUpAllowed;
 

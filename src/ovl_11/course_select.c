@@ -192,14 +192,14 @@ static s32 f_CourseTurnFrames[COURSE_TURN_FRAME_COUNT] = {2, 3, 4, COURSE_IMAGE_
 static s32 f_PlankSlide = 0;
 static PlanksState f_PlankMotion = PLANKS_SHUT;
 
-static u8 *f_BoardImage;
+static ImageAsset *f_BoardImage;
 static u8 *f_CourseBadges[COURSE_INDEX_COUNT];
-static u8 *f_CourseImage;
+static ImageAsset *f_CourseImage;
 static PaletteColor *f_CourseImagePalette;
-static u8 *f_ArrowsImage;
-static u8 *f_StarImages[STAR_IMAGE_COUNT];
-static u8 *f_EmptyStarImages[STAR_IMAGE_COUNT];
-static u8 *f_PlanksImage;
+static ImageAsset *f_ArrowsImage;
+static ImageAsset *f_StarImages[STAR_IMAGE_COUNT];
+static ImageAsset *f_EmptyStarImages[STAR_IMAGE_COUNT];
+static ImageAsset *f_PlanksImage;
 static s32 f_PressedButtons;
 static u32 f_RepeatedButtons;
 static u8 f_UnusedBufferAfterRepeatedButtons[0x40] UNUSED;
@@ -1144,7 +1144,7 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
     s32 top;
     s32 tile;
     CourseIndex courseIndex;
-    u8 *spinningImage = f_StarImages[f_StarBufferIndex];
+    ImageAsset *spinningImage = f_StarImages[f_StarBufferIndex];
 
     LoadSmallPalette(&gfx, TILE_SPINNING_STAR, ImageBody(spinningImage));
     gDPLoadTextureBlock_4b(

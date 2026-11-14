@@ -15,7 +15,7 @@
 
 #define PLAYER_COUNT_MAX 4
 
-extern u8 *g_PlayerFaceImages[PLAYER_COUNT_MAX];
+extern ImageAsset *g_PlayerFaceImages[PLAYER_COUNT_MAX];
 extern PaletteColor *g_PlayerFacePalettes[PLAYER_COUNT_MAX];
 
 #define RING_COUNT 3

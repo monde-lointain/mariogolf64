@@ -102,7 +102,7 @@ ImageAsset *g_MenuCourseSceneImage;
 MenuMemory g_MenuMemory;
 MenuScreen g_MenuScreen;
 ImageAsset *g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
-u8 *g_PlayerFaceImages[PLAYER_COUNT_MAX];
+ImageAsset *g_PlayerFaceImages[PLAYER_COUNT_MAX];
 PaletteColor *g_PlayerFacePalettes[PLAYER_COUNT_MAX];
 Player g_Players[PLAYER_COUNT_MAX];
 ImageAsset *g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];

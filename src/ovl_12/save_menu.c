@@ -1577,7 +1577,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
     s32 titleBob;
     s32 titleHeight;
     s32 slideOffset;
-    u8 *labelImage;
+    ImageAsset *labelImage;
     s32 labelWidth;
     s32 labelHeight;
     s32 text;
@@ -1811,8 +1811,8 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
         for (index = 0; index != RING_SHOT_RECORD_COUNT; index++) {
             if (rowLabels[index] != NO_REPLAY_LABEL) {
                 labelImage = f_ReplayLabelImages[rowLabels[index]];
-                labelWidth = labelImage[IMAGE_WIDTH_LOW_BYTE];
-                labelHeight = labelImage[IMAGE_HEIGHT_LOW_BYTE];
+                labelWidth = ReadSmallImageWidth(labelImage);
+                labelHeight = ReadSmallImageHeight(labelImage);
                 gDPPipeSync(gfx++);
                 if (index == f_CursorIndex) {
                     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);

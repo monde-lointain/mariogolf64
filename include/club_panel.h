@@ -3,9 +3,10 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
 #include "language.h"
 
-extern u8 *g_ClubPanelImage;
+extern ImageAsset *g_ClubPanelImage;
 
 void UpdateClubPanelDebugValue(void);
 void LoadClubPanelImages(void);

@@ -101,8 +101,8 @@ extern MenuBackdropState g_MenuBackdropState;
 #define ASSET_SKY_IMAGE_2_SECOND_HALF 0x707
 #define SKY_IMAGE_HALF_OFFSET 0x808
 #define ASSET_COURSE_SKY_IMAGE_0 0x4BA
-extern u8 *g_SkyImage;
-extern u8 *g_CourseSkyImage;
+extern ImageAsset *g_SkyImage;
+extern ImageAsset *g_CourseSkyImage;
 
 #define SKY_VIEW_COUNT 2
 

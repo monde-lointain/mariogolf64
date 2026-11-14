@@ -105,8 +105,8 @@ static Radians f_MarkerPulseAngle = 0.0f;
 static Mtx f_SpanBarTranslation;
 static Mtx f_SpanBarScale;
 
-u8 *f_ClubPanelImage;
-u8 *f_ShotModeImage;
+ImageAsset *f_ClubPanelImage;
+ImageAsset *f_ShotModeImage;
 
 void UpdateClubPanelDebugValue(void) {
     if (IsGameFlagSet(GAME_FLAG_CLUB_PANEL_DEBUG)) {

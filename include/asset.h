@@ -45,6 +45,9 @@ typedef struct ImageHeader {
     ((((u8 *)(image))[IMAGE_WIDTH_OFFSET] << 8) | ((u8 *)(image))[IMAGE_WIDTH_LOW_BYTE])
 #define ReadImageHeight(image) \
     ((((u8 *)(image))[IMAGE_HEIGHT_OFFSET] << 8) | ((u8 *)(image))[IMAGE_HEIGHT_LOW_BYTE])
+// For images known to be narrower and shorter than 256 texels
+#define ReadSmallImageWidth(image) (((u8 *)(image))[IMAGE_WIDTH_LOW_BYTE])
+#define ReadSmallImageHeight(image) (((u8 *)(image))[IMAGE_HEIGHT_LOW_BYTE])
 
 void OpenAssetFile(WideAssetId assetId, AssetFile *file);
 AssetFile *OpenPooledAssetFile(WideAssetId assetId);

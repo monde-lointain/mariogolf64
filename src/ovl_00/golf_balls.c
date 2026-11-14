@@ -369,11 +369,11 @@ void UnusedGolfBallStub(void) {
 }
 
 static ScreenPosition f_CurrentBallScreenPoint;
-static u8 *f_SmallBallImage;
-static u8 *f_RollingBallImage;
-static u8 *f_BallShadowImage;
-static u8 *f_BallMarkerImage;
-static u8 *f_BallAfterimageImage;
+static ImageAsset *f_SmallBallImage;
+static ImageAsset *f_RollingBallImage;
+static ImageAsset *f_BallShadowImage;
+static ImageAsset *f_BallMarkerImage;
+static ImageAsset *f_BallAfterimageImage;
 
 static u8 f_UnusedBytesAfterAfterimageImage[16] UNUSED;
 

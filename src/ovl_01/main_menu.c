@@ -8016,7 +8016,7 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 void DrawOptionsScreen(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
-    u8 *marioImage = GetMenuImageBuffer();
+    ImageAsset *marioImage = GetMenuImageBuffer();
     u8 *arrows = AddressPast(GetMenuImageBuffer(), OPTIONS_ARROWS_OFFSET);
     u8 *shadow = GetMenuImageBuffer();
     s32 loopIndex;
