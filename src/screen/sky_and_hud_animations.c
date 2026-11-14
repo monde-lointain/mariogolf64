@@ -1694,6 +1694,14 @@ void BlendSkyColors(void) {
     to = &g_SkyColors[GetCourseRecordIndex()]
                      [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyTimeIndex + 1];
     for (skyIndex = 0; skyIndex != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; skyIndex++) {
+#ifdef AVOID_UB
+        // The original also writes the other matrix buffer's vertices, which
+        // the RSP may still be reading for the previous frame. Each frame
+        // blends the buffer it draws, so they need not be written now.
+        if (skyIndex % MATRIX_BUFFER_COUNT != g_MatrixBufferIndex) {
+            continue;
+        }
+#endif
         for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
             f_SkyVertices[skyIndex][SKY_TOP_LEFT].v.cn[channel] = from->topColor[channel] +
                 ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
