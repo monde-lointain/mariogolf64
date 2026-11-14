@@ -45,14 +45,16 @@
 
 #define OPENING_BILLBOARD_HEAP_SIZE 0x7038
 
-typedef enum OpeningBallImage {
+enum OpeningBallImage {
     MARIO_FACE_BALL,
     DONKEY_KONG_FACE_BALL,
     YOSHI_FACE_BALL,
     LUIGI_FACE_BALL,
     PLAIN_BALL,
     OPENING_BALL_IMAGE_COUNT
-} OpeningBallImage;
+};
+
+typedef s32 OpeningBallImage;
 
 #define OPENING_BALL_SLOT_COUNT 2
 #define OPENING_BALL_IMAGE_SIZE 0x1208
@@ -66,11 +68,13 @@ typedef enum OpeningBallImage {
 #define OPENING_SCENE_END 999
 #define LAKITU_TRAIL_DEPTH 300.0f
 
-typedef enum OpeningBallState {
+enum OpeningBallState {
     OPENING_BALL_HIDDEN,
     OPENING_BALL_ON_GROUND,
     OPENING_BALL_IN_AIR
-} OpeningBallState;
+};
+
+typedef s32 OpeningBallState;
 
 #define OPENING_NAME_LOGO_COUNT 7
 #define OPENING_NAME_SLOT_COUNT 2
@@ -150,7 +154,7 @@ typedef s32 LookAtEase;
 
 #define LOGO_LETTER_COUNT 9
 
-typedef enum LogoLetterIndex {
+enum LogoLetterIndex {
     LOGO_LETTER_M,
     LOGO_LETTER_A,
     LOGO_LETTER_R,
@@ -160,7 +164,9 @@ typedef enum LogoLetterIndex {
     LOGO_LETTER_SECOND_O,
     LOGO_LETTER_L,
     LOGO_LETTER_F
-} LogoLetterIndex;
+};
+
+typedef s32 LogoLetterIndex;
 
 #define LOGO_LETTER_HIDDEN (-1000)
 
@@ -192,14 +198,16 @@ typedef enum LogoLetterIndex {
 #define LOGO_L_DEPTH 40
 #define LOGO_F_DEPTH 44
 
-typedef enum LogoLetterState {
+enum LogoLetterState {
     LOGO_LETTER_WAITING,
     LOGO_LETTER_FALLING,
     LOGO_LETTER_SQUASHING,
     LOGO_LETTER_SQUASHED,
     LOGO_LETTER_STRETCHING,
     LOGO_LETTER_LANDED = 9
-} LogoLetterState;
+};
+
+typedef s32 LogoLetterState;
 
 #define OPENING_SHOT_DASH_COUNT_MAX 200
 
@@ -224,19 +232,23 @@ void LoadOpeningBall(OpeningBallImage image, s32 slot);
 
 #define SPARK_COUNT 20
 
-typedef enum AmbientSoundChoice {
+enum AmbientSoundChoice {
     AMBIENT_SOUND_NONE,
     AMBIENT_SOUND_FIRST,
     AMBIENT_SOUND_SECOND
-} AmbientSoundChoice;
+};
 
-typedef enum SparksState {
+typedef s32 AmbientSoundChoice;
+
+enum SparksState {
     SPARKS_HIDDEN,
     SPARKS_STARTING,
     SPARKS_FLYING
-} SparksState;
+};
 
-typedef enum LogoState {
+typedef s32 SparksState;
+
+enum LogoState {
     LOGO_DROPPING_LETTERS,
     LOGO_CLUB_STARTING,
     LOGO_CLUB_CIRCLING,
@@ -245,16 +257,20 @@ typedef enum LogoState {
     LOGO_SHRINK_STARTING,
     LOGO_SHRINKING,
     LOGO_SHRUNK
-} LogoState;
+};
 
-typedef enum LogoFadeStage {
+typedef s32 LogoState;
+
+enum LogoFadeStage {
     LOGO_FADE_NONE,
     LOGO_FADE_GRAYING,
     LOGO_FADE_GRAY,
     LOGO_FADE_WHITENING,
     LOGO_FADE_WHITE,
     LOGO_FADE_LOGO_OUT
-} LogoFadeStage;
+};
+
+typedef s32 LogoFadeStage;
 
 #define LOGO_SHINE_FIRST_FRAME 20
 #define LOGO_SHINE_FIRST_SHOWN_FRAME 4
@@ -5113,7 +5129,7 @@ void EaseOpeningLookAt(void) {
 
 void LoadOpeningLogo(void) {
     EncodedAsset asset;
-    s32 letterIndex;
+    LogoLetterIndex letterIndex;
 
     OpenEncodedAsset(ASSET_LOGO_LETTER_IMAGES, &asset);
     ReadEncodedAsset(f_LogoLetterImages, &asset);
@@ -5213,8 +5229,8 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
     Gfx *gfx = *displayListHead;
     s32 texelsOffset;
     s32 letterTexelsOffset;
-    s32 logoLetter;
-    s32 letterIndex;
+    LogoLetterIndex logoLetter;
+    LogoLetterIndex letterIndex;
     s32 j;
     Radians angle;
     Radians orbitAngle;

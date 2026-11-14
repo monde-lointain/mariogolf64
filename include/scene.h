@@ -78,12 +78,14 @@ typedef u32 GameMode;
 #define IsOneOnOneMatchMode(mode) \
     ((mode) == GAME_MODE_MATCH_GAME || (mode) == GAME_MODE_GET_CHARACTER)
 
-typedef enum TitleScreenEntrance {
+enum TitleScreenEntrance {
     TITLE_ENTRANCE_NONE,
     TITLE_ENTRANCE_FROM_OPENING,
     TITLE_ENTRANCE_FROM_BOOT_LOGOS,
     TITLE_ENTRANCE_SHOWN
-} TitleScreenEntrance;
+};
+
+typedef s32 TitleScreenEntrance;
 
 extern TitleScreenEntrance g_TitleScreenEntrance;
 
