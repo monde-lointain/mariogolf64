@@ -5,7 +5,7 @@
 #include "audio/sound.h"
 #include "camera/camera.h"
 #include "course/course_space.h"
-#include "debug_text.h"
+#include "debug/debug_text.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "round/game_state.h"

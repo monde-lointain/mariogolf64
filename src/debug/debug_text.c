@@ -1,8 +1,8 @@
-#include "debug_text.h"
+#include "debug/debug_text.h"
 
 #include <ultra64.h>
 
-#include "game_flags.h"
+#include "debug/game_flags.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "system/c_language.h"
@@ -35,7 +35,7 @@
 #define HEX_DIGIT_COUNT 8
 
 static u16 f_DebugFont[FONT_WIDTH * FONT_HEIGHT / 2] = {
-#include "assets/debug_text/debug_font.ia4.inc.c"
+#include "assets/debug/debug_text/debug_font.ia4.inc.c"
 };
 u16 *g_MessageFramebuffer = NULL;
 static s8 f_DebugTextHighlight = 0;

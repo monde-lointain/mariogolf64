@@ -4,7 +4,7 @@
 
 #include "audio/sound.h"
 #include "course/course.h"
-#include "game_flags.h"
+#include "debug/game_flags.h"
 #include "menus/menu.h"
 #include "menus/menu_memory.h"
 #include "round/game_state.h"

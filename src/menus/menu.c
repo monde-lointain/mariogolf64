@@ -12,7 +12,7 @@
 #include "course/course.h"
 #include "course/course_space.h"
 #include "course/hole_setup.h"
-#include "game_flags.h"
+#include "debug/game_flags.h"
 #include "math/math_util.h"
 #include "menus/main_menu.h"
 #include "menus/menu_memory.h"

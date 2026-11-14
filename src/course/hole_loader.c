@@ -14,7 +14,7 @@
 #include "course/hole_triangles.h"
 #include "course/terrain.h"
 #include "course/work_area.h"
-#include "game_flags.h"
+#include "debug/game_flags.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "round/game_state.h"

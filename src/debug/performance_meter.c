@@ -1,4 +1,4 @@
-#include "performance_meter.h"
+#include "debug/performance_meter.h"
 
 #include <nusys.h>
 #include <ultra64.h>
@@ -183,7 +183,7 @@ static Gfx f_UnusedMeterDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
 };
 static u16 f_DigitTexture[] = {
-#include "assets/performance_meter/digit_texture.ia4.inc.c"
+#include "assets/debug/performance_meter/digit_texture.ia4.inc.c"
 };
 static u32 f_DigitDrawCount = 0;
 static u32 f_CpuBarMaximum = 0;

@@ -1,6 +1,6 @@
 #define CALLS_GROUND_POINT_SETTER_UNPROTOTYPED
 
-#include "hole_editor.h"
+#include "debug/hole_editor.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -21,9 +21,9 @@
 #include "course/surface.h"
 #include "course/terrain.h"
 #include "course/work_area.h"
-#include "debug_text.h"
+#include "debug/debug_text.h"
+#include "debug/game_flags.h"
 #include "game.h"
-#include "game_flags.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "round/play.h"

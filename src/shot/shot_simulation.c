@@ -3,7 +3,7 @@
 #include <ultra64.h>
 
 #include "course/surface.h"
-#include "debug_text.h"
+#include "debug/debug_text.h"
 #include "math/geometry.h"
 #include "round/game_state.h"
 #include "round/player.h"

@@ -10,7 +10,7 @@
 #include "course/hole_setup.h"
 #include "course/pin.h"
 #include "course/surface.h"
-#include "game_flags.h"
+#include "debug/game_flags.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "round/game_state.h"

@@ -7,7 +7,7 @@
 #include "cinematics/opening.h"
 #include "cinematics/opening_camera_editor.h"
 #include "cinematics/staff_roll.h"
-#include "game_flags.h"
+#include "debug/game_flags.h"
 #include "menus/menu.h"
 #include "menus/title_screen.h"
 #include "menus/transmit_menu.h"

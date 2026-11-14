@@ -3,7 +3,7 @@
 #include <ultra64.h>
 
 #include "course/course.h"
-#include "game_flags.h"
+#include "debug/game_flags.h"
 #include "math/math_util.h"
 #include "menus/menu.h"
 #include "round/game_state.h"

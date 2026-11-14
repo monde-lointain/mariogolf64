@@ -10,7 +10,7 @@
 #include "controllers/transfer_pak.h"
 #include "course/course.h"
 #include "course/hole_loader.h"
-#include "game_flags.h"
+#include "debug/game_flags.h"
 #include "math/math_util.h"
 #include "round/bets.h"
 #include "round/game_state.h"

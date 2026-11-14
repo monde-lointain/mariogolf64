@@ -3,8 +3,8 @@
 #include <ultra64.h>
 
 #include "controllers/controller.h"
-#include "debug_text.h"
-#include "game_flags.h"
+#include "debug/debug_text.h"
+#include "debug/game_flags.h"
 #include "math/math_util.h"
 #include "menus/menu.h"
 #include "round/game_state.h"

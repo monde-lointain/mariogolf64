@@ -5,7 +5,7 @@
 #include "audio/sound.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
-#include "game_flags.h"
+#include "debug/game_flags.h"
 #include "math/math_util.h"
 #include "menus/menu.h"
 #include "menus/unlocks.h"

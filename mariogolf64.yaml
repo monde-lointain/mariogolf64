@@ -91,9 +91,9 @@ segments:
       - [0x1B4A0, c, course/terrain]
       - [0x1EEF0, c, shot/club]
       - [0x207E0, c, camera/shot_camera]
-      - [0x28590, c, debug_text]
+      - [0x28590, c, debug/debug_text]
       - [0x29170, c, system/heap]
-      - [0x299A0, c, performance_meter]
+      - [0x299A0, c, debug/performance_meter]
       - [0x2B4E0, c, screen/animated_box]
       - [0x2B800, c, system/asset]
       - [0x2BFF0, c, audio/sound]
@@ -368,8 +368,8 @@ segments:
       - [0x95DB0, .data, course/terrain]
       - [0x964F0, .data, shot/club]
       - [0x99A20, .data, camera/shot_camera]
-      - [0x99AE0, .data, debug_text]
-      - [0x9B2F0, .data, performance_meter]
+      - [0x99AE0, .data, debug/debug_text]
+      - [0x9B2F0, .data, debug/performance_meter]
       - [0x9C250, .data, screen/animated_box]
       - [0x9C260, .data, audio/sound]
       - [0x9C770, .data, course/course]
@@ -457,7 +457,7 @@ segments:
       - [0xA5FD0, .rodata, shot/club]
       - [0xA7B60, .rodata, camera/shot_camera]
       - [0xA7E90, .rodata, system/heap]
-      - [0xA7F08, .rodata, performance_meter]
+      - [0xA7F08, .rodata, debug/performance_meter]
       - [0xA7F70, .rodata, system/asset]
       - [0xA7FB8, .rodata, audio/sound]
       - [0xA8030, .rodata, course/course]
@@ -521,9 +521,9 @@ segments:
       - { type: .bss, vram: 0x800DAC40, name: course/pin }
       - { type: .bss, vram: 0x800DAED0, name: course/terrain }
       - { type: .bss, vram: 0x800DAEE0, name: camera/shot_camera }
-      - { type: .bss, vram: 0x800DAF60, name: debug_text }
+      - { type: .bss, vram: 0x800DAF60, name: debug/debug_text }
       - { type: .bss, vram: 0x800DC6E0, name: system/heap }
-      - { type: .bss, vram: 0x800DC740, name: performance_meter }
+      - { type: .bss, vram: 0x800DC740, name: debug/performance_meter }
       - { type: .bss, vram: 0x800DE8A0, name: system/asset }
       - { type: .bss, vram: 0x800DE900, name: audio/sound }
       - { type: .bss, vram: 0x800DE910, name: characters/character_model }
@@ -682,10 +682,10 @@ segments:
     exclusive_ram_id: debug
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x11BA50, c, hole_editor/hole_editor]
-      - [0x127FD0, .data, hole_editor/hole_editor]
-      - [0x128250, .rodata, hole_editor/hole_editor]
-      - { start: 0x128580, type: .bss, vram: 0x8040CB30, name: hole_editor/hole_editor }
+      - [0x11BA50, c, debug/hole_editor]
+      - [0x127FD0, .data, debug/hole_editor]
+      - [0x128250, .rodata, debug/hole_editor]
+      - { start: 0x128580, type: .bss, vram: 0x8040CB30, name: debug/hole_editor }
 
   - name: ovl_02
     type: code

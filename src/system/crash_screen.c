@@ -4,7 +4,7 @@
 
 #include "PR/R4300.h"
 #include "audio/sound.h"
-#include "debug_text.h"
+#include "debug/debug_text.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 

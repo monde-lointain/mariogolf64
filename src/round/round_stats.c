@@ -4,7 +4,7 @@
 
 #include "course/course.h"
 #include "course/hole_setup.h"
-#include "debug_text.h"
+#include "debug/debug_text.h"
 #include "round/bets.h"
 #include "round/game_state.h"
 #include "round/player.h"
