@@ -2250,12 +2250,13 @@ void PlaceFlightCamera(s32 step) {
 
 #define LONG_SHOT_MIN_LENGTH 0x1C2000
 #define MID_SHOT_MIN_LENGTH 0x4B001
-#define NEAR_CUP_DISTANCE 0x1E00
+#define NEAR_CUP_DISTANCE_MAX 0x1E00
 #define CUP_LANDING_MIN_DISTANCE 0x1201
 #define CUP_LANDING_MAX_DISTANCE 0x4AFFF
 #define IsCupLandingDistance(distance) \
     ((distance) >= CUP_LANDING_MIN_DISTANCE && (distance) <= CUP_LANDING_MAX_DISTANCE)
-#define IsEndingNearCup() (g_SimulatedShot.endsInCup || f_LandingCupDistance < NEAR_CUP_DISTANCE)
+#define IsEndingNearCup() \
+    (g_SimulatedShot.endsInCup || f_LandingCupDistance < NEAR_CUP_DISTANCE_MAX)
 #define DEBUG_CAMERA_CONTROLLER 1
 
 #define IsTroubleSurface(info) \
