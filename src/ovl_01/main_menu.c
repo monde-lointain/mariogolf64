@@ -45,6 +45,7 @@
 #include "menu_number.h"
 #include "menu_window.h"
 #include "overlay_manager.h"
+#include "password.h"
 #include "play.h"
 #include "player.h"
 #include "player_stats.h"
@@ -2159,7 +2160,7 @@ void SetUpChosenGame(void) {
             g_ChosenHandicaps[index] = 0;
         }
 
-        if (GetClubTournamentCharacter() != -1) {
+        if (GetClubTournamentCharacter() != ANY_CHARACTER) {
             g_ChosenCharacters[0] = GetClubTournamentCharacter();
             g_ChosenLefties[0] = 0;
         }

@@ -3,6 +3,9 @@
 
 #include <ultra64.h>
 
+#include "character.h"
+#include "language.h"
+
 enum TournamentBuffer {
     TOURNAMENT_BUFFER_WIDE_CLOUD = 1,
     TOURNAMENT_BUFFER_YES_NO,
@@ -41,7 +44,7 @@ void LoadCodeEntryBuffer(void *buffer, CodeEntryBuffer bufferKind);
 void ResetCodeEntry(void);
 void UpdateClubTournament(void);
 void DrawClubTournament(Gfx **displayListHead);
-s32 GetClubTournamentCharacter(void);
-s32 TakeClubTournamentEntry(void);
+CharacterIndex GetClubTournamentCharacter(void);
+Boolean TakeClubTournamentEntry(void);
 
 #endif

@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "character.h"
+
 enum MenuWindowState {
     MENU_WINDOW_OPENING,
     MENU_WINDOW_OPEN,
@@ -25,6 +27,6 @@ void ShowMenuWindow(void);
 void CloseMenuWindow(void);
 s32 IsMenuWindowOpen(void);
 s32 IsMenuWindowClosed(void);
-void LoadMenuWindowImage(s32 imageIndex);
+void LoadMenuWindowImage(CharacterIndex characterIndex);
 
 #endif

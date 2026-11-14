@@ -35,7 +35,17 @@
 #define CLUB_COURSE_ICON_LIMIT 10
 
 #define MENU_WINDOW_PICTURE_COUNT 15
-#define MENU_WINDOW_PALETTE_COUNT 4
+
+// Holding a C button shows the club tournament's picture in another palette.
+enum MenuWindowPalette {
+    MENU_WINDOW_PALETTE_PLAIN,
+    MENU_WINDOW_PALETTE_C_LEFT,
+    MENU_WINDOW_PALETTE_C_DOWN,
+    MENU_WINDOW_PALETTE_C_RIGHT,
+    MENU_WINDOW_PALETTE_COUNT
+};
+
+typedef s32 MenuWindowPalette;
 
 #define CODE_UPPER_PANEL_LEFT 28
 #define CODE_UPPER_PANEL_TOP 56
@@ -413,7 +423,10 @@ void LoadTournamentBuffer(void *buffer, TournamentBuffer bufferKind) {
             break;
         case TOURNAMENT_BUFFER_ROW_FILE:
             f_MenuWindowPalette = buffer;
-            OpenAssetFile(f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT - 1][0], &file);
+            OpenAssetFile(
+                f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT - 1][MENU_WINDOW_PALETTE_PLAIN],
+                &file
+            );
             ReadAssetFile(f_MenuWindowPalette, (s16)GetAssetFileSize(&file), &file);
             break;
     }
@@ -438,41 +451,41 @@ void LoadClubCourseIcon(s32 imageIndex) {
     ReadEncodedAsset(f_ClubCourseIcon, &asset);
 }
 
-void LoadMenuWindowImage(s32 imageIndex) {
+void LoadMenuWindowImage(CharacterIndex characterIndex) {
     EncodedAsset asset;
 
-    if (imageIndex < 0) {
-        imageIndex = 0;
+    if (characterIndex < 0) {
+        characterIndex = 0;
     }
 
-    if (imageIndex >= ARRAY_COUNT(f_MenuWindowImageAssets)) {
-        imageIndex = ARRAY_COUNT(f_MenuWindowImageAssets) - 1;
+    if (characterIndex >= ARRAY_COUNT(f_MenuWindowImageAssets)) {
+        characterIndex = ARRAY_COUNT(f_MenuWindowImageAssets) - 1;
     }
 
-    OpenEncodedAsset(f_MenuWindowImageAssets[imageIndex], &asset);
+    OpenEncodedAsset(f_MenuWindowImageAssets[characterIndex], &asset);
     ReadEncodedAsset(f_MenuWindowImage, &asset);
 }
 
-void LoadMenuWindowPalette(s32 row, s32 column) {
+void LoadMenuWindowPalette(CharacterIndex characterIndex, MenuWindowPalette palette) {
     AssetFile file;
 
-    if (row < 0) {
-        row = 0;
+    if (characterIndex < 0) {
+        characterIndex = 0;
     }
 
-    if (row >= MENU_WINDOW_PICTURE_COUNT) {
-        row = MENU_WINDOW_PICTURE_COUNT - 1;
+    if (characterIndex >= MENU_WINDOW_PICTURE_COUNT) {
+        characterIndex = MENU_WINDOW_PICTURE_COUNT - 1;
     }
 
-    if (column < 0) {
-        column = 0;
+    if (palette < 0) {
+        palette = MENU_WINDOW_PALETTE_PLAIN;
     }
 
-    if (column >= MENU_WINDOW_PALETTE_COUNT) {
-        column = MENU_WINDOW_PALETTE_COUNT - 1;
+    if (palette >= MENU_WINDOW_PALETTE_COUNT) {
+        palette = MENU_WINDOW_PALETTE_COUNT - 1;
     }
 
-    OpenAssetFile(f_MenuWindowPaletteFiles[row][column], &file);
+    OpenAssetFile(f_MenuWindowPaletteFiles[characterIndex][palette], &file);
     ReadAssetFile(f_MenuWindowPalette, (s16)GetAssetFileSize(&file), &file);
 }
 
@@ -1347,11 +1360,11 @@ void UpdateClubTournament(void) {
                 f_ClubTournamentPhase = CLUB_CODE_PHASE_DETAILS;
                 if (GetClubTournamentCharacter() >= 0) {
                     LoadMenuWindowImage(GetClubTournamentCharacter());
-                    LoadMenuWindowPalette(GetClubTournamentCharacter(), 0);
+                    LoadMenuWindowPalette(GetClubTournamentCharacter(), MENU_WINDOW_PALETTE_PLAIN);
                 }
                 else {
                     LoadMenuWindowImage(CHARACTER_KID);
-                    LoadMenuWindowPalette(CHARACTER_KID, 0);
+                    LoadMenuWindowPalette(CHARACTER_KID, MENU_WINDOW_PALETTE_PLAIN);
                 }
 
                 return;
@@ -1442,7 +1455,7 @@ void UpdateClubTournament(void) {
     }
 }
 
-s32 IsClubCharacterChoosable(void);
+Boolean IsClubCharacterChoosable(void);
 
 void UpdateClubWindow(void) {
     Boolean isHudAnimationDone;
@@ -1746,7 +1759,7 @@ void DrawClubTournament(Gfx **displayListHead) {
     DrawCodePrompt(&gfx);
     if (f_ClubTournamentPhase == 1) {
         if (IsNintendoClubTournament()) {
-            windowStyle = (GetClubTournamentCharacter() != -1) ?
+            windowStyle = (GetClubTournamentCharacter() != ANY_CHARACTER) ?
                 CLUB_WINDOW_STYLE_PICTURE | CLUB_WINDOW_STYLE_NINTENDO :
                 CLUB_WINDOW_STYLE_NINTENDO;
             if (windowStyle == (CLUB_WINDOW_STYLE_PICTURE | CLUB_WINDOW_STYLE_NINTENDO) &&
@@ -1754,16 +1767,19 @@ void DrawClubTournament(Gfx **displayListHead) {
                 buttons = g_ControllerStates[0].buttons | g_ControllerStates[1].buttons |
                     g_ControllerStates[2].buttons | g_ControllerStates[3].buttons;
                 if (buttons & L_CBUTTONS) {
-                    LoadMenuWindowPalette(GetClubTournamentCharacter(), 1);
+                    LoadMenuWindowPalette(GetClubTournamentCharacter(), MENU_WINDOW_PALETTE_C_LEFT);
                 }
                 else if (buttons & D_CBUTTONS) {
-                    LoadMenuWindowPalette(GetClubTournamentCharacter(), 2);
+                    LoadMenuWindowPalette(GetClubTournamentCharacter(), MENU_WINDOW_PALETTE_C_DOWN);
                 }
                 else if (buttons & R_CBUTTONS) {
-                    LoadMenuWindowPalette(GetClubTournamentCharacter(), 3);
+                    LoadMenuWindowPalette(
+                        GetClubTournamentCharacter(),
+                        MENU_WINDOW_PALETTE_C_RIGHT
+                    );
                 }
                 else {
-                    LoadMenuWindowPalette(GetClubTournamentCharacter(), 0);
+                    LoadMenuWindowPalette(GetClubTournamentCharacter(), MENU_WINDOW_PALETTE_PLAIN);
                 }
             }
 
@@ -1780,22 +1796,26 @@ void DrawClubTournament(Gfx **displayListHead) {
             DrawClubNumber(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, g_ClubTournamentNumber);
         }
         else {
-            windowStyle = (GetClubTournamentCharacter() != -1) ? CLUB_WINDOW_STYLE_PICTURE :
-                                                                 CLUB_WINDOW_STYLE_PLAIN;
+            windowStyle = (GetClubTournamentCharacter() != ANY_CHARACTER) ?
+                CLUB_WINDOW_STYLE_PICTURE :
+                CLUB_WINDOW_STYLE_PLAIN;
             if (windowStyle != CLUB_WINDOW_STYLE_PLAIN && GetWipeKind() == WIPE_NONE) {
                 buttons = g_ControllerStates[0].buttons | g_ControllerStates[1].buttons |
                     g_ControllerStates[2].buttons | g_ControllerStates[3].buttons;
                 if (buttons & L_CBUTTONS) {
-                    LoadMenuWindowPalette(GetClubTournamentCharacter(), 1);
+                    LoadMenuWindowPalette(GetClubTournamentCharacter(), MENU_WINDOW_PALETTE_C_LEFT);
                 }
                 else if (buttons & D_CBUTTONS) {
-                    LoadMenuWindowPalette(GetClubTournamentCharacter(), 2);
+                    LoadMenuWindowPalette(GetClubTournamentCharacter(), MENU_WINDOW_PALETTE_C_DOWN);
                 }
                 else if (buttons & R_CBUTTONS) {
-                    LoadMenuWindowPalette(GetClubTournamentCharacter(), 3);
+                    LoadMenuWindowPalette(
+                        GetClubTournamentCharacter(),
+                        MENU_WINDOW_PALETTE_C_RIGHT
+                    );
                 }
                 else {
-                    LoadMenuWindowPalette(GetClubTournamentCharacter(), 0);
+                    LoadMenuWindowPalette(GetClubTournamentCharacter(), MENU_WINDOW_PALETTE_PLAIN);
                 }
             }
 
@@ -2421,15 +2441,15 @@ void DrawCodeCursor(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-s32 IsClubCharacterChoosable(void) {
-    return g_ClubTournamentRules.characterIndex == -1;
+Boolean IsClubCharacterChoosable(void) {
+    return g_ClubTournamentRules.characterIndex == ANY_CHARACTER;
 }
 
-s32 GetClubTournamentCharacter(void) {
+CharacterIndex GetClubTournamentCharacter(void) {
     return g_ClubTournamentRules.characterIndex;
 }
 
-s32 TakeClubTournamentEntry(void) {
+Boolean TakeClubTournamentEntry(void) {
     if (f_IsClubTournamentEntered) {
         f_IsClubTournamentEntered = FALSE;
         return TRUE;
