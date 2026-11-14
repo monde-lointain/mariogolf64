@@ -1,4 +1,4 @@
-#include "opening_camera_editor.h"
+#include "cinematics/opening_camera_editor.h"
 
 #include <math.h>
 #include <ultra64.h>

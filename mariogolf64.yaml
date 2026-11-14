@@ -735,20 +735,20 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x1370B0, hasm, ovl_05/padding]
-      - [0x1370C0, c, ovl_05/opening]
-      - [0x145A30, c, ovl_05/opening_camera_editor]
-      - [0x148D00, c, ovl_05/opening_ball]
-      - [0x14D2C0, .data, ovl_05/opening]
-      - [0x14DB50, .data, ovl_05/opening_camera_editor]
-      - [0x14DBE0, .data, ovl_05/opening_ball]
-      - [0x14E0F0, .rodata, ovl_05/opening]
-      - [0x14E710, .rodata, ovl_05/opening_camera_editor]
-      - [0x14E810, .rodata, ovl_05/opening_ball]
-      - { start: 0x14EA70, type: .bss, vram: 0x8020C3F0, name: ovl_05/opening }
-      - { type: .bss, vram: 0x8022BE10, name: ovl_05/opening_ball }
-      - { type: .bss, vram: 0x8022BE30, name: ovl_05/opening, linker_section: COMMON .scommon }
-      - { type: .bss, vram: 0x8022BFB0, name: ovl_05/opening_camera_editor, linker_section: COMMON .scommon }
+      - [0x1370B0, hasm, cinematics/opening_overlay_padding]
+      - [0x1370C0, c, cinematics/opening]
+      - [0x145A30, c, cinematics/opening_camera_editor]
+      - [0x148D00, c, cinematics/opening_ball]
+      - [0x14D2C0, .data, cinematics/opening]
+      - [0x14DB50, .data, cinematics/opening_camera_editor]
+      - [0x14DBE0, .data, cinematics/opening_ball]
+      - [0x14E0F0, .rodata, cinematics/opening]
+      - [0x14E710, .rodata, cinematics/opening_camera_editor]
+      - [0x14E810, .rodata, cinematics/opening_ball]
+      - { start: 0x14EA70, type: .bss, vram: 0x8020C3F0, name: cinematics/opening }
+      - { type: .bss, vram: 0x8022BE10, name: cinematics/opening_ball }
+      - { type: .bss, vram: 0x8022BE30, name: cinematics/opening, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022BFB0, name: cinematics/opening_camera_editor, linker_section: COMMON .scommon }
 
   - name: ovl_06
     type: code
@@ -774,11 +774,11 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x14FB50, hasm, ovl_07/padding]
-      - [0x14FB60, c, ovl_07/boot_logos]
-      - [0x150890, .data, ovl_07/boot_logos]
-      - [0x1508A0, .rodata, ovl_07/boot_logos]
-      - { start: 0x1508D0, type: .bss, vram: 0x801F57B0, name: ovl_07/boot_logos }
+      - [0x14FB50, hasm, cinematics/boot_logos_overlay_padding]
+      - [0x14FB60, c, cinematics/boot_logos]
+      - [0x150890, .data, cinematics/boot_logos]
+      - [0x1508A0, .rodata, cinematics/boot_logos]
+      - { start: 0x1508D0, type: .bss, vram: 0x801F57B0, name: cinematics/boot_logos }
 
   - name: ovl_08
     type: code
@@ -873,11 +873,11 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x16D650, hasm, ovl_14/padding]
-      - [0x16D660, c, ovl_14/staff_roll]
-      - [0x1715C0, .data, ovl_14/staff_roll]
-      - [0x171700, .rodata, ovl_14/staff_roll]
-      - { start: 0x171770, type: .bss, vram: 0x801F8B50, name: ovl_14/staff_roll }
+      - [0x16D650, hasm, cinematics/staff_roll_overlay_padding]
+      - [0x16D660, c, cinematics/staff_roll]
+      - [0x1715C0, .data, cinematics/staff_roll]
+      - [0x171700, .rodata, cinematics/staff_roll]
+      - { start: 0x171770, type: .bss, vram: 0x801F8B50, name: cinematics/staff_roll }
 
   - name: build_date
     type: code

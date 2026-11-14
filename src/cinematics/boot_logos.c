@@ -1,4 +1,4 @@
-#include "boot_logos.h"
+#include "cinematics/boot_logos.h"
 
 #include <ultra64.h>
 

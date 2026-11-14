@@ -1,4 +1,4 @@
-#include "opening_ball.h"
+#include "cinematics/opening_ball.h"
 
 #include <math.h>
 #include <stdlib.h>

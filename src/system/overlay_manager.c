@@ -3,16 +3,16 @@
 #include <nusys.h>
 #include <ultra64.h>
 
-#include "boot_logos.h"
+#include "cinematics/boot_logos.h"
+#include "cinematics/opening.h"
+#include "cinematics/opening_camera_editor.h"
+#include "cinematics/staff_roll.h"
 #include "game_flags.h"
 #include "menus/menu.h"
 #include "menus/title_screen.h"
 #include "menus/transmit_menu.h"
-#include "opening.h"
-#include "opening_camera_editor.h"
 #include "round/round_hud.h"
 #include "shot/golf_balls.h"
-#include "staff_roll.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/main.h"

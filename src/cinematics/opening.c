@@ -1,4 +1,4 @@
-#include "opening.h"
+#include "cinematics/opening.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -9,6 +9,8 @@
 #include "camera/view_projection.h"
 #include "characters/character.h"
 #include "characters/character_model.h"
+#include "cinematics/opening_ball.h"
+#include "cinematics/opening_camera_editor.h"
 #include "controllers/controller.h"
 #include "course/billboard.h"
 #include "course/course_space.h"
@@ -21,8 +23,6 @@
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "menus/menu.h"
-#include "opening_ball.h"
-#include "opening_camera_editor.h"
 #include "round/round_hud.h"
 #include "scene.h"
 #include "screen/display_list.h"
