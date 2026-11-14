@@ -276,14 +276,14 @@ typedef struct StatusTime {
 typedef struct StatusCourse {
     u8 roundCount[2];
     u8 bestScore;
-    u8 strokesAverage;
+    u8 scoreAverage;
     u8 longestDrive[2];
     u8 driveAverage[2];
-    u8 fairwayRate;
-    u8 puttsAverage;
-    u8 parOrBetterRate;
-    u8 parOnRate;
-    u8 sandSaveRate;
+    u8 fairwayPercent;
+    u8 puttAverage;
+    u8 parSavePercent;
+    u8 parOnPercent;
+    u8 sandSavePercent;
     u8 places;
     u8 characterBestScores[CHARACTER_COUNT];
     StatusTime bestTimes[BEST_TIME_COUNT];
@@ -3896,32 +3896,32 @@ void BuildStatusData(StatusData *status) {
                 course->roundCount[0] = figure;
                 course->roundCount[1] = figure >> BITS_PER_BYTE;
                 course->bestScore = courseStats->bestScore + STATUS_SCORE_BIAS;
-                course->strokesAverage = RoundedWholePart(courseStats->strokeTotal * reciprocal);
+                course->scoreAverage = RoundedWholePart(courseStats->strokeTotal * reciprocal);
                 figure = RoundedWholePart(courseStats->longestDrive * YARDS_PER_UNIT);
                 course->longestDrive[0] = figure;
                 course->longestDrive[1] = figure >> BITS_PER_BYTE;
                 figure = RoundedWholePart(courseStats->driveAverage * YARDS_PER_UNIT);
                 course->driveAverage[0] = figure;
                 course->driveAverage[1] = figure >> BITS_PER_BYTE;
-                course->fairwayRate = RoundedWholePart(
+                course->fairwayPercent = RoundedWholePart(
                     courseStats->measuredDriveTotal * reciprocal *
                     (PERCENTS_PER_ONE / HOLES_PER_ROUND)
                 );
-                course->puttsAverage =
+                course->puttAverage =
                     PackTenths(courseStats->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND));
-                course->parOrBetterRate = RoundedWholePart(
+                course->parSavePercent = RoundedWholePart(
                     courseStats->parOrBetterCount * reciprocal *
                     (PERCENTS_PER_ONE / HOLES_PER_ROUND)
                 );
-                course->parOnRate = RoundedWholePart(
+                course->parOnPercent = RoundedWholePart(
                     courseStats->parOnCount * reciprocal * (PERCENTS_PER_ONE / HOLES_PER_ROUND)
                 );
                 sum = courseStats->sandSaveCount + courseStats->missedSandSaveCount;
                 if (sum == 0) {
-                    course->sandSaveRate = 0;
+                    course->sandSavePercent = 0;
                 }
                 else {
-                    course->sandSaveRate = RoundedWholePart(
+                    course->sandSavePercent = RoundedWholePart(
                         ((f32)courseStats->sandSaveCount / (f32)sum) * PERCENTS_PER_ONE
                     );
                 }
@@ -4006,19 +4006,19 @@ void BuildStatusData(StatusData *status) {
         course->roundCount[0] = figure;
         course->roundCount[1] = figure >> BITS_PER_BYTE;
         course->bestScore = (s32)g_CourseStatFigures[COURSE_COUNT].bestScore + STATUS_SCORE_BIAS;
-        course->strokesAverage = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].scoreAverage);
+        course->scoreAverage = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].scoreAverage);
         sum = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].bestDrive);
         course->longestDrive[0] = sum;
         course->longestDrive[1] = sum >> BITS_PER_BYTE;
         sum = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].driveAverage);
         course->driveAverage[0] = sum;
         course->driveAverage[1] = sum >> BITS_PER_BYTE;
-        course->fairwayRate = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].fairwayPercent);
-        course->puttsAverage = PackTenths(g_CourseStatFigures[COURSE_COUNT].puttsAverage);
-        course->parOrBetterRate =
-            RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].parSavePercent);
-        course->parOnRate = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].parOnPercent);
-        course->sandSaveRate = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].sandSavePercent);
+        course->fairwayPercent = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].fairwayPercent);
+        course->puttAverage = PackTenths(g_CourseStatFigures[COURSE_COUNT].puttAverage);
+        course->parSavePercent = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].parSavePercent);
+        course->parOnPercent = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].parOnPercent);
+        course->sandSavePercent =
+            RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].sandSavePercent);
         course->places = 0;
         for (index = 0; index != CHARACTER_COUNT; index++) {
             for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {

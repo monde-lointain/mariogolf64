@@ -821,7 +821,7 @@ void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row) {
                 &gfx,
                 STATS_VALUE_X,
                 STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-                g_CourseStatFigures[courseIndex].puttsAverage
+                g_CourseStatFigures[courseIndex].puttAverage
             );
             break;
         case STAT_PAR_SAVE_PERCENT:

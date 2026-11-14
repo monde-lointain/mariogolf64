@@ -39,7 +39,7 @@ typedef struct CourseStatFigures {
     f32 driveAverage;
     f32 unusedDriveFigure;
     f32 fairwayPercent;
-    f32 puttsAverage;
+    f32 puttAverage;
     f32 parSavePercent;
     f32 parOnPercent;
     f32 sandSavePercent;

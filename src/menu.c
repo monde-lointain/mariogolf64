@@ -2505,7 +2505,7 @@ void ComputeRoundStatistics(void) {
             g_CourseStatFigures[courseIndex].driveAverage = 0.0f;
             g_CourseStatFigures[courseIndex].unusedDriveFigure = 0.0f;
             g_CourseStatFigures[courseIndex].fairwayPercent = 0.0f;
-            g_CourseStatFigures[courseIndex].puttsAverage = 0.0f;
+            g_CourseStatFigures[courseIndex].puttAverage = 0.0f;
             g_CourseStatFigures[courseIndex].parOnPercent = 0.0f;
             g_CourseStatFigures[courseIndex].parSavePercent = 0.0f;
             g_CourseStatFigures[courseIndex].hasPlace[THIRD_PLACE_INDEX] = FALSE;
@@ -2521,7 +2521,7 @@ void ComputeRoundStatistics(void) {
                 courseStats->driveAverage * YARDS_PER_UNIT;
             g_CourseStatFigures[courseIndex].fairwayPercent =
                 courseStats->measuredDriveTotal * reciprocal * (100.0f / HOLES_PER_ROUND);
-            g_CourseStatFigures[courseIndex].puttsAverage =
+            g_CourseStatFigures[courseIndex].puttAverage =
                 courseStats->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND);
             g_CourseStatFigures[courseIndex].parSavePercent =
                 courseStats->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND);
@@ -2553,7 +2553,7 @@ void ComputeRoundStatistics(void) {
     g_CourseStatFigures[COURSE_COUNT].bestDrive = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].driveAverage = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].fairwayPercent = 0.0f;
-    g_CourseStatFigures[COURSE_COUNT].puttsAverage = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].puttAverage = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].parSavePercent = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].parOnPercent = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].sandSavePercent = 0.0f;
@@ -2628,7 +2628,7 @@ void ComputeRoundStatistics(void) {
         }
 
         holeCount = g_CourseStatFigures[COURSE_COUNT].roundCount * HOLES_PER_ROUND;
-        g_CourseStatFigures[COURSE_COUNT].puttsAverage = puttSum / holeCount;
+        g_CourseStatFigures[COURSE_COUNT].puttAverage = puttSum / holeCount;
         g_CourseStatFigures[COURSE_COUNT].fairwayPercent = (measuredDriveSum / holeCount) * 100.0f;
         g_CourseStatFigures[COURSE_COUNT].parSavePercent = (parOrBetterSum / holeCount) * 100.0f;
         g_CourseStatFigures[COURSE_COUNT].parOnPercent = (parOnSum / holeCount) * 100.0f;
