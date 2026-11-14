@@ -247,6 +247,9 @@ s32 PaintDrivingRange(TerrainCode code, TerrainCode nearestCode, s32 nearestDist
 
 static u32 f_PaintSeed = 0;
 #define PAINT_RANDOM_SHIFT 16
+// Most courses paint no-drop ground as dark soil, speckled by two fields of
+// each paint random value.
+#define SpeckledSoilColor(random) Rgba16(((random) & 4) + 2, 4 - (((random) >> 5) & 3), 0, 1)
 
 static PaintLogic f_PaintLogics[] = {
     {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintDefaultCourse},
@@ -967,7 +970,7 @@ s32 PaintDefaultCourse(
             paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
             f_PaintSeed = NextRandomSeed(f_PaintSeed);
             random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
-            color = Rgba16((random & 4) + 2, 4 - ((random >> 5) & 3), 0, 1);
+            color = SpeckledSoilColor(random);
             break;
         case TERRAIN_CODE_GREEN:
             if (IsGreenEdge(code, nearestCode, nearestDistance)) {
@@ -1199,7 +1202,7 @@ s32 PaintShyGuyDesert(
             paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
             f_PaintSeed = NextRandomSeed(f_PaintSeed);
             random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
-            color = Rgba16((random & 4) + 2, 4 - ((random >> 5) & 3), 0, 1);
+            color = SpeckledSoilColor(random);
             break;
         case TERRAIN_CODE_GREEN:
             if (IsGreenEdge(code, nearestCode, nearestDistance)) {
@@ -1304,7 +1307,7 @@ s32 PaintBooValley(TerrainCode code, TerrainCode nearestCode, s32 nearestDistanc
             paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
             f_PaintSeed = NextRandomSeed(f_PaintSeed);
             random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
-            color = Rgba16((random & 4) + 2, 4 - ((random >> 5) & 3), 0, 1);
+            color = SpeckledSoilColor(random);
             break;
         case TERRAIN_CODE_GREEN:
             if (IsGreenEdge(code, nearestCode, nearestDistance)) {
@@ -1415,7 +1418,7 @@ s32 PaintYoshisIsland(
             paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
             f_PaintSeed = NextRandomSeed(f_PaintSeed);
             random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
-            color = Rgba16((random & 4) + 2, 4 - ((random >> 5) & 3), 0, 1);
+            color = SpeckledSoilColor(random);
             break;
         case TERRAIN_CODE_GREEN:
             if (IsGreenEdge(code, nearestCode, nearestDistance)) {
@@ -1644,7 +1647,7 @@ s32 PaintSecondMiniGolfCourse(
             paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
             f_PaintSeed = NextRandomSeed(f_PaintSeed);
             random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
-            color = Rgba16((random & 4) + 2, 4 - ((random >> 5) & 3), 0, 1);
+            color = SpeckledSoilColor(random);
             break;
         case TERRAIN_CODE_GREEN:
             if (IsGreenEdge(code, nearestCode, nearestDistance)) {
@@ -1699,7 +1702,7 @@ s32 PaintThirdMiniGolfCourse(
             paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
             f_PaintSeed = NextRandomSeed(f_PaintSeed);
             random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
-            color = Rgba16((random & 4) + 2, 4 - ((random >> 5) & 3), 0, 1);
+            color = SpeckledSoilColor(random);
             break;
         case TERRAIN_CODE_GREEN:
             if (nearestCode != TERRAIN_CODE_GREEN && nearestDistance < TERRAIN_BORDER_DISTANCE) {
@@ -1782,7 +1785,7 @@ s32 PaintDrivingRange(
             paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
             f_PaintSeed = NextRandomSeed(f_PaintSeed);
             random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
-            color = Rgba16((random & 4) + 2, 4 - ((random >> 5) & 3), 0, 1);
+            color = SpeckledSoilColor(random);
             break;
         case TERRAIN_CODE_GREEN:
             if (IsGreenEdge(code, nearestCode, nearestDistance)) {
