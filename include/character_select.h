@@ -17,9 +17,11 @@ enum CharacterSelectBuffer {
     CHARACTER_SELECT_BUFFER_UNREAD = 10
 };
 
+typedef s16 CharacterSelectBuffer;
+
 void HideGameBoyCharacters(void);
 s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChooseMarked);
-void LoadCharacterSelectBuffer(void *buffer, s16 bufferKind);
+void LoadCharacterSelectBuffer(void *buffer, CharacterSelectBuffer bufferKind);
 void PlaceRivalCursor(void);
 void LoadCharacterFaces(void);
 void DrawCharacterSelect(Gfx **displayListHead, UBoolean8 isSinglePlayer);

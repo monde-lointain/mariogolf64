@@ -224,7 +224,7 @@ s32 GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
     return MATCH_SIDE_NONE;
 }
 
-s32 GetGroupHoleResult(s8 *playerResults) {
+s32 GetGroupHoleResult(GroupPlayerMark *playerResults) {
     s8 ignoredResults[PLAYER_COUNT_MAX];
     s32 bestScore;
     s32 bestPlayerIndex;

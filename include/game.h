@@ -10,8 +10,10 @@ enum PacingMode {
     PACING_MODE_PERFORMANCE_METER
 };
 
+typedef s8 PacingMode;
+
 #define PACING_MODE_COUNT 4
-extern s8 g_FramePacingMode;
+extern PacingMode g_FramePacingMode;
 
 extern s32 g_DrawBufferIndex;
 

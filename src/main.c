@@ -61,6 +61,8 @@ enum HaltState {
     HALT_STATE_HALTED
 };
 
+typedef u8 HaltState;
+
 #define HALT_BUTTONS (A_BUTTON | B_BUTTON | L_TRIG | R_TRIG)
 
 #define PENDING_TASK_MAX 2
@@ -81,7 +83,7 @@ enum HaltState {
 
 Boolean8 g_IsDebugEnabled = FALSE;
 Boolean g_HasExpansionPak = FALSE;
-static volatile u8 f_DebugHaltState = HALT_STATE_DISALLOWED;
+static volatile HaltState f_DebugHaltState = HALT_STATE_DISALLOWED;
 Boolean g_HasThreeFrameBuffers = FALSE;
 s32 g_FramesPerSecond = 0;
 
@@ -94,7 +96,7 @@ static u16 *f_Framebuffers[FRAMEBUFFER_COUNT] = {
 };
 static s32 f_RetraceCount = 0;
 static s32 f_FramesThisSecond = 0;
-s8 g_FrameStepState = FRAME_STEP_RUNNING;
+FrameStep g_FrameStepState = FRAME_STEP_RUNNING;
 volatile s32 g_FrameCount = 0;
 static Boolean f_IsOddRetrace = FALSE;
 

@@ -13,11 +13,13 @@ enum FrameStep {
     FRAME_STEP_PAUSED
 };
 
+typedef s8 FrameStep;
+
 extern Boolean8 g_IsDebugEnabled;
 extern Boolean g_HasExpansionPak;
 extern Boolean g_HasThreeFrameBuffers;
 extern s32 g_FramesPerSecond;
-extern s8 g_FrameStepState;
+extern FrameStep g_FrameStepState;
 
 extern volatile s32 g_FrameCount;
 

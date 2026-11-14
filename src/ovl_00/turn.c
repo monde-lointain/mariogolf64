@@ -4409,7 +4409,7 @@ void UpdateTurns(void) {
                         else if (g_GameState.replayKind == REPLAY_KIND_NONE &&
                             (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                                 g_GameState.gameMode == GAME_MODE_CLUB_SLOTS)) {
-                            s8 results[PLAYER_COUNT_MAX];
+                            GroupPlayerMark results[PLAYER_COUNT_MAX];
 
                             if (g_Players[playerIndex].strokeCount >=
                                 g_HoleSetup.par * STROKE_LIMIT_PER_PAR) {
@@ -4791,7 +4791,7 @@ void UpdateTurns(void) {
                     }
                     else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                         g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-                        s8 results[PLAYER_COUNT_MAX];
+                        GroupPlayerMark results[PLAYER_COUNT_MAX];
                         Boolean isAnyOut = FALSE;
                         GroupHoleResult holeResult = GetGroupHoleResult(results);
 

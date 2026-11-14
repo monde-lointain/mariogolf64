@@ -115,6 +115,8 @@ enum PlanStage {
     PLAN_STAGE_TRIAL_RUNNING
 };
 
+typedef s8 PlanStage;
+
 static const char f_SimulationFaultText[];
 
 static GolferTraits f_GolferTraits[CHARACTER_COUNT] = {
@@ -238,7 +240,7 @@ static u8 f_UnusedBytesAfterTrialEvaluation[4] UNUSED;
 static CoursePoint f_TrialEndPoint;
 static s8 f_OtherUnusedPlanStartValue;
 static s32 f_LostTrialCount;
-static s8 f_PlanStage;
+static PlanStage f_PlanStage;
 static Boolean f_NeedsShorterClub;
 static u8 f_UnusedBytesAfterNeedsShorterClub[8] UNUSED;
 static CurrentShot f_Shot;

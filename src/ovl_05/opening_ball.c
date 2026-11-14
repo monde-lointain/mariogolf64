@@ -30,7 +30,7 @@
 
 #define OPENING_CLUB_COUNT 2
 
-static s8 f_OpeningClubTestMode = CLUB_TEST_NONE;
+static ClubTest f_OpeningClubTestMode = CLUB_TEST_NONE;
 
 static SurfaceTraits f_OpeningSurfaceTraits[SURFACE_COUNT] = {
     {SURFACE_KIND_OUT_OF_BOUNDS, "O.B.", 100, 100, 0, 0, 0, 0x500, SINK_DEPTH_HALF, 7},

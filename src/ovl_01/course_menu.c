@@ -104,14 +104,38 @@ typedef struct TrophyPosition {
     u32 y;
 } TrophyPosition;
 
+enum NumberField {
+    NUMBER_FIELD_TWO_NARROW,
+    NUMBER_FIELD_ONE,
+    NUMBER_FIELD_TWO,
+    NUMBER_FIELD_THREE,
+    NUMBER_FIELD_FOUR,
+    NUMBER_FIELD_NONE
+};
+
+typedef u8 NumberField;
+
 extern const char f_StatsStringFormat[];
 extern const char f_NumberedCourseFormat[];
 
 void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row);
-void DrawThreeDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark);
-void DrawFourDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark);
+void DrawThreeDigitMenuNumber(
+    Gfx **displayListHead,
+    s32 x,
+    s32 y,
+    s32 number,
+    MenuNumberStyle mark
+);
+void DrawFourDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, MenuNumberStyle mark);
 void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number);
-void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8 field);
+void DrawMenuNumber(
+    Gfx **displayListHead,
+    s32 x,
+    s32 y,
+    s32 number,
+    MenuNumberStyle mark,
+    NumberField field
+);
 
 static s16 f_FirstShownStat = 0;
 static s16 f_StatsTrophyFrame = 0;
@@ -1156,16 +1180,13 @@ void DrawCourseTrophies(Gfx **displayListHead) {
 #define THREE_DIGIT_MAX (FOUR_DIGIT_FIRST - 1)
 #define FOUR_DIGIT_MAX (FOUR_DIGIT_FIRST * DECIMAL_BASE - 1)
 
-enum NumberField {
-    NUMBER_FIELD_TWO_NARROW,
-    NUMBER_FIELD_ONE,
-    NUMBER_FIELD_TWO,
-    NUMBER_FIELD_THREE,
-    NUMBER_FIELD_FOUR,
-    NUMBER_FIELD_NONE
-};
-
-void DrawNarrowTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark) {
+void DrawNarrowTwoDigitMenuNumber(
+    Gfx **displayListHead,
+    s32 x,
+    s32 y,
+    s32 number,
+    MenuNumberStyle mark
+) {
     Gfx *gfx = *displayListHead;
 
     if (number > TWO_DIGIT_MAX) {
@@ -1180,7 +1201,7 @@ void DrawNarrowTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 numbe
     *displayListHead = gfx;
 }
 
-void DrawOneDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark) {
+void DrawOneDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, MenuNumberStyle mark) {
     Gfx *gfx = *displayListHead;
 
     if (number > ONE_DIGIT_MAX) {
@@ -1195,7 +1216,7 @@ void DrawOneDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 
     *displayListHead = gfx;
 }
 
-void DrawTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark) {
+void DrawTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, MenuNumberStyle mark) {
     Gfx *gfx = *displayListHead;
 
     if (number > TWO_DIGIT_MAX) {
@@ -1210,7 +1231,13 @@ void DrawTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 
     *displayListHead = gfx;
 }
 
-void DrawThreeDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark) {
+void DrawThreeDigitMenuNumber(
+    Gfx **displayListHead,
+    s32 x,
+    s32 y,
+    s32 number,
+    MenuNumberStyle mark
+) {
     Gfx *gfx = *displayListHead;
 
     if (number > THREE_DIGIT_MAX) {
@@ -1225,7 +1252,13 @@ void DrawThreeDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u
     *displayListHead = gfx;
 }
 
-void DrawFourDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark) {
+void DrawFourDigitMenuNumber(
+    Gfx **displayListHead,
+    s32 x,
+    s32 y,
+    s32 number,
+    MenuNumberStyle mark
+) {
     Gfx *gfx = *displayListHead;
 
     if (number > FOUR_DIGIT_MAX) {
@@ -1240,7 +1273,13 @@ void DrawFourDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8
     *displayListHead = gfx;
 }
 
-void DrawUnalignedMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark) {
+void DrawUnalignedMenuNumber(
+    Gfx **displayListHead,
+    s32 x,
+    s32 y,
+    s32 number,
+    MenuNumberStyle mark
+) {
     Gfx *gfx = *displayListHead;
 
     DrawMenuNumber(&gfx, x, y, number, mark, NUMBER_FIELD_NONE);
@@ -1251,7 +1290,14 @@ void DrawUnalignedMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8
 #define MENU_NUMBER_DIGIT_LIMIT 4
 #define MENU_NUMBER_LIMIT FOUR_DIGIT_MAX
 
-void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8 field) {
+void DrawMenuNumber(
+    Gfx **displayListHead,
+    s32 x,
+    s32 y,
+    s32 number,
+    MenuNumberStyle mark,
+    NumberField field
+) {
     Gfx *gfx = *displayListHead;
     s16 digits[MENU_NUMBER_DIGIT_LIMIT];
     s16 digitCount = 0;

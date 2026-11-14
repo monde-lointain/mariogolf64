@@ -104,7 +104,9 @@ enum ClubTest {
     CLUB_TEST_PUTT
 };
 
-extern s8 g_ClubTestMode;
+typedef s8 ClubTest;
+
+extern ClubTest g_ClubTestMode;
 
 struct CurrentShot;
 struct GameBoyCharacter;

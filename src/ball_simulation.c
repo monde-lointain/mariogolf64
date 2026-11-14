@@ -35,7 +35,7 @@ BallSimulation g_TurnBallSimulation;
 
 BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT] = {0};
 
-s8 g_ClubTestMode = CLUB_TEST_NONE;
+ClubTest g_ClubTestMode = CLUB_TEST_NONE;
 
 static SurfaceTraits f_SurfaceTraits[SURFACE_COUNT] = {
     {SURFACE_KIND_OUT_OF_BOUNDS, "O.B.", 100, 100, 0, 0, 0, 0x500, SINK_DEPTH_HALF, 7},

@@ -39,6 +39,8 @@ enum GroupPlayerMark {
     GROUP_PLAYER_OUT
 };
 
+typedef s8 GroupPlayerMark;
+
 enum ScoreToPar {
     SCORE_TO_PAR_ALBATROSS = -3,
     SCORE_TO_PAR_EAGLE,
@@ -73,7 +75,7 @@ void RenumberHoleHandicaps(void);
 s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex);
 s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex);
 s32 GetMatchHoleResult(s32 playerIndex, s32 opponentIndex);
-s32 GetGroupHoleResult(s8 *playerResults);
+s32 GetGroupHoleResult(GroupPlayerMark *playerResults);
 s32 GetHolingOutStakes(s32 playerIndex);
 
 #endif

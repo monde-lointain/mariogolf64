@@ -33,6 +33,8 @@ enum HoleCreatureKind {
     HOLE_CREATURE_MONKEY
 };
 
+typedef u8 HoleCreatureKind;
+
 #define ASSET_CHEEP_CHEEP 0x6E0
 #define ASSET_CHEEP_CHEEP_FIRST_VIEW 0x6DE
 #define CHEEP_CHEEP_VIEW_COUNT 5
@@ -68,7 +70,7 @@ typedef struct HoleCreature {
     u8 frameCount;
     UBoolean8 isFacingBack;
     UBoolean8 isGold;
-    u8 state;
+    HoleCreatureKind kind;
 } HoleCreature;
 
 static AssetId f_CheepCheepViewAssets[CHEEP_CHEEP_VIEW_COUNT] UNUSED = {
@@ -143,7 +145,7 @@ Boolean IsMonkeyShown(void) {
 
     for (creatureIndex = 0; creatureIndex != HOLE_CREATURE_COUNT; creatureIndex++) {
         creature = &f_HoleCreatures[creatureIndex];
-        if (creature->state == HOLE_CREATURE_MONKEY) {
+        if (creature->kind == HOLE_CREATURE_MONKEY) {
             return TRUE;
         }
     }
@@ -168,8 +170,8 @@ void StartMonkeyDrop(Radians cameraYaw) {
     ReadEncodedAsset(f_MonkeyImage, &asset);
     for (creatureIndex = 0; creatureIndex != HOLE_CREATURE_COUNT; creatureIndex++) {
         creature = &f_HoleCreatures[creatureIndex];
-        if (creature->state == HOLE_CREATURE_NONE) {
-            creature->state = HOLE_CREATURE_MONKEY;
+        if (creature->kind == HOLE_CREATURE_NONE) {
+            creature->kind = HOLE_CREATURE_MONKEY;
             creature->isGold = FALSE;
             creature->isFacingBack = FALSE;
             creature->frameCount = 0;
@@ -201,7 +203,7 @@ void ClearHoleCreatures(void) {
 
     for (creatureIndex = 0; creatureIndex != HOLE_CREATURE_COUNT; creatureIndex++) {
         creature = &f_HoleCreatures[creatureIndex];
-        creature->state = HOLE_CREATURE_NONE;
+        creature->kind = HOLE_CREATURE_NONE;
     }
 }
 
@@ -221,10 +223,10 @@ void StartCheepCheepLeap(s32 startValue) {
     f_OtherUnusedLeapValue = 0;
     for (creatureIndex = 0; creatureIndex != HOLE_CREATURE_COUNT; creatureIndex++) {
         creature = &f_HoleCreatures[creatureIndex];
-        if (creature->state == HOLE_CREATURE_NONE) {
+        if (creature->kind == HOLE_CREATURE_NONE) {
             s32 random = guRandom();
 
-            creature->state = HOLE_CREATURE_CHEEP_CHEEP;
+            creature->kind = HOLE_CREATURE_CHEEP_CHEEP;
             creature->position[AXIS_X] = g_TurnBallSimulation.position[AXIS_X];
             creature->position[AXIS_Y] = g_TurnBallSimulation.position[AXIS_Y] + CHEEP_CHEEP_DEPTH;
             creature->position[AXIS_Z] = g_TurnBallSimulation.position[AXIS_Z];
@@ -325,9 +327,9 @@ void DrawHoleCreatures(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     for (creatureIndex = 0; creatureIndex != HOLE_CREATURE_COUNT; creatureIndex++) {
         creature = &f_HoleCreatures[creatureIndex];
-        if (creature->state == HOLE_CREATURE_NONE) {
+        if (creature->kind == HOLE_CREATURE_NONE) {
         }
-        else if (creature->state == HOLE_CREATURE_CHEEP_CHEEP) {
+        else if (creature->kind == HOLE_CREATURE_CHEEP_CHEEP) {
             wasUnderwater = g_TurnBallSimulation.position[AXIS_Y] < creature->position[AXIS_Y];
             creature->velocity[1] += CHEEP_CHEEP_GRAVITY;
             creature->position[AXIS_X] += creature->velocity[0];
@@ -393,7 +395,7 @@ void DrawHoleCreatures(Gfx **displayListHead) {
 
             if (g_TurnBallSimulation.position[AXIS_Y] + CHEEP_CHEEP_DEPTH <
                 creature->position[AXIS_Y]) {
-                creature->state = HOLE_CREATURE_NONE;
+                creature->kind = HOLE_CREATURE_NONE;
             }
 
             gDPLoadTextureBlock(
@@ -421,7 +423,7 @@ void DrawHoleCreatures(Gfx **displayListHead) {
             gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
             gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
         }
-        else if (creature->state == HOLE_CREATURE_MONKEY) {
+        else if (creature->kind == HOLE_CREATURE_MONKEY) {
             creature->velocity[1] += GRAVITY;
             creature->position[AXIS_Y] += creature->velocity[1];
             switch (++creature->frameCount) {
@@ -445,7 +447,7 @@ void DrawHoleCreatures(Gfx **displayListHead) {
             }
 
             if (creature->frameCount >= MONKEY_LIFETIME) {
-                creature->state = HOLE_CREATURE_NONE;
+                creature->kind = HOLE_CREATURE_NONE;
             }
 
             translation[AXIS_X] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;

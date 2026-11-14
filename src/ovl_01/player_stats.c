@@ -121,6 +121,8 @@ enum StatsDirection {
     STATS_DIRECTION_DOWN
 };
 
+typedef u8 StatsDirection;
+
 #define STATS_DIRECTION_COUNT 4
 
 #define STATS_SLIDE_ROW_COUNT 9
@@ -2186,7 +2188,7 @@ void LoadScoreLabelBuffer(void *buffer, s16 bufferKind) {
     }
 }
 
-s32 FindNextBestShotCell(s8 column, s8 row, u8 direction);
+s32 FindNextBestShotCell(s8 column, s8 row, StatsDirection direction);
 
 void UpdateBestShots(void) {
     SaveData *save = GetSaveData();
@@ -2705,7 +2707,7 @@ void ReadBestShots(void) {
     }
 }
 
-s32 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
+s32 FindNextBestShotCell(s8 column, s8 row, StatsDirection direction) {
     s32 stepCount;
     s32 stepIndex;
 

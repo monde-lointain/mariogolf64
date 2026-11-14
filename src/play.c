@@ -570,7 +570,7 @@ s32 IsHoleOver(void) {
 
 void SetNextTeeOrder(void) {
     s32 orders[PLAYER_COUNT_MAX];
-    s8 results[PLAYER_COUNT_MAX];
+    GroupPlayerMark results[PLAYER_COUNT_MAX];
     s32 playerIndex;
     s32 otherIndex;
 
@@ -1188,7 +1188,7 @@ void UpdatePlay(void) {
                     if (g_GameState.replayKind == REPLAY_KIND_NONE &&
                         (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                             g_GameState.gameMode == GAME_MODE_CLUB_SLOTS)) {
-                        s8 results[PLAYER_COUNT_MAX];
+                        GroupPlayerMark results[PLAYER_COUNT_MAX];
 
                         if (GetGroupHoleResult(results) != TRUE) {
                             for (playerSlot = 0; playerSlot < g_GameState.playerCount;

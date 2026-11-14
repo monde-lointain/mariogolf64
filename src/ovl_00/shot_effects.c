@@ -44,6 +44,8 @@ enum SparkKind {
     SPARK_KIND_IMPACT
 };
 
+typedef u8 SparkKind;
+
 #define IMPACT_FLASH_FULL_LEVEL 255
 
 #define ASSET_SPARK_IMAGE 0x561
@@ -111,7 +113,7 @@ static Vec2 f_SparkOffsets[SPARK_COUNT];
 static Vec2 f_SparkVelocities[SPARK_COUNT];
 static Radians f_SparkAngles[SPARK_COUNT];
 static u8 f_SparkLives[SPARK_COUNT];
-static u8 f_SparkKinds[SPARK_COUNT];
+static SparkKind f_SparkKinds[SPARK_COUNT];
 static u8 f_SparkBursts[SPARK_COUNT];
 static s8 f_SparkBurstAges[SPARK_BURST_COUNT];
 static u8 f_SparkBurstTimers[SPARK_BURST_COUNT];

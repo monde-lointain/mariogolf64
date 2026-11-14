@@ -23,6 +23,8 @@ enum HoleTriangleKind {
     HOLE_TRIANGLE_KIND_SHADED
 };
 
+typedef s8 HoleTriangleKind;
+
 typedef struct HoleTriangle {
     u32 kind;
     Vtx vertices[HOLE_TRIANGLE_VERTEX_COUNT];

@@ -49,6 +49,15 @@
 #define RANDOM_YAW_MASK 0x7FFF
 #define RANDOM_YAW_TO_RADIANS (M_PI / 16384)
 
+enum ResultSound {
+    RESULT_SOUND_NONE,
+    RESULT_SOUND_GOOD_SHOT,
+    RESULT_SOUND_SUPERB_SHOT,
+    RESULT_SOUND_STAGE = 15
+};
+
+typedef s8 ResultSound;
+
 enum FlightPhase {
     FLIGHT_PHASE_NONE,
     FLIGHT_PHASE_LAUNCH,
@@ -136,7 +145,7 @@ static Radians f_TrailViewAngle = 0.0f;
 static s32 f_CupViewHoldCount = 0;
 static s32 f_FlightCameraFlags = 0;
 static u8 f_UnusedBytesAfterFlightFlags[8] UNUSED = {0};
-static s8 f_PendingResultSound = 0;
+static ResultSound f_PendingResultSound = 0;
 static s32 f_CameraChangeHoldCount = 0;
 static s32 f_UnusedFlightStartKind = 0;
 static Boolean f_IsFlightHudShown = FALSE;
@@ -175,13 +184,6 @@ static const char f_UnusedFloatFormat[] = "            %f";
 #define FLIGHT_SOUND_CHANNEL_LANDING 0xB
 #define FLIGHT_SOUND_CHANNEL_CUP_IN 0xF
 #define SOUND_FADE_FRAME_COUNT 120
-
-enum ResultSound {
-    RESULT_SOUND_NONE,
-    RESULT_SOUND_GOOD_SHOT,
-    RESULT_SOUND_SUPERB_SHOT,
-    RESULT_SOUND_STAGE = 15
-};
 
 #define FLYOVER_FIELD_OF_VIEW 80.0f
 #define FLYOVER_INSET_CENTER_X (SCREEN_WIDTH / 2)

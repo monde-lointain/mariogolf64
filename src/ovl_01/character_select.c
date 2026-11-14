@@ -36,6 +36,8 @@ enum GridMove {
     GRID_MOVE_RIGHT
 };
 
+typedef u8 GridMove;
+
 #define STICK_DIAGONAL_NONE 0
 #define STICK_DIAGONAL_UP_LEFT 1
 #define STICK_DIAGONAL_UP_RIGHT 2
@@ -199,7 +201,7 @@ void HideGameBoyCharacters(void) {
     f_SavedGameBoySlots[3] = fourthSlot;
 }
 
-s32 MoveGridCursor(s32 playerIndex, u8 direction, UBoolean8 canChooseMarked) {
+s32 MoveGridCursor(s32 playerIndex, GridMove direction, UBoolean8 canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
     MenuMemory *memory = GetMenuMemory();
@@ -1262,7 +1264,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
     return 0;
 }
 
-void LoadCharacterSelectBuffer(void *buffer, s16 bufferKind) {
+void LoadCharacterSelectBuffer(void *buffer, CharacterSelectBuffer bufferKind) {
     EncodedAsset asset;
     ImageAsset *image = buffer;
 

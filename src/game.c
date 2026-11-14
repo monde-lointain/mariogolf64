@@ -115,7 +115,7 @@ typedef s32 FadeColor;
 
 #define LOAD_LIST_PALETTE(list, index) gsDPLoadTLUT_pal256(&(list)[index])
 
-s8 g_FramePacingMode = PACING_MODE_NORMAL;
+PacingMode g_FramePacingMode = PACING_MODE_NORMAL;
 static s32 f_FadeAlpha = 0;
 TitleScreenEntrance g_TitleScreenEntrance = TITLE_ENTRANCE_NONE;
 ScreenEffect g_ScreenEffect = SCREEN_EFFECT_NONE;
