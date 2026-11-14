@@ -68,7 +68,7 @@ typedef struct CharacterPoint {
 typedef struct KeyframeSpan {
     s16 startFrame;
     s16 endFrame;
-    s16 index;
+    s16 startKeyIndex;
 } KeyframeSpan;
 
 typedef struct JointAnimation {

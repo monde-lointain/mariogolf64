@@ -4372,7 +4372,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
             else {
                 for (; keyIndex < joint->translationKeyCount; keyIndex++) {
                     if (g_CurrentAnimationFrame < joint->translationFrames[keyIndex]) {
-                        joint->translationSpan.index = keyIndex - 1;
+                        joint->translationSpan.startKeyIndex = keyIndex - 1;
                         joint->translationSpan.startFrame = joint->translationFrames[keyIndex - 1];
                         joint->translationSpan.endFrame = joint->translationFrames[keyIndex];
                         break;
@@ -4391,14 +4391,14 @@ void AnimateCharacterJoints(u32 slotIndex) {
 
         if (isInterpolated) {
             if (g_CurrentAnimationEndFrame < joint->translationSpan.endFrame) {
-                x = joint->translations[joint->translationSpan.index][0];
-                y = joint->translations[joint->translationSpan.index][1];
-                z = joint->translations[joint->translationSpan.index][2];
+                x = joint->translations[joint->translationSpan.startKeyIndex][0];
+                y = joint->translations[joint->translationSpan.startKeyIndex][1];
+                z = joint->translations[joint->translationSpan.startKeyIndex][2];
             }
             else {
                 progress = (g_CurrentAnimationFrame - joint->translationSpan.startFrame) /
                     (joint->translationSpan.endFrame - joint->translationSpan.startFrame);
-                spanIndex = joint->translationSpan.index;
+                spanIndex = joint->translationSpan.startKeyIndex;
                 nextSpanIndex = spanIndex + 1;
                 remaining = 1.0 - progress;
                 x = (remaining * joint->translations[spanIndex][0]) +
@@ -4426,7 +4426,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
             else {
                 for (; keyIndex < joint->rotationKeyCount; keyIndex++) {
                     if (g_CurrentAnimationFrame < joint->rotationFrames[keyIndex]) {
-                        joint->rotationSpan.index = keyIndex - 1;
+                        joint->rotationSpan.startKeyIndex = keyIndex - 1;
                         joint->rotationSpan.startFrame = joint->rotationFrames[keyIndex - 1];
                         joint->rotationSpan.endFrame = joint->rotationFrames[keyIndex];
                         break;
@@ -4446,16 +4446,20 @@ void AnimateCharacterJoints(u32 slotIndex) {
 
         if (isInterpolated) {
             if (g_CurrentAnimationEndFrame < joint->rotationSpan.endFrame) {
-                rotation[0] = joint->rotations[joint->rotationSpan.index][0] * QUATERNION_SCALE;
-                rotation[1] = joint->rotations[joint->rotationSpan.index][1] * QUATERNION_SCALE;
-                rotation[2] = joint->rotations[joint->rotationSpan.index][2] * QUATERNION_SCALE;
-                rotation[3] = joint->rotations[joint->rotationSpan.index][3] * QUATERNION_SCALE;
+                rotation[0] =
+                    joint->rotations[joint->rotationSpan.startKeyIndex][0] * QUATERNION_SCALE;
+                rotation[1] =
+                    joint->rotations[joint->rotationSpan.startKeyIndex][1] * QUATERNION_SCALE;
+                rotation[2] =
+                    joint->rotations[joint->rotationSpan.startKeyIndex][2] * QUATERNION_SCALE;
+                rotation[3] =
+                    joint->rotations[joint->rotationSpan.startKeyIndex][3] * QUATERNION_SCALE;
             }
             else {
                 f32 rotationProgress;
                 f32 coveredAngle;
 
-                spanIndex = joint->rotationSpan.index;
+                spanIndex = joint->rotationSpan.startKeyIndex;
                 nextSpanIndex = spanIndex + 1;
                 dot = ((joint->rotations[spanIndex][0] * QUATERNION_PRODUCT_SCALE) *
                           joint->rotations[nextSpanIndex][0]) +
@@ -4507,7 +4511,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
             else {
                 for (; keyIndex < joint->scaleKeyCount; keyIndex++) {
                     if (g_CurrentAnimationFrame < joint->scaleFrames[keyIndex]) {
-                        joint->scaleSpan.index = keyIndex - 1;
+                        joint->scaleSpan.startKeyIndex = keyIndex - 1;
                         joint->scaleSpan.startFrame = joint->scaleFrames[keyIndex - 1];
                         joint->scaleSpan.endFrame = joint->scaleFrames[keyIndex];
                         break;
@@ -4526,14 +4530,14 @@ void AnimateCharacterJoints(u32 slotIndex) {
 
         if (isInterpolated) {
             if (g_CurrentAnimationEndFrame < joint->scaleSpan.endFrame) {
-                x = joint->scales[joint->scaleSpan.index][0];
-                y = joint->scales[joint->scaleSpan.index][1];
-                z = joint->scales[joint->scaleSpan.index][2];
+                x = joint->scales[joint->scaleSpan.startKeyIndex][0];
+                y = joint->scales[joint->scaleSpan.startKeyIndex][1];
+                z = joint->scales[joint->scaleSpan.startKeyIndex][2];
             }
             else {
                 progress = (g_CurrentAnimationFrame - joint->scaleSpan.startFrame) /
                     (joint->scaleSpan.endFrame - joint->scaleSpan.startFrame);
-                spanIndex = joint->scaleSpan.index;
+                spanIndex = joint->scaleSpan.startKeyIndex;
                 nextSpanIndex = spanIndex + 1;
                 remaining = 1.0 - progress;
                 x = (remaining * joint->scales[spanIndex][0]) +
