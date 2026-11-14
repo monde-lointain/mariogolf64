@@ -177,7 +177,7 @@ void ResetBallSimulations(void) {
     }
 }
 
-s32 StepBallSimulation(BallSimulation *simulation) {
+StepFlags StepBallSimulation(BallSimulation *simulation) {
     PlaneTriangle hit;
     PlaneTriangle triangle;
     BallSpeed velocity[AXIS_COUNT];
@@ -185,7 +185,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
     f32 fraction;
     s32 previousVelocityX;
     s32 previousVelocityZ;
-    s32 stepFlags = 0;
+    StepFlags stepFlags = 0;
     s32 substep;
     s32 substepCount = 1;
     Boolean printsDebugText = FALSE;

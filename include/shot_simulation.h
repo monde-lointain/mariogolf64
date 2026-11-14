@@ -14,7 +14,7 @@ typedef struct SimulatedShot {
     s32 startPosition[3];
     s32 endPosition[3];
     s32 path[PATH_STEP_COUNT][3];
-    s8 pathFlags[PATH_STEP_COUNT];
+    StepFlags8 pathFlags[PATH_STEP_COUNT];
     s32 stepCount;
     s32 positionMax[3];
     s32 positionStepMax[3];

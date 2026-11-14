@@ -2021,11 +2021,11 @@ static const char f_SimulationFaultText[] = "AI Sim Fault!";
 s32 StepTrialShot(void) {
     PlaneTriangle hit;
     f32 fraction;
-    s32 stepFlags;
+    StepFlags stepFlags;
     BallState ballState;
     // Holds the same flags as stepFlags; reading them from a copy is needed
     // for the match.
-    s32 stepFlagsCopy;
+    StepFlags stepFlagsCopy;
     s32 velocityY;
     s32 bounceCount;
     s32 heightMiss;
@@ -2741,7 +2741,7 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
 
 Boolean IsTrialShotSafe(void) {
     SurfaceKind surfaceKind;
-    s32 stepFlags;
+    StepFlags stepFlags;
     s32 velocityY UNUSED;
 
     f_TrialLaunch->heading = f_TrialShot.heading;

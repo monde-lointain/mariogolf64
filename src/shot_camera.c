@@ -259,7 +259,7 @@ static Vec3 f_LookAtPoint;
 static s32 f_GreenSoundCount;
 static Boolean f_IsLandingSoundPlayed;
 static s32 f_UnusedClearedFlightWord;
-static s8 f_PassedPathFlags;
+static StepFlags8 f_PassedPathFlags;
 static SurfaceTraits *f_EndSurfaceTraits;
 static FlightPhase f_FlightPhase;
 

@@ -22,7 +22,7 @@ void SimulateShot(ShotLaunch *shot) {
     s32 step;
     Boolean hasGroundHit;
     Boolean hasHoleTriangleBounce;
-    s32 stepFlags;
+    StepFlags stepFlags;
     SurfaceKind firstBounceKind;
     UBoolean8 isWaterCut;
 

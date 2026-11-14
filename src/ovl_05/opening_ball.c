@@ -268,7 +268,7 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
 #define OPENING_SPIN_DECAY 0.995f
 #define OPENING_WIND_SCALE_PER_HEIGHT (1.0f / (160 * UNITS_PER_YARD))
 
-s32 StepOpeningBallSimulation(BallSimulation *simulation) {
+StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
     PlaneTriangle triangle;
 
     f32 GetOpeningStepNoise(void) {
@@ -333,7 +333,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
     s32 previousVelocityX;
     s32 previousVelocityZ;
     s32 contact;
-    s32 stepFlags = 0;
+    StepFlags stepFlags = 0;
     Boolean printsDebugText;
     s32 substep;
     s32 substepCount;

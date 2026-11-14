@@ -47,6 +47,11 @@ typedef f32 BallSpeed;
 #define STEP_FLAG_HOLE_TRIANGLE_BOUNCE 0x40
 #define STEP_FLAG_CUP_PULL 0x80
 
+// A set of STEP_FLAG bits.
+typedef s32 StepFlags;
+typedef s8 StepFlags8;
+typedef u8 UStepFlags8;
+
 enum BallState {
     BALL_STATE_STOPPED,
     BALL_STATE_FLYING,
@@ -153,13 +158,13 @@ typedef struct BallSimulation {
     Surface8 surface;
     Surface8 surfaceBelow;
     s8 playerIndex;
-    s8 stepFlags;
+    StepFlags8 stepFlags;
     Surface8 firstBounceSurface;
     // A CUP_IN_SOUND state for BALL_SOUND_CUP_IN; whether the sound is
     // playing for BALL_SOUND_ROLL.
     s8 soundStates[BALL_SOUND_COUNT];
     Boolean8 hasHitFlag;
-    u8 previousStepFlags;
+    UStepFlags8 previousStepFlags;
     u16 rollFrameCount;
     Boolean8 isOverCup;
 } BallSimulation;
@@ -177,7 +182,7 @@ ImpactEffect *GetImpactTimingEntry(
     ShotMode shotMode,
     s32 impactTiming
 );
-s32 StepBallSimulation(BallSimulation *simulation);
+StepFlags StepBallSimulation(BallSimulation *simulation);
 s32 LaunchBallSimulation(BallSimulation *simulation, LaunchPurpose purpose, ShotLaunch *shot);
 
 #endif

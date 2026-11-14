@@ -24,7 +24,7 @@ s32 LaunchOpeningBallSimulation(
     LaunchPurpose purpose,
     ShotLaunch *shot
 );
-s32 StepOpeningBallSimulation(BallSimulation *simulation);
+StepFlags StepOpeningBallSimulation(BallSimulation *simulation);
 Boolean ToggleOpeningCharacter(u32 slotIndex, OpeningModel model);
 
 #endif
