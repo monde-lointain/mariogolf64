@@ -52,23 +52,27 @@ enum PauseMenuRequest {
 typedef s32 PauseMenuRequest;
 
 // The pause menu's option lists, which the game mode picks
-// For a record being played back
-#define PAUSE_LAYOUT_NONE (-1)
-#define PAUSE_LAYOUT_SPEED_GOLF 0
-#define PAUSE_LAYOUT_RING_SHOT 1
-#define PAUSE_LAYOUT_TRAINING 2
-#define PAUSE_LAYOUT_TRAINING_MINI_GOLF 3
-#define PAUSE_LAYOUT_DRIVING_RANGE 4
-// Match Game, Get Character, Skins Match and Club Slots
-#define PAUSE_LAYOUT_VERSUS 5
-// Stroke, Tournament and the modes like them
-#define PAUSE_LAYOUT_STROKE 6
-// The layouts used while g_HasBroughtOverCharacter is set
-#define PAUSE_LAYOUT_BROUGHT_OVER_SPEED_GOLF 7
-#define PAUSE_LAYOUT_BROUGHT_OVER 8
-// The layouts used while g_GameState.isClubTournament is set
-#define PAUSE_LAYOUT_CLUB_TOURNAMENT_SPEED_GOLF 9
-#define PAUSE_LAYOUT_CLUB_TOURNAMENT 10
+enum PauseLayout {
+    // For a record being played back
+    PAUSE_LAYOUT_NONE = -1,
+    PAUSE_LAYOUT_SPEED_GOLF,
+    PAUSE_LAYOUT_RING_SHOT,
+    PAUSE_LAYOUT_TRAINING,
+    PAUSE_LAYOUT_TRAINING_MINI_GOLF,
+    PAUSE_LAYOUT_DRIVING_RANGE,
+    // Match Game, Get Character, Skins Match and Club Slots
+    PAUSE_LAYOUT_VERSUS,
+    // Stroke, Tournament and the modes like them
+    PAUSE_LAYOUT_STROKE,
+    // The layouts used while g_HasBroughtOverCharacter is set
+    PAUSE_LAYOUT_BROUGHT_OVER_SPEED_GOLF,
+    PAUSE_LAYOUT_BROUGHT_OVER,
+    // The layouts used while g_GameState.isClubTournament is set
+    PAUSE_LAYOUT_CLUB_TOURNAMENT_SPEED_GOLF,
+    PAUSE_LAYOUT_CLUB_TOURNAMENT
+};
+
+typedef s32 PauseLayout;
 
 #define PAUSE_MENU_SONG_VOLUME 0x60
 
@@ -382,7 +386,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_OPTIONS_MAX] = {
 // The number of options in each pause layout
 static s8 f_PauseLayoutOptionCounts[] = {5, 6, 9, 7, 9, 6, 6, 5, 6, 5, 6};
 
-static s32 f_PauseLayout = PAUSE_LAYOUT_NONE;
+static PauseLayout f_PauseLayout = PAUSE_LAYOUT_NONE;
 static Boolean f_IsPauseMenuLoaded = FALSE;
 static PauseMenuRequest f_PauseMenuRequest = PAUSE_MENU_REQUEST_NONE;
 static s32 f_PauseArrowsTick = 0;
@@ -561,18 +565,23 @@ void FreePauseMenu(void) {
 #define PAUSE_WIND_TURN_STEP 0xF0
 
 // The lies that the lie option sets the ball in, from the tee's
-#define PAUSE_LIE_TEE_UP 0
-#define PAUSE_LIE_FAIRWAY 1
-#define PAUSE_LIE_FAIRWAY_FAIR_LIE 2
-#define PAUSE_LIE_FAIRWAY_POOR_LIE 3
-#define PAUSE_LIE_SEMI_ROUGH 4
-#define PAUSE_LIE_ROUGH 5
-#define PAUSE_LIE_ROUGH_POOR_LIE 6
-#define PAUSE_LIE_DEEP_ROUGH 7
-#define PAUSE_LIE_BUNKER 8
-#define PAUSE_LIE_BUNKER_FAIR_LIE 9
-#define PAUSE_LIE_BUNKER_POOR_LIE 10
-#define PAUSE_LIE_COUNT 11
+enum PauseLie {
+    PAUSE_LIE_TEE_UP,
+    PAUSE_LIE_FAIRWAY,
+    PAUSE_LIE_FAIRWAY_FAIR_LIE,
+    PAUSE_LIE_FAIRWAY_POOR_LIE,
+    PAUSE_LIE_SEMI_ROUGH,
+    PAUSE_LIE_ROUGH,
+    PAUSE_LIE_ROUGH_POOR_LIE,
+    PAUSE_LIE_DEEP_ROUGH,
+    PAUSE_LIE_BUNKER,
+    PAUSE_LIE_BUNKER_FAIR_LIE,
+    PAUSE_LIE_BUNKER_POOR_LIE,
+    PAUSE_LIE_COUNT
+};
+
+typedef s32 PauseLie;
+
 // The ball moves across from the tee onto the patches of the rougher lies
 #define PAUSE_ROUGH_LIES_OFFSET_X (-0x2D000)
 #define PAUSE_DEEP_ROUGH_OFFSET_X (-0x5A000)
@@ -586,7 +595,7 @@ void FreePauseMenu(void) {
 PauseAction UpdatePauseMenu(ControllerState *controller) {
     PauseAction action;
     PauseOptionKind kind;
-    s32 lie;
+    PauseLie lie;
     Boolean hasLieChanged;
     Surface surface;
 

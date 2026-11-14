@@ -199,6 +199,18 @@ enum SpiralDirection {
 
 typedef s32 SpiralDirection;
 
+// The sky editor table's columns: the top, horizon and noise colors, the
+// background image's color, and fog
+enum SkyEditorColumn {
+    SKY_EDITOR_TOP,
+    SKY_EDITOR_HORIZON,
+    SKY_EDITOR_NOISE,
+    SKY_EDITOR_BACKGROUND,
+    SKY_EDITOR_FOG
+};
+
+typedef s32 SkyEditorColumn;
+
 // The frame's tiles turn over and fly apart towards the camera as the
 // animation goes on. The last column is narrower than the others.
 #define FRAME_TILE_COUNT (FRAME_TILE_ROW_COUNT * FRAME_TILE_COLUMN_COUNT)
@@ -1300,7 +1312,7 @@ static f32 f_UnusedPlaneCornerPoints[12] UNUSED =
     {0.0f, 0.0f, 0.0f, 4096.0f, 0.0f, 0.0f, 0.0f, 0.0f, 8192.0f, 4096.0f, 0.0f, 8192.0f};
 // The fog SetSceneFog draws while GAME_FLAG_SKY_EDITOR is set
 Fog g_DebugFog = {{200, 230, 200}, 970, 1100};
-static s32 f_SkyEditorColumn = 0;
+static SkyEditorColumn f_SkyEditorColumn = SKY_EDITOR_TOP;
 static s32 f_SkyEditorRow = 0;
 static s32 f_UnusedWordsAfterSkyEditorRow[3] UNUSED = {0};
 static Vtx f_TileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT] = {
@@ -1878,13 +1890,6 @@ void InitSkyColors(void) {
 #define SKY_EDITOR_ERASE_COLUMN 14
 #define SKY_EDITOR_ERASE_ROW 5
 
-// The table's columns: the top, horizon and noise colors, the background
-// image's color, and fog
-#define SKY_EDITOR_TOP 0
-#define SKY_EDITOR_HORIZON 1
-#define SKY_EDITOR_NOISE 2
-#define SKY_EDITOR_BACKGROUND 3
-#define SKY_EDITOR_FOG 4
 // Rows past blue: the background's alpha, and the fog's near and far
 #define SKY_EDITOR_ALPHA_ROW SKY_BACKGROUND_ALPHA
 #define SKY_EDITOR_FAR_ROW 4

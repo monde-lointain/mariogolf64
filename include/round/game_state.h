@@ -14,10 +14,14 @@
 #include "round/player.h"
 #include "system/c_language.h"
 
-// GameState.holeSelection values; code tests the nines as bits
-#define HOLE_SELECTION_ALL 0
-#define HOLE_SELECTION_BACK_NINE (1 << 1)
-#define HOLE_SELECTION_FRONT_NINE (1 << 2)
+// Which holes a game plays; code tests the nines as bits
+enum HoleSelection {
+    HOLE_SELECTION_ALL = 0,
+    HOLE_SELECTION_BACK_NINE = 1 << 1,
+    HOLE_SELECTION_FRONT_NINE = 1 << 2
+};
+
+typedef s32 HoleSelection;
 
 // Indices of GameState.carriedPots
 #define CARRIED_POT_LONGEST_DRIVE 0
@@ -79,7 +83,7 @@ typedef struct GameState {
     Boolean isSuddenDeath;
     s32 unusedAfterSuddenDeath;
     s32 currentPlayerIndex;
-    s32 holeSelection; // A HOLE_SELECTION_ value
+    HoleSelection holeSelection;
     s32 stopwatchFrameCount; // The time the stopwatch modes show, in frames
     s32 roundSeed; // Draws the cups, the tournament field's scores and the computers' luck
     Boolean8 isRoundContinued; // ROUND_CONTINUED or FALSE

@@ -19,10 +19,16 @@
 // The most experience a Game Boy character can hold
 #define GAME_BOY_EXPERIENCE_MAX 9999
 
-// A slot's status when it holds a character
-#define GAME_BOY_CHARACTER_STATUS_PRESENT 1
-// A cartridge character's status once it has been brought over
-#define GAME_BOY_CHARACTER_STATUS_BROUGHT_OVER 2
+// A Game Boy character slot's status
+enum GameBoyCharacterStatus {
+    GAME_BOY_CHARACTER_STATUS_EMPTY,
+    // A slot's status when it holds a character
+    GAME_BOY_CHARACTER_STATUS_PRESENT,
+    // A cartridge character's status once it has been brought over
+    GAME_BOY_CHARACTER_STATUS_BROUGHT_OVER
+};
+
+typedef u8 UGameBoyCharacterStatus8;
 
 // The name at the start of a Game Boy save, with its terminator
 #define SAVE_NAME_SIZE 11
@@ -62,7 +68,7 @@ typedef s8 GameBoyBallType;
 // A character from the Game Boy Color version's save, read through the Transfer
 // Pak
 typedef struct GameBoyCharacter {
-    u8 status;
+    UGameBoyCharacterStatus8 status;
     char name[GAME_BOY_CHARACTER_NAME_LENGTH];
     u8 saveName[SAVE_NAME_SIZE]; // As the Game Boy save spells it
     u8 unusedAfterSaveName;

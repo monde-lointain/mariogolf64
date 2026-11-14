@@ -290,12 +290,18 @@ typedef s32 HoleFileStep;
 #define POINT_HEIGHT_TEXT_ROW 8
 #define DEAD_TRIANGLE_TEXT_ROW 9
 
-// UpdateHolePointEditor's hole point editor
-#define HOLE_POINT_MODE_UNSET (-1)
-#define HOLE_POINT_MODE_PIN_TEE 0
-#define HOLE_POINT_MODE_AIM 1
-#define HOLE_POINT_MODE_ROUTE 2
-#define HOLE_POINT_MODE_COUNT 3
+// What UpdateHolePointEditor's hole point editor moves: the pin and tee, the
+// aim points or the route. It is unset until the editor first opens.
+enum HolePointMode {
+    HOLE_POINT_MODE_UNSET = -1,
+    HOLE_POINT_MODE_PIN_TEE,
+    HOLE_POINT_MODE_AIM,
+    HOLE_POINT_MODE_ROUTE,
+    HOLE_POINT_MODE_COUNT
+};
+
+typedef s32 HolePointMode;
+
 #define HOLE_POINT_STEP_LENGTH 10.0
 #define HEADING_RADIANS ((u16)f_HolePointCameraYawAngle * BINARY_ANGLE_TO_RADIANS)
 #define CURSOR_TEXT_COLUMN 3
@@ -694,7 +700,7 @@ static Radians f_HolePointCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 static Radians f_HolePointCameraYaw = EDITOR_CAMERA_START_ANGLE;
 static s32 f_UnusedHolePointAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static WideBinaryAngle f_HolePointCameraYawAngle = 0;
-static s32 f_HolePointEditMode = -1;
+static HolePointMode f_HolePointEditMode = HOLE_POINT_MODE_UNSET;
 static s32 f_PinTeeIndex = 0;
 static s32 f_AimPointIndex = 0;
 static s32 f_RoutePointIndex = 0;

@@ -54,7 +54,7 @@ void ResetGameBoyTransfer(TransferMode transferMode) {
     g_GameBoyTransfer.screen = TRANSMIT_SCREEN_OPTIONS;
     if (transferMode == TRANSFER_MODE_AT_BOOT) {
         for (index = 0; index != GAME_BOY_CHARACTER_COUNT; index++) {
-            g_GameBoyCharacters[index].status = 0;
+            g_GameBoyCharacters[index].status = GAME_BOY_CHARACTER_STATUS_EMPTY;
             g_GameBoyCharacters[index].companyCode = -1;
             g_GameBoyCharacters[index].saveIndex = -1;
             g_GameBoyTransfer.sourceIndices[index] = -1;

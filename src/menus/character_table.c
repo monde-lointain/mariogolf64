@@ -389,7 +389,7 @@ void DrawCharacterTable(Gfx **displayListHead) {
     CharacterIndex16 columnCharacter;
     s32 columnWins;
     s32 rowWins;
-    u8 drawMode;
+    UFaceDrawMode8 drawMode;
 
     DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
     gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
@@ -768,7 +768,7 @@ void DrawTablePopup(Gfx **displayListHead) {
     CharacterIndex columnCharacter;
     s32 rowWins;
     s32 columnWins;
-    u8 faceMode;
+    UFaceDrawMode8 faceMode;
 
     if (f_DoesTablePopupCoverCell[f_TablePopupCorner][memory->tableRow][memory->tableColumn] ==
         TRUE) {

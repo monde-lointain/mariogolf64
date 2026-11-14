@@ -544,8 +544,8 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                         &f_OpeningContactTriangle,
                         &f_OpeningContactFraction
                     ) > 0) {
-                    s8 *ringState = &g_Players[simulation->playerIndex]
-                                         .ringStates[f_OpeningContactTriangle.tag];
+                    RingState8 *ringState = &g_Players[simulation->playerIndex]
+                                                 .ringStates[f_OpeningContactTriangle.tag];
 
                     if (*ringState == RING_STATE_SHOWN &&
                         simulation->purpose == LAUNCH_PURPOSE_STROKE) {

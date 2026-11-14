@@ -48,7 +48,7 @@ Vec3 f_CameraSnapshots[SNAPSHOT_COUNT][SNAPSHOT_POINT_COUNT];
 // Starts the editor with its eye at (0, -100, 100) looking at the origin, and
 // its moves stopped
 void ResetCameraEditor(void) {
-    s32 pointIndex;
+    EditorPoint pointIndex;
 
     g_CameraEditor.points[EDITOR_POINT_EYE][AXIS_X] = 0.0f;
     g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_X] = 0.0f;
@@ -102,7 +102,7 @@ void PlaceEditorCamera(f32 eyeX, f32 eyeY, f32 eyeZ, f32 lookAtX, f32 lookAtY, f
 
 // Sets the top speed and acceleration of point index's moves. Nothing calls
 // it
-void SetEditorPointSpeeds(s32 pointIndex, f32 topSpeed, f32 acceleration) {
+void SetEditorPointSpeeds(EditorPoint pointIndex, f32 topSpeed, f32 acceleration) {
     g_CameraEditor.pointTopSpeeds[pointIndex] = topSpeed;
     g_CameraEditor.pointAccelerations[pointIndex] = acceleration;
 }
@@ -173,7 +173,7 @@ void MeasureEditorCamera(void) {
 
 // Starts moving point index to (x, y, z) over frameCount frames, or snaps it
 // there when it is close
-void MoveEditorPoint(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
+void MoveEditorPoint(EditorPoint pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
     f32 distance;
     s32 easeFrameCount;
     f32 speed;
@@ -242,7 +242,7 @@ void MoveEditorPoint(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
 
 // Moves point index to (x, y, z) over frameCount frames, carrying the other
 // point with it so that the camera keeps its direction and distance
-void MoveEditorCamera(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
+void MoveEditorCamera(EditorPoint pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
     if (!(g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_CARRYING)) {
         g_CameraEditor.flags[pointIndex] ^= EDITOR_FLAG_CARRYING;
     }
@@ -265,7 +265,7 @@ void MoveEditorCamera(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount) {
 // Starts turning the camera's heading by angle over frameCount frames, with
 // the other point swinging around point index, or turns it at once when angle
 // is tiny
-void TurnEditorCamera(s32 pointIndex, Radians angle, s32 frameCount) {
+void TurnEditorCamera(EditorPoint pointIndex, Radians angle, s32 frameCount) {
     s32 easeFrameCount;
     f32 speed;
 
@@ -303,7 +303,7 @@ void TurnEditorCamera(s32 pointIndex, Radians angle, s32 frameCount) {
 // Starts tilting the camera's pitch by angle over frameCount frames, with the
 // other point swinging around point index, or tilts it at once when angle is
 // tiny
-void TiltEditorCamera(s32 pointIndex, Radians angle, s32 frameCount) {
+void TiltEditorCamera(EditorPoint pointIndex, Radians angle, s32 frameCount) {
     s32 easeFrameCount;
     f32 speed;
 
@@ -340,7 +340,7 @@ void TiltEditorCamera(s32 pointIndex, Radians angle, s32 frameCount) {
 
 // Starts moving the other point to distance from point index over frameCount
 // frames, or moves it at once when it is close
-void ZoomEditorCamera(s32 pointIndex, f32 distance, s32 frameCount) {
+void ZoomEditorCamera(EditorPoint pointIndex, f32 distance, s32 frameCount) {
     s32 easeFrameCount;
     f32 change;
     f32 speed;
@@ -405,7 +405,7 @@ Boolean AreEditorFlagsClear(s32 mask) {
 
 // Stops the editor's moves and puts its speeds back to their starting values
 void StopEditorMoves(void) {
-    s32 pointIndex;
+    EditorPoint pointIndex;
 
     for (pointIndex = 0; pointIndex != EDITOR_POINT_COUNT; pointIndex++) {
         g_CameraEditor.targets[pointIndex][AXIS_X] = 0.0f;
@@ -549,7 +549,7 @@ void UpdateCameraEditor(void) {
     Boolean hasMoved = FALSE;
     // Whether a point carries the other, and later whether one is a pivot
     Boolean hasLeader = FALSE;
-    s32 pointIndex;
+    EditorPoint pointIndex;
     Boolean isDone;
     f32 x;
     f32 y;

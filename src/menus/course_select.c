@@ -36,11 +36,16 @@ enum CourseSelectState {
 
 typedef s32 CourseSelectState;
 
-// f_PressedDirection values
-#define DIRECTION_UP 1
-#define DIRECTION_DOWN 2
-#define DIRECTION_LEFT 4
-#define DIRECTION_RIGHT 8
+// The direction last pressed, whose arrow the course select pushes out
+enum PressedDirection {
+    DIRECTION_NONE = 0,
+    DIRECTION_UP = 1,
+    DIRECTION_DOWN = 2,
+    DIRECTION_LEFT = 4,
+    DIRECTION_RIGHT = 8
+};
+
+typedef u8 UPressedDirection8;
 
 // f_PlankMotion values
 enum PlanksState {
@@ -225,7 +230,7 @@ static CourseIndex f_ShownCourse = 0;
 static CourseIndex f_NextCourse = 0;
 static s32 f_CourseTurnIndex = 0;
 static s32 f_CourseTurnStep = 0; // 1 or -1 through f_CourseTurnFrames, or 0 when still
-static u8 f_PressedDirection = 0;
+static UPressedDirection8 f_PressedDirection = DIRECTION_NONE;
 static s32 f_CourseTurnFrames[COURSE_TURN_FRAME_COUNT] = {2, 3, 4, COURSE_IMAGE_BLANK, 0, 1, 2};
 static s32 f_PlankSlide = 0;
 static PlanksState f_PlankMotion = PLANKS_SHUT;
@@ -292,7 +297,7 @@ void LoadCourseSelect(Boolean isHoleSelect) {
         return;
     }
 
-    f_PressedDirection = 0;
+    f_PressedDirection = DIRECTION_NONE;
     if (!isHoleSelect) {
         f_LoadedScreen = COURSE_SELECT_RING_SHOT;
         f_BoardImage = AllocMemory(OpenEncodedAsset(ASSET_NAME_PLATE, &asset));
@@ -421,7 +426,7 @@ SelectResult UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
 
     f_PressedButtons = pressedButtons;
     f_RepeatedButtons = repeatedButtons;
-    f_PressedDirection = 0;
+    f_PressedDirection = DIRECTION_NONE;
     if (f_CourseTurnStep == 0 && !(pressedButtons & A_BUTTON)) {
         if (pressedButtons & B_BUTTON) {
             result = SELECT_BACK;
@@ -494,7 +499,7 @@ SelectResult UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
         openCourseCount = COURSE_COUNT;
     }
 
-    f_PressedDirection = 0;
+    f_PressedDirection = DIRECTION_NONE;
     if (!(pressedButtons & A_BUTTON)) {
         if (pressedButtons & B_BUTTON) {
             return SELECT_BACK;

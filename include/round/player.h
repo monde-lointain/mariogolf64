@@ -28,12 +28,17 @@ extern PaletteColor *g_PlayerFacePalettes[PLAYER_COUNT_MAX];
 
 // Values of the players' ringStates. Above RING_STATE_SHOWN, a state counts
 // the frames of the ring fading out, while sparkles circle it
-#define RING_STATE_NONE 0
-#define RING_STATE_SHOWN 1
-// The state a ring takes when the ball passes through it, the first frame of
-// its fade
-#define RING_STATE_PASSED 2
-#define RING_STATE_FADED 32
+enum RingState {
+    RING_STATE_NONE,
+    RING_STATE_SHOWN,
+    // The state a ring takes when the ball passes through it, the first frame
+    // of its fade
+    RING_STATE_PASSED,
+    RING_STATE_FADED = 32
+};
+
+typedef s32 RingState;
+typedef s8 RingState8;
 
 // The contest distances that are not measured yet, or do not count
 #define UNCOUNTED_DISTANCE (-1)
@@ -185,7 +190,7 @@ typedef struct Player {
     ClubIndex16 clubs[CLUB_SLOT_COUNT]; // Indices into g_Clubs, by bag slot
     u8 unusedAfterClubs[0x74 - 0x72];
     s32 stopwatchFrameCount; // The player's time in the stopwatch modes
-    s8 ringStates[RING_COUNT]; // RING_STATE_ values, for Ring Shot
+    RingState8 ringStates[RING_COUNT]; // For Ring Shot
     CButtonPalette8 paletteIndex; // Which of the character's palettes it wears
     s8 gameBoyCharacterIndex; // For the Game Boy characters, from CHARACTER_KID on
     u8 unusedAfterGameBoyIndex[3];

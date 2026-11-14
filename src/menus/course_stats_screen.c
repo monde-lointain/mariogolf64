@@ -58,17 +58,23 @@
 #define STATS_LABEL_X 30
 #define STATS_FIRST_Y 154
 #define STATS_LINE_HEIGHT 16
+
 // The statistics in the order the panel lists them
-#define STAT_ROUND_COUNT 0
-#define STAT_BEST_SCORE 1
-#define STAT_AVERAGE_SCORE 2
-#define STAT_BEST_DRIVE 3
-#define STAT_AVERAGE_DRIVE 4
-#define STAT_FAIRWAY_PERCENT 5
-#define STAT_AVERAGE_PUTTS 6
-#define STAT_PAR_SAVE_PERCENT 7
-#define STAT_PAR_ON_PERCENT 8
-#define STAT_SAND_SAVE_PERCENT 9
+enum CourseStat {
+    STAT_ROUND_COUNT,
+    STAT_BEST_SCORE,
+    STAT_AVERAGE_SCORE,
+    STAT_BEST_DRIVE,
+    STAT_AVERAGE_DRIVE,
+    STAT_FAIRWAY_PERCENT,
+    STAT_AVERAGE_PUTTS,
+    STAT_PAR_SAVE_PERCENT,
+    STAT_PAR_ON_PERCENT,
+    STAT_SAND_SAVE_PERCENT
+};
+
+typedef s16 CourseStat16;
+
 // Where DrawStatFigure draws the figures; shorter best scores move right to
 // line up
 #define STATS_ROUND_COUNT_X 96
@@ -100,9 +106,14 @@
 
 // The blinking arrows that DrawBlinkingSideArrows draws either side of a box,
 // from the third image on
-#define SIDE_ARROW_COUNT 2
-#define SIDE_ARROW_RIGHT 0
-#define SIDE_ARROW_LEFT 1
+enum SideArrow {
+    SIDE_ARROW_RIGHT,
+    SIDE_ARROW_LEFT,
+    SIDE_ARROW_COUNT
+};
+
+typedef s32 SideArrow;
+
 #define SIDE_ARROW_FIRST_IMAGE MENU_ARROW_RIGHT
 #define SIDE_ARROW_BLINK_FRAME_COUNT 4
 
@@ -146,7 +157,7 @@ enum NumberField {
 
 typedef u8 NumberField;
 
-void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row);
+void DrawStatFigure(Gfx **displayListHead, CourseStat16 statIndex, u8 row);
 void DrawThreeDigitMenuNumber(
     Gfx **displayListHead,
     s32 x,
@@ -165,8 +176,8 @@ void DrawMenuNumber(
     NumberField field
 );
 
-// The STAT_ row shown at the top of the panel, which Up and Down scroll
-static s16 f_FirstShownStat = 0;
+// The statistic shown at the top of the panel, which Up and Down scroll
+static CourseStat16 f_FirstShownStat = STAT_ROUND_COUNT;
 // The trophy's frame of g_TrophyFrameAssets, stepped when its timer reaches
 // TROPHY_FRAME_DELAY
 static s16 f_StatsTrophyFrame = 0;
@@ -179,7 +190,7 @@ static s32 f_StatsArrowFrame = 0;
 static s32 f_StatsArrowTimer = 0;
 // Read by no routine
 static s32 f_UnreadStatsWord UNUSED = 0;
-// The panel's label for each STAT_ row
+// The panel's label for each statistic
 static const char *f_StatLabels[STATS_COUNT] = {
     "Round",
     "Best Score",
@@ -727,7 +738,7 @@ void DrawCourseBanner(Gfx **displayListHead, u8 useCourseNames, CourseIndex cour
 void DrawStatsPanel(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 row = 0;
-    s16 statIndex;
+    CourseStat16 statIndex;
 
     GetSaveData();
     GetMenuMemory();
@@ -775,7 +786,7 @@ void DrawYardMark(Gfx **displayListHead, s16 x, s16 y);
 // Draws the statistic's figure for the chosen course, or for all courses on the
 // totals, on the panel's row, with its unit; nothing shows before any round has
 // been played
-void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row) {
+void DrawStatFigure(Gfx **displayListHead, CourseStat16 statIndex, u8 row) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory;
     CourseIndex courseIndex;
@@ -2012,7 +2023,7 @@ void DrawBlinkingSideArrows(
 ) {
     Gfx *gfx = *displayListHead;
     s32 left = 0;
-    s32 arrowIndex;
+    SideArrow arrowIndex;
     s32 frameOffset;
     s32 top;
     s32 imageOffset;

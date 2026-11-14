@@ -109,6 +109,19 @@ extern ImageAsset *g_MenuCourseSceneImage;
 #define PLAYER_COUNT_ASSET_ROW_LENGTH 12
 extern AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH];
 
+// The ways SlideBrickWall slides the stats panel's rows
+enum StatsSlide {
+    STATS_SLIDE_CURRENT,
+    STATS_SLIDE_OUT_RIGHT,
+    STATS_SLIDE_OUT_LEFT,
+    STATS_SLIDE_IN_FROM_RIGHT,
+    STATS_SLIDE_IN_FROM_LEFT,
+    STATS_SLIDE_COUNT
+};
+
+typedef s32 StatsSlide;
+typedef u8 UStatsSlide8;
+
 typedef struct ScreenCorner {
     s32 x;
     s32 y;
@@ -312,9 +325,6 @@ extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT
 #define NINTENDO_BADGE_WIDTH 144
 #define NINTENDO_BADGE_STRIP_HEIGHT 10
 #define NINTENDO_BADGE_STRIP_COUNT 2
-#define FACE_WITH_NAME 0
-#define FACE_PLAIN 1
-#define FACE_DARKENED 10
 #define FACE_DARKENED_SHADE 10
 #define FACE_NAME_OFFSET_X 24
 #define FACE_NAME_OFFSET_Y 12

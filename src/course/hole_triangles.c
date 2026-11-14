@@ -374,7 +374,7 @@ void DrawRings(Gfx **displayListHead, CameraMatrices *matrices UNUSED, Camera *c
     s32 green;
     s32 blue;
     s32 ringIndex;
-    s32 ringState;
+    RingState ringState;
     s32 section;
     s32 sparkleSection;
     s32 side;

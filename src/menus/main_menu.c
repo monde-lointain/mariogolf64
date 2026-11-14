@@ -81,15 +81,6 @@
 // The most modes the mode select offers for a player count
 #define MODE_CHOICE_LIMIT 12
 
-// The choices of both main menus; the one without Transmit stops at its options
-#define MAIN_CHOICE_CLUBHOUSE 0
-#define MAIN_CHOICE_HELP 1
-#define MAIN_CHOICE_OPTIONS 2
-#define MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT 3
-#define MAIN_CHOICE_CLUB_TOURNAMENT 2
-#define MAIN_CHOICE_FULL_OPTIONS 3
-#define MAIN_CHOICE_COUNT 4
-
 // The clubhouse's rows, and the rooms that f_ClubhouseRooms gives each of them.
 // The rooms index ASSET_CLUBHOUSE_LABELS, whose labels read Tournament, Best
 // Shots, Ring Shot, a blank for the birdie badges, VS. Records and Speed Golf.
@@ -107,20 +98,8 @@ enum ClubhouseRoom {
 typedef s32 ClubhouseRoom;
 typedef s16 ClubhouseRoom16;
 
-// The options screen's choices; GAME_FLAG_OPTIONS_SOUND_TEST adds the sound
-// test's
-#define OPTIONS_CHOICE_MUSIC 0
-#define OPTIONS_CHOICE_MONO 1
-#define OPTIONS_CHOICE_CAMERA 2
-#define OPTIONS_CHOICE_ERASE_SAVE_DATA 3
-#define OPTIONS_CHOICE_COUNT 4
-#define OPTIONS_CHOICE_SONG 4
-#define OPTIONS_CHOICE_SONG_REVERB 5
-#define OPTIONS_CHOICE_SONG_FREQUENCY 6
-#define OPTIONS_CHOICE_SONG_TEMPO 7
-#define OPTIONS_CHOICE_SOUND 8
-#define OPTIONS_CHOICE_SOUND_REVERB 9
-#define OPTIONS_CHOICE_SOUND_FREQUENCY 10
+// How many rows the options screen has once GAME_FLAG_OPTIONS_SOUND_TEST adds
+// the sound test's
 #define OPTIONS_SOUND_TEST_CHOICE_COUNT 21
 
 // The menu image buffer holds the options screen's Mario at its start, then
@@ -212,11 +191,6 @@ typedef struct ImageCorner {
 #define CHOSEN_HOLE_LIGHT_PITCH 0x1000
 #define CHOSEN_HOLE_LIGHT_YAW 0x2000
 
-// The title screen's rows, which UpdateMenuTitleScreen moves between
-#define TITLE_CHOICE_NEW_GAME 0
-#define TITLE_CHOICE_SAVED_GAMES 1
-#define TITLE_CHOICE_MENUS 2
-#define TITLE_CHOICE_COUNT 3
 // Holding these as A is pressed on the menus row shows the Transmit choice in
 // the main menu
 #define TRANSMIT_BUTTONS (A_BUTTON | L_TRIG | R_TRIG)
@@ -273,10 +247,16 @@ typedef struct ImageCorner {
 // turns from one to the next through MINI_GOLF_TURN_FRAME_COUNT frames.
 // Changing record slides the screen across instead.
 #define MINI_GOLF_TURN_FRAME_DURATION 2
-// f_MiniGolfDiscTurn values
-#define MINI_GOLF_TURN_NONE 0
-#define MINI_GOLF_TURN_TO_PREVIOUS 1
-#define MINI_GOLF_TURN_TO_NEXT 2
+
+// Which way the mini-golf disc is turning
+enum MiniGolfTurn {
+    MINI_GOLF_TURN_NONE,
+    MINI_GOLF_TURN_TO_PREVIOUS,
+    MINI_GOLF_TURN_TO_NEXT
+};
+
+typedef u8 UMiniGolfTurn8;
+
 #define MINI_GOLF_RECORD_SLIDE 45
 #define MINI_GOLF_RECORD_SLIDE_STEP 9
 
@@ -362,7 +342,7 @@ static s8 f_ViewerModelKind = 0;
 // How far the bet settings and handicap pages have slid in
 static s32 f_BetSlideOffset = 0;
 UBetPagesPhase8 g_BetPagesPhase = MENU_PHASE_START;
-u8 g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
+UStatsSlide8 g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
 // Cleared with the spinning star's state; no routine reads it
 static s16 f_UnusedSpinningStarCounter = 0;
 // Which of g_MenuTitleImages is shown; a new screen's title is read into the
@@ -1176,7 +1156,7 @@ static s32 f_MiniGolfDiscFrame = MINI_GOLF_FACING_FRAME;
 // The frames for which the mini-golf disc has shown its turn frame
 static s32 f_MiniGolfDiscFrameTime = 0;
 // Which way the mini-golf disc turns
-static u8 f_MiniGolfDiscTurn = MINI_GOLF_TURN_NONE;
+static UMiniGolfTurn8 f_MiniGolfDiscTurn = MINI_GOLF_TURN_NONE;
 // Which of g_MenuIconImages' buffer pairs the mini-golf disc shows
 static u8 f_MiniGolfDiscBufferIndex = 0;
 // The menus' camera orbit's updates
@@ -2336,7 +2316,7 @@ void SetUpChosenGame(void) {
     Player *player;
     s32 index;
     ClubSlot clubSlot;
-    s32 *holeSelection;
+    HoleSelection *holeSelection;
     s32 row;
     s32 column;
 
@@ -2503,7 +2483,7 @@ void SetUpChosenGame(void) {
 void UpdateMenuTitleScreen(void) {
     MenuMemory *memory = GetMenuMemory();
     s32 index;
-    s8 titleChoice;
+    TitleChoice8 titleChoice;
 
     if (IsHudAnimationDone() != TRUE) {
         return;
@@ -3977,10 +3957,6 @@ void UpdateUnusedBackToMain(void) {
 
 #define OPTIONS_TEXT_SLOT_COUNT 11
 #define ERASE_DECLINED_SOUND_CHANNEL 13
-// MenuMemory.eraseChoice values, which left and right toggle
-#define ERASE_CHOICE_YES 0
-#define ERASE_CHOICE_NO 1
-#define ERASE_CHOICE_COUNT 2
 // The sound test's limits; C left and right step its numbers by ten
 #define SOUND_TEST_COARSE_STEP 10
 #define SOUND_TEST_LAST_SOUND 0x214

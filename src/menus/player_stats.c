@@ -198,7 +198,7 @@ typedef struct GridStep {
     s8 row;
 } GridStep;
 
-void DrawBrickWallRows(Gfx **displayListHead, u8 slide);
+void DrawBrickWallRows(Gfx **displayListHead, UStatsSlide8 slide);
 
 void DrawBestShotsCursor(Gfx **displayListHead);
 void DrawBetIcon(Gfx **displayListHead, s32 left, s32 top, s32 size, s32 textureStep);
@@ -325,7 +325,7 @@ static s32 f_BrickSlideStartOffsets[STATS_SLIDE_COUNT - 1][STATS_SLIDE_ROW_COUNT
     {0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
 // The slide that the rows were last started on
-static u8 f_BrickWallSlide = 0;
+static UStatsSlide8 f_BrickWallSlide = STATS_SLIDE_CURRENT;
 // The corners of each page arrow that DrawTurnedPageArrows tilts
 static Vtx f_TurnedArrowVertices[TURNED_ARROW_VERTEX_COUNT] = {
     {{{-16, 16, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
@@ -577,22 +577,22 @@ void LoadPlayerStatsBuffer(void *buffer, PlayerStatsBuffer bufferKind) {
 
 // Sets each bet's stake level and rate from the mode's preset, or none, and
 // resets the handicaps
-void ApplyBetPreset(s32 requestedPreset) {
-    s8 presetIndex = requestedPreset;
+void ApplyBetPreset(BetPreset requestedPreset) {
+    BetPreset8 preset = requestedPreset;
     MenuMemory *memory = GetMenuMemory();
     s16 index;
 
     if ((u8)requestedPreset < BET_PRESET_COUNT) {
         if ((s8)requestedPreset == BET_PRESET_STROKE && g_ChosenPlayerCount == PLAYER_COUNT_MAX) {
-            presetIndex = BET_PRESET_STROKE_FOUR_PLAYER;
+            preset = BET_PRESET_STROKE_FOUR_PLAYER;
         }
 
-        if (presetIndex == BET_PRESET_MINI_GOLF && g_ChosenPlayerCount == PLAYER_COUNT_MAX) {
-            presetIndex = BET_PRESET_MINI_GOLF_FOUR_PLAYER;
+        if (preset == BET_PRESET_MINI_GOLF && g_ChosenPlayerCount == PLAYER_COUNT_MAX) {
+            preset = BET_PRESET_MINI_GOLF_FOUR_PLAYER;
         }
 
         for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
-            memory->betStakeLevels[index] = f_BetPresetStakeLevels[presetIndex][index];
+            memory->betStakeLevels[index] = f_BetPresetStakeLevels[preset][index];
             g_GameState.betRates[index] = f_BetStakeAmounts[memory->betStakeLevels[index]];
         }
     }
@@ -1908,7 +1908,7 @@ void DrawBetLabel(Gfx **displayListHead, s32 centerX, s32 top, u8 labelIndex) {
 
 // Starts the brick wall's rows on slide once the last slide has ended, then
 // draws them; returns whether the rows have yet to line up
-s32 SlideBrickWall(Gfx **displayListHead, u8 slide) {
+s32 SlideBrickWall(Gfx **displayListHead, UStatsSlide8 slide) {
     Gfx *gfx = *displayListHead;
     s32 index;
     s32 row;
@@ -1972,7 +1972,7 @@ s32 SlideBrickWall(Gfx **displayListHead, u8 slide) {
 
 // Moves each brick wall row whose delay has run out a step along slide, and
 // draws the rows
-void DrawBrickWallRows(Gfx **displayListHead, u8 slide) {
+void DrawBrickWallRows(Gfx **displayListHead, UStatsSlide8 slide) {
     Gfx *gfx = *displayListHead;
     s32 row;
     s32 stripHeight = STATS_WALL_STRIP_HEIGHT;
@@ -3332,7 +3332,7 @@ void DrawCharacterFace(
     s32 left,
     s32 top,
     CharacterIndex16 characterIndex,
-    u8 drawMode
+    UFaceDrawMode8 drawMode
 ) {
     Gfx *gfx = *displayListHead;
 

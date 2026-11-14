@@ -33,16 +33,22 @@
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
-// f_ClubSlotsState values
-#define CLUB_SLOTS_DONE 0
-// Before the reels speed up
-#define CLUB_SLOTS_STARTING 1
-// The reels speed up while START! grows
-#define CLUB_SLOTS_SPEEDING 2
-// The player stops the reels one by one
-#define CLUB_SLOTS_STOPPING 3
-// All three reels show their clubs
-#define CLUB_SLOTS_STOPPED 4
+
+// What the club slots are doing
+enum ClubSlotsState {
+    CLUB_SLOTS_DONE,
+    // Before the reels speed up
+    CLUB_SLOTS_STARTING,
+    // The reels speed up while START! grows
+    CLUB_SLOTS_SPEEDING,
+    // The player stops the reels one by one
+    CLUB_SLOTS_STOPPING,
+    // All three reels show their clubs
+    CLUB_SLOTS_STOPPED
+};
+
+typedef s32 ClubSlotsState;
+
 // Each of the first two states lasts this many frames
 #define CLUB_SLOTS_STATE_FRAME_COUNT 20
 // The clubs are given this many frames after the reels stop
@@ -203,7 +209,7 @@ typedef struct ClubSlots {
 
 void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scale);
 
-static s32 f_ClubSlotsState = CLUB_SLOTS_DONE;
+static ClubSlotsState f_ClubSlotsState = CLUB_SLOTS_DONE;
 static u8 f_FaceBufferIndex = 0;
 static u8 f_FaceFrame = 0;
 static u8 f_FaceFrameTime = 0;

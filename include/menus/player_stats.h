@@ -7,6 +7,7 @@
 
 #include <ultra64.h>
 
+#include "menus/menu.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
@@ -42,16 +43,37 @@ enum ScoreLabelBuffer {
 
 typedef s16 ScoreLabelBuffer;
 
-// The ways SlideBrickWall slides the stats panel's rows
-#define STATS_SLIDE_CURRENT 0
-#define STATS_SLIDE_OUT_RIGHT 1
-#define STATS_SLIDE_OUT_LEFT 2
-#define STATS_SLIDE_IN_FROM_RIGHT 3
-#define STATS_SLIDE_IN_FROM_LEFT 4
-#define STATS_SLIDE_COUNT 5
+// How DrawCharacterFace and DrawBestTimeFace draw a face: with the
+// character's name on it, plain, or darkened
+enum FaceDrawMode {
+    FACE_WITH_NAME = 0,
+    FACE_PLAIN = 1,
+    FACE_DARKENED = 10
+};
+
+typedef s32 FaceDrawMode;
+typedef u8 UFaceDrawMode8;
+
+// The presets of ApplyBetPreset; two of them have a variant that four players
+// take instead
+enum BetPreset {
+    BET_PRESET_STROKE,
+    BET_PRESET_STROKE_FOUR_PLAYER,
+    BET_PRESET_MATCH_GAME,
+    BET_PRESET_SKINS_MATCH,
+    BET_PRESET_CLUB_SLOTS,
+    BET_PRESET_MINI_GOLF,
+    BET_PRESET_MINI_GOLF_FOUR_PLAYER,
+    BET_PRESET_COUNT,
+    // Past ApplyBetPreset's presets, so that it clears the values instead
+    BET_PRESET_NONE = 10
+};
+
+typedef s32 BetPreset;
+typedef s8 BetPreset8;
 
 void LoadPlayerStatsBuffer(void *buffer, PlayerStatsBuffer bufferKind);
-void ApplyBetPreset(s32 requestedPreset);
+void ApplyBetPreset(BetPreset requestedPreset);
 void UpdateBetSettings(void);
 void DrawBetSettings(
     Gfx **displayListHead,
@@ -69,7 +91,7 @@ void DrawHandicaps(
     UBoolean8 isVerticalSlideReversed,
     UBoolean8 canShowPrompt
 );
-s32 SlideBrickWall(Gfx **displayListHead, u8 slide);
+s32 SlideBrickWall(Gfx **displayListHead, UStatsSlide8 slide);
 void LoadBestShotsCourseIcons(ImageAsset **buffers);
 void LoadScoreLabelBuffer(void *buffer, ScoreLabelBuffer bufferKind);
 void UpdateBestShots(void);
@@ -86,9 +108,9 @@ typedef s32 FaceCharacterIndexArgument;
 typedef s16 FaceCharacterIndexArgument;
 #endif
 #if !defined(AVOID_UB) && defined(WIDENS_FACE_DRAW_MODE)
-typedef s32 FaceDrawModeArgument;
+typedef FaceDrawMode FaceDrawModeArgument;
 #else
-typedef u8 FaceDrawModeArgument;
+typedef UFaceDrawMode8 FaceDrawModeArgument;
 #endif
 void DrawCharacterFace(
     Gfx **displayListHead,

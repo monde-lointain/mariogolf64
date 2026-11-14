@@ -108,12 +108,16 @@ void SetScorecardState(ScorecardState state);
 #define ASSET_NASSAU_BET_IMAGE 0x67E
 
 // The rows of f_PageTitleAssets
-#define PAGE_TITLES_SPEED_GOLF 0
-#define PAGE_TITLES_SOLO 1
-#define PAGE_TITLES_VERSUS 2
-#define PAGE_TITLES_SKINS 3
-#define PAGE_TITLES_TOURNAMENT 4
-#define PAGE_TITLES_ROW_COUNT 5
+enum PageTitlesRow {
+    PAGE_TITLES_SPEED_GOLF,
+    PAGE_TITLES_SOLO,
+    PAGE_TITLES_VERSUS,
+    PAGE_TITLES_SKINS,
+    PAGE_TITLES_TOURNAMENT,
+    PAGE_TITLES_ROW_COUNT
+};
+
+typedef s32 PageTitlesRow;
 
 static s32 f_UnusedWordsBeforePageTitles[] UNUSED = {0, 1, 2, 3, 5, 10};
 static AssetId f_PageTitleAssets[PAGE_TITLES_ROW_COUNT][PAGE_TITLE_COUNT] = {
@@ -142,7 +146,7 @@ ResultCharactersState g_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
 void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     EncodedAsset asset;
     AssetFile file;
-    s32 pageTitlesRow = PAGE_TITLES_SPEED_GOLF;
+    PageTitlesRow pageTitlesRow = PAGE_TITLES_SPEED_GOLF;
     s32 shownHoleCount;
     s32 oldPlace;
     s32 newPlace;

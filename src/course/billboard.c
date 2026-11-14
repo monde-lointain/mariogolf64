@@ -748,11 +748,11 @@ enum HostCommand {
     HOST_COMMAND_READ_FILE
 };
 
-s32 WriteHostFile(const char *fileName, u32 size) {
+HostFileResult WriteHostFile(const char *fileName, u32 size) {
     u32 *command;
     char *nameBuffer;
     u32 nameSize;
-    s32 result;
+    HostFileResult result;
 
     if (size == 0) {
         // "The transfer size is too small."
@@ -788,7 +788,7 @@ s32 WriteHostFile(const char *fileName, u32 size) {
     return result;
 }
 
-s32 ReadHostFile(const char *fileName, u32 *size) {
+HostFileResult ReadHostFile(const char *fileName, u32 *size) {
     u32 *command;
     char *nameBuffer;
     u32 nameSize;

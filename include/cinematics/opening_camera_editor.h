@@ -12,9 +12,13 @@
 #include "system/c_language.h"
 
 // The points of the camera that the editor moves
-#define EDITOR_POINT_EYE 0
-#define EDITOR_POINT_LOOK_AT 1
-#define EDITOR_POINT_COUNT 2
+enum EditorPoint {
+    EDITOR_POINT_EYE,
+    EDITOR_POINT_LOOK_AT,
+    EDITOR_POINT_COUNT
+};
+
+typedef s32 EditorPoint;
 
 // The axis along which MoveEditorPoint moves a point furthest
 enum EditorMoveAxis {
@@ -81,11 +85,11 @@ extern f32 g_LookAtMarkerScale;
 
 void PlaceEditorCamera(f32 eyeX, f32 eyeY, f32 eyeZ, f32 lookAtX, f32 lookAtY, f32 lookAtZ);
 void MeasureEditorCamera(void);
-void MoveEditorPoint(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount);
-void MoveEditorCamera(s32 pointIndex, f32 x, f32 y, f32 z, s32 frameCount);
-void TurnEditorCamera(s32 pointIndex, Radians angle, s32 frameCount);
-void TiltEditorCamera(s32 pointIndex, Radians angle, s32 frameCount);
-void ZoomEditorCamera(s32 pointIndex, f32 distance, s32 frameCount);
+void MoveEditorPoint(EditorPoint pointIndex, f32 x, f32 y, f32 z, s32 frameCount);
+void MoveEditorCamera(EditorPoint pointIndex, f32 x, f32 y, f32 z, s32 frameCount);
+void TurnEditorCamera(EditorPoint pointIndex, Radians angle, s32 frameCount);
+void TiltEditorCamera(EditorPoint pointIndex, Radians angle, s32 frameCount);
+void ZoomEditorCamera(EditorPoint pointIndex, f32 distance, s32 frameCount);
 Boolean AreEditorMovesDone(void);
 void StopEditorMoves(void);
 void ShiftEditorCamera(Vec3 offset);

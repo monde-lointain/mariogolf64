@@ -49,15 +49,22 @@ typedef s32 PlanThreadState;
 // PlanShot's result while it has more to do
 #define PLAN_UNFINISHED (-1)
 
-// ChooseShotOffset's results, indices into f_ShotOffsets
-#define SHOT_OFFSET_NONE 0
-#define SHOT_OFFSET_PLUS_SMALL 1
-#define SHOT_OFFSET_PLUS_MEDIUM 2
-#define SHOT_OFFSET_PLUS_LARGE 3
-#define SHOT_OFFSET_MINUS_SMALL 4
-#define SHOT_OFFSET_MINUS_MEDIUM 5
-#define SHOT_OFFSET_MINUS_LARGE 6
-#define SHOT_OFFSET_COUNT 8
+// ChooseShotOffset's results, indices into f_ShotOffsets. It never chooses
+// the table's last offset, SHOT_OFFSET_UNUSED
+enum ShotOffsetIndex {
+    SHOT_OFFSET_NONE,
+    SHOT_OFFSET_PLUS_SMALL,
+    SHOT_OFFSET_PLUS_MEDIUM,
+    SHOT_OFFSET_PLUS_LARGE,
+    SHOT_OFFSET_MINUS_SMALL,
+    SHOT_OFFSET_MINUS_MEDIUM,
+    SHOT_OFFSET_MINUS_LARGE,
+    SHOT_OFFSET_UNUSED,
+    SHOT_OFFSET_COUNT
+};
+
+typedef s32 ShotOffsetIndex;
+
 // The evaluation of a lost ball, and the one that the best starts at
 #define LOST_BALL_EVALUATION 0x10000000
 #define SORT_DESCENDING 1
@@ -113,7 +120,7 @@ typedef struct GolferTraits {
 // harder at planned shots and takes power shots readily
 #define BOLD_CLUB_CHOICE 2
 
-// The spin-like launch values that each SHOT_OFFSET_ value gives a shot
+// The spin-like launch values that each shot offset gives a shot
 typedef struct ShotOffset {
     s8 offsetX; // Becomes f_Shot.offsetX
     s8 offsetY; // Becomes f_Shot.offsetY
@@ -262,7 +269,7 @@ ClubType ChooseClubForDistance(s32 distance);
 
 s32 StepTrialShot(void);
 Boolean IsTrialShotSafe(void);
-s32 ChooseShotOffset(void);
+ShotOffsetIndex ChooseShotOffset(void);
 ClubSlot FindClubSlot(s32 unused, ClubType clubType);
 s32 PlanRoute(s8 *route);
 void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ);
@@ -317,8 +324,8 @@ static s32 f_TargetCarry;
 static s32 f_ClubCount;
 // The count of trials to take at the level
 static s32 f_LevelTrialCount;
-// The SHOT_OFFSET_ value that PlanShot chose for the shot
-static s32 f_ShotOffset;
+// The offset that PlanShot chose for the shot
+static ShotOffsetIndex f_ShotOffset;
 static s32 f_TrialStepCount;
 // Set when the trial is good enough to take
 static Boolean f_IsTrialAccepted;
@@ -2867,7 +2874,7 @@ Boolean RollClubCategoryChance(ClubChanceSet chanceSet);
 // windPlay trait, whether the shot aims at the cup, how far below the ball
 // the target is, and the wind's speed and direction against the shot's yaw.
 // Most offsets also need RollClubKindChance to succeed.
-s32 ChooseShotOffset(void) {
+ShotOffsetIndex ChooseShotOffset(void) {
     WindPlay windPlay;
     WideBinaryAngle aimYaw;
     WideBinaryAngle windDirection;

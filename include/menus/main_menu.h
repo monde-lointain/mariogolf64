@@ -94,7 +94,7 @@ enum BetPagesPhase {
 
 typedef u8 UBetPagesPhase8;
 extern UBetPagesPhase8 g_BetPagesPhase;
-extern u8 g_BetPagesWallSlide;
+extern UStatsSlide8 g_BetPagesWallSlide;
 extern s32 g_AnimatedIconFrame;
 extern u8 g_AnimatedIconBufferIndex;
 extern s8 g_AnimatedIconFrameTime;

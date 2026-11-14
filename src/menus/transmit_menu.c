@@ -2896,7 +2896,7 @@ void ClearCartridgeCharacters(void) {
                 transfer->listingStates[(controllerIndex * CARTRIDGE_SAVE_COUNT) + save] =
                     LISTING_NONE;
                 transfer->cartridgeCharacters[(controllerIndex * CARTRIDGE_SAVE_COUNT) + save]
-                    .status = 0;
+                    .status = GAME_BOY_CHARACTER_STATUS_EMPTY;
             }
         }
 

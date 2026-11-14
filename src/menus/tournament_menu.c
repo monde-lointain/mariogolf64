@@ -57,6 +57,14 @@ enum MenuWindowPalette {
 
 typedef s32 MenuWindowPalette;
 
+// Whether the chosen Yes or No button is growing or shrinking
+enum YesNoPulseDirection {
+    YES_NO_PULSE_GROWING,
+    YES_NO_PULSE_SHRINKING
+};
+
+typedef s32 YesNoPulseDirection;
+
 // DrawCodePanels stretches the menu banner of f_NamePlateImage into the two
 // panels behind the code screen
 #define CODE_UPPER_PANEL_LEFT 28
@@ -83,8 +91,15 @@ typedef s32 MenuWindowPalette;
 #define CODE_KEY_SPACING_Y 19
 #define CODE_HAND_STEP_FRAMES 1
 #define CODE_HAND_REACH 4
-#define CODE_HAND_MOVING_RIGHT 0
-#define CODE_HAND_MOVING_LEFT 1
+
+// Which way the pointing hand is moving
+enum CodeHandMotion {
+    CODE_HAND_MOVING_RIGHT,
+    CODE_HAND_MOVING_LEFT
+};
+
+typedef s32 CodeHandMotion;
+
 // The codes that enter club tournaments: how many there are, and their length
 #define CLUB_TOURNAMENT_CODE_COUNT 36
 #define CLUB_TOURNAMENT_CODE_LENGTH 8
@@ -168,9 +183,6 @@ typedef s32 CodeKeyResult;
 #define CLUB_WINDOW_HEIGHT 180
 #define CLUB_WINDOW_CENTER_X (SCREEN_WIDTH / 2)
 #define CLUB_WINDOW_CENTER_Y (SCREEN_HEIGHT / 2)
-#define CLUB_WINDOW_STYLE_PLAIN 0
-#define CLUB_WINDOW_STYLE_NINTENDO 1
-#define CLUB_WINDOW_STYLE_PICTURE 2
 #define CLUB_NUMBER_Y 68
 #define CLUB_TEXT_X (SCREEN_WIDTH / 2)
 #define CLUB_NAME_Y 94
@@ -180,6 +192,16 @@ typedef s32 CodeKeyResult;
 #define CLUB_COURSE_SLOT 4
 #define CLUB_MODE_SLOT 5
 #define CLUB_TEXT_SLOT_COUNT 11
+
+// How the club tournament's window is drawn: plain, with the Nintendo badge,
+// or with a picture
+enum ClubWindowStyle {
+    CLUB_WINDOW_STYLE_PLAIN,
+    CLUB_WINDOW_STYLE_NINTENDO,
+    CLUB_WINDOW_STYLE_PICTURE
+};
+
+typedef s32 ClubWindowStyle;
 
 // The window's choice in f_ClubWindowChoice, which left and right toggle
 enum ClubChoice {
@@ -205,7 +227,7 @@ static s32 f_UnusedWordsAfterWindowScale[2] UNUSED = {0, 0};
 // How far the chosen Yes or No button has grown, and whether it is growing or
 // shrinking
 static s32 f_YesNoPulse = 0;
-static s32 f_YesNoPulseDirection = 0;
+static YesNoPulseDirection f_YesNoPulseDirection = YES_NO_PULSE_GROWING;
 // The images that the window can show
 static AssetId f_MenuWindowImageAssets[MENU_WINDOW_PICTURE_COUNT] = {
     0x07C0,
@@ -256,7 +278,7 @@ static ImageAsset *f_CodeCursorBox = NULL;
 static s32 f_UnusedWordAfterCursorBox UNUSED = 0;
 // Which way the pointing hand is moving, how far it has reached, and the
 // frames until its next step
-static s32 f_CodeHandMotion = 0;
+static CodeHandMotion f_CodeHandMotion = CODE_HAND_MOVING_RIGHT;
 static s32 f_CodeHandReach = 0;
 static s32 f_CodeHandStepTimer = 0;
 // The characters of f_EnteredCode entered so far
@@ -411,12 +433,12 @@ void ResetMenuWindow(void) {
     f_MenuWindowScaleX = 0.0f;
     f_MenuWindowScaleY = 0.0f;
     f_YesNoPulse = 0;
-    f_YesNoPulseDirection = 0;
+    f_YesNoPulseDirection = YES_NO_PULSE_GROWING;
 }
 
 void ShowMenuWindow(void) {
     f_YesNoPulse = 0;
-    f_YesNoPulseDirection = 0;
+    f_YesNoPulseDirection = YES_NO_PULSE_GROWING;
     f_MenuWindowState = MENU_WINDOW_OPEN;
     f_MenuWindowScaleX = 1.0f;
     f_MenuWindowScaleY = 1.0f;
@@ -578,8 +600,6 @@ void GetSaveDataAndMenuMemory(void) {
 #define YES_NO_BUTTON_OFFSET 30.0f
 #define YES_NO_PULSE_STEP 2
 #define YES_NO_PULSE_LIMIT 16
-#define YES_NO_PULSE_GROWING 0
-#define YES_NO_PULSE_SHRINKING 1
 #define MESSAGE_OK 0x16B
 #define OK_TEXT_OFFSET_X 8
 #define OK_TEXT_OFFSET_Y 30
@@ -1417,7 +1437,7 @@ void ResetCodeEntry(void) {
 
     f_EnteredCodeLength = 0;
     f_ClubCodeState = CLUB_CODE_STATE_ENTERING;
-    f_CodeHandMotion = 0;
+    f_CodeHandMotion = CODE_HAND_MOVING_RIGHT;
     f_CodeHandReach = 0;
     f_CodeHandStepTimer = 0;
     f_UnusedDoubledHandReach = 0;
@@ -1936,7 +1956,7 @@ void DrawClubTournament(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 width = 0;
     s32 height = 0;
-    s32 windowStyle;
+    ClubWindowStyle windowStyle;
     u16 buttons;
 
     DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);

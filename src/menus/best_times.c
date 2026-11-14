@@ -496,7 +496,7 @@ void DrawBestTimeFace(
     s32 left,
     s32 top,
     CharacterIndex characterIndex,
-    u8 drawMode
+    UFaceDrawMode8 drawMode
 ) {
     Gfx *gfx = *displayListHead;
 

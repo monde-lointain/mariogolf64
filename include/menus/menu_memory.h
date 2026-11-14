@@ -18,19 +18,6 @@
 // GameState's betRates: one past the BET_COUNT bets
 #define BET_STAKE_SLOT_COUNT (BET_COUNT + 1)
 
-// The presets of ApplyBetPreset; two of them have a variant that four players
-// take instead
-#define BET_PRESET_COUNT 7
-#define BET_PRESET_STROKE 0
-#define BET_PRESET_STROKE_FOUR_PLAYER 1
-#define BET_PRESET_MATCH_GAME 2
-#define BET_PRESET_SKINS_MATCH 3
-#define BET_PRESET_CLUB_SLOTS 4
-#define BET_PRESET_MINI_GOLF 5
-#define BET_PRESET_MINI_GOLF_FOUR_PLAYER 6
-// Past ApplyBetPreset's presets, so that it clears the values instead
-#define BET_PRESET_NONE 10
-
 // What holesChoice holds once the C buttons choose the holes to play
 enum HolesChoice {
     // Never stored, only cleared: ResetMenuChoices sets HOLES_CHOICE_ALL right
@@ -43,10 +30,61 @@ enum HolesChoice {
 
 typedef s8 HolesChoice;
 
+// The choices of both main menus; the one without Transmit stops at its options
+enum MainChoice {
+    MAIN_CHOICE_CLUBHOUSE,
+    MAIN_CHOICE_HELP,
+    MAIN_CHOICE_OPTIONS,
+    MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT,
+    MAIN_CHOICE_CLUB_TOURNAMENT = MAIN_CHOICE_OPTIONS,
+    MAIN_CHOICE_FULL_OPTIONS,
+    MAIN_CHOICE_COUNT
+};
+
+typedef s8 MainChoice8;
+
+// The options screen's choices; GAME_FLAG_OPTIONS_SOUND_TEST adds the sound
+// test's
+enum OptionsChoice {
+    OPTIONS_CHOICE_MUSIC,
+    OPTIONS_CHOICE_MONO,
+    OPTIONS_CHOICE_CAMERA,
+    OPTIONS_CHOICE_ERASE_SAVE_DATA,
+    OPTIONS_CHOICE_COUNT,
+    OPTIONS_CHOICE_SONG = OPTIONS_CHOICE_COUNT,
+    OPTIONS_CHOICE_SONG_REVERB,
+    OPTIONS_CHOICE_SONG_FREQUENCY,
+    OPTIONS_CHOICE_SONG_TEMPO,
+    OPTIONS_CHOICE_SOUND,
+    OPTIONS_CHOICE_SOUND_REVERB,
+    OPTIONS_CHOICE_SOUND_FREQUENCY
+};
+
+typedef s8 OptionsChoice8;
+
+// The title screen's rows, which UpdateMenuTitleScreen moves between
+enum TitleChoice {
+    TITLE_CHOICE_NEW_GAME,
+    TITLE_CHOICE_SAVED_GAMES,
+    TITLE_CHOICE_MENUS,
+    TITLE_CHOICE_COUNT
+};
+
+typedef s8 TitleChoice8;
+
+// The erase window's choices, which left and right toggle
+enum EraseChoice {
+    ERASE_CHOICE_YES,
+    ERASE_CHOICE_NO,
+    ERASE_CHOICE_COUNT
+};
+
+typedef s8 EraseChoice8;
+
 // What the menus keep between visits, such as the last choices made
 typedef struct MenuMemory {
     s8 playerCountChoice; // The title screen's player count, less one
-    s8 titleChoice; // The title screen's row: a new game, the saved games or the menus
+    TitleChoice8 titleChoice;
     CharacterIndex8 viewerCharacter; // The animation viewer's character
     s8 characterColumns[PLAYER_COUNT_MAX]; // Each player's character select cursor column
     s8 characterRows[PLAYER_COUNT_MAX]; // And row
@@ -61,11 +99,11 @@ typedef struct MenuMemory {
     HolesChoice holesChoice;
     s8 caddyChoice; // The debug caddy select's caddy
     s8 unusedAfterCaddyChoice;
-    s8 mainChoice;
-    s8 mainChoiceWithoutTransmit;
+    MainChoice8 mainChoice;
+    MainChoice8 mainChoiceWithoutTransmit;
     s8 clubhouseChoice;
-    s8 optionsChoice;
-    s8 eraseChoice; // The erase window's yes or no
+    OptionsChoice8 optionsChoice;
+    EraseChoice8 eraseChoice;
     s8 helpTopicIndex;
     u8 unusedAfterHelpTopic[0x29 - 0x21];
     // The player whose handicap the handicap screen is choosing

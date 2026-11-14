@@ -49,12 +49,17 @@ enum ShotLabelMode {
 typedef s32 ShotLabelMode;
 
 // The corners of the ball that a tag sits off, clockwise from the lower right
-#define NO_CORNER (-1)
-#define CORNER_LOWER_RIGHT 0
-#define CORNER_LOWER_LEFT 1
-#define CORNER_UPPER_LEFT 2
-#define CORNER_UPPER_RIGHT 3
-#define CORNER_COUNT 4
+enum TagCorner {
+    NO_CORNER = -1,
+    CORNER_LOWER_RIGHT,
+    CORNER_LOWER_LEFT,
+    CORNER_UPPER_LEFT,
+    CORNER_UPPER_RIGHT,
+    CORNER_COUNT
+};
+
+typedef s32 TagCorner;
+
 // Only the upper corners are used while a shot is taken, keeping the tags clear
 // of the golfer
 #define UPPER_CORNER_COUNT 2
@@ -85,7 +90,7 @@ typedef struct ShotLabel {
     s32 x;
     s32 y;
     s32 depth;
-    s32 corner; // NO_CORNER when the tag is hidden
+    TagCorner corner; // NO_CORNER when the tag is hidden
 } ShotLabel;
 
 // The sign shows the shot's distance, with the target's height below it
@@ -178,14 +183,14 @@ void DrawShotLabels(Gfx **displayListHead) {
     ScreenSpot cup;
     Gfx *gfx = *displayListHead;
     ShotLabelMode labelMode;
-    s32 corner;
+    TagCorner corner;
     s32 cornerOffset;
 
     s32 playerIndex;
     s32 earlierIndex;
 
     // Draws the line from a tag at x and y to its ball, which lies off corner
-    void DrawLeaderLine(s32 x, s32 y, s32 corner) {
+    void DrawLeaderLine(s32 x, s32 y, TagCorner corner) {
         gDPPipeSync(gfx++);
         switch (corner) {
             case CORNER_LOWER_RIGHT:
@@ -250,7 +255,7 @@ void DrawShotLabels(Gfx **displayListHead) {
     }
 
     // Draws tag number tag centered on x and y
-    void DrawPlayerTag(s32 x, s32 y, s32 corner UNUSED, s32 tagIndex) {
+    void DrawPlayerTag(s32 x, s32 y, TagCorner corner UNUSED, s32 tagIndex) {
         gDPPipeSync(gfx++);
         gDPLoadTextureBlock_4b(
             gfx++,

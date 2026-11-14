@@ -9,15 +9,19 @@
 #include <ultra64.h>
 
 // Results of WriteHostFile and ReadHostFile; ReadHostFile also returns 1
-#define HOST_FILE_OK 0
-#define HOST_FILE_SIZE_TOO_SMALL 1
-#define HOST_FILE_NAME_TOO_SHORT 2
-#define HOST_FILE_NAME_TOO_LONG 3
+enum HostFileResult {
+    HOST_FILE_OK,
+    HOST_FILE_SIZE_TOO_SMALL,
+    HOST_FILE_NAME_TOO_SHORT,
+    HOST_FILE_NAME_TOO_LONG
+};
+
+typedef s32 HostFileResult;
 
 // Ends the text files written to the host
 #define END_OF_FILE_CHARACTER 0x1A
 
-s32 WriteHostFile(const char *fileName, u32 size);
-s32 ReadHostFile(const char *fileName, u32 *size);
+HostFileResult WriteHostFile(const char *fileName, u32 size);
+HostFileResult ReadHostFile(const char *fileName, u32 *size);
 
 #endif
