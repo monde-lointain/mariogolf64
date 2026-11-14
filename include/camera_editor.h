@@ -17,6 +17,16 @@ enum EditorMoveAxis {
     EDITOR_MOVE_AXIS_Z
 };
 
+#define EDITOR_FLAG_TIMED_MOVE 0x2
+#define EDITOR_FLAG_UNTIMED_MOVE 0x4
+#define EDITOR_FLAG_PIVOT 0x8
+#define EDITOR_FLAG_TURNING 0x10
+#define EDITOR_FLAG_TILTING 0x20
+#define EDITOR_FLAG_ZOOMING 0x40
+#define EDITOR_FLAG_CARRYING 0x80
+// A set of EDITOR_FLAG bits.
+typedef s32 EditorFlags;
+
 typedef struct CameraEditor {
     Vec3 points[EDITOR_POINT_COUNT];
     Radians heading;
@@ -43,17 +53,9 @@ typedef struct CameraEditor {
     Radians tiltBrakingAngle;
     Radians turnBrakingAngle;
     f32 zoomBrakingDistance;
-    s32 flags[EDITOR_POINT_COUNT];
+    EditorFlags flags[EDITOR_POINT_COUNT];
     s32 moveAxes[EDITOR_POINT_COUNT];
 } CameraEditor;
-
-#define EDITOR_FLAG_TIMED_MOVE 0x2
-#define EDITOR_FLAG_UNTIMED_MOVE 0x4
-#define EDITOR_FLAG_PIVOT 0x8
-#define EDITOR_FLAG_TURNING 0x10
-#define EDITOR_FLAG_TILTING 0x20
-#define EDITOR_FLAG_ZOOMING 0x40
-#define EDITOR_FLAG_CARRYING 0x80
 
 extern CameraEditor g_CameraEditor;
 extern f32 g_LookAtMarkerScale;

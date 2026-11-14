@@ -15,6 +15,8 @@
 #define SHOT_FLAG_NO_IMPACT_POINT 2
 #define SHOT_FLAG_APPROACH 4
 #define SHOT_FLAG_NEAR_CUP 8
+// A set of SHOT_FLAG bits.
+typedef s32 ShotFlags;
 
 enum PlayKind {
     PLAY_KIND_HOLE,
@@ -67,7 +69,7 @@ extern SignedBinaryAngle g_LookBackHeading;
 extern SignedBinaryAngle g_FreeLookHeading;
 extern s32 g_ShotSetupFrameCount;
 extern s32 g_ImpactPointLingerFrameCount;
-extern s32 g_ShotFlags;
+extern ShotFlags g_ShotFlags;
 extern Boolean g_HasShotComeToRest;
 extern Boolean8 g_IsHudTurnAwayRequested;
 extern CurrentShot g_ScriptedShot;

@@ -56,7 +56,7 @@ typedef struct QueuedCharacterSound {
 typedef struct SongChange {
     SongChangeKind kind;
     SongId songId;
-    s32 flags;
+    SongFlags flags;
     s32 delay;
 } SongChange;
 
@@ -682,7 +682,7 @@ SongId GetSongId(void) {
     return f_SongId;
 }
 
-void PlaySong(SongId songId, s32 songFlags) {
+void PlaySong(SongId songId, SongFlags songFlags) {
     if (!IsGameFlagSet(GAME_FLAG_SILENCE_SONGS)) {
         if (IsMusicOffChosen() && (songFlags & SONG_FLAG_FOLLOWS_MUSIC_OPTION)) {
             RequestSongStop();

@@ -44,6 +44,8 @@ typedef s8 HeightComparison;
 #define HUD_FLAG_SETTING_IMPACT 0x20
 #define HUD_FLAG_TRANSLUCENT_GAUGE 0x40
 #define HUD_FLAG_SWINGING 0x80
+// A set of HUD_FLAG bits.
+typedef u8 UHudFlags8;
 
 enum GreenGridState {
     GREEN_GRID_HIDDEN,
@@ -95,7 +97,7 @@ typedef struct RoundHud {
     UBoolean8 isPuttingClubChosen;
     u8 unusedAfterClubChoice;
     s8 shooterIndex;
-    u8 flags;
+    UHudFlags8 flags;
     UBoolean8 areLieArrowsShown;
     UBoolean8 areWindSpeedArrowsShown;
     UBoolean8 areWindDirectionArrowsShown;

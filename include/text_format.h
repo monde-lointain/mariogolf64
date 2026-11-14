@@ -10,6 +10,7 @@ typedef s16 MessageId16;
 #define NO_MESSAGE (-1)
 
 typedef s32 TextFlags;
+typedef u8 UTextFlags8;
 #define TEXT_FLAG_TYPED 0x01
 #define TEXT_FLAG_TYPING_SOUND 0x02
 #define TEXT_FLAG_CENTERED 0x10

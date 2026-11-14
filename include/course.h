@@ -60,6 +60,8 @@ extern s32 g_CourseNamePrimColors[];
 
 #define HOLE_FLAG_MARKED_PAR_FIVE (1 << 0)
 #define HOLE_FLAG_PAR_THREE (1 << 1)
+// A set of HOLE_FLAG bits.
+typedef u8 UHoleFlags8;
 
 #define PAR_THREE 3
 #define PAR_FOUR 4
@@ -72,7 +74,7 @@ typedef struct HoleRecord {
     s8 par;
     s8 handicap;
     u16 yardages[3];
-    u8 flags;
+    UHoleFlags8 flags;
 } HoleRecord;
 
 typedef struct CourseRecord {

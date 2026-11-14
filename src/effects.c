@@ -54,6 +54,8 @@
 
 #define RAINDROP_OFF_SCREEN (1 << 0)
 #define RAINDROP_HEAD_GROUNDED (1 << 4)
+// A set of RAINDROP flag bits.
+typedef u16 URaindropFlags16;
 #define RAIN_SPLASH_COUNT 32
 
 struct Raindrop {
@@ -66,7 +68,7 @@ struct Raindrop {
     s16 tailScreenX;
     s16 tailScreenY;
     s16 tailDepth;
-    u16 flags;
+    URaindropFlags16 flags;
     s8 landedFrameCount;
     u8 splashColumn;
 };

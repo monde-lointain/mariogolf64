@@ -39,7 +39,8 @@ typedef struct GlyphSprite {
     u16 code;
     u8 fontSize;
     s8 group;
-    u8 flags;
+    // TEXT_FLAG and GLYPH_FLAG bits.
+    UTextFlags8 flags;
 } GlyphSprite;
 
 #define GLYPH_SPRITE_COUNT 300

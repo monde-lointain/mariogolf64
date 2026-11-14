@@ -301,6 +301,8 @@ enum Song {
 #define SONG_FLAG_UNREAD 0x01
 #define SONG_FLAG_FOLLOWS_MUSIC_OPTION 0x10
 #define SONG_FLAG_RESTART 0x80
+// A set of SONG_FLAG bits.
+typedef s32 SongFlags;
 
 #define NO_SONG (-1)
 #define NORMAL_SONG_TEMPO 0x80
@@ -378,7 +380,7 @@ void SetSongReverb(SoundReverb reverb);
 void SetSongTempo(s32 tempo);
 void SetSongFrequencyOffset(f32 offset);
 SongId GetSongId(void);
-void PlaySong(SongId songId, s32 songFlags);
+void PlaySong(SongId songId, SongFlags songFlags);
 void InitAudio(void);
 
 #endif
