@@ -65,7 +65,9 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
 }
 
 void TallySkins(s32 endHole) {
-    s32 player;
+    s32 playerIndex;
+    // hole also indexes players in the first loop, and winner is first used
+    // as an is-anyone-playing flag; splitting either breaks the match.
     s32 hole;
     s32 winner;
     s32 skins;
@@ -75,8 +77,8 @@ void TallySkins(s32 endHole) {
     }
 
     winner = FALSE;
-    for (player = 0; player != g_GameState.playerCount; player++) {
-        if (g_Players[player].holeStatus == HOLE_STATUS_PLAYING) {
+    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+        if (g_Players[playerIndex].holeStatus == HOLE_STATUS_PLAYING) {
             winner = TRUE;
         }
     }
@@ -88,10 +90,10 @@ void TallySkins(s32 endHole) {
     skins = 1;
     for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
         winner = NO_SKINS_WINNER;
-        for (player = 0; player != g_GameState.playerCount; player++) {
-            if (g_Players[player].holes[hole].strokeCount != 0) {
-                winner = player;
-                g_Players[player].holes[hole].strokeCount = skins;
+        for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+            if (g_Players[playerIndex].holes[hole].strokeCount != 0) {
+                winner = playerIndex;
+                g_Players[playerIndex].holes[hole].strokeCount = skins;
             }
         }
 
