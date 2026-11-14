@@ -99,7 +99,6 @@
 
 #define SPOT_PLACE_DISTANCE 13824.0f
 #define PITCH_REFINEMENT_COUNT 2
-#define QUARTER_BINARY_TURN 0x4000
 
 #define REACTION_FRAME_COLUMN 3
 #define REACTION_FRAME_ROW 4
@@ -1331,7 +1330,7 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
     spot[AXIS_X] = f_ReactionSpot[AXIS_X];
     spot[AXIS_Y] = f_ReactionSpot[AXIS_Y];
     spot[AXIS_Z] = f_ReactionSpot[AXIS_Z];
-    sidewaysHeading = shotHeading + QUARTER_BINARY_TURN;
+    sidewaysHeading = shotHeading + BINARY_ANGLE_QUARTER_TURN;
     heading = (BinaryAngle)sidewaysHeading * BINARY_ANGLE_TO_RADIANS;
     ahead[AXIS_X] = (cosf(heading) * radius) + spot[AXIS_X];
     ahead[AXIS_Z] = (sinf(heading) * radius) + spot[AXIS_Z];

@@ -275,7 +275,7 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
     aimYaw = g_CurrentShot.heading;
     distance =
         GetBallDistance(0, player->clubs[g_CurrentShot.clubSlot], FALSE, g_CurrentShot.shotMode);
-    angle = ((aimYaw + (BINARY_ANGLE_TURN / 4)) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
+    angle = ((aimYaw + BINARY_ANGLE_QUARTER_TURN) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
     if (player->isLefty) {
         distance = -distance;
     }
@@ -330,9 +330,9 @@ SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot) {
 
     surfaceTraits = GetSurfaceTraits(player->ballSurface);
     sampleDistance = CROSS_SLOPE_DISTANCE;
-    yaw = aimYaw + (BINARY_ANGLE_TURN / 4);
+    yaw = aimYaw + BINARY_ANGLE_QUARTER_TURN;
     if (player->isLefty) {
-        angle = BINARY_ANGLE_TO_RADIANS * ((yaw + (BINARY_ANGLE_TURN / 2)) & BINARY_ANGLE_MASK);
+        angle = BINARY_ANGLE_TO_RADIANS * ((yaw + BINARY_ANGLE_HALF_TURN) & BINARY_ANGLE_MASK);
     }
     else {
         angle = (yaw & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
