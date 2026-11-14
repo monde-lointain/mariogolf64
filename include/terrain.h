@@ -268,7 +268,7 @@ typedef struct TrianglePlane {
     f32 normalLength;
 } TrianglePlane;
 
-s32 GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane);
+Outcome GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane);
 
 Vtx *GetGroundPoint(u32 column, u32 row);
 Vtx *GetGridVertex(u32 column, u32 row);
@@ -284,7 +284,7 @@ void PrepareHoleTriangles(void);
 Boolean IsOverlayInExpansionMemory(void);
 void UpdateDebugScenes(void);
 s32 GetTerrainCodeColor(TerrainCode code);
-s32 GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane);
+Outcome GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane);
 TerrainCode GetColorTerrainCode(s32 color);
 s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface);
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel);

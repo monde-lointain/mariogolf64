@@ -12,6 +12,14 @@ typedef u16 UBoolean16;
 typedef s8 Boolean8;
 typedef u8 UBoolean8;
 
+// How a routine ended, in the original's convention of 0 for success.
+enum Outcome {
+    OUTCOME_FAILED = -1,
+    OUTCOME_OK
+};
+
+typedef s32 Outcome;
+
 #define ARRAY_COUNT(array) (s32)(sizeof(array) / sizeof((array)[0]))
 
 #define MemberSize(type, member) (s32)sizeof(((type *)0)->member)

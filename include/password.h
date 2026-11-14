@@ -29,7 +29,7 @@ typedef struct ScoreReport {
     u8 gameBoyLevel;
 } ScoreReport;
 
-s32 DecodeTournamentPassword(u8 *code, char *password);
+Outcome DecodeTournamentPassword(u8 *code, char *password);
 void EncodeScorePassword(ScoreReport *report, char *password);
 TournamentRules *GetTournamentRules(u8 rulesIndex);
 

@@ -1602,7 +1602,7 @@ void InsertRankedRecord(PlayRecord *record) {
     osSyncPrintf("\n");
 }
 
-s32 SaveOrContinueGameByMode(Boolean isContinuing) {
+Outcome SaveOrContinueGameByMode(Boolean isContinuing) {
     Player *players;
     PlayRecord *records;
     SavedGame *game;
@@ -1635,7 +1635,7 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
             break;
 #ifdef AVOID_UB
         default:
-            return -1;
+            return OUTCOME_FAILED;
 #endif
     }
 
@@ -1643,7 +1643,7 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
         hasIllegalState = FALSE;
         if (g_GameState.playerCount > playerCount) {
             osSyncPrintf("Too Many Players\n");
-            return -1;
+            return OUTCOME_FAILED;
         }
 
         playerCount = g_GameState.playerCount;
@@ -1673,16 +1673,16 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
         game->hole = g_HoleSetup;
         if (!hasIllegalState) {
             game->isValid = TRUE;
-            return 0;
+            return OUTCOME_OK;
         }
 
-        return -1;
+        return OUTCOME_FAILED;
     }
 
     if (game->isValid == TRUE) {
         if (game->state.playerCount > playerCount) {
             osSyncPrintf("Too Many Players\n");
-            return -1;
+            return OUTCOME_FAILED;
         }
 
         playerCount = game->state.playerCount;
@@ -1699,12 +1699,12 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
 
     g_GameState.isRoundContinued = ROUND_CONTINUED;
     osSyncPrintf("Go Continue\n");
-    return 0;
+    return OUTCOME_OK;
 }
 
 #define SAVE_COUNT_MAX 99
 
-s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
+Outcome SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
     Player *players;
     SavedGame *game;
     s32 playerCount;
@@ -1718,7 +1718,7 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
         hasIllegalState = FALSE;
         if (g_GameState.playerCount > playerCount) {
             osSyncPrintf("Too Many Players\n");
-            return -1;
+            return OUTCOME_FAILED;
         }
 
         playerCount = g_GameState.playerCount;
@@ -1750,7 +1750,7 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
         game->hole = g_HoleSetup;
         game->roundStats = g_RoundStats;
         if (hasIllegalState) {
-            return -1;
+            return OUTCOME_FAILED;
         }
 
         game->isValid = TRUE;
@@ -1759,7 +1759,7 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
         if (game->isValid == TRUE) {
             if (game->state.playerCount > playerCount) {
                 osSyncPrintf("Too Many Players\n");
-                return -1;
+                return OUTCOME_FAILED;
             }
 
             playerCount = game->state.playerCount;
@@ -1782,7 +1782,7 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
         TransferSaveData(GetSaveData(), TRUE);
     }
 
-    return 0;
+    return OUTCOME_OK;
 }
 
 void RecordDisplayListLength(u32 commandCount) {

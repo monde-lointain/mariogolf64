@@ -1798,7 +1798,7 @@ SETTLE:
                         simulation->position[AXIS_Z],
                         &ground
                     ) == 0 &&
-                    GetTrianglePlane(&ground, &plane) == 0 &&
+                    GetTrianglePlane(&ground, &plane) == OUTCOME_OK &&
                     IsDropSlope(plane)) {
                     simulation->dropPosition[AXIS_X] = simulation->position[AXIS_X];
                     simulation->dropPosition[AXIS_Y] = simulation->position[AXIS_Y];

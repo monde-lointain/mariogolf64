@@ -1265,7 +1265,7 @@ void UpdateClubTournament(void) {
     s32 row;
     s32 column;
     CodeKeyResult keyResult;
-    Boolean isInvalid;
+    Outcome decoding;
     TournamentRules *rules;
     char debugText[DEBUG_TEXT_BUFFER_SIZE];
 
@@ -1331,13 +1331,13 @@ void UpdateClubTournament(void) {
         keyResult = PressCodeKey();
         if (keyResult == CODE_KEY_RESULT_DONE) {
             if (IsGameFlagSet(GAME_FLAG_EDIT_TOURNAMENT_CODE)) {
-                isInvalid = FALSE;
+                decoding = OUTCOME_OK;
             }
             else {
-                isInvalid = DecodeTournamentPassword(g_TournamentCode, (char *)f_EnteredCode);
+                decoding = DecodeTournamentPassword(g_TournamentCode, (char *)f_EnteredCode);
             }
 
-            if (!isInvalid) {
+            if (decoding == OUTCOME_OK) {
                 f_DecodedNameIndex = g_TournamentCode[0] & CLUB_CODE_NAME_MASK;
                 if (f_DecodedNameIndex >= CLUB_TOURNAMENT_NAME_COUNT) {
                     f_DecodedNameIndex = 0;

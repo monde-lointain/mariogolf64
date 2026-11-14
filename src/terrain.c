@@ -1814,7 +1814,7 @@ Boolean AreTrianglesDifferent(PlaneTriangle *first, PlaneTriangle *second) {
         (Abs(normalY) > NORMAL_PART_MAX) || \
         (Abs(normalZ) > NORMAL_PART_MAX))
 
-s32 GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane) {
+Outcome GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane) {
     s32 firstX;
     s32 secondX;
     s32 firstY;
@@ -1855,7 +1855,7 @@ s32 GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane) {
         plane->normal[AXIS_Z] = 0;
         plane->distance = 0;
         plane->normalLength = INTEGER_PLANE_UNIT;
-        return -1;
+        return OUTCOME_FAILED;
     }
 
     if (normalY < 0) {
@@ -1867,10 +1867,10 @@ s32 GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane) {
     plane->normal[AXIS_Y] = (normalY << INTEGER_PLANE_SHIFT) / length;
     plane->normal[AXIS_Z] = (normalZ << INTEGER_PLANE_SHIFT) / length;
     plane->distance = (distance << INTEGER_PLANE_SHIFT) / length;
-    return 0;
+    return OUTCOME_OK;
 }
 
-s32 GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane) {
+Outcome GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane) {
     s32 firstX;
     s32 secondX;
     s32 firstY;
@@ -1908,7 +1908,7 @@ s32 GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane) {
         plane->distance = 0.0f;
         plane->normal[AXIS_Y] = 1.0f;
         plane->normalLength = 1.0f;
-        return -1;
+        return OUTCOME_FAILED;
     }
 
     if (normalY < 0.0f) {
@@ -1921,7 +1921,7 @@ s32 GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane) {
     plane->normal[AXIS_Y] = normalY * scale;
     plane->normal[AXIS_Z] = normalZ * scale;
     plane->distance = distance * scale;
-    return 0;
+    return OUTCOME_OK;
 }
 
 #define NO_GROUND_HEIGHT (-300)

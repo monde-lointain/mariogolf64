@@ -1478,7 +1478,7 @@ void LoadGameModeLabelBuffer(void *buffer, GameModeLabelBuffer bufferKind) {
     }
 }
 
-s32 ContinueSavedGame(void);
+Outcome ContinueSavedGame(void);
 
 #define SAVED_GAME_TEXT_SLOT_COUNT 4
 #define SAVED_GAME_TURN_FRAMES 7
@@ -1888,7 +1888,7 @@ Boolean IsChosenGameEmpty(void) {
     return -(game->isValid == FALSE);
 }
 
-s32 ContinueModeGame(void) {
+Outcome ContinueModeGame(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     SavedGame *game;
@@ -1918,16 +1918,16 @@ s32 ContinueModeGame(void) {
             break;
 #ifdef AVOID_UB
         default:
-            return -1;
+            return OUTCOME_FAILED;
 #endif
     }
 
     if (!game->isValid) {
-        return -1;
+        return OUTCOME_FAILED;
     }
 
     if (game->state.playerCount > playerCount) {
-        return -1;
+        return OUTCOME_FAILED;
     }
 
     playerCount = game->state.playerCount;
@@ -1941,10 +1941,10 @@ s32 ContinueModeGame(void) {
     SetGameFlag(GAME_FLAG_LOADED_PLAY);
     g_HoleSetup = game->hole;
     g_GameState.isRoundContinued = ROUND_CONTINUED;
-    return 0;
+    return OUTCOME_OK;
 }
 
-s32 ContinueSavedGame(void) {
+Outcome ContinueSavedGame(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     Player *savedPlayer;
@@ -1953,11 +1953,11 @@ s32 ContinueSavedGame(void) {
     u16 controllerIndex;
 
     if (f_SavedGameModes[memory->savedGameIndex] == NO_SAVE_MENU_MODE) {
-        return -1;
+        return OUTCOME_FAILED;
     }
 
-    if (SaveOrContinueGame(memory->savedGameIndex, TRUE) == -1) {
-        return -1;
+    if (SaveOrContinueGame(memory->savedGameIndex, TRUE) == OUTCOME_FAILED) {
+        return OUTCOME_FAILED;
     }
 
     savedPlayer = save->savedPlayers[memory->savedGameIndex];
@@ -1977,7 +1977,7 @@ s32 ContinueSavedGame(void) {
         memset(&save->savedGames[memory->savedGameIndex], 0, sizeof(SavedGame));
     }
 
-    return 0;
+    return OUTCOME_OK;
 }
 
 const char f_SaveMenuNameFormat[] = "%s";

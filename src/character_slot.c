@@ -4610,7 +4610,7 @@ void FreeAllCharacterSlots(void) {
     }
 }
 
-s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
+Outcome SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
     CharacterSlot *slot;
     s32 checkedIndex;
 
@@ -4620,26 +4620,26 @@ s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
         if (choiceIndex == NO_DISPLAY_LIST_CHOICE) {
             ModelChosenDisplayList(slot->model)->words.w0 = G_ENDDL << 24;
             ModelChosenDisplayList(slot->model)->words.w1 = 0;
-            return 0;
+            return OUTCOME_OK;
         }
 
         for (; checkedIndex < choiceIndex; checkedIndex++) {
             if (ModelDisplayListChoices(slot->model)[checkedIndex] == END_OF_DISPLAY_LIST_CHOICES) {
-                return -1;
+                return OUTCOME_FAILED;
             }
         }
 
         if (ModelDisplayListChoices(slot->model)[checkedIndex] == END_OF_DISPLAY_LIST_CHOICES) {
-            return -1;
+            return OUTCOME_FAILED;
         }
 
         ModelChosenDisplayList(slot->model)->words.w0 = G_DL << 24;
         ModelChosenDisplayList(slot->model)->words.w1 =
             ModelDisplayListChoices(slot->model)[checkedIndex];
-        return 0;
+        return OUTCOME_OK;
     }
 
-    return -1;
+    return OUTCOME_FAILED;
 }
 
 ClubCategory GetCharacterClubCategory(u32 slotIndex, s32 clubIndex) {

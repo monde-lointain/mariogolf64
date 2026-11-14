@@ -240,7 +240,7 @@ extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT
 #define WHEEL_ARROW_X 160
 #define WHEEL_ARROW_Y 94
 
-s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing);
+Outcome SaveOrContinueGame(s32 slotIndex, Boolean isContinuing);
 MessageId GetClubTournamentCourseTitleMessage(void);
 GameMode GetClubTournamentGameMode(void);
 MessageId GetClubTournamentModeMessage(void);
@@ -320,7 +320,7 @@ void InvalidateBrokenRingShotRecords(void);
 void InvalidateBrokenSavedGames(void);
 void RememberPlayedHole(void);
 void ResetMenuChoices(void);
-s32 SaveOrContinueGameByMode(Boolean isContinuing);
+Outcome SaveOrContinueGameByMode(Boolean isContinuing);
 void SaveRingShotRecord(s32 recordIndex, RingShotRecord *record);
 void SortIndicesDescending(s32 *values, s32 *order, s32 count);
 

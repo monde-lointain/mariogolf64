@@ -22,7 +22,7 @@
 #define TIME_NUMBER_SALT 0x5B347F
 #define SCORE_NUMBER_SALT 0x3507F
 
-s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 variant);
+Outcome WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 variant);
 
 TournamentRules g_ClubTournamentRules;
 
@@ -270,13 +270,13 @@ static u8 ReverseBits(u8 bits) {
     return reversed;
 }
 
-s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 variant) {
+Outcome WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 variant) {
     s32 symbolIndex;
     char **spellings;
 
     for (symbolIndex = 0; symbolIndex < symbolCount; symbolIndex++) {
         if (symbols[symbolIndex] >= PASSWORD_SYMBOL_COUNT) {
-            return -1;
+            return OUTCOME_FAILED;
         }
 
         spellings =
@@ -289,10 +289,10 @@ s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 varia
         }
     }
 
-    return 0;
+    return OUTCOME_OK;
 }
 
-static s32 ReadPasswordSymbols(u8 *symbols, char *password, s32 symbolCount) {
+static Outcome ReadPasswordSymbols(u8 *symbols, char *password, s32 symbolCount) {
     s32 symbolIndex;
     s32 symbol;
     s32 spellingIndex;
@@ -315,24 +315,24 @@ static s32 ReadPasswordSymbols(u8 *symbols, char *password, s32 symbolCount) {
         }
 
         if (symbol >= PASSWORD_SYMBOL_COUNT) {
-            return -1;
+            return OUTCOME_FAILED;
         }
 
         symbols[symbolIndex] =
             (symbol + PASSWORD_SYMBOL_COUNT - symbolIndex) % PASSWORD_SYMBOL_COUNT;
     }
 
-    return 0;
+    return OUTCOME_OK;
 }
 
-s32 DecodeTournamentPassword(u8 *code, char *password) {
+Outcome DecodeTournamentPassword(u8 *code, char *password) {
     u8 bytes[TOURNAMENT_CODE_SIZE];
     u8 symbols[TOURNAMENT_PASSWORD_LENGTH];
     u32 number;
     s32 i;
 
-    if (ReadPasswordSymbols(symbols, password, TOURNAMENT_PASSWORD_LENGTH) != 0) {
-        return -1;
+    if (ReadPasswordSymbols(symbols, password, TOURNAMENT_PASSWORD_LENGTH) != OUTCOME_OK) {
+        return OUTCOME_FAILED;
     }
 
     symbols[0] = (symbols[0] + PASSWORD_SYMBOL_COUNT - symbols[5]) % PASSWORD_SYMBOL_COUNT;
@@ -341,15 +341,15 @@ s32 DecodeTournamentPassword(u8 *code, char *password) {
     symbols[3] = (symbols[3] + PASSWORD_SYMBOL_COUNT - symbols[7]) % PASSWORD_SYMBOL_COUNT;
     symbols[4] = (symbols[4] + PASSWORD_SYMBOL_COUNT - symbols[5]) % PASSWORD_SYMBOL_COUNT;
     if (symbols[5] != (symbols[4] + symbols[0] + symbols[1]) % (u32)PASSWORD_SYMBOL_COUNT) {
-        return -1;
+        return OUTCOME_FAILED;
     }
 
     if (symbols[6] != (symbols[1] + symbols[2] + symbols[3]) % (u32)PASSWORD_SYMBOL_COUNT) {
-        return -1;
+        return OUTCOME_FAILED;
     }
 
     if (symbols[7] != (symbols[2] + symbols[3] + symbols[4]) % (u32)PASSWORD_SYMBOL_COUNT) {
-        return -1;
+        return OUTCOME_FAILED;
     }
 
     number = 0;
@@ -365,7 +365,7 @@ s32 DecodeTournamentPassword(u8 *code, char *password) {
         code[i] = ReverseBits(bytes[i] ^ f_TournamentKey[i]);
     }
 
-    return 0;
+    return OUTCOME_OK;
 }
 
 void EncodeScorePassword(ScoreReport *report, char *password) {

@@ -1848,7 +1848,7 @@ TriangleFacing GetTriangleFacing(
     return facing;
 }
 
-s32 GetTrianglePlaneCopy(PlaneTriangle *triangle, TrianglePlane *plane) {
+Outcome GetTrianglePlaneCopy(PlaneTriangle *triangle, TrianglePlane *plane) {
     s32 firstX;
     s32 secondX;
     s32 firstY;
@@ -1883,7 +1883,7 @@ s32 GetTrianglePlaneCopy(PlaneTriangle *triangle, TrianglePlane *plane) {
         plane->distance = 0.0f;
         plane->normal[AXIS_Y] = 1.0f;
         plane->normalLength = 1.0f;
-        return -1;
+        return OUTCOME_FAILED;
     }
 
     if (normalY < 0.0f) {
@@ -1896,7 +1896,7 @@ s32 GetTrianglePlaneCopy(PlaneTriangle *triangle, TrianglePlane *plane) {
     plane->normal[AXIS_Y] = normalY * scale;
     plane->normal[AXIS_Z] = normalZ * scale;
     plane->distance = distance * scale;
-    return 0;
+    return OUTCOME_OK;
 }
 
 Boolean FindHoleTriangleHit(
