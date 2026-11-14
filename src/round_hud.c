@@ -3699,8 +3699,8 @@ void DrawAnimatedIcon(Gfx **displayListHead, s32 letterboxHeight) {
     }
 }
 
-s32 DrawLetterbox(Gfx **gfxP, s32 height) {
-    Gfx *gfx = *gfxP;
+s32 DrawLetterbox(Gfx **displayListHead, s32 height) {
+    Gfx *gfx = *displayListHead;
 
     if (g_RoundHud.isLetterboxShown) {
         if (IsLetterboxState(g_LetterboxState)) {
@@ -3748,14 +3748,14 @@ s32 DrawLetterbox(Gfx **gfxP, s32 height) {
         }
     }
 
-    *gfxP = gfx;
+    *displayListHead = gfx;
     return height;
 }
 
-void DrawDistanceText(Gfx **gfxP, s32 x, s32 y, char *text) {
+void DrawDistanceText(Gfx **displayListHead, s32 x, s32 y, char *text) {
     s32 width;
     s32 glyphS;
-    Gfx *gfx = *gfxP;
+    Gfx *gfx = *displayListHead;
 
     for (; *text != '\0'; text++) {
         switch (*text) {
@@ -3798,7 +3798,7 @@ void DrawDistanceText(Gfx **gfxP, s32 x, s32 y, char *text) {
         x += width;
     }
 
-    *gfxP = gfx;
+    *displayListHead = gfx;
 }
 
 const char f_ColorTestSampleText[] = "ｻﾝﾌﾟﾙABCDEFG";

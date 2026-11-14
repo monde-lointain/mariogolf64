@@ -208,8 +208,8 @@ static Mtx f_MeterTranslationMatrix;
 static Gfx f_MeterDisplayLists[2][512];
 static char f_ReadoutText[READOUT_TEXT_CAPACITY];
 
-static void DrawDigits(Gfx **gfxP, u16 x, u16 y, char *text) {
-    Gfx *gfx = *gfxP;
+static void DrawDigits(Gfx **displayListHead, u16 x, u16 y, char *text) {
+    Gfx *gfx = *displayListHead;
     char character;
 
     gDPPipeSync(gfx++);
@@ -262,7 +262,7 @@ static void DrawDigits(Gfx **gfxP, u16 x, u16 y, char *text) {
     }
 
     gDPPipeSync(gfx++);
-    *gfxP = gfx;
+    *displayListHead = gfx;
 }
 
 #define KeepBarStats(average, maximum, length) \

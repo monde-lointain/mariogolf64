@@ -259,13 +259,13 @@ void SortBillboardsByDepth(void) {
         (f_BillboardTextures[textureIndex].pixels != NULL))
 
 void DrawBillboard(
-    Gfx **gfxPtr,
+    Gfx **displayListHead,
     Billboard *billboard,
     BillboardTransform *transform,
     s32 textureIndex,
     CameraMatrices *cameraMatrices
 ) {
-    Gfx *gfx = *gfxPtr;
+    Gfx *gfx = *displayListHead;
     AssetFile file;
     s32 texelSize;
 
@@ -330,7 +330,7 @@ void DrawBillboard(
     gDPPipeSync(gfx++);
     gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
     f_LoadedTextureIndex = billboard->textureIndex;
-    *gfxPtr = gfx;
+    *displayListHead = gfx;
 }
 
 void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {

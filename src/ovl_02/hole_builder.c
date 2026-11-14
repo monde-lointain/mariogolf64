@@ -3762,7 +3762,7 @@ static inline void CopyVertices(Vtx *destination, Vtx *source, s32 count) {
 
 #define SegmentedVertex(segment, vertex) ((u8 *)(vertex) + ((segment) << 24))
 
-void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfxCursor, Vtx **vertexCursor) {
+void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **displayListHead, Vtx **vertexCursor) {
     void SetTileVertexMidpoint(Vtx_t * from, Vtx_t * to, Vtx_t * midpoint) {
         midpoint->ob[AXIS_X] = (from->ob[AXIS_X] + to->ob[AXIS_X]) / 2;
         midpoint->ob[AXIS_Y] = (from->ob[AXIS_Y] + to->ob[AXIS_Y]) / 2;
@@ -3776,7 +3776,7 @@ void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfxCursor, Vtx **vert
         midpoint->cn[3] = (from->cn[3] + to->cn[3]) / 2;
     }
 
-    Gfx *gfx = *gfxCursor;
+    Gfx *gfx = *displayListHead;
     Vtx *vertex = *vertexCursor;
     s32 tileIndex = (row * GROUND_TILE_COLUMN_COUNT) + column;
     Vtx *midpoints;
@@ -3989,7 +3989,7 @@ void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfxCursor, Vtx **vert
     gSPEndDisplayList(gfx++);
     SetTileTextureCoords(column, row, &(*vertexCursor)->v, &vertex->v);
     SetTileTextureCoords(column, row, &midpoints->v, &midpoints[TILE_MIDPOINT_COUNT].v);
-    *gfxCursor = gfx;
+    *displayListHead = gfx;
     *vertexCursor = vertex;
 }
 

@@ -12,7 +12,7 @@ static s32 f_QueuedBoxCount = 0;
 
 FILE_STATIC AnimatedBox *f_QueuedBoxes[QUEUED_BOX_CAPACITY];
 
-static void DrawAnimatedBox(Gfx **gfxHead, AnimatedBox *box) {
+static void DrawAnimatedBox(Gfx **displayListHead, AnimatedBox *box) {
     Gfx *gfx;
     s32 halfWidth;
     s16 step;
@@ -22,7 +22,7 @@ static void DrawAnimatedBox(Gfx **gfxHead, AnimatedBox *box) {
     s16 boxLeft;
     s16 boxRight;
 
-    gfx = *gfxHead;
+    gfx = *displayListHead;
     if (box->state == BOX_CLOSED) {
         return;
     }
@@ -71,7 +71,7 @@ static void DrawAnimatedBox(Gfx **gfxHead, AnimatedBox *box) {
         TEXEL_STEP_ONE,
         TEXEL_STEP_ONE
     );
-    *gfxHead = gfx;
+    *displayListHead = gfx;
 }
 
 void QueueAnimatedBox(AnimatedBox *box) {
