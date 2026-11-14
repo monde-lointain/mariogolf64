@@ -1172,7 +1172,7 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
     s32 labelSlide;
     MenuMemory *memory = GetMenuMemory();
     u16 playerIndex;
-    s32 columnIndex;
+    s32 column;
     s32 i;
     u16 textureLeft;
     s32 labelIndex;
@@ -1367,8 +1367,8 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
         HANDICAP_LABEL_PALETTE,
         TextureAddress(ImageBody(f_StatsPlayerLabels))
     );
-    for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
-        if (columnIndex == memory->handicapPlayer) {
+    for (column = 0; column != g_ChosenPlayerCount; column++) {
+        if (column == memory->handicapPlayer) {
             gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         }
         else {
@@ -1402,10 +1402,10 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
             gDPPipeSync(gfx++);
             gSPScisTextureRectangle(
                 gfx++,
-                QuarterPixels(f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] + slide),
+                QuarterPixels(f_HandicapColumnLefts[g_ChosenPlayerCount - 1][column] + slide),
                 QuarterPixels(HANDICAP_COLUMN_TOP + (i * HANDICAP_COLUMN_STRIP_HEIGHT)),
                 QuarterPixels(
-                    f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] + slide +
+                    f_HandicapColumnLefts[g_ChosenPlayerCount - 1][column] + slide +
                     HANDICAP_COLUMN_WIDTH
                 ),
                 QuarterPixels(
@@ -1422,9 +1422,9 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
         }
 
         IN_OWN_BLOCK(IN_OWN_BLOCK({
-            labelIndex = columnIndex;
-            if (g_PlayerControllerIndices[columnIndex] == NO_CONTROLLER_INDEX) {
-                labelIndex = columnIndex + PLAYER_LABEL_COMPUTER_FIRST;
+            labelIndex = column;
+            if (g_PlayerControllerIndices[column] == NO_CONTROLLER_INDEX) {
+                labelIndex = column + PLAYER_LABEL_COMPUTER_FIRST;
             }
         }));
 
@@ -1450,10 +1450,10 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
         labelSlide = slide + HANDICAP_LABEL_OFFSET_X;
         gSPScisTextureRectangle(
             gfx++,
-            QuarterPixels(f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] + labelSlide),
+            QuarterPixels(f_HandicapColumnLefts[g_ChosenPlayerCount - 1][column] + labelSlide),
             QuarterPixels(HANDICAP_LABEL_TOP),
             QuarterPixels(
-                f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] + labelSlide +
+                f_HandicapColumnLefts[g_ChosenPlayerCount - 1][column] + labelSlide +
                 PLAYER_LABEL_WIDTH
             ),
             QuarterPixels(HANDICAP_LABEL_TOP + PLAYER_LABEL_HEIGHT),
@@ -1667,7 +1667,7 @@ void DrawBetLabel(Gfx **displayListHead, s32 centerX, s32 top, u8 labelIndex) {
 s32 SlideBrickWall(Gfx **displayListHead, u8 slide) {
     Gfx *gfx = *displayListHead;
     s32 index;
-    s32 rowIndex;
+    s32 row;
     s32 offset;
     s32 first;
 
@@ -1687,27 +1687,26 @@ s32 SlideBrickWall(Gfx **displayListHead, u8 slide) {
         f_BrickWallSlide = slide;
         switch (slide) {
             case STATS_SLIDE_OUT_RIGHT:
-                for (rowIndex = 0; rowIndex != STATS_SLIDE_ROW_COUNT; rowIndex++) {
-                    f_BrickRowOffsets[rowIndex] =
-                        f_BrickSlideStartOffsets[STATS_SLIDE_OUT_RIGHT - 1][rowIndex];
-                    f_BrickRowDelays[rowIndex] = f_BrickRowStartDelays[rowIndex];
+                for (row = 0; row != STATS_SLIDE_ROW_COUNT; row++) {
+                    f_BrickRowOffsets[row] =
+                        f_BrickSlideStartOffsets[STATS_SLIDE_OUT_RIGHT - 1][row];
+                    f_BrickRowDelays[row] = f_BrickRowStartDelays[row];
                 }
 
                 break;
             case STATS_SLIDE_OUT_LEFT:
-                for (rowIndex = 0; rowIndex != STATS_SLIDE_ROW_COUNT; rowIndex++) {
-                    f_BrickRowOffsets[rowIndex] =
-                        f_BrickSlideStartOffsets[STATS_SLIDE_OUT_LEFT - 1][rowIndex];
-                    f_BrickRowDelays[rowIndex] = f_BrickRowStartDelays[rowIndex];
+                for (row = 0; row != STATS_SLIDE_ROW_COUNT; row++) {
+                    f_BrickRowOffsets[row] =
+                        f_BrickSlideStartOffsets[STATS_SLIDE_OUT_LEFT - 1][row];
+                    f_BrickRowDelays[row] = f_BrickRowStartDelays[row];
                 }
 
                 break;
             case STATS_SLIDE_IN_FROM_RIGHT:
             case STATS_SLIDE_IN_FROM_LEFT:
-                for (rowIndex = 0; rowIndex != STATS_SLIDE_ROW_COUNT; rowIndex++) {
-                    f_BrickRowOffsets[rowIndex] =
-                        f_BrickSlideStartOffsets[f_BrickWallSlide - 1][rowIndex];
-                    f_BrickRowDelays[rowIndex] = f_BrickRowStartDelays[rowIndex];
+                for (row = 0; row != STATS_SLIDE_ROW_COUNT; row++) {
+                    f_BrickRowOffsets[row] = f_BrickSlideStartOffsets[f_BrickWallSlide - 1][row];
+                    f_BrickRowDelays[row] = f_BrickRowStartDelays[row];
                 }
 
                 break;
@@ -1729,7 +1728,7 @@ s32 SlideBrickWall(Gfx **displayListHead, u8 slide) {
 
 void DrawBrickWallRows(Gfx **displayListHead, u8 slide) {
     Gfx *gfx = *displayListHead;
-    s32 rowIndex;
+    s32 row;
     s32 stripHeight = STATS_WALL_STRIP_HEIGHT;
 
     gDPPipeSync(gfx++);
@@ -1741,12 +1740,12 @@ void DrawBrickWallRows(Gfx **displayListHead, u8 slide) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_BrickWall)));
-    for (rowIndex = 0; rowIndex != STATS_SLIDE_ROW_COUNT; rowIndex++) {
+    for (row = 0; row != STATS_SLIDE_ROW_COUNT; row++) {
         gDPPipeSync(gfx++);
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
-                LargeImageTexels(f_BrickWall) + (stripHeight * STATS_WALL_IMAGE_WIDTH * rowIndex)
+                LargeImageTexels(f_BrickWall) + (stripHeight * STATS_WALL_IMAGE_WIDTH * row)
             ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
@@ -1761,36 +1760,36 @@ void DrawBrickWallRows(Gfx **displayListHead, u8 slide) {
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        if (f_BrickRowDelays[rowIndex] > 0) {
-            f_BrickRowDelays[rowIndex]--;
+        if (f_BrickRowDelays[row] > 0) {
+            f_BrickRowDelays[row]--;
         }
         else {
             switch (slide) {
                 case STATS_SLIDE_OUT_RIGHT:
-                    f_BrickRowOffsets[rowIndex] -= f_BrickRowSpeeds[rowIndex];
-                    if (f_BrickRowOffsets[rowIndex] <= 0) {
-                        f_BrickRowOffsets[rowIndex] = 0;
+                    f_BrickRowOffsets[row] -= f_BrickRowSpeeds[row];
+                    if (f_BrickRowOffsets[row] <= 0) {
+                        f_BrickRowOffsets[row] = 0;
                     }
 
                     break;
                 case STATS_SLIDE_OUT_LEFT:
-                    f_BrickRowOffsets[rowIndex] += f_BrickRowSpeeds[rowIndex];
-                    if (f_BrickRowOffsets[rowIndex] > 0) {
-                        f_BrickRowOffsets[rowIndex] = 0;
+                    f_BrickRowOffsets[row] += f_BrickRowSpeeds[row];
+                    if (f_BrickRowOffsets[row] > 0) {
+                        f_BrickRowOffsets[row] = 0;
                     }
 
                     break;
                 case STATS_SLIDE_IN_FROM_RIGHT:
-                    f_BrickRowOffsets[rowIndex] += f_BrickRowSpeeds[rowIndex];
-                    if (f_BrickRowOffsets[rowIndex] > SCREEN_WIDTH) {
-                        f_BrickRowOffsets[rowIndex] = SCREEN_WIDTH;
+                    f_BrickRowOffsets[row] += f_BrickRowSpeeds[row];
+                    if (f_BrickRowOffsets[row] > SCREEN_WIDTH) {
+                        f_BrickRowOffsets[row] = SCREEN_WIDTH;
                     }
 
                     break;
                 case STATS_SLIDE_IN_FROM_LEFT:
-                    f_BrickRowOffsets[rowIndex] -= f_BrickRowSpeeds[rowIndex];
-                    if (f_BrickRowOffsets[rowIndex] < -SCREEN_WIDTH) {
-                        f_BrickRowOffsets[rowIndex] = -SCREEN_WIDTH;
+                    f_BrickRowOffsets[row] -= f_BrickRowSpeeds[row];
+                    if (f_BrickRowOffsets[row] < -SCREEN_WIDTH) {
+                        f_BrickRowOffsets[row] = -SCREEN_WIDTH;
                     }
 
                     break;
@@ -1799,10 +1798,10 @@ void DrawBrickWallRows(Gfx **displayListHead, u8 slide) {
 
         gSPScisTextureRectangle(
             gfx++,
-            QuarterPixels(f_BrickRowOffsets[rowIndex]),
-            QuarterPixels(rowIndex * STATS_WALL_ROW_HEIGHT),
-            QuarterPixels(f_BrickRowOffsets[rowIndex] + SCREEN_WIDTH),
-            QuarterPixels((rowIndex * STATS_WALL_ROW_HEIGHT) + STATS_WALL_ROW_HEIGHT),
+            QuarterPixels(f_BrickRowOffsets[row]),
+            QuarterPixels(row * STATS_WALL_ROW_HEIGHT),
+            QuarterPixels(f_BrickRowOffsets[row] + SCREEN_WIDTH),
+            QuarterPixels((row * STATS_WALL_ROW_HEIGHT) + STATS_WALL_ROW_HEIGHT),
             G_TX_RENDERTILE,
             0,
             0,

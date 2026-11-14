@@ -213,7 +213,7 @@ void BuildPinShadow(void) {
 }
 
 void DrawPinShadow(void) {
-    s32 rowIndex;
+    s32 row;
 
     gDPSetCombineLERP(
         g_DisplayListHead++,
@@ -236,16 +236,16 @@ void DrawPinShadow(void) {
     );
     gDPPipeSync(g_DisplayListHead++);
     gSPVertex(g_DisplayListHead++, f_PinShadowVertices, PIN_SHADOW_VERTEX_COUNT, 0);
-    for (rowIndex = 0; rowIndex != PIN_SHADOW_ROW_COUNT - 1; rowIndex++) {
+    for (row = 0; row != PIN_SHADOW_ROW_COUNT - 1; row++) {
         gSP2Triangles(
             g_DisplayListHead++,
-            rowIndex * 2,
-            (rowIndex * 2) + 2,
-            (rowIndex * 2) + 1,
+            row * 2,
+            (row * 2) + 2,
+            (row * 2) + 1,
             0,
-            (rowIndex * 2) + 1,
-            (rowIndex * 2) + 2,
-            (rowIndex * 2) + 3,
+            (row * 2) + 1,
+            (row * 2) + 2,
+            (row * 2) + 3,
             0
         );
     }

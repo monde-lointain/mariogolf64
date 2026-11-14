@@ -91,7 +91,7 @@ void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
     s32 rowFontIndex;
     s32 pixelRow;
     s32 wordColumn;
-    s32 rowIndex;
+    s32 row;
     s32 fontIndex;
     s32 textureIndex;
     s32 character;
@@ -120,10 +120,10 @@ void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
         textureIndex = index;
         for (; pixelRow < GLYPH_SIZE; pixelRow++) {
             wordColumn = 0;
-            rowIndex = textureIndex * 2;
+            row = textureIndex * 2;
             rowFontIndex = fontIndex;
             for (; wordColumn < GLYPH_SIZE / PIXELS_PER_FONT_WORD; wordColumn++) {
-                texture[rowIndex + wordColumn] = f_DebugFont[rowFontIndex + wordColumn];
+                texture[row + wordColumn] = f_DebugFont[rowFontIndex + wordColumn];
             }
 
             fontIndex += FONT_ROW_WORD_COUNT;

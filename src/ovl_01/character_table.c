@@ -668,7 +668,7 @@ void DrawTablePopup(Gfx **displayListHead) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s32 index;
-    s32 rowIndex;
+    s32 row;
     CharacterId rowCharacter;
     CharacterId columnCharacter;
     s32 rowWins;
@@ -742,14 +742,14 @@ void DrawTablePopup(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
     }
 
-    rowIndex = memory->tableFirstRow + memory->tableRow;
-    rowCharacter = f_TableCharacters[rowIndex];
+    row = memory->tableFirstRow + memory->tableRow;
+    rowCharacter = f_TableCharacters[row];
     columnCharacter = f_TableCharacters[memory->tableFirstColumn + memory->tableColumn];
     columnWins =
         save->records.awards.matchups[rowCharacter][columnCharacter].lossCount & WIN_COUNT_MASK;
     rowWins = save->records.awards.matchups[rowCharacter][columnCharacter].winBits & WIN_COUNT_MASK;
     faceMode = FACE_DARKENED;
-    if (f_TableCharacterVisibility[rowIndex] != TABLE_CHARACTER_HIDDEN) {
+    if (f_TableCharacterVisibility[row] != TABLE_CHARACTER_HIDDEN) {
         faceMode = FACE_PLAIN;
     }
 

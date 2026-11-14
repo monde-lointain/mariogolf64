@@ -2061,7 +2061,7 @@ void FormatLeaderboardRow(char *row, TournamentStanding *standing) {
 void DrawLeaderboardPage(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     TournamentStanding *standing;
-    s32 rowIndex;
+    s32 row;
     s32 shade;
     s32 bottomFlapShade;
     s32 group;
@@ -2102,12 +2102,12 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     );
     gDPPipeSync(gfx++);
 
-    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
-        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
+    for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
+        if (row * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
             shade = COLOR_CHANNEL_MAX;
-            if (g_Scorecard.content.isRowFlipping[rowIndex] == TRUE &&
-                !(g_Scorecard.content.rowFlipAngles[rowIndex] > FLAP_EDGE_ON_ANGLE)) {
-                shade = (sinf(g_Scorecard.content.rowFlipAngles[rowIndex]) * FLAP_SHADE_RANGE) +
+            if (g_Scorecard.content.isRowFlipping[row] == TRUE &&
+                !(g_Scorecard.content.rowFlipAngles[row] > FLAP_EDGE_ON_ANGLE)) {
+                shade = (sinf(g_Scorecard.content.rowFlipAngles[row]) * FLAP_SHADE_RANGE) +
                     FLAP_FACING_SHADE;
             }
         }
@@ -2119,10 +2119,10 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
         DrawTextureRect(
             &gfx,
             QuarterPixels(g_Scorecard.x + ROW_LEFT),
-            QuarterPixels(((rowIndex * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
+            QuarterPixels(((row * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
             QuarterPixels(g_Scorecard.x + ROW_LEFT + ROW_IMAGE_WIDTH),
             QuarterPixels(
-                (rowIndex * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_IMAGE_HEIGHT + g_Scorecard.y
+                (row * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_IMAGE_HEIGHT + g_Scorecard.y
             ),
             G_TX_RENDERTILE,
             0,
@@ -2134,13 +2134,13 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
 
     LoadLargePalette(&gfx, ImageBody(g_Scorecard.flapNameImages));
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
-    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
-        if (g_Scorecard.content.isRowFlipping[rowIndex] == TRUE &&
-            (s32)g_Scorecard.content.rowFlipAngles[rowIndex] == 0) {
+    for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
+        if (g_Scorecard.content.isRowFlipping[row] == TRUE &&
+            (s32)g_Scorecard.content.rowFlipAngles[row] == 0) {
             LoadTextureBlock(
                 &gfx,
                 g_Scorecard.flapNameImages +
-                    ((rowIndex * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) +
+                    ((row * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) +
                         LARGE_PALETTED_TEXELS_OFFSET),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
@@ -2157,11 +2157,10 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT),
-                QuarterPixels(((rowIndex * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
+                QuarterPixels(((row * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
                 QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT + FLAP_NAME_IMAGE_WIDTH),
                 QuarterPixels(
-                    (rowIndex * LEADERBOARD_ROW_SPACING) + (ROW_IMAGE_HEIGHT + ROW_TOP) +
-                    g_Scorecard.y
+                    (row * LEADERBOARD_ROW_SPACING) + (ROW_IMAGE_HEIGHT + ROW_TOP) + g_Scorecard.y
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -2174,19 +2173,16 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
 
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
-    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
-        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
-            FormatLeaderboardRow(
-                g_PrintBuffer,
-                &g_TournamentStandings[g_Scorecard.topRow + rowIndex]
-            );
+    for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
+        if (row * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
+            FormatLeaderboardRow(g_PrintBuffer, &g_TournamentStandings[g_Scorecard.topRow + row]);
             DrawFixedWidthLargeText(
                 &gfx,
                 g_Scorecard.x + ROW_TEXT_LEFT,
-                RowTextTop(rowIndex),
+                RowTextTop(row),
                 g_PrintBuffer
             );
-            contestantId = g_TournamentStandings[g_Scorecard.topRow + rowIndex].contestantId;
+            contestantId = g_TournamentStandings[g_Scorecard.topRow + row].contestantId;
             if (contestantId == PLAYER_CONTESTANT) {
                 sprintf(g_PrintBuffer, "%-8s  ", g_Players[0].name);
             }
@@ -2198,7 +2194,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 );
             }
 
-            DrawLargeText(&gfx, g_Scorecard.x + ROW_NAME_LEFT, RowTextTop(rowIndex), g_PrintBuffer);
+            DrawLargeText(&gfx, g_Scorecard.x + ROW_NAME_LEFT, RowTextTop(row), g_PrintBuffer);
         }
     }
 
@@ -2208,30 +2204,30 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     gSPSetLights1(gfx++, f_FlapLights);
     gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
     gSPSetGeometryMode(gfx++, G_SHADE | G_LIGHTING | G_SHADING_SMOOTH);
-    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
-        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
-            g_Scorecard.content.isRowFlipping[rowIndex] == TRUE) {
+    for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
+        if (row * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
+            g_Scorecard.content.isRowFlipping[row] == TRUE) {
             Mat4 matrix;
             Vec3 translation;
             Vec3 rotation;
 
-            if (g_Scorecard.content.rowFlipAngles[rowIndex] > FLAP_EDGE_ON_ANGLE) {
-                rotation[AXIS_X] = g_Scorecard.content.rowFlipAngles[rowIndex] + M_PI;
+            if (g_Scorecard.content.rowFlipAngles[row] > FLAP_EDGE_ON_ANGLE) {
+                rotation[AXIS_X] = g_Scorecard.content.rowFlipAngles[row] + M_PI;
                 rotation[AXIS_Y] = 0;
                 rotation[AXIS_Z] = 0;
             }
             else {
-                rotation[AXIS_X] = g_Scorecard.content.rowFlipAngles[rowIndex];
+                rotation[AXIS_X] = g_Scorecard.content.rowFlipAngles[row];
                 rotation[AXIS_Y] = 0;
                 rotation[AXIS_Z] = 0;
             }
 
             translation[AXIS_X] = g_Scorecard.x;
             translation[AXIS_Y] = (SCREEN_HEIGHT / 2.0f) -
-                ((rowIndex * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y);
+                ((row * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y);
             translation[AXIS_Z] = FLAP_DISTANCE;
             BuildRotationMatrix(matrix, rotation, translation);
-            ConvertMatrixToFixed(matrix, &f_FlapMatrices[rowIndex][g_MatrixBufferIndex]);
+            ConvertMatrixToFixed(matrix, &f_FlapMatrices[row][g_MatrixBufferIndex]);
         }
     }
 
@@ -2268,15 +2264,15 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
 
-    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
-        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
-            g_Scorecard.content.isRowFlipping[rowIndex] == TRUE) {
-            if (g_Scorecard.content.rowFlipAngles[rowIndex] < FLAP_EDGE_ON_ANGLE) {
+    for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
+        if (row * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
+            g_Scorecard.content.isRowFlipping[row] == TRUE) {
+            if (g_Scorecard.content.rowFlipAngles[row] < FLAP_EDGE_ON_ANGLE) {
                 bottomFlapShade = COLOR_CHANNEL_MAX;
             }
             else {
                 bottomFlapShade = FLAP_LIT_SHADE -
-                    (sinf(g_Scorecard.content.rowFlipAngles[rowIndex] - FLAP_EDGE_ON_ANGLE) *
+                    (sinf(g_Scorecard.content.rowFlipAngles[row] - FLAP_EDGE_ON_ANGLE) *
                         FLAP_SHADE_RANGE);
             }
 
@@ -2293,13 +2289,11 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 &gfx,
                 QuarterPixels(g_Scorecard.x + ROW_LEFT),
                 QuarterPixels(
-                    (rowIndex * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_BOTTOM_HALF_ROW +
-                    g_Scorecard.y
+                    (row * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_BOTTOM_HALF_ROW + g_Scorecard.y
                 ),
                 QuarterPixels(g_Scorecard.x + ROW_LEFT + ROW_IMAGE_WIDTH),
                 QuarterPixels(
-                    (rowIndex * LEADERBOARD_ROW_SPACING) + (ROW_IMAGE_HEIGHT + ROW_TOP) +
-                    g_Scorecard.y
+                    (row * LEADERBOARD_ROW_SPACING) + (ROW_IMAGE_HEIGHT + ROW_TOP) + g_Scorecard.y
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -2311,14 +2305,14 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     }
 
     LoadLargePalette(&gfx, ImageBody(g_Scorecard.flapNameImages));
-    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
-        if (g_Scorecard.content.isRowFlipping[rowIndex] == TRUE) {
-            if (g_Scorecard.content.rowFlipAngles[rowIndex] < FLAP_EDGE_ON_ANGLE) {
+    for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
+        if (g_Scorecard.content.isRowFlipping[row] == TRUE) {
+            if (g_Scorecard.content.rowFlipAngles[row] < FLAP_EDGE_ON_ANGLE) {
                 shade = COLOR_CHANNEL_MAX;
             }
             else {
                 shade = FLAP_LIT_SHADE -
-                    (sinf(g_Scorecard.content.rowFlipAngles[rowIndex] - FLAP_EDGE_ON_ANGLE) *
+                    (sinf(g_Scorecard.content.rowFlipAngles[row] - FLAP_EDGE_ON_ANGLE) *
                         FLAP_SHADE_RANGE);
             }
 
@@ -2326,7 +2320,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
             LoadTextureBlock(
                 &gfx,
                 g_Scorecard.flapNameImages +
-                    ((rowIndex * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) +
+                    ((row * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) +
                         LARGE_PALETTED_TEXELS_OFFSET),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
@@ -2344,13 +2338,11 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 &gfx,
                 QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT),
                 QuarterPixels(
-                    (rowIndex * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_BOTTOM_HALF_ROW +
-                    g_Scorecard.y
+                    (row * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_BOTTOM_HALF_ROW + g_Scorecard.y
                 ),
                 QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT + FLAP_NAME_IMAGE_WIDTH),
                 QuarterPixels(
-                    (rowIndex * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_IMAGE_HEIGHT +
-                    g_Scorecard.y
+                    (row * LEADERBOARD_ROW_SPACING) + ROW_TOP + ROW_IMAGE_HEIGHT + g_Scorecard.y
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -2381,15 +2373,15 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     gDPPipeSync(gfx++);
-    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
-        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
-            g_Scorecard.content.isRowFlipping[rowIndex] == TRUE) {
+    for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
+        if (row * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
+            g_Scorecard.content.isRowFlipping[row] == TRUE) {
             gSPMatrix(
                 gfx++,
-                PhysicalAddress(&f_FlapMatrices[rowIndex][g_MatrixBufferIndex]),
+                PhysicalAddress(&f_FlapMatrices[row][g_MatrixBufferIndex]),
                 G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
             );
-            if (g_Scorecard.content.rowFlipAngles[rowIndex] > FLAP_EDGE_ON_ANGLE) {
+            if (g_Scorecard.content.rowFlipAngles[row] > FLAP_EDGE_ON_ANGLE) {
                 gSPVertex(gfx++, f_FlapVertices[FLAP_BOTTOM_QUAD], QUAD_VERTEX_COUNT, 0);
             }
             else {
@@ -2401,14 +2393,14 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     }
 
     LoadLargePalette(&gfx, ImageBody(g_Scorecard.flapNameImages));
-    for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
-        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
-            g_Scorecard.content.isRowFlipping[rowIndex] == TRUE &&
-            g_Scorecard.content.rowFlipAngles[rowIndex] < FLAP_EDGE_ON_ANGLE) {
+    for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
+        if (row * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
+            g_Scorecard.content.isRowFlipping[row] == TRUE &&
+            g_Scorecard.content.rowFlipAngles[row] < FLAP_EDGE_ON_ANGLE) {
             LoadTextureBlock(
                 &gfx,
                 g_Scorecard.flapNameImages +
-                    ((rowIndex * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) +
+                    ((row * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) +
                         LARGE_PALETTED_TEXELS_OFFSET),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
@@ -2424,7 +2416,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
             );
             gSPMatrix(
                 gfx++,
-                PhysicalAddress(&f_FlapMatrices[rowIndex][g_MatrixBufferIndex]),
+                PhysicalAddress(&f_FlapMatrices[row][g_MatrixBufferIndex]),
                 G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
             );
             gDPPipeSync(gfx++);
@@ -2438,11 +2430,11 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
     SetUpPerspectiveTextDrawing(&gfx);
-    for (rowIndex = 0, group = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
-        if (rowIndex * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
-            if (g_Scorecard.content.isRowFlipping[rowIndex] == TRUE &&
-                g_Scorecard.content.rowFlipAngles[rowIndex] > FLAP_EDGE_ON_ANGLE) {
-                standing = &g_TournamentStandings[g_Scorecard.topRow + rowIndex];
+    for (row = 0, group = 0; row != LEADERBOARD_ROW_COUNT; row++) {
+        if (row * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
+            if (g_Scorecard.content.isRowFlipping[row] == TRUE &&
+                g_Scorecard.content.rowFlipAngles[row] > FLAP_EDGE_ON_ANGLE) {
+                standing = &g_TournamentStandings[g_Scorecard.topRow + row];
                 FormatLeaderboardRow(g_PrintBuffer, standing);
                 PlaceGlyphGroup(
                     group,
@@ -2473,7 +2465,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 );
                 gSPMatrix(
                     gfx++,
-                    PhysicalAddress(&f_FlapMatrices[rowIndex][g_MatrixBufferIndex]),
+                    PhysicalAddress(&f_FlapMatrices[row][g_MatrixBufferIndex]),
                     G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
                 );
                 DrawGlyphGroup(&gfx, group);
@@ -2490,8 +2482,8 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     gDPSetTexturePersp(gfx++, G_TP_NONE);
 
     if (g_Scorecard.content.flipTime > LAST_ROW_FLIP_TIME) {
-        for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
-            TournamentStanding *rowStanding = &g_TournamentStandings[g_Scorecard.topRow + rowIndex];
+        for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
+            TournamentStanding *rowStanding = &g_TournamentStandings[g_Scorecard.topRow + row];
 
             if (rowStanding->contestantId == PLAYER_CONTESTANT) {
                 gSPDisplayList(gfx++, g_DecalTextureSetup);
@@ -2500,7 +2492,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 DrawSmallFace(
                     &gfx,
                     g_Scorecard.x + LEADERBOARD_FACE_LEFT,
-                    LEADERBOARD_FACE_TOP + (rowIndex * LEADERBOARD_ROW_SPACING),
+                    LEADERBOARD_FACE_TOP + (row * LEADERBOARD_ROW_SPACING),
                     0,
                     TRUE
                 );
@@ -2548,9 +2540,8 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     if (g_Scorecard.content.flipTime > LAST_ROW_FLIP_TIME) {
-        for (rowIndex = 0; rowIndex != LEADERBOARD_ROW_COUNT; rowIndex++) {
-            if (g_TournamentStandings[g_Scorecard.topRow + rowIndex].contestantId ==
-                    PLAYER_CONTESTANT &&
+        for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
+            if (g_TournamentStandings[g_Scorecard.topRow + row].contestantId == PLAYER_CONTESTANT &&
                 g_Scorecard.placeChange != PLACE_HELD) {
                 halfSize = FELL_ARROW_HALF_SIZE;
                 if (g_Scorecard.placeChange & PLACE_FELL) {
@@ -2576,12 +2567,12 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                     &gfx,
                     QuarterPixels(g_Scorecard.x + ARROW_CENTER_X - roundedHalfSize),
                     QuarterPixels(
-                        ((rowIndex * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y) -
+                        ((row * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y) -
                         roundedHalfSize
                     ),
                     QuarterPixels(g_Scorecard.x + ARROW_CENTER_X + roundedHalfSize),
                     QuarterPixels(
-                        ((rowIndex * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y) +
+                        ((row * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y) +
                         roundedHalfSize
                     ),
                     G_TX_RENDERTILE,

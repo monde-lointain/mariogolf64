@@ -1702,8 +1702,8 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle) {
     s32 baseRow;
     s32 slotColumn;
     s32 slotRow;
-    s32 rowIndex;
-    s32 columnIndex;
+    s32 rowSearchIndex;
+    s32 columnSearchIndex;
     s32 column;
     s32 row;
 
@@ -1764,12 +1764,13 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle) {
         slotRow = PointSlot(z >> (GROUND_TILE_SHIFT - TILE_POINT_SPAN_SHIFT));
     }
 
-    for (rowIndex = 0; rowIndex < GROUND_TILE_POINT_SPAN; rowIndex++) {
+    for (rowSearchIndex = 0; rowSearchIndex < GROUND_TILE_POINT_SPAN; rowSearchIndex++) {
         Vtx *corners[4];
 
-        row = baseRow + PointSlot(slotRow + f_CellSearchOffsets[rowIndex]);
-        for (columnIndex = 0; columnIndex < GROUND_TILE_POINT_SPAN; columnIndex++) {
-            column = baseColumn + PointSlot(slotColumn + f_CellSearchOffsets[columnIndex]);
+        row = baseRow + PointSlot(slotRow + f_CellSearchOffsets[rowSearchIndex]);
+        for (columnSearchIndex = 0; columnSearchIndex < GROUND_TILE_POINT_SPAN;
+            columnSearchIndex++) {
+            column = baseColumn + PointSlot(slotColumn + f_CellSearchOffsets[columnSearchIndex]);
             corners[0] = GetGroundPoint(column, row);
             corners[1] = GetGroundPoint(column + 1, row);
             corners[2] = GetGroundPoint(column, row + 1);

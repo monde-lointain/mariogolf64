@@ -744,7 +744,7 @@ void DrawSpinEffect(Gfx **displayListHead, CameraView *view) {
     Gfx *gfx = *displayListHead;
     Radians angleStep;
     Vtx *vertex;
-    s32 rowIndex;
+    s32 row;
 
     rotation[AXIS_X] = 0.0f;
     rotation[AXIS_Y] = f_SpinAngle;
@@ -771,7 +771,7 @@ void DrawSpinEffect(Gfx **displayListHead, CameraView *view) {
     }
 
     vertex = &f_SpinVertices[g_DrawBufferIndex];
-    for (rowIndex = 0; rowIndex != SPIN_MESH_ROW_COUNT; rowIndex++) {
+    for (row = 0; row != SPIN_MESH_ROW_COUNT; row++) {
         vertex[0].v.ob[AXIS_X] = -SPIN_MESH_HALF_WIDTH;
         vertex[1].v.ob[AXIS_X] = SPIN_MESH_HALF_WIDTH;
         vertex += 2;
@@ -853,7 +853,7 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     u32 frame = osVirtualToPhysical(nuGfxCfb_ptr);
     s32 gameStep;
-    s32 rowIndex;
+    s32 row;
     s32 blockIndex;
 
     void FitStripToScreen(void) {
@@ -932,7 +932,7 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
         g_PauseScreen != PAUSE_SCREEN_FREE_LOOK &&
         sourceTop <= HORIZON_STRIP_BOTTOM &&
         destinationOffset < DYNAMIC_TEXTURE_SIZE) {
-        for (rowIndex = 0; rowIndex != rowCount; rowIndex++) {
+        for (row = 0; row != rowCount; row++) {
             for (blockIndex = 0; blockIndex != MIRROR_BLOCK_COUNT; blockIndex++) {
                 gDPLoadTextureTile(
                     gfx++,
@@ -942,10 +942,10 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
                     SCREEN_WIDTH,
                     0,
                     MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING),
-                    sourceTop + HORIZON_FIRST_ROW + (rowIndex * HORIZON_ROW_SPACING),
+                    sourceTop + HORIZON_FIRST_ROW + (row * HORIZON_ROW_SPACING),
                     MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING) + MIRROR_BLOCK_WIDTH -
                         1,
-                    sourceTop + HORIZON_FIRST_ROW + (rowIndex * HORIZON_ROW_SPACING),
+                    sourceTop + HORIZON_FIRST_ROW + (row * HORIZON_ROW_SPACING),
                     0,
                     G_TX_NOMIRROR | G_TX_WRAP,
                     G_TX_NOMIRROR | G_TX_WRAP,
@@ -957,14 +957,12 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
                 gSPScisTextureRectangle(
                     gfx++,
                     QuarterPixels(blockIndex * MIRROR_BLOCK_WIDTH),
-                    QuarterPixels(DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destinationOffset),
+                    QuarterPixels(DYNAMIC_TEXTURE_SIZE - 1 - row - destinationOffset),
                     QuarterPixels((blockIndex * MIRROR_BLOCK_WIDTH) + MIRROR_BLOCK_WIDTH),
-                    QuarterPixels(DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destinationOffset + 1),
+                    QuarterPixels(DYNAMIC_TEXTURE_SIZE - 1 - row - destinationOffset + 1),
                     G_TX_RENDERTILE,
                     TexelCoordinate(MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING)),
-                    TexelCoordinate(
-                        sourceTop + HORIZON_FIRST_ROW + (rowIndex * HORIZON_ROW_SPACING)
-                    ),
+                    TexelCoordinate(sourceTop + HORIZON_FIRST_ROW + (row * HORIZON_ROW_SPACING)),
                     TEXEL_STEP_ONE,
                     TEXEL_STEP_ONE
                 );
@@ -1208,7 +1206,7 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
 void BuildDynamicTextures(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     u32 frame = osVirtualToPhysical(nuGfxCfb_ptr);
-    s32 rowIndex;
+    s32 row;
     s32 blockIndex;
 
     f_DynamicTextureScroll++;
@@ -1258,7 +1256,7 @@ void BuildDynamicTextures(Gfx **displayListHead) {
         RenderTargetAddress(osVirtualToPhysical(g_MirrorTexture))
     );
     gDPPipeSync(gfx++);
-    for (rowIndex = 0; rowIndex != DYNAMIC_TEXTURE_SIZE; rowIndex++) {
+    for (row = 0; row != DYNAMIC_TEXTURE_SIZE; row++) {
         for (blockIndex = 0; blockIndex != MIRROR_BLOCK_COUNT; blockIndex++) {
             gDPLoadTextureTile(
                 gfx++,
@@ -1268,9 +1266,9 @@ void BuildDynamicTextures(Gfx **displayListHead) {
                 SCREEN_WIDTH,
                 0,
                 MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING),
-                MIRROR_SOURCE_TOP + (rowIndex * MIRROR_ROW_SPACING),
+                MIRROR_SOURCE_TOP + (row * MIRROR_ROW_SPACING),
                 MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING) + MIRROR_BLOCK_WIDTH - 1,
-                MIRROR_SOURCE_TOP + (rowIndex * MIRROR_ROW_SPACING) + MIRROR_ROW_SPACING,
+                MIRROR_SOURCE_TOP + (row * MIRROR_ROW_SPACING) + MIRROR_ROW_SPACING,
                 0,
                 G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP,
@@ -1282,12 +1280,12 @@ void BuildDynamicTextures(Gfx **displayListHead) {
             gSPScisTextureRectangle(
                 gfx++,
                 QuarterPixels(blockIndex * MIRROR_BLOCK_WIDTH),
-                QuarterPixels(DYNAMIC_TEXTURE_SIZE - 1 - rowIndex),
+                QuarterPixels(DYNAMIC_TEXTURE_SIZE - 1 - row),
                 QuarterPixels((blockIndex * MIRROR_BLOCK_WIDTH) + MIRROR_BLOCK_WIDTH),
-                QuarterPixels(DYNAMIC_TEXTURE_SIZE - rowIndex),
+                QuarterPixels(DYNAMIC_TEXTURE_SIZE - row),
                 G_TX_RENDERTILE,
                 TexelCoordinate(MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING)),
-                TexelCoordinate(MIRROR_SOURCE_TOP + (rowIndex * MIRROR_ROW_SPACING)),
+                TexelCoordinate(MIRROR_SOURCE_TOP + (row * MIRROR_ROW_SPACING)),
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
