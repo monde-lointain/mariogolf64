@@ -449,7 +449,7 @@ void StartScorecardTally(s32 layout) {
     s32 ranks[PLAYER_COUNT_MAX];
     s32 scoresToPar[PLAYER_COUNT_MAX];
     s32 holeIndex;
-    SongId song;
+    SongId songId;
     s32 timedHoleCount;
     s32 i;
     s32 j;
@@ -465,27 +465,27 @@ void StartScorecardTally(s32 layout) {
             if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
                 if (g_Players[0].holes[holeIndex].strokeCount <
                     g_Players[1].holes[holeIndex].strokeCount) {
-                    song = SONG_HOLE_WON;
+                    songId = SONG_HOLE_WON;
                 }
                 else if (g_Players[1].holes[holeIndex].strokeCount <
                     g_Players[0].holes[holeIndex].strokeCount) {
-                    song = SONG_HOLE_LOST;
+                    songId = SONG_HOLE_LOST;
                 }
                 else {
                     goto HALVED;
                 }
             }
             else {
-                song = SONG_HOLE_WON;
+                songId = SONG_HOLE_WON;
                 if (g_Players[0].holes[holeIndex].strokeCount ==
                     g_Players[1].holes[holeIndex].strokeCount) {
 HALVED:
 
-                    song = SONG_HOLE_HALVED;
+                    songId = SONG_HOLE_HALVED;
                 }
             }
 
-            PlaySong(song, 0);
+            PlaySong(songId, 0);
             if (g_Players[0].holes[holeIndex].strokeCount ==
                 g_Players[1].holes[holeIndex].strokeCount) {
                 g_Scorecard.holeWinnerIndex = HOLE_WINNER_HALVED;
@@ -510,12 +510,12 @@ HALVED:
                 }
             }
 
-            song = SONG_HOLE_WON;
+            songId = SONG_HOLE_WON;
             if (g_Scorecard.holeWinnerIndex == HOLE_WINNER_HALVED) {
-                song = SONG_HOLE_HALVED;
+                songId = SONG_HOLE_HALVED;
             }
 
-            PlaySong(song, 0);
+            PlaySong(songId, 0);
             break;
         case SCORECARD_LAYOUT_TOURNAMENT:
             g_Scorecard.content.flipTime = 0;
@@ -1426,7 +1426,7 @@ void FreeResultCharacters(void) {
 
 s32 LoadResultCharacters(void) {
     s32 holeIndex = g_Scorecard.content.holeIndex - 1;
-    SongId song;
+    SongId songId;
 
     if (IsCharacterSlotBusy(0) || IsCharacterSlotBusy(1)) {
         FreeCharacterSlot(0);
@@ -1436,22 +1436,24 @@ s32 LoadResultCharacters(void) {
 
     LoadCharacter(0, g_Players[0].characterIndex + CHARACTER_COUNT, g_Players[0].paletteIndex);
     LoadCharacter(1, g_Players[1].characterIndex + CHARACTER_COUNT, g_Players[1].paletteIndex);
-    song = SONG_MATCH_RESULT;
+    songId = SONG_MATCH_RESULT;
     if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-        song = g_Players[0].holes[holeIndex].strokeCount;
-        if (song < g_Players[1].holes[holeIndex].strokeCount) {
-            song = SONG_HOLE_WON;
+        // songId briefly holds player 1's stroke count; a separate variable
+        // breaks the match.
+        songId = g_Players[0].holes[holeIndex].strokeCount;
+        if (songId < g_Players[1].holes[holeIndex].strokeCount) {
+            songId = SONG_HOLE_WON;
         }
         else if (g_Players[1].holes[holeIndex].strokeCount <
             g_Players[0].holes[holeIndex].strokeCount) {
-            song = SONG_HOLE_LOST;
+            songId = SONG_HOLE_LOST;
         }
         else {
-            song = SONG_HOLE_HALVED;
+            songId = SONG_HOLE_HALVED;
         }
     }
 
-    PlaySong(song, 0);
+    PlaySong(songId, 0);
     if (g_Players[0].holes[holeIndex].strokeCount < g_Players[1].holes[holeIndex].strokeCount) {
         SetCharacterAnimation(0, REACTION_ANIMATION_BIRDIE);
         SetCharacterAnimation(1, REACTION_ANIMATION_BOGEY);

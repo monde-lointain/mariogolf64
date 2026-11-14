@@ -193,7 +193,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
     s32 rollSpeed;
     Boolean isSteep;
 
-    void PlayStrokeImpactSound(SoundId sound, BallSpeed fullSpeed, BallSpeed speed) {
+    void PlayStrokeImpactSound(SoundId soundId, BallSpeed fullSpeed, BallSpeed speed) {
         SoundVolume volume = speed * SOUND_FULL_SCALE / fullSpeed;
 
         if (volume >= HIT_SOUND_VOLUME_MIN) {
@@ -202,7 +202,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             }
 
             if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-                PlaySound(sound, g_NextSoundChannel, volume);
+                PlaySound(soundId, g_NextSoundChannel, volume);
             }
         }
     }
@@ -228,7 +228,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
     }
 
     void PlayBillboardHitSound(BillboardCell cell, s32 speed) {
-        void PlayImpactSound(SoundId sound, BallSpeed fullSpeed, BallSpeed speed) {
+        void PlayImpactSound(SoundId soundId, BallSpeed fullSpeed, BallSpeed speed) {
             SoundVolume volume = speed * SOUND_FULL_SCALE / fullSpeed;
 
             if (volume >= HIT_SOUND_VOLUME_MIN) {
@@ -236,7 +236,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     volume = SOUND_FULL_SCALE;
                 }
 
-                PlaySound(sound, g_NextSoundChannel, volume);
+                PlaySound(soundId, g_NextSoundChannel, volume);
             }
         }
 

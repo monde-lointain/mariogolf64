@@ -3121,15 +3121,15 @@ void UpdateTurns(void) {
                         break;
                 }
                 {
-                    SongId song = SONG_ROUND_REPLAY;
+                    SongId songId = SONG_ROUND_REPLAY;
 
                     if (g_GameState.replayKind != REPLAY_KIND_NONE) {
-                        PlaySong(song, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
+                        PlaySong(songId, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
                     }
                     else if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
-                        song = SONG_MINI_GOLF;
+                        songId = SONG_MINI_GOLF;
                         if (g_GameState.isMiniGolf) {
-                            PlaySong(song, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
+                            PlaySong(songId, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
                         }
                         else if (g_GameState.gameMode != GAME_MODE_SPEED_GOLF) {
                             if (g_GameState.gameMode != GAME_MODE_RING_SHOT) {
@@ -3187,73 +3187,73 @@ void UpdateTurns(void) {
                         }
                     }
                     else {
-                        song = SONG_MINI_GOLF;
+                        songId = SONG_MINI_GOLF;
                         if (!g_GameState.isMiniGolf) {
                             switch (g_GameState.gameMode) {
                                 case GAME_MODE_RING_SHOT:
-                                    song = SONG_RING_SHOT;
+                                    songId = SONG_RING_SHOT;
                                     break;
                                 case GAME_MODE_SPEED_GOLF:
-                                    song = SONG_SPEED_GOLF;
+                                    songId = SONG_SPEED_GOLF;
                                     break;
                                 case GAME_MODE_TOURNAMENT:
                                     switch (g_GameState.courseIndex) {
                                         case COURSE_TOAD_HIGHLANDS:
-                                            song = SONG_TOURNAMENT_TOAD_HIGHLANDS;
+                                            songId = SONG_TOURNAMENT_TOAD_HIGHLANDS;
                                             break;
                                         case COURSE_KOOPA_PARK:
-                                            song = SONG_TOURNAMENT_KOOPA_PARK;
+                                            songId = SONG_TOURNAMENT_KOOPA_PARK;
                                             break;
                                         case COURSE_SHY_GUY_DESERT:
-                                            song = SONG_TOURNAMENT_SHY_GUY_DESERT;
+                                            songId = SONG_TOURNAMENT_SHY_GUY_DESERT;
                                             break;
                                         case COURSE_YOSHIS_ISLAND:
-                                            song = SONG_TOURNAMENT_YOSHIS_ISLAND;
+                                            songId = SONG_TOURNAMENT_YOSHIS_ISLAND;
                                             break;
                                         case COURSE_BOO_VALLEY:
-                                            song = SONG_TOURNAMENT_BOO_VALLEY;
+                                            songId = SONG_TOURNAMENT_BOO_VALLEY;
                                             break;
                                         case COURSE_MARIOS_STAR:
                                         default:
-                                            song = SONG_TOURNAMENT_MARIOS_STAR;
+                                            songId = SONG_TOURNAMENT_MARIOS_STAR;
                                             break;
                                     }
                                     break;
                                 case GAME_MODE_TRAINING:
-                                    song = SONG_TRAINING;
+                                    songId = SONG_TRAINING;
                                     break;
                                 default:
                                     if (GetLastHoleIndex() == g_GameState.holeIndex &&
                                         g_GameState.playerCount != 1) {
-                                        song = SONG_ROUND_FINAL;
+                                        songId = SONG_ROUND_FINAL;
                                     }
                                     else if (IsOneOnOneMatchMode(g_GameState.gameMode) &&
                                         GetMatchStanding(0, 1) != MATCH_STANDING_OPEN) {
-                                        song = SONG_ROUND_FINAL;
+                                        songId = SONG_ROUND_FINAL;
                                     }
                                     else if (IsYoshiAndDonkeyKongRound()) {
-                                        song = SONG_YOSHI_AND_DONKEY_KONG;
+                                        songId = SONG_YOSHI_AND_DONKEY_KONG;
                                     }
                                     else {
                                         switch (g_GameState.courseIndex) {
                                             case COURSE_TOAD_HIGHLANDS:
-                                                song = SONG_COURSE_TOAD_HIGHLANDS;
+                                                songId = SONG_COURSE_TOAD_HIGHLANDS;
                                                 break;
                                             case COURSE_KOOPA_PARK:
-                                                song = SONG_COURSE_KOOPA_PARK;
+                                                songId = SONG_COURSE_KOOPA_PARK;
                                                 break;
                                             case COURSE_SHY_GUY_DESERT:
-                                                song = SONG_COURSE_SHY_GUY_DESERT;
+                                                songId = SONG_COURSE_SHY_GUY_DESERT;
                                                 break;
                                             case COURSE_YOSHIS_ISLAND:
-                                                song = SONG_COURSE_YOSHIS_ISLAND;
+                                                songId = SONG_COURSE_YOSHIS_ISLAND;
                                                 break;
                                             case COURSE_BOO_VALLEY:
-                                                song = SONG_COURSE_BOO_VALLEY;
+                                                songId = SONG_COURSE_BOO_VALLEY;
                                                 break;
                                             case COURSE_MARIOS_STAR:
                                             default:
-                                                song = SONG_COURSE_MARIOS_STAR;
+                                                songId = SONG_COURSE_MARIOS_STAR;
                                                 break;
                                         }
                                     }
@@ -3261,7 +3261,7 @@ void UpdateTurns(void) {
                             }
                         }
 
-                        PlaySong(song, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
+                        PlaySong(songId, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
                     }
                 }
 
@@ -3802,7 +3802,7 @@ void UpdateTurns(void) {
                 if ((f_ShotSource != SHOT_SOURCE_PLAYER) ?
                         (g_ScriptedShot.powerGaugeFrame == g_CurrentShot.gaugeFrame) :
                         (g_TurnController.pressedButtons & A_BUTTON)) {
-                    SoundId sound;
+                    SoundId soundId;
 
                     g_CurrentShot.powerGaugeFrame = g_CurrentShot.gaugeFrame;
                     f_ShotLaunch.power = GetGaugeFramePower(g_CurrentShot.gaugeFrame);
@@ -3828,19 +3828,19 @@ void UpdateTurns(void) {
                             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
                         }
 
-                        sound = SOUND_IMPACT_OFF_MARK;
-                        PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
+                        soundId = SOUND_IMPACT_OFF_MARK;
+                        PlaySound(soundId, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
                     }
                     else {
                         nextState = PLAYER_STATE_SETTING_IMPACT;
                         if (f_ShotLaunch.power == LAUNCH_POWER_MAX) {
                             StartShotEffect(SHOT_EFFECT_MAX_POWER);
-                            sound = SOUND_IMPACT_ON_MARK;
-                            PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
+                            soundId = SOUND_IMPACT_ON_MARK;
+                            PlaySound(soundId, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
                         }
                         else {
-                            sound = SOUND_IMPACT_OFF_MARK;
-                            PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
+                            soundId = SOUND_IMPACT_OFF_MARK;
+                            PlaySound(soundId, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
                         }
                     }
                 }

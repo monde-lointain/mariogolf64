@@ -4443,7 +4443,7 @@ void HandleShotModeInput(void) {
                           g_CurrentShot.ballPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
                       ) *
         YARDS_PER_UNIT;
-    SoundId sound;
+    SoundId soundId;
 
     if ((g_MenuControllerData[g_CurrentShot.controllerIndex].button & B_BUTTON) &&
         IsShotModeChangeDone()) {
@@ -4458,23 +4458,23 @@ void HandleShotModeInput(void) {
                 g_CurrentShot.shotMode = PUTT_MODE_MIDDLE;
             }
 
-            sound = SOUND_LOOK_DOWN_RANGE;
-            PlaySound(sound, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
+            soundId = SOUND_LOOK_DOWN_RANGE;
+            PlaySound(soundId, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
         }
         else if (IsFartherThan(cupDistance, APPROACH_SHOT_DISTANCE)) {
             if (g_CurrentShot.shotMode == SHOT_MODE_NORMAL) {
-                sound = SOUND_POWER_SHOT_REFUSED;
+                soundId = SOUND_POWER_SHOT_REFUSED;
                 if (g_CurrentShot.powerShotCount != 0) {
                     g_CurrentShot.shotMode = SHOT_MODE_POWER;
-                    sound = SOUND_LOOK_DOWN_RANGE;
+                    soundId = SOUND_LOOK_DOWN_RANGE;
                 }
             }
             else {
                 g_CurrentShot.shotMode = SHOT_MODE_NORMAL;
-                sound = SOUND_LOOK_DOWN_RANGE;
+                soundId = SOUND_LOOK_DOWN_RANGE;
             }
 
-            PlaySound(sound, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
+            PlaySound(soundId, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
         }
         else {
             PlaySound(SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
