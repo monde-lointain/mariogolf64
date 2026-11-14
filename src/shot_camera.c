@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-#include "hole_setup.h"
-
 #define WIDENS_CHOSEN_OPTIONS
 
 #include "ball_simulation.h"
@@ -27,6 +25,7 @@
 #include "hole_conditions.h"
 #include "hole_display.h"
 #include "hole_objects.h"
+#include "hole_setup.h"
 #include "language.h"
 #include "main.h"
 #include "math_util.h"

@@ -5,8 +5,6 @@
 #include <string.h>
 #include <ultra64.h>
 
-#include "hole_setup.h"
-
 #define WIDENS_CHOSEN_OPTIONS
 #define WIDENS_CHOSEN_BEST_SHOT
 
@@ -36,6 +34,7 @@
 #include "hole_conditions.h"
 #include "hole_display.h"
 #include "hole_loader.h"
+#include "hole_setup.h"
 #include "language.h"
 #include "main.h"
 #include "math_util.h"

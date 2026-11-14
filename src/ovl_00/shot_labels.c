@@ -2,8 +2,6 @@
 
 #include <ultra64.h>
 
-#include "hole_setup.h"
-
 #define CALLS_CENTERED_SHADOWED_TEXT_UNPROTOTYPED
 
 #include "address.h"
@@ -18,6 +16,7 @@
 #include "game_state.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
+#include "hole_setup.h"
 #include "math_util.h"
 #include "overlay_manager.h"
 #include "play.h"

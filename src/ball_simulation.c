@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-#include "hole_setup.h"
-
 #define WIDENS_AIM_SLOPE_ANGLE
 
 #include "ball_physics.h"
@@ -19,6 +17,7 @@
 #include "game_state.h"
 #include "geometry.h"
 #include "hole_objects.h"
+#include "hole_setup.h"
 #include "hole_triangles.h"
 #include "language.h"
 #include "math_util.h"
