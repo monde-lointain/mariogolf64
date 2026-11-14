@@ -134,7 +134,7 @@ void DrawShotLabels(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 labelMode;
     s32 corner;
-    s32 tries;
+    s32 cornerOffset;
 
     s32 playerIndex;
     s32 earlierIndex;
@@ -317,10 +317,10 @@ void DrawShotLabels(Gfx **displayListHead) {
             f_ShotLabels[playerIndex].y = point.y + f_TagOffsetsY[f_ShotLabels[playerIndex].corner];
             f_ShotLabels[playerIndex].depth = point.depth;
             if (labelMode == SHOT_LABELS_OVERHEAD) {
-                for (tries = 0; tries != CORNER_COUNT; tries++) {
+                for (cornerOffset = 0; cornerOffset != CORNER_COUNT; cornerOffset++) {
                     s32 overlaps = FALSE;
 
-                    corner = (f_ShotLabels[playerIndex].corner + tries) % CORNER_COUNT;
+                    corner = (f_ShotLabels[playerIndex].corner + cornerOffset) % CORNER_COUNT;
                     for (earlierIndex = 0; earlierIndex != playerIndex; earlierIndex++) {
                         if (f_ShotLabels[earlierIndex].corner != NO_CORNER &&
                             IsTagOverlapping(
@@ -341,10 +341,11 @@ void DrawShotLabels(Gfx **displayListHead) {
                 continue;
             }
             else {
-                for (tries = 0; tries != UPPER_CORNER_COUNT; tries++) {
+                for (cornerOffset = 0; cornerOffset != UPPER_CORNER_COUNT; cornerOffset++) {
                     s32 overlaps = FALSE;
 
-                    corner = ((f_ShotLabels[playerIndex].corner + tries) % UPPER_CORNER_COUNT) +
+                    corner =
+                        ((f_ShotLabels[playerIndex].corner + cornerOffset) % UPPER_CORNER_COUNT) +
                         CORNER_UPPER_LEFT;
                     if (cup.state == SPOT_SHOWN &&
                         IsTagOverlapping(
