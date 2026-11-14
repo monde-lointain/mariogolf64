@@ -201,12 +201,12 @@ void HideGameBoyCharacters(void) {
     f_SavedGameBoySlots[3] = fourthSlot;
 }
 
-s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
+s32 MoveGridCursor(s32 playerIndex, u8 direction, u8 canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
     MenuMemory *memory = GetMenuMemory();
-    s16 oldColumn = memory->characterColumns[playerNumber];
-    s16 oldRow = memory->characterRows[playerNumber];
+    s16 oldColumn = memory->characterColumns[playerIndex];
+    s16 oldRow = memory->characterRows[playerIndex];
     s16 column = oldColumn;
     s16 row = oldRow;
     u16 slot;
@@ -253,8 +253,8 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     }
     while (g_CharacterGrid[row][column] < 0 &&
         (g_CharacterGrid[row][column] < CHOOSABLE_MARK_LIMIT && canChooseMarked == TRUE) == FALSE);
-    memory->characterColumns[playerNumber] = column;
-    memory->characterRows[playerNumber] = row;
+    memory->characterColumns[playerIndex] = column;
+    memory->characterRows[playerIndex] = row;
     if (column != oldColumn || row != oldRow) {
         character = g_CharacterGrid[oldRow][oldColumn];
         f_FaceFrame = 0;
@@ -288,13 +288,13 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     return -(column == oldColumn && row == oldRow);
 }
 
-s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
+s32 MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, u8 canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
     MenuMemory *memory = GetMenuMemory();
     s32 retryCount = 0;
-    s16 oldRow = memory->characterRows[playerNumber];
-    s16 oldColumn = memory->characterColumns[playerNumber];
+    s16 oldRow = memory->characterRows[playerIndex];
+    s16 oldColumn = memory->characterColumns[playerIndex];
     s32 column = oldColumn;
     s32 row = oldRow;
     u16 slot;
@@ -362,8 +362,8 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
         retryCount++;
     }
 
-    memory->characterColumns[playerNumber] = column;
-    memory->characterRows[playerNumber] = row;
+    memory->characterColumns[playerIndex] = column;
+    memory->characterRows[playerIndex] = row;
     if (column != oldColumn || row != oldRow) {
         character = g_CharacterGrid[oldRow][oldColumn];
         f_FaceFrame = 0;
@@ -1353,7 +1353,7 @@ static inline s32 ByteAddress(s8 *byte) {
 
 void DrawCharacterSelect(Gfx **displayListHead, u8 isSinglePlayer) {
     Gfx *gfx = *displayListHead;
-    s32 playerNumber;
+    s32 playerIndex;
     s16 column;
     s16 slot;
     s16 choiceIndex;
@@ -1389,18 +1389,18 @@ void DrawCharacterSelect(Gfx **displayListHead, u8 isSinglePlayer) {
 
     gDPPipeSync(gfx++);
     if (isSinglePlayer == FALSE) {
-        playerNumber = g_ChoosingPlayerIndex;
-        if (playerNumber >= g_ChosenPlayerCount) {
-            playerNumber = g_ChosenPlayerCount - 1;
+        playerIndex = g_ChoosingPlayerIndex;
+        if (playerIndex >= g_ChosenPlayerCount) {
+            playerIndex = g_ChosenPlayerCount - 1;
         }
     }
     else {
-        playerNumber = 1;
+        playerIndex = 1;
     }
 
-    column = *(s8 *)(ByteAddress(&GetMenuMemory()->characterColumns[1]) + (s16)playerNumber - 1);
+    column = *(s8 *)(ByteAddress(&GetMenuMemory()->characterColumns[1]) + (s16)playerIndex - 1);
     slot = g_CharacterGrid[*(s8 *)(ByteAddress(&GetMenuMemory()->characterRows[1]) +
-        (s16)playerNumber - 1)][column];
+        (s16)playerIndex - 1)][column];
     if (slot < CHOOSABLE_MARK_LIMIT) {
         choiceIndex = slot + MARKED_CHARACTER_OFFSET;
     }
