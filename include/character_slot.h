@@ -235,7 +235,7 @@ typedef struct CharacterSlot {
     s8 playsRandomTextureAnimation;
     s8 randomTextureAnimationDelay;
     TextureAnimationState textureAnimations[TEXTURE_ANIMATION_COUNT];
-    s8 usesFrontCulling;
+    Boolean8 usesFrontCulling;
     s8 reusesLastMatrices;
 } CharacterSlot;
 

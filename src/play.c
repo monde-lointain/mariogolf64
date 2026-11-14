@@ -198,7 +198,7 @@ s32 GetGaugeFramePower(s32 gaugeFrame) {
     return (gaugeFrame * LAUNCH_POWER_MAX) / GAUGE_FULL_FRAME;
 }
 
-s32 MarkUsableClubs(s32 unused UNUSED, s16 *clubs, s8 *isUsable) {
+s32 MarkUsableClubs(s32 unused UNUSED, s16 *clubs, Boolean8 *isUsable) {
     s32 clubSlot;
 
     for (clubSlot = 0; clubSlot < CLUB_SET_SIZE; clubSlot++) {
@@ -657,7 +657,7 @@ void LoadRingShotRecord(RingShotRecord *record) {
     SetUpPlayers();
 }
 
-void SetRingShotCleared(s8 isCleared) {
+void SetRingShotCleared(Boolean8 isCleared) {
     f_IsRingShotCleared = isCleared;
 }
 

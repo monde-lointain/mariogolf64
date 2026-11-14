@@ -99,10 +99,16 @@ void ResetSavedGameControllers(void);
 #define NO_CONTROLLER (-1)
 #define COMPUTER_CONTROLLER MAXCONTROLLERS
 
-s16 FindNextReplaySlot(s8 startSlot, u8 isForward);
+s16 FindNextReplaySlot(s8 startSlot, UBoolean8 isForward);
 s16 GetChosenReplaySlot(void);
 s32 GetOpenRingShotCourseCount(void);
-void DrawCourseLabel(Gfx **displayListHead, s32 courseIndex, s32 left, s32 top, u8 showsCourseWord);
+void DrawCourseLabel(
+    Gfx **displayListHead,
+    s32 courseIndex,
+    s32 left,
+    s32 top,
+    UBoolean8 showsCourseWord
+);
 void DrawRingShotRowIcon(Gfx **displayListHead, s32 imageIndex, s32 left, s32 top);
 
 static s32 f_RingShotArrowFrame = 0;
@@ -988,7 +994,7 @@ void LoadRingShotRecordFaces(void) {
     }
 }
 
-s16 FindNextReplaySlot(s8 startSlot, u8 isForward) {
+s16 FindNextReplaySlot(s8 startSlot, UBoolean8 isForward) {
     s32 slot = startSlot;
     s32 step;
     s32 tryCount;
@@ -1039,7 +1045,7 @@ void DrawCourseLabel(
     s32 courseIndex,
     s32 left,
     s32 top,
-    u8 showsCourseWord
+    UBoolean8 showsCourseWord
 ) {
     Gfx *gfx = *displayListHead;
 

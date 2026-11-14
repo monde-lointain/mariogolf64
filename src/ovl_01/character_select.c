@@ -97,7 +97,7 @@ typedef struct TagOffset {
     s8 y;
 } TagOffset;
 
-void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer);
+void DrawGridFaces(Gfx **displayListHead, UBoolean8 isSinglePlayer);
 void DrawCharacterBoard(Gfx **displayListHead);
 void DrawPlayerTags(Gfx **displayListHead, u8 tagMode);
 void DrawComputerIcon(Gfx **displayListHead, s32 unused);
@@ -199,7 +199,7 @@ void HideGameBoyCharacters(void) {
     f_SavedGameBoySlots[3] = fourthSlot;
 }
 
-s32 MoveGridCursor(s32 playerIndex, u8 direction, u8 canChooseMarked) {
+s32 MoveGridCursor(s32 playerIndex, u8 direction, UBoolean8 canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
     MenuMemory *memory = GetMenuMemory();
@@ -290,7 +290,7 @@ s32 MoveGridCursor(s32 playerIndex, u8 direction, u8 canChooseMarked) {
     return -(column == oldColumn && row == oldRow);
 }
 
-s32 MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, u8 canChooseMarked) {
+s32 MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, UBoolean8 canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
     MenuMemory *memory = GetMenuMemory();
@@ -1362,7 +1362,7 @@ static inline s32 ByteAddress(s8 *byte) {
     return (s32)byte;
 }
 
-void DrawCharacterSelect(Gfx **displayListHead, u8 isSinglePlayer) {
+void DrawCharacterSelect(Gfx **displayListHead, UBoolean8 isSinglePlayer) {
     Gfx *gfx = *displayListHead;
     s32 playerIndex;
     s16 column;
@@ -1503,7 +1503,7 @@ s32 GetUnusedPalette(s32 choiceIndex);
 #define HIDDEN_MARK_LIMIT (-10)
 #define FACE_FRAME_DURATION 4
 
-void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
+void DrawGridFaces(Gfx **displayListHead, UBoolean8 isSinglePlayer) {
     EncodedAsset asset;
     AssetFile file;
     Gfx *gfx = *displayListHead;

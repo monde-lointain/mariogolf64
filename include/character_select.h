@@ -22,6 +22,6 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 void LoadCharacterSelectBuffer(void *buffer, s16 bufferKind);
 void PlaceRivalCursor(void);
 void LoadCharacterFaces(void);
-void DrawCharacterSelect(Gfx **displayListHead, u8 isSinglePlayer);
+void DrawCharacterSelect(Gfx **displayListHead, UBoolean8 isSinglePlayer);
 
 #endif

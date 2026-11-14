@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "compiler.h"
+#include "language.h"
 
 enum PlayerStatsBuffer {
     PLAYER_STATS_BUFFER_BET_ICONS = 1,
@@ -37,9 +38,19 @@ enum ScoreLabelBuffer {
 void LoadPlayerStatsBuffer(void *buffer, s16 bufferKind);
 void ApplyBetPreset(s32 requestedPreset);
 void UpdateBetSettings(void);
-void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled);
+void DrawBetSettings(
+    Gfx **displayListHead,
+    s32 slide,
+    UBoolean8 isSlideReversed,
+    UBoolean8 isSettled
+);
 NO_RESULT UpdateHandicaps(s32 firstPlayerIndex, s32 playerCount);
-void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8 canShowPrompt);
+void DrawHandicaps(
+    Gfx **displayListHead,
+    s32 slide,
+    UBoolean8 isVerticalSlideReversed,
+    UBoolean8 canShowPrompt
+);
 s32 SlideBrickWall(Gfx **displayListHead, u8 slide);
 void LoadBestShotsCourseIcons(void **buffers);
 void LoadScoreLabelBuffer(void *buffer, s16 bufferKind);

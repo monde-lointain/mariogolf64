@@ -111,7 +111,7 @@ s32 GetGaugeFill(void);
 s32 GetRecordedScoreKind(s32 strokes);
 void LoadBestShotReplay(PlayRecord *record);
 void LoadRingShotRecord(RingShotRecord *record);
-s32 MarkUsableClubs(s32 unused, s16 *clubs, s8 *isUsable);
-void SetRingShotCleared(s8 isCleared);
+s32 MarkUsableClubs(s32 unused, s16 *clubs, Boolean8 *isUsable);
+void SetRingShotCleared(Boolean8 isCleared);
 
 #endif

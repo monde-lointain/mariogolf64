@@ -126,7 +126,7 @@ typedef struct SaveCopyLocation {
 } SaveCopyLocation;
 
 SaveData *GetSaveData(void);
-void TransferSaveData(SaveData *save, u8 isWrite);
+void TransferSaveData(SaveData *save, UBoolean8 isWrite);
 void ResetSaveData(void);
 void InitSaveData(void);
 void RecordDisplayListLength(u32 commandCount);

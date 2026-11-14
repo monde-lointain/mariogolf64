@@ -132,8 +132,8 @@ typedef struct GridCell {
     s16 row;
 } GridCell;
 
-s32 ReadSaveCopies(SaveData *save, u8 isInSram);
-s32 WriteSaveCopies(SaveData *save, u8 isInSram);
+s32 ReadSaveCopies(SaveData *save, UBoolean8 isInSram);
+s32 WriteSaveCopies(SaveData *save, UBoolean8 isInSram);
 
 s8 g_LoadedMenuScreen = NO_MENU_SCREEN;
 s8 g_PlayerControllerIndices[PLAYER_COUNT_MAX] =
@@ -2858,7 +2858,7 @@ void SyncSaveOptions(SaveData *save, Boolean isWrite, s32 readResult) {
     }
 }
 
-void TransferSaveData(SaveData *save, u8 isWrite) {
+void TransferSaveData(SaveData *save, UBoolean8 isWrite) {
     UBoolean8 isSramSelected;
     UBoolean8 isInSram;
     s32 readResult;
@@ -2878,7 +2878,7 @@ void TransferSaveData(SaveData *save, u8 isWrite) {
     }
 }
 
-s32 ReadSaveCopies(SaveData *save, u8 isInSram) {
+s32 ReadSaveCopies(SaveData *save, UBoolean8 isInSram) {
     u8 unusedBuffer[0x90] UNUSED;
     u8 checkBuffer[0x40];
     SaveCheck *check;
@@ -2929,7 +2929,7 @@ s32 ReadSaveCopies(SaveData *save, u8 isInSram) {
     return (unmarkedCount == SAVE_COPY_COUNT) ? SAVE_READ_NEVER_WRITTEN : SAVE_READ_FAILED;
 }
 
-s32 WriteSaveCopies(SaveData *save, u8 isInSram) {
+s32 WriteSaveCopies(SaveData *save, UBoolean8 isInSram) {
     u8 checkBuffer[0xC0];
     SaveCheck *check;
     u16 crc;

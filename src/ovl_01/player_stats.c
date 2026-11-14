@@ -684,7 +684,12 @@ void UpdateBetSettings(void) {
 #define BET_LABEL_CENTER_X (SCREEN_WIDTH / 2)
 #define BET_LABEL_TOP 156
 
-void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled) {
+void DrawBetSettings(
+    Gfx **displayListHead,
+    s32 slide,
+    UBoolean8 isSlideReversed,
+    UBoolean8 isSettled
+) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
     s16 i;
@@ -1156,7 +1161,12 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
 #define HANDICAP_PROMPT_Y 200
 #define MESSAGE_HANDICAP_PROMPT 0x1D
 
-void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8 canShowPrompt) {
+void DrawHandicaps(
+    Gfx **displayListHead,
+    s32 slide,
+    UBoolean8 isVerticalSlideReversed,
+    UBoolean8 canShowPrompt
+) {
     Gfx *gfx = *displayListHead;
     s32 labelSlide;
     MenuMemory *memory = GetMenuMemory();
@@ -1311,7 +1321,7 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_StatsNamePlate)));
     offsetY = slide;
-    if (reverseVerticalSlide) {
+    if (isVerticalSlideReversed) {
         offsetY = -slide;
     }
 

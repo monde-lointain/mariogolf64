@@ -5469,7 +5469,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     s32 texelStep;
     f32 bobOffset;
     s32 wheelShiftX = 0;
-    u8 areCharactersDrawn;
+    UBoolean8 areCharactersDrawn;
     s32 labelIndex;
     s32 labelX;
     void *image;

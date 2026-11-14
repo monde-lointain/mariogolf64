@@ -2920,7 +2920,7 @@ void UpdateTurns(void) {
         }
     }
 
-    void SetRoundHudPartsShown(s8 isShown) {
+    void SetRoundHudPartsShown(Boolean8 isShown) {
         g_RoundHud.isWindIndicatorShown = isShown;
         g_RoundHud.isHoleInfoShown = isShown;
         g_RoundHud.isLieIconShown = isShown;
