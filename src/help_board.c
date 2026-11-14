@@ -27,7 +27,7 @@
 #define HAND_SWING 8
 #define UNUSED_SWING 8
 #define UNUSED_SWING_STEP 2
-#define ARROW_COUNT 2
+#define TOPIC_ARROW_COUNT 2
 #define ARROW_LEFT 152
 #define ARROW_UP_TOP 54
 #define ARROW_DOWN_TOP 200
@@ -447,7 +447,7 @@ void DrawHelpBoard(Gfx **displayListHead) {
 
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_ArrowImages)));
-        for (index = 0; index != ARROW_COUNT; index++) {
+        for (index = 0; index != TOPIC_ARROW_COUNT; index++) {
             if (IsTopicArrowShown(index)) {
                 gDPLoadTextureTile_4b(
                     gfx++,
