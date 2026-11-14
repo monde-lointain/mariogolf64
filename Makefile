@@ -122,6 +122,8 @@ ROM         := $(BUILD_DIR)/$(TARGET).z64
 ROM_SIZE    := 0x2000000
 # Where the asset archive's assets are split to, one file each
 ARCHIVE_DIR := assets/asset_archive
+# The message file's messages as text, a message a line
+MESSAGE_TEXT := assets/text/messages.txt
 ELF         := $(BUILD_DIR)/$(TARGET).elf
 MAP         := $(BUILD_DIR)/$(TARGET).map
 
@@ -238,6 +240,7 @@ extract:
 	$(PYTHON) -m splat split $(SPLAT_YAML)
 	$(PYTHON) tools/extract_textures.py
 	$(PYTHON) tools/asset_archive.py split assets/asset_archive.bin $(ARCHIVE_DIR)
+	$(PYTHON) tools/messages.py decode assets/text/messages.bin $(MESSAGE_TEXT)
 
 setup: tools extract
 
@@ -369,7 +372,11 @@ $(BUILD_DIR)/%.bin.o: %.bin
 $(BUILD_DIR)/assets/asset_archive.bin: $(wildcard $(ARCHIVE_DIR)/*.bin) tools/asset_archive.py
 	$(PYTHON) tools/asset_archive.py pack $(ARCHIVE_DIR) $@
 
-$(BUILD_DIR)/assets/asset_archive.bin.o: $(BUILD_DIR)/assets/asset_archive.bin
+# The message file is encoded from the text that messages.py decodes it to
+$(BUILD_DIR)/assets/text/messages.bin: $(MESSAGE_TEXT) tools/messages.py tools/asset_archive.py
+	$(PYTHON) tools/messages.py encode $< $@
+
+$(BUILD_DIR)/assets/asset_archive.bin.o $(BUILD_DIR)/assets/text/messages.bin.o: %.o: %
 	$(OBJCOPY) -I binary -O $(BIN_FORMAT) -B mips $< $@
 
 # Textures in C data come from PNGs that extract_textures.py writes to

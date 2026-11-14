@@ -25,7 +25,7 @@ ARCHIVE_ALIGNMENT = 16
 ASSET_NAME_DIGITS = 3
 ASSET_SUFFIX = ".bin"
 # The original's writer filled a buffer of this many bytes and wrote it out
-# each time it was full. It padded the archive to ARCHIVE_ALIGNMENT without
+# each time it was full. It padded a file to ARCHIVE_ALIGNMENT without
 # clearing the buffer, so the padding repeats the bytes this far before it.
 WRITE_BUFFER_SIZE = 0x2000
 
@@ -36,6 +36,15 @@ ARGUMENT_COUNT = 4
 def padding_to(size: int, alignment: int) -> int:
     """Return how many bytes bring SIZE up to a multiple of ALIGNMENT."""
     return -size % alignment
+
+
+def pad_as_written(data: bytes) -> bytes:
+    """Return DATA padded to ARCHIVE_ALIGNMENT as the original's writer did."""
+    padded = bytearray(data)
+    for _ in range(padding_to(len(data), ARCHIVE_ALIGNMENT)):
+        stale = len(padded) - WRITE_BUFFER_SIZE
+        padded.append(padded[stale] if stale >= 0 else 0)
+    return bytes(padded)
 
 
 def read_entry(archive: bytes, asset_id: int) -> tuple[int, int]:
@@ -80,11 +89,7 @@ def pack(assets: list[bytes]) -> bytes:
         body += asset
         body += bytes(padding_to(len(asset), ASSET_ALIGNMENT))
 
-    archive = table + body
-    for _ in range(padding_to(len(archive), ARCHIVE_ALIGNMENT)):
-        stale = len(archive) - WRITE_BUFFER_SIZE
-        archive.append(archive[stale] if stale >= 0 else 0)
-    return bytes(archive)
+    return pad_as_written(bytes(table + body))
 
 
 def main() -> None:
