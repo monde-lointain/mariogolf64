@@ -2016,9 +2016,19 @@ Boolean IsMetalMarioUnlocked(void) {
     return badgeCount == COURSE_COUNT * COURSE_HOLE_COUNT;
 }
 
+// The cells the unlockable characters take once earned.
+#define MAPLE_GRID_ROW 0
+#define MAPLE_GRID_COLUMN 5
+#define DONKEY_KONG_GRID_ROW 1
+#define DONKEY_KONG_GRID_COLUMN 5
+#define METAL_MARIO_GRID_ROW 1
+#define METAL_MARIO_GRID_COLUMN 6
+#define BOWSER_GRID_ROW 0
+#define BOWSER_GRID_COLUMN 6
+
 // playerCount is reused to count a character's wins and then to hold an
-// imported character's ID; giving each use its own variable breaks the
-// match.
+// imported character's ID, and characterIndex later holds a grid entry;
+// giving each use its own variable breaks the match.
 void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     EncodedAsset asset;
     AssetFile file;
@@ -2075,15 +2085,17 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     }
 
     if (IsMapleUnlocked()) {
-        g_CharacterGrid[0][5] = CHARACTER_CHOICE_MAPLE;
+        g_CharacterGrid[MAPLE_GRID_ROW][MAPLE_GRID_COLUMN] = CHARACTER_CHOICE_MAPLE;
     }
 
     if (IsDonkeyKongUnlocked()) {
-        g_CharacterGrid[1][5] = CHARACTER_CHOICE_DONKEY_KONG;
+        g_CharacterGrid[DONKEY_KONG_GRID_ROW][DONKEY_KONG_GRID_COLUMN] =
+            CHARACTER_CHOICE_DONKEY_KONG;
     }
 
     if (IsMetalMarioUnlocked()) {
-        g_CharacterGrid[1][6] = CHARACTER_CHOICE_METAL_MARIO;
+        g_CharacterGrid[METAL_MARIO_GRID_ROW][METAL_MARIO_GRID_COLUMN] =
+            CHARACTER_CHOICE_METAL_MARIO;
     }
 
     PlaceImportedCharacters();
@@ -2097,14 +2109,15 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     }
 
     if (index == MARKABLE_CHARACTER_COUNT) {
-        if (g_CharacterGrid[0][6] != CHARACTER_CHOICE_BOWSER) {
-            g_CharacterGrid[0][6] = CHARACTER_CHOICE_BOWSER - MARKED_CHARACTER_OFFSET;
+        if (g_CharacterGrid[BOWSER_GRID_ROW][BOWSER_GRID_COLUMN] != CHARACTER_CHOICE_BOWSER) {
+            g_CharacterGrid[BOWSER_GRID_ROW][BOWSER_GRID_COLUMN] =
+                CHARACTER_CHOICE_BOWSER - MARKED_CHARACTER_OFFSET;
         }
     }
 
     if ((u8)skipsImportedFaces != TRUE) {
         for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
-            characterIndex = g_CharacterGrid[2][index];
+            characterIndex = g_CharacterGrid[GAME_BOY_CHARACTER_ROW][index];
             if (characterIndex >= 0) {
                 playerCount = g_ImportedCharacters[index].characterIndex;
                 OpenEncodedAsset(g_FaceAnimationAssets[playerCount][0], &asset);
