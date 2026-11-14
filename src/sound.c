@@ -64,7 +64,7 @@ SoundChannel g_NextSoundChannel = 0;
 static s32 f_SongHandle = NO_HANDLE;
 static s32 f_UnusedWordAfterSongHandle UNUSED = -1;
 static s32 f_SoundHandles[SOUND_CHANNEL_COUNT] = {NO_HANDLE};
-static u32 f_SoundFadeFrameCounts[SOUND_CHANNEL_COUNT] = {0};
+static u32 f_SoundFadeFramesLeft[SOUND_CHANNEL_COUNT] = {0};
 static f32 f_SoundVolumes[SOUND_CHANNEL_COUNT] = {0.0f};
 static s32 f_SongHandleCopy = NO_HANDLE;
 static s32 f_SoundHandleCopies[SOUND_CHANNEL_COUNT] = {NO_HANDLE};
@@ -420,7 +420,7 @@ void SetSoundReverb(SoundChannel channel, SoundReverb reverb) {
 }
 
 void FadeOutSound(SoundChannel channel, u32 frameCount) {
-    f_SoundFadeFrameCounts[channel] = frameCount;
+    f_SoundFadeFramesLeft[channel] = frameCount;
 }
 
 void SetSoundTempo(SoundChannel channel, s32 tempo) {
@@ -561,12 +561,12 @@ void SetSoundFrequencyOffset(SoundChannel channel, f32 offset) {
 }
 
 NO_RESULT UpdateAudio(void) {
-    u32 frame;
-    u32 frameCount;
+    u32 audioFrame;
+    u32 fadeFramesLeft;
     SoundChannel channel;
 
-    frame = MusGetFrameCount();
-    if (frame == f_LastAudioFrame) {
+    audioFrame = MusGetFrameCount();
+    if (audioFrame == f_LastAudioFrame) {
         osSyncPrintf(
             "Ouch!%d,%d,%d,%d!!!!!!!!!!!!!!!!\n",
             f_PendingSongChange.state,
@@ -577,13 +577,13 @@ NO_RESULT UpdateAudio(void) {
         return;
     }
 
-    f_LastAudioFrame = frame;
+    f_LastAudioFrame = audioFrame;
     for (channel = 0; channel != SOUND_CHANNEL_COUNT; channel++) {
-        frameCount = f_SoundFadeFrameCounts[channel];
-        if (frameCount != 0) {
-            f_SoundFadeFrameCounts[channel] = frameCount - 1;
+        fadeFramesLeft = f_SoundFadeFramesLeft[channel];
+        if (fadeFramesLeft != 0) {
+            f_SoundFadeFramesLeft[channel] = fadeFramesLeft - 1;
             f_SoundVolumes[channel] =
-                f_SoundVolumes[channel] * (f32)(frameCount - 1) / (f32)frameCount;
+                f_SoundVolumes[channel] * (f32)(fadeFramesLeft - 1) / (f32)fadeFramesLeft;
             SetSoundVolume(channel, f_SoundVolumes[channel]);
         }
     }
@@ -744,7 +744,7 @@ void InitAudio(void) {
     );
     for (channel = 0; channel < SOUND_CHANNEL_COUNT; channel++) {
         f_SoundHandles[channel] = 0;
-        f_SoundFadeFrameCounts[channel] = 0;
+        f_SoundFadeFramesLeft[channel] = 0;
     }
 
     ChangeCustomEffect(ECHO_EFFECT_INDEX);
