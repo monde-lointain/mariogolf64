@@ -154,7 +154,7 @@ static Boolean8 f_IsPlayStateBackedUp = FALSE;
 static s32 f_DebugCupIndex = 0;
 static s32 f_UnusedWordsAfterDebugCup[3] UNUSED = {0};
 static s8 f_UnusedByteBeforeGroundWaves UNUSED = 0;
-s8 g_ShowsGroundWaves = FALSE;
+Boolean8 g_ShowsGroundWaves = FALSE;
 f32 g_GroundFarthestDepth = 0.0f;
 f32 g_GroundNearDepthEighth = 0.0f;
 static s32 f_GroundClipRatio = 1;
@@ -1928,7 +1928,7 @@ void RebuildGroundTextureCoordinates(void) {
     )
 
 void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
-    u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT];
+    UBoolean8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT];
     Gfx *gfx;
     s32 half;
     Vtx *vertices;

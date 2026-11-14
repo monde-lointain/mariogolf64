@@ -151,7 +151,7 @@ static Vtx f_PinShadowVertices[PIN_SHADOW_VERTEX_COUNT] = {
     {{{30, 0, 0}, 0, {1024, 0}, {0x00, 0x00, 0x00, 0x00}}},
 };
 static Boolean8 f_IsPinOut = FALSE;
-static s8 f_SkipsNextPinDraw = FALSE;
+static Boolean8 f_SkipsNextPinDraw = FALSE;
 static f32 f_FlagWavePhase = 0.0f;
 
 static Mtx f_PinShadowMatrix;

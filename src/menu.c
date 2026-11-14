@@ -88,7 +88,7 @@ s32 g_ChoosingPlayerIndex;
 s32 g_ChosenCharacters[PLAYER_COUNT_MAX];
 s16 g_ChosenLabelGrowth;
 LabelGrowthDirection g_ChosenLabelGrowthDirection;
-s8 g_ChosenLefties[4];
+Boolean8 g_ChosenLefties[4];
 ImageAsset *g_ComputerLeftyIcons;
 CourseSelectKind g_CourseSelectKind;
 CourseStatFigures g_CourseStatFigures[COURSE_COUNT + 1];
@@ -2671,7 +2671,7 @@ void ResetMenuChoices(void) {
     g_CourseSelectKind = COURSE_SELECT_KIND_NONE;
     COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_AWARDS;
     for (index = 0; index != ARRAY_COUNT(g_ChosenLefties); index++) {
-        g_ChosenLefties[index] = 0;
+        g_ChosenLefties[index] = FALSE;
     }
 
     g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;

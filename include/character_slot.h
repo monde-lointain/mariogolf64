@@ -273,7 +273,7 @@ typedef struct CharacterSlot {
     s8 randomTextureAnimationDelay;
     TextureAnimationState textureAnimations[TEXTURE_ANIMATION_COUNT];
     Boolean8 usesFrontCulling;
-    s8 reusesLastMatrices;
+    Boolean8 reusesLastMatrices;
 } CharacterSlot;
 
 #define NO_NEXT_ANIMATION (-1)

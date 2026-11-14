@@ -963,7 +963,7 @@ void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 modelKind) {
         slot->playsRandomTextureAnimation = TRUE;
         slot->randomTextureAnimationDelay = LOADED_RANDOM_TEXTURE_ANIMATION_DELAY;
         slot->usesFrontCulling = 0;
-        slot->reusesLastMatrices = 0;
+        slot->reusesLastMatrices = FALSE;
         f_CurrentModelBuffer = slot->modelBuffer;
         if (isPatched) {
             LoadLzData(

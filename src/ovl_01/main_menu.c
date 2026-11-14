@@ -2072,7 +2072,7 @@ void UpdateMenus(void) {
             osSyncPrintf("ContPhase2\n");
         }
         else {
-            g_GameState.saveCount = FALSE;
+            g_GameState.saveCount = 0;
             InitPlay(PLAY_KIND_WITHOUT_HOLE_DISPLAY);
             SetUpChosenGame();
             InitRoundHud();
@@ -2168,7 +2168,7 @@ void SetUpChosenGame(void) {
 
         if (GetClubTournamentCharacter() != ANY_CHARACTER) {
             g_ChosenCharacters[0] = GetClubTournamentCharacter();
-            g_ChosenLefties[0] = 0;
+            g_ChosenLefties[0] = FALSE;
         }
     }
     else {
@@ -2360,7 +2360,7 @@ void UpdateMenuTitleScreen(void) {
             g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
             g_ChosenPlayerCount = g_MenuMemory.playerCountChoice + 1;
             for (index = 0; index != PLAYER_COUNT_MAX; index++) {
-                g_ChosenLefties[index] = 0;
+                g_ChosenLefties[index] = FALSE;
             }
 
             g_ChoosingPlayerIndex = 0;
@@ -2901,7 +2901,7 @@ void UpdateModeSelect(void) {
         g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
         g_ChoosingPlayerIndex--;
         characterIndex = g_ChosenCharacters[g_ChoosingPlayerIndex];
-        g_ChosenLefties[g_ChoosingPlayerIndex] = 0;
+        g_ChosenLefties[g_ChoosingPlayerIndex] = FALSE;
         g_PlayerControllerIndices[g_ChoosingPlayerIndex] = 0;
         g_TakenCharacters.isCharacterTaken[characterIndex] = FALSE;
         column = g_MenuMemory.characterColumns[g_ChoosingPlayerIndex];

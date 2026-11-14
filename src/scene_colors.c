@@ -46,7 +46,7 @@ static Vtx f_ShadedVertices[2][2 * QUAD_VERTEX_COUNT] = {
         {{{4096, 0, 8192}, 0, {0x1FFF, 0x3FFF}, {0x3F, 0x20, 0xEF, 0x00}}},
     },
 };
-s32 g_UnreadDebugSwitch = FALSE;
+Boolean g_UnreadDebugSwitch = FALSE;
 static s32 f_PlaneTextureScroll = 0;
 static s32 f_UnusedWordsAfterPlaneScroll[2] UNUSED = {0};
 static s32 f_UnusedFirstClearedWord;

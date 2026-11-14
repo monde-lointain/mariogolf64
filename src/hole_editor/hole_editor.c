@@ -3023,7 +3023,7 @@ void UpdateHoleFileMenu(void) {
     ClearDebugText();
     if (f_HoleFileStep == HOLE_FILE_STEP_ACTION) {
         if (g_MenuControllerData[0].button & (U_JPAD | D_JPAD)) {
-            f_IsSavingHoleFiles ^= 1;
+            f_IsSavingHoleFiles ^= TRUE;
         }
 
         if (g_MenuControllerData[0].button & A_BUTTON) {
@@ -3589,7 +3589,7 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
 }
 
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainStyle) {
-    u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT];
+    UBoolean8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT];
     Boolean keepsCombineMode;
     EditorCombineMode combineMode;
     Gfx *gfx;

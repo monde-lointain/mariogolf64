@@ -910,7 +910,7 @@ void AnimateScorecard(void) {
         case SCORECARD_SHOWN:
             if (g_Scorecard.faceFrameTime++ % FACE_FRAME_DURATION == 1) {
                 g_Scorecard.faceFrame++;
-                g_Scorecard.isOddFaceStep ^= 1;
+                g_Scorecard.isOddFaceStep ^= TRUE;
                 if (g_Scorecard.faceFrame < FACE_FRAME_COUNT) {
                     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
                         OpenEncodedAsset(

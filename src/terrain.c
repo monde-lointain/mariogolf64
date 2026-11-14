@@ -1322,7 +1322,7 @@ NO_RESULT UpdateDebugSceneMenu(void) {
 
     g_CurrentShot.surface = SURFACE_OUT_OF_BOUNDS;
     ClearGameFlag(GAME_FLAG_HOLE_LOADED);
-    g_ShowsGroundWaves = 0;
+    g_ShowsGroundWaves = FALSE;
     if (g_MenuControllerData[0].button & START_BUTTON) {
         ClearDebugText();
         f_IsSceneMenuOpen = FALSE;

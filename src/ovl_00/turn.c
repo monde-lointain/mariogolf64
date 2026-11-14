@@ -3679,7 +3679,7 @@ void UpdateTurns(void) {
 
                     if ((f_ShotSource != SHOT_SOURCE_PLAYER && isReady) ||
                         (f_ShotSource == SHOT_SOURCE_PLAYER && g_HasPressedShotButton == TRUE)) {
-                        g_ShowsGroundWaves = 0;
+                        g_ShowsGroundWaves = FALSE;
                         if (g_CurrentShot.shotMode != SHOT_MODE_APPROACH) {
                             SkipToAnimationEnd(0);
                         }

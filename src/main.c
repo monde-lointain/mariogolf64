@@ -541,7 +541,7 @@ void ReadControllers(void) {
 
 void HandleGfxRetrace(s32 pendingTaskCount) {
     if (nuScPreNMIFlag & NU_SC_PRENMI_GET) {
-        f_IsOddRetrace ^= 1;
+        f_IsOddRetrace ^= TRUE;
         if (!f_IsOddRetrace) {
             DrawResetFade();
         }
@@ -549,7 +549,7 @@ void HandleGfxRetrace(s32 pendingTaskCount) {
         return;
     }
 
-    f_IsOddRetrace ^= 1;
+    f_IsOddRetrace ^= TRUE;
     if (!f_IsOddRetrace) {
         if ((g_FramePacingMode != PACING_MODE_NORMAL) ?
                 pendingTaskCount < PENDING_TASK_MAX_RELAXED :
@@ -586,7 +586,7 @@ void HandleGfxRetrace(s32 pendingTaskCount) {
             }
         }
         else {
-            f_IsOddRetrace ^= 1;
+            f_IsOddRetrace ^= TRUE;
         }
     }
 

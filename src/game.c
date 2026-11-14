@@ -159,7 +159,7 @@ static u32 f_GfxTaskStartTime = 0;
 static u32 f_UpdateStartTime = 0;
 static u32 f_UpdateEndTime = 0;
 static f32 f_MapFieldOfView = 60.0f;
-static s8 f_NeedsIdentityMatrix = TRUE;
+static Boolean8 f_NeedsIdentityMatrix = TRUE;
 static FadeColor f_FadeColor = FADE_COLOR_WHITE;
 static u16 *f_CopySourceFrame = NULL;
 static u16 *f_PreviousFrame = NULL;
@@ -2803,7 +2803,7 @@ s32 DrawGame(void) {
         }
 
         if (g_ControllerStates[1].pressedButtons & D_JPAD) {
-            g_UnreadDebugSwitch ^= 1;
+            g_UnreadDebugSwitch ^= TRUE;
         }
 
         if (g_ControllerStates[1].pressedButtons & U_JPAD) {

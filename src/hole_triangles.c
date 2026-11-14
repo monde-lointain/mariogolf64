@@ -67,7 +67,7 @@ typedef struct RingCorners {
 #define RING_MODE_FOUR_GREEN 0xC8
 #define RING_MODE_FOUR_BLUE 0x00
 
-static s8 f_DimsTranslucentTriangles = FALSE;
+static Boolean8 f_DimsTranslucentTriangles = FALSE;
 static s32 f_UnusedWordAfterDimmingFlag UNUSED = 0;
 static Boolean f_HasTestRing = FALSE;
 static s32 f_TextureScroll = 0;

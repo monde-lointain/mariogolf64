@@ -97,7 +97,7 @@ extern TakenCharacters g_TakenCharacters;
 #define NO_CHOSEN_CHARACTER (-1)
 extern s32 g_ChosenCharacters[PLAYER_COUNT_MAX];
 
-extern s8 g_ChosenLefties[PLAYER_COUNT_MAX];
+extern Boolean8 g_ChosenLefties[PLAYER_COUNT_MAX];
 
 extern UBoolean8 g_IsMenuCharacterLoaded[MAXCONTROLLERS];
 

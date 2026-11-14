@@ -28,7 +28,7 @@ enum ViewportKind {
 #define VIEWPORT_COUNT 6
 extern Vp g_Viewports[VIEWPORT_COUNT];
 
-extern s32 g_UnreadDebugSwitch;
+extern Boolean g_UnreadDebugSwitch;
 
 extern Gfx *g_DisplayListHead;
 
