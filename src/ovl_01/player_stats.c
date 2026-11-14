@@ -2576,7 +2576,7 @@ void ReadBestShots(void) {
     s32 eagleCount;
     s32 albatrossCount;
     s32 holeInOneCount;
-    s32 flags;
+    s32 scoreKind;
     s32 row;
     s32 column;
     MenuMemory *memory;
@@ -2595,9 +2595,9 @@ void ReadBestShots(void) {
     holeInOneCount = 0;
     albatrossCount = 0;
     for (recordIndex = 0; recordIndex != RANKED_RECORD_COUNT; recordIndex++) {
-        flags = (s8)save->rankedRecords[recordIndex].scoreKind;
-        if (flags & SCORE_KIND_RECORDED) {
-            switch (flags & SCORE_KIND_MASK) {
+        scoreKind = (s8)save->rankedRecords[recordIndex].scoreKind;
+        if (scoreKind & SCORE_KIND_RECORDED) {
+            switch (scoreKind & SCORE_KIND_MASK) {
                 case SCORE_KIND_BIRDIE:
                     if (birdieCount < STATS_GRID_COLUMN_COUNT) {
                         kindRecords[GATHERED_BIRDIES][birdieCount++] = recordIndex;
