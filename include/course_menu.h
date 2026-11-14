@@ -23,8 +23,11 @@ enum CourseBuffer {
     COURSE_BUFFER_LAST
 };
 
+typedef s32 CourseBuffer;
+typedef s8 CourseBuffer8;
+
 void LoadCourseStatsIcons(ImageAsset **buffers);
-void LoadCourseTrophyImages(ImageAsset **buffers, s32 requestedKind);
+void LoadCourseTrophyImages(ImageAsset **buffers, CourseBuffer requestedKind);
 void LoadCourseMenuBuffer(void *buffer, CourseMenuBuffer bufferKind);
 void UpdateCourseStats(void);
 void DrawCourseStats(Gfx **displayListHead);

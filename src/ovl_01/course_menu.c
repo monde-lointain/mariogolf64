@@ -188,10 +188,10 @@ void LoadCourseStatsIcons(ImageAsset **buffers) {
     }
 }
 
-void LoadCourseTrophyImages(ImageAsset **buffers, s32 requestedKind) {
+void LoadCourseTrophyImages(ImageAsset **buffers, CourseBuffer requestedKind) {
     EncodedAsset asset;
     AssetFile file;
-    s8 bufferKind = requestedKind;
+    CourseBuffer8 bufferKind = requestedKind;
     MenuMemory *memory = GetMenuMemory();
     s16 index;
 
