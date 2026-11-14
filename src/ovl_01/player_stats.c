@@ -1668,16 +1668,16 @@ s32 SlideBrickWall(Gfx **displayListHead, u8 slide) {
     s32 index;
     s32 row;
     s32 offset;
-    s32 first;
+    s32 firstRowOffset;
 
     if ((slide != STATS_SLIDE_CURRENT && slide < STATS_SLIDE_COUNT) == FALSE) {
         return -1;
     }
 
     offset = f_BrickSlideStartOffsets[slide - 1][0];
-    first = f_BrickRowOffsets[0];
+    firstRowOffset = f_BrickRowOffsets[0];
     for (index = 0; index != STATS_SLIDE_ROW_COUNT; index++) {
-        if (f_BrickRowOffsets[index] != offset && first != f_BrickRowOffsets[index]) {
+        if (f_BrickRowOffsets[index] != offset && firstRowOffset != f_BrickRowOffsets[index]) {
             break;
         }
     }
