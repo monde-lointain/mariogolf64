@@ -321,7 +321,7 @@ static s32 f_PlayerPoints[PLAYER_COUNT_MAX];
 static s32 f_PlayerBetTotals[PLAYER_COUNT_MAX];
 static s32 f_PlayerRanks[PLAYER_COUNT_MAX];
 static s32 f_PrizePoints;
-static s32 f_PrizeShown;
+static s32 f_ShownPrizePoints;
 static CoursePointsTally f_CoursePointsTally;
 static s32 f_PortraitAnimations[PLAYER_COUNT_MAX];
 static s32 f_PortraitFrames[PLAYER_COUNT_MAX];
@@ -635,7 +635,7 @@ void LoadRoundResults(void) {
                     f_PrizePoints = f_TournamentPrizes[g_GameState.courseIndex][PRIZE_BRACKET_REST];
                 }
 
-                f_PrizeShown = f_PrizePoints;
+                f_ShownPrizePoints = f_PrizePoints;
                 if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
                     f_TrophyImage = AllocMemory(
                         OpenEncodedAsset(f_TrophyAssets[g_GameState.courseIndex].image, &asset)
@@ -2249,7 +2249,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
             place = rank - 1;
             if (f_TournamentOpenCourseCount < COURSE_COUNT) {
                 if (place < TROPHY_PLACE_COUNT) {
-                    SetTextSlotValue(f_PrizeShown, BANNER_TEXT_SLOT, 0);
+                    SetTextSlotValue(f_ShownPrizePoints, BANNER_TEXT_SLOT, 0);
                     SetTextSlot(
                         f_BannerX + PRIZE_TEXT_X,
                         f_BannerY + PRIZE_TEXT_Y,
@@ -2278,7 +2278,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                     }
 
                     SetTextName(g_PrintBuffer);
-                    SetTextSlotValue(f_PrizeShown, BANNER_TEXT_SLOT, 1);
+                    SetTextSlotValue(f_ShownPrizePoints, BANNER_TEXT_SLOT, 1);
                     SetTextSlot(
                         f_BannerX + PRIZE_TEXT_X,
                         f_BannerY + PRIZE_TEXT_Y,
