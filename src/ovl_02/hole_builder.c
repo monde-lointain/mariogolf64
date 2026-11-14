@@ -2177,20 +2177,20 @@ static inline void SetCode(s32 index, u8 code) {
         s32 previousAgain; \
         s32 next; \
 \
-        index = CodeIndex(column, row); \
+        (index) = CodeIndex(column, row); \
         code = GetCode(index); \
-        index = NeighborCodeIndex(column, row, -(columnStep), -(rowStep)); \
-        previous = GetCode(index); \
-        index = NeighborCodeIndex(column, row, -(columnStep), -(rowStep)); \
+        (index) = NeighborCodeIndex(column, row, -(columnStep), -(rowStep)); \
+        (previous) = GetCode(index); \
+        (index) = NeighborCodeIndex(column, row, -(columnStep), -(rowStep)); \
         previousAgain = GetCode(index); \
-        index = NeighborCodeIndex(column, row, columnStep, rowStep); \
+        (index) = NeighborCodeIndex(column, row, columnStep, rowStep); \
         next = GetCode(index); \
-        if (code != previous && previousAgain == next) { \
+        if (code != (previous) && previousAgain == next) { \
             u8 fill; \
 \
-            index = NeighborCodeIndex(column, row, columnStep, rowStep); \
+            (index) = NeighborCodeIndex(column, row, columnStep, rowStep); \
             fill = GetCode(index); \
-            index = CodeIndex(column, row); \
+            (index) = CodeIndex(column, row); \
             SetCode(index, fill); \
         } \
     }
