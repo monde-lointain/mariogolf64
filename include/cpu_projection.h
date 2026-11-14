@@ -14,6 +14,14 @@ enum NormalPlacement {
 
 #define NORMAL_LENGTH 127.0f
 
+// A screen position with its depth; ScreenPoint adds the projection's
+// scaling.
+typedef struct ScreenPosition {
+    s32 x;
+    s32 y;
+    s32 depth;
+} ScreenPosition;
+
 typedef struct ScreenPoint {
     s32 x;
     s32 y;

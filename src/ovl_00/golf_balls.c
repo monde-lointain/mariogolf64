@@ -84,12 +84,6 @@ typedef struct BallAfterimage {
     Boolean isInCup;
 } BallAfterimage;
 
-typedef struct BallScreenPoint {
-    s32 x;
-    s32 y;
-    s32 depth;
-} BallScreenPoint;
-
 static Gfx f_UnusedListBeforeBooMouth[] UNUSED = {gsSPEndDisplayList()};
 static u16 f_BooMouthTexture[] = {
 #include "assets/ovl_00/golf_balls/boo_mouth_texture.rgba16.inc.c"
@@ -374,7 +368,7 @@ static s32 f_BallRollFrame = 0;
 void UnusedGolfBallStub(void) {
 }
 
-static BallScreenPoint f_CurrentBallScreenPoint;
+static ScreenPosition f_CurrentBallScreenPoint;
 static u8 *f_SmallBallImage;
 static u8 *f_RollingBallImage;
 static u8 *f_BallShadowImage;

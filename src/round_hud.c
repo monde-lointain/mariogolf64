@@ -649,12 +649,6 @@ static s32 f_LoadedHoleIntroImages = 0;
 #define GREEN_GRID_ROW_COUNT_MAX 32
 #define GREEN_GRID_POINT_COUNT (GREEN_GRID_ROW_COUNT_MAX * GREEN_GRID_COLUMN_COUNT)
 
-typedef struct TrailPoint {
-    s32 x;
-    s32 y;
-    s32 depth;
-} TrailPoint;
-
 static Mtx f_LandingPanelMatrices[MATRIX_BUFFER_COUNT];
 static Mtx f_GreenGridMatrix;
 static Mtx f_BallTrailMatrix;
@@ -693,7 +687,7 @@ static void *f_HoleImage;
 static Vtx f_HoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT][HOLE_FLAG_VERTEX_COUNT];
 static s8 f_HoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
 static s32 f_GreenGridHeights[GREEN_GRID_POINT_COUNT];
-static TrailPoint f_BallTrailPoints[BALL_TRAIL_LENGTH];
+static ScreenPosition f_BallTrailPoints[BALL_TRAIL_LENGTH];
 static f32 f_BallTrail[BALL_TRAIL_LENGTH][3];
 static void *f_HoleContestImage;
 static void *f_MatchStandingImage;

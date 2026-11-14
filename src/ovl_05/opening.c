@@ -181,12 +181,6 @@ typedef enum LogoLetterIndex {
 #define LOGO_L_DEPTH 40
 #define LOGO_F_DEPTH 44
 
-typedef struct LogoLetter {
-    s32 x;
-    s32 y;
-    s32 depth;
-} LogoLetter;
-
 typedef enum LogoLetterState {
     LOGO_LETTER_WAITING,
     LOGO_LETTER_FALLING,
@@ -613,7 +607,7 @@ static u8 f_UnusedBufferAfterTrailStart[24] UNUSED;
 static u8 f_LogoMarioImage[LOGO_MARIO_IMAGE_BUFFER_SIZE];
 static u8 f_LogoLetterImages[LOGO_LETTER_IMAGES_BUFFER_SIZE];
 static u8 f_LogoClubImage[LOGO_CLUB_IMAGE_BUFFER_SIZE];
-static LogoLetter f_LogoLetters[LOGO_LETTER_COUNT];
+static ScreenPosition f_LogoLetters[LOGO_LETTER_COUNT];
 static s32 f_LogoLetterStates[LOGO_LETTER_COUNT];
 static f32 f_LogoLetterSpeeds[LOGO_LETTER_COUNT];
 static Vec2 f_LogoLetterScales[LOGO_LETTER_COUNT];
