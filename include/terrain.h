@@ -265,6 +265,13 @@ s32 GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane);
 Vtx *GetGroundPoint(u32 column, u32 row);
 Vtx *GetGridVertex(u32 column, u32 row);
 NO_RESULT SetGroundPoint(s32 column, s32 row, Vtx_t *point);
+// The hole editor calls this without a prototype in the original; a file
+// that defines CALLS_GROUND_POINT_SETTER_UNPROTOTYPED does too.
+#if !defined(AVOID_UB) && defined(CALLS_GROUND_POINT_SETTER_UNPROTOTYPED)
+NO_RESULT SetGroundPointHeightAndShade();
+#else
+NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade);
+#endif
 void PrepareHoleTriangles(void);
 Boolean IsOverlayInExpansionMemory(void);
 void UpdateDebugScenes(void);

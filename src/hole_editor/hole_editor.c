@@ -5,6 +5,10 @@
 #include <string.h>
 #include <ultra64.h>
 
+// The original calls SetGroundPointHeightAndShade here unprototyped; see
+// terrain.h.
+#define CALLS_GROUND_POINT_SETTER_UNPROTOTYPED
+
 #include "address.h"
 #include "billboard.h"
 #include "camera.h"
@@ -585,12 +589,6 @@ static Boolean f_ShowsGroundWaves = TRUE;
 static s32 f_CLeftPickedHeight = 0;
 static s32 f_CUpPickedHeight = 0;
 static s32 f_LastHeightEditKind = HEIGHT_EDIT_NONE;
-
-#ifdef AVOID_UB
-NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade);
-#else
-NO_RESULT SetGroundPointHeightAndShade();
-#endif
 
 static s32 f_UnusedHoleFileSetting UNUSED = 1;
 static Boolean f_IsSavingHoleFiles = FALSE;
