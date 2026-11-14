@@ -1159,9 +1159,9 @@ void BuildAllTileMidpoints(void) {
             g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex = tileIndex;
             midpoints = g_WorkArea.hole.midpoints[tileIndex];
             center = TileGridVertex(tileColumn, tileRow, 1, 1);
-            g_WorkArea.hole.tiles[tileIndex].center[0] = center->v.ob[AXIS_X];
-            g_WorkArea.hole.tiles[tileIndex].center[1] = center->v.ob[AXIS_Y];
-            g_WorkArea.hole.tiles[tileIndex].center[2] = center->v.ob[AXIS_Z];
+            g_WorkArea.hole.tiles[tileIndex].center[AXIS_X] = center->v.ob[AXIS_X];
+            g_WorkArea.hole.tiles[tileIndex].center[AXIS_Y] = center->v.ob[AXIS_Y];
+            g_WorkArea.hole.tiles[tileIndex].center[AXIS_Z] = center->v.ob[AXIS_Z];
             if (g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
                 BuildTileMidpoints(midpoints, tileColumn, tileRow);
             }

@@ -2107,7 +2107,12 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
         radius = (g_GroundTileHeightRanges[culledTileIndex] >= GROUND_TILE_RADIUS_MIN) ?
             g_GroundTileHeightRanges[culledTileIndex] :
             GROUND_TILE_RADIUS_MIN;
-        visibility = GetSphereVisibility(tile->center[0], tile->center[1], tile->center[2], radius);
+        visibility = GetSphereVisibility(
+            tile->center[AXIS_X],
+            tile->center[AXIS_Y],
+            tile->center[AXIS_Z],
+            radius
+        );
         if (visibility < 0) {
             if (tile->midpointBlockIndex >= 0 &&
                 (g_IsGroundTileNearby[culledTileIndex] ||

@@ -175,7 +175,7 @@ void StartMonkeyDrop(Radians cameraYaw) {
             creature->isGold = FALSE;
             creature->isFacingBack = FALSE;
             creature->frameCount = 0;
-            creature->velocity[1] = 0;
+            creature->velocity[AXIS_Y] = 0;
             creature->position[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X];
             creature->position[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y] - MONKEY_DROP_HEIGHT;
             creature->position[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
@@ -248,15 +248,15 @@ void StartCheepCheepLeap(s32 startValue) {
 
             creature->yaw = g_SkyState.yaws[0];
             if (creature->isFacingBack) {
-                creature->velocity[0] = cosf(creature->yaw) * -speed;
-                creature->velocity[2] = -sinf(creature->yaw) * -speed;
+                creature->velocity[AXIS_X] = cosf(creature->yaw) * -speed;
+                creature->velocity[AXIS_Z] = -sinf(creature->yaw) * -speed;
             }
             else {
-                creature->velocity[0] = cosf(creature->yaw) * speed;
-                creature->velocity[2] = -sinf(creature->yaw) * speed;
+                creature->velocity[AXIS_X] = cosf(creature->yaw) * speed;
+                creature->velocity[AXIS_Z] = -sinf(creature->yaw) * speed;
             }
 
-            creature->velocity[1] = -CHEEP_CHEEP_LEAP_SPEED;
+            creature->velocity[AXIS_Y] = -CHEEP_CHEEP_LEAP_SPEED;
             creature->pitch = -M_PI / 2;
             translation[AXIS_X] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
             translation[AXIS_Y] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
@@ -331,19 +331,19 @@ void DrawHoleCreatures(Gfx **displayListHead) {
         }
         else if (creature->kind == HOLE_CREATURE_CHEEP_CHEEP) {
             wasUnderwater = g_TurnBallSimulation.position[AXIS_Y] < creature->position[AXIS_Y];
-            creature->velocity[1] += CHEEP_CHEEP_GRAVITY;
-            creature->position[AXIS_X] += creature->velocity[0];
-            creature->position[AXIS_Y] += creature->velocity[1];
-            creature->position[AXIS_Z] += creature->velocity[2];
+            creature->velocity[AXIS_Y] += CHEEP_CHEEP_GRAVITY;
+            creature->position[AXIS_X] += creature->velocity[AXIS_X];
+            creature->position[AXIS_Y] += creature->velocity[AXIS_Y];
+            creature->position[AXIS_Z] += creature->velocity[AXIS_Z];
             horizontalSpeed = 0.0f;
-            horizontalSpeedSquared = (creature->velocity[0] * creature->velocity[0]) +
-                (creature->velocity[2] * creature->velocity[2]);
+            horizontalSpeedSquared = (creature->velocity[AXIS_X] * creature->velocity[AXIS_X]) +
+                (creature->velocity[AXIS_Z] * creature->velocity[AXIS_Z]);
             if ((s32)horizontalSpeedSquared > 0) {
                 horizontalSpeed = sqrtf(horizontalSpeedSquared);
             }
 
             creature->pitch =
-                ((f32)atan2(creature->velocity[1], horizontalSpeed) - creature->pitch) *
+                ((f32)atan2(creature->velocity[AXIS_Y], horizontalSpeed) - creature->pitch) *
                 CHEEP_CHEEP_PITCH_EASING;
             translation[AXIS_X] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
             translation[AXIS_Y] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
@@ -424,8 +424,8 @@ void DrawHoleCreatures(Gfx **displayListHead) {
             gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
         }
         else if (creature->kind == HOLE_CREATURE_MONKEY) {
-            creature->velocity[1] += GRAVITY;
-            creature->position[AXIS_Y] += creature->velocity[1];
+            creature->velocity[AXIS_Y] += GRAVITY;
+            creature->position[AXIS_Y] += creature->velocity[AXIS_Y];
             switch (++creature->frameCount) {
                 case MONKEY_SECOND_FRAME:
                     OpenEncodedAsset(f_MonkeyFrameAssets[1], &asset);

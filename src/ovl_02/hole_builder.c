@@ -2248,9 +2248,12 @@ f32 MeasureGroundTiles(void) {
             }
 
             g_GroundTileHeightRanges[tileIndex] = heightRange;
-            g_WorkArea.hole.tiles[tileIndex].center[0] = xSum / GROUND_TILE_AVERAGED_POINT_COUNT;
-            g_WorkArea.hole.tiles[tileIndex].center[1] = ySum / GROUND_TILE_AVERAGED_POINT_COUNT;
-            g_WorkArea.hole.tiles[tileIndex].center[2] = zSum / GROUND_TILE_AVERAGED_POINT_COUNT;
+            g_WorkArea.hole.tiles[tileIndex].center[AXIS_X] =
+                xSum / GROUND_TILE_AVERAGED_POINT_COUNT;
+            g_WorkArea.hole.tiles[tileIndex].center[AXIS_Y] =
+                ySum / GROUND_TILE_AVERAGED_POINT_COUNT;
+            g_WorkArea.hole.tiles[tileIndex].center[AXIS_Z] =
+                zSum / GROUND_TILE_AVERAGED_POINT_COUNT;
             tileIndex++;
         }
     }

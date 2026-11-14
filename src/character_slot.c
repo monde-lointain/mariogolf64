@@ -4365,9 +4365,9 @@ void AnimateCharacterJoints(u32 slotIndex) {
             keyIndex = 1;
             if (g_CurrentAnimationFrame < joint->translationFrames[0]) {
                 isInterpolated = FALSE;
-                x = joint->translations[0][0];
-                y = joint->translations[0][1];
-                z = joint->translations[0][2];
+                x = joint->translations[0][AXIS_X];
+                y = joint->translations[0][AXIS_Y];
+                z = joint->translations[0][AXIS_Z];
             }
             else {
                 for (; keyIndex < joint->translationKeyCount; keyIndex++) {
@@ -4382,18 +4382,18 @@ void AnimateCharacterJoints(u32 slotIndex) {
                 if (keyIndex == joint->translationKeyCount) {
                     keyIndex--;
                     isInterpolated = FALSE;
-                    x = joint->translations[keyIndex][0];
-                    y = joint->translations[keyIndex][1];
-                    z = joint->translations[keyIndex][2];
+                    x = joint->translations[keyIndex][AXIS_X];
+                    y = joint->translations[keyIndex][AXIS_Y];
+                    z = joint->translations[keyIndex][AXIS_Z];
                 }
             }
         }
 
         if (isInterpolated) {
             if (g_CurrentAnimationEndFrame < joint->translationSpan.endFrame) {
-                x = joint->translations[joint->translationSpan.startKeyIndex][0];
-                y = joint->translations[joint->translationSpan.startKeyIndex][1];
-                z = joint->translations[joint->translationSpan.startKeyIndex][2];
+                x = joint->translations[joint->translationSpan.startKeyIndex][AXIS_X];
+                y = joint->translations[joint->translationSpan.startKeyIndex][AXIS_Y];
+                z = joint->translations[joint->translationSpan.startKeyIndex][AXIS_Z];
             }
             else {
                 progress = (g_CurrentAnimationFrame - joint->translationSpan.startFrame) /
@@ -4401,12 +4401,12 @@ void AnimateCharacterJoints(u32 slotIndex) {
                 spanIndex = joint->translationSpan.startKeyIndex;
                 nextSpanIndex = spanIndex + 1;
                 remaining = 1.0 - progress;
-                x = (remaining * joint->translations[spanIndex][0]) +
-                    (progress * joint->translations[nextSpanIndex][0]);
-                y = (remaining * joint->translations[spanIndex][1]) +
-                    (progress * joint->translations[nextSpanIndex][1]);
-                z = (remaining * joint->translations[spanIndex][2]) +
-                    (progress * joint->translations[nextSpanIndex][2]);
+                x = (remaining * joint->translations[spanIndex][AXIS_X]) +
+                    (progress * joint->translations[nextSpanIndex][AXIS_X]);
+                y = (remaining * joint->translations[spanIndex][AXIS_Y]) +
+                    (progress * joint->translations[nextSpanIndex][AXIS_Y]);
+                z = (remaining * joint->translations[spanIndex][AXIS_Z]) +
+                    (progress * joint->translations[nextSpanIndex][AXIS_Z]);
             }
         }
 
@@ -4504,9 +4504,9 @@ void AnimateCharacterJoints(u32 slotIndex) {
             keyIndex = 1;
             if (g_CurrentAnimationFrame < joint->scaleFrames[0]) {
                 isInterpolated = FALSE;
-                x = joint->scales[0][0];
-                y = joint->scales[0][1];
-                z = joint->scales[0][2];
+                x = joint->scales[0][AXIS_X];
+                y = joint->scales[0][AXIS_Y];
+                z = joint->scales[0][AXIS_Z];
             }
             else {
                 for (; keyIndex < joint->scaleKeyCount; keyIndex++) {
@@ -4521,18 +4521,18 @@ void AnimateCharacterJoints(u32 slotIndex) {
                 if (keyIndex == joint->scaleKeyCount) {
                     keyIndex--;
                     isInterpolated = FALSE;
-                    x = joint->scales[keyIndex][0];
-                    y = joint->scales[keyIndex][1];
-                    z = joint->scales[keyIndex][2];
+                    x = joint->scales[keyIndex][AXIS_X];
+                    y = joint->scales[keyIndex][AXIS_Y];
+                    z = joint->scales[keyIndex][AXIS_Z];
                 }
             }
         }
 
         if (isInterpolated) {
             if (g_CurrentAnimationEndFrame < joint->scaleSpan.endFrame) {
-                x = joint->scales[joint->scaleSpan.startKeyIndex][0];
-                y = joint->scales[joint->scaleSpan.startKeyIndex][1];
-                z = joint->scales[joint->scaleSpan.startKeyIndex][2];
+                x = joint->scales[joint->scaleSpan.startKeyIndex][AXIS_X];
+                y = joint->scales[joint->scaleSpan.startKeyIndex][AXIS_Y];
+                z = joint->scales[joint->scaleSpan.startKeyIndex][AXIS_Z];
             }
             else {
                 progress = (g_CurrentAnimationFrame - joint->scaleSpan.startFrame) /
@@ -4540,12 +4540,12 @@ void AnimateCharacterJoints(u32 slotIndex) {
                 spanIndex = joint->scaleSpan.startKeyIndex;
                 nextSpanIndex = spanIndex + 1;
                 remaining = 1.0 - progress;
-                x = (remaining * joint->scales[spanIndex][0]) +
-                    (progress * joint->scales[nextSpanIndex][0]);
-                y = (remaining * joint->scales[spanIndex][1]) +
-                    (progress * joint->scales[nextSpanIndex][1]);
-                z = (remaining * joint->scales[spanIndex][2]) +
-                    (progress * joint->scales[nextSpanIndex][2]);
+                x = (remaining * joint->scales[spanIndex][AXIS_X]) +
+                    (progress * joint->scales[nextSpanIndex][AXIS_X]);
+                y = (remaining * joint->scales[spanIndex][AXIS_Y]) +
+                    (progress * joint->scales[nextSpanIndex][AXIS_Y]);
+                z = (remaining * joint->scales[spanIndex][AXIS_Z]) +
+                    (progress * joint->scales[nextSpanIndex][AXIS_Z]);
             }
         }
 
@@ -4742,12 +4742,12 @@ void GetCharacterSlotMatrix(CharacterSlot *slot, Mat4 matrix) {
     );
     guRotateRPYF(
         transform,
-        (s32)(ROLL_ORIGIN_DEGREES - (s32)(slot->rotation[0] * RADIANS_TO_DEGREES)),
-        (s32)(slot->rotation[1] * RADIANS_TO_DEGREES),
-        (s32)(slot->rotation[2] * RADIANS_TO_DEGREES)
+        (s32)(ROLL_ORIGIN_DEGREES - (s32)(slot->rotation[AXIS_X] * RADIANS_TO_DEGREES)),
+        (s32)(slot->rotation[AXIS_Y] * RADIANS_TO_DEGREES),
+        (s32)(slot->rotation[AXIS_Z] * RADIANS_TO_DEGREES)
     );
     guMtxCatF(transform, translation, translation);
-    guScaleF(transform, slot->scale[0], slot->scale[1], slot->scale[2]);
+    guScaleF(transform, slot->scale[AXIS_X], slot->scale[AXIS_Y], slot->scale[AXIS_Z]);
     guMtxCatF(transform, translation, matrix);
 }
 

@@ -639,9 +639,9 @@ void FrameMarioReaction(u32 slotIndex, CameraView *view) {
                 f_HasReactionLight = TRUE;
                 SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE_THIRD);
                 SetLightColor(&f_ReactionLights.l[2], 0xFF, 0xFF, 0x7F);
-                f_ReactionLights.l[2].l.dir[0] = lightDirection[AXIS_X];
-                f_ReactionLights.l[2].l.dir[1] = lightDirection[AXIS_Y];
-                f_ReactionLights.l[2].l.dir[2] = lightDirection[AXIS_Z];
+                f_ReactionLights.l[2].l.dir[AXIS_X] = lightDirection[AXIS_X];
+                f_ReactionLights.l[2].l.dir[AXIS_Y] = lightDirection[AXIS_Y];
+                f_ReactionLights.l[2].l.dir[AXIS_Z] = lightDirection[AXIS_Z];
             }
         }
     }

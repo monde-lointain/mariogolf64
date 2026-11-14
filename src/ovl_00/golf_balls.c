@@ -431,9 +431,9 @@ void RollGolfBall(GolfBall *ball UNUSED, BallSimulation *simulation) {
         f_LastRolledBallPosition[AXIS_Z] = simulation->position[AXIS_Z];
     }
     else {
-        movement[AXIS_X] = simulation->velocity[0];
-        movement[AXIS_Y] = simulation->velocity[1];
-        movement[AXIS_Z] = simulation->velocity[2];
+        movement[AXIS_X] = simulation->velocity[AXIS_X];
+        movement[AXIS_Y] = simulation->velocity[AXIS_Y];
+        movement[AXIS_Z] = simulation->velocity[AXIS_Z];
     }
 
     if (simulation->state != BALL_STATE_STOPPED) {

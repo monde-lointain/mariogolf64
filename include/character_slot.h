@@ -104,9 +104,9 @@ typedef struct JointAnimation {
     s16 *translationFrames;
     s16 *rotationFrames;
     s16 *scaleFrames;
-    f32 (*translations)[3];
+    Vec3 *translations;
     s16 (*rotations)[4];
-    f32 (*scales)[3];
+    Vec3 *scales;
     KeyframeSpan translationSpan;
     KeyframeSpan rotationSpan;
     KeyframeSpan scaleSpan;

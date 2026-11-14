@@ -4082,9 +4082,9 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
     for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
         tile = &g_WorkArea.hole.tiles[tileIndex];
         visibility = GetSphereVisibility(
-            tile->center[0],
-            tile->center[1],
-            tile->center[2],
+            tile->center[AXIS_X],
+            tile->center[AXIS_Y],
+            tile->center[AXIS_Z],
             GROUND_TILE_RADIUS_MIN
         );
         detail = GROUND_DETAIL_HIDDEN;
