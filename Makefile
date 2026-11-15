@@ -301,7 +301,7 @@ $(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
 .PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable FORCE \
         check-alignment \
-        progress equivalence sanitize test target-tests
+        progress equivalence sanitize test target-tests tool-tests
 
 # A recipe that fails after writing its target, such as a check of what it
 # wrote, would otherwise leave a target that the next run takes as built
@@ -339,6 +339,11 @@ pycheck:
 	.venv/bin/ruff check --quiet
 	.venv/bin/basedpyright --level warning
 	.venv/bin/vulture
+
+# Tests the custom character tools; the tests that need the game's files
+# skip until they're extracted
+tool-tests:
+	PYTHONPATH=tools $(PYTHON) -m unittest discover --start-directory tools/tests
 
 # Measures the matching build against the drafts' build and draws the
 # progress map in build/progress. Each run adds the measured commit to the

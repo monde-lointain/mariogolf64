@@ -30,6 +30,11 @@ ignore = [
   "S607",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# The tools' tests are modules that unittest finds on its own, and use its
+# assertions, as the project runs them with the standard library alone
+"tools/tests/*" = ["INP001", "PT009", "PT027"]
+
 [tool.ruff.lint.isort]
 # The tools import each other, since Python puts a script's directory on
 # the path

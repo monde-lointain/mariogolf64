@@ -16,8 +16,12 @@ the game's main heap, which it reads from include/system/heap.h: the heap
 keeps the original's size and address, so that the allocator behaves the
 same in every layout. In ROM, each segment follows the one before it, in
 the original's order, as the code takes every ROM address from the script's
-symbols. Other segments, such as an overlay of the Expansion Pak's memory,
-keep their addresses in RAM.
+symbols. Each starts on a 16-byte boundary, as every one of the original's
+does: a file that grows by other than a multiple of 16, such as a custom
+character's model, would otherwise leave the files after it where the
+cartridge's DMA, which reads from even addresses only, and the code that
+assumes the original's alignment can't take them. Other segments, such as
+an overlay of the Expansion Pak's memory, keep their addresses in RAM.
 
 The sanitized build's checks (make SANITIZE=1) pass their handlers the
 address of GCC's description of each, which only tools/sanitize.py reads.
@@ -90,6 +94,15 @@ OBJECT_SECTIONS = re.compile(r"^(\s*)(\S+\.o)\(([^()]*)\);$", re.MULTILINE)
 
 BLOCK_NAME = re.compile(r"^\s*(\w+)_ROM_START = __romPos;$", re.MULTILINE)
 SECTION_VRAM = re.compile(r"^(\s*\.\w+) (0x[0-9A-Fa-f]+) :", re.MULTILINE)
+
+
+def align_rom_start(block: str) -> str:
+    """Return BLOCK with its segment's ROM start moved up to the alignment."""
+    return BLOCK_NAME.sub(
+        lambda match: f"    __romPos = ALIGN(__romPos, {ALIGNMENT});\n{match.group(0)}",
+        block,
+        count=1,
+    )
 
 
 def block_name(block: str) -> str | None:
@@ -211,6 +224,7 @@ def lay_out(script: str, heap_start: int) -> str:
     out.append(build_date)
     out.extend(rom_only)
     out.extend(commands)
+    out[main_index + 2 :] = [align_rom_start(block) for block in out[main_index + 2 :]]
     body = OBJECT_SECTIONS.sub(keep_whole_sections, "\n\n".join(out))
     return head + separator + body + end_separator + tail
 
