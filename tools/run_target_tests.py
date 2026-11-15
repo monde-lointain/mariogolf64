@@ -26,8 +26,8 @@ from typing import cast, final
 
 SUMMARY = "Run a test ROM's unit tests on ares and print their report."
 DEFAULT_HARNESS = os.environ.get("N64_HARNESS", "n64-harness")
-# About ten seconds of the console's time. The tests take about one.
-DEFAULT_FRAMES = 600
+# About twenty seconds of the console's time. The tests take about eleven.
+DEFAULT_FRAMES = 1200
 # An nm -S line: address, size, type, name. Only the report has a size that
 # this reads, and only symbols with sizes match.
 NM_SIZED_SYMBOL = re.compile(r"^([0-9a-f]+) ([0-9a-f]+) \S (\S+)$", re.MULTILINE)
