@@ -20,7 +20,9 @@ sets g_HasLoaderFinished, which the game moves on in the first frame to
 find set, so the harness clears it there, and sets it in both builds as
 the first frame ends by which both loads have ended. Both then load in
 the same frames, as a slower loader would have, and builds of any speed
-can be compared.
+can be compared. A loader also writes the buffers of the frame it
+prepares the hole in, whose parity follows its speed, so there the
+modern build is given the matching build's (see LoaderGate).
 
 --reference and --modern name other builds' directories. With
 build/nonmatching as the reference, only the compilers differ, which
@@ -115,6 +117,16 @@ LOADER_FINISHED = "g_HasLoaderFinished"
 THREAD_END = "osDestroyThread"
 FIRST_ARGUMENT_REGISTER = 4
 ADDRESS_MASK = 0xFFFF_FFFF
+RUNNING_THREAD = "__osRunningThread"
+# What a hole loader leaves in the buffers of the frame it gets there in,
+# which the graphics thread swaps each frame: the index of the matrices'
+# buffer, which it sets to 0, and the routine with which it writes the
+# characters' lights in the draw buffer's slot of each of these
+MATRIX_BUFFER_INDEX = "g_MatrixBufferIndex"
+DRAW_BUFFER_INDEX = "g_DrawBufferIndex"
+LIGHTS_ROUTINE = "SetCharacterLights"
+DRAW_BUFFERED_LIGHTS = ("f_DryLights", "f_RainLights")
+DRAW_BUFFER_COUNT = 2
 
 # The layout of an Overlay (include/system/overlay_manager.h)
 OVERLAY_SIZE = 40
@@ -471,6 +483,18 @@ class Build:
         """The build's ROM."""
         return self.directory / ROM_NAME
 
+    def object_size(self, name: str) -> int:
+        """Find the size of the build's one object named NAME."""
+        sizes = [
+            symbol.size
+            for symbol in self.symbols
+            if symbol.is_object and symbol.name == name
+        ]
+        if len(sizes) != 1:
+            message = f"{self.directory}: {len(sizes)} objects named {name}"
+            raise KeyError(message)
+        return sizes[0]
+
     @property
     def rdram_extent(self) -> int:
         """How much of RDRAM, from its start, holds the build's sections and heap.
@@ -779,6 +803,7 @@ class Harness:
         _ = self.command(f"break {build.addresses['nuGfxTaskStart']:x}")
         _ = self.command(f"break {build.addresses['DrawLensFlare']:x}")
         _ = self.command(f"break {build.addresses[THREAD_END]:x}")
+        _ = self.command(f"break {build.addresses[LIGHTS_ROUTINE]:x}")
         _ = self.command("video off")
 
     def send(self, text: str) -> None:
@@ -819,6 +844,19 @@ class Harness:
     def write_word(self, address: int, value: int) -> None:
         """Write a word of memory."""
         _ = self.command(f"write {address:x} {value:08x}")
+
+    def swap_halves(self, name: str) -> None:
+        """Swap the two halves of the object NAME."""
+        address = self.build.addresses[name]
+        half = self.build.object_size(name) // DRAW_BUFFER_COUNT
+        first = self.command(f"read {address:x} {half:x}")
+        second = self.command(f"read {address + half:x} {half:x}")
+        _ = self.command(f"write {address:x} {second}{first}")
+
+    def is_loader_running(self) -> bool:
+        """Whether the hole loader thread is the one running."""
+        addresses = self.build.addresses
+        return self.read_word(addresses[RUNNING_THREAD]) == addresses[LOADER_THREAD]
 
     def frame(self) -> int:
         """Read which frame of logic the game is on."""
@@ -868,11 +906,22 @@ class LoaderGate:
     run between the two. So where the loader ends its thread, the flag is
     cleared, and the build is held until the end of a frame by which no
     build's loader is still at work.
+
+    Each build's loader also gets to the end of preparing the hole in a
+    frame of its own, in which it writes the lights in the draw buffer's
+    slot and sets the matrices' buffer to 0, which the graphics thread
+    swaps every frame from then on. Which buffer each frame then uses is the
+    outcome of a race that the loader's speed decides, as on the console,
+    so as the gate lets the loads end, it gives the modern build the
+    matching build's outcome: the lights in the matching build's slot, and
+    its matrices' buffer.
     """
 
     def __init__(self) -> None:
         """Hold no build."""
         self.held: list[Harness] = []
+        # The draw buffer that each build's loader wrote the lights in
+        self.light_slots: dict[Harness, int] = {}
 
     def take_thread_end(self, harness: Harness) -> None:
         """Hold HARNESS's build if its loader is ending its thread."""
@@ -887,13 +936,31 @@ class LoaderGate:
             message = f"{harness.build.directory}: the game stopped a held loader"
             raise HarnessError(message)
 
+    def take_lights(self, harness: Harness) -> None:
+        """Note the slot that HARNESS's loader is writing the lights in, if it is."""
+        if harness.is_loader_running():
+            address = harness.build.addresses[DRAW_BUFFER_INDEX]
+            self.light_slots[harness] = harness.read_word(address)
+
     def release(self, harnesses: tuple["Harness", "Harness"]) -> None:
         """Set the held builds' flags once no build's loader is at work."""
         if any(h.is_loading() for h in harnesses if h not in self.held):
             return
+        if self.held:
+            self.align_buffers(harnesses)
         for harness in self.held:
             harness.write_word(harness.build.addresses[LOADER_FINISHED], 1)
         self.held = []
+
+    def align_buffers(self, harnesses: tuple["Harness", "Harness"]) -> None:
+        """Give the modern build the matching build's buffers of the loads."""
+        matching, modern = harnesses
+        slots = [self.light_slots.pop(harness, None) for harness in harnesses]
+        if None not in slots and slots[0] != slots[1]:
+            for name in DRAW_BUFFERED_LIGHTS:
+                modern.swap_halves(name)
+        index = matching.read_word(matching.build.addresses[MATRIX_BUFFER_INDEX])
+        modern.write_word(modern.build.addresses[MATRIX_BUFFER_INDEX], index)
 
 
 @dataclass
@@ -918,6 +985,10 @@ class FrameRun:
         addresses = harness.build.addresses
         if address == addresses[THREAD_END]:
             self.gate.take_thread_end(harness)
+            self.running.append(harness)
+            return
+        if address == addresses[LIGHTS_ROUTINE]:
+            self.gate.take_lights(harness)
             self.running.append(harness)
             return
         frame = harness.frame()
