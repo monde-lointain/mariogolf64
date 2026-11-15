@@ -128,7 +128,7 @@ TakenCharacters g_TakenCharacters;
 ImageAsset *g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
 PaletteColor *g_TrophyPalettes[TROPHY_PALETTE_COUNT];
 
-FILE_STATIC SaveData f_SaveData;
+FILE_STATIC SaveData f_SaveData RCP_ALIGNED;
 
 // f_SlotCells lists slots in id order up to this count
 #define MARKABLE_CHARACTER_COUNT 10

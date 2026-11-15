@@ -364,7 +364,7 @@ static u8 f_UnusedBytesBeforeCastSlot[0x10] UNUSED;
 static s32 f_CastSlot; // The slot of the character shown, 0 or 1
 static CoursePoint f_NearCupPoint;
 static u8 f_UnusedBytesAfterNearCupPoint[16] UNUSED;
-static StaffRollImage f_StaffRollImage;
+static StaffRollImage f_StaffRollImage RCP_ALIGNED;
 static StaffText *f_StaffText;
 static u8 *f_StaffFont;
 static void *f_BillboardHeap;

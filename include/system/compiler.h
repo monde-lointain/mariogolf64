@@ -91,7 +91,9 @@
 #endif
 
 // Follows the declarator of a buffer of bytes or halfwords that the RCP or a
-// DMA reads or writes: a texture, palette or image, or a DMA's target. Their
+// DMA reads or writes: a texture, palette or image, or a DMA's target, or of
+// a structure that holds one at an 8-byte offset, such as an image after its
+// header or the save data that SRAM's DMA reads and writes whole. Their
 // address registers ignore the low three bits, as does TextureAddress, so the
 // buffer must start on an 8-byte boundary. The original's linker happened to
 // place each one so; other layouts have to ask for it.
