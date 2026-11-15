@@ -495,7 +495,7 @@ static Lights2 f_UnusedCharacterLights[DRAW_BUFFER_COUNT] UNUSED = {
 };
 // The ambient and first light last drawn with, used instead during the impact
 // flash; DrawCharacterAndShadow then sets their second light to the flash level
-static Lights2 f_SavedLights[DRAW_BUFFER_COUNT] = {
+static Lights2 f_ImpactFlashLights[DRAW_BUFFER_COUNT] = {
     gdSPDefLights2(0x20, 0x20, 0x20, 0xFF, 0xDC, 0xDC, 0, -127, 0, 0xFF, 0xDC, 0xDC, 126, 0, 1),
     gdSPDefLights2(0x20, 0x20, 0x20, 0xFF, 0xDC, 0xDC, 0, -127, 0, 0xFF, 0xDC, 0xDC, 126, 0, 1),
 };
@@ -1979,13 +1979,13 @@ void SetCharacterLights(void) {
     );
 }
 
-// Copies the ambient and first light into both of f_SavedLights
-#define SaveLights(lights) \
+// Copies the ambient and first light into both of f_ImpactFlashLights
+#define CopyLightsForImpactFlash(lights) \
     { \
-        f_SavedLights[0].l[0].l = (lights).l[0].l; \
-        f_SavedLights[1].l[0].l = (lights).l[0].l; \
-        f_SavedLights[0].a.l = (lights).a.l; \
-        f_SavedLights[1].a.l = (lights).a.l; \
+        f_ImpactFlashLights[0].l[0].l = (lights).l[0].l; \
+        f_ImpactFlashLights[1].l[0].l = (lights).l[0].l; \
+        f_ImpactFlashLights[0].a.l = (lights).a.l; \
+        f_ImpactFlashLights[1].a.l = (lights).a.l; \
     }
 
 // Draws the character in the slot with its lights, alpha and culling
@@ -1994,9 +1994,10 @@ void SetCharacterLights(void) {
 // and jump2 merges the two arms' identical tails, as the original does. Naming
 // each lights table in place lets fold add the first light's offset to the
 // table's address before the index's, so cse shares table + 8 between
-// gSPSetLights2 and SaveLights. Choosing the table into a pointer and falling
-// back once after the test adds the offset last: 99 words differed, 15 in
-// shape, or 71 (7) with the fallback's gSPSetLights2 in a block of its own.
+// gSPSetLights2 and CopyLightsForImpactFlash. Choosing the table into a
+// pointer and falling back once after the test adds the offset last: 99 words
+// differed, 15 in shape, or 71 (7) with the fallback's gSPSetLights2 in a
+// block of its own.
 void DrawCharacter(u32 slotIndex) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     Gfx *gfx = g_DisplayListHead;
@@ -2020,17 +2021,17 @@ void DrawCharacter(u32 slotIndex) {
             switch (slot->lighting) {
                 case CHARACTER_LIGHTING_FIXED:
                     gSPSetLights2(gfx++, f_FixedLights);
-                    SaveLights(f_FixedLights);
+                    CopyLightsForImpactFlash(f_FixedLights);
                     break;
                 default:
                 case CHARACTER_LIGHTING_SCENE:
                     if (g_HoleSetup.conditions.isRaining) {
                         gSPSetLights2(gfx++, f_RainLights[g_DrawBufferIndex]);
-                        SaveLights(f_RainLights[g_DrawBufferIndex]);
+                        CopyLightsForImpactFlash(f_RainLights[g_DrawBufferIndex]);
                     }
                     else {
                         gSPSetLights2(gfx++, f_DryLights[g_DrawBufferIndex]);
-                        SaveLights(f_DryLights[g_DrawBufferIndex]);
+                        CopyLightsForImpactFlash(f_DryLights[g_DrawBufferIndex]);
                     }
 
                     break;
@@ -2038,25 +2039,25 @@ void DrawCharacter(u32 slotIndex) {
                     if (g_HoleSetup.conditions.isRaining) {
                         if (!AddReactionLight(&gfx, &f_RainLights[g_DrawBufferIndex])) {
                             gSPSetLights2(gfx++, f_RainLights[g_DrawBufferIndex]);
-                            SaveLights(f_RainLights[g_DrawBufferIndex]);
+                            CopyLightsForImpactFlash(f_RainLights[g_DrawBufferIndex]);
                         }
                     }
                     else {
                         if (!AddReactionLight(&gfx, &f_DryLights[g_DrawBufferIndex])) {
                             gSPSetLights2(gfx++, f_DryLights[g_DrawBufferIndex]);
-                            SaveLights(f_DryLights[g_DrawBufferIndex]);
+                            CopyLightsForImpactFlash(f_DryLights[g_DrawBufferIndex]);
                         }
                     }
 
                     break;
                 case CHARACTER_LIGHTING_BLACK:
                     gSPSetLights2(gfx++, f_BlackLights);
-                    SaveLights(f_BlackLights);
+                    CopyLightsForImpactFlash(f_BlackLights);
                     break;
             }
         }
         else {
-            gSPSetLights2(gfx++, f_SavedLights[g_DrawBufferIndex]);
+            gSPSetLights2(gfx++, f_ImpactFlashLights[g_DrawBufferIndex]);
         }
 
         MapModelBuffer(slot);
@@ -2245,20 +2246,20 @@ void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotI
         }
 
         if (g_ImpactFlashState != IMPACT_FLASH_NONE) {
-            f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.col[0] = g_ImpactFlashLevel;
-            f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.col[1] = g_ImpactFlashLevel;
-            f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.col[2] = g_ImpactFlashLevel / 2;
-            f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[0] = g_ImpactFlashLevel;
-            f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[1] = g_ImpactFlashLevel;
-            f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[2] = g_ImpactFlashLevel / 2;
-            f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.dir[AXIS_X] =
+            f_ImpactFlashLights[g_DrawBufferIndex ^ 1].l[1].l.col[0] = g_ImpactFlashLevel;
+            f_ImpactFlashLights[g_DrawBufferIndex ^ 1].l[1].l.col[1] = g_ImpactFlashLevel;
+            f_ImpactFlashLights[g_DrawBufferIndex ^ 1].l[1].l.col[2] = g_ImpactFlashLevel / 2;
+            f_ImpactFlashLights[g_DrawBufferIndex ^ 1].l[1].l.colc[0] = g_ImpactFlashLevel;
+            f_ImpactFlashLights[g_DrawBufferIndex ^ 1].l[1].l.colc[1] = g_ImpactFlashLevel;
+            f_ImpactFlashLights[g_DrawBufferIndex ^ 1].l[1].l.colc[2] = g_ImpactFlashLevel / 2;
+            f_ImpactFlashLights[g_DrawBufferIndex ^ 1].l[1].l.dir[AXIS_X] =
                 sinf(GetImpactFlashYaw(
                     slot->rotation[AXIS_Y],
                     g_Players[g_CurrentShot.playerIndex].isLefty
                 )) *
                 LIGHT_DIRECTION_SCALE;
-            f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.dir[AXIS_Y] = 0;
-            f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.dir[AXIS_Z] =
+            f_ImpactFlashLights[g_DrawBufferIndex ^ 1].l[1].l.dir[AXIS_Y] = 0;
+            f_ImpactFlashLights[g_DrawBufferIndex ^ 1].l[1].l.dir[AXIS_Z] =
                 -cosf(GetImpactFlashYaw(
                     slot->rotation[AXIS_Y],
                     g_Players[g_CurrentShot.playerIndex].isLefty
