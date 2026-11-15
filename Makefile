@@ -20,6 +20,10 @@ MODERN      ?= 0
 ifneq ($(MODERN),0)
 override NON_MATCHING := 1
 endif
+# The modern build compiles each segment's code together, with LTO. Set
+# LTO=0 to link its objects as each compiled, such as to find whether LTO
+# brings about a difference. Build with -B after changing it.
+LTO         ?= 1
 # Set COMPARE=0 to skip the checksum comparison at the end of the build
 COMPARE      ?= 1
 ifneq ($(NON_MATCHING),0)
@@ -96,7 +100,12 @@ LIB_CC      := $(CC)
 # call.
 COLLECTED_SECTIONS := -ffunction-sections -fdata-sections
 GC_FLAGS    := --gc-sections
-TARGETFLAGS := $(MODERN_TARGETFLAGS) $(COLLECTED_SECTIONS)
+# Each object holds its bytecode, which the segments' LTO links compile
+# (see tools/link_segments.py), and its code as compiled alone, which the
+# links of the objects themselves take: the tests', check-shiftable's and,
+# with LTO=0, the game's. The tools that read the objects read that code.
+LTO_FLAGS   := -flto -ffat-lto-objects
+TARGETFLAGS := $(MODERN_TARGETFLAGS) $(COLLECTED_SECTIONS) $(LTO_FLAGS)
 KMC_ALIGN   :=
 GAME_DEFINES :=
 # Modern GCC's -ffast-math reorders the float math enough that the ball
@@ -125,9 +134,20 @@ SYMBOL_SCRIPTS := undefined_syms.txt
 # reference that holds only at the original's addresses fails to link.
 SHIFTABLE_LD      := $(BUILD_DIR)/shiftable.ld
 SHIFTABLE_SYMBOLS := $(BUILD_DIR)/fixed_syms.ld
+# The LTO links' objects, one for each segment of code, and the shiftable
+# script that places them in place of the segments' files
+LTO_DIR           := $(BUILD_DIR)/lto
+LTO_LD            := $(LTO_DIR)/segments.ld
 ifeq ($(NON_MATCHING),0)
 LD_SCRIPTS  := $(SPLAT_LD) $(SYMBOL_SCRIPTS)
 LINKED_O_FILTER :=
+else ifneq ($(MODERN),0)
+ifneq ($(LTO),0)
+LD_SCRIPTS  := $(LTO_LD) $(SHIFTABLE_SYMBOLS)
+else
+LD_SCRIPTS  := $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)
+endif
+LINKED_O_FILTER := $(MATCHING_ONLY_O)
 else
 LD_SCRIPTS  := $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)
 LINKED_O_FILTER := $(MATCHING_ONLY_O)
@@ -390,7 +410,11 @@ $(TEST_LD): $(SHIFTABLE_LD) tests/target/segment.ld
 	    $< > $@
 
 # NuSystem's boot starts the main thread in the boot stub instead of
-# mainproc. Modern GCC's linker reads both toolchains' objects.
+# mainproc. Modern GCC's linker reads both toolchains' objects. The link
+# takes the modern objects' code as each compiled, not the segments' LTO
+# objects: --wrap redirects only the references that an object leaves
+# undefined, and a segment's object defines mainproc where nuboot.c's
+# reference to it is.
 $(TEST_ELF): $(O_FILES) $(TEST_O_FILES) $(TEST_BOOT) $(TEST_LD) $(SHIFTABLE_SYMBOLS)
 	$(MODERN_CROSS)ld $(addprefix -T ,$(TEST_LD) $(SHIFTABLE_SYMBOLS)) -Map $(TEST_DIR)/tests.map \
 	    $(LAYOUT_FLAGS) --wrap=mainproc -o $@ $(TEST_O_FILES) $(TEST_BOOT) $(MODERN_LIBS)
@@ -448,7 +472,8 @@ $(KMC_DIR)/as:
 	wget -q -O - https://github.com/decompals/mips-binutils-2.6/releases/latest/download/binutils-2.6-linux.tar.gz | tar xz -C $(KMC_DIR)
 
 clean:
-	rm -rf $(BUILD_DIR)/asm $(BUILD_DIR)/src $(BUILD_DIR)/assets $(BUILD_DIR)/lib $(ROM) $(ELF) $(TEST_DIR)
+	rm -rf $(BUILD_DIR)/asm $(BUILD_DIR)/src $(BUILD_DIR)/assets $(BUILD_DIR)/lib $(ROM) $(ELF) $(TEST_DIR) \
+	    $(LTO_DIR)
 
 distclean:
 	rm -rf $(BUILD_DIR) asm assets
@@ -475,6 +500,11 @@ $(SPLAT_O_LIST): $(SPLAT_LD)
 $(SHIFTABLE_LD): $(SPLAT_LD) tools/shiftable_ld.py
 	@mkdir -p $(dir $@)
 	sed -e '\|$(MATCHING_ONLY_O)|d' -e 's|build/|$(BUILD_DIR)/|g' $< | $(PYTHON) tools/shiftable_ld.py > $@
+
+# The compiler's LTO takes its share of make's jobs
+$(LTO_LD): $(O_FILES) $(SHIFTABLE_LD) tools/link_segments.py
+	+$(PYTHON) tools/link_segments.py $(SHIFTABLE_LD) $(LTO_DIR) -- \
+	    $(CC) $(TARGETFLAGS) $(OPTFLAGS) $(WARNINGS)
 
 $(SHIFTABLE_SYMBOLS): $(SPLAT_YAML) $(SYMBOL_SCRIPTS) tools/fixed_syms.py
 	@mkdir -p $(dir $@)

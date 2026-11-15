@@ -73,12 +73,16 @@ PLACEMENT = re.compile(
 )
 EVERY_FILE = "*"
 ARCHIVE_MEMBER = re.compile(r"^(?P<archive>.+)\((?P<member>[^()]+)\)$")
-# The sections, by their names' starts, that hold what the game never loads
+# The sections, by their names' starts, that hold what the game never loads,
+# such as the bytecode that the modern build's objects carry for the
+# segments' LTO links (see link_segments.py), which a link of their code
+# leaves out
 UNLOADED_SECTIONS = (
     ".MIPS.abiflags",
     ".comment",
     ".debug",
     ".gnu.attributes",
+    ".gnu.lto_",
     ".mdebug",
     ".note",
     ".pdr",

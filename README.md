@@ -23,6 +23,14 @@ make setup    # download the KMC GCC 2.7.2 toolchain and split the ROM
 make -j       # build and verify build/mariogolf64.z64
 ```
 
+`make MODERN=1` builds `build/modern/mariogolf64.z64` with a modern GCC,
+libdragon's `mips64-elf-gcc`, which `N64_INST` names the directory of. It
+leaves out what nothing uses (`--gc-sections`) and compiles each segment's
+code together, with link-time optimization, so that routines inline
+across the segment's files while each overlay keeps its own code (see
+`tools/link_segments.py`). `LTO=0` links the objects as each compiled,
+such as to find whether LTO brings a difference about.
+
 ## Progress
 
 Every routine matches the original's. `make progress` also builds the ROM
