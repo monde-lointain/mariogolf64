@@ -31,6 +31,18 @@ bss rather than in the script's /DISCARD/.
 The matching build defines main's common objects in one file at the
 original's addresses, which this layout leaves out. Each object of main
 keeps its commons with its bss instead, as the overlays' objects do.
+
+A build may have the linker collect the sections that nothing refers to
+(--gc-sections). The code reaches many of the segments, such as the asset
+files and the build date, only through their addresses in ROM, which the
+collector can't follow. So every object's whole sections, those that the
+assembler and binary objects hold, are kept (KEEP), and only the ones that
+-ffunction-sections and -fdata-sections split off, each named for one
+routine or object (.text.NAME), may be collected. A pattern such as .text*
+becomes .text and .text[!.]*, which also matches a section of its own such
+as .text_messages, kept, and .text.*, which may be collected. Without
+--gc-sections, KEEP collects nothing, but each object's dotted sections,
+such as the merged constants of .rodata.cst4, now follow its whole ones.
 """
 
 import re
@@ -54,6 +66,9 @@ MAIN_BSS_END = f"        . = ALIGN(., 16);\n        {MAIN}_BSS_END = .;\n"
 OBJECT_BSS = re.compile(r"^(\s*\S+\.o)\(\.bss\*\);$", re.MULTILINE)
 EXACT_BSS = "(.bss COMMON .scommon)"
 ANY_BSS = "(.bss* COMMON .scommon*)"
+
+# A statement that places an object's input sections
+OBJECT_SECTIONS = re.compile(r"^(\s*)(\S+\.o)\(([^()]*)\);$", re.MULTILINE)
 
 BLOCK_NAME = re.compile(r"^\s*(\w+)_ROM_START = __romPos;$", re.MULTILINE)
 SECTION_VRAM = re.compile(r"^(\s*\.\w+) (0x[0-9A-Fa-f]+) :", re.MULTILINE)
@@ -94,6 +109,24 @@ def place_unlisted_sections(blocks: list[str], main_index: int) -> None:
     blocks[bss_index] = OBJECT_BSS.sub(
         r"\g<0>\n\1(COMMON .scommon*);", blocks[bss_index]
     ).replace(MAIN_BSS_END, ARCHIVE_BSS + MAIN_BSS_END, 1)
+
+
+def keep_whole_sections(match: re.Match[str]) -> str:
+    """Keep the whole sections that MATCH places; leave the split ones."""
+    indent, object_file, patterns = match.group(1), match.group(2), match.group(3)
+    kept: list[str] = []
+    split: list[str] = []
+    for pattern in patterns.split():
+        if pattern.startswith(".") and pattern.endswith("*"):
+            name = pattern.removesuffix("*")
+            kept += [name, f"{name}[!.]*"]
+            split.append(f"{name}.*")
+        else:
+            kept.append(pattern)
+    statement = f"{indent}KEEP({object_file}({' '.join(kept)}));"
+    if split:
+        statement += f"\n{indent}{object_file}({' '.join(split)});"
+    return statement
 
 
 def lay_out(script: str) -> str:
@@ -159,7 +192,8 @@ def lay_out(script: str) -> str:
     out.append(build_date)
     out.extend(rom_only)
     out.extend(commands)
-    return head + separator + "\n\n".join(out) + end_separator + tail
+    body = OBJECT_SECTIONS.sub(keep_whole_sections, "\n\n".join(out))
+    return head + separator + body + end_separator + tail
 
 
 def main() -> None:
