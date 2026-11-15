@@ -83,13 +83,20 @@ ULTRALIB_COMPILER := gcc
 ULTRALIB_ASM_ABI := -D_MIPS_SIM=1
 LIB_MODERN  :=
 LIBS        :=
+GC_FLAGS    :=
 else
 BUILD_DIR   := build/modern
 CROSS       := $(MODERN_CROSS)
 BIN_FORMAT  := elf32-bigmips
 CC          := $(MODERN_CC)
 LIB_CC      := $(CC)
-TARGETFLAGS := $(MODERN_TARGETFLAGS)
+# Each routine and object in a section of its own, which the link drops
+# unless something refers to it (see tools/shiftable_ld.py). The tests'
+# link keeps every routine, for the tests of those that the game doesn't
+# call.
+COLLECTED_SECTIONS := -ffunction-sections -fdata-sections
+GC_FLAGS    := --gc-sections
+TARGETFLAGS := $(MODERN_TARGETFLAGS) $(COLLECTED_SECTIONS)
 KMC_ALIGN   :=
 GAME_DEFINES :=
 # Modern GCC's -ffast-math reorders the float math enough that the ball
@@ -174,7 +181,7 @@ ASFLAGS     := -march=vr4300 -mabi=32 -G0 -EB -no-pad-sections -Iinclude
 # enough, so fix its size to keep the commons where the names put them.
 LD_HASH_SIZE := 8191
 LAYOUT_FLAGS   := --no-check-sections --hash-size=$(LD_HASH_SIZE) -G 0
-LDFLAGS         = $(addprefix -T ,$(LD_SCRIPTS)) -Map $(MAP) $(LAYOUT_FLAGS)
+LDFLAGS         = $(addprefix -T ,$(LD_SCRIPTS)) -Map $(MAP) $(LAYOUT_FLAGS) $(GC_FLAGS)
 
 # Host-side syntax checking of C sources with clang, pretending to be 32-bit MIPS
 CC_CHECK       := clang -fsyntax-only -fno-builtin -funsigned-char -std=gnu89 -m32 -nostdinc \
@@ -238,12 +245,6 @@ $(BUILD_DIR)/$(LIBNAUDIO_DIR)/%.o: OPTFLAGS := -O3
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nuboot.c.o: OPTFLAGS :=
 $(BUILD_DIR)/$(LIBKMC_DIR)/%.o: OPTFLAGS := -O1
 else
-# The modern build keeps every routine and object, used or not. Collecting
-# unreferenced sections (-ffunction-sections -fdata-sections --gc-sections)
-# would save about 55 KB of code and 80 KB of base RAM, which buys nothing
-# while the heap keeps the original's size; and the collector drops every
-# segment reached only through its ROM address, such as IPL3, the assets,
-# the sound banks and the build date, unless the script keeps each one.
 OPTFLAGS := -Os
 endif
 
