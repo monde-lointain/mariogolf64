@@ -116,13 +116,14 @@ typedef struct FlagPanel {
 // The map image texel at a texel column and row; the first texel row and
 // column of each tile are its border
 #define MAP_TEXEL(column, row) \
-    g_WorkArea.hole \
-        .tiles \
-            [((column) / GROUND_TILE_TEXEL_SPAN) + \
-                (((row) / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)] \
-        .texels[1] \
-               [((column) & (GROUND_TILE_TEXEL_SPAN - 1)) + \
-                   (((row) & (GROUND_TILE_TEXEL_SPAN - 1)) * GROUND_TILE_TEXEL_ROW_LENGTH) + 1]
+    TileTexelRun( \
+        g_WorkArea.hole \
+            .tiles \
+                [((column) / GROUND_TILE_TEXEL_SPAN) + \
+                    (((row) / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)] \
+            .texels \
+    )[GROUND_TILE_TEXEL_ROW_LENGTH + ((column) & (GROUND_TILE_TEXEL_SPAN - 1)) + \
+        (((row) & (GROUND_TILE_TEXEL_SPAN - 1)) * GROUND_TILE_TEXEL_ROW_LENGTH) + 1]
 
 // Water tests probe a vertical segment from -reach to +reach; the height
 // where it hits water is at the hit's fraction of the way along
@@ -1265,7 +1266,8 @@ void InitTerrainTextures(void) {
         // Fills the image's first texels as if its rows were unpadded
         for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
             for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN; texelColumn++) {
-                tile->texels[0][(texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn] = 0x7C1;
+                TileTexelRun(tile->texels)[(texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn] =
+                    0x7C1;
             }
         }
     }

@@ -94,6 +94,16 @@ enum TileMidpointSlot {
 #define GROUND_TILE_TEXEL_SPAN 32
 #define GROUND_TILE_TEXEL_ROW_COUNT 34
 #define GROUND_TILE_TEXEL_ROW_LENGTH 36
+// A tile image's texels as one run from the first. The game indexes both of
+// its layouts as a run: the bordered one's rows GROUND_TILE_TEXEL_ROW_LENGTH
+// texels apart, and the one without a border, which the hole builder
+// writes, GROUND_TILE_TEXEL_SPAN texels a row from the first texel. The
+// original indexes the first row past its end, which C leaves undefined.
+#ifdef AVOID_UB
+#    define TileTexelRun(texels) ((u16 *)(texels))
+#else
+#    define TileTexelRun(texels) ((texels)[0])
+#endif
 // A tile's place in the tile size coordinates, in quarter texels. A bordered
 // tile's texture starts half a texel into its place and ends past the start of
 // the next tile's place by these many.

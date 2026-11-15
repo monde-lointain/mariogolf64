@@ -2119,7 +2119,7 @@ void LoadCodeMap(char *path) {
         for (texelIndex = 0;
             texelIndex < GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH;
             texelIndex++) {
-            g_WorkArea.hole.tiles[tileIndex].texels[0][texelIndex] = 0;
+            TileTexelRun(g_WorkArea.hole.tiles[tileIndex].texels)[texelIndex] = 0;
         }
     }
 
@@ -4015,11 +4015,11 @@ void ShadeGroundTiles(void) {
         heights = heightRows[row & HEIGHT_RING_ROW_MASK];
         column = 0;
         do {
-            texel = &g_WorkArea.hole
-                         .tiles
-                             [(column / GROUND_TILE_TEXEL_SPAN) +
-                                 ((row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)]
-                         .texels[0][(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN];
+            texel = &TileTexelRun(g_WorkArea.hole
+                    .tiles
+                        [(column / GROUND_TILE_TEXEL_SPAN) +
+                            ((row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)]
+                    .texels)[(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN];
             // The offset heights can be off the map only in the edge tiles
             isMapEdge = column == 0 || column == MAP_COLUMN_COUNT - GROUND_TILE_TEXEL_SPAN;
             if (!isMapEdge) {
@@ -4264,7 +4264,9 @@ static inline u16 ReadTileTexel(s32 tileColumn, s32 tileRow, s32 texelColumn, s3
         // innermost sum and the tile's offset comes out as the last
         // addition's first operand; the twelve groupings of one sum give 4
         // words differing (none in shape), 8 (none) or 10 (2)
-        texel = &g_WorkArea.hole.tiles[0].texels[TILE_BORDER_BEFORE][TILE_BORDER_BEFORE] +
+        texel = &TileTexelRun(
+                    g_WorkArea.hole.tiles[0].texels
+                )[(TILE_BORDER_BEFORE * GROUND_TILE_TEXEL_ROW_LENGTH) + TILE_BORDER_BEFORE] +
             ((texelRow * GROUND_TILE_TEXEL_ROW_LENGTH) + texelColumn);
         texel = (u16 *)AddressPast(texel, tileIndex * sizeof(GroundTile));
         return *texel;
@@ -4311,22 +4313,24 @@ void ToggleGroundTileBorders(void) {
                     strippedTexelRow++) {
                     for (strippedTexelColumn = 0; strippedTexelColumn < GROUND_TILE_TEXEL_SPAN;
                         strippedTexelColumn++) {
-                        texels[0]
-                              [(strippedTexelRow * GROUND_TILE_TEXEL_SPAN) + strippedTexelColumn] =
-                                  ReadTileTexel(
-                                      strippedTileColumn,
-                                      strippedTileRow,
-                                      strippedTexelColumn,
-                                      strippedTexelRow
-                                  );
+                        TileTexelRun(
+                            texels
+                        )[(strippedTexelRow * GROUND_TILE_TEXEL_SPAN) + strippedTexelColumn] =
+                            ReadTileTexel(
+                                strippedTileColumn,
+                                strippedTileRow,
+                                strippedTexelColumn,
+                                strippedTexelRow
+                            );
                     }
                 }
 
                 texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0;
                 for (texelIndex = 0; texelIndex < BORDERED_TILE_TEXEL_COUNT; texelIndex++) {
-                    g_WorkArea.hole
-                        .tiles[(strippedTileRow * GROUND_TILE_COLUMN_COUNT) + strippedTileColumn]
-                        .texels[0][texelIndex] = texels[0][texelIndex];
+                    TileTexelRun(g_WorkArea.hole
+                            .tiles
+                                [(strippedTileRow * GROUND_TILE_COLUMN_COUNT) + strippedTileColumn]
+                            .texels)[texelIndex] = TileTexelRun(texels)[texelIndex];
                 }
             }
         }
@@ -4336,9 +4340,12 @@ void ToggleGroundTileBorders(void) {
 
     for (tileRow = 0; tileRow < GROUND_TILE_ROW_COUNT; tileRow++) {
         for (tileColumn = 0; tileColumn < GROUND_TILE_COLUMN_COUNT; tileColumn++) {
-            texel = &texels[TILE_BORDER_BEFORE][TILE_BORDER_BEFORE];
-            tileTexel =
-                g_WorkArea.hole.tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn].texels[0];
+            texel = &TileTexelRun(
+                texels
+            )[(TILE_BORDER_BEFORE * GROUND_TILE_TEXEL_ROW_LENGTH) + TILE_BORDER_BEFORE];
+            tileTexel = TileTexelRun(
+                g_WorkArea.hole.tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn].texels
+            );
             for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
                 for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN; texelColumn++) {
                     *texel++ = *tileTexel++;
@@ -4347,7 +4354,7 @@ void ToggleGroundTileBorders(void) {
                 texel += GROUND_TILE_TEXEL_ROW_LENGTH - GROUND_TILE_TEXEL_SPAN;
             }
 
-            texel = texels[0];
+            texel = TileTexelRun(texels);
             for (texelRow = -TILE_BORDER_BEFORE;
                 texelRow < GROUND_TILE_TEXEL_ROW_COUNT - TILE_BORDER_BEFORE;
                 texelRow++) {

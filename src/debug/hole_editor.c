@@ -5370,13 +5370,15 @@ void CaptureMapImage(void) {
         u32 row = texelIndex / MAP_CAPTURE_WIDTH % MAP_CAPTURE_HEIGHT;
 
         // The game indexes the texels past the border as one run of rows
-        return g_WorkArea.hole
-            .tiles
-                [column / GROUND_TILE_TEXEL_SPAN +
-                    row / GROUND_TILE_TEXEL_SPAN * GROUND_TILE_COLUMN_COUNT]
-            .texels[GROUND_TILE_TEXEL_BORDER]
-                   [GROUND_TILE_TEXEL_BORDER + column % GROUND_TILE_TEXEL_SPAN +
-                       row % GROUND_TILE_TEXEL_SPAN * GROUND_TILE_TEXEL_ROW_LENGTH];
+        return TileTexelRun(
+            g_WorkArea.hole
+                .tiles
+                    [column / GROUND_TILE_TEXEL_SPAN +
+                        row / GROUND_TILE_TEXEL_SPAN * GROUND_TILE_COLUMN_COUNT]
+                .texels
+        )[GROUND_TILE_TEXEL_BORDER * GROUND_TILE_TEXEL_ROW_LENGTH + GROUND_TILE_TEXEL_BORDER +
+            column % GROUND_TILE_TEXEL_SPAN +
+            row % GROUND_TILE_TEXEL_SPAN * GROUND_TILE_TEXEL_ROW_LENGTH];
     }
 
     MarkBillboardsOnMap();
