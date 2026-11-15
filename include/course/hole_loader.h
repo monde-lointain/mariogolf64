@@ -47,6 +47,11 @@ extern s32 g_HoleTimeMinutes[COURSE_HOLE_COUNT];
 extern s32 g_HoleTimeSeconds[COURSE_HOLE_COUNT];
 extern s32 g_HoleTimeHundredths[COURSE_HOLE_COUNT];
 
+// The loader thread's steps, which load the current hole and prepare its
+// scene. Both need the hole builder's overlay loaded.
+void LoadHole(void);
+void PrepareHoleScene(void);
+
 void ResetLoaderThread(void);
 void StartLoaderThread(void);
 void StopLoaderThread(void);
