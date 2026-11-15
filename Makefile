@@ -17,6 +17,18 @@ NON_MATCHING ?= 0
 # Set MODERN=1 to build with a modern GCC instead of KMC GCC 2.7.2. Its code
 # differs in size from the original's, so its ROM doesn't match either.
 MODERN      ?= 0
+# Set SANITIZE=1 to build a modern ROM, in build/sanitize, whose code checks
+# itself for what C leaves undefined and the layout or the compiler then
+# decides: an index past an array, a shift by the width or more, a division
+# by zero, and a float out of the integer's range that it becomes.
+# tools/sanitize.py runs it and reports the checks that failed. The checks'
+# code fits before the main heap only as LTO compiles it, so LTO=0,
+# check-shiftable and the tests, which link the objects as each compiled,
+# fail to link with it.
+SANITIZE    ?= 0
+ifneq ($(SANITIZE),0)
+override MODERN := 1
+endif
 ifneq ($(MODERN),0)
 override NON_MATCHING := 1
 endif
@@ -89,7 +101,7 @@ LIB_MODERN  :=
 LIBS        :=
 GC_FLAGS    :=
 else
-BUILD_DIR   := build/modern
+BUILD_DIR   := build/$(if $(filter-out 0,$(SANITIZE)),sanitize,modern)
 CROSS       := $(MODERN_CROSS)
 BIN_FORMAT  := elf32-bigmips
 CC          := $(MODERN_CC)
@@ -119,6 +131,22 @@ ULTRALIB_COMPILER := modern_gcc
 LIB_MODERN  := -DMODERN_CC
 ULTRALIB_ASM_ABI :=
 LIBS        := $(MODERN_LIBS)
+endif
+
+# GCC's undefined behavior sanitizer, whose failed checks call the handlers
+# of src/debug/sanitizer.c. They come from an archive, as libgcc's helpers
+# do, so that they go at the end of main's code, where every segment can
+# call them. Their own file is compiled without the checks, and without
+# LTO, as the archive holds code.
+SANITIZE_FLAGS := -fsanitize=bounds,shift,integer-divide-by-zero,float-cast-overflow,vla-bound
+SANITIZER_O    := $(BUILD_DIR)/src/debug/sanitizer.c.o
+ifneq ($(SANITIZE),0)
+TARGETFLAGS += $(SANITIZE_FLAGS)
+SANITIZER_LIB := $(BUILD_DIR)/libsanitizer.a
+LIBS        += $(SANITIZER_LIB)
+$(SANITIZER_O): TARGETFLAGS += -fno-sanitize=all -fno-lto
+else
+SANITIZER_LIB :=
 endif
 
 # main_bss.c only pins main's common objects at the original's addresses.
@@ -273,7 +301,7 @@ $(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
 .PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable \
         check-alignment \
-        progress equivalence test target-tests
+        progress equivalence sanitize test target-tests
 
 # A recipe that fails after writing its target, such as a check of what it
 # wrote, would otherwise leave a target that the next run takes as built
@@ -333,7 +361,7 @@ progress: $(ROM)
 # Links this build's objects in the shiftable layout, which fails on each
 # reference that holds only while the code and data keep their original
 # addresses. The shiftable builds link that way already.
-check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)
+check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS) $(SANITIZER_LIB)
 	$(LD) $(addprefix -T ,$(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)) -Map $(BUILD_DIR)/shiftable.map \
 	    $(LAYOUT_FLAGS) -o $(BUILD_DIR)/shiftable.elf $(LIBS)
 	@$(PYTHON) tools/check_link.py $(BUILD_DIR)/shiftable.elf $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS) -- $(O_FILES)
@@ -361,6 +389,15 @@ EQUIVALENCE_FRAMES ?= 3000
 equivalence: all
 	$(MAKE) MODERN=1
 	$(PYTHON) tools/equivalence.py --frames $(EQUIVALENCE_FRAMES)
+
+# Builds the sanitized ROM (SANITIZE=1), runs it in n64-harness for
+# SANITIZER_FRAMES frames, and reports the checks that failed (see
+# tools/sanitize.py)
+SANITIZER_FRAMES ?= 3000
+
+sanitize:
+	$(MAKE) SANITIZE=1
+	$(PYTHON) tools/sanitize.py --frames $(SANITIZER_FRAMES)
 
 # The unit tests in tests/, which run on the console with Unity. Each build
 # links them with its own objects into a test ROM, which boots into them
@@ -415,9 +452,11 @@ $(TEST_LD): $(SHIFTABLE_LD) tests/target/segment.ld
 # objects: --wrap redirects only the references that an object leaves
 # undefined, and a segment's object defines mainproc where nuboot.c's
 # reference to it is.
-$(TEST_ELF): $(O_FILES) $(TEST_O_FILES) $(TEST_BOOT) $(TEST_LD) $(SHIFTABLE_SYMBOLS)
+$(TEST_ELF): $(O_FILES) $(TEST_O_FILES) $(TEST_BOOT) $(TEST_LD) $(SHIFTABLE_SYMBOLS) \
+    $(SANITIZER_LIB)
 	$(MODERN_CROSS)ld $(addprefix -T ,$(TEST_LD) $(SHIFTABLE_SYMBOLS)) -Map $(TEST_DIR)/tests.map \
-	    $(LAYOUT_FLAGS) --wrap=mainproc -o $@ $(TEST_O_FILES) $(TEST_BOOT) $(MODERN_LIBS)
+	    $(LAYOUT_FLAGS) --wrap=mainproc -o $@ $(TEST_O_FILES) $(TEST_BOOT) $(MODERN_LIBS) \
+	    $(SANITIZER_LIB)
 	@$(PYTHON) tools/check_link.py $@ $(TEST_LD) $(SHIFTABLE_SYMBOLS) -- $(O_FILES)
 
 CLANG_TIDY ?= run-clang-tidy-23
@@ -523,9 +562,15 @@ $(ROM) $(TEST_ROM): %.z64: %.elf
 # tools/check_link.py checks the layout for what ld doesn't: scripts that
 # override an object's symbol, overlays that the game can't load together,
 # and sections with contents that the scripts discard
-$(ELF): $(O_FILES) $(LD_SCRIPTS)
+$(ELF): $(O_FILES) $(LD_SCRIPTS) $(SANITIZER_LIB)
 	$(LD) $(LDFLAGS) -o $@ $(LIBS)
 	@$(PYTHON) tools/check_link.py $@ $(LD_SCRIPTS) -- $(O_FILES)
+
+ifneq ($(SANITIZE),0)
+$(SANITIZER_LIB): $(SANITIZER_O)
+	rm -f $@
+	$(CROSS)ar rcs $@ $<
+endif
 
 $(BUILD_DIR)/%.s.o: %.s
 	@mkdir -p $(dir $@)

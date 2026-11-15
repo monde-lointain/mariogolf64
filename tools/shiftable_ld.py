@@ -19,6 +19,14 @@ the original's order, as the code takes every ROM address from the script's
 symbols. Other segments, such as an overlay of the Expansion Pak's memory,
 keep their addresses in RAM.
 
+The sanitized build's checks (make SANITIZE=1) pass their handlers the
+address of GCC's description of each, which only tools/sanitize.py reads.
+The descriptions go in a section that the ELF keeps and the ROM leaves
+out, at an address where no memory is, so that the checked code fits.
+In other builds, no section matches, and the section is left out. The
+section's own address would move the location counter, which the next
+section, the ROM header, takes, so the counter is kept around it.
+
 The routines that the build links from archives, such as the libgcc
 helpers that a modern GCC calls, go at the end of main's code, where
 every segment can call them, and their bss at the end of main's.
@@ -59,6 +67,16 @@ MAIN = "main"
 BUILD_DATE = "build_date"
 
 MAIN_TEXT_END = f"        {MAIN}_TEXT_END = .;\n"
+# KSEG0's view of the cartridge's domain, which holds no RDRAM, so that no
+# address of a sanitizer's description is taken for the game's
+SANITIZER_DESCRIPTORS_ADDRESS = 0x9000_0000
+SANITIZER_DESCRIPTORS = f"""\
+    HIDDEN(sanitizer_descriptors_LOCATION = .);
+    .sanitizer_descriptors 0x{SANITIZER_DESCRIPTORS_ADDRESS:X} (INFO) :
+    {{
+        *(.data.$Lubsan_* .bss.$Lubsan_*);
+    }}
+    . = sanitizer_descriptors_LOCATION;"""
 ARCHIVE_SECTIONS = "        *.a:*(.text* .rodata* .data*);\n"
 ARCHIVE_BSS = "        *.a:*(.bss* COMMON .scommon*);\n"
 # The end of main's bss, which splat aligns
@@ -168,7 +186,7 @@ def lay_out(script: str, heap_start: int) -> str:
         else:
             expansion.append(block)
 
-    out = blocks[: main_index + 1]
+    out = [SANITIZER_DESCRIPTORS, *blocks[: main_index + 1]]
     previous_ends = [f"{MAIN}_VRAM_END"]
     for index, vram in enumerate(sorted(regions), start=1):
         symbol = f"overlay_region_{index}_VRAM"

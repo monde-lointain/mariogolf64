@@ -71,6 +71,17 @@ builds' have ended, so builds of any speed compare: `--modern DIR` names
 another modern build, such as one with other optimizations, and
 `--reference build/nonmatching` compares the compilers alone.
 
+`make sanitize` builds a modern ROM, `build/sanitize/mariogolf64.z64`,
+whose code checks itself with GCC's undefined behavior sanitizer, and runs
+it for thousands of frames. It reports each place that indexes past an
+array, shifts by the width or more, divides by zero, or turns a float into
+an integer too small for it, by source line, with the values of its first
+failure and how often it failed. These are what C leaves undefined, so
+that the layout or the compiler decides them, and each such place may run
+differently in another build. The checks' handlers note each failure and
+return, so one run finds them all (see `src/debug/sanitizer.c` and
+`tools/sanitize.py`).
+
 `tools/find_races.py` runs one build and reports the CPU's stores into data
 that a queued frame has yet to draw with, which make the frame depend on
 how far the RDP falls behind. It holds each graphics task back, as an RDP
