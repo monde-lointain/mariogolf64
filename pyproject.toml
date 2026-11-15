@@ -31,6 +31,9 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+# Libraries that the tools import, rather than tools of their own
+"tools/character_model_format.py" = ["INP001"]
+"tools/f3dex2.py" = ["INP001"]
 # The tools' tests are modules that unittest finds on its own, and use its
 # assertions, as the project runs them with the standard library alone
 "tools/tests/*" = ["INP001", "PT009", "PT027"]
@@ -40,6 +43,10 @@ ignore = [
 # the path
 known-first-party = [
   "asset_archive",
+  "build_character",
+  "character_model_format",
+  "character_template",
+  "f3dex2",
   "fncompare",
   "heap_region",
   "lz_codec",
