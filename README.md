@@ -69,6 +69,15 @@ how far the RDP falls behind. It holds each graphics task back, as an RDP
 that falls behind would, and can press buttons from a file, such as
 `tools/inputs/tournament_tee_shot.txt`, to reach gameplay.
 
+`make check-alignment`, which `make test` runs too, finds each static
+array or structure whose address goes to the RCP or to a DMA, and fails
+on any that doesn't ask for 8-byte alignment with `RCP_ALIGNED` or through
+its type. The original's linker placed such buffers on 8-byte boundaries
+mostly by chance, so a buffer that doesn't ask can land 4 bytes off in
+another layout and be drawn or read from the wrong place. It reads the
+code with `clang-query`, and the alignment from the modern build's
+objects (see `tools/check_alignment.py`).
+
 ## Assets
 
 `make extract` cuts the files that the game reads from ROM out of the

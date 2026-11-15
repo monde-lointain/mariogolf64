@@ -252,6 +252,7 @@ endif
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
 .PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable \
+        check-alignment \
         progress equivalence test target-tests
 
 # A recipe that fails after writing its target, such as a check of what it
@@ -317,6 +318,21 @@ check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)
 	    $(LAYOUT_FLAGS) -o $(BUILD_DIR)/shiftable.elf
 	@$(PYTHON) tools/check_link.py $(BUILD_DIR)/shiftable.elf $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS) -- $(O_FILES)
 
+# Fails on each static buffer whose address reaches the RCP or a DMA but
+# which doesn't ask for 8-byte alignment, so that it lands aligned in any
+# layout (see tools/check_alignment.py). It reads the alignment that each
+# buffer asks for from the modern build's objects, whose -fdata-sections
+# gives each its own section.
+CLANG_QUERY ?= clang-query-23
+ifneq ($(MODERN),0)
+check-alignment: $(O_FILES) $(BUILD_DIR)/compile_commands.json
+	@$(PYTHON) tools/check_alignment.py $(BUILD_DIR) --clang-query $(CLANG_QUERY) \
+	    --include $(LIBMUS_DIR)/src --include $(ULTRALIB_DIR)/include/PR
+else
+check-alignment:
+	$(MAKE) MODERN=1 check-alignment
+endif
+
 # Runs the matching ROM and the modern build's side by side in ares's
 # n64-harness, which N64_HARNESS names, and compares the game's state at
 # each of EQUIVALENCE_FRAMES frames (see tools/equivalence.py)
@@ -352,7 +368,7 @@ TEST_DEFINES  := $(filter-out $(GAME_DEFINES),$(DEFINES)) -DUNITY_INCLUDE_CONFIG
 # Runs the tests against both toolchains' code, once the matching ROM has
 # matched the original
 test: all target-tests
-	$(MAKE) MODERN=1 target-tests
+	$(MAKE) MODERN=1 check-alignment target-tests
 
 # Runs this build's test ROM in ares's n64-harness, which N64_HARNESS names
 target-tests: $(TEST_ROM)
