@@ -446,7 +446,12 @@ lint: $(BUILD_DIR)/compile_commands.json
 # declaration of a routine or object with its definition, across files,
 # which no single compile can, including the libraries' declarations of
 # the game's routines. The modern build compiles the bytecode into its own
-# directory, and any mismatch fails the link.
+# directory, and any mismatch fails the link. The link compiles the
+# bytecode to code, as the segments' links do, rather than writing the
+# merged bytecode out again: GCC 16.2's lto1 faults on that, in the
+# inliner's merge of the mod/ref summaries of the nested functions of
+# particle_effects.c's SpawnShotDebris. Either way compares the
+# declarations.
 TYPECHECK_DIR := build/typecheck
 # The objects compiled from C, leaving out the data-only assembly that
 # splat names as C (see the ultralib rule for those)
@@ -458,7 +463,7 @@ typecheck:
 		$(TYPECHECK_DIR)/linked.o
 
 $(BUILD_DIR)/linked.o: $(C_O_FILES)
-	$(CC) -r -nostdlib $(TARGETFLAGS) $(OPTFLAGS) \
+	$(CC) -r -nostdlib $(TARGETFLAGS) $(OPTFLAGS) -flinker-output=nolto-rel -flto=auto \
 		-Werror=lto-type-mismatch -o $@ $^
 
 tools: $(KMC_DIR)/gcc $(KMC_DIR)/as
