@@ -299,7 +299,7 @@ endif
 # Per-object compiler flags
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
-.PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable \
+.PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable FORCE \
         check-alignment \
         progress equivalence sanitize test target-tests
 
@@ -575,6 +575,30 @@ endif
 $(BUILD_DIR)/%.s.o: %.s
 	@mkdir -p $(dir $@)
 	$(AS) $(ASFLAGS) -o $@ $<
+
+ifneq ($(MODERN),0)
+# A modern ROM is a build of its own, so it carries a build date of its own,
+# in the original's format, rather than the original's. The game shows it on
+# a debug screen and stamps it into each save, which no build checks when it
+# loads one. Set BUILD_DATE to choose it; by default it is the last commit's,
+# in UTC, so that a commit always builds the same ROM. The source is
+# rewritten only when the date changes, so that the ROM is relinked only then.
+BUILD_DATE_FORMAT := %a %b %e %H:%M:%S %Y
+BUILD_DATE ?= $(shell TZ=UTC git log -1 --date='format-local:$(BUILD_DATE_FORMAT)' \
+  --format=%cd 2>/dev/null || TZ=UTC date '+$(BUILD_DATE_FORMAT)')
+BUILD_DATE_S := $(BUILD_DIR)/src/system/build_date.s
+
+$(BUILD_DIR)/src/system/build_date.s.o: $(BUILD_DATE_S)
+	$(AS) $(ASFLAGS) -o $@ $<
+
+$(BUILD_DATE_S): FORCE
+	@mkdir -p $(dir $@)
+	@printf '.section .data\n    .ascii "%s\\r\\n"\n    .balign 16\n' \
+	    '$(BUILD_DATE)' > $@.new
+	@if cmp -s $@.new $@; then rm $@.new; else mv $@.new $@; fi
+endif
+
+FORCE:
 
 # The RSP loads its microcode by DMA from addresses aligned to 8 bytes. The
 # SDK's microcode objects align it to 16, which the original's layout keeps.

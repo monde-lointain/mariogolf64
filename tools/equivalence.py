@@ -46,7 +46,8 @@ equal when they can address the same place in each build:
 - the same linker marker, or the same offset in a section of the ROM.
 
 A copy that only AVOID_UB makes for the RCP to read stands for what it
-copies. The padding of some structures, which no one reads, is left out.
+copies. The padding of some structures, which no one reads, is left out,
+as is the build date that each build carries, and the copies of it.
 
 The sun's glare grows and fades with what the z-buffer shows as each frame's
 task ends, so its strength follows how far the RDP lags. The modern build
@@ -260,6 +261,31 @@ PADDING = {
     "f_DryLights": LIGHTS2_PADDING,
     "f_RainLights": LIGHTS2_PADDING,
     "f_OpeningContactTriangle": PLANE_TRIANGLE_PADDING,
+}
+
+
+# A span of bytes in an object
+@dataclass(frozen=True)
+class Field:
+    """Where a field lies in an object."""
+
+    offset: int
+    size: int
+
+    def holds(self, offset: int) -> bool:
+        """Return whether the word at OFFSET is in the field."""
+        return self.offset <= offset < self.offset + self.size
+
+
+# Each build has a build date of its own (see BUILD_DATE in the Makefile),
+# which the game reads from ROM and stamps into each save, inverted. By
+# object, the fields that hold it, as include/system/main.h and
+# include/save/save.h lay them out.
+ROM_BUILD_DATE_SIZE = 0x40
+SAVE_BUILD_DATE = Field(0x8, 0x20)
+BUILD_DATE_FIELDS = {
+    "g_RomBuildDate": Field(0, ROM_BUILD_DATE_SIZE),
+    "f_SaveData": SAVE_BUILD_DATE,
 }
 
 # An objdump -t line: address, binding (l or g), type (O for an object, F
@@ -1114,6 +1140,9 @@ class Comparison:
                 if (word.matching ^ word.modern)
                 & ~padding.masks.get(word.offset % padding.element_size, 0)
             ]
+        date = BUILD_DATE_FIELDS.get(key)
+        if date is not None:
+            words = [word for word in words if not date.holds(word.offset)]
         return words
 
     def words(self, matching: int, modern: int, size: int) -> list[WordDifference]:

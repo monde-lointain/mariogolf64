@@ -31,6 +31,12 @@ across the segment's files while each overlay keeps its own code (see
 `tools/link_segments.py`). `LTO=0` links the objects as each compiled,
 such as to find whether LTO brings a difference about.
 
+The modern ROM carries a build date of its own, which the game shows on a
+debug screen and stamps into each save: the last commit's, in UTC, so that
+a commit always builds the same ROM. `BUILD_DATE` sets another, in the
+original's format, such as `make MODERN=1 BUILD_DATE='Tue Jun 15 18:36:11
+1999'` for the original's.
+
 ## Progress
 
 Every routine matches the original's. `make progress` also builds the ROM
