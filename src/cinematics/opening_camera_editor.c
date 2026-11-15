@@ -455,6 +455,17 @@ void StopEditorMoves(void) {
     } \
     while (FALSE)
 
+// The flags of the point that moves around the pivot. When neither point
+// carries the other or is the pivot, the loop over the points leaves the
+// index past them, and the original reads the field after the flags, the
+// eye's move axis, which never has the flags of a turn, a tilt or a zoom.
+#ifdef AVOID_UB
+#    define MovingPointFlags(pointIndex) \
+        ((pointIndex) < EDITOR_POINT_COUNT ? g_CameraEditor.flags[pointIndex] : 0)
+#else
+#    define MovingPointFlags(pointIndex) (g_CameraEditor.flags[pointIndex])
+#endif
+
 // Moves the camera on by an update: the point being moved, or carried with the
 // other, speeds up, brakes near its target and stops on reaching it, and then
 // the zoom, the turn and the tilt around the pivot point do the same. The point
@@ -749,7 +760,7 @@ void UpdateCameraEditor(void) {
         hasLeader = TRUE;
     }
 
-    if (g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_ZOOMING) {
+    if (MovingPointFlags(pointIndex) & EDITOR_FLAG_ZOOMING) {
         f32 zoomLeft;
 
         // Kept in the points' variables, to match: the distance before the zoom
@@ -804,7 +815,7 @@ void UpdateCameraEditor(void) {
         hasMoved = TRUE;
     }
 
-    if (g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_TURNING) {
+    if (MovingPointFlags(pointIndex) & EDITOR_FLAG_TURNING) {
         if (g_CameraEditor.turnLeft != 0.0f) {
             if (fabsf(g_CameraEditor.turnLeft) < EDITOR_ARRIVAL_ANGLE) {
                 g_CameraEditor.heading += g_CameraEditor.turnLeft;
@@ -849,7 +860,7 @@ void UpdateCameraEditor(void) {
         hasMoved = TRUE;
     }
 
-    if (g_CameraEditor.flags[pointIndex] & EDITOR_FLAG_TILTING) {
+    if (MovingPointFlags(pointIndex) & EDITOR_FLAG_TILTING) {
         if (g_CameraEditor.tiltLeft != 0.0f) {
             if (fabsf(g_CameraEditor.tiltLeft) < EDITOR_ARRIVAL_ANGLE) {
                 g_CameraEditor.pitch += g_CameraEditor.tiltLeft;
