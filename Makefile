@@ -246,7 +246,7 @@ endif
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
 .PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable \
-        progress equivalence
+        progress equivalence test target-tests
 
 # A recipe that fails after writing its target, such as a check of what it
 # wrote, would otherwise leave a target that the next run takes as built
@@ -315,6 +315,60 @@ equivalence: all
 	$(MAKE) MODERN=1
 	$(PYTHON) tools/equivalence.py --frames $(EQUIVALENCE_FRAMES)
 
+# The unit tests in tests/, which run on the console with Unity. Each build
+# links them with its own objects into a test ROM, which boots into them
+# instead of the game (see tests/target/). Both builds compile the tests
+# with modern GCC, so the same tests face each toolchain's code. A build
+# that links the game in the original's layout links its tests in the
+# shiftable layout, which leaves room for them.
+TEST_DIR      := $(BUILD_DIR)/tests
+TEST_ELF      := $(TEST_DIR)/tests.elf
+TEST_ROM      := $(TEST_DIR)/tests.z64
+TEST_LD       := $(TEST_DIR)/tests.ld
+TEST_SOURCES  := $(wildcard tests/*.c) tests/target/runner.c tests/target/support.c \
+                 tests/unity/unity.c tests/unity/unity_fixture.c
+TEST_O_FILES  := $(TEST_SOURCES:%=$(BUILD_DIR)/%.o)
+# The boot stub goes into main's code, which takes it from an archive
+TEST_BOOT     := $(TEST_DIR)/boot.a
+# The tests see the declarations of the build they test, but not KMC GCC's
+# forms, as modern GCC compiles them. Unity needs the compiler's own
+# headers, such as stdarg.h, which the game's code doesn't include.
+TEST_CFLAGS    = $(MODERN_TARGETFLAGS) -Os -nostdinc -funsigned-char -Wall -Wextra \
+                 -isystem $(shell $(MODERN_CC) -print-file-name=include)
+TEST_INCLUDES := -Itests/target -Itests/unity $(INCLUDES)
+TEST_DEFINES  := $(filter-out $(GAME_DEFINES),$(DEFINES)) -DUNITY_INCLUDE_CONFIG_H
+
+# Runs the tests against both toolchains' code, once the matching ROM has
+# matched the original
+test: all target-tests
+	$(MAKE) MODERN=1 target-tests
+
+# Runs this build's test ROM in ares's n64-harness, which N64_HARNESS names
+target-tests: $(TEST_ROM)
+	$(PYTHON) tools/run_target_tests.py $(TEST_ELF) $<
+
+$(BUILD_DIR)/tests/%.c.o: tests/%.c | $(BUILD_DIR)/$(LIBNUSYS_DIR)/include/nusys.h
+	@mkdir -p $(dir $@)
+	$(DEPS) $(MODERN_CC) -c $(TEST_CFLAGS) $(TEST_INCLUDES) $(TEST_DEFINES) -o $@ $<
+
+$(TEST_BOOT): $(TEST_DIR)/target/boot.c.o
+	rm -f $@
+	$(MODERN_CROSS)ar rcs $@ $<
+
+# The shiftable layout with the tests' segment before the sections that it
+# discards
+$(TEST_LD): $(SHIFTABLE_LD) tests/target/segment.ld
+	awk -v segment=tests/target/segment.ld \
+	    '/^    \/DISCARD\/ :$$/ { while ((getline line < segment) > 0) print line } { print }' \
+	    $< > $@
+
+# NuSystem's boot starts the main thread in the boot stub instead of
+# mainproc. Modern GCC's linker reads both toolchains' objects.
+$(TEST_ELF): $(O_FILES) $(TEST_O_FILES) $(TEST_BOOT) $(TEST_LD) $(SHIFTABLE_SYMBOLS)
+	$(MODERN_CROSS)ld $(addprefix -T ,$(TEST_LD) $(SHIFTABLE_SYMBOLS)) -Map $(TEST_DIR)/tests.map \
+	    $(LAYOUT_FLAGS) --wrap=mainproc -o $@ $(TEST_O_FILES) $(TEST_BOOT) $(MODERN_LIBS)
+	@$(PYTHON) tools/check_link.py $@ $(TEST_LD) $(SHIFTABLE_SYMBOLS) -- $(O_FILES)
+
 CLANG_TIDY ?= run-clang-tidy-23
 # libkmc is KMC's C library, which keeps the C library's names
 LINT_FILES := $(filter-out $(LIBKMC_DIR)/%,\
@@ -362,7 +416,7 @@ $(KMC_DIR)/as:
 	wget -q -O - https://github.com/decompals/mips-binutils-2.6/releases/latest/download/binutils-2.6-linux.tar.gz | tar xz -C $(KMC_DIR)
 
 clean:
-	rm -rf $(BUILD_DIR)/asm $(BUILD_DIR)/src $(BUILD_DIR)/assets $(BUILD_DIR)/lib $(ROM) $(ELF)
+	rm -rf $(BUILD_DIR)/asm $(BUILD_DIR)/src $(BUILD_DIR)/assets $(BUILD_DIR)/lib $(ROM) $(ELF) $(TEST_DIR)
 
 distclean:
 	rm -rf $(BUILD_DIR) asm assets
@@ -378,7 +432,7 @@ $(SHIFTABLE_SYMBOLS): $(SPLAT_YAML) $(SYMBOL_SCRIPTS) tools/fixed_syms.py
 	$(PYTHON) tools/fixed_syms.py $(SPLAT_YAML) $(SYMBOL_SCRIPTS) > $@
 
 # IPL3 boots only a ROM whose header holds the checksum of the code after it
-$(ROM): $(ELF)
+$(ROM) $(TEST_ROM): %.z64: %.elf
 	$(OBJCOPY) -O binary --gap-fill=0xFF --pad-to=$(ROM_SIZE) $< $@
 	$(PYTHON) -m ipl3checksum sum --update $@ > /dev/null
 
@@ -481,7 +535,7 @@ $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.s
 	@mkdir -p $(dir $@)
 	$(DEPS) $(CC) -c $(ULTRALIB_ASFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
 
--include $(O_FILES:.o=.d)
+-include $(O_FILES:.o=.d) $(TEST_O_FILES:.o=.d) $(TEST_DIR)/target/boot.c.d
 # A header that a .d file lists but that has since gone only forces the
 # rebuild that writes a new list
 %.h: ;

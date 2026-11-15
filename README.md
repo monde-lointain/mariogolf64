@@ -36,6 +36,27 @@ every routine by state (`functions.svg`), the matched code over time
 drafts that differ in register numbers only. `tools/progress_map.py`, a
 copy of a tool kept elsewhere with this project's settings, draws them.
 
+## Tests
+
+`make test` builds the matching ROM, checks that it matches, then runs the
+unit tests in `tests/` on the console against both toolchains' code: the
+matching build's KMC GCC objects and the modern build's (`MODERN=1`). Each
+build links the same tests, compiled with modern GCC, into a test ROM that
+boots into them instead of the game, and runs it in
+[ares](https://ares-emu.net)'s `n64-harness`, from the project's fork of
+ares, which `N64_HARNESS` names. Both ROMs build and run in a few
+seconds. `make target-tests` runs one build's tests.
+
+The tests use [Unity](https://github.com/ThrowTheSwitch/Unity)'s fixture.
+A group goes in a file of its own, `tests/NAME_tests.c`, and its
+`RUN_TEST_GROUP` in `tests/target/runner.c`. The test ROM needs an
+Expansion Pak, whose free memory holds the tests (see
+`tests/target/segment.ld`).
+
+`make equivalence` runs the matching and modern ROMs side by side for
+thousands of frames and compares the game's state at each. It takes
+minutes, so it is a coarse, occasional check (see `tools/equivalence.py`).
+
 ## Assets
 
 `make extract` cuts the files that the game reads from ROM out of the
