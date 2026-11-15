@@ -23,3 +23,20 @@ TraceRecord
 
 # gdb calls a breakpoint's stop method when it is hit, in oracle_gdb.py
 _.stop
+
+# Blender reads the class attributes that describe an add-on's operators and
+# panels, and calls its unregister function when the add-on is turned off
+_.bl_category
+_.bl_context
+_.bl_label
+_.bl_options
+_.bl_region_type
+_.bl_space_type
+unregister
+
+# The add-on sets these Blender properties, which Blender reads
+_.display_type
+_.hide_select
+_.show_in_front
+_.use_bone_envelopes
+_.use_vertex_groups

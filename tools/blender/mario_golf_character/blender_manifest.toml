@@ -1,0 +1,17 @@
+schema_version = "1.0.0"
+
+id = "mario_golf_character"
+version = "1.0.0"
+name = "Mario Golf Character"
+tagline = "Model a custom Mario Golf (N64) character on the game's rig"
+maintainer = "mariogolf64 decompilation contributors"
+type = "add-on"
+
+tags = ["Import-Export", "Rigging"]
+
+blender_version_min = "5.2.0"
+
+license = ["SPDX:GPL-3.0-or-later"]
+
+[permissions]
+files = "Read rig templates and write character packages"

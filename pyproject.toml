@@ -34,6 +34,12 @@ ignore = [
 # Libraries that the tools import, rather than tools of their own
 "tools/character_model_format.py" = ["INP001"]
 "tools/f3dex2.py" = ["INP001"]
+# Blender finds operators and panels by names such as MG64_OT_export, and
+# reads bl_options as a class attribute
+"tools/blender/**" = ["N801", "RUF012"]
+# The add-on's tests run inside Blender, which has no test runner, so they
+# check with assert
+"tools/blender/tests/*" = ["INP001", "S101"]
 # The tools' tests are modules that unittest finds on its own, and use its
 # assertions, as the project runs them with the standard library alone
 "tools/tests/*" = ["INP001", "PT009", "PT027"]
@@ -55,7 +61,10 @@ known-first-party = [
 
 [tool.basedpyright]
 include = ["tools"]
-exclude = ["tools/progress_map.py", "**/__pycache__"]
+# The Blender add-on runs only inside Blender, whose bpy module has no stubs
+# here, and declares its properties as annotations that aren't types;
+# tools/blender/run_tests.sh tests it in Blender instead
+exclude = ["tools/progress_map.py", "tools/blender", "**/__pycache__"]
 pythonVersion = "3.10"
 typeCheckingMode = "all"
 venvPath = "."
@@ -69,3 +78,6 @@ paths = ["tools", "vulture_whitelist.py"]
 exclude = ["tools/progress_map.py"]
 min_confidence = 60
 sort_by_size = true
+# The Blender add-on's tests run from the list @test adds them to, and
+# Blender calls the methods its classes override
+ignore_decorators = ["@test", "@override"]
