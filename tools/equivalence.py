@@ -30,6 +30,11 @@ equal when they can address the same place in each build:
 A copy that only AVOID_UB makes for the RCP to read stands for what it
 copies. The padding of some structures, which no one reads, is left out.
 
+The sun's glare grows and fades with what the z-buffer shows as each frame's
+task ends, so its strength follows how far the RDP lags. The modern build
+draws each frame's lens flare with the strength that the matching build
+drew it with, so that the rest of the display list can still be compared.
+
 Each difference listed in KNOWN_DIFFERENCES is reported with its reason but
 passes, as does one seen only while a hole loader thread was at work, as
 each build's runs at its own speed. Any other fails the run, and the first
@@ -118,6 +123,9 @@ LOADING = "only while a hole loader thread was at work"
 # The scheduler's graphics thread runs UpdateSunGlare as each frame's task
 # ends, so the main thread finds its state a frame early or late.
 GRAPHICS_THREAD = "set as a frame's task ends, so when it changes follows speed"
+# The glare's strength, which the modern build draws each lens flare with
+# as the matching build drew it
+GLARE_STRENGTH = "f_SunGlareStrength"
 FRAME_RATE = "it counts retraces, so it follows speed"
 # libmus starts a sound only on a channel that its audio thread has freed,
 # and numbers each that it starts, so a start that comes a retrace sooner
@@ -628,7 +636,7 @@ def run_tool(*command: str) -> str:
 
 @final
 class Harness:
-    """A running n64-harness, which halts at the frame's queueing."""
+    """A running n64-harness, which halts at the frame's queueing and lens flare."""
 
     def __init__(self, program: str, build: Build) -> None:
         """Start the harness on BUILD's ROM and break at nuGfxTaskStart.
@@ -645,6 +653,7 @@ class Harness:
             start_new_session=True,
         )
         _ = self.command(f"break {build.addresses['nuGfxTaskStart']:x}")
+        _ = self.command(f"break {build.addresses['DrawLensFlare']:x}")
         _ = self.command("video off")
 
     def send(self, text: str) -> None:
@@ -673,6 +682,14 @@ class Harness:
     def read_word(self, address: int) -> int:
         """Read a word of memory."""
         return int(self.command(f"read {address:x} {WORD_SIZE:x}"), 16)
+
+    def halt(self) -> int:
+        """Read where a run halted."""
+        reply = self.reply()
+        if not reply.startswith("halt"):
+            message = f"{self.build.directory}: no frame queued ({reply})"
+            raise HarnessError(message)
+        return int(reply.split()[1], 16)
 
     def frame(self) -> int:
         """Read which frame of logic the game is on."""
@@ -713,21 +730,71 @@ def big_endian_word(rdram: bytes, offset: int) -> int:
     return int.from_bytes(rdram[offset : offset + WORD_SIZE], "big")
 
 
+@dataclass
+class FrameRun:
+    """Both builds' runs to a frame's queueing.
+
+    The frame's g_FrameCount is the same from its drawing to its queueing.
+    """
+
+    target: int
+    running: list[Harness]
+    # The matching build's glare strength at each frame's lens flare
+    flare_strengths: dict[int, int] = field(default_factory=dict[int, int])
+    # The last frame that the matching build queued
+    matching_frame: int = -1
+    # The frame whose lens flare the modern build waits to draw, if any
+    held_flare_frame: int | None = None
+
+    def take_halt(self, harness: Harness, address: int, *, is_matching: bool) -> None:
+        """Note where HARNESS halted, and run it on unless it is done or waits."""
+        addresses = harness.build.addresses
+        frame = harness.frame()
+        if address == addresses["DrawLensFlare"]:
+            if is_matching:
+                strength = harness.read_word(addresses[GLARE_STRENGTH])
+                self.flare_strengths[frame] = strength
+                self.running.append(harness)
+            else:
+                self.held_flare_frame = frame
+            return
+        if is_matching:
+            self.matching_frame = frame
+        if frame < self.target:
+            self.running.append(harness)
+
+    def release_flare(self, modern: Harness, *, is_matching_running: bool) -> None:
+        """Give the modern build the matching build's strength, once it is known.
+
+        The matching build's strength is known once it has queued the frame,
+        as an interrupt taken at DrawLensFlare can run the glare's update
+        and halt there again.
+        """
+        frame = self.held_flare_frame
+        if frame is None:
+            return
+        if self.matching_frame < frame and is_matching_running:
+            return
+        strength = self.flare_strengths.get(frame)
+        if strength is not None:
+            address = modern.build.addresses[GLARE_STRENGTH]
+            _ = modern.command(f"write {address:x} {strength:08x}")
+        self.held_flare_frame = None
+        self.running.append(modern)
+
+
 def run_frames(harnesses: tuple[Harness, Harness], target: int) -> None:
-    """Run both builds until each queues TARGET's display list."""
-    pending = list(harnesses)
-    while pending:
-        for harness in pending:
+    """Run the matching and modern builds until each queues TARGET's display list."""
+    matching, modern = harnesses
+    run = FrameRun(target, [matching, modern])
+    while run.running:
+        for harness in run.running:
             harness.send(f"run {FRAME_TIMEOUT}")
-        still_behind: list[Harness] = []
-        for harness in pending:
-            reply = harness.reply()
-            if not reply.startswith("halt"):
-                message = f"{harness.build.directory}: no frame queued ({reply})"
-                raise HarnessError(message)
-            if harness.frame() < target:
-                still_behind.append(harness)
-        pending = still_behind
+        halts = [(harness, harness.halt()) for harness in run.running]
+        run.running = []
+        for harness, address in halts:
+            run.take_halt(harness, address, is_matching=harness is matching)
+        run.release_flare(modern, is_matching_running=matching in run.running)
 
 
 def game_objects(
