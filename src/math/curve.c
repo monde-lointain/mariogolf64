@@ -152,9 +152,19 @@ s32 StepAlongPath(PathPoint *points, s32 pointCount, s32 pace, PathPoint *positi
         f_PathSegment.start[AXIS_X] = points[nextPointIndex].x;
         f_PathSegment.start[AXIS_Y] = points[nextPointIndex].y;
         f_PathSegment.start[AXIS_Z] = points[nextPointIndex].z;
+#ifdef AVOID_UB
+        // The last point has no line after it, so its end would be read from
+        // past the points. The next call ends the path without reading it.
+        if (nextPointIndex < pointCount - 1) {
+            f_PathSegment.end[AXIS_X] = points[nextPointIndex + 1].x;
+            f_PathSegment.end[AXIS_Y] = points[nextPointIndex + 1].y;
+            f_PathSegment.end[AXIS_Z] = points[nextPointIndex + 1].z;
+        }
+#else
         f_PathSegment.end[AXIS_X] = points[nextPointIndex + 1].x;
         f_PathSegment.end[AXIS_Y] = points[nextPointIndex + 1].y;
         f_PathSegment.end[AXIS_Z] = points[nextPointIndex + 1].z;
+#endif
         f_PathStepIndex = 0;
         f_PathPointIndex = nextPointIndex;
     }
