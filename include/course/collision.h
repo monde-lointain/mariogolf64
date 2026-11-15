@@ -47,6 +47,9 @@ Boolean FindMiniGolfGroundHit(
     PlaneTriangle *hit,
     f32 *fraction
 );
+// Returns the cell of a billboard texture's hit mask at fractions of the
+// billboard's width out from its middle and of its height down from its top
+BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down);
 s32 FindBillboardHit(
     s32 startX,
     s32 startY,
