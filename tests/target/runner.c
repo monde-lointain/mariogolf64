@@ -36,6 +36,7 @@ void TargetTestsFinished(void) {
 }
 
 static void RunAllGroups(void) {
+    RUN_TEST_GROUP(Fireworks);
     RUN_TEST_GROUP(Heap);
     RUN_TEST_GROUP(MathUtil);
 }
