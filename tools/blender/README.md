@@ -1,0 +1,99 @@
+# Custom characters
+
+A custom character takes the place of one of the game's characters, such as
+Charlie, and plays that character's animations. You model it in Blender on
+the character's own skeleton with the Mario Golf Character add-on, export a
+package, and the game's build turns the package into the character's model
+files.
+
+Each character has two models, and the package replaces both: the main
+model, on the course and in the menus, and the reaction model, in the
+close-up after each shot. They share a skeleton and the package's parts,
+and differ in their animations, so you model once.
+
+## What the game can draw
+
+The game's characters are rigid, in the N64 manner: each vertex moves with
+exactly one bone, and none blends between two. Every one of the game's 36
+character models is built this way, so the add-on has no weight painting.
+A character made of separate pieces, a head, an upper arm, a forearm and so
+on, each kept whole, looks best; a continuous skin creases at the joints,
+as the game can't stretch it.
+
+Rather than have Blender guess weights, you put each face in its bone's
+vertex group, then bind. Automatic weights would spread vertices across
+bones, which the game can't draw, and each such guess would have to be
+undone by hand; assigning faces is the choice the artist makes anyway, and
+the add-on checks it at once.
+
+Materials are drawn in one of three ways:
+
+- **Color**: the material's Base Color, lit. This is the cheapest and suits
+  most of a character.
+- **Texture**: the Image Texture that feeds its Base Color, lit. An image
+  can hold at most 2048 pixels, such as 64x32, and its width must be a
+  multiple of 4. Transparent pixels cut holes; the build fills the colors
+  under them from their neighbors so their edges don't darken.
+- **Face**: images that the game's animations swap, as for blinking. Each
+  of the template's face images needs one of yours in its place, at most
+  64x64. An image mixed over a color by its alpha, through a Mix Shader, is
+  drawn over that color, as Blender shows it.
+
+**Alternate Colors** gives a material other colors in the three color sets
+that a player picks with the C buttons.
+
+How much room a character may take depends on its triangles, materials and
+textures. The export reports the room each model uses, as in "Room used:
+main 60%, reaction 88%", and says what to cut when there's too little.
+
+## Setting up
+
+1. Build the decompilation once (`make setup`, `make extract`), so that the
+   add-on can read the characters' skeletons from the game's files.
+2. In Blender 5.2 or later, build and install the add-on: run `blender
+   --command extension build --source-dir tools/blender/mario_golf_character`
+   and install the zip it writes with Edit > Preferences > Get Extensions >
+   Install from Disk.
+3. In Edit > Preferences > Add-ons > Mario Golf Character, set the
+   **Decompilation Folder** to this repository.
+
+## Making a character
+
+The 3D View's sidebar (N) has a Mario Golf tab with the four steps.
+
+1. **Rig.** Add Template Rig adds the skeleton of the character to replace,
+   with its model as a wireframe guide. Its redo panel picks another
+   character.
+2. **Fit.** In Edit Mode, move the bones to your model's joints. Longer or
+   shorter bones change the character's proportions; the animations follow.
+3. **Parts.** Add Bone Groups gives your meshes a vertex group per bone.
+   Assign each face to one bone's group, then Bind to Rig. Binding refuses
+   faces in no group or in two bones' groups, and selects them for you.
+4. **Export.** Name the character, pick a Package Folder and Export
+   Character. The export checks the package with the game's build tool and
+   reports the room used, or what to fix.
+
+Each material's Mario Golf panel, under Material Properties, sets how it's
+drawn. For a face material, pick its Face Part, such as Eyes, then List Face
+Images to see the template's images and pick yours in their place.
+
+## Building the game with it
+
+```sh
+make -j CHARACTERS=path/to/package
+```
+
+builds `build/nonmatching/custom/mariogolf64.z64` with the character in
+place of the one it replaces; `MODERN=1` builds it with the modern
+toolchain, in `build/modern/custom`. `CHARACTERS` takes several packages,
+one per character replaced. The ROM no longer matches the original, and
+the original's build is left alone.
+
+`tools/build_character.py --check PACKAGE` checks a package without
+building the game, as the export does.
+
+## Testing the tools
+
+`make tool-tests` tests the build tools, some against the game's own
+files; `make blender-tests BLENDER=path/to/blender` tests the add-on in a
+Blender without a window.

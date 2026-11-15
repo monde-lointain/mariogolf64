@@ -128,6 +128,17 @@ IPL3 and the RSP's boot, audio and graphics microcode are Nintendo's
 own binaries, cut from the original as they are, and `textures.txt`
 lists the textures that C files hold, which are built from PNGs.
 
+## Custom characters
+
+A custom character, modeled in Blender with the add-on in
+`tools/blender`, takes the place of one of the game's characters and
+plays its animations. `make CHARACTERS=PACKAGE` builds
+`build/nonmatching/custom/mariogolf64.z64` with it; the original's build
+is left alone. Every segment after main starts on a 16-byte boundary, as
+in the original, so model files of any size fit. See
+[`tools/blender/README.md`](tools/blender/README.md) for the workflow, and
+`make tool-tests` and `make blender-tests` for the tools' tests.
+
 ## Formatting
 
 The sources follow the style in `.clang-format`, based on WebKit's, through
