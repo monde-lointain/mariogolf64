@@ -434,7 +434,8 @@ class Build:
         """Name the symbols and the heap's bytes at ADDRESS."""
         found: set[Place] = set()
         for contents in self.spanning_sections(address):
-            for key, offset in holders(contents, address):
+            for member, offset in holders(contents, address):
+                key = member.key
                 found.add((tag, key, offset))
                 if key in PAGE_ALIGNED_CONTENTS:
                     skip = -(address - offset) % PAGE_SIZE
@@ -447,10 +448,19 @@ class Build:
         return found
 
     def unnamed_places(self, physical: int, state: FrameState) -> Iterator[Place]:
-        """Name the unnamed data at PHYSICAL in a resident section, by its bytes."""
+        """Name the unnamed data at PHYSICAL in a resident section, by its bytes.
+
+        Data that follows a named object begins where the object ends, so
+        only an object that holds the address names it alone.
+        """
         address = physical | KSEG0
         resident = [self.sections.get(name) for name in state.sections]
-        if any(holders(contents, address) for contents in resident if contents):
+        if any(
+            offset < member.size
+            for contents in resident
+            if contents
+            for member, offset in holders(contents, address)
+        ):
             return
         if self.in_resident_section(address, state.sections):
             data = state.rdram[physical : physical + UNNAMED_DATA_LENGTH]
@@ -483,19 +493,19 @@ class Build:
         )
 
 
-def holders(contents: SectionContents, address: int) -> list[tuple[str, int]]:
-    """Name the members that hold ADDRESS or end at it, with its offsets."""
+def holders(contents: SectionContents, address: int) -> list[tuple[DataObject, int]]:
+    """List the members that hold ADDRESS or end at it, with its offsets."""
     index = bisect.bisect_right(contents.starts, address) - 1
     if index < 0:
         return []
-    found: list[tuple[str, int]] = []
+    found: list[tuple[DataObject, int]] = []
     member = contents.members[index]
     if address <= member.address + member.size:
-        found.append((member.key, address - member.address))
+        found.append((member, address - member.address))
     if address == member.address and index > 0:
         previous = contents.members[index - 1]
         if previous.address + previous.size == address:
-            found.append((previous.key, previous.size))
+            found.append((previous, previous.size))
     return found
 
 
