@@ -3,7 +3,9 @@
 
     check_link.py ELF SCRIPTS -- OBJECTS
 
-Two mistakes link without a word from ld:
+ld's map of the link is read from beside the ELF, with the suffix .map.
+
+Three mistakes link without a word from ld:
 
 A linker script that assigns a symbol which an object defines overrides the
 definition: ld gives the symbol the script's address, as an absolute
@@ -16,6 +18,12 @@ bss ends, by an inclusive comparison. The overlays of a region of RAM
 share its start, and those of other regions must stay clear of them, so
 every two overlays that it takes for alternatives must start at the same
 address.
+
+The scripts end by discarding every input section that they don't place,
+which drops the sections that the game never loads, and empty ones. A
+section with contents that no pattern places, such as one that a new
+attribute or compiler option names, would be left out of the ROM, so the
+map must list no such section among those discarded.
 
 Each mistake found is printed, and the exit status is 1 if there were any.
 """
@@ -30,6 +38,7 @@ OBJDUMP = "mips-linux-gnu-objdump"
 NM = "mips-linux-gnu-nm"
 USAGE = "usage: check_link.py ELF SCRIPTS -- OBJECTS"
 SEPARATOR = "--"
+MAP_SUFFIX = ".map"
 
 # A symbol assignment in a linker script: NAME = EXPRESSION;
 ASSIGNMENT = re.compile(r"^\s*([A-Za-z_.$][\w.$]*)\s*=", re.MULTILINE)
@@ -43,6 +52,25 @@ SECTION_PATTERN = (
     r"^\s*\d+ \S+\s+(?P<size>\w{8})\s+(?P<address>\w{8})\s+\w{8}\s+(?P<offset>\w{8})"
 )
 SECTION_LINE = re.compile(SECTION_PATTERN, re.MULTILINE)
+# The map's list of the input sections that the link discarded, and a line
+# of it: name, address, size and file. ld puts a long name on a line of its
+# own, which the space after it spans.
+DISCARDED_HEADING = "Discarded input sections"
+DISCARDED_END = "\nMemory Configuration"
+DISCARDED_LINE = re.compile(
+    r"^ (?P<name>\S+)\s+0x\w+\s+0x(?P<size>\w+) (?P<file>.+)$", re.MULTILINE
+)
+# The sections, by their names' starts, that hold what the game never loads
+UNLOADED_SECTIONS = (
+    ".MIPS.abiflags",
+    ".comment",
+    ".debug",
+    ".gnu.attributes",
+    ".mdebug",
+    ".note",
+    ".pdr",
+    ".reginfo",
+)
 # nm's line for a defined symbol: value, type, name
 DEFINED_LINE = re.compile(r"^[0-9a-f]+ [A-Za-z] (?P<name>\S+)$", re.MULTILINE)
 
@@ -123,6 +151,19 @@ def overlay_conflicts(elf: Path, symbols: dict[str, tuple[int, int]]) -> list[st
     return conflicts
 
 
+def discarded_contents(map_file: Path) -> list[str]:
+    """List the sections with contents that the link of MAP_FILE discarded."""
+    _, _, rest = map_file.read_text().partition(DISCARDED_HEADING)
+    discarded, _, _ = rest.partition(DISCARDED_END)
+    mistakes: list[str] = []
+    for match in DISCARDED_LINE.finditer(discarded):
+        name, size = match.group("name"), int(match.group("size"), 16)
+        if size and not name.startswith(UNLOADED_SECTIONS):
+            section = f"{name} of {match.group('file')}"
+            mistakes.append(f"discards {section}, 0x{size:x} bytes that it holds")
+    return mistakes
+
+
 def main() -> int:
     """Check the ELF that the command line names; return the exit status."""
     arguments = sys.argv[1:]
@@ -134,7 +175,11 @@ def main() -> int:
     scripts = [Path(script) for script in arguments[1:split]]
     objects = arguments[split + 1 :]
     symbols = symbol_table(elf)
-    mistakes = overrides(scripts, objects) + overlay_conflicts(elf, symbols)
+    mistakes = (
+        overrides(scripts, objects)
+        + overlay_conflicts(elf, symbols)
+        + discarded_contents(elf.with_suffix(MAP_SUFFIX))
+    )
     for mistake in mistakes:
         print(f"{elf}: {mistake}", file=sys.stderr)
     return 1 if mistakes else 0

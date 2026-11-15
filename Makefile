@@ -307,7 +307,8 @@ progress: $(ROM)
 # reference that holds only while the code and data keep their original
 # addresses. The shiftable builds link that way already.
 check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)
-	$(LD) $(addprefix -T ,$(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)) $(LAYOUT_FLAGS) -o $(BUILD_DIR)/shiftable.elf
+	$(LD) $(addprefix -T ,$(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)) -Map $(BUILD_DIR)/shiftable.map \
+	    $(LAYOUT_FLAGS) -o $(BUILD_DIR)/shiftable.elf
 	@$(PYTHON) tools/check_link.py $(BUILD_DIR)/shiftable.elf $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS) -- $(O_FILES)
 
 # Runs the matching ROM and the modern build's side by side in ares's
@@ -441,7 +442,8 @@ $(ROM) $(TEST_ROM): %.z64: %.elf
 	$(PYTHON) -m ipl3checksum sum --update $@ > /dev/null
 
 # tools/check_link.py checks the layout for what ld doesn't: scripts that
-# override an object's symbol, and overlays that the game can't load together
+# override an object's symbol, overlays that the game can't load together,
+# and sections with contents that the scripts discard
 $(ELF): $(O_FILES) $(LD_SCRIPTS)
 	$(LD) $(LDFLAGS) -o $@ $(LIBS)
 	@$(PYTHON) tools/check_link.py $@ $(LD_SCRIPTS) -- $(O_FILES)
