@@ -8,7 +8,9 @@ share three regions of base RAM after main, at fixed addresses, and in ROM
 they lie between main and the build date, which the asset files follow.
 
 The shiftable script packs each region of base RAM after the largest
-overlay of the region before it, the first after main, and defines
+overlay of the region before it, the first after main, with a gap: the
+overlay manager takes overlays whose ranges touch for overlays that
+overlap, and so never loads one while the other is loaded. It defines
 overlay_regions_VRAM_END after the last, which must not pass the start of
 the game's main heap: the heap keeps the original's size and address, so
 that the allocator behaves the same in every layout. In ROM,
@@ -128,9 +130,10 @@ def lay_out(script: str) -> str:
             SECTION_VRAM.sub(rf"\1 {symbol} :", block, count=1)
             for block in regions[vram]
         ]
-        moved[0] = (
-            f"    {symbol} = ALIGN({max_of(previous_ends)}, {ALIGNMENT});\n" + moved[0]
-        )
+        # One byte past the end keeps CanLoadOverlay from counting the
+        # regions as overlapping, as it compares their bounds inclusively
+        start = f"ALIGN({max_of(previous_ends)} + 1, {ALIGNMENT})"
+        moved[0] = f"    {symbol} = {start};\n" + moved[0]
         out.extend(moved)
         previous_ends = [f"{block_name(block)}_VRAM_END" for block in moved]
     # ld takes an ASSERT among the sections only without a semicolon
