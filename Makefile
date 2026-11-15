@@ -21,6 +21,27 @@ COMPARE      ?= 1
 ifneq ($(NON_MATCHING),0)
 override COMPARE := 0
 endif
+# libdragon's toolchain, built for the VR4300 with an o32 multilib, and its
+# own binutils, whose linker takes its objects' flags
+N64_INST    ?= /opt/libdragon
+MODERN_CROSS := $(N64_INST)/bin/mips64-elf-
+MODERN_CC   := $(MODERN_CROSS)gcc
+# The code was written for a compiler that took it as it reads. Where it
+# indexes past an array, such as a row of a 2D array taken as the whole
+# array, or overflows a signed integer, modern GCC would assume it doesn't
+# and cut loops short or drop checks. These keep KMC GCC's meaning.
+KMC_SEMANTICS := -fno-aggressive-loop-optimizations -fwrapv -fno-delete-null-pointer-checks
+# GNU C89 keeps the meaning of the sources' old-style declarations.
+# -fno-common makes a second definition of a variable an error, where KMC
+# GCC would merge it. -fno-toplevel-reorder keeps the statics that only
+# included asm uses.
+MODERN_TARGETFLAGS := -G0 -march=vr4300 -mabi=32 -mfix4300 -mno-abicalls -fno-PIC -std=gnu89 \
+               -fno-common -ffreestanding -fno-strict-aliasing -mdivide-breaks \
+               -fno-toplevel-reorder -fno-math-errno $(KMC_SEMANTICS)
+# The helpers, such as 64-bit shifts, that modern GCC calls rather than
+# inlines. It is only found when a link needs it.
+MODERN_LIBS  = $(shell $(MODERN_CC) $(MODERN_TARGETFLAGS) -print-libgcc-file-name)
+
 # The two toolchains, and what differs between their builds. Each build has
 # its own directory, so that no build links another's objects.
 ifeq ($(MODERN),0)
@@ -60,25 +81,11 @@ LIB_MODERN  :=
 LIBS        :=
 else
 BUILD_DIR   := build/modern
-# libdragon's toolchain, built for the VR4300 with an o32 multilib, and its
-# own binutils, whose linker takes its objects' flags
-N64_INST    ?= /opt/libdragon
-CROSS       := $(N64_INST)/bin/mips64-elf-
+CROSS       := $(MODERN_CROSS)
 BIN_FORMAT  := elf32-bigmips
-CC          := $(CROSS)gcc
+CC          := $(MODERN_CC)
 LIB_CC      := $(CC)
-# The code was written for a compiler that took it as it reads. Where it
-# indexes past an array, such as a row of a 2D array taken as the whole
-# array, or overflows a signed integer, modern GCC would assume it doesn't
-# and cut loops short or drop checks. These keep KMC GCC's meaning.
-KMC_SEMANTICS := -fno-aggressive-loop-optimizations -fwrapv -fno-delete-null-pointer-checks
-# GNU C89 keeps the meaning of the sources' old-style declarations.
-# -fno-common makes a second definition of a variable an error, where KMC
-# GCC would merge it. -fno-toplevel-reorder keeps the statics that only
-# included asm uses.
-TARGETFLAGS := -G0 -march=vr4300 -mabi=32 -mfix4300 -mno-abicalls -fno-PIC -std=gnu89 -fno-common \
-               -ffreestanding -fno-strict-aliasing -mdivide-breaks -fno-toplevel-reorder \
-               -fno-math-errno $(KMC_SEMANTICS)
+TARGETFLAGS := $(MODERN_TARGETFLAGS)
 KMC_ALIGN   :=
 GAME_DEFINES :=
 # Modern GCC's -ffast-math reorders the float math enough that the ball
@@ -91,8 +98,7 @@ WARNINGS    ?= -Wall -Wextra
 ULTRALIB_COMPILER := modern_gcc
 LIB_MODERN  := -DMODERN_CC
 ULTRALIB_ASM_ABI :=
-# The helpers, such as 64-bit shifts, that GCC calls rather than inlines
-LIBS        := $(shell $(CC) $(TARGETFLAGS) -print-libgcc-file-name)
+LIBS        := $(MODERN_LIBS)
 endif
 
 # main_bss.c only pins main's common objects at the original's addresses.
