@@ -3329,7 +3329,9 @@ void StartHudAnimation(HudAnimation animationId) {
 
 void DrawFadeAnimation(Gfx **displayListHead);
 
-void HandleFrameBufferSwap(void) {
+// The scheduler calls this with the frame buffer that the ended frame's task
+// drew, as each frame's task ends, and it does nothing
+void HandleFrameBufferSwap(void *frameBuffer UNUSED) {
 }
 
 // The fading animations draw f_CapturedFrame, which holds the frame inside
