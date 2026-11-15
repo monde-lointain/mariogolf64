@@ -54,8 +54,11 @@ Expansion Pak, whose free memory holds the tests (see
 `tests/target/segment.ld`).
 
 `make equivalence` runs the matching and modern ROMs side by side for
-thousands of frames and compares the game's state at each. It takes
-minutes, so it is a coarse, occasional check (see `tools/equivalence.py`).
+thousands of frames and compares the game's state at each. Worker
+processes compare each frame while the emulators run the next, so on a
+machine with many cores it takes under a minute, but it checks the whole
+game at once, so it is a coarse, occasional check (see
+`tools/equivalence.py`).
 
 `tools/find_races.py` runs one build and reports the CPU's stores into data
 that a queued frame has yet to draw with, which make the frame depend on

@@ -43,6 +43,7 @@ import argparse
 import bisect
 import collections
 import contextlib
+import multiprocessing
 import os
 import re
 import signal
@@ -51,6 +52,7 @@ import sys
 import tempfile
 from collections.abc import Iterator
 from dataclasses import dataclass, field
+from multiprocessing.pool import AsyncResult
 from pathlib import Path
 from struct import iter_unpack
 from typing import cast, final
@@ -96,6 +98,11 @@ DEFAULT_HARNESS = os.environ.get("N64_HARNESS", "n64-harness")
 # How many video frames the harness may run before a frame of logic must
 # have been queued; a build that takes longer has hung
 FRAME_TIMEOUT = 600
+
+# The processes that compare frames, while the harnesses run the next, and
+# how many frames' dumps may wait for them, each in its own pair of files
+WORKER_COUNT = max(1, (os.cpu_count() or 1) - 4)
+DUMP_SLOT_COUNT = 2 * WORKER_COUNT
 
 # Differences that are expected, by object, with why. An object is named
 # by its symbol, or as "FILE:SYMBOL" when the name alone is ambiguous, by
@@ -417,6 +424,24 @@ class Build:
         """The build's ROM."""
         return self.directory / ROM_NAME
 
+    def frame_state(self, rdram: bytes) -> FrameState:
+        """Take a frame's RDRAM, with the overlays loaded in it."""
+        return FrameState(rdram, self.resident_sections(rdram))
+
+    def resident_sections(self, rdram: bytes) -> frozenset[str]:
+        """Find the main segment's sections and the loaded overlays'."""
+        resident = {".main", ".main_bss"}
+        table = self.addresses["f_Overlays"] - KSEG0
+        for entry in range(table, table + overlay_table_size(self), OVERLAY_SIZE):
+            if not rdram[entry]:
+                continue
+            rom_start = big_endian_word(rdram, entry + OVERLAY_ROM_START_OFFSET)
+            index = bisect.bisect_left(self.rom_starts, rom_start)
+            if self.rom_starts[index : index + 1] == [rom_start]:
+                section = self.rom_sections[index][2]
+                resident.update({section, section + BSS_SUFFIX})
+        return frozenset(resident)
+
     def places(self, word: int, state: FrameState) -> set[Place]:
         """Name the places WORD can address, with its tag.
 
@@ -639,31 +664,15 @@ class Harness:
         """Whether the hole loader thread is at work."""
         return not self.read_word(self.build.addresses["g_HasLoaderFinished"])
 
-    def start_dump(self, dump: Path) -> None:
-        """Have the harness dump RDRAM to DUMP, without waiting for it."""
-        self.send(f"dump {dump} {KSEG0:x} {RDRAM_SIZE:x}")
+    def start_dump(self, dump: Path, size: int) -> None:
+        """Have the harness dump SIZE bytes of RDRAM to DUMP, without waiting."""
+        self.send(f"dump {dump} {KSEG0:x} {size:x}")
 
-    def state(self, dump: Path) -> FrameState:
-        """Take the dump that start_dump began, and the overlays loaded in it."""
+    def finish_dump(self, size: int) -> None:
+        """Wait for the dump that start_dump began."""
         reply = self.reply()
-        if reply != f"ok {RDRAM_SIZE}":
+        if reply != f"ok {size}":
             raise HarnessError(reply)
-        rdram = dump.read_bytes()
-        return FrameState(rdram, self.resident_sections(rdram))
-
-    def resident_sections(self, rdram: bytes) -> frozenset[str]:
-        """Find the main segment's sections and the loaded overlays'."""
-        resident = {".main", ".main_bss"}
-        table = self.build.addresses["f_Overlays"] - KSEG0
-        for entry in range(table, table + overlay_table_size(self.build), OVERLAY_SIZE):
-            if not rdram[entry]:
-                continue
-            rom_start = big_endian_word(rdram, entry + OVERLAY_ROM_START_OFFSET)
-            index = bisect.bisect_left(self.build.rom_starts, rom_start)
-            if self.build.rom_starts[index : index + 1] == [rom_start]:
-                section = self.build.rom_sections[index][2]
-                resident.update({section, section + BSS_SUFFIX})
-        return frozenset(resident)
 
     def close(self) -> None:
         """Stop the harness and anything it started."""
@@ -849,33 +858,98 @@ class Finding:
         return self.frames == self.last_frame
 
 
+# A frame's objects that differ, with their differing words
+FrameDifferences = list[tuple[str, list[WordDifference]]]
+
+
+@final
+class FrameComparer:
+    """Compares frames' dumps, keeping what it learns between frames."""
+
+    def __init__(self, builds: tuple[Build, Build], comparable: frozenset[str]) -> None:
+        """Compare BUILDS' COMPARABLE objects."""
+        self.builds = builds
+        self.comparable = comparable
+        self.same_pairs: set[tuple[int, int]] = set()
+
+    def compare(self, dumps: tuple[Path, Path]) -> FrameDifferences:
+        """Compare the builds' RDRAM in DUMPS."""
+        states = (
+            self.builds[0].frame_state(dumps[0].read_bytes()),
+            self.builds[1].frame_state(dumps[1].read_bytes()),
+        )
+        comparison = Comparison(self.builds, states, self.comparable, self.same_pairs)
+        return list(comparison.objects())
+
+
+# The comparer that each worker process has from the main one, which forks
+# them, so that the builds' symbols aren't sent to them
+FORKED_COMPARER: list[FrameComparer] = []
+
+
+def compare_frame(dumps: tuple[Path, Path]) -> FrameDifferences:
+    """Compare a frame's DUMPS in a worker process."""
+    return FORKED_COMPARER[0].compare(dumps)
+
+
+@dataclass
+class PendingFrame:
+    """A frame that a worker process is comparing."""
+
+    frame: int
+    loading: bool
+    differences: AsyncResult[FrameDifferences]
+
+
 def characterize(program: str, frames: int, *, verbose: bool) -> dict[str, Finding]:
-    """Compare the builds over FRAMES frames; return what differed."""
+    """Compare the builds over FRAMES frames; return what differed.
+
+    Worker processes compare each frame while the harnesses run the next,
+    and their findings are taken in the frames' order.
+    """
     builds = (Build(MATCHING_DIR), Build(MODERN_DIR))
     game = pair_symbols(builds)
     unpaired = unpaired_objects(builds, game)
     comparable = game - frozenset(unpaired)
     findings = {key: Finding() for key in unpaired}
-    same_pairs: set[tuple[int, int]] = set()
+    dump_size = RDRAM_SIZE
+
+    def take(pending: PendingFrame) -> None:
+        for key, words in pending.differences.get():
+            if verbose and key not in findings:
+                print(f"frame {pending.frame}: {key} differs")
+            findings.setdefault(key, Finding()).add(
+                pending.frame, words, loading=pending.loading
+            )
+
+    FORKED_COMPARER[:] = [FrameComparer(builds, comparable)]
     harnesses: list[Harness] = []
-    with tempfile.TemporaryDirectory(dir="/dev/shm") as scratch:
+    with (
+        tempfile.TemporaryDirectory(dir="/dev/shm") as scratch,
+        multiprocessing.get_context("fork").Pool(WORKER_COUNT) as pool,
+    ):
         try:
             harnesses = [Harness(program, build) for build in builds]
             pair = (harnesses[0], harnesses[1])
+            queued: collections.deque[PendingFrame] = collections.deque()
             for frame in range(1, frames + 1):
                 run_frames(pair, frame)
-                dumps = (Path(scratch) / "matching.bin", Path(scratch) / "modern.bin")
+                if len(queued) == DUMP_SLOT_COUNT:
+                    take(queued.popleft())
+                slot = frame % DUMP_SLOT_COUNT
+                dumps = (
+                    Path(scratch) / f"matching{slot}.bin",
+                    Path(scratch) / f"modern{slot}.bin",
+                )
                 for harness, dump in zip(pair, dumps, strict=True):
-                    harness.start_dump(dump)
-                states = (pair[0].state(dumps[0]), pair[1].state(dumps[1]))
+                    harness.start_dump(dump, dump_size)
+                for harness in pair:
+                    harness.finish_dump(dump_size)
                 loading = any(harness.is_loading() for harness in pair)
-                comparison = Comparison(builds, states, comparable, same_pairs)
-                for key, words in comparison.objects():
-                    if verbose and key not in findings:
-                        print(f"frame {frame}: {key} differs")
-                    findings.setdefault(key, Finding()).add(
-                        frame, words, loading=loading
-                    )
+                differences = pool.apply_async(compare_frame, (dumps,))
+                queued.append(PendingFrame(frame, loading, differences))
+            while queued:
+                take(queued.popleft())
         finally:
             for harness in harnesses:
                 harness.close()
