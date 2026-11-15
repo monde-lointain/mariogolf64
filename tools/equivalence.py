@@ -424,6 +424,20 @@ class Build:
         """The build's ROM."""
         return self.directory / ROM_NAME
 
+    @property
+    def rdram_extent(self) -> int:
+        """How much of RDRAM, from its start, holds the build's sections and heap.
+
+        Every place compared or read lies in one of them, so a dump of this
+        much of RDRAM holds them all.
+        """
+        ends = [
+            end
+            for start, end in self.ram_sections.values()
+            if KSEG0 <= start < KSEG0 + RDRAM_SIZE
+        ]
+        return max([*ends, MAIN_REGION_END]) - KSEG0
+
     def frame_state(self, rdram: bytes) -> FrameState:
         """Take a frame's RDRAM, with the overlays loaded in it."""
         return FrameState(rdram, self.resident_sections(rdram))
@@ -617,7 +631,10 @@ class Harness:
     """A running n64-harness, which halts at the frame's queueing."""
 
     def __init__(self, program: str, build: Build) -> None:
-        """Start the harness on BUILD's ROM and break at nuGfxTaskStart."""
+        """Start the harness on BUILD's ROM and break at nuGfxTaskStart.
+
+        Only memory is compared, so the harness shows no video.
+        """
         self.build = build
         self.process: subprocess.Popen[str] = subprocess.Popen(
             [program, str(build.rom)],
@@ -628,6 +645,7 @@ class Harness:
             start_new_session=True,
         )
         _ = self.command(f"break {build.addresses['nuGfxTaskStart']:x}")
+        _ = self.command("video off")
 
     def send(self, text: str) -> None:
         """Send a command without waiting for its reply."""
@@ -912,7 +930,7 @@ def characterize(program: str, frames: int, *, verbose: bool) -> dict[str, Findi
     unpaired = unpaired_objects(builds, game)
     comparable = game - frozenset(unpaired)
     findings = {key: Finding() for key in unpaired}
-    dump_size = RDRAM_SIZE
+    dump_size = max(build.rdram_extent for build in builds)
 
     def take(pending: PendingFrame) -> None:
         for key, words in pending.differences.get():
