@@ -453,10 +453,20 @@ DeclareModelFile(opening_model_15);
 DeclareModelFile(opening_toad);
 DeclareModelFile(opening_model_17);
 
+// A custom character's model files replace a character's, and the header
+// that tools/build_character.py writes for them defines each file's layout
+// as NAME_MODEL_LAYOUT, which its entry takes in place of the original's
+#ifdef CUSTOM_CHARACTERS
+#    include "custom_characters/layouts.h"
+#endif
+
 const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MODELS_PER_KIND] = {
     {
         {
             ModelRomBounds(plum),
+#ifdef PLUM_MODEL_LAYOUT
+            PLUM_MODEL_LAYOUT
+#else
             {
                 0x02010F60,
                 0x02000540,
@@ -478,9 +488,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(plum),
             0x02011750,
             0x02012750,
+#endif
         },
         {
             ModelRomBounds(charlie),
+#ifdef CHARLIE_MODEL_LAYOUT
+            CHARLIE_MODEL_LAYOUT
+#else
             {
                 0x02010C80,
                 0x02000540,
@@ -502,9 +516,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(charlie),
             0x02011460,
             0x02012460,
+#endif
         },
         {
             ModelRomBounds(maple),
+#ifdef MAPLE_MODEL_LAYOUT
+            MAPLE_MODEL_LAYOUT
+#else
             {
                 0x02012BB0,
                 0x02000540,
@@ -526,9 +544,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(maple),
             0x020133D0,
             0x020143D0,
+#endif
         },
         {
             ModelRomBounds(baby_mario),
+#ifdef BABY_MARIO_MODEL_LAYOUT
+            BABY_MARIO_MODEL_LAYOUT
+#else
             {
                 0x0200FF90,
                 0x02000540,
@@ -550,9 +572,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(baby_mario),
             0x02010750,
             0x02011750,
+#endif
         },
         {
             ModelRomBounds(luigi),
+#ifdef LUIGI_MODEL_LAYOUT
+            LUIGI_MODEL_LAYOUT
+#else
             {
                 0x0200EFD0,
                 0x02000540,
@@ -574,9 +600,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(luigi),
             0x0200F6F8,
             0x020106F8,
+#endif
         },
         {
             ModelRomBounds(peach),
+#ifdef PEACH_MODEL_LAYOUT
+            PEACH_MODEL_LAYOUT
+#else
             {
                 0x02011260,
                 0x02000540,
@@ -598,9 +628,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(peach),
             0x02011B08,
             0x02012B08,
+#endif
         },
         {
             ModelRomBounds(sonny),
+#ifdef SONNY_MODEL_LAYOUT
+            SONNY_MODEL_LAYOUT
+#else
             {
                 0x02011BE0,
                 0x02000540,
@@ -622,9 +656,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sonny),
             0x020123D0,
             0x020133D0,
+#endif
         },
         {
             ModelRomBounds(wario),
+#ifdef WARIO_MODEL_LAYOUT
+            WARIO_MODEL_LAYOUT
+#else
             {
                 0x02011530,
                 0x02000540,
@@ -646,9 +684,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(wario),
             0x02011D78,
             0x02012D78,
+#endif
         },
         {
             ModelRomBounds(harry),
+#ifdef HARRY_MODEL_LAYOUT
+            HARRY_MODEL_LAYOUT
+#else
             {
                 0x0200F640,
                 0x02000540,
@@ -670,9 +712,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(harry),
             0x0200FD58,
             0x02010D58,
+#endif
         },
         {
             ModelRomBounds(mario),
+#ifdef MARIO_MODEL_LAYOUT
+            MARIO_MODEL_LAYOUT
+#else
             {
                 0x0200C598,
                 0x02000540,
@@ -694,9 +740,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(mario),
             0x0200CCA8,
             0x0200DCA8,
+#endif
         },
         {
             ModelRomBounds(yoshi),
+#ifdef YOSHI_MODEL_LAYOUT
+            YOSHI_MODEL_LAYOUT
+#else
             {
                 0x0200E358,
                 0x02000540,
@@ -718,9 +768,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(yoshi),
             0x0200EB08,
             0x0200FB08,
+#endif
         },
         {
             ModelRomBounds(donkey_kong),
+#ifdef DONKEY_KONG_MODEL_LAYOUT
+            DONKEY_KONG_MODEL_LAYOUT
+#else
             {
                 0x020119E8,
                 0x02000540,
@@ -742,9 +796,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(donkey_kong),
             0x020121C0,
             0x020131C0,
+#endif
         },
         {
             ModelRomBounds(bowser),
+#ifdef BOWSER_MODEL_LAYOUT
+            BOWSER_MODEL_LAYOUT
+#else
             {
                 0x02010148,
                 0x02000540,
@@ -766,9 +824,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(bowser),
             0x02010790,
             0x02011790,
+#endif
         },
         {
             ModelRomBounds(metal_mario),
+#ifdef METAL_MARIO_MODEL_LAYOUT
+            METAL_MARIO_MODEL_LAYOUT
+#else
             {
                 0x02007900,
                 0x02000018,
@@ -790,9 +852,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(metal_mario),
             0x02007FE0,
             0x020087E0,
+#endif
         },
         {
             ModelRomBounds(kid),
+#ifdef KID_MODEL_LAYOUT
+            KID_MODEL_LAYOUT
+#else
             {
                 0x0200FB28,
                 0x02000540,
@@ -814,9 +880,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(kid),
             0x020102F8,
             0x020112F8,
+#endif
         },
         {
             ModelRomBounds(sherry),
+#ifdef SHERRY_MODEL_LAYOUT
+            SHERRY_MODEL_LAYOUT
+#else
             {
                 0x0200EFF8,
                 0x02000540,
@@ -838,9 +908,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sherry),
             0x0200F718,
             0x02010718,
+#endif
         },
         {
             ModelRomBounds(azalea),
+#ifdef AZALEA_MODEL_LAYOUT
+            AZALEA_MODEL_LAYOUT
+#else
             {
                 0x020131E8,
                 0x02000540,
@@ -862,9 +936,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(azalea),
             0x020139B8,
             0x020141B8,
+#endif
         },
         {
             ModelRomBounds(joe),
+#ifdef JOE_MODEL_LAYOUT
+            JOE_MODEL_LAYOUT
+#else
             {
                 0x02012A48,
                 0x02000540,
@@ -886,9 +964,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(joe),
             0x02013220,
             0x02013A20,
+#endif
         },
         {
             ModelRomBounds(plum_reaction),
+#ifdef PLUM_REACTION_MODEL_LAYOUT
+            PLUM_REACTION_MODEL_LAYOUT
+#else
             {
                 0x02010F98,
                 0x02000018,
@@ -910,9 +992,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(plum_reaction),
             0x02011618,
             0x02012618,
+#endif
         },
         {
             ModelRomBounds(charlie_reaction),
+#ifdef CHARLIE_REACTION_MODEL_LAYOUT
+            CHARLIE_REACTION_MODEL_LAYOUT
+#else
             {
                 0x02019188,
                 0x02000018,
@@ -934,9 +1020,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(charlie_reaction),
             0x02019770,
             0x0201A770,
+#endif
         },
         {
             ModelRomBounds(maple_reaction),
+#ifdef MAPLE_REACTION_MODEL_LAYOUT
+            MAPLE_REACTION_MODEL_LAYOUT
+#else
             {
                 0x0201A6D0,
                 0x02000018,
@@ -958,9 +1048,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(maple_reaction),
             0x0201AE40,
             0x0201BE40,
+#endif
         },
         {
             ModelRomBounds(baby_mario_reaction),
+#ifdef BABY_MARIO_REACTION_MODEL_LAYOUT
+            BABY_MARIO_REACTION_MODEL_LAYOUT
+#else
             {
                 0x02013ED0,
                 0x02000018,
@@ -982,9 +1076,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(baby_mario_reaction),
             0x02014590,
             0x02015590,
+#endif
         },
         {
             ModelRomBounds(luigi_reaction),
+#ifdef LUIGI_REACTION_MODEL_LAYOUT
+            LUIGI_REACTION_MODEL_LAYOUT
+#else
             {
                 0x02010020,
                 0x02000018,
@@ -1006,9 +1104,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(luigi_reaction),
             0x02010630,
             0x02011630,
+#endif
         },
         {
             ModelRomBounds(peach_reaction),
+#ifdef PEACH_REACTION_MODEL_LAYOUT
+            PEACH_REACTION_MODEL_LAYOUT
+#else
             {
                 0x020160C8,
                 0x02000018,
@@ -1030,9 +1132,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(peach_reaction),
             0x02016728,
             0x02017728,
+#endif
         },
         {
             ModelRomBounds(sonny_reaction),
+#ifdef SONNY_REACTION_MODEL_LAYOUT
+            SONNY_REACTION_MODEL_LAYOUT
+#else
             {
                 0x02011898,
                 0x02000018,
@@ -1054,9 +1160,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sonny_reaction),
             0x02011F80,
             0x02012F80,
+#endif
         },
         {
             ModelRomBounds(wario_reaction),
+#ifdef WARIO_REACTION_MODEL_LAYOUT
+            WARIO_REACTION_MODEL_LAYOUT
+#else
             {
                 0x020153E8,
                 0x020004D8,
@@ -1078,9 +1188,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(wario_reaction),
             0x02015AA0,
             0x02016AA0,
+#endif
         },
         {
             ModelRomBounds(harry_reaction),
+#ifdef HARRY_REACTION_MODEL_LAYOUT
+            HARRY_REACTION_MODEL_LAYOUT
+#else
             {
                 0x0200BD58,
                 0x02000018,
@@ -1102,9 +1216,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(harry_reaction),
             0x0200C400,
             0x0200D400,
+#endif
         },
         {
             ModelRomBounds(mario_reaction),
+#ifdef MARIO_REACTION_MODEL_LAYOUT
+            MARIO_REACTION_MODEL_LAYOUT
+#else
             {
                 0x020109B8,
                 0x02000018,
@@ -1126,9 +1244,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(mario_reaction),
             0x020110E8,
             0x020120E8,
+#endif
         },
         {
             ModelRomBounds(yoshi_reaction),
+#ifdef YOSHI_REACTION_MODEL_LAYOUT
+            YOSHI_REACTION_MODEL_LAYOUT
+#else
             {
                 0x020103C0,
                 0x02000540,
@@ -1150,9 +1272,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(yoshi_reaction),
             0x02010990,
             0x02011990,
+#endif
         },
         {
             ModelRomBounds(donkey_kong_reaction),
+#ifdef DONKEY_KONG_REACTION_MODEL_LAYOUT
+            DONKEY_KONG_REACTION_MODEL_LAYOUT
+#else
             {
                 0x020130F0,
                 0x02000018,
@@ -1174,9 +1300,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(donkey_kong_reaction),
             0x020138F8,
             0x020148F8,
+#endif
         },
         {
             ModelRomBounds(bowser_reaction),
+#ifdef BOWSER_REACTION_MODEL_LAYOUT
+            BOWSER_REACTION_MODEL_LAYOUT
+#else
             {
                 0x0200FD50,
                 0x02000018,
@@ -1198,9 +1328,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(bowser_reaction),
             0x020102F0,
             0x020112F0,
+#endif
         },
         {
             ModelRomBounds(metal_mario_reaction),
+#ifdef METAL_MARIO_REACTION_MODEL_LAYOUT
+            METAL_MARIO_REACTION_MODEL_LAYOUT
+#else
             {
                 0x020089A8,
                 0x02000018,
@@ -1222,9 +1356,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(metal_mario_reaction),
             0x02009090,
             0x02009890,
+#endif
         },
         {
             ModelRomBounds(kid_reaction),
+#ifdef KID_REACTION_MODEL_LAYOUT
+            KID_REACTION_MODEL_LAYOUT
+#else
             {
                 0x0200F620,
                 0x02000018,
@@ -1246,9 +1384,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(kid_reaction),
             0x0200FBC8,
             0x02010BC8,
+#endif
         },
         {
             ModelRomBounds(sherry_reaction),
+#ifdef SHERRY_REACTION_MODEL_LAYOUT
+            SHERRY_REACTION_MODEL_LAYOUT
+#else
             {
                 0x02012760,
                 0x02000018,
@@ -1270,9 +1412,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sherry_reaction),
             0x02013000,
             0x02014000,
+#endif
         },
         {
             ModelRomBounds(azalea_reaction),
+#ifdef AZALEA_REACTION_MODEL_LAYOUT
+            AZALEA_REACTION_MODEL_LAYOUT
+#else
             {
                 0x02019B68,
                 0x02000018,
@@ -1294,9 +1440,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(azalea_reaction),
             0x0201A468,
             0x0201B468,
+#endif
         },
         {
             ModelRomBounds(joe_reaction),
+#ifdef JOE_REACTION_MODEL_LAYOUT
+            JOE_REACTION_MODEL_LAYOUT
+#else
             {
                 0x02010930,
                 0x02000540,
@@ -1318,11 +1468,15 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(joe_reaction),
             0x02010F50,
             0x02011750,
+#endif
         },
     },
     {
         {
             ModelRomBounds(plum_palette_1),
+#ifdef PLUM_PALETTE_1_MODEL_LAYOUT
+            PLUM_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02010F70,
                 0x02000540,
@@ -1344,9 +1498,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(plum),
             0x02011760,
             0x02012760,
+#endif
         },
         {
             ModelRomBounds(charlie_palette_1),
+#ifdef CHARLIE_PALETTE_1_MODEL_LAYOUT
+            CHARLIE_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02010C80,
                 0x02000540,
@@ -1368,9 +1526,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(charlie),
             0x02011460,
             0x02012460,
+#endif
         },
         {
             ModelRomBounds(maple_palette_1),
+#ifdef MAPLE_PALETTE_1_MODEL_LAYOUT
+            MAPLE_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02012B40,
                 0x02000540,
@@ -1392,9 +1554,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(maple),
             0x02013358,
             0x02014358,
+#endif
         },
         {
             ModelRomBounds(baby_mario_palette_1),
+#ifdef BABY_MARIO_PALETTE_1_MODEL_LAYOUT
+            BABY_MARIO_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x0200FF78,
                 0x02000540,
@@ -1416,9 +1582,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(baby_mario),
             0x02010738,
             0x02011738,
+#endif
         },
         {
             ModelRomBounds(luigi_palette_1),
+#ifdef LUIGI_PALETTE_1_MODEL_LAYOUT
+            LUIGI_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x0200EFD0,
                 0x02000540,
@@ -1440,9 +1610,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(luigi),
             0x0200F6F8,
             0x020106F8,
+#endif
         },
         {
             ModelRomBounds(peach_palette_1),
+#ifdef PEACH_PALETTE_1_MODEL_LAYOUT
+            PEACH_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02011338,
                 0x02000540,
@@ -1464,9 +1638,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(peach),
             0x02011BE0,
             0x02012BE0,
+#endif
         },
         {
             ModelRomBounds(sonny_palette_1),
+#ifdef SONNY_PALETTE_1_MODEL_LAYOUT
+            SONNY_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x0200FC10,
                 0x02000540,
@@ -1488,9 +1666,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sonny),
             0x020103E0,
             0x02010BE0,
+#endif
         },
         {
             ModelRomBounds(wario_palette_1),
+#ifdef WARIO_PALETTE_1_MODEL_LAYOUT
+            WARIO_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02011530,
                 0x02000540,
@@ -1512,9 +1694,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(wario),
             0x02011D78,
             0x02012D78,
+#endif
         },
         {
             ModelRomBounds(harry_palette_1),
+#ifdef HARRY_PALETTE_1_MODEL_LAYOUT
+            HARRY_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x0200F640,
                 0x02000540,
@@ -1536,9 +1722,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(harry),
             0x0200FD58,
             0x02010D58,
+#endif
         },
         {
             ModelRomBounds(mario_palette_1),
+#ifdef MARIO_PALETTE_1_MODEL_LAYOUT
+            MARIO_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x0200C4E0,
                 0x02000540,
@@ -1560,9 +1750,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(mario),
             0x0200CBF0,
             0x0200DBF0,
+#endif
         },
         {
             ModelRomBounds(yoshi_palette_1),
+#ifdef YOSHI_PALETTE_1_MODEL_LAYOUT
+            YOSHI_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x0200E668,
                 0x02000540,
@@ -1584,9 +1778,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(yoshi),
             0x0200EE18,
             0x0200FE18,
+#endif
         },
         {
             ModelRomBounds(donkey_kong_palette_1),
+#ifdef DONKEY_KONG_PALETTE_1_MODEL_LAYOUT
+            DONKEY_KONG_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x020119E8,
                 0x02000540,
@@ -1608,9 +1806,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(donkey_kong),
             0x020121C0,
             0x020131C0,
+#endif
         },
         {
             ModelRomBounds(bowser_palette_1),
+#ifdef BOWSER_PALETTE_1_MODEL_LAYOUT
+            BOWSER_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02010148,
                 0x02000540,
@@ -1632,9 +1834,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(bowser),
             0x02010790,
             0x02011790,
+#endif
         },
         {
             ModelRomBounds(metal_mario_palette_1),
+#ifdef METAL_MARIO_PALETTE_1_MODEL_LAYOUT
+            METAL_MARIO_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02007820,
                 0x02000018,
@@ -1656,9 +1862,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(metal_mario),
             0x02007F00,
             0x02008700,
+#endif
         },
         {
             ModelRomBounds(kid_palette_1),
+#ifdef KID_PALETTE_1_MODEL_LAYOUT
+            KID_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x0200FB18,
                 0x02000540,
@@ -1680,9 +1890,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(kid),
             0x020102E8,
             0x020112E8,
+#endif
         },
         {
             ModelRomBounds(sherry_palette_1),
+#ifdef SHERRY_PALETTE_1_MODEL_LAYOUT
+            SHERRY_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x0200F000,
                 0x02000540,
@@ -1704,9 +1918,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sherry),
             0x0200F720,
             0x02010720,
+#endif
         },
         {
             ModelRomBounds(azalea_palette_1),
+#ifdef AZALEA_PALETTE_1_MODEL_LAYOUT
+            AZALEA_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02016498,
                 0x02000540,
@@ -1728,9 +1946,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(azalea),
             0x02016CA8,
             0x02017CA8,
+#endif
         },
         {
             ModelRomBounds(joe_palette_1),
+#ifdef JOE_PALETTE_1_MODEL_LAYOUT
+            JOE_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02012A48,
                 0x02000540,
@@ -1752,9 +1974,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(joe),
             0x02013220,
             0x02013A20,
+#endif
         },
         {
             ModelRomBounds(plum_reaction_palette_1),
+#ifdef PLUM_REACTION_PALETTE_1_MODEL_LAYOUT
+            PLUM_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02010FD0,
                 0x02000018,
@@ -1776,9 +2002,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(plum_reaction),
             0x02011650,
             0x02012650,
+#endif
         },
         {
             ModelRomBounds(charlie_reaction_palette_1),
+#ifdef CHARLIE_REACTION_PALETTE_1_MODEL_LAYOUT
+            CHARLIE_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02019188,
                 0x02000018,
@@ -1800,9 +2030,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(charlie_reaction),
             0x02019770,
             0x0201A770,
+#endif
         },
         {
             ModelRomBounds(maple_reaction_palette_1),
+#ifdef MAPLE_REACTION_PALETTE_1_MODEL_LAYOUT
+            MAPLE_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x0201A6D0,
                 0x02000018,
@@ -1824,9 +2058,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(maple_reaction),
             0x0201AE40,
             0x0201BE40,
+#endif
         },
         {
             ModelRomBounds(baby_mario_reaction_palette_1),
+#ifdef BABY_MARIO_REACTION_PALETTE_1_MODEL_LAYOUT
+            BABY_MARIO_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02013EB0,
                 0x02000018,
@@ -1848,9 +2086,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(baby_mario_reaction),
             0x02014570,
             0x02015570,
+#endif
         },
         {
             ModelRomBounds(luigi_reaction_palette_1),
+#ifdef LUIGI_REACTION_PALETTE_1_MODEL_LAYOUT
+            LUIGI_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02010018,
                 0x02000018,
@@ -1872,9 +2114,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(luigi_reaction),
             0x02010628,
             0x02011628,
+#endif
         },
         {
             ModelRomBounds(peach_reaction_palette_1),
+#ifdef PEACH_REACTION_PALETTE_1_MODEL_LAYOUT
+            PEACH_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02015FD8,
                 0x02000018,
@@ -1896,9 +2142,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(peach_reaction),
             0x02016638,
             0x02017638,
+#endif
         },
         {
             ModelRomBounds(sonny_reaction_palette_1),
+#ifdef SONNY_REACTION_PALETTE_1_MODEL_LAYOUT
+            SONNY_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02011898,
                 0x02000018,
@@ -1920,9 +2170,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sonny_reaction),
             0x02011F80,
             0x02012F80,
+#endif
         },
         {
             ModelRomBounds(wario_reaction_palette_1),
+#ifdef WARIO_REACTION_PALETTE_1_MODEL_LAYOUT
+            WARIO_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02015448,
                 0x02000540,
@@ -1944,9 +2198,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(wario_reaction),
             0x02015B00,
             0x02016B00,
+#endif
         },
         {
             ModelRomBounds(harry_reaction_palette_1),
+#ifdef HARRY_REACTION_PALETTE_1_MODEL_LAYOUT
+            HARRY_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x0200BD58,
                 0x02000018,
@@ -1968,9 +2226,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(harry_reaction),
             0x0200C400,
             0x0200D400,
+#endif
         },
         {
             ModelRomBounds(mario_reaction_palette_1),
+#ifdef MARIO_REACTION_PALETTE_1_MODEL_LAYOUT
+            MARIO_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x020109C0,
                 0x02000018,
@@ -1992,9 +2254,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(mario_reaction),
             0x020110F0,
             0x020120F0,
+#endif
         },
         {
             ModelRomBounds(yoshi_reaction_palette_1),
+#ifdef YOSHI_REACTION_PALETTE_1_MODEL_LAYOUT
+            YOSHI_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02010380,
                 0x02000540,
@@ -2016,9 +2282,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(yoshi_reaction),
             0x02010950,
             0x02011950,
+#endif
         },
         {
             ModelRomBounds(donkey_kong_reaction_palette_1),
+#ifdef DONKEY_KONG_REACTION_PALETTE_1_MODEL_LAYOUT
+            DONKEY_KONG_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x020130E8,
                 0x02000018,
@@ -2040,9 +2310,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(donkey_kong_reaction),
             0x020138F0,
             0x020148F0,
+#endif
         },
         {
             ModelRomBounds(bowser_reaction_palette_1),
+#ifdef BOWSER_REACTION_PALETTE_1_MODEL_LAYOUT
+            BOWSER_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x0200FD50,
                 0x02000018,
@@ -2064,9 +2338,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(bowser_reaction),
             0x020102F0,
             0x020112F0,
+#endif
         },
         {
             ModelRomBounds(metal_mario_reaction_palette_1),
+#ifdef METAL_MARIO_REACTION_PALETTE_1_MODEL_LAYOUT
+            METAL_MARIO_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x020089B0,
                 0x02000018,
@@ -2088,9 +2366,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(metal_mario_reaction),
             0x02009098,
             0x02009898,
+#endif
         },
         {
             ModelRomBounds(kid_reaction_palette_1),
+#ifdef KID_REACTION_PALETTE_1_MODEL_LAYOUT
+            KID_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x0200FE40,
                 0x02000018,
@@ -2112,9 +2394,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(kid_reaction),
             0x020103F0,
             0x020113F0,
+#endif
         },
         {
             ModelRomBounds(sherry_reaction_palette_1),
+#ifdef SHERRY_REACTION_PALETTE_1_MODEL_LAYOUT
+            SHERRY_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02012760,
                 0x02000018,
@@ -2136,9 +2422,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sherry_reaction),
             0x02013000,
             0x02014000,
+#endif
         },
         {
             ModelRomBounds(azalea_reaction_palette_1),
+#ifdef AZALEA_REACTION_PALETTE_1_MODEL_LAYOUT
+            AZALEA_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x02019B98,
                 0x02000018,
@@ -2160,9 +2450,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(azalea_reaction),
             0x0201A498,
             0x0201B498,
+#endif
         },
         {
             ModelRomBounds(joe_reaction_palette_1),
+#ifdef JOE_REACTION_PALETTE_1_MODEL_LAYOUT
+            JOE_REACTION_PALETTE_1_MODEL_LAYOUT
+#else
             {
                 0x020108C0,
                 0x020004D0,
@@ -2184,11 +2478,15 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(joe_reaction),
             0x02010EE0,
             0x020116E0,
+#endif
         },
     },
     {
         {
             ModelRomBounds(plum_palette_2),
+#ifdef PLUM_PALETTE_2_MODEL_LAYOUT
+            PLUM_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02010F70,
                 0x02000540,
@@ -2210,9 +2508,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(plum),
             0x02011760,
             0x02012760,
+#endif
         },
         {
             ModelRomBounds(charlie_palette_2),
+#ifdef CHARLIE_PALETTE_2_MODEL_LAYOUT
+            CHARLIE_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02010C80,
                 0x02000540,
@@ -2234,9 +2536,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(charlie),
             0x02011460,
             0x02012460,
+#endif
         },
         {
             ModelRomBounds(maple_palette_2),
+#ifdef MAPLE_PALETTE_2_MODEL_LAYOUT
+            MAPLE_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02012B40,
                 0x02000540,
@@ -2258,9 +2564,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(maple),
             0x02013358,
             0x02014358,
+#endif
         },
         {
             ModelRomBounds(baby_mario_palette_2),
+#ifdef BABY_MARIO_PALETTE_2_MODEL_LAYOUT
+            BABY_MARIO_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x0200FF68,
                 0x02000540,
@@ -2282,9 +2592,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(baby_mario),
             0x02010728,
             0x02011728,
+#endif
         },
         {
             ModelRomBounds(luigi_palette_2),
+#ifdef LUIGI_PALETTE_2_MODEL_LAYOUT
+            LUIGI_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x0200EFD0,
                 0x02000540,
@@ -2306,9 +2620,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(luigi),
             0x0200F6F8,
             0x020106F8,
+#endif
         },
         {
             ModelRomBounds(peach_palette_2),
+#ifdef PEACH_PALETTE_2_MODEL_LAYOUT
+            PEACH_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x020112F0,
                 0x02000540,
@@ -2330,9 +2648,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(peach),
             0x02011B98,
             0x02012B98,
+#endif
         },
         {
             ModelRomBounds(sonny_palette_2),
+#ifdef SONNY_PALETTE_2_MODEL_LAYOUT
+            SONNY_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x0200FBC8,
                 0x02000540,
@@ -2354,9 +2676,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sonny),
             0x02010398,
             0x02010B98,
+#endif
         },
         {
             ModelRomBounds(wario_palette_2),
+#ifdef WARIO_PALETTE_2_MODEL_LAYOUT
+            WARIO_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02011530,
                 0x02000540,
@@ -2378,9 +2704,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(wario),
             0x02011D78,
             0x02012D78,
+#endif
         },
         {
             ModelRomBounds(harry_palette_2),
+#ifdef HARRY_PALETTE_2_MODEL_LAYOUT
+            HARRY_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x0200F648,
                 0x02000540,
@@ -2402,9 +2732,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(harry),
             0x0200FD60,
             0x02010D60,
+#endif
         },
         {
             ModelRomBounds(mario_palette_2),
+#ifdef MARIO_PALETTE_2_MODEL_LAYOUT
+            MARIO_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x0200C4E0,
                 0x02000540,
@@ -2426,9 +2760,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(mario),
             0x0200CBF0,
             0x0200DBF0,
+#endif
         },
         {
             ModelRomBounds(yoshi_palette_2),
+#ifdef YOSHI_PALETTE_2_MODEL_LAYOUT
+            YOSHI_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x0200E668,
                 0x02000540,
@@ -2450,9 +2788,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(yoshi),
             0x0200EE18,
             0x0200FE18,
+#endif
         },
         {
             ModelRomBounds(donkey_kong_palette_2),
+#ifdef DONKEY_KONG_PALETTE_2_MODEL_LAYOUT
+            DONKEY_KONG_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x020119E8,
                 0x02000540,
@@ -2474,9 +2816,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(donkey_kong),
             0x020121C0,
             0x020131C0,
+#endif
         },
         {
             ModelRomBounds(bowser_palette_2),
+#ifdef BOWSER_PALETTE_2_MODEL_LAYOUT
+            BOWSER_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x020101F8,
                 0x02000540,
@@ -2498,9 +2844,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(bowser),
             0x02010840,
             0x02011840,
+#endif
         },
         {
             ModelRomBounds(metal_mario_palette_2),
+#ifdef METAL_MARIO_PALETTE_2_MODEL_LAYOUT
+            METAL_MARIO_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02007900,
                 0x02000018,
@@ -2522,9 +2872,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(metal_mario),
             0x02007FE0,
             0x020087E0,
+#endif
         },
         {
             ModelRomBounds(kid_palette_2),
+#ifdef KID_PALETTE_2_MODEL_LAYOUT
+            KID_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x0200FB18,
                 0x02000540,
@@ -2546,9 +2900,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(kid),
             0x020102E8,
             0x020112E8,
+#endif
         },
         {
             ModelRomBounds(sherry_palette_2),
+#ifdef SHERRY_PALETTE_2_MODEL_LAYOUT
+            SHERRY_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x0200EFA8,
                 0x02000540,
@@ -2570,9 +2928,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sherry),
             0x0200F6C8,
             0x020106C8,
+#endif
         },
         {
             ModelRomBounds(azalea_palette_2),
+#ifdef AZALEA_PALETTE_2_MODEL_LAYOUT
+            AZALEA_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02016490,
                 0x02000540,
@@ -2594,9 +2956,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(azalea),
             0x02016CA0,
             0x02017CA0,
+#endif
         },
         {
             ModelRomBounds(joe_palette_2),
+#ifdef JOE_PALETTE_2_MODEL_LAYOUT
+            JOE_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02012A88,
                 0x02000540,
@@ -2618,9 +2984,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(joe),
             0x02013260,
             0x02013A60,
+#endif
         },
         {
             ModelRomBounds(plum_reaction_palette_2),
+#ifdef PLUM_REACTION_PALETTE_2_MODEL_LAYOUT
+            PLUM_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02010FD0,
                 0x02000018,
@@ -2642,9 +3012,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(plum_reaction),
             0x02011650,
             0x02012650,
+#endif
         },
         {
             ModelRomBounds(charlie_reaction_palette_2),
+#ifdef CHARLIE_REACTION_PALETTE_2_MODEL_LAYOUT
+            CHARLIE_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02019188,
                 0x02000018,
@@ -2666,9 +3040,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(charlie_reaction),
             0x02019770,
             0x0201A770,
+#endif
         },
         {
             ModelRomBounds(maple_reaction_palette_2),
+#ifdef MAPLE_REACTION_PALETTE_2_MODEL_LAYOUT
+            MAPLE_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x0201A6D0,
                 0x02000018,
@@ -2690,9 +3068,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(maple_reaction),
             0x0201AE40,
             0x0201BE40,
+#endif
         },
         {
             ModelRomBounds(baby_mario_reaction_palette_2),
+#ifdef BABY_MARIO_REACTION_PALETTE_2_MODEL_LAYOUT
+            BABY_MARIO_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02013EA0,
                 0x02000018,
@@ -2714,9 +3096,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(baby_mario_reaction),
             0x02014560,
             0x02015560,
+#endif
         },
         {
             ModelRomBounds(luigi_reaction_palette_2),
+#ifdef LUIGI_REACTION_PALETTE_2_MODEL_LAYOUT
+            LUIGI_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02010018,
                 0x02000018,
@@ -2738,9 +3124,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(luigi_reaction),
             0x02010628,
             0x02011628,
+#endif
         },
         {
             ModelRomBounds(peach_reaction_palette_2),
+#ifdef PEACH_REACTION_PALETTE_2_MODEL_LAYOUT
+            PEACH_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02015FD8,
                 0x02000018,
@@ -2762,9 +3152,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(peach_reaction),
             0x02016638,
             0x02017638,
+#endif
         },
         {
             ModelRomBounds(sonny_reaction_palette_2),
+#ifdef SONNY_REACTION_PALETTE_2_MODEL_LAYOUT
+            SONNY_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02011898,
                 0x02000018,
@@ -2786,9 +3180,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sonny_reaction),
             0x02011F80,
             0x02012F80,
+#endif
         },
         {
             ModelRomBounds(wario_reaction_palette_2),
+#ifdef WARIO_REACTION_PALETTE_2_MODEL_LAYOUT
+            WARIO_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02015448,
                 0x02000540,
@@ -2810,9 +3208,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(wario_reaction),
             0x02015B00,
             0x02016B00,
+#endif
         },
         {
             ModelRomBounds(harry_reaction_palette_2),
+#ifdef HARRY_REACTION_PALETTE_2_MODEL_LAYOUT
+            HARRY_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x0200BD68,
                 0x02000018,
@@ -2834,9 +3236,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(harry_reaction),
             0x0200C410,
             0x0200D410,
+#endif
         },
         {
             ModelRomBounds(mario_reaction_palette_2),
+#ifdef MARIO_REACTION_PALETTE_2_MODEL_LAYOUT
+            MARIO_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x020109C0,
                 0x02000018,
@@ -2858,9 +3264,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(mario_reaction),
             0x020110F0,
             0x020120F0,
+#endif
         },
         {
             ModelRomBounds(yoshi_reaction_palette_2),
+#ifdef YOSHI_REACTION_PALETTE_2_MODEL_LAYOUT
+            YOSHI_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02010380,
                 0x02000540,
@@ -2882,9 +3292,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(yoshi_reaction),
             0x02010950,
             0x02011950,
+#endif
         },
         {
             ModelRomBounds(donkey_kong_reaction_palette_2),
+#ifdef DONKEY_KONG_REACTION_PALETTE_2_MODEL_LAYOUT
+            DONKEY_KONG_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x020130E8,
                 0x02000018,
@@ -2906,9 +3320,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(donkey_kong_reaction),
             0x020138F0,
             0x020148F0,
+#endif
         },
         {
             ModelRomBounds(bowser_reaction_palette_2),
+#ifdef BOWSER_REACTION_PALETTE_2_MODEL_LAYOUT
+            BOWSER_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x0200FD50,
                 0x02000018,
@@ -2930,9 +3348,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(bowser_reaction),
             0x020102F0,
             0x020112F0,
+#endif
         },
         {
             ModelRomBounds(metal_mario_reaction_palette_2),
+#ifdef METAL_MARIO_REACTION_PALETTE_2_MODEL_LAYOUT
+            METAL_MARIO_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x020089B0,
                 0x02000018,
@@ -2954,9 +3376,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(metal_mario_reaction),
             0x02009098,
             0x02009898,
+#endif
         },
         {
             ModelRomBounds(kid_reaction_palette_2),
+#ifdef KID_REACTION_PALETTE_2_MODEL_LAYOUT
+            KID_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x0200FE40,
                 0x02000018,
@@ -2978,9 +3404,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(kid_reaction),
             0x020103F0,
             0x020113F0,
+#endif
         },
         {
             ModelRomBounds(sherry_reaction_palette_2),
+#ifdef SHERRY_REACTION_PALETTE_2_MODEL_LAYOUT
+            SHERRY_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02012718,
                 0x02000018,
@@ -3002,9 +3432,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sherry_reaction),
             0x02012FB8,
             0x02013FB8,
+#endif
         },
         {
             ModelRomBounds(azalea_reaction_palette_2),
+#ifdef AZALEA_REACTION_PALETTE_2_MODEL_LAYOUT
+            AZALEA_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02019B98,
                 0x02000018,
@@ -3026,9 +3460,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(azalea_reaction),
             0x0201A498,
             0x0201B498,
+#endif
         },
         {
             ModelRomBounds(joe_reaction_palette_2),
+#ifdef JOE_REACTION_PALETTE_2_MODEL_LAYOUT
+            JOE_REACTION_PALETTE_2_MODEL_LAYOUT
+#else
             {
                 0x02010980,
                 0x02000540,
@@ -3050,11 +3488,15 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(joe_reaction),
             0x02010FA0,
             0x020117A0,
+#endif
         },
     },
     {
         {
             ModelRomBounds(plum_palette_3),
+#ifdef PLUM_PALETTE_3_MODEL_LAYOUT
+            PLUM_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x020109F8,
                 0x02000018,
@@ -3076,9 +3518,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(plum),
             0x020111E8,
             0x020121E8,
+#endif
         },
         {
             ModelRomBounds(charlie_palette_3),
+#ifdef CHARLIE_PALETTE_3_MODEL_LAYOUT
+            CHARLIE_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02010C80,
                 0x02000540,
@@ -3100,9 +3546,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(charlie),
             0x02011460,
             0x02012460,
+#endif
         },
         {
             ModelRomBounds(maple_palette_3),
+#ifdef MAPLE_PALETTE_3_MODEL_LAYOUT
+            MAPLE_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02012B40,
                 0x02000540,
@@ -3124,9 +3574,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(maple),
             0x02013358,
             0x02014358,
+#endif
         },
         {
             ModelRomBounds(baby_mario_palette_3),
+#ifdef BABY_MARIO_PALETTE_3_MODEL_LAYOUT
+            BABY_MARIO_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x0200FF78,
                 0x02000540,
@@ -3148,9 +3602,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(baby_mario),
             0x02010738,
             0x02011738,
+#endif
         },
         {
             ModelRomBounds(luigi_palette_3),
+#ifdef LUIGI_PALETTE_3_MODEL_LAYOUT
+            LUIGI_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x0200EFD0,
                 0x02000540,
@@ -3172,9 +3630,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(luigi),
             0x0200F6F8,
             0x020106F8,
+#endif
         },
         {
             ModelRomBounds(peach_palette_3),
+#ifdef PEACH_PALETTE_3_MODEL_LAYOUT
+            PEACH_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x020112F0,
                 0x02000540,
@@ -3196,9 +3658,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(peach),
             0x02011B98,
             0x02012B98,
+#endif
         },
         {
             ModelRomBounds(sonny_palette_3),
+#ifdef SONNY_PALETTE_3_MODEL_LAYOUT
+            SONNY_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x0200FC10,
                 0x02000540,
@@ -3220,9 +3686,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sonny),
             0x020103E0,
             0x02010BE0,
+#endif
         },
         {
             ModelRomBounds(wario_palette_3),
+#ifdef WARIO_PALETTE_3_MODEL_LAYOUT
+            WARIO_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02011530,
                 0x02000540,
@@ -3244,9 +3714,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(wario),
             0x02011D78,
             0x02012D78,
+#endif
         },
         {
             ModelRomBounds(harry_palette_3),
+#ifdef HARRY_PALETTE_3_MODEL_LAYOUT
+            HARRY_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x0200F640,
                 0x02000540,
@@ -3268,9 +3742,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(harry),
             0x0200FD58,
             0x02010D58,
+#endif
         },
         {
             ModelRomBounds(mario_palette_3),
+#ifdef MARIO_PALETTE_3_MODEL_LAYOUT
+            MARIO_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x0200BF68,
                 0x02000018,
@@ -3292,9 +3770,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(mario),
             0x0200C678,
             0x0200D678,
+#endif
         },
         {
             ModelRomBounds(yoshi_palette_3),
+#ifdef YOSHI_PALETTE_3_MODEL_LAYOUT
+            YOSHI_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x0200E548,
                 0x02000540,
@@ -3316,9 +3798,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(yoshi),
             0x0200ECF8,
             0x0200FCF8,
+#endif
         },
         {
             ModelRomBounds(donkey_kong_palette_3),
+#ifdef DONKEY_KONG_PALETTE_3_MODEL_LAYOUT
+            DONKEY_KONG_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x020119E8,
                 0x02000540,
@@ -3340,9 +3826,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(donkey_kong),
             0x020121C0,
             0x020131C0,
+#endif
         },
         {
             ModelRomBounds(bowser_palette_3),
+#ifdef BOWSER_PALETTE_3_MODEL_LAYOUT
+            BOWSER_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02010148,
                 0x02000540,
@@ -3364,9 +3854,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(bowser),
             0x02010790,
             0x02011790,
+#endif
         },
         {
             ModelRomBounds(metal_mario_palette_3),
+#ifdef METAL_MARIO_PALETTE_3_MODEL_LAYOUT
+            METAL_MARIO_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02007900,
                 0x02000018,
@@ -3388,9 +3882,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(metal_mario),
             0x02007FE0,
             0x020087E0,
+#endif
         },
         {
             ModelRomBounds(kid_palette_3),
+#ifdef KID_PALETTE_3_MODEL_LAYOUT
+            KID_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x0200F5A0,
                 0x02000018,
@@ -3412,9 +3910,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(kid),
             0x0200FD70,
             0x02010D70,
+#endif
         },
         {
             ModelRomBounds(sherry_palette_3),
+#ifdef SHERRY_PALETTE_3_MODEL_LAYOUT
+            SHERRY_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x0200F060,
                 0x02000540,
@@ -3436,9 +3938,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sherry),
             0x0200F780,
             0x02010780,
+#endif
         },
         {
             ModelRomBounds(azalea_palette_3),
+#ifdef AZALEA_PALETTE_3_MODEL_LAYOUT
+            AZALEA_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02016498,
                 0x02000540,
@@ -3460,9 +3966,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(azalea),
             0x02016CA8,
             0x02017CA8,
+#endif
         },
         {
             ModelRomBounds(joe_palette_3),
+#ifdef JOE_PALETTE_3_MODEL_LAYOUT
+            JOE_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02012A88,
                 0x02000540,
@@ -3484,9 +3994,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(joe),
             0x02013260,
             0x02013A60,
+#endif
         },
         {
             ModelRomBounds(plum_reaction_palette_3),
+#ifdef PLUM_REACTION_PALETTE_3_MODEL_LAYOUT
+            PLUM_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02012F38,
                 0x02000018,
@@ -3508,9 +4022,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(plum_reaction),
             0x020135C8,
             0x020145C8,
+#endif
         },
         {
             ModelRomBounds(charlie_reaction_palette_3),
+#ifdef CHARLIE_REACTION_PALETTE_3_MODEL_LAYOUT
+            CHARLIE_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02019188,
                 0x02000018,
@@ -3532,9 +4050,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(charlie_reaction),
             0x02019770,
             0x0201A770,
+#endif
         },
         {
             ModelRomBounds(maple_reaction_palette_3),
+#ifdef MAPLE_REACTION_PALETTE_3_MODEL_LAYOUT
+            MAPLE_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x0201A6D0,
                 0x02000018,
@@ -3556,9 +4078,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(maple_reaction),
             0x0201AE40,
             0x0201BE40,
+#endif
         },
         {
             ModelRomBounds(baby_mario_reaction_palette_3),
+#ifdef BABY_MARIO_REACTION_PALETTE_3_MODEL_LAYOUT
+            BABY_MARIO_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02013EB0,
                 0x02000018,
@@ -3580,9 +4106,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(baby_mario_reaction),
             0x02014570,
             0x02015570,
+#endif
         },
         {
             ModelRomBounds(luigi_reaction_palette_3),
+#ifdef LUIGI_REACTION_PALETTE_3_MODEL_LAYOUT
+            LUIGI_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02010018,
                 0x02000018,
@@ -3604,9 +4134,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(luigi_reaction),
             0x02010628,
             0x02011628,
+#endif
         },
         {
             ModelRomBounds(peach_reaction_palette_3),
+#ifdef PEACH_REACTION_PALETTE_3_MODEL_LAYOUT
+            PEACH_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02015FD8,
                 0x02000018,
@@ -3628,9 +4162,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(peach_reaction),
             0x02016638,
             0x02017638,
+#endif
         },
         {
             ModelRomBounds(sonny_reaction_palette_3),
+#ifdef SONNY_REACTION_PALETTE_3_MODEL_LAYOUT
+            SONNY_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02011898,
                 0x02000018,
@@ -3652,9 +4190,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sonny_reaction),
             0x02011F80,
             0x02012F80,
+#endif
         },
         {
             ModelRomBounds(wario_reaction_palette_3),
+#ifdef WARIO_REACTION_PALETTE_3_MODEL_LAYOUT
+            WARIO_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02015448,
                 0x02000540,
@@ -3676,9 +4218,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(wario_reaction),
             0x02015B00,
             0x02016B00,
+#endif
         },
         {
             ModelRomBounds(harry_reaction_palette_3),
+#ifdef HARRY_REACTION_PALETTE_3_MODEL_LAYOUT
+            HARRY_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x0200BD40,
                 0x02000018,
@@ -3700,9 +4246,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(harry_reaction),
             0x0200C3E8,
             0x0200D3E8,
+#endif
         },
         {
             ModelRomBounds(mario_reaction_palette_3),
+#ifdef MARIO_REACTION_PALETTE_3_MODEL_LAYOUT
+            MARIO_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x020109C0,
                 0x02000018,
@@ -3724,9 +4274,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(mario_reaction),
             0x020110F0,
             0x020120F0,
+#endif
         },
         {
             ModelRomBounds(yoshi_reaction_palette_3),
+#ifdef YOSHI_REACTION_PALETTE_3_MODEL_LAYOUT
+            YOSHI_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02010380,
                 0x02000540,
@@ -3748,9 +4302,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(yoshi_reaction),
             0x02010950,
             0x02011950,
+#endif
         },
         {
             ModelRomBounds(donkey_kong_reaction_palette_3),
+#ifdef DONKEY_KONG_REACTION_PALETTE_3_MODEL_LAYOUT
+            DONKEY_KONG_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x020130E8,
                 0x02000018,
@@ -3772,9 +4330,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(donkey_kong_reaction),
             0x020138F0,
             0x020148F0,
+#endif
         },
         {
             ModelRomBounds(bowser_reaction_palette_3),
+#ifdef BOWSER_REACTION_PALETTE_3_MODEL_LAYOUT
+            BOWSER_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x0200FD50,
                 0x02000018,
@@ -3796,9 +4358,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(bowser_reaction),
             0x020102F0,
             0x020112F0,
+#endif
         },
         {
             ModelRomBounds(metal_mario_reaction_palette_3),
+#ifdef METAL_MARIO_REACTION_PALETTE_3_MODEL_LAYOUT
+            METAL_MARIO_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x020089A8,
                 0x02000018,
@@ -3820,9 +4386,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(metal_mario_reaction),
             0x02009090,
             0x02009890,
+#endif
         },
         {
             ModelRomBounds(kid_reaction_palette_3),
+#ifdef KID_REACTION_PALETTE_3_MODEL_LAYOUT
+            KID_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x0200FE40,
                 0x02000018,
@@ -3844,9 +4414,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(kid_reaction),
             0x020103F0,
             0x020113F0,
+#endif
         },
         {
             ModelRomBounds(sherry_reaction_palette_3),
+#ifdef SHERRY_REACTION_PALETTE_3_MODEL_LAYOUT
+            SHERRY_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02012760,
                 0x02000018,
@@ -3868,9 +4442,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(sherry_reaction),
             0x02013000,
             0x02014000,
+#endif
         },
         {
             ModelRomBounds(azalea_reaction_palette_3),
+#ifdef AZALEA_REACTION_PALETTE_3_MODEL_LAYOUT
+            AZALEA_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02019B98,
                 0x02000018,
@@ -3892,9 +4470,13 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(azalea_reaction),
             0x0201A498,
             0x0201B498,
+#endif
         },
         {
             ModelRomBounds(joe_reaction_palette_3),
+#ifdef JOE_REACTION_PALETTE_3_MODEL_LAYOUT
+            JOE_REACTION_PALETTE_3_MODEL_LAYOUT
+#else
             {
                 0x02010910,
                 0x020004D0,
@@ -3916,6 +4498,7 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
             ModelRomBounds(joe_reaction),
             0x02010F30,
             0x02011730,
+#endif
         },
     },
 };

@@ -32,6 +32,14 @@ endif
 ifneq ($(MODERN),0)
 override NON_MATCHING := 1
 endif
+# Set CHARACTERS to the package folders of custom characters, which the
+# Blender add-on in tools/blender exports, to build each in place of the
+# character it replaces. Their model files differ from the original's, so
+# the ROM needn't match. See tools/build_character.py.
+CHARACTERS  ?=
+ifneq ($(strip $(CHARACTERS)),)
+override NON_MATCHING := 1
+endif
 # The modern build compiles each segment's code together, with LTO. Set
 # LTO=0 to link its objects as each compiled, such as to find whether LTO
 # brings about a difference. Build with -B after changing it.
@@ -131,6 +139,11 @@ ULTRALIB_COMPILER := modern_gcc
 LIB_MODERN  := -DMODERN_CC
 ULTRALIB_ASM_ABI :=
 LIBS        := $(MODERN_LIBS)
+endif
+# A build with custom characters has a directory of its own within its
+# toolchain's, as its character models' objects differ
+ifneq ($(strip $(CHARACTERS)),)
+BUILD_DIR   := $(BUILD_DIR)/custom
 endif
 
 # GCC's undefined behavior sanitizer, whose failed checks call the handlers
@@ -615,6 +628,42 @@ $(BUILD_DIR)/asm/data/%.s.o: asm/data/%.s
 $(BUILD_DIR)/%.bin.o: %.bin
 	@mkdir -p $(dir $@)
 	$(OBJCOPY) -I binary -O $(BIN_FORMAT) -B mips $< $@
+
+# Custom characters' model files, which build_character.py writes from their
+# packages over the original's models, and the header of their layouts,
+# which character_model.c includes in place of the original's
+CHARACTER_DIR    := $(BUILD_DIR)/custom_characters
+CHARACTER_HEADER := $(CHARACTER_DIR)/layouts.h
+# Changes to the list of packages, which their files' dates don't show
+CHARACTER_LIST   := $(CHARACTER_DIR)/packages.txt
+ifneq ($(strip $(CHARACTERS)),)
+DEFINES          += -DCUSTOM_CHARACTERS
+CHARACTER_FILES  := $(shell $(PYTHON) tools/build_character.py --list-files $(CHARACTERS))
+CHARACTER_BINS   := $(CHARACTER_FILES:%=$(CHARACTER_DIR)/%.bin)
+CHARACTER_TOOLS  := $(addprefix tools/,build_character.py character_template.py \
+                    character_model_format.py f3dex2.py lz_codec.py)
+
+$(CHARACTER_LIST): FORCE
+	@mkdir -p $(@D)
+	@echo '$(abspath $(CHARACTERS))' | cmp -s - $@ || echo '$(abspath $(CHARACTERS))' > $@
+
+$(CHARACTER_HEADER): $(CHARACTER_LIST) $(CHARACTER_TOOLS) $(shell find $(CHARACTERS) -type f) \
+                     src/characters/character_model.c $(wildcard assets/character_models/*.bin)
+	$(PYTHON) tools/build_character.py --output $(CHARACTER_DIR) --header $@ $(CHARACTERS)
+
+# The header is written last, so it's newer than the files it was written with
+$(CHARACTER_BINS): $(CHARACTER_HEADER) ;
+
+$(BUILD_DIR)/src/characters/character_model.c.o: $(CHARACTER_HEADER)
+
+# Every model's object, so that one no longer replaced is made again
+$(filter $(BUILD_DIR)/assets/character_models/%,$(O_FILES)): $(CHARACTER_LIST)
+
+$(CHARACTER_FILES:%=$(BUILD_DIR)/assets/character_models/%.bin.o): \
+$(BUILD_DIR)/assets/character_models/%.bin.o: $(CHARACTER_DIR)/%.bin
+	@mkdir -p $(dir $@)
+	$(OBJCOPY) -I binary -O $(BIN_FORMAT) -B mips $< $@
+endif
 
 # The asset archive is packed from the assets that asset_archive.py splits
 # it into, so that one can change without the table being worked out again
