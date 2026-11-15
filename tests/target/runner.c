@@ -42,6 +42,7 @@ static void RunAllGroups(void) {
     RUN_TEST_GROUP(HoleLoader);
     RUN_TEST_GROUP(MathUtil);
     RUN_TEST_GROUP(Password);
+    RUN_TEST_GROUP(ShotSimulation);
 }
 
 void RunTargetTests(void) {
