@@ -21,7 +21,12 @@ RAM.
 
 The routines that the build links from archives, such as the libgcc
 helpers that a modern GCC calls, go at the end of main's code, where
-every segment can call them.
+every segment can call them, and their bss at the end of main's.
+
+splat places an overlay's one object's bss as .bss, and every other bss
+as .bss*. Here each is .bss*, so that a section named .bss.NAME, as from
+an attribute or -fdata-sections, lands with the rest of its object's
+bss rather than in the script's /DISCARD/.
 
 The matching build defines main's common objects in one file at the
 original's addresses, which this layout leaves out. Each object of main
@@ -43,8 +48,12 @@ BUILD_DATE = "build_date"
 
 MAIN_TEXT_END = f"        {MAIN}_TEXT_END = .;\n"
 ARCHIVE_SECTIONS = "        *.a:*(.text* .rodata* .data*);\n"
-MAIN_BSS_END = f"        {MAIN}_BSS_END = .;\n"
+ARCHIVE_BSS = "        *.a:*(.bss* COMMON .scommon*);\n"
+# The end of main's bss, which splat aligns
+MAIN_BSS_END = f"        . = ALIGN(., 16);\n        {MAIN}_BSS_END = .;\n"
 OBJECT_BSS = re.compile(r"^(\s*\S+\.o)\(\.bss\*\);$", re.MULTILINE)
+EXACT_BSS = "(.bss COMMON .scommon)"
+ANY_BSS = "(.bss* COMMON .scommon*)"
 
 BLOCK_NAME = re.compile(r"^\s*(\w+)_ROM_START = __romPos;$", re.MULTILINE)
 SECTION_VRAM = re.compile(r"^(\s*\.\w+) (0x[0-9A-Fa-f]+) :", re.MULTILINE)
@@ -84,7 +93,7 @@ def place_unlisted_sections(blocks: list[str], main_index: int) -> None:
         sys.exit(f"expected {MAIN} to have bss")
     blocks[bss_index] = OBJECT_BSS.sub(
         r"\g<0>\n\1(COMMON .scommon*);", blocks[bss_index]
-    )
+    ).replace(MAIN_BSS_END, ARCHIVE_BSS + MAIN_BSS_END, 1)
 
 
 def lay_out(script: str) -> str:
@@ -100,6 +109,7 @@ def lay_out(script: str) -> str:
 
     main_index = names.index(MAIN)
     place_unlisted_sections(blocks, main_index)
+    blocks = [block.replace(EXACT_BSS, ANY_BSS) for block in blocks]
     build_date = blocks[names.index(BUILD_DATE)]
     # Segments without an address of their own, such as the asset files,
     # follow the build date in ROM
