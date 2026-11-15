@@ -145,6 +145,21 @@ void ReadAssetFile(void *buffer, u32 size, AssetFile *file) {
         osSyncPrintf("size error %d \n", f_LastOpenedAssetId);
     }
 
+#ifdef AVOID_UB
+    // Animations and screen changes read assets over the images and palettes
+    // that frames already queued may still load, so whether such a frame
+    // shows the old image or the new one depends on how far the RDP lags.
+    // The graphics thread, which updates and draws the game, waits for those
+    // frames to end before each read; decoding reads through here before it
+    // writes, so the wait covers it too. Loader threads fill buffers for
+    // scenes not yet drawn, and the game waits on their pace, so they don't
+    // wait. The graphics thread is the only one at its priority, and the
+    // library has no osGetThreadId.
+    if (osGetThreadPri(NULL) == NU_GFX_THREAD_PRI) {
+        nuGfxTaskAllEndWait();
+    }
+#endif
+
     nuPiReadRom(file->cursor, buffer, (size + 1) & ~1);
     file->cursor += size;
 }
