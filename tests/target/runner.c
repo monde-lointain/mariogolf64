@@ -38,6 +38,7 @@ void TargetTestsFinished(void) {
 static void RunAllGroups(void) {
     RUN_TEST_GROUP(AssetDecoding);
     RUN_TEST_GROUP(CourseHoles);
+    RUN_TEST_GROUP(Curve);
     RUN_TEST_GROUP(Fireworks);
     RUN_TEST_GROUP(Heap);
     RUN_TEST_GROUP(HoleLoader);
