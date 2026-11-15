@@ -1,0 +1,20 @@
+# Starts a one-player tournament as Plum on Toad Highlands' first hole and
+# plays the tee shot. FRAME BUTTON PRESSED, set as the game reaches FRAME.
+262 Start 1    # skip the opening
+265 Start 0
+330 Start 1    # leave the title for the main menu
+333 Start 0
+380 A 1        # one player
+383 A 0
+430 A 1        # Plum
+433 A 0
+482 A 1        # tournament
+485 A 0
+534 A 1        # Toad Highlands
+537 A 0
+1030 A 1       # start the swing
+1033 A 0
+1060 A 1       # set the power
+1063 A 0
+1085 A 1       # set the impact
+1088 A 0

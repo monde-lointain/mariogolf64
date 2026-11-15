@@ -57,6 +57,12 @@ Expansion Pak, whose free memory holds the tests (see
 thousands of frames and compares the game's state at each. It takes
 minutes, so it is a coarse, occasional check (see `tools/equivalence.py`).
 
+`tools/find_races.py` runs one build and reports the CPU's stores into data
+that a queued frame has yet to draw with, which make the frame depend on
+how far the RDP falls behind. It holds each graphics task back, as an RDP
+that falls behind would, and can press buttons from a file, such as
+`tools/inputs/tournament_tee_shot.txt`, to reach gameplay.
+
 ## Assets
 
 `make extract` cuts the files that the game reads from ROM out of the
