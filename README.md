@@ -69,7 +69,8 @@ that falls behind would, and can press buttons from a file, such as
 ## Assets
 
 `make extract` cuts the files that the game reads from ROM out of the
-original, into `assets/`, which is never committed:
+original, into `assets/`, which is never committed. It writes them afresh,
+over any edits, so it is needed only once:
 
 | Path | Contents |
 | --- | --- |
@@ -130,6 +131,17 @@ The sources are grouped by the part of the game they serve, not by the
 segment they load in; `mariogolf64.yaml` says which segment each file is
 linked into. `include/` has the same directories as `src/`, and a header
 is included by its directory, as in `"course/terrain.h"`.
+
+To add a file, list it in `mariogolf64.yaml` among the subsegments of the
+segment it loads in, after the file it follows, by its name alone:
+
+```yaml
+      - { type: c, name: shot/new_file }
+```
+
+`make` makes the linker script again from the yaml and builds the file.
+The matching ROM no longer matches, so build with `MODERN=1` or
+`NON_MATCHING=1`.
 
 | Directory | Contents |
 | --- | --- |

@@ -2,8 +2,12 @@
 
 TARGET      := mariogolf64
 SPLAT_YAML  := $(TARGET).yaml
+# The original ROM, which splat reads (the yaml's target_path)
+BASEROM     := baserom.us.z64
 SPLAT_DIR   := build/splat
 SPLAT_LD    := $(SPLAT_DIR)/$(TARGET).ld
+# The objects that splat's script names, as a makefile that sets SPLAT_O_FILES
+SPLAT_O_LIST := $(SPLAT_DIR)/objects.mk
 KMC_DIR     := tools/gcc_kmc
 
 # Set NON_MATCHING=1 to build a ROM that needn't match the original: it
@@ -178,9 +182,11 @@ CC_CHECK       := clang -fsyntax-only -fno-builtin -funsigned-char -std=gnu89 -m
                   -Wno-unused-variable -Wno-unused-but-set-variable -Wno-missing-braces
 RUN_CC_CHECK   ?= 0
 
-# Every object the linker script asks for, under this build's directory
-O_FILES := $(patsubst build/%,$(BUILD_DIR)/%,$(filter-out $(LINKED_O_FILTER),$(shell \
-  test -f $(SPLAT_LD) && grep -oE 'build/[A-Za-z0-9_./-]+\.o' $(SPLAT_LD) | sort -u)))
+# Every object the linker script asks for, under this build's directory.
+# When a change to the yaml makes the list again, make reads it in afresh
+# before building anything, so a file added to the yaml is compiled.
+-include $(SPLAT_O_LIST)
+O_FILES := $(patsubst build/%,$(BUILD_DIR)/%,$(filter-out $(LINKED_O_FILTER),$(SPLAT_O_FILES)))
 
 # libultra 2.0J, built the way ultralib builds libgultra_rom except that the
 # game's copy was compiled with signed chars
@@ -424,6 +430,23 @@ clean:
 
 distclean:
 	rm -rf $(BUILD_DIR) asm assets
+
+# splat writes the linker script from the yaml, so that a change to the
+# layout, such as a new file, needs no make extract, which would write the
+# extracted assets over any edits. Its ld mode leaves them be, apart from
+# the microcode, which splat always cuts from the ROM again. It writes the
+# script only if it changes, so the touch keeps an edit that changes none
+# from running it at every make. Without the ROM, which splat reads, make
+# has no way to make the script, and goals that need no link, such as
+# pycheck, go on without the list of objects.
+$(SPLAT_LD): $(SPLAT_YAML) symbol_addrs.txt reloc_addrs.txt $(BASEROM)
+	mkdir -p $(SPLAT_DIR)
+	$(PYTHON) -m splat split $(SPLAT_YAML) --modes ld > $(SPLAT_DIR)/split.log 2>&1 \
+	    || { cat $(SPLAT_DIR)/split.log; exit 1; }
+	touch $@
+
+$(SPLAT_O_LIST): $(SPLAT_LD)
+	grep -oE 'build/[A-Za-z0-9_./-]+\.o' $< | LC_ALL=C sort -u | sed 's/^/SPLAT_O_FILES += /' > $@
 
 # splat's script names the objects under build/, so the shiftable script
 # names them under this build's directory
