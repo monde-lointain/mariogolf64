@@ -59,17 +59,25 @@ main 60%, reaction 88%", and says what to cut when there's too little.
 
 ## Making a character
 
-The 3D View's sidebar (N) has a Mario Golf tab with the four steps.
+The 3D View's sidebar (N) has a Mario Golf tab with the five steps.
 
 1. **Rig.** Add Template Rig adds the skeleton of the character to replace,
    with its model as a wireframe guide. Its redo panel picks another
    character.
-2. **Fit.** In Edit Mode, move the bones to your model's joints. Longer or
-   shorter bones change the character's proportions; the animations follow.
+2. **Fit.** In Edit Mode, put each bone's head on your model's joint: the
+   hip, knee, ankle and so on. Only the heads count, so point the bones
+   wherever reads best to you. Longer or shorter bones change the
+   character's proportions; the animations follow.
 3. **Parts.** Add Bone Groups gives your meshes a vertex group per bone.
    Assign each face to one bone's group, then Bind to Rig. Binding refuses
    faces in no group or in two bones' groups, and selects them for you.
-4. **Export.** Name the character, pick a Package Folder and Export
+4. **Pose.** Match Template Pose stands your model as the template's guide
+   does, which the game's animations start from. A model built in a T-pose
+   drops its arms. Then, in Pose Mode, turn any part that still doesn't
+   line up with the guide; feet, hands and the head often need it, as
+   nothing tells which way they point. The game starts from the pose you
+   see.
+5. **Export.** Name the character, pick a Package Folder and Export
    Character. The export checks the package with the game's build tool and
    reports the room used, or what to fix.
 

@@ -1,17 +1,10 @@
 """Export a character modeled on a template rig as a character package.
 
-Each face moves with one bone, as binding.py works out. The rig may have
-been fitted to the model in Edit Mode, its bones moved and turned to where
-the model's joints are, such as for a T-pose. The game's animations turn
-each joint from the template's rest pose, so the export turns each bone's
-faces from the fitted bone onto the template's, about the bone's head, and
-keeps the fitted bones' lengths: the character keeps its proportions and
-takes the template's pose.
-
-Only a bone's direction counts, not its roll: each part turns the shortest
-way from its fitted bone's direction to the template's. Roll is unreliable
-for this, as moving a bone's tail keeps its roll number while its twist
-changes, so a part is never twisted about its bone by the export.
+Each face moves with one bone, as binding.py works out. The game starts
+the template's animations from the pose the rig shows, so each part is
+exported as posed: lined up with the template's wireframe guide by Match
+Template Pose and the artist's own turns, as pose.py tells. The fitted
+bones' lengths are kept, so the character keeps its proportions.
 
 The checks here are the barricade between what an artist made and the
 package: anything the game can't show is reported as a Problem, in Blender's
@@ -27,9 +20,9 @@ from pathlib import Path
 
 import bpy
 import numpy as np
-from mathutils import Matrix, Vector
+from mathutils import Vector
 
-from . import binding
+from . import binding, pose
 from . import rig as rigs
 from .problems import Report, agree, count
 
@@ -56,6 +49,11 @@ PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 # 8 bits a channel, RGBA, deflate, adaptive filtering, not interlaced
 PNG_RGBA_8 = (8, 6, 0, 0, 0)
 PNG_NO_FILTER = b"\x00"
+# A rig left in its rest pose with a bone this far, in degrees, from the
+# template's pose was surely not matched to it
+UNMATCHED_DEGREES = 10.0
+# How many of the most turned bones the unmatched pose's error names
+UNMATCHED_NAMED = 3
 
 
 def linear_to_srgb(value: float) -> int:
@@ -185,50 +183,6 @@ def base_image(material: bpy.types.Material) -> bpy.types.Image | None:
         return None
     source = node.inputs["Base Color"].links[0].from_node
     return source.image if source.type == "TEX_IMAGE" else None
-
-
-@dataclass
-class Unposing:
-    """How each bone's faces turn from the fitted rig onto the template's pose."""
-
-    rotations: dict[str, Matrix]
-    fitted_heads: dict[str, Vector]
-    heads: dict[str, Vector]
-
-    def place(self, bone: str, point: Vector) -> Vector:
-        """Where a point on BONE's faces goes in the template's pose."""
-        return self.heads[bone] + self.rotations[bone] @ (
-            point - self.fitted_heads[bone]
-        )
-
-
-def unposing(rig: bpy.types.Object, template: dict) -> Unposing:
-    """Work out how the fitted rig's bones turn onto the template's."""
-    bones = rig.data.bones
-    rotations: dict[str, Matrix] = {}
-    fitted: dict[str, Vector] = {}
-    heads: dict[str, Vector] = {}
-    for bone in template["bones"]:
-        name = bone["name"]
-        fitted_bone = bones[name]
-        fitted_direction = fitted_bone.tail_local - fitted_bone.head_local
-        template_direction = rigs.to_blender(bone["tail"]) - rigs.to_blender(
-            bone["head"]
-        )
-        rotations[name] = fitted_direction.rotation_difference(
-            template_direction
-        ).to_matrix()
-        fitted[name] = fitted_bone.head_local.copy()
-        parent = bone["parent"]
-        if parent is None:
-            heads[name] = fitted[name]
-        else:
-            # The fitted offset from the parent, turned as the parent turns,
-            # keeps the bone's length and takes the template's direction
-            heads[name] = heads[parent] + rotations[parent] @ (
-                fitted[name] - fitted[parent]
-            )
-    return Unposing(rotations, fitted, heads)
 
 
 def check_rig(rig: bpy.types.Object, template: dict, report: Report) -> None:
@@ -432,19 +386,22 @@ class PackageWriter:
         self.report.extend(report)
         return not report.errors
 
-    def _add_mesh(self, mesh_object: bpy.types.Object, unpose: Unposing) -> None:
+    def _add_mesh(self, mesh_object: bpy.types.Object, posed: pose.GamePose) -> None:
         if not self._check_mesh(mesh_object):
             return
         depsgraph = bpy.context.evaluated_depsgraph_get()
         evaluated = mesh_object.evaluated_get(depsgraph)
         mesh = evaluated.to_mesh()
         try:
-            self._add_faces(mesh_object, mesh, unpose)
+            self._add_faces(mesh_object, mesh, posed)
         finally:
             evaluated.to_mesh_clear()
 
     def _add_faces(
-        self, mesh_object: bpy.types.Object, mesh: bpy.types.Mesh, unpose: Unposing
+        self,
+        mesh_object: bpy.types.Object,
+        mesh: bpy.types.Mesh,
+        posed: pose.GamePose,
     ) -> None:
         """Add an evaluated mesh's triangles to their bones' and materials' parts."""
         found = binding.face_bones(
@@ -492,15 +449,12 @@ class PackageWriter:
                     "triangles": [],
                 },
             )
-            rotation = unpose.rotations[bone]
             corners = []
             for vertex, loop in list(
                 zip(triangle.vertices, triangle.loops, strict=True)
             )[corner_order]:
-                position = unpose.place(bone, to_rig @ mesh.vertices[vertex].co)
-                normal = (
-                    rotation @ (normal_to_rig @ normals[loop].vector)
-                ).normalized()
+                position = posed.place(bone, to_rig @ mesh.vertices[vertex].co)
+                normal = posed.turn_normal(bone, normal_to_rig @ normals[loop].vector)
                 uv = uv_layer.uv[loop].vector if uv_layer else Vector((0.0, 0.0))
                 part["positions"].append(
                     [round(c, POSITION_DIGITS) for c in rigs.to_model(position)]
@@ -512,8 +466,8 @@ class PackageWriter:
                 corners.append(len(part["positions"]) - 1)
             part["triangles"].append(corners)
 
-    def _gather(self) -> Unposing | None:
-        """Gather the parts at the rig's rest pose, whatever pose it is in."""
+    def _gather(self) -> pose.GamePose | None:
+        """Gather the parts as the rig's pose places them."""
         meshes = bound_meshes(self.rig)
         hidden = [mesh.name for mesh in meshes if mesh.hide_render]
         if hidden:
@@ -530,24 +484,64 @@ class PackageWriter:
             )
             return None
         pose_position = self.rig.data.pose_position
-        self.rig.data.pose_position = "REST"
         try:
+            # The pose is read as shown in Pose Position, even if the artist
+            # is looking at the rest, and the meshes at rest, where the pose
+            # can be put on each part whole
+            self.rig.data.pose_position = "POSE"
             bpy.context.view_layer.update()
-            unpose = unposing(self.rig, self.template)
+            posed = pose.game_pose(self.rig)
+            self.rig.data.pose_position = "REST"
+            bpy.context.view_layer.update()
             for mesh_object in meshes:
-                self._add_mesh(mesh_object, unpose)
+                self._add_mesh(mesh_object, posed)
         finally:
             self.rig.data.pose_position = pose_position
             bpy.context.view_layer.update()
-        return unpose
+        return posed
+
+    def _check_matched(self) -> None:
+        """Refuse a rig left in its rest pose when that isn't the template's pose.
+
+        Such a rig was fitted to a model posed otherwise, such as in a
+        T-pose, and never matched to the template, which the game's
+        animations start from.
+        """
+        if not pose.is_unposed(self.rig):
+            return
+        turns = pose.template_turns(self.rig, self.template)
+        off = sorted(
+            (
+                (pose.turn_degrees(turn), name)
+                for name, turn in turns.items()
+                if pose.turn_degrees(turn) > UNMATCHED_DEGREES
+            ),
+            reverse=True,
+        )
+        if not off:
+            return
+        slot = self.template["slot"].capitalize()
+        named = ", ".join(
+            f"{name} by {degrees:.0f}°" for degrees, name in off[:UNMATCHED_NAMED]
+        )
+        self.report.error(
+            self.rig.name,
+            f"it is still in its rest pose, which isn't {slot}'s: {named} "
+            f"{agree(len(off[:UNMATCHED_NAMED]), 'differs', 'differ')}. The game "
+            f"starts {slot}'s animations from {slot}'s pose, so use Match Template "
+            "Pose, then line your model up with the guide",
+        )
 
     def write(self) -> Report:
         """Write the package, unless the rig or its meshes have problems."""
         check_rig(self.rig, self.template, self.report)
         if self.report.errors:
             return self.report
-        unpose = self._gather()
-        if unpose is None or self.report.errors:
+        self._check_matched()
+        if self.report.errors:
+            return self.report
+        posed = self._gather()
+        if posed is None or self.report.errors:
             return self.report
         document = {
             "format": PACKAGE_FORMAT,
@@ -555,8 +549,11 @@ class PackageWriter:
             "name": self.name,
             "slot": self.template["slot"],
             "skeleton": {
-                name: [round(c, POSITION_DIGITS) for c in rigs.to_model(head)]
-                for name, head in unpose.heads.items()
+                bone["name"]: [
+                    round(c, POSITION_DIGITS)
+                    for c in rigs.to_model(posed.heads[bone["name"]])
+                ]
+                for bone in self.template["bones"]
             },
             "materials": [
                 entry.document

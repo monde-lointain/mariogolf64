@@ -130,6 +130,12 @@ def bind(rig: bpy.types.Object, meshes: list[bpy.types.Object]) -> set[str]:
     return run(bpy.ops.mg64.bind_to_rig)
 
 
+def match(rig: bpy.types.Object) -> set[str]:
+    """Match the rig to the template's pose, as the panel's button does."""
+    select([rig], rig)
+    return run(bpy.ops.mg64.match_template_pose)
+
+
 def export(directory: Path) -> set[str]:
     """Export the scene's character to DIRECTORY, as the panel's button does."""
     bpy.context.scene.mg64.package_directory = str(directory)
@@ -193,6 +199,8 @@ def unfitted_export_keeps_reference_positions() -> None:
     rig = add_rig()
     meshes = reference_meshes()
     assert bind(rig, list(meshes.values())) == {"FINISHED"}
+    # Matching a rig fitted to nothing leaves it as it is
+    assert match(rig) == {"FINISHED"}
     assert export(WORK / "unfitted") == {"FINISHED"}
     expected = {
         bone: sorted(
@@ -231,34 +239,92 @@ def turn_about(
 
 
 @test
-def fitted_bones_unpose_their_parts() -> None:
-    """Check that turning bones and their parts together exports the same parts.
+def matched_pose_lines_fitted_parts_up() -> None:
+    """Check that fitting to a model posed otherwise, then matching, gives the template.
 
-    That's what fitting the rig to a model posed unlike the template does.
-
-    The turns are about axes square to the bones, where a bone's direction
-    says all of its turn: the head nods, and the leg, whose bones lie in a
-    plane, swings in it.
+    The leg swings about its hip in the plane its bones lie in, as from a
+    model posed with its leg raised; its foot, at the chain's end, turns
+    back with its shin. (A twist about a line of joints leaves the joints
+    where they were, so only the artist can see it.) The
+    head, at the end of its own chain, is nodded too: it keeps the nod
+    until the artist turns it back in Pose Mode, which the export takes.
     """
     reset()
     rig = add_rig()
     meshes = reference_meshes()
     assert bind(rig, list(meshes.values())) == {"FINISHED"}
     assert export(WORK / "before_fit") == {"FINISHED"}
-    fit(rig, meshes, ["head"], turn_about(rig, "head", Vector((1, 0, 0)), 25))
+    before = positions_by_bone(exported(WORK / "before_fit"))
+    nod = turn_about(rig, "head", Vector((1, 0, 0)), 25)
+    fit(rig, meshes, ["head"], nod)
     leg = ["thigh.R", "shin.R", "foot.R"]
-    thigh = rig.data.bones["thigh.R"]
-    shin = rig.data.bones["shin.R"]
-    plane_normal = (thigh.tail_local - thigh.head_local).cross(
-        shin.tail_local - shin.head_local
-    )
+    hip, knee, ankle = (rig.data.bones[name].head_local for name in leg)
+    plane_normal = (knee - hip).cross(ankle - knee)
     fit(rig, meshes, leg, turn_about(rig, "thigh.R", plane_normal, 50))
-    assert export(WORK / "after_fit") == {"FINISHED"}
+    assert match(rig) == {"FINISHED"}
+    assert export(WORK / "matched") == {"FINISHED"}
+    matched = positions_by_bone(exported(WORK / "matched"))
     assert_close_triangles(
-        positions_by_bone(exported(WORK / "after_fit")),
-        positions_by_bone(exported(WORK / "before_fit")),
+        {bone: matched[bone] for bone in matched if bone != "head"},
+        {bone: before[bone] for bone in before if bone != "head"},
         POSITION_TOLERANCE * 2,
     )
+    assert matched["head"] != before["head"]
+    head = rig.pose.bones["head"]
+    head.matrix = nod.inverted() @ head.matrix
+    assert export(WORK / "head_turned_back") == {"FINISHED"}
+    assert_close_triangles(
+        positions_by_bone(exported(WORK / "head_turned_back")),
+        before,
+        POSITION_TOLERANCE * 2,
+    )
+
+
+@test
+def bone_tails_dont_turn_parts() -> None:
+    """Check that where a bone points doesn't turn its part, only where joints are.
+
+    Artists often point a foot's bone along the foot; that once tipped a
+    character onto its toes.
+    """
+    reset()
+    rig = add_rig()
+    meshes = reference_meshes()
+    assert bind(rig, list(meshes.values())) == {"FINISHED"}
+    assert export(WORK / "tails_before") == {"FINISHED"}
+    select([rig], rig)
+    bpy.ops.object.mode_set(mode="EDIT")
+    for name in ("foot.L", "foot.R", "hand.L", "head", "thigh.L"):
+        bone = rig.data.edit_bones[name]
+        bone.tail = bone.head + Vector((0.05, -0.2, -0.05))
+    bpy.ops.object.mode_set(mode="OBJECT")
+    assert match(rig) == {"FINISHED"}
+    assert export(WORK / "tails_after") == {"FINISHED"}
+    assert_close_triangles(
+        positions_by_bone(exported(WORK / "tails_after")),
+        positions_by_bone(exported(WORK / "tails_before")),
+        POSITION_TOLERANCE,
+    )
+
+
+@test
+def unmatched_pose_is_refused() -> None:
+    """Check that a rig fitted to a T-pose can't be exported before it's matched."""
+    reset()
+    rig = add_rig()
+    meshes = reference_meshes()
+    assert bind(rig, list(meshes.values())) == {"FINISHED"}
+    arm = ["upper_arm.L", "forearm.L", "hand.L"]
+    fit(rig, meshes, arm, turn_about(rig, "upper_arm.L", Vector((0, 1, 0)), 55))
+    report = submodule("export").export_character(rig, WORK / "unmatched", "Test")
+    messages = error_messages(report)
+    assert any(
+        "rest pose" in m and "upper_arm.L by 55°" in m and "Match Template Pose" in m
+        for m in messages
+    ), messages
+    assert not (WORK / "unmatched" / "character.json").exists()
+    assert match(rig) == {"FINISHED"}
+    assert export(WORK / "unmatched") == {"FINISHED"}
 
 
 @test

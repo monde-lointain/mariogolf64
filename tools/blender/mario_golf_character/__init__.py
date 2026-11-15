@@ -1,9 +1,10 @@
 """Model a custom Mario Golf character on a template rig and export it.
 
-The sidebar's Mario Golf tab takes a character through four steps: add the
-template rig of the character it replaces, fit the rig to the model, assign
-each part's faces to its bone's vertex group and bind, and export a package
-that tools/build_character.py builds into the game.
+The sidebar's Mario Golf tab takes a character through five steps: add the
+template rig of the character it replaces, fit the rig's joints to the
+model's, assign each part's faces to its bone's vertex group and bind,
+pose the model as the template stands, and export a package that
+tools/build_character.py builds into the game.
 """
 
 import subprocess
@@ -23,7 +24,7 @@ from bpy.props import (
     StringProperty,
 )
 
-from . import binding, export, rig
+from . import binding, export, pose, rig
 from .problems import Problem, Report, count
 
 TEMPLATE_DIRECTORY = "build/character_templates"
@@ -340,8 +341,8 @@ class MG64_OT_add_template_rig(bpy.types.Operator):
             return {"CANCELLED"}
         self.report(
             {"INFO"},
-            f"Added {added.name}. Next, in Edit Mode, move its bones to your model's "
-            "joints",
+            f"Added {added.name}. Next, in Edit Mode, put each bone's head on your "
+            "model's joint",
         )
         return {"FINISHED"}
 
@@ -422,9 +423,40 @@ class MG64_OT_bind_to_rig(bpy.types.Operator):
             report.extend(binding.bind(found, mesh_object, template))
         if not report.errors:
             names = ", ".join(mesh.name for mesh in meshes)
-            report.summary = f"Bound {names}. Pose the rig to see how the parts move"
+            report.summary = (
+                f"Bound {names}. Next, Match Template Pose and line your model up "
+                "with the guide"
+            )
         show_report(self, context, report, "Can't bind yet")
         return {"CANCELLED"} if report.errors else {"FINISHED"}
+
+
+class MG64_OT_match_template_pose(bpy.types.Operator):
+    """Pose your model as the guide stands. The game starts from this pose."""
+
+    bl_idname = "mg64.match_template_pose"
+    bl_label = "Match Template Pose"
+    bl_options = {"REGISTER", "UNDO"}
+
+    @override
+    def execute(self, context: bpy.types.Context) -> set[str]:
+        found = _rig_or_report(self, context)
+        if found is None:
+            return {"CANCELLED"}
+        template = _template_or_report(self, found)
+        if template is None:
+            return {"CANCELLED"}
+        if context.mode == "EDIT_ARMATURE":
+            # Leaving Edit Mode keeps the fitting just done
+            bpy.ops.object.mode_set(mode="OBJECT")
+        found.data.pose_position = "POSE"
+        pose.match_template_pose(found, template)
+        self.report(
+            {"INFO"},
+            f"Posed {found.name} as {template['slot'].capitalize()} stands. Turn any "
+            "part that doesn't line up with the guide in Pose Mode",
+        )
+        return {"FINISHED"}
 
 
 class MG64_OT_list_face_images(bpy.types.Operator):
@@ -563,7 +595,8 @@ class MG64_PT_character(bpy.types.Panel):
             step.label(text=f"{found.name}, in place of {found.get(rig.SLOT_PROPERTY)}")
         step = layout.box()
         step.label(text="2. Fit", icon="EDITMODE_HLT")
-        step.label(text="In Edit Mode, move bones to your model's joints")
+        step.label(text="In Edit Mode, put each bone's head")
+        step.label(text="on your model's joint")
         step = layout.box()
         step.label(text="3. Parts", icon="GROUP_VERTEX")
         step.label(text="Assign each part's faces to its bone's group")
@@ -574,7 +607,14 @@ class MG64_PT_character(bpy.types.Panel):
                 text=f"{count(len(export.bound_meshes(found)), 'mesh', 'meshes')} bound"
             )
         step = layout.box()
-        step.label(text="4. Export", icon="EXPORT")
+        step.label(text="4. Pose", icon="POSE_HLT")
+        step.operator(MG64_OT_match_template_pose.bl_idname)
+        if found is not None and pose.is_unposed(found):
+            step.label(text="Not posed yet", icon="INFO")
+        else:
+            step.label(text="Turn parts to match the guide")
+        step = layout.box()
+        step.label(text="5. Export", icon="EXPORT")
         settings = context.scene.mg64
         step.prop(settings, "character_name")
         step.prop(settings, "package_directory")
@@ -658,6 +698,7 @@ CLASSES = (
     MG64_OT_add_template_rig,
     MG64_OT_add_bone_groups,
     MG64_OT_bind_to_rig,
+    MG64_OT_match_template_pose,
     MG64_OT_list_face_images,
     MG64_OT_export,
     MG64_PT_character,
