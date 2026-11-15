@@ -145,6 +145,7 @@ KNOWN_DIFFERENCES = {
     "g_LoaderThreadStack": THREAD,
     "f_DrawnBillboardVertices": AVOID_UB_ONLY,
     "f_DrawnNoiseTexels": AVOID_UB_ONLY,
+    "f_DrawnImpactFlashLights": AVOID_UB_ONLY,
     "f_SkyVertices": SKY_BLENDING,
 }
 
@@ -165,6 +166,7 @@ class DrawnCopy:
 DRAWN_COPIES = {
     "f_DrawnBillboardVertices": DrawnCopy("f_BillboardVertices", 0x40),
     "f_DrawnNoiseTexels": DrawnCopy("g_NoiseTexels", 0x1000, through_pointer=True),
+    "f_DrawnImpactFlashLights": DrawnCopy("f_ImpactFlashLights", 0x50),
 }
 
 # Objects whose contents the game places from a page boundary in them, so

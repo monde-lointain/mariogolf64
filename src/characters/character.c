@@ -499,6 +499,10 @@ static Lights2 f_ImpactFlashLights[DRAW_BUFFER_COUNT] = {
     gdSPDefLights2(0x20, 0x20, 0x20, 0xFF, 0xDC, 0xDC, 0, -127, 0, 0xFF, 0xDC, 0xDC, 126, 0, 1),
     gdSPDefLights2(0x20, 0x20, 0x20, 0xFF, 0xDC, 0xDC, 0, -127, 0, 0xFF, 0xDC, 0xDC, 126, 0, 1),
 };
+#ifdef AVOID_UB
+// The copy of f_ImpactFlashLights that each draw buffer's frame drew with
+static Lights2 f_DrawnImpactFlashLights[DRAW_BUFFER_COUNT];
+#endif
 // The direction of each set's second light, across the main camera's view
 static s32 f_SecondLightDirection[AXIS_COUNT] = {0, 0, 0};
 // Set until the first draw sets up the matrices
@@ -2057,7 +2061,18 @@ void DrawCharacter(u32 slotIndex) {
             }
         }
         else {
+#ifdef AVOID_UB
+            // The next frames write f_ImpactFlashLights[g_DrawBufferIndex]
+            // while this frame's task, queued before, may not have read it
+            // yet: the impact flash sets up the following frame's light in
+            // the other buffer, and CopyLightsForImpactFlash fills both once
+            // the flash ends. A copy per draw buffer keeps what this frame
+            // drew with.
+            f_DrawnImpactFlashLights[g_DrawBufferIndex] = f_ImpactFlashLights[g_DrawBufferIndex];
+            gSPSetLights2(gfx++, f_DrawnImpactFlashLights[g_DrawBufferIndex]);
+#else
             gSPSetLights2(gfx++, f_ImpactFlashLights[g_DrawBufferIndex]);
+#endif
         }
 
         MapModelBuffer(slot);
