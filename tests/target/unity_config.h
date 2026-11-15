@@ -24,6 +24,12 @@
 // (see support.c)
 char *strstr(const char *haystack, const char *needle);
 
+// The report gives each test's time on the console, in milliseconds, so
+// that slow tests stand out
+#define UNITY_INCLUDE_EXEC_TIME
+unsigned int TargetTestClockMs(void);
+#define UNITY_CLOCK_MS() TargetTestClockMs()
+
 void TargetTestOutputChar(int character);
 #define UNITY_OUTPUT_CHAR(character) TargetTestOutputChar(character)
 #define UNITY_OUTPUT_CHAR_HEADER_DECLARATION TargetTestOutputChar(int)

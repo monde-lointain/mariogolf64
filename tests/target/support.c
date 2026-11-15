@@ -25,3 +25,8 @@ char *strstr(const char *haystack, const char *needle) {
         }
     }
 }
+
+// The console's time since it started, in milliseconds
+unsigned int TargetTestClockMs(void) {
+    return OS_CYCLES_TO_USEC(osGetTime()) / 1000;
+}
