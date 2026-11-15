@@ -66,7 +66,9 @@ extern "C" {
 /* Mario Golf decodes assets on the main thread with an 8 KB buffer, which */
 /* overruns the boot stack's size by 0x238 bytes into whatever lies below. */
 /* The boot itself still starts at NU_SPEC_BOOT_STACK, inside the array.   */
-#define NU_MAIN_STACK_SIZE	0x4000			/* Main thread */
+/* The deepest use is 0x2238 bytes; 0x3000 leaves room over it and keeps   */
+/* the KMC GCC build's overlays clear of the main heap.                    */
+#define NU_MAIN_STACK_SIZE	0x3000			/* Main thread */
 #else
 #define NU_MAIN_STACK_SIZE	NU_SPEC_BOOT_STACK_SIZE	/* Main thread */
 #endif
