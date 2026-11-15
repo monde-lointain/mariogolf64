@@ -315,7 +315,7 @@ progress: $(ROM)
 # addresses. The shiftable builds link that way already.
 check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)
 	$(LD) $(addprefix -T ,$(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)) -Map $(BUILD_DIR)/shiftable.map \
-	    $(LAYOUT_FLAGS) -o $(BUILD_DIR)/shiftable.elf
+	    $(LAYOUT_FLAGS) -o $(BUILD_DIR)/shiftable.elf $(LIBS)
 	@$(PYTHON) tools/check_link.py $(BUILD_DIR)/shiftable.elf $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS) -- $(O_FILES)
 
 # Fails on each static buffer whose address reaches the RCP or a DMA but
