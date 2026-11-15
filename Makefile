@@ -242,6 +242,10 @@ $(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 .PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable \
         progress equivalence
 
+# A recipe that fails after writing its target, such as a check of what it
+# wrote, would otherwise leave a target that the next run takes as built
+.DELETE_ON_ERROR:
+
 all: $(ROM)
 ifneq ($(COMPARE),0)
 	@sha1sum -c $(TARGET).sha1
