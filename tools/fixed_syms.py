@@ -4,11 +4,11 @@
     fixed_syms.py CONFIG SCRIPT... > FIXED_SCRIPT
 
 The matching build links with scripts that give symbols fixed addresses,
-such as the ones splat writes for every address the asm refers to without
-a name. An address inside a segment, in RAM or in ROM, only holds while the
-code and data before it keep their sizes: such an assignment is a pin, which
-a ROM whose code can move must do without. Addresses outside every segment,
-such as the boot segment's variables in low memory, stay where they are.
+such as undefined_syms.txt. An address inside a segment, in RAM or in ROM,
+only holds while the code and data before it keep their sizes: such an
+assignment is a pin, which a ROM whose code can move must do without.
+Addresses outside every segment, such as the boot segment's variables in
+low memory, stay where they are.
 
 This writes the SCRIPTs again without their pins, for the shiftable build
 to link with. A reference that still needs a pin is then left undefined,

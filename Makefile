@@ -104,9 +104,8 @@ endif
 # main_bss.c only pins main's common objects at the original's addresses.
 # Without it, each object is placed with the module that defines it.
 MATCHING_ONLY_O := build/src/system/main_bss.c.o
-# The fixed-address symbols that the original's layout gives the asm
-SYMBOL_SCRIPTS := undefined_syms.txt $(SPLAT_DIR)/undefined_syms_auto.txt \
-                  $(SPLAT_DIR)/undefined_funcs_auto.txt
+# The symbols that the objects use and none defines
+SYMBOL_SCRIPTS := undefined_syms.txt
 
 # The two layouts. The matching build places everything where the original
 # has it, and gives the asm the original's addresses. The shiftable layout

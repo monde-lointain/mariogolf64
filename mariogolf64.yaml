@@ -19,8 +19,6 @@ options:
     - reloc_addrs.txt
   symbol_addrs_path:
     - symbol_addrs.txt
-  undefined_funcs_auto_path: build/splat/undefined_funcs_auto.txt
-  undefined_syms_auto_path: build/splat/undefined_syms_auto.txt
 
   # The macro file in include/ is kept by hand
   generate_asm_macros_files: False
@@ -32,8 +30,11 @@ options:
   extensions_path: tools/splat_ext
   cache_path: build/splat/splat_cache.pickle
 
-  create_undefined_funcs_auto: True
-  create_undefined_syms_auto: True
+  # The symbols that no object defines are in undefined_syms.txt. splat's
+  # lists would name the functions that C files define as well when only
+  # its linker script is made, and override them.
+  create_undefined_funcs_auto: False
+  create_undefined_syms_auto: False
 
   subalign: null
   section_order: [".text", ".data", ".rodata", ".bss"]

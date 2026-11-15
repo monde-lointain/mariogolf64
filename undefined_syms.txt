@@ -1,4 +1,11 @@
-/* Symbols that splat names in the asm but leaves for the linker to define */
+/* Symbols that the objects use but none defines */
+
+/* The variables in low memory that IPL3 sets, and the buffer there that
+   keeps its contents through a reset */
+osTvType = 0x80000300;
+osRomBase = 0x80000308;
+osResetType = 0x8000030C;
+osAppNMIBuffer = 0x8000031C;
 
 /* rspboot ends where the n_audio microcode begins */
 rspbootTextEnd = n_aspMainTextStart;
@@ -34,4 +41,5 @@ f_AttributesPathFormat = 0x80255228;
 
 /* Main draws from vertex buffers at a fixed place in the Expansion Pak's
    memory, which the hole editor's memory must end before */
+g_ExpansionVertexBuffers = 0x8049C860;
 ASSERT(hole_editor_VRAM_END <= g_ExpansionVertexBuffers, "the hole editor overlaps the expansion vertex buffers");
