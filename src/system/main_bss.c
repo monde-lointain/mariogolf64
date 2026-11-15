@@ -20,7 +20,6 @@
 /* libmus is built for n_audio, which gives its objects n_audio's types */
 #define SUPPORT_NAUDIO
 #include <player_fx.h>
-
 #include <ultra64.h>
 
 #include "camera/camera.h"

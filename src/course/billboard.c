@@ -90,7 +90,7 @@ static Vtx *DrawnShapeVertices(s32 shapeIndex) {
     return vertices;
 }
 #else
-#define DrawnShapeVertices(shapeIndex) f_BillboardVertices[shapeIndex]
+#    define DrawnShapeVertices(shapeIndex) f_BillboardVertices[shapeIndex]
 #endif
 
 static s32 f_LoadedTextureIndex = NO_TEXTURE_LOADED;

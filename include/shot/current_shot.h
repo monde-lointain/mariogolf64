@@ -54,9 +54,9 @@ typedef s32 ImpactPointState;
 // see it under KMC. Nothing needs it: the planning thread copies the shot only
 // once the game thread has started it. Other builds drop it.
 #if defined(__IS_KMC__) && defined(READS_CURRENT_SHOT_VOLATILE)
-#define CURRENT_SHOT_VOLATILE volatile
+#    define CURRENT_SHOT_VOLATILE volatile
 #else
-#define CURRENT_SHOT_VOLATILE
+#    define CURRENT_SHOT_VOLATILE
 #endif
 extern CURRENT_SHOT_VOLATILE CurrentShot g_CurrentShot;
 extern ImpactPointState g_ImpactPointState;
