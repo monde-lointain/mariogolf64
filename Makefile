@@ -270,8 +270,12 @@ setup: tools extract
 CLANG_FORMAT ?= clang-format-23
 FORMAT_FILES := $(shell git ls-files 'src/*.c' 'src/*.h' 'include/*.h' '$(LIBKMC_DIR)/*.[ch]')
 
+# The tests are formatted too, but not Unity, which is kept as upstream has
+# it, and they aren't linted, as the lint's compile commands are the game's
+TEST_FORMAT_FILES := $(wildcard tests/*.c tests/target/*.c tests/target/*.h)
+
 format:
-	$(CLANG_FORMAT) -i $(FORMAT_FILES)
+	$(CLANG_FORMAT) -i $(FORMAT_FILES) $(TEST_FORMAT_FILES)
 	.venv/bin/ruff format --quiet
 
 # Lints and type-checks the Python tools, with the settings in pyproject.toml

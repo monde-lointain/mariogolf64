@@ -8,9 +8,8 @@
 
 #include <ultra64.h>
 
-#include "unity_fixture.h"
-
 #include "system/c_language.h"
+#include "unity_fixture.h"
 
 // Room for the report; what doesn't fit is dropped, and the driver says so
 #define REPORT_SIZE 0x10000

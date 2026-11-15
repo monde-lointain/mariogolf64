@@ -5,9 +5,8 @@
 
 #include <ultra64.h>
 
-#include "unity_fixture.h"
-
 #include "math/math_util.h"
+#include "unity_fixture.h"
 
 // CRC-16/X-25's check value, its CRC of these nine digits
 #define CHECK_DIGITS "123456789"

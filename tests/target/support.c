@@ -2,9 +2,8 @@
  * What Unity needs from a C library that the game's lacks
  */
 
-#include <ultra64.h>
-
 #include <string.h>
+#include <ultra64.h>
 
 #include "unity_config.h"
 
