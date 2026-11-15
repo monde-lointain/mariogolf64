@@ -72,7 +72,7 @@ import subprocess
 import sys
 import tempfile
 from collections.abc import Iterator
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from multiprocessing.pool import AsyncResult
 from pathlib import Path
 from struct import iter_unpack
@@ -158,6 +158,10 @@ AUDIO_HANDLE = "libmus's handles depend on when its audio thread frees channels"
 # The original blends both copies of the sky's vertices, one of which the
 # RSP may be reading, where AVOID_UB blends only the frame's own.
 SKY_BLENDING = "AVOID_UB blends only the frame's copy (a9ac2e65)"
+# Three of ovl_01's files have their own copies of this table, which the
+# collection of unused sections leaves two of, so the LTO build, which
+# names no source, has no way to say which (see attribute_sources)
+UNATTRIBUTED_COPY = "LTO names no source, and the builds keep different copies"
 KNOWN_DIFFERENCES = {
     "f_UpdateStartTime": TIMING,
     "f_UpdateEndTime": TIMING,
@@ -189,6 +193,7 @@ KNOWN_DIFFERENCES = {
     "f_DrawnSunScreenX": AVOID_UB_ONLY,
     "f_DrawnSunScreenY": AVOID_UB_ONLY,
     "f_SkyVertices": SKY_BLENDING,
+    ":f_CharacterChoices": UNATTRIBUTED_COPY,
 }
 
 
@@ -243,11 +248,13 @@ PADDING = {
 }
 
 # An objdump -t line: address, binding (l or g), type (O for an object, F
-# for a function, f for a source file), section, size and name. objdump
-# lists the symbols in the table's order, in which each source file's local
-# symbols follow its file symbol.
+# for a function, f for a source file), section, size and name, which a
+# hidden symbol's visibility comes before. objdump lists the symbols in the
+# table's order, in which each source file's local symbols follow its file
+# symbol. The objects that LTO compiles have file symbols with no name.
 OBJDUMP_SYMBOL = re.compile(
-    r"^([0-9a-f]{8}) (.).{5}(.) (\S+)\s+([0-9a-f]{8}) (\S+)$", re.MULTILINE
+    r"^([0-9a-f]{8}) (.).{5}(.) (\S+)\s+([0-9a-f]{8})(?: \.hidden)? ?(\S*)$",
+    re.MULTILINE,
 )
 LOCAL_BINDING = "l"
 GLOBAL_BINDING = "g"
@@ -259,15 +266,21 @@ FILE_TYPE = "f"
 # between compilers, and the prefix of the switch tables that only GCC 16
 # makes
 STATIC_NUMBER = re.compile(r"\.\d+$")
+# LTO renames a static that another file's static shares the name of, or
+# that it makes a hidden global, to use it from another part of the
+# program, with this suffix
+LTO_PRIVATE = re.compile(r"\.lto_priv\.\d+$")
 SWITCH_TABLE_PREFIX = "CSWTCH."
 # The game's sources, by basename, which file symbols give. KMC's name the
 # copy that the build converts to Shift JIS.
 GAME_SOURCES = frozenset(path.name for path in (ROOT / "src").rglob("*.c"))
 SHIFT_JIS_SUFFIX = ".sjis.c"
-# The modern build's objects of the game's sources, whose globals are the
-# game's, and an nm line of one of them: address or blanks, type, name
+# The modern build's objects of the game's sources, whose globals and
+# statics are the game's, an nm line of one of them: address or blanks,
+# type, name, and the types of a static object, in data or in bss
 GAME_OBJECT_FILES = "src/**/*.o"
 NM_SYMBOL = re.compile(r"^\S* *(\S) (\S+)$", re.MULTILINE)
+STATIC_OBJECT_TYPES = frozenset("bdgrs")
 # The suffix of the sections of bss, whose load addresses aren't in the ROM
 BSS_SUFFIX = "_bss"
 # An objdump -h line: index, name, size, VMA, LMA
@@ -394,9 +407,9 @@ class Build:
                 continue
             if name.startswith(SWITCH_TABLE_PREFIX):
                 continue
-            is_local = binding == LOCAL_BINDING
+            is_local = binding == LOCAL_BINDING or bool(LTO_PRIVATE.search(name))
             if is_local:
-                name = STATIC_NUMBER.sub("", name)
+                name = STATIC_NUMBER.sub("", LTO_PRIVATE.sub("", name))
             self.symbols.append(
                 Symbol(
                     source if is_local else "",
@@ -617,11 +630,96 @@ def source_name(file_symbol: str) -> str:
     return basename
 
 
-def game_globals(directory: Path) -> frozenset[str]:
-    """Name the globals that the game objects in DIRECTORY define."""
-    object_files = sorted(str(path) for path in directory.glob(GAME_OBJECT_FILES))
-    listing = run_tool("mips-linux-gnu-nm", "--defined-only", "-g", *object_files)
-    return frozenset(match.group(2) for match in NM_SYMBOL.finditer(listing))
+@final
+class GameSymbols:
+    """The names of the globals and statics that the game's objects define."""
+
+    def __init__(self, directory: Path) -> None:
+        """Read the game's objects in DIRECTORY."""
+        object_files = sorted(str(path) for path in directory.glob(GAME_OBJECT_FILES))
+        listing = run_tool("mips-linux-gnu-nm", "--defined-only", *object_files)
+        self.globals: frozenset[str] = frozenset(
+            match.group(2)
+            for match in NM_SYMBOL.finditer(listing)
+            if match.group(1).isupper()
+        )
+        self.statics: frozenset[str] = frozenset(
+            STATIC_NUMBER.sub("", match.group(2))
+            for match in NM_SYMBOL.finditer(listing)
+            if match.group(1) in STATIC_OBJECT_TYPES
+        )
+
+    def has(self, symbol: Symbol) -> bool:
+        """Whether SYMBOL is the game's.
+
+        A static is named by its source, or, where LTO left it none, by
+        whether a game object defines a static of its name.
+        """
+        if not symbol.is_local:
+            return symbol.name in self.globals
+        if symbol.source:
+            return symbol.source in GAME_SOURCES
+        return symbol.name in self.statics
+
+
+def address_of(symbol: Symbol) -> int:
+    """Return SYMBOL's address, to sort by."""
+    return symbol.address
+
+
+def counterpart(symbol: Symbol, peers: list[Symbol], found: list[Symbol]) -> str:
+    """Return the source of SYMBOL's counterpart among FOUND, or "" if unclear.
+
+    PEERS are SYMBOL's build's statics of its name in its segment. Of
+    several counterparts, the one of SYMBOL's size is taken, or, of copies
+    of one size, the one in its place in their order.
+    """
+    if len(found) == 1:
+        return found[0].source
+    alike = sorted((peer for peer in peers if peer.size == symbol.size), key=address_of)
+    same = sorted((each for each in found if each.size == symbol.size), key=address_of)
+    return same[alike.index(symbol)].source if len(same) == len(alike) else ""
+
+
+def segment_of(symbol: Symbol) -> tuple[str, str]:
+    """Return SYMBOL's name and segment: its section without the bss suffix.
+
+    KMC GCC puts a static that starts as 0 in data, where modern GCC puts
+    it in bss.
+    """
+    return symbol.name, symbol.section.removesuffix(BSS_SUFFIX)
+
+
+def attribute_sources(builds: tuple[Build, Build]) -> None:
+    """Give each static that LTO compiled the source of its counterpart.
+
+    LTO's objects name no source, so its statics take their counterpart's:
+    the other build's static of the same name in the same segment, or of
+    several, the one of the same size. Copies of one name and size, such
+    as the menus' own tables of the characters, are taken in address
+    order, which follows the files' order in the layout, as LTO keeps it
+    (-fno-toplevel-reorder). A static that matches none, or matches
+    copies of which the builds have different numbers, keeps no source,
+    so it pairs with nothing and is reported.
+    """
+    for build, other in (builds, builds[::-1]):
+        candidates: dict[tuple[str, str], list[Symbol]] = {}
+        for symbol in other.symbols:
+            if symbol.is_local and symbol.source:
+                candidates.setdefault(segment_of(symbol), []).append(symbol)
+        pending: dict[tuple[str, str], list[Symbol]] = {}
+        for symbol in build.symbols:
+            if symbol.is_local and not symbol.source:
+                pending.setdefault(segment_of(symbol), []).append(symbol)
+        sources = {
+            symbol: counterpart(symbol, peers, candidates.get(key, []))
+            for key, peers in pending.items()
+            for symbol in peers
+        }
+        build.symbols = [
+            replace(symbol, source=sources[symbol]) if sources.get(symbol) else symbol
+            for symbol in build.symbols
+        ]
 
 
 def pair_symbols(builds: tuple[Build, Build]) -> frozenset[str]:
@@ -629,10 +727,11 @@ def pair_symbols(builds: tuple[Build, Build]) -> frozenset[str]:
 
     A global is named by its symbol. So is a static, where no other symbol
     of either build has its name, and otherwise it is named by its source
-    too. The matching build defines main's commons in main_bss.c, as
-    globals, so the modern build, whose modules define their own, says
-    which objects are the game's.
+    too (see attribute_sources). The matching build defines main's commons
+    in main_bss.c, as globals, so the modern build, whose modules define
+    their own, says which objects are the game's.
     """
+    attribute_sources(builds)
     counts = [
         collections.Counter(symbol.name for symbol in build.symbols) for build in builds
     ]
@@ -646,12 +745,11 @@ def pair_symbols(builds: tuple[Build, Build]) -> frozenset[str]:
                 keys[symbol] = symbol.name
     for build in builds:
         build.name_symbols(keys)
-    names = game_globals(builds[1].directory)
+    game = GameSymbols(builds[1].directory)
     return frozenset(
         keys[symbol]
         for symbol in builds[1].symbols
-        if symbol.is_object
-        and (symbol.source in GAME_SOURCES if symbol.is_local else symbol.name in names)
+        if symbol.is_object and game.has(symbol)
     )
 
 
