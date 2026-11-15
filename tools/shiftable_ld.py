@@ -12,12 +12,12 @@ overlay of the region before it, the first after main, with a gap: the
 overlay manager takes overlays whose ranges touch for overlays that
 overlap, and so never loads one while the other is loaded. It defines
 overlay_regions_VRAM_END after the last, which must not pass the start of
-the game's main heap: the heap keeps the original's size and address, so
-that the allocator behaves the same in every layout. In ROM,
-each segment follows the one before it, in the original's order, as the
-code takes every ROM address from the script's symbols. Other segments,
-such as an overlay of the Expansion Pak's memory, keep their addresses in
-RAM.
+the game's main heap, which it reads from include/system/heap.h: the heap
+keeps the original's size and address, so that the allocator behaves the
+same in every layout. In ROM, each segment follows the one before it, in
+the original's order, as the code takes every ROM address from the script's
+symbols. Other segments, such as an overlay of the Expansion Pak's memory,
+keep their addresses in RAM.
 
 The routines that the build links from archives, such as the libgcc
 helpers that a modern GCC calls, go at the end of main's code, where
@@ -48,12 +48,12 @@ such as the merged constants of .rodata.cst4, now follow its whole ones.
 import re
 import sys
 
+from heap_region import read_main_region
+
 # Where the Expansion Pak's memory begins; regions below it are packed
 BASE_RDRAM_END = 0x80400000
 KSEG0_START = 0x80000000
 ALIGNMENT = 16
-# Where the main heap begins: MAIN_REGION_START in include/system/heap.h
-MAIN_REGION_START = 0x8025D800
 
 MAIN = "main"
 BUILD_DATE = "build_date"
@@ -129,8 +129,11 @@ def keep_whole_sections(match: re.Match[str]) -> str:
     return statement
 
 
-def lay_out(script: str) -> str:
-    """Return SCRIPT, splat's linker script, laid out to let code grow."""
+def lay_out(script: str, heap_start: int) -> str:
+    """Return SCRIPT, splat's linker script, laid out to let code grow.
+
+    The overlays' regions must end by HEAP_START, where the main heap begins.
+    """
     head, separator, rest = script.partition("SECTIONS\n{\n")
     body, end_separator, tail = rest.rpartition("\n}")
     if not separator or not end_separator:
@@ -181,9 +184,7 @@ def lay_out(script: str) -> str:
         previous_ends = [f"{block_name(block)}_VRAM_END" for block in moved]
     # ld takes an ASSERT among the sections only without a semicolon
     message = '"The overlays reach into the main heap: see include/system/heap.h"'
-    heap_check = (
-        f"    ASSERT(overlay_regions_VRAM_END <= 0x{MAIN_REGION_START:X}, {message})"
-    )
+    heap_check = f"    ASSERT(overlay_regions_VRAM_END <= 0x{heap_start:X}, {message})"
     out.append(
         f"    overlay_regions_VRAM_END = ALIGN({max_of(previous_ends)}, {ALIGNMENT});\n"
         + heap_check
@@ -198,7 +199,7 @@ def lay_out(script: str) -> str:
 
 def main() -> None:
     """Lay out the script read from standard input."""
-    _ = sys.stdout.write(lay_out(sys.stdin.read()))
+    _ = sys.stdout.write(lay_out(sys.stdin.read(), read_main_region().start))
 
 
 if __name__ == "__main__":

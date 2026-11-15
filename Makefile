@@ -497,7 +497,7 @@ $(SPLAT_O_LIST): $(SPLAT_LD)
 
 # splat's script names the objects under build/, so the shiftable script
 # names them under this build's directory
-$(SHIFTABLE_LD): $(SPLAT_LD) tools/shiftable_ld.py
+$(SHIFTABLE_LD): $(SPLAT_LD) tools/shiftable_ld.py tools/heap_region.py include/system/heap.h
 	@mkdir -p $(dir $@)
 	sed -e '\|$(MATCHING_ONLY_O)|d' -e 's|build/|$(BUILD_DIR)/|g' $< | $(PYTHON) tools/shiftable_ld.py > $@
 

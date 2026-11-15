@@ -80,6 +80,8 @@ from pathlib import Path
 from struct import iter_unpack
 from typing import cast, final
 
+from heap_region import read_main_region
+
 ROOT = Path(__file__).resolve().parent.parent
 REFERENCE_DIR = ROOT / "build"
 MODERN_DIR = ROOT / "build" / "modern"
@@ -105,9 +107,10 @@ UNNAMED_PREFIX = "unnamed data "
 PAGE_SUFFIX = " from its first page"
 
 # The main heap's region (include/system/heap.h), the same in every build
-MAIN_REGION_END = 0x802E_A000
-MAIN_REGION_SIZE = 0x8_C800
-HEAP_START = MAIN_REGION_END - MAIN_REGION_SIZE
+MAIN_REGION = read_main_region()
+MAIN_REGION_END = MAIN_REGION.end
+MAIN_REGION_SIZE = MAIN_REGION.size
+HEAP_START = MAIN_REGION.start
 HEAP_NAME = "(main heap)"
 
 # The hole loader thread, the flag it sets as it ends, and the routine it

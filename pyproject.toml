@@ -33,7 +33,7 @@ ignore = [
 [tool.ruff.lint.isort]
 # The tools import each other, since Python puts a script's directory on
 # the path
-known-first-party = ["asset_archive", "fncompare", "progress_report"]
+known-first-party = ["asset_archive", "fncompare", "heap_region", "progress_report"]
 
 [tool.basedpyright]
 include = ["tools"]
