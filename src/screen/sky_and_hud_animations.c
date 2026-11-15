@@ -1479,14 +1479,57 @@ static inline void GrowSunGlare(void) {
     }
 }
 
+#ifdef AVOID_UB
+// The scheduler runs UpdateSunGlare as each frame's task ends, and it reads
+// that frame's z-buffer where the sun is. The original reads f_SunScreenX
+// and f_SunScreenY, which the graphics thread may already have moved for a
+// frame queued after, so which pixel it reads depends on how far the RDP
+// lags. Each framebuffer keeps where the sun was in the frame queued to it
+// instead. While the game paces frames normally, it queues a frame only
+// while fewer than two are pending, so the frame queued before to the same
+// framebuffer has ended by then.
+static f32 f_DrawnSunScreenX[TRIPLE_BUFFERING];
+static f32 f_DrawnSunScreenY[TRIPLE_BUFFERING];
+
+void RecordDrawnSunPosition(void) {
+    f_DrawnSunScreenX[nuGfxCfbCounter] = f_SunScreenX[0];
+    f_DrawnSunScreenY[nuGfxCfbCounter] = f_SunScreenY[0];
+}
+
+// The index in nuGfxCfb of FRAMEBUFFER, one of its framebuffers
+static s32 FramebufferIndex(const void *framebuffer) {
+    s32 index;
+
+    for (index = 0; index < TRIPLE_BUFFERING - 1; index++) {
+        if (nuGfxCfb[index] == framebuffer) {
+            break;
+        }
+    }
+    return index;
+}
+
+#    define GlareSunX(frameIndex) f_DrawnSunScreenX[frameIndex]
+#    define GlareSunY(frameIndex) f_DrawnSunScreenY[frameIndex]
+#else
+#    define GlareSunX(frameIndex) f_SunScreenX[0]
+#    define GlareSunY(frameIndex) f_SunScreenY[0]
+#endif
+
 // Grows or fades the sun's glare by whether the z-buffer shows anything in
-// front of the sun
+// front of the sun. AVOID_UB passes the framebuffer of the frame that ended.
+#ifdef AVOID_UB
+void UpdateSunGlare(const void *framebuffer) {
+    u16 *zBuffer;
+    s32 frameIndex = FramebufferIndex(framebuffer);
+#else
 void UpdateSunGlare(void) {
     u16 *zBuffer;
+#endif
 
-    if (IsInsetOnScreen(f_SunScreenX[0], f_SunScreenY[0], SUN_DEPTH_MARGIN)) {
+    if (IsInsetOnScreen(GlareSunX(frameIndex), GlareSunY(frameIndex), SUN_DEPTH_MARGIN)) {
         zBuffer = nuGfxZBuffer;
-        f_SunDepth = zBuffer[((s32)f_SunScreenY[0] * SCREEN_WIDTH) + (s32)f_SunScreenX[0]];
+        f_SunDepth =
+            zBuffer[((s32)GlareSunY(frameIndex) * SCREEN_WIDTH) + (s32)GlareSunX(frameIndex)];
         if (f_SunDepth >= SUN_SKY_DEPTH) {
             GrowSunGlare();
         }
@@ -1498,7 +1541,7 @@ void UpdateSunGlare(void) {
             }
         }
     }
-    else if (IsNearScreen(f_SunScreenX[0], f_SunScreenY[0], SUN_GLARE_MARGIN)) {
+    else if (IsNearScreen(GlareSunX(frameIndex), GlareSunY(frameIndex), SUN_GLARE_MARGIN)) {
         GrowSunGlare();
     }
     else {

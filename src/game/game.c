@@ -3114,6 +3114,9 @@ s32 DrawGame(void) {
     }
 
     f_GfxTaskStartTime = OS_CYCLES_TO_USEC(osGetTime());
+#ifdef AVOID_UB
+    RecordDrawnSunPosition();
+#endif
     if (g_FramePacingMode == PACING_MODE_NORMAL) {
         nuGfxTaskStart(
             f_DisplayLists[g_DrawBufferIndex],
@@ -3297,6 +3300,9 @@ void DrawResetFade(void) {
         );
         gDPFullSync(gfx++);
         gSPEndDisplayList(gfx++);
+#ifdef AVOID_UB
+        RecordDrawnSunPosition();
+#endif
         nuGfxTaskStart(
             displayList,
             (s32)(gfx - displayList) * sizeof(Gfx),

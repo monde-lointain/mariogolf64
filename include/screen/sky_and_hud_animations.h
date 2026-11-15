@@ -164,4 +164,10 @@ void InitSkyColors(void);
 
 void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex);
 
+#ifdef AVOID_UB
+// Keeps where the sun is for the frame about to be queued, which
+// UpdateSunGlare samples the frame's depth at once its task ends
+void RecordDrawnSunPosition(void);
+#endif
+
 #endif

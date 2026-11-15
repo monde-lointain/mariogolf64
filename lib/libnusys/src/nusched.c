@@ -85,7 +85,12 @@ volatile u32	nuScGfxTaskStartRetrace;	/* Retrace count when it started */
 #define WATCHDOG_DISPLAY_OFF_RETRACE	54	/* Give up and blank the display */
 
 extern s8	g_IsDebugEnabled;
+#ifdef AVOID_UB
+/* Takes the ended frame's frame buffer, to read where its sun was drawn */
+extern void	UpdateSunGlare(const void* frameBuffer);
+#else
 extern void	UpdateSunGlare(void);
+#endif
 extern void	HandleFrameBufferSwap(void* frameBuffer);
 
 
@@ -628,7 +633,11 @@ static void nuScExecuteGraphics(void)
 #endif /* NU_DEBUG */
 
 	if(gfxTask->flags & NU_SC_SWAPBUFFER){
+#ifdef AVOID_UB
+	    UpdateSunGlare(gfxTask->framebuffer);
+#else
 	    UpdateSunGlare();
+#endif
 	    HandleFrameBufferSwap(gfxTask->framebuffer);
 	}
 

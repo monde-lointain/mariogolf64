@@ -162,6 +162,8 @@ KNOWN_DIFFERENCES = {
     "f_DrawnBillboardVertices": AVOID_UB_ONLY,
     "f_DrawnNoiseTexels": AVOID_UB_ONLY,
     "f_DrawnImpactFlashLights": AVOID_UB_ONLY,
+    "f_DrawnSunScreenX": AVOID_UB_ONLY,
+    "f_DrawnSunScreenY": AVOID_UB_ONLY,
     "f_SkyVertices": SKY_BLENDING,
 }
 
