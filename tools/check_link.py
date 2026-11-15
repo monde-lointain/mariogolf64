@@ -23,7 +23,9 @@ The scripts end by discarding every input section that they don't place,
 which drops the sections that the game never loads, and empty ones. A
 section with contents that no pattern places, such as one that a new
 attribute or compiler option names, would be left out of the ROM, so the
-map must list no such section among those discarded.
+map must list no such section among those discarded. The map lists there
+too the sections that --gc-sections collects, as nothing refers to them,
+which a pattern does place: those pass.
 
 Each mistake found is printed, and the exit status is 1 if there were any.
 """
@@ -31,8 +33,10 @@ Each mistake found is printed, and the exit status is 1 if there were any.
 import re
 import subprocess
 import sys
+from fnmatch import fnmatchcase
 from pathlib import Path
 from struct import iter_unpack
+from typing import final
 
 OBJDUMP = "mips-linux-gnu-objdump"
 NM = "mips-linux-gnu-nm"
@@ -60,6 +64,15 @@ DISCARDED_END = "\nMemory Configuration"
 DISCARDED_LINE = re.compile(
     r"^ (?P<name>\S+)\s+0x\w+\s+0x(?P<size>\w+) (?P<file>.+)$", re.MULTILINE
 )
+# A statement of the scripts that places input sections, kept or not: the
+# files' pattern, which names an archive's members as ARCHIVE:MEMBER, and
+# the sections'. The final /DISCARD/ places every file's ("*") sections.
+PLACEMENT = re.compile(
+    r"^\s*(?:KEEP\()?(?P<files>[^\s()]+)\((?P<sections>[^()]*)\)\)?;$",
+    re.MULTILINE,
+)
+EVERY_FILE = "*"
+ARCHIVE_MEMBER = re.compile(r"^(?P<archive>.+)\((?P<member>[^()]+)\)$")
 # The sections, by their names' starts, that hold what the game never loads
 UNLOADED_SECTIONS = (
     ".MIPS.abiflags",
@@ -151,14 +164,62 @@ def overlay_conflicts(elf: Path, symbols: dict[str, tuple[int, int]]) -> list[st
     return conflicts
 
 
-def discarded_contents(map_file: Path) -> list[str]:
-    """List the sections with contents that the link of MAP_FILE discarded."""
+@final
+class Placements:
+    """The input sections that the scripts place, as their patterns say."""
+
+    def __init__(self, scripts: list[Path]) -> None:
+        """Read the statements of SCRIPTS that place input sections."""
+        self.by_file: dict[str, list[str]] = {}
+        self.wildcards: list[tuple[str, list[str]]] = []
+        for script in scripts:
+            for match in PLACEMENT.finditer(script.read_text()):
+                files, sections = match.group("files"), match.group("sections")
+                if files == EVERY_FILE:
+                    continue
+                if any(character in files for character in "*?[:"):
+                    self.wildcards.append((files, sections.split()))
+                else:
+                    self.by_file.setdefault(files, []).extend(sections.split())
+
+    def places(self, section: str, file: str) -> bool:
+        """Whether a statement places SECTION of FILE, as the map names it."""
+        patterns = list(self.by_file.get(file, []))
+        for files, sections in self.wildcards:
+            if file_matches(files, file):
+                patterns += sections
+        return any(fnmatchcase(section, pattern) for pattern in patterns)
+
+
+def file_matches(pattern: str, file: str) -> bool:
+    """Whether a script's file PATTERN matches FILE, as the map names it."""
+    archive_pattern, separator, member_pattern = pattern.partition(":")
+    if not separator:
+        return fnmatchcase(file, pattern)
+    match = ARCHIVE_MEMBER.match(file)
+    return bool(
+        match
+        and fnmatchcase(match.group("archive"), archive_pattern)
+        and fnmatchcase(match.group("member"), member_pattern)
+    )
+
+
+def discarded_contents(map_file: Path, placements: Placements) -> list[str]:
+    """List the sections with contents that the link of MAP_FILE left out.
+
+    A section that a statement places was collected, not left out.
+    """
     _, _, rest = map_file.read_text().partition(DISCARDED_HEADING)
     discarded, _, _ = rest.partition(DISCARDED_END)
     mistakes: list[str] = []
     for match in DISCARDED_LINE.finditer(discarded):
         name, size = match.group("name"), int(match.group("size"), 16)
-        if size and not name.startswith(UNLOADED_SECTIONS):
+        file = match.group("file")
+        if (
+            size
+            and not name.startswith(UNLOADED_SECTIONS)
+            and not placements.places(name, file)
+        ):
             section = f"{name} of {match.group('file')}"
             mistakes.append(f"discards {section}, 0x{size:x} bytes that it holds")
     return mistakes
@@ -178,7 +239,7 @@ def main() -> int:
     mistakes = (
         overrides(scripts, objects)
         + overlay_conflicts(elf, symbols)
-        + discarded_contents(elf.with_suffix(MAP_SUFFIX))
+        + discarded_contents(elf.with_suffix(MAP_SUFFIX), Placements(scripts))
     )
     for mistake in mistakes:
         print(f"{elf}: {mistake}", file=sys.stderr)
