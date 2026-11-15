@@ -401,17 +401,22 @@ lint: $(BUILD_DIR)/compile_commands.json
 		> $(BUILD_DIR)/lint.log 2>&1 || true
 	@! grep -E '\[($(LINT_CHECKS))' $(BUILD_DIR)/lint.log | sort -u | grep .
 
-# Linking the game's code as LTO bytecode compares each declaration of a
-# routine or object with its definition, across files, which no single
-# compile can. The modern build compiles the bytecode into its own
+# Linking the game's and the libraries' code as LTO bytecode compares each
+# declaration of a routine or object with its definition, across files,
+# which no single compile can, including the libraries' declarations of
+# the game's routines. The modern build compiles the bytecode into its own
 # directory, and any mismatch fails the link.
 TYPECHECK_DIR := build/typecheck
+# The objects compiled from C, leaving out the data-only assembly that
+# splat names as C (see the ultralib rule for those)
+C_O_FILES = $(foreach object,$(filter %.c.o,$(O_FILES)), \
+  $(if $(wildcard $(patsubst $(BUILD_DIR)/%.c.o,%.c,$(object))),$(object)))
 
 typecheck:
 	@$(MAKE) MODERN=1 BUILD_DIR=$(TYPECHECK_DIR) OPTFLAGS='-Os -flto' \
 		$(TYPECHECK_DIR)/linked.o
 
-$(BUILD_DIR)/linked.o: $(filter $(BUILD_DIR)/src/%.c.o,$(O_FILES))
+$(BUILD_DIR)/linked.o: $(C_O_FILES)
 	$(CC) -r -nostdlib $(TARGETFLAGS) $(OPTFLAGS) \
 		-Werror=lto-type-mismatch -o $@ $^
 
