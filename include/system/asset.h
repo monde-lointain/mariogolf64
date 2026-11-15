@@ -9,6 +9,8 @@
 
 #include <ultra64.h>
 
+#include "system/compiler.h"
+
 // EncodedAsset methods; any other is read as halfword runs
 #define ENCODING_BYTE_RUNS 1
 
@@ -235,7 +237,9 @@ typedef struct EncodedAsset {
     AssetFile file;
 } EncodedAsset;
 
-// The boot logos, among other image assets, begin with this before their texels
+// The boot logos, among other image assets, begin with this before their texels.
+// The texels that follow must start on an 8-byte boundary for the RDP, so
+// every structure that holds a header has that alignment.
 typedef struct ImageHeader {
     // How the texels are stored: 0 for four-bit ones with no palette, 2 for
     // four-bit indices into a 16-color palette, 4 for eight-bit ones with no
@@ -244,7 +248,7 @@ typedef struct ImageHeader {
     u16 width;
     u16 height;
     u16 unusedAfterHeight;
-} ImageHeader;
+} RCP_ALIGNED ImageHeader;
 
 void InitAssetFiles(void);
 void OpenAssetFile(WideAssetId assetId, AssetFile *file);

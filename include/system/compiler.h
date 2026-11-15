@@ -92,11 +92,12 @@
 
 // Follows the declarator of a buffer of bytes or halfwords that the RCP or a
 // DMA reads or writes: a texture, palette or image, or a DMA's target, or of
-// a structure that holds one at an 8-byte offset, such as an image after its
-// header or the save data that SRAM's DMA reads and writes whole. Their
-// address registers ignore the low three bits, as does TextureAddress, so the
-// buffer must start on an 8-byte boundary. The original's linker happened to
-// place each one so; other layouts have to ask for it.
+// a structure that holds one at an 8-byte offset, such as the save data that
+// SRAM's DMA reads and writes whole. Their address registers ignore the low
+// three bits, as does TextureAddress, so the buffer must start on an 8-byte
+// boundary. The original's linker happened to place each one so; other
+// layouts have to ask for it. A type that always holds such a buffer, such as
+// ImageHeader, asks for it once, after its closing brace.
 #define RCP_ALIGNED __attribute__((aligned(8)))
 
 // Follows the declarator of a byte array that a thread uses as its stack. The

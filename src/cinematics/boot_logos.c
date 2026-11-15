@@ -115,9 +115,9 @@ static s32 f_BootLogoUnusedWord UNUSED = 0;
 static Boolean f_HasResetGameState = FALSE;
 
 static u8 f_UnusedBufferBeforeCamelotLogo[0x20] UNUSED;
-static CamelotLogo f_CamelotLogo RCP_ALIGNED;
-static NintendoLogo f_NintendoLogo RCP_ALIGNED;
-static N64Logo f_N64Logo RCP_ALIGNED;
+static CamelotLogo f_CamelotLogo;
+static NintendoLogo f_NintendoLogo;
+static N64Logo f_N64Logo;
 
 void LoadBootLogos(void) {
     EncodedAsset asset;

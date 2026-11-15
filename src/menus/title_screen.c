@@ -122,16 +122,16 @@ static s32 f_TitleUnusedWord UNUSED = 0;
 static f32 f_PressStartPhase = 0.0f;
 
 static u8 f_UnusedBufferAfterStartPhase[0x20] UNUSED;
-static TitleImage f_TitleImage RCP_ALIGNED;
+static TitleImage f_TitleImage;
 // Read by no routine; two objects, as one would be aligned to 16 bytes
 static u8 f_UnusedBytesAfterTitleImage[8] UNUSED;
 static u8 f_UnusedBufferAfterTitleImage[0x9800] UNUSED;
 
-static JapaneseLogo f_JapaneseLogo RCP_ALIGNED;
+static JapaneseLogo f_JapaneseLogo;
 
 static u8 f_UnusedBytesAfterJapaneseLogo[8] UNUSED;
 
-static PressStartText f_PressStartText RCP_ALIGNED;
+static PressStartText f_PressStartText;
 
 void OnUnlockCodeEntered(void) {
     UnlockEverything();
