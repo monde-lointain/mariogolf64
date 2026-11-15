@@ -82,6 +82,7 @@ PAGE_SUFFIX = " from its first page"
 # The main heap's region (include/system/heap.h), the same in every build
 MAIN_REGION_END = 0x802E_A000
 MAIN_REGION_SIZE = 0x8_C800
+HEAP_START = MAIN_REGION_END - MAIN_REGION_SIZE
 HEAP_NAME = "(main heap)"
 
 # The layout of an Overlay (include/system/overlay_manager.h)
@@ -320,6 +321,10 @@ class Build:
     covers: list[list[SectionContents]] = field(
         default_factory=list[list[SectionContents]]
     )
+    # The places that each word seen can address in any frame
+    fixed_place_cache: dict[int, frozenset[Place]] = field(
+        default_factory=dict[int, frozenset[Place]]
+    )
 
     def __post_init__(self) -> None:
         """Read the symbols and sections of the build."""
@@ -424,30 +429,53 @@ class Build:
         word that is a linker marker's address names it, as does one in the
         ROM its section.
         """
-        tag, physical = word & ~PHYSICAL_MASK, word & PHYSICAL_MASK
-        found = self.ram_places(tag, physical | KSEG0, state)
-        if tag == KSEG0:
-            found.update(self.unnamed_places(physical, state))
-        found.update((MARKER_TAG, name, 0) for name in self.markers.get(word, ()))
-        found.update(self.rom_places(word))
+        found = set(self.fixed_places(word))
+        found.update(self.frame_places(word, state))
         return found
 
-    def ram_places(self, tag: int, address: int, state: FrameState) -> set[Place]:
-        """Name the symbols and the heap's bytes at ADDRESS."""
-        found: set[Place] = set()
+    def fixed_places(self, word: int) -> frozenset[Place]:
+        """Name the places WORD can address in any frame; see places."""
+        found = self.fixed_place_cache.get(word)
+        if found is None:
+            found = frozenset(self.find_fixed_places(word))
+            self.fixed_place_cache[word] = found
+        return found
+
+    def find_fixed_places(self, word: int) -> Iterator[Place]:
+        """Name the symbols, heap bytes, markers and ROM sections at WORD."""
+        tag, physical = word & ~PHYSICAL_MASK, word & PHYSICAL_MASK
+        address = physical | KSEG0
         for contents in self.spanning_sections(address):
             for member, offset in holders(contents, address):
                 key = member.key
-                found.add((tag, key, offset))
+                yield (tag, key, offset)
                 if key in PAGE_ALIGNED_CONTENTS:
                     skip = -(address - offset) % PAGE_SIZE
-                    found.add((tag, key + PAGE_SUFFIX, offset - skip))
-                if key in DRAWN_COPIES:
-                    found.add(self.copied_place(DRAWN_COPIES[key], tag, offset, state))
-        heap_offset = address - (MAIN_REGION_END - MAIN_REGION_SIZE)
+                    yield (tag, key + PAGE_SUFFIX, offset - skip)
+                copy = DRAWN_COPIES.get(key)
+                if copy is not None and not copy.through_pointer:
+                    yield (tag, copy.source, offset % copy.size)
+        heap_offset = address - HEAP_START
         if 0 <= heap_offset < MAIN_REGION_SIZE:
-            found.add((tag, HEAP_NAME, heap_offset))
-        return found
+            yield (tag, HEAP_NAME, heap_offset)
+        yield from ((MARKER_TAG, name, 0) for name in self.markers.get(word, ()))
+        yield from self.rom_places(word)
+
+    def frame_places(self, word: int, state: FrameState) -> Iterator[Place]:
+        """Name the places WORD addresses by what the frame's RDRAM holds.
+
+        These are the heap's bytes that a drawn copy copies through a
+        pointer, and unnamed data, which is named by its bytes.
+        """
+        tag, physical = word & ~PHYSICAL_MASK, word & PHYSICAL_MASK
+        address = physical | KSEG0
+        for contents in self.spanning_sections(address):
+            for member, offset in holders(contents, address):
+                copy = DRAWN_COPIES.get(member.key)
+                if copy is not None and copy.through_pointer:
+                    yield self.pointed_place(copy, tag, offset, state)
+        if tag == KSEG0:
+            yield from self.unnamed_places(physical, state)
 
     def unnamed_places(self, physical: int, state: FrameState) -> Iterator[Place]:
         """Name the unnamed data at PHYSICAL in a resident section, by its bytes.
@@ -477,15 +505,12 @@ class Build:
             elif word == end:
                 yield (ROM_TAG, name, END_OFFSET)
 
-    def copied_place(
+    def pointed_place(
         self, copy: DrawnCopy, tag: int, offset: int, state: FrameState
     ) -> Place:
-        """Name the place that a byte of a drawn copy copies."""
-        if not copy.through_pointer:
-            return (tag, copy.source, offset % copy.size)
+        """Name the heap's byte that a byte of a copy through a pointer copies."""
         pointer = big_endian_word(state.rdram, self.addresses[copy.source] - KSEG0)
-        heap_offset = pointer - (MAIN_REGION_END - MAIN_REGION_SIZE)
-        return (tag, HEAP_NAME, heap_offset + offset % copy.size)
+        return (tag, HEAP_NAME, pointer - HEAP_START + offset % copy.size)
 
     def in_resident_section(self, address: int, sections: frozenset[str]) -> bool:
         """Whether ADDRESS is in one of the resident SECTIONS."""
@@ -705,6 +730,8 @@ class Comparison:
     builds: tuple[Build, Build]
     states: tuple[FrameState, FrameState]
     comparable: frozenset[str]
+    # The pairs of words found to address the same place in any frame
+    same_pairs: set[tuple[int, int]]
 
     def objects(self) -> Iterator[tuple[str, list[WordDifference]]]:
         """Each object that differs, with its differing words."""
@@ -719,8 +746,7 @@ class Comparison:
             words = self.object_words(key, matching[key], modern[key])
             if words:
                 yield key, words
-        heap_start = MAIN_REGION_END - MAIN_REGION_SIZE
-        words = self.words(heap_start, heap_start, MAIN_REGION_SIZE)
+        words = self.words(HEAP_START, HEAP_START, MAIN_REGION_SIZE)
         if words:
             yield HEAP_NAME, words
 
@@ -778,7 +804,17 @@ class Comparison:
         return differences
 
     def same_target(self, matching: int, modern: int) -> bool:
-        """Whether two words can address the same place in each build."""
+        """Whether two words can address the same place in each build.
+
+        Most pairs do so in every frame, which is learned once for each.
+        """
+        pair = (matching, modern)
+        if pair in self.same_pairs:
+            return True
+        fixed = self.builds[0].fixed_places(matching)
+        if not fixed.isdisjoint(self.builds[1].fixed_places(modern)):
+            self.same_pairs.add(pair)
+            return True
         first = self.builds[0].places(matching, self.states[0])
         return bool(first) and not first.isdisjoint(
             self.builds[1].places(modern, self.states[1])
@@ -820,6 +856,7 @@ def characterize(program: str, frames: int, *, verbose: bool) -> dict[str, Findi
     unpaired = unpaired_objects(builds, game)
     comparable = game - frozenset(unpaired)
     findings = {key: Finding() for key in unpaired}
+    same_pairs: set[tuple[int, int]] = set()
     harnesses: list[Harness] = []
     with tempfile.TemporaryDirectory(dir="/dev/shm") as scratch:
         try:
@@ -832,7 +869,7 @@ def characterize(program: str, frames: int, *, verbose: bool) -> dict[str, Findi
                     harness.start_dump(dump)
                 states = (pair[0].state(dumps[0]), pair[1].state(dumps[1]))
                 loading = any(harness.is_loading() for harness in pair)
-                comparison = Comparison(builds, states, comparable)
+                comparison = Comparison(builds, states, comparable, same_pairs)
                 for key, words in comparison.objects():
                     if verbose and key not in findings:
                         print(f"frame {frame}: {key} differs")
