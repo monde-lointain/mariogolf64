@@ -243,13 +243,24 @@ void RunHeartbeatLoop(void) {
     }
 }
 
-// Divides the start of g_WorkArea among the character slots
+// Divides the start of g_WorkArea among the character slots.
+//
+// SetCharacterBuffer rounds each buffer up to a page, so the spacing that the
+// rounding leaves follows where g_WorkArea starts in its page. The original's
+// starts 0xD00 into one, which spaces them as its first page boundary would.
+// Builds with other layouts divide it from that boundary, so that their
+// buffers lie as the original's do wherever g_WorkArea lands.
 void AssignCharacterBuffers(void) {
     s32 bufferSize = GetCharacterBufferSize();
+#ifdef NON_MATCHING
+    u8 *buffers = (u8 *)RoundUpTo((u32)g_WorkArea.bytes, SMALLEST_PAGE_SIZE);
+#else
+    u8 *buffers = g_WorkArea.bytes;
+#endif
 
-    SetCharacterBuffer(CHARACTER_SLOT_PARTNER, g_WorkArea.bytes);
-    SetCharacterBuffer(CHARACTER_SLOT_GOLFER, g_WorkArea.bytes + bufferSize);
-    SetCharacterBuffer(CHARACTER_SLOT_CADDIE, g_WorkArea.bytes + (bufferSize * 2));
+    SetCharacterBuffer(CHARACTER_SLOT_PARTNER, buffers);
+    SetCharacterBuffer(CHARACTER_SLOT_GOLFER, buffers + bufferSize);
+    SetCharacterBuffer(CHARACTER_SLOT_CADDIE, buffers + (bufferSize * 2));
     osSyncPrintf("GMemLeft=%x\n", WORK_AREA_SIZE - (bufferSize * 3));
 }
 
