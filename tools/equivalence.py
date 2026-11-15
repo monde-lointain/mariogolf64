@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Characterize the modern build against the matching build, frame by frame.
 
-    equivalence.py [--frames N] [--harness PATH] [--verbose]
+    equivalence.py [--frames N] [--harness PATH] [--reference DIR]
+                   [--modern DIR] [--verbose]
 
 Runs build/mariogolf64.z64 and build/modern/mariogolf64.z64 side by side in
 ares's n64-harness and stops each where nuGfxTaskStart queues a frame's
@@ -10,6 +11,21 @@ game's state there is a narrow place through which all of the frame's
 behavior passes. Frames are paired by g_FrameCount, which counts frames of
 logic, and not by when each build shows them, as the builds run at
 different speeds.
+
+The game's logic follows two things that the harness does not otherwise
+control: the buttons, which neither run presses, and how many frames each
+hole takes to load, which follows the speed of the build's code. The
+harness controls the loads too. Each build's loader ends at once after it
+sets g_HasLoaderFinished, which the game moves on in the first frame to
+find set, so the harness clears it there, and sets it in both builds as
+the first frame ends by which both loads have ended. Both then load in
+the same frames, as a slower loader would have, and builds of any speed
+can be compared.
+
+--reference and --modern name other builds' directories. With
+build/nonmatching as the reference, only the compilers differ, which
+compares source that no longer matches the original. Any modern build,
+such as one with other optimizations, can stand for the modern one.
 
 At each frame it compares every object that the game's own code defines in
 the main segment and the loaded overlays, and the main heap, word by word.
@@ -63,7 +79,7 @@ from struct import iter_unpack
 from typing import cast, final
 
 ROOT = Path(__file__).resolve().parent.parent
-MATCHING_DIR = ROOT / "build"
+REFERENCE_DIR = ROOT / "build"
 MODERN_DIR = ROOT / "build" / "modern"
 ELF_NAME = "mariogolf64.elf"
 ROM_NAME = "mariogolf64.z64"
@@ -91,6 +107,14 @@ MAIN_REGION_END = 0x802E_A000
 MAIN_REGION_SIZE = 0x8_C800
 HEAP_START = MAIN_REGION_END - MAIN_REGION_SIZE
 HEAP_NAME = "(main heap)"
+
+# The hole loader thread, the flag it sets as it ends, and the routine it
+# ends itself with, whose first argument is the thread
+LOADER_THREAD = "f_LoaderThread"
+LOADER_FINISHED = "g_HasLoaderFinished"
+THREAD_END = "osDestroyThread"
+FIRST_ARGUMENT_REGISTER = 4
+ADDRESS_MASK = 0xFFFF_FFFF
 
 # The layout of an Overlay (include/system/overlay_manager.h)
 OVERLAY_SIZE = 40
@@ -593,9 +617,9 @@ def source_name(file_symbol: str) -> str:
     return basename
 
 
-def game_globals() -> frozenset[str]:
-    """Name the globals that the modern build's game objects define."""
-    object_files = sorted(str(path) for path in MODERN_DIR.glob(GAME_OBJECT_FILES))
+def game_globals(directory: Path) -> frozenset[str]:
+    """Name the globals that the game objects in DIRECTORY define."""
+    object_files = sorted(str(path) for path in directory.glob(GAME_OBJECT_FILES))
     listing = run_tool("mips-linux-gnu-nm", "--defined-only", "-g", *object_files)
     return frozenset(match.group(2) for match in NM_SYMBOL.finditer(listing))
 
@@ -622,7 +646,7 @@ def pair_symbols(builds: tuple[Build, Build]) -> frozenset[str]:
                 keys[symbol] = symbol.name
     for build in builds:
         build.name_symbols(keys)
-    names = game_globals()
+    names = game_globals(builds[1].directory)
     return frozenset(
         keys[symbol]
         for symbol in builds[1].symbols
@@ -656,6 +680,7 @@ class Harness:
         )
         _ = self.command(f"break {build.addresses['nuGfxTaskStart']:x}")
         _ = self.command(f"break {build.addresses['DrawLensFlare']:x}")
+        _ = self.command(f"break {build.addresses[THREAD_END]:x}")
         _ = self.command("video off")
 
     def send(self, text: str) -> None:
@@ -693,13 +718,17 @@ class Harness:
             raise HarnessError(message)
         return int(reply.split()[1], 16)
 
+    def write_word(self, address: int, value: int) -> None:
+        """Write a word of memory."""
+        _ = self.command(f"write {address:x} {value:08x}")
+
     def frame(self) -> int:
         """Read which frame of logic the game is on."""
         return self.read_word(self.build.addresses["g_FrameCount"])
 
     def is_loading(self) -> bool:
-        """Whether the hole loader thread is at work."""
-        return not self.read_word(self.build.addresses["g_HasLoaderFinished"])
+        """Whether the hole loader thread is at work, or its end is held."""
+        return not self.read_word(self.build.addresses[LOADER_FINISHED])
 
     def start_dump(self, dump: Path, size: int) -> None:
         """Have the harness dump SIZE bytes of RDRAM to DUMP, without waiting."""
@@ -732,6 +761,43 @@ def big_endian_word(rdram: bytes, offset: int) -> int:
     return int.from_bytes(rdram[offset : offset + WORD_SIZE], "big")
 
 
+@final
+class LoaderGate:
+    """Holds each build's finished hole load until both builds' have ended.
+
+    The loader sets g_HasLoaderFinished and then ends its own thread, and
+    the main thread, which reads the flag, has the lower priority and can't
+    run between the two. So where the loader ends its thread, the flag is
+    cleared, and the build is held until the end of a frame by which no
+    build's loader is still at work.
+    """
+
+    def __init__(self) -> None:
+        """Hold no build."""
+        self.held: list[Harness] = []
+
+    def take_thread_end(self, harness: Harness) -> None:
+        """Hold HARNESS's build if its loader is ending its thread."""
+        addresses = harness.build.addresses
+        argument = harness.command(f"reg {FIRST_ARGUMENT_REGISTER}")
+        if int(argument, 16) & ADDRESS_MASK != addresses[LOADER_THREAD]:
+            return
+        if harness.read_word(addresses[LOADER_FINISHED]):
+            harness.write_word(addresses[LOADER_FINISHED], 0)
+            self.held.append(harness)
+        elif harness in self.held:
+            message = f"{harness.build.directory}: the game stopped a held loader"
+            raise HarnessError(message)
+
+    def release(self, harnesses: tuple["Harness", "Harness"]) -> None:
+        """Set the held builds' flags once no build's loader is at work."""
+        if any(h.is_loading() for h in harnesses if h not in self.held):
+            return
+        for harness in self.held:
+            harness.write_word(harness.build.addresses[LOADER_FINISHED], 1)
+        self.held = []
+
+
 @dataclass
 class FrameRun:
     """Both builds' runs to a frame's queueing.
@@ -741,6 +807,7 @@ class FrameRun:
 
     target: int
     running: list[Harness]
+    gate: LoaderGate
     # The matching build's glare strength at each frame's lens flare
     flare_strengths: dict[int, int] = field(default_factory=dict[int, int])
     # The last frame that the matching build queued
@@ -751,6 +818,10 @@ class FrameRun:
     def take_halt(self, harness: Harness, address: int, *, is_matching: bool) -> None:
         """Note where HARNESS halted, and run it on unless it is done or waits."""
         addresses = harness.build.addresses
+        if address == addresses[THREAD_END]:
+            self.gate.take_thread_end(harness)
+            self.running.append(harness)
+            return
         frame = harness.frame()
         if address == addresses["DrawLensFlare"]:
             if is_matching:
@@ -785,10 +856,12 @@ class FrameRun:
         self.running.append(modern)
 
 
-def run_frames(harnesses: tuple[Harness, Harness], target: int) -> None:
+def run_frames(
+    harnesses: tuple[Harness, Harness], target: int, gate: LoaderGate
+) -> None:
     """Run the matching and modern builds until each queues TARGET's display list."""
     matching, modern = harnesses
-    run = FrameRun(target, [matching, modern])
+    run = FrameRun(target, [matching, modern], gate)
     while run.running:
         for harness in run.running:
             harness.send(f"run {FRAME_TIMEOUT}")
@@ -988,13 +1061,13 @@ class PendingFrame:
     differences: AsyncResult[FrameDifferences]
 
 
-def characterize(program: str, frames: int, *, verbose: bool) -> dict[str, Finding]:
-    """Compare the builds over FRAMES frames; return what differed.
+def characterize(arguments: "Arguments") -> dict[str, Finding]:
+    """Compare the builds over the frames asked for; return what differed.
 
     Worker processes compare each frame while the harnesses run the next,
     and their findings are taken in the frames' order.
     """
-    builds = (Build(MATCHING_DIR), Build(MODERN_DIR))
+    builds = (Build(Path(arguments.reference)), Build(Path(arguments.modern)))
     game = pair_symbols(builds)
     unpaired = unpaired_objects(builds, game)
     comparable = game - frozenset(unpaired)
@@ -1003,7 +1076,7 @@ def characterize(program: str, frames: int, *, verbose: bool) -> dict[str, Findi
 
     def take(pending: PendingFrame) -> None:
         for key, words in pending.differences.get():
-            if verbose and key not in findings:
+            if arguments.verbose and key not in findings:
                 print(f"frame {pending.frame}: {key} differs")
             findings.setdefault(key, Finding()).add(
                 pending.frame, words, loading=pending.loading
@@ -1016,11 +1089,12 @@ def characterize(program: str, frames: int, *, verbose: bool) -> dict[str, Findi
         multiprocessing.get_context("fork").Pool(WORKER_COUNT) as pool,
     ):
         try:
-            harnesses = [Harness(program, build) for build in builds]
+            harnesses = [Harness(arguments.harness, build) for build in builds]
             pair = (harnesses[0], harnesses[1])
+            gate = LoaderGate()
             queued: collections.deque[PendingFrame] = collections.deque()
-            for frame in range(1, frames + 1):
-                run_frames(pair, frame)
+            for frame in range(1, arguments.frames + 1):
+                run_frames(pair, frame, gate)
                 if len(queued) == DUMP_SLOT_COUNT:
                     take(queued.popleft())
                 slot = frame % DUMP_SLOT_COUNT
@@ -1033,6 +1107,7 @@ def characterize(program: str, frames: int, *, verbose: bool) -> dict[str, Findi
                 for harness in pair:
                     harness.finish_dump(dump_size)
                 loading = any(harness.is_loading() for harness in pair)
+                gate.release(pair)
                 differences = pool.apply_async(compare_frame, (dumps,))
                 queued.append(PendingFrame(frame, loading, differences))
             while queued:
@@ -1079,6 +1154,8 @@ class Arguments(argparse.Namespace):
 
     frames: int = DEFAULT_FRAMES
     harness: str = DEFAULT_HARNESS
+    reference: str = str(REFERENCE_DIR)
+    modern: str = str(MODERN_DIR)
     verbose: bool = False
 
 
@@ -1088,12 +1165,14 @@ def main() -> int:
     _ = parser.add_argument("--frames", type=int, help="frames of logic to compare")
     _ = parser.add_argument("--harness", help="the n64-harness program")
     _ = parser.add_argument(
+        "--reference", help="the directory of the build to compare with"
+    )
+    _ = parser.add_argument("--modern", help="the directory of the modern build")
+    _ = parser.add_argument(
         "--verbose", action="store_true", help="print each finding as found"
     )
     arguments = parser.parse_args(namespace=Arguments())
-    findings = characterize(
-        arguments.harness, arguments.frames, verbose=arguments.verbose
-    )
+    findings = characterize(arguments)
     return 0 if report(findings) else 1
 
 
