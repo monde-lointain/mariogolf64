@@ -41,6 +41,7 @@ static void RunAllGroups(void) {
     RUN_TEST_GROUP(Heap);
     RUN_TEST_GROUP(HoleLoader);
     RUN_TEST_GROUP(MathUtil);
+    RUN_TEST_GROUP(OverlayManager);
     RUN_TEST_GROUP(Password);
     RUN_TEST_GROUP(ShotSimulation);
 }
