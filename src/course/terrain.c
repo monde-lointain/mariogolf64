@@ -194,7 +194,7 @@ static u8 f_PointSlots[GROUND_TILE_POINT_SPAN + 1][8] = {
     {0x04, 0x0D, 0x0E, 0x0F, 0x05},
     {0x82, 0x06, 0x86, 0x07, 0x8A},
 };
-HoleSetup g_HoleSetup = {
+HoleSetup g_HoleSetup RCP_ALIGNED = {
     .cupPosition = {GROUND_WIDTH / 2, 0, GROUND_LENGTH / 2},
     .teePosition = {GROUND_WIDTH / 2, 0, GROUND_LENGTH / 8},
 };

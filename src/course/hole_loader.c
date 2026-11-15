@@ -154,7 +154,7 @@ static s32 f_CycledCupIndex = 0;
 volatile Boolean g_HasLoaderFinished = TRUE;
 static s32 f_UnusedWordAfterLoaderFinished UNUSED = 0;
 static OSThread f_LoaderThread;
-HolePoints g_HolePoints;
+HolePoints g_HolePoints RCP_ALIGNED;
 s32 g_HoleTimeFrames[COURSE_HOLE_COUNT];
 s32 g_HoleTimeHundredths[COURSE_HOLE_COUNT];
 s32 g_HoleTimeMinutes[COURSE_HOLE_COUNT];
