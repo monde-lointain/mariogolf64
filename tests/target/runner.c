@@ -37,6 +37,7 @@ void TargetTestsFinished(void) {
 
 static void RunAllGroups(void) {
     RUN_TEST_GROUP(AssetDecoding);
+    RUN_TEST_GROUP(CharacterBuffers);
     RUN_TEST_GROUP(Collision);
     RUN_TEST_GROUP(CourseHoles);
     RUN_TEST_GROUP(Curve);
