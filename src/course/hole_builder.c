@@ -4502,8 +4502,15 @@ static inline void CopyVertices(Vtx *destination, Vtx *source, s32 count) {
     }
 }
 
-// The address of a vertex through a vertex segment
-#define SegmentedVertex(segment, vertex) ((u8 *)(vertex) + ((segment) << 24))
+// The address of a vertex through a vertex segment, whose base the drawing
+// code sets to an offset that snaps the vertex to a coarser neighbor's. The
+// RSP took the segment from bits 24 to 27 of an N64 address; a host's
+// address carries it above the address's own bits.
+#ifdef TARGET_PC
+#    define SegmentedVertex(segment, vertex) osPcSegmentAddress((segment), (vertex))
+#else
+#    define SegmentedVertex(segment, vertex) ((u8 *)(vertex) + ((segment) << 24))
+#endif
 
 // Builds the display list and vertices of the ground tile at column and
 // row, at the cursors, and moves the cursors past them
