@@ -53,6 +53,7 @@ target_link_libraries(mariogolf64 PRIVATE
     mg64_platform
     mg64_nusys
     mg64_mus
+    mg64_audio_output
     mg64_gpu
     mg64_gfx
     mg64_ultra

@@ -90,3 +90,10 @@ mg64_add_port_test(sequencer_test
     SOURCES sequencer_test.c
     LIBRARIES mg64_synth SDL3::SDL3
 )
+
+# The player's thread runs on the port's libultra; the audio output is the
+# test's own
+mg64_add_port_test(music_player_test
+    SOURCES music_player_test.c
+    LIBRARIES mg64_mus mg64_ultra SDL3::SDL3
+)

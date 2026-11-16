@@ -15,5 +15,17 @@ target_link_libraries(mg64_synth
     PRIVATE SDL3::SDL3 mg64_port_warnings
 )
 
-add_library(mg64_mus INTERFACE)
-target_link_libraries(mg64_mus INTERFACE mg64_port_internal)
+# The libmus API over the synthesizer. It plays into the audio output that
+# audio_output.h declares, which the program links from mg64_audio_output and
+# the tests from their own doubles.
+add_library(mg64_mus STATIC music_player.c)
+target_link_libraries(mg64_mus
+    PUBLIC mg64_synth
+    PRIVATE mg64_ultra SDL3::SDL3 mg64_port_warnings
+)
+
+add_library(mg64_audio_output STATIC sdl_audio_output.c)
+target_link_libraries(mg64_audio_output
+    PUBLIC mg64_port_internal
+    PRIVATE SDL3::SDL3 mg64_port_warnings
+)
