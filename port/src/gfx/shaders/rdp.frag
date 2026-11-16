@@ -281,11 +281,13 @@ void main() {
 
     vec4 combined = CombineCycle(material.combine.z, material.combine.w, inputs);
 
+    // The alpha compare tests the first cycle's alpha
     if ((material.modes & MATERIAL_ALPHA_THRESHOLD) != 0u) {
         float threshold = (material.modes & MATERIAL_ALPHA_DITHER) != 0u ? Noise() :
                                                                          material.blendColor.a;
+        float comparedAlpha = isTwoCycle ? inputs.combined.a : combined.a;
 
-        if (combined.a < threshold) {
+        if (comparedAlpha < threshold) {
             discard;
         }
     }

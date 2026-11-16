@@ -324,6 +324,55 @@ static void TestSecondCycleTexel(void) {
     EXPECT_PIXEL(1, 1, 0, 0, 255);
 }
 
+// Draws a rectangle of the primitive color in two cycles, whose first
+// cycle's alpha is firstAlpha and second's is secondAlpha, through a
+// threshold compare at half
+static void DrawComparedRectangle(u8 firstAlpha, u8 secondAlpha) {
+    Gfx *gfx = BeginList(f_DisplayList);
+
+    gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 0, 1));
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPSetRenderMode(gfx++, G_RM_PASS, G_RM_OPA_SURF2);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 0, 0, 0, 0x80);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0, 0, firstAlpha);
+    gDPSetEnvColor(gfx++, 0, 0, 0, secondAlpha);
+    gDPSetCombineLERP(
+        gfx++,
+        0,
+        0,
+        0,
+        PRIMITIVE,
+        0,
+        0,
+        0,
+        PRIMITIVE,
+        0,
+        0,
+        0,
+        COMBINED,
+        0,
+        0,
+        0,
+        ENVIRONMENT
+    );
+    gSPTextureRectangle(gfx++, 0, 0, 4 << 2, 4 << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    RunList(gfx);
+}
+
+// In two cycles the alpha compare tests the first cycle's alpha, not the
+// second's
+static void TestTwoCycleAlphaCompare(void) {
+    DrawComparedRectangle(0, 0xFF);
+    EXPECT_PIXEL(1, 1, 0, 0, 0);
+
+    DrawComparedRectangle(0xFF, 0);
+    EXPECT_PIXEL(1, 1, 255, 0, 0);
+}
+
 static SDL_GPUDevice *CreateDevice(void) {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         // A machine with no display can still have a GPU
@@ -355,6 +404,7 @@ int main(void) {
     TestTranslucentBlend();
     TestDepth();
     TestSecondCycleTexel();
+    TestTwoCycleAlphaCompare();
     ShutdownRdp();
     ShutdownGpuBackend();
     SDL_DestroyGPUDevice(device);
