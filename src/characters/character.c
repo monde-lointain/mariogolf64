@@ -1908,7 +1908,7 @@ void ResetCharacterSlots(void) {
     FreeAllCharacterSlots();
     for (slotIndex = 0; slotIndex < CHARACTER_SLOT_COUNT; slotIndex++) {
         g_CharacterSlots[slotIndex].lastDrawnFrame = LONG_AGO_FRAME;
-        SetCharacterBuffer(slotIndex, (u8 *)DEFAULT_CHARACTER_BUFFER);
+        SetCharacterBuffer(slotIndex, (u8 *)FixedAddress(DEFAULT_CHARACTER_BUFFER));
     }
 }
 

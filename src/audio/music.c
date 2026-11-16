@@ -63,7 +63,7 @@ static musConfig f_DefaultMusicConfig = {
     24,
     NULL,
     70,
-    (u8 *)0x80335000,
+    (u8 *)FixedAddress(0x80335000),
     0x5A800,
     NULL,
     NULL,

@@ -268,9 +268,9 @@ void InitHeapRegions(Boolean hasExpansionPak) {
     f_MemorySentinel.next = f_MemorySentinel.previous = (MemoryBlock *)&f_MemorySentinel;
     f_FreeMemorySize = 0;
 
-    AddMemoryRegion((void *)MAIN_REGION_START, (void *)MAIN_REGION_END);
+    AddMemoryRegion(FixedAddress(MAIN_REGION_START), FixedAddress(MAIN_REGION_END));
     if (hasExpansionPak == TRUE) {
-        AddMemoryRegion((void *)EXPANSION_REGION_START, (void *)EXPANSION_REGION_END);
+        AddMemoryRegion(FixedAddress(EXPANSION_REGION_START), FixedAddress(EXPANSION_REGION_END));
     }
 
     f_LargestFreeMemorySize = UNMEASURED_SIZE;

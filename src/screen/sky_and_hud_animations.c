@@ -251,7 +251,7 @@ typedef struct LensFlare {
     f32 position; // Along the line, 0 at the sun and 1 at its axis point
 } LensFlare;
 
-static u32 *f_CapturedFrame = (u32 *)MAIN_REGION_END;
+static u32 *f_CapturedFrame = (u32 *)FixedAddress(MAIN_REGION_END);
 static s32 f_HudAnimationFramesLeft = 0;
 static HudAnimation f_HudAnimation = HUD_ANIMATION_UNUSED;
 static s32 f_SkyTimeIndex = 0;

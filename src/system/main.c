@@ -48,7 +48,7 @@
 
 // The frame buffers fill the end of the base RDRAM, in order
 #define FramebufferAddress(index) \
-    ((u16 *)(BASE_RDRAM_END - ((FRAMEBUFFER_COUNT - (index)) * FRAMEBUFFER_SIZE)))
+    ((u16 *)FixedAddress(BASE_RDRAM_END - ((FRAMEBUFFER_COUNT - (index)) * FRAMEBUFFER_SIZE)))
 
 // The first flag in each byte is its top bit
 #define GameFlagByte(flag) (f_GameFlagBits[(flag) / GAME_FLAGS_PER_BYTE])
@@ -302,7 +302,7 @@ void mainproc(void *arg UNUSED) {
     osAiSetFrequency(AUDIO_FREQUENCY);
     // Clear all memory past the main segment's bss: the overlays, the heaps
     // and the framebuffers
-    bzero(main_BSS_END, BytesBetween(main_BSS_END, BASE_RDRAM_END));
+    bzero(main_BSS_END, BytesBetween(main_BSS_END, FixedAddress(BASE_RDRAM_END)));
     osWritebackDCacheAll();
     DisableFloatExceptions();
     RunBootHook();

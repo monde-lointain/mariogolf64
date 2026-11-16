@@ -80,7 +80,7 @@ enum VertexEncoding {
 #define CLEARED_BILLBOARD_WIDTH 64
 #define CLEARED_BILLBOARD_HEIGHT 256
 // Where the build buffer starts
-#define BUILD_BUFFER_START ((u8 *)0x80315000)
+#define BUILD_BUFFER_START ((u8 *)FixedAddress(0x80315000))
 
 // The hole files that OpenHoleAsset opens, in the order of their asset ids
 enum HoleAssetKind {
@@ -120,7 +120,7 @@ typedef s8 HoleAssetKind8;
 // The size of the attributes unpacked into the build buffer
 #define ATTRIBUTE_BUFFER_SIZE 0x20000
 // Where hole files are read to
-#define HOLE_FILE_BUFFER ((u8 *)0x8030F800)
+#define HOLE_FILE_BUFFER ((u8 *)FixedAddress(0x8030F800))
 
 #define TEXEL_RED_MASK 0xF800
 #define TEXEL_GREEN_MASK 0x7C0

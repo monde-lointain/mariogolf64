@@ -23,14 +23,25 @@
 #    define PhysicalAddress(address) ((u32)(address) - K0BASE)
 #endif
 
-// An address as a number, as wide as the host's addresses, and the signed
-// type that holds one
+// An address as a number, as wide as the host's addresses, and the types
+// that hold one
 #ifdef TARGET_PC
 #    define AddressNumber(address) ((uintptr_t)(address))
+typedef uintptr_t UnsignedAddress;
 typedef intptr_t SignedAddress;
 #else
 #    define AddressNumber(address) ((u32)(address))
+typedef u32 UnsignedAddress;
 typedef s32 SignedAddress;
+#endif
+
+// The memory at an address that the game fixes in the N64's KSEG0, such as a
+// framebuffer's or a heap's. A native build keeps the memory that these lie
+// in in osPcRdram, an array as large as the N64's, at the same offsets.
+#ifdef TARGET_PC
+#    define FixedAddress(address) ((void *)PcRdramAddress(address))
+#else
+#    define FixedAddress(address) ((void *)(address))
 #endif
 
 // The uncached address of the memory at a virtual address, through which the

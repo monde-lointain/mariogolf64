@@ -150,7 +150,7 @@ ScreenEffect g_ScreenEffect = SCREEN_EFFECT_NONE;
 // The effect's length in frames; the tiled image counts it down
 static s32 f_ScreenEffectFrameCount = 0;
 // Holds a frame for the saved-frame effect, past the general pool
-static u16 *f_SavedFrameBuffer = (u16 *)MAIN_REGION_END;
+static u16 *f_SavedFrameBuffer = (u16 *)FixedAddress(MAIN_REGION_END);
 // Set when the effects stop, never read
 static s32 f_UnreadEffectSetting = 0;
 static Radians f_SpinAngle = 0.0f; // In radians
@@ -947,7 +947,7 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
     s32 destinationOffset;
     s32 rowCount;
     Gfx *gfx = *displayListHead;
-    u32 frame = osVirtualToPhysical(nuGfxCfb_ptr);
+    UnsignedAddress frame = osVirtualToPhysical(nuGfxCfb_ptr);
     GameStateStep gameStep;
     s32 row;
     s32 blockIndex;
@@ -1306,7 +1306,7 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
 // the frame as the color image when done.
 void BuildDynamicTextures(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    u32 frame = osVirtualToPhysical(nuGfxCfb_ptr);
+    UnsignedAddress frame = osVirtualToPhysical(nuGfxCfb_ptr);
     s32 row;
     s32 blockIndex;
 
@@ -1658,13 +1658,20 @@ typedef u32 DrawMode;
 // Vertices that the course drawers may add to a frame
 #define VERTEX_BUFFER_LENGTH 512
 #define EXPANSION_VERTEX_BUFFER_LENGTH 5000
+// Where undefined_syms.txt places g_ExpansionVertexBuffers for the N64
+#define EXPANSION_VERTEX_BUFFERS_ADDRESS 0x8049C860
 #define WORK_AREA_VERTEX_OFFSET 0x6A920
 
 #define GFX_TASK_FLAGS (NU_SC_TASK_DP_WAIT | NU_SC_SWAPBUFFER)
 
 // With the Expansion Pak, the vertex buffers of the frames, one for each draw
 // buffer, at a fixed place in its memory
+#ifdef TARGET_PC
+#    define g_ExpansionVertexBuffers \
+        (*(Vtx(*)[2][EXPANSION_VERTEX_BUFFER_LENGTH])FixedAddress(EXPANSION_VERTEX_BUFFERS_ADDRESS))
+#else
 extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
+#endif
 extern unsigned long _mus_cpu_last;
 
 extern unsigned long _mus_cpu_worst;
