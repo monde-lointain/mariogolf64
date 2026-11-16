@@ -598,13 +598,13 @@ void ApplyBetPreset(BetPreset requestedPreset) {
 
         for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
             memory->betStakeLevels[index] = f_BetPresetStakeLevels[preset][index];
-            g_GameState.betRates[index] = f_BetStakeAmounts[memory->betStakeLevels[index]];
+            BetStakeSlotRate(index) = f_BetStakeAmounts[memory->betStakeLevels[index]];
         }
     }
     else {
         for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
             memory->betStakeLevels[index] = NO_BET;
-            g_GameState.betRates[index] = UNSET_BET_RATE;
+            BetStakeSlotRate(index) = UNSET_BET_RATE;
         }
     }
 
@@ -672,10 +672,10 @@ void UpdateBetSettings(void) {
         );
         for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
             if (memory->betStakeLevels[index] != NO_BET) {
-                g_GameState.betRates[index] = f_BetStakeAmounts[memory->betStakeLevels[index]];
+                BetStakeSlotRate(index) = f_BetStakeAmounts[memory->betStakeLevels[index]];
             }
             else {
-                g_GameState.betRates[index] = UNSET_BET_RATE;
+                BetStakeSlotRate(index) = UNSET_BET_RATE;
             }
         }
 
@@ -700,10 +700,10 @@ void UpdateBetSettings(void) {
         );
         for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
             if (memory->betStakeLevels[index] != NO_BET) {
-                g_GameState.betRates[index] = f_BetStakeAmounts[memory->betStakeLevels[index]];
+                BetStakeSlotRate(index) = f_BetStakeAmounts[memory->betStakeLevels[index]];
             }
             else {
-                g_GameState.betRates[index] = UNSET_BET_RATE;
+                BetStakeSlotRate(index) = UNSET_BET_RATE;
             }
         }
 

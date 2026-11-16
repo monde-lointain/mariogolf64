@@ -2342,7 +2342,7 @@ void SetUpChosenGame(void) {
         g_GameState.gameMode = GetClubTournamentGameMode();
         g_GameState.isMiniGolf = g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX;
         for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
-            g_GameState.betRates[index] = UNSET_BET_RATE;
+            BetStakeSlotRate(index) = UNSET_BET_RATE;
         }
 
         for (index = 0; index != PLAYER_COUNT_MAX; index++) {

@@ -100,6 +100,16 @@ typedef struct GameState {
 } GameState;
 
 extern GameState g_GameState;
+// The rate of a bet stake slot. The menus set one more slot than there are
+// bets, which lands on the byte after betRates; a build that avoids undefined
+// behavior writes that byte by name.
+#ifdef AVOID_UB
+#    define BetStakeSlotRate(slot) \
+        (*((slot) < BET_COUNT ? &g_GameState.betRates[slot] : \
+                                (s8 *)&g_GameState.unusedAfterBetRates))
+#else
+#    define BetStakeSlotRate(slot) g_GameState.betRates[slot]
+#endif
 
 // The game state and players as BackUpPlayState last copied them
 extern GameState g_BackedUpGameState;
