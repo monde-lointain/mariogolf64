@@ -7,11 +7,19 @@
  * words of every odd row, as the RDP does so that it can read four texels of
  * a row at once, and the decoder swaps them back, so that a texture laid out
  * in RDRAM for that swap reads correctly.
+ *
+ * Memory that the port didn't load from ROM holds the game's arrays in the
+ * host's order: 4- and 8-bit texels as on the N64, but 16- and 32-bit ones
+ * as host words. 32-bit texels and palettes load whole words, so their
+ * loads put them in the N64's order. The game loads 4- and 8-bit textures
+ * as 16-bit blocks, though, so TMEM instead notes which of its words came
+ * from the host's order, and reading a 16-bit texel there swaps its bytes.
  */
 
 #ifndef PORT_GFX_TMEM_H
 #define PORT_GFX_TMEM_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #define TMEM_SIZE 4096
@@ -58,10 +66,12 @@ typedef struct TextureImage {
     uint8_t format;
     uint8_t size;
     uint16_t width; // In texels
+    bool isHostOrder; // Its 16- and 32-bit texels are host words
 } TextureImage;
 
 typedef struct Tmem {
     _Alignas(16) uint8_t bytes[TMEM_SIZE];
+    bool isHostOrderWord[TMEM_SIZE / TMEM_WORD_SIZE];
     RdpTile tiles[RDP_TILE_COUNT];
 } Tmem;
 

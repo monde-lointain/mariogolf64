@@ -6,6 +6,7 @@
 
 #include <PR/gbi.h>
 #include <SDL3/SDL_assert.h>
+#include <SDL3/SDL_endian.h>
 #include <SDL3/SDL_stdinc.h>
 #include <stdbool.h>
 
@@ -41,12 +42,16 @@ static void StoreLoadedBytes(
     uint32_t destination,
     const uint8_t *source,
     uint32_t byteCount,
-    uint32_t swap
+    uint32_t swap,
+    bool isHostOrder
 ) {
     uint32_t i;
 
     for (i = 0; i < byteCount; i++) {
-        tmem->bytes[((destination + i) ^ swap) & TMEM_ADDRESS_MASK] = source[i];
+        uint32_t address = ((destination + i) ^ swap) & TMEM_ADDRESS_MASK;
+
+        tmem->bytes[address] = source[i];
+        tmem->isHostOrderWord[address / TMEM_WORD_SIZE] = isHostOrder;
     }
 }
 
@@ -57,19 +62,25 @@ static void StoreSplitTexels(
     uint32_t destination,
     const uint8_t *source,
     uint32_t texelCount,
-    uint32_t swap
+    uint32_t swap,
+    bool isHostOrder
 ) {
+    // The order of the texel's bytes from red to alpha
+    uint32_t order = isHostOrder && SDL_BYTEORDER == SDL_LIL_ENDIAN ? 3 : 0;
     uint32_t i;
 
     for (i = 0; i < texelCount; i++) {
         uint32_t offset = destination + (i * 2);
         uint32_t low = (offset ^ swap) & TMEM_HALF_MASK;
         uint32_t high = low + TMEM_HALF_SIZE;
+        const uint8_t *texel = &source[i * 4];
 
-        tmem->bytes[low] = source[(i * 4) + 0];
-        tmem->bytes[low + 1] = source[(i * 4) + 1];
-        tmem->bytes[high] = source[(i * 4) + 2];
-        tmem->bytes[high + 1] = source[(i * 4) + 3];
+        tmem->bytes[low] = texel[0 ^ order];
+        tmem->bytes[low + 1] = texel[1 ^ order];
+        tmem->bytes[high] = texel[2 ^ order];
+        tmem->bytes[high + 1] = texel[3 ^ order];
+        tmem->isHostOrderWord[low / TMEM_WORD_SIZE] = false;
+        tmem->isHostOrderWord[high / TMEM_WORD_SIZE] = false;
     }
 }
 
@@ -118,7 +129,14 @@ void LoadTmemBlock(
             uint32_t swap = ((rowCounter >> DXT_FRACTION_BITS) & 1) ? ODD_ROW_SWAP : 0;
             uint32_t count = SDL_min(2u, texelCount - (word * 2));
 
-            StoreSplitTexels(tmem, destination + (word * 4), source + (word * 8), count, swap);
+            StoreSplitTexels(
+                tmem,
+                destination + (word * 4),
+                source + (word * 8),
+                count,
+                swap,
+                image->isHostOrder
+            );
             rowCounter += dxt;
         }
         return;
@@ -134,7 +152,8 @@ void LoadTmemBlock(
             destination + (word * TMEM_WORD_SIZE),
             source + (word * TMEM_WORD_SIZE),
             SDL_min((uint32_t)TMEM_WORD_SIZE, bytesLeft),
-            swap
+            swap,
+            image->isHostOrder
         );
         rowCounter += dxt;
     }
@@ -165,7 +184,7 @@ void LoadTmemTile(
         uint32_t swap = (row & 1) ? ODD_ROW_SWAP : 0;
 
         if (image->size == G_IM_SIZ_32b) {
-            StoreSplitTexels(tmem, destination, source, texelsPerRow, swap);
+            StoreSplitTexels(tmem, destination, source, texelsPerRow, swap, image->isHostOrder);
         }
         else {
             StoreLoadedBytes(
@@ -173,7 +192,8 @@ void LoadTmemTile(
                 destination,
                 source,
                 BytesForTexels(image->size, texelsPerRow),
-                swap
+                swap,
+                image->isHostOrder
             );
         }
     }
@@ -191,18 +211,25 @@ void LoadTmemPalette(
     RdpTile *tile = &tmem->tiles[tileIndex];
     const uint8_t *source = ImageTexelAddress(image, upperLeftS >> 2, upperLeftT >> 2);
     uint32_t entryCount = (lowerRightS >> 2) - (upperLeftS >> 2) + 1;
+    // Palettes are 16-bit entries, whose bytes a host word swaps
+    uint32_t order = image->isHostOrder && SDL_BYTEORDER == SDL_LIL_ENDIAN ? 1 : 0;
     uint32_t entry;
 
     SDL_assert(tileIndex >= 0 && tileIndex < RDP_TILE_COUNT && lowerRightS >= upperLeftS);
     SetTileCorners(tile, upperLeftS, upperLeftT, lowerRightS, lowerRightT);
     for (entry = 0; entry < entryCount; entry++) {
-        uint32_t destination = tile->tmemAddress + (entry * PALETTE_ENTRY_STRIDE);
+        uint32_t destination =
+            (tile->tmemAddress + (entry * PALETTE_ENTRY_STRIDE)) & TMEM_ADDRESS_MASK;
+        uint8_t high = source[(entry * 2) ^ order];
+        uint8_t low = source[((entry * 2) + 1) ^ order];
         uint32_t copy;
 
         for (copy = 0; copy < PALETTE_ENTRY_STRIDE; copy += 2) {
-            tmem->bytes[(destination + copy) & TMEM_ADDRESS_MASK] = source[entry * 2];
-            tmem->bytes[(destination + copy + 1) & TMEM_ADDRESS_MASK] = source[(entry * 2) + 1];
+            tmem->bytes[(destination + copy) & TMEM_ADDRESS_MASK] = high;
+            tmem->bytes[(destination + copy + 1) & TMEM_ADDRESS_MASK] = low;
         }
+
+        tmem->isHostOrderWord[destination / TMEM_WORD_SIZE] = false;
     }
 }
 
@@ -239,6 +266,12 @@ static uint64_t HashTmemRange(uint64_t hash, const Tmem *tmem, uint32_t start, u
         uint32_t chunk = SDL_min(size, (uint32_t)TMEM_SIZE - offset);
 
         hash = HashBytes(hash, &tmem->bytes[offset], chunk);
+        // The same bytes read as other texels in the other order
+        hash = HashBytes(
+            hash,
+            &tmem->isHostOrderWord[offset / TMEM_WORD_SIZE],
+            ((offset + chunk + TMEM_WORD_SIZE - 1) / TMEM_WORD_SIZE) - (offset / TMEM_WORD_SIZE)
+        );
         size -= chunk;
         offset = 0;
     }
@@ -332,8 +365,15 @@ static uint32_t ExpandIa16(uint16_t texel) {
 }
 
 static uint16_t ReadTmem16(const Tmem *tmem, uint32_t address) {
-    return (uint16_t)((tmem->bytes[address & TMEM_ADDRESS_MASK] << 8) |
-        tmem->bytes[(address + 1) & TMEM_ADDRESS_MASK]);
+    uint32_t first = address & TMEM_ADDRESS_MASK;
+    uint16_t texel =
+        (uint16_t)((tmem->bytes[first] << 8) | tmem->bytes[(address + 1) & TMEM_ADDRESS_MASK]);
+
+    if (tmem->isHostOrderWord[first / TMEM_WORD_SIZE] && SDL_BYTEORDER == SDL_LIL_ENDIAN) {
+        texel = SDL_Swap16(texel);
+    }
+
+    return texel;
 }
 
 static uint32_t LookUpPalette(const Tmem *tmem, uint32_t index, PaletteType paletteType) {

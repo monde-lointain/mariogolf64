@@ -125,6 +125,70 @@ static void TestColorIndexPalettes(void) {
     EXPECT(decoded[1] == RGBA8(0x11, 0x11, 0x11, 0x11));
 }
 
+// Host memory holds 16- and 32-bit texels and palette entries as host
+// words, but 8-bit texels as the N64 does, though the game loads both as
+// 16-bit blocks
+static void TestHostOrderLoads(void) {
+    uint16_t texels16[4] = {0xF801, 0x07C1, 0x003F, 0xFFFF};
+    uint8_t texels8[8] = {0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70};
+    uint16_t palette[16];
+    uint32_t texels32[2] = {0x11223344, 0x55667788};
+    TextureImage image16 = {(const uint8_t *)texels16, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, true};
+    TextureImage image8 = {texels8, G_IM_FMT_I, G_IM_SIZ_16b, 4, true};
+    TextureImage paletteImage = {(const uint8_t *)palette, G_IM_FMT_RGBA, G_IM_SIZ_16b, 16, true};
+    TextureImage image32 = {(const uint8_t *)texels32, G_IM_FMT_RGBA, G_IM_SIZ_32b, 2, true};
+    uint8_t indices[2] = {0x12, 0x3F};
+    TextureImage indexImage = {indices, G_IM_FMT_CI, G_IM_SIZ_16b, 1, true};
+    uint32_t decoded[8];
+    TileTexture texture;
+    int i;
+
+    for (i = 0; i < 16; i++) {
+        palette[i] = (uint16_t)((i << 1) | 1);
+    }
+
+    memset(&f_Tmem, 0, sizeof(f_Tmem));
+    SetTile(G_TX_LOADTILE, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0);
+    LoadTmemBlock(&f_Tmem, &image16, G_TX_LOADTILE, 0, 0, 3, 0);
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, 0);
+    SetTileSize(G_TX_RENDERTILE, 4, 1);
+    texture = DescribeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_NONE);
+    DecodeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_NONE, &texture, decoded);
+    for (i = 0; i < 4; i++) {
+        EXPECT(decoded[i] == ExpandRgba16(texels16[i]));
+    }
+
+    SetTile(G_TX_LOADTILE, G_IM_FMT_I, G_IM_SIZ_16b, 0, 0);
+    LoadTmemBlock(&f_Tmem, &image8, G_TX_LOADTILE, 0, 0, 3, 0);
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, 1, 0);
+    SetTileSize(G_TX_RENDERTILE, 8, 1);
+    texture = DescribeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_NONE);
+    DecodeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_NONE, &texture, decoded);
+    for (i = 0; i < 8; i++) {
+        EXPECT(decoded[i] == RGBA8(texels8[i], texels8[i], texels8[i], texels8[i]));
+    }
+
+    SetTile(G_TX_LOADTILE, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 256);
+    LoadTmemPalette(&f_Tmem, &paletteImage, G_TX_LOADTILE, 0, 0, 15 << 2, 0);
+    SetTile(G_TX_LOADTILE, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0);
+    LoadTmemBlock(&f_Tmem, &indexImage, G_TX_LOADTILE, 0, 0, 0, 0);
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0);
+    SetTileSize(G_TX_RENDERTILE, 4, 1);
+    texture = DescribeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16);
+    DecodeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16, &texture, decoded);
+    EXPECT(decoded[0] == ExpandRgba16(palette[1]) && decoded[1] == ExpandRgba16(palette[2]));
+    EXPECT(decoded[3] == ExpandRgba16(palette[15]));
+
+    SetTile(G_TX_LOADTILE, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0);
+    LoadTmemBlock(&f_Tmem, &image32, G_TX_LOADTILE, 0, 0, 1, 0);
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, 0);
+    SetTileSize(G_TX_RENDERTILE, 2, 1);
+    texture = DescribeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_NONE);
+    DecodeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_NONE, &texture, decoded);
+    EXPECT(decoded[0] == RGBA8(0x11, 0x22, 0x33, 0x44));
+    EXPECT(decoded[1] == RGBA8(0x55, 0x66, 0x77, 0x88));
+}
+
 static void DecodeOneRow(int format, int size, const uint8_t *bytes, int width, uint32_t *decoded) {
     TileTexture texture;
 
@@ -203,6 +267,7 @@ int main(void) {
     TestLoadTileRoundTrip();
     TestLoadBlockDxt();
     TestColorIndexPalettes();
+    TestHostOrderLoads();
     TestIntensityFormats();
     TestRgba16Expansion();
     TestTextureKeys();

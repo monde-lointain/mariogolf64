@@ -13,6 +13,7 @@
 #include "rcp.h"
 #include "rsp.h"
 #include "test_support.h"
+#include "tmem.h"
 
 #define IMAGE_WIDTH 64
 #define IMAGE_HEIGHT 32
@@ -38,6 +39,7 @@ static struct {
     GfxPass passes[CAPTURE_PASS_MAX];
     uint32_t passCount;
     uint32_t uploadCount;
+    uint32_t firstTexel; // The first texel of the frame's first upload
     int frameCount;
     int readCount;
     int writeCount;
@@ -78,6 +80,9 @@ void BackendExecuteFrame(const GfxFrame *frame) {
     f_Gpu.passCount = SDL_min(frame->passCount, CAPTURE_PASS_MAX);
     SDL_memcpy(f_Gpu.passes, frame->passes, f_Gpu.passCount * sizeof(GfxPass));
     f_Gpu.uploadCount = frame->uploadCount;
+    if (frame->uploadCount != 0) {
+        f_Gpu.firstTexel = frame->texels[frame->uploads[0].texelOffset];
+    }
     f_Gpu.frameCount++;
 }
 
@@ -329,9 +334,11 @@ static void TestTextureFromDrawnImage(void) {
     RunList(gfx);
 
     EXPECT(f_Gpu.readCount == 1);
-    // The red that the double read back, in the N64's order
-    EXPECT(SDL_Swap16BE(f_ColorImage[0]) == GPACK_RGBA5551(255, 0, 0, 1));
+    // The red that the double read back, as the game's CPU reads it
+    EXPECT(f_ColorImage[0] == GPACK_RGBA5551(255, 0, 0, 1));
     EXPECT(f_Gpu.uploadCount == 1);
+    // The texture reads the image's memory as the CPU wrote it
+    EXPECT(f_Gpu.firstTexel == ExpandRgba16(GPACK_RGBA5551(255, 0, 0, 1)));
     EXPECT(f_Gpu.vertexCount == 6);
     EXPECT(f_Gpu.draws[0].pipelineKey == PIPELINE_WRITE_ALPHA);
     EXPECT(f_Gpu.materials[0].tiles[0].size[0] == 8);

@@ -1081,6 +1081,8 @@ void RunRdpCommand(uint32_t w0, uintptr_t w1, const RcpMemory *memory) {
             f_Rdp.textureImage.format = (uint8_t)Field(w0, 21, 3);
             f_Rdp.textureImage.size = (uint8_t)Field(w0, 19, 2);
             f_Rdp.textureImage.width = (uint16_t)(Field(w0, 0, 12) + 1);
+            f_Rdp.textureImage.isHostOrder =
+                f_Rdp.textureImage.address != NULL && !osPcIsRomOrder(f_Rdp.textureImage.address);
             break;
         case G_SETCOMBINE:
             f_Rdp.combineHigh = w0 & 0xFFFFFF;

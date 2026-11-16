@@ -6,6 +6,7 @@
 
 #include <PR/gbi.h>
 #include <SDL3/SDL_assert.h>
+#include <SDL3/SDL_endian.h>
 #include <SDL3/SDL_mutex.h>
 #include <SDL3/SDL_stdinc.h>
 
@@ -78,6 +79,9 @@ static uint64_t HashImageMemory(const ColorImage *image) {
 
 // The memory's pixels as RGBA8, red lowest. RGBA16 keeps one bit of alpha,
 // its coverage bit.
+// The game's CPU code reads and writes its images as host words: a 16-bit
+// pixel is 5-5-5-1 from red, and a 32-bit one red to alpha from the top
+// byte. The renderer's pixels are RGBA8 bytes.
 static void ReadMemoryPixels(const ColorImage *image, uint32_t *rgba) {
     uint32_t count = (uint32_t)image->width * image->height;
     const uint8_t *bytes = image->address;
@@ -85,14 +89,18 @@ static void ReadMemoryPixels(const ColorImage *image, uint32_t *rgba) {
 
     if (image->bytesPerPixel == 2) {
         for (i = 0; i < count; i++) {
-            rgba[i] = ExpandRgba16((uint16_t)((bytes[i * 2] << 8) | bytes[(i * 2) + 1]));
+            uint16_t pixel;
+
+            SDL_memcpy(&pixel, &bytes[i * 2], sizeof(pixel));
+            rgba[i] = ExpandRgba16(pixel);
         }
     }
     else {
         for (i = 0; i < count; i++) {
-            const uint8_t *pixel = &bytes[i * 4];
+            uint32_t pixel;
 
-            rgba[i] = pixel[0] | (pixel[1] << 8) | (pixel[2] << 16) | ((uint32_t)pixel[3] << 24);
+            SDL_memcpy(&pixel, &bytes[i * 4], sizeof(pixel));
+            rgba[i] = SDL_Swap32(pixel);
         }
     }
 }
@@ -104,22 +112,18 @@ static void WriteMemoryPixels(ColorImage *image, const uint32_t *rgba) {
 
     if (image->bytesPerPixel == 2) {
         for (i = 0; i < count; i++) {
-            uint32_t pixel = rgba[i];
-            uint32_t texel = ((pixel & 0xF8) << 8) | ((pixel & 0xF800) >> 5) |
-                ((pixel & 0xF80000) >> 18) | ((pixel >> 31) & 1);
+            uint32_t color = rgba[i];
+            uint16_t pixel = (uint16_t)(((color & 0xF8) << 8) | ((color & 0xF800) >> 5) |
+                ((color & 0xF80000) >> 18) | ((color >> 31) & 1));
 
-            bytes[i * 2] = (uint8_t)(texel >> 8);
-            bytes[(i * 2) + 1] = (uint8_t)texel;
+            SDL_memcpy(&bytes[i * 2], &pixel, sizeof(pixel));
         }
     }
     else {
         for (i = 0; i < count; i++) {
-            uint32_t pixel = rgba[i];
+            uint32_t pixel = SDL_Swap32(rgba[i]);
 
-            bytes[i * 4] = (uint8_t)pixel;
-            bytes[(i * 4) + 1] = (uint8_t)(pixel >> 8);
-            bytes[(i * 4) + 2] = (uint8_t)(pixel >> 16);
-            bytes[(i * 4) + 3] = (uint8_t)(pixel >> 24);
+            SDL_memcpy(&bytes[i * 4], &pixel, sizeof(pixel));
         }
     }
 }
