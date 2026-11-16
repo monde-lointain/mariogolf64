@@ -492,17 +492,35 @@ static bool DoSelectorsRead(uint32_t selectors, uint8_t input, uint8_t inputAlph
     return false;
 }
 
-static bool DoesCombinerRead(const GfxMaterial *material, uint8_t input, uint8_t inputAlpha) {
-    int firstWord = (material->modes & MATERIAL_TWO_CYCLE) ? 0 : 2;
-    int i;
+// Whether a cycle of the combiner reads an input, in its color or alpha
+static bool DoesCycleRead(
+    const GfxMaterial *material,
+    int cycle,
+    uint8_t input,
+    uint8_t inputAlpha
+) {
+    return DoSelectorsRead(material->combine[cycle * 2], input, inputAlpha) ||
+        DoSelectorsRead(material->combine[(cycle * 2) + 1], input, inputAlpha);
+}
 
-    for (i = firstWord; i < 4; i++) {
-        if (DoSelectorsRead(material->combine[i], input, inputAlpha)) {
-            return true;
-        }
+// Whether the combiner reads the texel of the tile that TEXEL0 names, or of
+// the next tile. The RDP hands each cycle's texel on down its pipeline, so
+// two cycles' second cycle reads the next tile's texel as TEXEL0 and the
+// first tile's as TEXEL1. One cycle reads only the first tile.
+static void FindReadTiles(const GfxMaterial *material, bool readsTile[2]) {
+    bool readsTexel0 = DoesCycleRead(material, 1, COMBINER_TEXEL0, COMBINER_TEXEL0_ALPHA);
+    bool readsTexel1 = DoesCycleRead(material, 1, COMBINER_TEXEL1, COMBINER_TEXEL1_ALPHA);
+
+    if ((material->modes & MATERIAL_TWO_CYCLE) == 0) {
+        readsTile[0] = readsTexel0 || readsTexel1;
+        readsTile[1] = false;
+        return;
     }
 
-    return false;
+    readsTile[0] =
+        DoesCycleRead(material, 0, COMBINER_TEXEL0, COMBINER_TEXEL0_ALPHA) || readsTexel1;
+    readsTile[1] =
+        DoesCycleRead(material, 0, COMBINER_TEXEL1, COMBINER_TEXEL1_ALPHA) || readsTexel0;
 }
 
 // An RDP color, red in the top byte, as the shader's floats
@@ -654,6 +672,7 @@ static void BuildMaterial(int tileIndex, MaterialKind kind) {
     GfxMaterial *material = &f_Rdp.material;
     uint32_t low = f_Rdp.otherModeLow;
     uint32_t high = f_Rdp.otherModeHigh;
+    bool readsTile[2];
 
     SDL_zerop(material);
     if (kind == MATERIAL_KIND_COMBINED) {
@@ -697,11 +716,12 @@ static void BuildMaterial(int tileIndex, MaterialKind kind) {
     UnpackColor(f_Rdp.blendColor, material->blendColor);
     material->primitiveLodFraction = (float)f_Rdp.primitiveLodFraction / 255.0f;
 
-    if (DoesCombinerRead(material, COMBINER_TEXEL0, COMBINER_TEXEL0_ALPHA)) {
+    FindReadTiles(material, readsTile);
+    if (readsTile[0]) {
         material->tiles[0] = *UseSampler(tileIndex);
     }
 
-    if (DoesCombinerRead(material, COMBINER_TEXEL1, COMBINER_TEXEL1_ALPHA)) {
+    if (readsTile[1]) {
         material->tiles[1] = *UseSampler((tileIndex + 1) & (RDP_TILE_COUNT - 1));
     }
 }

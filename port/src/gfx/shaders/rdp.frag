@@ -268,9 +268,15 @@ void main() {
     inputs.primitiveLodFraction = material.primitiveLodFraction;
     inputs.noise = Noise();
 
-    // One-cycle mode runs the second cycle's settings alone
+    // One-cycle mode runs the second cycle's settings alone. In two, the
+    // texels move down the pipeline between the cycles, so the second
+    // cycle's TEXEL0 is the first's TEXEL1 and the reverse.
     if (isTwoCycle) {
+        vec4 firstTexel = inputs.texel0;
+
         inputs.combined = CombineCycle(material.combine.x, material.combine.y, inputs);
+        inputs.texel0 = inputs.texel1;
+        inputs.texel1 = firstTexel;
     }
 
     vec4 combined = CombineCycle(material.combine.z, material.combine.w, inputs);

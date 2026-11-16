@@ -213,6 +213,91 @@ static void TestTriangleTransform(void) {
     EXPECT(f_Gpu.vertexCount == 0);
 }
 
+// Loads a 4-texel square for tile 0 and an 8-texel one for tile 1, so a
+// material's samplers tell which tile each read
+static Gfx *LoadTwoTiles(Gfx *gfx) {
+    static u16 texels[8 * 8] __attribute__((aligned(8)));
+
+    gDPLoadTextureBlock(
+        gfx++,
+        texels,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        4,
+        4,
+        0,
+        G_TX_CLAMP,
+        G_TX_CLAMP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gDPLoadMultiBlock(
+        gfx++,
+        texels,
+        0x100,
+        1,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        8,
+        8,
+        0,
+        G_TX_CLAMP,
+        G_TX_CLAMP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    return gfx;
+}
+
+static Gfx *DrawTriangle(Gfx *gfx) {
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gDPPipeSync(gfx++);
+    return gfx;
+}
+
+// The texels move down the RDP's pipeline between two cycles, so the second
+// cycle's TEXEL0 reads the next tile and its TEXEL1 the first. One cycle
+// reads the first tile for either.
+static void TestTexelsOfEachCycle(void) {
+    Gfx *gfx = BeginTriangles(f_DisplayList, G_SHADE | G_SHADING_SMOOTH);
+
+    ResetCapture();
+    gfx = LoadTwoTiles(gfx);
+    gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPSetRenderMode(gfx++, G_RM_PASS, G_RM_OPA_SURF2);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, SHADE, 0, 0, 0, 1, 0, 0, 0, TEXEL0, 0, 0, 0, 1);
+    gfx = DrawTriangle(gfx);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, SHADE, 0, 0, 0, 1, 0, 0, 0, TEXEL1, 0, 0, 0, 1);
+    gfx = DrawTriangle(gfx);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL1, 0, 0, 0, 1, 0, 0, 0, COMBINED, 0, 0, 0, 1);
+    gfx = DrawTriangle(gfx);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL1, 0, 0, 0, 1, 0, 0, 0, TEXEL1, 0, 0, 0, 1);
+    gfx = DrawTriangle(gfx);
+    RunList(gfx);
+
+    EXPECT(f_Gpu.materialCount == 4);
+    // The second cycle's TEXEL0 is the next tile's texel
+    EXPECT(f_Gpu.materials[0].tiles[0].size[0] == 0);
+    EXPECT(f_Gpu.materials[0].tiles[1].size[0] == 8);
+    // Its TEXEL1 is the first tile's
+    EXPECT(f_Gpu.materials[1].tiles[0].size[0] == 4);
+    EXPECT(f_Gpu.materials[1].tiles[1].size[0] == 0);
+    // The first cycle reads them as named
+    EXPECT(f_Gpu.materials[2].tiles[0].size[0] == 0);
+    EXPECT(f_Gpu.materials[2].tiles[1].size[0] == 8);
+    // One cycle has one tile's texel
+    EXPECT(f_Gpu.materials[3].tiles[0].size[0] == 4);
+    EXPECT(f_Gpu.materials[3].tiles[1].size[0] == 0);
+}
+
 // A threshold compare reads the blend color's alpha; a dithered one
 // compares with a random threshold instead
 static void TestAlphaCompareModes(void) {
@@ -443,6 +528,7 @@ int main(void) {
     InitRsp();
     TestFillRectangle();
     TestTriangleTransform();
+    TestTexelsOfEachCycle();
     TestAlphaCompareModes();
     TestDepthClear();
     TestRomOrderList();

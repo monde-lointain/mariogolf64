@@ -262,6 +262,68 @@ static void TestDepth(void) {
     EXPECT_PIXEL(IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2, 0, 0, 255);
 }
 
+// Fills a texture of 4 by 4 texels with one color
+static void FillTexture(u16 *texels, u16 color) {
+    int i;
+
+    for (i = 0; i < 4 * 4; i++) {
+        texels[i] = color;
+    }
+}
+
+// In two cycles the second cycle's TEXEL0 is the texel of the tile after
+// the one that the first cycle's TEXEL0 reads
+static void TestSecondCycleTexel(void) {
+    static u16 red[4 * 4] __attribute__((aligned(8)));
+    static u16 blue[4 * 4] __attribute__((aligned(8)));
+    Gfx *gfx = BeginList(f_DisplayList);
+
+    FillTexture(red, GPACK_RGBA5551(255, 0, 0, 1));
+    FillTexture(blue, GPACK_RGBA5551(0, 0, 255, 1));
+    gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 0, 1));
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPLoadTextureBlock(
+        gfx++,
+        red,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        4,
+        4,
+        0,
+        G_TX_CLAMP,
+        G_TX_CLAMP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gDPLoadMultiBlock(
+        gfx++,
+        blue,
+        0x100,
+        1,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        4,
+        4,
+        0,
+        G_TX_CLAMP,
+        G_TX_CLAMP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPSetRenderMode(gfx++, G_RM_PASS, G_RM_OPA_SURF2);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, 1, 0, 0, 0, TEXEL0, 0, 0, 0, 1);
+    gSPTextureRectangle(gfx++, 0, 0, 4 << 2, 4 << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    RunList(gfx);
+
+    EXPECT_PIXEL(1, 1, 0, 0, 255);
+}
+
 static SDL_GPUDevice *CreateDevice(void) {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         // A machine with no display can still have a GPU
@@ -292,6 +354,7 @@ int main(void) {
     TestCopiedTexture();
     TestTranslucentBlend();
     TestDepth();
+    TestSecondCycleTexel();
     ShutdownRdp();
     ShutdownGpuBackend();
     SDL_DestroyGPUDevice(device);
