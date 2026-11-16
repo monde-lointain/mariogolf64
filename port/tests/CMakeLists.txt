@@ -72,6 +72,12 @@ mg64_add_port_test(debug_text_test
     LIBRARIES mg64_game_options mg64_ultra SDL3::SDL3
 )
 
+# The message file as the CPU reads it
+mg64_add_port_test(text_test
+    SOURCES text_test.c "${PROJECT_SOURCE_DIR}/src/text/text.c"
+    LIBRARIES mg64_game_options mg64_ultra SDL3::SDL3
+)
+
 # Built through a Shift-JIS copy, as the game's sources are
 include(ShiftJisSources)
 mg64_encode_shift_jis(shift_jis_test_copy "${CMAKE_CURRENT_SOURCE_DIR}/shift_jis_test.c")

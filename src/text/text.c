@@ -17,6 +17,7 @@
 #include "screen/screen_layers.h"
 #include "shot/current_shot.h"
 #include "system/asset.h"
+#include "system/big_endian.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/heap.h"
@@ -280,6 +281,9 @@ void LoadTextAssets(void) {
     FreeMemory(&header);
     f_Messages = AllocMemory(size);
     nuPiReadRom((u32)AddressNumber(g_MessageFileRomStart), f_Messages, size);
+    // The CPU reads the file's halfwords as numbers
+    ConvertHalvesFromBigEndian(f_Messages, size);
+    MarkHostOrder(f_Messages, size);
 
     // The halfwords of the table's header and its entries come first
     f_MessageCodesStart = (f_Messages->messageCount * 2) + 2;
