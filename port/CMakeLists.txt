@@ -137,4 +137,17 @@ add_library(mg64_port_internal INTERFACE)
 target_include_directories(mg64_port_internal INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/src/include")
 target_link_libraries(mg64_port_internal INTERFACE mg64_headers)
 
+# The warnings that the port's own code is held to
+add_library(mg64_port_warnings INTERFACE)
+target_compile_options(mg64_port_warnings INTERFACE
+    -Wall
+    -Wextra
+    -Wno-unused-parameter
+    -Wno-missing-field-initializers
+)
+
 add_subdirectory(src)
+
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()

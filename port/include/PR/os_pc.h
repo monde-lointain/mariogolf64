@@ -61,8 +61,16 @@ void *osPcTranslate(u32 virtualAddress);
 void osPcResetSegment(u32 segmentNumber);
 
 /* Blocks the calling thread until the next interrupt, for a thread that
-   would otherwise spin until another changes something */
+   would otherwise spin until an interrupt or another thread changes
+   something */
 void osPcWaitForInterrupt(void);
+
+/* Set when an interrupt has made a thread of higher priority than the
+   running one runnable. The running thread gives up the CPU at its next
+   libultra call, or at a long loop's osPcReachPreemptionPoint. */
+extern volatile int osPcPreemptPending;
+void osPcPreempt(void);
+#define osPcReachPreemptionPoint() (osPcPreemptPending ? osPcPreempt() : (void)0)
 
 #ifdef __cplusplus
 }
