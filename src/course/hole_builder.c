@@ -27,6 +27,7 @@
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "system/asset.h"
+#include "system/big_endian.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/host_file.h"
@@ -2811,6 +2812,14 @@ void BuildHole(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
             }
 
             ReadAssetFile(&g_HoleSetup, GetAssetFileSize(&asset), &asset);
+            ConvertWordsFromBigEndian(g_HoleSetup.cupPosition, sizeof(CoursePoint));
+            ConvertWordsFromBigEndian(g_HoleSetup.teePosition, sizeof(CoursePoint));
+            ConvertFromBigEndian32(g_HoleSetup.conditions.windSpeed);
+            ConvertFromBigEndian16(g_HoleSetup.conditions.windDirection);
+            ConvertFromBigEndian32(g_HoleSetup.conditions.isRaining);
+            ConvertFromBigEndian32(g_HoleSetup.conditions.sceneColorIndex);
+            ConvertFromBigEndian16(g_HoleSetup.conditions.lightYaw);
+            ConvertFromBigEndian16(g_HoleSetup.conditions.lightPitch);
         }
 
         if (g_GameState.gameMode == GAME_MODE_TITLE_HOLE) {
@@ -2822,6 +2831,7 @@ void BuildHole(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
 
         pointsSize = GetAssetFileSize(&asset);
         ReadAssetFile(&g_HolePoints, pointsSize, &asset);
+        ConvertWordsFromBigEndian(&g_HolePoints, pointsSize);
         osSyncPrintf("%d\n", pointsSize);
         FinishHolePoints(courseRecordIndex, holeIndex);
         OpenHoleAsset(courseRecordIndex, holeIndex, HOLE_ASSET_TRIANGLES);
@@ -2988,6 +2998,9 @@ void ResetBuildBuffer(void);
 
 // Clears everything a hole is built into
 void ClearHoleBuild(void) {
+    // The work area held other scenes' data, some read from ROM; the hole's
+    // texels, vertices and display lists are built here in the host's order
+    MarkHostOrder(&g_WorkArea, sizeof(g_WorkArea));
     ClearHolePoints();
     ClearTileBorders();
     InitTerrainTextures();
@@ -3196,6 +3209,7 @@ void ReadAttributeRuns(void) {
     bufferEnd = (u16 *)(f_BuildCursor + ATTRIBUTE_BUFFER_SIZE);
     while (TRUE) {
         ReadFileBytes(&runLength, sizeof(runLength));
+        ConvertFromBigEndian16(runLength);
         if (runLength == 0) {
             break;
         }
@@ -3244,6 +3258,11 @@ void ReadBillboards(void) {
         g_Billboards[billboardIndex].isNearCourseEdge = FALSE;
         ReadFileBytes(&g_Billboards[billboardIndex].width, sizeof(u16));
         ReadFileBytes(&g_Billboards[billboardIndex].height, sizeof(u16));
+        ConvertFromBigEndian16(g_Billboards[billboardIndex].x);
+        ConvertFromBigEndian16(g_Billboards[billboardIndex].y);
+        ConvertFromBigEndian16(g_Billboards[billboardIndex].z);
+        ConvertFromBigEndian16(g_Billboards[billboardIndex].width);
+        ConvertFromBigEndian16(g_Billboards[billboardIndex].height);
     }
 }
 
@@ -3271,6 +3290,9 @@ void ReadHoleTriangles(void) {
         ReadFileBytes(triangle->vertices[0].v.ob, sizeof(s16) * AXIS_COUNT);
         ReadFileBytes(triangle->vertices[1].v.ob, sizeof(s16) * AXIS_COUNT);
         ReadFileBytes(triangle->vertices[2].v.ob, sizeof(s16) * AXIS_COUNT);
+        ConvertHalvesFromBigEndian(triangle->vertices[0].v.ob, sizeof(s16) * AXIS_COUNT);
+        ConvertHalvesFromBigEndian(triangle->vertices[1].v.ob, sizeof(s16) * AXIS_COUNT);
+        ConvertHalvesFromBigEndian(triangle->vertices[2].v.ob, sizeof(s16) * AXIS_COUNT);
     }
 }
 
@@ -3280,6 +3302,7 @@ void ReadTileMirroredCells(void) {
 
     for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
         ReadFileBytes(&g_WorkArea.hole.tiles[tileIndex].mirroredCells, sizeof(u16));
+        ConvertFromBigEndian16(g_WorkArea.hole.tiles[tileIndex].mirroredCells);
     }
 }
 
@@ -3374,18 +3397,22 @@ void ReadVertexX(s16 *coordinate, s32 vertexFlags) {
     switch (vertexFlags & VERTEX_FLAG_X_ENCODING) {
         case VERTEX_ENCODING_BYTE:
             ReadFileBytes(coordinate, 1);
+            ConvertFromBigEndian16(*coordinate);
             *coordinate = (u16)*coordinate >> BITS_PER_BYTE;
             break;
         case VERTEX_ENCODING_FINE_BYTE:
             ReadFileBytes(coordinate, 1);
+            ConvertFromBigEndian16(*coordinate);
             *coordinate = ((u16)*coordinate >> BITS_PER_BYTE) << VERTEX_FINE_HORIZONTAL_SHIFT;
             break;
         case VERTEX_ENCODING_COARSE_BYTE:
             ReadFileBytes(coordinate, 1);
+            ConvertFromBigEndian16(*coordinate);
             *coordinate = ((u16)*coordinate >> BITS_PER_BYTE) << VERTEX_COARSE_HORIZONTAL_SHIFT;
             break;
         case VERTEX_ENCODING_TWO_BYTES:
             ReadFileBytes(coordinate, 2);
+            ConvertFromBigEndian16(*coordinate);
             break;
     }
 }
@@ -3400,18 +3427,22 @@ void ReadVertexY(s16 *coordinate, s32 vertexFlags) {
     switch ((u8)(vertexFlags & VERTEX_FLAG_Y_ENCODING) >> VERTEX_FLAG_Y_ENCODING_SHIFT) {
         case VERTEX_ENCODING_BYTE:
             ReadFileBytes(coordinate, 1);
+            ConvertFromBigEndian16(*coordinate);
             *coordinate = (u16)*coordinate >> BITS_PER_BYTE;
             break;
         case VERTEX_ENCODING_FINE_BYTE:
             ReadFileBytes(coordinate, 1);
+            ConvertFromBigEndian16(*coordinate);
             *coordinate = ((u16)*coordinate >> BITS_PER_BYTE) << VERTEX_FINE_HEIGHT_SHIFT;
             break;
         case VERTEX_ENCODING_COARSE_BYTE:
             ReadFileBytes(coordinate, 1);
+            ConvertFromBigEndian16(*coordinate);
             *coordinate = ((u16)*coordinate >> BITS_PER_BYTE) << VERTEX_COARSE_HEIGHT_SHIFT;
             break;
         case VERTEX_ENCODING_TWO_BYTES:
             ReadFileBytes(coordinate, 2);
+            ConvertFromBigEndian16(*coordinate);
             break;
     }
 }
@@ -3426,18 +3457,22 @@ void ReadVertexZ(s16 *coordinate, s32 vertexFlags) {
     switch ((u8)(vertexFlags & VERTEX_FLAG_Z_ENCODING) >> VERTEX_FLAG_Z_ENCODING_SHIFT) {
         case VERTEX_ENCODING_BYTE:
             ReadFileBytes(coordinate, 1);
+            ConvertFromBigEndian16(*coordinate);
             *coordinate = (u16)*coordinate >> BITS_PER_BYTE;
             break;
         case VERTEX_ENCODING_FINE_BYTE:
             ReadFileBytes(coordinate, 1);
+            ConvertFromBigEndian16(*coordinate);
             *coordinate = ((u16)*coordinate >> BITS_PER_BYTE) << VERTEX_FINE_HORIZONTAL_SHIFT;
             break;
         case VERTEX_ENCODING_COARSE_BYTE:
             ReadFileBytes(coordinate, 1);
+            ConvertFromBigEndian16(*coordinate);
             *coordinate = ((u16)*coordinate >> BITS_PER_BYTE) << VERTEX_COARSE_HORIZONTAL_SHIFT;
             break;
         case VERTEX_ENCODING_TWO_BYTES:
             ReadFileBytes(coordinate, 2);
+            ConvertFromBigEndian16(*coordinate);
             break;
     }
 }

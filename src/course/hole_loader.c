@@ -32,6 +32,7 @@
 #include "save/play_record.h"
 #include "shot/ball_simulation.h"
 #include "shot/current_shot.h"
+#include "system/big_endian.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/main.h"
@@ -205,7 +206,7 @@ s32 DecodeLzChunk(LzStream *stream) {
             }
         }
 
-        controlBits = *input++;
+        controlBits = FromBigEndian16(*input++);
         if (controlBits == 0) {
             evenWord = input[0];
             oddWord = input[1];
@@ -257,7 +258,7 @@ s32 DecodeLzChunk(LzStream *stream) {
                 break;
             }
 
-            reference = *input++;
+            reference = FromBigEndian16(*input++);
             if (reference == 0) {
                 return BytesBetween(stream->outputStart, output);
             }
@@ -371,7 +372,7 @@ s32 DecodePatchedLzChunk(LzStream *stream) {
             }
         }
 
-        controlBits = *input++;
+        controlBits = FromBigEndian16(*input++);
         controlBits <<= LZ_CONTROL_BIT_COUNT;
         controlBits |= LZ_CONTROL_END_BIT;
 
@@ -382,7 +383,7 @@ DECODE:
                 window[windowIndex++] = word;
                 windowIndex &= LZ_WINDOW_MASK;
                 if (patchCount == 0) {
-                    ApplyPatchCommand(word);
+                    ApplyPatchCommand(FromBigEndian16(word));
                 }
                 else {
                     history[historyIndex++] = *output;
@@ -399,7 +400,7 @@ DECODE:
                 break;
             }
 
-            reference = *input++;
+            reference = FromBigEndian16(*input++);
 
             // The u16 casts are redundant, but they are needed to match: without
             // either or both, 5 words differ (1 to 3 in shape); with no casts, a
@@ -417,7 +418,7 @@ DECODE:
                 word = window[(index - reference) & LZ_WINDOW_MASK];
                 window[index] = word;
                 if (patchCount == 0) {
-                    ApplyPatchCommand(word);
+                    ApplyPatchCommand(FromBigEndian16(word));
                 }
                 else {
                     history[historyIndex++] = *output;
