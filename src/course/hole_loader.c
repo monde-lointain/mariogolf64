@@ -523,6 +523,8 @@ s32 LoadLzData(u32 romAddress, void *destination, u32 size) {
     }
 
     osWritebackDCache(destination, decodedSize);
+    // What it unpacked is the ROM's data, in the ROM's order
+    MarkRomOrder(destination, decodedSize);
     return decodedSize;
 }
 
@@ -614,6 +616,8 @@ s32 LoadPatchedLzData(u32 romAddress, void *destination, u32 size) {
     }
 
     osWritebackDCache(destination, decodedSize);
+    // What it unpacked is the ROM's data, in the ROM's order
+    MarkRomOrder(destination, decodedSize);
     return decodedSize;
 }
 

@@ -13,7 +13,8 @@
  *
  * The port's renderer reads memory that the cartridge filled in the ROM's
  * order. MarkHostOrder tells it that code has written values of its own
- * over such memory, or converted them in place.
+ * over such memory, or converted them in place, and MarkRomOrder that code
+ * has copied or unpacked the ROM's data into memory.
  */
 
 #ifndef BIG_ENDIAN_H
@@ -56,8 +57,10 @@ static inline void ConvertWordsFromBigEndian(void *start, u32 size) {
 
 #ifdef TARGET_PC
 #    define MarkHostOrder(start, size) osPcUnmarkRomOrder((start), (size))
+#    define MarkRomOrder(start, size) osPcMarkRomOrder((start), (size))
 #else
 #    define MarkHostOrder(start, size) ((void)0)
+#    define MarkRomOrder(start, size) ((void)0)
 #endif
 
 #endif
