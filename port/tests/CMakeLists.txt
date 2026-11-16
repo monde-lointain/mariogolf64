@@ -52,3 +52,8 @@ mg64_add_port_test(tmem_test
     SOURCES tmem_test.c
     LIBRARIES mg64_gfx
 )
+
+mg64_add_port_test(texture_cache_test
+    SOURCES texture_cache_test.c
+    LIBRARIES mg64_gfx SDL3::SDL3
+)

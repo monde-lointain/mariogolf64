@@ -3,6 +3,7 @@
 
 add_library(mg64_gfx STATIC
     frame.c
+    texture_cache.c
     tmem.c
 )
 target_include_directories(mg64_gfx PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
