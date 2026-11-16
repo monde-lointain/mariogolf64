@@ -2,6 +2,7 @@
 # commands, and the SDL_GPU backend that draws what it records.
 
 add_library(mg64_gfx STATIC
+    color_images.c
     frame.c
     texture_cache.c
     tmem.c
