@@ -133,8 +133,7 @@ u32 g_GroundDrawFrame;
 CurrentShot g_SavedShots[PLAYER_COUNT_MAX];
 Player g_SavedPlayers[PLAYER_COUNT_MAX];
 ShotLaunch g_LastShotLaunch;
-// DrawGround's included assembly names it, as splat calls g_WorkArea's
-// address less a row of tiles after the nearest symbol
+// Nothing reads it; it keeps its room in the original's bss
 FILE_STATIC u8 f_UnreadPlayBuffer[0xDEC] UNUSED;
 
 FILE_STATIC UBoolean8 f_IsGroundTileNearby[GROUND_TILE_COUNT];

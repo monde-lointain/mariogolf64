@@ -12,12 +12,13 @@
 #   Display list macros      gbi style     gSPStretchedTextureRectangle
 #   Enum constants           UPPER_CASE
 #
-# Placeholders keep the address that splat gave them (func_80400FBC,
+# Placeholders keep the original's address (func_80400FBC,
 # D_8040C5B8_hole_editor) until their meaning is known. File-local
 # data keeps the f_ prefix even where it isn't static. Names from the
 # SDK and the C library (nu*, os*, n_*, _*, mainproc, rand, fabsf, errno,
-# diskrom_handle, gReverbFx) are fixed by those libraries, and
-# lib/libkmc is the C library itself.
+# diskrom_handle, gReverbFx) are fixed by those libraries, as are the
+# locals that libultra's display list macros declare (_g), and lib/libkmc
+# is the C library itself.
 #
 # Macros are fully parenthesized, so a macro's body or argument can't
 # combine with the operators around it.
@@ -30,6 +31,7 @@ CheckOptions:
   readability-identifier-naming.GlobalVariablePrefix: 'g_'
   readability-identifier-naming.GlobalVariableIgnoredRegexp: '^(f_[A-Z][A-Za-z0-9]*|D_[0-9A-F]{8}(_[A-Za-z0-9]+)*|_.*|nu[A-Z][A-Za-z0-9_]*|n_[A-Za-z0-9_]+|os[A-Z][A-Za-z0-9]*|errno|diskrom_handle|gReverbFx)$'
   readability-identifier-naming.VariableCase: camelBack
+  readability-identifier-naming.VariableIgnoredRegexp: '^_g$'
   readability-identifier-naming.ParameterCase: camelBack
   readability-identifier-naming.MemberCase: camelBack
   readability-identifier-naming.StructCase: CamelCase
