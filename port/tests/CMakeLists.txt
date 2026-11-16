@@ -84,6 +84,13 @@ mg64_add_port_test(performance_meter_test
     LIBRARIES mg64_game_options mg64_ultra SDL3::SDL3
 )
 
+# The move of the game's nested functions to file scope, whose output it
+# compiles and runs with the build's C compiler
+add_test(NAME nested_functions_test
+    COMMAND Python3::Interpreter -I "${CMAKE_CURRENT_SOURCE_DIR}/nested_functions_test.py"
+        --compiler "${CMAKE_C_COMPILER}"
+)
+
 # Built through a Shift-JIS copy, as the game's sources are
 include(ShiftJisSources)
 mg64_encode_shift_jis(shift_jis_test_copy "${CMAKE_CURRENT_SOURCE_DIR}/shift_jis_test.c")

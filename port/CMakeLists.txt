@@ -11,22 +11,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(GameSources)
 include(Dependencies)
 
-# The game's code relies on GNU C's nested functions
-include(CheckSourceCompiles)
-check_source_compiles(C [=[
-    int Outer(int x) {
-        int Inner(void) { return x + 1; }
-        return Inner();
-    }
-    int main(void) { return Outer(0) - 1; }
-]=] MG64_HAS_NESTED_FUNCTIONS)
-if(NOT MG64_HAS_NESTED_FUNCTIONS)
-    message(FATAL_ERROR
-        "The game's code defines functions inside functions, a GNU C extension "
-        "that ${CMAKE_C_COMPILER_ID} doesn't support. Configure with GCC, such "
-        "as -DCMAKE_C_COMPILER=gcc, or MinGW-w64's GCC for Windows.")
-endif()
-
 set(MG64_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 add_custom_command(
