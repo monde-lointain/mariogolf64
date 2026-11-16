@@ -21,6 +21,10 @@ typedef struct ColorImage ColorImage;
 
 void InitColorImages(void);
 
+// Destroys every image's target, without writing back what memory lacks,
+// before the GPU goes away
+void ReleaseColorImages(void);
+
 // The image that the RDP draws into at address, of the G_IM_SIZ_* size,
 // at least height rows tall: found, made, or grown. What the CPU has
 // written to its memory since the GPU last agreed with it is uploaded

@@ -47,6 +47,9 @@ typedef struct RcpMemory {
 const void *ResolveRcpAddress(const RcpMemory *memory, uintptr_t address);
 
 void InitRdp(void);
+// Sends what the frame holds and releases the GPU's targets, before the
+// backend shuts down
+void ShutdownRdp(void);
 void ResetRdpForTask(void);
 
 // Runs one RDP command, other than the texture rectangles, which need the

@@ -107,6 +107,12 @@ void InitRdp(void) {
     f_Rdp.isMaterialDirty = true;
 }
 
+void ShutdownRdp(void) {
+    FlushRdpFrame();
+    ReleaseColorImages();
+    f_Rdp.colorImage = NULL;
+}
+
 void ResetRdpForTask(void) {
     // A task starts with no color image of its own, but the RDP's other
     // state carries over from the last, as on the N64

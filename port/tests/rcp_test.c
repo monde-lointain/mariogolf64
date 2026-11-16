@@ -22,6 +22,9 @@
 #define CAPTURE_PASS_MAX 8
 #define READ_BACK_COLOR 0xFF0000FFu // Opaque red
 
+// The targets that the double has created and not destroyed
+static int f_LiveTargetCount;
+
 struct GfxTarget {
     uint32_t width;
     uint32_t height;
@@ -56,10 +59,15 @@ GfxTarget *BackendCreateTarget(uint32_t width, uint32_t height, bool isDepth) {
     target->width = width;
     target->height = height;
     target->isDepth = isDepth;
+    f_LiveTargetCount++;
     return target;
 }
 
 void BackendDestroyTarget(GfxTarget *target) {
+    if (target != NULL) {
+        f_LiveTargetCount--;
+    }
+
     SDL_free(target);
 }
 
@@ -383,6 +391,22 @@ static void TestShownTarget(void) {
     UnlockShownTarget();
 }
 
+// Shutting down releases every target, and drawing after it makes new ones
+static void TestShutdownReleasesTargets(void) {
+    Gfx *gfx;
+
+    EXPECT(f_LiveTargetCount != 0);
+    ShutdownRdp();
+    EXPECT(f_LiveTargetCount == 0);
+
+    gfx = BeginList(f_DisplayList);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetFillColor(gfx++, 0);
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    RunList(gfx);
+    EXPECT(f_LiveTargetCount == 1);
+}
+
 int main(void) {
     MakeIdentity(&f_Identity);
     InitRdp();
@@ -394,5 +418,6 @@ int main(void) {
     TestRomOrderList();
     TestTextureFromDrawnImage();
     TestShownTarget();
+    TestShutdownReleasesTargets();
     return ReportTestResults("rcp_test");
 }

@@ -55,6 +55,23 @@ void InitColorImages(void) {
     }
 }
 
+void ReleaseColorImages(void) {
+    int i;
+
+    SDL_LockMutex(f_Lock);
+    for (i = 0; i < COLOR_IMAGE_COUNT_MAX; i++) {
+        BackendDestroyTarget(f_ColorImages[i].target);
+    }
+
+    for (i = 0; i < DEPTH_IMAGE_COUNT_MAX; i++) {
+        BackendDestroyTarget(f_DepthImages[i].target);
+    }
+
+    SDL_zeroa(f_ColorImages);
+    SDL_zeroa(f_DepthImages);
+    SDL_UnlockMutex(f_Lock);
+}
+
 static uint32_t *PixelBuffer(uint32_t count) {
     if (count > f_PixelCapacity) {
         SDL_free(f_Pixels);
