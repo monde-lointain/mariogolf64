@@ -60,6 +60,12 @@ mg64_add_port_test(character_tables_test
     LIBRARIES mg64_game_support mg64_ultra SDL3::SDL3
 )
 
+# The game's encoded assets, decoded from an archive on a fake cartridge
+mg64_add_port_test(asset_test
+    SOURCES asset_test.c "${PROJECT_SOURCE_DIR}/src/system/asset.c"
+    LIBRARIES mg64_ultra SDL3::SDL3
+)
+
 mg64_add_port_test(tmem_test
     SOURCES tmem_test.c
     LIBRARIES mg64_gfx

@@ -180,11 +180,15 @@ s32 OpenEncodedAsset(AssetId assetId, EncodedAsset *asset) {
     ReadAssetFile(header, sizeof(*header), &asset->file);
     asset->method = *(u8 *)header;
     ConvertFromBigEndian32(*header);
+#ifdef TARGET_PC
+    asset->decodedSize = *header & 0xFFFFFF;
+#endif
     return *header &= 0xFFFFFF;
 }
 
 // Decodes an asset that OpenEncodedAsset opened into buffer, which must have
-// room for its decoded size
+// room for its decoded size. The decoders copy the ROM's bytes as they are,
+// so what they write is in the ROM's order.
 void ReadEncodedAsset(void *buffer, EncodedAsset *asset) {
     if (asset->method == ENCODING_BYTE_RUNS) {
         DecodeByteRuns(buffer, asset);
@@ -192,6 +196,8 @@ void ReadEncodedAsset(void *buffer, EncodedAsset *asset) {
     else {
         DecodeHalfwordRuns(buffer, asset);
     }
+
+    MarkRomOrder(buffer, asset->decodedSize);
 }
 
 // Decodes runs that each start with a signed count byte: a positive

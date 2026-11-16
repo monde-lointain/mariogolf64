@@ -235,6 +235,9 @@ typedef struct EncodedAsset {
     s32 method;
     s32 encodedSize; // The whole file's, including that word
     AssetFile file;
+#ifdef TARGET_PC
+    u32 decodedSize; // For marking what the decoders write as the ROM's order
+#endif
 } EncodedAsset;
 
 // The boot logos, among other image assets, begin with this before their texels.
