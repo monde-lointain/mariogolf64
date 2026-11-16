@@ -1,0 +1,71 @@
+/*
+ * What the native port adds to libultra's interface: the memory that stands
+ * in for the N64's RDRAM, addresses as wide as the host's, and the few
+ * routines that the game's code calls only in a native build.
+ *
+ * ultra64.h includes this after libultra's headers, so that its macros
+ * replace theirs.
+ */
+
+#ifndef _OS_PC_H_
+#define _OS_PC_H_
+
+#include <stdint.h>
+
+#include <PR/ultratypes.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* The N64's memory with the Expansion Pak: the game places its heaps, frame
+   buffers and some buffers at fixed addresses in it, which a native build
+   finds at the same offsets in this array. */
+#define PC_RDRAM_SIZE 0x800000
+#define PC_RDRAM_BASE 0x80000000u
+extern u8 osPcRdram[PC_RDRAM_SIZE];
+
+/* The memory at an address of the N64's KSEG0, an address constant */
+#define PcRdramAddress(address) (&osPcRdram[(u32)(address) - PC_RDRAM_BASE])
+
+/* The RCP reads the host's memory, so a physical address is the host's
+   address. Virtual addresses that a mapping set by osPcMapRange covers are
+   translated through it, as the TLB did. */
+uintptr_t osPcVirtualToPhysical(const void *address);
+#undef osVirtualToPhysical
+#define osVirtualToPhysical(address) osPcVirtualToPhysical(address)
+
+#undef OS_K0_TO_PHYSICAL
+#undef OS_K1_TO_PHYSICAL
+#undef OS_PHYSICAL_TO_K0
+#undef OS_PHYSICAL_TO_K1
+#define OS_K0_TO_PHYSICAL(address) ((uintptr_t)(address))
+#define OS_K1_TO_PHYSICAL(address) ((uintptr_t)(address))
+#define OS_PHYSICAL_TO_K0(address) ((void *)(uintptr_t)(address))
+#define OS_PHYSICAL_TO_K1(address) ((void *)(uintptr_t)(address))
+
+/* Maps size bytes of virtual addresses from virtualAddress onto the host's
+   memory at hostAddress, as osMapTLB mapped them onto physical memory, in
+   place of any mapping there before. */
+void osPcMapRange(u32 virtualAddress, void *hostAddress, u32 size);
+
+/* Removes every mapping, as osUnmapTLBAll does */
+void osPcUnmapAll(void);
+
+/* The host's address of a virtual address that a mapping covers, or NULL */
+void *osPcTranslate(u32 virtualAddress);
+
+/* Puts the variables of the code segment with the number that
+   rom_file_offsets.h gives it back to their values at start-up, as reading
+   the segment from ROM and clearing its bss did on the N64. */
+void osPcResetSegment(u32 segmentNumber);
+
+/* Blocks the calling thread until the next interrupt, for a thread that
+   would otherwise spin until another changes something */
+void osPcWaitForInterrupt(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

@@ -1,0 +1,2 @@
+add_library(mg64_mus INTERFACE)
+target_link_libraries(mg64_mus INTERFACE mg64_port_internal)

@@ -1,0 +1,2 @@
+add_library(mg64_nusys INTERFACE)
+target_link_libraries(mg64_nusys INTERFACE mg64_port_internal)

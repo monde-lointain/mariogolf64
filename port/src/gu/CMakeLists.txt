@@ -1,0 +1,2 @@
+add_library(mg64_gu INTERFACE)
+target_link_libraries(mg64_gu INTERFACE mg64_port_internal)

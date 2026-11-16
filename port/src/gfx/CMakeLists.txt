@@ -1,0 +1,2 @@
+add_library(mg64_gfx INTERFACE)
+target_link_libraries(mg64_gfx INTERFACE mg64_port_internal)
