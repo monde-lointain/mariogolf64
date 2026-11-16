@@ -26,6 +26,9 @@ ENCODING_BYTE_RUNS = 1
 ENCODING_HEADER_SIZE = 4
 METHOD_SHIFT = 24
 DECODED_SIZE_MASK = 0xFFFFFF
+# The longest run that a count byte gives, either way. The original's
+# encoder went no further, though a copy could take 128.
+RUN_LENGTH_MAX = 127
 IMAGE_HEADER_SIZE = 8
 IMAGE_SIZE_OFFSET = 2
 OUTPUT_ARGUMENT_COUNT = 3
@@ -89,9 +92,54 @@ def decode_runs(data: bytes, unit: int) -> bytes:
             position += unit * -count
 
 
+def encode_runs(data: bytes, unit: int) -> bytes:
+    """Return DATA as decode_runs reads it: repeated units as runs, the rest copied."""
+    units = [data[i : i + unit] for i in range(0, len(data), unit)]
+    out = bytearray()
+    copied: list[bytes] = []
+
+    def copy_out() -> None:
+        while copied:
+            chunk = copied[:RUN_LENGTH_MAX]
+            del copied[:RUN_LENGTH_MAX]
+            out.extend((-len(chunk)).to_bytes(1, "big", signed=True))
+            out.extend(b"".join(chunk))
+
+    position = 0
+    while position < len(units):
+        end = position
+        while (
+            end < len(units)
+            and units[end] == units[position]
+            and end - position < RUN_LENGTH_MAX
+        ):
+            end += 1
+        if end - position > 1:
+            copy_out()
+            out.append(end - position)
+            out += units[position]
+            position = end
+        else:
+            copied.append(units[position])
+            position += 1
+    copy_out()
+    out.append(0)
+    return bytes(out)
+
+
+def encode_asset(data: bytes) -> bytes:
+    """Return DATA as an asset that ReadEncodedAsset decodes, in byte runs."""
+    word = ENCODING_BYTE_RUNS << METHOD_SHIFT | len(data)
+    return word.to_bytes(ENCODING_HEADER_SIZE, "big") + encode_runs(data, 1)
+
+
 def decode_asset(rom: bytes, asset_id: int) -> bytes:
     """Return an asset decoded, as ReadEncodedAsset leaves it."""
-    data = read_asset(rom, asset_id)
+    return decode_encoded(read_asset(rom, asset_id))
+
+
+def decode_encoded(data: bytes) -> bytes:
+    """Return an encoded asset's bytes decoded."""
     word = int.from_bytes(data[:ENCODING_HEADER_SIZE], "big")
     method = word >> METHOD_SHIFT
     size = word & DECODED_SIZE_MASK

@@ -2,7 +2,7 @@
 """Split the asset archive into its assets, or pack them into it again.
 
     asset_archive.py split ARCHIVE DIRECTORY
-    asset_archive.py pack DIRECTORY ARCHIVE
+    asset_archive.py pack DIRECTORY ARCHIVE [REPLACEMENTS]
 
 The archive begins with a table of each asset's size and its offset from
 the archive's start, eight bytes an asset, which ReadAssetFileBounds
@@ -12,6 +12,9 @@ padded with zeros to a multiple of eight bytes.
 split writes each asset to DIRECTORY as its ID in three hexadecimal
 digits, such as 688.bin for ASSET_PLACES. pack reads them back in that
 order, so an asset can change size, but a new one must take the next ID.
+An asset in the directory REPLACEMENTS, such as a custom character's face
+sprites, which tools/face_sprites.py writes, takes the place of the one of
+the same name.
 """
 
 import struct
@@ -31,6 +34,7 @@ WRITE_BUFFER_SIZE = 0x2000
 
 USAGE_EXIT = 2
 ARGUMENT_COUNT = 4
+REPLACING_ARGUMENT_COUNT = 5
 
 
 def padding_to(size: int, alignment: int) -> int:
@@ -64,8 +68,8 @@ def split(archive: bytes, directory: Path) -> None:
         _ = (directory / name).write_bytes(archive[offset : offset + size])
 
 
-def read_assets(directory: Path) -> list[bytes]:
-    """Return the assets in DIRECTORY in the order of their IDs."""
+def read_assets(directory: Path, replacements: Path | None = None) -> list[bytes]:
+    """Return the assets in DIRECTORY in the order of their IDs, or REPLACEMENTS'."""
     paths = sorted(
         directory.glob(f"*{ASSET_SUFFIX}"), key=lambda path: int(path.stem, 16)
     )
@@ -76,6 +80,14 @@ def read_assets(directory: Path) -> list[bytes]:
             sys.exit(
                 f"expected asset {asset_id:X} in {directory}, but found {path.name}"
             )
+    if replacements is not None:
+        for path in replacements.glob(f"*{ASSET_SUFFIX}"):
+            if not (directory / path.name).is_file():
+                sys.exit(f"{path} replaces no asset of {directory}")
+        paths = [
+            replacements / path.name if (replacements / path.name).is_file() else path
+            for path in paths
+        ]
     return [path.read_bytes() for path in paths]
 
 
@@ -94,7 +106,12 @@ def pack(assets: list[bytes]) -> bytes:
 
 def main() -> None:
     """Split or pack the archive that the command line names."""
-    if len(sys.argv) != ARGUMENT_COUNT or sys.argv[1] not in {"split", "pack"}:
+    count = len(sys.argv)
+    command = sys.argv[1] if count > 1 else ""
+    usable = (command == "split" and count == ARGUMENT_COUNT) or (
+        command == "pack" and count in {ARGUMENT_COUNT, REPLACING_ARGUMENT_COUNT}
+    )
+    if not usable:
         print(__doc__, file=sys.stderr)
         sys.exit(USAGE_EXIT)
     if sys.argv[1] == "split":
@@ -102,7 +119,8 @@ def main() -> None:
     else:
         out = Path(sys.argv[3])
         out.parent.mkdir(parents=True, exist_ok=True)
-        _ = out.write_bytes(pack(read_assets(Path(sys.argv[2]))))
+        replacements = Path(sys.argv[4]) if count == REPLACING_ARGUMENT_COUNT else None
+        _ = out.write_bytes(pack(read_assets(Path(sys.argv[2]), replacements)))
 
 
 if __name__ == "__main__":

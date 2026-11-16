@@ -52,6 +52,7 @@ known-first-party = [
   "build_character",
   "character_model_format",
   "character_template",
+  "decode_asset",
   "f3dex2",
   "fncompare",
   "heap_region",
