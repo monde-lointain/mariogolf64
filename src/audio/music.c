@@ -113,7 +113,7 @@ void LoadSampleBank(u8 *pointerBankRom, u32 pointerBankSize, u8 *waveBankRom) {
     u32 pointerIndex;
 
     f_PointerBank = __MusIntMemMalloc(pointerBankSize);
-    nuPiReadRom((u32)pointerBankRom, f_PointerBank, pointerBankSize);
+    nuPiReadRom((u32)AddressNumber(pointerBankRom), f_PointerBank, pointerBankSize);
     osSyncPrintf("nuAuSampleBank_ptr %x, size%d\n", f_PointerBank, pointerBankSize);
     for (pointerIndex = 0; pointerIndex < PRINTED_BANK_SIZE; pointerIndex++) {
         osSyncPrintf("%2.2X ", f_PointerBank[pointerIndex]);
@@ -244,6 +244,6 @@ void LoadSoundEffectBank(u8 *bankRom, u32 bankSize) {
         osSyncPrintf("SE Seq. Buffer Over\n");
     }
 
-    nuPiReadRom((u32)bankRom, f_SoundEffectBuffer, bankSize);
+    nuPiReadRom((u32)AddressNumber(bankRom), f_SoundEffectBuffer, bankSize);
     MusFxBankInitialize(f_SoundEffectBuffer);
 }

@@ -1743,7 +1743,7 @@ void DrawHandicaps(
             gDPLoadTextureTile_4b(
                 gfx++,
                 TextureAddress(
-                    (u32)f_StatsGreenArrows +
+                    AddressNumber(f_StatsGreenArrows) +
                     ((i * GREEN_ARROW_IMAGE_SIZE) + PALETTED_TEXELS_OFFSET +
                         (f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE))
                 ),
@@ -2759,8 +2759,10 @@ void DrawBestShots(Gfx **displayListHead) {
         gDPLoadTLUT_pal256(
             gfx++,
             TextureAddress(
-                (u32)f_BestShotsCourseIcons
-                    [save->rankedRecords[f_BestShotRecords[iconRow][iconColumn]].courseIndex] +
+                AddressNumber(
+                    f_BestShotsCourseIcons
+                        [save->rankedRecords[f_BestShotRecords[iconRow][iconColumn]].courseIndex]
+                ) +
                 IMAGE_HEADER_SIZE
             )
         );
@@ -2768,8 +2770,11 @@ void DrawBestShots(Gfx **displayListHead) {
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(
-                    (u32)f_BestShotsCourseIcons
-                        [save->rankedRecords[f_BestShotRecords[iconRow][iconColumn]].courseIndex] +
+                    AddressNumber(
+                        f_BestShotsCourseIcons[save
+                                ->rankedRecords[f_BestShotRecords[iconRow][iconColumn]]
+                                .courseIndex]
+                    ) +
                     LARGE_PALETTED_TEXELS_OFFSET +
                     (index * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT)
                 ),

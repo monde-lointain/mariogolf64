@@ -23,11 +23,23 @@
 #    define PhysicalAddress(address) ((u32)(address) - K0BASE)
 #endif
 
-// An address as a number, as wide as the host's addresses
+// An address as a number, as wide as the host's addresses, and the signed
+// type that holds one
 #ifdef TARGET_PC
 #    define AddressNumber(address) ((uintptr_t)(address))
+typedef intptr_t SignedAddress;
 #else
 #    define AddressNumber(address) ((u32)(address))
+typedef s32 SignedAddress;
+#endif
+
+// The uncached address of the memory at a virtual address, through which the
+// CPU's writes reach the RCP at once. A native build has no caches between
+// the two.
+#ifdef TARGET_PC
+#    define UncachedAddress(address) ((void *)(address))
+#else
+#    define UncachedAddress(address) ((void *)(osVirtualToPhysical(address) + K1BASE))
 #endif
 
 // The bytes from start up to end, which may point at different types or into

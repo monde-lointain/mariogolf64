@@ -253,7 +253,7 @@ void RunHeartbeatLoop(void) {
 void AssignCharacterBuffers(void) {
     s32 bufferSize = GetCharacterBufferSize();
 #ifdef NON_MATCHING
-    u8 *buffers = (u8 *)RoundUpTo((u32)g_WorkArea.bytes, SMALLEST_PAGE_SIZE);
+    u8 *buffers = (u8 *)RoundUpTo(AddressNumber(g_WorkArea.bytes), SMALLEST_PAGE_SIZE);
 #else
     u8 *buffers = g_WorkArea.bytes;
 #endif
@@ -314,7 +314,7 @@ void mainproc(void *arg UNUSED) {
         buildDateSize = BUILD_DATE_LENGTH_MAX;
     }
 
-    nuPiReadRom((u32)build_date_ROM_START, g_RomBuildDate, buildDateSize);
+    nuPiReadRom((u32)AddressNumber(build_date_ROM_START), g_RomBuildDate, buildDateSize);
     g_RomBuildDate[buildDateSize] = '\0';
     g_SaveBuildDate[0] = '\0';
 

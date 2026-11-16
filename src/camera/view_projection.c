@@ -13,6 +13,7 @@
 #include "math/math_util.h"
 #include "screen/screen.h"
 #include "system/compiler.h"
+#include "system/memory_address.h"
 
 // The screen depth of the far plane over two, in a viewport's depth units
 #define SCREEN_DEPTH_SCALE 16352.0f
@@ -392,9 +393,9 @@ void SetTriangleNormal(
     s32 thirdIndex,
     s32 placement
 ) {
-    Vtx_tn *first = (Vtx_tn *)((firstIndex * sizeof(Vtx)) + (u32)vertices);
-    Vtx_tn *second = (Vtx_tn *)((secondIndex * sizeof(Vtx)) + (u32)vertices);
-    Vtx_tn *third = (Vtx_tn *)((thirdIndex * sizeof(Vtx)) + (u32)vertices);
+    Vtx_tn *first = (Vtx_tn *)((firstIndex * sizeof(Vtx)) + AddressNumber(vertices));
+    Vtx_tn *second = (Vtx_tn *)((secondIndex * sizeof(Vtx)) + AddressNumber(vertices));
+    Vtx_tn *third = (Vtx_tn *)((thirdIndex * sizeof(Vtx)) + AddressNumber(vertices));
     s32 firstEdgeX = second->ob[AXIS_X] - first->ob[AXIS_X];
     // Written to read first's coordinate first, to match: second's y less
     // first's gives 18 words differing, none in shape

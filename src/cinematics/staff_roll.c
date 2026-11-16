@@ -445,11 +445,11 @@ void LoadStaffRoll(void) {
     f_StaffFont = AllocMemory(OpenEncodedAsset(ASSET_STAFF_FONT, &asset));
     ReadEncodedAsset(f_StaffFont, &asset);
     header = AllocMemory(STAFF_TEXT_HEADER_SIZE);
-    nuPiReadRom((u32)g_StaffTextRomStart, header, STAFF_TEXT_HEADER_SIZE);
+    nuPiReadRom((u32)AddressNumber(g_StaffTextRomStart), header, STAFF_TEXT_HEADER_SIZE);
     textSize = header[0] << 8 | header[1];
     FreeMemory(&header);
     f_StaffText = AllocMemory(textSize);
-    nuPiReadRom((u32)g_StaffTextRomStart, f_StaffText, textSize);
+    nuPiReadRom((u32)AddressNumber(g_StaffTextRomStart), f_StaffText, textSize);
     g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &shadowAsset));
     ReadEncodedAsset(g_ShadowTexture, &shadowAsset);
     f_BillboardHeap = AllocMemory(BILLBOARD_HEAP_SIZE);
@@ -1638,10 +1638,9 @@ void DrawStaffRoll(Gfx **displayListHead) {
                 ((index != IMAGE_STRIP_COUNT - 1) ? IMAGE_STRIP_STEP : 0) | IMAGE_STRIP_OVERLAP;
             gDPLoadTextureTile(
                 gfx++,
-                (u32) &
-                    ((
-                        u16 *
-                    )f_StaffRollImage.texels)[index * IMAGE_STRIP_STEP * STAFF_ROLL_IMAGE_WIDTH] &
+                AddressNumber(&(
+                    (u16 *)f_StaffRollImage.texels
+                )[index * IMAGE_STRIP_STEP * STAFF_ROLL_IMAGE_WIDTH]) &
                     ~7,
                 G_IM_FMT_RGBA,
                 G_IM_SIZ_16b,
@@ -1887,9 +1886,9 @@ void DrawStaffRollPainting(Gfx **displayListHead) {
                 IMAGE_STRIP_OVERLAP;
             gDPLoadTextureTile(
                 gfx++,
-                (u32) &
-                    ((u8 *)&f_StaffRollImage)
-                        [(stripIndex * IMAGE_STRIP_STEP * STAFF_ROLL_IMAGE_WIDTH) + texelOffset] &
+                AddressNumber(&(
+                    (u8 *)&f_StaffRollImage
+                )[(stripIndex * IMAGE_STRIP_STEP * STAFF_ROLL_IMAGE_WIDTH) + texelOffset]) &
                     ~7,
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,

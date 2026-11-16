@@ -269,17 +269,17 @@ void LoadTextAssets(void) {
     f_TextGradientImages[1] = AllocMemory(OpenEncodedAsset(ASSET_TEXT_BANDED_GRADIENT, &asset));
     ReadEncodedAsset(f_TextGradientImages[1], &asset);
     header = AllocMemory(FILE_HEADER_SIZE);
-    nuPiReadRom((u32)g_GlyphFileRomStart, header, FILE_HEADER_SIZE);
+    nuPiReadRom((u32)AddressNumber(g_GlyphFileRomStart), header, FILE_HEADER_SIZE);
     size = (ReadHeaderHalfword(header, GLYPH_COUNT_OFFSET) *
                ReadHeaderHalfword(header, GLYPH_SIZE_OFFSET)) +
         FILE_HEADER_SIZE;
     f_MessageGlyphs = AllocMemory(size);
-    nuPiReadRom((u32)g_GlyphFileRomStart, f_MessageGlyphs, size);
-    nuPiReadRom((u32)g_MessageFileRomStart, header, FILE_HEADER_SIZE);
+    nuPiReadRom((u32)AddressNumber(g_GlyphFileRomStart), f_MessageGlyphs, size);
+    nuPiReadRom((u32)AddressNumber(g_MessageFileRomStart), header, FILE_HEADER_SIZE);
     size = ReadHeaderHalfword(header, MESSAGE_FILE_SIZE_OFFSET);
     FreeMemory(&header);
     f_Messages = AllocMemory(size);
-    nuPiReadRom((u32)g_MessageFileRomStart, f_Messages, size);
+    nuPiReadRom((u32)AddressNumber(g_MessageFileRomStart), f_Messages, size);
 
     // The halfwords of the table's header and its entries come first
     f_MessageCodesStart = (f_Messages->messageCount * 2) + 2;

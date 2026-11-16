@@ -2643,7 +2643,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                 gDPLoadTextureTile(
                     gfx++,
                     TextureAddress(
-                        (u32)f_TrophyImage +
+                        AddressNumber(f_TrophyImage) +
                         (i * f_TrophySizes[courseIndex][TROPHY_WIDTH] *
                             f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS])
                     ),
@@ -2719,7 +2719,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
                 gDPLoadTextureTile(
                     gfx++,
                     TextureAddress(
-                        (u32)f_TrophyImage +
+                        AddressNumber(f_TrophyImage) +
                         (i * f_TrophySizes[courseIndex][TROPHY_WIDTH] *
                             f_TrophySizes[courseIndex][TROPHY_PART_HEIGHTS])
                     ),

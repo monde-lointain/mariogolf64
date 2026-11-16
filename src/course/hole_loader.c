@@ -110,7 +110,7 @@ typedef u16 ULzStreamFlags16;
 // The DMA buffers' alignment, in bytes
 #define LZ_BUFFER_ALIGNMENT 16
 #define AlignedLzBuffer(address) \
-    (((u32)(address) + LZ_BUFFER_ALIGNMENT - 1) & ~(LZ_BUFFER_ALIGNMENT - 1))
+    ((AddressNumber(address) + LZ_BUFFER_ALIGNMENT - 1) & ~(LZ_BUFFER_ALIGNMENT - 1))
 
 // A reference word holds a distance back into the output, then a length less
 // than the copy's

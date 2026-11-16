@@ -10,6 +10,7 @@
 
 #include "system/c_language.h"
 #include "system/compiler.h"
+#include "system/memory_address.h"
 
 // The integer lengths halve their components until they are below this
 // magnitude
@@ -98,7 +99,7 @@ u16 ComputeCrc16(u8 *bytes, u32 size) {
         // The original adds the size to the address, size first; pointer
         // arithmetic, as data + size, size + data, &data[size] or AddressPast,
         // adds the address first, which leaves 2 words differing
-        end = (u8 *)(size + (u32)bytes);
+        end = (u8 *)(size + AddressNumber(bytes));
         do {
             crc ^= *bytes;
             for (bitIndex = 0; bitIndex < BITS_PER_BYTE; bitIndex++) {

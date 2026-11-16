@@ -738,7 +738,7 @@ void DrawStopwatchTime(Gfx **displayListHead, s32 left, s32 top, s32 frameCount)
             gDPLoadTextureBlock_4b(
                 gfx++,
                 TextureAddress(
-                    (u32)f_StopwatchGlyphs + (TIME_SEPARATOR_GLYPH * TIME_GLYPH_BYTES) +
+                    AddressNumber(f_StopwatchGlyphs) + (TIME_SEPARATOR_GLYPH * TIME_GLYPH_BYTES) +
                     PALETTED_TEXELS_OFFSET
                 ),
                 G_IM_FMT_CI,

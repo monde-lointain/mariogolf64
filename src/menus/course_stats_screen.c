@@ -1154,7 +1154,7 @@ void DrawStatsScrollArrows(Gfx **displayListHead) {
             gDPLoadTextureBlock_4b(
                 gfx++,
                 TextureAddress(
-                    (u32)f_CourseStatsDigitsAndArrows +
+                    AddressNumber(f_CourseStatsDigitsAndArrows) +
                     (PALETTED_TEXELS_OFFSET + (STATS_FIRST_ARROW_IMAGE * STATS_ARROW_IMAGE_SIZE)) +
                     (firstArrow + arrowIndex) * STATS_ARROW_IMAGE_SIZE
                 ),
@@ -2127,7 +2127,7 @@ void DrawGreenArrow(
     gDPLoadTextureTile_4b(
         gfx++,
         TextureAddress(
-            (u32)image +
+            AddressNumber(image) +
             (direction * GREEN_ARROW_IMAGE_SIZE +
                 (blinkFrame * GREEN_ARROW_FRAME_SIZE +
                     (headerSize + SMALL_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)))

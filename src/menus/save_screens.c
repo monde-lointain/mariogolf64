@@ -3226,7 +3226,7 @@ void DrawSavedMiniGolfImage(Gfx **displayListHead) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
-                (u32)f_CourseImageBuffers[f_ShownCourseBufferIndex] +
+                AddressNumber(f_CourseImageBuffers[f_ShownCourseBufferIndex]) +
                 (stripIndex * COURSE_THUMBNAIL_WIDTH * COURSE_THUMBNAIL_STRIP_HEIGHT)
             ),
             G_IM_FMT_CI,

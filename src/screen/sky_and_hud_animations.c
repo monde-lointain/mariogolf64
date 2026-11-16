@@ -4033,7 +4033,8 @@ void DrawMenuBackdrop(Gfx **displayListHead) {
             height = StripHeight(strip);
             gDPLoadTextureTile(
                 gfx++,
-                (u32)&f_CapturedFrame[strip * BACKDROP_STRIP_STEP * FRAME_WORDS_PER_ROW] & ~7,
+                AddressNumber(&f_CapturedFrame[strip * BACKDROP_STRIP_STEP * FRAME_WORDS_PER_ROW]) &
+                    ~7,
                 G_IM_FMT_RGBA,
                 G_IM_SIZ_16b,
                 SCREEN_WIDTH,
@@ -4080,7 +4081,8 @@ void DrawMenuBackdrop(Gfx **displayListHead) {
             height = StripHeight(strip);
             gDPLoadTextureTile(
                 gfx++,
-                (u32)&f_CapturedFrame[strip * BACKDROP_STRIP_STEP * FRAME_WORDS_PER_ROW] & ~7,
+                AddressNumber(&f_CapturedFrame[strip * BACKDROP_STRIP_STEP * FRAME_WORDS_PER_ROW]) &
+                    ~7,
                 G_IM_FMT_IA,
                 G_IM_SIZ_16b,
                 SCREEN_WIDTH,

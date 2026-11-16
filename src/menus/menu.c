@@ -42,6 +42,7 @@
 #include "system/heap.h"
 #include "system/host_file.h"
 #include "system/main.h"
+#include "system/memory_address.h"
 
 // Keeps the save data on the development host instead of in SRAM
 #define GAME_FLAG_SAVE_TO_HOST 0x53
@@ -57,7 +58,8 @@
 // The R COM and L LEFTY button icons
 #define ASSET_COMPUTER_LEFTY_ICONS_IMAGE 0x709
 
-#define DmaAlignedAddress(address) (((u32)(address) + DMA_ALIGNMENT - 1) & ~(DMA_ALIGNMENT - 1))
+#define DmaAlignedAddress(address) \
+    ((AddressNumber(address) + DMA_ALIGNMENT - 1) & ~(DMA_ALIGNMENT - 1))
 
 // The records that unlock two of the characters
 #define DONKEY_KONG_STAR_COUNT 30

@@ -4331,11 +4331,11 @@ void DrawColorTest(Gfx **displayListHead) {
         gDPLoadTLUT_pal16( \
             g_DisplayListHead++, \
             0, \
-            TextureAddress((u32)(image) + IMAGE_HEADER_SIZE) \
+            TextureAddress(AddressNumber(image) + IMAGE_HEADER_SIZE) \
         ); \
         gDPLoadTextureBlock_4b( \
             g_DisplayListHead++, \
-            TextureAddress((u32)(image) + PALETTED_TEXELS_OFFSET), \
+            TextureAddress(AddressNumber(image) + PALETTED_TEXELS_OFFSET), \
             G_IM_FMT_CI, \
             SHOT_PANEL_LABEL_WIDTH, \
             SHOT_PANEL_LABEL_HEIGHT, \

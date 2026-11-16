@@ -164,8 +164,8 @@ void PrintMessage(s8 *text, u32 column, u32 row) {
 // Draws a character of the debug font straight into both framebuffers, at a
 // column and row of the message grid, and turns the screen back on.
 void DrawMessageCharacter(s8 character, u32 column, u32 row) {
-    u16 *currentFramebuffer = (u16 *)(osVirtualToPhysical(osViGetCurrentFramebuffer()) + K1BASE);
-    u16 *nextFramebuffer = (u16 *)(osVirtualToPhysical(osViGetNextFramebuffer()) + K1BASE);
+    u16 *currentFramebuffer = UncachedAddress(osViGetCurrentFramebuffer());
+    u16 *nextFramebuffer = UncachedAddress(osViGetNextFramebuffer());
     s32 glyphStart;
     s32 pixelRow;
     s32 pixelColumn;

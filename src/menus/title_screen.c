@@ -385,7 +385,9 @@ void DrawTitleScreen(Gfx **displayListHead) {
             (stripIndex == TITLE_STRIP_COUNT - 1) ? TITLE_LAST_STRIP_HEIGHT : TITLE_STRIP_HEIGHT;
         gDPLoadTextureTile(
             gfx++,
-            (u32)&f_TitleImage.texels[stripIndex * TITLE_STRIP_HEIGHT * TITLE_IMAGE_WIDTH] & ~7,
+            AddressNumber(
+                &f_TitleImage.texels[stripIndex * TITLE_STRIP_HEIGHT * TITLE_IMAGE_WIDTH]
+            ) & ~7,
             G_IM_FMT_RGBA,
             G_IM_SIZ_16b,
             TITLE_IMAGE_WIDTH,

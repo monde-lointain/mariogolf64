@@ -1523,8 +1523,8 @@ void LoadCharacterFaces(void) {
 }
 
 // A byte's address as an integer, for adding a player number to
-static inline s32 ByteAddress(s8 *byte) {
-    return (s32)byte;
+static inline SignedAddress ByteAddress(s8 *byte) {
+    return (SignedAddress)byte;
 }
 
 // The menu memory fields are read through ByteAddress because the original

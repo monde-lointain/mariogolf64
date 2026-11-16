@@ -1638,7 +1638,13 @@ void PrepareHoleTriangles(void) {
 // Tests whether BuildHole was linked above the first 4 MB of RAM. It
 // is not, so this returns FALSE and the debug scene menu never opens.
 Boolean IsOverlayInExpansionMemory(void) {
+#ifdef TARGET_PC
+    // A native build links the overlays into the program, where the hole
+    // builder runs where it did on the N64, below the expansion memory
+    return FALSE;
+#else
     return (u32)BuildHole > BASE_RDRAM_END - 1;
+#endif
 }
 
 // A map texel's span in world units, which billboards are placed in

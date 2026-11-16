@@ -4715,7 +4715,8 @@ void BuildGroundDisplayLists(void) {
         }
     }
 
-    if ((u32)gfx > (u32)GROUND_DISPLAY_LIST_END || (u32)vertices > (u32)GROUND_VERTEX_END) {
+    if (AddressNumber(gfx) > AddressNumber(GROUND_DISPLAY_LIST_END) ||
+        AddressNumber(vertices) > AddressNumber(GROUND_VERTEX_END)) {
         ReportDivisionError();
     }
 }
