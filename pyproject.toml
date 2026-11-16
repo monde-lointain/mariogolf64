@@ -54,6 +54,7 @@ known-first-party = [
   "character_template",
   "decode_asset",
   "f3dex2",
+  "face_sprites",
   "fncompare",
   "heap_region",
   "lz_codec",

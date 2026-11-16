@@ -100,12 +100,39 @@ the original's build is left alone.
 `tools/build_character.py --check PACKAGE` checks a package without
 building the game, as the export does.
 
-## Name
+## Name and face pictures
 
 The name you give at export replaces the character's name everywhere the
 game shows it: menus, scorecards, the tournament's contestants and its
 tournament, such as "Charlie Tournament". A name has at most 11 letters,
 digits, spaces, periods and hyphens, which is what the menus' font has.
+
+The menus and scorecards also show small pictures of the character's face:
+one at rest, four pleased, four beaten and a head for the menus, each in
+the four color sets. The build draws them from your model, with the camera,
+pose, expression and light of the original's pictures, and writes them as
+one sheet to see them by:
+
+    build/nonmatching/custom/custom_characters/SLOT_face_sprites.png
+
+where SLOT is the character replaced, such as `charlie`. A column is one
+picture, a row one color set. To touch them up, paint over a copy of that
+sheet and save it in the package folder as `face_sprites.png`; the build
+then uses yours instead of drawing them. Keep its size and layout, and
+its three kinds of pixel:
+
+- **Clear**: the background.
+- **Half clear**: the outline's soft edge, which the game blends into
+  what's behind. Its color is darkened, as the original's is.
+- **Opaque**: the character.
+
+A pixel's palette entry is shared by the four color sets, so each spot
+should change color the same way in every row. The pictures hold about 250
+colors in all; the build picks the closest. Delete `face_sprites.png` to
+go back to drawn pictures, for instance after changing the model.
+
+The build draws pictures only for characters whose originals' cameras it
+knows, Charlie's so far; others keep their original pictures.
 
 ## Testing the tools
 

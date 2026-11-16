@@ -644,8 +644,13 @@ CHARACTER_LIST   := $(CHARACTER_DIR)/packages.txt
 # Where the text files are encoded from: a custom build's copies have the
 # characters' names changed
 TEXT_ROOT        :=
+# The assets that replace the archive's
+ARCHIVE_REPLACEMENTS :=
 ifneq ($(strip $(CHARACTERS)),)
 TEXT_ROOT        := $(CHARACTER_DIR)/
+ARCHIVE_REPLACEMENTS := $(CHARACTER_DIR)/asset_archive
+# The list of the face sprites' files, which face_sprites.py writes last
+FACE_SPRITES     := $(CHARACTER_DIR)/face_sprites.txt
 DEFINES          += -DCUSTOM_CHARACTERS
 CHARACTER_FILES  := $(shell $(PYTHON) tools/build_character.py --list-files $(CHARACTERS))
 CHARACTER_BINS   := $(CHARACTER_FILES:%=$(CHARACTER_DIR)/%.bin)
@@ -666,6 +671,11 @@ $(CHARACTER_HEADER): $(CHARACTER_LIST) $(CHARACTER_TOOLS) $(shell find $(CHARACT
 $(CHARACTER_BINS) $(CHARACTER_DIR)/names.h $(TEXT_FILES:%=$(CHARACTER_DIR)/%.txt): \
     $(CHARACTER_HEADER) ;
 
+$(FACE_SPRITES): $(CHARACTER_LIST) $(CHARACTER_TOOLS) $(shell find $(CHARACTERS) -type f) \
+                  $(addprefix tools/,face_sprites.py face_sprites.json decode_asset.py)
+	$(PYTHON) tools/face_sprites.py --assets $(ARCHIVE_DIR) --output $(CHARACTER_DIR) \
+	    $(CHARACTERS)
+
 # The files that include the layouts or, through characters/character_names.h,
 # the names
 $(addprefix $(BUILD_DIR)/src/,characters/character_model.c.o menus/menu.c.o \
@@ -681,9 +691,11 @@ $(BUILD_DIR)/assets/character_models/%.bin.o: $(CHARACTER_DIR)/%.bin
 endif
 
 # The asset archive is packed from the assets that asset_archive.py splits
-# it into, so that one can change without the table being worked out again
-$(BUILD_DIR)/assets/asset_archive.bin: $(wildcard $(ARCHIVE_DIR)/*.bin) tools/asset_archive.py
-	$(PYTHON) tools/asset_archive.py pack $(ARCHIVE_DIR) $@
+# it into, so that one can change without the table being worked out again.
+# A custom build's characters replace some, such as their face sprites.
+$(BUILD_DIR)/assets/asset_archive.bin: $(wildcard $(ARCHIVE_DIR)/*.bin) tools/asset_archive.py \
+                                       $(FACE_SPRITES)
+	$(PYTHON) tools/asset_archive.py pack $(ARCHIVE_DIR) $@ $(ARCHIVE_REPLACEMENTS)
 
 # The text files are encoded from the text that messages.py decodes them to
 $(TEXT_FILES:%=$(BUILD_DIR)/%.bin): $(BUILD_DIR)/%.bin: $(TEXT_ROOT)%.txt tools/messages.py tools/asset_archive.py

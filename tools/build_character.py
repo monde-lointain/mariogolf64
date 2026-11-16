@@ -40,6 +40,8 @@ The character's name replaces the slot's in the game's menus, its text and
 its tournaments. With --text, the output DIR also gets a copy of each text
 file named, as assets/text/messages.txt, with the names changed, and
 names.h, which include/characters/character_names.h reads.
+tools/face_sprites.py draws the character's face sprites, which the menus
+and scorecards show.
 """
 
 import argparse

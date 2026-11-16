@@ -40,3 +40,6 @@ _.hide_select
 _.show_in_front
 _.use_bone_envelopes
 _.use_vertex_groups
+
+# unittest calls a test module's tearDownModule once its tests have run
+tearDownModule
