@@ -319,7 +319,7 @@ int MusHandleAsk(musHandle handle) {
 }
 
 int MusHandleStop(musHandle handle, int speed) {
-    return StopSound((uint32_t)handle, speed);
+    return StopSequencedSound((uint32_t)handle, speed);
 }
 
 int MusHandleSetVolume(musHandle handle, int volume) {

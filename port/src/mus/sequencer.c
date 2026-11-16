@@ -1496,7 +1496,7 @@ int CountSoundKinds(uint32_t kinds) {
     return count;
 }
 
-int StopSound(uint32_t handle, int frames) {
+int StopSequencedSound(uint32_t handle, int frames) {
     int count = 0;
     int i;
 

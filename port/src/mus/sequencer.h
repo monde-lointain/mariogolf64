@@ -64,7 +64,7 @@ int CountSoundKinds(uint32_t kinds);
 
 // Each of these acts on the channels of one handle, and gives how many
 // there were
-int StopSound(uint32_t handle, int frames);
+int StopSequencedSound(uint32_t handle, int frames);
 int CountSoundChannels(uint32_t handle);
 int SetSoundVolumeScale(uint32_t handle, int scale);
 int SetSoundPanScale(uint32_t handle, int scale);

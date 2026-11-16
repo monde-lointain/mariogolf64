@@ -165,7 +165,7 @@ static void TestStopFades(void) {
     handle = StartTheEffect(0, EFFECT_BANK_PRIORITY);
     last = PlayFrame();
     EXPECT(last > 0.9);
-    EXPECT(StopSound(handle, 4) == 1);
+    EXPECT(StopSequencedSound(handle, 4) == 1);
     for (frame = 1; frame <= 4; frame++) {
         const double level = PlayFrame();
 
