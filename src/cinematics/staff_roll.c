@@ -43,6 +43,7 @@
 #include "shot/current_shot.h"
 #include "shot/particle_effects.h"
 #include "system/asset.h"
+#include "system/big_endian.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/heap.h"
@@ -450,6 +451,9 @@ void LoadStaffRoll(void) {
     FreeMemory(&header);
     f_StaffText = AllocMemory(textSize);
     nuPiReadRom((u32)AddressNumber(g_StaffTextRomStart), f_StaffText, textSize);
+    // The CPU reads the text's halfwords as numbers
+    ConvertHalvesFromBigEndian(f_StaffText, textSize);
+    MarkHostOrder(f_StaffText, textSize);
     g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &shadowAsset));
     ReadEncodedAsset(g_ShadowTexture, &shadowAsset);
     f_BillboardHeap = AllocMemory(BILLBOARD_HEAP_SIZE);
