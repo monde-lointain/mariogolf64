@@ -1,0 +1,396 @@
+/*
+ * The port's program: it loads the player's ROM, opens the window, starts
+ * the game on NuSystem, and then plays the part of the N64's hardware. Each
+ * sixtieth of a second it reads the controllers, raises the video retrace
+ * that drives the game, and shows the frame buffer that the retrace chose.
+ *
+ *     mariogolf64 [--scale N] [--fullscreen] [--save PATH] [--gpu-debug]
+ *                 [--headless] [--frames N] [--screenshot PATH] [ROM]
+ *
+ * --headless draws without a window, and --frames ends the program after N
+ * retraces, writing the screen it last showed to the --screenshot file, for
+ * tests and machines without a display.
+ *
+ * Without a ROM, it looks for baserom.us.z64 beside the program, then in
+ * the current directory.
+ */
+
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
+#include <stdlib.h>
+#include <ultra64.h>
+
+#include "audio_output.h"
+#include "input.h"
+#include "port/nusys_host.h"
+#include "port/os_host.h"
+#include "presenter.h"
+#include "rcp.h"
+#include "rom_image.h"
+#include "rsp.h"
+#include "save_memory.h"
+#include "sdl_gpu_backend.h"
+
+#define WINDOW_TITLE "Mario Golf"
+#define DEFAULT_ROM_NAME "baserom.us.z64"
+#define WINDOW_SCALE 3
+#define MAX_RENDER_SCALE 8
+#define RETRACES_PER_SECOND 60
+// Retraces behind before the clock gives up catching up, after a stall
+#define MAX_LATE_RETRACES 4
+#define HALT_TIMEOUT_MS 2000
+
+typedef struct Options {
+    const char *romPath;
+    const char *savePath;
+    const char *screenshotPath;
+    int renderScale; // 0 to choose from the display
+    long frameLimit; // Retraces to run, or 0 for no limit
+    bool isFullscreen;
+    bool isGpuDebug;
+    bool isHeadless;
+} Options;
+
+static SDL_Window *f_Window;
+static SDL_GPUDevice *f_Device;
+static bool f_IsQuitting;
+static const void *f_ShownFramebuffer; // What the last retrace showed
+
+// --- What the game asks of the platform ---
+
+void PcRunGfxTask(Gfx *displayList, u32 size) {
+    (void)size;
+    RunRspTask(displayList);
+}
+
+// The development hardware's debugger, which the game enters when told to
+// halt; the port has none, so the game just stays halted
+void EnterDevelopmentDebugger(s32 argument) {
+    static bool isReported;
+
+    if (!isReported) {
+        SDL_Log("The game asked for its debugger (%d), which the port lacks", (int)argument);
+        isReported = true;
+    }
+}
+
+// --- Starting ---
+
+static void PrintUsage(const char *program) {
+    SDL_Log(
+        "Usage: %s [--scale N] [--fullscreen] [--save PATH] [--gpu-debug] [--headless] [--frames "
+        "N] "
+        "[--screenshot PATH] [ROM]",
+        program
+    );
+}
+
+static bool ParseOptions(int argc, char **argv, Options *options) {
+    int i;
+
+    SDL_zerop(options);
+    for (i = 1; i < argc; i++) {
+        const char *argument = argv[i];
+
+        if (SDL_strcmp(argument, "--scale") == 0 && i + 1 < argc) {
+            options->renderScale = SDL_atoi(argv[++i]);
+            if (options->renderScale < 1 || options->renderScale > MAX_RENDER_SCALE) {
+                SDL_Log("The scale must be from 1 to %d", MAX_RENDER_SCALE);
+                return false;
+            }
+        }
+        else if (SDL_strcmp(argument, "--save") == 0 && i + 1 < argc) {
+            options->savePath = argv[++i];
+        }
+        else if (SDL_strcmp(argument, "--frames") == 0 && i + 1 < argc) {
+            options->frameLimit = SDL_strtol(argv[++i], NULL, 10);
+            if (options->frameLimit < 1) {
+                SDL_Log("The frame count must be at least 1");
+                return false;
+            }
+        }
+        else if (SDL_strcmp(argument, "--screenshot") == 0 && i + 1 < argc) {
+            options->screenshotPath = argv[++i];
+        }
+        else if (SDL_strcmp(argument, "--headless") == 0) {
+            options->isHeadless = true;
+        }
+        else if (SDL_strcmp(argument, "--fullscreen") == 0) {
+            options->isFullscreen = true;
+        }
+        else if (SDL_strcmp(argument, "--gpu-debug") == 0) {
+            options->isGpuDebug = true;
+        }
+        else if (argument[0] != '-' && options->romPath == NULL) {
+            options->romPath = argument;
+        }
+        else {
+            PrintUsage(argv[0]);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Reads the ROM that the options name, or else the first found of the
+// default name beside the program and in the current directory
+static uint8_t *LoadPlayersRom(const Options *options, size_t *size) {
+    const char *base = SDL_GetBasePath();
+    char *besideProgram = NULL;
+    uint8_t *rom;
+
+    if (options->romPath != NULL) {
+        return LoadRomImage(options->romPath, size);
+    }
+
+    if (base != NULL && SDL_asprintf(&besideProgram, "%s%s", base, DEFAULT_ROM_NAME) >= 0) {
+        if (SDL_GetPathInfo(besideProgram, NULL)) {
+            rom = LoadRomImage(besideProgram, size);
+            SDL_free(besideProgram);
+            return rom;
+        }
+
+        SDL_free(besideProgram);
+    }
+
+    if (SDL_GetPathInfo(DEFAULT_ROM_NAME, NULL)) {
+        return LoadRomImage(DEFAULT_ROM_NAME, size);
+    }
+
+    SDL_Log("No ROM: name one, or put %s beside the program", DEFAULT_ROM_NAME);
+    return NULL;
+}
+
+// The renderer draws at a whole multiple of the N64's resolution: the
+// least that covers the display's height
+static int ChooseRenderScale(void) {
+    const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+    int scale = WINDOW_SCALE;
+
+    if (mode != NULL && mode->h > 0) {
+        const float density = (mode->pixel_density > 0.0f) ? mode->pixel_density : 1.0f;
+        const int pixels = (int)SDL_ceilf((float)mode->h * density);
+
+        scale = (pixels + SCREEN_HEIGHT - 1) / SCREEN_HEIGHT;
+    }
+
+    return SDL_clamp(scale, 1, MAX_RENDER_SCALE);
+}
+
+static void UseSaveMemoryPath(const Options *options) {
+    char *path;
+
+    if (options->savePath != NULL) {
+        SetSaveMemoryPath(options->savePath);
+        return;
+    }
+
+    path = FindDefaultSaveMemoryPath();
+    SetSaveMemoryPath(path);
+    if (path != NULL) {
+        SDL_Log("Saving to %s", path);
+    }
+
+    SDL_free(path);
+}
+
+static bool OpenWindow(const Options *options) {
+    const SDL_WindowFlags flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY |
+        (options->isFullscreen ? SDL_WINDOW_FULLSCREEN : 0);
+    int scale;
+
+    f_Device = SDL_CreateGPUDevice(
+        SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_MSL,
+        options->isGpuDebug,
+        NULL
+    );
+    if (f_Device == NULL) {
+        SDL_Log("No GPU that the port can draw with: %s", SDL_GetError());
+        return false;
+    }
+
+    if (!options->isHeadless) {
+        f_Window = SDL_CreateWindow(
+            WINDOW_TITLE,
+            SCREEN_WIDTH * WINDOW_SCALE,
+            SCREEN_HEIGHT * WINDOW_SCALE,
+            flags
+        );
+        if (f_Window == NULL) {
+            SDL_Log("Can't open the window: %s", SDL_GetError());
+            return false;
+        }
+
+        if (!InitPresenter(f_Device, f_Window)) {
+            return false;
+        }
+    }
+
+    scale = (options->renderScale > 0) ? options->renderScale : ChooseRenderScale();
+    SDL_Log(
+        "Drawing with %s at %dx%d",
+        SDL_GetGPUDeviceDriver(f_Device),
+        SCREEN_WIDTH * scale,
+        SCREEN_HEIGHT * scale
+    );
+    InitGpuBackend(f_Device, (uint32_t)scale);
+    InitRdp();
+    InitRsp();
+    return true;
+}
+
+// --- Running ---
+
+static void ToggleFullscreen(void) {
+    const bool isFullscreen = (SDL_GetWindowFlags(f_Window) & SDL_WINDOW_FULLSCREEN) != 0;
+
+    (void)SDL_SetWindowFullscreen(f_Window, !isFullscreen);
+}
+
+static void HandleEvent(const SDL_Event *event) {
+    switch (event->type) {
+        case SDL_EVENT_QUIT:
+            f_IsQuitting = true;
+            break;
+        case SDL_EVENT_GAMEPAD_ADDED:
+            ConnectGamepad(event->gdevice.which);
+            break;
+        case SDL_EVENT_GAMEPAD_REMOVED:
+            DisconnectGamepad(event->gdevice.which);
+            break;
+        case SDL_EVENT_KEY_DOWN:
+            if (!event->key.repeat &&
+                (event->key.scancode == SDL_SCANCODE_F11 ||
+                    (event->key.scancode == SDL_SCANCODE_RETURN &&
+                        (event->key.mod & SDL_KMOD_ALT) != 0))) {
+                ToggleFullscreen();
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+// Raises the retraces at their own pace, whatever the display's rate. After
+// a stall the clock starts afresh rather than rush the game to catch up.
+static void RunRetraces(long frameLimit) {
+    const Uint64 period = SDL_NS_PER_SECOND / RETRACES_PER_SECOND;
+    Uint64 next = SDL_GetTicksNS();
+    long frameCount = 0;
+
+    while (!f_IsQuitting && (frameLimit == 0 || frameCount < frameLimit)) {
+        SDL_Event event;
+        Uint64 now;
+
+        while (SDL_PollEvent(&event)) {
+            HandleEvent(&event);
+        }
+
+        UpdateControllers();
+        f_ShownFramebuffer = PcRaiseRetrace();
+        if (f_Window != NULL) {
+            PresentFramebuffer(f_ShownFramebuffer);
+        }
+
+        frameCount++;
+        next += period;
+        now = SDL_GetTicksNS();
+        if (now < next) {
+            SDL_DelayPrecise(next - now);
+        }
+        else if (now - next > period * MAX_LATE_RETRACES) {
+            next = now;
+        }
+    }
+}
+
+// --- Ending ---
+
+// With the game halted, nothing else uses the renderer or the audio, so
+// they go in the order that each needs: the renderer's targets before the
+// backend, and the backend before the device. A game that won't halt
+// still holds them, so the program leaves without releasing anything.
+static bool ShutDown(const char *screenshotPath) {
+    bool isSaved = true;
+
+    if (!PcHaltGame(HALT_TIMEOUT_MS)) {
+        SDL_Log("The game didn't stop; leaving without cleaning up");
+        _Exit(EXIT_FAILURE);
+    }
+
+    CloseAudioOutput();
+    if (screenshotPath != NULL) {
+        isSaved = SaveScreenImage(f_ShownFramebuffer, screenshotPath);
+    }
+
+    ShutdownRdp();
+    ShutdownGpuBackend();
+    if (f_Window != NULL) {
+        ShutdownPresenter();
+    }
+
+    SDL_DestroyGPUDevice(f_Device);
+
+    ShutdownControllers();
+    SDL_DestroyWindow(f_Window);
+    SDL_Quit();
+    return isSaved;
+}
+
+int main(int argc, char *argv[]) {
+    Options options;
+    uint8_t *rom;
+    size_t romSize = 0;
+
+    if (!ParseOptions(argc, argv, &options)) {
+        return EXIT_FAILURE;
+    }
+
+    // Without a window, the GPU still needs a video driver, but not a display
+    if (options.isHeadless) {
+        SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "offscreen");
+    }
+
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
+        SDL_Log("Can't start SDL: %s", SDL_GetError());
+        return EXIT_FAILURE;
+    }
+
+    rom = LoadPlayersRom(&options, &romSize);
+    if (rom == NULL) {
+        SDL_ShowSimpleMessageBox(
+            SDL_MESSAGEBOX_ERROR,
+            WINDOW_TITLE,
+            "The port needs the US release's ROM. See the log.",
+            NULL
+        );
+        SDL_Quit();
+        return EXIT_FAILURE;
+    }
+
+    if (!OpenWindow(&options)) {
+        SDL_ShowSimpleMessageBox(
+            SDL_MESSAGEBOX_ERROR,
+            WINDOW_TITLE,
+            "Can't draw: no suitable GPU. See the log.",
+            NULL
+        );
+        SDL_Quit();
+        return EXIT_FAILURE;
+    }
+
+    UseSaveMemoryPath(&options);
+    InitControllers();
+    PcInitOs();
+    PcInsertCartridge(rom, romSize);
+    PcBootNuSystem();
+    RunRetraces(options.frameLimit);
+    if (!ShutDown(options.screenshotPath)) {
+        SDL_free(rom);
+        return EXIT_FAILURE;
+    }
+
+    SDL_free(rom);
+    return EXIT_SUCCESS;
+}

@@ -45,7 +45,7 @@ add_subdirectory(mus)
 add_subdirectory(gfx)
 add_subdirectory(platform)
 
-add_executable(mariogolf64 "${overlay_sections_source}")
+add_executable(mariogolf64 platform/main.c "${overlay_sections_source}")
 target_link_libraries(mariogolf64 PRIVATE
     mg64_headers
     mg64_game_main
