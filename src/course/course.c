@@ -49,7 +49,27 @@ static RingShotHole f_RingShotHoles[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT
 
 // The one caller scales the sine and cosine of an angle by this, so it is
 // taken to be a radius
+#ifdef CUSTOM_HOLE_RADII
+// A course whose header gives its holes' radii
+typedef struct CustomHoleRadii {
+    CourseRecordIndex courseRecordIndex;
+    s16 radii[COURSE_HOLE_COUNT];
+} CustomHoleRadii;
+
+static CustomHoleRadii f_CustomHoleRadii[] = {CUSTOM_HOLE_RADII};
+#endif
+
 s32 GetHoleRadius(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
+#ifdef CUSTOM_HOLE_RADII
+    s32 index;
+
+    for (index = 0; index != ARRAY_COUNT(f_CustomHoleRadii); index++) {
+        if (f_CustomHoleRadii[index].courseRecordIndex == courseRecordIndex) {
+            return f_CustomHoleRadii[index].radii[holeIndex];
+        }
+    }
+#endif
+
     switch (courseRecordIndex) {
         case COURSE_RECORD_TOAD_HIGHLANDS:
             if (holeIndex == 10) {

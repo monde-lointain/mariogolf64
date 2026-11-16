@@ -12,6 +12,18 @@
 #define HOLE_RECORD(par, handicap, yardage, flags) \
     {(par), (handicap), {(yardage), (yardage), (yardage)}, (flags)}
 
+// A copy of this header that replaces courses may also define
+// CUSTOM_HOLE_RADII, giving for each such course its CourseRecordIndex and
+// its 18 holes' radii for the flyover camera, which circles a hole's cup at
+// a distance that grows with the radius:
+//
+//     #define CUSTOM_HOLE_RADII \
+//         {COURSE_RECORD_KOOPA_PARK, {200, 400, 200, ...}}, \
+//         {COURSE_RECORD_BOO_VALLEY, {300, 200, 200, ...}}
+//
+// The game's own holes use DEFAULT_HOLE_RADIUS, 200, or as much as 1000 for
+// the longest.
+
 // clang-format off
 #define TOAD_HIGHLANDS_NAME "Toad HighLands"
 #define TOAD_HIGHLANDS_TOURNAMENT_NAME "Toad Tournament"
