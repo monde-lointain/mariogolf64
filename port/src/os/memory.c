@@ -15,8 +15,6 @@
 #define TLB_PAGE_COUNT (TLB_ENTRY_COUNT * 2)
 // The ranges that osPcMapRange keeps, beyond the TLB's
 #define MAPPED_RANGE_COUNT 8
-// osMapTLB's physical address for a page that it leaves unmapped
-#define UNMAPPED_PAGE ((u32) - 1)
 
 typedef struct MappedRange {
     u32 virtualStart;
@@ -126,24 +124,24 @@ static u32 PageSize(OSPageMask pageMask) {
     }
 }
 
-// A page of physical memory: an offset into osPcRdram
-static void MapTlbPage(MappedRange *page, u32 virtualStart, u32 pageSize, u32 physical) {
-    if (physical == UNMAPPED_PAGE || physical >= PC_RDRAM_SIZE) {
+// A page of physical memory, which is the host's memory at its address
+static void MapTlbPage(MappedRange *page, u32 virtualStart, u32 pageSize, uintptr_t physical) {
+    if (physical == PC_UNMAPPED_PAGE) {
         page->size = 0;
         return;
     }
 
     page->virtualStart = virtualStart;
-    page->size = SDL_min(pageSize, PC_RDRAM_SIZE - physical);
-    page->host = &osPcRdram[physical];
+    page->size = pageSize;
+    page->host = (u8 *)physical;
 }
 
-void osMapTLB(
+void osPcMapTLB(
     s32 index,
-    OSPageMask pageMask,
+    u32 pageMask,
     void *virtualAddress,
-    u32 evenPhysical,
-    u32 oddPhysical,
+    uintptr_t evenPhysical,
+    uintptr_t oddPhysical,
     s32 asid
 ) {
     u32 pageSize = PageSize(pageMask);

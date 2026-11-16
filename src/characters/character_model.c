@@ -199,7 +199,7 @@ s32 SetMultiTlb(
     TlbPageMode pageMode,
     u32 pageCount,
     u32 virtualAddress,
-    u32 physicalAddress
+    UnsignedAddress physicalAddress
 ) {
     s32 tlbIndex;
     u32 pageSize;

@@ -17,6 +17,7 @@
 #include "shot/club.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
+#include "system/memory_address.h"
 
 #define CHARACTER_MODEL_KIND_COUNT 4
 #define CHARACTER_MODELS_PER_KIND 36
@@ -404,7 +405,7 @@ s32 SetMultiTlb(
     TlbPageMode pageMode,
     u32 pageCount,
     u32 virtualAddress,
-    u32 physicalAddress
+    UnsignedAddress physicalAddress
 );
 Outcome SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex);
 ClubCategory GetCharacterClubCategory(u32 slotIndex, ClubIndex clubIndex);

@@ -48,6 +48,11 @@ mg64_add_port_test(rom_order_test
     LIBRARIES mg64_ultra SDL3::SDL3
 )
 
+mg64_add_port_test(memory_test
+    SOURCES memory_test.c
+    LIBRARIES mg64_ultra SDL3::SDL3
+)
+
 mg64_add_port_test(tmem_test
     SOURCES tmem_test.c
     LIBRARIES mg64_gfx

@@ -56,6 +56,22 @@ uintptr_t osPcVirtualToPhysical(const void *address);
    place of any mapping there before. */
 void osPcMapRange(u32 virtualAddress, void *hostAddress, u32 size);
 
+/* osMapTLB with the host's physical addresses: maps a TLB entry's even and
+   odd pages onto the host's memory at evenPhysical and oddPhysical, which
+   osVirtualToPhysical gives, or leaves a page unmapped where its address is
+   PC_UNMAPPED_PAGE, as the N64's -1 did. */
+#define PC_UNMAPPED_PAGE ((uintptr_t)-1)
+void osPcMapTLB(
+    s32 index,
+    u32 pageMask,
+    void *virtualAddress,
+    uintptr_t evenPhysical,
+    uintptr_t oddPhysical,
+    s32 asid
+);
+#define osMapTLB(index, pageMask, virtualAddress, evenPhysical, oddPhysical, asid) \
+    osPcMapTLB((index), (pageMask), (virtualAddress), (evenPhysical), (oddPhysical), (asid))
+
 /* Removes every mapping, as osUnmapTLBAll does */
 void osPcUnmapAll(void);
 

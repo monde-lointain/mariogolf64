@@ -1883,7 +1883,7 @@ s32 GetCharacterBufferSize(void) {
 
 void SetCharacterBuffer(s32 slotIndex, u8 *buffer) {
     // Aligned for SetMultiTlb
-    u32 alignedBuffer = RoundUpTo((u32)buffer, SMALLEST_PAGE_SIZE);
+    UnsignedAddress alignedBuffer = RoundUpTo(AddressNumber(buffer), SMALLEST_PAGE_SIZE);
     s32 warningCount;
     s32 copyIndex;
 
