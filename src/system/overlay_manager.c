@@ -205,7 +205,8 @@ Boolean CanLoadOverlay(s32 overlayId) {
             continue;
         }
 
-        if ((u32)f_Overlays[otherOverlayIndex].bssEnd < (u32)f_Overlays[overlayIndex].vramStart) {
+        if (AddressNumber(f_Overlays[otherOverlayIndex].bssEnd) <
+            AddressNumber(f_Overlays[overlayIndex].vramStart)) {
             continue;
         }
 
