@@ -10,9 +10,8 @@
 #ifndef _OS_PC_H_
 #define _OS_PC_H_
 
-#include <stdint.h>
-
 #include <PR/ultratypes.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
