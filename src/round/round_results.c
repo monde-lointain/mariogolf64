@@ -1601,8 +1601,9 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_POINT);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 
-    // Once the swing settles the picture is drawn at full size, where point
-    // sampling is sharper
+    // Meant to point-sample the picture once the swing settles at full size,
+    // where that is sharper. But the swing stops at M_PI held as a float,
+    // which never equals the double M_PI, so the picture is always filtered.
     if (f_NoticeAngle == M_PI) {
         gDPPipeSync(gfx++);
         gDPSetTextureFilter(gfx++, G_TF_POINT);
