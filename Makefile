@@ -590,11 +590,13 @@ $(BUILD_DIR)/%.bin.o: %.bin
 	@mkdir -p $(dir $@)
 	$(OBJCOPY) -I binary -O $(BIN_FORMAT) -B mips $< $@
 
-# Custom characters' model files, which build_character.py writes from their
-# packages over the original's models, and the header of their layouts,
-# which character_model.c includes in place of the original's
+# The files that build_character.py and face_sprites.py write from custom
+# characters' packages, each in place of the file at the same path here:
+# their model files, the headers of their names and layouts, which come
+# first on the include path, the text with their names and their face
+# sprites. The layouts' header is written last.
 CHARACTER_DIR    := $(BUILD_DIR)/custom_characters
-CHARACTER_HEADER := $(CHARACTER_DIR)/layouts.h
+CHARACTER_HEADER := $(CHARACTER_DIR)/include/characters/model_layouts.h
 # Changes to the list of packages, which their files' dates don't show
 CHARACTER_LIST   := $(CHARACTER_DIR)/packages.txt
 # Where the text files are encoded from: a custom build's copies have the
@@ -604,12 +606,12 @@ TEXT_ROOT        :=
 ARCHIVE_REPLACEMENTS :=
 ifneq ($(strip $(CHARACTERS)),)
 TEXT_ROOT        := $(CHARACTER_DIR)/
-ARCHIVE_REPLACEMENTS := $(CHARACTER_DIR)/asset_archive
 # The list of the face sprites' files, which face_sprites.py writes last
 FACE_SPRITES     := $(CHARACTER_DIR)/face_sprites.txt
-DEFINES          += -DCUSTOM_CHARACTERS
+INCLUDES         := -I$(CHARACTER_DIR)/include $(INCLUDES)
+ARCHIVE_REPLACEMENTS := $(CHARACTER_DIR)/assets/asset_archive
 CHARACTER_FILES  := $(shell $(PYTHON) tools/build_character.py --list-files $(CHARACTERS))
-CHARACTER_BINS   := $(CHARACTER_FILES:%=$(CHARACTER_DIR)/%.bin)
+CHARACTER_BINS   := $(CHARACTER_FILES:%=$(CHARACTER_DIR)/assets/character_models/%.bin)
 CHARACTER_TOOLS  := $(addprefix tools/,build_character.py character_template.py \
                     character_model_format.py f3dex2.py lz_codec.py)
 
@@ -618,13 +620,15 @@ $(CHARACTER_LIST): FORCE
 	@echo '$(abspath $(CHARACTERS))' | cmp -s - $@ || echo '$(abspath $(CHARACTERS))' > $@
 
 $(CHARACTER_HEADER): $(CHARACTER_LIST) $(CHARACTER_TOOLS) $(shell find $(CHARACTERS) -type f) \
-                     src/characters/character_model.c $(wildcard assets/character_models/*.bin) \
+                     src/characters/character_model.c include/characters/model_layouts.h \
+                     include/characters/character_names.h $(wildcard assets/character_models/*.bin) \
                      $(TEXT_FILES:%=%.txt)
-	$(PYTHON) tools/build_character.py --output $(CHARACTER_DIR) --header $@ \
+	$(PYTHON) tools/build_character.py --output $(CHARACTER_DIR) \
 	    $(TEXT_FILES:%=--text %.txt) $(CHARACTERS)
 
 # The header is written last, so it's newer than the files it was written with
-$(CHARACTER_BINS) $(CHARACTER_DIR)/names.h $(TEXT_FILES:%=$(CHARACTER_DIR)/%.txt): \
+$(CHARACTER_BINS) $(CHARACTER_DIR)/include/characters/character_names.h \
+$(TEXT_FILES:%=$(CHARACTER_DIR)/%.txt): \
     $(CHARACTER_HEADER) ;
 
 $(FACE_SPRITES): $(CHARACTER_LIST) $(CHARACTER_TOOLS) $(shell find $(CHARACTERS) -type f) \
@@ -641,7 +645,7 @@ $(addprefix $(BUILD_DIR)/src/,characters/character_model.c.o menus/menu.c.o \
 $(filter $(BUILD_DIR)/assets/character_models/%,$(O_FILES)): $(CHARACTER_LIST)
 
 $(CHARACTER_FILES:%=$(BUILD_DIR)/assets/character_models/%.bin.o): \
-$(BUILD_DIR)/assets/character_models/%.bin.o: $(CHARACTER_DIR)/%.bin
+$(BUILD_DIR)/assets/character_models/%.bin.o: $(CHARACTER_DIR)/assets/character_models/%.bin
 	@mkdir -p $(dir $@)
 	$(OBJCOPY) -I binary -O $(BIN_FORMAT) -B mips $< $@
 endif

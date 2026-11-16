@@ -378,7 +378,8 @@ def _as_vec3(values: FloatArray) -> Vec3:
 def load_template(repository: Path, slot: str) -> CharacterTemplate:
     """Read the template of SLOT, such as "charlie", from the extracted files."""
     table = fmt.read_model_table(
-        repository / "src" / "characters" / "character_model.c"
+        repository / "src" / "characters" / "character_model.c",
+        repository / "include" / "characters" / "model_layouts.h",
     )
     models_dir = repository / "assets" / "character_models"
     try:

@@ -3,9 +3,10 @@
 A character model file is LZ-compressed (see lz_codec.py). Decompressed, it
 is loaded at segment 2, 0x02000000, and its CharacterModel entry in
 src/characters/character_model.c gives the segment addresses of what it
-holds (see include/characters/character_model.h). The file has no table of
-its own, so reading one needs the entry, which read_model_table() parses
-from the source.
+holds (see include/characters/character_model.h), as its layout in
+include/characters/model_layouts.h has them. The file has no table of its
+own, so reading one needs the entry, which read_model_table() parses from
+the two.
 
 The main display list draws the skeleton: each joint pushes its matrix,
 which AnimateCharacterJoints writes to segment 3 each frame, onto its
@@ -146,28 +147,40 @@ class ModelEntry:
         return self.rom_name != self.base_name
 
 
-# An entry gives its file's original layout after the hook by which a
-# custom character's layout can take its place
-_ENTRY_SOURCE = (
-    r"ModelRomBounds\((\w+)\),\s*"
-    r"(?:#ifdef \w+\s+\w+\s+#else\s+)?"
-    r"\{([^}]*)\},\s*(-?\d+),\s*"
+# An entry names its file, then the macro that gives its layout
+_ENTRY_PATTERN = re.compile(r"ModelRomBounds\((\w+)\),\s*(\w+_MODEL_LAYOUT)\b")
+_LAYOUT_SOURCE = (
+    r"#define (\w+_MODEL_LAYOUT)\s*\\\s*"
+    r"\{([^}]*)\},\s*\\\s*(-?\d+),\s*"
     r"ModelRomBounds\((\w+)\),\s*(0x[0-9A-Fa-f]+),\s*(0x[0-9A-Fa-f]+)"
 )
-_ENTRY_PATTERN = re.compile(_ENTRY_SOURCE)
+_LAYOUT_PATTERN = re.compile(_LAYOUT_SOURCE)
 
 
-def read_model_table(source: Path) -> list[ModelEntry]:
-    """Parse g_CharacterModels' entries, in model index order, from SOURCE."""
+def read_model_table(source: Path, layouts: Path) -> list[ModelEntry]:
+    """Parse g_CharacterModels' entries, in model index order.
+
+    SOURCE is the file that holds the table, and LAYOUTS the header whose
+    macros give each entry's layout.
+    """
     text = source.read_text()
     start = text.find(MODEL_TABLE_NAME + "[")
     end = text.find(OPENING_TABLE_NAME + "[")
     if start < 0 or end < start:
         msg = f"{source} has no {MODEL_TABLE_NAME} table before {OPENING_TABLE_NAME}"
         raise ModelFormatError(msg)
+    found = cast(
+        "list[tuple[str, str, str, str, str, str]]",
+        _LAYOUT_PATTERN.findall(layouts.read_text()),
+    )
+    layout_of = {layout[0]: layout[1:] for layout in found}
     entries: list[ModelEntry] = []
     for match in _ENTRY_PATTERN.finditer(text, start, end):
-        rom_name, segments, shadow, base_name, frame_start, frame_end = match.groups()
+        rom_name, macro = match.groups()
+        if macro not in layout_of:
+            msg = f"{layouts} doesn't define {macro}, which {source} uses"
+            raise ModelFormatError(msg)
+        segments, shadow, base_name, frame_start, frame_end = layout_of[macro]
         words = cast("list[str]", re.findall(r"0x[0-9A-Fa-f]+", segments))
         addresses = tuple(int(word, 16) for word in words)
         if len(addresses) != SEGMENT_ADDRESS_COUNT:

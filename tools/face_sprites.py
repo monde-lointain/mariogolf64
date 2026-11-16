@@ -17,9 +17,10 @@ artist can paint over the sheet that this writes, DIR/SLOT_face_sprites.png,
 and save it in the package as face_sprites.png; this then takes that in
 place of drawing it.
 
-The pictures' asset files go in DIR/asset_archive, for asset_archive.py to
-pack in place of the originals in ARCHIVE, the directory that make splits
-the archive into. DIR/face_sprites.txt, written last, lists the files.
+The pictures' asset files go in DIR/assets/asset_archive, for
+asset_archive.py to pack in place of the originals in ARCHIVE, the
+directory that make splits the archive into. DIR/face_sprites.txt, written
+last, lists the files.
 """
 
 from __future__ import annotations
@@ -54,7 +55,7 @@ SUMMARY = "Draw custom characters' face sprites, for the menus and scorecards."
 SHEET_FILE = "face_sprites.png"
 LIST_FILE = "face_sprites.txt"
 # Where in the output the assets that replace the archive's go
-ARCHIVE_DIRECTORY = "asset_archive"
+ARCHIVE_DIRECTORY = Path("assets/asset_archive")
 WIDTH = 32
 HEIGHT = 32
 # The character's colors, then its three palettes'
@@ -854,8 +855,8 @@ def write_face_sprites(
 ) -> list[Path]:
     """Write a package's face sprites to OUTPUT, if its slot's are known.
 
-    Their asset files go in OUTPUT/asset_archive, and a sheet of them, as the
-    game shows them, is OUTPUT/SLOT_face_sprites.png. Return the files.
+    Their asset files go in OUTPUT/assets/asset_archive, and a sheet of them,
+    as the game shows them, is OUTPUT/SLOT_face_sprites.png. Return the files.
     """
     built = build_face_sprites(package, template, archive)
     if built is None:

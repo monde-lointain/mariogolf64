@@ -509,9 +509,7 @@ class CommandLineTest(unittest.TestCase):
         ):
             run_main([str(package)])
         self.assertEqual(caught.exception.code, 2)
-        self.assertIn(
-            "give --output and --header, --check or --list-files", errors.getvalue()
-        )
+        self.assertIn("give --output, --check or --list-files", errors.getvalue())
 
     def test_list_files_names_every_file(self) -> None:
         """Check that --list-files names the eight files a slot's package replaces."""
@@ -656,13 +654,19 @@ class NameTest(unittest.TestCase):
                     self.assertEqual(menu, bc.menu_spelling(name))
 
     def test_header_renames_the_slot(self) -> None:
-        """Check that names.h defines the replaced slot's three names."""
-        header = bc.names_header(
-            [named_package(self, "Mr. Fox"), named_package(self, "Big D", "joe")]
-        )
-        defines = dict(
+        """Check that the names header's copy renames only the replaced slots."""
+        output = PackageDirectory(self).path
+        packages = [named_package(self, "Mr. Fox"), named_package(self, "Big D", "joe")]
+        bc.write_names(packages, REPOSITORY, [], output)
+        header = (output / bc.NAMES_HEADER).read_text()
+        copied = dict(
             cast("list[tuple[str, str]]", re.findall(r"#define (\w+) (.+)", header))
         )
+        original = header_defines()
+        defines = {
+            name: copied[name] for name in copied if copied[name] != original[name]
+        }
+        self.assertEqual(set(copied), set(original))
         self.assertEqual(
             defines,
             {
@@ -674,7 +678,6 @@ class NameTest(unittest.TestCase):
                 "JOE_CONTESTANT_NAME": bc.menu_spelling("Big_D"),
             },
         )
-        self.assertEqual(set(defines) - set(header_defines()), set())
 
     def test_names_the_menus_cannot_show_are_refused(self) -> None:
         """Check that a name too long, empty or with other letters is refused.
@@ -708,13 +711,70 @@ class NameTest(unittest.TestCase):
         self.assertEqual(renamed, expected)
 
     def test_text_path_must_be_relative(self) -> None:
-        """Check that an absolute text file, whose copy would land on it, is refused."""
+        """Check that a text file outside the repository is refused."""
         output = PackageDirectory(self).path
         text = output / "messages.txt"
         _ = text.write_text("Charlie\n")
-        with self.assertRaises(bc.BuilderBugError):
-            bc.write_names([named_package(self, "Terry")], [text], output)
+        for path in [text, Path("../messages.txt")]:
+            with self.subTest(path=path), self.assertRaises(bc.BuilderBugError):
+                bc.write_names(
+                    [named_package(self, "Terry")], REPOSITORY, [path], output
+                )
         self.assertEqual(text.read_text(), "Charlie\n")
+
+
+# A header whose definitions DefineTest replaces
+DEFINES_HEADER = (
+    "#ifndef H\n#define H\n"
+    "#define ONE 1\n"
+    "#define LONG \\\n    { 1, \\\n      2 }, \\\n    3\n"
+    "#define ONE_MORE 4\n"
+    "#endif\n"
+)
+
+
+class DefineTest(unittest.TestCase):
+    """Check how a header's copy takes the definitions that replace its own."""
+
+    def test_replaces_whole_definitions_only(self) -> None:
+        """Check that a definition and its continued lines are replaced, not others.
+
+        ONE is a prefix of ONE_MORE, which must keep its own definition.
+        """
+        replaced = bc.replace_defines(
+            DEFINES_HEADER,
+            {"ONE": "#define ONE 9", "LONG": "#define LONG 5"},
+            Path("h.h"),
+        )
+        expected = (
+            "#ifndef H\n#define H\n#define ONE 9\n#define LONG 5\n"
+            "#define ONE_MORE 4\n#endif\n"
+        )
+        self.assertEqual(replaced, expected)
+
+    def test_unknown_macro_is_a_bug(self) -> None:
+        """Check that a macro the header lacks is reported, not added."""
+        with self.assertRaises(bc.BuilderBugError) as caught:
+            _ = bc.replace_defines(
+                DEFINES_HEADER, {"TWO": "#define TWO 2"}, Path("h.h")
+            )
+        self.assertTrue(str(caught.exception).startswith("h.h doesn't define TWO."))
+
+    def test_layouts_header_takes_every_slots_layout(self) -> None:
+        """Check that each model file's layout macro is one the header defines.
+
+        The table reads the header's own layouts back as the originals'.
+        """
+        repository_layouts = REPOSITORY / bc.LAYOUTS_HEADER
+        table = fmt.read_model_table(
+            REPOSITORY / "src" / "characters" / "character_model.c", repository_layouts
+        )
+        header = repository_layouts.read_text()
+        for slot in bc.SLOT_NAMES:
+            for names in bc.model_file_names(slot).values():
+                defines = {name.upper() + bc.LAYOUT_SUFFIX: "" for name in names}
+                _ = bc.replace_defines(header, defines, repository_layouts)
+        self.assertEqual(len(table), 144)
 
 
 if __name__ == "__main__":

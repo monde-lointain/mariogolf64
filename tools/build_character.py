@@ -1,23 +1,27 @@
 #!/usr/bin/env python3
 """Build a custom character's model files from its package.
 
-    build_character.py --output DIR --header FILE PACKAGE...
+    build_character.py [--repository BASE] --output DIR PACKAGE...
     build_character.py --check PACKAGE...
     build_character.py --list-files PACKAGE...
 
 Each PACKAGE is a directory that the Blender add-on in
 tools/blender/mario_golf_character exports: a character.json and its
 textures. It names the character slot it replaces, such as "charlie". The
-slot's own models, extracted by make setup into assets/character_models,
+slot's own models, extracted by make setup into BASE/assets/character_models,
 are its template: the custom character keeps their skeletons, animations,
-clubs and points, and brings its own parts, colors and face.
+clubs and points, and brings its own parts, colors and face. BASE is the
+decompilation's folder, the current one unless given.
 
-For each package, the output DIR gets the slot's eight model files, compressed
-as the game loads them: SLOT.bin, SLOT_reaction.bin and their palettes,
-which patch them. The header FILE gets the macros that give src/characters/
-character_model.c the files' layouts in place of the originals'. --check
-only reads the packages and reports what's wrong with them, and
---list-files only names the model files that they replace, one a line.
+DIR gets the files that take the place of BASE's files at the same paths
+within it. For each package, these are the slot's eight model files in
+assets/character_models, compressed as the game loads them: SLOT.bin,
+SLOT_reaction.bin and their palettes, which patch them. Then come
+include/characters/character_names.h, with the packages' names, and,
+written last, include/characters/model_layouts.h, with their model files'
+layouts. --check only reads the packages and reports what's wrong with
+them, and --list-files only names the model files that they replace, one
+a line.
 
 character.json holds, with positions in the game's model units, Y up and
 the character facing +Z, in the template's bind pose:
@@ -37,9 +41,8 @@ the character facing +Z, in the template's bind pose:
     portrait_camera optional: six numbers for each model kind
 
 The character's name replaces the slot's in the game's menus, its text and
-its tournaments. With --text, the output DIR also gets a copy of each text
-file named, as assets/text/messages.txt, with the names changed, and
-names.h, which include/characters/character_names.h reads.
+its tournaments. DIR also gets a copy of each text file that --text names
+within BASE, such as assets/text/messages.txt, with the names changed.
 tools/face_sprites.py draws the character's face sprites, which the menus
 and scorecards show.
 """
@@ -47,6 +50,7 @@ and scorecards show.
 import argparse
 import json
 import math
+import re
 import struct
 import sys
 from collections.abc import Callable
@@ -101,7 +105,14 @@ NAME_PUNCTUATION = " .-"
 # The menus' font codes a lowercase letter as the letter plus this
 LOWERCASE_CODE_OFFSET = 0x80
 HEX_DIGITS = "0123456789ABCDEFabcdef"
-NAMES_FILE = "names.h"
+# The headers that a build's copies replace, and where its model files go
+NAMES_HEADER = Path("include/characters/character_names.h")
+LAYOUTS_HEADER = Path("include/characters/model_layouts.h")
+MODELS_DIRECTORY = Path("assets/character_models")
+# A C macro's definition, with the lines that a backslash continues it onto
+DEFINE_PATTERN = re.compile(r"^#define (\w+)\b(?:.*\\\n)*.*$", re.MULTILINE)
+# How many segment addresses a line of a layout's macro holds
+ADDRESSES_PER_LINE = 5
 TOURNAMENT_SUFFIX = " Tournament"
 
 # How much of a slot's model buffer a model can use, and how much of it the
@@ -532,23 +543,34 @@ def menu_spelling(name: str) -> str:
     return spelled + '"'
 
 
-def names_header(packages: list[Package]) -> str:
-    """Return names.h, which gives character_names.h the packages' names."""
-    lines = [
-        "// The custom characters' names, which tools/build_character.py wrote",
-        "// from their packages",
-    ]
+def name_defines(packages: list[Package]) -> dict[str, str]:
+    """Return the definitions that give character_names.h the packages' names."""
+    defines: dict[str, str] = {}
     for package in packages:
         macro = package.slot.upper()
-        lines += [
-            f'#define {macro}_NAME "{package.name}"',
-            f"#define {macro}_MENU_NAME {menu_spelling(package.name)}",
-            (
-                f"#define {macro}_CONTESTANT_NAME "
-                f"{menu_spelling(package.name.replace(' ', '_'))}"
-            ),
-        ]
-    return "\n".join(lines) + "\n"
+        spellings = {
+            "NAME": f'"{package.name}"',
+            "MENU_NAME": menu_spelling(package.name),
+            "CONTESTANT_NAME": menu_spelling(package.name.replace(" ", "_")),
+        }
+        for suffix, value in spellings.items():
+            defines[f"{macro}_{suffix}"] = f"#define {macro}_{suffix} {value}"
+    return defines
+
+
+def replace_defines(header: str, defines: dict[str, str], where: Path) -> str:
+    """Return HEADER with each macro that DEFINES names defined as it gives.
+
+    A macro's definition takes the lines its backslashes continue it onto.
+    WHERE names the header, for the error when it lacks a macro.
+    """
+    missing = set(defines) - set(cast("list[str]", DEFINE_PATTERN.findall(header)))
+    if missing:
+        msg = f"{where} doesn't define {', '.join(sorted(missing))}"
+        raise BuilderBugError(msg)
+    return DEFINE_PATTERN.sub(
+        lambda match: defines.get(match.group(1), match.group(0)), header
+    )
 
 
 def rename_text(text: str, packages: list[Package]) -> str:
@@ -1648,31 +1670,40 @@ def build_models(
     return models
 
 
-def layout_macro(name: str, base: BuiltModel, shadow_scale: int) -> str:
-    """Return the C macro that gives character_model.c a file's layout."""
-    segments = ", ".join(f"0x{address:08X}" for address in base.segments)
+def layout_define(name: str, base: BuiltModel, shadow_scale: int) -> str:
+    """Return the definition that gives model_layouts.h a file's layout."""
+    words = [f"0x{address:08X}" for address in base.segments]
+    rows = [
+        ", ".join(words[start : start + ADDRESSES_PER_LINE])
+        for start in range(0, len(words), ADDRESSES_PER_LINE)
+    ]
+    segments = ", \\\n      ".join(rows)
     return (
         f"#define {name.upper()}{LAYOUT_SUFFIX} \\\n    {{ {segments} }}, \\\n    "
         f"{shadow_scale}, ModelRomBounds({base.name}), 0x{base.frame_start:08X}, "
-        f"0x{base.frame_end:08X}\n"
+        f"0x{base.frame_end:08X}"
     )
 
 
 def write_models(
     package: Package, template: tmpl.CharacterTemplate, output: Path
-) -> list[str]:
-    """Write a package's compressed model files, and return its layout macros."""
-    macros: list[str] = []
+) -> dict[str, str]:
+    """Write a package's compressed model files, and return their layouts' defines."""
+    models = output / MODELS_DIRECTORY
+    models.mkdir(parents=True, exist_ok=True)
+    defines: dict[str, str] = {}
     for kind, built in build_models(package, template).items():
         base = built[0]
-        _ = (output / f"{base.name}.bin").write_bytes(lz_codec.encode(base.data))
+        _ = (models / f"{base.name}.bin").write_bytes(lz_codec.encode(base.data))
         shadow_scale = template.models()[kind].model.entry.shadow_scale
         for palette in built[1:]:
-            _ = (output / f"{palette.name}.bin").write_bytes(
+            _ = (models / f"{palette.name}.bin").write_bytes(
                 lz_codec.encode_patch(base.data, palette.data)
             )
-        macros += [layout_macro(model.name, base, shadow_scale) for model in built]
-    return macros
+        for model in built:
+            define = layout_define(model.name, base, shadow_scale)
+            defines[model.name.upper() + LAYOUT_SUFFIX] = define
+    return defines
 
 
 def _claim_slot(slots: dict[str, Path], slot: str, directory: Path) -> None:
@@ -1713,28 +1744,24 @@ def main() -> None:
     _ = parser.add_argument(
         "--repository", type=Path, default=Path(), help="the decompilation's root"
     )
-    _ = parser.add_argument("--output", type=Path, help="where the model files go")
-    _ = parser.add_argument("--header", type=Path, help="the layout header to write")
+    _ = parser.add_argument(
+        "--output", type=Path, help="where the files that replace BASE's go"
+    )
     _ = parser.add_argument(
         "--text",
         type=Path,
         action="append",
-        help="a text file to copy to --output with the names changed",
+        help="a text file in BASE to copy to --output with the names changed",
     )
     _ = parser.add_argument(
         "packages", type=Path, nargs="+", help="character package directories"
     )
     arguments = parser.parse_args(namespace=Arguments())
-    output, header = arguments.output, arguments.header
+    output = arguments.output
     building = not (arguments.check or arguments.list_files)
-    if building and (output is None or header is None):
-        parser.error("give --output and --header, --check or --list-files")
-    macros = [
-        (
-            "// The layouts of the custom characters' model files, which\n// "
-            "tools/build_character.py wrote from their packages\n"
-        )
-    ]
+    if building and output is None:
+        parser.error("give --output, --check or --list-files")
+    layouts: dict[str, str] = {}
     slots: dict[str, Path] = {}
     packages: list[Package] = []
     try:
@@ -1750,10 +1777,10 @@ def main() -> None:
             if arguments.check:
                 print(check_report(package, build_models(package, template)))
             elif output is not None:
-                output.mkdir(parents=True, exist_ok=True)
-                macros += write_models(package, template, output)
+                layouts |= write_models(package, template, output)
         if output is not None and building:
-            write_names(packages, arguments.text or [], output)
+            write_names(packages, arguments.repository, arguments.text or [], output)
+            write_header(arguments.repository, LAYOUTS_HEADER, layouts, output)
     except (
         PackageError,
         BuilderBugError,
@@ -1762,23 +1789,37 @@ def main() -> None:
         OSError,
     ) as error:
         sys.exit(f"build_character.py: {error}")
-    if header is not None and building:
-        header.parent.mkdir(parents=True, exist_ok=True)
-        _ = header.write_text("\n".join(macros))
 
 
-def write_names(packages: list[Package], texts: list[Path], output: Path) -> None:
-    """Write names.h to OUTPUT, and a copy of each of TEXTS with the names changed."""
-    _ = (output / NAMES_FILE).write_text(names_header(packages))
+def write_header(
+    repository: Path, header: Path, defines: dict[str, str], output: Path
+) -> None:
+    """Write to OUTPUT a copy of REPOSITORY's HEADER with DEFINES in place."""
+    source = repository / header
+    copy = output / header
+    copy.parent.mkdir(parents=True, exist_ok=True)
+    _ = copy.write_text(replace_defines(source.read_text(), defines, source))
+
+
+def write_names(
+    packages: list[Package], repository: Path, texts: list[Path], output: Path
+) -> None:
+    """Write to OUTPUT copies of the names header and TEXTS with the names changed.
+
+    Each of TEXTS is a path within REPOSITORY, and its copy has the same
+    path within OUTPUT.
+    """
+    write_header(repository, NAMES_HEADER, name_defines(packages), output)
     for text in texts:
-        if text.is_absolute():
-            msg = f"--text {text} should be relative to the repository, as its copy is"
+        if text.is_absolute() or ".." in text.parts:
+            msg = (
+                f"--text {text} should be a path within the repository, as its copy is"
+            )
             raise BuilderBugError(msg)
         copy = output / text
         copy.parent.mkdir(parents=True, exist_ok=True)
-        _ = copy.write_text(
-            rename_text(text.read_text(encoding="utf-8"), packages), encoding="utf-8"
-        )
+        renamed = rename_text((repository / text).read_text(encoding="utf-8"), packages)
+        _ = copy.write_text(renamed, encoding="utf-8")
 
 
 def check_report(package: Package, models: dict[str, list[BuiltModel]]) -> str:
