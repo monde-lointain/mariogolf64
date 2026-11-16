@@ -53,6 +53,13 @@ mg64_add_port_test(memory_test
     LIBRARIES mg64_ultra SDL3::SDL3
 )
 
+# The host's copies of a character model's tables, from a model built in
+# the N64's layout
+mg64_add_port_test(character_tables_test
+    SOURCES character_tables_test.c
+    LIBRARIES mg64_game_support mg64_ultra SDL3::SDL3
+)
+
 mg64_add_port_test(tmem_test
     SOURCES tmem_test.c
     LIBRARIES mg64_gfx
