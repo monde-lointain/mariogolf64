@@ -1,0 +1,622 @@
+# The ROM's layout, in order, for tools/layout.py, which writes the linker
+# scripts from it.
+#
+#   segment NAME ADDRESS   code and data that run at ADDRESS in RAM
+#       PATH [KIND...]     an object to place, by its source's path
+#       pad SIZE KIND      a gap of SIZE bytes among the sections of KIND
+#   file PATH              a file that the ROM holds as it is
+#
+# A segment places its objects' code (text), then their data, read-only data
+# (rodata) and bss, each in the order of the lines that list them. A line
+# places the kinds that it names, all four if it names none, so an object
+# whose sections go in another order is listed once for each. A line that
+# names "common" places the object's common symbols; a segment with no such
+# line places each object's after its bss. "matching" marks an object that
+# only the original's layout links. A file's symbols are named after its
+# path below assets/, such as text_glyphs_ROM_START for
+# assets/text/glyphs.bin. '#' starts a comment.
+file assets/header.bin
+file assets/ipl3.bin
+
+segment main 0x80025C00
+    src/system/entry.s
+    lib/libnusys/src/nupireadrom.c
+    src/system/overlay_manager.c
+    src/course/billboard.c
+    lib/libnusys/src/nugfxinit_ex2.c
+    lib/libnusys/src/nusched.c
+    lib/libnusys/src/nugfxsetcfb.c
+    lib/libnusys/src/nugfxtaskmgr.c
+    src/system/main.c
+    src/game/game.c
+    src/screen/rcp_init.c
+    src/shot/ball_simulation.c
+    src/course/collision.c
+    src/course/pin.c
+    src/course/terrain.c
+    src/shot/club.c
+    src/camera/shot_camera.c
+    src/debug/debug_text.c
+    src/system/heap.c
+    src/debug/performance_meter.c
+    src/screen/animated_box.c
+    src/system/asset.c
+    src/audio/sound.c
+    src/course/course.c
+    src/round/scoring.c
+    src/characters/character_model.c
+    src/characters/character.c
+    src/math/math_library.c
+    src/menus/menu.c
+    src/system/crash_screen.c
+    src/audio/music.c
+    src/round/play.c
+    src/camera/view_projection.c
+    src/course/hole_triangles.c
+    src/characters/character_sound.c
+    src/math/matrix_conversion.c
+    src/round/tournament.c
+    src/course/hole_loader.c
+    src/math/math_util.c
+    src/screen/screen_layers.c
+    src/round/round_stats.c
+    src/screen/scene_colors.c
+    src/controllers/controller_paks.c
+    src/menus/help_board.c
+    src/save/awards.c
+    src/text/text.c
+    src/camera/camera_framing.c
+    src/math/curve.c
+    src/round/fireworks.c
+    src/shot/particle_effects.c
+    src/round/round_hud.c
+    src/screen/sky_and_hud_animations.c
+    src/characters/reaction.c
+    src/menus/password.c
+    src/save/sram.c
+    lib/libnusys/src/nuboot.c
+    lib/libmus/src/player.c
+    lib/libmus/src/player_fx.c
+    lib/libmus/src/aud_dma.c
+    lib/libmus/src/aud_sched.c
+    lib/libmus/src/aud_thread.c
+    lib/libmus/src/lib_memory.c
+    lib/libmus/src/aud_samples.c
+    lib/libnaudio/src/n_auxbus.c
+    lib/libnaudio/src/n_drvrNew.c
+    lib/libnaudio/src/n_env.c
+    lib/libnaudio/src/n_load.c
+    lib/libnaudio/src/n_resample.c
+    lib/libnaudio/src/n_reverb.c
+    lib/libnaudio/src/n_sl.c
+    lib/libnaudio/src/n_synaddplayer.c
+    lib/libnaudio/src/n_synallocvoice.c
+    lib/libnaudio/src/n_syndelete.c
+    lib/libnaudio/src/n_synsetfxmix.c
+    lib/libnaudio/src/n_synsetpan.c
+    lib/libnaudio/src/n_synsetpitch.c
+    lib/libnaudio/src/n_synsetvol.c
+    lib/libnaudio/src/n_synstartvoice.c
+    lib/libnaudio/src/n_synstopvoice.c
+    lib/libnaudio/src/n_synthesizer.c
+    lib/libnaudio/src/n_save.c
+    lib/libnaudio/src/n_synallocfx.c
+    lib/libnaudio/src/n_mainbus.c
+    lib/libnusys/src/nuprenmifuncset.c
+    lib/libnusys/src/nugfxthread.c
+    lib/libnusys/src/nugfxfuncset.c
+    lib/libnusys/src/nugfxswapcfbfuncset.c
+    lib/libnusys/src/nugfxswapcfb.c
+    lib/libnusys/src/nugfxtaskallendwait.c
+    lib/libnusys/src/nugfxretracewait.c
+    lib/libnusys/src/nugfxdisplayoff.c
+    lib/libnusys/src/nugfxdisplayon.c
+    lib/libnusys/src/nupiinit.c
+    lib/libnusys/src/nupiinitsram.c
+    lib/libnusys/src/nupireadwritesram.c
+    lib/libnusys/src/nucontinit.c
+    lib/libnusys/src/nucontdatagetex.c
+    lib/libnusys/src/nucontrmbmgr.c
+    lib/libnusys/src/nucontrmbstart.c
+    lib/libnusys/src/nucontrmbcheck.c
+    lib/libnusys/src/nucontrmbmodeset.c
+    lib/libnusys/src/nucontrmbforcestop.c
+    lib/libnaudio/src/n_synfreefx.c
+    lib/libnusys/src/nucontgbpakmgr.c
+    lib/libnusys/src/nucontgbpakopen.c
+    lib/libnusys/src/nucontgbpakgetstatus.c
+    lib/libnusys/src/nucontgbpakpower.c
+    lib/libnusys/src/nucontgbpakreadid.c
+    lib/libnusys/src/nucontgbpakreadwrite.c
+    lib/libnusys/src/nucontgbpakcheck.c
+    lib/libnusys/src/nucontgbpakfread.c
+    lib/libnusys/src/nucontgbpakfwrite.c
+    lib/libnusys/src/nusimgr.c
+    lib/libnusys/src/nusicallbackadd.c
+    lib/libnusys/src/nusicallbackremove.c
+    lib/libnusys/src/nucontmgr.c
+    lib/libnusys/src/nucontdatalock.c
+    lib/libnusys/src/nucontqueryread.c
+    lib/ultralib/src/os/getcurrfaultthread.c
+    lib/ultralib/src/os/setintmask.s
+    lib/ultralib/src/io/pimgr.c
+    lib/ultralib/src/io/epirawdma.c
+    lib/ultralib/src/io/epidma.c
+    lib/ultralib/src/io/epilinkhandle.c
+    lib/ultralib/src/io/cartrominit.c
+    lib/ultralib/src/io/devmgr.c
+    lib/ultralib/src/io/piacs.c
+    lib/ultralib/src/io/aigetlen.c
+    lib/ultralib/src/io/aigetstat.c
+    lib/ultralib/src/io/aisetfreq.c
+    lib/ultralib/src/io/aisetnextbuf.c
+    lib/ultralib/src/audio/drvrnew.c
+    lib/ultralib/src/audio/load.c
+    lib/ultralib/src/audio/auxbus.c
+    lib/ultralib/src/audio/env.c
+    lib/ultralib/src/audio/filter.c
+    lib/ultralib/src/audio/mainbus.c
+    lib/ultralib/src/audio/resample.c
+    lib/ultralib/src/audio/reverb.c
+    lib/ultralib/src/audio/save.c
+    lib/ultralib/src/audio/sl.c
+    lib/ultralib/src/audio/heapinit.c
+    lib/ultralib/src/audio/heapalloc.c
+    lib/ultralib/src/audio/copy.c
+    lib/ultralib/src/os/invaldcache.s
+    lib/ultralib/src/os/invalicache.s
+    lib/ultralib/src/os/writebackdcache.s
+    lib/ultralib/src/os/writebackdcacheall.s
+    lib/ultralib/src/io/contquery.c
+    lib/ultralib/src/io/contreaddata.c
+    lib/ultralib/src/io/controller.c
+    lib/ultralib/src/os/virtualtophysical.c
+    lib/ultralib/src/gu/align.c
+    lib/ultralib/src/gu/cosf.c
+    lib/ultralib/src/gu/lookat.c
+    lib/ultralib/src/gu/lookathil.c
+    lib/ultralib/src/gu/lookatref.c
+    lib/ultralib/src/gu/mtxcatf.c
+    lib/ultralib/src/gu/mtxcatl.c
+    lib/ultralib/src/gu/ortho.c
+    lib/ultralib/src/gu/perspective.c
+    lib/ultralib/src/gu/position.c
+    lib/ultralib/src/gu/random.c
+    lib/ultralib/src/gu/rotate.c
+    lib/ultralib/src/gu/rotaterpy.c
+    lib/ultralib/src/gu/scale.c
+    lib/ultralib/src/gu/sinf.c
+    lib/ultralib/src/gu/translate.c
+    lib/ultralib/src/libc/bcopy.s
+    lib/ultralib/src/libc/bzero.s
+    lib/ultralib/src/libc/string.c
+    lib/ultralib/src/libc/sprintf.c
+    lib/ultralib/src/libc/syncprintf.c
+    lib/ultralib/src/os/createmesgqueue.c
+    lib/ultralib/src/os/jammesg.c
+    lib/ultralib/src/os/recvmesg.c
+    lib/ultralib/src/os/sendmesg.c
+    lib/ultralib/src/os/seteventmesg.c
+    lib/ultralib/src/io/dpsetstat.c
+    lib/ultralib/src/io/dpctr.c
+    lib/ultralib/src/os/getcount.s
+    lib/ultralib/src/io/sptask.c
+    lib/ultralib/src/io/sptaskyield.c
+    lib/ultralib/src/io/sptaskyielded.c
+    lib/ultralib/src/sched/sched.c
+    lib/ultralib/src/io/sirawdma.c
+    lib/ultralib/src/io/siacs.c
+    lib/ultralib/src/os/createthread.c
+    lib/ultralib/src/os/destroythread.c
+    lib/ultralib/src/os/getthreadpri.c
+    lib/ultralib/src/os/setthreadpri.c
+    lib/ultralib/src/os/startthread.c
+    lib/ultralib/src/os/stopthread.c
+    lib/ultralib/src/os/thread.c
+    lib/ultralib/src/os/yieldthread.c
+    lib/ultralib/src/os/gettime.c
+    lib/ultralib/src/os/settimer.c
+    lib/ultralib/src/os/timerintr.c
+    lib/ultralib/src/os/maptlb.s
+    lib/ultralib/src/os/probetlb.s
+    lib/ultralib/src/os/unmaptlb.s
+    lib/ultralib/src/os/unmaptlball.s
+    lib/ultralib/src/io/vigetcurrframebuf.c
+    lib/ultralib/src/io/vigetnextframebuf.c
+    lib/ultralib/src/io/vigetmode.c
+    lib/ultralib/src/io/vimgr.c
+    lib/ultralib/src/io/visetevent.c
+    lib/ultralib/src/io/visetmode.c
+    lib/ultralib/src/io/visetspecial.c
+    lib/ultralib/src/io/visetyscale.c
+    lib/ultralib/src/io/viswapbuf.c
+    lib/ultralib/src/io/viswapcontext.c
+    lib/ultralib/src/io/viblack.c
+    lib/ultralib/src/io/gbpakinit.c
+    lib/ultralib/src/io/gbpakgetstatus.c
+    lib/ultralib/src/io/gbpakpower.c
+    lib/ultralib/src/io/gbpakreadwrite.c
+    lib/ultralib/src/io/vitbl.c data
+    lib/ultralib/src/io/gbpakreadid.c
+    lib/ultralib/src/io/gbpakcheckconnector.c
+    lib/ultralib/src/io/motor.c
+    lib/ultralib/src/io/pfsgetstatus.c
+    lib/ultralib/src/io/pfsselectbank.c
+    lib/ultralib/src/io/contpfs.c
+    lib/ultralib/src/io/contramread.c
+    lib/ultralib/src/io/contramwrite.c
+    pad 0x60 text
+    lib/ultralib/src/os/afterprenmi.c
+    lib/ultralib/src/os/initialize.c
+    lib/ultralib/src/os/exceptasm.s
+    lib/ultralib/src/os/interrupt.s
+    lib/ultralib/src/os/setglobalintmask.c
+    lib/ultralib/src/os/resetglobalintmask.c
+    lib/ultralib/src/io/pirawdma.c
+    lib/ultralib/src/io/pigetcmdq.c
+    lib/ultralib/src/io/epirawread.c
+    lib/ultralib/src/io/epirawwrite.c
+    lib/ultralib/src/io/ai.c
+    lib/ultralib/src/gu/sqrtf.s
+    lib/ultralib/src/libc/bcmp.s
+    lib/ultralib/src/gu/libm_vals.s rodata
+    lib/ultralib/src/libc/xprintf.c
+    lib/ultralib/src/io/dpsetnextbuf.c
+    lib/ultralib/src/os/getcause.s
+    lib/ultralib/src/os/getsr.s
+    lib/ultralib/src/os/setcompare.s
+    lib/ultralib/src/os/setfpccsr.s
+    lib/ultralib/src/os/setsr.s
+    lib/ultralib/src/os/setwatchlo.s
+    lib/ultralib/src/io/sp.c
+    lib/ultralib/src/io/spgetstat.c
+    lib/ultralib/src/io/spsetstat.c
+    lib/ultralib/src/io/spsetpc.c
+    lib/ultralib/src/io/sprawdma.c
+    lib/ultralib/src/io/sirawread.c
+    lib/ultralib/src/io/sirawwrite.c
+    lib/ultralib/src/io/crc.c
+    lib/ultralib/src/os/maptlbrdb.s
+    lib/ultralib/src/io/vi.c
+    lib/ultralib/src/io/vigetcurrcontext.c
+    lib/ultralib/src/io/gbpaksetbank.c
+    lib/ultralib/src/io/pfsisplug.c
+    lib/ultralib/src/vimodes/vimodentsclan1.c data
+    lib/ultralib/src/vimodes/vimodepallan1.c data
+    lib/ultralib/src/vimodes/vimodempallan1.c data
+    lib/ultralib/src/libc/xlitob.c
+    lib/ultralib/src/libc/xldtob.c
+    lib/ultralib/src/io/dp.c
+    lib/ultralib/src/io/si.c
+    lib/ultralib/src/libc/ldiv.c
+    lib/libkmc/src/atan.c
+    lib/libkmc/src/memset.c
+    lib/libkmc/src/rand.c
+    lib/libkmc/src/trig.c
+    lib/libkmc/src/strcmp.c
+    lib/libkmc/src/matherror.c
+    lib/libkmc/src/longlong.s
+    lib/libkmc/src/floatdidf.s
+    lib/libkmc/src/matherr.c
+    src/system/microcode.s text
+    src/shot/current_shot.c bss
+    src/course/work_area.c bss
+    lib/libkmc/src/errno.c bss
+    lib/ultralib/src/debug/kdebugserver.c bss
+    lib/libnusys/src/nudramstack.c bss
+    lib/libnusys/src/nurdpoutput.c bss
+    lib/libnusys/src/nuyieldbuf.c bss
+    src/system/main_bss.c bss matching
+    src/system/microcode.s data
+
+segment ovl_00 0x801F4A30
+    src/round/round_overlay_padding.s
+    src/round/round_results.c
+    src/shot/golf_balls.c
+    src/round/turn.c
+    src/course/hole_creatures.c
+    src/round/round_events.c
+    src/shot/shot_effects.c
+    src/round/pause_menu.c
+    src/shot/shot_labels.c
+    src/round/hole_intro.c
+    src/shot/club_panel.c
+    src/round/turn.c common
+    src/course/hole_creatures.c common
+    src/round/round_events.c common
+    src/shot/shot_effects.c common
+    src/round/pause_menu.c common
+    src/shot/shot_labels.c common
+    src/shot/club_panel.c common
+
+segment ovl_01 0x801F4A30
+    src/menus/menu_overlay_padding.s
+    src/menus/main_menu.c
+    src/menus/character_select.c
+    src/menus/course_stats_screen.c
+    src/menus/best_times.c
+    src/menus/character_table.c
+    src/menus/player_stats.c
+    src/menus/save_screens.c
+    src/menus/tournament_menu.c
+    src/menus/main_menu.c common
+    src/menus/character_select.c common
+    src/menus/player_stats.c common
+    src/menus/save_screens.c common
+
+segment hole_editor 0x80400000
+    src/debug/hole_editor.c
+
+segment ovl_02 0x8024D800
+    src/course/hole_builder.c
+
+segment ovl_03 0x8024D800
+    src/round/computer_golfer.c
+
+segment ovl_04 0x8024D800
+    src/shot/shot_simulation.c
+    pad 0x4 rodata
+    src/shot/shot_simulation.c common
+
+segment ovl_05 0x801F4A30
+    src/cinematics/opening_overlay_padding.s
+    src/cinematics/opening.c
+    src/cinematics/opening_camera_editor.c
+    src/cinematics/opening_ball.c
+    src/cinematics/opening.c common
+    src/cinematics/opening_camera_editor.c common
+
+segment ovl_06 0x801F4A30
+    src/menus/title_screen_overlay_padding.s
+    src/menus/title_screen.c
+    src/menus/unlocks.c
+
+segment ovl_07 0x801F4A30
+    src/cinematics/boot_logos_overlay_padding.s
+    src/cinematics/boot_logos.c
+
+segment ovl_08 0x801F4A30
+    src/menus/confirm_wait_overlay_padding.s
+    src/menus/confirm_wait.c
+
+segment ovl_09 0x80241800
+    src/round/scorecard.c
+    src/round/scorecard_drawing.c
+
+segment ovl_10 0x80241800
+    src/round/club_slots.c
+
+segment ovl_11 0x80241800
+    src/menus/course_select.c
+
+segment ovl_12 0x80241800
+    src/round/save_menu.c
+
+segment ovl_13 0x801F4A30
+    src/menus/transmit_menu_overlay_padding.s
+    src/menus/transmit_menu.c text data rodata
+    src/menus/cursor_box.c
+    src/menus/transmit_menu.c bss
+
+segment ovl_14 0x801F4A30
+    src/cinematics/staff_roll_overlay_padding.s
+    src/cinematics/staff_roll.c
+
+segment build_date 0xB0171770
+    src/system/build_date.s
+
+file assets/sound/pointer_bank.bin
+file assets/sound/wave_bank.bin
+file assets/sound/effect_bank.bin
+file assets/songs/hole_out_eagle.bin
+file assets/songs/hole_out_birdie.bin
+file assets/songs/hole_out_par.bin
+file assets/songs/results.bin
+file assets/songs/hole_out_bogey.bin
+file assets/songs/hole_out_over_bogey.bin
+file assets/songs/hole_won.bin
+file assets/songs/hole_lost.bin
+file assets/songs/hole_halved.bin
+file assets/songs/song_9.bin
+file assets/songs/match_result.bin
+file assets/songs/round_tournament.bin
+file assets/songs/course_toad_highlands.bin
+file assets/songs/course_koopa_park.bin
+file assets/songs/cup_in_par.bin
+file assets/songs/cup_in_over_par.bin
+file assets/songs/cup_in_under_par.bin
+file assets/songs/course_shy_guy_desert.bin
+file assets/songs/course_boo_valley.bin
+file assets/songs/course_yoshis_island.bin
+file assets/songs/round_final.bin
+file assets/songs/training.bin
+file assets/songs/transmit_menu.bin
+file assets/songs/controls.bin
+file assets/songs/round_speed_golf.bin
+file assets/songs/round_match.bin
+file assets/songs/round_training.bin
+file assets/songs/round_course.bin
+file assets/songs/song_28.bin
+file assets/songs/round_ring_shot.bin
+file assets/songs/ring_shot.bin
+file assets/songs/round_replay.bin
+file assets/songs/tournament_toad_highlands.bin
+file assets/songs/tournament_koopa_park.bin
+file assets/songs/tournament_shy_guy_desert.bin
+file assets/songs/tournament_boo_valley.bin
+file assets/songs/tournament_marios_star.bin
+file assets/songs/tournament_results.bin
+file assets/songs/speed_golf.bin
+file assets/songs/title.bin
+file assets/songs/yoshi_and_donkey_kong.bin
+file assets/songs/course_marios_star.bin
+file assets/songs/attract_title.bin
+file assets/songs/round_club_slots.bin
+file assets/songs/mini_golf.bin
+file assets/songs/round_mini_golf.bin
+file assets/songs/round_skins_match.bin
+file assets/songs/opening.bin
+file assets/songs/tournament_yoshis_island.bin
+file assets/songs/staff_roll.bin
+file assets/songs/closing.bin
+file assets/asset_archive.bin
+file assets/text/glyphs.bin
+file assets/text/messages.bin
+file assets/text/unused_glyphs.bin
+file assets/text/unused_messages.bin
+file assets/text/staff_roll.bin
+file assets/character_models/opening_model_15.bin
+file assets/character_models/mario.bin
+file assets/character_models/mario_palette_1.bin
+file assets/character_models/mario_palette_2.bin
+file assets/character_models/mario_palette_3.bin
+file assets/character_models/mario_reaction.bin
+file assets/character_models/mario_reaction_palette_1.bin
+file assets/character_models/mario_reaction_palette_2.bin
+file assets/character_models/mario_reaction_palette_3.bin
+file assets/character_models/luigi.bin
+file assets/character_models/luigi_palette_1.bin
+file assets/character_models/luigi_palette_2.bin
+file assets/character_models/luigi_palette_3.bin
+file assets/character_models/luigi_reaction.bin
+file assets/character_models/luigi_reaction_palette_1.bin
+file assets/character_models/luigi_reaction_palette_2.bin
+file assets/character_models/luigi_reaction_palette_3.bin
+file assets/character_models/wario.bin
+file assets/character_models/wario_palette_1.bin
+file assets/character_models/wario_palette_2.bin
+file assets/character_models/wario_palette_3.bin
+file assets/character_models/wario_reaction.bin
+file assets/character_models/wario_reaction_palette_1.bin
+file assets/character_models/wario_reaction_palette_2.bin
+file assets/character_models/wario_reaction_palette_3.bin
+file assets/character_models/azalea.bin
+file assets/character_models/azalea_palette_1.bin
+file assets/character_models/azalea_palette_2.bin
+file assets/character_models/azalea_palette_3.bin
+file assets/character_models/azalea_reaction.bin
+file assets/character_models/azalea_reaction_palette_1.bin
+file assets/character_models/azalea_reaction_palette_2.bin
+file assets/character_models/azalea_reaction_palette_3.bin
+file assets/character_models/kid.bin
+file assets/character_models/kid_palette_1.bin
+file assets/character_models/kid_palette_2.bin
+file assets/character_models/kid_palette_3.bin
+file assets/character_models/kid_reaction.bin
+file assets/character_models/kid_reaction_palette_1.bin
+file assets/character_models/kid_reaction_palette_2.bin
+file assets/character_models/kid_reaction_palette_3.bin
+file assets/character_models/sherry.bin
+file assets/character_models/sherry_palette_1.bin
+file assets/character_models/sherry_palette_2.bin
+file assets/character_models/sherry_palette_3.bin
+file assets/character_models/sherry_reaction.bin
+file assets/character_models/sherry_reaction_palette_1.bin
+file assets/character_models/sherry_reaction_palette_2.bin
+file assets/character_models/sherry_reaction_palette_3.bin
+file assets/character_models/peach.bin
+file assets/character_models/peach_palette_1.bin
+file assets/character_models/peach_palette_2.bin
+file assets/character_models/peach_palette_3.bin
+file assets/character_models/peach_reaction.bin
+file assets/character_models/peach_reaction_palette_1.bin
+file assets/character_models/peach_reaction_palette_2.bin
+file assets/character_models/peach_reaction_palette_3.bin
+file assets/character_models/charlie.bin
+file assets/character_models/charlie_palette_1.bin
+file assets/character_models/charlie_palette_2.bin
+file assets/character_models/charlie_palette_3.bin
+file assets/character_models/charlie_reaction.bin
+file assets/character_models/charlie_reaction_palette_1.bin
+file assets/character_models/charlie_reaction_palette_2.bin
+file assets/character_models/charlie_reaction_palette_3.bin
+file assets/character_models/maple.bin
+file assets/character_models/maple_palette_1.bin
+file assets/character_models/maple_palette_2.bin
+file assets/character_models/maple_palette_3.bin
+file assets/character_models/maple_reaction.bin
+file assets/character_models/maple_reaction_palette_1.bin
+file assets/character_models/maple_reaction_palette_2.bin
+file assets/character_models/maple_reaction_palette_3.bin
+file assets/character_models/donkey_kong.bin
+file assets/character_models/donkey_kong_palette_1.bin
+file assets/character_models/donkey_kong_palette_2.bin
+file assets/character_models/donkey_kong_palette_3.bin
+file assets/character_models/donkey_kong_reaction.bin
+file assets/character_models/donkey_kong_reaction_palette_1.bin
+file assets/character_models/donkey_kong_reaction_palette_2.bin
+file assets/character_models/donkey_kong_reaction_palette_3.bin
+file assets/character_models/joe.bin
+file assets/character_models/joe_palette_1.bin
+file assets/character_models/joe_palette_2.bin
+file assets/character_models/joe_palette_3.bin
+file assets/character_models/joe_reaction.bin
+file assets/character_models/joe_reaction_palette_1.bin
+file assets/character_models/joe_reaction_palette_2.bin
+file assets/character_models/joe_reaction_palette_3.bin
+file assets/character_models/harry.bin
+file assets/character_models/harry_palette_1.bin
+file assets/character_models/harry_palette_2.bin
+file assets/character_models/harry_palette_3.bin
+file assets/character_models/harry_reaction.bin
+file assets/character_models/harry_reaction_palette_1.bin
+file assets/character_models/harry_reaction_palette_2.bin
+file assets/character_models/harry_reaction_palette_3.bin
+file assets/character_models/plum.bin
+file assets/character_models/plum_palette_1.bin
+file assets/character_models/plum_palette_2.bin
+file assets/character_models/plum_palette_3.bin
+file assets/character_models/plum_reaction.bin
+file assets/character_models/plum_reaction_palette_1.bin
+file assets/character_models/plum_reaction_palette_2.bin
+file assets/character_models/plum_reaction_palette_3.bin
+file assets/character_models/sonny.bin
+file assets/character_models/sonny_palette_1.bin
+file assets/character_models/sonny_palette_2.bin
+file assets/character_models/sonny_palette_3.bin
+file assets/character_models/sonny_reaction.bin
+file assets/character_models/sonny_reaction_palette_1.bin
+file assets/character_models/sonny_reaction_palette_2.bin
+file assets/character_models/sonny_reaction_palette_3.bin
+file assets/character_models/baby_mario.bin
+file assets/character_models/baby_mario_palette_1.bin
+file assets/character_models/baby_mario_palette_2.bin
+file assets/character_models/baby_mario_palette_3.bin
+file assets/character_models/baby_mario_reaction.bin
+file assets/character_models/baby_mario_reaction_palette_1.bin
+file assets/character_models/baby_mario_reaction_palette_2.bin
+file assets/character_models/baby_mario_reaction_palette_3.bin
+file assets/character_models/unreferenced.bin
+file assets/character_models/bowser.bin
+file assets/character_models/bowser_palette_1.bin
+file assets/character_models/bowser_palette_2.bin
+file assets/character_models/bowser_palette_3.bin
+file assets/character_models/bowser_reaction.bin
+file assets/character_models/bowser_reaction_palette_1.bin
+file assets/character_models/bowser_reaction_palette_2.bin
+file assets/character_models/bowser_reaction_palette_3.bin
+file assets/character_models/yoshi.bin
+file assets/character_models/yoshi_palette_1.bin
+file assets/character_models/yoshi_palette_2.bin
+file assets/character_models/yoshi_palette_3.bin
+file assets/character_models/yoshi_reaction.bin
+file assets/character_models/yoshi_reaction_palette_1.bin
+file assets/character_models/yoshi_reaction_palette_2.bin
+file assets/character_models/yoshi_reaction_palette_3.bin
+file assets/character_models/opening_mario.bin
+file assets/character_models/opening_luigi.bin
+file assets/character_models/opening_toad.bin
+file assets/character_models/opening_plum.bin
+file assets/character_models/opening_peach.bin
+file assets/character_models/opening_baby_mario.bin
+file assets/character_models/opening_donkey_kong.bin
+file assets/character_models/opening_yoshi.bin
+file assets/character_models/opening_model_17.bin
+file assets/character_models/metal_mario.bin
+file assets/character_models/metal_mario_reaction.bin
+file assets/character_models/metal_mario_palette_1.bin
+file assets/character_models/metal_mario_reaction_palette_1.bin
+file assets/character_models/metal_mario_palette_2.bin
+file assets/character_models/metal_mario_reaction_palette_2.bin
+file assets/character_models/metal_mario_palette_3.bin
+file assets/character_models/metal_mario_reaction_palette_3.bin

@@ -31,8 +31,6 @@ build/
 tools/gcc_kmc/
 __pycache__/
 *.pyc
-.splat/
-nonmatchings/
 
 # uv writes this on every run; the tools project has no dependencies to lock
 uv.lock

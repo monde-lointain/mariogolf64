@@ -19,7 +19,7 @@ Requirements: `make`, `wget`, Python 3.10+, and the `mips-linux-gnu` binutils.
 git submodule update --init
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-make setup    # download the KMC GCC 2.7.2 toolchain and split the ROM
+make setup    # download the KMC GCC 2.7.2 toolchain and extract the assets
 make -j       # build and verify build/mariogolf64.z64
 ```
 
@@ -93,8 +93,9 @@ objects (see `tools/check_alignment.py`).
 ## Assets
 
 `make extract` cuts the files that the game reads from ROM out of the
-original, into `assets/`, which is never committed. It writes them afresh,
-over any edits, so it is needed only once:
+original, as `assets.txt` lists them, into `assets/`, which is never
+committed. It writes them afresh, over any edits, so it is needed only
+once:
 
 | Path | Contents |
 | --- | --- |
@@ -155,30 +156,31 @@ basedpyright and looks for dead code with vulture, using the settings in
 
 | Path | Contents |
 | --- | --- |
-| `mariogolf64.yaml` | [splat](https://github.com/ethteck/splat) configuration describing the ROM |
-| `symbol_addrs.txt` | Names of functions and variables |
+| `layout.txt` | What the ROM holds, in order: each segment's files, and the assets |
 | `src/` | Decompiled C sources |
 | `include/` | Headers |
 | `lib/ultralib` | Decompiled libultra, the parts the game uses |
 
 The game was compiled with KMC GCC 2.7.2 at `-O2`. Code lives in a main
 segment loaded at `0x80025C00` and in overlays (“module sets”) that the
-game's overlay manager loads on demand; see `mariogolf64.yaml`.
+game's overlay manager loads on demand; see `layout.txt`.
 
 The sources are grouped by the part of the game they serve, not by the
-segment they load in; `mariogolf64.yaml` says which segment each file is
+segment they load in; `layout.txt` says which segment each file is
 linked into. `include/` has the same directories as `src/`, and a header
 is included by its directory, as in `"course/terrain.h"`.
 
-To add a file, list it in `mariogolf64.yaml` among the subsegments of the
-segment it loads in, after the file it follows, by its name alone:
+To add a file, list it in `layout.txt` among the files of the segment it
+loads in, after the file it follows, by its path:
 
-```yaml
-      - { type: c, name: shot/new_file }
+```
+segment ovl_03 0x8024D800
+    src/round/computer_golfer.c
+    src/round/new_file.c
 ```
 
-`make` makes the linker script again from the yaml and builds the file.
-The matching ROM no longer matches, so build with `MODERN=1` or
+`make` writes the linker scripts again (see `tools/layout.py`) and builds
+the file. The matching ROM no longer matches, so build with `MODERN=1` or
 `NON_MATCHING=1`.
 
 | Directory | Contents |

@@ -1,13 +1,14 @@
 # Mario Golf (North America) matching decompilation
 
 TARGET      := mariogolf64
-SPLAT_YAML  := $(TARGET).yaml
-# The original ROM, which splat reads (the yaml's target_path)
-BASEROM     := baserom.us.z64
-SPLAT_DIR   := build/splat
-SPLAT_LD    := $(SPLAT_DIR)/$(TARGET).ld
-# The objects that splat's script names, as a makefile that sets SPLAT_O_FILES
-SPLAT_O_LIST := $(SPLAT_DIR)/objects.mk
+# What the ROM holds, in order, from which tools/layout.py writes the
+# linker scripts
+LAYOUT      := layout.txt
+# The objects that the layout places, as a makefile that sets LAYOUT_OBJECTS
+# and MATCHING_ONLY_OBJECTS to their sources' paths
+LAYOUT_MK   := build/layout.mk
+# What the linker scripts are written with
+LAYOUT_TOOLS := tools/layout.py tools/heap_region.py include/system/heap.h
 KMC_DIR     := tools/gcc_kmc
 
 # Set NON_MATCHING=1 to build a ROM that needn't match the original: it
@@ -115,7 +116,7 @@ BIN_FORMAT  := elf32-bigmips
 CC          := $(MODERN_CC)
 LIB_CC      := $(CC)
 # Each routine and object in a section of its own, which the link drops
-# unless something refers to it (see tools/shiftable_ld.py). The tests'
+# unless something refers to it (see tools/layout.py). The tests'
 # link keeps every routine, for the tests of those that the game doesn't
 # call.
 COLLECTED_SECTIONS := -ffunction-sections -fdata-sections
@@ -162,37 +163,33 @@ else
 SANITIZER_LIB :=
 endif
 
-# main_bss.c only pins main's common objects at the original's addresses.
-# Without it, each object is placed with the module that defines it.
-MATCHING_ONLY_O := build/src/system/main_bss.c.o
 # The symbols that the objects use and none defines
-SYMBOL_SCRIPTS := undefined_syms.txt
+SYMBOL_SCRIPT := undefined_syms.txt
 
-# The two layouts. The matching build places everything where the original
-# has it, and gives the asm the original's addresses. The shiftable layout
-# packs the overlays (see tools/shiftable_ld.py) and keeps only the symbols
-# outside the original's segments (see tools/fixed_syms.py), so that a
-# reference that holds only at the original's addresses fails to link.
+# The two layouts (see tools/layout.py). The matching build places
+# everything where the original has it. The shiftable layout lets the code
+# and data grow, and leaves out the objects that only the matching links,
+# such as main_bss.c, which pins main's common objects at the original's
+# addresses.
+MATCHING_LD       := $(BUILD_DIR)/matching.ld
 SHIFTABLE_LD      := $(BUILD_DIR)/shiftable.ld
-SHIFTABLE_SYMBOLS := $(BUILD_DIR)/fixed_syms.ld
 # The LTO links' objects, one for each segment of code, and the shiftable
 # script that places them in place of the segments' files
 LTO_DIR           := $(BUILD_DIR)/lto
 LTO_LD            := $(LTO_DIR)/segments.ld
 ifeq ($(NON_MATCHING),0)
-LD_SCRIPTS  := $(SPLAT_LD) $(SYMBOL_SCRIPTS)
-LINKED_O_FILTER :=
-else ifneq ($(MODERN),0)
+GAME_LD     := $(MATCHING_LD)
+LINKED_SOURCES = $(LAYOUT_OBJECTS)
+else
+GAME_LD     := $(SHIFTABLE_LD)
+LINKED_SOURCES = $(filter-out $(MATCHING_ONLY_OBJECTS),$(LAYOUT_OBJECTS))
+endif
+ifneq ($(MODERN),0)
 ifneq ($(LTO),0)
-LD_SCRIPTS  := $(LTO_LD) $(SHIFTABLE_SYMBOLS)
-else
-LD_SCRIPTS  := $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)
+GAME_LD     := $(LTO_LD)
 endif
-LINKED_O_FILTER := $(MATCHING_ONLY_O)
-else
-LD_SCRIPTS  := $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)
-LINKED_O_FILTER := $(MATCHING_ONLY_O)
 endif
+LD_SCRIPTS  := $(GAME_LD) $(SYMBOL_SCRIPT)
 
 ROM         := $(BUILD_DIR)/$(TARGET).z64
 # The cartridge's size, which 0xFF fills after the last asset
@@ -250,11 +247,11 @@ CC_CHECK       := clang -fsyntax-only -fno-builtin -funsigned-char -std=gnu89 -m
                   -Wno-unused-variable -Wno-unused-but-set-variable -Wno-missing-braces
 RUN_CC_CHECK   ?= 0
 
-# Every object the linker script asks for, under this build's directory.
-# When a change to the yaml makes the list again, make reads it in afresh
-# before building anything, so a file added to the yaml is compiled.
--include $(SPLAT_O_LIST)
-O_FILES := $(patsubst build/%,$(BUILD_DIR)/%,$(filter-out $(LINKED_O_FILTER),$(SPLAT_O_FILES)))
+# Every object that the build links, under its directory. When a change to
+# the layout makes the list again, make reads it in afresh before building
+# anything, so that a file added to the layout is built.
+include $(LAYOUT_MK)
+O_FILES := $(LINKED_SOURCES:%=$(BUILD_DIR)/%.o)
 
 # libultra 2.0J, built the way ultralib builds libgultra_rom except that the
 # game's copy was compiled with signed chars
@@ -326,7 +323,7 @@ ifneq ($(COMPARE),0)
 endif
 
 extract:
-	$(PYTHON) -m splat split $(SPLAT_YAML)
+	$(PYTHON) tools/extract_assets.py
 	$(PYTHON) tools/extract_textures.py
 	$(PYTHON) tools/asset_archive.py split assets/asset_archive.bin $(ARCHIVE_DIR)
 	for text in $(TEXT_FILES); do \
@@ -366,10 +363,10 @@ blender-tests:
 # Links this build's objects in the shiftable layout, which fails on each
 # reference that holds only while the code and data keep their original
 # addresses. The shiftable builds link that way already.
-check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS) $(SANITIZER_LIB)
-	$(LD) $(addprefix -T ,$(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)) -Map $(BUILD_DIR)/shiftable.map \
+check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SYMBOL_SCRIPT) $(SANITIZER_LIB)
+	$(LD) $(addprefix -T ,$(SHIFTABLE_LD) $(SYMBOL_SCRIPT)) -Map $(BUILD_DIR)/shiftable.map \
 	    $(LAYOUT_FLAGS) -o $(BUILD_DIR)/shiftable.elf $(LIBS)
-	@$(PYTHON) tools/check_link.py $(BUILD_DIR)/shiftable.elf $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS) -- $(O_FILES)
+	@$(PYTHON) tools/check_link.py $(BUILD_DIR)/shiftable.elf $(SHIFTABLE_LD) $(SYMBOL_SCRIPT) -- $(O_FILES)
 
 # Fails on each static buffer whose address reaches the RCP or a DMA but
 # which doesn't ask for 8-byte alignment, so that it lands aligned in any
@@ -444,12 +441,10 @@ $(TEST_BOOT): $(TEST_DIR)/target/boot.c.o
 	rm -f $@
 	$(MODERN_CROSS)ar rcs $@ $<
 
-# The shiftable layout with the tests' segment before the sections that it
-# discards
-$(TEST_LD): $(SHIFTABLE_LD) tests/target/segment.ld
-	awk -v segment=tests/target/segment.ld \
-	    '/^    \/DISCARD\/ :$$/ { while ((getline line < segment) > 0) print line } { print }' \
-	    $< > $@
+# The shiftable layout with the tests' segment
+$(TEST_LD): $(LAYOUT) tests/target/segment.ld $(LAYOUT_TOOLS)
+	@mkdir -p $(dir $@)
+	$(PYTHON) tools/layout.py shiftable $(LAYOUT) $(BUILD_DIR) tests/target/segment.ld > $@
 
 # NuSystem's boot starts the main thread in the boot stub instead of
 # mainproc. Modern GCC's linker reads both toolchains' objects. The link
@@ -457,12 +452,12 @@ $(TEST_LD): $(SHIFTABLE_LD) tests/target/segment.ld
 # objects: --wrap redirects only the references that an object leaves
 # undefined, and a segment's object defines mainproc where nuboot.c's
 # reference to it is.
-$(TEST_ELF): $(O_FILES) $(TEST_O_FILES) $(TEST_BOOT) $(TEST_LD) $(SHIFTABLE_SYMBOLS) \
+$(TEST_ELF): $(O_FILES) $(TEST_O_FILES) $(TEST_BOOT) $(TEST_LD) $(SYMBOL_SCRIPT) \
     $(SANITIZER_LIB)
-	$(MODERN_CROSS)ld $(addprefix -T ,$(TEST_LD) $(SHIFTABLE_SYMBOLS)) -Map $(TEST_DIR)/tests.map \
+	$(MODERN_CROSS)ld $(addprefix -T ,$(TEST_LD) $(SYMBOL_SCRIPT)) -Map $(TEST_DIR)/tests.map \
 	    $(LAYOUT_FLAGS) --wrap=mainproc -o $@ $(TEST_O_FILES) $(TEST_BOOT) $(MODERN_LIBS) \
 	    $(SANITIZER_LIB)
-	@$(PYTHON) tools/check_link.py $@ $(TEST_LD) $(SHIFTABLE_SYMBOLS) -- $(O_FILES)
+	@$(PYTHON) tools/check_link.py $@ $(TEST_LD) $(SYMBOL_SCRIPT) -- $(O_FILES)
 
 CLANG_TIDY ?= run-clang-tidy-23
 # libkmc is KMC's C library, which keeps the C library's names
@@ -497,10 +492,8 @@ lint: $(BUILD_DIR)/compile_commands.json
 # particle_effects.c's SpawnShotDebris. Either way compares the
 # declarations.
 TYPECHECK_DIR := build/typecheck
-# The objects compiled from C, leaving out the data-only assembly that
-# splat names as C (see the ultralib rule for those)
-C_O_FILES = $(foreach object,$(filter %.c.o,$(O_FILES)), \
-  $(if $(wildcard $(patsubst $(BUILD_DIR)/%.c.o,%.c,$(object))),$(object)))
+# The objects compiled from C
+C_O_FILES = $(filter %.c.o,$(O_FILES))
 
 typecheck:
 	@$(MAKE) MODERN=1 BUILD_DIR=$(TYPECHECK_DIR) OPTFLAGS='-Os -flto' \
@@ -521,43 +514,28 @@ $(KMC_DIR)/as:
 	wget -q -O - https://github.com/decompals/mips-binutils-2.6/releases/latest/download/binutils-2.6-linux.tar.gz | tar xz -C $(KMC_DIR)
 
 clean:
-	rm -rf $(BUILD_DIR)/asm $(BUILD_DIR)/src $(BUILD_DIR)/assets $(BUILD_DIR)/lib $(ROM) $(ELF) $(TEST_DIR) \
+	rm -rf $(BUILD_DIR)/src $(BUILD_DIR)/assets $(BUILD_DIR)/lib $(ROM) $(ELF) $(TEST_DIR) \
 	    $(LTO_DIR)
 
 distclean:
-	rm -rf $(BUILD_DIR) asm assets
+	rm -rf $(BUILD_DIR) assets
 
-# splat writes the linker script from the yaml, so that a change to the
-# layout, such as a new file, needs no make extract, which would write the
-# extracted assets over any edits. Its ld mode leaves them be, apart from
-# the microcode, which splat always cuts from the ROM again. It writes the
-# script only if it changes, so the touch keeps an edit that changes none
-# from running it at every make. Without the ROM, which splat reads, make
-# has no way to make the script, and goals that need no link, such as
-# pycheck, go on without the list of objects.
-$(SPLAT_LD): $(SPLAT_YAML) symbol_addrs.txt reloc_addrs.txt $(BASEROM)
-	mkdir -p $(SPLAT_DIR)
-	$(PYTHON) -m splat split $(SPLAT_YAML) --modes ld > $(SPLAT_DIR)/split.log 2>&1 \
-	    || { cat $(SPLAT_DIR)/split.log; exit 1; }
-	touch $@
-
-$(SPLAT_O_LIST): $(SPLAT_LD)
-	grep -oE 'build/[A-Za-z0-9_./-]+\.o' $< | LC_ALL=C sort -u | sed 's/^/SPLAT_O_FILES += /' > $@
-
-# splat's script names the objects under build/, so the shiftable script
-# names them under this build's directory
-$(SHIFTABLE_LD): $(SPLAT_LD) tools/shiftable_ld.py tools/heap_region.py include/system/heap.h
+$(LAYOUT_MK): $(LAYOUT) tools/layout.py
 	@mkdir -p $(dir $@)
-	sed -e '\|$(MATCHING_ONLY_O)|d' -e 's|build/|$(BUILD_DIR)/|g' $< | $(PYTHON) tools/shiftable_ld.py > $@
+	$(PYTHON) tools/layout.py objects $< > $@
+
+$(MATCHING_LD): $(LAYOUT) $(LAYOUT_TOOLS)
+	@mkdir -p $(dir $@)
+	$(PYTHON) tools/layout.py matching $< $(BUILD_DIR) > $@
+
+$(SHIFTABLE_LD): $(LAYOUT) $(LAYOUT_TOOLS)
+	@mkdir -p $(dir $@)
+	$(PYTHON) tools/layout.py shiftable $< $(BUILD_DIR) > $@
 
 # The compiler's LTO takes its share of make's jobs
-$(LTO_LD): $(O_FILES) $(SHIFTABLE_LD) tools/link_segments.py
-	+$(PYTHON) tools/link_segments.py $(SHIFTABLE_LD) $(LTO_DIR) -- \
+$(LTO_LD): $(O_FILES) $(LAYOUT) $(LAYOUT_TOOLS) tools/link_segments.py
+	+$(PYTHON) tools/link_segments.py $(LAYOUT) $(BUILD_DIR) $(LTO_DIR) -- \
 	    $(CC) $(TARGETFLAGS) $(OPTFLAGS) $(WARNINGS)
-
-$(SHIFTABLE_SYMBOLS): $(SPLAT_YAML) $(SYMBOL_SCRIPTS) tools/fixed_syms.py
-	@mkdir -p $(dir $@)
-	$(PYTHON) tools/fixed_syms.py $(SPLAT_YAML) $(SYMBOL_SCRIPTS) > $@
 
 # IPL3 boots only a ROM whose header holds the checksum of the code after it
 $(ROM) $(TEST_ROM): %.z64: %.elf
@@ -605,12 +583,8 @@ endif
 
 FORCE:
 
-# The RSP loads its microcode by DMA from addresses aligned to 8 bytes. The
-# SDK's microcode objects align it to 16, which the original's layout keeps.
-$(BUILD_DIR)/asm/data/%.s.o: asm/data/%.s
-	@mkdir -p $(dir $@)
-	$(AS) $(ASFLAGS) -o $@ $<
-	$(OBJCOPY) --set-section-alignment .text=16 --set-section-alignment .data=16 $@
+# The microcode that make extract cuts from the ROM
+$(BUILD_DIR)/src/system/microcode.s.o: $(wildcard assets/microcode/*.bin)
 
 $(BUILD_DIR)/%.bin.o: %.bin
 	@mkdir -p $(dir $@)
@@ -745,12 +719,6 @@ $(filter $(BUILD_DIR)/src/%,$(O_FILES)): | $(BUILD_DIR)/$(LIBNUSYS_DIR)/include/
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/include/nusys.h: $(LIBNUSYS_DIR)/include/nusys.h
 	@mkdir -p $(dir $@)
 	tr -d '\r' < $< > $@
-
-# splat names data-only objects as if they were C, so assembly files that
-# only hold data (such as gu/libm_vals.s) are found under a .c.o name
-$(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.s
-	@mkdir -p $(dir $@)
-	$(DEPS) $(CC) -c $(ULTRALIB_ASFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
 
 -include $(O_FILES:.o=.d) $(TEST_O_FILES:.o=.d) $(TEST_DIR)/target/boot.c.d
 # A header that a .d file lists but that has since gone only forces the

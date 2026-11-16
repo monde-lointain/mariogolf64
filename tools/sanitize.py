@@ -19,7 +19,7 @@ is read. Each place whose check failed is reported once, by source line,
 routine and segment, with what failed, the values of its first failure,
 how many times it failed, and the retrace of the first. GCC's description
 of each check is kept in the ELF only, at an address of no memory (see
-tools/shiftable_ld.py). The link map tells which segment's object each
+tools/layout.py). The link map tells which segment's object each
 description comes from, which tells apart the overlays that share
 addresses.
 
