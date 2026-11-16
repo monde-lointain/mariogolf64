@@ -15,11 +15,10 @@
 // A copy of this header that replaces courses may also define
 // CUSTOM_HOLE_RADII, giving for each such course its CourseRecordIndex and
 // its 18 holes' radii for the flyover camera, which circles a hole's cup at
-// a distance that grows with the radius:
+// a distance that grows with the radius. The courses' entries are separated
+// by commas, as in:
 //
-//     #define CUSTOM_HOLE_RADII \
-//         {COURSE_RECORD_KOOPA_PARK, {200, 400, 200, ...}}, \
-//         {COURSE_RECORD_BOO_VALLEY, {300, 200, 200, ...}}
+//     #define CUSTOM_HOLE_RADII {COURSE_RECORD_KOOPA_PARK, {200, 400, 200, ...}}
 //
 // The game's own holes use DEFAULT_HOLE_RADIUS, 200, or as much as 1000 for
 // the longest.
