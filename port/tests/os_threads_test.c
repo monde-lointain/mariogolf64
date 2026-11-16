@@ -10,7 +10,6 @@
 #include <SDL3/SDL_main.h>
 
 #include "port/os_host.h"
-#include "port/overlay_sections.h"
 #include "test_support.h"
 
 #define LOW_PRIORITY 10
@@ -18,12 +17,6 @@
 #define HIGH_PRIORITY 30
 #define QUEUE_LENGTH 4
 #define TRACE_LENGTH 64
-
-// A link seam: the program's table of overlays, which the tests don't have
-const OverlaySections *GetOverlaySections(int *count) {
-    *count = 0;
-    return NULL;
-}
 
 static char f_Trace[TRACE_LENGTH];
 static int f_TraceLength;

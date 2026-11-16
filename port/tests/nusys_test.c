@@ -13,7 +13,6 @@
 
 #include "port/nusys_host.h"
 #include "port/os_host.h"
-#include "port/overlay_sections.h"
 #include "test_support.h"
 
 #define FRAMEBUFFER_SIZE (SCREEN_WIDTH_FOR_TEST * SCREEN_HEIGHT_FOR_TEST)
@@ -35,12 +34,7 @@ static OSContPad f_Pads[4];
 static int f_MotorOn[4];
 static u8 f_Rom[FAKE_ROM_SIZE];
 
-// Link seams: the program's overlays, and what the platform provides
-const OverlaySections *GetOverlaySections(int *count) {
-    *count = 0;
-    return NULL;
-}
-
+// Link seams: what the platform provides
 void PcRunGfxTask(Gfx *displayList, u32 size) {
     (void)displayList;
     (void)size;

@@ -4,16 +4,9 @@
 
 #include <ultra64.h>
 
-#include "port/overlay_sections.h"
 #include "test_support.h"
 
 static u8 f_Memory[256];
-
-// The program's overlays, which libultra's memory asks for: none here
-const OverlaySections *GetOverlaySections(int *count) {
-    *count = 0;
-    return NULL;
-}
 
 // A marked range covers its first byte to its last, and nothing beyond
 static void TestMarkedRangeBounds(void) {
