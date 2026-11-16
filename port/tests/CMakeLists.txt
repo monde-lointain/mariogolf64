@@ -29,3 +29,8 @@ mg64_add_port_test(nusys_test
     SOURCES nusys_test.c
     LIBRARIES mg64_nusys mg64_ultra SDL3::SDL3
 )
+
+mg64_add_port_test(tmem_test
+    SOURCES tmem_test.c
+    LIBRARIES mg64_gfx
+)
