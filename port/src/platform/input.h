@@ -48,4 +48,8 @@ void DisconnectGamepad(uint32_t instanceId);
 // game asked for since the last time
 void UpdateControllers(void);
 
+// Replaces what a port's controller holds until the next update, as a
+// script's input does
+void OverrideControllerPad(int port, const OSContPad *pad);
+
 #endif

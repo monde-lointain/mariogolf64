@@ -4,6 +4,7 @@
 
 add_library(mg64_platform STATIC
     input.c
+    input_script.c
     presenter.c
     rom_image.c
     save_memory.c

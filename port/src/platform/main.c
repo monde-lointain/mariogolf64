@@ -5,11 +5,13 @@
  * that drives the game, and shows the frame buffer that the retrace chose.
  *
  *     mariogolf64 [--scale N] [--fullscreen] [--save PATH] [--gpu-debug]
- *                 [--headless] [--frames N] [--screenshot PATH] [ROM]
+ *                 [--headless] [--frames N] [--screenshot PATH]
+ *                 [--input-script PATH] [ROM]
  *
  * --headless draws without a window, and --frames ends the program after N
  * retraces, writing the screen it last showed to the --screenshot file, for
- * tests and machines without a display.
+ * tests and machines without a display. --input-script plays the first
+ * controller from a script, as input_script.h describes.
  *
  * Without a ROM, it looks for baserom.us.z64 beside the program, then in
  * the current directory.
@@ -22,6 +24,7 @@
 
 #include "audio_output.h"
 #include "input.h"
+#include "input_script.h"
 #include "port/nusys_host.h"
 #include "port/os_host.h"
 #include "presenter.h"
@@ -44,6 +47,7 @@ typedef struct Options {
     const char *romPath;
     const char *savePath;
     const char *screenshotPath;
+    const char *inputScriptPath;
     int renderScale; // 0 to choose from the display
     long frameLimit; // Retraces to run, or 0 for no limit
     bool isFullscreen;
@@ -80,7 +84,7 @@ static void PrintUsage(const char *program) {
     SDL_Log(
         "Usage: %s [--scale N] [--fullscreen] [--save PATH] [--gpu-debug] [--headless] [--frames "
         "N] "
-        "[--screenshot PATH] [ROM]",
+        "[--screenshot PATH] [--input-script PATH] [ROM]",
         program
     );
 }
@@ -111,6 +115,9 @@ static bool ParseOptions(int argc, char **argv, Options *options) {
         }
         else if (SDL_strcmp(argument, "--screenshot") == 0 && i + 1 < argc) {
             options->screenshotPath = argv[++i];
+        }
+        else if (SDL_strcmp(argument, "--input-script") == 0 && i + 1 < argc) {
+            options->inputScriptPath = argv[++i];
         }
         else if (SDL_strcmp(argument, "--headless") == 0) {
             options->isHeadless = true;
@@ -274,13 +281,14 @@ static void HandleEvent(const SDL_Event *event) {
 
 // Raises the retraces at their own pace, whatever the display's rate. After
 // a stall the clock starts afresh rather than rush the game to catch up.
-static void RunRetraces(long frameLimit) {
+static void RunRetraces(long frameLimit, const InputScript *script) {
     const Uint64 period = SDL_NS_PER_SECOND / RETRACES_PER_SECOND;
     Uint64 next = SDL_GetTicksNS();
     long frameCount = 0;
 
     while (!f_IsQuitting && (frameLimit == 0 || frameCount < frameLimit)) {
         SDL_Event event;
+        OSContPad pad;
         Uint64 now;
 
         while (SDL_PollEvent(&event)) {
@@ -288,6 +296,10 @@ static void RunRetraces(long frameLimit) {
         }
 
         UpdateControllers();
+        if (script != NULL && FindScriptedPad(script, frameCount, &pad)) {
+            OverrideControllerPad(0, &pad);
+        }
+
         f_ShownFramebuffer = PcRaiseRetrace();
         if (f_Window != NULL) {
             PresentFramebuffer(f_ShownFramebuffer);
@@ -338,12 +350,39 @@ static bool ShutDown(const char *screenshotPath) {
     return isSaved;
 }
 
+// Reads the script that --input-script names, if any; false if it can't
+static bool LoadInputScript(const char *path, InputScript **script) {
+    char error[128];
+    char *text;
+
+    *script = NULL;
+    if (path == NULL) {
+        return true;
+    }
+
+    text = SDL_LoadFile(path, NULL);
+    if (text == NULL) {
+        SDL_Log("Can't read the input script %s: %s", path, SDL_GetError());
+        return false;
+    }
+
+    *script = ParseInputScript(text, error, sizeof(error));
+    SDL_free(text);
+    if (*script == NULL) {
+        SDL_Log("The input script %s, %s", path, error);
+        return false;
+    }
+
+    return true;
+}
+
 int main(int argc, char *argv[]) {
     Options options;
+    InputScript *script;
     uint8_t *rom;
     size_t romSize = 0;
 
-    if (!ParseOptions(argc, argv, &options)) {
+    if (!ParseOptions(argc, argv, &options) || !LoadInputScript(options.inputScriptPath, &script)) {
         return EXIT_FAILURE;
     }
 
@@ -354,6 +393,7 @@ int main(int argc, char *argv[]) {
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         SDL_Log("Can't start SDL: %s", SDL_GetError());
+        FreeInputScript(script);
         return EXIT_FAILURE;
     }
 
@@ -365,6 +405,7 @@ int main(int argc, char *argv[]) {
             "The port needs the US release's ROM. See the log.",
             NULL
         );
+        FreeInputScript(script);
         SDL_Quit();
         return EXIT_FAILURE;
     }
@@ -376,6 +417,7 @@ int main(int argc, char *argv[]) {
             "Can't draw: no suitable GPU. See the log.",
             NULL
         );
+        FreeInputScript(script);
         SDL_Quit();
         return EXIT_FAILURE;
     }
@@ -385,12 +427,14 @@ int main(int argc, char *argv[]) {
     PcInitOs();
     PcInsertCartridge(rom, romSize);
     PcBootNuSystem();
-    RunRetraces(options.frameLimit);
+    RunRetraces(options.frameLimit, script);
     if (!ShutDown(options.screenshotPath)) {
+        FreeInputScript(script);
         SDL_free(rom);
         return EXIT_FAILURE;
     }
 
+    FreeInputScript(script);
     SDL_free(rom);
     return EXIT_SUCCESS;
 }

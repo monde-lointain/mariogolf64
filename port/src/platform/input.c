@@ -327,6 +327,13 @@ void UpdateControllers(void) {
     }
 }
 
+void OverrideControllerPad(int port, const OSContPad *pad) {
+    SDL_assert(port >= 0 && port < PORT_COUNT && pad != NULL);
+    SDL_LockMutex(f_Lock);
+    f_Ports[port].pad = *pad;
+    SDL_UnlockMutex(f_Lock);
+}
+
 // --- NuSystem's side ---
 
 u8 PcGetConnectedControllers(void) {

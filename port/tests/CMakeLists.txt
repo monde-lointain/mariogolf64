@@ -112,6 +112,12 @@ mg64_add_port_test(music_player_test
 
 # The platform's parts that need no window or device. The presenter's
 # object comes along, so the renderer's libraries do too.
+# Scripted input's parser and lookup
+mg64_add_port_test(input_script_test
+    SOURCES input_script_test.c
+    LIBRARIES mg64_platform mg64_ultra SDL3::SDL3
+)
+
 mg64_add_port_test(platform_test
     SOURCES platform_test.c
     LIBRARIES mg64_platform mg64_gpu mg64_gfx mg64_ultra SDL3::SDL3
