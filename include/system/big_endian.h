@@ -86,6 +86,15 @@ static inline void StoreRomCommand(void *destination, u32 firstWord, u32 secondW
     StoreBigEndian32((u8 *)destination + sizeof(u32), secondWord);
 }
 
+// Puts an array of u16 words that only the RDP reads, such as 4-bit texels
+// packed into words, into the cartridge's byte order in place, which is the
+// order the RDP reads texels of 8 bits and fewer in. Call it once.
+static inline void PutHalvesInRomOrder(void *start, u32 size) {
+    // Converting from big-endian swaps the bytes, which is its own inverse
+    ConvertHalvesFromBigEndian(start, size);
+    MarkRomOrder(start, size);
+}
+
 #    define ROM_COMMAND_SIZE 8
 
 static inline void StoreRomCommands(void *destination, const Gfx *commands, s32 count) {
@@ -102,6 +111,7 @@ static inline void StoreRomCommands(void *destination, const Gfx *commands, s32 
 #else
 #    define MarkHostOrder(start, size) ((void)0)
 #    define MarkRomOrder(start, size) ((void)0)
+#    define PutHalvesInRomOrder(start, size) ((void)0)
 #endif
 
 #endif

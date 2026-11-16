@@ -11,6 +11,7 @@
 #include "math/geometry.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
+#include "system/big_endian.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/heap.h"
@@ -206,6 +207,21 @@ static Gfx f_UnusedMeterDisplayList[] UNUSED = {
 static u16 f_DigitTexture[] RCP_ALIGNED = {
 #include "assets/debug/performance_meter/digit_texture.ia4.inc.c"
 };
+// The RDP reads the digits' 4-bit texels in the N64's byte order, which a
+// host's u16 words don't hold, so a host puts them in that order before
+// the first load
+#ifdef TARGET_PC
+static Boolean f_IsDigitTextureInRomOrder = FALSE;
+
+static void PutDigitTextureInRomOrder(void) {
+    if (!f_IsDigitTextureInRomOrder) {
+        PutHalvesInRomOrder(f_DigitTexture, sizeof(f_DigitTexture));
+        f_IsDigitTextureInRomOrder = TRUE;
+    }
+}
+#else
+#    define PutDigitTextureInRomOrder() ((void)0)
+#endif
 static u32 f_DigitDrawCount = 0;
 static u32 f_CpuBarMaximum = 0;
 static u32 f_CpuBarAverage = 0;
@@ -248,6 +264,7 @@ static void DrawDigits(Gfx **displayListHead, u16 x, u16 y, char *text) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPPipeSync(gfx++);
+    PutDigitTextureInRomOrder();
     gDPLoadTextureBlock_4b(
         gfx++,
         TextureAddress(f_DigitTexture),

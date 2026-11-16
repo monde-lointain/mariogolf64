@@ -78,6 +78,12 @@ mg64_add_port_test(text_test
     LIBRARIES mg64_game_options mg64_ultra SDL3::SDL3
 )
 
+# The performance meter's digits as the RDP loads them
+mg64_add_port_test(performance_meter_test
+    SOURCES performance_meter_test.c "${PROJECT_SOURCE_DIR}/src/debug/performance_meter.c"
+    LIBRARIES mg64_game_options mg64_ultra SDL3::SDL3
+)
+
 # Built through a Shift-JIS copy, as the game's sources are
 include(ShiftJisSources)
 mg64_encode_shift_jis(shift_jis_test_copy "${CMAKE_CURRENT_SOURCE_DIR}/shift_jis_test.c")
