@@ -391,6 +391,36 @@ static void TestShownTarget(void) {
     UnlockShownTarget();
 }
 
+// Memory that the CPU fills after the GPU drew there, as when the game loads
+// data into a frame's memory, keeps what the CPU wrote: a sync doesn't bring
+// back the older drawing, and the next use of the image reads the memory
+static void TestCpuWritesOutliveDrawing(void) {
+    Gfx *gfx = BeginList(f_DisplayList);
+    int writeCount;
+    int i;
+
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetFillColor(gfx++, 0);
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    RunList(gfx);
+
+    ResetCapture();
+    for (i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT; i++) {
+        f_ColorImage[i] = (uint16_t)(i * 3);
+    }
+
+    SyncRdpMemory(f_ColorImage, sizeof(f_ColorImage));
+    EXPECT(f_Gpu.readCount == 0);
+    EXPECT(f_ColorImage[0] == 0 && f_ColorImage[100] == 300);
+
+    writeCount = f_Gpu.writeCount;
+    gfx = BeginList(f_DisplayList);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPFillRectangle(gfx++, 0, 0, 0, 0);
+    RunList(gfx);
+    EXPECT(f_Gpu.writeCount == writeCount + 1);
+}
+
 // Shutting down releases every target, and drawing after it makes new ones
 static void TestShutdownReleasesTargets(void) {
     Gfx *gfx;
@@ -418,6 +448,7 @@ int main(void) {
     TestRomOrderList();
     TestTextureFromDrawnImage();
     TestShownTarget();
+    TestCpuWritesOutliveDrawing();
     TestShutdownReleasesTargets();
     return ReportTestResults("rcp_test");
 }

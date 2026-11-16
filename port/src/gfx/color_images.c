@@ -189,6 +189,19 @@ static void DownloadTarget(ColorImage *image) {
     image->isMemoryBehind = false;
 }
 
+// Brings memory up to date with the GPU's drawing, unless the CPU has
+// written the memory since it last agreed with the target. The CPU's writes
+// are then the newer, as when the game loads data into a frame's memory, and
+// the drawing is dropped; the image's next use uploads the memory.
+static void SyncImageToMemory(ColorImage *image) {
+    if (HashImageMemory(image) == image->memoryHash) {
+        DownloadTarget(image);
+    }
+    else {
+        image->isMemoryBehind = false;
+    }
+}
+
 // An unused entry, or else the least recently used one, whose drawing goes
 // back to memory first. The caller has flushed the frame, so no draw still
 // waits on the evicted target.
@@ -209,7 +222,7 @@ static ColorImage *FreeColorImage(void) {
     }
 
     if (oldest->isMemoryBehind) {
-        DownloadTarget(oldest);
+        SyncImageToMemory(oldest);
     }
 
     BackendDestroyTarget(oldest->target);
@@ -356,7 +369,7 @@ void SyncColorImagesToMemory(const uint8_t *start, uintptr_t size) {
         if (image->address != NULL &&
             image->isMemoryBehind &&
             DoRangesOverlap(start, size, image->address, ImageByteCount(image))) {
-            DownloadTarget(image);
+            SyncImageToMemory(image);
         }
     }
 
