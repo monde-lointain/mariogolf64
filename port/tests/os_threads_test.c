@@ -25,6 +25,7 @@ static OSThread f_Threads[4];
 static OSMesgQueue f_Queue;
 static OSMesg f_Messages[QUEUE_LENGTH];
 static SDL_AtomicInt f_RunningCount;
+static SDL_AtomicInt f_HaltCounter;
 
 static void Trace(char mark) {
     // More than one thread of the game's in here at once is a failure
@@ -197,6 +198,16 @@ static void TestDestroyWaitingThread(void *argument) {
     SDL_SignalSemaphore(f_TestDone);
 }
 
+// Counts forever, calling libultra as game code does
+static void TestHaltStopsThreads(void *argument) {
+    (void)argument;
+    SDL_SignalSemaphore(f_TestDone);
+    for (;;) {
+        SDL_AddAtomicInt(&f_HaltCounter, 1);
+        osYieldThread();
+    }
+}
+
 static void RunBootThread(void (*test)(void *)) {
     ResetTrace();
     PcStartBootThread(&f_Threads[0], test, NULL, LOW_PRIORITY);
@@ -238,6 +249,22 @@ int main(int argc, char **argv) {
     RunBootThread(TestDestroyWaitingThread);
     EXPECT(f_TraceLength == 41);
     EXPECT(f_Trace[f_TraceLength - 1] == 'd');
+
+    // Once halted, no thread of the game's runs again
+    RunBootThread(TestHaltStopsThreads);
+    while (SDL_GetAtomicInt(&f_HaltCounter) < 1000) {
+        SDL_Delay(1);
+    }
+
+    EXPECT(PcHaltGame(1000));
+    {
+        const int haltedCount = SDL_GetAtomicInt(&f_HaltCounter);
+
+        SDL_Delay(20);
+        PcRaiseEvent(OS_EVENT_SI);
+        SDL_Delay(20);
+        EXPECT(SDL_GetAtomicInt(&f_HaltCounter) == haltedCount);
+    }
 
     return ReportTestResults("os_threads_test");
 }

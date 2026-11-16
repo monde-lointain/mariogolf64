@@ -46,6 +46,8 @@ static ThreadSlot f_Slots[THREAD_SLOT_COUNT];
 static ThreadSlot *f_RunningSlot; // NULL while every thread waits
 static u64 f_ReadySequence;
 static SDL_TLSID f_CallingSlot;
+static bool f_IsHalted; // No thread gets the CPU again
+static SDL_Condition *f_CpuReleased; // Signaled when a halt leaves it idle
 
 volatile int osPcPreemptPending;
 
@@ -96,6 +98,10 @@ static ThreadSlot *ChooseSlot(void) {
     ThreadSlot *best = NULL;
     int i;
 
+    if (f_IsHalted) {
+        return NULL;
+    }
+
     for (i = 0; i < THREAD_SLOT_COUNT; i++) {
         ThreadSlot *slot = &f_Slots[i];
 
@@ -121,6 +127,9 @@ static void Dispatch(void) {
         if (chosen != NULL) {
             chosen->thread->state = OS_STATE_RUNNING;
             SDL_BroadcastCondition(chosen->turn);
+        }
+        else {
+            SDL_BroadcastCondition(f_CpuReleased);
         }
     }
 }
@@ -287,7 +296,8 @@ void PcInitScheduler(void) {
     int i;
 
     f_Lock = SDL_CreateMutex();
-    if (f_Lock == NULL) {
+    f_CpuReleased = SDL_CreateCondition();
+    if (f_Lock == NULL || f_CpuReleased == NULL) {
         PcFatalError("Can't create the scheduler's lock: %s", SDL_GetError());
     }
 
@@ -436,6 +446,25 @@ void osPcWaitForInterrupt(void) {
     }
 
     UnlockScheduler();
+}
+
+bool PcHaltGame(int timeoutMs) {
+    const Uint64 deadline = SDL_GetTicks() + (Uint64)SDL_max(timeoutMs, 0);
+    bool isIdle;
+
+    LockScheduler();
+    f_IsHalted = true;
+    if (f_RunningSlot != NULL) {
+        osPcPreemptPending = TRUE;
+    }
+
+    while (f_RunningSlot != NULL && SDL_GetTicks() < deadline) {
+        (void)SDL_WaitConditionTimeout(f_CpuReleased, f_Lock, (Sint32)(deadline - SDL_GetTicks()));
+    }
+
+    isIdle = f_RunningSlot == NULL;
+    UnlockScheduler();
+    return isIdle;
 }
 
 OSThread *__osGetCurrFaultedThread(void) {

@@ -9,6 +9,7 @@
 #ifndef PORT_OS_HOST_H
 #define PORT_OS_HOST_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <ultra64.h>
 
@@ -53,6 +54,12 @@ void PcRaiseEvent(OSEvent event);
    raises the interrupt. Returns the frame buffer now shown, or NULL while
    the screen is black. */
 void *PcRaiseRetrace(void);
+
+/* Stops the game's threads for good, at an exit: none gets the CPU again,
+   and the one that holds it gives it up at its next call to libultra.
+   Returns once it has, or false after timeoutMs if it hasn't, as when it
+   loops without calling libultra. */
+bool PcHaltGame(int timeoutMs);
 
 /* Ends the program with a message, for errors that the port can't recover
    from */
