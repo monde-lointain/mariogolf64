@@ -140,7 +140,9 @@ So a mod holds only what it changes:
 `MODS` names more folders laid out the same way, such as code that
 several mods share; the build looks in the mod's folder first, then in
 each of them in order. Each of these folders can have a `mod.mk`, which
-the build reads before its rules, to add settings and rules of its own.
+the build reads before its rules, to add settings and rules of its own. A
+`mod.mk` adds each setting that chooses which files the build takes to
+`MOD_SETTINGS`, so that changing it rebuilds what it chose.
 `TARGET` names the ROM. Run `make setup` once, in this repository: mods
 use its assets and tools.
 

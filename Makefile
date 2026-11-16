@@ -346,7 +346,10 @@ $(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 # declare. Those include libultra's headers from PR/ by their bare names.
 $(BUILD_DIR)/src/system/main_bss.c.o: INCLUDES += $(call include_dirs,$(LIBMUS_DIR)/src $(ULTRALIB_DIR)/include/PR)
 
-# The mods' own settings and rules
+# The mods' own settings and rules. A mod.mk adds to MOD_SETTINGS each
+# setting that chooses which files the build takes, such as the character
+# kit's CHARACTERS, so that changing it rebuilds what it chose.
+MOD_SETTINGS :=
 include $(wildcard $(MOD_ROOTS:%=%/mod.mk))
 
 .PHONY: all setup tools extract clean distclean check-shiftable check-alignment equivalence \
@@ -629,19 +632,23 @@ $(BUILD_DIR)/$(LIBNUSYS_DIR)/include/nusys.h: $(LIBNUSYS_DIR)/include/nusys.h
 	@mkdir -p $(dir $@)
 	tr -d '\r' < $< > $@
 
-# Adding a file to a mod, or removing one, changes which file the build
-# takes for its path, which no file's date shows, so a change to the list
-# of the mods' files rebuilds every object
+# Which files a mod's build takes, which no file's date shows: adding a
+# file to a mod, or removing one, changes the file that the build takes for
+# its path, and so does a change to the layout taken or to MOD_SETTINGS. A
+# change to any of them rebuilds everything built from the files taken.
 ifneq ($(MOD_ROOTS),)
-MOD_FILES := $(BUILD_DIR)/mod_files.txt
-MOD_FILE_LIST := $(shell find $(wildcard $(foreach root,$(MOD_ROOTS),\
+MOD_INPUTS := $(BUILD_DIR)/mod_inputs.txt
+MOD_INPUT_LIST := $(LAYOUT) $(MOD_SETTINGS) $(shell find $(wildcard $(foreach root,$(MOD_ROOTS),\
                    $(addprefix $(root)/,src include lib tests assets))) -type f | sort)
 
-$(MOD_FILES): FORCE
+$(MOD_INPUTS): FORCE
 	@mkdir -p $(@D)
-	@echo '$(MOD_FILE_LIST)' | cmp -s - $@ || echo '$(MOD_FILE_LIST)' > $@
+	@echo '$(MOD_INPUT_LIST)' | cmp -s - $@ || echo '$(MOD_INPUT_LIST)' > $@
 
-$(O_FILES) $(TEST_O_FILES) $(TEST_DIR)/target/boot.c.o: $(MOD_FILES)
+$(O_FILES) $(TEST_O_FILES) $(TEST_DIR)/target/boot.c.o $(GENERATED_HEADERS) \
+$(BUILD_DIR)/assets/asset_archive.bin $(TEXT_FILES:%=$(BUILD_DIR)/%.bin) \
+$(addprefix $(BUILD_DIR)/,$(TEXTURE_PNGS:.png=.inc.c)) \
+$(LAYOUT_MK) $(MATCHING_LD) $(SHIFTABLE_LD) $(TEST_LD): $(MOD_INPUTS)
 endif
 
 -include $(O_FILES:.o=.d) $(TEST_O_FILES:.o=.d) $(TEST_DIR)/target/boot.c.d
