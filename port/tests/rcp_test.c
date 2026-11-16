@@ -7,6 +7,7 @@
 #include <SDL3/SDL_stdinc.h>
 #include <ultra64.h>
 
+#include "color_images.h"
 #include "frame.h"
 #include "gfx_backend.h"
 #include "rcp.h"
@@ -349,6 +350,32 @@ static void MakeIdentity(Mtx *matrix) {
     words[7] = 0x00000001;
 }
 
+// The GPU's drawing shows until the CPU writes the image's memory after it
+// last agreed with the target
+static void TestShownTarget(void) {
+    Gfx *gfx = BeginList(f_DisplayList);
+    uint16_t width = 0;
+    uint16_t height = 0;
+    GfxTarget *target;
+
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetFillColor(gfx++, 0);
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    RunList(gfx);
+
+    target = LockShownTarget((const uint8_t *)f_ColorImage, &width, &height);
+    UnlockShownTarget();
+    EXPECT(target != NULL && width == IMAGE_WIDTH && height == IMAGE_HEIGHT);
+
+    SyncColorImagesToMemory((const uint8_t *)f_ColorImage, sizeof(f_ColorImage));
+    f_ColorImage[0] ^= 0xFFFF;
+    target = LockShownTarget((const uint8_t *)f_ColorImage, &width, &height);
+    UnlockShownTarget();
+    EXPECT(target == NULL);
+    EXPECT(LockShownTarget((const uint8_t *)f_OtherImage + 2, &width, &height) == NULL);
+    UnlockShownTarget();
+}
+
 int main(void) {
     MakeIdentity(&f_Identity);
     InitRdp();
@@ -359,5 +386,6 @@ int main(void) {
     TestDepthClear();
     TestRomOrderList();
     TestTextureFromDrawnImage();
+    TestShownTarget();
     return ReportTestResults("rcp_test");
 }

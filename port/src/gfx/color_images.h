@@ -51,7 +51,10 @@ bool HasUnsyncedColorImage(const uint8_t *start, uintptr_t size);
 void SyncColorImagesToMemory(const uint8_t *start, uintptr_t size);
 
 // The target that shows the image at address, or NULL when the GPU has
-// never drawn it or the CPU has written it since
-GfxTarget *FindShownTarget(const uint8_t *address, uint16_t *width, uint16_t *height);
+// never drawn it or the CPU has written it since. The images stay locked,
+// so that the target outlives the presenter's use of it on its own thread,
+// until UnlockShownTarget, which must follow either way.
+GfxTarget *LockShownTarget(const uint8_t *address, uint16_t *width, uint16_t *height);
+void UnlockShownTarget(void);
 
 #endif

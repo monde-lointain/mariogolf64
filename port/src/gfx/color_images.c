@@ -342,8 +342,7 @@ void SyncColorImagesToMemory(const uint8_t *start, uintptr_t size) {
     SDL_UnlockMutex(f_Lock);
 }
 
-GfxTarget *FindShownTarget(const uint8_t *address, uint16_t *width, uint16_t *height) {
-    GfxTarget *target = NULL;
+GfxTarget *LockShownTarget(const uint8_t *address, uint16_t *width, uint16_t *height) {
     int i;
 
     SDL_LockMutex(f_Lock);
@@ -354,13 +353,15 @@ GfxTarget *FindShownTarget(const uint8_t *address, uint16_t *width, uint16_t *he
         // memory isn't what the game shows
         if (image->address == address &&
             (image->isMemoryBehind || HashImageMemory(image) == image->memoryHash)) {
-            target = image->target;
             *width = image->width;
             *height = image->height;
-            break;
+            return image->target;
         }
     }
 
+    return NULL;
+}
+
+void UnlockShownTarget(void) {
     SDL_UnlockMutex(f_Lock);
-    return target;
 }
