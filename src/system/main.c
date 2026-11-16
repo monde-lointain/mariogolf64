@@ -36,6 +36,7 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 #include "system/segment_symbols.h"
+#include "system/thread_wait.h"
 
 // The audio interface's sample rate, in Hz
 #define AUDIO_FREQUENCY 32000
@@ -379,6 +380,8 @@ void mainproc(void *arg UNUSED) {
             if (f_DebugHaltState == HALT_STATE_HALTED) {
                 EnterDevelopmentDebugger(100);
             }
+
+            WaitForOtherThreads();
         }
 
         nuGfxDisplayOff();

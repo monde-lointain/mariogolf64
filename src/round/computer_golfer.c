@@ -33,6 +33,7 @@
 #include "shot/current_shot.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
+#include "system/thread_wait.h"
 
 enum PlanThreadState {
     PLAN_THREAD_RUNNING,
@@ -386,11 +387,13 @@ void RunShotPlan(void *arg UNUSED) {
     s32 planResult;
     do {
         planResult = PlanShot(&f_PlannedShot);
+        LetWokenThreadsRun();
     }
 
     while (planResult == PLAN_UNFINISHED);
     f_PlanThreadState = PLAN_THREAD_DONE;
     while (TRUE) {
+        WaitForOtherThreads();
     }
 }
 

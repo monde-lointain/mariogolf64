@@ -37,6 +37,7 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
+#include "system/thread_wait.h"
 
 // ChooseHoleConditions gives up on finding a set cup position after these
 #define CUP_ATTEMPT_COUNT_MAX 120
@@ -932,6 +933,7 @@ void InitHoleState(void) {
         GetGroundHeight(g_HoleSetup.cupPosition[AXIS_X], g_HoleSetup.cupPosition[AXIS_Z]);
     if (IsGameFlagSet(GAME_FLAG_HALT_HOLE_LOADER)) {
         while (TRUE) {
+            WaitForOtherThreads();
         }
     }
 
@@ -967,15 +969,18 @@ void RunLoaderThread(void) {
 
     while (TRUE) {
         while (g_HasLoaderFinished) {
+            WaitForOtherThreads();
         }
 
         courseRecordIndex = GetCourseRecordIndex();
         while (g_FrameCount - g_GroundDrawFrame < LOADER_FRAME_DELAY) {
+            WaitForOtherThreads();
         }
 
         osSyncPrintf("MPSTART\n");
         while (IsAnyCharacterSlotBusy()) {
             osSyncPrintf("Wow! Polychar is alive\n");
+            WaitForOtherThreads();
         }
 
         if (IsGameFlagSet(GAME_FLAG_NEXT_COURSE_FIRST_HOLE) && g_GameState.holeIndex == 0) {
@@ -1023,6 +1028,7 @@ void RunLoaderThread(void) {
         SetGameFlag(GAME_FLAG_HOLE_LOADED);
         if (IsGameFlagSet(GAME_FLAG_HALT_HOLE_LOADER)) {
             while (TRUE) {
+                WaitForOtherThreads();
             }
         }
 
