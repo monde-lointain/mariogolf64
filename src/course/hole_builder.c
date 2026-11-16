@@ -265,8 +265,18 @@ enum TileVertexSlot {
 
 // The work-area buffers that the ground tiles' display lists and vertices are
 // built in
-#define GROUND_DISPLAY_LIST_START ((Gfx *)&g_WorkArea.bytes[0x6E920])
-#define GROUND_DISPLAY_LIST_END ((Gfx *)&g_WorkArea.bytes[0x77D20])
+#ifdef TARGET_PC
+// A host's display list commands are twice the N64's size, so the ground's
+// outgrow their place in the work area; they get a buffer of their own that
+// holds as many commands
+#    define GROUND_DISPLAY_LIST_COMMAND_COUNT ((0x77D20 - 0x6E920) / 8)
+static Gfx f_GroundDisplayLists[GROUND_DISPLAY_LIST_COMMAND_COUNT];
+#    define GROUND_DISPLAY_LIST_START (&f_GroundDisplayLists[0])
+#    define GROUND_DISPLAY_LIST_END (&f_GroundDisplayLists[GROUND_DISPLAY_LIST_COMMAND_COUNT])
+#else
+#    define GROUND_DISPLAY_LIST_START ((Gfx *)&g_WorkArea.bytes[0x6E920])
+#    define GROUND_DISPLAY_LIST_END ((Gfx *)&g_WorkArea.bytes[0x77D20])
+#endif
 #define GROUND_VERTEX_START ((Vtx *)&g_WorkArea.bytes[0x77F20])
 #define GROUND_VERTEX_END ((Vtx *)&g_WorkArea.bytes[0x82720])
 
