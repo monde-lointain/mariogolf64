@@ -35,6 +35,11 @@ the character facing +Z, in the template's bind pose:
                     UVs and triangles
     points          optional: a point's id, bone and position, to move it
     portrait_camera optional: six numbers for each model kind
+
+The character's name replaces the slot's in the game's menus, its text and
+its tournaments. With --text, the output DIR also gets a copy of each text
+file named, as assets/text/messages.txt, with the names changed, and
+names.h, which include/characters/character_names.h reads.
 """
 
 import argparse
@@ -66,6 +71,36 @@ PALETTE_COUNT = 3
 COLOR_CHANNELS = 4
 CHANNEL_MAX = 255
 PORTRAIT_CAMERA_VALUE_COUNT = fmt.PORTRAIT_CAMERA_VALUE_COUNT
+
+# Each slot's character's name, as the game writes it
+SLOT_NAMES = {
+    "plum": "Plum",
+    "charlie": "Charlie",
+    "maple": "Maple",
+    "baby_mario": "Baby Mario",
+    "luigi": "Luigi",
+    "peach": "Peach",
+    "sonny": "Sonny",
+    "wario": "Wario",
+    "harry": "Harry",
+    "mario": "Mario",
+    "yoshi": "Yoshi",
+    "donkey_kong": "DK",
+    "bowser": "Bowser",
+    "metal_mario": "Metal Mario",
+    "kid": "Kid",
+    "sherry": "Sherry",
+    "azalea": "Azalea",
+    "joe": "Joe",
+}
+# A name must fit the menus' IMPORTED_CHARACTER_NAME_LENGTH, with its end
+NAME_LENGTH_MAX = 11
+NAME_PUNCTUATION = " .-"
+# The menus' font codes a lowercase letter as the letter plus this
+LOWERCASE_CODE_OFFSET = 0x80
+HEX_DIGITS = "0123456789ABCDEFabcdef"
+NAMES_FILE = "names.h"
+TOURNAMENT_SUFFIX = " Tournament"
 
 # How much of a slot's model buffer a model can use, and how much of it the
 # CPU sees through the TLB at segment 2: CHARACTER_BUFFER_SIZE, less what
@@ -441,9 +476,15 @@ def read_package(directory: Path) -> Package:
             "maps bone names to heads",
         ).items()
     }
+    name = _as_str(
+        document.get("name", SLOT_NAMES.get(slot, slot)),
+        where,
+        '"name" should be the character\'s name, such as "Terry"',
+    )
+    _check_name(name, where)
     return Package(
         directory,
-        str(document.get("name", slot)),
+        name,
         slot,
         materials,
         parts,
@@ -451,6 +492,75 @@ def read_package(directory: Path) -> Package:
         cameras,
         skeleton,
     )
+
+
+def _check_name(name: str, where: str) -> None:
+    """Reject a name that the game's menus can't show."""
+    _require(
+        0 < len(name) <= NAME_LENGTH_MAX,
+        where,
+        (
+            f'the name "{name}" should be 1 to {NAME_LENGTH_MAX} letters long, '
+            "to fit the menus"
+        ),
+    )
+    _require(
+        all((c.isascii() and c.isalnum()) or c in NAME_PUNCTUATION for c in name),
+        where,
+        (
+            f'the name "{name}" can hold only the letters A to Z, digits, spaces, '
+            "periods and hyphens, which the menus' font has"
+        ),
+    )
+
+
+def menu_spelling(name: str) -> str:
+    """Return NAME as a C string in the menus' font, as character_names.h has it."""
+    spelled = '"'
+    escaped = False
+    for c in name:
+        if c.islower():
+            spelled += f"\\x{ord(c) + LOWERCASE_CODE_OFFSET:02X}"
+            escaped = True
+            continue
+        if escaped and c in HEX_DIGITS:
+            spelled += '" "'  # Else the escape would take the digit as its own
+        spelled += c
+        escaped = False
+    return spelled + '"'
+
+
+def names_header(packages: list[Package]) -> str:
+    """Return names.h, which gives character_names.h the packages' names."""
+    lines = [
+        "// The custom characters' names, which tools/build_character.py wrote",
+        "// from their packages",
+    ]
+    for package in packages:
+        macro = package.slot.upper()
+        lines += [
+            f'#define {macro}_NAME "{package.name}"',
+            f"#define {macro}_MENU_NAME {menu_spelling(package.name)}",
+            (
+                f"#define {macro}_CONTESTANT_NAME "
+                f"{menu_spelling(package.name.replace(' ', '_'))}"
+            ),
+        ]
+    return "\n".join(lines) + "\n"
+
+
+def rename_text(text: str, packages: list[Package]) -> str:
+    """Return a text file's TEXT with each slot's name and tournament the packages'."""
+    renames: dict[str, str] = {}
+    for package in packages:
+        old = SLOT_NAMES.get(package.slot, package.slot)
+        renames[old] = package.name
+        renames[old + TOURNAMENT_SUFFIX] = package.name + TOURNAMENT_SUFFIX
+    lines: list[str] = []
+    for line in text.splitlines(keepends=True):
+        content = line.rstrip("\r\n")
+        lines.append(renames.get(content, content) + line[len(content) :])
+    return "".join(lines)
 
 
 @dataclass
@@ -1584,6 +1694,7 @@ class Arguments(argparse.Namespace):
     repository: Path = Path()
     output: Path | None = None
     header: Path | None = None
+    text: list[Path] | None = None
     packages: list[Path] | None = None
 
 
@@ -1603,6 +1714,12 @@ def main() -> None:
     _ = parser.add_argument("--output", type=Path, help="where the model files go")
     _ = parser.add_argument("--header", type=Path, help="the layout header to write")
     _ = parser.add_argument(
+        "--text",
+        type=Path,
+        action="append",
+        help="a text file to copy to --output with the names changed",
+    )
+    _ = parser.add_argument(
         "packages", type=Path, nargs="+", help="character package directories"
     )
     arguments = parser.parse_args(namespace=Arguments())
@@ -1617,10 +1734,12 @@ def main() -> None:
         )
     ]
     slots: dict[str, Path] = {}
+    packages: list[Package] = []
     try:
         for directory in arguments.packages or []:
             package = read_package(directory)
             _claim_slot(slots, package.slot, directory)
+            packages.append(package)
             if arguments.list_files:
                 for names in model_file_names(package.slot).values():
                     print("\n".join(names))
@@ -1628,10 +1747,11 @@ def main() -> None:
             template = tmpl.load_template(arguments.repository, package.slot)
             if arguments.check:
                 print(check_report(package, build_models(package, template)))
-                continue
-            if output is not None:
+            elif output is not None:
                 output.mkdir(parents=True, exist_ok=True)
                 macros += write_models(package, template, output)
+        if output is not None and building:
+            write_names(packages, arguments.text or [], output)
     except (
         PackageError,
         BuilderBugError,
@@ -1643,6 +1763,20 @@ def main() -> None:
     if header is not None and building:
         header.parent.mkdir(parents=True, exist_ok=True)
         _ = header.write_text("\n".join(macros))
+
+
+def write_names(packages: list[Package], texts: list[Path], output: Path) -> None:
+    """Write names.h to OUTPUT, and a copy of each of TEXTS with the names changed."""
+    _ = (output / NAMES_FILE).write_text(names_header(packages))
+    for text in texts:
+        if text.is_absolute():
+            msg = f"--text {text} should be relative to the repository, as its copy is"
+            raise BuilderBugError(msg)
+        copy = output / text
+        copy.parent.mkdir(parents=True, exist_ok=True)
+        _ = copy.write_text(
+            rename_text(text.read_text(encoding="utf-8"), packages), encoding="utf-8"
+        )
 
 
 def check_report(package: Package, models: dict[str, list[BuiltModel]]) -> str:

@@ -14,6 +14,7 @@
 
 #include "audio/sound.h"
 #include "characters/character.h"
+#include "characters/character_names.h"
 #include "controllers/transfer_pak.h"
 #include "course/course.h"
 #include "course/course_space.h"
@@ -1118,21 +1119,22 @@ static GridCell f_SlotCells[] = {
     {2, 2},
     {3, 2},
 };
+// Each character's name, then the names of some modes
 char g_CharacterNames[][IMPORTED_CHARACTER_NAME_LENGTH] = {
-    "Plum",
-    "Charlie",
-    "Peach",
-    "Baby Mario",
-    "Luigi",
-    "Yoshi",
-    "Sonny",
-    "Wario",
-    "Harry",
-    "Mario",
-    "Maple",
-    "DK",
-    "Bowser",
-    "Metal Mario",
+    PLUM_NAME,
+    CHARLIE_NAME,
+    PEACH_NAME,
+    BABY_MARIO_NAME,
+    LUIGI_NAME,
+    YOSHI_NAME,
+    SONNY_NAME,
+    WARIO_NAME,
+    HARRY_NAME,
+    MARIO_NAME,
+    MAPLE_NAME,
+    DONKEY_KONG_NAME,
+    BOWSER_NAME,
+    METAL_MARIO_NAME,
 };
 static s8 f_ImportedCharacterNames[IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] =
     {"Kid", "Sherry", "Azalea", "Joe"};

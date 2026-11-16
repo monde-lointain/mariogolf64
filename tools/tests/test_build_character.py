@@ -11,6 +11,7 @@ import dataclasses
 import functools
 import io
 import json
+import re
 import tempfile
 import unittest
 import unittest.mock
@@ -116,7 +117,7 @@ class _PackageWriter:
         return {
             "format": bc.PACKAGE_FORMAT,
             "version": bc.PACKAGE_VERSION,
-            "name": "Charlie again",
+            "name": "Charlie II",
             "slot": SLOT,
             "materials": self.materials,
             "parts": parts,
@@ -565,6 +566,155 @@ class TextureTest(unittest.TestCase):
         pixels = np.zeros((2, 2, 4), dtype=np.uint16)
         bled = bc.bleed_edges(pixels, pixels[:, :, 3] > 0)
         self.assertEqual(bled.tolist(), pixels.tolist())
+
+
+def c_string_bytes(literals: str) -> bytes:
+    """Return the bytes of C string LITERALS, as a C compiler reads them.
+
+    A hexadecimal escape takes every hex digit after it, as C's does, so
+    that a name spelled without a break would show here as a wrong byte.
+    Adjacent literals join, as C's do.
+    """
+    out = bytearray()
+    found = cast("list[str]", re.findall(r'"((?:[^"\\]|\\.)*)"', literals))
+    for literal in found:
+        position = 0
+        while position < len(literal):
+            if literal.startswith("\\x", position):
+                digits = re.match(r"[0-9A-Fa-f]+", literal[position + 2 :])
+                if digits is None:
+                    raise ValueError(literals)
+                out.append(int(digits.group(), 16) % SIGNED_BYTE_RANGE)
+                if int(digits.group(), 16) >= SIGNED_BYTE_RANGE:
+                    out.append(0)  # Too wide for a char: mark the bytes wrong
+                position += 2 + len(digits.group())
+            else:
+                out += literal[position].encode("ascii")
+                position += 1
+    return bytes(out)
+
+
+def menu_bytes(name: str) -> bytes:
+    """Return NAME in the menus' font: lowercase letters raised by its offset."""
+    return bytes(
+        ord(c) + bc.LOWERCASE_CODE_OFFSET if c.islower() else ord(c) for c in name
+    )
+
+
+def header_defines() -> dict[str, str]:
+    """Return character_names.h's macros' values, as the original's names."""
+    header = (REPOSITORY / "include" / "characters" / "character_names.h").read_text()
+    return dict(
+        cast("list[tuple[str, str]]", re.findall(r"#\s*define (\w+) (.+)", header))
+    )
+
+
+def named_package(test: unittest.TestCase, name: str, slot: str = SLOT) -> bc.Package:
+    """Return a minimal package named NAME that replaces SLOT."""
+    document = minimal_document()
+    document["name"] = name
+    document["slot"] = slot
+    return bc.read_package(PackageDirectory(test).write(document))
+
+
+class NameTest(unittest.TestCase):
+    """Check the names that a custom character gives the menus and text."""
+
+    def test_spelling_reads_back_as_the_menu_font(self) -> None:
+        """Check that every spelling, read as C reads it, is the name's bytes.
+
+        The names put capitals that are hex digits after lowercase letters,
+        whose escapes would take them in without a break.
+        """
+        names = ["Terry", "DaD", "Ab1", "Mr. T-1", "a", "zZ", "Eve 2", "BaBe-F0"]
+        for name in [*names, *bc.SLOT_NAMES.values()]:
+            with self.subTest(name=name):
+                spelled = bc.menu_spelling(name)
+                self.assertEqual(c_string_bytes(spelled), menu_bytes(name))
+
+    def test_spelling_matches_the_originals(self) -> None:
+        """Check that the original names spell as the game's menus have them.
+
+        The original menus write a second word lowercase ("Baby mario"),
+        which a custom name keeps as its artist wrote it, so for those only
+        the bytes after the space differ.
+        """
+        defines = header_defines()
+        lowered_second_word = {"baby_mario", "metal_mario"}
+        for slot, name in bc.SLOT_NAMES.items():
+            macro = slot.upper()
+            with self.subTest(slot=slot):
+                self.assertEqual(defines[f"{macro}_NAME"], f'"{name}"')
+                contestant = bc.menu_spelling(name.replace(" ", "_"))
+                self.assertEqual(defines[f"{macro}_CONTESTANT_NAME"], contestant)
+                menu = defines[f"{macro}_MENU_NAME"]
+                if slot in lowered_second_word:
+                    first, second = name.split(" ")
+                    menu_name = f"{first} {second.lower()}"
+                    self.assertEqual(c_string_bytes(menu), menu_bytes(menu_name))
+                else:
+                    self.assertEqual(menu, bc.menu_spelling(name))
+
+    def test_header_renames_the_slot(self) -> None:
+        """Check that names.h defines the replaced slot's three names."""
+        header = bc.names_header(
+            [named_package(self, "Mr. Fox"), named_package(self, "Big D", "joe")]
+        )
+        defines = dict(
+            cast("list[tuple[str, str]]", re.findall(r"#define (\w+) (.+)", header))
+        )
+        self.assertEqual(
+            defines,
+            {
+                "CHARLIE_NAME": '"Mr. Fox"',
+                "CHARLIE_MENU_NAME": bc.menu_spelling("Mr. Fox"),
+                "CHARLIE_CONTESTANT_NAME": bc.menu_spelling("Mr._Fox"),
+                "JOE_NAME": '"Big D"',
+                "JOE_MENU_NAME": bc.menu_spelling("Big D"),
+                "JOE_CONTESTANT_NAME": bc.menu_spelling("Big_D"),
+            },
+        )
+        self.assertEqual(set(defines) - set(header_defines()), set())
+
+    def test_names_the_menus_cannot_show_are_refused(self) -> None:
+        """Check that a name too long, empty or with other letters is refused.
+
+        The longest name fits the game's buffer for it, with its terminator.
+        """
+        header = (REPOSITORY / "include" / "characters" / "character.h").read_text()
+        found = re.search(r"#define IMPORTED_CHARACTER_NAME_LENGTH (\d+)", header)
+        self.assertIsNotNone(found)
+        longest = "A" * (int(found.group(1)) - 1 if found else 0)
+        self.assertEqual(named_package(self, longest).name, longest)
+        self.assertEqual(named_package(self, "Mr. T-1").name, "Mr. T-1")
+        for name in ["", longest + "A", "Terry!", "T\u00e9rry", "Terry_Fox"]:
+            with self.subTest(name=name), self.assertRaises(bc.PackageError) as caught:
+                _ = named_package(self, name)
+            self.assertIn(f'"{name}"', str(caught.exception))
+
+    def test_name_defaults_to_the_slots(self) -> None:
+        """Check that a package without a name keeps the slot's."""
+        document = minimal_document()
+        del document["name"]
+        document["slot"] = "donkey_kong"
+        package = bc.read_package(PackageDirectory(self).write(document))
+        self.assertEqual(package.name, "DK")
+
+    def test_text_renames_whole_lines_only(self) -> None:
+        """Check that only lines that are the name, or its tournament, change."""
+        text = "Charlie\nCharlie Tournament\r\nCharlie's ball\n Charlie\nPlum\nCharlie"
+        renamed = bc.rename_text(text, [named_package(self, "Terry")])
+        expected = "Terry\nTerry Tournament\r\nCharlie's ball\n Charlie\nPlum\nTerry"
+        self.assertEqual(renamed, expected)
+
+    def test_text_path_must_be_relative(self) -> None:
+        """Check that an absolute text file, whose copy would land on it, is refused."""
+        output = PackageDirectory(self).path
+        text = output / "messages.txt"
+        _ = text.write_text("Charlie\n")
+        with self.assertRaises(bc.BuilderBugError):
+            bc.write_names([named_package(self, "Terry")], [text], output)
+        self.assertEqual(text.read_text(), "Charlie\n")
 
 
 if __name__ == "__main__":

@@ -100,6 +100,13 @@ the original's build is left alone.
 `tools/build_character.py --check PACKAGE` checks a package without
 building the game, as the export does.
 
+## Name
+
+The name you give at export replaces the character's name everywhere the
+game shows it: menus, scorecards, the tournament's contestants and its
+tournament, such as "Charlie Tournament". A name has at most 11 letters,
+digits, spaces, periods and hyphens, which is what the menus' font has.
+
 ## Testing the tools
 
 `make tool-tests` tests the build tools, some against the game's own

@@ -135,7 +135,8 @@ A custom character, modeled in Blender with the add-on in
 plays its animations. `make CHARACTERS=PACKAGE` builds
 `build/nonmatching/custom/mariogolf64.z64` with it; the original's build
 is left alone. Every segment after main starts on a 16-byte boundary, as
-in the original, so model files of any size fit. See
+in the original, so model files of any size fit. The character's name
+replaces the original's in the menus and text. See
 [`tools/blender/README.md`](tools/blender/README.md) for the workflow, and
 `make tool-tests` and `make blender-tests` for the tools' tests.
 

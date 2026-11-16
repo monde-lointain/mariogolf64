@@ -641,7 +641,11 @@ CHARACTER_DIR    := $(BUILD_DIR)/custom_characters
 CHARACTER_HEADER := $(CHARACTER_DIR)/layouts.h
 # Changes to the list of packages, which their files' dates don't show
 CHARACTER_LIST   := $(CHARACTER_DIR)/packages.txt
+# Where the text files are encoded from: a custom build's copies have the
+# characters' names changed
+TEXT_ROOT        :=
 ifneq ($(strip $(CHARACTERS)),)
+TEXT_ROOT        := $(CHARACTER_DIR)/
 DEFINES          += -DCUSTOM_CHARACTERS
 CHARACTER_FILES  := $(shell $(PYTHON) tools/build_character.py --list-files $(CHARACTERS))
 CHARACTER_BINS   := $(CHARACTER_FILES:%=$(CHARACTER_DIR)/%.bin)
@@ -653,13 +657,19 @@ $(CHARACTER_LIST): FORCE
 	@echo '$(abspath $(CHARACTERS))' | cmp -s - $@ || echo '$(abspath $(CHARACTERS))' > $@
 
 $(CHARACTER_HEADER): $(CHARACTER_LIST) $(CHARACTER_TOOLS) $(shell find $(CHARACTERS) -type f) \
-                     src/characters/character_model.c $(wildcard assets/character_models/*.bin)
-	$(PYTHON) tools/build_character.py --output $(CHARACTER_DIR) --header $@ $(CHARACTERS)
+                     src/characters/character_model.c $(wildcard assets/character_models/*.bin) \
+                     $(TEXT_FILES:%=%.txt)
+	$(PYTHON) tools/build_character.py --output $(CHARACTER_DIR) --header $@ \
+	    $(TEXT_FILES:%=--text %.txt) $(CHARACTERS)
 
 # The header is written last, so it's newer than the files it was written with
-$(CHARACTER_BINS): $(CHARACTER_HEADER) ;
+$(CHARACTER_BINS) $(CHARACTER_DIR)/names.h $(TEXT_FILES:%=$(CHARACTER_DIR)/%.txt): \
+    $(CHARACTER_HEADER) ;
 
-$(BUILD_DIR)/src/characters/character_model.c.o: $(CHARACTER_HEADER)
+# The files that include the layouts or, through characters/character_names.h,
+# the names
+$(addprefix $(BUILD_DIR)/src/,characters/character_model.c.o menus/menu.c.o \
+                               menus/main_menu.c.o round/tournament.c.o): $(CHARACTER_HEADER)
 
 # Every model's object, so that one no longer replaced is made again
 $(filter $(BUILD_DIR)/assets/character_models/%,$(O_FILES)): $(CHARACTER_LIST)
@@ -676,7 +686,7 @@ $(BUILD_DIR)/assets/asset_archive.bin: $(wildcard $(ARCHIVE_DIR)/*.bin) tools/as
 	$(PYTHON) tools/asset_archive.py pack $(ARCHIVE_DIR) $@
 
 # The text files are encoded from the text that messages.py decodes them to
-$(TEXT_FILES:%=$(BUILD_DIR)/%.bin): $(BUILD_DIR)/%.bin: %.txt tools/messages.py tools/asset_archive.py
+$(TEXT_FILES:%=$(BUILD_DIR)/%.bin): $(BUILD_DIR)/%.bin: $(TEXT_ROOT)%.txt tools/messages.py tools/asset_archive.py
 	$(PYTHON) tools/messages.py encode $< $@
 
 $(BUILD_DIR)/assets/asset_archive.bin.o $(TEXT_FILES:%=$(BUILD_DIR)/%.bin.o): %.o: %

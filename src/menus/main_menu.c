@@ -28,6 +28,7 @@
 #include "camera/view_projection.h"
 #include "characters/character.h"
 #include "characters/character_model.h"
+#include "characters/character_names.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
 #include "course/course.h"
@@ -424,27 +425,26 @@ static const char *f_UnusedModeNames[] UNUSED = {
     "9HOLE MODE  ",
     "CLUB HANDI",
 };
-// Each character's name, with LOWERCASE_CODE_OFFSET added to its lowercase
-// letters
+// Each character's name as the menus spell it
 char g_MenuCharacterNames[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] = {
-    "P\xEC\xF5\xED", // Plum
-    "C\xE8\xE1\xF2\xEC\xE9\xE5", // Charlie
-    "P\xE5\xE1\xE3\xE8", // Peach
-    "B\xE1\xE2\xF9 \xED\xE1\xF2\xE9\xEF", // Baby mario
-    "L\xF5\xE9\xE7\xE9", // Luigi
-    "Y\xEF\xF3\xE8\xE9", // Yoshi
-    "S\xEF\xEE\xEE\xF9", // Sonny
-    "W\xE1\xF2\xE9\xEF", // Wario
-    "H\xE1\xF2\xF2\xF9", // Harry
-    "M\xE1\xF2\xE9\xEF", // Mario
-    "M\xE1\xF0\xEC\xE5", // Maple
-    "DK", // DK
-    "B\xEF\xF7\xF3\xE5\xF2", // Bowser
-    "M\xE5\xF4\xE1\xEC \xED\xE1\xF2\xE9\xEF", // Metal mario
-    "K\xE9\xE4", // Kid
-    "S\xE8\xE5\xF2\xF2\xF9", // Sherry
-    "A\xFA\xE1\xEC\xE5\xE1", // Azalea
-    "J\xEF\xE5", // Joe
+    PLUM_MENU_NAME,
+    CHARLIE_MENU_NAME,
+    PEACH_MENU_NAME,
+    BABY_MARIO_MENU_NAME,
+    LUIGI_MENU_NAME,
+    YOSHI_MENU_NAME,
+    SONNY_MENU_NAME,
+    WARIO_MENU_NAME,
+    HARRY_MENU_NAME,
+    MARIO_MENU_NAME,
+    MAPLE_MENU_NAME,
+    DONKEY_KONG_MENU_NAME,
+    BOWSER_MENU_NAME,
+    METAL_MARIO_MENU_NAME,
+    KID_MENU_NAME,
+    SHERRY_MENU_NAME,
+    AZALEA_MENU_NAME,
+    JOE_MENU_NAME,
 };
 static const char *f_UnusedOptionNames[] UNUSED = {
     "TOURNAMENT",

@@ -9,6 +9,7 @@
 #include <string.h>
 #include <ultra64.h>
 
+#include "characters/character_names.h"
 #include "course/course.h"
 #include "math/math_util.h"
 #include "menus/menu.h"
@@ -82,17 +83,17 @@ char g_ContestantNames[COURSE_COUNT * NAMES_PER_COURSE][CONTESTANT_NAME_LENGTH] 
     "M\xE9\xEB\xE5", // Mike
     "G\xE1\xE9\xEC", // Gail
     "C\xEF\xEC\xE9\xEE", // Colin
-    "B\xE1\xE2\xF9_M\xE1\xF2\xE9\xEF", // Baby_Mario
+    BABY_MARIO_CONTESTANT_NAME,
     "G\xF2\xE5\xE7", // Greg
     "C\xE8\xF2\xE9\xF3\xF4\xE9\xE1\xEE", // Christian
     "B\xE9\xEC\xEC", // Bill
-    "P\xE5\xE1\xE3\xE8", // Peach
+    PEACH_CONTESTANT_NAME,
     "M\xE9\xE3\xE8\xE5\xEC\xEC\xE5", // Michelle
     "P\xE8\xE9\xEC", // Phil
-    "C\xE8\xE1\xF2\xEC\xE9\xE5", // Charlie
+    CHARLIE_CONTESTANT_NAME,
     "L\xE9\xEE\xEB", // Link
     "S\xE8\xE5\xE9\xEB", // Sheik
-    "P\xEC\xF5\xED", // Plum
+    PLUM_CONTESTANT_NAME,
     "D\xE1\xF2\xF5\xEE\xE9\xE1", // Darunia
     "D\xEF\xF2\xE9\xE5", // Dorie
     "F\xEF\xF8", // Fox
@@ -106,25 +107,25 @@ char g_ContestantNames[COURSE_COUNT * NAMES_PER_COURSE][CONTESTANT_NAME_LENGTH] 
     "K\xEF\xEF\xF0\xE1", // Koopa
     "B\xF5\xE2\xE2\xE1", // Bubba
     "L\xE1\xF2\xF2\xF9", // Larry
-    "Y\xEF\xF3\xE8\xE9", // Yoshi
+    YOSHI_CONTESTANT_NAME,
     "T\xEF\xE1\xE4", // Toad
     "K\xE5\xEE", // Ken
     "U\xEB\xEB\xE9\xEB\xE9", // Ukkiki
     "B\xEF\xE2-\xEF\xED\xE2", // Bob-omb
     "M\xEF\xEE\xF4\xF9_M\xEF\xEC\xE5", // Monty_Mole
-    "L\xF5\xE9\xE7\xE9", // Luigi
+    LUIGI_CONTESTANT_NAME,
     "F\xEC\xF9_G\xF5\xF9", // Fly_Guy
     "C\xE8\xE5\xE5\xF0_C\xE8\xE5\xE5\xF0", // Cheep_Cheep
     "C\xE8\xE9\xEC\xEC_B\xF5\xEC\xEC\xF9", // Chill_Bully
     "B\xE9\xE7_P\xE5\xEE\xE7\xF5\xE9\xEE", // Big_Penguin
-    "B\xE1\xE2\xF9_M\xE1\xF2\xE9\xEF", // Baby_Mario
+    BABY_MARIO_CONTESTANT_NAME,
     "H\xE5\xEE\xF2\xF9", // Henry
     "A\xF2\xED\xEF\xEE\xE4", // Armond
     "D\xE1\xF6\xE9\xE4", // David
     "F\xE1\xF2\xE1\xEE", // Faran
     "E\xE4", // Ed
     "T\xEF\xED", // Tom
-    "M\xE5\xF4\xE1\xEC_M\xE1\xF2\xE9\xEF", // Metal_Mario
+    METAL_MARIO_CONTESTANT_NAME,
     "W\xE9\xE7\xE7\xEC\xE5\xF2", // Wiggler
     "T\xE1\xEC\xEF\xEE", // Talon
     "R\xE5\xE4_B\xE5\xE5\xFA\xEF", // Red_Beezo
@@ -136,22 +137,22 @@ char g_ContestantNames[COURSE_COUNT * NAMES_PER_COURSE][CONTESTANT_NAME_LENGTH] 
     "S\xE8\xF9_G\xF5\xF9", // Shy_Guy
     "W\xE8\xEF\xED\xF0", // Whomp
     "Z\xE5\xEC\xE4\xE1", // Zelda
-    "M\xE1\xF0\xEC\xE5", // Maple
+    MAPLE_CONTESTANT_NAME,
     "G\xEF\xEF\xED\xE2\xE1", // Goomba
-    "S\xEF\xEE\xEE\xF9", // Sonny
+    SONNY_CONTESTANT_NAME,
     "K\xEF\xEF\xF0\xE1", // Koopa
     "L\xE1\xEB\xE9\xF4\xF5", // Lakitu
     "L\xE1\xF2\xF2\xF9", // Larry
     "B\xF5\xFA\xFA\xF9", // Buzzy
-    "Y\xEF\xF3\xE8\xE9", // Yoshi
+    YOSHI_CONTESTANT_NAME,
     "S\xF0\xE9\xEE\xF9", // Spiny
     "B\xEF\xE2-\xEF\xED\xE2", // Bob-omb
-    "L\xF5\xE9\xE7\xE9", // Luigi
+    LUIGI_CONTESTANT_NAME,
     "F\xEC\xF9_G\xF5\xF9", // Fly_Guy
     "C\xE8\xE5\xE5\xF0_C\xE8\xE5\xE5\xF0", // Cheep_Cheep
     "C\xE8\xE9\xEC\xEC_B\xF5\xEC\xEC\xF9", // Chill_Bully
     "B\xE9\xE7_P\xE5\xEE\xE7\xF5\xE9\xEE", // Big_Penguin
-    "B\xE1\xE2\xF9_M\xE1\xF2\xE9\xEF", // Baby_Mario
+    BABY_MARIO_CONTESTANT_NAME,
     "R\xE5\xF8", // Rex
     "P\xE9\xE4\xE7\xE9\xF4", // Pidgit
     "W\xE5\xEE\xE4\xF9_O.", // Wendy_O.
@@ -167,27 +168,27 @@ char g_ContestantNames[COURSE_COUNT * NAMES_PER_COURSE][CONTESTANT_NAME_LENGTH] 
     "B\xF5\xE2\xE2\xE1", // Bubba
     "S\xEB\xF5\xEC\xEC_K\xE9\xE4", // Skull_Kid
     "S\xEC\xE9\xF0\xF0\xF9", // Slippy
-    "H\xE1\xF2\xF2\xF9", // Harry
+    HARRY_CONTESTANT_NAME,
     "P\xE1\xF2\xE1\xF4\xF2\xEF\xEF\xF0\xE1", // Paratroopa
     "C\xE8\xE1\xE9\xEE_C\xE8\xEF\xED\xF0", // Chain_Chomp
     "P\xEF\xE4\xEF\xE2\xEF\xEF", // Podoboo
-    "W\xE1\xF2\xE9\xEF", // Wario
+    WARIO_CONTESTANT_NAME,
     "S\xE8\xF9_G\xF5\xF9", // Shy_Guy
     "R\xE1\xF5\xF2\xF5", // Rauru
-    "M\xE1\xF0\xEC\xE5", // Maple
+    MAPLE_CONTESTANT_NAME,
     "N\xE1\xE2\xEF\xEF\xF2\xF5", // Nabooru
-    "S\xEF\xEE\xEE\xF9", // Sonny
+    SONNY_CONTESTANT_NAME,
     "B\xE9\xE7_M\xF2._I.", // Big_Mr._I.
     "S\xE3\xF5\xF4\xF4\xEC\xE5_B\xF5\xE7", // Scuttle_Bug
     "B\xF5\xFA\xFA\xF9", // Buzzy
-    "Y\xEF\xF3\xE8\xE9", // Yoshi
+    YOSHI_CONTESTANT_NAME,
     "S\xF0\xE9\xEE\xF9", // Spiny
     "C\xE8\xE1\xF2\xEC\xE5\xF3", // Charles
-    "L\xF5\xE9\xE7\xE9", // Luigi
+    LUIGI_CONTESTANT_NAME,
     "J\xE5\xEE", // Jen
     "D\xE5\xF8", // Dex
     "H\xE1\xEC\xE5\xF9", // Haley
-    "B\xE1\xE2\xF9_M\xE1\xF2\xE9\xEF", // Baby_Mario
+    BABY_MARIO_CONTESTANT_NAME,
     "T\xE5\xF2\xF2\xF9", // Terry
     "M\xE9\xEB\xE5", // Mike
     "D\xE1\xF6\xE9\xE4", // David
@@ -197,23 +198,23 @@ char g_ContestantNames[COURSE_COUNT * NAMES_PER_COURSE][CONTESTANT_NAME_LENGTH] 
     "P\xE1\xF2\xE1\xF4\xF2\xEF\xEF\xF0\xE1", // Paratroopa
     "C\xE8\xE1\xE9\xEE_C\xE8\xEF\xED\xF0", // Chain_Chomp
     "P\xEF\xE4\xEF\xE2\xEF\xEF", // Podoboo
-    "W\xE1\xF2\xE9\xEF", // Wario
+    WARIO_CONTESTANT_NAME,
     "S\xE8\xF9_G\xF5\xF9", // Shy_Guy
-    "M\xE1\xF0\xEC\xE5", // Maple
+    MAPLE_CONTESTANT_NAME,
     "Z\xE5\xEC\xE4\xE1", // Zelda
     "S\xF5\xED\xEF_B\xF2\xEF\xF3.", // Sumo_Bros.
-    "S\xEF\xEE\xEE\xF9", // Sonny
+    SONNY_CONTESTANT_NAME,
     "S\xE3\xF5\xF4\xF4\xEC\xE5_B\xF5\xE7", // Scuttle_Bug
     "J\xE5\xF3\xF3\xE9\xE3\xE1", // Jessica
     "B\xF5\xFA\xFA\xF9", // Buzzy
-    "Y\xEF\xF3\xE8\xE9", // Yoshi
+    YOSHI_CONTESTANT_NAME,
     "S\xF0\xE9\xEE\xF9", // Spiny
     "B\xEF\xE2-\xEF\xED\xE2", // Bob-omb
-    "L\xF5\xE9\xE7\xE9", // Luigi
+    LUIGI_CONTESTANT_NAME,
     "F\xEC\xF9_G\xF5\xF9", // Fly_Guy
     "C\xE8\xE5\xE5\xF0_C\xE8\xE5\xE5\xF0", // Cheep_Cheep
     "C\xE8\xE9\xEC\xEC_B\xF5\xEC\xEC\xF9", // Chill_Bully
-    "B\xE1\xE2\xF9_M\xE1\xF2\xE9\xEF", // Baby_Mario
+    BABY_MARIO_CONTESTANT_NAME,
     "M\xE1\xF2\xEB", // Mark
     "T\xE9\xED", // Tim
     "M\xE9\xE3\xE8\xE1\xE5\xEC", // Michael
@@ -223,32 +224,32 @@ char g_ContestantNames[COURSE_COUNT * NAMES_PER_COURSE][CONTESTANT_NAME_LENGTH] 
     "D\xE1\xED\xF0\xE5", // Dampe
     "P\xE9\xE7\xED\xE1", // Pigma
     "A\xEE\xE4\xF2\xEF\xF3\xF3", // Andross
-    "B\xEF\xF7\xF3\xE5\xF2", // Bowser
-    "DK", // DK
-    "M\xE1\xF2\xE9\xEF", // Mario
+    BOWSER_CONTESTANT_NAME,
+    DONKEY_KONG_CONTESTANT_NAME,
+    MARIO_CONTESTANT_NAME,
     "G\xEF\xEF\xED\xE2\xE1", // Goomba
     "U\xEE\xE1\xE7\xE9", // Unagi
     "B\xE9\xE7_B\xEF\xE2-\xEF\xED\xE2", // Big_Bob-omb
     "A\xEE\xE4\xF9", // Andy
     "S\xEC\xE9\xF0\xF0\xF9", // Slippy
-    "H\xE1\xF2\xF2\xF9", // Harry
+    HARRY_CONTESTANT_NAME,
     "B\xEF\xEF", // Boo
     "B\xEC\xEF\xEF\xE2\xE5\xF2", // Bloober
     "F\xE9\xF2\xE5_B\xF2\xEF\xF3.", // Fire_Bros.
-    "W\xE1\xF2\xE9\xEF", // Wario
+    WARIO_CONTESTANT_NAME,
     "H\xE1\xED\xED\xE5\xF2_B\xF2\xEF\xF3.", // Hammer_Bros.
     "S\xEE\xE9\xE6\xE9\xF4", // Snifit
-    "M\xE1\xF0\xEC\xE5", // Maple
-    "S\xEF\xEE\xEE\xF9", // Sonny
+    MAPLE_CONTESTANT_NAME,
+    SONNY_CONTESTANT_NAME,
     "S\xF5\xED\xEF_B\xF2\xEF\xF3.", // Sumo_Bros.
     "B\xE1\xE2\xF9_B\xEF\xF7\xF3\xE5\xF2", // Baby_Bowser
     "M\xF2._I.", // Mr._I.
-    "Y\xEF\xF3\xE8\xE9", // Yoshi
+    YOSHI_CONTESTANT_NAME,
     "S\xF0\xE9\xEE\xF9", // Spiny
     "T\xE1\xEC\xEF\xEE", // Talon
     "B\xEF\xEE\xEF\xEF\xF2\xF5", // Bonooru
     "P\xE9\xE5\xF2\xF2\xE5", // Pierre
-    "L\xF5\xE9\xE7\xE9", // Luigi
+    LUIGI_CONTESTANT_NAME,
     "K\xE9\xEE\xE7_Z\xEF\xF2\xE1", // King_Zora
     "P\xE1\xF5\xEC\xE9\xEE\xE5", // Pauline
     "I\xEE\xE7\xEF", // Ingo
