@@ -66,6 +66,12 @@ mg64_add_port_test(asset_test
     LIBRARIES mg64_ultra SDL3::SDL3
 )
 
+# The debug font as the CPU and the RDP each read it
+mg64_add_port_test(debug_text_test
+    SOURCES debug_text_test.c "${PROJECT_SOURCE_DIR}/src/debug/debug_text.c"
+    LIBRARIES mg64_game_options mg64_ultra SDL3::SDL3
+)
+
 # Built through a Shift-JIS copy, as the game's sources are
 include(ShiftJisSources)
 mg64_encode_shift_jis(shift_jis_test_copy "${CMAKE_CURRENT_SOURCE_DIR}/shift_jis_test.c")

@@ -12,6 +12,7 @@
 #include "debug/game_flags.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
+#include "system/big_endian.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/main.h"
@@ -58,6 +59,36 @@ static u8 f_DebugText[TEXT_ROW_COUNT * TEXT_COLUMN_COUNT];
 static u8 f_DebugLog[LOG_LINE_COUNT * TEXT_COLUMN_COUNT];
 static s32 f_DebugLogCursor;
 
+// The RDP reads the font's 4-bit texels in the N64's byte order, which a
+// host's u16 words don't hold, while its CPU reads f_DebugFont's words as
+// numbers. So a host gives the RDP a copy in the cartridge's order, and
+// writes the words of texts' textures in that order too.
+#ifdef TARGET_PC
+static u16 f_RdpDebugFont[ARRAY_COUNT(f_DebugFont)] RCP_ALIGNED;
+static Boolean f_IsRdpDebugFontCopied = FALSE;
+
+static u16 *GetRdpDebugFont(void) {
+    s32 i;
+
+    if (!f_IsRdpDebugFontCopied) {
+        for (i = 0; i < ARRAY_COUNT(f_DebugFont); i++) {
+            StoreBigEndian16(&f_RdpDebugFont[i], f_DebugFont[i]);
+        }
+
+        MarkRomOrder(f_RdpDebugFont, sizeof(f_RdpDebugFont));
+        f_IsRdpDebugFontCopied = TRUE;
+    }
+
+    return f_RdpDebugFont;
+}
+
+#    define RdpDebugFont() GetRdpDebugFont()
+#    define StoreTextureWord(word, value) StoreBigEndian16(&(word), (value))
+#else
+#    define RdpDebugFont() f_DebugFont
+#    define StoreTextureWord(word, value) ((word) = (value))
+#endif
+
 void SetUpDebugTextDrawing(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
@@ -81,7 +112,7 @@ void SetUpDebugTextDrawing(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(
         gfx++,
-        TextureAddress(f_DebugFont),
+        TextureAddress(RdpDebugFont()),
         G_IM_FMT_IA,
         FONT_WIDTH,
         FONT_HEIGHT,
@@ -96,6 +127,10 @@ void SetUpDebugTextDrawing(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
 }
+
+// The bytes of a 4-bit texture one glyph tall and length glyphs wide
+#define TextTextureSize(length) \
+    ((length) * DEBUG_GLYPH_SIZE * (DEBUG_GLYPH_SIZE / PIXELS_PER_FONT_WORD) * sizeof(u16))
 
 // Draws the glyphs of text into a 4-bit texture one glyph tall and length
 // glyphs wide.
@@ -141,7 +176,7 @@ void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
             row = textureIndex * 2;
             rowFontIndex = fontIndex;
             for (; wordColumn < DEBUG_GLYPH_SIZE / PIXELS_PER_FONT_WORD; wordColumn++) {
-                texture[row + wordColumn] = f_DebugFont[rowFontIndex + wordColumn];
+                StoreTextureWord(texture[row + wordColumn], f_DebugFont[rowFontIndex + wordColumn]);
             }
 
             fontIndex += FONT_ROW_WORD_COUNT;
@@ -149,6 +184,8 @@ void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
         }
         text++;
     }
+
+    MarkRomOrder(texture, TextTextureSize(length));
 }
 
 // Puts text in the grid and draws it into the framebuffers at once
