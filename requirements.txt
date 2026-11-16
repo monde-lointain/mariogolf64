@@ -2,12 +2,8 @@ splat64[mips]>=0.50.1,<1.0.0
 spimdisasm>=1.42.4
 rabbitizer
 ipl3checksum
-mapfile-parser
-# oracle.py
-levenshtein
-# progress_report.py
+# The texture and custom character tools
 numpy
-# decode_asset.py
 pillow
 # make pycheck
 ruff

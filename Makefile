@@ -314,7 +314,7 @@ $(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
 .PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable FORCE \
         check-alignment \
-        progress equivalence sanitize test target-tests tool-tests blender-tests
+        equivalence sanitize test target-tests tool-tests blender-tests
 
 # A recipe that fails after writing its target, such as a check of what it
 # wrote, would otherwise leave a target that the next run takes as built
@@ -362,24 +362,6 @@ tool-tests:
 BLENDER ?= blender
 blender-tests:
 	tools/blender/run_tests.sh $(BLENDER)
-
-# Measures the matching build against the drafts' build and draws the
-# progress map in build/progress. Each run adds the measured commit to the
-# history kept there, which follows tools/progress_seed.json, the commits
-# before the first run (see tools/progress_seed.py).
-PROGRESS_DIR := build/progress
-DRAFTS_DIR   := build/nonmatching
-PROGRESS_O_FILES := $(filter $(BUILD_DIR)/src/% $(BUILD_DIR)/lib/%,$(O_FILES))
-
-progress: $(ROM)
-	$(MAKE) NON_MATCHING=1
-	@mkdir -p $(PROGRESS_DIR)
-	$(PYTHON) tools/progress_report.py $(PROGRESS_DIR) $(DRAFTS_DIR) \
-	    $(PROGRESS_O_FILES)
-	$(PYTHON) tools/progress_map.py $(PROGRESS_DIR)/report.json -o $(PROGRESS_DIR) \
-	    --regs $(PROGRESS_DIR)/regs.json --history tools/progress_seed.json \
-	    --history $(PROGRESS_DIR)/history.json \
-	    --commit $$(git rev-parse HEAD) --date $$(git log -1 --format=%cI)
 
 # Links this build's objects in the shiftable layout, which fails on each
 # reference that holds only while the code and data keep their original

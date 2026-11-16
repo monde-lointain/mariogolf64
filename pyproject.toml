@@ -7,9 +7,6 @@ requires-python = ">=3.10"
 [tool.ruff]
 target-version = "py310"
 include = ["tools/*.py"]
-# progress_map.py is a copy of a tool kept elsewhere, changed only in its
-# settings
-extend-exclude = ["tools/progress_map.py"]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -55,10 +52,8 @@ known-first-party = [
   "decode_asset",
   "f3dex2",
   "face_sprites",
-  "fncompare",
   "heap_region",
   "lz_codec",
-  "progress_report",
 ]
 
 [tool.basedpyright]
@@ -66,7 +61,7 @@ include = ["tools"]
 # The Blender add-on runs only inside Blender, whose bpy module has no stubs
 # here, and declares its properties as annotations that aren't types;
 # tools/blender/run_tests.sh tests it in Blender instead
-exclude = ["tools/progress_map.py", "tools/blender", "**/__pycache__"]
+exclude = ["tools/blender", "**/__pycache__"]
 pythonVersion = "3.10"
 typeCheckingMode = "all"
 venvPath = "."
@@ -77,7 +72,6 @@ extraPaths = ["tools"]
 
 [tool.vulture]
 paths = ["tools", "vulture_whitelist.py"]
-exclude = ["tools/progress_map.py"]
 min_confidence = 60
 sort_by_size = true
 # The Blender add-on's tests run from the list @test adds them to, and

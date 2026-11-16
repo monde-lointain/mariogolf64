@@ -37,19 +37,6 @@ a commit always builds the same ROM. `BUILD_DATE` sets another, in the
 original's format, such as `make MODERN=1 BUILD_DATE='Tue Jun 15 18:36:11
 1999'` for the original's.
 
-## Progress
-
-Every routine matches the original's. `make progress` also builds the ROM
-that needn't match (`NON_MATCHING=1`) and writes the progress images and page to
-`build/progress`: a treemap of the code by source file (`progress.svg`),
-every routine by state (`functions.svg`), the matched code over time
-(`history.svg`, `day.svg`, `daily.svg`) and all of them on one page
-(`index.html`). Each run adds the measured commit to `history.json`.
-`tools/progress_report.py` measures the build into objdiff's
-`report.json` format, scoring each draft as objdiff does, and lists the
-drafts that differ in register numbers only. `tools/progress_map.py`, a
-copy of a tool kept elsewhere with this project's settings, draws them.
-
 ## Tests
 
 `make test` builds the matching ROM, checks that it matches, then runs the
