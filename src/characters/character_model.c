@@ -275,7 +275,7 @@ s32 SetMultiTlb(
         osMapTLB(
             tlbIndex++,
             pageMask,
-            (void *)virtualAddress,
+            (void *)(UnsignedAddress)virtualAddress,
             NO_PHYSICAL_PAGE,
             physicalAddress,
             NO_TLB_ASID
@@ -289,7 +289,7 @@ s32 SetMultiTlb(
         osMapTLB(
             tlbIndex++,
             pageMask,
-            (void *)virtualAddress,
+            (void *)(UnsignedAddress)virtualAddress,
             physicalAddress,
             physicalAddress + pageSize,
             NO_TLB_ASID
@@ -304,7 +304,7 @@ s32 SetMultiTlb(
         osMapTLB(
             tlbIndex++,
             pageMask,
-            (void *)virtualAddress,
+            (void *)(UnsignedAddress)virtualAddress,
             physicalAddress,
             NO_PHYSICAL_PAGE,
             NO_TLB_ASID

@@ -1821,7 +1821,7 @@ void ChooseStartingClub(HoleSetup *hole) {
     g_CurrentShot.clubSlot = 0;
     g_CurrentShot.shotMode = SHOT_MODE_NORMAL;
     clubCount = MarkUsableClubs(
-        (s32)GetSurfaceTraits(g_CurrentShot.surface),
+        (s32)(SignedAddress)GetSurfaceTraits(g_CurrentShot.surface),
         g_Players[g_CurrentShot.playerIndex].clubs,
         isUsable
     );

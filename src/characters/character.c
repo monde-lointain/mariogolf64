@@ -1186,8 +1186,9 @@ void LoadCharacter(u32 slotIndex, CharacterIndex characterIndex, s32 modelKind) 
             frameDataSize = FRAME_DATA_COPY_SIZE;
         }
 
-        slot->frameData[0] =
-            OS_PHYSICAL_TO_K0(osVirtualToPhysical((void *)slot->model->frameDataStart));
+        slot->frameData[0] = OS_PHYSICAL_TO_K0(
+            osVirtualToPhysical((void *)(UnsignedAddress)slot->model->frameDataStart)
+        );
         // Added as integers, the size first, to match: adding the size to a u8
         // pointer, on either side, or adding the integers pointer first gives 4
         // words differing, none in shape
@@ -1239,7 +1240,8 @@ void LoadCharacter(u32 slotIndex, CharacterIndex characterIndex, s32 modelKind) 
         }
 
         slot->jointMatrices = g_CurrentJointMatrices;
-        slot->displayList = (Gfx *)slot->model->segmentAddresses[CHARACTER_MODEL_DISPLAY_LIST];
+        slot->displayList =
+            (Gfx *)(UnsignedAddress)slot->model->segmentAddresses[CHARACTER_MODEL_DISPLAY_LIST];
         slot->portraitCamera[0] =
             *(f32 *)CharacterModelTable(slot->model, CHARACTER_MODEL_PORTRAIT_CAMERA);
         slot->portraitCamera[1] =

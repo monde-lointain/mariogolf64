@@ -13,6 +13,9 @@
 #define C_LANGUAGE_H
 
 #include <ultra64.h>
+#ifdef TARGET_PC
+#    include <stddef.h>
+#endif
 
 // Zero is false and any other value true, as C tests it. The sized forms
 // match the original's storage for a flag.
@@ -33,8 +36,14 @@ typedef s32 Outcome;
 #define ARRAY_COUNT(array) (s32)(sizeof(array) / sizeof((array)[0]))
 // The size of a struct member, without an instance to apply sizeof to
 #define MemberSize(type, member) (s32)sizeof(((type *)0)->member)
-// How many bytes into a struct a member starts
-#define MemberOffset(type, member) ((u32) & ((type *)0)->member)
+// How many bytes into a struct a member starts. The original takes the
+// member's address in a struct at zero, which a host's wider pointers would
+// truncate.
+#ifdef TARGET_PC
+#    define MemberOffset(type, member) ((u32)offsetof(type, member))
+#else
+#    define MemberOffset(type, member) ((u32) & ((type *)0)->member)
+#endif
 
 #define BITS_PER_BYTE 8
 // The largest s32 value

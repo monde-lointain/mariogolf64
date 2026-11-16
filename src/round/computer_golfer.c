@@ -33,6 +33,7 @@
 #include "shot/current_shot.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
+#include "system/memory_address.h"
 #include "system/thread_wait.h"
 
 enum PlanThreadState {
@@ -605,7 +606,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
         }
 
         f_ClubCount = MarkUsableClubs(
-            (s32)GetSurfaceTraits(g_CurrentShot.surface),
+            (s32)(SignedAddress)GetSurfaceTraits(g_CurrentShot.surface),
             g_Players[g_CurrentShot.playerIndex].clubs,
             f_IsClubUsable
         );

@@ -1863,7 +1863,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     // (0) in the tests' place 83.
     if (club != NULL) {
         if (gfx != NULL) {
-            unusedClub = (u32)club;
+            unusedClub = (u32)(AddressNumber(club));
         }
     }
 
