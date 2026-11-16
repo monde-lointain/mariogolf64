@@ -241,12 +241,6 @@ LD_HASH_SIZE := 8191
 LAYOUT_FLAGS   := --no-check-sections --hash-size=$(LD_HASH_SIZE) -G 0
 LDFLAGS         = $(addprefix -T ,$(LD_SCRIPTS)) -Map $(MAP) $(LAYOUT_FLAGS) $(GC_FLAGS)
 
-# Host-side syntax checking of C sources with clang, pretending to be 32-bit MIPS
-CC_CHECK       := clang -fsyntax-only -fno-builtin -funsigned-char -std=gnu89 -m32 -nostdinc \
-                  -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DCC_CHECK=1 -Wall -Wno-unknown-pragmas \
-                  -Wno-unused-variable -Wno-unused-but-set-variable -Wno-missing-braces
-RUN_CC_CHECK   ?= 0
-
 # Every object that the build links, under its directory. When a change to
 # the layout makes the list again, make reads it in afresh before building
 # anything, so that a file added to the layout is built.
@@ -684,9 +678,6 @@ ICONV := iconv -f UTF-8 -t SHIFT_JIS
 
 $(BUILD_DIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
-ifneq ($(RUN_CC_CHECK),0)
-	$(CC_CHECK) $(INCLUDES) $(DEFINES) $<
-endif
 	{ echo '# 1 "$<"'; $(ICONV) $<; } > $(BUILD_DIR)/$*.sjis.c
 	$(DEPS) $(CC) -c $(CFLAGS) -I$(dir $<) $(INCLUDES) $(DEFINES) -o $@ $(BUILD_DIR)/$*.sjis.c
 
