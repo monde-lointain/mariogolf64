@@ -70,3 +70,8 @@ mg64_add_port_test(gpu_backend_test
     LIBRARIES mg64_gpu mg64_gfx SDL3::SDL3
 )
 set_tests_properties(gpu_backend_test PROPERTIES SKIP_RETURN_CODE 77)
+
+mg64_add_port_test(vadpcm_test
+    SOURCES vadpcm_test.c
+    LIBRARIES mg64_synth
+)
