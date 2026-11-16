@@ -10,6 +10,7 @@
 #include <ultra64.h>
 
 #include "debug/game_flags.h"
+#include "system/big_endian.h"
 #include "system/compiler.h"
 #include "system/memory_address.h"
 #include "system/rom_files.h"
@@ -95,6 +96,8 @@ void ReadAssetFileBounds(WideAssetId assetId, AssetFile *file) {
 
     nuPiReadRom((u32)AddressNumber(&ASSET_TABLE[assetId].size), size, sizeof(*size));
     nuPiReadRom((u32)AddressNumber(&ASSET_TABLE[assetId].offset), offset, sizeof(*offset));
+    ConvertFromBigEndian32(*size);
+    ConvertFromBigEndian32(*offset);
     file->romStart = (u32)AddressNumber(g_AssetArchiveRomStart) + *offset;
     file->cursor = file->romStart;
     file->romEnd = file->romStart + *size;
@@ -176,6 +179,7 @@ s32 OpenEncodedAsset(AssetId assetId, EncodedAsset *asset) {
     asset->encodedSize = GetAssetFileSize(&asset->file);
     ReadAssetFile(header, sizeof(*header), &asset->file);
     asset->method = *(u8 *)header;
+    ConvertFromBigEndian32(*header);
     return *header &= 0xFFFFFF;
 }
 
