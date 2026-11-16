@@ -85,3 +85,8 @@ mg64_add_port_test(synth_test
     SOURCES synth_test.c
     LIBRARIES mg64_synth SDL3::SDL3
 )
+
+mg64_add_port_test(sequencer_test
+    SOURCES sequencer_test.c
+    LIBRARIES mg64_synth SDL3::SDL3
+)

@@ -4,6 +4,7 @@
 
 add_library(mg64_synth STATIC
     reverb.c
+    sequencer.c
     sound_data.c
     synth.c
     vadpcm.c
