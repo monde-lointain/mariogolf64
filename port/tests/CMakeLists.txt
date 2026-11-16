@@ -24,3 +24,8 @@ mg64_add_port_test(gu_test
     SOURCES gu_test.c "${PROJECT_SOURCE_DIR}/src/math/matrix_conversion.c"
     LIBRARIES mg64_gu
 )
+
+mg64_add_port_test(nusys_test
+    SOURCES nusys_test.c
+    LIBRARIES mg64_nusys mg64_ultra SDL3::SDL3
+)
