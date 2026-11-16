@@ -225,6 +225,10 @@ ARCHIVE_DIR := assets/asset_archive
 ARCHIVE_REPLACEMENTS := $(wildcard $(patsubst ./%,%,$(MOD_ROOTS:%=%/$(ARCHIVE_DIR))))
 # The files of messages that are built from text, a message a line
 TEXT_FILES  := assets/text/messages assets/text/staff_roll
+# The folder of the text that they're built from, found in the mods before
+# the base. A mod.mk that changes the text reads it from here and then sets
+# this to the folder of its own copy, so that several mods' changes add up.
+TEXT_SOURCE := assets/text
 
 AS          := $(CROSS)as
 LD          := $(CROSS)ld
@@ -574,7 +578,7 @@ $(BUILD_DIR)/assets/asset_archive.bin: $(wildcard $(BASE)/$(ARCHIVE_DIR)/*.bin) 
 	$(PYTHON) $(TOOLS)/asset_archive.py pack $(BASE)/$(ARCHIVE_DIR) $@ $(ARCHIVE_REPLACEMENTS)
 
 # The text files are encoded from the text that messages.py decodes them to
-$(BUILD_DIR)/assets/text/%.bin: assets/text/%.txt $(TOOLS)/messages.py $(TOOLS)/asset_archive.py
+$(BUILD_DIR)/assets/text/%.bin: $(TEXT_SOURCE)/%.txt $(TOOLS)/messages.py $(TOOLS)/asset_archive.py
 	@mkdir -p $(dir $@)
 	$(ENCODE_TEXT)
 
