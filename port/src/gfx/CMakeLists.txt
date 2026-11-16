@@ -14,3 +14,15 @@ target_link_libraries(mg64_gfx
     PUBLIC mg64_port_internal SDL3::SDL3
     PRIVATE mg64_ultra mg64_port_warnings
 )
+
+# The backend is a library of its own, so that the interpreter's tests can
+# put a double in its place
+include(CompileShaders)
+
+add_library(mg64_gpu STATIC gpu/sdl_gpu_backend.c)
+target_include_directories(mg64_gpu PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/gpu")
+target_link_libraries(mg64_gpu
+    PUBLIC mg64_gfx SDL3::SDL3
+    PRIVATE mg64_ultra mg64_port_warnings
+)
+mg64_compile_shaders(mg64_gpu SHADERS shaders/rdp.vert shaders/rdp.frag)

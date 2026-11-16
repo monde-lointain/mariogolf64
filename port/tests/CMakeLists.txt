@@ -63,3 +63,10 @@ mg64_add_port_test(rcp_test
     SOURCES rcp_test.c
     LIBRARIES mg64_gfx SDL3::SDL3
 )
+
+# The renderer on a real GPU, which the test skips when there is none
+mg64_add_port_test(gpu_backend_test
+    SOURCES gpu_backend_test.c
+    LIBRARIES mg64_gpu mg64_gfx SDL3::SDL3
+)
+set_tests_properties(gpu_backend_test PROPERTIES SKIP_RETURN_CODE 77)
