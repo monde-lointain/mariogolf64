@@ -3,7 +3,9 @@
 # game's songs and sound effects.
 
 add_library(mg64_synth STATIC
+    reverb.c
     sound_data.c
+    synth.c
     vadpcm.c
 )
 target_include_directories(mg64_synth PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

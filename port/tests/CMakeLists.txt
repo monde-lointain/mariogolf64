@@ -80,3 +80,8 @@ mg64_add_port_test(sound_data_test
     SOURCES sound_data_test.c
     LIBRARIES mg64_synth
 )
+
+mg64_add_port_test(synth_test
+    SOURCES synth_test.c
+    LIBRARIES mg64_synth SDL3::SDL3
+)
