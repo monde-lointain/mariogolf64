@@ -75,3 +75,8 @@ mg64_add_port_test(vadpcm_test
     SOURCES vadpcm_test.c
     LIBRARIES mg64_synth
 )
+
+mg64_add_port_test(sound_data_test
+    SOURCES sound_data_test.c
+    LIBRARIES mg64_synth
+)
