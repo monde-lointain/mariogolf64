@@ -10,8 +10,9 @@
  *
  * --headless draws without a window, and --frames ends the program after N
  * retraces, writing the screen it last showed to the --screenshot file, for
- * tests and machines without a display. --input-script plays the first
- * controller from a script, as input_script.h describes.
+ * tests and machines without a display. Headless, each retrace waits for
+ * the game to finish with the last, so a script plays the same every time. --input-script plays the
+ * first controller from a script, as input_script.h describes.
  *
  * Without a ROM, it looks for baserom.us.z64 beside the program, then in
  * the current directory.
@@ -42,6 +43,8 @@
 // Retraces behind before the clock gives up catching up, after a stall
 #define MAX_LATE_RETRACES 4
 #define HALT_TIMEOUT_MS 2000
+// How long a headless retrace waits for the game to finish with the last
+#define LOCKSTEP_TIMEOUT_MS 10000
 
 typedef struct Options {
     const char *romPath;
@@ -280,8 +283,10 @@ static void HandleEvent(const SDL_Event *event) {
 }
 
 // Raises the retraces at their own pace, whatever the display's rate. After
-// a stall the clock starts afresh rather than rush the game to catch up.
-static void RunRetraces(long frameLimit, const InputScript *script) {
+// a stall the clock starts afresh rather than rush the game to catch up. In
+// lockstep, each retrace also waits for the game to finish with it, so that
+// the game sees every one, wherever the host is slow.
+static void RunRetraces(long frameLimit, const InputScript *script, bool isLockstep) {
     const Uint64 period = SDL_NS_PER_SECOND / RETRACES_PER_SECOND;
     Uint64 next = SDL_GetTicksNS();
     long frameCount = 0;
@@ -301,6 +306,10 @@ static void RunRetraces(long frameLimit, const InputScript *script) {
         }
 
         f_ShownFramebuffer = PcRaiseRetrace();
+        if (isLockstep && !PcWaitForIdleCpu(LOCKSTEP_TIMEOUT_MS)) {
+            SDL_Log("The game didn't finish retrace %ld in time", frameCount);
+        }
+
         if (f_Window != NULL) {
             PresentFramebuffer(f_ShownFramebuffer);
         }
@@ -427,7 +436,7 @@ int main(int argc, char *argv[]) {
     PcInitOs();
     PcInsertCartridge(rom, romSize);
     PcBootNuSystem();
-    RunRetraces(options.frameLimit, script);
+    RunRetraces(options.frameLimit, script, options.isHeadless);
     if (!ShutDown(options.screenshotPath)) {
         FreeInputScript(script);
         SDL_free(rom);
