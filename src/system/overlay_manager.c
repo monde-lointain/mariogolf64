@@ -20,6 +20,7 @@
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/main.h"
+#include "system/memory_address.h"
 #include "system/segment_symbols.h"
 
 // A frame long enough ago that no module conflicts with an overlay
@@ -39,8 +40,8 @@
 #define OVERLAY_ENTRY(name, moduleIds, onLoad, onUnload) \
     {FALSE, \
         moduleIds, \
-        (u32)name##_ROM_START, \
-        (u32)name##_ROM_END, \
+        (u32)AddressNumber(name##_ROM_START), \
+        (u32)AddressNumber(name##_ROM_END), \
         name##_VRAM, \
         name##_TEXT_END, \
         name##_BSS_START, \
@@ -265,11 +266,17 @@ Boolean LoadOverlay(s32 overlayId) {
         // don't record and which the queue of tasks can outlast.
         nuGfxTaskAllEndWait();
 #endif
+#ifdef TARGET_PC
+        // The native port links the overlay into the program, and its
+        // romStart numbers its segment
+        osPcResetSegment(overlay->romStart);
+#else
         osWritebackDCacheAll();
         nuPiReadRom(overlay->romStart, overlay->vramStart, overlay->romEnd - overlay->romStart);
         bzero(overlay->bssStart, overlay->bssEnd - overlay->bssStart);
         osWritebackDCache(overlay->bssStart, overlay->bssEnd - overlay->bssStart);
         osInvalICache(overlay->vramStart, overlay->textEnd - overlay->vramStart);
+#endif
         if (overlay->onLoad != NULL) {
             overlay->onLoad();
         }

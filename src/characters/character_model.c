@@ -19,6 +19,8 @@
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/main.h"
+#include "system/memory_address.h"
+#include "system/rom_files.h"
 
 // How many frames a drawn slot stays busy
 #define BUSY_FRAME_COUNT 2
@@ -294,10 +296,10 @@ s32 SetMultiTlb(
 }
 
 // A character model's file in ROM, whose bounds the linker script defines
-#define DeclareModelFile(name) \
-    extern u8 character_models_##name##_ROM_START[], character_models_##name##_ROM_END[]
+#define DeclareModelFile(name) DECLARE_ROM_FILE(character_models_##name)
 #define ModelRomBounds(name) \
-    (u32)(character_models_##name##_ROM_START), (u32)(character_models_##name##_ROM_END)
+    (u32)(AddressNumber(character_models_##name##_ROM_START)), \
+        (u32)(AddressNumber(character_models_##name##_ROM_END))
 
 DeclareModelFile(plum);
 DeclareModelFile(charlie);

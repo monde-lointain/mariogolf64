@@ -11,6 +11,8 @@
 
 #include "debug/game_flags.h"
 #include "system/compiler.h"
+#include "system/memory_address.h"
+#include "system/rom_files.h"
 
 // How many files OpenPooledAssetFile can keep open at once
 #define ASSET_FILE_POOL_SIZE 2
@@ -19,7 +21,7 @@
 #define ASSET_CHUNK_SIZE 0x2000
 
 // Rounds a stack buffer up to the 16-byte alignment that ROM reads need
-#define AlignedReadBuffer(buffer) ((void *)(((u32)(buffer) + 0xF) & ~0xF))
+#define AlignedReadBuffer(buffer) ((void *)((AddressNumber(buffer) + 0xF) & ~0xF))
 
 // Reads the next chunk of the asset into chunk
 #define ReadNextChunk(chunk, remaining, asset) \
@@ -64,9 +66,6 @@ typedef struct LargeChunkReader {
     u32 remaining;
 } LargeChunkReader;
 
-// Where the asset archive starts in ROM, just after the last song
-extern u8 g_AssetArchiveRomStart[];
-
 static AssetFile f_AssetFilePool[ASSET_FILE_POOL_SIZE];
 // The original reserves these bytes, but nothing reads them
 static u8 f_UnusedBufferAfterAssetFilePool[0x40] UNUSED;
@@ -94,9 +93,9 @@ void ReadAssetFileBounds(WideAssetId assetId, AssetFile *file) {
     u32 *offset = AlignedReadBuffer(rawOffset);
     s32 *size = AlignedReadBuffer(rawSize);
 
-    nuPiReadRom((u32)&ASSET_TABLE[assetId].size, size, sizeof(*size));
-    nuPiReadRom((u32)&ASSET_TABLE[assetId].offset, offset, sizeof(*offset));
-    file->romStart = (u32)g_AssetArchiveRomStart + *offset;
+    nuPiReadRom((u32)AddressNumber(&ASSET_TABLE[assetId].size), size, sizeof(*size));
+    nuPiReadRom((u32)AddressNumber(&ASSET_TABLE[assetId].offset), offset, sizeof(*offset));
+    file->romStart = (u32)AddressNumber(g_AssetArchiveRomStart) + *offset;
     file->cursor = file->romStart;
     file->romEnd = file->romStart + *size;
     file->size = *size;

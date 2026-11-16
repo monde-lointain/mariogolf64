@@ -21,6 +21,7 @@
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
+#include "system/rom_files.h"
 #include "text/text.h"
 
 // The messages and their character codes
@@ -127,9 +128,6 @@ enum TextIcon {
 #define SHADOW_OFFSET 1
 #define SHADOW_DIMMING_SHIFT 2
 
-// Where the glyph and message files are in the ROM
-extern u8 g_GlyphFileRomStart[];
-extern u8 g_MessageFileRomStart[];
 static ImageAsset *f_SmallFontImage;
 static ImageAsset *f_MediumFontImage;
 static ImageAsset *f_LargeFontImage;

@@ -49,6 +49,7 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
+#include "system/rom_files.h"
 #include "text/text.h"
 
 // The cast leaves out one character, the one after the start ShuffleCastOrder
@@ -313,8 +314,6 @@ typedef struct StaffText {
 // Whether the character is drawn over the one before it
 #define IS_OVERLAID_CHARACTER(character) \
     ((u32)((character) - FIRST_OVERLAID_CHARACTER) < OVERLAID_CHARACTER_COUNT)
-
-extern u8 g_StaffTextRomStart[];
 
 void DrawStaffLine(Gfx **displayListHead, s32 left, s32 top, s32 lineIndex);
 void DrawStaffRollPainting(Gfx **displayListHead);

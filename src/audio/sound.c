@@ -22,6 +22,7 @@
 #include "system/asset.h"
 #include "system/compiler.h"
 #include "system/memory_address.h"
+#include "system/rom_files.h"
 #include "text/text.h"
 
 // A channel's or the song's handle when there is nothing to control
@@ -78,12 +79,6 @@ typedef struct SongChange {
     SongFlags flags;
     s32 delay;
 } SongChange;
-
-extern u8 g_SoundPointerBankRomStart[];
-extern u8 g_SoundPointerBankRomEnd[];
-extern u8 g_SoundWaveBankRomStart[];
-extern u8 g_SoundEffectBankRomStart[];
-extern u8 g_SoundEffectBankRomEnd[];
 
 SoundChannel g_NextSoundChannel = 0;
 static musHandle f_SongHandle = NO_HANDLE;
@@ -176,8 +171,9 @@ static CharacterSoundKind f_DelayEditorKind = CHARACTER_SOUND_KIND_FULL_SHOT;
 static SongChange f_PendingSongChange = {SONG_CHANGE_NONE, 0, 0, 0};
 static SongId f_SongId = NO_SONG;
 // A song's file in ROM, whose bounds the linker script defines
-#define DeclareSongFile(name) extern u8 songs_##name##_ROM_START[], songs_##name##_ROM_END[]
-#define SongRomBounds(name) (u32)(songs_##name##_ROM_START), (u32)(songs_##name##_ROM_END)
+#define DeclareSongFile(name) DECLARE_ROM_FILE(songs_##name)
+#define SongRomBounds(name) \
+    (u32)(AddressNumber(songs_##name##_ROM_START)), (u32)(AddressNumber(songs_##name##_ROM_END))
 
 DeclareSongFile(hole_out_eagle);
 DeclareSongFile(hole_out_birdie);

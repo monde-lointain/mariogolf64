@@ -7,13 +7,18 @@
 
 #include <ultra64.h>
 
-#define DECLARE_SEGMENT(name) \
-    extern u8 name##_ROM_START[]; \
-    extern u8 name##_ROM_END[]; \
-    extern u8 name##_VRAM[]; \
-    extern u8 name##_TEXT_END[]; \
-    extern u8 name##_BSS_START[]; \
-    extern u8 name##_BSS_END[]
+#ifdef TARGET_PC
+// The native port links every segment into the program and defines these
+// names as constants that tell the segments apart (see port/cmake)
+#    include <rom_file_offsets.h>
+#else
+#    define DECLARE_SEGMENT(name) \
+        extern u8 name##_ROM_START[]; \
+        extern u8 name##_ROM_END[]; \
+        extern u8 name##_VRAM[]; \
+        extern u8 name##_TEXT_END[]; \
+        extern u8 name##_BSS_START[]; \
+        extern u8 name##_BSS_END[]
 
 DECLARE_SEGMENT(main);
 DECLARE_SEGMENT(build_date);
@@ -32,5 +37,6 @@ DECLARE_SEGMENT(ovl_11);
 DECLARE_SEGMENT(ovl_12);
 DECLARE_SEGMENT(ovl_13);
 DECLARE_SEGMENT(ovl_14);
+#endif
 
 #endif
