@@ -122,11 +122,15 @@
 
 // The stack pointer's current value. The asm is volatile so that GCC can't
 // move memory accesses across the read.
-#define GetStackPointer() \
-    ({ \
-        void *stackPointer; \
-        __asm__ volatile("move %0, $sp" : "=r"(stackPointer)); \
-        stackPointer; \
-    })
+#ifdef __mips__
+#    define GetStackPointer() \
+        ({ \
+            void *stackPointer; \
+            __asm__ volatile("move %0, $sp" : "=r"(stackPointer)); \
+            stackPointer; \
+        })
+#else
+#    define GetStackPointer() __builtin_frame_address(0)
+#endif
 
 #endif

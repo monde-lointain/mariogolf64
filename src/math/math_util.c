@@ -127,7 +127,15 @@ u16 ComputeCrc16(u8 *bytes, u32 size) {
 s32 ReportDivisionError(void) {
     u32 returnAddress;
 
+#ifdef __mips__
     asm volatile("move %0, $31" : "=r"(returnAddress));
     osSyncPrintf("kDivError %x\n", returnAddress);
     return 1.0f / f_ZeroDivisor;
+#else
+    // Other CPUs give a number for the quotient, so the error stops the game
+    // as the N64's exception did
+    returnAddress = (uintptr_t)__builtin_return_address(0);
+    osSyncPrintf("kDivError %x\n", returnAddress);
+    __builtin_trap();
+#endif
 }

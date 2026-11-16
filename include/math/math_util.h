@@ -113,12 +113,17 @@ float atanf(float x);
 // only at an abs.s, match with it; without volatile, 5 and 7 of their words
 // differ. The matched functions that need the built-in's abs.s take fabs
 // of a float, which GCC narrows to one.
+#ifdef __mips__
 static inline float fabsf(float value) {
     float magnitude;
 
     __asm__ volatile("abs.s %0, %1" : "=f"(magnitude) : "f"(value));
     return magnitude;
 }
+#else
+// Other CPUs have no abs.s to place, and the library's fabsf is the same
+float fabsf(float value);
+#endif
 
 // Built into GCC, which compiles it to a sqrt.s instruction. Unlike fabsf, the
 // game uses the built-in: as inline assembly like fabsf's, volatile or not,

@@ -275,6 +275,7 @@ void PrepareForReset(void) {
 // The first mask clears bits 8 to 12 and 28 to 31, the second the enables
 // in bits 7 to 11, and nothing is set again.
 void DisableFloatExceptions(void) {
+#ifdef __mips__
     __asm__ volatile("cfc1 $4, $31\n"
                      "nop\n"
                      "li $5, 0x0FFFE0FF\n"
@@ -289,6 +290,7 @@ void DisableFloatExceptions(void) {
         :
         :
         : "$4", "$5");
+#endif
 }
 
 // Starts every system, then hands the game to HandleGfxRetrace and waits,

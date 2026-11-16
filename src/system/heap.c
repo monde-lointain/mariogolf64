@@ -14,7 +14,11 @@
 #include "system/memory_address.h"
 
 // Copies $ra, for the messages that name the caller of a failed call
-#define GET_RETURN_ADDRESS(variable) __asm__ volatile("addu %0, $31, $0" : "=r"(variable))
+#ifdef __mips__
+#    define GET_RETURN_ADDRESS(variable) __asm__ volatile("addu %0, $31, $0" : "=r"(variable))
+#else
+#    define GET_RETURN_ADDRESS(variable) ((variable) = (uintptr_t)__builtin_return_address(0))
+#endif
 
 // A block's tag
 enum BlockTag {
