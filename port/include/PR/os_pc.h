@@ -62,11 +62,12 @@ void osPcUnmapAll(void);
 /* The host's address of a virtual address that a mapping covers, or NULL */
 void *osPcTranslate(u32 virtualAddress);
 
-/* Marks size bytes from start as holding display lists, vertices or
-   matrices in the ROM's big-endian order, as the game loaded them, for the
-   renderer to read them so. It reads all other memory in the host's order.
-   Marking a range drops the marks of the ranges that it overlaps;
-   unmarking drops them too. */
+/* Marks size bytes from start as holding data in the ROM's big-endian
+   order, as the game loaded it, for the renderer to read their display
+   lists, vertices, matrices and textures so. It reads all other memory in
+   the host's order. Every read from the cartridge marks the bytes that it
+   fills; code that writes values of its own over them unmarks them. Marks
+   are exact to the byte. */
 void osPcMarkRomOrder(const void *start, u32 size);
 void osPcUnmarkRomOrder(const void *start, u32 size);
 /* Whether the byte at address lies in a range marked as in the ROM's

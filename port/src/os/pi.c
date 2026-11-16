@@ -46,6 +46,8 @@ void PcReadCartridge(u32 romOffset, void *destination, u32 size) {
     if (available < size) {
         SDL_memset(bytes + available, 0, size - available);
     }
+
+    osPcMarkRomOrder(bytes, size);
 }
 
 OSPiHandle *osCartRomInit(void) {

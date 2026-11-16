@@ -38,7 +38,7 @@ void PcInsertCartridge(const u8 *rom, size_t size);
 const u8 *PcGetCartridgeRom(size_t *size);
 
 /* Copies size bytes of the cartridge's ROM at romOffset to destination,
-   reading zeros past its end */
+   reading zeros past its end, and marks them as in the ROM's order */
 void PcReadCartridge(u32 romOffset, void *destination, u32 size);
 
 /* Creates and starts a thread of the game's from a host thread of the

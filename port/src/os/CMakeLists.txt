@@ -8,6 +8,7 @@ add_library(mg64_ultra STATIC
     message.c
     microcode.c
     pi.c
+    rom_order.c
     scheduler.c
     vi.c
 )

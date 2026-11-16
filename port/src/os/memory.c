@@ -18,14 +18,6 @@
 // osMapTLB's physical address for a page that it leaves unmapped
 #define UNMAPPED_PAGE ((u32) - 1)
 
-// The ranges of memory that hold data in the ROM's byte order
-#define ROM_ORDER_RANGE_COUNT 16
-
-typedef struct RomOrderRange {
-    uintptr_t start;
-    uintptr_t size; // 0 for an unused range
-} RomOrderRange;
-
 typedef struct MappedRange {
     u32 virtualStart;
     u32 size; // 0 for an unused range
@@ -36,7 +28,6 @@ typedef struct MappedRange {
 _Alignas(64) u8 osPcRdram[PC_RDRAM_SIZE];
 
 static MappedRange f_TlbPages[TLB_PAGE_COUNT];
-static RomOrderRange f_RomOrderRanges[ROM_ORDER_RANGE_COUNT];
 static MappedRange f_MappedRanges[MAPPED_RANGE_COUNT];
 
 // Each overlay's variables as they were at start-up
@@ -90,50 +81,6 @@ void osPcMapRange(u32 virtualAddress, void *hostAddress, u32 size) {
     f_MappedRanges[freeIndex].virtualStart = virtualAddress;
     f_MappedRanges[freeIndex].size = size;
     f_MappedRanges[freeIndex].host = hostAddress;
-}
-
-void osPcUnmarkRomOrder(const void *start, u32 size) {
-    uintptr_t first = (uintptr_t)start;
-    int i;
-
-    for (i = 0; i < ROM_ORDER_RANGE_COUNT; i++) {
-        RomOrderRange *range = &f_RomOrderRanges[i];
-
-        if (range->size != 0 && first < range->start + range->size && range->start < first + size) {
-            range->size = 0;
-        }
-    }
-}
-
-void osPcMarkRomOrder(const void *start, u32 size) {
-    int i;
-
-    SDL_assert(start != NULL && size != 0);
-    osPcUnmarkRomOrder(start, size);
-    for (i = 0; i < ROM_ORDER_RANGE_COUNT; i++) {
-        if (f_RomOrderRanges[i].size == 0) {
-            f_RomOrderRanges[i].start = (uintptr_t)start;
-            f_RomOrderRanges[i].size = size;
-            return;
-        }
-    }
-
-    PcFatalError("More than %d ranges in the ROM's byte order", ROM_ORDER_RANGE_COUNT);
-}
-
-int osPcIsRomOrder(const void *address) {
-    uintptr_t byte = (uintptr_t)address;
-    int i;
-
-    for (i = 0; i < ROM_ORDER_RANGE_COUNT; i++) {
-        const RomOrderRange *range = &f_RomOrderRanges[i];
-
-        if (byte - range->start < range->size) {
-            return TRUE;
-        }
-    }
-
-    return FALSE;
 }
 
 void osPcUnmapAll(void) {
