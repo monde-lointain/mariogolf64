@@ -35,6 +35,7 @@
 #include "screen/scene_colors.h"
 #include "screen/screen.h"
 #include "system/asset.h"
+#include "system/big_endian.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/heap.h"
@@ -100,6 +101,18 @@
 #define SKY_PERCENT_TO_STEPS (SKY_BLEND_STEP_COUNT / PERCENT_PER_WHOLE)
 // The course sky image is paletted, and InitSkyColors recolors its palette
 #define PALETTE_START (IMAGE_HEADER_SIZE / PALETTE_COLOR_SIZE)
+// A color of the course sky image's palette, which a host keeps in the
+// cartridge's order for the RDP
+#ifdef TARGET_PC
+#    define CourseSkyColor(index) \
+        FromBigEndian16(((u16 *)g_CourseSkyImage)[PALETTE_START + (index)])
+#    define SetCourseSkyColor(index, color) \
+        StoreBigEndian16(&((u16 *)g_CourseSkyImage)[PALETTE_START + (index)], (color))
+#else
+#    define CourseSkyColor(index) ((u16 *)g_CourseSkyImage)[PALETTE_START + (index)]
+#    define SetCourseSkyColor(index, color) \
+        (((u16 *)g_CourseSkyImage)[PALETTE_START + (index)] = (color))
+#endif
 #define SKY_IMAGE_CHANNEL_MAX 31
 // The palette colors mix five parts of the horizon color with one of the top
 // color, shifted down to five bits
@@ -1865,7 +1878,7 @@ void InitSkyColors(void) {
     OpenEncodedAsset(f_CourseSkyImageAssets[GetCourseRecordIndex()], &asset);
     ReadEncodedAsset(g_CourseSkyImage, &asset);
     for (i = 0; i != LARGE_PALETTE_COLOR_COUNT; i++) {
-        color = ((u16 *)g_CourseSkyImage)[PALETTE_START + i];
+        color = CourseSkyColor(i);
         red = (color >> 11) & SKY_IMAGE_CHANNEL_MAX;
         green = (color >> 6) & SKY_IMAGE_CHANNEL_MAX;
         blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
@@ -1926,8 +1939,11 @@ void InitSkyColors(void) {
             blue = SKY_IMAGE_CHANNEL_MAX;
         }
 
-        ((u16 *)g_CourseSkyImage)[PALETTE_START + i] = (red << RGBA16_RED_SHIFT) |
-            (green << RGBA16_GREEN_SHIFT) | (blue << RGBA16_BLUE_SHIFT) | alpha;
+        SetCourseSkyColor(
+            i,
+            (red << RGBA16_RED_SHIFT) | (green << RGBA16_GREEN_SHIFT) |
+                (blue << RGBA16_BLUE_SHIFT) | alpha
+        );
     }
 
     DeriveSceneColors();
@@ -2167,7 +2183,7 @@ Boolean UpdateSkyEditor(void) {
         OpenEncodedAsset(f_CourseSkyImageAssets[GetCourseRecordIndex()], &asset);
         ReadEncodedAsset(g_CourseSkyImage, &asset);
         for (index = 0; index != LARGE_PALETTE_COLOR_COUNT; index++) {
-            color = ((u16 *)g_CourseSkyImage)[PALETTE_START + index];
+            color = CourseSkyColor(index);
             red = (color >> 11) & SKY_IMAGE_CHANNEL_MAX;
             green = (color >> 6) & SKY_IMAGE_CHANNEL_MAX;
             blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
@@ -2229,8 +2245,11 @@ Boolean UpdateSkyEditor(void) {
                 blue = SKY_IMAGE_CHANNEL_MAX;
             }
 
-            ((u16 *)g_CourseSkyImage)[PALETTE_START + index] = (red << RGBA16_RED_SHIFT) |
-                (green << RGBA16_GREEN_SHIFT) | (blue << RGBA16_BLUE_SHIFT) | alpha;
+            SetCourseSkyColor(
+                index,
+                (red << RGBA16_RED_SHIFT) | (green << RGBA16_GREEN_SHIFT) |
+                    (blue << RGBA16_BLUE_SHIFT) | alpha
+            );
         }
     }
 
