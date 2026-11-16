@@ -66,6 +66,7 @@ typedef enum CombinerInput {
 #define MATERIAL_FILTERED 0x0004
 #define MATERIAL_ALPHA_THRESHOLD 0x0008
 #define MATERIAL_ALPHA_COVERAGE 0x0010
+#define MATERIAL_ALPHA_DITHER 0x0020
 // The blender's shape: how its last cycle's terms reach the GPU's blending
 #define MATERIAL_BLEND_SHIFT 8
 #define MATERIAL_BLEND_MASK 0x0700

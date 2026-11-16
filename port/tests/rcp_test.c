@@ -199,6 +199,31 @@ static void TestTriangleTransform(void) {
     EXPECT(f_Gpu.vertexCount == 0);
 }
 
+// A threshold compare reads the blend color's alpha; a dithered one
+// compares with a random threshold instead
+static void TestAlphaCompareModes(void) {
+    Gfx *gfx = BeginTriangles(f_DisplayList, G_SHADE | G_SHADING_SMOOTH);
+
+    ResetCapture();
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_DITHER);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+
+    EXPECT(f_Gpu.materialCount == 2);
+    EXPECT(
+        (f_Gpu.materials[0].modes & (MATERIAL_ALPHA_THRESHOLD | MATERIAL_ALPHA_DITHER)) ==
+        MATERIAL_ALPHA_THRESHOLD
+    );
+    EXPECT(
+        (f_Gpu.materials[1].modes & (MATERIAL_ALPHA_THRESHOLD | MATERIAL_ALPHA_DITHER)) ==
+        (MATERIAL_ALPHA_THRESHOLD | MATERIAL_ALPHA_DITHER)
+    );
+}
+
 // A fill of the depth image clears it for the next pass that tests depth,
 // rather than drawing
 static void TestDepthClear(void) {
@@ -330,6 +355,7 @@ int main(void) {
     InitRsp();
     TestFillRectangle();
     TestTriangleTransform();
+    TestAlphaCompareModes();
     TestDepthClear();
     TestRomOrderList();
     TestTextureFromDrawnImage();

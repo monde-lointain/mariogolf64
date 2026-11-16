@@ -668,8 +668,13 @@ static void BuildMaterial(int tileIndex, MaterialKind kind) {
         material->modes |= MATERIAL_FILTERED;
     }
 
+    // The compare's threshold is the blend color's alpha, or with dithering
+    // a random one for each pixel
     if (Field(low, G_MDSFT_ALPHACOMPARE, 2) != 0 && kind != MATERIAL_KIND_FILL) {
         material->modes |= MATERIAL_ALPHA_THRESHOLD;
+        if ((low & G_AC_DITHER) == G_AC_DITHER) {
+            material->modes |= MATERIAL_ALPHA_DITHER;
+        }
     }
 
     // Coverage times alpha leaves the faintest fragments uncovered, and
