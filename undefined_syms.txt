@@ -29,16 +29,6 @@ g_GlyphFileRomStart = text_glyphs_ROM_START;
 g_MessageFileRomStart = text_messages_ROM_START;
 g_StaffTextRomStart = text_staff_roll_ROM_START;
 
-/* The hole file path formats, which BuildHole has as string literals and
-   the asm of SaveHoleFiles reads under these names */
-f_VerticesPathFormat = 0x80255168;
-f_MidpointsPathFormat = 0x80255188;
-f_TreesPathFormat = 0x802551A8;
-f_Unk6PathFormat = 0x802551C8;
-f_PointsPathFormat = 0x802551E8;
-f_TrianglesPathFormat = 0x80255208;
-f_AttributesPathFormat = 0x80255228;
-
 /* Main draws from vertex buffers at a fixed place in the Expansion Pak's
    memory, which the hole editor's memory must end before */
 g_ExpansionVertexBuffers = 0x8049C860;
