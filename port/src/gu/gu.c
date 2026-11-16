@@ -211,6 +211,29 @@ void guRotateRPY(Mtx *m, f32 roll, f32 pitch, f32 heading) {
     guMtxF2L(mf, m);
 }
 
+// Places an object: rotates it by roll, pitch and heading as guRotateRPYF
+// does, scales it evenly, and moves it to (x, y, z)
+void guPositionF(f32 mf[4][4], f32 roll, f32 pitch, f32 heading, f32 scale, f32 x, f32 y, f32 z) {
+    int row;
+    int column;
+
+    guRotateRPYF(mf, roll, pitch, heading);
+    for (row = 0; row < 3; row++) {
+        for (column = 0; column < 3; column++) {
+            mf[row][column] *= scale;
+        }
+    }
+
+    SetRow(mf, 3, MakeVector(x, y, z), 1.0f);
+}
+
+void guPosition(Mtx *m, f32 roll, f32 pitch, f32 heading, f32 scale, f32 x, f32 y, f32 z) {
+    f32 mf[4][4];
+
+    guPositionF(mf, roll, pitch, heading, scale, x, y, z);
+    guMtxF2L(mf, m);
+}
+
 // Turns the z axis to point against the direction (x, y, z), and the x and
 // y axes by angle about it. A vertical direction leaves the identity.
 void guAlignF(f32 mf[4][4], f32 angle, f32 x, f32 y, f32 z) {

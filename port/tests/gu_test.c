@@ -59,6 +59,9 @@ static void TestRotations(void) {
     // Roll comes before pitch: rolling y onto z, then pitching z onto x
     guRotateRPYF(mf, 90.0f, 90.0f, 0.0f);
     ExpectTransform(mf, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    // A position turns, then scales, then moves
+    guPositionF(mf, 0.0f, 0.0f, 90.0f, 2.0f, 3.0f, 4.0f, 5.0f);
+    ExpectTransform(mf, 1.0f, 0.0f, 0.0f, 3.0f, 6.0f, 5.0f);
 }
 
 static void TestAlign(void) {
