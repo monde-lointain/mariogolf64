@@ -18,3 +18,9 @@ mg64_add_port_test(os_threads_test
     SOURCES os_threads_test.c
     LIBRARIES mg64_ultra SDL3::SDL3
 )
+
+# The game's own fixed-point conversions, which the gu routines call
+mg64_add_port_test(gu_test
+    SOURCES gu_test.c "${PROJECT_SOURCE_DIR}/src/math/matrix_conversion.c"
+    LIBRARIES mg64_gu
+)
