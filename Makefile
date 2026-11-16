@@ -1,20 +1,57 @@
 # Mario Golf (North America) matching decompilation
+#
+# A mod builds the game from its own folder, with a makefile that includes
+# this one. Each file that the build reads is taken from the first folder
+# that has it: the mod's, then each of MODS, then this repository's, the
+# base's. A mod holds only the files that it changes, at the same paths as
+# the base's, and its ROM is built under its own build/. MODS names further
+# folders laid out the same way, such as a kit of tools that writes files
+# for the build. Each of these folders' mod.mk, if it has one, is read
+# before the rules below, to add its own.
 
-TARGET      := mariogolf64
+# This repository's folder, as the makefile that includes this one names it
+BASE        := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
+MODS        ?=
+MOD_ROOTS   := $(strip $(if $(filter .,$(BASE)),,.) $(MODS))
+ROOTS       := $(MOD_ROOTS) $(BASE)
+# PATH within each of ROOTS, in order, without a leading ./
+roots        = $(patsubst ./%,%,$(addsuffix /$1,$(ROOTS)))
+# The first of ROOTS that has the file PATH, as PATH within it
+find         = $(firstword $(wildcard $(call roots,$1)))
+# Each PATH that one of ROOTS has, in order, as include options
+include_dirs = $(addprefix -I,$(wildcard $(foreach dir,$1,$(call roots,$(dir)))))
+# Sources are searched for in the same order. Build outputs aren't, so that
+# a mod's build never takes the base's.
+vpath src/% $(ROOTS)
+vpath lib/% $(ROOTS)
+vpath tests/% $(ROOTS)
+vpath assets/% $(ROOTS)
+
+# make alone builds the ROM, whichever rule a mod.mk gives first
+.DEFAULT_GOAL := all
+
+# The ROM's name; a mod can give its own
+TARGET      ?= mariogolf64
+TOOLS       := $(BASE)/tools
+PYTHON      ?= $(BASE)/.venv/bin/python3
+KMC_DIR     := $(BASE)/tools/gcc_kmc
+# The original ROM, which make extract cuts the assets from
+BASEROM     := $(BASE)/baserom.us.z64
 # What the ROM holds, in order, from which tools/layout.py writes the
-# linker scripts
-LAYOUT      := layout.txt
-# The objects that the layout places, as a makefile that sets LAYOUT_OBJECTS
-# and MATCHING_ONLY_OBJECTS to their sources' paths
-LAYOUT_MK   := build/layout.mk
+# linker scripts. A mod adds a file to the game by changing its own copy.
+LAYOUT      := $(call find,layout.txt)
 # What the linker scripts are written with
-LAYOUT_TOOLS := tools/layout.py tools/heap_region.py include/system/heap.h
-KMC_DIR     := tools/gcc_kmc
+LAYOUT_TOOLS := $(TOOLS)/layout.py $(TOOLS)/heap_region.py $(BASE)/include/system/heap.h
+# The symbols that the objects use and none defines
+SYMBOL_SCRIPT := $(BASE)/undefined_syms.txt
 
 # Set NON_MATCHING=1 to build a ROM that needn't match the original: it
 # avoids the original's undefined behavior and is laid out to let code and
-# data move (see the layouts below).
+# data move (see the layouts below). A mod's ROM never matches.
 NON_MATCHING ?= 0
+ifneq ($(MOD_ROOTS),)
+override NON_MATCHING := 1
+endif
 # Set MODERN=1 to build with a modern GCC instead of KMC GCC 2.7.2. Its code
 # differs in size from the original's, so its ROM doesn't match either.
 MODERN      ?= 0
@@ -163,14 +200,12 @@ else
 SANITIZER_LIB :=
 endif
 
-# The symbols that the objects use and none defines
-SYMBOL_SCRIPT := undefined_syms.txt
-
 # The two layouts (see tools/layout.py). The matching build places
 # everything where the original has it. The shiftable layout lets the code
 # and data grow, and leaves out the objects that only the matching links,
 # such as main_bss.c, which pins main's common objects at the original's
 # addresses.
+LAYOUT_MK         := $(BUILD_DIR)/layout.mk
 MATCHING_LD       := $(BUILD_DIR)/matching.ld
 SHIFTABLE_LD      := $(BUILD_DIR)/shiftable.ld
 # The LTO links' objects, one for each segment of code, and the shiftable
@@ -192,27 +227,31 @@ endif
 LD_SCRIPTS  := $(GAME_LD) $(SYMBOL_SCRIPT)
 
 ROM         := $(BUILD_DIR)/$(TARGET).z64
+ELF         := $(BUILD_DIR)/$(TARGET).elf
+MAP         := $(BUILD_DIR)/$(TARGET).map
 # The cartridge's size, which 0xFF fills after the last asset
 ROM_SIZE    := 0x2000000
 # Where the asset archive's assets are split to, one file each
 ARCHIVE_DIR := assets/asset_archive
+# The folders of assets that replace the archive's, file by file: those of
+# the mods. A mod.mk can add folders that it writes.
+ARCHIVE_REPLACEMENTS := $(wildcard $(patsubst ./%,%,$(MOD_ROOTS:%=%/$(ARCHIVE_DIR))))
 # The files of messages that are built from text, a message a line
 TEXT_FILES  := assets/text/messages assets/text/staff_roll
-ELF         := $(BUILD_DIR)/$(TARGET).elf
-MAP         := $(BUILD_DIR)/$(TARGET).map
 
 AS          := $(CROSS)as
 LD          := $(CROSS)ld
 OBJCOPY     := $(CROSS)objcopy
-PYTHON      := .venv/bin/python3
 
 # Each library's headers are in its own include directory. NuSystem's is
 # included through its converted copy, as the rule below explains. The
 # game reaches libultra's PR/ headers through <ultra64.h>, so PR/ isn't
 # searched, and none of its headers, such as PR/rcp.h, can stand in for a
-# game header of the same name.
-INCLUDES    := -Iinclude -Ilib/libkmc/include -Ilib/ultralib/include \
-               -Ilib/libmus/include -I$(BUILD_DIR)/lib/libnusys/include -Ilib/libnusys/include -Isrc -I$(BUILD_DIR)
+# game header of the same name. A mod.mk can put folders of headers that it
+# writes first.
+INCLUDES    := $(call include_dirs,include lib/libkmc/include lib/ultralib/include lib/libmus/include) \
+               -I$(BUILD_DIR)/lib/libnusys/include $(call include_dirs,lib/libnusys/include src) \
+               -I$(BUILD_DIR)
 DEFINES     := -D_LANGUAGE_C -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI_2 -DNDEBUG -D_FINALROM -DBUILD_VERSION=VERSION_J \
                $(GAME_DEFINES)
 # A ROM that doesn't match moves the code and data, so it must also avoid
@@ -233,13 +272,21 @@ endif
 DEPS         = rm -f $(@:.o=.d); SUNPRO_DEPENDENCIES='$(@:.o=.d) $@'
 
 CFLAGS       = $(TARGETFLAGS) $(FAST_MATH) $(KMC_ALIGN) -nostdinc -funsigned-char $(WARNINGS) $(OPTFLAGS)
-ASFLAGS     := -march=vr4300 -mabi=32 -G0 -EB -no-pad-sections -Iinclude
+# The assembler searches each of ROOTS for the files that .incbin names,
+# such as the extracted microcode
+ASFLAGS     := -march=vr4300 -mabi=32 -G0 -EB -no-pad-sections $(call include_dirs,include) \
+               $(addprefix -I,$(filter-out .,$(ROOTS)))
 # ld lays out each object's common symbols in the order of its symbol hash
 # table's buckets. The table grows with the symbol count unless it starts big
 # enough, so fix its size to keep the commons where the names put them.
 LD_HASH_SIZE := 8191
 LAYOUT_FLAGS   := --no-check-sections --hash-size=$(LD_HASH_SIZE) -G 0
 LDFLAGS         = $(addprefix -T ,$(LD_SCRIPTS)) -Map $(MAP) $(LAYOUT_FLAGS) $(GC_FLAGS)
+
+# The recipes that turn a file into an object that holds it, and a text
+# file into the messages that the game reads, for a mod.mk's rules too
+BIN_TO_OBJECT = $(OBJCOPY) -I binary -O $(BIN_FORMAT) -B mips $< $@
+ENCODE_TEXT   = $(PYTHON) $(TOOLS)/messages.py encode $< $@
 
 # Every object that the build links, under its directory. When a change to
 # the layout makes the list again, make reads it in afresh before building
@@ -250,7 +297,7 @@ O_FILES := $(LINKED_SOURCES:%=$(BUILD_DIR)/%.o)
 # libultra 2.0J, built the way ultralib builds libgultra_rom except that the
 # game's copy was compiled with signed chars
 ULTRALIB_DIR      := lib/ultralib
-ULTRALIB_INCLUDES := -I$(ULTRALIB_DIR)/include -I$(ULTRALIB_DIR)/include/compiler/$(ULTRALIB_COMPILER) -I$(ULTRALIB_DIR)/include/PR
+ULTRALIB_INCLUDES := $(call include_dirs,$(addprefix $(ULTRALIB_DIR)/include,/ /compiler/$(ULTRALIB_COMPILER) /PR))
 ULTRALIB_DEFINES  := $(LIB_MODERN) -D_MIPS_SZLONG=32 -D__USE_ISOC99 -DF3DEX_GBI -DBUILD_VERSION=VERSION_J \
                      -DBUILD_VERSION_STRING=\"2.0J\" -DNDEBUG -D_FINALROM
 ULTRALIB_CFLAGS    = $(WARNINGS) -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS)
@@ -260,14 +307,14 @@ ULTRALIB_ASFLAGS  := -x assembler-with-cpp -nostdinc $(TARGETFLAGS) -P \
 # libmus, the n_audio build of the Software Creations music library, as its
 # makefile built libn_gmus.
 LIBMUS_DIR        := lib/libmus
-LIBMUS_INCLUDES   := -I$(LIBMUS_DIR)/src -I$(LIBMUS_DIR)/include $(ULTRALIB_INCLUDES)
+LIBMUS_INCLUDES   := $(call include_dirs,$(LIBMUS_DIR)/src $(LIBMUS_DIR)/include) $(ULTRALIB_INCLUDES)
 LIBMUS_DEFINES    := $(LIB_MODERN) -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DSUPPORT_NAUDIO
 LIBMUS_CFLAGS      = $(WARNINGS) -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS) $(KMC_ALIGN)
 
 # n_audio, built from the SDK's n_audio_sc sources for the n_aspMain
 # microcode as other games of the time built it
 LIBNAUDIO_DIR      := lib/libnaudio
-LIBNAUDIO_INCLUDES := -I$(LIBNAUDIO_DIR)/src -I$(LIBNAUDIO_DIR)/include $(ULTRALIB_INCLUDES)
+LIBNAUDIO_INCLUDES := $(call include_dirs,$(LIBNAUDIO_DIR)/src $(LIBNAUDIO_DIR)/include) $(ULTRALIB_INCLUDES)
 LIBNAUDIO_DEFINES  := $(LIB_MODERN) -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DN_MICRO
 LIBNAUDIO_CFLAGS    = $(LIBMUS_CFLAGS)
 
@@ -277,9 +324,15 @@ LIBNAUDIO_CFLAGS    = $(LIBMUS_CFLAGS)
 # endings, and KMC's preprocessor doesn't join lines that end in a backslash
 # and a carriage return, so they're compiled from copies without the CRs.
 LIBNUSYS_DIR       := lib/libnusys
-LIBNUSYS_INCLUDES  := -I$(BUILD_DIR)/$(LIBNUSYS_DIR)/include -I$(LIBNUSYS_DIR)/include $(ULTRALIB_INCLUDES)
+LIBNUSYS_INCLUDES  := -I$(BUILD_DIR)/$(LIBNUSYS_DIR)/include $(call include_dirs,$(LIBNUSYS_DIR)/include) \
+                      $(ULTRALIB_INCLUDES)
 LIBNUSYS_DEFINES   := $(LIB_MODERN) $(LIB_AVOID_UB) -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DUSE_EPI -DBUILD_VERSION=VERSION_J -D_FINALROM
 LIBNUSYS_CFLAGS     = $(WARNINGS) -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS) $(KMC_ALIGN)
+# Game code includes NuSystem's header through its converted copy, so the
+# copy must exist before any game file compiles. A mod.mk can add the
+# headers that it writes. The .d files make the files that include them
+# rebuild when they change.
+GENERATED_HEADERS  := $(BUILD_DIR)/$(LIBNUSYS_DIR)/include/nusys.h
 
 # libkmc, KMC's C library, built like the game's code except without
 # -ffast-math, which turns divisions by constants into multiplications
@@ -302,10 +355,72 @@ endif
 
 # Per-object compiler flags
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
+# main_bss.c defines libmus's bss objects too, whose types only its sources
+# declare. Those include libultra's headers from PR/ by their bare names.
+$(BUILD_DIR)/src/system/main_bss.c.o: INCLUDES += $(call include_dirs,$(LIBMUS_DIR)/src $(ULTRALIB_DIR)/include/PR)
 
-.PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable FORCE \
-        check-alignment \
-        equivalence sanitize test target-tests tool-tests blender-tests
+# The mods' own settings and rules
+include $(wildcard $(MOD_ROOTS:%=%/mod.mk))
+
+# The files that build_character.py and face_sprites.py write from custom
+# characters' packages, each at the path of the file it replaces: their
+# model files, the headers of their names and layouts, which come first on
+# the include path, the text with their names and their face sprites. The
+# layouts' header is written last.
+ifneq ($(strip $(CHARACTERS)),)
+CHARACTER_DIR    := $(BUILD_DIR)/custom_characters
+CHARACTER_HEADER := $(CHARACTER_DIR)/include/characters/model_layouts.h
+# Changes to the list of packages, which their files' dates don't show
+CHARACTER_LIST   := $(CHARACTER_DIR)/packages.txt
+# The list of the face sprites' files, which face_sprites.py writes last
+FACE_SPRITES     := $(CHARACTER_DIR)/face_sprites.txt
+CHARACTER_FILES  := $(shell $(PYTHON) $(TOOLS)/build_character.py --list-files $(CHARACTERS))
+CHARACTER_BINS   := $(CHARACTER_FILES:%=$(CHARACTER_DIR)/assets/character_models/%.bin)
+CHARACTER_TOOLS  := $(addprefix $(TOOLS)/,build_character.py character_template.py \
+                    character_model_format.py f3dex2.py lz_codec.py)
+PACKAGE_FILES    := $(shell find $(CHARACTERS) -type f)
+INCLUDES         := -I$(CHARACTER_DIR)/include $(INCLUDES)
+GENERATED_HEADERS += $(CHARACTER_HEADER)
+ARCHIVE_REPLACEMENTS += $(CHARACTER_DIR)/$(ARCHIVE_DIR)
+
+$(CHARACTER_LIST): FORCE
+	@mkdir -p $(@D)
+	@echo '$(abspath $(CHARACTERS))' | cmp -s - $@ || echo '$(abspath $(CHARACTERS))' > $@
+
+$(CHARACTER_HEADER): $(CHARACTER_LIST) $(CHARACTER_TOOLS) $(PACKAGE_FILES) \
+                     $(addprefix $(BASE)/,src/characters/character_model.c \
+                     include/characters/model_layouts.h include/characters/character_names.h \
+                     $(TEXT_FILES:%=%.txt)) $(wildcard $(BASE)/assets/character_models/*.bin)
+	$(PYTHON) $(TOOLS)/build_character.py --repository $(BASE) --output $(CHARACTER_DIR) \
+	    $(TEXT_FILES:%=--text %.txt) $(CHARACTERS)
+
+# The header is written last, so it's newer than the files it was written with
+$(CHARACTER_BINS) $(CHARACTER_DIR)/include/characters/character_names.h \
+$(TEXT_FILES:%=$(CHARACTER_DIR)/%.txt): $(CHARACTER_HEADER) ;
+
+$(FACE_SPRITES): $(CHARACTER_LIST) $(CHARACTER_TOOLS) $(PACKAGE_FILES) \
+                 $(addprefix $(TOOLS)/,face_sprites.py face_sprites.json decode_asset.py)
+	$(PYTHON) $(TOOLS)/face_sprites.py --repository $(BASE) --assets $(BASE)/$(ARCHIVE_DIR) \
+	    --output $(CHARACTER_DIR) \
+	    $(CHARACTERS)
+
+$(BUILD_DIR)/assets/asset_archive.bin: $(FACE_SPRITES)
+
+$(TEXT_FILES:%=$(BUILD_DIR)/%.bin): $(BUILD_DIR)/%.bin: $(CHARACTER_DIR)/%.txt $(TOOLS)/messages.py
+	@mkdir -p $(dir $@)
+	$(ENCODE_TEXT)
+
+# Every model's object, so that one no longer replaced is made again
+$(filter $(BUILD_DIR)/assets/character_models/%,$(O_FILES)): $(CHARACTER_LIST)
+
+$(CHARACTER_FILES:%=$(BUILD_DIR)/assets/character_models/%.bin.o): \
+$(BUILD_DIR)/assets/character_models/%.bin.o: $(CHARACTER_DIR)/assets/character_models/%.bin
+	@mkdir -p $(dir $@)
+	$(BIN_TO_OBJECT)
+endif
+
+.PHONY: all setup tools extract clean distclean check-shiftable check-alignment equivalence \
+        sanitize test target-tests format lint typecheck pycheck tool-tests blender-tests FORCE
 
 # A recipe that fails after writing its target, such as a check of what it
 # wrote, would otherwise leave a target that the next run takes as built
@@ -313,189 +428,20 @@ $(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
 all: $(ROM)
 ifneq ($(COMPARE),0)
-	@sha1sum -c $(TARGET).sha1
+	@sha1sum -c $(BASE)/$(TARGET).sha1
 endif
-
-extract:
-	$(PYTHON) tools/extract_assets.py
-	$(PYTHON) tools/extract_textures.py
-	$(PYTHON) tools/asset_archive.py split assets/asset_archive.bin $(ARCHIVE_DIR)
-	for text in $(TEXT_FILES); do \
-		$(PYTHON) tools/messages.py decode $$text.bin $$text.txt || exit; \
-	done
 
 setup: tools extract
 
-CLANG_FORMAT ?= clang-format-23
-FORMAT_FILES := $(shell git ls-files 'src/*.c' 'src/*.h' 'include/*.h' '$(LIBKMC_DIR)/*.[ch]')
-
-# The tests are formatted too, but not Unity, which is kept as upstream has
-# it, and they aren't linted, as the lint's compile commands are the game's
-TEST_FORMAT_FILES := $(wildcard tests/*.c tests/target/*.c tests/target/*.h)
-
-format:
-	$(CLANG_FORMAT) -i $(FORMAT_FILES) $(TEST_FORMAT_FILES)
-	.venv/bin/ruff format --quiet
-
-# Lints and type-checks the Python tools, with the settings in pyproject.toml
-pycheck:
-	.venv/bin/ruff format --check --quiet
-	.venv/bin/ruff check --quiet
-	.venv/bin/basedpyright --level warning
-	.venv/bin/vulture
-
-# Tests the custom character tools; the tests that need the game's files
-# skip until they're extracted
-tool-tests:
-	PYTHONPATH=tools $(PYTHON) -m unittest discover --start-directory tools/tests
-
-# Tests the Blender add-on in a Blender without a window, which BLENDER names
-BLENDER ?= blender
-blender-tests:
-	tools/blender/run_tests.sh $(BLENDER)
-
-# Links this build's objects in the shiftable layout, which fails on each
-# reference that holds only while the code and data keep their original
-# addresses. The shiftable builds link that way already.
-check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SYMBOL_SCRIPT) $(SANITIZER_LIB)
-	$(LD) $(addprefix -T ,$(SHIFTABLE_LD) $(SYMBOL_SCRIPT)) -Map $(BUILD_DIR)/shiftable.map \
-	    $(LAYOUT_FLAGS) -o $(BUILD_DIR)/shiftable.elf $(LIBS)
-	@$(PYTHON) tools/check_link.py $(BUILD_DIR)/shiftable.elf $(SHIFTABLE_LD) $(SYMBOL_SCRIPT) -- $(O_FILES)
-
-# Fails on each static buffer whose address reaches the RCP or a DMA but
-# which doesn't ask for 8-byte alignment, so that it lands aligned in any
-# layout (see tools/check_alignment.py). It reads the alignment that each
-# buffer asks for from the modern build's objects, whose -fdata-sections
-# gives each its own section.
-CLANG_QUERY ?= clang-query-23
-ifneq ($(MODERN),0)
-check-alignment: $(O_FILES) $(BUILD_DIR)/compile_commands.json
-	@$(PYTHON) tools/check_alignment.py $(BUILD_DIR) --clang-query $(CLANG_QUERY) \
-	    --include $(LIBMUS_DIR)/src --include $(ULTRALIB_DIR)/include/PR
-else
-check-alignment:
-	$(MAKE) MODERN=1 check-alignment
-endif
-
-# Runs the matching ROM and the modern build's side by side in ares's
-# n64-harness, which N64_HARNESS names, and compares the game's state at
-# each of EQUIVALENCE_FRAMES frames (see tools/equivalence.py)
-EQUIVALENCE_FRAMES ?= 3000
-
-equivalence: all
-	$(MAKE) MODERN=1
-	$(PYTHON) tools/equivalence.py --frames $(EQUIVALENCE_FRAMES)
-
-# Builds the sanitized ROM (SANITIZE=1), runs it in n64-harness for
-# SANITIZER_FRAMES frames, and reports the checks that failed (see
-# tools/sanitize.py)
-SANITIZER_FRAMES ?= 3000
-
-sanitize:
-	$(MAKE) SANITIZE=1
-	$(PYTHON) tools/sanitize.py --frames $(SANITIZER_FRAMES)
-
-# The unit tests in tests/, which run on the console with Unity. Each build
-# links them with its own objects into a test ROM, which boots into them
-# instead of the game (see tests/target/). Both builds compile the tests
-# with modern GCC, so the same tests face each toolchain's code. A build
-# that links the game in the original's layout links its tests in the
-# shiftable layout, which leaves room for them.
-TEST_DIR      := $(BUILD_DIR)/tests
-TEST_ELF      := $(TEST_DIR)/tests.elf
-TEST_ROM      := $(TEST_DIR)/tests.z64
-TEST_LD       := $(TEST_DIR)/tests.ld
-TEST_SOURCES  := $(wildcard tests/*.c) tests/target/runner.c tests/target/support.c \
-                 tests/unity/unity.c tests/unity/unity_fixture.c
-TEST_O_FILES  := $(TEST_SOURCES:%=$(BUILD_DIR)/%.o)
-# The boot stub goes into main's code, which takes it from an archive
-TEST_BOOT     := $(TEST_DIR)/boot.a
-# The tests see the declarations of the build they test, but not KMC GCC's
-# forms, as modern GCC compiles them. Unity needs the compiler's own
-# headers, such as stdarg.h, which the game's code doesn't include.
-TEST_CFLAGS    = $(MODERN_TARGETFLAGS) -Os -nostdinc -funsigned-char -Wall -Wextra \
-                 -isystem $(shell $(MODERN_CC) -print-file-name=include)
-TEST_INCLUDES := -Itests/target -Itests/unity $(INCLUDES)
-TEST_DEFINES  := $(filter-out $(GAME_DEFINES),$(DEFINES)) -DUNITY_INCLUDE_CONFIG_H
-
-# Runs the tests against both toolchains' code, once the matching ROM has
-# matched the original
-test: all target-tests
-	$(MAKE) MODERN=1 check-alignment target-tests
-
-# Runs this build's test ROM in ares's n64-harness, which N64_HARNESS names
-target-tests: $(TEST_ROM)
-	$(PYTHON) tools/run_target_tests.py $(TEST_ELF) $<
-
-$(BUILD_DIR)/tests/%.c.o: tests/%.c | $(BUILD_DIR)/$(LIBNUSYS_DIR)/include/nusys.h
-	@mkdir -p $(dir $@)
-	$(DEPS) $(MODERN_CC) -c $(TEST_CFLAGS) $(TEST_INCLUDES) $(TEST_DEFINES) -o $@ $<
-
-$(TEST_BOOT): $(TEST_DIR)/target/boot.c.o
-	rm -f $@
-	$(MODERN_CROSS)ar rcs $@ $<
-
-# The shiftable layout with the tests' segment
-$(TEST_LD): $(LAYOUT) tests/target/segment.ld $(LAYOUT_TOOLS)
-	@mkdir -p $(dir $@)
-	$(PYTHON) tools/layout.py shiftable $(LAYOUT) $(BUILD_DIR) tests/target/segment.ld > $@
-
-# NuSystem's boot starts the main thread in the boot stub instead of
-# mainproc. Modern GCC's linker reads both toolchains' objects. The link
-# takes the modern objects' code as each compiled, not the segments' LTO
-# objects: --wrap redirects only the references that an object leaves
-# undefined, and a segment's object defines mainproc where nuboot.c's
-# reference to it is.
-$(TEST_ELF): $(O_FILES) $(TEST_O_FILES) $(TEST_BOOT) $(TEST_LD) $(SYMBOL_SCRIPT) \
-    $(SANITIZER_LIB)
-	$(MODERN_CROSS)ld $(addprefix -T ,$(TEST_LD) $(SYMBOL_SCRIPT)) -Map $(TEST_DIR)/tests.map \
-	    $(LAYOUT_FLAGS) --wrap=mainproc -o $@ $(TEST_O_FILES) $(TEST_BOOT) $(MODERN_LIBS) \
-	    $(SANITIZER_LIB)
-	@$(PYTHON) tools/check_link.py $@ $(TEST_LD) $(SYMBOL_SCRIPT) -- $(O_FILES)
-
-CLANG_TIDY ?= run-clang-tidy-23
-# libkmc is KMC's C library, which keeps the C library's names
-LINT_FILES := $(filter-out $(LIBKMC_DIR)/%,\
-	$(filter %.c,$(FORMAT_FILES)))
-
-$(BUILD_DIR)/compile_commands.json: tools/compile_commands.py Makefile
-	@mkdir -p $(BUILD_DIR)
-	@python3 tools/compile_commands.py $@ $(INCLUDES) $(DEFINES) -- $(LINT_FILES)
-
-LINT_JOBS ?= 4
-
-# clang can't parse everything GCC 2.7 accepts, such as nested functions,
-# so only the naming and macro diagnostics fail the check, each printed
-# once though a header's repeats for every file that includes it. The
-# rest stay in the log.
-LINT_CHECKS := readability-identifier-naming|bugprone-macro-parentheses
-
-lint: $(BUILD_DIR)/compile_commands.json
-	@$(CLANG_TIDY) -p $(BUILD_DIR) -j $(LINT_JOBS) -quiet $(LINT_FILES) \
-		> $(BUILD_DIR)/lint.log 2>&1 || true
-	@! grep -E '\[($(LINT_CHECKS))' $(BUILD_DIR)/lint.log | sort -u | grep .
-
-# Linking the game's and the libraries' code as LTO bytecode compares each
-# declaration of a routine or object with its definition, across files,
-# which no single compile can, including the libraries' declarations of
-# the game's routines. The modern build compiles the bytecode into its own
-# directory, and any mismatch fails the link. The link compiles the
-# bytecode to code, as the segments' links do, rather than writing the
-# merged bytecode out again: GCC 16.2's lto1 faults on that, in the
-# inliner's merge of the mod/ref summaries of the nested functions of
-# particle_effects.c's SpawnShotDebris. Either way compares the
-# declarations.
-TYPECHECK_DIR := build/typecheck
-# The objects compiled from C
-C_O_FILES = $(filter %.c.o,$(O_FILES))
-
-typecheck:
-	@$(MAKE) MODERN=1 BUILD_DIR=$(TYPECHECK_DIR) OPTFLAGS='-Os -flto' \
-		$(TYPECHECK_DIR)/linked.o
-
-$(BUILD_DIR)/linked.o: $(C_O_FILES)
-	$(CC) -r -nostdlib $(TARGETFLAGS) $(OPTFLAGS) -flinker-output=nolto-rel -flto=auto \
-		-Werror=lto-type-mismatch -o $@ $^
+# Cuts the files that the game reads from the original ROM into the base's
+# assets/, once for every mod
+extract:
+	$(PYTHON) $(TOOLS)/extract_assets.py
+	$(PYTHON) $(TOOLS)/extract_textures.py
+	$(PYTHON) $(TOOLS)/asset_archive.py split $(BASE)/assets/asset_archive.bin $(BASE)/$(ARCHIVE_DIR)
+	for text in $(TEXT_FILES); do \
+		$(PYTHON) $(TOOLS)/messages.py decode $(BASE)/$$text.bin $(BASE)/$$text.txt || exit; \
+	done
 
 tools: $(KMC_DIR)/gcc $(KMC_DIR)/as
 
@@ -511,24 +457,126 @@ clean:
 	rm -rf $(BUILD_DIR)/src $(BUILD_DIR)/assets $(BUILD_DIR)/lib $(ROM) $(ELF) $(TEST_DIR) \
 	    $(LTO_DIR)
 
+# Removes every build and, in the base, the files that make extract cut
 distclean:
-	rm -rf $(BUILD_DIR) assets
+	rm -rf build $(if $(filter .,$(BASE)),assets)
 
-$(LAYOUT_MK): $(LAYOUT) tools/layout.py
+# Links this build's objects in the shiftable layout, which fails on each
+# reference that holds only while the code and data keep their original
+# addresses. The shiftable builds link that way already.
+check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SYMBOL_SCRIPT) $(SANITIZER_LIB)
+	$(LD) $(addprefix -T ,$(SHIFTABLE_LD) $(SYMBOL_SCRIPT)) -Map $(BUILD_DIR)/shiftable.map \
+	    $(LAYOUT_FLAGS) -o $(BUILD_DIR)/shiftable.elf $(LIBS)
+	@$(PYTHON) $(TOOLS)/check_link.py $(BUILD_DIR)/shiftable.elf $(SHIFTABLE_LD) $(SYMBOL_SCRIPT) -- $(O_FILES)
+
+# Fails on each static buffer whose address reaches the RCP or a DMA but
+# which doesn't ask for 8-byte alignment, so that it lands aligned in any
+# layout (see tools/check_alignment.py). It reads the alignment that each
+# buffer asks for from the modern build's objects, whose -fdata-sections
+# gives each its own section.
+CLANG_QUERY ?= clang-query-23
+ifneq ($(MODERN),0)
+check-alignment: $(O_FILES) $(BUILD_DIR)/compile_commands.json
+	@$(PYTHON) $(TOOLS)/check_alignment.py $(BUILD_DIR) --clang-query $(CLANG_QUERY) \
+	    --include $(LIBMUS_DIR)/src --include $(ULTRALIB_DIR)/include/PR
+else
+check-alignment:
+	$(MAKE) MODERN=1 check-alignment
+endif
+
+# Runs the matching ROM and the modern build's side by side in ares's
+# n64-harness, which N64_HARNESS names, and compares the game's state at
+# each of EQUIVALENCE_FRAMES frames (see tools/equivalence.py)
+EQUIVALENCE_FRAMES ?= 3000
+
+equivalence: all
+	$(MAKE) MODERN=1
+	$(PYTHON) $(TOOLS)/equivalence.py --frames $(EQUIVALENCE_FRAMES)
+
+# Builds the sanitized ROM (SANITIZE=1), runs it in n64-harness for
+# SANITIZER_FRAMES frames, and reports the checks that failed (see
+# tools/sanitize.py)
+SANITIZER_FRAMES ?= 3000
+
+sanitize:
+	$(MAKE) SANITIZE=1
+	$(PYTHON) $(TOOLS)/sanitize.py --frames $(SANITIZER_FRAMES)
+
+# The unit tests in tests/, which run on the console with Unity. Each build
+# links them with its own objects into a test ROM, which boots into them
+# instead of the game (see tests/target/). Both builds compile the tests
+# with modern GCC, so the same tests face each toolchain's code. A build
+# that links the game in the original's layout links its tests in the
+# shiftable layout, which leaves room for them.
+TEST_DIR      := $(BUILD_DIR)/tests
+TEST_ELF      := $(TEST_DIR)/tests.elf
+TEST_ROM      := $(TEST_DIR)/tests.z64
+TEST_LD       := $(TEST_DIR)/tests.ld
+TEST_SEGMENT  := $(BASE)/tests/target/segment.ld
+TEST_SOURCES  := $(patsubst $(BASE)/%,%,$(wildcard $(BASE)/tests/*.c)) tests/target/runner.c \
+                 tests/target/support.c tests/unity/unity.c tests/unity/unity_fixture.c
+TEST_O_FILES  := $(TEST_SOURCES:%=$(BUILD_DIR)/%.o)
+# The boot stub goes into main's code, which takes it from an archive
+TEST_BOOT     := $(TEST_DIR)/boot.a
+# The tests see the declarations of the build they test, but not KMC GCC's
+# forms, as modern GCC compiles them. Unity needs the compiler's own
+# headers, such as stdarg.h, which the game's code doesn't include.
+TEST_CFLAGS    = $(MODERN_TARGETFLAGS) -Os -nostdinc -funsigned-char -Wall -Wextra \
+                 -isystem $(shell $(MODERN_CC) -print-file-name=include)
+TEST_INCLUDES := $(call include_dirs,tests/target tests/unity) $(INCLUDES)
+TEST_DEFINES  := $(filter-out $(GAME_DEFINES),$(DEFINES)) -DUNITY_INCLUDE_CONFIG_H
+
+# Runs the tests against both toolchains' code, once the matching ROM has
+# matched the original
+test: all target-tests
+	$(MAKE) MODERN=1 check-alignment target-tests
+
+# Runs this build's test ROM in ares's n64-harness, which N64_HARNESS names
+target-tests: $(TEST_ROM)
+	$(PYTHON) $(TOOLS)/run_target_tests.py $(TEST_ELF) $<
+
+$(BUILD_DIR)/tests/%.c.o: tests/%.c | $(GENERATED_HEADERS)
 	@mkdir -p $(dir $@)
-	$(PYTHON) tools/layout.py objects $< > $@
+	$(DEPS) $(MODERN_CC) -c $(TEST_CFLAGS) $(TEST_INCLUDES) $(TEST_DEFINES) -o $@ $<
+
+$(TEST_BOOT): $(TEST_DIR)/target/boot.c.o
+	rm -f $@
+	$(MODERN_CROSS)ar rcs $@ $<
+
+# The shiftable layout with the tests' segment
+$(TEST_LD): $(LAYOUT) $(TEST_SEGMENT) $(LAYOUT_TOOLS)
+	@mkdir -p $(dir $@)
+	$(PYTHON) $(TOOLS)/layout.py shiftable $(LAYOUT) $(BUILD_DIR) $(TEST_SEGMENT) > $@
+
+# NuSystem's boot starts the main thread in the boot stub instead of
+# mainproc. Modern GCC's linker reads both toolchains' objects. The link
+# takes the modern objects' code as each compiled, not the segments' LTO
+# objects: --wrap redirects only the references that an object leaves
+# undefined, and a segment's object defines mainproc where nuboot.c's
+# reference to it is.
+$(TEST_ELF): $(O_FILES) $(TEST_O_FILES) $(TEST_BOOT) $(TEST_LD) $(SYMBOL_SCRIPT) \
+    $(SANITIZER_LIB)
+	$(MODERN_CROSS)ld $(addprefix -T ,$(TEST_LD) $(SYMBOL_SCRIPT)) -Map $(TEST_DIR)/tests.map \
+	    $(LAYOUT_FLAGS) --wrap=mainproc -o $@ $(TEST_O_FILES) $(TEST_BOOT) $(MODERN_LIBS) \
+	    $(SANITIZER_LIB)
+	@$(PYTHON) $(TOOLS)/check_link.py $@ $(TEST_LD) $(SYMBOL_SCRIPT) -- $(O_FILES)
+
+# The linker scripts, and the list of objects, from the layout
+$(LAYOUT_MK): $(LAYOUT) $(TOOLS)/layout.py
+	@mkdir -p $(dir $@)
+	$(PYTHON) $(TOOLS)/layout.py objects $< > $@
 
 $(MATCHING_LD): $(LAYOUT) $(LAYOUT_TOOLS)
 	@mkdir -p $(dir $@)
-	$(PYTHON) tools/layout.py matching $< $(BUILD_DIR) > $@
+	$(PYTHON) $(TOOLS)/layout.py matching $< $(BUILD_DIR) > $@
 
 $(SHIFTABLE_LD): $(LAYOUT) $(LAYOUT_TOOLS)
 	@mkdir -p $(dir $@)
-	$(PYTHON) tools/layout.py shiftable $< $(BUILD_DIR) > $@
+	$(PYTHON) $(TOOLS)/layout.py shiftable $< $(BUILD_DIR) > $@
 
 # The compiler's LTO takes its share of make's jobs
-$(LTO_LD): $(O_FILES) $(LAYOUT) $(LAYOUT_TOOLS) tools/link_segments.py
-	+$(PYTHON) tools/link_segments.py $(LAYOUT) $(BUILD_DIR) $(LTO_DIR) -- \
+$(LTO_LD): $(O_FILES) $(LAYOUT) $(LAYOUT_TOOLS) $(TOOLS)/link_segments.py
+	+$(PYTHON) $(TOOLS)/link_segments.py $(LAYOUT) $(BUILD_DIR) $(LTO_DIR) -- \
 	    $(CC) $(TARGETFLAGS) $(OPTFLAGS) $(WARNINGS)
 
 # IPL3 boots only a ROM whose header holds the checksum of the code after it
@@ -541,7 +589,7 @@ $(ROM) $(TEST_ROM): %.z64: %.elf
 # and sections with contents that the scripts discard
 $(ELF): $(O_FILES) $(LD_SCRIPTS) $(SANITIZER_LIB)
 	$(LD) $(LDFLAGS) -o $@ $(LIBS)
-	@$(PYTHON) tools/check_link.py $@ $(LD_SCRIPTS) -- $(O_FILES)
+	@$(PYTHON) $(TOOLS)/check_link.py $@ $(LD_SCRIPTS) -- $(O_FILES)
 
 ifneq ($(SANITIZE),0)
 $(SANITIZER_LIB): $(SANITIZER_O)
@@ -578,93 +626,36 @@ endif
 FORCE:
 
 # The microcode that make extract cuts from the ROM
-$(BUILD_DIR)/src/system/microcode.s.o: $(wildcard assets/microcode/*.bin)
+$(BUILD_DIR)/src/system/microcode.s.o: $(wildcard $(call roots,assets/microcode/*.bin))
 
 $(BUILD_DIR)/%.bin.o: %.bin
 	@mkdir -p $(dir $@)
-	$(OBJCOPY) -I binary -O $(BIN_FORMAT) -B mips $< $@
-
-# The files that build_character.py and face_sprites.py write from custom
-# characters' packages, each in place of the file at the same path here:
-# their model files, the headers of their names and layouts, which come
-# first on the include path, the text with their names and their face
-# sprites. The layouts' header is written last.
-CHARACTER_DIR    := $(BUILD_DIR)/custom_characters
-CHARACTER_HEADER := $(CHARACTER_DIR)/include/characters/model_layouts.h
-# Changes to the list of packages, which their files' dates don't show
-CHARACTER_LIST   := $(CHARACTER_DIR)/packages.txt
-# Where the text files are encoded from: a custom build's copies have the
-# characters' names changed
-TEXT_ROOT        :=
-# The assets that replace the archive's
-ARCHIVE_REPLACEMENTS :=
-ifneq ($(strip $(CHARACTERS)),)
-TEXT_ROOT        := $(CHARACTER_DIR)/
-# The list of the face sprites' files, which face_sprites.py writes last
-FACE_SPRITES     := $(CHARACTER_DIR)/face_sprites.txt
-INCLUDES         := -I$(CHARACTER_DIR)/include $(INCLUDES)
-ARCHIVE_REPLACEMENTS := $(CHARACTER_DIR)/assets/asset_archive
-CHARACTER_FILES  := $(shell $(PYTHON) tools/build_character.py --list-files $(CHARACTERS))
-CHARACTER_BINS   := $(CHARACTER_FILES:%=$(CHARACTER_DIR)/assets/character_models/%.bin)
-CHARACTER_TOOLS  := $(addprefix tools/,build_character.py character_template.py \
-                    character_model_format.py f3dex2.py lz_codec.py)
-
-$(CHARACTER_LIST): FORCE
-	@mkdir -p $(@D)
-	@echo '$(abspath $(CHARACTERS))' | cmp -s - $@ || echo '$(abspath $(CHARACTERS))' > $@
-
-$(CHARACTER_HEADER): $(CHARACTER_LIST) $(CHARACTER_TOOLS) $(shell find $(CHARACTERS) -type f) \
-                     src/characters/character_model.c include/characters/model_layouts.h \
-                     include/characters/character_names.h $(wildcard assets/character_models/*.bin) \
-                     $(TEXT_FILES:%=%.txt)
-	$(PYTHON) tools/build_character.py --output $(CHARACTER_DIR) \
-	    $(TEXT_FILES:%=--text %.txt) $(CHARACTERS)
-
-# The header is written last, so it's newer than the files it was written with
-$(CHARACTER_BINS) $(CHARACTER_DIR)/include/characters/character_names.h \
-$(TEXT_FILES:%=$(CHARACTER_DIR)/%.txt): \
-    $(CHARACTER_HEADER) ;
-
-$(FACE_SPRITES): $(CHARACTER_LIST) $(CHARACTER_TOOLS) $(shell find $(CHARACTERS) -type f) \
-                  $(addprefix tools/,face_sprites.py face_sprites.json decode_asset.py)
-	$(PYTHON) tools/face_sprites.py --assets $(ARCHIVE_DIR) --output $(CHARACTER_DIR) \
-	    $(CHARACTERS)
-
-# The files that include the layouts or, through characters/character_names.h,
-# the names
-$(addprefix $(BUILD_DIR)/src/,characters/character_model.c.o menus/menu.c.o \
-                               menus/main_menu.c.o round/tournament.c.o): $(CHARACTER_HEADER)
-
-# Every model's object, so that one no longer replaced is made again
-$(filter $(BUILD_DIR)/assets/character_models/%,$(O_FILES)): $(CHARACTER_LIST)
-
-$(CHARACTER_FILES:%=$(BUILD_DIR)/assets/character_models/%.bin.o): \
-$(BUILD_DIR)/assets/character_models/%.bin.o: $(CHARACTER_DIR)/assets/character_models/%.bin
-	@mkdir -p $(dir $@)
-	$(OBJCOPY) -I binary -O $(BIN_FORMAT) -B mips $< $@
-endif
+	$(BIN_TO_OBJECT)
 
 # The asset archive is packed from the assets that asset_archive.py splits
-# it into, so that one can change without the table being worked out again.
-# A custom build's characters replace some, such as their face sprites.
-$(BUILD_DIR)/assets/asset_archive.bin: $(wildcard $(ARCHIVE_DIR)/*.bin) tools/asset_archive.py \
-                                       $(FACE_SPRITES)
-	$(PYTHON) tools/asset_archive.py pack $(ARCHIVE_DIR) $@ $(ARCHIVE_REPLACEMENTS)
+# it into, so that one can change without the table being worked out again,
+# and from the folders of assets that replace some
+$(BUILD_DIR)/assets/asset_archive.bin: $(wildcard $(BASE)/$(ARCHIVE_DIR)/*.bin) \
+                                       $(wildcard $(ARCHIVE_REPLACEMENTS:%=%/*.bin)) $(TOOLS)/asset_archive.py
+	@mkdir -p $(dir $@)
+	$(PYTHON) $(TOOLS)/asset_archive.py pack $(BASE)/$(ARCHIVE_DIR) $@ $(ARCHIVE_REPLACEMENTS)
 
 # The text files are encoded from the text that messages.py decodes them to
-$(TEXT_FILES:%=$(BUILD_DIR)/%.bin): $(BUILD_DIR)/%.bin: $(TEXT_ROOT)%.txt tools/messages.py tools/asset_archive.py
-	$(PYTHON) tools/messages.py encode $< $@
+$(BUILD_DIR)/assets/text/%.bin: assets/text/%.txt $(TOOLS)/messages.py $(TOOLS)/asset_archive.py
+	@mkdir -p $(dir $@)
+	$(ENCODE_TEXT)
 
 $(BUILD_DIR)/assets/asset_archive.bin.o $(TEXT_FILES:%=$(BUILD_DIR)/%.bin.o): %.o: %
-	$(OBJCOPY) -I binary -O $(BIN_FORMAT) -B mips $< $@
+	$(BIN_TO_OBJECT)
 
 # Textures in C data come from PNGs that extract_textures.py writes to
 # assets/SOURCE/, where SOURCE is the path of the C file under src/ that
 # includes them
-TEXTURE_PNGS := $(shell sed 's/\#.*//' textures.txt | awk 'NF { print $$5 }')
+TEXTURE_PNGS := $(shell sed 's/\#.*//' $(BASE)/textures.txt | awk 'NF { print $$5 }')
 
-$(BUILD_DIR)/assets/%.inc.c: assets/%.png tools/png_to_c.py
-	$(PYTHON) tools/png_to_c.py $< $@
+$(BUILD_DIR)/assets/%.inc.c: assets/%.png $(TOOLS)/png_to_c.py
+	@mkdir -p $(dir $@)
+	$(PYTHON) $(TOOLS)/png_to_c.py $< $@
 
 $(foreach png,$(TEXTURE_PNGS),$(eval \
   $(patsubst assets/%/,$(BUILD_DIR)/src/%.c.o,$(dir $(png))): \
@@ -673,17 +664,13 @@ $(foreach png,$(TEXTURE_PNGS),$(eval \
 # The sources are UTF-8, but the game's strings are Shift-JIS. KMC GCC
 # compiles a Shift-JIS copy, and the line marker keeps its messages
 # pointing at the source. -I adds back the source's own directory, which
-# GCC searches first for quoted includes.
+# GCC searches first for quoted includes, in each of ROOTS.
 ICONV := iconv -f UTF-8 -t SHIFT_JIS
 
 $(BUILD_DIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
 	{ echo '# 1 "$<"'; $(ICONV) $<; } > $(BUILD_DIR)/$*.sjis.c
-	$(DEPS) $(CC) -c $(CFLAGS) -I$(dir $<) $(INCLUDES) $(DEFINES) -o $@ $(BUILD_DIR)/$*.sjis.c
-
-# main_bss.c defines libmus's bss objects too, whose types only its sources
-# declare. Those include libultra's headers from PR/ by their bare names.
-$(BUILD_DIR)/src/system/main_bss.c.o: INCLUDES += -I$(LIBMUS_DIR)/src -I$(ULTRALIB_DIR)/include/PR
+	$(DEPS) $(CC) -c $(CFLAGS) $(call include_dirs,$(patsubst %/,%,$(dir $*))) $(INCLUDES) $(DEFINES) -o $@ $(BUILD_DIR)/$*.sjis.c
 
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.c
 	@mkdir -p $(dir $@)
@@ -706,16 +693,100 @@ $(BUILD_DIR)/$(LIBNUSYS_DIR)/%.c.o: $(LIBNUSYS_DIR)/%.c $(BUILD_DIR)/$(LIBNUSYS_
 	tr -d '\r' < $< > $(@:.o=)
 	$(DEPS) $(LIB_CC) -c $(LIBNUSYS_CFLAGS) $(LIBNUSYS_INCLUDES) $(LIBNUSYS_DEFINES) -o $@ $(@:.o=)
 
-# Game code includes NuSystem's header through its converted copy, so the
-# copy must exist before any game file compiles. The .d files make the
-# files that include it rebuild when it changes.
-$(filter $(BUILD_DIR)/src/%,$(O_FILES)): | $(BUILD_DIR)/$(LIBNUSYS_DIR)/include/nusys.h
+$(filter $(BUILD_DIR)/src/%,$(O_FILES)): | $(GENERATED_HEADERS)
 
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/include/nusys.h: $(LIBNUSYS_DIR)/include/nusys.h
 	@mkdir -p $(dir $@)
 	tr -d '\r' < $< > $@
 
+# Adding a file to a mod, or removing one, changes which file the build
+# takes for its path, which no file's date shows, so a change to the list
+# of the mods' files rebuilds every object
+ifneq ($(MOD_ROOTS),)
+MOD_FILES := $(BUILD_DIR)/mod_files.txt
+MOD_FILE_LIST := $(shell find $(wildcard $(foreach root,$(MOD_ROOTS),\
+                   $(addprefix $(root)/,src include lib tests assets))) -type f | sort)
+
+$(MOD_FILES): FORCE
+	@mkdir -p $(@D)
+	@echo '$(MOD_FILE_LIST)' | cmp -s - $@ || echo '$(MOD_FILE_LIST)' > $@
+
+$(O_FILES) $(TEST_O_FILES) $(TEST_DIR)/target/boot.c.o: $(MOD_FILES)
+endif
+
 -include $(O_FILES:.o=.d) $(TEST_O_FILES:.o=.d) $(TEST_DIR)/target/boot.c.d
 # A header that a .d file lists but that has since gone only forces the
 # rebuild that writes a new list
 %.h: ;
+
+# What follows checks the base's own sources and tools, from its folder.
+
+CLANG_FORMAT ?= clang-format-23
+FORMAT_FILES  = $(shell git ls-files 'src/*.c' 'src/*.h' 'include/*.h' '$(LIBKMC_DIR)/*.[ch]')
+# The tests are formatted too, but not Unity, which is kept as upstream has
+# it, and they aren't linted, as the lint's compile commands are the game's
+TEST_FORMAT_FILES = $(wildcard tests/*.c tests/target/*.c tests/target/*.h)
+
+format:
+	$(CLANG_FORMAT) -i $(FORMAT_FILES) $(TEST_FORMAT_FILES)
+	.venv/bin/ruff format --quiet
+
+# Lints and type-checks the Python tools, with the settings in pyproject.toml
+pycheck:
+	.venv/bin/ruff format --check --quiet
+	.venv/bin/ruff check --quiet
+	.venv/bin/basedpyright --level warning
+	.venv/bin/vulture
+
+# Tests the Python tools; the tests that need the game's files skip until
+# they're extracted
+tool-tests:
+	PYTHONPATH=tools $(PYTHON) -m unittest discover --start-directory tools/tests
+
+# Tests the Blender add-on in a Blender without a window, which BLENDER names
+BLENDER ?= blender
+blender-tests:
+	tools/blender/run_tests.sh $(BLENDER)
+
+CLANG_TIDY ?= run-clang-tidy-23
+# libkmc is KMC's C library, which keeps the C library's names
+LINT_FILES = $(filter-out $(LIBKMC_DIR)/%,$(filter %.c,$(FORMAT_FILES)))
+
+$(BUILD_DIR)/compile_commands.json: $(TOOLS)/compile_commands.py $(BASE)/Makefile
+	@mkdir -p $(BUILD_DIR)
+	@python3 $(TOOLS)/compile_commands.py $@ $(INCLUDES) $(DEFINES) -- $(LINT_FILES)
+
+LINT_JOBS ?= 4
+
+# clang can't parse everything GCC 2.7 accepts, such as nested functions,
+# so only the naming and macro diagnostics fail the check, each printed
+# once though a header's repeats for every file that includes it. The
+# rest stay in the log.
+LINT_CHECKS := readability-identifier-naming|bugprone-macro-parentheses
+
+lint: $(BUILD_DIR)/compile_commands.json
+	@$(CLANG_TIDY) -p $(BUILD_DIR) -j $(LINT_JOBS) -quiet $(LINT_FILES) \
+		> $(BUILD_DIR)/lint.log 2>&1 || true
+	@! grep -E '\[($(LINT_CHECKS))' $(BUILD_DIR)/lint.log | sort -u | grep .
+
+# Linking the game's and the libraries' code as LTO bytecode compares each
+# declaration of a routine or object with its definition, across files,
+# which no single compile can, including the libraries' declarations of
+# the game's routines. The modern build compiles the bytecode into its own
+# directory, and any mismatch fails the link. The link compiles the
+# bytecode to code, as the segments' links do, rather than writing the
+# merged bytecode out again: GCC 16.2's lto1 faults on that, in the
+# inliner's merge of the mod/ref summaries of the nested functions of
+# particle_effects.c's SpawnShotDebris. Either way compares the
+# declarations.
+TYPECHECK_DIR := build/typecheck
+# The objects compiled from C
+C_O_FILES = $(filter %.c.o,$(O_FILES))
+
+typecheck:
+	@$(MAKE) MODERN=1 BUILD_DIR=$(TYPECHECK_DIR) OPTFLAGS='-Os -flto' \
+		$(TYPECHECK_DIR)/linked.o
+
+$(BUILD_DIR)/linked.o: $(C_O_FILES)
+	$(CC) -r -nostdlib $(TARGETFLAGS) $(OPTFLAGS) -flinker-output=nolto-rel -flto=auto \
+		-Werror=lto-type-mismatch -o $@ $^

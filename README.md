@@ -130,6 +130,34 @@ the menus and scorecards. See
 [`tools/blender/README.md`](tools/blender/README.md) for the workflow, and
 `make tool-tests` and `make blender-tests` for the tools' tests.
 
+## Mods
+
+A mod lives in a folder of its own, outside this repository, with a
+`Makefile` that includes this one:
+
+```make
+include ../mariogolf64/Makefile
+```
+
+`make` in the mod's folder builds its ROM there, in
+`build/nonmatching/mariogolf64.z64`. The build takes each file from the
+mod if the mod has one at the same path, and from this repository if not.
+So a mod holds only what it changes:
+
+| Path | Change |
+| --- | --- |
+| `src/`, `include/` | A source or header in place of the original's |
+| `assets/` | An asset in place of the original's, once `make extract` has cut it |
+| `assets/asset_archive/` | Assets in place of the archive's, by ID |
+| `layout.txt` | The files that the ROM holds, to add a file |
+
+`MODS` names more folders laid out the same way, such as code that
+several mods share; the build looks in the mod's folder first, then in
+each of them in order. Each of these folders can have a `mod.mk`, which
+the build reads before its rules, to add settings and rules of its own.
+`TARGET` names the ROM. Run `make setup` once, in this repository: mods
+use its assets and tools.
+
 ## Formatting
 
 The sources follow the style in `.clang-format`, based on WebKit's, through
