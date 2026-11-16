@@ -496,8 +496,13 @@ NoticeState GetNoticeState(void);
 // a scalar is there to match: GCC keeps a struct field's constant address
 // in a register when it is used twice. In DrawPressingHand, reading the
 // field gives 24 words differing (12 in shape), and copying it to a local
-// first 28 (6).
+// first 28 (6). The PC port's pointers move the field, so there it is
+// named as what it is.
+#ifdef TARGET_PC
+#    define g_PressingHandImage (g_GameBoyTransfer.pressingHandImage)
+#else
 extern ImageAsset *g_PressingHandImage;
+#endif
 
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer);
 
