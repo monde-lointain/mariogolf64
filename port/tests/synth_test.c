@@ -163,6 +163,17 @@ static void TestVolumeGlides(void) {
     EXPECT_NEAR(Left(0), 0.0, TOLERANCE);
 }
 
+// The level is the square of the volume's share, so half the volume is a
+// quarter of the level
+static void TestVolumeIsSquared(void) {
+    InitSynth(SAMPLE_RATE, 4);
+    MakeRampSample();
+    StartVoice(0, 1.0f, 0);
+    SetSynthVoiceVolume(0, (SYNTH_MAX_VOLUME + 1) / 2);
+    RenderSynth(f_Output, 1);
+    EXPECT_NEAR(Left(0), 0.25 * f_Pcm[0] / FULL_SCALE, TOLERANCE);
+}
+
 // Voices add up, and the sum is clamped
 static void TestMixClamps(void) {
     int voice;
@@ -220,6 +231,7 @@ int main(void) {
     TestPanKeepsPower();
     TestLoops();
     TestVolumeGlides();
+    TestVolumeIsSquared();
     TestMixClamps();
     TestEchoDelaysTheSend();
     return ReportTestResults("synth_test");

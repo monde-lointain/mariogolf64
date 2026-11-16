@@ -36,6 +36,7 @@ void StopSynthVoice(int voice);
 bool IsSynthVoicePlaying(int voice);
 
 void SetSynthVoicePitch(int voice, float ratio);
+// The gain is the square of the volume's share of SYNTH_MAX_VOLUME
 void SetSynthVoiceVolume(int voice, uint16_t volume);
 void SetSynthVoicePan(int voice, uint8_t pan);
 void SetSynthVoiceSend(int voice, uint8_t send);

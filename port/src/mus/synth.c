@@ -125,7 +125,10 @@ void SetSynthVoiceSend(int voice, uint8_t send) {
 }
 
 static VoiceGains ComputeGains(const Voice *voice) {
-    const float level = (float)voice->volume / (float)SYNTH_MAX_VOLUME;
+    // The volume is squared, as the N64's mixer did, so that its steps
+    // follow loudness rather than amplitude
+    const float volume = (float)voice->volume / (float)SYNTH_MAX_VOLUME;
+    const float level = volume * volume;
     const float dry = level * f_FallingCurve[voice->send];
     const float wet = level * f_RisingCurve[voice->send];
     VoiceGains gains;
