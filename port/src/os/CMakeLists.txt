@@ -6,6 +6,7 @@ add_library(mg64_ultra STATIC
     init.c
     memory.c
     message.c
+    microcode.c
     pi.c
     scheduler.c
     vi.c
