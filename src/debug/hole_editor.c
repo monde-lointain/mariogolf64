@@ -376,8 +376,13 @@ typedef s32 HolePointMode;
     (CAPTURE_HEADER_SIZE + (SCREEN_WIDTH * SCREEN_HEIGHT * CAPTURE_BYTES_PER_PIXEL))
 // Adds to a cached KSEG0 address to read the same memory uncached through KSEG1
 #define KSEG1_OFFSET 0x20000000
-// The same memory read uncached, to see what the RDP wrote
-#define UncachedAddress(address) AddressPast((address), KSEG1_OFFSET)
+// The same memory read uncached, to see what the RDP wrote. A native build
+// has no caches, so it reads the address itself.
+#ifdef TARGET_PC
+#    define UncachedFrameAddress(address) UncachedAddress(address)
+#else
+#    define UncachedFrameAddress(address) AddressPast((address), KSEG1_OFFSET)
+#endif
 
 // A plain if leaves GCC to invert the condition, which the game's code does not
 #define AssertInEditor(condition, lineNumber) \
@@ -5418,7 +5423,7 @@ void CaptureFrame(void) {
     s32 row;
     s32 column;
 
-    frame = (u16 *)UncachedAddress(nuGfxCfb_ptr);
+    frame = (u16 *)UncachedFrameAddress(nuGfxCfb_ptr);
     capture = AllocMemory(SCREEN_CAPTURE_SIZE);
     for (byteIndex = 0; byteIndex != CAPTURE_HEADER_SIZE; byteIndex++) {
         capture[byteIndex] = f_ScreenCaptureHeader[byteIndex];
@@ -5454,7 +5459,7 @@ void CaptureFrameCorner(s32 captureIndex) {
     s32 column;
 
     capture = g_WorkArea.bytes;
-    frame = (u16 *)UncachedAddress(nuGfxCfb_ptr);
+    frame = (u16 *)UncachedFrameAddress(nuGfxCfb_ptr);
     for (byteIndex = 0; byteIndex != CAPTURE_HEADER_SIZE; byteIndex++) {
         capture[byteIndex] = f_CornerCaptureHeader[byteIndex];
     }
