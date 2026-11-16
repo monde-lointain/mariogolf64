@@ -237,6 +237,17 @@ static s16 f_BetSetBets[OFFERING_BET_SET_COUNT][BET_SET_COLUMN_COUNT_MAX] = {
     {2, 3, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
     {2, 3, 5, 7, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
 };
+// The bet that a column of a bet set shows. With no bet set chosen, the
+// menus still load the chosen column's icon, and the original read the row
+// before the table: on the N64, the last words of f_BetIconFrameAssets,
+// which name the first bet at the even columns and lie past the icons at
+// the odd ones. Avoiding that, the first bet's icon is loaded.
+#ifdef AVOID_UB
+#    define ColumnBet(betSet, column) ((betSet) == 0 ? 0 : f_BetSetBets[(betSet) - 1][column])
+#else
+#    define ColumnBet(betSet, column) f_BetSetBets[(betSet) - 1][column]
+#endif
+
 // Which of betStakeLevels' stakes each column of a bet set sets
 static s16 f_BetSetStakeSlots[OFFERING_BET_SET_COUNT][BET_SET_COLUMN_COUNT_MAX] = {
     {0, 1, 2, 3, 4, UNUSED_BET_COLUMN},
@@ -510,20 +521,14 @@ void LoadPlayerStatsBuffer(void *buffer, PlayerStatsBuffer bufferKind) {
             betSet = g_BetSet;
             imageSlot = &f_ChosenBetIconFrames[0];
             *imageSlot = buffer;
-            OpenEncodedAsset(
-                f_BetIconFrameAssets[f_BetSetBets[betSet - 1][memory->betColumn]][0],
-                &asset
-            );
+            OpenEncodedAsset(f_BetIconFrameAssets[ColumnBet(betSet, memory->betColumn)][0], &asset);
             ReadEncodedAsset(*imageSlot, &asset);
             break;
         case PLAYER_STATS_BUFFER_BET_ICON_SECOND_FRAME:
             betSet = g_BetSet;
             imageSlot = &f_ChosenBetIconFrames[1];
             *imageSlot = buffer;
-            OpenEncodedAsset(
-                f_BetIconFrameAssets[f_BetSetBets[betSet - 1][memory->betColumn]][1],
-                &asset
-            );
+            OpenEncodedAsset(f_BetIconFrameAssets[ColumnBet(betSet, memory->betColumn)][1], &asset);
             ReadEncodedAsset(*imageSlot, &asset);
             break;
         case PLAYER_STATS_BUFFER_UNUSED:
@@ -614,7 +619,7 @@ void ApplyBetPreset(BetPreset requestedPreset) {
 
 // The asset of the given frame of the chosen bet column's icon
 static inline AssetId ChosenBetIconFrame(MenuMemory *memory, s32 frame) {
-    return f_BetIconFrameAssets[f_BetSetBets[g_BetSet - 1][memory->betColumn]][frame];
+    return f_BetIconFrameAssets[ColumnBet(g_BetSet, memory->betColumn)][frame];
 }
 
 // Handles the bet settings screen's buttons. Up and down raise and lower the
