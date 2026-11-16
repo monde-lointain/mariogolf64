@@ -43,6 +43,14 @@ uintptr_t osPcVirtualToPhysical(const void *address);
 #define OS_PHYSICAL_TO_K0(address) ((void *)(uintptr_t)(address))
 #define OS_PHYSICAL_TO_K1(address) ((void *)(uintptr_t)(address))
 
+/* A segmented address that holds a host's address: the RSP adds the
+   segment's base to it, as the N64's adds the base to the low 24 bits of a
+   segmented address. The segment goes in the top byte, which no host's
+   address in user space uses. */
+#define PC_SEGMENT_SHIFT 56
+#define osPcSegmentAddress(segment, address) \
+    ((void *)((uintptr_t)(address) + ((uintptr_t)(segment) << PC_SEGMENT_SHIFT)))
+
 /* Maps size bytes of virtual addresses from virtualAddress onto the host's
    memory at hostAddress, as osMapTLB mapped them onto physical memory, in
    place of any mapping there before. */
@@ -53,6 +61,17 @@ void osPcUnmapAll(void);
 
 /* The host's address of a virtual address that a mapping covers, or NULL */
 void *osPcTranslate(u32 virtualAddress);
+
+/* Marks size bytes from start as holding display lists, vertices or
+   matrices in the ROM's big-endian order, as the game loaded them, for the
+   renderer to read them so. It reads all other memory in the host's order.
+   Marking a range drops the marks of the ranges that it overlaps;
+   unmarking drops them too. */
+void osPcMarkRomOrder(const void *start, u32 size);
+void osPcUnmarkRomOrder(const void *start, u32 size);
+/* Whether the byte at address lies in a range marked as in the ROM's
+   order */
+int osPcIsRomOrder(const void *address);
 
 /* Puts the variables of the code segment with the number that
    rom_file_offsets.h gives it back to their values at start-up, as reading
