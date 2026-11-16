@@ -19,14 +19,17 @@ foreach(overlay IN LISTS MG64_OVERLAY_NAMES)
     list(REMOVE_ITEM main_sources ${MG64_OVERLAY_${overlay}_SOURCES})
 endforeach()
 
-add_library(mg64_game_main OBJECT ${main_sources})
+include(ShiftJisSources)
+mg64_encode_shift_jis(main_copies ${main_sources})
+add_library(mg64_game_main OBJECT ${main_copies})
 target_link_libraries(mg64_game_main PRIVATE mg64_game_options)
 
 # Each overlay is a library of its own, so that the linker can gather its
 # variables where osPcResetSegment finds them
 set(overlay_targets "")
 foreach(overlay IN LISTS MG64_OVERLAY_NAMES)
-    add_library(mg64_${overlay} OBJECT ${MG64_OVERLAY_${overlay}_SOURCES})
+    mg64_encode_shift_jis(overlay_copies ${MG64_OVERLAY_${overlay}_SOURCES})
+    add_library(mg64_${overlay} OBJECT ${overlay_copies})
     target_link_libraries(mg64_${overlay} PRIVATE mg64_game_options)
     list(APPEND overlay_targets mg64_${overlay})
 endforeach()

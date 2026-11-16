@@ -66,6 +66,16 @@ mg64_add_port_test(asset_test
     LIBRARIES mg64_ultra SDL3::SDL3
 )
 
+# Built through a Shift-JIS copy, as the game's sources are
+include(ShiftJisSources)
+mg64_encode_shift_jis(shift_jis_test_copy "${CMAKE_CURRENT_SOURCE_DIR}/shift_jis_test.c")
+mg64_add_port_test(shift_jis_test
+    SOURCES ${shift_jis_test_copy}
+)
+target_compile_definitions(shift_jis_test PRIVATE
+    SHIFT_JIS_TEST_SOURCE="${CMAKE_CURRENT_SOURCE_DIR}/shift_jis_test.c"
+)
+
 mg64_add_port_test(tmem_test
     SOURCES tmem_test.c
     LIBRARIES mg64_gfx
