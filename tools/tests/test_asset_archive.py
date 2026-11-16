@@ -136,14 +136,14 @@ class ArchiveTest(unittest.TestCase):
             _ = (assets / f"{asset:03X}.bin").write_bytes(bytes([asset]) * 5)
         return assets, replacements
 
-    def refusal(self, assets: Path, replacements: Path | None = None) -> str:
+    def refusal(self, assets: Path, replacements: list[Path] | None = None) -> str:
         """Return what reading the assets says as it exits."""
         stderr = io.StringIO()
         with (
             self.assertRaises(SystemExit) as caught,
             contextlib.redirect_stderr(stderr),
         ):
-            _ = asset_archive.read_assets(assets, replacements)
+            _ = asset_archive.read_assets(assets, replacements or [])
         return str(caught.exception.code)
 
     def test_split_reads_back_what_was_packed(self) -> None:
@@ -158,15 +158,26 @@ class ArchiveTest(unittest.TestCase):
         """Check that a replacement is packed in place of its asset alone."""
         directory, replacements = self.directories()
         _ = (replacements / "001.bin").write_bytes(b"new")
-        assets = asset_archive.read_assets(directory, replacements)
+        assets = asset_archive.read_assets(directory, [replacements])
         self.assertEqual(assets, [bytes(5), b"new", b"\x02" * 5])
+
+    def test_first_replacement_is_taken(self) -> None:
+        """Check that of two replacements of an asset, the first folder's is packed."""
+        directory, first = self.directories()
+        second = directory.parent / "second"
+        second.mkdir()
+        _ = (first / "001.bin").write_bytes(b"first")
+        _ = (second / "001.bin").write_bytes(b"second")
+        _ = (second / "002.bin").write_bytes(b"only")
+        assets = asset_archive.read_assets(directory, [first, second])
+        self.assertEqual(assets, [bytes(5), b"first", b"only"])
 
     def test_replacement_of_no_asset_is_refused(self) -> None:
         """Check that a replacement for an asset the archive lacks is named."""
         directory, replacements = self.directories()
         stray = replacements / "0FF.bin"
         _ = stray.write_bytes(b"new")
-        self.assertIn(str(stray), self.refusal(directory, replacements))
+        self.assertIn(str(stray), self.refusal(directory, [replacements]))
 
     def test_missing_asset_is_named(self) -> None:
         """Check that a gap in the assets' IDs is named, not packed shifted."""
