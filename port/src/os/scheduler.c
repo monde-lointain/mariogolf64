@@ -448,8 +448,19 @@ void osPcWaitForInterrupt(void) {
     UnlockScheduler();
 }
 
-bool PcHaltGame(int timeoutMs) {
+// Waits, holding the lock, until no thread holds the CPU, or timeoutMs
+// passes, and tells whether none does
+static bool AwaitIdleCpu(int timeoutMs) {
     const Uint64 deadline = SDL_GetTicks() + (Uint64)SDL_max(timeoutMs, 0);
+
+    while (f_RunningSlot != NULL && SDL_GetTicks() < deadline) {
+        (void)SDL_WaitConditionTimeout(f_CpuReleased, f_Lock, (Sint32)(deadline - SDL_GetTicks()));
+    }
+
+    return f_RunningSlot == NULL;
+}
+
+bool PcHaltGame(int timeoutMs) {
     bool isIdle;
 
     LockScheduler();
@@ -458,11 +469,16 @@ bool PcHaltGame(int timeoutMs) {
         osPcPreemptPending = TRUE;
     }
 
-    while (f_RunningSlot != NULL && SDL_GetTicks() < deadline) {
-        (void)SDL_WaitConditionTimeout(f_CpuReleased, f_Lock, (Sint32)(deadline - SDL_GetTicks()));
-    }
+    isIdle = AwaitIdleCpu(timeoutMs);
+    UnlockScheduler();
+    return isIdle;
+}
 
-    isIdle = f_RunningSlot == NULL;
+bool PcWaitForIdleCpu(int timeoutMs) {
+    bool isIdle;
+
+    LockScheduler();
+    isIdle = AwaitIdleCpu(timeoutMs);
     UnlockScheduler();
     return isIdle;
 }

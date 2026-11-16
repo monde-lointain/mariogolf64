@@ -61,6 +61,12 @@ void *PcRaiseRetrace(void);
    loops without calling libultra. */
 bool PcHaltGame(int timeoutMs);
 
+/* Waits until every thread of the game's waits, as once it has done all
+   that the interrupts raised so far woke it for, so that the next one finds
+   the game at the same point however fast the host runs it. Returns false
+   after timeoutMs if a thread still holds the CPU. */
+bool PcWaitForIdleCpu(int timeoutMs);
+
 /* Ends the program with a message, for errors that the port can't recover
    from */
 PC_NORETURN void PcFatalError(const char *format, ...) PC_PRINTF_FORMAT(1, 2);

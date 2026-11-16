@@ -1,7 +1,8 @@
 /*
  * Tests of the port's libultra threads and message queues: that threads run
  * one at a time in the N64's priority order, that messages and interrupts
- * wake them, and that a destroyed thread's slot can be used again.
+ * wake them, that a destroyed thread's slot can be used again, and that the
+ * hardware can wait for the game to finish with an interrupt.
  *
  * The test's main thread plays the hardware, as the platform layer does.
  */
@@ -17,6 +18,9 @@
 #define HIGH_PRIORITY 30
 #define QUEUE_LENGTH 4
 #define TRACE_LENGTH 64
+// The preemption points a worker passes for each interrupt
+#define WORK_STEPS 200
+#define IDLE_ROUNDS 20
 
 static char f_Trace[TRACE_LENGTH];
 static int f_TraceLength;
@@ -26,6 +30,7 @@ static OSMesgQueue f_Queue;
 static OSMesg f_Messages[QUEUE_LENGTH];
 static SDL_AtomicInt f_RunningCount;
 static SDL_AtomicInt f_HaltCounter;
+static SDL_AtomicInt f_WorkDone;
 
 static void Trace(char mark) {
     // More than one thread of the game's in here at once is a failure
@@ -198,6 +203,32 @@ static void TestDestroyWaitingThread(void *argument) {
     SDL_SignalSemaphore(f_TestDone);
 }
 
+// For each interrupt's message, counts WORK_STEPS, passing a preemption
+// point at each, and then waits for the next
+static void RunInterruptWorker(void *argument) {
+    OSMesg message;
+    int step;
+
+    (void)argument;
+    for (;;) {
+        osRecvMesg(&f_Queue, &message, OS_MESG_BLOCK);
+        for (step = 0; step < WORK_STEPS; step++) {
+            SDL_AddAtomicInt(&f_WorkDone, 1);
+            osYieldThread();
+        }
+    }
+}
+
+// Starts the worker, which waits for the first interrupt
+static void TestIdleAfterInterruptWork(void *argument) {
+    (void)argument;
+    osCreateMesgQueue(&f_Queue, f_Messages, QUEUE_LENGTH);
+    osSetEventMesg(OS_EVENT_SI, &f_Queue, (OSMesg)1);
+    osCreateThread(&f_Threads[3], 4, RunInterruptWorker, NULL, NULL, HIGH_PRIORITY);
+    osStartThread(&f_Threads[3]);
+    SDL_SignalSemaphore(f_TestDone);
+}
+
 // Counts forever, calling libultra as game code does
 static void TestHaltStopsThreads(void *argument) {
     (void)argument;
@@ -250,12 +281,32 @@ int main(int argc, char **argv) {
     EXPECT(f_TraceLength == 41);
     EXPECT(f_Trace[f_TraceLength - 1] == 'd');
 
+    // Waiting for an idle CPU after each interrupt finds all of its work
+    // done, every time
+    RunBootThread(TestIdleAfterInterruptWork);
+    EXPECT(PcWaitForIdleCpu(1000));
+    {
+        int finishedRounds = 0;
+        int round;
+
+        for (round = 1; round <= IDLE_ROUNDS; round++) {
+            PcRaiseEvent(OS_EVENT_SI);
+            if (PcWaitForIdleCpu(1000) && SDL_GetAtomicInt(&f_WorkDone) == round * WORK_STEPS) {
+                finishedRounds++;
+            }
+        }
+
+        EXPECT(finishedRounds == IDLE_ROUNDS);
+    }
+
     // Once halted, no thread of the game's runs again
     RunBootThread(TestHaltStopsThreads);
     while (SDL_GetAtomicInt(&f_HaltCounter) < 1000) {
         SDL_Delay(1);
     }
 
+    // A thread that never waits keeps the CPU from idling
+    EXPECT(!PcWaitForIdleCpu(20));
     EXPECT(PcHaltGame(1000));
     {
         const int haltedCount = SDL_GetAtomicInt(&f_HaltCounter);
