@@ -26,5 +26,10 @@ function(mg64_encode_shift_jis out_var)
         )
         list(APPEND copies "${copy}")
     endforeach()
+    # Clang reads sources as UTF-8 and warns at each Shift-JIS string, which
+    # the copies hold by design
+    set_source_files_properties(${copies} PROPERTIES
+        COMPILE_OPTIONS "$<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-invalid-source-encoding>"
+    )
     set(${out_var} "${copies}" PARENT_SCOPE)
 endfunction()
