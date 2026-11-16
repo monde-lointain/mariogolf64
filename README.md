@@ -16,7 +16,6 @@ repository as `baserom.us.z64`.
 Requirements: `make`, `wget`, Python 3.10+, and the `mips-linux-gnu` binutils.
 
 ```sh
-git submodule update --init
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 make setup    # download the KMC GCC 2.7.2 toolchain and extract the assets
