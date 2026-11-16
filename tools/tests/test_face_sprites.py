@@ -8,6 +8,8 @@ extract" has run. The indexing is checked by reading its pictures back.
 """
 
 import functools
+import itertools
+import math
 import tempfile
 import unittest
 from pathlib import Path
@@ -47,6 +49,14 @@ OVERLAP_MIN = 0.8
 COLOR_ERROR_MAX = 40
 # Colors a test sheet uses, fewer than the palette's free entries
 TEST_COLORS = 40
+# The game plays each sequence of pictures as a loop: rest, 1, 2, 3, 4, 3, 2,
+# 1. Fitted one picture at a time, the chest and head, which an outline pins
+# loosely, took a different near-equal angle each, and the drawing wobbled.
+SEQUENCES = ("pleased", "beaten")
+SEQUENCE_LENGTH = 4
+BODY_BONES = ("chest", "head")
+# The most that the chest or head may turn from one picture to the next
+BODY_STEP_MAX = 15.0
 
 ByteArray = npt.NDArray[np.uint8]
 FloatArray = npt.NDArray[np.float64]
@@ -286,6 +296,40 @@ def _moved(points: FloatArray, turn: FloatArray, offset: FloatArray) -> FloatArr
     """Return POINTS turned by TURN, then moved by OFFSET."""
     turned = points @ turn.T  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
     return cast("FloatArray", turned) + offset
+
+
+def _angle_between(first: FloatArray, second: FloatArray) -> float:
+    """Return the angle in degrees of the turn from FIRST to SECOND."""
+    # The trace of first.T @ second, which is 1 + 2 cos(angle)
+    cosine = (float((first * second).sum()) - 1) / 2
+    return math.degrees(math.acos(max(-1.0, min(1.0, cosine))))
+
+
+class MotionTest(unittest.TestCase):
+    """Check that each sequence of pictures is one continuous motion."""
+
+    def test_body_turns_one_way_in_small_steps(self) -> None:
+        """Check that the chest and head turn further from rest every picture."""
+        for slot, sprites in fs.load_sprite_sets().items():
+            poses = {picture.name: picture.pose for picture in sprites.pictures}
+            for sequence in SEQUENCES:
+                names = [
+                    "rest",
+                    *(f"{sequence}_{i}" for i in range(1, SEQUENCE_LENGTH + 1)),
+                ]
+                for bone in BODY_BONES:
+                    turns = [
+                        fs.rotation(poses[name].get(bone, (0.0, 0.0, 0.0)))
+                        for name in names
+                    ]
+                    from_rest = [_angle_between(turns[0], turn) for turn in turns]
+                    steps = [
+                        _angle_between(turn, after)
+                        for turn, after in itertools.pairwise(turns)
+                    ]
+                    with self.subTest(slot=slot, sequence=sequence, bone=bone):
+                        self.assertEqual(from_rest, sorted(from_rest))
+                        self.assertLessEqual(max(steps), BODY_STEP_MAX)
 
 
 @unittest.skipUnless(HAVE_GAME_FILES, NEEDS_GAME_FILES)
