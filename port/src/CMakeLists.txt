@@ -12,6 +12,13 @@ target_compile_options(mg64_game_options INTERFACE
     -Wno-error=implicit-function-declaration
     -Wno-error=incompatible-pointer-types
     -Wno-error=int-conversion
+    # Clang warns at what the matched code does on purpose: calls to
+    # GetCourseRecordIndex, left unprototyped (see course.h); fabsf taken of
+    # integers, which it converts as the game meant; and the notice's float
+    # compared with the double M_PI (see DrawCourseResultsNotice)
+    $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-deprecated-non-prototype>
+    $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-absolute-value>
+    $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-literal-range>
 )
 
 set(main_sources ${MG64_GAME_SOURCES})
