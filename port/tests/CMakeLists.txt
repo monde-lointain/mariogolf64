@@ -57,3 +57,9 @@ mg64_add_port_test(texture_cache_test
     SOURCES texture_cache_test.c
     LIBRARIES mg64_gfx SDL3::SDL3
 )
+
+# The interpreter alone, with a double of the GPU backend
+mg64_add_port_test(rcp_test
+    SOURCES rcp_test.c
+    LIBRARIES mg64_gfx SDL3::SDL3
+)

@@ -4,6 +4,8 @@
 add_library(mg64_gfx STATIC
     color_images.c
     frame.c
+    rdp.c
+    rsp.c
     texture_cache.c
     tmem.c
 )
