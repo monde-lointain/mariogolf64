@@ -15,6 +15,7 @@
 #include "camera/view_projection.h"
 #include "characters/character.h"
 #include "characters/character_model.h"
+#include "characters/character_tables.h"
 #include "characters/reaction.h"
 #include "course/course_space.h"
 #include "course/hole_conditions.h"
@@ -34,6 +35,7 @@
 #include "shot/current_shot.h"
 #include "shot/shot_effects.h"
 #include "system/asset.h"
+#include "system/big_endian.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/heap.h"
@@ -52,60 +54,99 @@
 // Long enough ago that IsCharacterSlotBusy finds a slot not busy
 #define LONG_AGO_FRAME (-4)
 
+#ifdef TARGET_PC
+static inline CharacterAnimation *ModelAnimations(const CharacterModel *model) {
+    return CharacterModelTable(model, CHARACTER_MODEL_ANIMATIONS);
+}
+#else
 static inline CharacterAnimation *ModelAnimations(const CharacterModel *model) {
     u32 address = model->segmentAddresses[CHARACTER_MODEL_ANIMATIONS];
 
     return (CharacterAnimation *)address;
 }
+#endif
 
 #define ModelJointAnimations(model) \
-    ((JointAnimation *)(model)->segmentAddresses[CHARACTER_MODEL_JOINTS])
+    ((JointAnimation *)CharacterModelTable(model, CHARACTER_MODEL_JOINTS))
 #define ModelAnimatedTriangles(model) \
-    ((AnimatedTriangle **)(model)->segmentAddresses[CHARACTER_MODEL_ANIMATED_TRIANGLES])
+    ((AnimatedTriangle **)CharacterModelTable(model, CHARACTER_MODEL_ANIMATED_TRIANGLES))
 #define ModelTextureAnimations(model) \
-    ((TextureAnimation *)(model)->segmentAddresses[CHARACTER_MODEL_TEXTURE_ANIMATIONS])
+    ((TextureAnimation *)CharacterModelTable(model, CHARACTER_MODEL_TEXTURE_ANIMATIONS))
 #define ModelAnimatedTextures(model) \
-    ((AnimatedTexture *)(model)->segmentAddresses[CHARACTER_MODEL_TEXTURES])
+    ((AnimatedTexture *)CharacterModelTable(model, CHARACTER_MODEL_TEXTURES))
 
 // Where a segment address into the frame data points in the slot's copy being
 // written. With the copy's address first, the texture routines' registers
 // swap.
 #define FrameDataAddress(slot, address) \
-    (SEGMENT_OFFSET(address) + (u32)(slot)->frameData[(slot)->frameDataIndex])
+    (SEGMENT_OFFSET(address) + AddressNumber((slot)->frameData[(slot)->frameDataIndex]))
+
+// Loads the texture with the tiles that an animated triangle draws with
+#define LoadAnimatedTexture(gfx, texture) \
+    gDPLoadTextureBlock( \
+        (gfx), \
+        (texture)->address & ~(TEXTURE_ALIGNMENT - 1), \
+        G_IM_FMT_RGBA, \
+        G_IM_SIZ_16b, \
+        (texture)->width, \
+        (texture)->height, \
+        0, \
+        G_TX_NOMIRROR | G_TX_CLAMP, \
+        G_TX_NOMIRROR | G_TX_CLAMP, \
+        ANIMATED_TEXTURE_MASK, \
+        ANIMATED_TEXTURE_MASK, \
+        G_TX_NOLOD, \
+        G_TX_NOLOD \
+    )
 
 // Patches the slot's frame data copy being written so the triangle shows the
 // texture with the texture coordinates. Uses the locals gfx, vertex and i.
-#define SetTriangleTexture(slot, triangle, texture, sCoordinates, tCoordinates, vertexIndex) \
-    { \
-        gfx = (Gfx *) \
-            FrameDataAddress(slot, (triangle)->loadTextureBlock + LOAD_TEXTURE_BLOCK_OFFSET); \
-        gDPLoadTextureBlock( \
-            gfx++, \
-            (texture)->address & ~(TEXTURE_ALIGNMENT - 1), \
-            G_IM_FMT_RGBA, \
-            G_IM_SIZ_16b, \
-            (texture)->width, \
-            (texture)->height, \
-            0, \
-            G_TX_NOMIRROR | G_TX_CLAMP, \
-            G_TX_NOMIRROR | G_TX_CLAMP, \
-            ANIMATED_TEXTURE_MASK, \
-            ANIMATED_TEXTURE_MASK, \
-            G_TX_NOLOD, \
-            G_TX_NOLOD \
-        ); \
-        for ((vertexIndex) = 0; (vertexIndex) < TRIANGLE_VERTEX_COUNT; (vertexIndex)++) { \
-            vertex = \
-                (Vtx *)FrameDataAddress(slot, ((vertexIndex) * VTX_SIZE) + (triangle)->vertices); \
-            vertex->v.tc[TEXTURE_AXIS_S] = (sCoordinates)[(vertexIndex)]; \
-            vertex->v.tc[TEXTURE_AXIS_T] = (tCoordinates)[(vertexIndex)]; \
-        } \
-    }
+//
+// The frame data holds the model's display list and vertices as the ROM
+// does, so a native build writes the commands in the N64's form, and the
+// coordinates big-endian.
+#ifdef TARGET_PC
+#    define SetTriangleTexture(slot, triangle, texture, sCoordinates, tCoordinates, vertexIndex) \
+        { \
+            Gfx commands[LOAD_TEXTURE_BLOCK_COMMAND_COUNT]; \
+\
+            gfx = commands; \
+            LoadAnimatedTexture(gfx++, texture); \
+            StoreRomCommands( \
+                ( \
+                    void * \
+                )FrameDataAddress(slot, (triangle)->loadTextureBlock + LOAD_TEXTURE_BLOCK_OFFSET), \
+                commands, \
+                gfx - commands \
+            ); \
+            for ((vertexIndex) = 0; (vertexIndex) < TRIANGLE_VERTEX_COUNT; (vertexIndex)++) { \
+                vertex = (Vtx *) \
+                    FrameDataAddress(slot, ((vertexIndex) * VTX_SIZE) + (triangle)->vertices); \
+                StoreBigEndian16(&vertex->v.tc[TEXTURE_AXIS_S], (sCoordinates)[(vertexIndex)]); \
+                StoreBigEndian16(&vertex->v.tc[TEXTURE_AXIS_T], (tCoordinates)[(vertexIndex)]); \
+            } \
+        }
+#else
+#    define SetTriangleTexture(slot, triangle, texture, sCoordinates, tCoordinates, vertexIndex) \
+        { \
+            gfx = (Gfx *) \
+                FrameDataAddress(slot, (triangle)->loadTextureBlock + LOAD_TEXTURE_BLOCK_OFFSET); \
+            LoadAnimatedTexture(gfx++, texture); \
+            for ((vertexIndex) = 0; (vertexIndex) < TRIANGLE_VERTEX_COUNT; (vertexIndex)++) { \
+                vertex = (Vtx *) \
+                    FrameDataAddress(slot, ((vertexIndex) * VTX_SIZE) + (triangle)->vertices); \
+                vertex->v.tc[TEXTURE_AXIS_S] = (sCoordinates)[(vertexIndex)]; \
+                vertex->v.tc[TEXTURE_AXIS_T] = (tCoordinates)[(vertexIndex)]; \
+            } \
+        }
+#endif
 
 // The size of a Vtx
 #define VTX_SIZE 0x10
 // From AnimatedTriangle.loadTextureBlock to the gDPLoadTextureBlock
 #define LOAD_TEXTURE_BLOCK_OFFSET 0x10
+// The commands of a gDPLoadTextureBlock
+#define LOAD_TEXTURE_BLOCK_COMMAND_COUNT 7
 // The alignment the RDP needs of a texture's address
 #define TEXTURE_ALIGNMENT 8
 // The texture coordinate mask of an animated triangle's tiles, 64 texels each
@@ -1132,6 +1173,14 @@ void LoadCharacter(u32 slotIndex, CharacterIndex characterIndex, s32 modelKind) 
             CHARACTER_MODEL_ADDRESS,
             osVirtualToPhysical(f_CurrentModelBuffer)
         );
+#ifdef TARGET_PC
+        UnpackCharacterTables(
+            (s32)slotIndex,
+            slot->model,
+            f_CurrentModelBuffer,
+            CHARACTER_BUFFER_SIZE
+        );
+#endif
         frameDataSize = slot->model->frameDataEnd - slot->model->frameDataStart;
         if (frameDataSize < FRAME_DATA_COPY_SIZE) {
             frameDataSize = FRAME_DATA_COPY_SIZE;
@@ -1142,10 +1191,12 @@ void LoadCharacter(u32 slotIndex, CharacterIndex characterIndex, s32 modelKind) 
         // Added as integers, the size first, to match: adding the size to a u8
         // pointer, on either side, or adding the integers pointer first gives 4
         // words differing, none in shape
-        slot->frameData[1] = (void *)(frameDataSize + (u32)slot->frameData[0]);
-        slot->frameData[2] = (void *)(frameDataSize + (u32)slot->frameData[1]);
+        slot->frameData[1] = (void *)(frameDataSize + AddressNumber(slot->frameData[0]));
+        slot->frameData[2] = (void *)(frameDataSize + AddressNumber(slot->frameData[1]));
         memcpy(slot->frameData[1], slot->frameData[0], frameDataSize);
         memcpy(slot->frameData[2], slot->frameData[0], frameDataSize);
+        MarkRomOrder(slot->frameData[1], frameDataSize);
+        MarkRomOrder(slot->frameData[2], frameDataSize);
         g_CurrentJointMatrices = slot->frameData[slot->frameDataIndex];
         f_StartedAnimationIndex = slot->animationIndex;
         if (IsGameFlagSet(GAME_FLAG_LOG_CHARACTER_SETUP)) {
@@ -1190,17 +1241,17 @@ void LoadCharacter(u32 slotIndex, CharacterIndex characterIndex, s32 modelKind) 
         slot->jointMatrices = g_CurrentJointMatrices;
         slot->displayList = (Gfx *)slot->model->segmentAddresses[CHARACTER_MODEL_DISPLAY_LIST];
         slot->portraitCamera[0] =
-            *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_PORTRAIT_CAMERA];
+            *(f32 *)CharacterModelTable(slot->model, CHARACTER_MODEL_PORTRAIT_CAMERA);
         slot->portraitCamera[1] =
-            *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_PORTRAIT_CAMERA + 1];
+            *(f32 *)CharacterModelTable(slot->model, CHARACTER_MODEL_PORTRAIT_CAMERA + 1);
         slot->portraitCamera[2] =
-            *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_PORTRAIT_CAMERA + 2];
+            *(f32 *)CharacterModelTable(slot->model, CHARACTER_MODEL_PORTRAIT_CAMERA + 2);
         slot->portraitCamera[3] =
-            *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_PORTRAIT_CAMERA + 3];
+            *(f32 *)CharacterModelTable(slot->model, CHARACTER_MODEL_PORTRAIT_CAMERA + 3);
         slot->portraitCamera[4] =
-            *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_PORTRAIT_CAMERA + 4];
+            *(f32 *)CharacterModelTable(slot->model, CHARACTER_MODEL_PORTRAIT_CAMERA + 4);
         slot->portraitCamera[5] =
-            *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_PORTRAIT_CAMERA + 5];
+            *(f32 *)CharacterModelTable(slot->model, CHARACTER_MODEL_PORTRAIT_CAMERA + 5);
         slot->shadowScale = slot->model->shadowScale;
         animationCount = 0;
         for (animation = ModelAnimations(slot->model); animation->events != NULL; animation++) {
@@ -1563,8 +1614,8 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
     s16 spanIndex;
     s16 nextSpanIndex;
 
-    joint = (JointAnimation *)GetUsedCharacterSlot(slotIndex)
-                ->model->segmentAddresses[CHARACTER_MODEL_JOINTS];
+    joint = (JointAnimation *)
+        CharacterModelTable(GetUsedCharacterSlot(slotIndex)->model, CHARACTER_MODEL_JOINTS);
     if (joint->translationKeyCount == END_OF_JOINT_ANIMATIONS) {
         return;
     }

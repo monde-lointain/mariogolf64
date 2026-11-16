@@ -9,6 +9,7 @@
 #include <ultra64.h>
 
 #include "camera/camera.h"
+#include "characters/character_tables.h"
 #include "characters/model_layouts.h"
 #include "course/hole_setup.h"
 #include "game/game.h"
@@ -16,6 +17,7 @@
 #include "math/math_util.h"
 #include "screen/display_list.h"
 #include "shot/club.h"
+#include "system/big_endian.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/main.h"
@@ -36,10 +38,27 @@
 #define HIGHLIGHT_TEXTURE_SIZE 32
 #define HIGHLIGHT_SECOND_TILE 1
 
-#define ModelChosenDisplayList(model) \
-    ((Gfx *)(model)->segmentAddresses[CHARACTER_MODEL_CHOSEN_DISPLAY_LIST])
 #define ModelDisplayListChoices(model) \
-    ((u32 *)(model)->segmentAddresses[CHARACTER_MODEL_DISPLAY_LIST_CHOICES])
+    ((u32 *)CharacterModelTable(model, CHARACTER_MODEL_DISPLAY_LIST_CHOICES))
+
+// Sets the command that the model's display list calls its choice with. A
+// native build writes it in the N64's form, as the model's display lists are.
+#ifdef TARGET_PC
+#    define SetChosenDisplayList(model, firstWord, secondWord) \
+        StoreRomCommand( \
+            osPcTranslate((model)->segmentAddresses[CHARACTER_MODEL_CHOSEN_DISPLAY_LIST]), \
+            (firstWord), \
+            (secondWord) \
+        )
+#else
+#    define ModelChosenDisplayList(model) \
+        ((Gfx *)(model)->segmentAddresses[CHARACTER_MODEL_CHOSEN_DISPLAY_LIST])
+#    define SetChosenDisplayList(model, firstWord, secondWord) \
+        { \
+            ModelChosenDisplayList(model)->words.w0 = (firstWord); \
+            ModelChosenDisplayList(model)->words.w1 = (secondWord); \
+        }
+#endif
 
 // osMapTLB's physical address for a page left unmapped
 #define NO_PHYSICAL_PAGE (-1)
@@ -1083,8 +1102,8 @@ void AnimateCharacterJoints(u32 slotIndex) {
     s16 spanIndex;
     s16 nextSpanIndex;
 
-    joint = (JointAnimation *)GetUsedCharacterSlot(slotIndex)
-                ->model->segmentAddresses[CHARACTER_MODEL_JOINTS];
+    joint = (JointAnimation *)
+        CharacterModelTable(GetUsedCharacterSlot(slotIndex)->model, CHARACTER_MODEL_JOINTS);
     matrix = g_CurrentJointMatrices;
     if (joint->translationKeyCount == END_OF_JOINT_ANIMATIONS) {
         return;
@@ -1296,12 +1315,18 @@ void AnimateCharacterJoints(u32 slotIndex) {
         joint++;
     }
     while (joint->translationKeyCount != END_OF_JOINT_ANIMATIONS);
+
+    // The matrices replace the ROM's in the frame data
+    MarkHostOrder(g_CurrentJointMatrices, (matrix - g_CurrentJointMatrices) * sizeof(Mtx));
 }
 
 NO_RESULT FreeCharacterSlot(u32 slotIndex) {
     osSyncPrintf("D PC[%d]\n", slotIndex);
     if (slotIndex < CHARACTER_SLOT_COUNT) {
         g_CharacterSlots[slotIndex].modelIndex = NO_CHARACTER_MODEL;
+#ifdef TARGET_PC
+        ForgetCharacterTables((s32)slotIndex);
+#endif
     }
 }
 
@@ -1364,8 +1389,7 @@ Outcome SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
     if (slot != NULL) {
         checkedIndex = 0;
         if (choiceIndex == NO_DISPLAY_LIST_CHOICE) {
-            ModelChosenDisplayList(slot->model)->words.w0 = G_ENDDL << 24;
-            ModelChosenDisplayList(slot->model)->words.w1 = 0;
+            SetChosenDisplayList(slot->model, G_ENDDL << 24, 0);
             return OUTCOME_OK;
         }
 
@@ -1379,9 +1403,11 @@ Outcome SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
             return OUTCOME_FAILED;
         }
 
-        ModelChosenDisplayList(slot->model)->words.w0 = G_DL << 24;
-        ModelChosenDisplayList(slot->model)->words.w1 =
-            ModelDisplayListChoices(slot->model)[checkedIndex];
+        SetChosenDisplayList(
+            slot->model,
+            G_DL << 24,
+            ModelDisplayListChoices(slot->model)[checkedIndex]
+        );
         return OUTCOME_OK;
     }
 
@@ -1438,7 +1464,7 @@ PointLookup GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *posi
             CHARACTER_MODEL_ADDRESS,
             osVirtualToPhysical(slot->modelBuffer)
         );
-        point = (CharacterPoint *)slot->model->segmentAddresses[CHARACTER_MODEL_POINTS];
+        point = (CharacterPoint *)CharacterModelTable(slot->model, CHARACTER_MODEL_POINTS);
         while (point->jointPath != NULL) {
             if (point->id == pointId) {
                 break;
