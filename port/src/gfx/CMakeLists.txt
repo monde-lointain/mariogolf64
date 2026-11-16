@@ -2,10 +2,11 @@
 # commands, and the SDL_GPU backend that draws what it records.
 
 add_library(mg64_gfx STATIC
+    frame.c
     tmem.c
 )
 target_include_directories(mg64_gfx PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(mg64_gfx
     PUBLIC mg64_port_internal SDL3::SDL3
-    PRIVATE mg64_port_warnings
+    PRIVATE mg64_ultra mg64_port_warnings
 )
