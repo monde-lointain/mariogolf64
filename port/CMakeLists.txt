@@ -121,12 +121,14 @@ target_compile_features(mg64_headers INTERFACE c_std_11)
 # took it as it reads where modern GCC would assume that undefined behavior
 # can't happen (see the Makefile's KMC_SEMANTICS). Contracting multiplies and
 # adds into fused ones would change the ball's flight from one host to
-# another, and with it the demos' and replays' outcomes.
+# another, and with it the demos' and replays' outcomes. Clang has no switch
+# to match GCC's against loop bounds taken from undefined behavior: -fwrapv
+# covers its overflows, and AVOID_UB the game's known reads past arrays.
 target_compile_options(mg64_headers INTERFACE
     -funsigned-char
     -fno-strict-aliasing
     -fwrapv
-    -fno-aggressive-loop-optimizations
+    $<$<C_COMPILER_ID:GNU>:-fno-aggressive-loop-optimizations>
     -fno-delete-null-pointer-checks
     -fno-common
     -ffp-contract=off
