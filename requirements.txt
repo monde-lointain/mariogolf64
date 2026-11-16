@@ -1,5 +1,5 @@
 ipl3checksum
-# The texture and custom character tools
+# The texture and asset tools
 numpy
 pillow
 # make pycheck

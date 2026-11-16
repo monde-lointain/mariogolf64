@@ -1,4 +1,4 @@
-"""Test the asset archive's encoder and packing, which custom face sprites use.
+"""Test the asset archive's encoder and packing, which mods' assets use.
 
 The encoder's oracle is the decoder, which follows the game's DecodeByteRuns
 and DecodeHalfwordRuns: whatever the encoder writes must decode to what it

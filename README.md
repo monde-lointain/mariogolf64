@@ -116,20 +116,6 @@ IPL3 and the RSP's boot, audio and graphics microcode are Nintendo's
 own binaries, cut from the original as they are, and `textures.txt`
 lists the textures that C files hold, which are built from PNGs.
 
-## Custom characters
-
-A custom character, modeled in Blender with the add-on in
-`tools/blender`, takes the place of one of the game's characters and
-plays its animations. `make CHARACTERS=PACKAGE` builds
-`build/nonmatching/custom/mariogolf64.z64` with it; the original's build
-is left alone. Every segment after main starts on a 16-byte boundary, as
-in the original, so model files of any size fit. The character's name
-replaces the original's in the menus and text, and its face pictures,
-drawn from its model by `tools/face_sprites.py`, replace the original's in
-the menus and scorecards. See
-[`tools/blender/README.md`](tools/blender/README.md) for the workflow, and
-`make tool-tests` and `make blender-tests` for the tools' tests.
-
 ## Mods
 
 A mod lives in a folder of its own, outside this repository, with a
@@ -157,6 +143,11 @@ each of them in order. Each of these folders can have a `mod.mk`, which
 the build reads before its rules, to add settings and rules of its own.
 `TARGET` names the ROM. Run `make setup` once, in this repository: mods
 use its assets and tools.
+
+`mg64-mod-template` is a mod to start from. `mg64-character-kit` is a
+folder for `MODS` that puts custom characters, modeled in Blender with its
+add-on, in place of the game's: each takes the place of one of the game's
+characters, with its name, and plays its animations.
 
 ## Formatting
 

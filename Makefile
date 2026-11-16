@@ -70,14 +70,6 @@ endif
 ifneq ($(MODERN),0)
 override NON_MATCHING := 1
 endif
-# Set CHARACTERS to the package folders of custom characters, which the
-# Blender add-on in tools/blender exports, to build each in place of the
-# character it replaces. Their model files differ from the original's, so
-# the ROM needn't match. See tools/build_character.py.
-CHARACTERS  ?=
-ifneq ($(strip $(CHARACTERS)),)
-override NON_MATCHING := 1
-endif
 # The modern build compiles each segment's code together, with LTO. Set
 # LTO=0 to link its objects as each compiled, such as to find whether LTO
 # brings about a difference. Build with -B after changing it.
@@ -177,11 +169,6 @@ ULTRALIB_COMPILER := modern_gcc
 LIB_MODERN  := -DMODERN_CC
 ULTRALIB_ASM_ABI :=
 LIBS        := $(MODERN_LIBS)
-endif
-# A build with custom characters has a directory of its own within its
-# toolchain's, as its character models' objects differ
-ifneq ($(strip $(CHARACTERS)),)
-BUILD_DIR   := $(BUILD_DIR)/custom
 endif
 
 # GCC's undefined behavior sanitizer, whose failed checks call the handlers
@@ -362,65 +349,8 @@ $(BUILD_DIR)/src/system/main_bss.c.o: INCLUDES += $(call include_dirs,$(LIBMUS_D
 # The mods' own settings and rules
 include $(wildcard $(MOD_ROOTS:%=%/mod.mk))
 
-# The files that build_character.py and face_sprites.py write from custom
-# characters' packages, each at the path of the file it replaces: their
-# model files, the headers of their names and layouts, which come first on
-# the include path, the text with their names and their face sprites. The
-# layouts' header is written last.
-ifneq ($(strip $(CHARACTERS)),)
-CHARACTER_DIR    := $(BUILD_DIR)/custom_characters
-CHARACTER_HEADER := $(CHARACTER_DIR)/include/characters/model_layouts.h
-# Changes to the list of packages, which their files' dates don't show
-CHARACTER_LIST   := $(CHARACTER_DIR)/packages.txt
-# The list of the face sprites' files, which face_sprites.py writes last
-FACE_SPRITES     := $(CHARACTER_DIR)/face_sprites.txt
-CHARACTER_FILES  := $(shell $(PYTHON) $(TOOLS)/build_character.py --list-files $(CHARACTERS))
-CHARACTER_BINS   := $(CHARACTER_FILES:%=$(CHARACTER_DIR)/assets/character_models/%.bin)
-CHARACTER_TOOLS  := $(addprefix $(TOOLS)/,build_character.py character_template.py \
-                    character_model_format.py f3dex2.py lz_codec.py)
-PACKAGE_FILES    := $(shell find $(CHARACTERS) -type f)
-INCLUDES         := -I$(CHARACTER_DIR)/include $(INCLUDES)
-GENERATED_HEADERS += $(CHARACTER_HEADER)
-ARCHIVE_REPLACEMENTS += $(CHARACTER_DIR)/$(ARCHIVE_DIR)
-
-$(CHARACTER_LIST): FORCE
-	@mkdir -p $(@D)
-	@echo '$(abspath $(CHARACTERS))' | cmp -s - $@ || echo '$(abspath $(CHARACTERS))' > $@
-
-$(CHARACTER_HEADER): $(CHARACTER_LIST) $(CHARACTER_TOOLS) $(PACKAGE_FILES) \
-                     $(addprefix $(BASE)/,src/characters/character_model.c \
-                     include/characters/model_layouts.h include/characters/character_names.h \
-                     $(TEXT_FILES:%=%.txt)) $(wildcard $(BASE)/assets/character_models/*.bin)
-	$(PYTHON) $(TOOLS)/build_character.py --repository $(BASE) --output $(CHARACTER_DIR) \
-	    $(TEXT_FILES:%=--text %.txt) $(CHARACTERS)
-
-# The header is written last, so it's newer than the files it was written with
-$(CHARACTER_BINS) $(CHARACTER_DIR)/include/characters/character_names.h \
-$(TEXT_FILES:%=$(CHARACTER_DIR)/%.txt): $(CHARACTER_HEADER) ;
-
-$(FACE_SPRITES): $(CHARACTER_LIST) $(CHARACTER_TOOLS) $(PACKAGE_FILES) \
-                 $(addprefix $(TOOLS)/,face_sprites.py face_sprites.json decode_asset.py)
-	$(PYTHON) $(TOOLS)/face_sprites.py --repository $(BASE) --assets $(BASE)/$(ARCHIVE_DIR) \
-	    --output $(CHARACTER_DIR) \
-	    $(CHARACTERS)
-
-$(BUILD_DIR)/assets/asset_archive.bin: $(FACE_SPRITES)
-
-$(TEXT_FILES:%=$(BUILD_DIR)/%.bin): $(BUILD_DIR)/%.bin: $(CHARACTER_DIR)/%.txt $(TOOLS)/messages.py
-	@mkdir -p $(dir $@)
-	$(ENCODE_TEXT)
-
-# Every model's object, so that one no longer replaced is made again
-$(filter $(BUILD_DIR)/assets/character_models/%,$(O_FILES)): $(CHARACTER_LIST)
-
-$(CHARACTER_FILES:%=$(BUILD_DIR)/assets/character_models/%.bin.o): \
-$(BUILD_DIR)/assets/character_models/%.bin.o: $(CHARACTER_DIR)/assets/character_models/%.bin
-	@mkdir -p $(dir $@)
-	$(BIN_TO_OBJECT)
-endif
-
 .PHONY: all setup tools extract clean distclean check-shiftable check-alignment equivalence \
-        sanitize test target-tests format lint typecheck pycheck tool-tests blender-tests FORCE
+        sanitize test target-tests format lint typecheck pycheck tool-tests FORCE
 
 # A recipe that fails after writing its target, such as a check of what it
 # wrote, would otherwise leave a target that the next run takes as built
@@ -742,11 +672,6 @@ pycheck:
 # they're extracted
 tool-tests:
 	PYTHONPATH=tools $(PYTHON) -m unittest discover --start-directory tools/tests
-
-# Tests the Blender add-on in a Blender without a window, which BLENDER names
-BLENDER ?= blender
-blender-tests:
-	tools/blender/run_tests.sh $(BLENDER)
 
 CLANG_TIDY ?= run-clang-tidy-23
 # libkmc is KMC's C library, which keeps the C library's names

@@ -12,10 +12,10 @@ padded with zeros to a multiple of eight bytes.
 split writes each asset to DIRECTORY as its ID in three hexadecimal
 digits, such as 688.bin for ASSET_PLACES. pack reads them back in that
 order, so an asset can change size, but a new one must take the next ID.
-An asset in one of the directories REPLACEMENTS, such as a custom
-character's face sprites, takes the place of the one of the same name. Where
-several have it, the first's is taken, as a mod's file is taken before those
-of the folders it builds on.
+An asset in one of the directories REPLACEMENTS, such as a mod's, takes
+the place of the one of the same name. Where several have it, the first's
+is taken, as a mod's file is taken before those of the folders it builds
+on.
 """
 
 import struct
