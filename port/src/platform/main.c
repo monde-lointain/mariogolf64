@@ -15,7 +15,8 @@
  * first controller from a script, as input_script.h describes.
  *
  * Without a ROM, it looks for baserom.us.z64 beside the program, then in
- * the current directory.
+ * the current directory. Without --save, the game saves to the user's data
+ * folder, or headless, nowhere.
  */
 
 #include <SDL3/SDL.h>
@@ -207,11 +208,20 @@ static int ChooseRenderScale(void) {
     return SDL_clamp(scale, 1, MAX_RENDER_SCALE);
 }
 
+// The save goes to the --save file, or else to the player's own, in the
+// user's data folder. A headless run, being a test's, keeps none but a
+// --save file, lest it overwrite the player's progress.
 static void UseSaveMemoryPath(const Options *options) {
     char *path;
 
     if (options->savePath != NULL) {
         SetSaveMemoryPath(options->savePath);
+        return;
+    }
+
+    if (options->isHeadless) {
+        SetSaveMemoryPath(NULL);
+        SDL_Log("Keeping no save, as no --save file is named");
         return;
     }
 
