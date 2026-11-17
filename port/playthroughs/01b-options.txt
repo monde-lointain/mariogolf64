@@ -1,0 +1,91 @@
+# Recorded by mariogolf64 on 2026-11-16 at 23:37
+# Starts from the save with CRC-32 1F93B89D
+0
+212 A
+216
+245 A
+249
+267 stick=-1,-12
+268 stick=-2,-80
+269 stick=-1,-80
+270 stick=-2,-80
+272 stick=0,-5
+273
+280 A
+284
+300 B
+303
+311 stick=-1,-15
+312 stick=0,-49
+313 stick=0,-80
+314 stick=-1,-80
+316 stick=-4,-72
+317
+324 stick=-1,-22
+325 stick=-2,-78
+326 stick=-2,-80
+328 stick=-2,-39
+329
+333 A
+337
+348 stick=-4,-21
+349 stick=-6,-71
+350 stick=-4,-80
+351 stick=-3,-80
+352 stick=-2,-32
+353
+355 stick=-1,-9
+356 stick=-2,-69
+357 stick=-1,-80
+359 stick=-2,-44
+360
+363 A
+368
+382 stick=8,3
+383 stick=80,6
+386 stick=36,8
+387
+392 A
+397
+399 stick=-5,-18
+400 stick=-9,-79
+401 stick=-7,-80
+403 stick=-9,-75
+404 stick=-1,-1
+405
+408 A
+411
+417 stick=-50,3
+418 stick=-80,4
+421 stick=-61,4
+422
+425 A
+429
+432 stick=-1,-27
+433 stick=-2,-78
+434 stick=-2,-80
+436 stick=-1,-35
+437
+439 stick=-2,-16
+440 stick=-3,-78
+441 stick=-2,-80
+443 stick=-1,-49
+444
+503 A
+509
+549 A
+554
+597 A
+602
+623 stick=-80,4
+626 stick=-65,4
+627
+634 A
+638
+678 B
+682
+701 B
+705
+726 B
+730
+# Ends at frame 912
