@@ -17,4 +17,13 @@ int KmcRandom(void);
 // The game's srand: starts KmcRandom's sequence again from seed
 void SeedKmcRandom(unsigned int seed);
 
+// The game's sin, cos, tan, atan and atan2, which give the N64's results
+// to the last bit. The first three give NaN for an angle that isn't
+// finite or is 2^31 half turns or more, where the N64 raised an exception.
+double KmcSine(double angle);
+double KmcCosine(double angle);
+double KmcTangent(double angle);
+double KmcArcTangent(double value);
+double KmcArcTangent2(double y, double x);
+
 #endif

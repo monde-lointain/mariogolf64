@@ -170,6 +170,11 @@ set_tests_properties(gpu_backend_test PROPERTIES
     ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0"
 )
 
+mg64_add_port_test(kmc_math_test
+    SOURCES kmc_math_test.c
+    LIBRARIES mg64_kmc
+)
+
 mg64_add_port_test(kmc_random_test
     SOURCES kmc_random_test.c
     LIBRARIES mg64_kmc

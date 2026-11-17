@@ -48,6 +48,7 @@ Each preset builds into `build/pc/<preset>`. `cmake --workflow --preset
 | `src/nusys/`     | NuSystem: the frame loop, graphics tasks, controllers, EEPROM     |
 | `src/mus/`       | libmus: the sequencer and the synthesizer behind the sound calls  |
 | `src/gu/`        | The matrix and vector routines of libultra's gu library           |
+| `src/kmc/`       | KMC's C library: its random numbers and CORDIC trigonometry       |
 | `src/gfx/`       | The display list interpreter and its SDL_GPU backend              |
 | `src/platform/`  | `main`, the window, input, audio output, saves and the ROM file   |
 | `shaders/`       | The shaders' GLSL source and the bytecode compiled from it        |
