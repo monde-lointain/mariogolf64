@@ -8,6 +8,8 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+# Before any target, SDL's included, for the sanitizers to cover them all
+include(Sanitizers)
 include(GameSources)
 include(Dependencies)
 

@@ -44,6 +44,13 @@ Each preset builds into `build/pc/<preset>`. `cmake --workflow --preset
 <preset>` configures, builds and runs the tests in one step, as CI does;
 `windows-mingw` runs its tests through Wine where it is installed.
 
+`-DMG64_SANITIZERS=<list>` builds the game, SDL and the tests with the
+sanitizers named, as `-fsanitize` names them: `address;undefined` is what
+`linux-sanitize` sets, and `thread` builds one with ThreadSanitizer. The
+configure step rejects the combinations that can't work, such as address
+and thread together. The sanitizers' options come from the environment
+when the program runs (`ASAN_OPTIONS` and the like).
+
 CI (`.github/workflows/port.yml`) checks the Python tools and the
 nested-function hoister on every push. The builds need the assets cut from
 the ROM, so they run each preset's workflow only where the repository's

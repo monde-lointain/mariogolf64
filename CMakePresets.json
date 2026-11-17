@@ -39,8 +39,7 @@
             "inherits": "linux",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_C_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
-                "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined"
+                "MG64_SANITIZERS": "address;undefined"
             }
         },
         {
