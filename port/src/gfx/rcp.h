@@ -18,17 +18,28 @@ typedef struct RspVertex {
     // Clip space, with the viewport folded in: x and y in pixels times w,
     // z in [0, 1] times w
     float screen[4];
+    float clip[4]; // Clip space, without the viewport
     float texCoord[2]; // In texels
     uint8_t color[4];
-    uint8_t clipFlags; // CLIP_* for the planes that the vertex is outside
+    uint16_t clipFlags; // CLIP_* for the planes that the vertex is outside
 } RspVertex;
 
+// The screen's edges, and the near and far planes
 #define CLIP_LEFT 0x01
 #define CLIP_RIGHT 0x02
 #define CLIP_TOP 0x04
 #define CLIP_BOTTOM 0x08
 #define CLIP_NEAR 0x10
 #define CLIP_FAR 0x20
+#define CLIP_SCREEN (CLIP_LEFT | CLIP_RIGHT | CLIP_TOP | CLIP_BOTTOM | CLIP_NEAR | CLIP_FAR)
+// The screen's edges moved out by the clip ratio, where the RSP clips
+#define CLIP_RATIO_LEFT 0x0100
+#define CLIP_RATIO_RIGHT 0x0200
+#define CLIP_RATIO_TOP 0x0400
+#define CLIP_RATIO_BOTTOM 0x0800
+// A triangle with a vertex outside one of these is clipped
+#define CLIP_CLIPPED \
+    (CLIP_RATIO_LEFT | CLIP_RATIO_RIGHT | CLIP_RATIO_TOP | CLIP_RATIO_BOTTOM | CLIP_NEAR | CLIP_FAR)
 
 // The RSP's state that the RDP's primitives depend on
 typedef struct RspDrawState {

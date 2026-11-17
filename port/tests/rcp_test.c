@@ -224,6 +224,93 @@ static void TestTriangleTransform(void) {
     EXPECT(f_Gpu.vertexCount == 0);
 }
 
+// A projection whose w is the model's z, with the near plane, z = -w, at
+// z = 1: clip space is (x, y, z - 2, z)
+static Mtx f_DepthProjection;
+// Red corners in front of the near plane, and a blue one behind the eye.
+// The edges to it cross the near plane a quarter of the way along.
+static Vtx f_NearTriangle[3] = {
+    {{{-1, -1, 2}, 0, {0, 0}, {0xFF, 0, 0, 0xFF}}},
+    {{{1, -1, 2}, 0, {0, 0}, {0xFF, 0, 0, 0xFF}}},
+    {{{0, 3, -2}, 0, {0, 0}, {0, 0, 0xFF, 0xFF}}},
+};
+
+// The color a quarter of the way from red to blue, truncated, as packed
+#define NEAR_PLANE_COLOR 0x3F00BFu
+
+static void RunNearTriangle(u32 geometryMode, int first, int second, int third) {
+    Gfx *gfx = BeginTriangles(f_DisplayList, geometryMode);
+
+    ResetCapture();
+    gSPMatrix(gfx++, &f_DepthProjection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPFogFactor(gfx++, 256, 0);
+    gSPVertex(gfx++, f_NearTriangle, 3, 0);
+    gSP1Triangle(gfx++, first, second, third, 0);
+    RunList(gfx);
+}
+
+// The RSP cuts a triangle off at the near plane, making corners there
+// whose colors it steps to along the edges, and draws the rest as a fan
+static void TestNearPlaneClipping(void) {
+    uint32_t i;
+
+    RunNearTriangle(G_SHADE | G_SHADING_SMOOTH, 0, 1, 2);
+    // The fan about the last corner: (near, A, near) and (A, B, near)
+    EXPECT(f_Gpu.vertexCount == 6);
+    for (i = 0; i < f_Gpu.vertexCount; i++) {
+        EXPECT(f_Gpu.vertices[i].position[3] > 0.0f);
+    }
+
+    EXPECT((f_Gpu.vertices[0].color & 0xFFFFFF) == NEAR_PLANE_COLOR);
+    EXPECT((f_Gpu.vertices[1].color & 0xFFFFFF) == 0xFF);
+    EXPECT((f_Gpu.vertices[2].color & 0xFFFFFF) == NEAR_PLANE_COLOR);
+    EXPECT((f_Gpu.vertices[3].color & 0xFFFFFF) == 0xFF);
+    EXPECT((f_Gpu.vertices[5].color & 0xFFFFFF) == NEAR_PLANE_COLOR);
+    // On the near plane: w is one and the depth zero
+    EXPECT_NEAR(f_Gpu.vertices[0].position[3], 1.0, 1e-5);
+    EXPECT_NEAR(f_Gpu.vertices[0].position[2], 0.0, 1e-5);
+    EXPECT_NEAR(f_Gpu.vertices[0].position[0], -0.75, 1e-5);
+
+    // The pieces face as the triangle does, and are culled as it is
+    RunNearTriangle(G_SHADE | G_SHADING_SMOOTH | G_CULL_BACK, 0, 1, 2);
+    EXPECT(f_Gpu.vertexCount == 6);
+    RunNearTriangle(G_SHADE | G_SHADING_SMOOTH | G_CULL_BACK, 0, 2, 1);
+    EXPECT(f_Gpu.vertexCount == 0);
+}
+
+// x reaching past the screen's edge by half of w is clipped only once the
+// clip ratio comes in from two to one
+static void TestClipRatio(void) {
+    static Vtx wide[3] = {
+        {{{-1, -1, 0}, 0, {0, 0}, {0xFF, 0, 0, 0xFF}}},
+        {{{3, -1, 0}, 0, {0, 0}, {0xFF, 0, 0, 0xFF}}},
+        {{{-1, 1, 0}, 0, {0, 0}, {0xFF, 0, 0, 0xFF}}},
+    };
+    Gfx *gfx = BeginTriangles(f_DisplayList, G_SHADE);
+    uint32_t i;
+
+    ResetCapture();
+    gSPVertex(gfx++, wide, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+    // The fan (A, cut, C) and (cut, cut, C), whose first cut is at x = 2
+    EXPECT(f_Gpu.vertexCount == 6);
+    EXPECT_NEAR(f_Gpu.vertices[1].position[0], 2.0, 1e-5);
+
+    gfx = BeginTriangles(f_DisplayList, G_SHADE);
+    ResetCapture();
+    gSPClipRatio(gfx++, FRUSTRATIO_1);
+    gSPVertex(gfx++, wide, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+    EXPECT(f_Gpu.vertexCount == 6);
+    for (i = 0; i < f_Gpu.vertexCount; i++) {
+        EXPECT(f_Gpu.vertices[i].position[0] <= 1.0f + 1e-5f);
+    }
+
+    EXPECT_NEAR(f_Gpu.vertices[1].position[0], 1.0, 1e-5);
+}
+
 // Loads a 4-texel square for tile 0 and an 8-texel one for tile 1, so a
 // material's samplers tell which tile each read
 static Gfx *LoadTwoTiles(Gfx *gfx) {
@@ -482,6 +569,20 @@ static void MakeIdentity(Mtx *matrix) {
     words[7] = 0x00000001;
 }
 
+// The integer matrix whose rows are given, in Mtx's fixed point
+static void MakeIntegerMatrix(Mtx *matrix, const int16_t rows[4][4]) {
+    int32_t *words = (int32_t *)matrix->m;
+    int element;
+
+    SDL_zerop(matrix);
+    for (element = 0; element < 16; element += 2) {
+        uint16_t high = (uint16_t)rows[element / 4][element % 4];
+        uint16_t low = (uint16_t)rows[element / 4][(element % 4) + 1];
+
+        words[element / 2] = (int32_t)(((uint32_t)high << 16) | low);
+    }
+}
+
 // The GPU's drawing shows until the CPU writes the image's memory after it
 // last agreed with the target
 static void TestShownTarget(void) {
@@ -658,11 +759,21 @@ static void TestShutdownReleasesTargets(void) {
 }
 
 int main(void) {
+    static const int16_t depthProjection[4][4] = {
+        {1, 0, 0, 0},
+        {0, 1, 0, 0},
+        {0, 0, 1, 1},
+        {0, 0, -2, 0},
+    };
+
     MakeIdentity(&f_Identity);
+    MakeIntegerMatrix(&f_DepthProjection, depthProjection);
     InitRdp();
     InitRsp();
     TestFillRectangle();
     TestTriangleTransform();
+    TestNearPlaneClipping();
+    TestClipRatio();
     TestTexelsOfEachCycle();
     TestAlphaCompareModes();
     TestDepthClear();

@@ -35,7 +35,23 @@
 #define TEXGEN_RANGE 512.0f
 #define NORMAL_SCALE 128.0f
 
+// Without moving them the RSP clips x and y at twice w
+#define CLIP_RATIO_DEFAULT 2.0f
+// A triangle clipped by each plane gains at most one corner
+#define CLIP_POLYGON_MAX (3 + CLIP_PLANE_COUNT)
+
 typedef float Matrix[4][4];
+
+// The planes that the RSP clips a triangle at, in the order it does
+typedef enum ClipPlane {
+    CLIP_PLANE_NEAR,
+    CLIP_PLANE_FAR,
+    CLIP_PLANE_TOP,
+    CLIP_PLANE_RIGHT,
+    CLIP_PLANE_BOTTOM,
+    CLIP_PLANE_LEFT,
+    CLIP_PLANE_COUNT
+} ClipPlane;
 
 typedef struct RspLight {
     float color[3];
@@ -65,6 +81,8 @@ typedef struct RspState {
 
     float viewportScale[3];
     float viewportTranslate[3];
+    // The multiples of w where the RSP clips x and y, by ClipPlane
+    float clipRatios[CLIP_PLANE_COUNT];
     float fogMultiplier;
     float fogOffset;
     float textureScale[2];
@@ -304,23 +322,87 @@ static void MoveWord(uint32_t w0, uintptr_t w1) {
             }
             break;
         }
+        case G_MW_CLIP: {
+            // The RSP keeps the positive sides' ratios negated
+            float ratio = (float)(int16_t)w1;
+
+            switch (offset) {
+                case G_MWO_CLIP_RNX:
+                    f_Rsp.clipRatios[CLIP_PLANE_LEFT] = ratio;
+                    break;
+                case G_MWO_CLIP_RNY:
+                    f_Rsp.clipRatios[CLIP_PLANE_BOTTOM] = ratio;
+                    break;
+                case G_MWO_CLIP_RPX:
+                    f_Rsp.clipRatios[CLIP_PLANE_RIGHT] = -ratio;
+                    break;
+                case G_MWO_CLIP_RPY:
+                    f_Rsp.clipRatios[CLIP_PLANE_TOP] = -ratio;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        }
         default:
-            // The clip ratio, perspective normalization and forced matrix
-            // elements, which the GPU's clipping and floats don't need
+            // Perspective normalization and forced matrix elements, which
+            // floats don't need
             break;
     }
 }
 
-static uint8_t ClipFlags(const float clip[4]) {
-    uint8_t flags = 0;
+// How far inside a clipping plane a point in clip space is, in a measure
+// that changes linearly between points: negative outside
+static float FindPlaneDistance(const float clip[4], ClipPlane plane) {
     float w = clip[3];
+
+    switch (plane) {
+        case CLIP_PLANE_NEAR:
+            return clip[2] + w;
+        case CLIP_PLANE_FAR:
+            return w - clip[2];
+        case CLIP_PLANE_TOP:
+            return (f_Rsp.clipRatios[plane] * w) - clip[1];
+        case CLIP_PLANE_RIGHT:
+            return (f_Rsp.clipRatios[plane] * w) - clip[0];
+        case CLIP_PLANE_BOTTOM:
+            return clip[1] + (f_Rsp.clipRatios[plane] * w);
+        case CLIP_PLANE_LEFT:
+            return clip[0] + (f_Rsp.clipRatios[plane] * w);
+        default:
+            SDL_assert(!"Unknown clipping plane");
+            return 0.0f;
+    }
+}
+
+static uint16_t FindPlaneFlag(ClipPlane plane) {
+    static const uint16_t flags[CLIP_PLANE_COUNT] = {
+        CLIP_NEAR,
+        CLIP_FAR,
+        CLIP_RATIO_TOP,
+        CLIP_RATIO_RIGHT,
+        CLIP_RATIO_BOTTOM,
+        CLIP_RATIO_LEFT,
+    };
+
+    return flags[plane];
+}
+
+static uint16_t ClipFlags(const float clip[4]) {
+    uint16_t flags = 0;
+    float w = clip[3];
+    int plane;
 
     flags |= clip[0] < -w ? CLIP_LEFT : 0;
     flags |= clip[0] > w ? CLIP_RIGHT : 0;
     flags |= clip[1] > w ? CLIP_TOP : 0;
     flags |= clip[1] < -w ? CLIP_BOTTOM : 0;
-    flags |= clip[2] < -w ? CLIP_NEAR : 0;
-    flags |= clip[2] > w ? CLIP_FAR : 0;
+    for (plane = 0; plane < CLIP_PLANE_COUNT; plane++) {
+        if (FindPlaneDistance(clip, (ClipPlane)plane) < 0.0f) {
+            flags |= FindPlaneFlag((ClipPlane)plane);
+        }
+    }
+
     return flags;
 }
 
@@ -390,10 +472,23 @@ static void UpdateCombinedMatrix(void) {
 }
 
 // Transforms one Vtx into the RSP's vertex buffer
+// Fills in the vertex's screen position and flags from its clip space one
+static void ProjectVertex(RspVertex *vertex) {
+    const float *clip = vertex->clip;
+
+    vertex->screen[0] = (clip[0] * f_Rsp.viewportScale[0]) + (clip[3] * f_Rsp.viewportTranslate[0]);
+    vertex->screen[1] = (clip[3] * f_Rsp.viewportTranslate[1]) - (clip[1] * f_Rsp.viewportScale[1]);
+    vertex->screen[2] =
+        ((clip[2] * f_Rsp.viewportScale[2]) + (clip[3] * f_Rsp.viewportTranslate[2])) /
+        DEPTH_SCALE_MAX;
+    vertex->screen[3] = clip[3];
+    vertex->clipFlags = ClipFlags(clip);
+}
+
 static void LoadVertex(const uint8_t *bytes, bool isRomOrder, RspVertex *vertex) {
     const Matrix *combined = &f_Rsp.combined;
     float position[3];
-    float clip[4];
+    float *clip = vertex->clip;
     int axis;
 
     for (axis = 0; axis < 3; axis++) {
@@ -405,13 +500,7 @@ static void LoadVertex(const uint8_t *bytes, bool isRomOrder, RspVertex *vertex)
             (position[2] * (*combined)[2][axis]) + (*combined)[3][axis];
     }
 
-    vertex->screen[0] = (clip[0] * f_Rsp.viewportScale[0]) + (clip[3] * f_Rsp.viewportTranslate[0]);
-    vertex->screen[1] = (clip[3] * f_Rsp.viewportTranslate[1]) - (clip[1] * f_Rsp.viewportScale[1]);
-    vertex->screen[2] =
-        ((clip[2] * f_Rsp.viewportScale[2]) + (clip[3] * f_Rsp.viewportTranslate[2])) /
-        DEPTH_SCALE_MAX;
-    vertex->screen[3] = clip[3];
-    vertex->clipFlags = ClipFlags(clip);
+    ProjectVertex(vertex);
 
     vertex->texCoord[0] =
         (float)ReadHalf(bytes + 8, isRomOrder) * f_Rsp.textureScale[0] / TEXEL_FRACTION;
@@ -525,6 +614,103 @@ static bool IsCulled(const RspVertex *first, const RspVertex *second, const RspV
     return (cullMode & G_CULL_BACK) ? area > 0.0f : area < 0.0f;
 }
 
+static void DrawUnclippedTriangle(
+    const RspVertex *first,
+    const RspVertex *second,
+    const RspVertex *third
+) {
+    if (!IsCulled(first, second, third)) {
+        DrawRdpTriangle(first, second, third, &f_Rsp.draw);
+    }
+}
+
+// The vertex where the edge from inside a plane to outside it crosses it.
+// The RSP steps every attribute along the edge in clip space, the color's
+// too, so that fog stays as the corners had it, and truncates the color.
+static void CutEdge(
+    const RspVertex *inside,
+    const RspVertex *outside,
+    ClipPlane plane,
+    RspVertex *vertex
+) {
+    float insideDistance = FindPlaneDistance(inside->clip, plane);
+    float outsideDistance = FindPlaneDistance(outside->clip, plane);
+    float t = SDL_clamp(insideDistance / (insideDistance - outsideDistance), 0.0f, 1.0f);
+    int i;
+
+    for (i = 0; i < 4; i++) {
+        vertex->clip[i] = inside->clip[i] + ((outside->clip[i] - inside->clip[i]) * t);
+        vertex->color[i] = (uint8_t)((float)inside->color[i] +
+            (((float)outside->color[i] - (float)inside->color[i]) * t));
+    }
+
+    for (i = 0; i < 2; i++) {
+        vertex->texCoord[i] =
+            inside->texCoord[i] + ((outside->texCoord[i] - inside->texCoord[i]) * t);
+    }
+
+    ProjectVertex(vertex);
+}
+
+// Cuts the polygon down to the side of the plane that's inside, adding the
+// vertices it makes to made. Returns the corners' new count.
+static int ClipPolygon(
+    const RspVertex *corners[CLIP_POLYGON_MAX],
+    int count,
+    ClipPlane plane,
+    RspVertex *made,
+    int *madeCount
+) {
+    const RspVertex *kept[CLIP_POLYGON_MAX];
+    uint16_t flag = FindPlaneFlag(plane);
+    const RspVertex *previous = corners[count - 1];
+    int keptCount = 0;
+    int i;
+
+    for (i = 0; i < count; i++) {
+        const RspVertex *corner = corners[i];
+        bool isOutside = (corner->clipFlags & flag) != 0;
+
+        if (isOutside != ((previous->clipFlags & flag) != 0)) {
+            RspVertex *vertex = &made[(*madeCount)++];
+
+            CutEdge(isOutside ? previous : corner, isOutside ? corner : previous, plane, vertex);
+            kept[keptCount++] = vertex;
+        }
+
+        if (!isOutside) {
+            kept[keptCount++] = corner;
+        }
+
+        previous = corner;
+    }
+
+    SDL_assert(keptCount <= CLIP_POLYGON_MAX);
+    SDL_memcpy(corners, kept, sizeof(kept[0]) * (size_t)keptCount);
+    return keptCount;
+}
+
+// Clips the triangle at each plane in turn, as the RSP does, and draws
+// what's left as a fan of triangles about its last corner
+static void DrawClippedTriangle(const RspVertex *triangle[3]) {
+    const RspVertex *corners[CLIP_POLYGON_MAX];
+    // Each plane makes at most two vertices
+    RspVertex made[CLIP_PLANE_COUNT * 2];
+    int madeCount = 0;
+    int count = 3;
+    int plane;
+    int i;
+
+    SDL_memcpy(corners, triangle, sizeof(triangle[0]) * 3);
+    for (plane = 0; plane < CLIP_PLANE_COUNT && count >= 3; plane++) {
+        count = ClipPolygon(corners, count, (ClipPlane)plane, made, &madeCount);
+    }
+
+    for (i = 0; i + 2 < count; i++) {
+        DrawUnclippedTriangle(corners[i], corners[i + 1], corners[count - 1]);
+    }
+}
+
 static void DrawTriangle(uint32_t first, uint32_t second, uint32_t third) {
     const RspVertex *corners[3];
 
@@ -540,22 +726,27 @@ static void DrawTriangle(uint32_t first, uint32_t second, uint32_t third) {
     corners[0] = &f_Rsp.vertices[first];
     corners[1] = &f_Rsp.vertices[second];
     corners[2] = &f_Rsp.vertices[third];
-    // Wholly outside one of the clipping planes
-    if ((corners[0]->clipFlags & corners[1]->clipFlags & corners[2]->clipFlags) != 0) {
+    // Wholly outside one of the screen's planes
+    if ((corners[0]->clipFlags & corners[1]->clipFlags & corners[2]->clipFlags & CLIP_SCREEN) !=
+        0) {
         return;
     }
 
-    if (IsCulled(corners[0], corners[1], corners[2])) {
+    // The RSP culls the pieces of a clipped triangle, whose corners have
+    // places on the screen
+    if (((corners[0]->clipFlags | corners[1]->clipFlags | corners[2]->clipFlags) & CLIP_CLIPPED) !=
+        0) {
+        DrawClippedTriangle(corners);
         return;
     }
 
-    DrawRdpTriangle(corners[0], corners[1], corners[2], &f_Rsp.draw);
+    DrawUnclippedTriangle(corners[0], corners[1], corners[2]);
 }
 
 static bool IsDisplayListCulled(uint32_t w0, uint32_t w1) {
     uint32_t first = (w0 & 0xFFFF) / 2;
     uint32_t last = (w1 & 0xFFFF) / 2;
-    uint8_t flags = 0xFF;
+    uint16_t flags = CLIP_SCREEN;
     uint32_t i;
 
     if (last >= VERTEX_BUFFER_SIZE || first > last) {
@@ -604,6 +795,8 @@ static void SetTexture(uint32_t w0, uint32_t w1) {
 }
 
 static void ResetRsp(void) {
+    int plane;
+
     SDL_zero(f_Rsp);
     SetIdentity(f_Rsp.modelview[0]);
     SetIdentity(f_Rsp.projection);
@@ -611,6 +804,9 @@ static void ResetRsp(void) {
     f_Rsp.areModelLightsStale = true;
     f_Rsp.textureScale[0] = 1.0f;
     f_Rsp.textureScale[1] = 1.0f;
+    for (plane = 0; plane < CLIP_PLANE_COUNT; plane++) {
+        f_Rsp.clipRatios[plane] = CLIP_RATIO_DEFAULT;
+    }
 }
 
 void InitRsp(void) {
