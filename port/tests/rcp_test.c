@@ -351,6 +351,27 @@ static void TestDepthClear(void) {
 
 // A list from ROM holds the N64's words, big-endian, and reaches its
 // vertices through a segment
+// The ROM's data holds the N64's addresses, which lead into RDRAM as the
+// microcode leads them, through the segment in bits 24 to 27
+static void TestN64Addresses(void) {
+    static uint8_t hostData[16];
+    RcpMemory memory;
+
+    SDL_zero(memory);
+    memory.segments[6] = 0x100000;
+    memory.segments[3] = (uintptr_t)hostData;
+    EXPECT(ResolveRcpAddress(&memory, 0x80001000) == &osPcRdram[0x1000]);
+    EXPECT(ResolveRcpAddress(&memory, 0xA0001000) == &osPcRdram[0x1000]);
+    EXPECT(ResolveRcpAddress(&memory, 0x06000010) == &osPcRdram[0x100010]);
+    EXPECT(ResolveRcpAddress(&memory, 0x03000004) == &hostData[4]);
+    // Bits above the segment's are dropped, and the sum wraps at 16 MB
+    EXPECT(ResolveRcpAddress(&memory, 0x81189320) == &osPcRdram[0x189320]);
+    memory.segments[1] = 0x200000;
+    EXPECT(ResolveRcpAddress(&memory, 0x81000010) == &osPcRdram[0x200010]);
+    memory.segments[0xE] = 0xFFFFF0;
+    EXPECT(ResolveRcpAddress(&memory, 0x0E000020) == &osPcRdram[0x10]);
+}
+
 static void TestRomOrderList(void) {
     static uint8_t romData[256];
     uint32_t *words = (uint32_t *)romData;
@@ -607,6 +628,7 @@ int main(void) {
     TestTexelsOfEachCycle();
     TestAlphaCompareModes();
     TestDepthClear();
+    TestN64Addresses();
     TestRomOrderList();
     TestTextureFromDrawnImage();
     TestShownTarget();

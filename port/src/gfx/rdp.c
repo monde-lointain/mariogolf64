@@ -169,14 +169,16 @@ const void *ResolveRcpAddress(const RcpMemory *memory, uintptr_t address) {
             (address & (((uintptr_t)1 << PC_SEGMENT_SHIFT) - 1)));
     }
 
-    // The N64's addresses, from the ROM's data: segmented, or in KSEG0 or 1
-    if (address >= 0x80000000u) {
-        resolved = address & 0x1FFFFFFF;
-    }
-    else {
-        resolved = memory->segments[(address >> 24) & 0xF] + (address & 0x00FFFFFF);
+    // The N64's addresses, from the ROM's data. The microcode takes the
+    // segment from bits 24 to 27, whatever the bits above, so that KSEG0's
+    // and KSEG1's addresses are segment 0's, and adds its base to the low 24
+    // bits. The RSP's DMA keeps 24 bits of an N64 base's sum.
+    resolved = memory->segments[(address >> 24) & 0xF];
+    if ((resolved >> 32) != 0) {
+        return (const void *)(resolved + (address & 0x00FFFFFF));
     }
 
+    resolved = (resolved + (address & 0x00FFFFFF)) & 0x00FFFFFF;
     if (resolved < PC_RDRAM_SIZE) {
         return &osPcRdram[resolved];
     }
