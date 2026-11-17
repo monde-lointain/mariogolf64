@@ -122,10 +122,12 @@ target_compile_options(mg64_headers INTERFACE
     -fno-common
     -ffp-contract=off
 )
-# KMC GCC's meanings, which MG64_KMC_SEMANTICS chooses above
+# KMC GCC's meanings, which MG64_KMC_SEMANTICS chooses above. The game's
+# accesses of memory as other types than its own are fixed (see AVOID_UB),
+# as TypeSanitizer finds none left in the playthroughs, so the port no
+# longer needs -fno-strict-aliasing, which KMC GCC's code was built with.
 if(MG64_KMC_SEMANTICS)
     target_compile_options(mg64_headers INTERFACE
-        -fno-strict-aliasing
         -fwrapv
         $<$<C_COMPILER_ID:GNU>:-fno-aggressive-loop-optimizations>
         -fno-delete-null-pointer-checks

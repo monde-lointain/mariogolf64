@@ -65,8 +65,9 @@ a pointer to a routine of another type.
 
 `linux-clang-tysan` builds with TypeSanitizer, which finds where the code
 reads or stores an object under a type that strict aliasing would let the
-optimizer assume it isn't, so that the port can drop KMC GCC's
-`-fno-strict-aliasing`. It checks the project's own code only, not SDL's,
+optimizer assume it isn't. With none left in the recorded sessions, the
+port no longer builds with KMC GCC's `-fno-strict-aliasing`, and this
+build guards that. It checks the project's own code only, not SDL's,
 and needs Clang 23 (`clang-23`) on Linux. It builds optimized, with debug
 information, as the checks make a debug build too slow to replay a
 session: the three recorded sessions take 33 minutes at `-O0` and under 4

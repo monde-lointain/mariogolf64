@@ -43,18 +43,12 @@ if(exclusive_count GREATER 1)
 endif()
 
 # TypeSanitizer is Clang's alone. It checks the accesses that strict aliasing
-# lets the optimizer assume apart, so it sees none under -fno-strict-aliasing.
+# lets the optimizer assume apart.
 if("type" IN_LIST MG64_SANITIZERS)
     if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_VERSION VERSION_LESS 23)
         message(FATAL_ERROR
             "MG64_SANITIZERS' type needs Clang 23 or later, whose runtime can "
             "forget types, not ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}"
-        )
-    endif()
-    if(MG64_KMC_SEMANTICS)
-        message(FATAL_ERROR
-            "MG64_SANITIZERS' type needs MG64_KMC_SEMANTICS=OFF, as KMC GCC's "
-            "-fno-strict-aliasing leaves it nothing to check"
         )
     endif()
     if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
