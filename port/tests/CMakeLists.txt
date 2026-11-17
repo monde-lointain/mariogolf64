@@ -85,10 +85,19 @@ mg64_add_port_test(performance_meter_test
 )
 
 # The move of the game's nested functions to file scope, whose output it
-# compiles and runs with the build's C compiler
+# compiles and runs with the build's C compiler, through the emulator that
+# runs the other tests when cross-compiling. Python is named by its path, as
+# CTest would run an executable target, even an imported one, through the
+# emulator too.
+set(emulator_arguments "")
+foreach(word IN LISTS CMAKE_CROSSCOMPILING_EMULATOR)
+    list(APPEND emulator_arguments "--emulator=${word}")
+endforeach()
 add_test(NAME nested_functions_test
-    COMMAND Python3::Interpreter -I "${CMAKE_CURRENT_SOURCE_DIR}/nested_functions_test.py"
+    COMMAND "${Python3_EXECUTABLE}" -I "${CMAKE_CURRENT_SOURCE_DIR}/nested_functions_test.py"
         --compiler "${CMAKE_C_COMPILER}"
+        "--executable-suffix=${CMAKE_EXECUTABLE_SUFFIX}"
+        ${emulator_arguments}
 )
 
 # The linker script that gathers overlays' variables, linked into a program

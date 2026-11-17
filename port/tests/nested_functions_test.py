@@ -20,6 +20,10 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "cmake"))
 from nested_functions import NestedFunctionError, hoist_nested_functions  # noqa: E402
 
 COMPILER: str | None = None
+# What runs the compiled programs, such as Wine for a cross-compiler's, and
+# the suffix that the compiler gives them
+EMULATOR: list[str] = []
+EXECUTABLE_SUFFIX = ""
 
 # A captured parameter's pointer, spelled through the type that the
 # parameter has, which an array parameter's declaration doesn't give
@@ -346,10 +350,12 @@ class TestCompiledMeaning(unittest.TestCase):
     def run_program(self, text: str) -> str:
         with tempfile.TemporaryDirectory() as directory:
             source = pathlib.Path(directory, "program.c")
-            program = pathlib.Path(directory, "program")
+            program = pathlib.Path(directory, "program" + EXECUTABLE_SUFFIX)
             source.write_text(hoist(text))
             subprocess.run([COMPILER, "-std=gnu11", "-o", str(program), str(source)], check=True)
-            return subprocess.run([str(program)], check=True, capture_output=True, text=True).stdout
+            return subprocess.run(
+                [*EMULATOR, str(program)], check=True, capture_output=True, text=True
+            ).stdout
 
     def test_writes_seen_on_both_sides(self):
         text = (
@@ -414,11 +420,15 @@ class TestCompiledMeaning(unittest.TestCase):
 
 
 def main() -> None:
-    global COMPILER
+    global COMPILER, EMULATOR, EXECUTABLE_SUFFIX
     parser = argparse.ArgumentParser()
     parser.add_argument("--compiler")
+    parser.add_argument("--emulator", action="append", default=[])
+    parser.add_argument("--executable-suffix", default="")
     arguments, rest = parser.parse_known_args()
     COMPILER = arguments.compiler
+    EMULATOR = arguments.emulator
+    EXECUTABLE_SUFFIX = arguments.executable_suffix
     TestCompiledMeaning.__unittest_skip__ = COMPILER is None
     unittest.main(argv=[sys.argv[0]] + rest)
 
