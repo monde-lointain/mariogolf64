@@ -128,6 +128,15 @@ typedef u16 ULzStreamFlags16;
 #define LZ_CONTROL_BIT_COUNT 16
 #define LZ_CONTROL_END_BIT 0x8000
 #define LZ_SPENT_CONTROL_BITS 0x80000000
+// Shifts the control bits up by count. They pass through the sign bit, as the
+// decoders test the top one by its sign, which C leaves undefined to shift
+// into or out of as an s32; shifting a u32 gives the same bits.
+#ifdef AVOID_UB
+#    define ShiftControlBits(controlBits, count) \
+        ((controlBits) = (s32)((u32)(controlBits) << (count)))
+#else
+#    define ShiftControlBits(controlBits, count) ((controlBits) <<= (count))
+#endif
 
 // A patch command holds its kind or offset in its high byte and its count less
 // one in its low byte
@@ -245,15 +254,15 @@ s32 DecodeLzChunk(LzStream *stream) {
             continue;
         }
 
-        controlBits <<= LZ_CONTROL_BIT_COUNT;
+        ShiftControlBits(controlBits, LZ_CONTROL_BIT_COUNT);
         controlBits |= LZ_CONTROL_END_BIT;
         while (TRUE) {
             while (controlBits >= 0) {
                 *output++ = *input++;
-                controlBits <<= 1;
+                ShiftControlBits(controlBits, 1);
             }
 
-            controlBits <<= 1;
+            ShiftControlBits(controlBits, 1);
             if (controlBits == 0) {
                 break;
             }
@@ -373,7 +382,7 @@ s32 DecodePatchedLzChunk(LzStream *stream) {
         }
 
         controlBits = FromBigEndian16(*input++);
-        controlBits <<= LZ_CONTROL_BIT_COUNT;
+        ShiftControlBits(controlBits, LZ_CONTROL_BIT_COUNT);
         controlBits |= LZ_CONTROL_END_BIT;
 
 DECODE:
@@ -392,10 +401,10 @@ DECODE:
                     patchCount--;
                 }
 
-                controlBits <<= 1;
+                ShiftControlBits(controlBits, 1);
             }
 
-            controlBits <<= 1;
+            ShiftControlBits(controlBits, 1);
             if (controlBits == 0) {
                 break;
             }
