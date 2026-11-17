@@ -404,6 +404,294 @@ static void TestLeavesTheOutputUntyped(void) {
     free(output);
 }
 
+// --- The patching decoder ---
+
+// The output that the patches apply to, as LoadLzData leaves the unpatched
+// data, with each word its own index above PATCHED_DATA_BASE
+#define PATCHED_DATA_BASE 0xE000
+#define PATCHED_DATA_WORD_COUNT 256
+#define WINDOW_WORD_COUNT (LZ_WINDOW_MASK + 1)
+#define HISTORY_WORD_COUNT (LZ_HISTORY_MASK + 1)
+
+// Literal patches, as a command's kind and count less one
+#define PatchLiterals(count) (LZ_PATCH_KIND_LITERALS | ((count) - 1))
+// Copies from offset words later in the output, or before it in the
+// history of the words patched over
+#define PatchCopy(offset, count) ((((offset) & 0xFF) << 8) | ((count) - 1))
+
+typedef struct PatchBuffers {
+    u8 *output;
+    u8 *window;
+    u8 *history;
+} PatchBuffers;
+
+static PatchBuffers AllocPatchBuffers(void) {
+    PatchBuffers buffers;
+    u16 data[PATCHED_DATA_WORD_COUNT];
+    s32 i;
+
+    for (i = 0; i < PATCHED_DATA_WORD_COUNT; i++) {
+        data[i] = (u16)(PATCHED_DATA_BASE + i);
+    }
+    buffers.output = PackWords(data, PATCHED_DATA_WORD_COUNT);
+    buffers.window = AllocUnwritten(WINDOW_WORD_COUNT);
+    buffers.history = AllocUnwritten(HISTORY_WORD_COUNT);
+    return buffers;
+}
+
+static void FreePatchBuffers(PatchBuffers *buffers) {
+    free(buffers->history);
+    free(buffers->window);
+    free(buffers->output);
+}
+
+static void StartPatchedStream(
+    LzStream *stream,
+    const PatchBuffers *buffers,
+    u8 *chunk,
+    s32 count,
+    u16 *nextInput
+) {
+    stream->input = (u16 *)chunk + CARRY_WORD_COUNT;
+    stream->inputEnd = stream->input + count;
+    stream->nextInput = nextInput;
+    stream->outputStart = (u16 *)buffers->output;
+    stream->window = (u16 *)buffers->window;
+    stream->history = (u16 *)buffers->history;
+    stream->flags = LZ_STREAM_FLAG_FIRST | (nextInput == NULL ? LZ_STREAM_FLAG_LAST : 0);
+}
+
+static s32 PatchWholeStream(const u16 *words, s32 count, const PatchBuffers *buffers) {
+    u8 *chunk = PackChunk(words, count);
+    LzStream stream;
+    s32 size;
+
+    StartPatchedStream(&stream, buffers, chunk, count, NULL);
+    size = DecodePatchedLzChunk(&stream);
+    free(chunk);
+    return size;
+}
+
+// Whether the output starts with the expected words, and the data after
+// them is unpatched
+static Boolean HasPatchedOutput(const u8 *output, const u16 *expected, s32 count) {
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        if (ReadWord(output, i) != expected[i]) {
+            return FALSE;
+        }
+    }
+    return ReadWord(output, count) == PATCHED_DATA_BASE + count;
+}
+
+// A literal patch writes the words after it over the data, and the size is
+// up to the last word patched
+static void TestPatchesLiterals(void) {
+    static const u16 stream[] = {
+        HEADER_WORD,
+        HEADER_WORD,
+        0x1000,
+        PatchLiterals(2),
+        0x1111,
+        0x2222,
+        END_REFERENCE,
+    };
+    static const u16 expected[] = {0x1111, 0x2222};
+    PatchBuffers buffers = AllocPatchBuffers();
+
+    EXPECT(PatchWholeStream(stream, ARRAY_COUNT(stream), &buffers) == sizeof(expected));
+    EXPECT(HasPatchedOutput(buffers.output, expected, ARRAY_COUNT(expected)));
+    FreePatchBuffers(&buffers);
+}
+
+// A copy from the word itself skips it, and one from later words moves them
+// back
+static void TestCopiesFromLaterWords(void) {
+    static const u16 stream[] = {
+        HEADER_WORD,
+        HEADER_WORD,
+        0x2000,
+        PatchCopy(0, 1),
+        PatchCopy(2, 2),
+        END_REFERENCE,
+    };
+    static const u16 expected[] = {0xE000, 0xE003, 0xE004};
+    PatchBuffers buffers = AllocPatchBuffers();
+
+    EXPECT(PatchWholeStream(stream, ARRAY_COUNT(stream), &buffers) == sizeof(expected));
+    EXPECT(HasPatchedOutput(buffers.output, expected, ARRAY_COUNT(expected)));
+    FreePatchBuffers(&buffers);
+}
+
+// A negative offset copies from the words that patches have overwritten,
+// counting back from the last
+static void TestCopiesOverwrittenWords(void) {
+    static const u16 stream[] = {
+        HEADER_WORD,
+        HEADER_WORD,
+        0x0800,
+        PatchLiterals(2),
+        0x1111,
+        0x2222,
+        PatchCopy(-2, 2),
+        END_REFERENCE,
+    };
+    static const u16 expected[] = {0x1111, 0x2222, 0xE000, 0xE001};
+    PatchBuffers buffers = AllocPatchBuffers();
+
+    EXPECT(PatchWholeStream(stream, ARRAY_COUNT(stream), &buffers) == sizeof(expected));
+    EXPECT(HasPatchedOutput(buffers.output, expected, ARRAY_COUNT(expected)));
+    FreePatchBuffers(&buffers);
+}
+
+// Only 0x80 in the high byte makes literals: 0x7F copies from 127 words on,
+// and 0x81 from 127 words back in the history, where the history's
+// unwritten words still are
+static void TestTellsLiteralsFromFarCopies(void) {
+    static const u16 stream[] = {
+        HEADER_WORD,
+        HEADER_WORD,
+        0x2000,
+        PatchCopy(127, 1),
+        PatchCopy(-127, 1),
+        END_REFERENCE,
+    };
+    static const u16 expected[] = {0xE000 + 127, UNWRITTEN_WORD};
+    PatchBuffers buffers = AllocPatchBuffers();
+
+    EXPECT(PatchWholeStream(stream, ARRAY_COUNT(stream), &buffers) == sizeof(expected));
+    EXPECT(HasPatchedOutput(buffers.output, expected, ARRAY_COUNT(expected)));
+    FreePatchBuffers(&buffers);
+}
+
+// References repeat decoded words, here a skip and then a literal patch's
+// command, as commands in turn
+static void TestRepeatsDecodedCommands(void) {
+    static const u16 stream[] = {
+        HEADER_WORD,
+        HEADER_WORD,
+        0x4800,
+        PatchCopy(0, 1),
+        Reference(1, 3),
+        PatchLiterals(1),
+        0x5555,
+        END_REFERENCE,
+    };
+    static const u16 expected[] = {0xE000, 0xE001, 0xE002, 0xE003, 0x5555};
+    PatchBuffers buffers = AllocPatchBuffers();
+
+    EXPECT(PatchWholeStream(stream, ARRAY_COUNT(stream), &buffers) == sizeof(expected));
+    EXPECT(HasPatchedOutput(buffers.output, expected, ARRAY_COUNT(expected)));
+    FreePatchBuffers(&buffers);
+}
+
+// A chunk ends inside a literal patch, which the next goes on with; there a
+// copy from the history and a reference into the window find what the
+// first chunk left in them. The first chunk's last 16 words, its second
+// control word and 15 of that word's items, are carried and decoded with
+// the next. The first two literals are a skip and a history copy, as data,
+// which the reference then repeats as commands from 31 words back.
+static void TestCarriesPatchesIntoTheNextChunk(void) {
+    u16 firstChunk[2 + 1 + 16 + 1 + 15];
+    static const u16 secondChunk[] = {PatchCopy(-11, 1), 0xC000, Reference(31, 2), END_REFERENCE};
+    u16 expected[33];
+    u8 *firstBuffer;
+    u8 *nextBuffer = AllocUnwritten(CARRY_WORD_COUNT + ARRAY_COUNT(secondChunk));
+    u16 *nextInput = (u16 *)nextBuffer + CARRY_WORD_COUNT;
+    u8 *packed = PackWords(secondChunk, ARRAY_COUNT(secondChunk));
+    PatchBuffers buffers = AllocPatchBuffers();
+    LzStream stream;
+    s32 i;
+
+    memcpy(nextInput, packed, sizeof(secondChunk));
+    free(packed);
+    firstChunk[0] = HEADER_WORD;
+    firstChunk[1] = HEADER_WORD;
+    firstChunk[2] = 0x0000;
+    firstChunk[3] = PatchLiterals(20);
+    for (i = 0; i < 20; i++) {
+        expected[i] = (u16)(0x1001 + i);
+    }
+    expected[0] = PatchCopy(0, 1);
+    expected[1] = PatchCopy(-11, 1);
+    memcpy(&firstChunk[4], &expected[0], 15 * sizeof(u16));
+    firstChunk[19] = 0x0000;
+    memcpy(&firstChunk[20], &expected[15], 5 * sizeof(u16));
+    for (i = 25; i < 35; i++) {
+        firstChunk[i] = PatchCopy(0, 1);
+    }
+
+    firstBuffer = PackChunk(firstChunk, ARRAY_COUNT(firstChunk));
+    StartPatchedStream(&stream, &buffers, firstBuffer, ARRAY_COUNT(firstChunk), nextInput);
+    EXPECT(DecodePatchedLzChunk(&stream) == -1);
+    EXPECT(stream.input == nextInput - 16);
+    EXPECT(stream.output == (u16 *)buffers.output + 15);
+    EXPECT(stream.patchCount == 5);
+    EXPECT(stream.windowIndex == 16);
+    EXPECT(stream.historyIndex == 15);
+    EXPECT(ReadWord((const u8 *)(nextInput - 16), 0) == 0x0000);
+
+    // The skips keep words 20 to 29, which go into the history after the
+    // 20 that the literals overwrote; 11 back from there is word 19's
+    // old value. The reference's skip keeps word 31, and its history copy
+    // then finds word 21's.
+    for (i = 20; i < 30; i++) {
+        expected[i] = (u16)(PATCHED_DATA_BASE + i);
+    }
+    expected[30] = 0xE013;
+    expected[31] = 0xE01F;
+    expected[32] = 0xE015;
+    stream.inputEnd = nextInput + ARRAY_COUNT(secondChunk);
+    stream.nextInput = (u16 *)firstBuffer + CARRY_WORD_COUNT;
+    stream.flags = LZ_STREAM_FLAG_LAST;
+    EXPECT(DecodePatchedLzChunk(&stream) == sizeof(expected));
+    EXPECT(HasPatchedOutput(buffers.output, expected, ARRAY_COUNT(expected)));
+    FreePatchBuffers(&buffers);
+    free(firstBuffer);
+    free(nextBuffer);
+}
+
+// As DecodeLzChunk, a chunk carries its words over once fewer than 17 are
+// left after a control word's items: with 17 left it decodes a literal
+// patch's command and 15 words, and with 16 it carries them all
+static void TestCarriesPatchesOnceARunMightNotFit(void) {
+    u16 stream[2 + 1 + 16];
+    u8 *chunk;
+    u8 *nextBuffer = AllocUnwritten(CARRY_WORD_COUNT + 1);
+    u16 *nextInput = (u16 *)nextBuffer + CARRY_WORD_COUNT;
+    PatchBuffers buffers = AllocPatchBuffers();
+    LzStream decoded;
+    s32 count;
+    s32 i;
+
+    stream[0] = HEADER_WORD;
+    stream[1] = HEADER_WORD;
+    stream[2] = 0x0000;
+    stream[3] = PatchLiterals(15);
+    for (i = 0; i < 15; i++) {
+        stream[4 + i] = (u16)(0x5000 + i);
+    }
+
+    for (count = ARRAY_COUNT(stream); count >= ARRAY_COUNT(stream) - 1; count--) {
+        chunk = PackChunk(stream, count);
+        StartPatchedStream(&decoded, &buffers, chunk, count, nextInput);
+        EXPECT(DecodePatchedLzChunk(&decoded) == -1);
+        if (count == ARRAY_COUNT(stream)) {
+            EXPECT(decoded.output == (u16 *)buffers.output + 15);
+            EXPECT(decoded.input == nextInput);
+        }
+        else {
+            EXPECT(decoded.output == (u16 *)buffers.output);
+            EXPECT(decoded.input == nextInput - 16);
+        }
+        free(chunk);
+    }
+
+    FreePatchBuffers(&buffers);
+    free(nextBuffer);
+}
+
 int main(void) {
     TestCopiesLiterals();
     TestCopiesOverlappingReferences();
@@ -414,5 +702,12 @@ int main(void) {
     TestCarriesInputIntoTheNextChunk();
     TestCarriesOnceARunMightNotFit();
     TestLeavesTheOutputUntyped();
+    TestPatchesLiterals();
+    TestCopiesFromLaterWords();
+    TestCopiesOverwrittenWords();
+    TestTellsLiteralsFromFarCopies();
+    TestRepeatsDecodedCommands();
+    TestCarriesPatchesIntoTheNextChunk();
+    TestCarriesPatchesOnceARunMightNotFit();
     return ReportTestResults("lz_decoder_test");
 }
