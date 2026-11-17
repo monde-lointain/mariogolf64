@@ -23,7 +23,7 @@ Each one has one goal, and takes 5 to 15 minutes unless it says otherwise.
 
 | #  | Goal                                                                                                      |
 |----|-----------------------------------------------------------------------------------------------------------|
-| 01 | Opening and menus: watch the opening and the title's demo through, then visit every main-menu entry and back out of each without playing |
+| 01 | Opening and menus: watch the opening, the attract hole, through to the title, then visit every main-menu entry and back out of each without playing |
 | 02 | First holes: Stroke on Toad Highlands with Plum, 3 holes, using club changes, the landing view (R), the overview (Z+R) and the shot replay (B) |
 | 03 | Shot controls: spin (Z + stick), power shots, moving the target, long putts and chips, over several holes |
 | 04 | Pause and quit: pause mid-hole, try each pause-menu entry, then quit the round |
