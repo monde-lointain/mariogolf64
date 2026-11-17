@@ -219,6 +219,31 @@ static void TestControllers(void) {
     EXPECT(f_MotorOn[0]);
 }
 
+// No controller holds a Transfer Pak, so the game finds no Game Boy
+// cartridge, and every access to one fails the same way
+static void TestTransferPaksAreAbsent(void) {
+    NUContPakFile file;
+    u8 status = 0;
+    u8 bytes[4] = {0x11, 0x22, 0x33, 0x44};
+
+    nuContGBPakMgrInit();
+    file.error = 0;
+    EXPECT(nuContGBPakOpen(&file, 0) == PFS_ERR_NOPACK && file.error == PFS_ERR_NOPACK);
+    file.error = 0;
+    EXPECT(nuContGBPakGetStatus(&file, &status) == PFS_ERR_NOPACK && file.error == PFS_ERR_NOPACK);
+    file.error = 0;
+    EXPECT(nuContGBPakPower(&file, OS_GBPAK_POWER_ON) == PFS_ERR_NOPACK);
+    EXPECT(file.error == PFS_ERR_NOPACK);
+    file.error = 0;
+    EXPECT(nuContGBPakCheckConnector(&file, &status) == PFS_ERR_NOPACK);
+    EXPECT(file.error == PFS_ERR_NOPACK);
+    EXPECT(nuContGBPakFread(&file, 0, bytes, sizeof(bytes)) == PFS_ERR_NOPACK);
+    EXPECT(nuContGBPakFwrite(&file, 0, bytes, sizeof(bytes)) == PFS_ERR_NOPACK);
+    // A failed read leaves the game's buffer as it was
+    EXPECT(bytes[0] == 0x11 && bytes[3] == 0x44);
+    nuContGBPakMgrRemove();
+}
+
 // Starts a task that draws into the frame buffer next in the ring
 static void StartFrame(void) {
     f_DrawnFramebuffer = nuGfxCfb_ptr;
@@ -259,6 +284,7 @@ void mainproc(void *argument) {
     TestSaveMemory();
     TestRomReads();
     TestControllers();
+    TestTransferPaksAreAbsent();
     SDL_SignalSemaphore(f_TestDone);
 }
 
