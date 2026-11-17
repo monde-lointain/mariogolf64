@@ -18,6 +18,8 @@
 #define TMEM_HALF_MASK (TMEM_HALF_SIZE - 1)
 // The 32-bit halves of the 64-bit words of odd rows trade places
 #define ODD_ROW_SWAP 4
+// The bytes in each half of a word, which the odd rows' swap exchanges
+#define HALF_WORD_SIZE 4u
 // LoadBlock's dxt counts rows in 1.11 fixed point
 #define DXT_FRACTION_BITS 11
 // A palette entry fills a 64-bit word of the palette half, four copies wide
@@ -37,6 +39,9 @@ static uint32_t BytesForTexels(int size, uint32_t count) {
     return ((count * TexelSizeInHalfBytes(size)) + 1) / 2;
 }
 
+// Copies bytes into TMEM half a word at a time. Tiles address TMEM in whole
+// words, and the swap and the wrap at TMEM's end move whole halves, so each
+// half's bytes stay side by side.
 static void StoreLoadedBytes(
     Tmem *tmem,
     uint32_t destination,
@@ -47,10 +52,11 @@ static void StoreLoadedBytes(
 ) {
     uint32_t i;
 
-    for (i = 0; i < byteCount; i++) {
+    SDL_assert(destination % TMEM_WORD_SIZE == 0);
+    for (i = 0; i < byteCount; i += HALF_WORD_SIZE) {
         uint32_t address = ((destination + i) ^ swap) & TMEM_ADDRESS_MASK;
 
-        tmem->bytes[address] = source[i];
+        SDL_memcpy(&tmem->bytes[address], &source[i], SDL_min(HALF_WORD_SIZE, byteCount - i));
         tmem->isHostOrderWord[address / TMEM_WORD_SIZE] = isHostOrder;
     }
 }
