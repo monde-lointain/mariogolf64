@@ -42,8 +42,14 @@
 // this many texels a pixel
 #define COPY_MODE_TEXELS_PER_CYCLE 4
 #define COPY_MODE_TEXEL_STEP (COPY_MODE_TEXELS_PER_CYCLE * TEXEL_STEP_ONE)
-// A texel position, as texture coordinates take it in 10.5 fixed point
-#define TexelCoordinate(texel) ((texel) << 5)
+// A texel position, as texture coordinates take it in 10.5 fixed point. A
+// texel left of or above a texture's origin is negative, which C leaves
+// undefined to shift; multiplying gives the same bits in two's complement.
+#ifdef AVOID_UB
+#    define TexelCoordinate(texel) ((texel) * (1 << 5))
+#else
+#    define TexelCoordinate(texel) ((texel) << 5)
+#endif
 // The words gSPModifyVertex takes for a point's screen position, x and y in
 // quarter pixels, and for its texture coordinates, s and t in 10.5
 #define ScreenPointWord(x, y) (((x) << 16) + (y))
