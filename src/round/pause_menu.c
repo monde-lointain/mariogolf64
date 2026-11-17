@@ -589,6 +589,39 @@ typedef s32 PauseLie;
 // The tee holds the ball up off the ground
 #define PAUSE_TEE_UP_HEIGHT 307.2f
 
+#ifdef AVOID_UB
+// PAUSE_LAYOUT_NONE has no row in the layouts' tables, which the update
+// reads on the frame that first opens the menu, before the draw loads it.
+// The N64 reads the bytes before the tables: a count of 0, the padding
+// after the last layout, and an option index from f_PauseValueTexts'
+// pointers, which lands past f_PauseOptions in the overlay's static data.
+// These are those words read as options, for the selections 0 and -1 that
+// a count of 0 leaves. The first's action is the free look's; neither the
+// second's action nor either kind is any of the pause menu's.
+static PauseOption f_NoLayoutOptions[] = {
+    {(PauseMessage16)0xE700, PAUSE_ACTION_FREE_LOOK, (PauseOptionKind)0x8000},
+    {(PauseMessage16)0x801F, (PauseAction16)0x55FC, (PauseOptionKind)(-0x7FE0AA04)},
+};
+
+// The number of options in the pause layout
+static s32 CountPauseLayoutOptions(void) {
+    if (f_PauseLayout == PAUSE_LAYOUT_NONE) {
+        return 0;
+    }
+
+    return f_PauseLayoutOptionCounts[f_PauseLayout];
+}
+
+// The pause layout's selected option
+static PauseOption *FindSelectedPauseOption(void) {
+    if (f_PauseLayout == PAUSE_LAYOUT_NONE) {
+        return &f_NoLayoutOptions[(f_PauseSelection < 0) ? 1 : 0];
+    }
+
+    return &f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection]];
+}
+#endif
+
 // Takes the player's input on the pause menu. It returns the chosen option's
 // action, or PAUSE_ACTION_NONE. The weather, wind and lie options are changed
 // with the control pad's left and right.
@@ -600,7 +633,11 @@ PauseAction UpdatePauseMenu(ControllerState *controller) {
     Surface surface;
 
     if (controller->repeatedButtons & A_BUTTON) {
+#ifdef AVOID_UB
+        action = FindSelectedPauseOption()->action;
+#else
         action = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection]].action;
+#endif
         switch (action) {
             case PAUSE_ACTION_QUIT_GAME:
                 PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
@@ -680,6 +717,17 @@ PauseAction UpdatePauseMenu(ControllerState *controller) {
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
     }
 
+#ifdef AVOID_UB
+    if (f_PauseSelection > CountPauseLayoutOptions() - 1) {
+        f_PauseSelection = 0;
+    }
+
+    if (f_PauseSelection < 0) {
+        f_PauseSelection = CountPauseLayoutOptions() - 1;
+    }
+
+    kind = FindSelectedPauseOption()->kind;
+#else
     if (f_PauseSelection > f_PauseLayoutOptionCounts[f_PauseLayout] - 1) {
         f_PauseSelection = 0;
     }
@@ -689,6 +737,7 @@ PauseAction UpdatePauseMenu(ControllerState *controller) {
     }
 
     kind = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection]].kind;
+#endif
     f_PauseMenuDrawnMarker = 0;
     g_RoundHud.areLieArrowsShown = FALSE;
     g_RoundHud.areWindSpeedArrowsShown = FALSE;
