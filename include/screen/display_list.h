@@ -83,9 +83,16 @@ static inline void SetLightColor(Light *light, s32 red, s32 green, s32 blue) {
 #define TRANSPARENT_ALPHA 0
 #define OPAQUE_ALPHA 0xFF
 
-// A 32-bit RGBA color, as gSPModifyVertex takes a vertex color
-#define RgbaColor(red, green, blue, alpha) \
-    (((red) << 24) | ((green) << 16) | ((blue) << 8) | (alpha))
+// A 32-bit RGBA color, as gSPModifyVertex takes a vertex color. A red of
+// 0x80 or more reaches the sign bit, which C leaves undefined to shift as an
+// int; shifting a u32 gives the same bits.
+#ifdef AVOID_UB
+#    define RgbaColor(red, green, blue, alpha) \
+        (((u32)(red) << 24) | ((green) << 16) | ((blue) << 8) | (alpha))
+#else
+#    define RgbaColor(red, green, blue, alpha) \
+        (((red) << 24) | ((green) << 16) | ((blue) << 8) | (alpha))
+#endif
 
 // Appends a pipe sync followed by a single-command GBI state setter.
 // displayList must be a side-effect-free Gfx* lvalue with room for both

@@ -51,9 +51,16 @@
 #    define TexelCoordinate(texel) ((texel) << 5)
 #endif
 // The words gSPModifyVertex takes for a point's screen position, x and y in
-// quarter pixels, and for its texture coordinates, s and t in 10.5
-#define ScreenPointWord(x, y) (((x) << 16) + (y))
-#define TextureCoordinateWord(s, t) (((s) << 16) + (t))
+// quarter pixels, and for its texture coordinates, s and t in 10.5. x or s
+// may be negative, or reach the sign bit, which C leaves undefined to shift
+// as an int; shifting a u32 gives the same bits.
+#ifdef AVOID_UB
+#    define ScreenPointWord(x, y) (((u32)(x) << 16) + (y))
+#    define TextureCoordinateWord(s, t) (((u32)(s) << 16) + (t))
+#else
+#    define ScreenPointWord(x, y) (((x) << 16) + (y))
+#    define TextureCoordinateWord(s, t) (((s) << 16) + (t))
+#endif
 
 // Where the 5-bit channels sit in an RGBA16 pixel, and the shift that widens
 // one to 8 bits
