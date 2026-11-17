@@ -7,8 +7,16 @@
 #
 # A linker script gathers the .data and .bss input sections of each overlay's
 # object files, which CMake writes under the directory of the overlay's
-# target, mg64_<overlay>.dir, into output sections of their own, bounded by
-# symbols. A generated C file lists those bounds for osPcResetSegment.
+# target, mg64_<overlay>.dir, into two output sections, .ovldata and .ovlbss,
+# with symbols at each overlay's bounds. A generated C file lists those bounds
+# for osPcResetSegment.
+#
+# One section of each kind, rather than one for each overlay, keeps the
+# script the same for ELF and Windows' PE: PE's linker drops an empty section,
+# with any symbols in it, and an overlay may have no variables of a kind. PE
+# also needs each section to start at a page, where the loader maps it; its
+# own sections do so through BLOCK(__section_alignment__), which ELF's linker
+# lacks.
 #
 #   mg64_write_overlay_sections(OVERLAYS <name>...
 #                               LINKER_SCRIPT <variable> SOURCE <variable>)
@@ -21,6 +29,11 @@ function(mg64_write_overlay_sections)
         message(FATAL_ERROR "mg64_write_overlay_sections needs OVERLAYS, LINKER_SCRIPT and SOURCE")
     endif()
 
+    if(WIN32)
+        set(alignment " BLOCK(__section_alignment__)")
+    else()
+        set(alignment "")
+    endif()
     set(data_statements "")
     set(bss_statements "")
     set(declarations "")
@@ -28,17 +41,13 @@ function(mg64_write_overlay_sections)
     foreach(overlay IN LISTS arg_OVERLAYS)
         set(prefix "mg64_${overlay}")
         string(APPEND data_statements
-            "  .${prefix}_data : {\n"
             "    ${prefix}_data_start = .;\n"
             "    *${prefix}.dir/*(.data .data.*)\n"
-            "    ${prefix}_data_end = .;\n"
-            "  }\n")
+            "    ${prefix}_data_end = .;\n")
         string(APPEND bss_statements
-            "  .${prefix}_bss (NOLOAD) : {\n"
             "    ${prefix}_bss_start = .;\n"
             "    *${prefix}.dir/*(.bss .bss.* COMMON)\n"
-            "    ${prefix}_bss_end = .;\n"
-            "  }\n")
+            "    ${prefix}_bss_end = .;\n")
         string(APPEND declarations
             "extern unsigned char ${prefix}_data_start[], ${prefix}_data_end[];\n"
             "extern unsigned char ${prefix}_bss_start[], ${prefix}_bss_end[];\n")
@@ -52,12 +61,16 @@ function(mg64_write_overlay_sections)
 /* Written by port/cmake/OverlaySections.cmake; don't edit */
 SECTIONS
 {
-@data_statements@}
+  .ovldata@alignment@ : {
+@data_statements@  }
+}
 INSERT AFTER .data;
 
 SECTIONS
 {
-@bss_statements@}
+  .ovlbss@alignment@ : {
+@bss_statements@  }
+}
 INSERT AFTER .bss;
 ]=] @ONLY)
 

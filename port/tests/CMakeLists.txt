@@ -91,6 +91,34 @@ add_test(NAME nested_functions_test
         --compiler "${CMAKE_C_COMPILER}"
 )
 
+# The linker script that gathers overlays' variables, linked into a program
+# of its own with two overlays, in place of the doubles' empty table
+include(OverlaySections)
+set(sections_overlays "")
+foreach(overlay IN ITEMS sections_a sections_b)
+    string(REPLACE "sections_" "" letter "${overlay}")
+    add_library(mg64_${overlay} OBJECT overlay_sections/overlay_${letter}.c)
+    target_link_libraries(mg64_${overlay} PRIVATE mg64_port_warnings)
+    list(APPEND sections_overlays mg64_${overlay})
+endforeach()
+mg64_write_overlay_sections(
+    OVERLAYS sections_a sections_b
+    LINKER_SCRIPT sections_linker_script
+    SOURCE sections_source
+)
+add_executable(overlay_sections_test overlay_sections_test.c "${sections_source}")
+target_include_directories(overlay_sections_test PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/overlay_sections"
+    "${PROJECT_SOURCE_DIR}/port/src/include"
+)
+target_link_libraries(overlay_sections_test PRIVATE
+    mg64_test_support ${sections_overlays} mg64_port_warnings
+)
+target_link_options(overlay_sections_test PRIVATE "LINKER:-T,${sections_linker_script}")
+set_property(TARGET overlay_sections_test APPEND PROPERTY LINK_DEPENDS "${sections_linker_script}")
+add_test(NAME overlay_sections_test COMMAND overlay_sections_test)
+set_tests_properties(overlay_sections_test PROPERTIES TIMEOUT 60)
+
 # Built through a Shift-JIS copy, as the game's sources are
 include(ShiftJisSources)
 mg64_encode_shift_jis(shift_jis_test_copy "${CMAKE_CURRENT_SOURCE_DIR}/shift_jis_test.c")
