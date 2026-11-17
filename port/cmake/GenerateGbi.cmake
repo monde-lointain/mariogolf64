@@ -7,7 +7,8 @@
 # Mtx_t's elements are long, which is 64 bits wide on LP64 hosts; the RSP
 # reads them as 32-bit words. The colour and depth packing macros give
 # unsigned values, as the game shifts them into a fill color's high half,
-# which a signed int's sign bit makes undefined.
+# which a signed int's sign bit makes undefined. So does the blender's first
+# cycle, whose top input shifts into the sign bit.
 #
 # Run as a script: cmake -DINPUT=<libultra gbi.h> -DOUTPUT=<gbi.h> -P GenerateGbi.cmake
 
@@ -43,6 +44,10 @@ replace_required("(\\(\\(a\\) & 0x1\\)\\))" "\\1)")
 replace_required(
     "(#define[ \t]+GPACK_ZDZ\\(z, dz\\)[ \t]+)(\\(\\(z\\) << 2 \\| \\(dz\\)\\))"
     "\\1((unsigned int)\\2)"
+)
+replace_required(
+    "(#define[ \t]+GBL_c1\\(m1a, m1b, m2a, m2b\\)[ \t]+\\\\[ \t\r\n]+)(\\(m1a\\) << 30)"
+    "\\1(unsigned int)\\2"
 )
 replace_required("#define[ \t]+_GBI_H_" "#define _GBI_H_\n\n#include <stdint.h>")
 
