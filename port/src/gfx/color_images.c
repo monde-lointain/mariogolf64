@@ -246,13 +246,19 @@ static ColorImage *FreeColorImage(void) {
     return oldest;
 }
 
+// The ranges can lie in different objects, such as RDRAM and a heap block
+// that the TLB maps, which C leaves the order of undefined: their
+// addresses' order isn't
 static bool DoRangesOverlap(
     const uint8_t *start,
     uintptr_t size,
     const uint8_t *otherStart,
     uintptr_t otherSize
 ) {
-    return start < otherStart + otherSize && otherStart < start + size;
+    uintptr_t first = (uintptr_t)start;
+    uintptr_t otherFirst = (uintptr_t)otherStart;
+
+    return first < otherFirst + otherSize && otherFirst < first + size;
 }
 
 // Drops the images that a new one's memory overlaps: the game has given
