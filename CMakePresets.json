@@ -43,6 +43,16 @@
             }
         },
         {
+            "name": "linux-clang-sanitize",
+            "displayName": "Linux, a Clang debug build with AddressSanitizer and UBSan, without KMC GCC's meanings",
+            "inherits": "linux-clang",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "MG64_SANITIZERS": "address;undefined",
+                "MG64_KMC_SEMANTICS": "OFF"
+            }
+        },
+        {
             "name": "windows-mingw",
             "displayName": "64-bit Windows, cross-compiled with MinGW-w64",
             "inherits": "pc",
@@ -61,6 +71,10 @@
         {
             "name": "linux-sanitize",
             "configurePreset": "linux-sanitize"
+        },
+        {
+            "name": "linux-clang-sanitize",
+            "configurePreset": "linux-clang-sanitize"
         },
         {
             "name": "windows-mingw",
@@ -98,6 +112,15 @@
             }
         },
         {
+            "name": "linux-clang-sanitize",
+            "inherits": "pc",
+            "configurePreset": "linux-clang-sanitize",
+            "environment": {
+                "ASAN_OPTIONS": "detect_stack_use_after_return=1",
+                "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+            }
+        },
+        {
             "name": "windows-mingw",
             "inherits": "pc",
             "configurePreset": "windows-mingw",
@@ -129,6 +152,14 @@
                 {"type": "configure", "name": "linux-sanitize"},
                 {"type": "build", "name": "linux-sanitize"},
                 {"type": "test", "name": "linux-sanitize"}
+            ]
+        },
+        {
+            "name": "linux-clang-sanitize",
+            "steps": [
+                {"type": "configure", "name": "linux-clang-sanitize"},
+                {"type": "build", "name": "linux-clang-sanitize"},
+                {"type": "test", "name": "linux-clang-sanitize"}
             ]
         },
         {

@@ -112,13 +112,21 @@ target_compile_features(mg64_headers INTERFACE c_std_11)
 # covers its overflows, and AVOID_UB the game's known reads past arrays.
 target_compile_options(mg64_headers INTERFACE
     -funsigned-char
-    -fno-strict-aliasing
-    -fwrapv
-    $<$<C_COMPILER_ID:GNU>:-fno-aggressive-loop-optimizations>
-    -fno-delete-null-pointer-checks
     -fno-common
     -ffp-contract=off
 )
+# The switches that give what C leaves undefined KMC GCC's meaning. A
+# sanitizer build turns them off, so that its checks see the undefined
+# behavior they would hide, and the port can drop each once none is left.
+option(MG64_KMC_SEMANTICS "Give the game's undefined behavior KMC GCC's meaning" ON)
+if(MG64_KMC_SEMANTICS)
+    target_compile_options(mg64_headers INTERFACE
+        -fno-strict-aliasing
+        -fwrapv
+        $<$<C_COMPILER_ID:GNU>:-fno-aggressive-loop-optimizations>
+        -fno-delete-null-pointer-checks
+    )
+endif()
 
 # The headers that the port's own libraries share among themselves
 add_library(mg64_port_internal INTERFACE)

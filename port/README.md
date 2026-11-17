@@ -33,12 +33,13 @@ PNGs that `make extract` cuts from the ROM (see the top-level README).
 
 `cmake --list-presets` shows the others:
 
-| Preset           | What it builds                                               |
-|------------------|--------------------------------------------------------------|
-| `linux`          | Linux, with the default C compiler                           |
-| `linux-clang`    | Linux, with Clang                                            |
-| `linux-sanitize` | Linux, a debug build with AddressSanitizer and UBSan         |
-| `windows-mingw`  | 64-bit Windows, cross-compiled with MinGW-w64                |
+| Preset                 | What it builds                                          |
+|------------------------|---------------------------------------------------------|
+| `linux`                | Linux, with the default C compiler                      |
+| `linux-clang`          | Linux, with Clang                                       |
+| `linux-sanitize`       | Linux, a debug build with AddressSanitizer and UBSan    |
+| `linux-clang-sanitize` | The same with Clang, without KMC GCC's meanings (below) |
+| `windows-mingw`        | 64-bit Windows, cross-compiled with MinGW-w64           |
 
 Each preset builds into `build/pc/<preset>`. `cmake --workflow --preset
 <preset>` configures, builds and runs the tests in one step, as CI does;
@@ -50,6 +51,16 @@ sanitizers named, as `-fsanitize` names them: `address;undefined` is what
 configure step rejects the combinations that can't work, such as address
 and thread together. The sanitizers' options come from the environment
 when the program runs (`ASAN_OPTIONS` and the like).
+
+The game was written for KMC GCC, which gave some of what C leaves
+undefined a meaning that modern compilers needn't, such as a signed
+overflow's wrapping. The port keeps those meanings with switches such
+as `-fwrapv`, which also hide those cases from UBSan.
+`-DMG64_KMC_SEMANTICS=OFF`, which `linux-clang-sanitize` sets, leaves the
+switches out, so that its checks find what the port must fix before it
+can drop them, and Clang's UBSan adds checks that GCC's lacks: of a
+float converted to an integer outside its range, and of a call through
+a pointer to a routine of another type.
 
 CI (`.github/workflows/port.yml`) checks the Python tools and the
 nested-function hoister on every push. The builds need the assets cut from

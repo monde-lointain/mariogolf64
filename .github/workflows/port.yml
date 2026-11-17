@@ -74,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        preset: [linux, linux-clang, linux-sanitize, windows-mingw]
+        preset: [linux, linux-clang, linux-sanitize, linux-clang-sanitize, windows-mingw]
     steps:
       - uses: actions/checkout@v4
 
