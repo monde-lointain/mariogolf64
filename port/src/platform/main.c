@@ -5,12 +5,14 @@
  * that drives the game, and shows the frame buffer that the retrace chose.
  *
  *     mariogolf64 [--scale N] [--fullscreen] [--save PATH] [--gpu-debug]
- *                 [--headless] [--frames N] [--screenshot PATH]
+ *                 [--headless] [--frames N] [--game-frames N]
+ *                 [--screenshot PATH]
  *                 [--input-script PATH] [--record PATH] [ROM]
  *
  * --headless draws without a window, and --frames ends the program after N
  * retraces, writing the screen it last showed to the --screenshot file, for
- * tests and machines without a display. Headless, each retrace waits for
+ * tests and machines without a display. --game-frames ends it once the game
+ * has run N frames, as a script counts them. Headless, each retrace waits for
  * the game to finish with the last. --input-script plays the first
  * controller from a script, as input_script.h describes, and --record
  * writes what the game reads from it as such a script, to a new file.
@@ -57,6 +59,7 @@ typedef struct Options {
     const char *recordingPath;
     int renderScale; // 0 to choose from the display
     long frameLimit; // Retraces to run, or 0 for no limit
+    long gameFrameLimit; // The game's frames to run, or 0 for no limit
     bool isFullscreen;
     bool isGpuDebug;
     bool isHeadless;
@@ -91,7 +94,8 @@ void EnterDevelopmentDebugger(s32 argument) {
 static void PrintUsage(const char *program) {
     SDL_Log(
         "Usage: %s [--scale N] [--fullscreen] [--save PATH] [--gpu-debug] [--headless] "
-        "[--frames N] [--screenshot PATH] [--input-script PATH] [--record PATH] [ROM]",
+        "[--frames N] [--game-frames N] [--screenshot PATH] [--input-script PATH] "
+        "[--record PATH] [ROM]",
         program
     );
 }
@@ -117,6 +121,13 @@ static bool ParseOptions(int argc, char **argv, Options *options) {
             options->frameLimit = SDL_strtol(argv[++i], NULL, 10);
             if (options->frameLimit < 1) {
                 SDL_Log("The frame count must be at least 1");
+                return false;
+            }
+        }
+        else if (SDL_strcmp(argument, "--game-frames") == 0 && i + 1 < argc) {
+            options->gameFrameLimit = SDL_strtol(argv[++i], NULL, 10);
+            if (options->gameFrameLimit < 1) {
+                SDL_Log("The game frame count must be at least 1");
                 return false;
             }
         }
@@ -321,7 +332,7 @@ static void HandleEvent(const SDL_Event *event) {
 // a stall the clock starts afresh rather than rush the game to catch up. In
 // lockstep, each retrace also waits for the game to finish with it, so that
 // the game sees every one, wherever the host is slow.
-static void RunRetraces(long frameLimit, bool isLockstep) {
+static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
     const Uint64 period = SDL_NS_PER_SECOND / RETRACES_PER_SECOND;
     Uint64 next = SDL_GetTicksNS();
     long frameCount = 0;
@@ -332,7 +343,9 @@ static void RunRetraces(long frameLimit, bool isLockstep) {
         SDL_Log("The game didn't finish booting in time");
     }
 
-    while (!f_IsQuitting && (frameLimit == 0 || frameCount < frameLimit)) {
+    while (!f_IsQuitting &&
+        (frameLimit == 0 || frameCount < frameLimit) &&
+        (gameFrameLimit == 0 || CountGameFrames() < gameFrameLimit)) {
         SDL_Event event;
         Uint64 now;
 
@@ -538,7 +551,7 @@ int main(int argc, char *argv[]) {
     PcInitOs();
     PcInsertCartridge(rom, romSize);
     PcBootNuSystem();
-    RunRetraces(options.frameLimit, options.isHeadless);
+    RunRetraces(options.frameLimit, options.gameFrameLimit, options.isHeadless);
     if (!ShutDown(options.screenshotPath)) {
         FreeInputScript(script);
         SDL_free(rom);

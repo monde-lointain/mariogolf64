@@ -229,9 +229,9 @@ static u16 ReadFirstPortButtons(void) {
     return pad.button;
 }
 
-// The game's nth read of the first port gets the script's pad at frame n.
-// Reads of the other ports count no frames, and a script played afresh
-// counts from frame 0 again.
+// The game's nth read of the first port gets the script's pad at frame n,
+// and counts n + 1 frames. Reads of the other ports count no frames, and a
+// script played afresh counts from frame 0 again.
 static void TestScriptedFrames(void) {
     char error[64];
     InputScript *script = ParseInputScript("2 A\n3\n", error, sizeof(error));
@@ -246,8 +246,10 @@ static void TestScriptedFrames(void) {
     EXPECT(ReadFirstPortButtons() == 0);
     EXPECT(ReadFirstPortButtons() == A_BUTTON);
     EXPECT(ReadFirstPortButtons() == 0);
+    EXPECT(CountGameFrames() == 4);
 
     PlayInputScript(script);
+    EXPECT(CountGameFrames() == 0);
     EXPECT(ReadFirstPortButtons() == 0);
     EXPECT(ReadFirstPortButtons() == 0);
     EXPECT(ReadFirstPortButtons() == A_BUTTON);

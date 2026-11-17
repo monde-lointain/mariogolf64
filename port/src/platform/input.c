@@ -367,6 +367,15 @@ u8 PcGetConnectedControllers(void) {
 
 // The first port's read also counts the game's frame, plays the script and
 // records
+long CountGameFrames(void) {
+    long count;
+
+    SDL_LockMutex(f_Lock);
+    count = f_FirstPortReadCount;
+    SDL_UnlockMutex(f_Lock);
+    return count;
+}
+
 void RecordFirstPort(InputRecorder *recorder) {
     SDL_LockMutex(f_Lock);
     f_Recorder = recorder;

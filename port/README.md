@@ -62,8 +62,10 @@ from (its CRC-32), and a replay must start from the same save:
 
     cp my.sra session-start.sra
     mariogolf64 --save my.sra --record session.txt baserom.us.z64
-    mariogolf64 --headless --frames 60000 --save session-start.sra \
+    mariogolf64 --headless --game-frames N --save session-start.sra \
         --input-script session.txt baserom.us.z64
+
+where N is the frame that the recording ends at, as its last line says.
 
 `--record` won't overwrite a file, so a recording can't be lost to a
 reused name. Each line is written as soon as it is made, so a session cut

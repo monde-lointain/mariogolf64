@@ -64,6 +64,10 @@ void UpdateControllers(void);
 // script's first line. The script must outlive its use.
 void PlayInputScript(const InputScript *script);
 
+// The game's frames counted since the script was last set: its reads of the
+// first port
+long CountGameFrames(void);
+
 // Records what the game reads from the first port from now on, by the same
 // frames, after any script has played; NULL stops. The recorder must
 // outlive its use, and a failed write is logged once.
