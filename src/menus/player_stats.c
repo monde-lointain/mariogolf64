@@ -3249,6 +3249,16 @@ void DrawBestShotsCursor(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+#ifdef AVOID_UB
+// The grid's last cells lie past g_MenuCharacterPalettes, so on the N64 they
+// read their palettes into the first of g_ReplayFacePalettes, which follows it
+#    define BestShotFacePalette(cell) \
+        (((cell) < CHARACTER_COUNT) ? g_MenuCharacterPalettes[cell] : \
+                                      g_ReplayFacePalettes[(cell) - CHARACTER_COUNT])
+#else
+#    define BestShotFacePalette(cell) g_MenuCharacterPalettes[cell]
+#endif
+
 // Reads every character's face, then the palette of each best shot's character
 // in the grid, clamped to the known ones
 //
@@ -3318,13 +3328,13 @@ void LoadBestShotFaces(void) {
                 }
 
                 f_BestShotFacePalettes[row][column] =
-                    g_MenuCharacterPalettes[(row * STATS_GRID_COLUMN_COUNT) + column];
+                    BestShotFacePalette((row * STATS_GRID_COLUMN_COUNT) + column);
             }
             else {
                 characterIndex = 0;
                 paletteIndex = UP_C_PALETTE;
                 f_BestShotFacePalettes[row][column] =
-                    g_MenuCharacterPalettes[(row * STATS_GRID_COLUMN_COUNT) + column];
+                    BestShotFacePalette((row * STATS_GRID_COLUMN_COUNT) + column);
             }
 
             OpenAssetFile(g_CharacterPaletteFiles[characterIndex][paletteIndex], &file);

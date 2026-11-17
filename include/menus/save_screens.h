@@ -12,6 +12,9 @@
 
 // Character palette files that the menu screens read, one per slot
 extern PaletteColor g_MenuCharacterPalettes[CHARACTER_COUNT][LARGE_PALETTE_COLOR_COUNT];
+// The palettes of the faces on the replay slots, which follow
+// g_MenuCharacterPalettes in memory
+extern PaletteColor g_ReplayFacePalettes[][LARGE_PALETTE_COLOR_COUNT];
 
 // The buffers of LoadSaveGameBuffer, and what it reads into them
 enum SaveGameBuffer {
