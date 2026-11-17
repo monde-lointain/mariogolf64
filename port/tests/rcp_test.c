@@ -278,6 +278,18 @@ static void TestNearPlaneClipping(void) {
     EXPECT(f_Gpu.vertexCount == 0);
 }
 
+// Behind the eye the fog goes to the end that z points to, here none, so
+// the near plane's corners have none either
+static void TestFogBehindEye(void) {
+    uint32_t i;
+
+    RunNearTriangle(G_SHADE | G_SHADING_SMOOTH | G_FOG, 0, 1, 2);
+    EXPECT(f_Gpu.vertexCount == 6);
+    for (i = 0; i < f_Gpu.vertexCount; i++) {
+        EXPECT((f_Gpu.vertices[i].color >> 24) == 0);
+    }
+}
+
 // x reaching past the screen's edge by half of w is clipped only once the
 // clip ratio comes in from two to one
 static void TestClipRatio(void) {
@@ -773,6 +785,7 @@ int main(void) {
     TestFillRectangle();
     TestTriangleTransform();
     TestNearPlaneClipping();
+    TestFogBehindEye();
     TestClipRatio();
     TestTexelsOfEachCycle();
     TestAlphaCompareModes();

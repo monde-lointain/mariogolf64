@@ -37,6 +37,8 @@
 
 // Without moving them the RSP clips x and y at twice w
 #define CLIP_RATIO_DEFAULT 2.0f
+// The integer half of the RSP's reciprocal of w at its largest
+#define BEHIND_EYE_RECIPROCAL 32767.0f
 // A triangle clipped by each plane gains at most one corner
 #define CLIP_POLYGON_MAX (3 + CLIP_PLANE_COUNT)
 
@@ -485,6 +487,16 @@ static void ProjectVertex(RspVertex *vertex) {
     vertex->clipFlags = ClipFlags(clip);
 }
 
+// The fog factor from z over w. At or behind the eye the RSP's reciprocal
+// of w saturates at its largest positive value, so the fog goes to
+// whichever end z's sign points it to.
+static uint8_t FindFog(const float clip[4]) {
+    float w = clip[3];
+    float reciprocal = w > 0.0f ? 1.0f / w : BEHIND_EYE_RECIPROCAL;
+
+    return ClampToByte((clip[2] * reciprocal * f_Rsp.fogMultiplier) + f_Rsp.fogOffset);
+}
+
 static void LoadVertex(const uint8_t *bytes, bool isRomOrder, RspVertex *vertex) {
     const Matrix *combined = &f_Rsp.combined;
     float position[3];
@@ -515,9 +527,7 @@ static void LoadVertex(const uint8_t *bytes, bool isRomOrder, RspVertex *vertex)
     }
 
     if (f_Rsp.draw.geometryMode & G_FOG) {
-        float depth = clip[3] != 0.0f ? clip[2] / clip[3] : 0.0f;
-
-        vertex->color[3] = ClampToByte((depth * f_Rsp.fogMultiplier) + f_Rsp.fogOffset);
+        vertex->color[3] = FindFog(clip);
     }
 }
 
