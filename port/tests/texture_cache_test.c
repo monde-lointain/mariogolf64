@@ -2,6 +2,8 @@
  * Tests of the texture atlas's cache: finding, placing and evicting.
  */
 
+#include <stdbool.h>
+
 #include "test_support.h"
 #include "texture_cache.h"
 
@@ -54,9 +56,79 @@ static void TestEviction(void) {
     EXPECT(FindTexture(1, ATLAS_SIDE / 2, ATLAS_SIDE / 2, &place) != TEXTURE_FOUND);
 }
 
+#define LAYER_SHARE (TEXTURE_CACHE_ENTRY_MAX / ATLAS_LAYER_COUNT)
+
+// A layer is full once it holds its share of the textures, however small
+// they are. With every layer full, emptying the least recently used one
+// loses only its textures.
+static void TestLayerHoldsItsShare(void) {
+    AtlasPlace place;
+    uint64_t key;
+    bool isEachPlaced = true;
+
+    InitTextureCache();
+    BeginTextureCacheFrame();
+    for (key = 1; key <= LAYER_SHARE; key++) {
+        isEachPlaced =
+            isEachPlaced && FindTexture(key, 1, 1, &place) == TEXTURE_PLACED && place.layer == 0;
+    }
+
+    EXPECT(isEachPlaced);
+    EXPECT(FindTexture(key, 1, 1, &place) == TEXTURE_PLACED && place.layer == 1);
+    for (key++; key <= TEXTURE_CACHE_ENTRY_MAX; key++) {
+        isEachPlaced = isEachPlaced && FindTexture(key, 1, 1, &place) == TEXTURE_PLACED;
+    }
+
+    EXPECT(isEachPlaced);
+    EXPECT(FindTexture(key, 1, 1, &place) == TEXTURE_NEEDS_FLUSH);
+
+    BeginTextureCacheFrame();
+    EXPECT(FindTexture(key, 1, 1, &place) == TEXTURE_PLACED && place.layer == 0);
+    EXPECT(FindTexture(1, 1, 1, &place) == TEXTURE_PLACED);
+    EXPECT(FindTexture(LAYER_SHARE + 1, 1, 1, &place) == TEXTURE_FOUND && place.layer == 1);
+    EXPECT(FindTexture(TEXTURE_CACHE_ENTRY_MAX, 1, 1, &place) == TEXTURE_FOUND);
+}
+
+// New textures every frame, as when the game draws into a texture each
+// frame, cycle through the layers without filling the table: each frame's
+// are placed and then found, however many came before
+static void TestTexturesCycleThroughLayers(void) {
+    enum {
+        FRAME_COUNT = 200,
+        FRAME_TEXTURE_COUNT = 1000
+    };
+
+    AtlasPlace place;
+    uint64_t key = 1;
+    bool isEachPlaced = true;
+    bool isEachFound = true;
+    int frame;
+    int i;
+
+    InitTextureCache();
+    for (frame = 0; frame < FRAME_COUNT; frame++) {
+        uint64_t frameFirstKey = key;
+
+        BeginTextureCacheFrame();
+        for (i = 0; i < FRAME_TEXTURE_COUNT; i++, key++) {
+            isEachPlaced = isEachPlaced && FindTexture(key, 8, 1, &place) == TEXTURE_PLACED;
+        }
+
+        for (i = 0; i < FRAME_TEXTURE_COUNT; i++) {
+            isEachFound = isEachFound &&
+                FindTexture(frameFirstKey + (uint64_t)i, 8, 1, &place) == TEXTURE_FOUND;
+        }
+    }
+
+    EXPECT(isEachPlaced);
+    EXPECT(isEachFound);
+}
+
 int main(void) {
     TestFindAndPlace();
     TestZeroKey();
     TestEviction();
+    TestLayerHoldsItsShare();
+    TestTexturesCycleThroughLayers();
     return ReportTestResults("texture_cache_test");
 }

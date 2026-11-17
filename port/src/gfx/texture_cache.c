@@ -7,18 +7,18 @@
 #include <SDL3/SDL_assert.h>
 #include <SDL3/SDL_stdinc.h>
 
-// Enough entries that the table stays sparse with every layer full of the
-// smallest textures that the game uses
-#define TABLE_SIZE (1 << 16)
+// Twice the textures that the cache holds, so that the table is at most
+// half full and its probes stay short
+#define TABLE_SIZE (TEXTURE_CACHE_ENTRY_MAX * 2)
 #define TABLE_MASK (TABLE_SIZE - 1)
+#define LAYER_ENTRY_MAX (TEXTURE_CACHE_ENTRY_MAX / ATLAS_LAYER_COUNT)
 #define SHELF_COUNT_MAX 256
 // A shelf takes textures down to half its height before opening another
 #define SHELF_FIT_DIVISOR 2
 
 typedef struct TableEntry {
-    uint64_t key; // 0 for an entry never used
+    uint64_t key; // 0 for an empty entry
     AtlasPlace place;
-    uint32_t generation; // Of its layer when it was placed
 } TableEntry;
 
 typedef struct Shelf {
@@ -31,11 +31,13 @@ typedef struct AtlasLayer {
     Shelf shelves[SHELF_COUNT_MAX];
     int shelfCount;
     uint16_t usedHeight;
-    uint32_t generation; // Counts the times that the layer was emptied
+    uint32_t entryCount; // The textures placed in it
     uint32_t lastUsedFrame;
 } AtlasLayer;
 
 static TableEntry f_Table[TABLE_SIZE];
+// The entries that a rebuild of the table keeps
+static TableEntry f_KeptEntries[TEXTURE_CACHE_ENTRY_MAX];
 static AtlasLayer f_Layers[ATLAS_LAYER_COUNT];
 static uint32_t f_FrameNumber;
 
@@ -49,40 +51,39 @@ void BeginTextureCacheFrame(void) {
     f_FrameNumber++;
 }
 
-static bool IsCurrent(const TableEntry *entry) {
-    return entry->key != 0 && entry->generation == f_Layers[entry->place.layer].generation;
+// The key as the table stores it: zero marks an empty entry, so a texture
+// whose key is zero moves
+static uint64_t StoreKey(uint64_t key) {
+    return key != 0 ? key : 1;
 }
 
-static TableEntry *ProbeTable(uint64_t key) {
-    uint32_t index = (uint32_t)key & TABLE_MASK;
-    TableEntry *reusable = NULL;
-    uint32_t step;
+// The entry that holds the stored key, or the empty one where it would go.
+// The table is never more than half full, so there is always one.
+static TableEntry *ProbeTable(uint64_t storedKey) {
+    uint32_t index = (uint32_t)storedKey & TABLE_MASK;
 
-    // A zero key marks an empty entry, so a texture whose key is zero moves
-    key = key != 0 ? key : 1;
-    for (step = 0; step < TABLE_SIZE; step++) {
-        TableEntry *entry = &f_Table[(index + step) & TABLE_MASK];
-
-        if (entry->key == key) {
-            return entry;
-        }
-
-        if (entry->key == 0) {
-            return reusable != NULL ? reusable : entry;
-        }
-
-        if (reusable == NULL && !IsCurrent(entry)) {
-            reusable = entry;
-        }
+    while (f_Table[index].key != storedKey && f_Table[index].key != 0) {
+        index = (index + 1) & TABLE_MASK;
     }
 
-    SDL_assert_always(reusable != NULL);
-    return reusable;
+    return &f_Table[index];
+}
+
+static void InsertEntry(uint64_t storedKey, const AtlasPlace *place) {
+    TableEntry *entry = ProbeTable(storedKey);
+
+    SDL_assert(entry->key == 0);
+    entry->key = storedKey;
+    entry->place = *place;
 }
 
 static bool PlaceInLayer(AtlasLayer *layer, uint16_t width, uint16_t height, AtlasPlace *place) {
     Shelf *shelf;
     int i;
+
+    if (layer->entryCount == LAYER_ENTRY_MAX) {
+        return false;
+    }
 
     for (i = 0; i < layer->shelfCount; i++) {
         shelf = &layer->shelves[i];
@@ -110,10 +111,27 @@ static bool PlaceInLayer(AtlasLayer *layer, uint16_t width, uint16_t height, Atl
     return true;
 }
 
+// Empties the layer, and rebuilds the table without its textures. Taking
+// their entries out one by one would leave gaps in other keys' probes.
 static void EmptyLayer(AtlasLayer *layer) {
+    uint16_t layerIndex = (uint16_t)(layer - f_Layers);
+    uint32_t keptCount = 0;
+    uint32_t i;
+
+    for (i = 0; i < TABLE_SIZE; i++) {
+        if (f_Table[i].key != 0 && f_Table[i].place.layer != layerIndex) {
+            f_KeptEntries[keptCount++] = f_Table[i];
+        }
+    }
+
+    SDL_zeroa(f_Table);
+    for (i = 0; i < keptCount; i++) {
+        InsertEntry(f_KeptEntries[i].key, &f_KeptEntries[i].place);
+    }
+
     layer->shelfCount = 0;
     layer->usedHeight = 0;
-    layer->generation++;
+    layer->entryCount = 0;
 }
 
 static AtlasLayer *LeastRecentlyUsedLayer(void) {
@@ -151,10 +169,11 @@ static bool PlaceTexture(uint16_t width, uint16_t height, AtlasPlace *place) {
 }
 
 TextureLookup FindTexture(uint64_t key, uint16_t width, uint16_t height, AtlasPlace *place) {
-    TableEntry *entry = ProbeTable(key);
+    uint64_t storedKey = StoreKey(key);
+    const TableEntry *entry = ProbeTable(storedKey);
 
     SDL_assert(width != 0 && height != 0 && width <= ATLAS_SIDE && height <= ATLAS_SIDE);
-    if (entry->key == (key != 0 ? key : 1) && IsCurrent(entry)) {
+    if (entry->key == storedKey) {
         *place = entry->place;
         f_Layers[place->layer].lastUsedFrame = f_FrameNumber;
         return TEXTURE_FOUND;
@@ -164,11 +183,9 @@ TextureLookup FindTexture(uint64_t key, uint16_t width, uint16_t height, AtlasPl
         return TEXTURE_NEEDS_FLUSH;
     }
 
-    // Emptying a layer can have made the entry probed above stale, which is
-    // as good a place for the key as any
-    entry->key = key != 0 ? key : 1;
-    entry->place = *place;
-    entry->generation = f_Layers[place->layer].generation;
+    // Emptying a layer rebuilds the table, so the key is probed for again
+    InsertEntry(storedKey, place);
+    f_Layers[place->layer].entryCount++;
     f_Layers[place->layer].lastUsedFrame = f_FrameNumber;
     return TEXTURE_PLACED;
 }

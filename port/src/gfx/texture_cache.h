@@ -17,6 +17,9 @@
 
 #define ATLAS_SIDE 2048
 #define ATLAS_LAYER_COUNT 4
+// The most textures that the cache holds at once. Each layer holds at most
+// its share, and is full when it does, however much room it has left.
+#define TEXTURE_CACHE_ENTRY_MAX 32768
 
 typedef struct AtlasPlace {
     uint16_t x;
