@@ -801,10 +801,24 @@ static uint16_t PipelineKey(bool usesDepth, MaterialKind kind) {
     return key;
 }
 
-// Makes the color image's target the current pass's, and returns whether
-// there is one to draw into
-static bool UseColorImageTarget(void) {
+// The rows of the color image that a primitive reaching down to bottom, in
+// pixels, can draw in. The RDP writes only the pixels that primitives
+// cover, and the game draws into small textures with the scissor left at
+// the screen's size, so an image is as tall as its drawing reaches.
+static uint16_t FindDrawnHeight(float bottom) {
     uint16_t height = SDL_max(f_Rdp.scissor.bottom, 1);
+
+    if (bottom < (float)height) {
+        height = (uint16_t)SDL_max(SDL_ceilf(bottom), 1.0f);
+    }
+
+    return height;
+}
+
+// Makes the color image's target the current pass's, and returns whether
+// there is one to draw into, for a primitive reaching down to bottom
+static bool UseColorImageTarget(float bottom) {
+    uint16_t height = FindDrawnHeight(bottom);
 
     if (f_Rdp.colorImageAddress == NULL) {
         return false;
@@ -845,9 +859,11 @@ static void UseDepthTarget(void) {
     UseFrameDepth(&f_Frame, depth, clearValue);
 }
 
-// Readies the frame for a primitive of vertexCount vertices and gives
-// where they go, or NULL when there is nowhere to draw
+// Readies the frame for a primitive of vertexCount vertices, reaching down
+// to bottom in pixels, and gives where they go, or NULL when there is
+// nowhere to draw
 static GfxVertex *BeginPrimitive(
+    float bottom,
     uint32_t vertexCount,
     int tileIndex,
     MaterialKind kind,
@@ -860,7 +876,7 @@ static GfxVertex *BeginPrimitive(
         FlushRdpFrame();
     }
 
-    if (!UseColorImageTarget()) {
+    if (!UseColorImageTarget(bottom)) {
         return NULL;
     }
 
@@ -891,6 +907,26 @@ static uint32_t PackShade(const uint8_t color[4]) {
         ((uint32_t)color[3] << 24);
 }
 
+// The lowest row, in pixels, that a triangle's corners reach. One with a
+// corner at or behind the eye has no bound on the screen, and takes the
+// whole scissor.
+static float FindTriangleBottom(const RspVertex *const corners[3]) {
+    float bottom = 0.0f;
+    int i;
+
+    for (i = 0; i < 3; i++) {
+        float w = corners[i]->screen[3];
+
+        if (!(w > 0.0f)) {
+            return (float)UINT16_MAX;
+        }
+
+        bottom = SDL_max(bottom, corners[i]->screen[1] / w);
+    }
+
+    return bottom;
+}
+
 void DrawRdpTriangle(
     const RspVertex *first,
     const RspVertex *second,
@@ -907,8 +943,14 @@ void DrawRdpTriangle(
     float yScale;
     int i;
 
-    vertices =
-        BeginPrimitive(3, state->textureTile, MATERIAL_KIND_COMBINED, usesDepth, &materialIndex);
+    vertices = BeginPrimitive(
+        FindTriangleBottom(corners),
+        3,
+        state->textureTile,
+        MATERIAL_KIND_COMBINED,
+        usesDepth,
+        &materialIndex
+    );
     if (vertices == NULL) {
         return;
     }
@@ -958,7 +1000,8 @@ static void StoreRectangle(
     float depth;
     int i;
 
-    vertices = BeginPrimitive(6, tileIndex, kind, usesPrimitiveDepth, &materialIndex);
+    vertices =
+        BeginPrimitive(rectangle->bottom, 6, tileIndex, kind, usesPrimitiveDepth, &materialIndex);
     if (vertices == NULL) {
         return;
     }

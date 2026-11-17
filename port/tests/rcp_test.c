@@ -51,6 +51,7 @@ static struct {
 static uint16_t f_ColorImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static uint16_t f_DepthImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static uint16_t f_OtherImage[IMAGE_WIDTH * IMAGE_HEIGHT];
+static uint16_t f_SmallImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static Gfx f_DisplayList[256];
 
 GfxTarget *BackendCreateTarget(uint32_t width, uint32_t height, bool isDepth) {
@@ -506,6 +507,81 @@ static void TestCpuWritesOutliveDrawing(void) {
     EXPECT(f_Gpu.writeCount == writeCount + 1);
 }
 
+#define UNTOUCHED_PIXEL 0x1234
+
+// The height of the target that holds f_SmallImage
+static uint16_t FindSmallImageHeight(void) {
+    uint16_t width = 0;
+    uint16_t height = 0;
+
+    LockShownTarget((const uint8_t *)f_SmallImage, &width, &height);
+    UnlockShownTarget();
+    return height;
+}
+
+// Whether a sync of the whole of f_SmallImage changed exactly its first rows
+static bool SyncsOnlyFirstRows(int rowCount) {
+    int i;
+
+    SyncColorImagesToMemory((const uint8_t *)f_SmallImage, sizeof(f_SmallImage));
+    for (i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT; i++) {
+        bool isTouched = f_SmallImage[i] != UNTOUCHED_PIXEL;
+
+        if (isTouched != (i < rowCount * IMAGE_WIDTH)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// An image is as tall as its drawing reaches, with the scissor left lower
+// as the game leaves it to draw into its small textures: syncing it writes
+// no memory beyond. A primitive reaching lower grows it.
+static void TestImageSizedByDrawing(void) {
+    static const Vtx upperHalf[3] = {
+        {{{-1, 0, 0}, 0, {0, 0}, {0xFF, 0, 0, 0xFF}}},
+        {{{1, 0, 0}, 0, {0, 0}, {0xFF, 0, 0, 0xFF}}},
+        {{{-1, 1, 0}, 0, {0, 0}, {0xFF, 0, 0, 0xFF}}},
+    };
+    static Mtx doubled;
+    int32_t *words = (int32_t *)doubled.m;
+    Gfx *gfx = f_DisplayList;
+    int i;
+
+    for (i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT; i++) {
+        f_SmallImage[i] = UNTOUCHED_PIXEL;
+    }
+
+    // Two on the diagonal, in Mtx's fixed point
+    SDL_zero(doubled);
+    words[0] = 0x00020000;
+    words[2] = 0x00000002;
+    words[5] = 0x00020000;
+    words[7] = 0x00000002;
+
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_SmallImage);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetFillColor(gfx++, 0);
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, 3);
+    RunList(gfx);
+    EXPECT(FindSmallImageHeight() == 4);
+    EXPECT(SyncsOnlyFirstRows(4));
+
+    // The viewport puts clip space's y of 0 at row 16. The projection
+    // doubles every coordinate, w included, which leaves the triangle where
+    // it was on the screen.
+    gfx = BeginTriangles(f_DisplayList, G_SHADE);
+    gSPMatrix(gfx++, &doubled, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_SmallImage);
+    gSPVertex(gfx++, upperHalf, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+    EXPECT(FindSmallImageHeight() == IMAGE_HEIGHT / 2);
+    EXPECT(SyncsOnlyFirstRows(IMAGE_HEIGHT / 2));
+}
+
 // Shutting down releases every target, and drawing after it makes new ones
 static void TestShutdownReleasesTargets(void) {
     Gfx *gfx;
@@ -535,6 +611,7 @@ int main(void) {
     TestTextureFromDrawnImage();
     TestShownTarget();
     TestCpuWritesOutliveDrawing();
+    TestImageSizedByDrawing();
     TestShutdownReleasesTargets();
     return ReportTestResults("rcp_test");
 }
