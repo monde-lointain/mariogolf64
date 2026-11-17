@@ -6,6 +6,7 @@
 
 #include "course/hole_builder.h"
 
+#include <string.h>
 #include <ultra64.h>
 
 #include "course/billboard.h"
@@ -802,7 +803,9 @@ void DrawBandHeights(s16 *heights, s32 band) {
     f32 cachedReciprocal;
     s32 row;
     s32 column;
+#ifndef AVOID_UB
     f64 fill;
+#endif
 
     // DrawTriangleHeights is a nested function, a GNU C extension.
     void DrawTriangleHeights(void) {
@@ -967,6 +970,13 @@ void DrawBandHeights(s16 *heights, s32 band) {
 
     cachedSpan = -1;
     if (band < GROUND_TILE_ROW_COUNT) {
+#ifdef AVOID_UB
+        // The original stores the shorts as pairs and copies them as doubles,
+        // which strict aliasing lets the compiler assume are other objects
+        for (column = 0; column < HEIGHT_BAND_ROW_COUNT * MAP_COLUMN_COUNT; column++) {
+            heights[column] = NO_HEIGHT;
+        }
+#else
         ((u32 *)heights)[0] = NO_HEIGHT_PAIR;
         ((u32 *)heights)[1] = NO_HEIGHT_PAIR;
         fill = *(f64 *)heights;
@@ -974,6 +984,7 @@ void DrawBandHeights(s16 *heights, s32 band) {
             column++) {
             ((f64 *)heights)[column] = fill;
         }
+#endif
 
         for (row = band * GROUND_TILE_POINT_SPAN; row < (band + 1) * GROUND_TILE_POINT_SPAN;
             row++) {
@@ -4347,9 +4358,11 @@ void ToggleGroundTileBorders(void) {
     s32 texelRow;
     u16 *texel;
     u16 *tileTexel;
+#ifndef AVOID_UB
     f64 *source;
     f64 *sourceEnd;
     f64 *destination;
+#endif
 
     if (g_WorkArea.hole.tiles[0]
             .texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0) {
@@ -4433,6 +4446,15 @@ void ToggleGroundTileBorders(void) {
 
             texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0xFFFF;
 
+#ifdef AVOID_UB
+            // The original copies the texels as doubles, which strict aliasing
+            // lets the compiler assume are other objects
+            memcpy(
+                g_WorkArea.hole.tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn].texels,
+                texels,
+                sizeof(texels)
+            );
+#else
             // The source is set before the destination and its end kept in a
             // variable, to match: the destination set first gives 4 words
             // differing (2 in shape), and the end worked out in the loop's test
@@ -4446,6 +4468,7 @@ void ToggleGroundTileBorders(void) {
                 *destination++ = *source++;
                 *destination++ = *source++;
             }
+#endif
 
             g_WorkArea.hole.tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn]
                 .extraPassCount = 0;
@@ -4502,12 +4525,18 @@ void SetTileTextureCoordinates(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
 // Copies count vertices; copying them as f64s is there to match: copying the
 // structs gives 177 words differing in BuildGroundTileDisplayList, 93 in shape
 static inline void CopyVertices(Vtx *destination, Vtx *source, s32 count) {
+#ifdef AVOID_UB
+    // The doubles would be read and stored where strict aliasing lets the
+    // compiler assume the vertices aren't
+    memcpy(destination, source, count * sizeof(Vtx));
+#else
     s32 vertexIndex;
 
     for (vertexIndex = 0; vertexIndex < count; vertexIndex++) {
         ((f64 *)&destination[vertexIndex])[0] = ((f64 *)&source[vertexIndex])[0];
         ((f64 *)&destination[vertexIndex])[1] = ((f64 *)&source[vertexIndex])[1];
     }
+#endif
 }
 
 // The address of a vertex through a vertex segment, whose base the drawing
