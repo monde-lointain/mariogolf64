@@ -47,7 +47,6 @@ typedef struct Voice {
     VoiceGains gains; // Where the last block left them
 } Voice;
 
-static int f_SampleRate = 32000;
 static int f_VoiceCount;
 static Voice f_Voices[SYNTH_MAX_VOICES];
 // Equal-power curves: cosine falling and sine rising across the levels
@@ -65,7 +64,6 @@ void InitSynth(int sampleRate, int voiceCount) {
 
     SDL_assert(sampleRate > 0);
     SDL_assert(voiceCount >= 0 && voiceCount <= SYNTH_MAX_VOICES);
-    f_SampleRate = sampleRate;
     f_VoiceCount = voiceCount;
     SDL_zeroa(f_Voices);
     for (level = 0; level < LEVEL_COUNT; level++) {
