@@ -39,7 +39,7 @@ PNGs that `make extract` cuts from the ROM (see the top-level README).
 | `linux-clang`          | Linux, with Clang                                       |
 | `linux-sanitize`       | Linux, a debug build with AddressSanitizer and UBSan    |
 | `linux-clang-sanitize` | The same with Clang, without KMC GCC's meanings (below) |
-| `linux-clang-tysan`    | A Clang 23 debug build with TypeSanitizer, likewise     |
+| `linux-clang-tysan`    | An optimized Clang 23 build with TypeSanitizer, too     |
 | `windows-mingw`        | 64-bit Windows, cross-compiled with MinGW-w64           |
 
 Each preset builds into `build/pc/<preset>`. `cmake --workflow --preset
@@ -67,7 +67,10 @@ a pointer to a routine of another type.
 reads or stores an object under a type that strict aliasing would let the
 optimizer assume it isn't, so that the port can drop KMC GCC's
 `-fno-strict-aliasing`. It checks the project's own code only, not SDL's,
-and needs Clang 23 (`clang-23`) on Linux.
+and needs Clang 23 (`clang-23`) on Linux. It builds optimized, with debug
+information, as the checks make a debug build too slow to replay a
+session: the three recorded sessions take 33 minutes at `-O0` and under 4
+at `-O2`, and report the same places.
 
 CI (`.github/workflows/port.yml`) checks the Python tools and the
 nested-function hoister on every push. The builds need the assets cut from

@@ -54,11 +54,11 @@
         },
         {
             "name": "linux-clang-tysan",
-            "displayName": "Linux, a Clang debug build with TypeSanitizer, without KMC GCC's meanings",
+            "displayName": "Linux, an optimized Clang build with TypeSanitizer, without KMC GCC's meanings",
             "inherits": "linux-clang",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "clang-23",
-                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
                 "MG64_SANITIZERS": "type",
                 "MG64_KMC_SEMANTICS": "OFF"
             }
