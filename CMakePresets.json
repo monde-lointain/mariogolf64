@@ -91,7 +91,10 @@
         {
             "name": "linux-sanitize",
             "inherits": "pc",
-            "configurePreset": "linux-sanitize"
+            "configurePreset": "linux-sanitize",
+            "environment": {
+                "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+            }
         },
         {
             "name": "windows-mingw",
