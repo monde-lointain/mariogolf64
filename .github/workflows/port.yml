@@ -86,7 +86,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends \
-            glslang-tools spirv-cross ninja-build clang
+            glslang-tools spirv-cross ninja-build clang libusb-1.0-0-dev libudev-dev
           if [ "${{ matrix.preset }}" = windows-mingw ]; then
             sudo apt-get install --yes --no-install-recommends mingw-w64 wine64
           fi
