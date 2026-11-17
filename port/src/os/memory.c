@@ -228,6 +228,12 @@ static void ClearSectionBytes(void *to, size_t size) {
 }
 #endif
 
+// A section's bounds are the linker's, outside any one of C's objects, which
+// C leaves the difference of undefined: their addresses' difference isn't
+static size_t MeasureSection(const unsigned char *start, const unsigned char *end) {
+    return (uintptr_t)end - (uintptr_t)start;
+}
+
 void PcInitSegments(void) {
     size_t snapshotSize = 0;
     u8 *cursor;
@@ -235,7 +241,8 @@ void PcInitSegments(void) {
 
     f_OverlaySections = GetOverlaySections(&f_OverlayCount);
     for (i = 0; i < f_OverlayCount; i++) {
-        snapshotSize += f_OverlaySections[i].dataEnd - f_OverlaySections[i].dataStart;
+        snapshotSize +=
+            MeasureSection(f_OverlaySections[i].dataStart, f_OverlaySections[i].dataEnd);
     }
 
     f_OverlaySnapshots = SDL_malloc(snapshotSize + 1);
@@ -245,7 +252,7 @@ void PcInitSegments(void) {
 
     cursor = f_OverlaySnapshots;
     for (i = 0; i < f_OverlayCount; i++) {
-        size_t size = f_OverlaySections[i].dataEnd - f_OverlaySections[i].dataStart;
+        size_t size = MeasureSection(f_OverlaySections[i].dataStart, f_OverlaySections[i].dataEnd);
 
         CopySectionBytes(cursor, f_OverlaySections[i].dataStart, size);
         cursor += size;
@@ -258,11 +265,14 @@ void osPcResetSegment(u32 segmentNumber) {
 
     for (i = 0; i < f_OverlayCount; i++) {
         const OverlaySections *sections = &f_OverlaySections[i];
-        size_t size = sections->dataEnd - sections->dataStart;
+        size_t size = MeasureSection(sections->dataStart, sections->dataEnd);
 
         if (sections->segmentNumber == segmentNumber) {
             CopySectionBytes(sections->dataStart, snapshot, size);
-            ClearSectionBytes(sections->bssStart, sections->bssEnd - sections->bssStart);
+            ClearSectionBytes(
+                sections->bssStart,
+                MeasureSection(sections->bssStart, sections->bssEnd)
+            );
             return;
         }
 
