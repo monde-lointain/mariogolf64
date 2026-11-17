@@ -2040,7 +2040,12 @@ void UpdateMenus(void) {
                 else {
                     for (index = 0; index != COURSE_COUNT; index++) {
                         OpenEncodedAsset(g_CourseIconAssets[index], &asset);
+#ifdef AVOID_UB
+                        // The same buffer, without indexing a pair past its two
+                        ReadEncodedAsset(g_MenuIconImages[index], &asset);
+#else
                         ReadEncodedAsset(MENU_ICON_IMAGE_PAIRS[0][index], &asset);
+#endif
                     }
                 }
 
