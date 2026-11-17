@@ -598,6 +598,15 @@ void ApplyBetPreset(BetPreset requestedPreset) {
 
         for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
             memory->betStakeLevels[index] = f_BetPresetStakeLevels[preset][index];
+#ifdef AVOID_UB
+            // A slot with no bet read the byte before f_BetStakeAmounts on the
+            // N64: the last of f_BetPresetStakeLevels, NO_BET, which as a rate
+            // is UNSET_BET_RATE
+            if (memory->betStakeLevels[index] == NO_BET) {
+                BetStakeSlotRate(index) = UNSET_BET_RATE;
+                continue;
+            }
+#endif
             BetStakeSlotRate(index) = f_BetStakeAmounts[memory->betStakeLevels[index]];
         }
     }
