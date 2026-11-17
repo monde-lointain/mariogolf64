@@ -56,6 +56,7 @@ segment main 0x80025C00
     src/characters/character_sound.c
     src/math/matrix_conversion.c
     src/round/tournament.c
+    src/course/lz_decoder.c
     src/course/hole_loader.c
     src/math/math_util.c
     src/screen/screen_layers.c
