@@ -61,6 +61,11 @@ mg64_add_port_test(character_tables_test
 )
 
 # The game's encoded assets, decoded from an archive on a fake cartridge
+mg64_add_port_test(view_projection_test
+    SOURCES view_projection_test.c "${PROJECT_SOURCE_DIR}/src/camera/view_projection.c"
+    LIBRARIES mg64_port_internal m
+)
+
 mg64_add_port_test(gbi_test
     SOURCES gbi_test.c
     LIBRARIES mg64_port_internal

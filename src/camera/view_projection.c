@@ -380,7 +380,13 @@ void ConvertMatrixToFixed(Mat4 matrix, Mtx *fixedMatrix) {
             first = matrix[row][pairIndex * 2] * 65536.0f;
             second = matrix[row][(pairIndex * 2) + 1] * 65536.0f;
             *integerPart++ = (first & 0xFFFF0000) | ((u32)second >> 16);
+#ifdef AVOID_UB
+            // A fraction of a half or more, a whole part or a negative value
+            // shifts past or into the sign bit, which C leaves undefined
+            *fractionPart++ = ((u32)first << 16) | (second & 0xFFFF);
+#else
             *fractionPart++ = (first << 16) | (second & 0xFFFF);
+#endif
         }
     }
 }
