@@ -239,10 +239,18 @@ static void TestHaltStopsThreads(void *argument) {
     }
 }
 
-static void RunBootThread(void (*test)(void *)) {
+static void StartBootThread(void (*test)(void *)) {
     ResetTrace();
     PcStartBootThread(&f_Threads[0], test, NULL, LOW_PRIORITY);
     SDL_WaitSemaphore(f_TestDone);
+}
+
+// Runs the test until its threads have ended. They signal that they're
+// done before they return, so the next test mustn't create them again
+// until the CPU is idle.
+static void RunBootThread(void (*test)(void *)) {
+    StartBootThread(test);
+    EXPECT(PcWaitForIdleCpu(1000));
 }
 
 int main(int argc, char **argv) {
@@ -276,6 +284,7 @@ int main(int argc, char **argv) {
     }
 
     EXPECT_STRING(f_Trace, "sIS");
+    EXPECT(PcWaitForIdleCpu(1000));
 
     RunBootThread(TestDestroyWaitingThread);
     EXPECT(f_TraceLength == 41);
@@ -284,7 +293,6 @@ int main(int argc, char **argv) {
     // Waiting for an idle CPU after each interrupt finds all of its work
     // done, every time
     RunBootThread(TestIdleAfterInterruptWork);
-    EXPECT(PcWaitForIdleCpu(1000));
     {
         int finishedRounds = 0;
         int round;
@@ -300,7 +308,7 @@ int main(int argc, char **argv) {
     }
 
     // Once halted, no thread of the game's runs again
-    RunBootThread(TestHaltStopsThreads);
+    StartBootThread(TestHaltStopsThreads);
     while (SDL_GetAtomicInt(&f_HaltCounter) < 1000) {
         SDL_Delay(1);
     }
