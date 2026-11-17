@@ -10,9 +10,9 @@
 #define STICK_LIMIT 80
 #define STICK_PREFIX "stick="
 
-// A line of the script: the pad that it holds from a retrace
+// A line of the script: the pad that it holds from a frame
 typedef struct ScriptStep {
-    long retrace;
+    long frame;
     OSContPad pad;
 } ScriptStep;
 
@@ -91,7 +91,7 @@ static bool ReadStick(const char *word, OSContPad *pad) {
     return true;
 }
 
-// Reads a line's words after its retrace into a pad, or names the word that
+// Reads a line's words after its frame into a pad, or names the word that
 // it can't read
 static bool ReadPad(char *words, OSContPad *pad, const char **badWord) {
     char *state = NULL;
@@ -121,7 +121,7 @@ static bool ReadPad(char *words, OSContPad *pad, const char **badWord) {
 // Reads a line without its comment into a step; a blank line gives none
 static bool ReadLine(
     char *line,
-    long lastRetrace,
+    long lastFrame,
     ScriptStep *step,
     bool *hasStep,
     char *error,
@@ -144,13 +144,13 @@ static bool ReadLine(
         return true;
     }
 
-    if (!ReadNumber(first, 0, SDL_MAX_SINT32, &step->retrace)) {
-        SDL_snprintf(error, errorSize, "line %d: \"%s\" isn't a retrace", lineNumber, first);
+    if (!ReadNumber(first, 0, SDL_MAX_SINT32, &step->frame)) {
+        SDL_snprintf(error, errorSize, "line %d: \"%s\" isn't a frame", lineNumber, first);
         return false;
     }
 
-    if (step->retrace <= lastRetrace) {
-        SDL_snprintf(error, errorSize, "line %d: the retraces must increase", lineNumber);
+    if (step->frame <= lastFrame) {
+        SDL_snprintf(error, errorSize, "line %d: the frames must increase", lineNumber);
         return false;
     }
 
@@ -178,7 +178,7 @@ InputScript *ParseInputScript(const char *text, char *error, size_t errorSize) {
     InputScript *script;
     char *copy;
     char *line;
-    long lastRetrace = -1;
+    long lastFrame = -1;
     int lineNumber = 0;
 
     SDL_assert(text != NULL && error != NULL && errorSize != 0);
@@ -209,7 +209,7 @@ InputScript *ParseInputScript(const char *text, char *error, size_t errorSize) {
         lineNumber++;
         if (!ReadLine(
                 line,
-                lastRetrace,
+                lastFrame,
                 &script->steps[script->stepCount],
                 &hasStep,
                 error,
@@ -222,7 +222,7 @@ InputScript *ParseInputScript(const char *text, char *error, size_t errorSize) {
         }
 
         if (hasStep) {
-            lastRetrace = script->steps[script->stepCount].retrace;
+            lastFrame = script->steps[script->stepCount].frame;
             script->stepCount++;
         }
 
@@ -240,17 +240,17 @@ void FreeInputScript(InputScript *script) {
     }
 }
 
-bool FindScriptedPad(const InputScript *script, long retrace, OSContPad *pad) {
+bool FindScriptedPad(const InputScript *script, long frame, OSContPad *pad) {
     size_t low = 0;
     size_t high;
 
     SDL_assert(script != NULL && pad != NULL);
     high = script->stepCount;
-    // The last step at or before the retrace: low ends one past it
+    // The last step at or before the frame: low ends one past it
     while (low < high) {
         size_t middle = low + ((high - low) / 2);
 
-        if (script->steps[middle].retrace <= retrace) {
+        if (script->steps[middle].frame <= frame) {
             low = middle + 1;
         }
         else {

@@ -16,6 +16,8 @@
 #include <stdint.h>
 #include <ultra64.h>
 
+#include "input_script.h"
+
 // What a host controller holds at one moment, in SDL's terms: a bit for
 // each SDL_GamepadButton, and each SDL_GamepadAxis's value
 typedef struct HostPadState {
@@ -55,8 +57,10 @@ void DisconnectGamepad(uint32_t instanceId);
 // game asked for since the last time
 void UpdateControllers(void);
 
-// Replaces what a port's controller holds until the next update, as a
-// script's input does
-void OverrideControllerPad(int port, const OSContPad *pad);
+// Plays a script into the first port from now on, or stops with NULL. The
+// game's reads of the port count its frames from 0, and each read gets
+// what the script holds at that frame, or the devices' state before the
+// script's first line. The script must outlive its use.
+void PlayInputScript(const InputScript *script);
 
 #endif

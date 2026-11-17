@@ -221,6 +221,41 @@ static void TestKeyboard(void) {
     EXPECT(pad.stick_x == 80 && pad.stick_y == 0);
 }
 
+// Reads the first port's buttons as the game does once a frame
+static u16 ReadFirstPortButtons(void) {
+    OSContPad pad;
+
+    PcReadControllerPad(0, &pad);
+    return pad.button;
+}
+
+// The game's nth read of the first port gets the script's pad at frame n.
+// Reads of the other ports count no frames, and a script played afresh
+// counts from frame 0 again.
+static void TestScriptedFrames(void) {
+    char error[64];
+    InputScript *script = ParseInputScript("2 A\n3\n", error, sizeof(error));
+    OSContPad pad;
+
+    EXPECT(script != NULL);
+    // Without SDL's gamepads, no device joins the ports
+    InitControllers();
+    PlayInputScript(script);
+    EXPECT(ReadFirstPortButtons() == 0);
+    PcReadControllerPad(1, &pad);
+    EXPECT(ReadFirstPortButtons() == 0);
+    EXPECT(ReadFirstPortButtons() == A_BUTTON);
+    EXPECT(ReadFirstPortButtons() == 0);
+
+    PlayInputScript(script);
+    EXPECT(ReadFirstPortButtons() == 0);
+    EXPECT(ReadFirstPortButtons() == 0);
+    EXPECT(ReadFirstPortButtons() == A_BUTTON);
+    PlayInputScript(NULL);
+    ShutdownControllers();
+    FreeInputScript(script);
+}
+
 // --- The save memory ---
 
 // The file goes in the test's working directory
@@ -292,6 +327,7 @@ int main(void) {
     TestPadButtons();
     TestGameCubePad();
     TestKeyboard();
+    TestScriptedFrames();
     TestSaveMemory();
     TestFitScreen();
     TestScreenPixels();

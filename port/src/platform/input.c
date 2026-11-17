@@ -97,6 +97,8 @@ static const KeyAxis f_KeyAxes[] = {
 static SDL_Mutex *f_Lock; // Guards f_Ports between the platform and the game
 static ControllerPort f_Ports[PORT_COUNT];
 static Uint64 f_LastRumbleRenewal;
+static const InputScript *f_Script;
+static long f_FirstPortReadCount; // The game's frames, as it reads once each
 
 // --- Mapping ---
 
@@ -339,10 +341,10 @@ void UpdateControllers(void) {
     }
 }
 
-void OverrideControllerPad(int port, const OSContPad *pad) {
-    SDL_assert(port >= 0 && port < PORT_COUNT && pad != NULL);
+void PlayInputScript(const InputScript *script) {
     SDL_LockMutex(f_Lock);
-    f_Ports[port].pad = *pad;
+    f_Script = script;
+    f_FirstPortReadCount = 0;
     SDL_UnlockMutex(f_Lock);
 }
 
@@ -361,12 +363,21 @@ u8 PcGetConnectedControllers(void) {
     return bits;
 }
 
+// The first port's read also counts the game's frame, and plays the script
 void PcReadControllerPad(int port, OSContPad *pad) {
     SDL_assert(pad != NULL);
     SDL_zerop(pad);
     if (port >= 0 && port < PORT_COUNT) {
         SDL_LockMutex(f_Lock);
         *pad = f_Ports[port].pad;
+        if (port == 0) {
+            if (f_Script != NULL) {
+                (void)FindScriptedPad(f_Script, f_FirstPortReadCount, pad);
+            }
+
+            f_FirstPortReadCount++;
+        }
+
         SDL_UnlockMutex(f_Lock);
     }
 }

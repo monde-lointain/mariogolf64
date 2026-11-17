@@ -9,11 +9,14 @@
  *     126
  *     400 A stick=0,80
  *
- * A line starts with the retrace, counted from the first, from which the
- * controller holds what the line names until the next line: buttons, from
+ * A line starts with the game's frame, counted from the first, from which
+ * the controller holds what the line names until the next line: buttons, from
  * A B Z START L R CUP CDOWN CLEFT CRIGHT UP DOWN LEFT RIGHT, and the stick,
  * each axis from -80 to 80 with up positive. A line naming nothing lets
- * everything go. The retraces must increase from line to line.
+ * everything go. The frames must increase from line to line.
+ *
+ * The game reads the controller once a frame, however many retraces the
+ * frame takes, so a script plays the same on any host at any pace.
  */
 
 #ifndef PORT_PLATFORM_INPUT_SCRIPT_H
@@ -30,8 +33,8 @@ typedef struct InputScript InputScript;
 InputScript *ParseInputScript(const char *text, char *error, size_t errorSize);
 void FreeInputScript(InputScript *script);
 
-// The controller's state that the script holds at a retrace; false before
+// The controller's state that the script holds at a frame; false before
 // its first line, when the player's devices play
-bool FindScriptedPad(const InputScript *script, long retrace, OSContPad *pad);
+bool FindScriptedPad(const InputScript *script, long frame, OSContPad *pad);
 
 #endif

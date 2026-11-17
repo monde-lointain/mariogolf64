@@ -25,7 +25,7 @@ static bool FailsOnLine(const char *text, int lineNumber) {
     return script == NULL && SDL_strstr(f_Error, expected) == f_Error;
 }
 
-// Each line holds from its retrace until the next's, and nothing holds
+// Each line holds from its frame until the next's, and nothing holds
 // before the first
 static void TestHoldsEachLine(void) {
     InputScript *script = Parse(
@@ -50,7 +50,7 @@ static void TestHoldsEachLine(void) {
     FreeInputScript(script);
 }
 
-// An empty script holds nothing; one line from the first retrace holds
+// An empty script holds nothing; one line from the first frame holds
 // from it on
 static void TestLeastScripts(void) {
     InputScript *script = Parse("");
@@ -88,7 +88,7 @@ static void TestStickLimits(void) {
     EXPECT(FailsOnLine("1 stick=0,-81", 1));
 }
 
-// Bad lines: a retrace that isn't a number, is negative or doesn't
+// Bad lines: a frame that isn't a number, is negative or doesn't
 // increase, an unknown or misspelled word, and a malformed stick
 static void TestRejectsBadLines(void) {
     EXPECT(FailsOnLine("START", 1));

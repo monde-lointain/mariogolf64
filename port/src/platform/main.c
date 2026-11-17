@@ -11,8 +11,8 @@
  * --headless draws without a window, and --frames ends the program after N
  * retraces, writing the screen it last showed to the --screenshot file, for
  * tests and machines without a display. Headless, each retrace waits for
- * the game to finish with the last, so a script plays the same every time. --input-script plays the
- * first controller from a script, as input_script.h describes.
+ * the game to finish with the last. --input-script plays the first
+ * controller from a script, as input_script.h describes.
  *
  * Without a ROM, it looks for baserom.us.z64 beside the program, then in
  * the current directory. Without --save, the game saves to the user's data
@@ -315,7 +315,7 @@ static void HandleEvent(const SDL_Event *event) {
 // a stall the clock starts afresh rather than rush the game to catch up. In
 // lockstep, each retrace also waits for the game to finish with it, so that
 // the game sees every one, wherever the host is slow.
-static void RunRetraces(long frameLimit, const InputScript *script, bool isLockstep) {
+static void RunRetraces(long frameLimit, bool isLockstep) {
     const Uint64 period = SDL_NS_PER_SECOND / RETRACES_PER_SECOND;
     Uint64 next = SDL_GetTicksNS();
     long frameCount = 0;
@@ -328,7 +328,6 @@ static void RunRetraces(long frameLimit, const InputScript *script, bool isLocks
 
     while (!f_IsQuitting && (frameLimit == 0 || frameCount < frameLimit)) {
         SDL_Event event;
-        OSContPad pad;
         Uint64 now;
 
         while (SDL_PollEvent(&event)) {
@@ -336,9 +335,6 @@ static void RunRetraces(long frameLimit, const InputScript *script, bool isLocks
         }
 
         UpdateControllers();
-        if (script != NULL && FindScriptedPad(script, frameCount, &pad)) {
-            OverrideControllerPad(0, &pad);
-        }
 
         f_ShownFramebuffer = PcRaiseRetrace();
         if (isLockstep && !PcWaitForIdleCpu(LOCKSTEP_TIMEOUT_MS)) {
@@ -463,10 +459,11 @@ int main(int argc, char *argv[]) {
 
     UseSaveMemoryPath(&options);
     InitControllers();
+    PlayInputScript(script);
     PcInitOs();
     PcInsertCartridge(rom, romSize);
     PcBootNuSystem();
-    RunRetraces(options.frameLimit, script, options.isHeadless);
+    RunRetraces(options.frameLimit, options.isHeadless);
     if (!ShutDown(options.screenshotPath)) {
         FreeInputScript(script);
         SDL_free(rom);
