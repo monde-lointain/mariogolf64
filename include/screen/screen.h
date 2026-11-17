@@ -21,8 +21,13 @@
 #define QUARTER_PIXELS_PER_PIXEL (1 << QUARTER_PIXEL_SHIFT)
 // A screen position in pixels, in the quarter pixels display lists take. It
 // shifts rather than multiplies, since the GBI's masks fold differently
-// around a multiply.
-#define QuarterPixels(pixels) ((pixels) << QUARTER_PIXEL_SHIFT)
+// around a multiply. A position left of or above the screen is negative,
+// which C leaves the shift of undefined, and the multiply gives the same.
+#ifdef AVOID_UB
+#    define QuarterPixels(pixels) ((pixels) * QUARTER_PIXELS_PER_PIXEL)
+#else
+#    define QuarterPixels(pixels) ((pixels) << QUARTER_PIXEL_SHIFT)
+#endif
 
 // Texture rectangle steps are 5.10 fixed point
 #define TEXEL_STEP_SHIFT 10
