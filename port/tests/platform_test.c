@@ -63,6 +63,80 @@ static void TestSupportedRom(void) {
     SDL_free(rom);
 }
 
+// zlib's CRC-32, whose check value is that of the digits 1 to 9
+static void TestRomChecksum(void) {
+    EXPECT(ComputeRomChecksum((const uint8_t *)"123456789", 9) == 0xCBF43926u);
+    EXPECT(ComputeRomChecksum(f_BigEndianStart, 0) == 0);
+}
+
+// Writes size bytes to path, failing the test when it can't
+static void WriteTestFile(const char *path, const void *data, size_t size) {
+    EXPECT(SDL_SaveFile(path, data, size));
+}
+
+// Whether loading path fails, and SDL's error then names the problem
+static bool IsRomRejected(const char *path, const char *problem) {
+    size_t size = 1;
+    uint8_t *rom = LoadRomImage(path, &size);
+
+    if (rom != NULL) {
+        SDL_free(rom);
+        return false;
+    }
+
+    return SDL_strstr(SDL_GetError(), problem) != NULL && SDL_strstr(SDL_GetError(), path) != NULL;
+}
+
+// Writes an image in the N64's order to path in the .v64 order, each
+// 16-bit pair swapped
+static void WriteSwappedRom(const char *path, const uint8_t *rom, size_t size) {
+    uint8_t *swapped = SDL_malloc(size);
+    size_t i;
+
+    SDL_assert(swapped != NULL && size % 2 == 0);
+    for (i = 0; i < size; i += 2) {
+        swapped[i] = rom[i + 1];
+        swapped[i + 1] = rom[i];
+    }
+
+    WriteTestFile(path, swapped, size);
+    SDL_free(swapped);
+}
+
+// Each image that isn't the unmodified US release is refused, saying why
+static void TestRomRejections(void) {
+    const char *path = "platform_test_rom.v64";
+    uint8_t *rom = SDL_calloc(SUPPORTED_ROM_SIZE, 1);
+    char expected[32];
+
+    (void)SDL_RemovePath(path);
+    EXPECT(IsRomRejected(path, "Can't read the ROM"));
+
+    WriteTestFile(path, f_BigEndianStart, sizeof(f_BigEndianStart));
+    EXPECT(IsRomRejected(path, "isn't an N64 ROM image"));
+
+    SDL_memcpy(rom, f_BigEndianStart, sizeof(f_BigEndianStart));
+    SDL_memcpy(rom + 0x3B, "NMFJ", 4);
+    WriteSwappedRom(path, rom, SUPPORTED_ROM_SIZE);
+    EXPECT(IsRomRejected(path, "game code NMFE"));
+
+    // The US release's header on other contents. The message gives the
+    // image's checksum in the N64's order, so the dump was converted.
+    SDL_memcpy(rom + 0x3B, "NMFE", 4);
+    WriteSwappedRom(path, rom, SUPPORTED_ROM_SIZE);
+    SDL_snprintf(
+        expected,
+        sizeof(expected),
+        "CRC-32 is %08" SDL_PRIX32 ",",
+        ComputeRomChecksum(rom, SUPPORTED_ROM_SIZE)
+    );
+    EXPECT(IsRomRejected(path, expected));
+    EXPECT(IsRomRejected(path, "2FC4C216"));
+
+    (void)SDL_RemovePath(path);
+    SDL_free(rom);
+}
+
 // --- The controllers ---
 
 static void TestStick(void) {
@@ -192,6 +266,8 @@ static void TestScreenPixels(void) {
 int main(void) {
     TestRomByteOrders();
     TestSupportedRom();
+    TestRomChecksum();
+    TestRomRejections();
     TestStick();
     TestPadButtons();
     TestKeyboard();

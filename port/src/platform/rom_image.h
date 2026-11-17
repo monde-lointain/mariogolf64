@@ -28,8 +28,12 @@ bool ConvertRomToBigEndian(uint8_t *rom, size_t size);
 // Whether an image in the N64's order is the US release
 bool IsSupportedRom(const uint8_t *rom, size_t size);
 
-// Reads, converts and checks the image at path. Gives it, to be released
-// with SDL_free, or NULL after logging why not.
+// The CRC-32 of size bytes of an image, as zlib computes it
+uint32_t ComputeRomChecksum(const uint8_t *rom, size_t size);
+
+// Reads, converts and checks the image at path: the US release, unmodified.
+// Gives it, to be released with SDL_free, or NULL with SDL_GetError saying
+// why not.
 uint8_t *LoadRomImage(const char *path, size_t *size);
 
 #endif

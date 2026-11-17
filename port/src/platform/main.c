@@ -144,7 +144,8 @@ static bool ParseOptions(int argc, char **argv, Options *options) {
 }
 
 // Reads the ROM that the options name, or else the first found of the
-// default name beside the program and in the current directory
+// default name beside the program and in the current directory. Gives NULL
+// with SDL_GetError saying why when there's none to play.
 static uint8_t *LoadPlayersRom(const Options *options, size_t *size) {
     const char *base = SDL_GetBasePath();
     char *besideProgram = NULL;
@@ -168,8 +169,26 @@ static uint8_t *LoadPlayersRom(const Options *options, size_t *size) {
         return LoadRomImage(DEFAULT_ROM_NAME, size);
     }
 
-    SDL_Log("No ROM: name one, or put %s beside the program", DEFAULT_ROM_NAME);
+    SDL_SetError(
+        "No ROM: name one, or put %s, the US release's, beside the program",
+        DEFAULT_ROM_NAME
+    );
     return NULL;
+}
+
+// Logs and shows why there's no ROM to play. The message box may set SDL's
+// error itself, so it gets a copy.
+static void ShowRomProblem(void) {
+    char *problem = SDL_strdup(SDL_GetError());
+
+    SDL_Log("%s", problem != NULL ? problem : "No ROM");
+    SDL_ShowSimpleMessageBox(
+        SDL_MESSAGEBOX_ERROR,
+        WINDOW_TITLE,
+        problem != NULL ? problem : "The port needs the US release's ROM",
+        NULL
+    );
+    SDL_free(problem);
 }
 
 // The renderer draws at a whole multiple of the N64's resolution: the
@@ -408,12 +427,7 @@ int main(int argc, char *argv[]) {
 
     rom = LoadPlayersRom(&options, &romSize);
     if (rom == NULL) {
-        SDL_ShowSimpleMessageBox(
-            SDL_MESSAGEBOX_ERROR,
-            WINDOW_TITLE,
-            "The port needs the US release's ROM. See the log.",
-            NULL
-        );
+        ShowRomProblem();
         FreeInputScript(script);
         SDL_Quit();
         return EXIT_FAILURE;
