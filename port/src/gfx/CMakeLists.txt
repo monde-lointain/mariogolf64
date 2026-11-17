@@ -14,6 +14,7 @@ target_link_libraries(mg64_gfx
     PUBLIC mg64_port_internal SDL3::SDL3
     PRIVATE mg64_ultra mg64_port_warnings
 )
+mg64_skip_type_sanitizer(mg64_gfx)
 
 # The backend is a library of its own, so that the interpreter's tests can
 # put a double in its place

@@ -14,6 +14,7 @@ target_link_libraries(mg64_synth
     PUBLIC mg64_port_internal
     PRIVATE SDL3::SDL3 mg64_port_warnings
 )
+mg64_skip_type_sanitizer(mg64_synth)
 
 # The libmus API over the synthesizer. It plays into the audio output that
 # audio_output.h declares, which the program links from mg64_audio_output and

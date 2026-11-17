@@ -10,10 +10,27 @@
 # the project's programs also forgets the types it gives static storage
 # (see forget_static_types.c), and so needs Linux's names for its ends.
 #
+# TypeSanitizer also leaves out the code that mg64_skip_type_sanitizer
+# names: the renderer and the synthesizer. They read the game's memory as
+# bytes, with memcpy, or (for display lists) as the Gfx the game wrote,
+# and each byte read of memory that the game stored under its own types
+# takes the runtime's slow path. That made the replays eight times
+# slower. Their own structures go unchecked as a result.
+#
 # Only a top-level build takes them, so that a project that includes this
 # one keeps its own choice.
 
 add_library(mg64_project_sanitizers INTERFACE)
+
+# Leaves the target's own sources out of TypeSanitizer's checks
+function(mg64_skip_type_sanitizer target)
+    if(PROJECT_IS_TOP_LEVEL AND "type" IN_LIST MG64_SANITIZERS)
+        get_target_property(sources ${target} SOURCES)
+        set_property(SOURCE ${sources} TARGET_DIRECTORY ${target}
+            APPEND PROPERTY COMPILE_OPTIONS -fno-sanitize=type
+        )
+    endif()
+endfunction()
 
 set(MG64_SANITIZERS "" CACHE STRING
     "The sanitizers to build with, as -fsanitize names in a list, such as address;undefined"
