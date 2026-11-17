@@ -7,7 +7,6 @@
  * one alignment step more.
  */
 
-#include <stdlib.h>
 #include <ultra64.h>
 
 #include "system/c_language.h"
@@ -15,9 +14,10 @@
 #include "system/memory_address.h"
 #include "test_support.h"
 
-// The header that heap.c puts before each block: a size and a tag, then the
-// list's two pointers
-#define HEADER_SIZE (2 * sizeof(u32) + 2 * sizeof(void *))
+// The header that heap.c puts before each block: a size, a tag and the
+// list's two links, 16 bytes as on the N64, so that the game's memory runs
+// out where the original's does
+#define HEADER_SIZE 16
 
 #define HEAP_REGION_SIZE 512
 
@@ -51,8 +51,9 @@ typedef struct Allocator {
     u32 (*FreeSize)(void);
 } Allocator;
 
-// Memory with no declared type, as the RDRAM's regions are to the game
-static u8 *f_HeapRegion;
+// A static region, as the game's heaps are, which the program's start
+// leaves untyped under the type sanitizer as it does the RDRAM's
+static _Alignas(8) u8 f_HeapRegion[HEAP_REGION_SIZE];
 
 static u8 *StartHeap(void) {
     ResetHeap(HEAP_BILLBOARD);
@@ -300,8 +301,6 @@ static void TestAddsTheExpansionPak(void) {
 }
 
 int main(void) {
-    f_HeapRegion = malloc(HEAP_REGION_SIZE);
-    EXPECT(f_HeapRegion != NULL);
     TestAllocator(&f_Heap);
     TestAllocator(&f_MainMemory);
     TestAddsRegionsAsFreeMemory();
@@ -309,6 +308,5 @@ int main(void) {
     TestKeepsSeparateRegionsApart(TRUE);
     TestKeepsSeparateRegionsApart(FALSE);
     TestAddsTheExpansionPak();
-    free(f_HeapRegion);
     return ReportTestResults("heap_test");
 }

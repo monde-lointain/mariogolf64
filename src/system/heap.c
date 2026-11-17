@@ -9,6 +9,10 @@
 
 #include <ultra64.h>
 
+#ifdef TARGET_PC
+#    include <assert.h>
+#endif
+
 #include "math/math_util.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
@@ -39,13 +43,56 @@ typedef s32 BlockTag;
 #define EXPANSION_REGION_START 0x80600000
 #define EXPANSION_REGION_END 0x80800000
 
+// How a block's header links it to the next and previous blocks of its list.
+// The native port links each block to another by the signed distance in
+// bytes from it, not by a pointer, so that a header is 16 bytes there as it
+// is on the N64. Every block takes the same room, and the game's memory runs
+// out where the original's does. A heap's blocks and the sentinel that it
+// keeps are in the program's own memory, osPcRdram or its other variables,
+// so a distance fits in 32 bits.
+#ifdef TARGET_PC
+typedef s32 BlockLink;
+#else
+typedef struct MemoryBlock *BlockLink;
+#endif
+
 // The header of each block, followed by its memory
 typedef struct MemoryBlock {
     u32 size; // Including the header
     BlockTag tag;
-    struct MemoryBlock *next;
-    struct MemoryBlock *previous;
+    BlockLink next;
+    BlockLink previous;
 } MemoryBlock;
+
+// The link from a block to another, and the routines that read and set a
+// block's next and previous blocks. These take the block itself, not its
+// address: KMC GCC compiles a member of &f_Heaps[i].sentinel differently
+// from the same member of f_Heaps[i].sentinel, and (*block).next as it does
+// block->next.
+#ifdef TARGET_PC
+_Static_assert(sizeof(MemoryBlock) == 16, "A block's header is the N64's size");
+
+static BlockLink LinkBetween(const MemoryBlock *block, const MemoryBlock *other) {
+    SignedAddress distance = (SignedAddress)(AddressNumber(other) - AddressNumber(block));
+
+    assert(distance >= S32_MIN && distance <= S32_MAX);
+    return (BlockLink)distance;
+}
+
+static MemoryBlock *LinkedBlock(const MemoryBlock *block, BlockLink link) {
+    return (MemoryBlock *)(AddressNumber(block) + (UnsignedAddress)(SignedAddress)link);
+}
+
+#    define BlockLinkTo(block, other) LinkBetween((block), (other))
+#    define NextBlock(block) LinkedBlock(&(block), (block).next)
+#    define PreviousBlock(block) LinkedBlock(&(block), (block).previous)
+#else
+#    define BlockLinkTo(block, other) (other)
+#    define NextBlock(block) ((block).next)
+#    define PreviousBlock(block) ((block).previous)
+#endif
+#define SetNextBlock(block, other) ((block).next = BlockLinkTo(&(block), (other)))
+#define SetPreviousBlock(block, other) ((block).previous = BlockLinkTo(&(block), (other)))
 
 // Allocations round each block, header included, up to a multiple of this
 #define BLOCK_ALIGNMENT 8
@@ -89,10 +136,10 @@ void AddHeapRegion(HeapIndex heapIndex, void *start, void *end) {
     block->size = size;
     f_Heaps[heapIndex].freeSize += size;
     block->tag = BLOCK_FREE;
-    block->next = &f_Heaps[heapIndex].sentinel;
-    block->previous = f_Heaps[heapIndex].sentinel.previous;
-    f_Heaps[heapIndex].sentinel.previous->next = block;
-    f_Heaps[heapIndex].sentinel.previous = block;
+    SetNextBlock(*block, &f_Heaps[heapIndex].sentinel);
+    SetPreviousBlock(*block, PreviousBlock(f_Heaps[heapIndex].sentinel));
+    SetNextBlock(*PreviousBlock(f_Heaps[heapIndex].sentinel), block);
+    SetPreviousBlock(f_Heaps[heapIndex].sentinel, block);
 }
 
 // Empties the heap of all its blocks, so that it needs regions added again
@@ -102,8 +149,8 @@ void ResetHeap(HeapIndex heapIndex) {
     f_Heaps[heapIndex].freeSize = 0;
     f_Heaps[heapIndex].sentinel.size = 0;
     f_Heaps[heapIndex].sentinel.tag = BLOCK_SENTINEL;
-    heap->sentinel.previous = &heap->sentinel;
-    f_Heaps[heapIndex].sentinel.next = &heap->sentinel;
+    SetPreviousBlock(heap->sentinel, &heap->sentinel);
+    SetNextBlock(f_Heaps[heapIndex].sentinel, &heap->sentinel);
     f_Heaps[heapIndex].largestFreeSize = UNMEASURED_SIZE;
 }
 
@@ -136,12 +183,12 @@ void *AllocFromHeap(HeapIndex heapIndex, u32 size) {
     // own gives 66 words differing, 8 in shape
     size = RoundUpTo(size + sizeof(MemoryBlock), BLOCK_ALIGNMENT);
     bestSize = NO_BLOCK_SIZE;
-    block = heap->sentinel.next;
+    block = NextBlock(heap->sentinel);
     bestBlock = NULL;
 
     // Find the smallest free block that fits, and the largest free size that
     // will be left once it is taken
-    for (; block != &heap->sentinel; block = block->next) {
+    for (; block != &heap->sentinel; block = NextBlock(*block)) {
         if (block->tag == BLOCK_FREE && block->size >= size) {
             if (block->size < bestSize) {
                 if (largestFreeSize < bestSize && bestSize != NO_BLOCK_SIZE) {
@@ -177,10 +224,10 @@ void *AllocFromHeap(HeapIndex heapIndex, u32 size) {
         ForgetMemoryTypes(rest, sizeof(MemoryBlock));
         rest->size = bestBlock->size - size;
         rest->tag = BLOCK_FREE;
-        bestBlock->next->previous = rest;
-        rest->next = bestBlock->next;
-        bestBlock->next = rest;
-        rest->previous = bestBlock;
+        SetPreviousBlock(*NextBlock(*bestBlock), rest);
+        SetNextBlock(*rest, NextBlock(*bestBlock));
+        SetNextBlock(*bestBlock, rest);
+        SetPreviousBlock(*rest, bestBlock);
         bestBlock->size = size;
     }
     else {
@@ -212,17 +259,18 @@ void FreeFromHeap(HeapIndex heapIndex, void *pointerToBlock) {
     block = BlockOfMemory(pointer);
     f_Heaps[heapIndex].freeSize += block->size;
     // Merge the block with the free blocks on either side of it
-    if (block->previous->tag == BLOCK_FREE && IsBlockFollowedBy(block->previous, block)) {
-        block->next->previous = block->previous;
-        block->previous->next = block->next;
-        block->previous->size += block->size;
-        block = block->previous;
+    if (PreviousBlock(*block)->tag == BLOCK_FREE &&
+        IsBlockFollowedBy(PreviousBlock(*block), block)) {
+        SetPreviousBlock(*NextBlock(*block), PreviousBlock(*block));
+        SetNextBlock(*PreviousBlock(*block), NextBlock(*block));
+        PreviousBlock(*block)->size += block->size;
+        block = PreviousBlock(*block);
     }
 
-    if (block->next->tag == BLOCK_FREE && IsBlockFollowedBy(block, block->next)) {
-        block->next->next->previous = block;
-        block->size += block->next->size;
-        block->next = block->next->next;
+    if (NextBlock(*block)->tag == BLOCK_FREE && IsBlockFollowedBy(block, NextBlock(*block))) {
+        SetPreviousBlock(*NextBlock(*NextBlock(*block)), block);
+        block->size += NextBlock(*block)->size;
+        SetNextBlock(*block, NextBlock(*NextBlock(*block)));
     }
 
     block->tag = BLOCK_FREE;
@@ -242,11 +290,11 @@ void InitHeapRegions(Boolean hasExpansionPak) {
 
         block->size = size;
         block->tag = BLOCK_FREE;
-        block->next = (MemoryBlock *)&f_MemorySentinel;
-        block->previous = f_MemorySentinel.previous;
+        SetNextBlock(*block, (MemoryBlock *)&f_MemorySentinel);
+        SetPreviousBlock(*block, PreviousBlock(f_MemorySentinel));
         f_FreeMemorySize += size;
-        f_MemorySentinel.previous->next = block;
-        f_MemorySentinel.previous = block;
+        SetNextBlock(*PreviousBlock(f_MemorySentinel), block);
+        SetPreviousBlock(f_MemorySentinel, block);
     }
 
     // The original stores the sentinel's size and tag before anything else,
@@ -268,7 +316,8 @@ void InitHeapRegions(Boolean hasExpansionPak) {
     // local to the sentinel 9 (7).
     f_MemorySentinel.size = 0;
     f_MemorySentinel.tag = BLOCK_SENTINEL;
-    f_MemorySentinel.next = f_MemorySentinel.previous = (MemoryBlock *)&f_MemorySentinel;
+    f_MemorySentinel.next = f_MemorySentinel.previous =
+        BlockLinkTo((MemoryBlock *)&f_MemorySentinel, (MemoryBlock *)&f_MemorySentinel);
     f_FreeMemorySize = 0;
 
     AddMemoryRegion(FixedAddress(MAIN_REGION_START), FixedAddress(MAIN_REGION_END));
@@ -285,10 +334,10 @@ u32 GetFreeMemorySize(void) {
 
 // Measures the largest free block of the main memory's heap
 u32 FindLargestFreeMemorySize(void) {
-    MemoryBlock *block = f_MemorySentinel.next;
+    MemoryBlock *block = NextBlock(f_MemorySentinel);
     u32 largestFreeSize = 0;
 
-    for (; block != &f_MemorySentinel; block = block->next) {
+    for (; block != &f_MemorySentinel; block = NextBlock(*block)) {
         if (block->tag == BLOCK_FREE && largestFreeSize < block->size) {
             largestFreeSize = block->size;
         }
@@ -317,10 +366,10 @@ void *AllocMemory(u32 size) {
     size = RoundUpTo(size + sizeof(MemoryBlock), BLOCK_ALIGNMENT);
     bestSize = NO_BLOCK_SIZE;
     bestBlock = NULL;
-    block = f_MemorySentinel.next;
+    block = NextBlock(f_MemorySentinel);
     // Find the smallest free block that fits, and the largest free size that
     // will be left once it is taken
-    for (; block != &f_MemorySentinel; block = block->next) {
+    for (; block != &f_MemorySentinel; block = NextBlock(*block)) {
         if (block->tag == BLOCK_FREE && block->size >= size) {
             if (block->size < bestSize) {
                 if (largestFreeSize < bestSize && bestSize != NO_BLOCK_SIZE) {
@@ -356,10 +405,10 @@ void *AllocMemory(u32 size) {
         ForgetMemoryTypes(rest, sizeof(MemoryBlock));
         rest->size = bestBlock->size - size;
         rest->tag = BLOCK_FREE;
-        bestBlock->next->previous = rest;
-        rest->next = bestBlock->next;
-        bestBlock->next = rest;
-        rest->previous = bestBlock;
+        SetPreviousBlock(*NextBlock(*bestBlock), rest);
+        SetNextBlock(*rest, NextBlock(*bestBlock));
+        SetNextBlock(*bestBlock, rest);
+        SetPreviousBlock(*rest, bestBlock);
         bestBlock->size = size;
     }
     else {
@@ -391,20 +440,20 @@ void FreeMemory(void *pointerToBlock) {
     }
 
     block = BlockOfMemory(pointer);
-    previous = block->previous;
+    previous = PreviousBlock(*block);
     f_FreeMemorySize += block->size;
     // Merge the block with the free blocks on either side of it
     if (previous->tag == BLOCK_FREE && IsBlockFollowedBy(previous, block)) {
-        block->next->previous = previous;
-        block->previous->next = block->next;
-        block->previous->size += block->size;
-        block = block->previous;
+        SetPreviousBlock(*NextBlock(*block), previous);
+        SetNextBlock(*PreviousBlock(*block), NextBlock(*block));
+        PreviousBlock(*block)->size += block->size;
+        block = PreviousBlock(*block);
     }
 
-    if (block->next->tag == BLOCK_FREE && IsBlockFollowedBy(block, block->next)) {
-        block->next->next->previous = block;
-        block->size += block->next->size;
-        block->next = block->next->next;
+    if (NextBlock(*block)->tag == BLOCK_FREE && IsBlockFollowedBy(block, NextBlock(*block))) {
+        SetPreviousBlock(*NextBlock(*NextBlock(*block)), block);
+        block->size += NextBlock(*block)->size;
+        SetNextBlock(*block, NextBlock(*NextBlock(*block)));
     }
 
     block->tag = BLOCK_FREE;
