@@ -38,6 +38,12 @@ Each preset builds into `build/pc/<preset>`. `cmake --workflow --preset
 <preset>` configures, builds and runs the tests in one step, as CI does;
 `windows-mingw` runs its tests through Wine where it is installed.
 
+CI (`.github/workflows/port.yml`) checks the Python tools and the
+nested-function hoister on every push. The builds need the assets cut from
+the ROM, so they run each preset's workflow only where the repository's
+`BASEROM_URL` secret names a private copy of the ROM, which is checked
+against `mariogolf64.sha1` before use and deleted after.
+
 ## Layout
 
 | Folder           | What it holds                                                     |
