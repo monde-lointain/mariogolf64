@@ -207,6 +207,16 @@ typedef struct GroundLightColor {
 // HEIGHT_STEP_SCALE_COUNT
 #define TEXEL_HEIGHT_FRACTION_BITS 16
 #define TEXEL_HEIGHT_ONE 65536.0f
+// A height, or a difference of heights, in the two fixed points. Ground below
+// the course's zero, and a row that runs downhill, give negative values,
+// which C leaves undefined to shift; multiplying gives the same bits.
+#ifdef AVOID_UB
+#    define HeightToFixed(height) ((height) * (1 << HEIGHT_FRACTION_BITS))
+#    define TexelHeightToFixed(height) ((height) * (1 << TEXEL_HEIGHT_FRACTION_BITS))
+#else
+#    define HeightToFixed(height) ((height) << HEIGHT_FRACTION_BITS)
+#    define TexelHeightToFixed(height) ((height) << TEXEL_HEIGHT_FRACTION_BITS)
+#endif
 #define HEIGHT_STEP_SCALE_COUNT 32
 // The band's heights are filled with NO_HEIGHT four at a time, as doubles
 #define HEIGHTS_PER_FILL 4
@@ -832,12 +842,11 @@ void DrawBandHeights(s16 *heights, s32 band) {
                 texelHeightStep = f_HeightStepScales[rowSpanCount] * (toHeight - height);
             }
             else {
-                texelHeightStep =
-                    ((toHeight - height) << TEXEL_HEIGHT_FRACTION_BITS) / rowSpanCount;
+                texelHeightStep = TexelHeightToFixed(toHeight - height) / rowSpanCount;
             }
 
             bandRow = (rowZ >> HEIGHT_ROW_SPAN_SHIFT) - band * HEIGHT_BAND_ROW_COUNT;
-            height <<= TEXEL_HEIGHT_FRACTION_BITS;
+            height = TexelHeightToFixed(height);
             if (bandRow >= 0 && bandRow < HEIGHT_BAND_ROW_COUNT) {
                 rowTexels = &heights[bandRow * MAP_COLUMN_COUNT];
                 for (texelIndex = 0; texelIndex <= rowSpanCount; texelIndex++) {
@@ -892,7 +901,7 @@ void DrawBandHeights(s16 *heights, s32 band) {
             shortHeightStep = shortSlopeHeight * HEIGHT_ROW_STEP_SCALE;
             shortX = corners[0]->v.ob[AXIS_X] << HEIGHT_FRACTION_BITS;
             longX = shortX;
-            shortHeight = corners[0]->v.ob[AXIS_Y] << HEIGHT_FRACTION_BITS;
+            shortHeight = HeightToFixed(corners[0]->v.ob[AXIS_Y]);
             longHeight = shortHeight;
             for (offsetZ = 0; offsetZ < span + HEIGHT_ROW_SPAN / 2; offsetZ += HEIGHT_ROW_SPAN) {
                 DrawHeightRow(
@@ -932,14 +941,13 @@ void DrawBandHeights(s16 *heights, s32 band) {
             shortSlopeHeight =
                 (corners[2]->v.ob[AXIS_Y] - corners[1]->v.ob[AXIS_Y]) * cachedReciprocal;
             longX = ((s32)(longSlopeX * span) + corners[0]->v.ob[AXIS_X]) << HEIGHT_FRACTION_BITS;
-            longHeight = ((s32)(longSlopeHeight * span) + corners[0]->v.ob[AXIS_Y])
-                << HEIGHT_FRACTION_BITS;
+            longHeight = HeightToFixed((s32)(longSlopeHeight * span) + corners[0]->v.ob[AXIS_Y]);
             longXStep = longSlopeX * HEIGHT_ROW_STEP_SCALE;
             shortXStep = shortSlopeX * HEIGHT_ROW_STEP_SCALE;
             longHeightStep = longSlopeHeight * HEIGHT_ROW_STEP_SCALE;
             shortHeightStep = shortSlopeHeight * HEIGHT_ROW_STEP_SCALE;
             shortX = corners[1]->v.ob[AXIS_X] << HEIGHT_FRACTION_BITS;
-            shortHeight = corners[1]->v.ob[AXIS_Y] << HEIGHT_FRACTION_BITS;
+            shortHeight = HeightToFixed(corners[1]->v.ob[AXIS_Y]);
             for (offsetZ = 0; offsetZ < lowerSpan + HEIGHT_ROW_SPAN / 2;
                 offsetZ += HEIGHT_ROW_SPAN) {
                 DrawHeightRow(
