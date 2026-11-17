@@ -367,6 +367,43 @@ static void TestCarriesOnceARunMightNotFit(void) {
     free(nextBuffer);
 }
 
+// The game reads what it unpacks as ints, floats and pointers, so the
+// decoder has to copy the words without giving them a type of their own.
+// Under the type sanitizer, a word stored as a u16 gives its bytes the type
+// short, and reading them here as a u32 halts the test; the other builds
+// only check the words. The stream has a literal, a run and a reference.
+static void TestLeavesTheOutputUntyped(void) {
+    u16 stream[2 + 1 + 16 + 1 + 1 + 1 + 1];
+    u8 *output = AllocOutput();
+    const u32 *outputWords = (const u32 *)output;
+    u8 *expectedBytes;
+    u16 expected[16 + 1 + 3];
+    u32 expectedWord;
+    s32 i;
+
+    stream[0] = HEADER_WORD;
+    stream[1] = HEADER_WORD;
+    stream[2] = 0x0000;
+    for (i = 0; i < 16; i++) {
+        expected[i] = (u16)(0x3000 + i);
+        stream[3 + i] = expected[i];
+    }
+    stream[19] = 0x6000;
+    stream[20] = 0x4444;
+    expected[16] = 0x4444;
+    stream[21] = Reference(1, 3);
+    expected[17] = expected[18] = expected[19] = 0x4444;
+    stream[22] = END_REFERENCE;
+    EXPECT(DecodeWholeStream(stream, ARRAY_COUNT(stream), output) == sizeof(expected));
+    expectedBytes = PackWords(expected, ARRAY_COUNT(expected));
+    for (i = 0; i < (s32)sizeof(expected) / (s32)sizeof(u32); i++) {
+        memcpy(&expectedWord, expectedBytes + i * sizeof(u32), sizeof(u32));
+        EXPECT(outputWords[i] == expectedWord);
+    }
+    free(expectedBytes);
+    free(output);
+}
+
 int main(void) {
     TestCopiesLiterals();
     TestCopiesOverlappingReferences();
@@ -376,5 +413,6 @@ int main(void) {
     TestCopiesTheFarthestLongestReference();
     TestCarriesInputIntoTheNextChunk();
     TestCarriesOnceARunMightNotFit();
+    TestLeavesTheOutputUntyped();
     return ReportTestResults("lz_decoder_test");
 }

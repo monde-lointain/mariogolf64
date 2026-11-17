@@ -5,6 +5,7 @@
 
 #include "course/lz_decoder.h"
 
+#include <string.h>
 #include <ultra64.h>
 
 #include "system/big_endian.h"
@@ -21,6 +22,14 @@
 #    define ShiftControlBits(controlBits, count) ((controlBits) <<= (count))
 #endif
 
+#ifdef AVOID_UB
+// The decoded words are the bytes of whatever the data holds, which the game
+// then reads and stores under its own types, such as a Mtx's s32s. Copying
+// them as u16s would make u16 their type, which strict aliasing lets the
+// compiler assume those other types don't read, so they are copied as bytes.
+#    define CopyLzWord(destination, source) memcpy((destination), (source), sizeof(u16))
+#endif
+
 // Decodes the compressed words from stream->input to stream->inputEnd onto
 // the end of the output. Returns the output's size in bytes once the stream
 // ends. If the chunk runs low first and more is to come, moves the words left
@@ -35,8 +44,12 @@ s32 DecodeLzChunk(LzStream *stream) {
     u16 reference;
     u16 *referenceEnd;
     u16 *referenceOutput;
+#ifdef AVOID_UB
+    s32 literal;
+#else
     u16 evenWord;
     u16 oddWord;
+#endif
     Boolean hasMoreInput;
 
     if (stream->flags & LZ_STREAM_FLAG_FIRST) {
@@ -56,7 +69,13 @@ s32 DecodeLzChunk(LzStream *stream) {
             if (hasMoreInput) {
                 carriedInput = stream->nextInput;
                 while (input < inputEnd) {
+#ifdef AVOID_UB
+                    carriedInput--;
+                    inputEnd--;
+                    CopyLzWord(carriedInput, inputEnd);
+#else
                     *--carriedInput = *--inputEnd;
+#endif
                 }
 
                 stream->input = carriedInput;
@@ -67,6 +86,13 @@ s32 DecodeLzChunk(LzStream *stream) {
 
         controlBits = FromBigEndian16(*input++);
         if (controlBits == 0) {
+#ifdef AVOID_UB
+            // From the first word, as the original copies them, in case the
+            // output trails the input in the same buffer
+            for (literal = 0; literal < LZ_LITERAL_RUN_LENGTH; literal++) {
+                CopyLzWord(&output[literal], &input[literal]);
+            }
+#else
             evenWord = input[0];
             oddWord = input[1];
             output[0] = evenWord;
@@ -99,6 +125,7 @@ s32 DecodeLzChunk(LzStream *stream) {
             oddWord = input[15];
             output[14] = evenWord;
             output[15] = oddWord;
+#endif
             input += LZ_LITERAL_RUN_LENGTH;
             output += LZ_LITERAL_RUN_LENGTH;
             continue;
@@ -108,7 +135,13 @@ s32 DecodeLzChunk(LzStream *stream) {
         controlBits |= LZ_CONTROL_END_BIT;
         while (TRUE) {
             while (controlBits >= 0) {
+#ifdef AVOID_UB
+                CopyLzWord(output, input);
+                output++;
+                input++;
+#else
                 *output++ = *input++;
+#endif
                 ShiftControlBits(controlBits, 1);
             }
 
@@ -125,12 +158,26 @@ s32 DecodeLzChunk(LzStream *stream) {
             source = output - (reference >> LZ_REFERENCE_DISTANCE_SHIFT);
             referenceEnd =
                 output + ((reference & LZ_REFERENCE_LENGTH_MASK) + LZ_REFERENCE_LENGTH_MIN);
+#ifdef AVOID_UB
+            // A reference may overlap the words it decodes, so it is copied a
+            // word at a time, from its start
+            CopyLzWord(output, source);
+            source++;
+            referenceOutput = output + 1;
+            do {
+                CopyLzWord(referenceOutput, source);
+                referenceOutput++;
+                source++;
+            }
+            while (referenceOutput != referenceEnd);
+#else
             *output = *source++;
             referenceOutput = output + 1;
             do {
                 *referenceOutput++ = *source++;
             }
             while (referenceOutput != referenceEnd);
+#endif
             output = referenceOutput;
         }
     }
