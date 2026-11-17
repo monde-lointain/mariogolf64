@@ -15,7 +15,7 @@ supply at start-up and takes every model, texture, sound and song from it.
 CMake 3.30 or newer, Python 3.10 or newer, and GCC or Clang are required.
 The game's code defines some 60 routines inside others, as the original
 did, a GNU C extension that Clang lacks, so the build compiles a copy of
-each source with them moved to file scope. SDL 3.2 or newer is found as an
+each source with them moved to file scope. SDL 3.4 or newer is found as an
 installed package or else downloaded and built with the game.
 
     cmake --preset linux

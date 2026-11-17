@@ -7,11 +7,12 @@
 
 include(FetchContent)
 
-set(MG64_SDL_MINIMUM_VERSION 3.2.0)
+# 3.4 is the first with SDL_SavePNG, which writes --screenshot's image
+set(MG64_SDL_MINIMUM_VERSION 3.4.0)
 
 FetchContent_Declare(SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG release-3.2.26
+    GIT_TAG release-3.4.20
     GIT_SHALLOW TRUE
     FIND_PACKAGE_ARGS ${MG64_SDL_MINIMUM_VERSION} CONFIG
 )
