@@ -110,6 +110,8 @@ foreach(overlay IN ITEMS sections_a sections_b)
     target_link_libraries(mg64_${overlay} PRIVATE mg64_port_warnings)
     list(APPEND sections_overlays mg64_${overlay})
 endforeach()
+# A sanitizer's checks give the overlay without variables data of their own
+target_compile_options(mg64_sections_b PRIVATE -fno-sanitize=all)
 mg64_write_overlay_sections(
     OVERLAYS sections_a sections_b
     LINKER_SCRIPT sections_linker_script
@@ -159,7 +161,14 @@ mg64_add_port_test(gpu_backend_test
     SOURCES gpu_backend_test.c
     LIBRARIES mg64_gpu mg64_gfx SDL3::SDL3
 )
-set_tests_properties(gpu_backend_test PROPERTIES SKIP_RETURN_CODE 77)
+# The GPU's driver and the libraries it loads, such as libdbus, keep
+# memory that LeakSanitizer reports, and the driver is unloaded before it
+# reports, so no suppression can name it. The sanitizers still check the
+# rest.
+set_tests_properties(gpu_backend_test PROPERTIES
+    SKIP_RETURN_CODE 77
+    ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0"
+)
 
 mg64_add_port_test(vadpcm_test
     SOURCES vadpcm_test.c
