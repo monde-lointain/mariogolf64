@@ -49,10 +49,9 @@ Each preset builds into `build/pc/<preset>`. `cmake --workflow --preset
 | `src/mus/`       | libmus: the sequencer and the synthesizer behind the sound calls  |
 | `src/gu/`        | The matrix and vector routines of libultra's gu library           |
 | `src/kmc/`       | KMC's C library: its random numbers and CORDIC trigonometry       |
-| `src/gfx/`       | The display list interpreter and its SDL_GPU backend              |
+| `src/gfx/`       | The display list interpreter, its SDL_GPU backend and its shaders |
 | `src/platform/`  | `main`, the window, input, audio output, saves and the ROM file   |
-| `shaders/`       | The shaders' GLSL source and the bytecode compiled from it        |
-| `tests/`         | Unit tests and the start-up smoke test, run by CTest              |
+| `tests/`         | Unit tests of the port's libraries and tools, run by CTest        |
 
 ## Design
 
