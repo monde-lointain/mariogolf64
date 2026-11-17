@@ -1378,9 +1378,9 @@ NO_RESULT ConsiderReactionSpot(CoursePoint point) {
         for (billboardIndex = 0; billboardIndex < BILLBOARD_COUNT; billboardIndex++) {
             billboard = &g_Billboards[billboardIndex];
             if ((s32)IntLength2D(
-                    (billboard->x << WORLD_TO_COURSE_SHIFT) - point[AXIS_X],
-                    (billboard->z << WORLD_TO_COURSE_SHIFT) - point[AXIS_Z]
-                ) - (billboard->width << WORLD_TO_COURSE_SHIFT) <
+                    WorldToCourse(billboard->x) - point[AXIS_X],
+                    WorldToCourse(billboard->z) - point[AXIS_Z]
+                ) - WorldToCourse(billboard->width) <
                 SPOT_BILLBOARD_CLEARANCE) {
                 isNearBillboard = TRUE;
             }

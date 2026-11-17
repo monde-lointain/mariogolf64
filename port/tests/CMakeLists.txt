@@ -76,6 +76,11 @@ mg64_add_port_test(screen_test
     LIBRARIES mg64_port_internal
 )
 
+mg64_add_port_test(course_space_test
+    SOURCES course_space_test.c
+    LIBRARIES mg64_port_internal
+)
+
 mg64_add_port_test(math_util_test
     SOURCES math_util_test.c "${PROJECT_SOURCE_DIR}/src/math/math_util.c"
     LIBRARIES mg64_port_internal

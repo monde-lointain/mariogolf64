@@ -1145,30 +1145,22 @@ Boolean FindMiniGolfGroundHit(
                     hitX = (s32)((endX - startX) * hitFraction) + startX;
                     hitZ = (s32)((endZ - startZ) * hitFraction) + startZ;
                     if (((triangles[i].corners[AXIS_X][1] - triangles[i].corners[AXIS_X][0]) *
-                            (hitZ - (triangles[i].corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT))) -
+                            (hitZ - WorldToCourse(triangles[i].corners[AXIS_Z][0]))) -
                             ((triangles[i].corners[AXIS_Z][1] - triangles[i].corners[AXIS_Z][0]) *
-                                (hitX -
-                                    (triangles[i].corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT))) >=
+                                (hitX - WorldToCourse(triangles[i].corners[AXIS_X][0]))) >=
                         0) {
                         if (((triangles[i].corners[AXIS_X][2] - triangles[i].corners[AXIS_X][1]) *
-                                (hitZ -
-                                    (triangles[i].corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT))) -
+                                (hitZ - WorldToCourse(triangles[i].corners[AXIS_Z][1]))) -
                                 ((triangles[i].corners[AXIS_Z][2] -
                                      triangles[i].corners[AXIS_Z][1]) *
-                                    (hitX -
-                                        (triangles[i].corners[AXIS_X][1]
-                                            << WORLD_TO_COURSE_SHIFT))) >=
+                                    (hitX - WorldToCourse(triangles[i].corners[AXIS_X][1]))) >=
                             0) {
                             if (((triangles[i].corners[AXIS_X][0] -
                                      triangles[i].corners[AXIS_X][2]) *
-                                    (hitZ -
-                                        (triangles[i].corners[AXIS_Z][2]
-                                            << WORLD_TO_COURSE_SHIFT))) -
+                                    (hitZ - WorldToCourse(triangles[i].corners[AXIS_Z][2]))) -
                                     ((triangles[i].corners[AXIS_Z][0] -
                                          triangles[i].corners[AXIS_Z][2]) *
-                                        (hitX -
-                                            (triangles[i].corners[AXIS_X][2]
-                                                << WORLD_TO_COURSE_SHIFT))) >=
+                                        (hitX - WorldToCourse(triangles[i].corners[AXIS_X][2]))) >=
                                 0) {
                                 nearestFraction = hitFraction;
                                 hitIndex = i;
@@ -1410,30 +1402,22 @@ Boolean FindGroundHit(
                     hitX = ((endX - startX) * hitFraction) + startX;
                     hitZ = ((endZ - startZ) * hitFraction) + startZ;
                     if (((triangles[i].corners[AXIS_X][1] - triangles[i].corners[AXIS_X][0]) *
-                            (hitZ - (triangles[i].corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT))) -
+                            (hitZ - WorldToCourse(triangles[i].corners[AXIS_Z][0]))) -
                             ((triangles[i].corners[AXIS_Z][1] - triangles[i].corners[AXIS_Z][0]) *
-                                (hitX -
-                                    (triangles[i].corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT))) >=
+                                (hitX - WorldToCourse(triangles[i].corners[AXIS_X][0]))) >=
                         0) {
                         if (((triangles[i].corners[AXIS_X][2] - triangles[i].corners[AXIS_X][1]) *
-                                (hitZ -
-                                    (triangles[i].corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT))) -
+                                (hitZ - WorldToCourse(triangles[i].corners[AXIS_Z][1]))) -
                                 ((triangles[i].corners[AXIS_Z][2] -
                                      triangles[i].corners[AXIS_Z][1]) *
-                                    (hitX -
-                                        (triangles[i].corners[AXIS_X][1]
-                                            << WORLD_TO_COURSE_SHIFT))) >=
+                                    (hitX - WorldToCourse(triangles[i].corners[AXIS_X][1]))) >=
                             0) {
                             if (((triangles[i].corners[AXIS_X][0] -
                                      triangles[i].corners[AXIS_X][2]) *
-                                    (hitZ -
-                                        (triangles[i].corners[AXIS_Z][2]
-                                            << WORLD_TO_COURSE_SHIFT))) -
+                                    (hitZ - WorldToCourse(triangles[i].corners[AXIS_Z][2]))) -
                                     ((triangles[i].corners[AXIS_Z][0] -
                                          triangles[i].corners[AXIS_Z][2]) *
-                                        (hitX -
-                                            (triangles[i].corners[AXIS_X][2]
-                                                << WORLD_TO_COURSE_SHIFT))) >=
+                                        (hitX - WorldToCourse(triangles[i].corners[AXIS_X][2]))) >=
                                 0) {
                                 nearestFraction = hitFraction;
                                 hitIndex = i;
@@ -2216,11 +2200,10 @@ Boolean FindHoleTriangleHit(
                 // Each cross product tells which side of an edge the hit is on,
                 // seen from above. The third repeats the first edge, so the edge
                 // from the third corner back to the first is never tested.
-                edgeCrosses[0] =
-                    ((triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0]) *
-                        (hitZ - (triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT))) -
+                edgeCrosses[0] = ((triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0]) *
+                                     (hitZ - WorldToCourse(triangle.corners[AXIS_Z][0]))) -
                     ((triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0]) *
-                        (hitX - (triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT)));
+                        (hitX - WorldToCourse(triangle.corners[AXIS_X][0])));
                 if (edgeCrosses[0] < 0) {
                     sides = EDGE_SIDE_NEGATIVE;
                 }
@@ -2228,11 +2211,10 @@ Boolean FindHoleTriangleHit(
                     sides = (edgeCrosses[0] == 0) ? EDGE_SIDE_ON : EDGE_SIDE_POSITIVE;
                 }
 
-                edgeCrosses[1] =
-                    ((triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][1]) *
-                        (hitZ - (triangle.corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT))) -
+                edgeCrosses[1] = ((triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][1]) *
+                                     (hitZ - WorldToCourse(triangle.corners[AXIS_Z][1]))) -
                     ((triangle.corners[AXIS_Z][2] - triangle.corners[AXIS_Z][1]) *
-                        (hitX - (triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT)));
+                        (hitX - WorldToCourse(triangle.corners[AXIS_X][1])));
                 if (edgeCrosses[1] < 0) {
                     sides &= EDGE_SIDE_NEGATIVE;
                 }
@@ -2244,11 +2226,10 @@ Boolean FindHoleTriangleHit(
                 }
 
                 if (sides != 0) {
-                    edgeCrosses[2] =
-                        ((triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0]) *
-                            (hitZ - (triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT))) -
+                    edgeCrosses[2] = ((triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0]) *
+                                         (hitZ - WorldToCourse(triangle.corners[AXIS_Z][0]))) -
                         ((triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0]) *
-                            (hitX - (triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT)));
+                            (hitX - WorldToCourse(triangle.corners[AXIS_X][0])));
                     if (edgeCrosses[2] < 0) {
                         sides &= EDGE_SIDE_NEGATIVE;
                     }
@@ -2481,12 +2462,12 @@ Boolean FindWallHit(
                         triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][2]
                     );
                     if (triangle.corners[AXIS_X][0] < triangle.corners[AXIS_X][2]) {
-                        farEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
-                        nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+                        farEnd = WorldToCourse(triangle.corners[AXIS_X][2]);
+                        nearEnd = WorldToCourse(triangle.corners[AXIS_X][0]);
                     }
                     else {
-                        farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
-                        nearEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
+                        farEnd = WorldToCourse(triangle.corners[AXIS_X][0]);
+                        nearEnd = WorldToCourse(triangle.corners[AXIS_X][2]);
                     }
 
                     if (endX < startX) {
@@ -2553,12 +2534,12 @@ Boolean FindWallHit(
                         triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][1]
                     );
                     if (triangle.corners[AXIS_X][0] < triangle.corners[AXIS_X][1]) {
-                        farEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
-                        nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+                        farEnd = WorldToCourse(triangle.corners[AXIS_X][1]);
+                        nearEnd = WorldToCourse(triangle.corners[AXIS_X][0]);
                     }
                     else {
-                        farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
-                        nearEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
+                        farEnd = WorldToCourse(triangle.corners[AXIS_X][0]);
+                        nearEnd = WorldToCourse(triangle.corners[AXIS_X][1]);
                     }
 
                     if (endX < startX) {
@@ -2623,10 +2604,8 @@ Boolean FindWallHit(
                 if (hitFraction == 0.0f) {
                     nearestCorner = FARTHEST_CORNER_DISTANCE;
                     for (cornerIndex = 0; cornerIndex < TRIANGLE_CORNER_COUNT; cornerIndex++) {
-                        cornerDistance = fabsf(
-                            hitPointU -
-                            (triangle.corners[AXIS_X][cornerIndex] << WORLD_TO_COURSE_SHIFT)
-                        );
+                        cornerDistance =
+                            fabsf(hitPointU - WorldToCourse(triangle.corners[AXIS_X][cornerIndex]));
                         if (cornerDistance < nearestCorner) {
                             nearestCorner = cornerDistance;
                         }
@@ -2674,12 +2653,12 @@ Boolean FindWallHit(
                         triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][2]
                     );
                     if (triangle.corners[AXIS_Z][0] < triangle.corners[AXIS_Z][2]) {
-                        farEnd = triangle.corners[AXIS_Z][2] << WORLD_TO_COURSE_SHIFT;
-                        nearEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
+                        farEnd = WorldToCourse(triangle.corners[AXIS_Z][2]);
+                        nearEnd = WorldToCourse(triangle.corners[AXIS_Z][0]);
                     }
                     else {
-                        farEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
-                        nearEnd = triangle.corners[AXIS_Z][2] << WORLD_TO_COURSE_SHIFT;
+                        farEnd = WorldToCourse(triangle.corners[AXIS_Z][0]);
+                        nearEnd = WorldToCourse(triangle.corners[AXIS_Z][2]);
                     }
 
                     // Unlike along x, the fraction is to the wall's end itself, not past
@@ -2738,12 +2717,12 @@ Boolean FindWallHit(
                         triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][1]
                     );
                     if (triangle.corners[AXIS_Z][0] < triangle.corners[AXIS_Z][1]) {
-                        farEnd = triangle.corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT;
-                        nearEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
+                        farEnd = WorldToCourse(triangle.corners[AXIS_Z][1]);
+                        nearEnd = WorldToCourse(triangle.corners[AXIS_Z][0]);
                     }
                     else {
-                        farEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
-                        nearEnd = triangle.corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT;
+                        farEnd = WorldToCourse(triangle.corners[AXIS_Z][0]);
+                        nearEnd = WorldToCourse(triangle.corners[AXIS_Z][1]);
                     }
 
                     if (endZ < startZ) {
@@ -2796,10 +2775,8 @@ Boolean FindWallHit(
                 if (hitFraction == 0.0f) {
                     nearestCorner = FARTHEST_CORNER_DISTANCE;
                     for (cornerIndex = 0; cornerIndex < TRIANGLE_CORNER_COUNT; cornerIndex++) {
-                        cornerDistance = fabsf(
-                            hitPointV -
-                            (triangle.corners[AXIS_Z][cornerIndex] << WORLD_TO_COURSE_SHIFT)
-                        );
+                        cornerDistance =
+                            fabsf(hitPointV - WorldToCourse(triangle.corners[AXIS_Z][cornerIndex]));
                         if (cornerDistance < nearestCorner) {
                             nearestCorner = cornerDistance;
                         }
@@ -3033,13 +3010,13 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, Boolean checksHeight) {
             osSyncPrintf("うっ\n"); // "Ugh"
             for (corner = 0; corner < TRIANGLE_CORNER_COUNT; corner++) {
                 cornerDistance = Length2D(
-                    (wall.corners[AXIS_X][corner] << WORLD_TO_COURSE_SHIFT) - x,
-                    (wall.corners[AXIS_Z][corner] << WORLD_TO_COURSE_SHIFT) - z
+                    WorldToCourse(wall.corners[AXIS_X][corner]) - x,
+                    WorldToCourse(wall.corners[AXIS_Z][corner]) - z
                 );
                 if (cornerDistance < WALL_TOUCH_DISTANCE) {
-                    push[AXIS_X] = x - (wall.corners[AXIS_X][corner] << WORLD_TO_COURSE_SHIFT);
+                    push[AXIS_X] = x - WorldToCourse(wall.corners[AXIS_X][corner]);
                     push[AXIS_Y] = 0.0f;
-                    push[AXIS_Z] = z - (wall.corners[AXIS_Z][corner] << WORLD_TO_COURSE_SHIFT);
+                    push[AXIS_Z] = z - WorldToCourse(wall.corners[AXIS_Z][corner]);
                     if (cornerDistance > CORNER_LEAST_DISTANCE) {
                         guNormalize(&push[AXIS_X], &push[AXIS_Y], &push[AXIS_Z]);
                     }
@@ -3049,8 +3026,8 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, Boolean checksHeight) {
 
                     push[AXIS_X] *= WALL_PUSH_DISTANCE;
                     push[AXIS_Z] *= WALL_PUSH_DISTANCE;
-                    x = push[AXIS_X] + (wall.corners[AXIS_X][corner] << WORLD_TO_COURSE_SHIFT);
-                    z = push[AXIS_Z] + (wall.corners[AXIS_Z][corner] << WORLD_TO_COURSE_SHIFT);
+                    x = push[AXIS_X] + WorldToCourse(wall.corners[AXIS_X][corner]);
+                    z = push[AXIS_Z] + WorldToCourse(wall.corners[AXIS_Z][corner]);
                     isPushed = TRUE;
                     osSyncPrintf("WallInsideOutCorner!\n");
                     break;

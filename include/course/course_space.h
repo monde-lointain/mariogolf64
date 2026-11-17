@@ -20,6 +20,16 @@ typedef s32 CoursePoint[AXIS_COUNT];
 // WORLD_TO_COURSE_SCALE as a shift
 #define WORLD_TO_COURSE_SHIFT 10
 
+// A world coordinate or size in course units. Course X and Z, and the
+// ground's heights, are often negative, which C leaves undefined to shift,
+// so other builds than the matching one multiply, which gives the same bits
+// and, for any integer, the same type.
+#ifdef AVOID_UB
+#    define WorldToCourse(value) ((value) * (1 << WORLD_TO_COURSE_SHIFT))
+#else
+#    define WorldToCourse(value) ((value) << WORLD_TO_COURSE_SHIFT)
+#endif
+
 // Course point units in a yard, a foot and a meter
 #define UNITS_PER_YARD 14045.184f
 #define UNITS_PER_FOOT 4681.728f

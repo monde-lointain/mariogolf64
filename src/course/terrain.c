@@ -1912,9 +1912,8 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle) {
     // end
     inline Boolean IsOutsideEdge(Vtx * start, Vtx * end) {
         return (end->v.ob[AXIS_X] - start->v.ob[AXIS_X]) *
-                (z - (start->v.ob[AXIS_Z] << WORLD_TO_COURSE_SHIFT)) -
-            (end->v.ob[AXIS_Z] - start->v.ob[AXIS_Z]) *
-                (x - (start->v.ob[AXIS_X] << WORLD_TO_COURSE_SHIFT)) <
+                (z - WorldToCourse(start->v.ob[AXIS_Z])) -
+            (end->v.ob[AXIS_Z] - start->v.ob[AXIS_Z]) * (x - WorldToCourse(start->v.ob[AXIS_X])) <
             0;
     }
 
@@ -2218,15 +2217,9 @@ s32 GetTerrainHeight(s32 x, s32 z) {
     firstX = triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0];
     secondY = triangle.corners[AXIS_Y][2] - triangle.corners[AXIS_Y][0];
     secondX = triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][0];
-#ifdef AVOID_UB
-    // Ground below the course's zero is negative, which C leaves undefined to
-    // shift; multiplying gives the same bits
-    height = triangle.corners[AXIS_Y][0] * (1 << WORLD_TO_COURSE_SHIFT);
-#else
-    height = triangle.corners[AXIS_Y][0] << WORLD_TO_COURSE_SHIFT;
-#endif
-    originX = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
-    originZ = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
+    height = WorldToCourse(triangle.corners[AXIS_Y][0]);
+    originX = WorldToCourse(triangle.corners[AXIS_X][0]);
+    originZ = WorldToCourse(triangle.corners[AXIS_Z][0]);
     offsetX = x - originX;
     offsetZ = z - originZ;
     normalX = (firstY * secondZ) + (secondY * -firstZ);

@@ -2461,10 +2461,8 @@ void UpdateOpening(void) {
 
                 if (f_OpeningSceneFramesLeft >= 23 && f_OpeningSceneFramesLeft < 42) {
                     GetCharacterPointPosition(2, 2, point);
-                    g_CurrentShot.ballPosition[AXIS_X] = (s32)point[AXIS_X]
-                        << WORLD_TO_COURSE_SHIFT;
-                    g_CurrentShot.ballPosition[AXIS_Z] = (s32)point[AXIS_Z]
-                        << WORLD_TO_COURSE_SHIFT;
+                    g_CurrentShot.ballPosition[AXIS_X] = WorldToCourse((s32)point[AXIS_X]);
+                    g_CurrentShot.ballPosition[AXIS_Z] = WorldToCourse((s32)point[AXIS_Z]);
                     g_CurrentShot.ballPosition[AXIS_Y] = GetGroundHeight(
                                                              g_CurrentShot.ballPosition[AXIS_X],
                                                              g_CurrentShot.ballPosition[AXIS_Z]

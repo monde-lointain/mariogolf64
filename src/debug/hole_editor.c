@@ -1268,10 +1268,10 @@ void UpdateHolePointEditor(void) {
 
     if (f_HolePointEditMode == HOLE_POINT_MODE_PIN_TEE) {
         if (g_MenuControllerData[EDITOR_CONTROLLER].button & A_BUTTON) {
-            g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] = f_HolePointCursor[GROUND_AXIS_X]
-                << WORLD_TO_COURSE_SHIFT;
-            g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] = f_HolePointCursor[GROUND_AXIS_Z]
-                << WORLD_TO_COURSE_SHIFT;
+            g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] =
+                WorldToCourse(f_HolePointCursor[GROUND_AXIS_X]);
+            g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] =
+                WorldToCourse(f_HolePointCursor[GROUND_AXIS_Z]);
             g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Y] = GetGroundHeight(
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X],
                 g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z]
@@ -1294,10 +1294,10 @@ void UpdateHolePointEditor(void) {
         }
 
         if (g_MenuControllerData[EDITOR_CONTROLLER].button & B_BUTTON) {
-            g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X] = f_HolePointCursor[GROUND_AXIS_X]
-                << WORLD_TO_COURSE_SHIFT;
-            g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z] = f_HolePointCursor[GROUND_AXIS_Z]
-                << WORLD_TO_COURSE_SHIFT;
+            g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X] =
+                WorldToCourse(f_HolePointCursor[GROUND_AXIS_X]);
+            g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z] =
+                WorldToCourse(f_HolePointCursor[GROUND_AXIS_Z]);
             g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Y] = GetGroundHeight(
                 g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X],
                 g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z]
@@ -1369,10 +1369,10 @@ void UpdateHolePointEditor(void) {
 
     if (f_HolePointEditMode == HOLE_POINT_MODE_AIM) {
         if (g_MenuControllerData[EDITOR_CONTROLLER].button & A_BUTTON) {
-            g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X] = f_HolePointCursor[GROUND_AXIS_X]
-                << WORLD_TO_COURSE_SHIFT;
-            g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z] = f_HolePointCursor[GROUND_AXIS_Z]
-                << WORLD_TO_COURSE_SHIFT;
+            g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X] =
+                WorldToCourse(f_HolePointCursor[GROUND_AXIS_X]);
+            g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z] =
+                WorldToCourse(f_HolePointCursor[GROUND_AXIS_Z]);
             g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Y] = GetGroundHeight(
                 g_HolePoints.aimPoints[f_AimPointIndex][AXIS_X],
                 g_HolePoints.aimPoints[f_AimPointIndex][AXIS_Z]
@@ -1428,10 +1428,10 @@ void UpdateHolePointEditor(void) {
 
     if (f_HolePointEditMode == HOLE_POINT_MODE_ROUTE) {
         if (g_MenuControllerData[EDITOR_CONTROLLER].button & A_BUTTON) {
-            g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] = f_HolePointCursor[GROUND_AXIS_X]
-                << WORLD_TO_COURSE_SHIFT;
-            g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] = f_HolePointCursor[GROUND_AXIS_Z]
-                << WORLD_TO_COURSE_SHIFT;
+            g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] =
+                WorldToCourse(f_HolePointCursor[GROUND_AXIS_X]);
+            g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] =
+                WorldToCourse(f_HolePointCursor[GROUND_AXIS_Z]);
             g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Y] = GetGroundHeight(
                 g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X],
                 g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z]
@@ -1561,8 +1561,8 @@ void UpdateHolePointEditor(void) {
     g_MapCamera.view.lookAt[AXIS_X] = f_HolePointCursor[GROUND_AXIS_X];
     g_MapCamera.view.lookAt[AXIS_Z] = f_HolePointCursor[GROUND_AXIS_Z];
     g_MapCamera.view.lookAt[AXIS_Y] = GetGroundHeight(
-                                          f_HolePointCursor[GROUND_AXIS_X] << WORLD_TO_COURSE_SHIFT,
-                                          f_HolePointCursor[GROUND_AXIS_Z] << WORLD_TO_COURSE_SHIFT
+                                          WorldToCourse(f_HolePointCursor[GROUND_AXIS_X]),
+                                          WorldToCourse(f_HolePointCursor[GROUND_AXIS_Z])
                                       ) *
         (1.0f / (1 << WORLD_TO_COURSE_SHIFT));
     cameraDistance = EDITOR_CAMERA_DISTANCE;
@@ -2146,8 +2146,8 @@ void UpdateWallEditor(void) {
                 vertex = &g_WorkArea.hole.triangles[f_WallTriangleIndex].vertices[corner].v;
                 if (isDropping == TRUE) {
                     s32 height = (GetGroundHeight(
-                                      vertex->ob[AXIS_X] << WORLD_TO_COURSE_SHIFT,
-                                      vertex->ob[AXIS_Z] << WORLD_TO_COURSE_SHIFT
+                                      WorldToCourse(vertex->ob[AXIS_X]),
+                                      WorldToCourse(vertex->ob[AXIS_Z])
                                   ) - WALL_SINK_DEPTH) *
                         (1.0f / (1 << WORLD_TO_COURSE_SHIFT));
 
@@ -2334,8 +2334,8 @@ void PutObjectsOnGround(void) {
             g_Billboards[i].y =
                 GetGroundHeight(g_Billboards[i].x, g_Billboards[i].z) * COURSE_TO_WORLD_SCALE;
             height = GetGroundHeight(
-                         g_Billboards[i].x << WORLD_TO_COURSE_SHIFT,
-                         g_Billboards[i].z << WORLD_TO_COURSE_SHIFT
+                         WorldToCourse(g_Billboards[i].x),
+                         WorldToCourse(g_Billboards[i].z)
                      ) /
                 (1 << WORLD_TO_COURSE_SHIFT);
             guTranslateF(translation, g_Billboards[i].x, height + 1, g_Billboards[i].z);
@@ -3221,8 +3221,8 @@ PLANTED:
     for (billboardIndex = 0; billboardIndex < treeCount; billboardIndex++) {
         g_Billboards[billboardIndex].y =
             (GetGroundHeight(
-                 treePositions[billboardIndex][GROUND_AXIS_X] << WORLD_TO_COURSE_SHIFT,
-                 treePositions[billboardIndex][GROUND_AXIS_Z] << WORLD_TO_COURSE_SHIFT
+                 WorldToCourse(treePositions[billboardIndex][GROUND_AXIS_X]),
+                 WorldToCourse(treePositions[billboardIndex][GROUND_AXIS_Z])
              ) / (1 << WORLD_TO_COURSE_SHIFT)) +
             1;
         g_Billboards[billboardIndex].x = treePositions[billboardIndex][GROUND_AXIS_X];
@@ -3599,8 +3599,8 @@ void UpdateTreeEditor(void) {
     // The translation goes unused; PlaceBillboards places every tree again
     if (editKind != TRIANGLE_EDIT_NONE) {
         height = GetGroundHeight(
-                     g_Billboards[f_EditedTreeIndex].x << WORLD_TO_COURSE_SHIFT,
-                     g_Billboards[f_EditedTreeIndex].z << WORLD_TO_COURSE_SHIFT
+                     WorldToCourse(g_Billboards[f_EditedTreeIndex].x),
+                     WorldToCourse(g_Billboards[f_EditedTreeIndex].z)
                  ) /
             (1 << WORLD_TO_COURSE_SHIFT);
         guTranslateF(
