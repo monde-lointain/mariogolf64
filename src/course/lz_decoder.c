@@ -217,17 +217,35 @@ s32 DecodePatchedLzChunk(LzStream *stream) {
             if (offset < 0) {
                 while (patchCount != 0) {
                     copiedWord = history[(historyIndex + offset) & LZ_HISTORY_MASK];
+#ifdef AVOID_UB
+                    CopyLzWord(&history[historyIndex], output);
+                    historyIndex++;
+                    historyIndex &= LZ_HISTORY_MASK;
+                    CopyLzWord(output, &copiedWord);
+                    output++;
+#else
                     history[historyIndex++] = *output;
                     historyIndex &= LZ_HISTORY_MASK;
                     *output++ = copiedWord;
+#endif
                     patchCount--;
                 }
             }
             else {
                 while (patchCount != 0) {
+#ifdef AVOID_UB
+                    // Through copiedWord, as an offset of 0 copies the word
+                    // onto itself, which memcpy can't
+                    CopyLzWord(&history[historyIndex], output);
+                    historyIndex++;
+                    historyIndex &= LZ_HISTORY_MASK;
+                    CopyLzWord(&copiedWord, &output[offset]);
+                    CopyLzWord(output, &copiedWord);
+#else
                     history[historyIndex++] = *output;
                     historyIndex &= LZ_HISTORY_MASK;
                     *output = output[offset];
+#endif
                     output++;
                     patchCount--;
                 }
@@ -292,9 +310,17 @@ DECODE:
                     ApplyPatchCommand(FromBigEndian16(word));
                 }
                 else {
+#ifdef AVOID_UB
+                    CopyLzWord(&history[historyIndex], output);
+                    historyIndex++;
+                    historyIndex &= LZ_HISTORY_MASK;
+                    CopyLzWord(output, &word);
+                    output++;
+#else
                     history[historyIndex++] = *output;
                     historyIndex &= LZ_HISTORY_MASK;
                     *output++ = word;
+#endif
                     patchCount--;
                 }
 
@@ -327,9 +353,17 @@ DECODE:
                     ApplyPatchCommand(FromBigEndian16(word));
                 }
                 else {
+#ifdef AVOID_UB
+                    CopyLzWord(&history[historyIndex], output);
+                    historyIndex++;
+                    historyIndex &= LZ_HISTORY_MASK;
+                    CopyLzWord(output, &word);
+                    output++;
+#else
                     history[historyIndex++] = *output;
                     historyIndex &= LZ_HISTORY_MASK;
                     *output++ = word;
+#endif
                     patchCount--;
                 }
 

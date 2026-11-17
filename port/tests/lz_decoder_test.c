@@ -407,7 +407,8 @@ static void TestLeavesTheOutputUntyped(void) {
 // --- The patching decoder ---
 
 // The output that the patches apply to, as LoadLzData leaves the unpatched
-// data, with each word its own index above PATCHED_DATA_BASE
+// data, copied without a type, with each word its own index above
+// PATCHED_DATA_BASE
 #define PATCHED_DATA_BASE 0xE000
 #define PATCHED_DATA_WORD_COUNT 256
 #define WINDOW_WORD_COUNT (LZ_WINDOW_MASK + 1)
@@ -428,12 +429,16 @@ typedef struct PatchBuffers {
 static PatchBuffers AllocPatchBuffers(void) {
     PatchBuffers buffers;
     u16 data[PATCHED_DATA_WORD_COUNT];
+    u8 *packed;
     s32 i;
 
     for (i = 0; i < PATCHED_DATA_WORD_COUNT; i++) {
         data[i] = (u16)(PATCHED_DATA_BASE + i);
     }
-    buffers.output = PackWords(data, PATCHED_DATA_WORD_COUNT);
+    packed = PackWords(data, PATCHED_DATA_WORD_COUNT);
+    buffers.output = AllocUnwritten(PATCHED_DATA_WORD_COUNT);
+    memcpy(buffers.output, packed, sizeof(data));
+    free(packed);
     buffers.window = AllocUnwritten(WINDOW_WORD_COUNT);
     buffers.history = AllocUnwritten(HISTORY_WORD_COUNT);
     return buffers;
@@ -692,6 +697,49 @@ static void TestCarriesPatchesOnceARunMightNotFit(void) {
     free(nextBuffer);
 }
 
+// The game reads the models it patches as ints, floats and pointers, and
+// the model buffer last held another model, which it read the same way.
+// So the decoder has to read and write the words without giving them a
+// type of its own. Under the type sanitizer, reading the old model's words
+// as u16 halts the test, as does reading the patched words here as u32;
+// the other builds only check the words. The stream has literals, two of
+// them from a reference, a forward copy and a history copy.
+static void TestPatchesWithoutTypes(void) {
+    static const u16 stream[] = {
+        HEADER_WORD,
+        HEADER_WORD,
+        0x2400,
+        PatchLiterals(3),
+        0x1111,
+        Reference(1, 2),
+        PatchCopy(1, 1),
+        PatchCopy(-4, 1),
+        END_REFERENCE,
+    };
+    static const u16 expected[] = {0x1111, 0x1111, 0x1111, 0xE004, 0xE000};
+    PatchBuffers buffers = AllocPatchBuffers();
+    const volatile u32 *outputWords = (const volatile u32 *)buffers.output;
+    u8 *expectedBytes;
+    u32 expectedWord;
+    u32 oldWord;
+    s32 i;
+
+    for (i = 0; i < PATCHED_DATA_WORD_COUNT / 2; i++) {
+        oldWord = outputWords[i];
+    }
+
+    EXPECT(PatchWholeStream(stream, ARRAY_COUNT(stream), &buffers) == sizeof(expected));
+    EXPECT(HasPatchedOutput(buffers.output, expected, ARRAY_COUNT(expected)));
+    expectedBytes = PackWords(expected, ARRAY_COUNT(expected));
+    for (i = 0; i < (s32)sizeof(expected) / (s32)sizeof(u32); i++) {
+        memcpy(&expectedWord, expectedBytes + i * sizeof(u32), sizeof(u32));
+        EXPECT(outputWords[i] == expectedWord);
+    }
+    (void)oldWord;
+    free(expectedBytes);
+    FreePatchBuffers(&buffers);
+}
+
 int main(void) {
     TestCopiesLiterals();
     TestCopiesOverlappingReferences();
@@ -709,5 +757,6 @@ int main(void) {
     TestRepeatsDecodedCommands();
     TestCarriesPatchesIntoTheNextChunk();
     TestCarriesPatchesOnceARunMightNotFit();
+    TestPatchesWithoutTypes();
     return ReportTestResults("lz_decoder_test");
 }
