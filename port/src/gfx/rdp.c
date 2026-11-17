@@ -828,7 +828,8 @@ static bool UseColorImageTarget(float bottom) {
 
     if (f_Rdp.colorImage == NULL || ColorImageHeight(f_Rdp.colorImage) < height) {
         // Uploading what the CPU wrote, or growing the target, must follow
-        // the draws recorded so far
+        // the draws recorded so far. Taking in more rows of memory needn't:
+        // no draw has reached them.
         if (!IsColorImageCurrent(
                 f_Rdp.colorImageAddress,
                 f_Rdp.colorImageWidth,
@@ -842,6 +843,7 @@ static bool UseColorImageTarget(float bottom) {
             f_Rdp.colorImageAddress,
             f_Rdp.colorImageWidth,
             height,
+            SDL_max(height, f_Rdp.scissor.bottom),
             f_Rdp.colorImageSize
         );
     }
@@ -891,7 +893,7 @@ static GfxVertex *BeginPrimitive(
     }
 
     scissor.right = SDL_min(scissor.right, ColorImageWidth(f_Rdp.colorImage));
-    scissor.bottom = SDL_min(scissor.bottom, ColorImageHeight(f_Rdp.colorImage));
+    scissor.bottom = SDL_min(scissor.bottom, ColorImageTargetHeight(f_Rdp.colorImage));
     if (scissor.right <= scissor.left || scissor.bottom <= scissor.top) {
         return NULL;
     }
@@ -958,7 +960,7 @@ void DrawRdpTriangle(
     }
 
     xScale = 2.0f / (float)ColorImageWidth(f_Rdp.colorImage);
-    yScale = 2.0f / (float)ColorImageHeight(f_Rdp.colorImage);
+    yScale = 2.0f / (float)ColorImageTargetHeight(f_Rdp.colorImage);
     for (i = 0; i < 3; i++) {
         const RspVertex *corner = corners[i];
         GfxVertex *vertex = &vertices[i];
@@ -1009,7 +1011,7 @@ static void StoreRectangle(
     }
 
     xScale = 2.0f / (float)ColorImageWidth(f_Rdp.colorImage);
-    yScale = 2.0f / (float)ColorImageHeight(f_Rdp.colorImage);
+    yScale = 2.0f / (float)ColorImageTargetHeight(f_Rdp.colorImage);
     depth = usesPrimitiveDepth ? PrimitiveDepth() : 0.0f;
     for (i = 0; i < 6; i++) {
         int corner = cornerOrder[i];

@@ -21,7 +21,8 @@
 struct ColorImage {
     uint8_t *address; // NULL for an unused entry
     uint16_t width;
-    uint16_t height;
+    uint16_t height; // The rows of memory, as far as drawing has reached
+    uint16_t targetHeight; // The target's rows, at least height
     uint8_t bytesPerPixel;
     bool isMemoryBehind; // The GPU has drawn what memory lacks
     uint64_t memoryHash; // Of the memory, when it last agreed with the target
@@ -99,9 +100,15 @@ static uint64_t HashImageMemory(const ColorImage *image) {
 // The game's CPU code reads and writes its images as host words: a 16-bit
 // pixel is 5-5-5-1 from red, and a 32-bit one red to alpha from the top
 // byte. The renderer's pixels are RGBA8 bytes.
-static void ReadMemoryPixels(const ColorImage *image, uint32_t *rgba) {
-    uint32_t count = (uint32_t)image->width * image->height;
-    const uint8_t *bytes = image->address;
+static void ReadMemoryPixels(
+    const ColorImage *image,
+    uint32_t firstRow,
+    uint32_t rowCount,
+    uint32_t *rgba
+) {
+    uint32_t count = (uint32_t)image->width * rowCount;
+    const uint8_t *bytes =
+        image->address + ((uintptr_t)image->width * firstRow * image->bytesPerPixel);
     uint32_t i;
 
     if (image->bytesPerPixel == 2) {
@@ -145,12 +152,19 @@ static void WriteMemoryPixels(ColorImage *image, const uint32_t *rgba) {
     }
 }
 
-static void UploadMemory(ColorImage *image) {
-    uint32_t *pixels = PixelBuffer((uint32_t)image->width * image->height);
+// Replaces the target's rows from firstRow to the image's height with
+// memory's
+static void UploadMemoryRows(ColorImage *image, uint16_t firstRow) {
+    uint32_t rowCount = (uint32_t)image->height - firstRow;
+    uint32_t *pixels = PixelBuffer((uint32_t)image->width * rowCount);
 
-    ReadMemoryPixels(image, pixels);
-    BackendWriteTarget(image->target, image->width, image->height, pixels);
+    ReadMemoryPixels(image, firstRow, rowCount, pixels);
+    BackendWriteTarget(image->target, image->width, firstRow, rowCount, pixels);
     image->memoryHash = HashImageMemory(image);
+}
+
+static void UploadMemory(ColorImage *image) {
+    UploadMemoryRows(image, 0);
     image->isMemoryBehind = false;
 }
 
@@ -177,7 +191,9 @@ static int BytesPerPixel(int size) {
 bool IsColorImageCurrent(const uint8_t *address, uint16_t width, uint16_t height, int size) {
     ColorImage *image = FindColorImage(address, width, BytesPerPixel(size));
 
-    return image != NULL && image->height >= height && HashImageMemory(image) == image->memoryHash;
+    return image != NULL &&
+        image->targetHeight >= height &&
+        HashImageMemory(image) == image->memoryHash;
 }
 
 static void DownloadTarget(ColorImage *image) {
@@ -256,11 +272,43 @@ static void DropOverlappedImages(const uint8_t *address, uintptr_t size, const C
     }
 }
 
-ColorImage *UseColorImage(uint8_t *address, uint16_t width, uint16_t height, int size) {
+// Makes the target at least height rows tall, keeping what it holds. The
+// caller has flushed the frame, so the copy follows the frame's draws.
+static void FitTarget(ColorImage *image, uint16_t height) {
+    GfxTarget *grown;
+
+    if (image->targetHeight >= height) {
+        return;
+    }
+
+    grown = BackendCreateTarget(image->width, height, false);
+    BackendCopyTarget(image->target, grown, image->width, image->targetHeight);
+    BackendDestroyTarget(image->target);
+    image->target = grown;
+    image->targetHeight = height;
+}
+
+// Takes in memory's rows down to height. No draw has reached below the old
+// height, so the new rows come from memory and the drawing above stays.
+static void ExtendImage(ColorImage *image, uint16_t height) {
+    uint16_t oldHeight = image->height;
+
+    image->height = height;
+    DropOverlappedImages(image->address, ImageByteCount(image), image);
+    UploadMemoryRows(image, oldHeight);
+}
+
+ColorImage *UseColorImage(
+    uint8_t *address,
+    uint16_t width,
+    uint16_t height,
+    uint16_t targetHeight,
+    int size
+) {
     int bytesPerPixel = BytesPerPixel(size);
     ColorImage *image;
 
-    SDL_assert(address != NULL && width != 0 && height != 0);
+    SDL_assert(address != NULL && width != 0 && height != 0 && height <= targetHeight);
     SDL_LockMutex(f_Lock);
     image = FindColorImage(address, width, bytesPerPixel);
     if (image == NULL) {
@@ -268,23 +316,22 @@ ColorImage *UseColorImage(uint8_t *address, uint16_t width, uint16_t height, int
         image->address = address;
         image->width = width;
         image->height = height;
+        image->targetHeight = targetHeight;
         image->bytesPerPixel = (uint8_t)bytesPerPixel;
         DropOverlappedImages(address, ImageByteCount(image), image);
-        image->target = BackendCreateTarget(width, height, false);
-        UploadMemory(image);
-    }
-    else if (image->height < height) {
-        GfxTarget *grown = BackendCreateTarget(width, height, false);
-
-        BackendCopyTarget(image->target, grown, width, image->height);
-        BackendDestroyTarget(image->target);
-        image->target = grown;
-        image->height = height;
-        DropOverlappedImages(address, ImageByteCount(image), image);
+        image->target = BackendCreateTarget(width, targetHeight, false);
         UploadMemory(image);
     }
     else if (HashImageMemory(image) != image->memoryHash) {
+        // The CPU's writes are newer than any drawing
+        FitTarget(image, height);
+        image->height = SDL_max(image->height, height);
+        DropOverlappedImages(address, ImageByteCount(image), image);
         UploadMemory(image);
+    }
+    else if (image->height < height) {
+        FitTarget(image, height);
+        ExtendImage(image, height);
     }
 
     image->lastUse = ++f_UseCount;
@@ -304,6 +351,10 @@ uint16_t ColorImageHeight(const ColorImage *image) {
     return image->height;
 }
 
+uint16_t ColorImageTargetHeight(const ColorImage *image) {
+    return image->targetHeight;
+}
+
 void MarkColorImageDrawn(ColorImage *image) {
     image->isMemoryBehind = true;
 }
@@ -318,7 +369,7 @@ GfxTarget *UseDepthImage(const uint8_t *address, const ColorImage *colorImage) {
         if (depth->target != NULL &&
             depth->address == address &&
             depth->width == colorImage->width &&
-            depth->height == colorImage->height) {
+            depth->height == colorImage->targetHeight) {
             return depth->target;
         }
 
@@ -338,8 +389,8 @@ GfxTarget *UseDepthImage(const uint8_t *address, const ColorImage *colorImage) {
 
     free->address = address;
     free->width = colorImage->width;
-    free->height = colorImage->height;
-    free->target = BackendCreateTarget(colorImage->width, colorImage->height, true);
+    free->height = colorImage->targetHeight;
+    free->target = BackendCreateTarget(colorImage->width, colorImage->targetHeight, true);
     return free->target;
 }
 

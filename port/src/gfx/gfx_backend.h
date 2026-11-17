@@ -29,7 +29,14 @@ void BackendExecuteFrame(const GfxFrame *frame);
 // as RGBA8 with red in the lowest byte
 void BackendReadTarget(GfxTarget *target, uint32_t width, uint32_t height, uint32_t *rgba);
 
-// Replaces a color target's pixels with these
-void BackendWriteTarget(GfxTarget *target, uint32_t width, uint32_t height, const uint32_t *rgba);
+// Replaces rowCount rows of a color target's pixels, from firstRow down,
+// with these. It goes ahead of the draws that wait for the next frame.
+void BackendWriteTarget(
+    GfxTarget *target,
+    uint32_t width,
+    uint32_t firstRow,
+    uint32_t rowCount,
+    const uint32_t *rgba
+);
 
 #endif

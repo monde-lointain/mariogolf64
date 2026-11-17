@@ -695,6 +695,7 @@ static void BlitTexture(
     uint32_t sourceWidth,
     uint32_t sourceHeight,
     SDL_GPUTexture *destination,
+    uint32_t destinationTop,
     uint32_t destinationWidth,
     uint32_t destinationHeight,
     SDL_GPUFilter filter
@@ -706,6 +707,7 @@ static void BlitTexture(
     blit.source.w = sourceWidth;
     blit.source.h = sourceHeight;
     blit.destination.texture = destination;
+    blit.destination.y = destinationTop;
     blit.destination.w = destinationWidth;
     blit.destination.h = destinationHeight;
     blit.load_op = SDL_GPU_LOADOP_LOAD;
@@ -734,6 +736,7 @@ void BackendReadTarget(GfxTarget *target, uint32_t width, uint32_t height, uint3
             width * f_Gpu.scale,
             height * f_Gpu.scale,
             source,
+            0,
             width,
             height,
             SDL_GPU_FILTER_LINEAR
@@ -769,8 +772,15 @@ void BackendReadTarget(GfxTarget *target, uint32_t width, uint32_t height, uint3
     SDL_UnmapGPUTransferBuffer(f_Gpu.device, f_Gpu.pixelDownload.buffer);
 }
 
-void BackendWriteTarget(GfxTarget *target, uint32_t width, uint32_t height, const uint32_t *rgba) {
-    uint32_t byteCount = width * height * (uint32_t)sizeof(uint32_t);
+void BackendWriteTarget(
+    GfxTarget *target,
+    uint32_t width,
+    uint32_t firstRow,
+    uint32_t rowCount,
+    const uint32_t *rgba
+) {
+    uint32_t byteCount = width * rowCount * (uint32_t)sizeof(uint32_t);
+    uint32_t destinationRow = firstRow;
     SDL_GPUCommandBuffer *commands = AcquireCommandBuffer();
     SDL_GPUTexture *destinationTexture = target->texture;
     SDL_GPUTextureTransferInfo source;
@@ -789,17 +799,19 @@ void BackendWriteTarget(GfxTarget *target, uint32_t width, uint32_t height, cons
     SDL_UnmapGPUTransferBuffer(f_Gpu.device, f_Gpu.pixelUpload.buffer);
 
     if (f_Gpu.scale != 1) {
-        destinationTexture = UseStaging(width, height);
+        destinationTexture = UseStaging(width, rowCount);
+        destinationRow = 0;
     }
 
     SDL_zero(source);
     source.transfer_buffer = f_Gpu.pixelUpload.buffer;
     source.pixels_per_row = width;
-    source.rows_per_layer = height;
+    source.rows_per_layer = rowCount;
     SDL_zero(destination);
     destination.texture = destinationTexture;
+    destination.y = destinationRow;
     destination.w = width;
-    destination.h = height;
+    destination.h = rowCount;
     destination.d = 1;
     copy = SDL_BeginGPUCopyPass(commands);
     SDL_UploadToGPUTexture(copy, &source, &destination, false);
@@ -811,10 +823,11 @@ void BackendWriteTarget(GfxTarget *target, uint32_t width, uint32_t height, cons
             commands,
             destinationTexture,
             width,
-            height,
+            rowCount,
             target->texture,
+            firstRow * f_Gpu.scale,
             width * f_Gpu.scale,
-            height * f_Gpu.scale,
+            rowCount * f_Gpu.scale,
             SDL_GPU_FILTER_NEAREST
         );
     }

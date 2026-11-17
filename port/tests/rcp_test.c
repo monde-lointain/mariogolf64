@@ -46,12 +46,15 @@ static struct {
     int frameCount;
     int readCount;
     int writeCount;
+    uint32_t lastWrittenRow; // The first row of the last write
+    uint32_t writtenRowCount; // And its rows
 } f_Gpu;
 
 static uint16_t f_ColorImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static uint16_t f_DepthImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static uint16_t f_OtherImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static uint16_t f_SmallImage[IMAGE_WIDTH * IMAGE_HEIGHT];
+static uint16_t f_GrowingImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static Gfx f_DisplayList[256];
 
 GfxTarget *BackendCreateTarget(uint32_t width, uint32_t height, bool isDepth) {
@@ -106,11 +109,18 @@ void BackendReadTarget(GfxTarget *target, uint32_t width, uint32_t height, uint3
     f_Gpu.readCount++;
 }
 
-void BackendWriteTarget(GfxTarget *target, uint32_t width, uint32_t height, const uint32_t *rgba) {
+void BackendWriteTarget(
+    GfxTarget *target,
+    uint32_t width,
+    uint32_t firstRow,
+    uint32_t rowCount,
+    const uint32_t *rgba
+) {
     (void)target;
     (void)width;
-    (void)height;
     (void)rgba;
+    f_Gpu.lastWrittenRow = firstRow;
+    f_Gpu.writtenRowCount = rowCount;
     f_Gpu.writeCount++;
 }
 
@@ -603,6 +613,34 @@ static void TestImageSizedByDrawing(void) {
     EXPECT(SyncsOnlyFirstRows(IMAGE_HEIGHT / 2));
 }
 
+// An image that a lower primitive grows in the middle of a task keeps what
+// was drawn above: only memory's new rows go up, into a target made with
+// room for the scissor, so the frame's draws needn't reach the GPU first
+static void TestImageGrowsInPlace(void) {
+    Gfx *gfx = f_DisplayList;
+    GfxTarget *target;
+    uint16_t width = 0;
+    uint16_t height = 0;
+    int frameCount;
+
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_GrowingImage);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetFillColor(gfx++, 0);
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, 3);
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, 15);
+    ResetCapture();
+    frameCount = f_Gpu.frameCount;
+    RunList(gfx);
+
+    EXPECT(f_Gpu.frameCount == frameCount + 1);
+    EXPECT(f_Gpu.passCount == 1);
+    EXPECT(f_Gpu.lastWrittenRow == 4 && f_Gpu.writtenRowCount == 12);
+    target = LockShownTarget((const uint8_t *)f_GrowingImage, &width, &height);
+    EXPECT(target != NULL && target->height == IMAGE_HEIGHT && height == 16);
+    UnlockShownTarget();
+}
+
 // Shutting down releases every target, and drawing after it makes new ones
 static void TestShutdownReleasesTargets(void) {
     Gfx *gfx;
@@ -634,6 +672,7 @@ int main(void) {
     TestShownTarget();
     TestCpuWritesOutliveDrawing();
     TestImageSizedByDrawing();
+    TestImageGrowsInPlace();
     TestShutdownReleasesTargets();
     return ReportTestResults("rcp_test");
 }
