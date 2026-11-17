@@ -33,6 +33,9 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
+#ifdef AVOID_UB
+#    include "math/float_to_unsigned.h"
+#endif
 
 #define GOLF_BALL_COUNT 32
 #define AFTERIMAGE_LENGTH_MAX 60
@@ -858,6 +861,12 @@ typedef s32 BallSprite;
 #define PulledBallDepth(point, offset) \
     ((point).depth - ((point).depthStep * (BALL_DEPTH_PULL * g_PinVertexScale)) + (offset) - \
         BALL_DEPTH_BIAS)
+// The afterimages' depths are unsigned, and the pulled depths are negative
+#ifdef AVOID_UB
+#    define PulledAfterimageDepth(point, offset) TruncateToU32(PulledBallDepth(point, offset))
+#else
+#    define PulledAfterimageDepth(point, offset) PulledBallDepth(point, offset)
+#endif
 #define FULL_SHADOW_SHADE 0x7F
 #define SHADOW_FADE_DEPTH 512
 #define SHADOW_SHADE_MIN 0x5F
@@ -1657,10 +1666,10 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                 }
                 else {
                     if (afterimageProjectedDepth < g_CupViewDepth) {
-                        afterimageDepth = PulledBallDepth(ballPoint, NEAR_BALL_DEPTH_OFFSET);
+                        afterimageDepth = PulledAfterimageDepth(ballPoint, NEAR_BALL_DEPTH_OFFSET);
                     }
                     else if (afterimage->isInCup == FALSE) {
-                        afterimageDepth = PulledBallDepth(ballPoint, FAR_BALL_DEPTH_OFFSET);
+                        afterimageDepth = PulledAfterimageDepth(ballPoint, FAR_BALL_DEPTH_OFFSET);
                     }
                     else {
                         continue;
