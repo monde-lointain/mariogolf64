@@ -167,6 +167,14 @@ target_compile_definitions(shift_jis_test PRIVATE
     SHIFT_JIS_TEST_SOURCE="${CMAKE_CURRENT_SOURCE_DIR}/shift_jis_test.c"
 )
 
+# The decoder of the holes' LZ-compressed data, through the copy that has
+# DecodePatchedLzChunk's nested function at file scope
+mg64_encode_shift_jis(lz_decoder_copy "${PROJECT_SOURCE_DIR}/src/course/lz_decoder.c")
+mg64_add_port_test(lz_decoder_test
+    SOURCES lz_decoder_test.c ${lz_decoder_copy}
+    LIBRARIES mg64_port_internal
+)
+
 mg64_add_port_test(tmem_test
     SOURCES tmem_test.c
     LIBRARIES mg64_gfx
