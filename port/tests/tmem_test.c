@@ -88,6 +88,54 @@ static void TestLoadBlockDxt(void) {
     EXPECT(f_Tmem.tiles[G_TX_LOADTILE].lowerRightS == 15);
 }
 
+// Rows that end partway through a word leave the rest of it as it was, and
+// a load that runs off the end of TMEM goes on at its start. Here two rows
+// of seven 8-bit texels start in TMEM's last word: the first fills all but
+// its last byte, and the second, an odd row, wraps to the first word with
+// its halves swapped, filling all but the last byte of its high half. Each
+// word that a load reaches notes the image's order; the next, which none
+// reaches, doesn't.
+static void TestLoadTileRowEndsAndWrap(void) {
+    uint8_t image[7 * 2];
+    TextureImage source = {image, G_IM_FMT_I, G_IM_SIZ_8b, 7, true};
+    int i;
+
+    for (i = 0; i < 7 * 2; i++) {
+        image[i] = (uint8_t)(i + 1);
+    }
+
+    memset(f_Tmem.bytes, 0xEE, sizeof(f_Tmem.bytes));
+    memset(f_Tmem.isHostOrderWord, 0, sizeof(f_Tmem.isHostOrderWord));
+    SetTile(G_TX_LOADTILE, G_IM_FMT_I, G_IM_SIZ_8b, 1, (TMEM_SIZE / TMEM_WORD_SIZE) - 1);
+    LoadTmemTile(&f_Tmem, &source, G_TX_LOADTILE, 0, 0, 6 << 2, 1 << 2);
+    for (i = 0; i < 7; i++) {
+        EXPECT(f_Tmem.bytes[TMEM_SIZE - TMEM_WORD_SIZE + i] == i + 1);
+    }
+
+    EXPECT(f_Tmem.bytes[TMEM_SIZE - 1] == 0xEE);
+    EXPECT(f_Tmem.bytes[4] == 8 && f_Tmem.bytes[5] == 9);
+    EXPECT(f_Tmem.bytes[6] == 10 && f_Tmem.bytes[7] == 11);
+    EXPECT(f_Tmem.bytes[0] == 12 && f_Tmem.bytes[1] == 13 && f_Tmem.bytes[2] == 14);
+    EXPECT(f_Tmem.bytes[3] == 0xEE && f_Tmem.bytes[8] == 0xEE);
+    EXPECT(f_Tmem.isHostOrderWord[(TMEM_SIZE / TMEM_WORD_SIZE) - 1]);
+    EXPECT(f_Tmem.isHostOrderWord[0]);
+    EXPECT(!f_Tmem.isHostOrderWord[1]);
+}
+
+// A row that spans words notes the image's order in each of them, and in
+// no other
+static void TestLoadTileNotesEachWordsOrder(void) {
+    uint8_t image[12] = {0};
+    TextureImage source = {image, G_IM_FMT_I, G_IM_SIZ_8b, 12, true};
+
+    memset(f_Tmem.isHostOrderWord, 0, sizeof(f_Tmem.isHostOrderWord));
+    SetTile(G_TX_LOADTILE, G_IM_FMT_I, G_IM_SIZ_8b, 2, 2);
+    LoadTmemTile(&f_Tmem, &source, G_TX_LOADTILE, 0, 0, 11 << 2, 0);
+    EXPECT(!f_Tmem.isHostOrderWord[1]);
+    EXPECT(f_Tmem.isHostOrderWord[2] && f_Tmem.isHostOrderWord[3]);
+    EXPECT(!f_Tmem.isHostOrderWord[4]);
+}
+
 // A CI4 tile reads its palette's sixteen entries; a CI8 tile all 256
 static void TestColorIndexPalettes(void) {
     uint8_t palette[16 * 2];
@@ -266,6 +314,8 @@ static void TestTextureKeys(void) {
 int main(void) {
     TestLoadTileRoundTrip();
     TestLoadBlockDxt();
+    TestLoadTileRowEndsAndWrap();
+    TestLoadTileNotesEachWordsOrder();
     TestColorIndexPalettes();
     TestHostOrderLoads();
     TestIntensityFormats();
