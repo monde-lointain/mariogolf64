@@ -1992,7 +1992,15 @@ void UpdateSavedGames(void) {
             }
 
             f_AssignedHumanCount--;
-            f_SavedPlayerControllers[f_HumanPlayerIndices[f_AssignedHumanCount]] = NO_CONTROLLER;
+#ifdef AVOID_UB
+            // B with no human player given a controller has left for the title
+            // screen, taking the count below 0. The N64 then wrote at an index
+            // read from before f_HumanPlayerIndices: the low half of the last
+            // f_GameBoards pointer.
+            if (f_AssignedHumanCount >= 0)
+#endif
+                f_SavedPlayerControllers[f_HumanPlayerIndices[f_AssignedHumanCount]] =
+                    NO_CONTROLLER;
             if (f_AssignedHumanCount <= 0) {
                 f_IsGameChosen = FALSE;
                 for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
