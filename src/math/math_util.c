@@ -24,7 +24,8 @@
 #define CRC16_INITIAL_VALUE 0xFFFF
 
 static s32 f_RandomSeed = 0;
-static f32 f_ZeroDivisor = 0.0f;
+// Only the N64 divides by it
+static f32 f_ZeroDivisor UNUSED = 0.0f;
 static s32 f_UnusedWordsAfterZeroDivisor[2] UNUSED = {0};
 
 // Halves the components until they are small enough, and doubles the length
