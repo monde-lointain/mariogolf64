@@ -63,7 +63,12 @@ void PcLoadSaveMemory(u8 *image, u32 size) {
         SDL_memcpy(image, contents, size);
     }
     else if (contents != NULL) {
-        SDL_Log("Ignoring %s: it holds %zu bytes, not %u", f_Path, fileSize, size);
+        SDL_Log(
+            "Ignoring %s: it holds %" SDL_PRIu64 " bytes, not %u",
+            f_Path,
+            (Uint64)fileSize,
+            size
+        );
     }
 
     SDL_UnlockMutex(f_Lock);
