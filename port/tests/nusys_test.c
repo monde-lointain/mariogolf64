@@ -28,6 +28,8 @@ static u16 *f_FramebufferList[3] = {f_Framebuffers[0], f_Framebuffers[1], f_Fram
 static SDL_Semaphore *f_TestDone;
 static SDL_AtomicInt f_RetracesWanted;
 static int f_GfxTaskCount;
+static void *f_DrawnFramebuffer;
+static int f_ShownDrawCount;
 static u8 f_StoredSram[PC_SRAM_SIZE];
 static int f_StoreCount;
 static OSContPad f_Pads[4];
@@ -39,6 +41,10 @@ void PcRunGfxTask(Gfx *displayList, u32 size) {
     (void)displayList;
     (void)size;
     f_GfxTaskCount++;
+    if (osViGetCurrentFramebuffer() == f_DrawnFramebuffer ||
+        osViGetNextFramebuffer() == f_DrawnFramebuffer) {
+        f_ShownDrawCount++;
+    }
 }
 
 u8 PcGetConnectedControllers(void) {
@@ -213,11 +219,43 @@ static void TestControllers(void) {
     EXPECT(f_MotorOn[0]);
 }
 
+// Starts a task that draws into the frame buffer next in the ring
+static void StartFrame(void) {
+    f_DrawnFramebuffer = nuGfxCfb_ptr;
+    nuGfxTaskStart(NULL, 0, NU_GFX_UCODE_F3DEX, NU_SC_SWAPBUFFER);
+}
+
+// A task whose frame buffer the screen shows, or is to show, draws only
+// once the retraces have taken it off
+static void TestDrawingWaitsForHiddenFramebuffer(void) {
+    RetireAllTasks();
+    WaitForRetraces(2);
+    nuGfxSetCfb(f_FramebufferList, TRIPLE_BUFFERING);
+    f_ShownDrawCount = 0;
+    StartFrame();
+    WaitForRetraces(1);
+    EXPECT(FramebufferIndex(osViGetCurrentFramebuffer()) == 0);
+    StartFrame();
+    StartFrame();
+    // The fourth frame's buffer is the first's, which the screen shows, so
+    // the task needs the retraces that show the second
+    SDL_AddAtomicInt(&f_RetracesWanted, 4);
+    StartFrame();
+    EXPECT(f_ShownDrawCount == 0);
+    EXPECT(FramebufferIndex(osViGetCurrentFramebuffer()) == 1);
+    while (SDL_GetAtomicInt(&f_RetracesWanted) > 0) {
+        osPcWaitForInterrupt();
+    }
+
+    RetireAllTasks();
+}
+
 void mainproc(void *argument) {
     (void)argument;
     nuGfxInitEX2();
     TestFramebufferRing();
     TestSwapPacing();
+    TestDrawingWaitsForHiddenFramebuffer();
     TestSaveMemory();
     TestRomReads();
     TestControllers();

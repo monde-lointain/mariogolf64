@@ -7,6 +7,10 @@
  * SWAP_RETRACE_MIN retraces after the last, as the game's NuSystem does, so
  * that every frame stays on the screen as long.
  *
+ * Before a task draws, it waits for the retraces that take its frame buffer
+ * off the screen, as the game's NuSystem does, so that it never draws over
+ * a frame that the screen shows or is about to.
+ *
  * The game draws into two or three frame buffers. With two, the third's
  * memory holds the depth buffer, which the saved-frame effect draws into;
  * with three, the depth buffer lies at a fixed address. The buffers in use
@@ -172,6 +176,14 @@ static void AdvanceFramebuffer(void) {
     nuGfxCfb_ptr = nuGfxCfb[nuGfxCfbCounter];
 }
 
+// Waits until the screen neither shows the frame buffer nor is to show it
+// at the next retrace
+static void WaitForFreeFramebuffer(const void *framebuffer) {
+    while (osViGetCurrentFramebuffer() == framebuffer || osViGetNextFramebuffer() == framebuffer) {
+        osPcWaitForInterrupt();
+    }
+}
+
 void nuGfxTaskStart(Gfx *displayList, u32 size, u32 ucode, u32 flags) {
     NUScTask *task = &f_Tasks[f_NextTaskIndex];
 
@@ -186,6 +198,7 @@ void nuGfxTaskStart(Gfx *displayList, u32 size, u32 ucode, u32 flags) {
     }
 
     nuGfxTaskSpool++;
+    WaitForFreeFramebuffer(task->framebuffer);
     PcRunGfxTask(displayList, size);
     osSendMesg(&f_FinishedTaskQueue, task, OS_MESG_BLOCK);
 }
