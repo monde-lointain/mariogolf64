@@ -16,6 +16,9 @@
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/memory_address.h"
+#ifdef AVOID_UB
+#    include "screen/sky_colors_overrun.h"
+#endif
 
 // Each half of f_ShadedVertices is two quads; the second takes the derived
 // color
@@ -73,14 +76,29 @@ void DeriveSceneColors(void) {
     SkyColors *colors;
     s32 vertexOffset;
     s32 channelIndex;
+#ifdef AVOID_UB
+    SkyColorsNeighbors neighbors;
+    SkyColors pastTable;
+#endif
 
     f_UnusedFirstClearedWord = 0;
     f_UnusedSecondClearedWord = 0;
 
     // This steps through the table a course of colors at a time, unlike
-    // BlendSkyColors
+    // BlendSkyColors, and the later scene colors and the rainy ones pass its
+    // end
+#ifdef AVOID_UB
+    GetSkyColorsNeighbors(&neighbors);
+    colors = FindSceneSkyColors(
+        g_SkyColors,
+        (g_HoleSetup.conditions.isRaining * 3) + g_HoleSetup.conditions.sceneColorIndex,
+        &neighbors,
+        &pastTable
+    );
+#else
     colors = g_SkyColors
         [(g_HoleSetup.conditions.isRaining * 3) + g_HoleSetup.conditions.sceneColorIndex];
+#endif
     for (vertexOffset = 0; vertexOffset != QUAD_VERTEX_COUNT; vertexOffset++) {
         for (channelIndex = 0; channelIndex != RGB_CHANNEL_COUNT; channelIndex++) {
             f_ShadedVertices[0][SHADED_QUAD_START + vertexOffset].v.cn[channelIndex] =

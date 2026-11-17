@@ -41,6 +41,9 @@
 #include "system/heap.h"
 #include "system/memory_address.h"
 #include "text/text.h"
+#ifdef AVOID_UB
+#    include "screen/sky_colors_overrun.h"
+#endif
 
 // The hole that plays behind the title screen: the last hole of the first
 // course, calm and lit from a fixed direction.
@@ -1430,6 +1433,17 @@ static Vtx f_TileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT] =
         {{{168, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
     },
 };
+
+#ifdef AVOID_UB
+void GetSkyColorsNeighbors(SkyColorsNeighbors *neighbors) {
+    neighbors->isGlareSettled = f_IsSunGlareSettled;
+    neighbors->glareStrength = f_SunGlareStrength;
+    neighbors->firstFlareColor = f_LensFlares[0].color;
+    neighbors->skyVertices = f_SkyVertices;
+    neighbors->tileGridVertices = f_TileGridVertices;
+}
+#endif
+
 static Boolean f_IsFrameCapturePending = FALSE;
 static s32 f_HudAnimationFrame = 0;
 s32 g_CapturedSliceCount = 0;
