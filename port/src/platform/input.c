@@ -108,6 +108,14 @@ static void SetHostButton(HostPadState *host, SDL_GamepadButton button) {
     host->buttons |= 1u << button;
 }
 
+void ArrangeGameCubePad(HostPadState *host) {
+    SDL_assert(host != NULL);
+    if (IsHostButtonDown(host, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER)) {
+        host->buttons &= ~(1u << SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER);
+        SetHostButton(host, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER);
+    }
+}
+
 void MapHostStick(int16_t x, int16_t y, s8 *stickX, s8 *stickY) {
     // Up is negative to SDL and positive to the N64
     const float hostX = (float)x;
@@ -189,6 +197,10 @@ static void ReadGamepad(SDL_Gamepad *gamepad, HostPadState *host) {
 
     for (i = 0; i < SDL_GAMEPAD_AXIS_COUNT; i++) {
         host->axes[i] = SDL_GetGamepadAxis(gamepad, (SDL_GamepadAxis)i);
+    }
+
+    if (SDL_GetGamepadType(gamepad) == SDL_GAMEPAD_TYPE_GAMECUBE) {
+        ArrangeGameCubePad(host);
     }
 }
 

@@ -185,6 +185,26 @@ static void TestPadButtons(void) {
     EXPECT(pad.button == D_CBUTTONS);
 }
 
+// A GameCube controller's Z button is the N64's L, and its analog L and R
+// triggers are Z and R
+static void TestGameCubePad(void) {
+    HostPadState host;
+    OSContPad pad;
+
+    SDL_zero(host);
+    host.buttons = (1u << SDL_GAMEPAD_BUTTON_SOUTH) | (1u << SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER);
+    ArrangeGameCubePad(&host);
+    MapHostPad(&host, &pad);
+    EXPECT(pad.button == (A_BUTTON | L_TRIG));
+
+    SDL_zero(host);
+    host.axes[SDL_GAMEPAD_AXIS_LEFT_TRIGGER] = AXIS_MAX;
+    host.axes[SDL_GAMEPAD_AXIS_RIGHT_TRIGGER] = AXIS_MAX;
+    ArrangeGameCubePad(&host);
+    MapHostPad(&host, &pad);
+    EXPECT(pad.button == (Z_TRIG | R_TRIG));
+}
+
 static void TestKeyboard(void) {
     static bool keys[SDL_SCANCODE_COUNT];
     HostPadState host;
@@ -270,6 +290,7 @@ int main(void) {
     TestRomRejections();
     TestStick();
     TestPadButtons();
+    TestGameCubePad();
     TestKeyboard();
     TestSaveMemory();
     TestFitScreen();
