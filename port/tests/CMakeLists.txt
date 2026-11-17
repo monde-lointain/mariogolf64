@@ -175,6 +175,16 @@ mg64_add_port_test(lz_decoder_test
     LIBRARIES mg64_port_internal
 )
 
+mg64_encode_shift_jis(heap_copy "${PROJECT_SOURCE_DIR}/src/system/heap.c")
+# The original stores the main heap's largest free size, which nothing reads
+set_property(SOURCE ${heap_copy} APPEND PROPERTY COMPILE_OPTIONS
+    "$<$<AND:$<C_COMPILER_ID:Clang>,$<VERSION_GREATER_EQUAL:$<C_COMPILER_VERSION>,23>>:-Wno-unused-but-set-global>"
+)
+mg64_add_port_test(heap_test
+    SOURCES heap_test.c ${heap_copy}
+    LIBRARIES mg64_port_internal
+)
+
 mg64_add_port_test(tmem_test
     SOURCES tmem_test.c
     LIBRARIES mg64_gfx
