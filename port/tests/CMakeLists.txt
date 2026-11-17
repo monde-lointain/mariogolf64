@@ -117,13 +117,20 @@ mg64_write_overlay_sections(
     LINKER_SCRIPT sections_linker_script
     SOURCE sections_source
 )
-add_executable(overlay_sections_test overlay_sections_test.c "${sections_source}")
+# With the port's snapshot of the overlays' variables, built in so that the
+# test's own linker script and GetOverlaySections give it its overlays
+add_executable(overlay_sections_test
+    overlay_sections_test.c
+    "${sections_source}"
+    "${PROJECT_SOURCE_DIR}/port/src/os/memory.c"
+)
 target_include_directories(overlay_sections_test PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/overlay_sections"
     "${PROJECT_SOURCE_DIR}/port/src/include"
+    "${PROJECT_SOURCE_DIR}/port/src/os"
 )
 target_link_libraries(overlay_sections_test PRIVATE
-    mg64_test_support ${sections_overlays} mg64_port_warnings
+    mg64_test_support ${sections_overlays} mg64_headers mg64_port_warnings SDL3::SDL3
 )
 target_link_options(overlay_sections_test PRIVATE "LINKER:-T,${sections_linker_script}")
 set_property(TARGET overlay_sections_test APPEND PROPERTY LINK_DEPENDS "${sections_linker_script}")

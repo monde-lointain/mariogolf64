@@ -6,6 +6,7 @@
 
 static int f_Value = 7;
 static int f_Zero;
+static int f_OtherZero;
 static int *f_Pointers[SECTIONS_A_POINTER_COUNT] = {
     [0 ... SECTIONS_A_POINTER_COUNT - 1] = &f_Value,
 };
@@ -16,6 +17,10 @@ int *GetOverlayAValue(void) {
 
 int *GetOverlayAZero(void) {
     return &f_Zero;
+}
+
+int *GetOverlayAOtherZero(void) {
+    return &f_OtherZero;
 }
 
 int **GetOverlayAPointers(void) {

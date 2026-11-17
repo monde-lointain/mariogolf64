@@ -28,6 +28,16 @@ _Alignas(64) u8 osPcRdram[PC_RDRAM_SIZE];
 static MappedRange f_TlbPages[TLB_PAGE_COUNT];
 static MappedRange f_MappedRanges[MAPPED_RANGE_COUNT];
 
+// AddressSanitizer pads each variable with poisoned bytes, which the
+// copies of an overlay's sections cover, as they take the sections whole
+#if defined(__SANITIZE_ADDRESS__)
+#    define IS_ADDRESS_SANITIZED 1
+#elif defined(__has_feature)
+#    if __has_feature(address_sanitizer)
+#        define IS_ADDRESS_SANITIZED 1
+#    endif
+#endif
+
 // Each overlay's variables as they were at start-up
 static u8 *f_OverlaySnapshots;
 static const OverlaySections *f_OverlaySections;
@@ -182,6 +192,42 @@ void osWritebackDCache(void *address, s32 size) {
 void osWritebackDCacheAll(void) {
 }
 
+#ifdef IS_ADDRESS_SANITIZED
+// Copies and clears a section's bytes unchecked, padding included. Byte by
+// byte, as memcpy and memset are checked whatever their caller; neither
+// GCC nor Clang makes these loops calls of them, at any level.
+__attribute__((no_sanitize_address)) static void CopySectionBytes(
+    void *to,
+    const void *from,
+    size_t size
+) {
+    u8 *out = to;
+    const u8 *in = from;
+    size_t i;
+
+    for (i = 0; i < size; i++) {
+        out[i] = in[i];
+    }
+}
+
+__attribute__((no_sanitize_address)) static void ClearSectionBytes(void *to, size_t size) {
+    u8 *out = to;
+    size_t i;
+
+    for (i = 0; i < size; i++) {
+        out[i] = 0;
+    }
+}
+#else
+static void CopySectionBytes(void *to, const void *from, size_t size) {
+    SDL_memcpy(to, from, size);
+}
+
+static void ClearSectionBytes(void *to, size_t size) {
+    SDL_memset(to, 0, size);
+}
+#endif
+
 void PcInitSegments(void) {
     size_t snapshotSize = 0;
     u8 *cursor;
@@ -201,7 +247,7 @@ void PcInitSegments(void) {
     for (i = 0; i < f_OverlayCount; i++) {
         size_t size = f_OverlaySections[i].dataEnd - f_OverlaySections[i].dataStart;
 
-        SDL_memcpy(cursor, f_OverlaySections[i].dataStart, size);
+        CopySectionBytes(cursor, f_OverlaySections[i].dataStart, size);
         cursor += size;
     }
 }
@@ -215,8 +261,8 @@ void osPcResetSegment(u32 segmentNumber) {
         size_t size = sections->dataEnd - sections->dataStart;
 
         if (sections->segmentNumber == segmentNumber) {
-            SDL_memcpy(sections->dataStart, snapshot, size);
-            SDL_memset(sections->bssStart, 0, sections->bssEnd - sections->bssStart);
+            CopySectionBytes(sections->dataStart, snapshot, size);
+            ClearSectionBytes(sections->bssStart, sections->bssEnd - sections->bssStart);
             return;
         }
 

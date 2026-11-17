@@ -15,6 +15,7 @@
 // program must fix up
 int *GetOverlayAValue(void);
 int *GetOverlayAZero(void);
+int *GetOverlayAOtherZero(void);
 int **GetOverlayAPointers(void);
 
 // Overlay B has no variables, only this

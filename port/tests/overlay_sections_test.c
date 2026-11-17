@@ -4,13 +4,19 @@
  * GetOverlaySections gives, on the platform's own linker and loader. The
  * program has two overlays (see overlay_sections/): A with variables of
  * every kind, and B with none, which some linkers would drop a section for.
+ * And that port/src/os/memory.c's snapshot puts an overlay's variables back
+ * as they were linked, which it does by copying their sections whole.
  */
 
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <ultra64.h>
 
+#include "os_internal.h"
 #include "overlay_sections/overlays.h"
+#include "port/os_host.h"
 #include "port/overlay_sections.h"
 #include "test_support.h"
 
@@ -69,6 +75,7 @@ static void TestBoundsOverlayVariables(void) {
         a->dataEnd
     ));
     EXPECT(IsWithin(GetOverlayAZero(), sizeof(int), a->bssStart, a->bssEnd));
+    EXPECT(IsWithin(GetOverlayAOtherZero(), sizeof(int), a->bssStart, a->bssEnd));
 }
 
 static void TestLeavesOtherVariablesOut(void) {
@@ -106,11 +113,45 @@ static void TestLoadsInitialValues(void) {
     }
 }
 
+// The snapshot can't be taken here: the test's only way out
+void PcFatalError(const char *format, ...) {
+    (void)format;
+    EXPECT(false);
+    exit(ReportTestResults("overlay_sections_test"));
+}
+
+// Resetting an overlay's segment gives back its variables' linked values,
+// and leaves the program's own alone. Its copies span the whole of each
+// section, the padding that a sanitizer puts between variables included.
+static void TestResetsOverlayVariables(void) {
+    int **pointers = GetOverlayAPointers();
+    int i;
+
+    PcInitSegments();
+    *GetOverlayAValue() = 70;
+    *GetOverlayAZero() = 5;
+    *GetOverlayAOtherZero() = 6;
+    pointers[0] = NULL;
+    f_MainValue = 30;
+
+    osPcResetSegment(SEGMENT_B);
+    EXPECT(*GetOverlayAValue() == 70);
+    osPcResetSegment(SEGMENT_A);
+    EXPECT(*GetOverlayAValue() == 7);
+    EXPECT(*GetOverlayAZero() == 0);
+    EXPECT(*GetOverlayAOtherZero() == 0);
+    for (i = 0; i < SECTIONS_A_POINTER_COUNT; i++) {
+        EXPECT(pointers[i] == GetOverlayAValue());
+    }
+    EXPECT(f_MainValue == 30);
+}
+
 int main(void) {
     TestListsEachOverlay();
     TestBoundsOverlayVariables();
     TestLeavesOtherVariablesOut();
     TestGivesEmptyBoundsWithoutVariables();
     TestLoadsInitialValues();
+    TestResetsOverlayVariables();
     return ReportTestResults("overlay_sections_test");
 }
