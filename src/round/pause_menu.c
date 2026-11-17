@@ -1333,7 +1333,12 @@ void OpenChoiceBox(ChoiceBoxId choiceBoxId) {
 // Moves the choice box's selection, and returns the chosen option's result once
 // the box closes
 ChoiceResult UpdateChoiceBox(ControllerState *controller) {
+#ifdef AVOID_UB
+    // With no box open the index is -1, and the box is never read
+    ChoiceBox *box = &f_ChoiceBoxes[(f_ChoiceBoxId != CHOICE_BOX_ID_NONE) ? f_ChoiceBoxId : 0];
+#else
     ChoiceBox *box = &f_ChoiceBoxes[f_ChoiceBoxId];
+#endif
 
     if (f_ChoiceBoxId == CHOICE_BOX_ID_NONE) {
         return CHOICE_RESULT_NONE;
@@ -1395,7 +1400,13 @@ ChoiceResult UpdateChoiceBox(ControllerState *controller) {
 // half that label's width left of its sway.
 void DrawChoiceBox(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
+#ifdef AVOID_UB
+    // With no box open the index is -1, and the width read from the box
+    // before the check goes unused
+    ChoiceBox *box = &f_ChoiceBoxes[(f_ChoiceBoxId != CHOICE_BOX_ID_NONE) ? f_ChoiceBoxId : 0];
+#else
     ChoiceBox *box = &f_ChoiceBoxes[f_ChoiceBoxId];
+#endif
     s32 halfWidth;
     s32 red;
     s32 green;
