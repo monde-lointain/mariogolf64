@@ -30,7 +30,13 @@
 
 // The linear congruential step that the game's random generators share
 #define RANDOM_MULTIPLIER 0x5D588B65
-#define NextRandomSeed(seed) (((seed) * RANDOM_MULTIPLIER) + 1)
+#ifdef AVOID_UB
+// The seeds are signed, which C leaves the multiply's overflow undefined
+// for: an unsigned multiply gives the same bits
+#    define NextRandomSeed(seed) (((u32)(seed) * RANDOM_MULTIPLIER) + 1)
+#else
+#    define NextRandomSeed(seed) (((seed) * RANDOM_MULTIPLIER) + 1)
+#endif
 
 // Angles as floats: sinf and atan2f work in radians, guRotate in degrees
 typedef f32 Radians;
