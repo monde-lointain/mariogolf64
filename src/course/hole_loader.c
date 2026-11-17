@@ -1046,13 +1046,25 @@ void ResetLoaderThread(void) {
     g_HasLoaderFinished = TRUE;
 }
 
+#ifdef AVOID_UB
+// The loader thread's entry as osCreateThread calls it, with an argument.
+// Calling RunLoaderThread through a pointer of that type is undefined.
+static void EnterLoaderThread(void *argument UNUSED) {
+    RunLoaderThread();
+}
+#endif
+
 void StartLoaderThread(void) {
     UnloadOverlay(GetOverlayOfModule(MODULE_SHOT_SIMULATION));
     LoadOverlay(GetOverlayOfModule(MODULE_HOLE_BUILDER));
     osCreateThread(
         &f_LoaderThread,
         LOADER_THREAD_ID,
+#ifdef AVOID_UB
+        EnterLoaderThread,
+#else
         (void (*)(void *))RunLoaderThread,
+#endif
         NULL,
         &g_LoaderThreadStack[LOADER_THREAD_STACK_SIZE],
         LOADER_THREAD_PRIORITY

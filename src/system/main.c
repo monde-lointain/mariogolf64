@@ -137,6 +137,13 @@ volatile s32 g_FrameCount = 0;
 static Boolean f_IsOddRetrace = FALSE;
 
 void HandleGfxRetrace(s32 pendingTaskCount);
+#ifdef AVOID_UB
+// HandleGfxRetrace as NuSystem calls it, with an unsigned count. Calling it
+// through a pointer of that type is undefined.
+static void HandleGfxTaskRetrace(u32 pendingTaskCount) {
+    HandleGfxRetrace(pendingTaskCount);
+}
+#endif
 // The development debugger's entry, outside the game's code
 void EnterDevelopmentDebugger(s32 argument);
 
@@ -368,7 +375,11 @@ void mainproc(void *arg UNUSED) {
         if (f_MainLoopState == MAIN_LOOP_START) {
             f_MainLoopState = MAIN_LOOP_RUNNING;
             StartGame();
+#ifdef AVOID_UB
+            nuGfxFuncSet(HandleGfxTaskRetrace);
+#else
             nuGfxFuncSet((NUGfxFunc)HandleGfxRetrace);
+#endif
             nuPreNMIFuncSet(PrepareForReset);
         }
 
