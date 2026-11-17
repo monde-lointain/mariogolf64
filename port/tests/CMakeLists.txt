@@ -265,6 +265,14 @@ mg64_add_port_test(input_script_test
     LIBRARIES mg64_platform mg64_ultra SDL3::SDL3
 )
 
+# The wait that keeps a headless run in step with the game, with the
+# scheduler's wait replaced through a link seam
+mg64_add_port_test(lockstep_test
+    SOURCES lockstep_test.c "${PROJECT_SOURCE_DIR}/port/src/platform/lockstep.c"
+    LIBRARIES mg64_port_internal SDL3::SDL3
+)
+target_include_directories(lockstep_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
+
 # The input recorder, and the script lines that it writes
 mg64_add_port_test(input_recorder_test
     SOURCES input_recorder_test.c

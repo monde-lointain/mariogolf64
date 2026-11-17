@@ -32,6 +32,7 @@
 #include "input.h"
 #include "input_recorder.h"
 #include "input_script.h"
+#include "lockstep.h"
 #include "port/nusys_host.h"
 #include "port/os_host.h"
 #include "presenter.h"
@@ -49,8 +50,6 @@
 // Retraces behind before the clock gives up catching up, after a stall
 #define MAX_LATE_RETRACES 4
 #define HALT_TIMEOUT_MS 2000
-// How long a headless retrace waits for the game to finish with the last
-#define LOCKSTEP_TIMEOUT_MS 10000
 
 typedef struct Options {
     const char *romPath;
@@ -329,6 +328,17 @@ static void HandleEvent(const SDL_Event *event) {
     }
 }
 
+// Handles the events that have come, and tells whether one asked to quit
+static bool PollQuitEvents(void) {
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event)) {
+        HandleEvent(&event);
+    }
+
+    return f_IsQuitting;
+}
+
 // Raises the retraces at their own pace, whatever the display's rate. After
 // a stall the clock starts afresh rather than rush the game to catch up. In
 // lockstep, each retrace instead waits for the game to finish with it, so
@@ -342,8 +352,8 @@ static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
 
     // The game boots to its first wait before the first retrace, so that it
     // sees that retrace however long the host takes to get to it
-    if (isLockstep && !PcWaitForIdleCpu(LOCKSTEP_TIMEOUT_MS)) {
-        SDL_Log("The game didn't finish booting in time");
+    if (isLockstep) {
+        (void)AwaitGameInLockstep(LOCKSTEP_BOOT, PollQuitEvents);
     }
 
     while (!f_IsQuitting &&
@@ -359,8 +369,8 @@ static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
         UpdateControllers();
 
         f_ShownFramebuffer = PcRaiseRetrace();
-        if (isLockstep && !PcWaitForIdleCpu(LOCKSTEP_TIMEOUT_MS)) {
-            SDL_Log("The game didn't finish retrace %ld in time", frameCount);
+        if (isLockstep) {
+            (void)AwaitGameInLockstep(frameCount, PollQuitEvents);
         }
 
         if (f_Window != NULL) {
