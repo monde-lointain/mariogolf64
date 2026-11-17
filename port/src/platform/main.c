@@ -13,7 +13,8 @@
  * retraces, writing the screen it last showed to the --screenshot file, for
  * tests and machines without a display. --game-frames ends it once the game
  * has run N frames, as a script counts them. Headless, each retrace waits for
- * the game to finish with the last. --input-script plays the first
+ * the game to finish with the last, and the next follows at once, with no
+ * wait for the clock. --input-script plays the first
  * controller from a script, as input_script.h describes, and --record
  * writes what the game reads from it as such a script, to a new file.
  *
@@ -330,8 +331,10 @@ static void HandleEvent(const SDL_Event *event) {
 
 // Raises the retraces at their own pace, whatever the display's rate. After
 // a stall the clock starts afresh rather than rush the game to catch up. In
-// lockstep, each retrace also waits for the game to finish with it, so that
-// the game sees every one, wherever the host is slow.
+// lockstep, each retrace instead waits for the game to finish with it, so
+// that the game sees every one, wherever the host is slow, and the next
+// follows at once: what the game computes doesn't depend on the clock, which
+// only its debugging meters read.
 static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
     const Uint64 period = SDL_NS_PER_SECOND / RETRACES_PER_SECOND;
     Uint64 next = SDL_GetTicksNS();
@@ -365,6 +368,10 @@ static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
         }
 
         frameCount++;
+        if (isLockstep) {
+            continue;
+        }
+
         next += period;
         now = SDL_GetTicksNS();
         if (now < next) {
