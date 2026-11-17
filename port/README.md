@@ -18,12 +18,25 @@ did, a GNU C extension that Clang lacks, so the build compiles a copy of
 each source with them moved to file scope. SDL 3.4 or newer is found as an
 installed package or else downloaded and built with the game.
 
+The build takes the textures that the game keeps in its code from the
+PNGs that `make extract` cuts from the ROM (see the top-level README).
+
     cmake --preset linux
     cmake --build --preset linux
-    ./build/pc/linux/mariogolf64 --rom baserom.us.z64
+    ./build/pc/linux/port/src/mariogolf64 baserom.us.z64
 
-`cmake --list-presets` shows the others, such as `windows-mingw`, which
-cross-compiles with MinGW-w64.
+`cmake --list-presets` shows the others:
+
+| Preset           | What it builds                                               |
+|------------------|--------------------------------------------------------------|
+| `linux`          | Linux, with the default C compiler                           |
+| `linux-clang`    | Linux, with Clang                                            |
+| `linux-sanitize` | Linux, a debug build with AddressSanitizer and UBSan         |
+| `windows-mingw`  | 64-bit Windows, cross-compiled with MinGW-w64                |
+
+Each preset builds into `build/pc/<preset>`. `cmake --workflow --preset
+<preset>` configures, builds and runs the tests in one step, as CI does;
+`windows-mingw` runs its tests through Wine where it is installed.
 
 ## Layout
 

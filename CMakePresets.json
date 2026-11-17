@@ -1,0 +1,140 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 30,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "pc",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/pc/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
+            "name": "linux",
+            "displayName": "Linux, with the default C compiler",
+            "inherits": "pc",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "linux-clang",
+            "displayName": "Linux, with Clang",
+            "inherits": "linux",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang"
+            }
+        },
+        {
+            "name": "linux-sanitize",
+            "displayName": "Linux, with AddressSanitizer and UndefinedBehaviorSanitizer",
+            "inherits": "linux",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_C_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
+                "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined"
+            }
+        },
+        {
+            "name": "windows-mingw",
+            "displayName": "64-bit Windows, cross-compiled with MinGW-w64",
+            "inherits": "pc",
+            "toolchainFile": "${sourceDir}/port/cmake/toolchains/mingw-w64-x86_64.cmake"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "linux",
+            "configurePreset": "linux"
+        },
+        {
+            "name": "linux-clang",
+            "configurePreset": "linux-clang"
+        },
+        {
+            "name": "linux-sanitize",
+            "configurePreset": "linux-sanitize"
+        },
+        {
+            "name": "windows-mingw",
+            "configurePreset": "windows-mingw"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "pc",
+            "hidden": true,
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error"
+            }
+        },
+        {
+            "name": "linux",
+            "inherits": "pc",
+            "configurePreset": "linux"
+        },
+        {
+            "name": "linux-clang",
+            "inherits": "pc",
+            "configurePreset": "linux-clang"
+        },
+        {
+            "name": "linux-sanitize",
+            "inherits": "pc",
+            "configurePreset": "linux-sanitize"
+        },
+        {
+            "name": "windows-mingw",
+            "inherits": "pc",
+            "configurePreset": "windows-mingw",
+            "environment": {
+                "WINEDEBUG": "-all"
+            }
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "linux",
+            "steps": [
+                {"type": "configure", "name": "linux"},
+                {"type": "build", "name": "linux"},
+                {"type": "test", "name": "linux"}
+            ]
+        },
+        {
+            "name": "linux-clang",
+            "steps": [
+                {"type": "configure", "name": "linux-clang"},
+                {"type": "build", "name": "linux-clang"},
+                {"type": "test", "name": "linux-clang"}
+            ]
+        },
+        {
+            "name": "linux-sanitize",
+            "steps": [
+                {"type": "configure", "name": "linux-sanitize"},
+                {"type": "build", "name": "linux-sanitize"},
+                {"type": "test", "name": "linux-sanitize"}
+            ]
+        },
+        {
+            "name": "windows-mingw",
+            "steps": [
+                {"type": "configure", "name": "windows-mingw"},
+                {"type": "build", "name": "windows-mingw"},
+                {"type": "test", "name": "windows-mingw"}
+            ]
+        }
+    ]
+}
