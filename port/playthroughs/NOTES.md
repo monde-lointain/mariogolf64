@@ -76,7 +76,7 @@ Recorded in `10-toad-tournament.txt`.
 
 | ID   | Note                                                                       | Status |
 |------|----------------------------------------------------------------------------|--------|
-| 10-1 | Froze briefly at the scorecard between hole 9 and hole 10                  | open |
+| 10-1 | Froze briefly at the scorecard between hole 9 and hole 10                  | open; not seen in replays, headless or windowed, with the save and a recording on the SSD: the save there (frame 12451) takes about 3 ms, as at 11 other holes, and no game frame waits more than 3 retraces |
 | 10-2 | A blue background appears around the spinning Toad trophy                  | open |
 
 ## Found by replays and comparisons
