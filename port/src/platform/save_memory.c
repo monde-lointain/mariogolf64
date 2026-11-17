@@ -75,6 +75,31 @@ void PcLoadSaveMemory(u8 *image, u32 size) {
     SDL_free(contents);
 }
 
+bool ChecksumSaveMemory(uint32_t size, uint32_t *crc) {
+    size_t fileSize = 0;
+    void *contents = NULL;
+    bool isFound;
+
+    SDL_assert(crc != NULL);
+    if (f_Lock == NULL) {
+        return false;
+    }
+
+    SDL_LockMutex(f_Lock);
+    if (f_Path != NULL) {
+        contents = SDL_LoadFile(f_Path, &fileSize);
+    }
+
+    SDL_UnlockMutex(f_Lock);
+    isFound = contents != NULL && fileSize == size;
+    if (isFound) {
+        *crc = SDL_crc32(0, contents, fileSize);
+    }
+
+    SDL_free(contents);
+    return isFound;
+}
+
 void PcStoreSaveMemory(const u8 *image, u32 size) {
     char *temporary = NULL;
 

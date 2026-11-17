@@ -222,6 +222,12 @@ mg64_add_port_test(input_script_test
     LIBRARIES mg64_platform mg64_ultra SDL3::SDL3
 )
 
+# The input recorder, and the script lines that it writes
+mg64_add_port_test(input_recorder_test
+    SOURCES input_recorder_test.c
+    LIBRARIES mg64_platform mg64_ultra SDL3::SDL3
+)
+
 mg64_add_port_test(platform_test
     SOURCES platform_test.c
     LIBRARIES mg64_platform mg64_gpu mg64_gfx mg64_ultra SDL3::SDL3

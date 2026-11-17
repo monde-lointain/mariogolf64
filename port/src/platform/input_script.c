@@ -265,3 +265,46 @@ bool FindScriptedPad(const InputScript *script, long frame, OSContPad *pad) {
     *pad = script->steps[low - 1].pad;
     return true;
 }
+
+// Each piece is added while it fits, so a short line leaves no part word
+static bool AppendText(char *line, size_t lineSize, size_t *length, const char *text) {
+    size_t textLength = SDL_strlen(text);
+
+    if (*length + textLength >= lineSize) {
+        return false;
+    }
+
+    SDL_memcpy(line + *length, text, textLength + 1);
+    *length += textLength;
+    return true;
+}
+
+bool FormatScriptLine(long frame, const OSContPad *pad, char *line, size_t lineSize) {
+    char word[32];
+    size_t length = 0;
+    size_t i;
+
+    SDL_assert(frame >= 0 && pad != NULL && line != NULL && lineSize != 0);
+    line[0] = '\0';
+    SDL_snprintf(word, sizeof(word), "%ld", frame);
+    if (!AppendText(line, lineSize, &length, word)) {
+        return false;
+    }
+
+    for (i = 0; i < SDL_arraysize(f_ButtonNames); i++) {
+        if ((pad->button & f_ButtonNames[i].button) != 0 &&
+            (!AppendText(line, lineSize, &length, " ") ||
+                !AppendText(line, lineSize, &length, f_ButtonNames[i].name))) {
+            return false;
+        }
+    }
+
+    if (pad->stick_x != 0 || pad->stick_y != 0) {
+        SDL_snprintf(word, sizeof(word), " " STICK_PREFIX "%d,%d", pad->stick_x, pad->stick_y);
+        if (!AppendText(line, lineSize, &length, word)) {
+            return false;
+        }
+    }
+
+    return AppendText(line, lineSize, &length, "\n");
+}

@@ -16,6 +16,7 @@
 #include <stdint.h>
 #include <ultra64.h>
 
+#include "input_recorder.h"
 #include "input_script.h"
 
 // What a host controller holds at one moment, in SDL's terms: a bit for
@@ -62,5 +63,10 @@ void UpdateControllers(void);
 // what the script holds at that frame, or the devices' state before the
 // script's first line. The script must outlive its use.
 void PlayInputScript(const InputScript *script);
+
+// Records what the game reads from the first port from now on, by the same
+// frames, after any script has played; NULL stops. The recorder must
+// outlive its use, and a failed write is logged once.
+void RecordFirstPort(InputRecorder *recorder);
 
 #endif

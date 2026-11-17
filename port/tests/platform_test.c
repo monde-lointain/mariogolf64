@@ -256,6 +256,32 @@ static void TestScriptedFrames(void) {
     FreeInputScript(script);
 }
 
+// What the game reads from the first port, scripted or not, is recorded
+// by the same frames
+static void TestRecordsReadFrames(void) {
+    char error[64];
+    char text[256] = {0};
+    InputScript *script = ParseInputScript("1 B\n", error, sizeof(error));
+    InputRecorder *recorder = CreateInputRecorder(SDL_IOFromMem(text, sizeof(text) - 1), "");
+    OSContPad pad;
+
+    EXPECT(script != NULL && recorder != NULL);
+    InitControllers();
+    PlayInputScript(script);
+    RecordFirstPort(recorder);
+    (void)ReadFirstPortButtons();
+    PcReadControllerPad(2, &pad);
+    (void)ReadFirstPortButtons();
+    (void)ReadFirstPortButtons();
+    RecordFirstPort(NULL);
+    (void)ReadFirstPortButtons();
+    EXPECT(CloseInputRecorder(recorder));
+    EXPECT(SDL_strcmp(text, "0\n1 B\n# Ends at frame 3\n") == 0);
+    PlayInputScript(NULL);
+    ShutdownControllers();
+    FreeInputScript(script);
+}
+
 // --- The save memory ---
 
 // The file goes in the test's working directory
@@ -263,6 +289,7 @@ static void TestSaveMemory(void) {
     const char *path = "platform_test_save.sra";
     u8 stored[PC_SRAM_SIZE];
     u8 loaded[PC_SRAM_SIZE];
+    uint32_t crc;
     int i;
 
     (void)SDL_RemovePath(path);
@@ -270,8 +297,9 @@ static void TestSaveMemory(void) {
         stored[i] = (u8)(i * 7);
     }
 
-    // With no file yet, the memory is left as it was
+    // With no file yet, the memory is left as it was, and has no checksum
     SetSaveMemoryPath(path);
+    EXPECT(!ChecksumSaveMemory(PC_SRAM_SIZE, &crc));
     SDL_memset(loaded, 0xAA, sizeof(loaded));
     PcLoadSaveMemory(loaded, sizeof(loaded));
     EXPECT(loaded[0] == 0xAA && loaded[PC_SRAM_SIZE - 1] == 0xAA);
@@ -279,16 +307,19 @@ static void TestSaveMemory(void) {
     PcStoreSaveMemory(stored, sizeof(stored));
     PcLoadSaveMemory(loaded, sizeof(loaded));
     EXPECT(SDL_memcmp(stored, loaded, sizeof(stored)) == 0);
+    EXPECT(ChecksumSaveMemory(PC_SRAM_SIZE, &crc) && crc == SDL_crc32(0, stored, sizeof(stored)));
 
     // A file of another size isn't loaded
     SDL_memset(loaded, 0xAA, sizeof(loaded));
     PcLoadSaveMemory(loaded, sizeof(loaded) / 2);
     EXPECT(loaded[0] == 0xAA);
+    EXPECT(!ChecksumSaveMemory(PC_SRAM_SIZE / 2, &crc));
 
     // Without a path, nothing is kept
     SetSaveMemoryPath(NULL);
     PcLoadSaveMemory(loaded, sizeof(loaded));
     EXPECT(loaded[0] == 0xAA);
+    EXPECT(!ChecksumSaveMemory(PC_SRAM_SIZE, &crc));
 
     (void)SDL_RemovePath(path);
 }
@@ -328,6 +359,7 @@ int main(void) {
     TestGameCubePad();
     TestKeyboard();
     TestScriptedFrames();
+    TestRecordsReadFrames();
     TestSaveMemory();
     TestFitScreen();
     TestScreenPixels();

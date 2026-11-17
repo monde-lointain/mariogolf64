@@ -37,4 +37,8 @@ void FreeInputScript(InputScript *script);
 // its first line, when the player's devices play
 bool FindScriptedPad(const InputScript *script, long frame, OSContPad *pad);
 
+// Writes the script's line that holds the pad from a frame, with its line
+// break, as ParseInputScript reads it back; false if the line doesn't fit
+bool FormatScriptLine(long frame, const OSContPad *pad, char *line, size_t lineSize);
+
 #endif

@@ -98,6 +98,8 @@ static SDL_Mutex *f_Lock; // Guards f_Ports between the platform and the game
 static ControllerPort f_Ports[PORT_COUNT];
 static Uint64 f_LastRumbleRenewal;
 static const InputScript *f_Script;
+static InputRecorder *f_Recorder;
+static bool f_HasRecordingFailed;
 static long f_FirstPortReadCount; // The game's frames, as it reads once each
 
 // --- Mapping ---
@@ -363,7 +365,23 @@ u8 PcGetConnectedControllers(void) {
     return bits;
 }
 
-// The first port's read also counts the game's frame, and plays the script
+// The first port's read also counts the game's frame, plays the script and
+// records
+void RecordFirstPort(InputRecorder *recorder) {
+    SDL_LockMutex(f_Lock);
+    f_Recorder = recorder;
+    f_HasRecordingFailed = false;
+    SDL_UnlockMutex(f_Lock);
+}
+
+// Records a frame's pad, and says so the first time that it can't
+static void RecordFirstPortFrame(long frame, const OSContPad *pad) {
+    if (!RecordInputFrame(f_Recorder, frame, pad) && !f_HasRecordingFailed) {
+        SDL_Log("Can't write the input recording: %s", SDL_GetError());
+        f_HasRecordingFailed = true;
+    }
+}
+
 void PcReadControllerPad(int port, OSContPad *pad) {
     SDL_assert(pad != NULL);
     SDL_zerop(pad);
@@ -373,6 +391,10 @@ void PcReadControllerPad(int port, OSContPad *pad) {
         if (port == 0) {
             if (f_Script != NULL) {
                 (void)FindScriptedPad(f_Script, f_FirstPortReadCount, pad);
+            }
+
+            if (f_Recorder != NULL) {
+                RecordFirstPortFrame(f_FirstPortReadCount, pad);
             }
 
             f_FirstPortReadCount++;

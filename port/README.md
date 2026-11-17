@@ -50,6 +50,25 @@ the ROM, so they run each preset's workflow only where the repository's
 `BASEROM_URL` secret names a private copy of the ROM, which is checked
 against `mariogolf64.sha1` before use and deleted after.
 
+## Recording and replaying a session
+
+`--record PATH` writes what the game reads from the first controller to a
+new file, as an input script: a line for each game frame at which the
+controller changes. `--input-script PATH` plays such a file back into the
+first controller. The game reads the controller once a frame, however long
+the frame takes, so a session played in a window replays the same way
+headless. The recording's header names the save that the session started
+from (its CRC-32), and a replay must start from the same save:
+
+    cp my.sra session-start.sra
+    mariogolf64 --save my.sra --record session.txt baserom.us.z64
+    mariogolf64 --headless --frames 60000 --save session-start.sra \
+        --input-script session.txt baserom.us.z64
+
+`--record` won't overwrite a file, so a recording can't be lost to a
+reused name. Each line is written as soon as it is made, so a session cut
+short by a crash keeps what came before.
+
 ## Layout
 
 | Folder           | What it holds                                                     |

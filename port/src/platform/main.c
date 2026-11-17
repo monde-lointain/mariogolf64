@@ -6,13 +6,14 @@
  *
  *     mariogolf64 [--scale N] [--fullscreen] [--save PATH] [--gpu-debug]
  *                 [--headless] [--frames N] [--screenshot PATH]
- *                 [--input-script PATH] [ROM]
+ *                 [--input-script PATH] [--record PATH] [ROM]
  *
  * --headless draws without a window, and --frames ends the program after N
  * retraces, writing the screen it last showed to the --screenshot file, for
  * tests and machines without a display. Headless, each retrace waits for
  * the game to finish with the last. --input-script plays the first
- * controller from a script, as input_script.h describes.
+ * controller from a script, as input_script.h describes, and --record
+ * writes what the game reads from it as such a script, to a new file.
  *
  * Without a ROM, it looks for baserom.us.z64 beside the program, then in
  * the current directory. Without --save, the game saves to the user's data
@@ -26,6 +27,7 @@
 
 #include "audio_output.h"
 #include "input.h"
+#include "input_recorder.h"
 #include "input_script.h"
 #include "port/nusys_host.h"
 #include "port/os_host.h"
@@ -52,6 +54,7 @@ typedef struct Options {
     const char *savePath;
     const char *screenshotPath;
     const char *inputScriptPath;
+    const char *recordingPath;
     int renderScale; // 0 to choose from the display
     long frameLimit; // Retraces to run, or 0 for no limit
     bool isFullscreen;
@@ -63,6 +66,7 @@ static SDL_Window *f_Window;
 static SDL_GPUDevice *f_Device;
 static bool f_IsQuitting;
 static const void *f_ShownFramebuffer; // What the last retrace showed
+static InputRecorder *f_Recorder;
 
 // --- What the game asks of the platform ---
 
@@ -86,9 +90,8 @@ void EnterDevelopmentDebugger(s32 argument) {
 
 static void PrintUsage(const char *program) {
     SDL_Log(
-        "Usage: %s [--scale N] [--fullscreen] [--save PATH] [--gpu-debug] [--headless] [--frames "
-        "N] "
-        "[--screenshot PATH] [--input-script PATH] [ROM]",
+        "Usage: %s [--scale N] [--fullscreen] [--save PATH] [--gpu-debug] [--headless] "
+        "[--frames N] [--screenshot PATH] [--input-script PATH] [--record PATH] [ROM]",
         program
     );
 }
@@ -122,6 +125,9 @@ static bool ParseOptions(int argc, char **argv, Options *options) {
         }
         else if (SDL_strcmp(argument, "--input-script") == 0 && i + 1 < argc) {
             options->inputScriptPath = argv[++i];
+        }
+        else if (SDL_strcmp(argument, "--record") == 0 && i + 1 < argc) {
+            options->recordingPath = argv[++i];
         }
         else if (SDL_strcmp(argument, "--headless") == 0) {
             options->isHeadless = true;
@@ -364,16 +370,22 @@ static void RunRetraces(long frameLimit, bool isLockstep) {
 // backend, and the backend before the device. A game that won't halt
 // still holds them, so the program leaves without releasing anything.
 static bool ShutDown(const char *screenshotPath) {
-    bool isSaved = true;
+    bool isOutputWhole = true;
 
     if (!PcHaltGame(HALT_TIMEOUT_MS)) {
         SDL_Log("The game didn't stop; leaving without cleaning up");
         _Exit(EXIT_FAILURE);
     }
 
+    RecordFirstPort(NULL);
+    if (!CloseInputRecorder(f_Recorder)) {
+        SDL_Log("The input recording is incomplete: a write failed");
+        isOutputWhole = false;
+    }
+
     CloseAudioOutput();
-    if (screenshotPath != NULL) {
-        isSaved = SaveScreenImage(f_ShownFramebuffer, screenshotPath);
+    if (screenshotPath != NULL && !SaveScreenImage(f_ShownFramebuffer, screenshotPath)) {
+        isOutputWhole = false;
     }
 
     ShutdownRdp();
@@ -387,7 +399,7 @@ static bool ShutDown(const char *screenshotPath) {
     ShutdownControllers();
     SDL_DestroyWindow(f_Window);
     SDL_Quit();
-    return isSaved;
+    return isOutputWhole;
 }
 
 // Reads the script that --input-script names, if any; false if it can't
@@ -416,6 +428,61 @@ static bool LoadInputScript(const char *path, InputScript **script) {
     return true;
 }
 
+// Starts the recording that --record names, if any, in a new file, with a
+// header saying when and from which save it starts; false if it can't
+static bool StartRecording(const char *path) {
+    char header[256];
+    SDL_DateTime date;
+    SDL_Time now = 0;
+    SDL_IOStream *stream;
+    uint32_t crc;
+    int length;
+
+    if (path == NULL) {
+        return true;
+    }
+
+    if (SDL_GetPathInfo(path, NULL)) {
+        SDL_Log("%s already exists; name a new file for the recording", path);
+        return false;
+    }
+
+    SDL_zero(date);
+    (void)SDL_GetCurrentTime(&now);
+    (void)SDL_TimeToDateTime(now, &date, true);
+    length = SDL_snprintf(
+        header,
+        sizeof(header),
+        "# Recorded by mariogolf64 on %04d-%02d-%02d at %02d:%02d\n",
+        date.year,
+        date.month,
+        date.day,
+        date.hour,
+        date.minute
+    );
+    if (ChecksumSaveMemory(PC_SRAM_SIZE, &crc)) {
+        SDL_snprintf(
+            header + length,
+            sizeof(header) - (size_t)length,
+            "# Starts from the save with CRC-32 %08" SDL_PRIX32 "\n",
+            crc
+        );
+    }
+    else {
+        SDL_snprintf(header + length, sizeof(header) - (size_t)length, "# Starts with no save\n");
+    }
+
+    stream = SDL_IOFromFile(path, "w");
+    f_Recorder = (stream != NULL) ? CreateInputRecorder(stream, header) : NULL;
+    if (f_Recorder == NULL) {
+        SDL_Log("Can't record to %s: %s", path, SDL_GetError());
+        return false;
+    }
+
+    SDL_Log("Recording the first controller to %s", path);
+    return true;
+}
+
 int main(int argc, char *argv[]) {
     Options options;
     InputScript *script;
@@ -423,6 +490,12 @@ int main(int argc, char *argv[]) {
     size_t romSize = 0;
 
     if (!ParseOptions(argc, argv, &options) || !LoadInputScript(options.inputScriptPath, &script)) {
+        return EXIT_FAILURE;
+    }
+
+    UseSaveMemoryPath(&options);
+    if (!StartRecording(options.recordingPath)) {
+        FreeInputScript(script);
         return EXIT_FAILURE;
     }
 
@@ -440,6 +513,7 @@ int main(int argc, char *argv[]) {
     rom = LoadPlayersRom(&options, &romSize);
     if (rom == NULL) {
         ShowRomProblem();
+        (void)CloseInputRecorder(f_Recorder);
         FreeInputScript(script);
         SDL_Quit();
         return EXIT_FAILURE;
@@ -452,14 +526,15 @@ int main(int argc, char *argv[]) {
             "Can't draw: no suitable GPU. See the log.",
             NULL
         );
+        (void)CloseInputRecorder(f_Recorder);
         FreeInputScript(script);
         SDL_Quit();
         return EXIT_FAILURE;
     }
 
-    UseSaveMemoryPath(&options);
     InitControllers();
     PlayInputScript(script);
+    RecordFirstPort(f_Recorder);
     PcInitOs();
     PcInsertCartridge(rom, romSize);
     PcBootNuSystem();
