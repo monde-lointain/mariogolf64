@@ -1653,14 +1653,24 @@ Outcome ContinueSavedGame(void);
 
 // The saved game the boards show
 #define CHOSEN_GAME (save->savedGames[memory->savedGameIndex])
+#ifdef AVOID_UB
+// An empty slot's mode, NO_SAVE_MENU_MODE, indexed the word before
+// f_SaveMenuModeIcons, the last of f_SaveMenuGameModes on the N64
+#    define SavedGameModeIcon(mode) \
+        (((mode) == NO_SAVE_MENU_MODE) ? \
+                (ModeIcon)f_SaveMenuGameModes[SAVE_MENU_MODE_MINI_GOLF - 1] : \
+                f_SaveMenuModeIcons[mode])
+#else
+#    define SavedGameModeIcon(mode) f_SaveMenuModeIcons[mode]
+#endif
+
 // Reads the chosen saved game's mode icon, then its course image into the
 // course buffer not on screen, which then becomes the one on screen
 #define LoadChosenGameImages() \
     { \
         OpenEncodedAsset( \
-            g_ModeIconAnimations[( \
-                u8 \
-            )f_SaveMenuModeIcons[f_SavedGameModes[memory->savedGameIndex]]][g_AnimatedIconFrame], \
+            g_ModeIconAnimations[(u8)SavedGameModeIcon(f_SavedGameModes[memory->savedGameIndex])] \
+                                [g_AnimatedIconFrame], \
             &asset \
         ); \
         ReadEncodedAsset(f_ChosenModeIconBuffers[g_AnimatedIconBufferIndex], &asset); \
