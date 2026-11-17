@@ -225,8 +225,16 @@ Boolean CanLoadOverlay(s32 overlayId) {
         moduleIds = f_Overlays[otherOverlayIndex].moduleIds;
         moduleIndex = 0;
         while (moduleIds[moduleIndex] != MODULE_ID_END) {
+#ifdef AVOID_UB
+            // A module that never asked holds RDP_REQUEST_FRAME_NEVER, the
+            // least s32, which C leaves a signed subtraction's overflow
+            // undefined for: an unsigned one gives the same bits
+            if ((u32)g_FrameCount - (u32)g_ModuleRdpRequestFrames[moduleIds[moduleIndex]] <
+                RDP_REQUEST_FRAMES_IN_USE) {
+#else
             if ((u32)(g_FrameCount - g_ModuleRdpRequestFrames[moduleIds[moduleIndex]]) <
                 RDP_REQUEST_FRAMES_IN_USE) {
+#endif
                 if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
                     osSyncPrintf(
                         "Conflicting %d m.s. and other module[%x-%x]'s RDP request\n",
