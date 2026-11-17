@@ -1573,7 +1573,14 @@ s32 MeasureText(READ_ONLY char *text, s32 fontSize, TextFlags flags) {
 // Measures a message as a slot would show it: its widest line and the
 // height of its line breaks.
 void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, s32 slot) {
+#ifdef AVOID_UB
+    // Lines after the third add up in a last word that no routine reads. On
+    // the N64 they went to the unused stack words after the array, so their
+    // widths were left out, as in the erase-data question's fourth and fifth.
+    s32 lineWidths[MESSAGE_LINE_COUNT + 1] = {0, 0, 0, 0};
+#else
     s32 lineWidths[MESSAGE_LINE_COUNT] = {0, 0, 0};
+#endif
     s32 codeIndex;
     s32 lineCount;
     s32 line;
@@ -1603,7 +1610,10 @@ void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, 
         else if (code >= MESSAGE_CODE_CONTROL) {
             switch (code) {
                 case MESSAGE_CODE_LINE_BREAK:
-                    line++;
+#ifdef AVOID_UB
+                    if (line < MESSAGE_LINE_COUNT)
+#endif
+                        line++;
                     lineCount += LINE_SPACING + fontSize;
                     break;
                 case MESSAGE_CODE_NAME:

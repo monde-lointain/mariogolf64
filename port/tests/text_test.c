@@ -6,6 +6,7 @@
  * the game made of it.
  */
 
+#include <SDL3/SDL.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ultra64.h>
@@ -27,7 +28,8 @@
 // The space a line break adds below a line, past the font's height
 #define LINE_SPACING 6
 #define GLYPH_FILE_SIZE 10
-#define MESSAGE_FILE_HALFWORDS 13
+#define MESSAGE_COUNT 3
+#define MESSAGE_FILE_HALFWORDS 31
 
 GameState g_GameState;
 RoundHud g_RoundHud;
@@ -110,37 +112,50 @@ void guTranslate(Mtx *m, float x, float y, float z) {
 // --- Scaffolding ---
 
 static void StoreHalfword(int index, u16 value) {
+    SDL_assert(index >= 0 && index < MESSAGE_FILE_HALFWORDS);
     f_MessageFile[index * 2] = (u8)(value >> 8);
     f_MessageFile[(index * 2) + 1] = (u8)value;
 }
 
-// Two messages: "AB", a line break and "C"; and then "DEF" on one line.
-// Each code below MESSAGE_CODE_GLYPH that is no mark is as wide as a small
-// or medium font.
-static void WriteMessageFile(void) {
-    static const u16 codes[] = {'A', 'B', MESSAGE_CODE_LINE_BREAK, 'C', 'D', 'E', 'F'};
+// Stores the codes of message index as the text's characters, with each new
+// line a line break, after the codes of the messages before it
+static void StoreMessage(int index, const char *text) {
+    static int codeCount;
+    int length = (int)strlen(text);
     int i;
 
-    StoreHalfword(0, sizeof(f_MessageFile));
-    StoreHalfword(1, 2);
-    StoreHalfword(2, 0);
-    StoreHalfword(3, 4);
-    StoreHalfword(4, 4);
-    StoreHalfword(5, 3);
-    for (i = 0; i < (int)ARRAY_COUNT(codes); i++) {
-        StoreHalfword(6 + i, codes[i]);
+    if (index == 0) {
+        codeCount = 0;
     }
+
+    StoreHalfword(2 + (index * 2), (u16)codeCount);
+    StoreHalfword(3 + (index * 2), (u16)length);
+    for (i = 0; i < length; i++) {
+        StoreHalfword(
+            2 + (MESSAGE_COUNT * 2) + codeCount + i,
+            (text[i] == '\n') ? MESSAGE_CODE_LINE_BREAK : (u16)text[i]
+        );
+    }
+
+    codeCount += length;
+}
+
+// Three messages: "AB", a line break and "C"; "DEF" on one line; and five
+// lines, the last two the widest. Each code below MESSAGE_CODE_GLYPH that is
+// no mark is as wide as a small or medium font.
+static void WriteMessageFile(void) {
+    StoreHalfword(0, sizeof(f_MessageFile));
+    StoreHalfword(1, MESSAGE_COUNT);
+    StoreMessage(0, "AB\nC");
+    StoreMessage(1, "DEF");
+    StoreMessage(2, "A\nB\nC\nDEFG\nHIJKL");
 }
 
 // The messages' spans and codes read as the cartridge's halfwords, so each
-// message measures as its codes do. The first message bounds the table, and
-// the last its end.
+// message measures as its codes do. The first message bounds the table.
 static void TestMessagesReadAsBigEndian(void) {
     s32 width = -1;
     s32 height = -1;
-
-    WriteMessageFile();
-    LoadTextAssets();
 
     MeasureMessage(0, FONT_SIZE_MEDIUM, &width, &height, 0);
     EXPECT(width == 2 * FONT_SIZE_MEDIUM);
@@ -151,7 +166,22 @@ static void TestMessagesReadAsBigEndian(void) {
     EXPECT(height == 0);
 }
 
+// A message of more than three lines, such as the erase-data question,
+// measures as wide as its first three, as on the N64, whose lines past the
+// third went to unused stack words. Each line still adds to the height.
+static void TestMeasuresFirstThreeLines(void) {
+    s32 width = -1;
+    s32 height = -1;
+
+    MeasureMessage(2, FONT_SIZE_SMALL, &width, &height, 0);
+    EXPECT(width == FONT_SIZE_SMALL);
+    EXPECT(height == 4 * (LINE_SPACING + FONT_SIZE_SMALL));
+}
+
 int main(void) {
+    WriteMessageFile();
+    LoadTextAssets();
     TestMessagesReadAsBigEndian();
+    TestMeasuresFirstThreeLines();
     return ReportTestResults("text_test");
 }
