@@ -36,6 +36,7 @@ include(ShiftJisSources)
 mg64_encode_shift_jis(main_copies ${main_sources})
 add_library(mg64_game_main OBJECT ${main_copies})
 target_link_libraries(mg64_game_main PRIVATE mg64_game_options)
+mg64_skip_pointer_pair_checks(mg64_game_main src/math/math_util.c src/game/game.c)
 
 # Each overlay is a library of its own, so that the linker can gather its
 # variables where osPcResetSegment finds them

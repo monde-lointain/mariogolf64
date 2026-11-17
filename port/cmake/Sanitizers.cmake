@@ -17,6 +17,16 @@
 # takes the runtime's slow path. That made the replays eight times
 # slower. Their own structures go unchecked as a result.
 #
+# GCC's checks of pointer pairs leave out the files that
+# mg64_skip_pointer_pair_checks names. The runtime finds a global's bounds
+# by walking a list of every global in the program, about 7500 of them, so
+# each check of a pair of pointers into a global takes about a millisecond.
+# The CRC of the save data (math_util.c), a compare for each of its 10872
+# bytes, and the display list lengths that DrawGame takes each frame
+# (game.c) made up 78% of a replay's time. Each of those pairs is a pointer
+# and the start or end of its own buffer, and the address sanitizer
+# already checks the pointer's reads and writes past it.
+#
 # Only a top-level build takes them, so that a project that includes this
 # one keeps its own choice.
 
@@ -30,6 +40,46 @@ function(mg64_skip_type_sanitizer target)
             APPEND PROPERTY COMPILE_OPTIONS -fno-sanitize=type
         )
     endif()
+endfunction()
+
+# Leaves the target's sources whose paths end with those named out of GCC's
+# checks of pointer pairs
+function(mg64_skip_pointer_pair_checks target)
+    if(NOT PROJECT_IS_TOP_LEVEL)
+        return()
+    endif()
+    if(NOT "pointer-compare" IN_LIST MG64_SANITIZERS AND
+       NOT "pointer-subtract" IN_LIST MG64_SANITIZERS)
+        return()
+    endif()
+
+    get_target_property(sources ${target} SOURCES)
+    foreach(ending IN LISTS ARGN)
+        set(found "")
+        foreach(source IN LISTS sources)
+            # A slash before the source, so that a relative one matches whole
+            string(LENGTH "/${source}" source_length)
+            string(LENGTH "/${ending}" ending_length)
+            if(source_length LESS ending_length)
+                continue()
+            endif()
+            math(EXPR start "${source_length} - ${ending_length}")
+            string(SUBSTRING "/${source}" ${start} -1 source_ending)
+            if(source_ending STREQUAL "/${ending}")
+                list(APPEND found "${source}")
+            endif()
+        endforeach()
+        list(LENGTH found found_count)
+        if(NOT found_count EQUAL 1)
+            message(FATAL_ERROR
+                "mg64_skip_pointer_pair_checks found ${found_count} of ${target}'s "
+                "sources ending with ${ending}, not 1"
+            )
+        endif()
+        set_property(SOURCE ${found} TARGET_DIRECTORY ${target}
+            APPEND PROPERTY COMPILE_OPTIONS -fno-sanitize=pointer-compare,pointer-subtract
+        )
+    endforeach()
 endfunction()
 
 set(MG64_SANITIZERS "" CACHE STRING
