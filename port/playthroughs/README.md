@@ -17,6 +17,24 @@ keep a copy of the save it started from:
 Quit the window when the goal is done. Note anything that looks wrong,
 and roughly when it happened.
 
+## Replaying a session
+
+Replay a session headless from a copy of the save it started from, to the
+frame on its last line, then compare the save with the one that the
+recording left:
+
+    cp 01-start.sra 01-replay.sra
+    build/pc/linux-dev/port/src/mariogolf64 --headless --save 01-replay.sra \
+        --input-script port/playthroughs/01-opening-and-menus.txt \
+        --game-frames 8305 baserom.us.z64
+    cmp 01-replay.sra 01-play.sra
+
+Headless runs keep the game in step with the retraces, so a replay makes
+the same save on every build and host: the sanitizer presets, and the
+Windows build under Wine, all match the recordings. The save holds only
+what the game keeps, so a match doesn't show that every frame drew the
+same.
+
 ## Sessions
 
 Each one has one goal, and takes 5 to 15 minutes unless it says otherwise.
