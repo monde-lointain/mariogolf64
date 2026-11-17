@@ -134,10 +134,33 @@ static void TestDecodesEmptyAsset(void) {
     EXPECT(IsOnlyDecodedRomOrder(0));
 }
 
+// An image's parts sit at fixed offsets past its address
+static void TestFindsImageParts(void) {
+    static u8 image[LARGE_PALETTED_TEXELS_OFFSET];
+
+    EXPECT(ImageBody(image) == &image[IMAGE_HEADER_SIZE]);
+    EXPECT((u8 *)ImagePalette(image) == &image[IMAGE_HEADER_SIZE]);
+    EXPECT(ImageTexels(image) == &image[PALETTED_TEXELS_OFFSET]);
+    EXPECT(LargeImageTexels(image) == &image[LARGE_PALETTED_TEXELS_OFFSET]);
+}
+
+// An image that isn't loaded is a null pointer, whose body and texels the
+// effects still load textures from: the addresses past 0, as on the N64
+static void TestFindsUnloadedImageParts(void) {
+    void *volatile unloaded = NULL;
+
+    EXPECT(AddressNumber(ImageBody(unloaded)) == IMAGE_HEADER_SIZE);
+    EXPECT(AddressNumber(ImagePalette(unloaded)) == IMAGE_HEADER_SIZE);
+    EXPECT(AddressNumber(ImageTexels(unloaded)) == PALETTED_TEXELS_OFFSET);
+    EXPECT(AddressNumber(LargeImageTexels(unloaded)) == LARGE_PALETTED_TEXELS_OFFSET);
+}
+
 int main(void) {
     InitAssetFiles();
     TestDecodesByteRuns();
     TestDecodesHalfwordRuns();
     TestDecodesEmptyAsset();
+    TestFindsImageParts();
+    TestFindsUnloadedImageParts();
     return ReportTestResults("asset_test");
 }

@@ -10,6 +10,7 @@
 #include <ultra64.h>
 
 #include "system/compiler.h"
+#include "system/memory_address.h"
 
 // EncodedAsset methods; any other is read as halfword runs
 #define ENCODING_BYTE_RUNS 1
@@ -45,13 +46,22 @@
 
 // The image that starts offset bytes into a buffer holding several
 #define ImageAt(buffer, offset) ((u8 *)(buffer) + (offset))
+#ifdef AVOID_UB
+// The effects load the textures of each kind they draw, whether or not
+// that kind's image is loaded, which the N64 read from the address past 0.
+// C leaves adding to a null pointer undefined; adding to its address isn't.
+#    define ImageBody(image) ((u8 *)(AddressNumber(image) + IMAGE_HEADER_SIZE))
+#    define ImageTexels(image) ((u8 *)(AddressNumber(image) + PALETTED_TEXELS_OFFSET))
+#    define LargeImageTexels(image) ((u8 *)(AddressNumber(image) + LARGE_PALETTED_TEXELS_OFFSET))
+#else
 // What follows an image's header: a CI image's palette, any other's texels
-#define ImageBody(image) ((u8 *)(image) + IMAGE_HEADER_SIZE)
-#define ImagePalette(image) ((PaletteColor *)ImageBody(image))
+#    define ImageBody(image) ((u8 *)(image) + IMAGE_HEADER_SIZE)
 // A four-bit CI image's texels
-#define ImageTexels(image) ((u8 *)(image) + PALETTED_TEXELS_OFFSET)
+#    define ImageTexels(image) ((u8 *)(image) + PALETTED_TEXELS_OFFSET)
 // An eight-bit CI image's texels
-#define LargeImageTexels(image) ((u8 *)(image) + LARGE_PALETTED_TEXELS_OFFSET)
+#    define LargeImageTexels(image) ((u8 *)(image) + LARGE_PALETTED_TEXELS_OFFSET)
+#endif
+#define ImagePalette(image) ((PaletteColor *)ImageBody(image))
 // The same, offset bytes in, as for a frame of an image that holds several.
 // They add the two offsets first, as the original does.
 #define ImageBodyAt(image, offset) ((u8 *)(image) + ((offset) + IMAGE_HEADER_SIZE))
