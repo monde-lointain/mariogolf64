@@ -13,6 +13,21 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/*
+ * libultra's controller structures have fields named errno, and the game
+ * defines its libc's errno as a variable of its own. MinGW's <stddef.h> and
+ * <stdlib.h> make errno a macro for the C library's, which would rename them
+ * all; they define it only once, so it stays undefined after this. The one
+ * header that sets errno in inline code, GCC's mm_malloc.h, comes in through
+ * <stdlib.h>, so that is read first, while errno is still the C library's.
+ */
+#ifdef __MINGW32__
+#    include <stdlib.h>
+#endif
+#ifdef errno
+#    undef errno
+#endif
+
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
