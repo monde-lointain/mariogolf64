@@ -42,15 +42,22 @@ SDL_Rect FitScreenToWindow(uint32_t windowWidth, uint32_t windowHeight) {
 }
 
 // Each 5-bit channel fills 8 bits by repeating its top bits, so that full
-// stays full and zero stays zero
-void ExpandScreenPixels(const uint16_t *pixels, uint32_t count, uint32_t *rgba) {
+// stays full and zero stays zero. The pixels are read as bytes, as the VI
+// reads them, since the game's CPU code reads the same memory as words too.
+void ExpandScreenPixels(const void *pixels, uint32_t count, uint32_t *rgba) {
+    const uint8_t *bytes = pixels;
     uint32_t i;
 
     for (i = 0; i < count; i++) {
-        const uint32_t pixel = pixels[i];
-        const uint32_t red = (pixel >> 11) & 0x1F;
-        const uint32_t green = (pixel >> 6) & 0x1F;
-        const uint32_t blue = (pixel >> 1) & 0x1F;
+        uint16_t pixel;
+        uint32_t red;
+        uint32_t green;
+        uint32_t blue;
+
+        SDL_memcpy(&pixel, &bytes[i * sizeof(pixel)], sizeof(pixel));
+        red = (pixel >> 11) & 0x1F;
+        green = (pixel >> 6) & 0x1F;
+        blue = (pixel >> 1) & 0x1F;
 
         rgba[i] = ((red << 3) | (red >> 2)) | (((green << 3) | (green >> 2)) << 8) |
             (((blue << 3) | (blue >> 2)) << 16) | 0xFF000000u;

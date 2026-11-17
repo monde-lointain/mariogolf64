@@ -351,6 +351,28 @@ static void TestScreenPixels(void) {
     EXPECT(rgba[3] == 0xFF00FF00u);
 }
 
+// The game's CPU code reads the frame's memory as words too, two pixels at a
+// time, as CaptureHudAnimationFrame does. The presenter reads it as the VI
+// does, as bytes, whatever the CPU took them for; the type sanitizer reports
+// a read as pixels of memory that the CPU last read as words.
+static void TestReadsScreenWhateverTheCpuReadItAs(void) {
+    static const uint16_t pixels[] = {0xF801, 0x07C0};
+    uint32_t rgba[SDL_arraysize(pixels)];
+    void *memory = SDL_malloc(sizeof(pixels));
+    uint32_t word;
+
+    EXPECT(memory != NULL);
+    SDL_memcpy(memory, pixels, sizeof(pixels));
+    // Volatile, so that the compiler can't take the word from the copy
+    word = *(const volatile uint32_t *)memory;
+    EXPECT(word != 0);
+
+    ExpandScreenPixels(memory, SDL_arraysize(pixels), rgba);
+    EXPECT(rgba[0] == 0xFF0000FFu);
+    EXPECT(rgba[1] == 0xFF00FF00u);
+    SDL_free(memory);
+}
+
 int main(void) {
     TestRomByteOrders();
     TestSupportedRom();
@@ -365,5 +387,6 @@ int main(void) {
     TestSaveMemory();
     TestFitScreen();
     TestScreenPixels();
+    TestReadsScreenWhateverTheCpuReadItAs();
     return ReportTestResults("platform_test");
 }

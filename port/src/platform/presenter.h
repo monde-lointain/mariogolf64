@@ -22,8 +22,8 @@
 SDL_Rect FitScreenToWindow(uint32_t windowWidth, uint32_t windowHeight);
 
 // Turns 16-bit RGBA5551 pixels, in the host's order, into RGBA8 with red
-// lowest
-void ExpandScreenPixels(const uint16_t *pixels, uint32_t count, uint32_t *rgba);
+// lowest. The pixels needn't be stored as uint16_t.
+void ExpandScreenPixels(const void *pixels, uint32_t count, uint32_t *rgba);
 
 // Readies the window's swapchain on the device; false, with an error
 // logged, when it can't
