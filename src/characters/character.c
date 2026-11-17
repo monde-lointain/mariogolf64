@@ -1146,6 +1146,8 @@ void LoadCharacter(u32 slotIndex, CharacterIndex characterIndex, s32 modelKind) 
         slot->usesFrontCulling = 0;
         slot->reusesLastMatrices = FALSE;
         f_CurrentModelBuffer = slot->modelBuffer;
+        // The buffer lies in memory that other scenes use for other objects
+        ForgetMemoryTypes(f_CurrentModelBuffer, CHARACTER_BUFFER_SIZE);
         if (isPatched) {
             LoadLzData(
                 slot->model->baseRomStart,

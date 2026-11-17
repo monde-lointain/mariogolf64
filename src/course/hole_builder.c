@@ -3020,6 +3020,7 @@ void ClearHoleBuild(void) {
     // The work area held other scenes' data, some read from ROM; the hole's
     // texels, vertices and display lists are built here in the host's order
     MarkHostOrder(&g_WorkArea, sizeof(g_WorkArea));
+    ForgetMemoryTypes(&g_WorkArea, sizeof(g_WorkArea));
     ClearHolePoints();
     ClearTileBorders();
     InitTerrainTextures();
