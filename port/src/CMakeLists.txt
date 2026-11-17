@@ -20,6 +20,14 @@ target_compile_options(mg64_game_options INTERFACE
     $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-absolute-value>
     $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-literal-range>
 )
+# The KMC C library's random numbers, in place of the host's, which differ
+# from them and from each other (see port/kmc.h). A macro rather than a
+# definition of rand, so that the host's own callers of rand, such as a GPU
+# driver, neither take the game's numbers nor move its sequence on.
+target_compile_definitions(mg64_game_options INTERFACE
+    rand=KmcRandom
+    srand=SeedKmcRandom
+)
 
 set(main_sources ${MG64_GAME_SOURCES})
 foreach(overlay IN LISTS MG64_OVERLAY_NAMES)
@@ -50,6 +58,7 @@ mg64_write_overlay_sections(
 
 add_subdirectory(os)
 add_subdirectory(gu)
+add_subdirectory(kmc)
 add_subdirectory(nusys)
 add_subdirectory(mus)
 add_subdirectory(gfx)
@@ -70,6 +79,7 @@ target_link_libraries(mariogolf64 PRIVATE
     mg64_gfx
     mg64_ultra
     mg64_gu
+    mg64_kmc
     SDL3::SDL3
 )
 target_link_options(mariogolf64 PRIVATE "LINKER:-T,${overlay_linker_script}")
