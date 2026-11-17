@@ -34,6 +34,51 @@ Recorded in `02-first-holes.txt`.
 | 02-7 | Gleam off ball while flying looks black                                    | open |
 | 02-8 | When zoomed in on cup during putting, unnatural green block appears from below it | open |
 
+Every note from sessions 01 and 02 was seen again in sessions 03 to 11.
+Sessions 05, 06, 08 and 11 brought no new notes.
+
+## Session 03: shot controls
+
+Recorded in `03-shot-controls.txt`.
+
+| ID   | Note                                                                       | Status |
+|------|----------------------------------------------------------------------------|--------|
+| 03-1 | "PIKA" text appears in the ball's spot when the ball falls into the cup, blue and red or blue and gold by turns | open |
+| 03-2 | When raining, the rain occasionally covers the entire screen, which is distracting and unlike the real game | open |
+
+## Session 04: pause menu
+
+Recorded in `04-pause-menu.txt`.
+
+| ID   | Note                                                                       | Status |
+|------|----------------------------------------------------------------------------|--------|
+| 04-1 | Trees on hole 1 appear to alias into other trees                           | open |
+
+## Session 07: Mini-Golf
+
+Recorded in `07-mini-golf.txt`.
+
+| ID   | Note                                                                       | Status |
+|------|----------------------------------------------------------------------------|--------|
+| 07-1 | Walls appear enlarged on the Mini-Golf course                              | open |
+
+## Session 09: Get Character against Luigi
+
+Recorded in `09-get-character.txt`.
+
+| ID   | Note                                                                       | Status |
+|------|----------------------------------------------------------------------------|--------|
+| 09-1 | Luigi's button triangles are surrounded by black                           | open |
+
+## Session 10: Toad Highlands tournament
+
+Recorded in `10-toad-tournament.txt`.
+
+| ID   | Note                                                                       | Status |
+|------|----------------------------------------------------------------------------|--------|
+| 10-1 | Froze briefly at the scorecard between hole 9 and hole 10                  | open |
+| 10-2 | A blue background appears around the spinning Toad trophy                  | open |
+
 ## Found by replays and comparisons
 
 Not noted while playing, but seen in the port's own runs.
