@@ -39,7 +39,7 @@
             "inherits": "linux",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "MG64_SANITIZERS": "address;undefined"
+                "MG64_SANITIZERS": "address;undefined;pointer-compare;pointer-subtract"
             }
         },
         {
@@ -93,6 +93,7 @@
             "inherits": "pc",
             "configurePreset": "linux-sanitize",
             "environment": {
+                "ASAN_OPTIONS": "detect_invalid_pointer_pairs=1:detect_stack_use_after_return=1",
                 "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
             }
         },
