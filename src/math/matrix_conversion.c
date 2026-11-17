@@ -49,7 +49,13 @@ void guMtxF2L(f32 mf[4][4], Mtx *m) {
             first = FloatToFixed(mf[row][pair * 2]);
             second = FloatToFixed(mf[row][(pair * 2) + 1]);
             *(integerParts++) = (first & 0xFFFF0000) | ((second >> 16) & 0xFFFF);
+#ifdef AVOID_UB
+            // A fraction of a half or more reaches the sign bit, where C
+            // leaves a signed shift undefined
+            *(fractionParts++) = (((u32)first << 16) & 0xFFFF0000) | (second & 0xFFFF);
+#else
             *(fractionParts++) = ((first << 16) & 0xFFFF0000) | (second & 0xFFFF);
+#endif
         }
     }
 }
