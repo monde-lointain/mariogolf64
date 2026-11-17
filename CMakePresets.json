@@ -53,6 +53,17 @@
             }
         },
         {
+            "name": "linux-clang-tysan",
+            "displayName": "Linux, a Clang debug build with TypeSanitizer, without KMC GCC's meanings",
+            "inherits": "linux-clang",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang-23",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "MG64_SANITIZERS": "type",
+                "MG64_KMC_SEMANTICS": "OFF"
+            }
+        },
+        {
             "name": "windows-mingw",
             "displayName": "64-bit Windows, cross-compiled with MinGW-w64",
             "inherits": "pc",
@@ -75,6 +86,10 @@
         {
             "name": "linux-clang-sanitize",
             "configurePreset": "linux-clang-sanitize"
+        },
+        {
+            "name": "linux-clang-tysan",
+            "configurePreset": "linux-clang-tysan"
         },
         {
             "name": "windows-mingw",
@@ -121,6 +136,14 @@
             }
         },
         {
+            "name": "linux-clang-tysan",
+            "inherits": "pc",
+            "configurePreset": "linux-clang-tysan",
+            "environment": {
+                "TYSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+            }
+        },
+        {
             "name": "windows-mingw",
             "inherits": "pc",
             "configurePreset": "windows-mingw",
@@ -160,6 +183,14 @@
                 {"type": "configure", "name": "linux-clang-sanitize"},
                 {"type": "build", "name": "linux-clang-sanitize"},
                 {"type": "test", "name": "linux-clang-sanitize"}
+            ]
+        },
+        {
+            "name": "linux-clang-tysan",
+            "steps": [
+                {"type": "configure", "name": "linux-clang-tysan"},
+                {"type": "build", "name": "linux-clang-tysan"},
+                {"type": "test", "name": "linux-clang-tysan"}
             ]
         },
         {

@@ -3,8 +3,17 @@
 # come from the environment (ASAN_OPTIONS and the like), which the test
 # presets set.
 #
+# TypeSanitizer is the exception: it checks only the project's own code,
+# through mg64_project_sanitizers, which the project's targets link. SDL's
+# code reads its objects under other types than it stores them, and the
+# runtime crashes on what SDL's vector code leaves in its shadow. Each of
+# the project's programs also forgets the types it gives static storage
+# (see forget_static_types.c), and so needs Linux's names for its ends.
+#
 # Only a top-level build takes them, so that a project that includes this
 # one keeps its own choice.
+
+add_library(mg64_project_sanitizers INTERFACE)
 
 set(MG64_SANITIZERS "" CACHE STRING
     "The sanitizers to build with, as -fsanitize names in a list, such as address;undefined"
@@ -20,7 +29,7 @@ endif()
 
 # Each of these keeps its own shadow of memory, so no two can share a program
 set(exclusive_sanitizers "")
-foreach(sanitizer IN ITEMS address thread memory)
+foreach(sanitizer IN ITEMS address thread memory type)
     if(sanitizer IN_LIST MG64_SANITIZERS)
         list(APPEND exclusive_sanitizers ${sanitizer})
     endif()
@@ -28,9 +37,29 @@ endforeach()
 list(LENGTH exclusive_sanitizers exclusive_count)
 if(exclusive_count GREATER 1)
     message(FATAL_ERROR
-        "MG64_SANITIZERS can hold only one of address, thread and memory, not "
+        "MG64_SANITIZERS can hold only one of address, thread, memory and type, not "
         "${exclusive_sanitizers}"
     )
+endif()
+
+# TypeSanitizer is Clang's alone. It checks the accesses that strict aliasing
+# lets the optimizer assume apart, so it sees none under -fno-strict-aliasing.
+if("type" IN_LIST MG64_SANITIZERS)
+    if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_VERSION VERSION_LESS 23)
+        message(FATAL_ERROR
+            "MG64_SANITIZERS' type needs Clang 23 or later, whose runtime can "
+            "forget types, not ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}"
+        )
+    endif()
+    if(MG64_KMC_SEMANTICS)
+        message(FATAL_ERROR
+            "MG64_SANITIZERS' type needs MG64_KMC_SEMANTICS=OFF, as KMC GCC's "
+            "-fno-strict-aliasing leaves it nothing to check"
+        )
+    endif()
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        message(FATAL_ERROR "MG64_SANITIZERS' type needs Linux")
+    endif()
 endif()
 
 # Clang's checks of pointer pairs also take a difference or comparison of
@@ -50,6 +79,20 @@ foreach(sanitizer IN ITEMS pointer-compare pointer-subtract)
     endif()
 endforeach()
 
-list(JOIN MG64_SANITIZERS "," sanitizer_list)
-add_compile_options(-fsanitize=${sanitizer_list} -fno-omit-frame-pointer)
-add_link_options(-fsanitize=${sanitizer_list})
+set(program_sanitizers ${MG64_SANITIZERS})
+list(REMOVE_ITEM program_sanitizers type)
+if(program_sanitizers)
+    list(JOIN program_sanitizers "," sanitizer_list)
+    add_compile_options(-fsanitize=${sanitizer_list} -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=${sanitizer_list})
+endif()
+if("type" IN_LIST MG64_SANITIZERS)
+    target_compile_options(mg64_project_sanitizers INTERFACE
+        -fsanitize=type
+        -fno-omit-frame-pointer
+    )
+    target_link_options(mg64_project_sanitizers INTERFACE -fsanitize=type)
+    target_sources(mg64_project_sanitizers INTERFACE
+        "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:${CMAKE_CURRENT_LIST_DIR}/../src/sanitizers/forget_static_types.c>"
+    )
+endif()

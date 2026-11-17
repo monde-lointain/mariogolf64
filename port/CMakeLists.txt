@@ -7,6 +7,12 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
+# The switches that give what C leaves undefined KMC GCC's meaning. A
+# sanitizer build turns them off, so that its checks see the undefined
+# behavior they would hide, and the port can drop each once none is left.
+# The sanitizers check it, so it comes first.
+option(MG64_KMC_SEMANTICS "Give the game's undefined behavior KMC GCC's meaning" ON)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # Before any target, SDL's included, for the sanitizers to cover them all
 include(Sanitizers)
@@ -103,6 +109,7 @@ target_compile_definitions(mg64_headers INTERFACE
     MODERN_CC
 )
 target_compile_features(mg64_headers INTERFACE c_std_11)
+target_link_libraries(mg64_headers INTERFACE mg64_project_sanitizers)
 # The game's code was written for KMC GCC, whose char is unsigned, and which
 # took it as it reads where modern GCC would assume that undefined behavior
 # can't happen (see the Makefile's KMC_SEMANTICS). Contracting multiplies and
@@ -115,10 +122,7 @@ target_compile_options(mg64_headers INTERFACE
     -fno-common
     -ffp-contract=off
 )
-# The switches that give what C leaves undefined KMC GCC's meaning. A
-# sanitizer build turns them off, so that its checks see the undefined
-# behavior they would hide, and the port can drop each once none is left.
-option(MG64_KMC_SEMANTICS "Give the game's undefined behavior KMC GCC's meaning" ON)
+# KMC GCC's meanings, which MG64_KMC_SEMANTICS chooses above
 if(MG64_KMC_SEMANTICS)
     target_compile_options(mg64_headers INTERFACE
         -fno-strict-aliasing

@@ -39,6 +39,7 @@ PNGs that `make extract` cuts from the ROM (see the top-level README).
 | `linux-clang`          | Linux, with Clang                                       |
 | `linux-sanitize`       | Linux, a debug build with AddressSanitizer and UBSan    |
 | `linux-clang-sanitize` | The same with Clang, without KMC GCC's meanings (below) |
+| `linux-clang-tysan`    | A Clang 23 debug build with TypeSanitizer, likewise     |
 | `windows-mingw`        | 64-bit Windows, cross-compiled with MinGW-w64           |
 
 Each preset builds into `build/pc/<preset>`. `cmake --workflow --preset
@@ -61,6 +62,12 @@ switches out, so that its checks find what the port must fix before it
 can drop them, and Clang's UBSan adds checks that GCC's lacks: of a
 float converted to an integer outside its range, and of a call through
 a pointer to a routine of another type.
+
+`linux-clang-tysan` builds with TypeSanitizer, which finds where the code
+reads or stores an object under a type that strict aliasing would let the
+optimizer assume it isn't, so that the port can drop KMC GCC's
+`-fno-strict-aliasing`. It checks the project's own code only, not SDL's,
+and needs Clang 23 (`clang-23`) on Linux.
 
 CI (`.github/workflows/port.yml`) checks the Python tools and the
 nested-function hoister on every push. The builds need the assets cut from
