@@ -41,6 +41,15 @@
 #define ModelDisplayListChoices(model) \
     ((u32 *)CharacterModelTable(model, CHARACTER_MODEL_DISPLAY_LIST_CHOICES))
 
+// A command's first word with only its opcode set. The opcodes that set it
+// here are 0xDE and up, which C leaves undefined to shift into an int's sign
+// bit; shifting a u32 gives the same bits.
+#ifdef AVOID_UB
+#    define OpcodeWord(opcode) ((u32)(opcode) << 24)
+#else
+#    define OpcodeWord(opcode) ((opcode) << 24)
+#endif
+
 // Sets the command that the model's display list calls its choice with. A
 // native build writes it in the N64's form, as the model's display lists are.
 #ifdef TARGET_PC
@@ -1389,7 +1398,7 @@ Outcome SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
     if (slot != NULL) {
         checkedIndex = 0;
         if (choiceIndex == NO_DISPLAY_LIST_CHOICE) {
-            SetChosenDisplayList(slot->model, G_ENDDL << 24, 0);
+            SetChosenDisplayList(slot->model, OpcodeWord(G_ENDDL), 0);
             return OUTCOME_OK;
         }
 
@@ -1405,7 +1414,7 @@ Outcome SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
 
         SetChosenDisplayList(
             slot->model,
-            G_DL << 24,
+            OpcodeWord(G_DL),
             ModelDisplayListChoices(slot->model)[checkedIndex]
         );
         return OUTCOME_OK;
