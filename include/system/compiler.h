@@ -141,4 +141,21 @@
 #    define GetStackPointer() __builtin_frame_address(0)
 #endif
 
+// Tells the type sanitizer that size bytes from address hold no object, as
+// its malloc does of the memory it hands out, so that the next stores give
+// them their types. The game's own allocator puts blocks and headers where
+// other objects were, which C allows, and the sanitizer would otherwise
+// take the old objects' types for the new ones'. Other builds compile it to
+// nothing.
+#if defined(__has_feature)
+#    if __has_feature(type_sanitizer)
+#        include <sanitizer/tysan_interface.h>
+#        define ForgetMemoryTypes(address, size) __tysan_set_type_unknown((address), (size))
+#    endif
+#endif
+
+#ifndef ForgetMemoryTypes
+#    define ForgetMemoryTypes(address, size) ((void)0)
+#endif
+
 #endif

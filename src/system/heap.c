@@ -11,6 +11,7 @@
 
 #include "math/math_util.h"
 #include "system/c_language.h"
+#include "system/compiler.h"
 #include "system/memory_address.h"
 
 // Copies $ra, for the messages that name the caller of a failed call
@@ -173,6 +174,7 @@ void *AllocFromHeap(HeapIndex heapIndex, u32 size) {
     if (bestBlock->size - size > sizeof(MemoryBlock)) {
         f_Heaps[heapIndex].freeSize -= size;
         rest = BlockAt(bestBlock, size);
+        ForgetMemoryTypes(rest, sizeof(MemoryBlock));
         rest->size = bestBlock->size - size;
         rest->tag = BLOCK_FREE;
         bestBlock->next->previous = rest;
@@ -186,6 +188,7 @@ void *AllocFromHeap(HeapIndex heapIndex, u32 size) {
     }
 
     bestBlock->tag = BLOCK_USED;
+    ForgetMemoryTypes(BlockMemory(bestBlock), bestBlock->size - sizeof(MemoryBlock));
     osSetIntMask(mask);
     return BlockMemory(bestBlock);
 }
@@ -350,6 +353,7 @@ void *AllocMemory(u32 size) {
     if (bestBlock->size - size > sizeof(MemoryBlock)) {
         f_FreeMemorySize -= size;
         rest = BlockAt(bestBlock, size);
+        ForgetMemoryTypes(rest, sizeof(MemoryBlock));
         rest->size = bestBlock->size - size;
         rest->tag = BLOCK_FREE;
         bestBlock->next->previous = rest;
@@ -363,6 +367,7 @@ void *AllocMemory(u32 size) {
     }
 
     bestBlock->tag = BLOCK_USED;
+    ForgetMemoryTypes(BlockMemory(bestBlock), bestBlock->size - sizeof(MemoryBlock));
     osSetIntMask(mask);
     return BlockMemory(bestBlock);
 }

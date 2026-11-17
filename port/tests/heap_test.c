@@ -191,6 +191,27 @@ static void TestLogsFreeingNull(const Allocator *allocator) {
     EXPECT(f_InterruptMask == OS_IM_ALL);
 }
 
+// A block that its last user stored its own types in is freed, and a
+// header for the rest of a smaller block is put over them. The header's
+// stores must begin new objects rather than store over the user's under a
+// type that strict aliasing lets the compiler assume differs, which the
+// type sanitizer reports; the other builds only check where the blocks go.
+static void TestPutsHeadersOverUsedMemory(const Allocator *allocator) {
+    u8 *start = allocator->Start();
+    u32 memorySize = MemorySizeFor(allocator->regionSize);
+    s32 *memory = allocator->Alloc(memorySize);
+    u32 i;
+
+    for (i = 0; i < memorySize / sizeof(s32); i++) {
+        memory[i] = (s32)i;
+    }
+
+    allocator->Free(&memory);
+    EXPECT(allocator->Alloc(MemorySizeFor(64)) == start + HEADER_SIZE);
+    EXPECT(allocator->Alloc(MemorySizeFor(64)) == start + 64 + HEADER_SIZE);
+    EXPECT(allocator->FreeSize() == allocator->regionSize - 128);
+}
+
 static void TestAllocator(const Allocator *allocator) {
     TestSplitsOffTheRest(allocator);
     TestKeepsALeftoverHeaderInTheBlock(allocator);
@@ -200,6 +221,7 @@ static void TestAllocator(const Allocator *allocator) {
     TestTakesTheFirstOfEqualBlocks(allocator);
     TestMergesFreeNeighbors(allocator);
     TestLogsFreeingNull(allocator);
+    TestPutsHeadersOverUsedMemory(allocator);
 }
 
 static void TestAddsRegionsAsFreeMemory(void) {
