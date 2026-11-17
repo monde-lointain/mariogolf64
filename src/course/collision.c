@@ -205,7 +205,7 @@ static inline Boolean IsOffMiniGolfGround(s32 x, s32 z) {
         (fabsf((f32)((startSide) - (endSide))) < BARE_CROSSING_DISTANCE))
 
 // The hit masks, and which mask each billboard texture has
-static s8 f_BillboardMasks[BILLBOARD_MASK_COUNT][BILLBOARD_MASK_CELL_COUNT] NONSTRING = {
+static s8 f_BillboardMasks[BILLBOARD_MASK_COUNT][BILLBOARD_MASK_CELL_COUNT] NONSTRING_ROWS = {
     {
         "0000000000000000"
         "0000000000000000"

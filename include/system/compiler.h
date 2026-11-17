@@ -60,6 +60,14 @@
 #    define NONSTRING __attribute__((nonstring))
 #endif
 
+// The same for an array of such arrays, which GCC takes the attribute on
+// only from version 15, the first to warn without it
+#if defined(__IS_KMC__) || (defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 15)
+#    define NONSTRING_ROWS
+#else
+#    define NONSTRING_ROWS __attribute__((nonstring))
+#endif
+
 // The length to declare a struct's last array with when the game reads past
 // it. The original declares one element and reads on, which is undefined;
 // with AVOID_UB it is a flexible array, which KMC GCC writes as a
