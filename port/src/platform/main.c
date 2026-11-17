@@ -320,6 +320,12 @@ static void RunRetraces(long frameLimit, const InputScript *script, bool isLocks
     Uint64 next = SDL_GetTicksNS();
     long frameCount = 0;
 
+    // The game boots to its first wait before the first retrace, so that it
+    // sees that retrace however long the host takes to get to it
+    if (isLockstep && !PcWaitForIdleCpu(LOCKSTEP_TIMEOUT_MS)) {
+        SDL_Log("The game didn't finish booting in time");
+    }
+
     while (!f_IsQuitting && (frameLimit == 0 || frameCount < frameLimit)) {
         SDL_Event event;
         OSContPad pad;
