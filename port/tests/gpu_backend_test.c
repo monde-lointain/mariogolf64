@@ -202,6 +202,62 @@ static void TestCopiedTexture(void) {
     EXPECT_PIXEL(0, 4, 0, 0, 0);
 }
 
+// The RDP finds a pixel's texture coordinates at its corner, not its
+// center, so a filtered texture laid one texel to a pixel keeps its texels
+// whole rather than blending each with its neighbors
+static void TestFilteredTexelsOneForOne(void) {
+    static u16 texture[4 * 4] __attribute__((aligned(8)));
+    Gfx *gfx = BeginList(f_DisplayList);
+    int i;
+
+    for (i = 0; i < 4 * 4; i++) {
+        bool isOdd = (((i % 4) + (i / 4)) & 1) != 0;
+
+        texture[i] = isOdd ? GPACK_RGBA5551(0, 0, 255, 1) : GPACK_RGBA5551(255, 255, 0, 1);
+    }
+
+    gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 0, 1));
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, 1, 0, 0, 0, TEXEL0, 0, 0, 0, 1);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPLoadTextureBlock(
+        gfx++,
+        texture,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        4,
+        4,
+        0,
+        G_TX_CLAMP,
+        G_TX_CLAMP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gSPTextureRectangle(
+        gfx++,
+        8 << 2,
+        8 << 2,
+        12 << 2,
+        12 << 2,
+        G_TX_RENDERTILE,
+        0,
+        0,
+        1 << 10,
+        1 << 10
+    );
+    RunList(gfx);
+
+    EXPECT_PIXEL(8, 8, 255, 255, 0);
+    EXPECT_PIXEL(9, 8, 0, 0, 255);
+    EXPECT_PIXEL(8, 9, 0, 0, 255);
+    EXPECT_PIXEL(10, 9, 0, 0, 255);
+    EXPECT_PIXEL(10, 10, 255, 255, 0);
+}
+
 // A translucent surface mixes its color with memory's by its alpha
 static void TestTranslucentBlend(void) {
     static Vtx vertices[4];
@@ -405,6 +461,14 @@ int main(void) {
     TestDepth();
     TestSecondCycleTexel();
     TestTwoCycleAlphaCompare();
+    ShutdownRdp();
+    ShutdownGpuBackend();
+
+    // Upscaled, a pixel in memory averages the target's, so the N64's own
+    // sampling shows only at its resolution
+    InitGpuBackend(device, 1);
+    InitRdp();
+    TestFilteredTexelsOneForOne();
     ShutdownRdp();
     ShutdownGpuBackend();
     SDL_DestroyGPUDevice(device);

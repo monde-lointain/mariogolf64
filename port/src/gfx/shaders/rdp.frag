@@ -132,8 +132,8 @@ vec4 FetchTexel(TileSampler tile, ivec2 texel) {
 
 // The RDP filters between a texel and the next ones, with no half-texel
 // offset
-vec4 SampleTile(TileSampler tile, bool isFiltered) {
-    vec2 coordinate = (inTexCoord * tile.scale) - tile.offset;
+vec4 SampleTile(TileSampler tile, vec2 texCoord, bool isFiltered) {
+    vec2 coordinate = (texCoord * tile.scale) - tile.offset;
     ivec2 base = ivec2(floor(coordinate));
 
     if (!isFiltered) {
@@ -256,11 +256,14 @@ void main() {
     Material material = materials[inMaterial];
     bool isTwoCycle = (material.modes & MATERIAL_TWO_CYCLE) != 0u;
     bool isFiltered = (material.modes & MATERIAL_FILTERED) != 0u;
+    // The RDP samples a pixel's texture at its top left corner, where the
+    // host interpolates at its center. Upscaled, each target pixel does so.
+    vec2 texCoord = inTexCoord - (0.5 * (dFdx(inTexCoord) + dFdy(inTexCoord)));
     CombinerInputs inputs;
 
     inputs.combined = vec4(0.0);
-    inputs.texel0 = SampleTile(material.tiles[0], isFiltered);
-    inputs.texel1 = isTwoCycle ? SampleTile(material.tiles[1], isFiltered) : inputs.texel0;
+    inputs.texel0 = SampleTile(material.tiles[0], texCoord, isFiltered);
+    inputs.texel1 = isTwoCycle ? SampleTile(material.tiles[1], texCoord, isFiltered) : inputs.texel0;
     inputs.primitive = material.primitiveColor;
     inputs.shade = inShade;
     inputs.environment = material.environmentColor;
