@@ -1113,7 +1113,11 @@ void LoadCharacter(u32 slotIndex, CharacterIndex characterIndex, s32 modelKind) 
         g_CharacterModelIndex =
             ((modelKind & (CHARACTER_MODEL_KIND_COUNT - 1)) * CHARACTER_MODELS_PER_KIND) +
             (characterIndex % CHARACTER_MODELS_PER_KIND);
+#ifdef AVOID_UB
+        slot->model = CharacterModelAt(g_CharacterModelIndex);
+#else
         slot->model = &g_CharacterModels[0][g_CharacterModelIndex];
+#endif
     }
     else {
         g_CharacterModelIndex = (u32)characterIndex % OPENING_CHARACTER_MODEL_COUNT;

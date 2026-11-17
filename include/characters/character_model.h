@@ -23,6 +23,10 @@
 #define CHARACTER_MODELS_PER_KIND 36
 // The character that a model index shows, whichever kind of model it is
 #define ModelCharacter(modelIndex) ((modelIndex) % CHARACTER_MODELS_PER_KIND)
+// The model at an index across all the kinds, found by its row and column, as
+// the index passes the first row of g_CharacterModels
+#define CharacterModelAt(modelIndex) \
+    (&g_CharacterModels[(modelIndex) / CHARACTER_MODELS_PER_KIND][ModelCharacter(modelIndex)])
 #define OPENING_CHARACTER_MODEL_COUNT 18
 #define CHARACTER_MODEL_SEGMENT_ADDRESS_COUNT 15
 
