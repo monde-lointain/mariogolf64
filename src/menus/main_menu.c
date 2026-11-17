@@ -2040,12 +2040,7 @@ void UpdateMenus(void) {
                 else {
                     for (index = 0; index != COURSE_COUNT; index++) {
                         OpenEncodedAsset(g_CourseIconAssets[index], &asset);
-#ifdef AVOID_UB
-                        // The same buffer, without indexing a pair past its two
-                        ReadEncodedAsset(g_MenuIconImages[index], &asset);
-#else
-                        ReadEncodedAsset(MENU_ICON_IMAGE_PAIRS[0][index], &asset);
-#endif
+                        ReadEncodedAsset(MenuIconImage(index), &asset);
                     }
                 }
 
@@ -7417,14 +7412,13 @@ void DrawCourseSelect(Gfx **displayListHead) {
                 palette = g_MiniGolfDiscImages[drawnIndex];
                 // Indexed as one row, to match: indexed by the buffer and the slot,
                 // 5 words differ, 1 in shape
-                texels =
-                    MENU_ICON_IMAGE_PAIRS[0]
-                                         [(f_MiniGolfDiscBufferIndex * MINI_GOLF_DISC_IMAGE_COUNT) +
-                                             drawnIndex];
+                texels = MenuIconImage(
+                    (f_MiniGolfDiscBufferIndex * MINI_GOLF_DISC_IMAGE_COUNT) + drawnIndex
+                );
             }
             else {
-                palette = (PaletteColor *)ImageBody(MENU_ICON_IMAGE_PAIRS[0][drawnIndex]);
-                texels = MENU_ICON_IMAGE_PAIRS[0][drawnIndex];
+                palette = (PaletteColor *)ImageBody(MenuIconImage(drawnIndex));
+                texels = MenuIconImage(drawnIndex);
             }
 
             gDPLoadTLUT_pal256(gfx++, TextureAddress(palette));

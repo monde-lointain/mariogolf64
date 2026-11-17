@@ -86,6 +86,11 @@ mg64_add_port_test(float_to_unsigned_test
     LIBRARIES mg64_port_internal
 )
 
+mg64_add_port_test(menu_icon_image_test
+    SOURCES menu_icon_image_test.c
+    LIBRARIES mg64_port_internal
+)
+
 mg64_add_port_test(course_space_test
     SOURCES course_space_test.c
     LIBRARIES mg64_port_internal

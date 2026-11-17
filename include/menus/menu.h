@@ -428,6 +428,13 @@ extern MenuScreen16 g_LastMenuScreen;
 extern ImageAsset *g_MenuIconImages[MENU_ICON_COUNT];
 // g_MenuIconImages as the main menu uses them, in pairs of buffers
 #define MENU_ICON_IMAGE_PAIRS ((void *(*)[MINI_GOLF_DISC_IMAGE_COUNT])g_MenuIconImages)
+// The buffer at an index across all the pairs, which the N64 finds by
+// indexing the first pair past its two
+#ifdef AVOID_UB
+#    define MenuIconImage(index) ((void *)g_MenuIconImages[index])
+#else
+#    define MenuIconImage(index) (MENU_ICON_IMAGE_PAIRS[0][index])
+#endif
 extern ImageAsset *g_MenuBoardImages[MENU_IMAGE_BUFFER_COUNT];
 extern ImageAsset *g_MenuTitleImages[MENU_IMAGE_BUFFER_COUNT];
 // More of the menus' image buffers, named for the image LoadMenuResources first reads into each.
