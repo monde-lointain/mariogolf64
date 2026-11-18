@@ -106,6 +106,24 @@ nested-function hoister, and runs each preset's workflow, on every push.
 Neither the builds nor the tests need the ROM: the tests that read data
 from it make ROMs of their own.
 
+## Settings
+
+The game keeps its settings in `config.ini`, beside its save in the
+user's data folder (`~/.local/share/mariogolf64/mariogolf64/` on Linux,
+`%APPDATA%\mariogolf64\mariogolf64\` on Windows), and writes the file,
+with a comment on each setting, when there is none. It holds the ROM to
+play, the scale to draw at, fullscreen, the present mode (`mailbox`,
+`vsync` or `immediate`), the window's size and place, the volume, and
+what keys and gamepad controls play each N64 control, with the stick's
+dead zone and range. A line that the game can't use is logged with its
+line number and changes nothing.
+
+The game remembers its window in the file when it ends, which loses
+comments of your own, and leaves a file with problems alone.
+`--config PATH` reads and writes another file instead; a `--headless`
+run reads none without one, so that a test's run doesn't depend on the
+player's settings. The command line's options go over the file's.
+
 ## Recording and replaying a session
 
 `--record PATH` writes what the game reads from the first controller to a

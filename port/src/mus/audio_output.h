@@ -16,6 +16,10 @@
 bool OpenAudioOutput(int sampleRate);
 void CloseAudioOutput(void);
 
+// Sets how loud the output plays, from 0, silent, to 1, as the player
+// made it, before the music player starts
+void SetAudioOutputVolume(float volume);
+
 // Queues frameCount frames, interleaved left and right
 void QueueAudioOutput(const float *frames, int frameCount);
 

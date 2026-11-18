@@ -13,6 +13,7 @@
 #include "rom_image.h"
 #include "save_memory.h"
 #include "test_support.h"
+#include "window_place.h"
 
 #define SUPPORTED_ROM_SIZE 0x2000000u
 
@@ -315,6 +316,43 @@ static void TestPresentModeFallbacks(void) {
     EXPECT(PickPresentMode(immediate, false, false) == vsync);
 }
 
+// Whether a window of 800x600 at x, y shows enough of its top on the
+// displays
+static bool IsShown(int x, int y, const SDL_Rect *displays, int count) {
+    const SDL_Rect window = {x, y, 800, 600};
+
+    return IsWindowPlaceVisible(&window, displays, count);
+}
+
+// The window's top must overlap one display by 64x32 at least: each edge
+// of a display at that overlap and one pixel less
+static void TestWindowPlaces(void) {
+    static const SDL_Rect displays[] = {{0, 0, 1920, 1080}, {1920, 0, 1280, 1024}};
+    const SDL_Rect one = displays[0];
+
+    EXPECT(IsShown(100, 100, &one, 1));
+    EXPECT(IsShown(1920 - 64, 0, &one, 1));
+    EXPECT(!IsShown(1920 - 63, 0, &one, 1));
+    EXPECT(IsShown(64 - 800, 0, &one, 1));
+    EXPECT(!IsShown(63 - 800, 0, &one, 1));
+    EXPECT(IsShown(0, 1080 - 32, &one, 1));
+    EXPECT(!IsShown(0, 1080 - 31, &one, 1));
+    EXPECT(!IsShown(0, -1, &one, 1));
+    EXPECT(!IsShown(0, 0, NULL, 0));
+
+    // The second display holds the window that's off the first
+    EXPECT(IsShown(1921, 990, displays, 2));
+    EXPECT(!IsShown(1921, 1024 - 31, &displays[1], 1));
+    EXPECT(IsShown(1921, 1024 - 32, displays, 2));
+
+    // 40 pixels on each of two displays is on neither
+    {
+        const SDL_Rect straddling = {1880, 0, 80, 600};
+
+        EXPECT(!IsWindowPlaceVisible(&straddling, displays, 2));
+    }
+}
+
 int main(void) {
     TestRomByteOrders();
     TestSupportedRom();
@@ -327,5 +365,6 @@ int main(void) {
     TestScreenPixels();
     TestReadsScreenWhateverTheCpuReadItAs();
     TestPresentModeFallbacks();
+    TestWindowPlaces();
     return ReportTestResults("platform_test");
 }

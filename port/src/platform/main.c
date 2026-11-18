@@ -4,8 +4,8 @@
  * sixtieth of a second it reads the controllers, raises the video retrace
  * that drives the game, and shows the frame buffer that the retrace chose.
  *
- *     mariogolf64 [--scale N] [--fullscreen] [--save PATH] [--gpu-debug]
- *                 [--headless] [--frames N] [--game-frames N]
+ *     mariogolf64 [--scale N] [--fullscreen] [--save PATH] [--config PATH]
+ *                 [--gpu-debug] [--headless] [--frames N] [--game-frames N]
  *                 [--screenshot PATH]
  *                 [--input-script PATH] [--record PATH] [ROM]
  *
@@ -18,9 +18,12 @@
  * controller from a script, as input_script.h describes, and --record
  * writes what the game reads from it as such a script, to a new file.
  *
- * Without a ROM, it looks for baserom.us.z64 beside the program, then in
- * the current directory. Without --save, the game saves to the user's data
- * folder, or headless, nowhere.
+ * Without a ROM, it looks for the settings' ROM, or else baserom.us.z64
+ * beside the program, then in the current directory. Without --save, the
+ * game saves to the user's data folder, or headless, nowhere. The settings
+ * come from the --config file, or else config.ini in the user's data
+ * folder, which config.h describes; headless, from the defaults. The
+ * command line's options go over them.
  */
 
 #include <SDL3/SDL.h>
@@ -29,6 +32,8 @@
 #include <ultra64.h>
 
 #include "audio_output.h"
+#include "config.h"
+#include "config_file.h"
 #include "input.h"
 #include "input_recorder.h"
 #include "input_script.h"
@@ -43,11 +48,11 @@
 #include "sdl_gpu_backend.h"
 #include "stall_watch.h"
 #include "system/rom_arrays.h"
+#include "window_place.h"
 
 #define WINDOW_TITLE "Mario Golf"
 #define DEFAULT_ROM_NAME "baserom.us.z64"
 #define WINDOW_SCALE 3
-#define MAX_RENDER_SCALE 8
 #define RETRACES_PER_SECOND 60
 // Retraces behind before the clock gives up catching up, after a stall
 #define MAX_LATE_RETRACES 4
@@ -56,6 +61,7 @@
 typedef struct Options {
     const char *romPath;
     const char *savePath;
+    const char *configPath;
     const char *screenshotPath;
     const char *inputScriptPath;
     const char *recordingPath;
@@ -72,6 +78,9 @@ static SDL_GPUDevice *f_Device;
 static bool f_IsQuitting;
 static const void *f_ShownFramebuffer; // What the last retrace showed
 static InputRecorder *f_Recorder;
+static Config f_Config;
+static char *f_ConfigPath; // Where the settings came from, or NULL
+static bool f_StartsFullscreen;
 
 // --- What the game asks of the platform ---
 
@@ -95,7 +104,8 @@ void EnterDevelopmentDebugger(s32 argument) {
 
 static void PrintUsage(const char *program) {
     SDL_Log(
-        "Usage: %s [--scale N] [--fullscreen] [--save PATH] [--gpu-debug] [--headless] "
+        "Usage: %s [--scale N] [--fullscreen] [--save PATH] [--config PATH] [--gpu-debug] "
+        "[--headless] "
         "[--frames N] [--game-frames N] [--screenshot PATH] [--input-script PATH] "
         "[--record PATH] [ROM]",
         program
@@ -111,13 +121,16 @@ static bool ParseOptions(int argc, char **argv, Options *options) {
 
         if (SDL_strcmp(argument, "--scale") == 0 && i + 1 < argc) {
             options->renderScale = SDL_atoi(argv[++i]);
-            if (options->renderScale < 1 || options->renderScale > MAX_RENDER_SCALE) {
-                SDL_Log("The scale must be from 1 to %d", MAX_RENDER_SCALE);
+            if (options->renderScale < 1 || options->renderScale > CONFIG_SCALE_MAX) {
+                SDL_Log("The scale must be from 1 to %d", CONFIG_SCALE_MAX);
                 return false;
             }
         }
         else if (SDL_strcmp(argument, "--save") == 0 && i + 1 < argc) {
             options->savePath = argv[++i];
+        }
+        else if (SDL_strcmp(argument, "--config") == 0 && i + 1 < argc) {
+            options->configPath = argv[++i];
         }
         else if (SDL_strcmp(argument, "--frames") == 0 && i + 1 < argc) {
             options->frameLimit = SDL_strtol(argv[++i], NULL, 10);
@@ -161,6 +174,36 @@ static bool ParseOptions(int argc, char **argv, Options *options) {
     }
 
     return true;
+}
+
+// Takes the settings from the --config file, or else from the player's
+// own in the user's data folder; a headless run, being a test's, takes the
+// defaults without a --config file, lest the player's settings change
+// what it shows. The command line's options go over the settings.
+static void LoadSettings(Options *options) {
+    if (options->configPath != NULL) {
+        f_ConfigPath = SDL_strdup(options->configPath);
+    }
+    else if (!options->isHeadless) {
+        f_ConfigPath = FindDefaultConfigPath();
+    }
+
+    if (f_ConfigPath != NULL) {
+        (void)LoadConfigFile(f_ConfigPath, &f_Config);
+    }
+    else {
+        SetDefaultConfig(&f_Config);
+    }
+
+    if (options->romPath == NULL && f_Config.romPath[0] != '\0') {
+        options->romPath = f_Config.romPath;
+    }
+
+    if (options->renderScale == 0) {
+        options->renderScale = f_Config.renderScale;
+    }
+
+    options->isFullscreen = options->isFullscreen || f_Config.isFullscreen;
 }
 
 // Reads the ROM that the options name, or else the first found of the
@@ -224,7 +267,7 @@ static int ChooseRenderScale(void) {
         scale = (pixels + SCREEN_HEIGHT - 1) / SCREEN_HEIGHT;
     }
 
-    return SDL_clamp(scale, 1, MAX_RENDER_SCALE);
+    return SDL_clamp(scale, 1, CONFIG_SCALE_MAX);
 }
 
 // The save goes to the --save file, or else to the player's own, in the
@@ -253,9 +296,75 @@ static void UseSaveMemoryPath(const Options *options) {
     SDL_free(path);
 }
 
+static SDL_GPUPresentMode PresentModeOf(PresentChoice choice) {
+    switch (choice) {
+        case PRESENT_VSYNC:
+            return SDL_GPU_PRESENTMODE_VSYNC;
+        case PRESENT_IMMEDIATE:
+            return SDL_GPU_PRESENTMODE_IMMEDIATE;
+        default:
+            return SDL_GPU_PRESENTMODE_MAILBOX;
+    }
+}
+
+// Whether the window would show on the displays there are now
+static bool IsOnDisplays(const SDL_Rect *window) {
+    SDL_Rect areas[16];
+    SDL_DisplayID *displays;
+    int displayCount = 0;
+    int areaCount = 0;
+    int i;
+
+    displays = SDL_GetDisplays(&displayCount);
+    for (i = 0; displays != NULL && i < displayCount && areaCount < (int)SDL_arraysize(areas);
+        i++) {
+        if (SDL_GetDisplayUsableBounds(displays[i], &areas[areaCount])) {
+            areaCount++;
+        }
+    }
+
+    SDL_free(displays);
+    return IsWindowPlaceVisible(window, areas, areaCount);
+}
+
+// Opens the window at the size and place that the settings remember, when
+// they do and the place is still on a display
+static SDL_Window *CreateGameWindow(bool isFullscreen) {
+    const SDL_PropertiesID properties = SDL_CreateProperties();
+    SDL_Rect place;
+    SDL_Window *window;
+
+    place.w = (f_Config.windowWidth > 0) ? f_Config.windowWidth : SCREEN_WIDTH * WINDOW_SCALE;
+    place.h = (f_Config.windowHeight > 0) ? f_Config.windowHeight : SCREEN_HEIGHT * WINDOW_SCALE;
+    place.x = f_Config.windowX;
+    place.y = f_Config.windowY;
+    (void)SDL_SetStringProperty(properties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, WINDOW_TITLE);
+    (void)SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, place.w);
+    (void)SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, place.h);
+    (void)SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, true);
+    (void)
+        SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN, true);
+    (void)
+        SDL_SetBooleanProperty(properties, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, isFullscreen);
+    if (f_Config.hasWindowPosition) {
+        if (IsOnDisplays(&place)) {
+            (void)SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_X_NUMBER, place.x);
+            (void)SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_Y_NUMBER, place.y);
+        }
+        else {
+            SDL_Log(
+                "The window's remembered place is off the displays; letting the system "
+                "place it"
+            );
+        }
+    }
+
+    window = SDL_CreateWindowWithProperties(properties);
+    SDL_DestroyProperties(properties);
+    return window;
+}
+
 static bool OpenWindow(const Options *options) {
-    const SDL_WindowFlags flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY |
-        (options->isFullscreen ? SDL_WINDOW_FULLSCREEN : 0);
     int scale;
 
     f_Device = SDL_CreateGPUDevice(
@@ -269,18 +378,14 @@ static bool OpenWindow(const Options *options) {
     }
 
     if (!options->isHeadless) {
-        f_Window = SDL_CreateWindow(
-            WINDOW_TITLE,
-            SCREEN_WIDTH * WINDOW_SCALE,
-            SCREEN_HEIGHT * WINDOW_SCALE,
-            flags
-        );
+        f_Window = CreateGameWindow(options->isFullscreen);
         if (f_Window == NULL) {
             SDL_Log("Can't open the window: %s", SDL_GetError());
             return false;
         }
 
-        if (!InitPresenter(f_Device, f_Window, SDL_GPU_PRESENTMODE_MAILBOX)) {
+        f_StartsFullscreen = options->isFullscreen;
+        if (!InitPresenter(f_Device, f_Window, PresentModeOf(f_Config.present))) {
             return false;
         }
     }
@@ -424,6 +529,59 @@ static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
 
 // --- Ending ---
 
+static bool IsVideoDriver(const char *name) {
+    const char *driver = SDL_GetCurrentVideoDriver();
+
+    return driver != NULL && SDL_strcmp(driver, name) == 0;
+}
+
+// Remembers in the settings file where the player left the window: its
+// size and place when it's neither fullscreen, maximized nor minimized,
+// and whether it's fullscreen when the player changed that. A size left
+// at the default stays the default.
+static void RememberWindow(void) {
+    const SDL_WindowFlags states =
+        SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED;
+    const int limit = CONFIG_WINDOW_POSITION_LIMIT;
+    Config window = f_Config;
+    SDL_WindowFlags flags;
+    bool isFullscreen;
+    int width;
+    int height;
+    int x;
+    int y;
+
+    if (f_Window == NULL || f_ConfigPath == NULL) {
+        return;
+    }
+
+    flags = SDL_GetWindowFlags(f_Window);
+    isFullscreen = (flags & SDL_WINDOW_FULLSCREEN) != 0;
+    if (isFullscreen != f_StartsFullscreen) {
+        window.isFullscreen = isFullscreen;
+    }
+
+    if ((flags & states) == 0 &&
+        SDL_GetWindowSize(f_Window, &width, &height) &&
+        (window.windowWidth != 0 ||
+            width != SCREEN_WIDTH * WINDOW_SCALE ||
+            height != SCREEN_HEIGHT * WINDOW_SCALE)) {
+        window.windowWidth = SDL_clamp(width, CONFIG_WINDOW_SIZE_MIN, CONFIG_WINDOW_SIZE_MAX);
+        window.windowHeight = SDL_clamp(height, CONFIG_WINDOW_SIZE_MIN, CONFIG_WINDOW_SIZE_MAX);
+    }
+
+    // Wayland tells no window where it is
+    if ((flags & states) == 0 &&
+        !IsVideoDriver("wayland") &&
+        SDL_GetWindowPosition(f_Window, &x, &y)) {
+        window.hasWindowPosition = true;
+        window.windowX = SDL_clamp(x, -limit, limit);
+        window.windowY = SDL_clamp(y, -limit, limit);
+    }
+
+    (void)StoreWindowSettings(f_ConfigPath, &window);
+}
+
 // With the game halted, nothing else uses the renderer or the audio, so
 // they go in the order that each needs: the renderer's targets before the
 // backend, and the backend before the device. A game that won't halt
@@ -431,6 +589,9 @@ static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
 static bool ShutDown(const char *screenshotPath) {
     bool isOutputWhole = true;
 
+    RememberWindow();
+    SDL_free(f_ConfigPath);
+    f_ConfigPath = NULL;
     if (!PcHaltGame(HALT_TIMEOUT_MS)) {
         SDL_Log("The game didn't stop; leaving without cleaning up");
         _Exit(EXIT_FAILURE);
@@ -552,6 +713,8 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    LoadSettings(&options);
+
     UseSaveMemoryPath(&options);
     if (!StartRecording(options.recordingPath)) {
         FreeInputScript(script);
@@ -592,6 +755,8 @@ int main(int argc, char *argv[]) {
     }
 
     InitControllers();
+    SetPadBindings(&f_Config.bindings);
+    SetAudioOutputVolume((float)f_Config.volume / (float)CONFIG_VOLUME_MAX);
     PlayInputScript(script);
     RecordFirstPort(f_Recorder);
     PcInsertCartridge(rom, romSize);

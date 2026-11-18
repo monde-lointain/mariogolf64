@@ -11,6 +11,7 @@
 #define FRAME_SIZE (STEREO * (int)sizeof(float))
 
 static SDL_AudioStream *f_Stream;
+static float f_Gain = 1.0f;
 
 bool OpenAudioOutput(int sampleRate) {
     SDL_AudioSpec spec;
@@ -32,6 +33,7 @@ bool OpenAudioOutput(int sampleRate) {
         return false;
     }
 
+    (void)SDL_SetAudioStreamGain(f_Stream, f_Gain);
     SDL_ResumeAudioStreamDevice(f_Stream);
     return true;
 }
@@ -41,6 +43,17 @@ void CloseAudioOutput(void) {
         SDL_DestroyAudioStream(f_Stream);
         f_Stream = NULL;
         SDL_QuitSubSystem(SDL_INIT_AUDIO);
+    }
+}
+
+// Loudness goes more nearly with the square of the gain than with the
+// gain, so the volume's halfway is a quarter of the gain
+void SetAudioOutputVolume(float volume) {
+    const float clamped = SDL_clamp(volume, 0.0f, 1.0f);
+
+    f_Gain = clamped * clamped;
+    if (f_Stream != NULL) {
+        (void)SDL_SetAudioStreamGain(f_Stream, f_Gain);
     }
 }
 

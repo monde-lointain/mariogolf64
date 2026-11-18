@@ -144,7 +144,9 @@ static const Setting f_Settings[] = {
         FIELD(windowWidth),
         0,
         0,
-        "The window's size in pixels, from 160 to 16384, or 0 for the default"},
+        "The window's size, from 160 to 16384, or 0 for the default; on a\n"
+        "display that scales, in its units rather than pixels. The game\n"
+        "remembers the window's size and place here when it ends."},
     {"window", "height", SETTING_WINDOW_SIZE, FIELD(windowHeight), 0, 0, NULL},
     {"window",
         "position",
@@ -196,6 +198,11 @@ static const Setting f_Settings[] = {
         PAD_STICK_RANGE_MAX,
         "How far the N64's stick goes all the way, from 1 to 80"},
 };
+
+static const char f_FileComment[] =
+    "Mario Golf's settings. Lines that start with # are comments. The game\n"
+    "rewrites this file to remember its window, keeping the settings but not\n"
+    "comments of your own.";
 
 static const char f_ControlsComment[] =
     "Each N64 control takes up to 4 sources, separated by commas: a key by\n"
@@ -777,7 +784,7 @@ char *FormatConfig(const Config *config) {
     builder.capacity = 4096;
     builder.length = 0;
     builder.text = SDL_malloc(builder.capacity);
-    AppendText(&builder, "# Mario Golf's settings. Lines that start with # are comments.\n");
+    AppendComment(&builder, f_FileComment);
     for (i = 0; i < SDL_arraysize(f_Settings); i++) {
         const Setting *setting = &f_Settings[i];
 

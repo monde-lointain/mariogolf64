@@ -365,6 +365,16 @@ mg64_add_port_test(config_test
 )
 target_include_directories(config_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
+# The settings file on disk
+mg64_add_port_test(config_file_test
+    SOURCES config_file_test.c
+        "${PROJECT_SOURCE_DIR}/port/src/platform/config_file.c"
+        "${PROJECT_SOURCE_DIR}/port/src/platform/config.c"
+        "${PROJECT_SOURCE_DIR}/port/src/platform/pad_mapping.c"
+    LIBRARIES mg64_port_internal SDL3::SDL3
+)
+target_include_directories(config_file_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
+
 # The bindings of the host's gamepads and keys to the N64 controller's
 mg64_add_port_test(pad_mapping_test
     SOURCES pad_mapping_test.c "${PROJECT_SOURCE_DIR}/port/src/platform/pad_mapping.c"
