@@ -29,7 +29,7 @@ target_compile_options(mg64_game_options INTERFACE
 target_compile_options(mg64_game_options INTERFACE
     "SHELL:-include \"${CMAKE_CURRENT_SOURCE_DIR}/include/port/kmc_names.h\""
 )
-target_link_libraries(mg64_game_options INTERFACE mg64_kmc)
+target_link_libraries(mg64_game_options INTERFACE mg64_kmc mg64_math)
 
 set(main_sources ${MG64_GAME_SOURCES})
 foreach(overlay IN LISTS MG64_OVERLAY_NAMES)
@@ -90,6 +90,3 @@ target_link_libraries(mariogolf64 PRIVATE
 )
 include(OverlaySections)
 mg64_gather_overlay_variables(TARGET mariogolf64 OVERLAYS ${MG64_OVERLAY_NAMES})
-if(NOT WIN32)
-    target_link_libraries(mariogolf64 PRIVATE m)
-endif()

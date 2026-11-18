@@ -4,7 +4,7 @@
 
 add_library(mg64_test_support STATIC test_support.c)
 target_include_directories(mg64_test_support PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(mg64_test_support PRIVATE m)
+target_link_libraries(mg64_test_support PRIVATE mg64_math)
 
 # Doubles for the program's parts that the port's libraries call. Their
 # objects go into every test, wherever the libraries that call them fall
@@ -126,7 +126,7 @@ mg64_add_port_test(character_tables_test
 # The game's encoded assets, decoded from an archive on a fake cartridge
 mg64_add_port_test(view_projection_test
     SOURCES view_projection_test.c "${PROJECT_SOURCE_DIR}/src/camera/view_projection.c"
-    LIBRARIES mg64_port_internal m
+    LIBRARIES mg64_port_internal mg64_math
 )
 
 mg64_add_port_test(gbi_test

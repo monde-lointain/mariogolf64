@@ -13,6 +13,12 @@ include(Sanitizers)
 include(GameSources)
 include(Dependencies)
 
+# Every library that the port's targets link is a target from here on, so
+# that a misspelt name stops the configure rather than reaching the linker,
+# which could find a library of that name. SDL's targets, added above, link
+# system libraries by name.
+set(CMAKE_LINK_LIBRARIES_ONLY_TARGETS ON)
+
 set(MG64_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 add_custom_command(

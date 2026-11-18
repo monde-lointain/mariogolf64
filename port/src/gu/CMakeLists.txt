@@ -4,5 +4,5 @@
 add_library(mg64_gu STATIC gu.c)
 target_link_libraries(mg64_gu
     PUBLIC mg64_port_internal
-    PRIVATE mg64_port_warnings m
+    PRIVATE mg64_port_warnings mg64_math
 )

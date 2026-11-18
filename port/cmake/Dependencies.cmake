@@ -1,5 +1,6 @@
 # Finds what the port builds against: SDL 3 for the window, input, audio and
-# GPU, and the Python that runs the build's scripts.
+# GPU, the C library's maths functions, and the Python that runs the build's
+# scripts.
 #
 # SDL is downloaded and built as part of the project, linked statically, so
 # that every build has the same SDL and needs nothing installed to run.
@@ -33,6 +34,14 @@ endif()
 
 if(NOT TARGET SDL3::SDL3)
     message(FATAL_ERROR "SDL3 provided no SDL3::SDL3 target")
+endif()
+
+# The C library's maths functions, which Unix C libraries keep apart in
+# libm. Windows' C runtime holds them itself; MinGW's libm is an empty
+# stand-in.
+add_library(mg64_math INTERFACE IMPORTED)
+if(NOT WIN32)
+    set_target_properties(mg64_math PROPERTIES IMPORTED_LIBNAME m)
 endif()
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
