@@ -454,6 +454,9 @@ static SDL_Window *CreateGameWindow(bool isFullscreen) {
     place.h = (f_Config.windowHeight > 0) ? f_Config.windowHeight : SCREEN_HEIGHT * WINDOW_SCALE;
     place.x = f_Config.windowX;
     place.y = f_Config.windowY;
+    // A phone or tablet turns the game sideways, whatever the player's
+    // rotation lock says, as the N64's screen is wider than it is tall
+    (void)SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
     (void)SDL_SetStringProperty(properties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, WINDOW_TITLE);
     (void)SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, place.w);
     (void)SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, place.h);
