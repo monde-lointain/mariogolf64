@@ -12,6 +12,8 @@ target_link_libraries(mg64_test_support PRIVATE m)
 add_library(mg64_test_doubles OBJECT no_overlays.c)
 target_link_libraries(mg64_test_doubles PRIVATE mg64_port_internal)
 
+# A test that can't run where it is, such as one without a GPU or without
+# SDL's gamepads, exits with 77, which CTest reports as skipped
 function(mg64_add_port_test name)
     cmake_parse_arguments(PARSE_ARGV 1 arg "" "" "SOURCES;LIBRARIES")
     add_executable(${name} ${arg_SOURCES})
@@ -19,7 +21,7 @@ function(mg64_add_port_test name)
         PRIVATE mg64_test_support ${arg_LIBRARIES} mg64_test_doubles mg64_port_warnings
     )
     add_test(NAME ${name} COMMAND ${name})
-    set_tests_properties(${name} PROPERTIES TIMEOUT 60)
+    set_tests_properties(${name} PROPERTIES TIMEOUT 60 SKIP_RETURN_CODE 77)
 endfunction()
 
 # Fuzz targets: each runs the inputs in its corpus, fuzz_corpus/<target>,
@@ -284,20 +286,14 @@ mg64_add_port_test(gpu_backend_test
 # memory that LeakSanitizer reports, and the driver is unloaded before it
 # reports, so no suppression can name it. The sanitizers still check the
 # rest.
-set_tests_properties(gpu_backend_test PROPERTIES
-    SKIP_RETURN_CODE 77
-    ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0"
-)
+set_tests_properties(gpu_backend_test PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0")
 
 mg64_add_port_test(shape_overlay_test
     SOURCES shape_overlay_test.c
     LIBRARIES mg64_gpu mg64_gfx SDL3::SDL3
 )
 # As for gpu_backend_test
-set_tests_properties(shape_overlay_test PROPERTIES
-    SKIP_RETURN_CODE 77
-    ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0"
-)
+set_tests_properties(shape_overlay_test PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0")
 
 mg64_add_port_test(kmc_math_test
     SOURCES kmc_math_test.c
