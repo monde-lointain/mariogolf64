@@ -18,37 +18,16 @@
 
 #include "input_recorder.h"
 #include "input_script.h"
-
-// What a host controller holds at one moment, in SDL's terms: a bit for
-// each SDL_GamepadButton, and each SDL_GamepadAxis's value
-typedef struct HostPadState {
-    uint32_t buttons;
-    int16_t axes[6];
-} HostPadState;
-
-// Makes an N64 controller's state from a host controller's
-void MapHostPad(const HostPadState *host, OSContPad *pad);
-
-// Puts a GameCube controller's buttons where the N64's are, as Nintendo's
-// own N64 games on the GameCube had them: its L trigger, under the left
-// index finger as the N64's Z is, is already Z, and its R trigger R, so its
-// Z button, which SDL calls the right shoulder, becomes the left shoulder,
-// the N64's L
-void ArrangeGameCubePad(HostPadState *host);
-
-// Scales a stick's position, each axis from -32768 to 32767, to the N64
-// stick's range, from -80 to 80, with up positive and a dead zone around
-// the center
-void MapHostStick(int16_t x, int16_t y, s8 *stickX, s8 *stickY);
-
-// Adds the keyboard's keys to a host controller's state; keys is
-// SDL_GetKeyboardState's array
-void AddKeyboardToHostPad(const bool *keys, HostPadState *host);
+#include "pad_mapping.h"
 
 // Starts and ends the platform's use of the gamepads; SDL's gamepad
 // subsystem must be up
 void InitControllers(void);
 void ShutdownControllers(void);
+
+// Maps the controllers with these bindings from the next update on, in
+// place of the defaults; from the platform's thread
+void SetPadBindings(const PadBindings *bindings);
 
 // Takes a gamepad that SDL found into the first free port, or lets one go
 void ConnectGamepad(uint32_t instanceId);

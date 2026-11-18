@@ -1,7 +1,5 @@
 /*
- * The controllers. The layout follows the N64 controller's shape on a
- * modern pad: the face buttons give A and B, the triggers Z and R, the left
- * shoulder L, and the right stick the C buttons.
+ * The controllers, which pad_mapping.c's bindings map to the N64's.
  */
 
 #include "input.h"
@@ -12,36 +10,10 @@
 #include "port/os_host.h"
 
 #define PORT_COUNT MAXCONTROLLERS
-#define AXIS_MAX 32767
-#define STICK_RANGE 80
-// The share of the stick's throw, out of AXIS_MAX, ignored around the
-// center and counted as full at the edge
-#define STICK_DEAD_ZONE 7000
-#define STICK_FULL 30000
-// How far a trigger or the right stick goes before it counts as pressed
-#define PRESS_THRESHOLD 16000
 #define RUMBLE_STRENGTH 0xC000
 // SDL stops a rumble after this long unless it is renewed, so a crash
 // doesn't leave a motor running
 #define RUMBLE_RENEW_MS 250
-
-typedef struct ButtonMapping {
-    SDL_GamepadButton host;
-    u16 n64;
-} ButtonMapping;
-
-// A key that presses a gamepad's button
-typedef struct KeyButton {
-    SDL_Scancode key;
-    SDL_GamepadButton button;
-} KeyButton;
-
-// A key that pushes a gamepad's axis to a value
-typedef struct KeyAxis {
-    SDL_Scancode key;
-    SDL_GamepadAxis axis;
-    int16_t value;
-} KeyAxis;
 
 typedef struct ControllerPort {
     SDL_Gamepad *gamepad;
@@ -53,140 +25,14 @@ typedef struct ControllerPort {
     bool isRumbling;
 } ControllerPort;
 
-static const ButtonMapping f_ButtonMappings[] = {
-    {SDL_GAMEPAD_BUTTON_SOUTH, A_BUTTON},
-    {SDL_GAMEPAD_BUTTON_WEST, B_BUTTON},
-    {SDL_GAMEPAD_BUTTON_EAST, B_BUTTON},
-    {SDL_GAMEPAD_BUTTON_START, START_BUTTON},
-    {SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, L_TRIG},
-    {SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, R_TRIG},
-    {SDL_GAMEPAD_BUTTON_DPAD_UP, U_JPAD},
-    {SDL_GAMEPAD_BUTTON_DPAD_DOWN, D_JPAD},
-    {SDL_GAMEPAD_BUTTON_DPAD_LEFT, L_JPAD},
-    {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, R_JPAD},
-    {SDL_GAMEPAD_BUTTON_NORTH, U_CBUTTONS},
-};
-
-// The keyboard plays a gamepad: X and C are A and B, Z is Z, Q and W are L
-// and R, I, J, K and L the C buttons, T, F, G and H the D-pad, and the
-// arrow keys the stick
-static const KeyButton f_KeyButtons[] = {
-    {SDL_SCANCODE_X, SDL_GAMEPAD_BUTTON_SOUTH},
-    {SDL_SCANCODE_C, SDL_GAMEPAD_BUTTON_WEST},
-    {SDL_SCANCODE_RETURN, SDL_GAMEPAD_BUTTON_START},
-    {SDL_SCANCODE_Q, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER},
-    {SDL_SCANCODE_W, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER},
-    {SDL_SCANCODE_T, SDL_GAMEPAD_BUTTON_DPAD_UP},
-    {SDL_SCANCODE_G, SDL_GAMEPAD_BUTTON_DPAD_DOWN},
-    {SDL_SCANCODE_F, SDL_GAMEPAD_BUTTON_DPAD_LEFT},
-    {SDL_SCANCODE_H, SDL_GAMEPAD_BUTTON_DPAD_RIGHT},
-};
-
-static const KeyAxis f_KeyAxes[] = {
-    {SDL_SCANCODE_Z, SDL_GAMEPAD_AXIS_LEFT_TRIGGER, AXIS_MAX},
-    {SDL_SCANCODE_I, SDL_GAMEPAD_AXIS_RIGHTY, -AXIS_MAX},
-    {SDL_SCANCODE_K, SDL_GAMEPAD_AXIS_RIGHTY, AXIS_MAX},
-    {SDL_SCANCODE_J, SDL_GAMEPAD_AXIS_RIGHTX, -AXIS_MAX},
-    {SDL_SCANCODE_L, SDL_GAMEPAD_AXIS_RIGHTX, AXIS_MAX},
-    {SDL_SCANCODE_LEFT, SDL_GAMEPAD_AXIS_LEFTX, -AXIS_MAX},
-    {SDL_SCANCODE_RIGHT, SDL_GAMEPAD_AXIS_LEFTX, AXIS_MAX},
-    {SDL_SCANCODE_UP, SDL_GAMEPAD_AXIS_LEFTY, -AXIS_MAX},
-    {SDL_SCANCODE_DOWN, SDL_GAMEPAD_AXIS_LEFTY, AXIS_MAX},
-};
-
 static SDL_Mutex *f_Lock; // Guards f_Ports between the platform and the game
+static PadBindings f_Bindings; // The platform's thread's alone
 static ControllerPort f_Ports[PORT_COUNT];
 static Uint64 f_LastRumbleRenewal;
 static const InputScript *f_Script;
 static InputRecorder *f_Recorder;
 static bool f_HasRecordingFailed;
 static long f_FirstPortReadCount; // The game's frames, as it reads once each
-
-// --- Mapping ---
-
-static bool IsHostButtonDown(const HostPadState *host, SDL_GamepadButton button) {
-    return (host->buttons & (1u << button)) != 0;
-}
-
-static void SetHostButton(HostPadState *host, SDL_GamepadButton button) {
-    host->buttons |= 1u << button;
-}
-
-void ArrangeGameCubePad(HostPadState *host) {
-    SDL_assert(host != NULL);
-    if (IsHostButtonDown(host, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER)) {
-        host->buttons &= ~(1u << SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER);
-        SetHostButton(host, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER);
-    }
-}
-
-void MapHostStick(int16_t x, int16_t y, s8 *stickX, s8 *stickY) {
-    // Up is negative to SDL and positive to the N64
-    const float hostX = (float)x;
-    const float hostY = -(float)y;
-    const float length = SDL_sqrtf((hostX * hostX) + (hostY * hostY));
-    float scale;
-
-    if (length <= STICK_DEAD_ZONE) {
-        *stickX = 0;
-        *stickY = 0;
-        return;
-    }
-
-    // The throw past the dead zone, as a share of the rest, along the
-    // stick's own direction
-    scale = SDL_min((length - STICK_DEAD_ZONE) / (STICK_FULL - STICK_DEAD_ZONE), 1.0f) *
-        STICK_RANGE / length;
-    *stickX = (s8)SDL_clamp((int)SDL_lroundf(hostX * scale), -STICK_RANGE, STICK_RANGE);
-    *stickY = (s8)SDL_clamp((int)SDL_lroundf(hostY * scale), -STICK_RANGE, STICK_RANGE);
-}
-
-void MapHostPad(const HostPadState *host, OSContPad *pad) {
-    const int16_t cameraX = host->axes[SDL_GAMEPAD_AXIS_RIGHTX];
-    const int16_t cameraY = host->axes[SDL_GAMEPAD_AXIS_RIGHTY];
-    u16 buttons = 0;
-    size_t i;
-
-    SDL_assert(host != NULL && pad != NULL);
-    for (i = 0; i < SDL_arraysize(f_ButtonMappings); i++) {
-        if (IsHostButtonDown(host, f_ButtonMappings[i].host)) {
-            buttons |= f_ButtonMappings[i].n64;
-        }
-    }
-
-    buttons |= (host->axes[SDL_GAMEPAD_AXIS_LEFT_TRIGGER] > PRESS_THRESHOLD) ? Z_TRIG : 0;
-    buttons |= (host->axes[SDL_GAMEPAD_AXIS_RIGHT_TRIGGER] > PRESS_THRESHOLD) ? R_TRIG : 0;
-    buttons |= (cameraY < -PRESS_THRESHOLD) ? U_CBUTTONS : 0;
-    buttons |= (cameraY > PRESS_THRESHOLD) ? D_CBUTTONS : 0;
-    buttons |= (cameraX < -PRESS_THRESHOLD) ? L_CBUTTONS : 0;
-    buttons |= (cameraX > PRESS_THRESHOLD) ? R_CBUTTONS : 0;
-    pad->button = buttons;
-    MapHostStick(
-        host->axes[SDL_GAMEPAD_AXIS_LEFTX],
-        host->axes[SDL_GAMEPAD_AXIS_LEFTY],
-        &pad->stick_x,
-        &pad->stick_y
-    );
-    pad->errno = 0;
-}
-
-// A key overrides the gamepad's axis; of two opposed keys, the later wins
-void AddKeyboardToHostPad(const bool *keys, HostPadState *host) {
-    size_t i;
-
-    SDL_assert(keys != NULL && host != NULL);
-    for (i = 0; i < SDL_arraysize(f_KeyButtons); i++) {
-        if (keys[f_KeyButtons[i].key]) {
-            SetHostButton(host, f_KeyButtons[i].button);
-        }
-    }
-
-    for (i = 0; i < SDL_arraysize(f_KeyAxes); i++) {
-        if (keys[f_KeyAxes[i].key]) {
-            host->axes[f_KeyAxes[i].axis] = f_KeyAxes[i].value;
-        }
-    }
-}
 
 // --- The devices ---
 
@@ -226,6 +72,7 @@ void InitControllers(void) {
     int count = 0;
     int i;
 
+    SetDefaultPadBindings(&f_Bindings);
     f_Lock = SDL_CreateMutex();
     if (f_Lock == NULL) {
         PcFatalError("Can't create the controllers' lock: %s", SDL_GetError());
@@ -327,11 +174,8 @@ void UpdateControllers(void) {
             ReadGamepad(port->gamepad, &host);
         }
 
-        if (i == 0 && keys != NULL) {
-            AddKeyboardToHostPad(keys, &host);
-        }
-
-        MapHostPad(&host, &pad);
+        // The keyboard plays the first port
+        MapHostPad(&f_Bindings, &host, (i == 0) ? keys : NULL, &pad);
         SDL_LockMutex(f_Lock);
         port->pad = pad;
         ApplyRumble(port, isRenewal);
@@ -341,6 +185,11 @@ void UpdateControllers(void) {
     if (isRenewal) {
         f_LastRumbleRenewal = now;
     }
+}
+
+void SetPadBindings(const PadBindings *bindings) {
+    SDL_assert(bindings != NULL && IsStickShapeValid(&bindings->stick));
+    f_Bindings = *bindings;
 }
 
 void PlayInputScript(const InputScript *script) {

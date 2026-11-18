@@ -348,6 +348,13 @@ mg64_add_port_test(lockstep_test
 )
 target_include_directories(lockstep_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
+# The bindings of the host's gamepads and keys to the N64 controller's
+mg64_add_port_test(pad_mapping_test
+    SOURCES pad_mapping_test.c "${PROJECT_SOURCE_DIR}/port/src/platform/pad_mapping.c"
+    LIBRARIES mg64_port_internal SDL3::SDL3
+)
+target_include_directories(pad_mapping_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
+
 # Where a run in real time stalls, from the times of its retraces
 mg64_add_port_test(stall_watch_test
     SOURCES stall_watch_test.c "${PROJECT_SOURCE_DIR}/port/src/platform/stall_watch.c"

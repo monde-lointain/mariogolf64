@@ -1,7 +1,7 @@
 /*
  * Tests of the platform layer's parts that need no window or device: the
- * ROM's byte orders and check, the controllers' mapping, the save memory's
- * file, and the presenter's fit and pixels.
+ * ROM's byte orders and check, the controllers' scripts and recordings,
+ * the save memory's file, and the presenter's fit and pixels.
  */
 
 #include <SDL3/SDL.h>
@@ -14,7 +14,6 @@
 #include "save_memory.h"
 #include "test_support.h"
 
-#define AXIS_MAX 32767
 #define SUPPORTED_ROM_SIZE 0x2000000u
 
 // --- The ROM ---
@@ -135,237 +134,6 @@ static void TestRomRejections(void) {
 
     (void)SDL_RemovePath(path);
     SDL_free(rom);
-}
-
-// --- The controllers ---
-
-static void TestStick(void) {
-    s8 x;
-    s8 y;
-
-    // Within the dead zone, the stick rests
-    MapHostStick(5000, -5000, &x, &y);
-    EXPECT(x == 0 && y == 0);
-    // All the way, the N64's full throw; up is positive on the N64
-    MapHostStick(AXIS_MAX, 0, &x, &y);
-    EXPECT(x == 80 && y == 0);
-    MapHostStick(0, -AXIS_MAX, &x, &y);
-    EXPECT(x == 0 && y == 80);
-    MapHostStick(0, AXIS_MAX, &x, &y);
-    EXPECT(x == 0 && y == -80);
-    // A diagonal keeps its direction and doesn't go past the full throw
-    MapHostStick(AXIS_MAX, -AXIS_MAX, &x, &y);
-    EXPECT(x == y);
-    EXPECT(x > 50 && x <= 80);
-    // Halfway past the dead zone is about halfway
-    MapHostStick(18500, 0, &x, &y);
-    EXPECT(x >= 38 && x <= 42);
-}
-
-static void TestPadButtons(void) {
-    HostPadState host;
-    OSContPad pad;
-
-    SDL_zero(host);
-    host.buttons = (1u << SDL_GAMEPAD_BUTTON_SOUTH) | (1u << SDL_GAMEPAD_BUTTON_START) |
-        (1u << SDL_GAMEPAD_BUTTON_DPAD_LEFT);
-    host.axes[SDL_GAMEPAD_AXIS_LEFT_TRIGGER] = AXIS_MAX;
-    host.axes[SDL_GAMEPAD_AXIS_RIGHTX] = -AXIS_MAX;
-    host.axes[SDL_GAMEPAD_AXIS_LEFTY] = -AXIS_MAX;
-    MapHostPad(&host, &pad);
-    EXPECT(pad.button == (A_BUTTON | START_BUTTON | L_JPAD | Z_TRIG | L_CBUTTONS));
-    EXPECT(pad.stick_x == 0 && pad.stick_y == 80);
-
-    // A trigger only partly in doesn't press
-    SDL_zero(host);
-    host.axes[SDL_GAMEPAD_AXIS_LEFT_TRIGGER] = 8000;
-    host.axes[SDL_GAMEPAD_AXIS_RIGHT_TRIGGER] = 8000;
-    host.axes[SDL_GAMEPAD_AXIS_RIGHTY] = AXIS_MAX;
-    MapHostPad(&host, &pad);
-    EXPECT(pad.button == D_CBUTTONS);
-}
-
-// A GameCube controller's Z button is the N64's L, and its analog L and R
-// triggers are Z and R
-static void TestGameCubePad(void) {
-    HostPadState host;
-    OSContPad pad;
-
-    SDL_zero(host);
-    host.buttons = (1u << SDL_GAMEPAD_BUTTON_SOUTH) | (1u << SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER);
-    ArrangeGameCubePad(&host);
-    MapHostPad(&host, &pad);
-    EXPECT(pad.button == (A_BUTTON | L_TRIG));
-
-    SDL_zero(host);
-    host.axes[SDL_GAMEPAD_AXIS_LEFT_TRIGGER] = AXIS_MAX;
-    host.axes[SDL_GAMEPAD_AXIS_RIGHT_TRIGGER] = AXIS_MAX;
-    ArrangeGameCubePad(&host);
-    MapHostPad(&host, &pad);
-    EXPECT(pad.button == (Z_TRIG | R_TRIG));
-}
-
-static void TestKeyboard(void) {
-    static bool keys[SDL_SCANCODE_COUNT];
-    HostPadState host;
-    OSContPad pad;
-
-    SDL_zero(host);
-    keys[SDL_SCANCODE_X] = true;
-    keys[SDL_SCANCODE_Z] = true;
-    keys[SDL_SCANCODE_I] = true;
-    keys[SDL_SCANCODE_RIGHT] = true;
-    AddKeyboardToHostPad(keys, &host);
-    MapHostPad(&host, &pad);
-    EXPECT(pad.button == (A_BUTTON | Z_TRIG | U_CBUTTONS));
-    EXPECT(pad.stick_x == 80 && pad.stick_y == 0);
-}
-
-// A host button, axis or key that presses one N64 button
-typedef struct PressedButton {
-    int code; // The SDL_GamepadButton, SDL_GamepadAxis or SDL_Scancode
-    int axisValue; // For an axis, where it is pushed to
-    u16 n64;
-} PressedButton;
-
-// Each of the gamepad's buttons that the N64's buttons have
-static const PressedButton f_GamepadButtons[] = {
-    {SDL_GAMEPAD_BUTTON_SOUTH, 0, A_BUTTON},
-    {SDL_GAMEPAD_BUTTON_WEST, 0, B_BUTTON},
-    {SDL_GAMEPAD_BUTTON_EAST, 0, B_BUTTON},
-    {SDL_GAMEPAD_BUTTON_START, 0, START_BUTTON},
-    {SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, 0, L_TRIG},
-    {SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, 0, R_TRIG},
-    {SDL_GAMEPAD_BUTTON_DPAD_UP, 0, U_JPAD},
-    {SDL_GAMEPAD_BUTTON_DPAD_DOWN, 0, D_JPAD},
-    {SDL_GAMEPAD_BUTTON_DPAD_LEFT, 0, L_JPAD},
-    {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, 0, R_JPAD},
-    {SDL_GAMEPAD_BUTTON_NORTH, 0, U_CBUTTONS},
-};
-
-// Each of the gamepad's axes that presses a button, at full throw
-static const PressedButton f_GamepadAxes[] = {
-    {SDL_GAMEPAD_AXIS_LEFT_TRIGGER, AXIS_MAX, Z_TRIG},
-    {SDL_GAMEPAD_AXIS_RIGHT_TRIGGER, AXIS_MAX, R_TRIG},
-    {SDL_GAMEPAD_AXIS_RIGHTY, -AXIS_MAX - 1, U_CBUTTONS},
-    {SDL_GAMEPAD_AXIS_RIGHTY, AXIS_MAX, D_CBUTTONS},
-    {SDL_GAMEPAD_AXIS_RIGHTX, -AXIS_MAX - 1, L_CBUTTONS},
-    {SDL_GAMEPAD_AXIS_RIGHTX, AXIS_MAX, R_CBUTTONS},
-};
-
-// Each key that presses a button
-static const PressedButton f_KeyButtons[] = {
-    {SDL_SCANCODE_X, 0, A_BUTTON},
-    {SDL_SCANCODE_C, 0, B_BUTTON},
-    {SDL_SCANCODE_Z, 0, Z_TRIG},
-    {SDL_SCANCODE_RETURN, 0, START_BUTTON},
-    {SDL_SCANCODE_Q, 0, L_TRIG},
-    {SDL_SCANCODE_W, 0, R_TRIG},
-    {SDL_SCANCODE_I, 0, U_CBUTTONS},
-    {SDL_SCANCODE_K, 0, D_CBUTTONS},
-    {SDL_SCANCODE_J, 0, L_CBUTTONS},
-    {SDL_SCANCODE_L, 0, R_CBUTTONS},
-    {SDL_SCANCODE_T, 0, U_JPAD},
-    {SDL_SCANCODE_G, 0, D_JPAD},
-    {SDL_SCANCODE_F, 0, L_JPAD},
-    {SDL_SCANCODE_H, 0, R_JPAD},
-};
-
-// Each key that pushes the stick, and where to
-typedef struct StickKey {
-    SDL_Scancode key;
-    s8 x;
-    s8 y;
-} StickKey;
-
-static const StickKey f_StickKeys[] = {
-    {SDL_SCANCODE_UP, 0, 80},
-    {SDL_SCANCODE_DOWN, 0, -80},
-    {SDL_SCANCODE_LEFT, -80, 0},
-    {SDL_SCANCODE_RIGHT, 80, 0},
-};
-
-// Maps a host controller with nothing held but the keyboard's keys
-static void MapKeys(const bool *keys, OSContPad *pad) {
-    HostPadState host;
-
-    SDL_zero(host);
-    AddKeyboardToHostPad(keys, &host);
-    MapHostPad(&host, pad);
-}
-
-// Each control on its own presses its button and nothing else, and leaves
-// the stick at rest
-static void TestEachControlPressesItsButton(void) {
-    static bool keys[SDL_SCANCODE_COUNT];
-    HostPadState host;
-    OSContPad pad;
-    size_t i;
-
-    for (i = 0; i < SDL_arraysize(f_GamepadButtons); i++) {
-        SDL_zero(host);
-        host.buttons = 1u << f_GamepadButtons[i].code;
-        MapHostPad(&host, &pad);
-        EXPECT(pad.button == f_GamepadButtons[i].n64);
-        EXPECT(pad.stick_x == 0 && pad.stick_y == 0);
-    }
-
-    for (i = 0; i < SDL_arraysize(f_GamepadAxes); i++) {
-        SDL_zero(host);
-        host.axes[f_GamepadAxes[i].code] = (int16_t)f_GamepadAxes[i].axisValue;
-        MapHostPad(&host, &pad);
-        EXPECT(pad.button == f_GamepadAxes[i].n64);
-        EXPECT(pad.stick_x == 0 && pad.stick_y == 0);
-    }
-
-    for (i = 0; i < SDL_arraysize(f_KeyButtons); i++) {
-        keys[f_KeyButtons[i].code] = true;
-        MapKeys(keys, &pad);
-        keys[f_KeyButtons[i].code] = false;
-        EXPECT(pad.button == f_KeyButtons[i].n64);
-        EXPECT(pad.stick_x == 0 && pad.stick_y == 0);
-    }
-
-    for (i = 0; i < SDL_arraysize(f_StickKeys); i++) {
-        keys[f_StickKeys[i].key] = true;
-        MapKeys(keys, &pad);
-        keys[f_StickKeys[i].key] = false;
-        EXPECT(pad.button == 0);
-        EXPECT(pad.stick_x == f_StickKeys[i].x && pad.stick_y == f_StickKeys[i].y);
-    }
-}
-
-// Nothing held presses nothing; no other button or key does anything
-static void TestOtherControlsPressNothing(void) {
-    static bool keys[SDL_SCANCODE_COUNT];
-    HostPadState host;
-    OSContPad pad;
-    size_t i;
-
-    SDL_zero(host);
-    MapHostPad(&host, &pad);
-    EXPECT(pad.button == 0 && pad.stick_x == 0 && pad.stick_y == 0);
-
-    host.buttons = (1u << SDL_GAMEPAD_BUTTON_BACK) | (1u << SDL_GAMEPAD_BUTTON_GUIDE) |
-        (1u << SDL_GAMEPAD_BUTTON_LEFT_STICK) | (1u << SDL_GAMEPAD_BUTTON_RIGHT_STICK) |
-        (1u << SDL_GAMEPAD_BUTTON_MISC1);
-    MapHostPad(&host, &pad);
-    EXPECT(pad.button == 0);
-
-    for (i = 0; i < SDL_SCANCODE_COUNT; i++) {
-        keys[i] = true;
-    }
-
-    for (i = 0; i < SDL_arraysize(f_KeyButtons); i++) {
-        keys[f_KeyButtons[i].code] = false;
-    }
-
-    for (i = 0; i < SDL_arraysize(f_StickKeys); i++) {
-        keys[f_StickKeys[i].key] = false;
-    }
-
-    MapKeys(keys, &pad);
-    EXPECT(pad.button == 0 && pad.stick_x == 0 && pad.stick_y == 0);
 }
 
 // Reads the first port's buttons as the game does once a frame
@@ -538,12 +306,6 @@ int main(void) {
     TestSupportedRom();
     TestRomChecksum();
     TestRomRejections();
-    TestStick();
-    TestPadButtons();
-    TestGameCubePad();
-    TestKeyboard();
-    TestEachControlPressesItsButton();
-    TestOtherControlsPressNothing();
     TestScriptedFrames();
     TestRecordsReadFrames();
     TestSaveMemory();
