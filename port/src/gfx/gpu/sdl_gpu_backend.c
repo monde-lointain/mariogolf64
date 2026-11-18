@@ -20,6 +20,7 @@
 #include <SDL3/SDL_stdinc.h>
 
 #include "frame.h"
+#include "frames_in_flight.h"
 #include "gfx_backend.h"
 #include "port/os_host.h"
 #include "shaders/rdp.frag.h"
@@ -72,6 +73,7 @@ static struct {
     uint32_t stagingWidth;
     uint32_t stagingHeight;
     uint32_t noiseSeed;
+    FramesInFlight framesInFlight;
 } f_Gpu;
 
 static uint32_t GrownSize(uint32_t needed) {
@@ -401,6 +403,7 @@ void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale) {
 }
 
 void ShutdownGpuBackend(void) {
+    SDL_GPUFence *fence;
     int key;
 
     if (f_Gpu.device == NULL) {
@@ -408,6 +411,10 @@ void ShutdownGpuBackend(void) {
     }
 
     SDL_WaitForGPUIdle(f_Gpu.device);
+    while ((fence = TakeOldestFrameInFlight(&f_Gpu.framesInFlight)) != NULL) {
+        SDL_ReleaseGPUFence(f_Gpu.device, fence);
+    }
+
     for (key = 0; key < PIPELINE_KEY_COUNT; key++) {
         SDL_ReleaseGPUGraphicsPipeline(f_Gpu.device, f_Gpu.pipelines[key][0]);
         SDL_ReleaseGPUGraphicsPipeline(f_Gpu.device, f_Gpu.pipelines[key][1]);
@@ -479,6 +486,24 @@ static SDL_GPUCommandBuffer *AcquireCommandBuffer(void) {
 static void Submit(SDL_GPUCommandBuffer *commands) {
     if (!SDL_SubmitGPUCommandBuffer(commands)) {
         PcFatalError("Can't submit GPU commands: %s", SDL_GetError());
+    }
+}
+
+// Submits a frame, then waits for the oldest frame in flight once there
+// are more than FRAMES_IN_FLIGHT, so that the CPU never runs far ahead of
+// the GPU. Its fence also covers the copies submitted before it.
+static void SubmitFrame(SDL_GPUCommandBuffer *commands) {
+    SDL_GPUFence *fence = SDL_SubmitGPUCommandBufferAndAcquireFence(commands);
+    SDL_GPUFence *oldest;
+
+    if (fence == NULL) {
+        PcFatalError("Can't submit GPU commands: %s", SDL_GetError());
+    }
+
+    oldest = AddFrameInFlight(&f_Gpu.framesInFlight, fence);
+    if (oldest != NULL) {
+        SDL_WaitForGPUFences(f_Gpu.device, true, &oldest, 1);
+        SDL_ReleaseGPUFence(f_Gpu.device, oldest);
     }
 }
 
@@ -668,7 +693,7 @@ void BackendExecuteFrame(const GfxFrame *frame) {
         }
     }
 
-    Submit(commands);
+    SubmitFrame(commands);
 }
 
 // The staging texture, at least as big as the N64's image

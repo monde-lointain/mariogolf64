@@ -20,7 +20,7 @@ mg64_skip_type_sanitizer(mg64_gfx)
 # put a double in its place
 include(CompileShaders)
 
-add_library(mg64_gpu STATIC gpu/sdl_gpu_backend.c)
+add_library(mg64_gpu STATIC gpu/frames_in_flight.c gpu/sdl_gpu_backend.c)
 target_include_directories(mg64_gpu PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/gpu")
 target_link_libraries(mg64_gpu
     PUBLIC mg64_gfx SDL3::SDL3

@@ -285,6 +285,13 @@ mg64_add_port_test(input_script_test
     LIBRARIES mg64_platform mg64_ultra SDL3::SDL3
 )
 
+# The fences that keep the CPU from running far ahead of the GPU
+mg64_add_port_test(frames_in_flight_test
+    SOURCES frames_in_flight_test.c "${PROJECT_SOURCE_DIR}/port/src/gfx/gpu/frames_in_flight.c"
+    LIBRARIES SDL3::SDL3
+)
+target_include_directories(frames_in_flight_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/gfx/gpu")
+
 # The wait that keeps a headless run in step with the game, with the
 # scheduler's wait replaced through a link seam
 mg64_add_port_test(lockstep_test
