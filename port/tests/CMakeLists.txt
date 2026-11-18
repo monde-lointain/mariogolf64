@@ -382,6 +382,12 @@ mg64_add_port_test(touch_controls_test
     LIBRARIES mg64_platform_headers mg64_port_internal SDL3::SDL3
 )
 
+# The program's command line
+mg64_add_port_test(options_test
+    SOURCES options_test.c "${PROJECT_SOURCE_DIR}/port/src/platform/options.c"
+    LIBRARIES mg64_platform_headers mg64_port_internal SDL3::SDL3
+)
+
 # Where a run in real time stalls, from the times of its retraces
 mg64_add_port_test(stall_watch_test
     SOURCES stall_watch_test.c "${PROJECT_SOURCE_DIR}/port/src/platform/stall_watch.c"

@@ -14,6 +14,7 @@ add_library(mg64_platform STATIC
     input_recorder.c
     input_script.c
     lockstep.c
+    options.c
     pad_mapping.c
     presenter.c
     rom_image.c
