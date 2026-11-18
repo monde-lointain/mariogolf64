@@ -19,6 +19,10 @@ target_compile_options(mg64_game_options INTERFACE
     $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-deprecated-non-prototype>
     $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-absolute-value>
     $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-literal-range>
+    # The matched code calls sinf and cosf for nothing, as the original
+    # did, which Clang notices where the C library's maths sets no errno,
+    # as Android's doesn't
+    $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-unused-value>
 )
 # The KMC C library's random numbers and trigonometry, in place of the
 # host's, which differ from them and from each other (see port/kmc_names.h)
