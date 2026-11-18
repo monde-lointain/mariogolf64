@@ -21,3 +21,10 @@ deadlock:libdbus-1.so.3
 # thread is still returning from the broadcast on them. That is Mesa's,
 # which isn't instrumented, so its own synchronization is only partly seen.
 race:libvulkan_lvp.so
+
+# SDL 3.4.20's HIDAPI over libusb stops its event thread by setting a plain
+# int, shutdown_event_thread, which the thread polls between waits for
+# libusb's events, and SDL_Quit sets it on the main thread. That is SDL's,
+# and any program that starts SDL's gamepads with libusb reaches it when
+# it quits.
+race:stop_event_thread
