@@ -30,7 +30,6 @@ endif()
 set(native_library "${CMAKE_CURRENT_BINARY_DIR}/jniLibs/${CMAKE_ANDROID_ARCH_ABI}/libmain.so")
 set(gradle_dir "${CMAKE_CURRENT_BINARY_DIR}/gradle")
 set(apk "${gradle_dir}/app/outputs/apk/debug/app-debug.apk")
-set(MG64_APK "${apk}" CACHE INTERNAL "The debug APK that mg64_apk builds")
 
 set(gradle_sources
     settings.gradle
