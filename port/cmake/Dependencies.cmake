@@ -3,7 +3,10 @@
 # scripts.
 #
 # SDL is downloaded and built as part of the project, linked statically, so
-# that every build has the same SDL and needs nothing installed to run.
+# that every build has the same SDL and needs nothing installed to run. The
+# download is SDL's release archive, checked against its hash, which a tag
+# in SDL's repository couldn't guarantee: a tag can move. The archive also
+# holds the android-project that the Android app is packed from.
 # Distributions' SDL can also lack libusb, through which alone SDL reaches
 # the Wii U GameCube controller adapter (Ubuntu's does). MG64_USE_SYSTEM_SDL
 # builds against an installed SDL instead.
@@ -19,9 +22,8 @@ if(MG64_USE_SYSTEM_SDL)
     find_package(SDL3 ${MG64_SDL_MINIMUM_VERSION} REQUIRED CONFIG)
 else()
     FetchContent_Declare(SDL3
-        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-        GIT_TAG release-3.4.20
-        GIT_SHALLOW TRUE
+        URL https://github.com/libsdl-org/SDL/releases/download/release-3.4.20/SDL3-3.4.20.tar.gz
+        URL_HASH SHA256=f3bb06f55bed9557227a700af2ea62e49497ebdf58037732a731a5fb3ef8581f
     )
     set(SDL_SHARED OFF CACHE BOOL "")
     set(SDL_STATIC ON CACHE BOOL "")
