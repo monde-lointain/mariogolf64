@@ -14,6 +14,7 @@ add_library(mg64_platform STATIC
     rom_image.c
     save_memory.c
     stall_watch.c
+    touch_controls.c
     window_place.c
 )
 target_include_directories(mg64_platform PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

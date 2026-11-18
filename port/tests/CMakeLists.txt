@@ -382,6 +382,15 @@ mg64_add_port_test(pad_mapping_test
 )
 target_include_directories(pad_mapping_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
+# The touch controls' layout, and what fingers on them play
+mg64_add_port_test(touch_controls_test
+    SOURCES touch_controls_test.c
+        "${PROJECT_SOURCE_DIR}/port/src/platform/touch_controls.c"
+        "${PROJECT_SOURCE_DIR}/port/src/platform/pad_mapping.c"
+    LIBRARIES mg64_port_internal SDL3::SDL3
+)
+target_include_directories(touch_controls_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
+
 # Where a run in real time stalls, from the times of its retraces
 mg64_add_port_test(stall_watch_test
     SOURCES stall_watch_test.c "${PROJECT_SOURCE_DIR}/port/src/platform/stall_watch.c"
