@@ -127,6 +127,13 @@ where N is the frame that the recording ends at, as its last line says.
 reused name. Each line is written as soon as it is made, so a session cut
 short by a crash keeps what came before.
 
+A replay runs in lockstep, so it can't show a freeze. A session played in
+a window logs one instead, on the standard error: a retrace that the host
+reached 100 ms or more after the last, or a frame that the game took that
+long to reach, with the game frame. In lockstep the game never takes that
+long, so each such line is the host's doing, and its game frame finds the
+spot in the recording.
+
 ## Layout
 
 | Folder           | What it holds                                                     |

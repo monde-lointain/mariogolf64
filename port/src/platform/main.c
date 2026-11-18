@@ -41,6 +41,7 @@
 #include "rsp.h"
 #include "save_memory.h"
 #include "sdl_gpu_backend.h"
+#include "stall_watch.h"
 #include "system/rom_arrays.h"
 
 #define WINDOW_TITLE "Mario Golf"
@@ -340,16 +341,38 @@ static bool PollQuitEvents(void) {
     return f_IsQuitting;
 }
 
+// Logs the stalls that a retrace ends in a run in real time, for a
+// player's report of a freeze
+static void ReportStalls(Stalls stalls, long frameCount, long gameFrame) {
+    if (stalls.hostNs != 0) {
+        SDL_Log(
+            "Stall: retrace %ld came %" SDL_PRIu64 " ms after the last, at game frame %ld",
+            frameCount,
+            stalls.hostNs / SDL_NS_PER_MS,
+            gameFrame
+        );
+    }
+
+    if (stalls.gameNs != 0) {
+        SDL_Log(
+            "Stall: game frame %ld came %" SDL_PRIu64 " ms after the last",
+            gameFrame,
+            stalls.gameNs / SDL_NS_PER_MS
+        );
+    }
+}
+
 // Raises the retraces at their own pace, whatever the display's rate. After
 // a stall the clock starts afresh rather than rush the game to catch up. In
 // lockstep, each retrace instead waits for the game to finish with it, so
 // that the game sees every one, wherever the host is slow, and the next
 // follows at once: what the game computes doesn't depend on the clock, which
-// only its debugging meters read.
+// only its debugging meters read. A run in real time logs its stalls.
 static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
     const Uint64 period = SDL_NS_PER_SECOND / RETRACES_PER_SECOND;
     Uint64 next = SDL_GetTicksNS();
     long frameCount = 0;
+    StallWatch stallWatch;
 
     // The game boots to its first wait before the first retrace, so that it
     // sees that retrace however long the host takes to get to it
@@ -357,11 +380,14 @@ static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
         (void)AwaitGameInLockstep(LOCKSTEP_BOOT, PollQuitEvents);
     }
 
+    StartStallWatch(&stallWatch, next, CountGameFrames());
+
     while (!f_IsQuitting &&
         (frameLimit == 0 || frameCount < frameLimit) &&
         (gameFrameLimit == 0 || CountGameFrames() < gameFrameLimit)) {
         SDL_Event event;
         Uint64 now;
+        long gameFrame;
 
         while (SDL_PollEvent(&event)) {
             HandleEvent(&event);
@@ -383,8 +409,10 @@ static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
             continue;
         }
 
-        next += period;
         now = SDL_GetTicksNS();
+        gameFrame = CountGameFrames();
+        ReportStalls(WatchRetrace(&stallWatch, now, gameFrame), frameCount, gameFrame);
+        next += period;
         if (now < next) {
             SDL_DelayPrecise(next - now);
         }

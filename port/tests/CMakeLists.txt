@@ -348,6 +348,13 @@ mg64_add_port_test(lockstep_test
 )
 target_include_directories(lockstep_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
+# Where a run in real time stalls, from the times of its retraces
+mg64_add_port_test(stall_watch_test
+    SOURCES stall_watch_test.c "${PROJECT_SOURCE_DIR}/port/src/platform/stall_watch.c"
+    LIBRARIES SDL3::SDL3
+)
+target_include_directories(stall_watch_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
+
 # The input recorder, and the script lines that it writes
 mg64_add_port_test(input_recorder_test
     SOURCES input_recorder_test.c

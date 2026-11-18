@@ -10,6 +10,7 @@ add_library(mg64_platform STATIC
     presenter.c
     rom_image.c
     save_memory.c
+    stall_watch.c
 )
 target_include_directories(mg64_platform PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(mg64_platform
