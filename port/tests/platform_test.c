@@ -74,17 +74,39 @@ static void WriteTestFile(const char *path, const void *data, size_t size) {
     EXPECT(SDL_SaveFile(path, data, size));
 }
 
-// Whether loading path fails, and SDL's error then names the problem
+// Whether loading path fails, and SDL's error then names the problem and
+// the image, by its path or by the name given, which starts it. The error
+// left is the one for the name.
 static bool IsRomRejected(const char *path, const char *problem) {
+    static const char name[] = "That file";
     size_t size = 1;
     uint8_t *rom = LoadRomImage(path, &size);
+    bool isRejected;
 
     if (rom != NULL) {
         SDL_free(rom);
         return false;
     }
 
-    return SDL_strstr(SDL_GetError(), problem) != NULL && SDL_strstr(SDL_GetError(), path) != NULL;
+    isRejected =
+        SDL_strstr(SDL_GetError(), problem) != NULL && SDL_strstr(SDL_GetError(), path) != NULL;
+
+    // Named otherwise, as a file that the player chose is
+    rom = LoadNamedRomImage(path, name, &size);
+    if (rom != NULL) {
+        SDL_free(rom);
+        return false;
+    }
+
+    return isRejected &&
+        SDL_strstr(SDL_GetError(), problem) != NULL &&
+        SDL_strncmp(SDL_GetError(), name, sizeof(name) - 1) == 0;
+}
+
+// Whether the image named otherwise was rejected for what it holds, which
+// the port says in its own words, without the path
+static bool IsPathHidden(const char *path) {
+    return SDL_strstr(SDL_GetError(), path) == NULL;
 }
 
 // Writes an image in the N64's order to path in the .v64 order, each
@@ -110,15 +132,17 @@ static void TestRomRejections(void) {
     char expected[32];
 
     (void)SDL_RemovePath(path);
-    EXPECT(IsRomRejected(path, "Can't read the ROM"));
+    EXPECT(IsRomRejected(path, "can't be read"));
 
     WriteTestFile(path, f_BigEndianStart, sizeof(f_BigEndianStart));
     EXPECT(IsRomRejected(path, "isn't an N64 ROM image"));
+    EXPECT(IsPathHidden(path));
 
     SDL_memcpy(rom, f_BigEndianStart, sizeof(f_BigEndianStart));
     SDL_memcpy(rom + 0x3B, "NMFJ", 4);
     WriteSwappedRom(path, rom, SUPPORTED_ROM_SIZE);
     EXPECT(IsRomRejected(path, "game code NMFE"));
+    EXPECT(IsPathHidden(path));
 
     // The US release's header on other contents. The message gives the
     // image's checksum in the N64's order, so the dump was converted.
@@ -132,6 +156,7 @@ static void TestRomRejections(void) {
     );
     EXPECT(IsRomRejected(path, expected));
     EXPECT(IsRomRejected(path, "2FC4C216"));
+    EXPECT(IsPathHidden(path));
 
     (void)SDL_RemovePath(path);
     SDL_free(rom);

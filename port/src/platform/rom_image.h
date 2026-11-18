@@ -36,4 +36,8 @@ uint32_t ComputeRomChecksum(const uint8_t *rom, size_t size);
 // why not.
 uint8_t *LoadRomImage(const char *path, size_t *size);
 
+// The same, but naming the image in what SDL_GetError says as name, which
+// starts it, rather than by its path, which may mean nothing to the player
+uint8_t *LoadNamedRomImage(const char *path, const char *name, size_t *size);
+
 #endif

@@ -102,26 +102,26 @@ static uint8_t *RejectRomImage(uint8_t *rom) {
     return NULL;
 }
 
-uint8_t *LoadRomImage(const char *path, size_t *size) {
+uint8_t *LoadNamedRomImage(const char *path, const char *name, size_t *size) {
     uint8_t *rom;
     uint32_t checksum;
 
-    SDL_assert(path != NULL && size != NULL);
+    SDL_assert(path != NULL && name != NULL && size != NULL);
     rom = SDL_LoadFile(path, size);
     if (rom == NULL) {
-        SDL_SetError("Can't read the ROM %s: %s", path, SDL_GetError());
+        SDL_SetError("%s can't be read: %s", name, SDL_GetError());
         return NULL;
     }
 
     if (*size < HEADER_SIZE || !ConvertRomToBigEndian(rom, *size)) {
-        SDL_SetError("%s isn't an N64 ROM image", path);
+        SDL_SetError("%s isn't an N64 ROM image", name);
         return RejectRomImage(rom);
     }
 
     if (!IsSupportedRom(rom, *size)) {
         SDL_SetError(
             "%s isn't the US release of Mario Golf (game code %s), which the port needs",
-            path,
+            name,
             SUPPORTED_GAME_CODE
         );
         return RejectRomImage(rom);
@@ -132,7 +132,7 @@ uint8_t *LoadRomImage(const char *path, size_t *size) {
         SDL_SetError(
             "%s is a revision or a modified dump of Mario Golf's US release: its CRC-32 is "
             "%08" SDL_PRIX32 ", where the port needs the unmodified release's, %08X (SHA-1 %s)",
-            path,
+            name,
             checksum,
             SUPPORTED_CRC32,
             SUPPORTED_SHA1
@@ -141,4 +141,8 @@ uint8_t *LoadRomImage(const char *path, size_t *size) {
     }
 
     return rom;
+}
+
+uint8_t *LoadRomImage(const char *path, size_t *size) {
+    return LoadNamedRomImage(path, path, size);
 }
