@@ -76,7 +76,7 @@ Recorded in `10-toad-tournament.txt`.
 
 | ID   | Note                                                                       | Status |
 |------|----------------------------------------------------------------------------|--------|
-| 10-1 | Froze briefly at the scorecard between hole 9 and hole 10                  | open; not seen in replays, headless or windowed, with the save and a recording on the SSD: the save there (frame 12451) takes about 3 ms, as at 11 other holes, and no game frame waits more than 3 retraces |
+| 10-1 | Froze briefly at the scorecard between hole 9 and hole 10                  | open; not seen in replays, headless or windowed, with the save and a recording on the SSD: the save there (frame 12451) takes about 3 ms, as at 11 other holes, and no game frame waits more than 3 retraces, nor any retrace more than 12 ms on the RTX 4070; play in a window now logs each stall with its game frame (see `port/README.md`) |
 | 10-2 | A blue background appears around the spinning Toad trophy                  | open |
 
 ## Found by replays and comparisons
@@ -88,3 +88,4 @@ Not noted while playing, but seen in the port's own runs.
 | R-1 | A black wedge in the sky, top right, only in windowed runs; the RSP's sky triangles match a headless run's | open |
 | R-2 | Frames differ from ares by up to a few thousand pixels: slightly darker overall, dither, two-texture blends, the tree line, the HUD and shadows | open |
 | R-3 | AddressSanitizer stopped session 02's replay on choosing the mode: a preset's empty bet slot read before the stakes table | fixed in 6062eae5 |
+| R-4 | On the RTX 4070 each new blend state's pipeline takes about 59 ms to create, on first use, so the first screens hitch four times | open |
