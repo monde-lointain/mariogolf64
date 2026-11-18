@@ -26,6 +26,7 @@ typedef struct ControllerPort {
     SDL_Gamepad *gamepad;
     SDL_JoystickID instanceId;
     OSContPad pad;
+    u16 unreadButtons; // Pressed at an update since the game last read
     bool isConnected;
     bool canRumble;
     bool wantsRumble;
@@ -170,6 +171,7 @@ void DisconnectGamepad(uint32_t instanceId) {
             port->isRumbling = false;
             port->isConnected = (i == 0);
             SDL_zero(port->pad);
+            port->unreadButtons = 0;
             SDL_UnlockMutex(f_Lock);
         }
     }
@@ -212,6 +214,7 @@ void UpdateControllers(void) {
 
         SDL_LockMutex(f_Lock);
         port->pad = pad;
+        port->unreadButtons |= pad.button;
         ApplyRumble(port, isRenewal);
         SDL_UnlockMutex(f_Lock);
     }
@@ -280,6 +283,8 @@ void PcReadControllerPad(int port, OSContPad *pad) {
     if (port >= 0 && port < PORT_COUNT) {
         SDL_LockMutex(f_Lock);
         *pad = f_Ports[port].pad;
+        pad->button |= f_Ports[port].unreadButtons;
+        f_Ports[port].unreadButtons = 0;
         if (port == 0) {
             if (f_Script != NULL) {
                 (void)FindScriptedPad(f_Script, f_FirstPortReadCount, pad);

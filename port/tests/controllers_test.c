@@ -185,6 +185,44 @@ static void TestMotors(void) {
     DetachPad(&shaker);
 }
 
+// The game reads the ports at its own pace, slower than the updates when
+// it lags, so a press that an update saw lasts until the game's next read
+// of its port, even when the next update finds it let go
+static void TestBriefPressLastsToRead(void) {
+    VirtualPad pads[2];
+
+    AttachPad(&pads[0], false);
+    AttachPad(&pads[1], false);
+    InitControllers();
+    PressSouth(&pads[1], true);
+    UpdateControllers();
+    PressSouth(&pads[1], false);
+    UpdateControllers();
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == 0);
+    EXPECT(ReadButtons(1) == A_BUTTON);
+    EXPECT(ReadButtons(1) == 0);
+
+    // A press that the game saw goes as it's let go
+    PressSouth(&pads[0], true);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == A_BUTTON);
+    PressSouth(&pads[0], false);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == 0);
+
+    // A gamepad that leaves takes its presses with it
+    PressSouth(&pads[1], true);
+    UpdateControllers();
+    PressSouth(&pads[1], false);
+    UpdateControllers();
+    DisconnectGamepad(pads[1].id);
+    EXPECT(ReadButtons(1) == 0);
+    ShutdownControllers();
+    DetachPad(&pads[0]);
+    DetachPad(&pads[1]);
+}
+
 // --- The touch controls ---
 
 // A phone-sized screen, and a layout of it to find the controls by
@@ -338,6 +376,7 @@ int main(void) {
 
     TestPortsFillInOrder();
     TestMotors();
+    TestBriefPressLastsToRead();
     TestTouchPlaysFirstPort();
     TestTouchStick();
     TestTouchHidesForOtherController();

@@ -6,7 +6,8 @@
  * The platform's thread reads the devices once a retrace with
  * UpdateControllers, and the game's threads read what it found through
  * nusys_host.h's PcReadControllerPad and its siblings, which may be called
- * from any thread.
+ * from any thread. A press that an update saw lasts until the game reads
+ * its port, as the game may read less often than the updates come.
  */
 
 #ifndef PORT_PLATFORM_INPUT_H
