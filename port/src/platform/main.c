@@ -60,6 +60,13 @@
 // How often a paused window shows its frame again
 #define PAUSED_REDRAW_MS 100
 
+// A phone's or tablet's game fills the screen, over the system's bars
+#if defined(SDL_PLATFORM_ANDROID) || defined(SDL_PLATFORM_IOS)
+#    define IS_ALWAYS_FULLSCREEN true
+#else
+#    define IS_ALWAYS_FULLSCREEN false
+#endif
+
 typedef struct Options {
     const char *romPath;
     const char *savePath;
@@ -206,7 +213,7 @@ static void LoadSettings(Options *options) {
         options->renderScale = f_Config.renderScale;
     }
 
-    options->isFullscreen = options->isFullscreen || f_Config.isFullscreen;
+    options->isFullscreen = options->isFullscreen || f_Config.isFullscreen || IS_ALWAYS_FULLSCREEN;
 }
 
 // Reads the ROM that the options name, or else the first found of the
@@ -407,7 +414,9 @@ static bool OpenWindow(const Options *options) {
 static void ToggleFullscreen(void) {
     const bool isFullscreen = (SDL_GetWindowFlags(f_Window) & SDL_WINDOW_FULLSCREEN) != 0;
 
-    (void)SDL_SetWindowFullscreen(f_Window, !isFullscreen);
+    if (!IS_ALWAYS_FULLSCREEN) {
+        (void)SDL_SetWindowFullscreen(f_Window, !isFullscreen);
+    }
 }
 
 static void HandleEvent(const SDL_Event *event) {
