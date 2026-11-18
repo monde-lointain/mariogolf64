@@ -113,10 +113,11 @@ user's data folder (`~/.local/share/mariogolf64/mariogolf64/` on Linux,
 `%APPDATA%\mariogolf64\mariogolf64\` on Windows), and writes the file,
 with a comment on each setting, when there is none. It holds the ROM to
 play, the scale to draw at, fullscreen, the present mode (`mailbox`,
-`vsync` or `immediate`), the window's size and place, the volume, and
-what keys and gamepad controls play each N64 control, with the stick's
-dead zone and range. A line that the game can't use is logged with its
-line number and changes nothing.
+`vsync` or `immediate`), the window's size and place, whether to pause
+while another window has the focus, the volume, and what keys and
+gamepad controls play each N64 control, with the stick's dead zone and
+range. A line that the game can't use is logged with its line number and
+changes nothing.
 
 The game remembers its window in the file when it ends, which loses
 comments of your own, and leaves a file with problems alone.

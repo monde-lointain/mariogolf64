@@ -57,6 +57,8 @@
 // Retraces behind before the clock gives up catching up, after a stall
 #define MAX_LATE_RETRACES 4
 #define HALT_TIMEOUT_MS 2000
+// How often a paused window shows its frame again
+#define PAUSED_REDRAW_MS 100
 
 typedef struct Options {
     const char *romPath;
@@ -81,6 +83,7 @@ static InputRecorder *f_Recorder;
 static Config f_Config;
 static char *f_ConfigPath; // Where the settings came from, or NULL
 static bool f_StartsFullscreen;
+static bool f_IsUnfocused; // Since another window took the focus
 
 // --- What the game asks of the platform ---
 
@@ -416,6 +419,12 @@ static void HandleEvent(const SDL_Event *event) {
         case SDL_EVENT_QUIT:
             f_IsQuitting = true;
             break;
+        case SDL_EVENT_WINDOW_FOCUS_LOST:
+            f_IsUnfocused = true;
+            break;
+        case SDL_EVENT_WINDOW_FOCUS_GAINED:
+            f_IsUnfocused = false;
+            break;
         case SDL_EVENT_GAMEPAD_ADDED:
             ConnectGamepad(event->gdevice.which);
             break;
@@ -467,12 +476,31 @@ static void ReportStalls(Stalls stalls, long frameCount, long gameFrame) {
     }
 }
 
+// While another window has the focus, no retraces come, so the game and
+// its music wait, and the window shows the last frame. A window that never
+// had the focus, as under a display without a window manager, runs.
+static void WaitWhileUnfocused(void) {
+    SDL_Log("Paused at game frame %ld while another window has the focus", CountGameFrames());
+    while (!f_IsQuitting && f_IsUnfocused) {
+        SDL_Event event;
+
+        if (SDL_WaitEventTimeout(&event, PAUSED_REDRAW_MS)) {
+            HandleEvent(&event);
+        }
+
+        PresentFramebuffer(f_ShownFramebuffer);
+    }
+
+    SDL_Log("Resumed at game frame %ld", CountGameFrames());
+}
+
 // Raises the retraces at their own pace, whatever the display's rate. After
 // a stall the clock starts afresh rather than rush the game to catch up. In
 // lockstep, each retrace instead waits for the game to finish with it, so
 // that the game sees every one, wherever the host is slow, and the next
 // follows at once: what the game computes doesn't depend on the clock, which
-// only its debugging meters read. A run in real time logs its stalls.
+// only its debugging meters read. A run in real time logs its stalls, and
+// pauses, if the settings say so, while the window is unfocused.
 static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
     const Uint64 period = SDL_NS_PER_SECOND / RETRACES_PER_SECOND;
     Uint64 next = SDL_GetTicksNS();
@@ -496,6 +524,13 @@ static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
 
         while (SDL_PollEvent(&event)) {
             HandleEvent(&event);
+        }
+
+        if (!isLockstep && f_IsUnfocused && f_Config.pausesWhenUnfocused) {
+            WaitWhileUnfocused();
+            next = SDL_GetTicksNS();
+            StartStallWatch(&stallWatch, next, CountGameFrames());
+            continue;
         }
 
         UpdateControllers();
