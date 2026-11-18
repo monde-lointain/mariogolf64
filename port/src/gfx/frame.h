@@ -31,7 +31,7 @@ typedef struct GfxTileSampler {
     int32_t atlasOrigin[2];
     int32_t atlasLayer;
     uint32_t axisModes; // TILE_AXIS_* for s, then the same shifted 8 for t
-    int32_t size[2]; // The texels decoded each way
+    int32_t size[2]; // The texels decoded each way, or 0 for a tile not read
     int32_t clampLimit[2];
 } GfxTileSampler;
 

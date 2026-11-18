@@ -136,6 +136,13 @@ vec4 SampleTile(TileSampler tile, vec2 texCoord, bool isFiltered) {
     vec2 coordinate = (texCoord * tile.scale) - tile.offset;
     ivec2 base = ivec2(floor(coordinate));
 
+    // A tile that the material doesn't read has size 0. Wrapping into it
+    // would clamp to an empty range, which GLSL leaves undefined, and the
+    // fetch could land outside the atlas.
+    if (tile.size.x <= 0 || tile.size.y <= 0) {
+        return vec4(0.0);
+    }
+
     if (!isFiltered) {
         return FetchTexel(tile, base);
     }
