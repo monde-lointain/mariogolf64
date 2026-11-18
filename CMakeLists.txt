@@ -9,6 +9,11 @@ project(mariogolf64
     LANGUAGES C
 )
 
+# SDL's Android code has some C++, whose runtime the program then links
+if(ANDROID)
+    enable_language(CXX)
+endif()
+
 if(PROJECT_IS_TOP_LEVEL)
     include(CTest)
 endif()

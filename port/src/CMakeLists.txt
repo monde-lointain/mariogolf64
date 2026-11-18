@@ -68,7 +68,18 @@ add_subdirectory(gfx)
 add_subdirectory(game)
 add_subdirectory(platform)
 
-add_executable(mariogolf64 platform/main.c "${overlay_sections_source}")
+if(ANDROID)
+    # SDL's Java activity loads the program as libmain.so and calls its
+    # SDL_main, which SDL_main.h makes of main. The game's own atan2f,
+    # atanf and acosf are bound within the library: otherwise the C
+    # library's, which Android loads before any app, would stand in for
+    # them, and change the game's numbers.
+    add_library(mariogolf64 SHARED platform/main.c "${overlay_sections_source}")
+    set_target_properties(mariogolf64 PROPERTIES OUTPUT_NAME main LINKER_LANGUAGE CXX)
+    target_link_options(mariogolf64 PRIVATE "LINKER:-Bsymbolic")
+else()
+    add_executable(mariogolf64 platform/main.c "${overlay_sections_source}")
+endif()
 target_link_libraries(mariogolf64 PRIVATE
     mg64_headers
     mg64_game_main
