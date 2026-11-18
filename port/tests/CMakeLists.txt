@@ -22,6 +22,48 @@ function(mg64_add_port_test name)
     set_tests_properties(${name} PROPERTIES TIMEOUT 60)
 endfunction()
 
+# Fuzz targets: each runs the inputs in its corpus, fuzz_corpus/<target>,
+# as a test. With MG64_FUZZ, which needs Clang, each is a libFuzzer program
+# that also fuzzes, when run with a directory to grow a corpus in; without
+# it, fuzz_driver.c runs the files named, so that every build checks the
+# inputs that once failed. A target compiles the code that it fuzzes, for
+# libFuzzer to see what each input reaches.
+option(MG64_FUZZ "Build the fuzz targets with libFuzzer" OFF)
+if(MG64_FUZZ AND NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    message(FATAL_ERROR "MG64_FUZZ needs Clang's libFuzzer, not ${CMAKE_C_COMPILER_ID}")
+endif()
+
+function(mg64_add_fuzz_target name)
+    cmake_parse_arguments(PARSE_ARGV 1 arg "" "" "SOURCES;LIBRARIES")
+    add_executable(${name} ${arg_SOURCES})
+    target_link_libraries(${name} PRIVATE ${arg_LIBRARIES} mg64_port_warnings)
+    if(MG64_FUZZ)
+        target_compile_options(${name} PRIVATE -fsanitize=fuzzer)
+        target_link_options(${name} PRIVATE -fsanitize=fuzzer)
+    else()
+        target_sources(${name} PRIVATE fuzz_driver.c)
+    endif()
+
+    file(GLOB corpus CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/fuzz_corpus/${name}/*")
+    if(NOT corpus)
+        message(FATAL_ERROR "${name} has no inputs in fuzz_corpus/${name}")
+    endif()
+    add_test(NAME ${name} COMMAND ${name} ${corpus})
+    set_tests_properties(${name} PROPERTIES TIMEOUT 60)
+endfunction()
+
+mg64_add_fuzz_target(input_script_fuzz
+    SOURCES input_script_fuzz.c "${PROJECT_SOURCE_DIR}/port/src/platform/input_script.c"
+    LIBRARIES mg64_port_internal SDL3::SDL3
+)
+target_include_directories(input_script_fuzz PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
+
+mg64_add_fuzz_target(rom_image_fuzz
+    SOURCES rom_image_fuzz.c "${PROJECT_SOURCE_DIR}/port/src/platform/rom_image.c"
+    LIBRARIES SDL3::SDL3
+)
+target_include_directories(rom_image_fuzz PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
+
 mg64_add_port_test(os_threads_test
     SOURCES os_threads_test.c
     LIBRARIES mg64_ultra SDL3::SDL3

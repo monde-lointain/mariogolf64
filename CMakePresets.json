@@ -44,12 +44,13 @@
         },
         {
             "name": "linux-clang-sanitize",
-            "displayName": "Linux, a Clang debug build with AddressSanitizer and UBSan, without KMC GCC's meanings",
+            "displayName": "Linux, a Clang debug build with AddressSanitizer and UBSan, without KMC GCC's meanings, and libFuzzer",
             "inherits": "linux-clang",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "MG64_SANITIZERS": "address;undefined",
-                "MG64_KMC_SEMANTICS": "OFF"
+                "MG64_KMC_SEMANTICS": "OFF",
+                "MG64_FUZZ": "ON"
             }
         },
         {

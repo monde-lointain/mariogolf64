@@ -83,6 +83,24 @@ in ThreadSanitizer's allocator, and its suppressions,
 SDL's, libdbus's and Mesa's code. lavapipe starts a thread for each CPU,
 so set `LP_NUM_THREADS` low when running several replays at once.
 
+The fuzz targets in `port/tests` feed the port's readers of outside data
+input after input: `input_script_fuzz` the input scripts' parser, and
+`rom_image_fuzz` the reading of a dump's byte order. Each checks
+properties that must hold whatever the input, such as that a script's
+pads read back the same once written. Every preset's tests run each
+target over the inputs in `port/tests/fuzz_corpus/<target>`.
+`linux-clang-sanitize` builds them with libFuzzer (`-DMG64_FUZZ=ON`, which
+needs Clang), and to fuzz, run one with a directory of its own to grow,
+starting from those inputs:
+
+    mkdir -p /tmp/fuzz && cp port/tests/fuzz_corpus/input_script_fuzz/* /tmp/fuzz
+    build/pc/linux-clang-sanitize/port/tests/input_script_fuzz -max_total_time=300 /tmp/fuzz
+
+An input that fails is written to the working directory as `crash-<hash>`;
+once the bug is fixed, it belongs in the corpus, named for what it holds.
+The save file has no target: the port takes it only as bytes of the save
+memory's size, and the game trusts what passes its own CRC, as the N64 did.
+
 CI (`.github/workflows/port.yml`) checks the Python tools and the
 nested-function hoister on every push. The builds need the assets cut from
 the ROM, so they run each preset's workflow only where the repository's

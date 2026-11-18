@@ -1,0 +1,4 @@
+# Into the menus
+120 START
+126
+400 A stick=0,80
