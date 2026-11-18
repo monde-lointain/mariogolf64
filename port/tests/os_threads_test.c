@@ -23,7 +23,9 @@
 #define IDLE_ROUNDS 20
 
 static char f_Trace[TRACE_LENGTH];
-static int f_TraceLength;
+// Atomic, because the host's main thread waits on it while the game's
+// threads add to the trace
+static SDL_AtomicInt f_TraceLength;
 static SDL_Semaphore *f_TestDone;
 static OSThread f_Threads[4];
 static OSMesgQueue f_Queue;
@@ -33,10 +35,14 @@ static SDL_AtomicInt f_HaltCounter;
 static SDL_AtomicInt f_WorkDone;
 
 static void Trace(char mark) {
+    int length;
+
     // More than one thread of the game's in here at once is a failure
     EXPECT(SDL_AddAtomicInt(&f_RunningCount, 1) == 0);
-    if (f_TraceLength < TRACE_LENGTH - 1) {
-        f_Trace[f_TraceLength++] = mark;
+    length = SDL_GetAtomicInt(&f_TraceLength);
+    if (length < TRACE_LENGTH - 1) {
+        f_Trace[length] = mark;
+        SDL_SetAtomicInt(&f_TraceLength, length + 1);
     }
 
     SDL_AddAtomicInt(&f_RunningCount, -1);
@@ -44,7 +50,7 @@ static void Trace(char mark) {
 
 static void ResetTrace(void) {
     SDL_memset(f_Trace, 0, sizeof(f_Trace));
-    f_TraceLength = 0;
+    SDL_SetAtomicInt(&f_TraceLength, 0);
 }
 
 static void RunHighThread(void *argument) {
@@ -156,7 +162,7 @@ static void RunInterruptWaiter(void *argument) {
 static void RunSpinningThread(void *argument) {
     (void)argument;
     Trace('s');
-    while (f_TraceLength < 2) {
+    while (SDL_GetAtomicInt(&f_TraceLength) < 2) {
         osPcReachPreemptionPoint();
     }
 
@@ -273,13 +279,13 @@ int main(int argc, char **argv) {
 
     ResetTrace();
     PcStartBootThread(&f_Threads[0], TestInterruptPreempts, NULL, MIDDLE_PRIORITY);
-    while (f_TraceLength < 1) {
+    while (SDL_GetAtomicInt(&f_TraceLength) < 1) {
         SDL_Delay(1);
     }
 
     PcRaiseEvent(OS_EVENT_SI);
     SDL_WaitSemaphore(f_TestDone);
-    while (f_TraceLength < 3) {
+    while (SDL_GetAtomicInt(&f_TraceLength) < 3) {
         SDL_Delay(1);
     }
 
@@ -287,8 +293,8 @@ int main(int argc, char **argv) {
     EXPECT(PcWaitForIdleCpu(1000));
 
     RunBootThread(TestDestroyWaitingThread);
-    EXPECT(f_TraceLength == 41);
-    EXPECT(f_Trace[f_TraceLength - 1] == 'd');
+    EXPECT(SDL_GetAtomicInt(&f_TraceLength) == 41);
+    EXPECT(f_Trace[40] == 'd');
 
     // Waiting for an idle CPU after each interrupt finds all of its work
     // done, every time
