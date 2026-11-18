@@ -370,11 +370,7 @@ static SDL_Window *CreateGameWindow(bool isFullscreen) {
 static bool OpenWindow(const Options *options) {
     int scale;
 
-    f_Device = SDL_CreateGPUDevice(
-        SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_MSL,
-        options->isGpuDebug,
-        NULL
-    );
+    f_Device = CreateGpuDevice(options->isGpuDebug);
     if (f_Device == NULL) {
         SDL_Log("No GPU that the port can draw with: %s", SDL_GetError());
         return false;

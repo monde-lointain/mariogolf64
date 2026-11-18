@@ -438,7 +438,7 @@ static SDL_GPUDevice *CreateDevice(void) {
         }
     }
 
-    return SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_MSL, true, NULL);
+    return CreateGpuDevice(true);
 }
 
 int main(void) {

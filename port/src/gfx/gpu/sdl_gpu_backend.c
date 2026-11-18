@@ -365,6 +365,46 @@ static SDL_GPUTexture *CreateTexture(
     return texture;
 }
 
+// SDL asks a device by default for features that the renderer doesn't use,
+// and that some GPUs lack, such as ARM's Mali, which has no clip distances
+SDL_GPUDevice *CreateGpuDevice(bool isDebug) {
+    SDL_PropertiesID properties = SDL_CreateProperties();
+    SDL_GPUDevice *device;
+
+    if (properties == 0) {
+        return NULL;
+    }
+
+    (void)SDL_SetBooleanProperty(properties, SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, isDebug);
+    (void)
+        SDL_SetBooleanProperty(properties, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN, true);
+    (void)SDL_SetBooleanProperty(properties, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_MSL_BOOLEAN, true);
+    (void)SDL_SetBooleanProperty(
+        properties,
+        SDL_PROP_GPU_DEVICE_CREATE_FEATURE_CLIP_DISTANCE_BOOLEAN,
+        false
+    );
+    // The pipelines clip at the near and far planes rather than clamp
+    (void)SDL_SetBooleanProperty(
+        properties,
+        SDL_PROP_GPU_DEVICE_CREATE_FEATURE_DEPTH_CLAMPING_BOOLEAN,
+        false
+    );
+    (void)SDL_SetBooleanProperty(
+        properties,
+        SDL_PROP_GPU_DEVICE_CREATE_FEATURE_INDIRECT_DRAW_FIRST_INSTANCE_BOOLEAN,
+        false
+    );
+    (void)SDL_SetBooleanProperty(
+        properties,
+        SDL_PROP_GPU_DEVICE_CREATE_FEATURE_ANISOTROPY_BOOLEAN,
+        false
+    );
+    device = SDL_CreateGPUDeviceWithProperties(properties);
+    SDL_DestroyProperties(properties);
+    return device;
+}
+
 void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale) {
     SDL_assert(device != NULL && scale >= 1);
     SDL_zero(f_Gpu);

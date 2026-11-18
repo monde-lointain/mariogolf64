@@ -7,9 +7,15 @@
 #define PORT_GFX_SDL_GPU_BACKEND_H
 
 #include <SDL3/SDL_gpu.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "frame.h"
+
+// Creates a device that runs the backend's and the presenter's shaders,
+// with SDL's checks of its use when isDebug. Gives NULL, with SDL_GetError
+// saying why, where there's none.
+SDL_GPUDevice *CreateGpuDevice(bool isDebug);
 
 // Readies the backend to draw with the device, into targets scale times the
 // N64's resolution each way. The device must outlive the backend.
