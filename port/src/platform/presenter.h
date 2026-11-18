@@ -25,9 +25,15 @@ SDL_Rect FitScreenToWindow(uint32_t windowWidth, uint32_t windowHeight);
 // lowest. The pixels needn't be stored as uint16_t.
 void ExpandScreenPixels(const void *pixels, uint32_t count, uint32_t *rgba);
 
-// Readies the window's swapchain on the device; false, with an error
-// logged, when it can't
-bool InitPresenter(SDL_GPUDevice *device, SDL_Window *window);
+// The present mode to use when the player wants one and the display has
+// what it has: immediate falls back to mailbox, and mailbox to vsync,
+// which every display has
+SDL_GPUPresentMode PickPresentMode(SDL_GPUPresentMode wanted, bool hasMailbox, bool hasImmediate);
+
+// Readies the window's swapchain on the device, presenting as wanted or
+// as near as the display allows; false, with an error logged, when it
+// can't
+bool InitPresenter(SDL_GPUDevice *device, SDL_Window *window, SDL_GPUPresentMode wanted);
 void ShutdownPresenter(void);
 
 // Shows the frame buffer at framebuffer, an address in the N64's memory,

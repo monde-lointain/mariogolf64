@@ -64,17 +64,21 @@ void ExpandScreenPixels(const void *pixels, uint32_t count, uint32_t *rgba) {
     }
 }
 
-static SDL_GPUPresentMode ChoosePresentMode(void) {
-    // Mailbox shows the newest frame at the display's next refresh without
-    // making the presenter wait; plain vsync is always there
-    if (SDL_WindowSupportsGPUPresentMode(f_Device, f_Window, SDL_GPU_PRESENTMODE_MAILBOX)) {
+SDL_GPUPresentMode PickPresentMode(SDL_GPUPresentMode wanted, bool hasMailbox, bool hasImmediate) {
+    if (wanted == SDL_GPU_PRESENTMODE_IMMEDIATE && hasImmediate) {
+        return SDL_GPU_PRESENTMODE_IMMEDIATE;
+    }
+
+    if (wanted != SDL_GPU_PRESENTMODE_VSYNC && hasMailbox) {
         return SDL_GPU_PRESENTMODE_MAILBOX;
     }
 
     return SDL_GPU_PRESENTMODE_VSYNC;
 }
 
-bool InitPresenter(SDL_GPUDevice *device, SDL_Window *window) {
+bool InitPresenter(SDL_GPUDevice *device, SDL_Window *window, SDL_GPUPresentMode wanted) {
+    SDL_GPUPresentMode mode;
+
     SDL_GPUTextureCreateInfo texture;
     SDL_GPUTransferBufferCreateInfo upload;
 
@@ -86,12 +90,19 @@ bool InitPresenter(SDL_GPUDevice *device, SDL_Window *window) {
         return false;
     }
 
-    if (!SDL_SetGPUSwapchainParameters(
-            device,
-            window,
-            SDL_GPU_SWAPCHAINCOMPOSITION_SDR,
-            ChoosePresentMode()
-        )) {
+    mode = PickPresentMode(
+        wanted,
+        SDL_WindowSupportsGPUPresentMode(device, window, SDL_GPU_PRESENTMODE_MAILBOX),
+        SDL_WindowSupportsGPUPresentMode(device, window, SDL_GPU_PRESENTMODE_IMMEDIATE)
+    );
+    if (mode != wanted) {
+        SDL_Log(
+            "The display can't present as asked; presenting %s instead",
+            (mode == SDL_GPU_PRESENTMODE_MAILBOX) ? "by mailbox" : "with vsync"
+        );
+    }
+
+    if (!SDL_SetGPUSwapchainParameters(device, window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, mode)) {
         SDL_Log("Can't set the swapchain up: %s", SDL_GetError());
     }
 

@@ -280,7 +280,7 @@ static bool OpenWindow(const Options *options) {
             return false;
         }
 
-        if (!InitPresenter(f_Device, f_Window)) {
+        if (!InitPresenter(f_Device, f_Window, SDL_GPU_PRESENTMODE_MAILBOX)) {
             return false;
         }
     }

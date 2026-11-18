@@ -301,6 +301,20 @@ static void TestReadsScreenWhateverTheCpuReadItAs(void) {
     SDL_free(memory);
 }
 
+// Each wanted mode with each that the display may lack
+static void TestPresentModeFallbacks(void) {
+    const SDL_GPUPresentMode vsync = SDL_GPU_PRESENTMODE_VSYNC;
+    const SDL_GPUPresentMode mailbox = SDL_GPU_PRESENTMODE_MAILBOX;
+    const SDL_GPUPresentMode immediate = SDL_GPU_PRESENTMODE_IMMEDIATE;
+
+    EXPECT(PickPresentMode(vsync, true, true) == vsync);
+    EXPECT(PickPresentMode(mailbox, true, true) == mailbox);
+    EXPECT(PickPresentMode(mailbox, false, true) == vsync);
+    EXPECT(PickPresentMode(immediate, true, true) == immediate);
+    EXPECT(PickPresentMode(immediate, true, false) == mailbox);
+    EXPECT(PickPresentMode(immediate, false, false) == vsync);
+}
+
 int main(void) {
     TestRomByteOrders();
     TestSupportedRom();
@@ -312,5 +326,6 @@ int main(void) {
     TestFitScreen();
     TestScreenPixels();
     TestReadsScreenWhateverTheCpuReadItAs();
+    TestPresentModeFallbacks();
     return ReportTestResults("platform_test");
 }
