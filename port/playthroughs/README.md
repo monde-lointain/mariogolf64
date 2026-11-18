@@ -35,6 +35,15 @@ Windows build under Wine, all match the recordings. The save holds only
 what the game keeps, so a match doesn't show that every frame drew the
 same.
 
+A replay in real time, with a window or on a phone, can end differently,
+and session 03's does, the same way on every host tried. The thread that
+builds a hole runs while the game's thread waits for a retrace, and both
+draw from the C library's random numbers, so which of them draws first
+around a frame depends on how long the frames take. In session 03 the
+builder's draws for a hole's ground noise come a frame later in real time,
+and from there each thread gets other numbers: other raindrops, and in the
+end another save. Compare saves only from headless replays.
+
 ## Sessions
 
 Each one has one goal, and takes 5 to 15 minutes unless it says otherwise.
