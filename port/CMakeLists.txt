@@ -162,6 +162,10 @@ target_compile_options(mg64_port_warnings INTERFACE
 
 add_subdirectory(src)
 
+if(ANDROID)
+    add_subdirectory(android)
+endif()
+
 if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()

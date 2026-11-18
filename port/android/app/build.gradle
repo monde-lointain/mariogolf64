@@ -1,0 +1,45 @@
+// CMake passes, as properties: mg64.sdlJavaDir, SDL's Java sources, of
+// the same version as the SDL linked into libmain.so; mg64.nativeLibDir,
+// which holds libmain.so in a directory for each ABI; mg64.buildDir,
+// where Gradle works, in CMake's build tree; mg64.versionName, the
+// project's version; and mg64.minSdk, the API level that the NDK built
+// libmain.so for.
+
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace = 'org.mariogolf64'
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = 'org.mariogolf64'
+        minSdk = property('mg64.minSdk') as int
+        targetSdk = 35
+        versionCode = 1
+        versionName = property('mg64.versionName')
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs += property('mg64.sdlJavaDir')
+            jniLibs.srcDirs = [property('mg64.nativeLibDir')]
+        }
+    }
+
+    // SDL's Java sources are written for Java 8, which today's compilers
+    // warn is obsolete
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled = false
+        }
+    }
+}
+
+layout.buildDirectory = file("${property('mg64.buildDir')}/app")

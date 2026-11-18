@@ -78,6 +78,19 @@
             "displayName": "64-bit Windows, cross-compiled with MinGW-w64",
             "inherits": "pc",
             "toolchainFile": "${sourceDir}/port/cmake/toolchains/mingw-w64-x86_64.cmake"
+        },
+        {
+            "name": "android-arm64",
+            "displayName": "64-bit Arm Android, cross-compiled with the NDK",
+            "inherits": "pc",
+            "toolchainFile": "$env{ANDROID_HOME}/ndk/30.0.16248370/build/cmake/android.toolchain.cmake",
+            "cacheVariables": {
+                "ANDROID_ABI": "arm64-v8a",
+                "ANDROID_PLATFORM": "android-29",
+                "ANDROID_STL": "c++_static",
+                "ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES": "ON",
+                "BUILD_TESTING": "OFF"
+            }
         }
     ],
     "buildPresets": [
@@ -108,6 +121,11 @@
         {
             "name": "windows-mingw",
             "configurePreset": "windows-mingw"
+        },
+        {
+            "name": "android-arm64",
+            "configurePreset": "android-arm64",
+            "targets": ["all", "mg64_apk"]
         }
     ],
     "testPresets": [

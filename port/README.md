@@ -42,10 +42,31 @@ game keeps in arrays in its code are read from the ROM at start-up.
 | `linux-clang-tysan`    | An optimized Clang 23 build with TypeSanitizer, too     |
 | `linux-clang-tsan`     | An optimized Clang build with ThreadSanitizer           |
 | `windows-mingw`        | 64-bit Windows, cross-compiled with MinGW-w64           |
+| `android-arm64`        | 64-bit Arm Android, cross-compiled with the NDK         |
 
 Each preset builds into `build/pc/<preset>`. `cmake --workflow --preset
 <preset>` configures, builds and runs the tests in one step, as CI does;
 `windows-mingw` runs its tests through Wine where it is installed.
+
+`android-arm64` builds the app for 64-bit Arm phones and tablets with
+Android 10 or newer, the first to require Vulkan, which SDL_GPU draws with
+there. It builds with NDK r30 (30.0.16248370) from the Android SDK that
+`ANDROID_HOME` names, and has no tests. Its `mg64_apk` target packs the
+program, `libmain.so`, into a debug APK with Gradle, which runs from SDL's
+own Android project, with SDL's Java sources, and needs a Java of 17 to
+23, which `MG64_JAVA_HOME` names (`JAVA_HOME` by default):
+
+    export ANDROID_HOME=~/Android/Sdk
+    cmake --preset android-arm64 -DMG64_JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+    cmake --build --preset android-arm64
+    adb install build/pc/android-arm64/port/android/gradle/app/outputs/apk/debug/app-debug.apk
+
+The app looks for the ROM, as `baserom.us.z64`, among its own files, where
+it keeps its save and settings too. A debug build's can be copied there:
+
+    adb push baserom.us.z64 /data/local/tmp/
+    adb shell run-as org.mariogolf64 sh -c "'mkdir -p files && cp /data/local/tmp/baserom.us.z64 files/'"
+    adb shell rm /data/local/tmp/baserom.us.z64
 
 `-DMG64_SANITIZERS=<list>` builds the game, SDL and the tests with the
 sanitizers named, as `-fsanitize` names them: `address;undefined` is what

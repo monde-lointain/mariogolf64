@@ -1,0 +1,6 @@
+// The version of the Android plugin that SDL's own project builds with
+plugins {
+    id 'com.android.application' version '8.7.3' apply false
+}
+
+layout.buildDirectory = file("${property('mg64.buildDir')}/root")

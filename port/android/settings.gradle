@@ -1,0 +1,19 @@
+// The Android app around the port's libmain.so, which CMake builds and
+// packs through port/android/CMakeLists.txt (see port/README.md)
+
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'mariogolf64'
+include ':app'
