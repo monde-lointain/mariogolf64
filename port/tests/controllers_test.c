@@ -418,6 +418,35 @@ static void TestTouchHidesForOtherController(void) {
     DetachPad(&pads[1]);
 }
 
+// --- The system's Back ---
+
+// The system's Back, Android's key or gesture, is the game's way back, B,
+// whatever the bindings say, and it leaves the touch controls shown, as
+// it doesn't mean that the player has taken up another controller
+static void TestBackPressesB(void) {
+    TouchLayout layout;
+    const TouchScreen screen = MakeTouchScreen(&layout);
+    PadBindings bindings;
+
+    InitControllers();
+    SetDefaultPadBindings(&bindings);
+    SDL_zeroa(bindings.sources[PAD_CONTROL_B]);
+    SetPadBindings(&bindings);
+    SetTouchScreen(&screen);
+    SendFinger(SDL_EVENT_FINGER_DOWN, 1, &screen, &layout.controls[TOUCH_CONTROL_A]);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == A_BUTTON);
+    SendKey(SDL_SCANCODE_AC_BACK, true);
+    SendKey(SDL_SCANCODE_AC_BACK, false);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == (A_BUTTON | B_BUTTON));
+    EXPECT(CountShownShapes() == TOUCH_SHAPE_COUNT);
+    SendFinger(SDL_EVENT_FINGER_UP, 1, &screen, &layout.controls[TOUCH_CONTROL_A]);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == 0);
+    ShutdownControllers();
+}
+
 int main(void) {
     char except[32];
 
@@ -437,6 +466,7 @@ int main(void) {
     TestTouchPlaysFirstPort();
     TestTouchStick();
     TestTouchHidesForOtherController();
+    TestBackPressesB();
     SDL_Quit();
     return ReportTestResults("controllers_test");
 }

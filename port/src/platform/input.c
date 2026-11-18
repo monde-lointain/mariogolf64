@@ -18,6 +18,10 @@
 #else
 #    define IS_TOUCH_FIRST false
 #endif
+// The system's Back, as Android's key and gesture come, is the game's way
+// back, B, whatever the bindings; it plays the first port after the touch
+// controls, as it doesn't mean that the player took up another controller
+#define BACK_KEY SDL_SCANCODE_AC_BACK
 // SDL stops a rumble after this long unless it is renewed, so a crash
 // doesn't leave a motor running
 #define RUMBLE_RENEW_MS 250
@@ -229,6 +233,9 @@ void UpdateControllers(void) {
         MapHostPad(&f_Bindings, &host, (i == 0) ? keys : NULL, &pad);
         if (i == 0) {
             PlayTouchControls(&pad);
+            if (keys[BACK_KEY]) {
+                pad.button |= B_BUTTON;
+            }
         }
 
         SDL_LockMutex(f_Lock);

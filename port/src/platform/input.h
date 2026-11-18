@@ -42,7 +42,8 @@ void DisconnectGamepad(uint32_t instanceId);
 void UpdateControllers(void);
 
 // Takes a key's event, SDL_EVENT_KEY_DOWN or _UP, so that a key pressed and
-// let go between two updates still plays the first port at the next
+// let go between two updates still plays the first port at the next. The
+// system's Back key, which Android's Back gesture sends too, is B.
 void HandleKeyEvent(const SDL_Event *event);
 
 // Plays a script into the first port from now on, or stops with NULL. The
