@@ -217,36 +217,45 @@ static void LoadSettings(Options *options) {
 }
 
 // Reads the ROM that the options name, or else the first found of the
-// default name beside the program and in the current directory. Gives NULL
-// with SDL_GetError saying why when there's none to play.
-static uint8_t *LoadPlayersRom(const Options *options, size_t *size) {
+// default name beside the program, in the current directory, and among the
+// port's files, where it keeps the one that the player chose. Gives NULL
+// with SDL_GetError saying why when there's none to play, and isMissing
+// when there was none to try.
+static uint8_t *LoadPlayersRom(const Options *options, size_t *size, bool *isMissing) {
     const char *base = SDL_GetBasePath();
-    char *besideProgram = NULL;
-    uint8_t *rom;
+    char *places[3] = {NULL, NULL, NULL};
+    uint8_t *rom = NULL;
+    int found;
+    int i;
 
+    *isMissing = false;
     if (options->romPath != NULL) {
         return LoadRomImage(options->romPath, size);
     }
 
-    if (base != NULL && SDL_asprintf(&besideProgram, "%s%s", base, DEFAULT_ROM_NAME) >= 0) {
-        if (SDL_GetPathInfo(besideProgram, NULL)) {
-            rom = LoadRomImage(besideProgram, size);
-            SDL_free(besideProgram);
-            return rom;
-        }
-
-        SDL_free(besideProgram);
+    if (base == NULL || SDL_asprintf(&places[0], "%s%s", base, DEFAULT_ROM_NAME) < 0) {
+        places[0] = NULL;
     }
 
-    if (SDL_GetPathInfo(DEFAULT_ROM_NAME, NULL)) {
-        return LoadRomImage(DEFAULT_ROM_NAME, size);
+    places[1] = SDL_strdup(DEFAULT_ROM_NAME);
+    places[2] = FindStoredRomPath();
+    found = FindRomPlace((const char *const *)places, (int)SDL_arraysize(places));
+    if (found != ROM_PLACE_NONE) {
+        rom = LoadRomImage(places[found], size);
+    }
+    else {
+        *isMissing = true;
+        SDL_SetError(
+            "No ROM: name one, or put %s, the US release's, beside the program",
+            DEFAULT_ROM_NAME
+        );
     }
 
-    SDL_SetError(
-        "No ROM: name one, or put %s, the US release's, beside the program",
-        DEFAULT_ROM_NAME
-    );
-    return NULL;
+    for (i = 0; i < (int)SDL_arraysize(places); i++) {
+        SDL_free(places[i]);
+    }
+
+    return rom;
 }
 
 // Logs and shows why there's no ROM to play. The message box may set SDL's
@@ -262,6 +271,103 @@ static void ShowRomProblem(void) {
         NULL
     );
     SDL_free(problem);
+}
+
+// What the file dialog gave, from its callback, which may run on another
+// thread: the path, NULL when the player cancelled, set before isDone. It
+// outlives the wait for it, which quitting cuts short, as only one dialog is
+// ever open.
+typedef struct RomChoice {
+    char *path;
+    SDL_AtomicInt isDone;
+} RomChoice;
+
+static RomChoice f_RomChoice;
+
+static void SDLCALL TakeChosenRom(void *userdata, const char *const *files, int filter) {
+    RomChoice *choice = userdata;
+
+    (void)filter;
+    if (files == NULL) {
+        SDL_Log("The file dialog failed: %s", SDL_GetError());
+    }
+
+    choice->path = (files != NULL && files[0] != NULL) ? SDL_strdup(files[0]) : NULL;
+    SDL_SetAtomicInt(&choice->isDone, 1);
+}
+
+// Shows the system's dialog for choosing a file and waits until the player
+// chooses or cancels, or the port is told to quit, handling the events
+// meanwhile, as some dialogs need. Gives the path, to be released with
+// SDL_free, or NULL.
+static char *AskForRomPath(void) {
+    static const SDL_DialogFileFilter filters[] = {
+        {"N64 ROM images", "z64;n64;v64"},
+        {"All files", "*"},
+    };
+    RomChoice *choice = &f_RomChoice;
+
+    choice->path = NULL;
+    SDL_SetAtomicInt(&choice->isDone, 0);
+    SDL_ShowOpenFileDialog(
+        TakeChosenRom,
+        choice,
+        NULL,
+        filters,
+        (int)SDL_arraysize(filters),
+        NULL,
+        false
+    );
+    while (SDL_GetAtomicInt(&choice->isDone) == 0 && !f_IsQuitting) {
+        SDL_Event event;
+
+        if (SDL_WaitEventTimeout(&event, PAUSED_REDRAW_MS) && event.type == SDL_EVENT_QUIT) {
+            f_IsQuitting = true;
+        }
+    }
+
+    return SDL_GetAtomicInt(&choice->isDone) != 0 ? choice->path : NULL;
+}
+
+// Asks the player for the ROM, saying why first, until they choose one that
+// the port can play or cancel, and keeps a copy among the port's files,
+// where the next start finds it. On Android, the app may read the file
+// chosen only while it runs, so the copy is the only way to keep it.
+static uint8_t *ChooseRom(size_t *size) {
+    char *storedPath = FindStoredRomPath();
+    uint8_t *rom = NULL;
+
+    SDL_ShowSimpleMessageBox(
+        SDL_MESSAGEBOX_INFORMATION,
+        WINDOW_TITLE,
+        "Choose your copy of Mario Golf's ROM, the US release's, which the port plays. "
+        "It keeps a copy of its own.",
+        NULL
+    );
+    while (rom == NULL && !f_IsQuitting) {
+        char *chosen = AskForRomPath();
+
+        if (chosen == NULL) {
+            break;
+        }
+
+        // The player just chose it, and the path may be a URI
+        rom = LoadNamedRomImage(chosen, "That file", size);
+        SDL_free(chosen);
+        if (rom == NULL) {
+            ShowRomProblem();
+        }
+    }
+
+    if (rom == NULL) {
+        SDL_SetError("No ROM chosen: the port needs the US release's to play");
+    }
+    else if (storedPath == NULL || !StoreRomImage(storedPath, rom, *size)) {
+        SDL_Log("Not keeping the ROM, so it will be asked for again: %s", SDL_GetError());
+    }
+
+    SDL_free(storedPath);
+    return rom;
 }
 
 // The renderer draws at a whole multiple of the N64's resolution: the
@@ -748,6 +854,7 @@ int main(int argc, char *argv[]) {
     InputScript *script;
     uint8_t *rom;
     size_t romSize = 0;
+    bool isRomMissing;
 
     if (!ParseOptions(argc, argv, &options) || !LoadInputScript(options.inputScriptPath, &script)) {
         return EXIT_FAILURE;
@@ -772,9 +879,20 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    rom = LoadPlayersRom(&options, &romSize);
+    rom = LoadPlayersRom(&options, &romSize, &isRomMissing);
+    if (rom == NULL && isRomMissing && !options.isHeadless) {
+        rom = ChooseRom(&romSize);
+    }
+
     if (rom == NULL) {
-        ShowRomProblem();
+        // Told to quit while choosing: nobody's there to answer a box
+        if (f_IsQuitting) {
+            SDL_Log("Quit before a ROM was chosen");
+        }
+        else {
+            ShowRomProblem();
+        }
+
         (void)CloseInputRecorder(f_Recorder);
         FreeInputScript(script);
         SDL_Quit();

@@ -31,6 +31,12 @@ game keeps in arrays in its code are read from the ROM at start-up.
     cmake --build --preset linux
     ./build/pc/linux/port/src/mariogolf64 baserom.us.z64
 
+Without a ROM named, the program plays `baserom.us.z64` from beside
+itself, the current directory or the user's data folder (see Settings),
+in that order. When there's none, it asks for the ROM with the system's
+file dialog and keeps a copy in the data folder, where the next start
+finds it.
+
 `cmake --list-presets` shows the others:
 
 | Preset                 | What it builds                                          |
@@ -61,8 +67,9 @@ own Android project, with SDL's Java sources, and needs a Java of 17 to
     cmake --build --preset android-arm64
     adb install build/pc/android-arm64/port/android/gradle/app/outputs/apk/debug/app-debug.apk
 
-The app looks for the ROM, as `baserom.us.z64`, among its own files, where
-it keeps its save and settings too. A debug build's can be copied there:
+The app asks for the ROM with the system's file picker when it first
+starts, and keeps a copy, `baserom.us.z64`, among its own files, with
+its save and settings. A debug build's can be copied there instead:
 
     adb push baserom.us.z64 /data/local/tmp/
     adb shell run-as org.mariogolf64 sh -c "'mkdir -p files && cp /data/local/tmp/baserom.us.z64 files/'"
