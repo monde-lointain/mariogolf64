@@ -64,7 +64,7 @@ static void TestFillsToRomEnd(void) {
 // The array holds the host's values, which the renderer must not read in
 // the ROM's order, even where the memory held data in that order before
 static void TestLeavesHostOrder(void) {
-    u16 halves[4];
+    u16 halves[4] = {0};
     OSPcRomArray array = {halves, sizeof(halves), sizeof(u16), 0};
 
     osPcMarkRomOrder(halves, sizeof(halves));
