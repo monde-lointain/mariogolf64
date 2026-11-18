@@ -9,6 +9,17 @@
 # and is left out here so that the reports are the port's own.
 deadlock:VULKAN_INTERNAL_DefragmentMemory
 
+# SDL 3.4.20's Vulkan backend also takes its dispose and framebuffer locks
+# in both orders, in VULKAN_INTERNAL_RemoveFramebuffersContainingView, which
+# removes a view's framebuffers under the framebuffer lock.
+# VULKAN_INTERNAL_PerformPendingDestroys holds the dispose lock while it
+# destroys textures, which calls it, and when
+# VULKAN_INTERNAL_DestroySwapchainImage calls it, each framebuffer's release
+# takes the dispose lock. The port reaches both on the main thread when it
+# shuts down with a window, waiting for the GPU and then releasing the
+# window. That is SDL's to fix too.
+deadlock:VULKAN_INTERNAL_RemoveFramebuffersContainingView
+
 # libdbus takes its bus lock and a connection's lock in one order when
 # SDL_Init connects to the session bus, and in the other when SDL_Quit
 # closes it, both on the main thread. That is libdbus's, and with one
