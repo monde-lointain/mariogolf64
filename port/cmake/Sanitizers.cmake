@@ -85,7 +85,7 @@ if(NOT PROJECT_IS_TOP_LEVEL OR NOT MG64_SANITIZERS)
     return()
 endif()
 
-if(NOT CMAKE_C_COMPILER_ID MATCHES "^(GNU|Clang)$")
+if(NOT CMAKE_C_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
     message(FATAL_ERROR "MG64_SANITIZERS needs GCC or Clang, not ${CMAKE_C_COMPILER_ID}")
 endif()
 
