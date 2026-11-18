@@ -9,6 +9,14 @@ project(mariogolf64
     LANGUAGES C
 )
 
+# The game's code is C89 in GNU C's dialect, which it needs exactly: C23
+# would take its empty parameter lists to mean no parameters, and is the
+# default of GCC 15 and later. So the standard is set, not only asked for
+# as a minimum, which a compiler's newer default would satisfy.
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS ON)
+
 # SDL's Android code has some C++, whose runtime the program then links
 if(ANDROID)
     enable_language(CXX)

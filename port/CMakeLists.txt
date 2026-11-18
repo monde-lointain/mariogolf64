@@ -1,12 +1,6 @@
 # The port's targets: the game's code compiled for the host, our own
 # libultra, NuSystem and libmus, the renderer, and the program that joins them.
 
-# The game's code is C89 in GNU C's dialect: C23 would take its empty
-# parameter lists to mean no parameters
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS ON)
-
 # The switches that give what C leaves undefined KMC GCC's meaning. A
 # sanitizer build turns them off, so that its checks see the undefined
 # behavior they would hide, and the port can drop each once none is left.
@@ -120,7 +114,6 @@ target_compile_definitions(mg64_headers INTERFACE
     # Declares libultra's bzero, bcopy and bcmp as the host's C library does
     MODERN_CC
 )
-target_compile_features(mg64_headers INTERFACE c_std_11)
 target_link_libraries(mg64_headers INTERFACE mg64_project_sanitizers)
 # The game's code was written for KMC GCC, whose char is unsigned, and which
 # took it as it reads where modern GCC would assume that undefined behavior
