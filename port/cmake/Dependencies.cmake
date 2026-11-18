@@ -1,5 +1,5 @@
 # Finds what the port builds against: SDL 3 for the window, input, audio and
-# GPU, and the Python that converts the texture PNGs.
+# GPU, and the Python that runs the build's scripts.
 #
 # SDL is downloaded and built as part of the project, linked statically, so
 # that every build has the same SDL and needs nothing installed to run.
@@ -35,8 +35,4 @@ if(NOT TARGET SDL3::SDL3)
     message(FATAL_ERROR "SDL3 provided no SDL3::SDL3 target")
 endif()
 
-# The project's own virtual environment has Pillow, which png_to_c.py needs
-if(NOT DEFINED Python3_EXECUTABLE AND EXISTS "${PROJECT_SOURCE_DIR}/.venv/bin/python3")
-    set(Python3_EXECUTABLE "${PROJECT_SOURCE_DIR}/.venv/bin/python3")
-endif()
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
