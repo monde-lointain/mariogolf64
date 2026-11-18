@@ -1,0 +1,23 @@
+# ThreadSanitizer's suppressions, which the linux-clang-tsan test preset
+# names in TSAN_OPTIONS.
+#
+# SDL 3.4.20's Vulkan backend takes its allocator and dispose locks in both
+# orders: VULKAN_INTERNAL_DefragmentMemory holds the allocator lock while it
+# releases buffers, which takes the dispose lock, and
+# VULKAN_INTERNAL_PerformPendingDestroys holds the dispose lock while it
+# destroys textures, which takes the allocator lock. That is SDL's to fix,
+# and is left out here so that the reports are the port's own.
+deadlock:VULKAN_INTERNAL_DefragmentMemory
+
+# libdbus takes its bus lock and a connection's lock in one order when
+# SDL_Init connects to the session bus, and in the other when SDL_Quit
+# closes it, both on the main thread. That is libdbus's, and with one
+# thread it can't deadlock.
+deadlock:libdbus-1.so.3
+
+# Mesa's lavapipe, which the test preset and the replays use because the
+# NVIDIA driver's threads crash in ThreadSanitizer's allocator: llvmpipe
+# destroys a fence's mutex and condition variable while its rasterizer
+# thread is still returning from the broadcast on them. That is Mesa's,
+# which isn't instrumented, so its own synchronization is only partly seen.
+race:libvulkan_lvp.so

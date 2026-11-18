@@ -64,6 +64,15 @@
             }
         },
         {
+            "name": "linux-clang-tsan",
+            "displayName": "Linux, an optimized Clang build with ThreadSanitizer",
+            "inherits": "linux-clang",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "MG64_SANITIZERS": "thread"
+            }
+        },
+        {
             "name": "windows-mingw",
             "displayName": "64-bit Windows, cross-compiled with MinGW-w64",
             "inherits": "pc",
@@ -90,6 +99,10 @@
         {
             "name": "linux-clang-tysan",
             "configurePreset": "linux-clang-tysan"
+        },
+        {
+            "name": "linux-clang-tsan",
+            "configurePreset": "linux-clang-tsan"
         },
         {
             "name": "windows-mingw",
@@ -144,6 +157,15 @@
             }
         },
         {
+            "name": "linux-clang-tsan",
+            "inherits": "pc",
+            "configurePreset": "linux-clang-tsan",
+            "environment": {
+                "TSAN_OPTIONS": "halt_on_error=1:second_deadlock_stack=1:suppressions=${sourceDir}/port/src/sanitizers/tsan_suppressions.txt",
+                "VK_LOADER_DRIVERS_SELECT": "*lvp*"
+            }
+        },
+        {
             "name": "windows-mingw",
             "inherits": "pc",
             "configurePreset": "windows-mingw",
@@ -191,6 +213,14 @@
                 {"type": "configure", "name": "linux-clang-tysan"},
                 {"type": "build", "name": "linux-clang-tysan"},
                 {"type": "test", "name": "linux-clang-tysan"}
+            ]
+        },
+        {
+            "name": "linux-clang-tsan",
+            "steps": [
+                {"type": "configure", "name": "linux-clang-tsan"},
+                {"type": "build", "name": "linux-clang-tsan"},
+                {"type": "test", "name": "linux-clang-tsan"}
             ]
         },
         {

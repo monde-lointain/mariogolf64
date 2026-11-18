@@ -40,6 +40,7 @@ PNGs that `make extract` cuts from the ROM (see the top-level README).
 | `linux-sanitize`       | Linux, a debug build with AddressSanitizer and UBSan    |
 | `linux-clang-sanitize` | The same with Clang, without KMC GCC's meanings (below) |
 | `linux-clang-tysan`    | An optimized Clang 23 build with TypeSanitizer, too     |
+| `linux-clang-tsan`     | An optimized Clang build with ThreadSanitizer           |
 | `windows-mingw`        | 64-bit Windows, cross-compiled with MinGW-w64           |
 
 Each preset builds into `build/pc/<preset>`. `cmake --workflow --preset
@@ -72,6 +73,15 @@ and needs Clang 23 (`clang-23`) on Linux. It builds optimized, with debug
 information, as the checks make a debug build too slow to replay a
 session: the three recorded sessions take 33 minutes at `-O0` and under 4
 at `-O2`, and report the same places.
+
+`linux-clang-tsan` builds with ThreadSanitizer, which finds data races
+between the game's threads, the host threads that raise the N64's
+interrupts, and the renderer. It draws with Mesa's lavapipe
+(`VK_LOADER_DRIVERS_SELECT=*lvp*`), as the NVIDIA driver's threads crash
+in ThreadSanitizer's allocator, and its suppressions,
+`port/src/sanitizers/tsan_suppressions.txt`, leave out what it reports in
+SDL's, libdbus's and Mesa's code. lavapipe starts a thread for each CPU,
+so set `LP_NUM_THREADS` low when running several replays at once.
 
 CI (`.github/workflows/port.yml`) checks the Python tools and the
 nested-function hoister on every push. The builds need the assets cut from
