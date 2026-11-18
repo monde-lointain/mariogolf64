@@ -3,6 +3,7 @@
 # The program's main is the executable's own, in main.c.
 
 add_library(mg64_platform STATIC
+    config.c
     input.c
     input_recorder.c
     input_script.c

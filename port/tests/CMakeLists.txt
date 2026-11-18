@@ -58,6 +58,14 @@ mg64_add_fuzz_target(input_script_fuzz
 )
 target_include_directories(input_script_fuzz PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
+mg64_add_fuzz_target(config_fuzz
+    SOURCES config_fuzz.c
+        "${PROJECT_SOURCE_DIR}/port/src/platform/config.c"
+        "${PROJECT_SOURCE_DIR}/port/src/platform/pad_mapping.c"
+    LIBRARIES mg64_port_internal SDL3::SDL3
+)
+target_include_directories(config_fuzz PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
+
 mg64_add_fuzz_target(rom_image_fuzz
     SOURCES rom_image_fuzz.c "${PROJECT_SOURCE_DIR}/port/src/platform/rom_image.c"
     LIBRARIES SDL3::SDL3
@@ -347,6 +355,15 @@ mg64_add_port_test(lockstep_test
     LIBRARIES mg64_port_internal SDL3::SDL3
 )
 target_include_directories(lockstep_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
+
+# The player's settings and the file that holds them
+mg64_add_port_test(config_test
+    SOURCES config_test.c
+        "${PROJECT_SOURCE_DIR}/port/src/platform/config.c"
+        "${PROJECT_SOURCE_DIR}/port/src/platform/pad_mapping.c"
+    LIBRARIES mg64_port_internal SDL3::SDL3
+)
+target_include_directories(config_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
 # The bindings of the host's gamepads and keys to the N64 controller's
 mg64_add_port_test(pad_mapping_test
