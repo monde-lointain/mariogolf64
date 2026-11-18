@@ -56,23 +56,20 @@ endfunction()
 
 mg64_add_fuzz_target(input_script_fuzz
     SOURCES input_script_fuzz.c "${PROJECT_SOURCE_DIR}/port/src/platform/input_script.c"
-    LIBRARIES mg64_port_internal SDL3::SDL3
+    LIBRARIES mg64_platform_headers mg64_port_internal SDL3::SDL3
 )
-target_include_directories(input_script_fuzz PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
 mg64_add_fuzz_target(config_fuzz
     SOURCES config_fuzz.c
         "${PROJECT_SOURCE_DIR}/port/src/platform/config.c"
         "${PROJECT_SOURCE_DIR}/port/src/platform/pad_mapping.c"
-    LIBRARIES mg64_port_internal SDL3::SDL3
+    LIBRARIES mg64_platform_headers mg64_port_internal SDL3::SDL3
 )
-target_include_directories(config_fuzz PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
 mg64_add_fuzz_target(rom_image_fuzz
     SOURCES rom_image_fuzz.c "${PROJECT_SOURCE_DIR}/port/src/platform/rom_image.c"
-    LIBRARIES SDL3::SDL3
+    LIBRARIES mg64_platform_headers SDL3::SDL3
 )
-target_include_directories(rom_image_fuzz PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
 mg64_add_port_test(os_threads_test
     SOURCES os_threads_test.c
@@ -351,18 +348,16 @@ target_include_directories(frames_in_flight_test PRIVATE "${PROJECT_SOURCE_DIR}/
 # scheduler's wait replaced through a link seam
 mg64_add_port_test(lockstep_test
     SOURCES lockstep_test.c "${PROJECT_SOURCE_DIR}/port/src/platform/lockstep.c"
-    LIBRARIES mg64_port_internal SDL3::SDL3
+    LIBRARIES mg64_platform_headers mg64_port_internal SDL3::SDL3
 )
-target_include_directories(lockstep_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
 # The player's settings and the file that holds them
 mg64_add_port_test(config_test
     SOURCES config_test.c
         "${PROJECT_SOURCE_DIR}/port/src/platform/config.c"
         "${PROJECT_SOURCE_DIR}/port/src/platform/pad_mapping.c"
-    LIBRARIES mg64_port_internal SDL3::SDL3
+    LIBRARIES mg64_platform_headers mg64_port_internal SDL3::SDL3
 )
-target_include_directories(config_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
 # The settings file on disk
 mg64_add_port_test(config_file_test
@@ -370,32 +365,28 @@ mg64_add_port_test(config_file_test
         "${PROJECT_SOURCE_DIR}/port/src/platform/config_file.c"
         "${PROJECT_SOURCE_DIR}/port/src/platform/config.c"
         "${PROJECT_SOURCE_DIR}/port/src/platform/pad_mapping.c"
-    LIBRARIES mg64_port_internal SDL3::SDL3
+    LIBRARIES mg64_platform_headers mg64_port_internal SDL3::SDL3
 )
-target_include_directories(config_file_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
 # The bindings of the host's gamepads and keys to the N64 controller's
 mg64_add_port_test(pad_mapping_test
     SOURCES pad_mapping_test.c "${PROJECT_SOURCE_DIR}/port/src/platform/pad_mapping.c"
-    LIBRARIES mg64_port_internal SDL3::SDL3
+    LIBRARIES mg64_platform_headers mg64_port_internal SDL3::SDL3
 )
-target_include_directories(pad_mapping_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
 # The touch controls' layout, and what fingers on them play
 mg64_add_port_test(touch_controls_test
     SOURCES touch_controls_test.c
         "${PROJECT_SOURCE_DIR}/port/src/platform/touch_controls.c"
         "${PROJECT_SOURCE_DIR}/port/src/platform/pad_mapping.c"
-    LIBRARIES mg64_port_internal SDL3::SDL3
+    LIBRARIES mg64_platform_headers mg64_port_internal SDL3::SDL3
 )
-target_include_directories(touch_controls_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
 # Where a run in real time stalls, from the times of its retraces
 mg64_add_port_test(stall_watch_test
     SOURCES stall_watch_test.c "${PROJECT_SOURCE_DIR}/port/src/platform/stall_watch.c"
-    LIBRARIES SDL3::SDL3
+    LIBRARIES mg64_platform_headers SDL3::SDL3
 )
-target_include_directories(stall_watch_test PRIVATE "${PROJECT_SOURCE_DIR}/port/src/platform")
 
 # The input recorder, and the script lines that it writes
 mg64_add_port_test(input_recorder_test
