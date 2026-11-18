@@ -55,20 +55,15 @@ function(mg64_skip_pointer_pair_checks target)
 
     get_target_property(sources ${target} SOURCES)
     foreach(ending IN LISTS ARGN)
-        set(found "")
-        foreach(source IN LISTS sources)
-            # A slash before the source, so that a relative one matches whole
-            string(LENGTH "/${source}" source_length)
-            string(LENGTH "/${ending}" ending_length)
-            if(source_length LESS ending_length)
-                continue()
-            endif()
-            math(EXPR start "${source_length} - ${ending_length}")
-            string(SUBSTRING "/${source}" ${start} -1 source_ending)
-            if(source_ending STREQUAL "/${ending}")
-                list(APPEND found "${source}")
-            endif()
-        endforeach()
+        # An ending matches whole names: a.c matches src/a.c, not src/ba.c.
+        # Of the characters allowed in it, only the dot needs escaping in a
+        # regular expression.
+        if(NOT ending MATCHES "^[A-Za-z0-9_./]+$")
+            message(FATAL_ERROR "mg64_skip_pointer_pair_checks can't match ${ending}")
+        endif()
+        string(REPLACE "." "\\." pattern "(^|/)${ending}$")
+        set(found ${sources})
+        list(FILTER found INCLUDE REGEX "${pattern}")
         list(LENGTH found found_count)
         if(NOT found_count EQUAL 1)
             message(FATAL_ERROR
