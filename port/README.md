@@ -197,7 +197,7 @@ spot in the recording.
 | `src/os/`        | libultra: threads, message queues, timers, ROM reads, controllers |
 | `src/nusys/`     | NuSystem: the frame loop, graphics tasks, controllers, EEPROM     |
 | `src/mus/`       | libmus: the sequencer and the synthesizer behind the sound calls  |
-| `src/gu/`        | The matrix and vector routines of libultra's gu library           |
+| `src/gu/`        | libultra's gu library: matrices, vectors, sine and cosine         |
 | `src/kmc/`       | KMC's C library: its random numbers and CORDIC trigonometry       |
 | `src/gfx/`       | The display list interpreter, its SDL_GPU backend and its shaders |
 | `src/platform/`  | `main`, the window, input, audio output, saves and the ROM file   |
@@ -252,3 +252,15 @@ Every overlay is linked into the program. Loading one resets its variables
 to their values at start-up, as reading the overlay from ROM did: those
 it was linked with, and the arrays filled from the ROM before the game
 starts.
+
+### Arithmetic
+
+The port aims to give the game the same numbers on every host, so that a
+recorded session plays the same way on each, as it does on Linux and on
+Windows. The build forbids fusing a multiply and an add into one, which some
+compilers do by default. The game's random numbers and its `sin`, `cos`,
+`tan`, `atan` and `atan2` are KMC's, as the N64 gave them (`src/kmc/`). Its
+`sinf` and `cosf`, and the gu transforms', give the nearest float to the
+true value (`src/gu/sine.c`), where the hosts' C libraries differ from each
+other in the last bit. Its other maths is its own, or square roots, which
+IEEE arithmetic rounds the same everywhere.
