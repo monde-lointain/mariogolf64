@@ -395,6 +395,12 @@ mg64_add_port_test(input_recorder_test
     LIBRARIES mg64_platform mg64_ultra SDL3::SDL3
 )
 
+# The controllers' ports, with SDL's virtual gamepads
+mg64_add_port_test(controllers_test
+    SOURCES controllers_test.c
+    LIBRARIES mg64_platform mg64_gpu mg64_gfx mg64_ultra SDL3::SDL3
+)
+
 mg64_add_port_test(platform_test
     SOURCES platform_test.c
     LIBRARIES mg64_platform mg64_gpu mg64_gfx mg64_ultra SDL3::SDL3
