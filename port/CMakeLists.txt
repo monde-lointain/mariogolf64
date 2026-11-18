@@ -88,17 +88,14 @@ foreach(line IN LISTS texture_lines)
     )
 endforeach()
 
-add_custom_target(mg64_generated_headers
-    DEPENDS
-        "${MG64_GENERATED_DIR}/PR/gbi.h"
-        "${MG64_GENERATED_DIR}/rom_file_offsets.h"
-)
-
 # What every target that includes the game's or libultra's headers needs.
 # The port's headers come first, to stand in for libultra's where they
-# differ.
-add_library(mg64_headers INTERFACE)
-add_dependencies(mg64_headers mg64_generated_headers)
+# differ. The generated headers are its sources, which CMake writes before
+# it compiles any target that links it.
+add_library(mg64_headers INTERFACE
+    "${MG64_GENERATED_DIR}/PR/gbi.h"
+    "${MG64_GENERATED_DIR}/rom_file_offsets.h"
+)
 target_include_directories(mg64_headers INTERFACE
     "${MG64_GENERATED_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
