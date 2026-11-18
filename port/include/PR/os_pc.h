@@ -102,10 +102,14 @@ void osPcWaitForInterrupt(void);
 
 /* Set when an interrupt has made a thread of higher priority than the
    running one runnable. The running thread gives up the CPU at its next
-   libultra call, or at a long loop's osPcReachPreemptionPoint. */
-extern volatile int osPcPreemptPending;
+   libultra call, or at a long loop's osPcReachPreemptionPoint. The host
+   thread that raises the interrupt sets it while the running thread reads
+   it, so both go through atomics; osPcPreempt then takes the scheduler's
+   lock, which orders everything else. */
+extern int osPcPreemptPending;
 void osPcPreempt(void);
-#define osPcReachPreemptionPoint() (osPcPreemptPending ? osPcPreempt() : (void)0)
+#define osPcIsPreemptPending() __atomic_load_n(&osPcPreemptPending, __ATOMIC_RELAXED)
+#define osPcReachPreemptionPoint() (osPcIsPreemptPending() ? osPcPreempt() : (void)0)
 
 #ifdef __cplusplus
 }

@@ -49,7 +49,12 @@ static SDL_TLSID f_CallingSlot;
 static bool f_IsHalted; // No thread gets the CPU again
 static SDL_Condition *f_CpuReleased; // Signaled when a halt leaves it idle
 
-volatile int osPcPreemptPending;
+int osPcPreemptPending;
+
+// Sets osPcPreemptPending, which the running thread reads without the lock
+static void SetPreemptPending(int isPending) {
+    __atomic_store_n(&osPcPreemptPending, isPending, __ATOMIC_RELAXED);
+}
 
 static ThreadSlot *FindSlot(const OSThread *thread) {
     int i;
@@ -117,7 +122,7 @@ static ThreadSlot *ChooseSlot(void) {
 static void Dispatch(void) {
     ThreadSlot *chosen = ChooseSlot();
 
-    osPcPreemptPending = FALSE;
+    SetPreemptPending(FALSE);
     if (chosen != f_RunningSlot) {
         if (f_RunningSlot != NULL && f_RunningSlot->state == THREAD_RUNNABLE) {
             f_RunningSlot->thread->state = OS_STATE_RUNNABLE;
@@ -187,7 +192,7 @@ void RequestPreemption(void) {
 
     chosen = ChooseSlot();
     if (chosen != f_RunningSlot) {
-        osPcPreemptPending = TRUE;
+        SetPreemptPending(TRUE);
     }
 }
 
@@ -466,7 +471,7 @@ bool PcHaltGame(int timeoutMs) {
     LockScheduler();
     f_IsHalted = true;
     if (f_RunningSlot != NULL) {
-        osPcPreemptPending = TRUE;
+        SetPreemptPending(TRUE);
     }
 
     isIdle = AwaitIdleCpu(timeoutMs);
