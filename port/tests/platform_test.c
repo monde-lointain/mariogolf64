@@ -291,6 +291,7 @@ static void TestSaveMemory(void) {
     const char *path = "platform_test_save.sra";
     u8 stored[PC_SRAM_SIZE];
     u8 loaded[PC_SRAM_SIZE];
+    u8 *longer;
     uint32_t crc;
     int i;
 
@@ -316,6 +317,18 @@ static void TestSaveMemory(void) {
     PcLoadSaveMemory(loaded, sizeof(loaded) / 2);
     EXPECT(loaded[0] == 0xAA);
     EXPECT(!ChecksumSaveMemory(PC_SRAM_SIZE / 2, &crc));
+
+    // Nor is a file a byte short of the size or a byte past it
+    longer = SDL_calloc(PC_SRAM_SIZE + 1, 1);
+    EXPECT(SDL_SaveFile(path, longer, PC_SRAM_SIZE - 1));
+    PcLoadSaveMemory(loaded, sizeof(loaded));
+    EXPECT(loaded[0] == 0xAA && loaded[PC_SRAM_SIZE - 1] == 0xAA);
+    EXPECT(!ChecksumSaveMemory(PC_SRAM_SIZE, &crc));
+    EXPECT(SDL_SaveFile(path, longer, PC_SRAM_SIZE + 1));
+    PcLoadSaveMemory(loaded, sizeof(loaded));
+    EXPECT(loaded[0] == 0xAA && loaded[PC_SRAM_SIZE - 1] == 0xAA);
+    EXPECT(!ChecksumSaveMemory(PC_SRAM_SIZE, &crc));
+    SDL_free(longer);
 
     // Without a path, nothing is kept
     SetSaveMemoryPath(NULL);
