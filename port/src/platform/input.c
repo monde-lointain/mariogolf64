@@ -11,6 +11,13 @@
 
 #define PORT_COUNT MAXCONTROLLERS
 #define RUMBLE_STRENGTH 0xC000
+// A phone or tablet shows its touch controls from the start, unless a
+// gamepad plays the first port; a computer waits for a touch
+#if defined(SDL_PLATFORM_ANDROID) || defined(SDL_PLATFORM_IOS)
+#    define IS_TOUCH_FIRST true
+#else
+#    define IS_TOUCH_FIRST false
+#endif
 // SDL stops a rumble after this long unless it is renewed, so a crash
 // doesn't leave a motor running
 #define RUMBLE_RENEW_MS 250
@@ -33,6 +40,11 @@ static const InputScript *f_Script;
 static InputRecorder *f_Recorder;
 static bool f_HasRecordingFailed;
 static long f_FirstPortReadCount; // The game's frames, as it reads once each
+// The touch controls, the platform's thread's alone
+static TouchScreen f_TouchScreen;
+static TouchLayout f_TouchLayout;
+static TouchPad f_TouchPad;
+static bool f_IsTouchShown;
 
 // --- The devices ---
 
@@ -87,6 +99,8 @@ void InitControllers(void) {
     }
 
     SDL_free(gamepads);
+    LiftAllTouches(&f_TouchPad);
+    f_IsTouchShown = IS_TOUCH_FIRST && f_Ports[0].gamepad == NULL;
 }
 
 void ShutdownControllers(void) {
@@ -99,6 +113,9 @@ void ShutdownControllers(void) {
     }
 
     SDL_zeroa(f_Ports);
+    LiftAllTouches(&f_TouchPad);
+    SDL_zero(f_TouchScreen);
+    f_IsTouchShown = false;
     SDL_DestroyMutex(f_Lock);
     f_Lock = NULL;
 }
@@ -158,6 +175,19 @@ void DisconnectGamepad(uint32_t instanceId) {
     }
 }
 
+// Adds what the touch controls play to the first port's other devices,
+// and hides them while another device plays
+static void PlayTouchControls(OSContPad *pad) {
+    OSContPad touch;
+
+    if (pad->button != 0 || pad->stick_x != 0 || pad->stick_y != 0) {
+        f_IsTouchShown = false;
+    }
+
+    ReadTouchPad(&f_TouchPad, &f_TouchLayout, &touch);
+    MergeTouchPad(&touch, pad);
+}
+
 void UpdateControllers(void) {
     const bool *keys = SDL_GetKeyboardState(NULL);
     const Uint64 now = SDL_GetTicks();
@@ -174,8 +204,12 @@ void UpdateControllers(void) {
             ReadGamepad(port->gamepad, &host);
         }
 
-        // The keyboard plays the first port
+        // The keyboard and the touch controls play the first port
         MapHostPad(&f_Bindings, &host, (i == 0) ? keys : NULL, &pad);
+        if (i == 0) {
+            PlayTouchControls(&pad);
+        }
+
         SDL_LockMutex(f_Lock);
         port->pad = pad;
         ApplyRumble(port, isRenewal);
@@ -282,4 +316,52 @@ void PcSetRumble(int port, int isOn) {
         f_Ports[port].wantsRumble = isOn != 0;
         SDL_UnlockMutex(f_Lock);
     }
+}
+
+// --- The touch controls ---
+
+void SetTouchScreen(const TouchScreen *screen) {
+    SDL_assert(screen != NULL);
+    f_TouchScreen = *screen;
+    ArrangeTouchControls(&f_TouchScreen, &f_TouchLayout);
+}
+
+void HandleTouchEvent(const SDL_Event *event) {
+    float x;
+    float y;
+
+    SDL_assert(event != NULL);
+    // Without a screen, there are no controls to touch
+    if (f_TouchScreen.width <= 0.0f) {
+        return;
+    }
+
+    x = event->tfinger.x * f_TouchScreen.width;
+    y = event->tfinger.y * f_TouchScreen.height;
+
+    switch (event->type) {
+        case SDL_EVENT_FINGER_DOWN:
+            PressTouch(&f_TouchPad, &f_TouchLayout, event->tfinger.fingerID, x, y);
+            f_IsTouchShown = true;
+            break;
+        case SDL_EVENT_FINGER_MOTION:
+            MoveTouch(&f_TouchPad, event->tfinger.fingerID, x, y);
+            break;
+        case SDL_EVENT_FINGER_UP:
+            LiftTouch(&f_TouchPad, event->tfinger.fingerID);
+            break;
+        case SDL_EVENT_FINGER_CANCELED:
+            CancelTouch(&f_TouchPad, event->tfinger.fingerID);
+            break;
+        default:
+            break;
+    }
+}
+
+void LiftTouchControls(void) {
+    LiftAllTouches(&f_TouchPad);
+}
+
+int DescribeShownTouchControls(OverlayShape *shapes) {
+    return f_IsTouchShown ? DescribeTouchControls(&f_TouchPad, &f_TouchLayout, shapes) : 0;
 }

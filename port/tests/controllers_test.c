@@ -11,6 +11,7 @@
 #include "input.h"
 #include "port/nusys_host.h"
 #include "test_support.h"
+#include "touch_controls.h"
 
 #define VIRTUAL_VENDOR 0x1209
 #define VIRTUAL_PRODUCT 0x0001
@@ -184,6 +185,145 @@ static void TestMotors(void) {
     DetachPad(&shaker);
 }
 
+// --- The touch controls ---
+
+// A phone-sized screen, and a layout of it to find the controls by
+static TouchScreen MakeTouchScreen(TouchLayout *layout) {
+    TouchScreen screen;
+
+    SDL_zero(screen);
+    screen.width = 2400.0f;
+    screen.height = 1080.0f;
+    screen.pixelsPerDp = 2.75f;
+    ArrangeTouchControls(&screen, layout);
+    return screen;
+}
+
+static void SendFinger(
+    Uint32 type,
+    SDL_FingerID finger,
+    const TouchScreen *screen,
+    const TouchCircle *place
+) {
+    SDL_Event event;
+
+    SDL_zero(event);
+    event.type = type;
+    event.tfinger.touchID = 1;
+    event.tfinger.fingerID = finger;
+    event.tfinger.x = place->x / screen->width;
+    event.tfinger.y = place->y / screen->height;
+    HandleTouchEvent(&event);
+}
+
+static int CountShownShapes(void) {
+    OverlayShape shapes[OVERLAY_MAX_SHAPES];
+
+    return DescribeShownTouchControls(shapes);
+}
+
+// On a computer the controls wait for a touch to show; a finger on one
+// plays the first port alone, at the next update
+static void TestTouchPlaysFirstPort(void) {
+    TouchLayout layout;
+    const TouchScreen screen = MakeTouchScreen(&layout);
+    VirtualPad pad;
+
+    AttachPad(&pad, false);
+    InitControllers();
+    SetTouchScreen(&screen);
+    EXPECT(CountShownShapes() == 0);
+    SendFinger(SDL_EVENT_FINGER_DOWN, 1, &screen, &layout.controls[TOUCH_CONTROL_A]);
+    EXPECT(CountShownShapes() == TOUCH_SHAPE_COUNT);
+    EXPECT(ReadButtons(0) == 0);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == A_BUTTON && ReadButtons(1) == 0);
+
+    // With the gamepad's own presses
+    PressSouth(&pad, true);
+    SendFinger(SDL_EVENT_FINGER_DOWN, 2, &screen, &layout.controls[TOUCH_CONTROL_Z]);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == (A_BUTTON | Z_TRIG));
+    PressSouth(&pad, false);
+    SendFinger(SDL_EVENT_FINGER_UP, 1, &screen, &layout.controls[TOUCH_CONTROL_A]);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == Z_TRIG);
+    // A finger that the system cancels lifts, and one canceled before any
+    // update saw it presses nothing
+    SendFinger(SDL_EVENT_FINGER_CANCELED, 2, &screen, &layout.controls[TOUCH_CONTROL_Z]);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == 0);
+    SendFinger(SDL_EVENT_FINGER_DOWN, 5, &screen, &layout.controls[TOUCH_CONTROL_B]);
+    SendFinger(SDL_EVENT_FINGER_CANCELED, 5, &screen, &layout.controls[TOUCH_CONTROL_B]);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == 0);
+    ShutdownControllers();
+    DetachPad(&pad);
+}
+
+// The stick follows a finger's motion, in the screen's pixels
+static void TestTouchStick(void) {
+    TouchLayout layout;
+    const TouchScreen screen = MakeTouchScreen(&layout);
+    const TouchCircle start = {300.0f, 700.0f, 0.0f};
+    TouchCircle pushed = start;
+    OSContPad contPad;
+
+    // Without a screen, as when there's no window, a touch does nothing,
+    // even after the screen of an earlier start
+    InitControllers();
+    SendFinger(SDL_EVENT_FINGER_DOWN, 3, &screen, &start);
+    UpdateControllers();
+    PcReadControllerPad(0, &contPad);
+    EXPECT(contPad.stick_x == 0 && CountShownShapes() == 0);
+    SendFinger(SDL_EVENT_FINGER_UP, 3, &screen, &start);
+
+    SetTouchScreen(&screen);
+    SendFinger(SDL_EVENT_FINGER_DOWN, 3, &screen, &start);
+    pushed.x += layout.controls[TOUCH_CONTROL_STICK].radius;
+    SendFinger(SDL_EVENT_FINGER_MOTION, 3, &screen, &pushed);
+    UpdateControllers();
+    PcReadControllerPad(0, &contPad);
+    EXPECT(contPad.stick_x == PAD_STICK_RANGE_MAX && contPad.stick_y == 0);
+    ShutdownControllers();
+}
+
+// Another controller played on the first port hides the controls, as the
+// player has picked it up; one on another port leaves them. Losing the
+// window's focus lifts every finger.
+static void TestTouchHidesForOtherController(void) {
+    TouchLayout layout;
+    const TouchScreen screen = MakeTouchScreen(&layout);
+    VirtualPad pads[2];
+
+    AttachPad(&pads[0], false);
+    AttachPad(&pads[1], false);
+    InitControllers();
+    SetTouchScreen(&screen);
+    SendFinger(SDL_EVENT_FINGER_DOWN, 1, &screen, &layout.controls[TOUCH_CONTROL_B]);
+    PressSouth(&pads[1], true);
+    UpdateControllers();
+    EXPECT(CountShownShapes() == TOUCH_SHAPE_COUNT);
+    EXPECT(ReadButtons(0) == B_BUTTON);
+    PressSouth(&pads[0], true);
+    UpdateControllers();
+    EXPECT(CountShownShapes() == 0);
+    // Still played while hidden
+    EXPECT(ReadButtons(0) == (A_BUTTON | B_BUTTON));
+    PressSouth(&pads[0], false);
+    LiftTouchControls();
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == 0);
+    // A touch shows them again
+    SendFinger(SDL_EVENT_FINGER_DOWN, 4, &screen, &layout.controls[TOUCH_CONTROL_R]);
+    EXPECT(CountShownShapes() == TOUCH_SHAPE_COUNT);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == R_TRIG);
+    ShutdownControllers();
+    DetachPad(&pads[0]);
+    DetachPad(&pads[1]);
+}
+
 int main(void) {
     char except[32];
 
@@ -198,6 +338,9 @@ int main(void) {
 
     TestPortsFillInOrder();
     TestMotors();
+    TestTouchPlaysFirstPort();
+    TestTouchStick();
+    TestTouchHidesForOtherController();
     SDL_Quit();
     return ReportTestResults("controllers_test");
 }

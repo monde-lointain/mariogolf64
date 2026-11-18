@@ -528,6 +528,64 @@ static void ToggleFullscreen(void) {
     }
 }
 
+// Lays the touch controls out on the window's pixels, inside the area that
+// the system's bars and the camera's cutout leave clear
+static void FitTouchControls(void) {
+    TouchScreen screen;
+    SDL_Rect safe;
+    int pixelWidth = 0;
+    int pixelHeight = 0;
+    int width = 0;
+    int height = 0;
+    float density;
+
+    if (f_Window == NULL ||
+        !SDL_GetWindowSizeInPixels(f_Window, &pixelWidth, &pixelHeight) ||
+        !SDL_GetWindowSize(f_Window, &width, &height) ||
+        width <= 0 ||
+        height <= 0) {
+        return;
+    }
+
+    if (!SDL_GetWindowSafeArea(f_Window, &safe)) {
+        safe.x = 0;
+        safe.y = 0;
+        safe.w = width;
+        safe.h = height;
+    }
+
+    // The safe area is in the window's coordinates, which may not be pixels
+    density = (float)pixelWidth / (float)width;
+    SDL_zero(screen);
+    screen.width = (float)pixelWidth;
+    screen.height = (float)pixelHeight;
+    screen.pixelsPerDp = SDL_GetWindowDisplayScale(f_Window);
+    if (screen.pixelsPerDp <= 0.0f) {
+        screen.pixelsPerDp = 1.0f;
+    }
+
+    screen.safeLeft = (float)safe.x * density;
+    screen.safeTop = (float)safe.y * density;
+    screen.safeRight = (float)(width - safe.x - safe.w) * density;
+    screen.safeBottom = (float)(height - safe.y - safe.h) * density;
+    SetTouchScreen(&screen);
+}
+
+// Whether a touch device is a touchpad, whose fingers point rather than
+// play. A screen that has gone may still lift its fingers.
+static bool IsTouchpad(SDL_TouchID touch) {
+    const SDL_TouchDeviceType type = SDL_GetTouchDeviceType(touch);
+
+    return type == SDL_TOUCH_DEVICE_INDIRECT_ABSOLUTE || type == SDL_TOUCH_DEVICE_INDIRECT_RELATIVE;
+}
+
+// Shows the frame that the game last gave, with the touch controls over it
+static void PresentShownFrame(void) {
+    OverlayShape shapes[OVERLAY_MAX_SHAPES];
+
+    PresentFramebuffer(f_ShownFramebuffer, shapes, DescribeShownTouchControls(shapes));
+}
+
 static void HandleEvent(const SDL_Event *event) {
     switch (event->type) {
         case SDL_EVENT_QUIT:
@@ -535,6 +593,20 @@ static void HandleEvent(const SDL_Event *event) {
             break;
         case SDL_EVENT_WINDOW_FOCUS_LOST:
             f_IsUnfocused = true;
+            LiftTouchControls();
+            break;
+        case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+        case SDL_EVENT_WINDOW_SAFE_AREA_CHANGED:
+        case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
+            FitTouchControls();
+            break;
+        case SDL_EVENT_FINGER_DOWN:
+        case SDL_EVENT_FINGER_MOTION:
+        case SDL_EVENT_FINGER_UP:
+        case SDL_EVENT_FINGER_CANCELED:
+            if (!IsTouchpad(event->tfinger.touchID)) {
+                HandleTouchEvent(event);
+            }
             break;
         case SDL_EVENT_WINDOW_FOCUS_GAINED:
             f_IsUnfocused = false;
@@ -602,7 +674,7 @@ static void WaitWhileUnfocused(void) {
             HandleEvent(&event);
         }
 
-        PresentFramebuffer(f_ShownFramebuffer, NULL, 0);
+        PresentShownFrame();
     }
 
     SDL_Log("Resumed at game frame %ld", CountGameFrames());
@@ -655,7 +727,7 @@ static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
         }
 
         if (f_Window != NULL) {
-            PresentFramebuffer(f_ShownFramebuffer, NULL, 0);
+            PresentShownFrame();
         }
 
         frameCount++;
@@ -916,6 +988,7 @@ int main(int argc, char *argv[]) {
     }
 
     InitControllers();
+    FitTouchControls();
     SetPadBindings(&f_Config.bindings);
     SetAudioOutputVolume((float)f_Config.volume / (float)CONFIG_VOLUME_MAX);
     PlayInputScript(script);
