@@ -90,6 +90,21 @@ void osPcUnmarkRomOrder(const void *start, u32 size);
    order */
 int osPcIsRomOrder(const void *address);
 
+/* An array of the game's that the N64 build initializes with data from the
+   ROM, and that a native build reads from the player's ROM instead of
+   holding a copy: size bytes from romOffset, of elements of elementSize
+   bytes, which the ROM holds in its big-endian order. */
+typedef struct {
+    void *start;
+    u32 size;
+    u32 elementSize;
+    u32 romOffset;
+} OSPcRomArray;
+
+/* Fills an array from the inserted cartridge's ROM with the values that the
+   N64 build's initializer gives it, each element in the host's order */
+void osPcFillRomArray(const OSPcRomArray *array);
+
 /* Puts the variables of the code segment with the number that
    rom_file_offsets.h gives it back to their values at start-up, as reading
    the segment from ROM and clearing its bss did on the N64. */

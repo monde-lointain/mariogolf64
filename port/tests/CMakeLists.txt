@@ -90,6 +90,12 @@ mg64_add_port_test(rom_order_test
     LIBRARIES mg64_ultra SDL3::SDL3
 )
 
+# The game's arrays as a native build fills them from the ROM
+mg64_add_port_test(rom_array_test
+    SOURCES rom_array_test.c
+    LIBRARIES mg64_ultra SDL3::SDL3
+)
+
 mg64_add_port_test(memory_test
     SOURCES memory_test.c
     LIBRARIES mg64_ultra SDL3::SDL3

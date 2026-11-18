@@ -50,6 +50,49 @@ void PcReadCartridge(u32 romOffset, void *destination, u32 size) {
     osPcMarkRomOrder(bytes, size);
 }
 
+// Stores the big-endian value of size bytes as the host's value of an
+// element of that size
+static void StoreHostElement(u8 *element, const u8 *bigEndian, u32 size) {
+    u32 value = 0;
+    u16 half;
+    u32 i;
+
+    for (i = 0; i < size; i++) {
+        value = (value << 8) | bigEndian[i];
+    }
+
+    if (size == sizeof(u8)) {
+        *element = (u8)value;
+    }
+    else if (size == sizeof(u16)) {
+        half = (u16)value;
+        SDL_memcpy(element, &half, sizeof(half));
+    }
+    else {
+        SDL_memcpy(element, &value, sizeof(value));
+    }
+}
+
+void osPcFillRomArray(const OSPcRomArray *array) {
+    u8 *bytes;
+    u32 i;
+
+    SDL_assert_always(array != NULL && array->start != NULL && f_Rom != NULL);
+    SDL_assert_always(
+        array->elementSize == sizeof(u8) ||
+        array->elementSize == sizeof(u16) ||
+        array->elementSize == sizeof(u32)
+    );
+    SDL_assert_always(array->size % array->elementSize == 0);
+    SDL_assert_always(array->romOffset <= f_RomSize && array->size <= f_RomSize - array->romOffset);
+    bytes = array->start;
+    for (i = 0; i < array->size; i += array->elementSize) {
+        StoreHostElement(&bytes[i], &f_Rom[array->romOffset + i], array->elementSize);
+    }
+
+    osPcUnmarkRomOrder(bytes, array->size);
+}
+
 OSPiHandle *osCartRomInit(void) {
     f_CartHandle.type = DEVICE_TYPE_CART;
     f_CartHandle.baseAddress = PHYS_TO_K1(CART_ROM_BASE);
