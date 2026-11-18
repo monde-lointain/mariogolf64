@@ -6,12 +6,15 @@
  * on the left, so a matrix's rows are the images of the axes and its last
  * row the translation. Angles are in degrees. The fixed-point forms go
  * through the game's own guMtxF2L, which clamps each element as the
- * game's code expects.
+ * game's code expects. Sines and cosines are the port's, which are the same
+ * on every host.
  */
 
 #include <math.h>
 #include <string.h>
 #include <ultra64.h>
+
+#include "port/gu_sine.h"
 
 #define DEGREES_TO_RADIANS (3.14159265358979323846f / 180.0f)
 
@@ -171,8 +174,8 @@ void guScale(Mtx *m, f32 x, f32 y, f32 z) {
 // the axis's tip, by Rodrigues' formula
 void guRotateF(f32 mf[4][4], f32 angle, f32 x, f32 y, f32 z) {
     f32 radians = angle * DEGREES_TO_RADIANS;
-    f32 s = sinf(radians);
-    f32 c = cosf(radians);
+    f32 s = GuSine(radians);
+    f32 c = GuCosine(radians);
     f32 t = 1.0f - c;
 
     guNormalize(&x, &y, &z);
@@ -191,12 +194,12 @@ void guRotate(Mtx *m, f32 angle, f32 x, f32 y, f32 z) {
 
 // Rolls about x, then pitches about y, then turns to the heading about z
 void guRotateRPYF(f32 mf[4][4], f32 roll, f32 pitch, f32 heading) {
-    f32 sr = sinf(roll * DEGREES_TO_RADIANS);
-    f32 cr = cosf(roll * DEGREES_TO_RADIANS);
-    f32 sp = sinf(pitch * DEGREES_TO_RADIANS);
-    f32 cp = cosf(pitch * DEGREES_TO_RADIANS);
-    f32 sh = sinf(heading * DEGREES_TO_RADIANS);
-    f32 ch = cosf(heading * DEGREES_TO_RADIANS);
+    f32 sr = GuSine(roll * DEGREES_TO_RADIANS);
+    f32 cr = GuCosine(roll * DEGREES_TO_RADIANS);
+    f32 sp = GuSine(pitch * DEGREES_TO_RADIANS);
+    f32 cp = GuCosine(pitch * DEGREES_TO_RADIANS);
+    f32 sh = GuSine(heading * DEGREES_TO_RADIANS);
+    f32 ch = GuCosine(heading * DEGREES_TO_RADIANS);
 
     SetRow(mf, 0, MakeVector(cp * ch, cp * sh, -sp), 0.0f);
     SetRow(mf, 1, MakeVector(sr * sp * ch - cr * sh, sr * sp * sh + cr * ch, sr * cp), 0.0f);
@@ -238,8 +241,8 @@ void guPosition(Mtx *m, f32 roll, f32 pitch, f32 heading, f32 scale, f32 x, f32 
 // y axes by angle about it. A vertical direction leaves the identity.
 void guAlignF(f32 mf[4][4], f32 angle, f32 x, f32 y, f32 z) {
     f32 radians = angle * DEGREES_TO_RADIANS;
-    f32 s = sinf(radians);
-    f32 c = cosf(radians);
+    f32 s = GuSine(radians);
+    f32 c = GuCosine(radians);
     f32 horizontal;
     Vector across;
     Vector rising;
@@ -449,7 +452,8 @@ void guPerspectiveF(
     f32 far,
     f32 scale
 ) {
-    f32 cotangent = cosf(fovy * DEGREES_TO_RADIANS / 2.0f) / sinf(fovy * DEGREES_TO_RADIANS / 2.0f);
+    f32 cotangent =
+        GuCosine(fovy * DEGREES_TO_RADIANS / 2.0f) / GuSine(fovy * DEGREES_TO_RADIANS / 2.0f);
     int row;
     int column;
 

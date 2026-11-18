@@ -24,12 +24,13 @@ target_compile_options(mg64_game_options INTERFACE
     # as Android's doesn't
     $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-unused-value>
 )
-# The KMC C library's random numbers and trigonometry, in place of the
-# host's, which differ from them and from each other (see port/kmc_names.h)
+# The KMC C library's random numbers and trigonometry, and libultra's sine
+# and cosine, in place of the host's, which differ from them and from each
+# other (see port/kmc_names.h)
 target_compile_options(mg64_game_options INTERFACE
     "SHELL:-include \"${CMAKE_CURRENT_SOURCE_DIR}/include/port/kmc_names.h\""
 )
-target_link_libraries(mg64_game_options INTERFACE mg64_kmc mg64_math)
+target_link_libraries(mg64_game_options INTERFACE mg64_kmc mg64_gu mg64_math)
 
 set(main_sources ${MG64_GAME_SOURCES})
 foreach(overlay IN LISTS MG64_OVERLAY_NAMES)

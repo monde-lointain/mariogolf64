@@ -1,7 +1,8 @@
 /*
  * Gives the game's calls to the C library's random numbers and
- * trigonometry to the port's KMC stand-ins (see port/kmc.h). The build
- * includes it before each of the game's sources.
+ * trigonometry to the port's KMC stand-ins (see port/kmc.h), and its calls
+ * to libultra's sinf and cosf to the port's (see port/gu_sine.h). The
+ * build includes it before each of the game's sources.
  *
  * The host's own headers come first, so that their include guards keep
  * the names below out of them: glibc's math.h builds other names from
@@ -16,7 +17,9 @@
 #include <math.h>
 #include <stdlib.h>
 
-// Its neighbour, by a path that needs none of the port's include directories
+// Its neighbours, by a path that needs none of the port's include
+// directories
+#include "gu_sine.h"
 #include "kmc.h"
 
 #define rand KmcRandom
@@ -26,5 +29,7 @@
 #define tan KmcTangent
 #define atan KmcArcTangent
 #define atan2 KmcArcTangent2
+#define sinf GuSine
+#define cosf GuCosine
 
 #endif

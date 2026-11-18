@@ -4,6 +4,9 @@
  * bit for about one angle in a thousand, so a shot could fly differently
  * from one host to the next. These give the same result on every host,
  * which is the nearest float to the true sine or cosine.
+ *
+ * The game's sources call them by libultra's names, which their build
+ * defines to these (see port/kmc_names.h).
  */
 
 #ifndef PORT_GU_SINE_H
