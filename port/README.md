@@ -24,8 +24,8 @@ as a udev rule like this one, in `/etc/udev/rules.d/`, makes it:
 
     SUBSYSTEM=="usb", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="0337", TAG+="uaccess"
 
-The build takes the textures that the game keeps in its code from the
-PNGs that `make extract` cuts from the ROM (see the top-level README).
+The build needs nothing cut from the ROM: even the few textures that the
+game keeps in arrays in its code are read from the ROM at start-up.
 
     cmake --preset linux
     cmake --build --preset linux
@@ -102,10 +102,9 @@ The save file has no target: the port takes it only as bytes of the save
 memory's size, and the game trusts what passes its own CRC, as the N64 did.
 
 CI (`.github/workflows/port.yml`) checks the Python tools and the
-nested-function hoister on every push. The builds need the assets cut from
-the ROM, so they run each preset's workflow only where the repository's
-`BASEROM_URL` secret names a private copy of the ROM, which is checked
-against `mariogolf64.sha1` before use and deleted after.
+nested-function hoister, and runs each preset's workflow, on every push.
+Neither the builds nor the tests need the ROM: the tests that read data
+from it make ROMs of their own.
 
 ## Recording and replaying a session
 
@@ -189,4 +188,6 @@ samples itself.
 ### Overlays
 
 Every overlay is linked into the program. Loading one resets its variables
-to their initial values, as reading the overlay from ROM did.
+to their values at start-up, as reading the overlay from ROM did: those
+it was linked with, and the arrays filled from the ROM before the game
+starts.

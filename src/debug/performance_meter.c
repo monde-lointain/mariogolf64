@@ -16,6 +16,7 @@
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
+#include "system/rom_arrays.h"
 
 // A frame of time is this wide on the meter, in the meter's own units
 #define FRAME_WIDTH 280
@@ -207,6 +208,7 @@ static Gfx f_UnusedMeterDisplayList[] UNUSED = {
 static u16 f_DigitTexture[] RCP_ALIGNED = {
 #include "assets/debug/performance_meter/digit_texture.ia4.inc.c"
 };
+DEFINE_ROM_ARRAY(digit_texture, f_DigitTexture);
 // The RDP reads the digits' 4-bit texels in the N64's byte order, which a
 // host's u16 words don't hold, so a host puts them in that order before
 // the first load

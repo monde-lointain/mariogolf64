@@ -1,30 +1,36 @@
 /*
  * Tests of the performance meter's digit texture on a host. The game
- * declares the texture as u16 words of packed 4-bit texels, which the RDP
- * reads in the N64's byte order; the meter must hand the RDP those bytes,
- * however many times it draws.
+ * declares the texture as u16 words of packed 4-bit texels, which the port
+ * fills from the ROM as the host's values, and which the RDP reads in the
+ * N64's byte order; the meter must hand the RDP the ROM's bytes, however
+ * many times it draws.
  */
 
+#include <SDL3/SDL.h>
 #include <nusys.h>
 #include <stdbool.h>
 #include <string.h>
 #include <ultra64.h>
 
 #include "debug/performance_meter.h"
+#include "port/os_host.h"
 #include "system/c_language.h"
 #include "system/heap.h"
+#include "system/rom_arrays.h"
 #include "test_support.h"
 
 #define G_SETTIMG_OPCODE 0xFD
 #define G_ENDDL_OPCODE 0xDF
 // More commands than the meter writes
 #define COMMAND_LIMIT 4096
+// The digits' 64x8 texels of 4 bits
+#define DIGIT_TEXTURE_SIZE (64 * 8 / 2)
+// Bytes of the ROM past the digits, which no fill reads
+#define ROM_SLACK 16
 
-// The words the game's source declares, from the same extracted asset that
-// the game's build includes
-static const u16 f_DeclaredDigits[] = {
-#include "assets/debug/performance_meter/digit_texture.ia4.inc.c"
-};
+// A ROM that reaches past the digits, whose bytes differ from their
+// neighbors'
+static u8 *f_Rom;
 
 static u16 f_Framebuffer[320 * 240];
 u16 *nuGfxCfb_ptr = f_Framebuffer;
@@ -103,19 +109,28 @@ static const u8 *FindDigitTexture(void) {
     return NULL;
 }
 
-// Whether the texture's bytes are the declared words, high byte first, and
-// marked as in the cartridge's order
-static bool IsInRomOrder(const u8 *texture) {
+// Fills the digits from a ROM of numbered bytes, as the port does at
+// start-up
+static void FillDigitsFromRom(void) {
+    size_t size = digit_texture_ROM_OFFSET + DIGIT_TEXTURE_SIZE + ROM_SLACK;
     size_t i;
 
-    for (i = 0; i < ARRAY_COUNT(f_DeclaredDigits); i++) {
-        if (texture[i * 2] != (f_DeclaredDigits[i] >> 8) ||
-            texture[(i * 2) + 1] != (f_DeclaredDigits[i] & 0xFF)) {
-            return false;
-        }
+    f_Rom = SDL_malloc(size);
+    SDL_assert_always(f_Rom != NULL);
+    for (i = 0; i < size; i++) {
+        f_Rom[i] = (u8)((i * 37) + 11);
     }
 
-    return osPcIsRomOrder(&texture[0]) && osPcIsRomOrder(&texture[sizeof(f_DeclaredDigits) - 1]);
+    PcInsertCartridge(f_Rom, size);
+    osPcFillRomArray(&digit_texture_ROM_ARRAY);
+}
+
+// Whether the texture's bytes are the ROM's, and marked as in the
+// cartridge's order
+static bool IsInRomOrder(const u8 *texture) {
+    return SDL_memcmp(texture, &f_Rom[digit_texture_ROM_OFFSET], DIGIT_TEXTURE_SIZE) == 0 &&
+        osPcIsRomOrder(&texture[0]) &&
+        osPcIsRomOrder(&texture[DIGIT_TEXTURE_SIZE - 1]);
 }
 
 // The first draw hands the RDP the digits in the cartridge's order, and a
@@ -138,6 +153,8 @@ static void TestDigitsLoadInRomOrder(void) {
 }
 
 int main(void) {
+    FillDigitsFromRom();
     TestDigitsLoadInRomOrder();
+    SDL_free(f_Rom);
     return ReportTestResults("performance_meter_test");
 }

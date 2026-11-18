@@ -65,6 +65,7 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
+#include "system/rom_arrays.h"
 #include "text/text.h"
 
 // f_SceneryState values
@@ -601,6 +602,7 @@ static Gfx f_UnusedNoOpDisplayList[] UNUSED = {
 static u8 f_InsetFrameTexture[] RCP_ALIGNED = {
 #include "assets/round/round_hud/inset_frame_texture.i4.inc.c"
 };
+DEFINE_ROM_ARRAY(inset_frame_texture, f_InsetFrameTexture);
 static LandingReaction f_LandingReaction = LANDING_REACTION_NONE;
 static s32 f_LandingReactionFrame = NO_LANDING_REACTION_FRAME;
 static Vtx f_LandingPanelVertices[4] = {
@@ -736,6 +738,7 @@ static Gfx f_UnusedEmptyHudDisplayList[] UNUSED = {
 static u16 f_WhiteDistancePalette[] RCP_ALIGNED = {
 #include "assets/round/round_hud/white_distance_palette.rgba16.inc.c"
 };
+DEFINE_ROM_ARRAY(white_distance_palette, f_WhiteDistancePalette);
 static s32 f_LoadedHoleIntroImages = 0;
 
 // The grid drawn over the ground around a shot's target, as

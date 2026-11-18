@@ -76,6 +76,7 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
+#include "system/rom_arrays.h"
 #include "text/text.h"
 
 #define INSET_VIEW_SOUND_VOLUME 0x3F
@@ -180,9 +181,11 @@ static Gfx f_UnreadPaletteLoads[] = {
 static u8 f_NoiseTexture[] RCP_ALIGNED = {
 #include "assets/game/game/noise_texture.i8.inc.c"
 };
+DEFINE_ROM_ARRAY(noise_texture, f_NoiseTexture);
 static u16 f_FlameGradientTexture[] RCP_ALIGNED = {
 #include "assets/game/game/flame_gradient_texture.rgba16.inc.c"
 };
+DEFINE_ROM_ARRAY(flame_gradient_texture, f_FlameGradientTexture);
 
 s32 g_HorizonRow = 0;
 // How far BuildHorizonDynamicTextures has scrolled its textures

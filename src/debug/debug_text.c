@@ -17,6 +17,7 @@
 #include "system/compiler.h"
 #include "system/main.h"
 #include "system/memory_address.h"
+#include "system/rom_arrays.h"
 #include "text/text.h"
 
 #define TEXT_COLUMN_COUNT 40
@@ -51,6 +52,7 @@
 static u16 f_DebugFont[FONT_WIDTH * FONT_HEIGHT / 2] RCP_ALIGNED = {
 #include "assets/debug/debug_text/debug_font.ia4.inc.c"
 };
+DEFINE_ROM_ARRAY(debug_font, f_DebugFont);
 u16 *g_MessageFramebuffer = NULL;
 static s8 f_DebugTextHighlight = 0;
 static s32 f_DebugLogShownLineCount = LOG_SHOWN_LINE_COUNT;

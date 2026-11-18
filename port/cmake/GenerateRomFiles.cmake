@@ -7,6 +7,12 @@
 # from assets.txt, and the names that the game's code gives some of them from
 # undefined_syms.txt.
 #
+# The textures that the game's code holds in C arrays are in the ROM too,
+# in the code's data. textures.txt gives their offsets, which the header
+# names NAME_ROM_OFFSET, for NAME.FORMAT.png, along with
+# FOR_EACH_ROM_ARRAY(X), which applies X to each NAME (see
+# include/system/rom_arrays.h).
+#
 # The code segments are linked into the program, so their symbols only need
 # to tell the segments apart: a segment's ROM_START and ROM_END are its
 # number, counting from 1 in layout.txt's order, and its VRAM, TEXT_END,
@@ -18,11 +24,12 @@
 #
 # Run as a script:
 #   cmake -DASSETS=<assets.txt> -DSYMBOLS=<undefined_syms.txt> -DLAYOUT=<layout.txt>
-#         -DOUTPUT=<rom_file_offsets.h> -P GenerateRomFiles.cmake
+#         -DTEXTURES=<textures.txt> -DOUTPUT=<rom_file_offsets.h>
+#         -P GenerateRomFiles.cmake
 
 cmake_minimum_required(VERSION 3.30)
 
-foreach(variable IN ITEMS ASSETS SYMBOLS LAYOUT OUTPUT)
+foreach(variable IN ITEMS ASSETS SYMBOLS LAYOUT TEXTURES OUTPUT)
     if(NOT DEFINED ${variable})
         message(FATAL_ERROR "GenerateRomFiles.cmake needs ${variable}")
     endif()
@@ -69,6 +76,19 @@ foreach(line IN LISTS symbol_lines)
     string(REGEX MATCH "^([A-Za-z_0-9]+) = ([A-Za-z_0-9]+);" match "${line}")
     string(APPEND header "#define ${CMAKE_MATCH_1} ${CMAKE_MATCH_2}\n")
 endforeach()
+
+string(APPEND header
+    "\n/* The textures that the game's code holds in C arrays: each one's offset */\n")
+file(STRINGS "${TEXTURES}" texture_lines REGEX "^0x[0-9A-Fa-f]+ ")
+set(texture_names "")
+foreach(line IN LISTS texture_lines)
+    if(NOT line MATCHES "^(0x[0-9A-Fa-f]+) .* assets/([^ ]+/)?([A-Za-z_0-9]+)\\.[a-z0-9]+\\.png")
+        message(FATAL_ERROR "Can't read the texture of \"${line}\" in ${TEXTURES}")
+    endif()
+    string(APPEND header "#define ${CMAKE_MATCH_3}_ROM_OFFSET ${CMAKE_MATCH_1}\n")
+    string(APPEND texture_names " X(${CMAKE_MATCH_3})")
+endforeach()
+string(APPEND header "#define FOR_EACH_ROM_ARRAY(X)${texture_names}\n")
 
 string(APPEND header "\n/* The code segments: each one's number, and its address on the N64 */\n")
 file(STRINGS "${LAYOUT}" segment_lines REGEX "^segment +[A-Za-z_0-9]+ +0x[0-9A-Fa-f]+")

@@ -3,6 +3,7 @@
 
 add_library(mg64_game_support STATIC
     character_tables.c
+    rom_arrays.c
 )
 target_link_libraries(mg64_game_support
     PUBLIC mg64_port_internal

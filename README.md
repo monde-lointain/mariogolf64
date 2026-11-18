@@ -113,7 +113,8 @@ the decoded bytes again does not give the original's.
 
 IPL3 and the RSP's boot, audio and graphics microcode are Nintendo's
 own binaries, cut from the original as they are, and `textures.txt`
-lists the textures that C files hold, which are built from PNGs.
+lists the textures that C files hold, which are built from PNGs. The PC
+port reads those from the ROM at start-up instead, so it needs no assets.
 
 ## Mods
 

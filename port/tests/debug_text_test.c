@@ -2,16 +2,20 @@
  * Tests of the debug font's two readers on a host: the CPU, which draws
  * messages straight into the framebuffers, and the RDP, which draws text
  * from the font and from textures of it. Whatever the font's glyphs look
- * like, both must see the same ones.
+ * like, both must see the same ones. The port fills the font from the ROM,
+ * which here holds numbered bytes.
  */
 
+#include <SDL3/SDL.h>
 #include <stdbool.h>
 #include <string.h>
 #include <ultra64.h>
 
 #include "debug/debug_text.h"
+#include "port/os_host.h"
 #include "screen/screen.h"
 #include "system/main.h"
+#include "system/rom_arrays.h"
 #include "test_support.h"
 
 #define FRAMEBUFFER_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT)
@@ -23,10 +27,15 @@
 #define FONT_ROW_BYTES (32 * DEBUG_GLYPH_SIZE / 2)
 #define FIRST_GLYPH ' '
 #define G_SETTIMG_OPCODE 0xFD
+// Bytes of the ROM past the font, which no fill reads
+#define ROM_SLACK 16
 
 Boolean8 g_IsDebugEnabled;
 static u16 f_CurrentFramebuffer[FRAMEBUFFER_SIZE];
 static u16 f_NextFramebuffer[FRAMEBUFFER_SIZE];
+// A ROM that reaches past the font, whose bytes differ from their
+// neighbors', so that a glyph read in the wrong order differs
+static u8 *f_Rom;
 
 Boolean IsGameFlagSet(u32 flag) {
     (void)flag;
@@ -43,6 +52,21 @@ void *osViGetCurrentFramebuffer(void) {
 
 void *osViGetNextFramebuffer(void) {
     return f_NextFramebuffer;
+}
+
+// Fills the font from a ROM of numbered bytes, as the port does at start-up
+static void FillFontFromRom(void) {
+    size_t size = debug_font_ROM_OFFSET + debug_font_ROM_ARRAY.size + ROM_SLACK;
+    size_t i;
+
+    f_Rom = SDL_malloc(size);
+    SDL_assert_always(f_Rom != NULL);
+    for (i = 0; i < size; i++) {
+        f_Rom[i] = (u8)((i * 37) + 11);
+    }
+
+    PcInsertCartridge(f_Rom, size);
+    osPcFillRomArray(&debug_font_ROM_ARRAY);
 }
 
 // The 4-bit texel at (x, y) of an image of rowBytes bytes a row, as the RDP
@@ -147,7 +171,9 @@ static void TestRdpFontMatchesMessages(void) {
 }
 
 int main(void) {
+    FillFontFromRom();
     TestTextTextureMatchesMessages();
     TestRdpFontMatchesMessages();
+    SDL_free(f_Rom);
     return ReportTestResults("debug_text_test");
 }

@@ -1,8 +1,6 @@
-# Checks the PC port. The tools' checks need nothing but the repository.
-# The port's builds need the assets that make extract cuts from the
-# original ROM, which no repository may hold: they run only where the
-# repository's BASEROM_URL secret names a private copy of it, which they
-# check against the matching build's SHA-1 before using.
+# Checks the PC port. Nothing here needs the original ROM, which no
+# repository may hold: the port reads the game's data from the player's
+# ROM at run time, and its tests make ROMs of their own.
 
 name: Port
 
@@ -49,27 +47,8 @@ jobs:
       - name: Test the nested-function hoister with Clang
         run: python3 -I port/tests/nested_functions_test.py --compiler clang
 
-  rom:
-    name: Find the base ROM
-    runs-on: ubuntu-24.04
-    outputs:
-      available: ${{ steps.check.outputs.available }}
-    steps:
-      - id: check
-        env:
-          BASEROM_URL: ${{ secrets.BASEROM_URL }}
-        run: |
-          if [ -n "$BASEROM_URL" ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No BASEROM_URL secret, so the port's builds are skipped"
-          fi
-
   port:
     name: Port (${{ matrix.preset }})
-    needs: rom
-    if: needs.rom.outputs.available == 'true'
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -94,22 +73,8 @@ jobs:
           .venv/bin/pip install --quiet -r requirements.txt "cmake>=3.30"
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
 
-      - name: Get the base ROM
-        env:
-          BASEROM_URL: ${{ secrets.BASEROM_URL }}
-        run: |
-          curl --fail --silent --show-error --location --output baserom.us.z64 "$BASEROM_URL"
-          echo "$(cut -d ' ' -f 1 mariogolf64.sha1)  baserom.us.z64" | sha1sum --check --quiet
-
-      - name: Extract the assets
-        run: make extract
-
       - name: Configure, build and test
         env:
           # No GPU here, so the GPU's tests skip themselves
           SDL_AUDIO_DRIVER: dummy
         run: cmake --workflow --preset ${{ matrix.preset }}
-
-      - name: Remove the base ROM
-        if: always()
-        run: rm -f baserom.us.z64

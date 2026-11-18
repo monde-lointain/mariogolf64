@@ -41,6 +41,7 @@
 #include "rsp.h"
 #include "save_memory.h"
 #include "sdl_gpu_backend.h"
+#include "system/rom_arrays.h"
 
 #define WINDOW_TITLE "Mario Golf"
 #define DEFAULT_ROM_NAME "baserom.us.z64"
@@ -565,8 +566,9 @@ int main(int argc, char *argv[]) {
     InitControllers();
     PlayInputScript(script);
     RecordFirstPort(f_Recorder);
-    PcInitOs();
     PcInsertCartridge(rom, romSize);
+    FillGameRomArrays();
+    PcInitOs();
     PcBootNuSystem();
     RunRetraces(options.frameLimit, options.gameFrameLimit, options.isHeadless);
     if (!ShutDown(options.screenshotPath)) {

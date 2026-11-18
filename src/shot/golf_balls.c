@@ -33,6 +33,7 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
+#include "system/rom_arrays.h"
 #ifdef AVOID_UB
 #    include "math/float_to_unsigned.h"
 #endif
@@ -114,10 +115,12 @@ static Gfx f_UnusedListBeforeBooMouth[] UNUSED = {gsSPEndDisplayList()};
 static u16 f_BooMouthTexture[] RCP_ALIGNED = {
 #include "assets/shot/golf_balls/boo_mouth_texture.rgba16.inc.c"
 };
+DEFINE_ROM_ARRAY(boo_mouth_texture, f_BooMouthTexture);
 static Gfx f_UnusedListAfterBooMouth[] UNUSED = {gsSPEndDisplayList()};
 static u16 f_BooEyeTexture[] RCP_ALIGNED = {
 #include "assets/shot/golf_balls/boo_eye_texture.rgba16.inc.c"
 };
+DEFINE_ROM_ARRAY(boo_eye_texture, f_BooEyeTexture);
 static Vtx f_BooEyeVertices[] = {
     {{{-146, 40, -96}, 0, {0xD80, 0x940}, {0xB9, 0x25, 0x62, 0xFF}}},
     {{{0, 35, -56}, 0, {0x120, 0x940}, {0x00, 0x0B, 0x7E, 0xFF}}},
