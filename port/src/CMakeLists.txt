@@ -52,13 +52,6 @@ foreach(overlay IN LISTS MG64_OVERLAY_NAMES)
     list(APPEND overlay_targets mg64_${overlay})
 endforeach()
 
-include(OverlaySections)
-mg64_write_overlay_sections(
-    OVERLAYS ${MG64_OVERLAY_NAMES}
-    LINKER_SCRIPT overlay_linker_script
-    SOURCE overlay_sections_source
-)
-
 add_subdirectory(os)
 add_subdirectory(gu)
 add_subdirectory(kmc)
@@ -74,11 +67,11 @@ if(ANDROID)
     # atanf and acosf are bound within the library: otherwise the C
     # library's, which Android loads before any app, would stand in for
     # them, and change the game's numbers.
-    add_library(mariogolf64 SHARED platform/main.c "${overlay_sections_source}")
+    add_library(mariogolf64 SHARED platform/main.c)
     set_target_properties(mariogolf64 PROPERTIES OUTPUT_NAME main LINKER_LANGUAGE CXX)
     target_link_options(mariogolf64 PRIVATE "LINKER:-Bsymbolic")
 else()
-    add_executable(mariogolf64 platform/main.c "${overlay_sections_source}")
+    add_executable(mariogolf64 platform/main.c)
 endif()
 target_link_libraries(mariogolf64 PRIVATE
     mg64_headers
@@ -95,8 +88,8 @@ target_link_libraries(mariogolf64 PRIVATE
     mg64_gu
     SDL3::SDL3
 )
-target_link_options(mariogolf64 PRIVATE "LINKER:-T,${overlay_linker_script}")
-set_property(TARGET mariogolf64 APPEND PROPERTY LINK_DEPENDS "${overlay_linker_script}")
+include(OverlaySections)
+mg64_gather_overlay_variables(TARGET mariogolf64 OVERLAYS ${MG64_OVERLAY_NAMES})
 if(NOT WIN32)
     target_link_libraries(mariogolf64 PRIVATE m)
 endif()

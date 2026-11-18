@@ -213,16 +213,10 @@ foreach(overlay IN ITEMS sections_a sections_b sections_c)
 endforeach()
 # A sanitizer's checks give the overlay without variables data of their own
 target_compile_options(mg64_sections_b PRIVATE -fno-sanitize=all)
-mg64_write_overlay_sections(
-    OVERLAYS sections_a sections_b sections_c
-    LINKER_SCRIPT sections_linker_script
-    SOURCE sections_source
-)
 # With the port's snapshot of the overlays' variables, built in so that the
 # test's own linker script and GetOverlaySections give it its overlays
 add_executable(overlay_sections_test
     overlay_sections_test.c
-    "${sections_source}"
     "${PROJECT_SOURCE_DIR}/port/src/os/memory.c"
 )
 target_include_directories(overlay_sections_test PRIVATE
@@ -233,8 +227,7 @@ target_include_directories(overlay_sections_test PRIVATE
 target_link_libraries(overlay_sections_test PRIVATE
     mg64_test_support ${sections_overlays} mg64_headers mg64_port_warnings SDL3::SDL3
 )
-target_link_options(overlay_sections_test PRIVATE "LINKER:-T,${sections_linker_script}")
-set_property(TARGET overlay_sections_test APPEND PROPERTY LINK_DEPENDS "${sections_linker_script}")
+mg64_gather_overlay_variables(TARGET overlay_sections_test OVERLAYS sections_a sections_b sections_c)
 add_test(NAME overlay_sections_test COMMAND overlay_sections_test)
 set_tests_properties(overlay_sections_test PROPERTIES TIMEOUT 60)
 

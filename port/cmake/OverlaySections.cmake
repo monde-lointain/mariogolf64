@@ -18,15 +18,15 @@
 # own sections do so through BLOCK(__section_alignment__), which ELF's linker
 # lacks.
 #
-#   mg64_write_overlay_sections(OVERLAYS <name>...
-#                               LINKER_SCRIPT <variable> SOURCE <variable>)
+#   mg64_gather_overlay_variables(TARGET <program> OVERLAYS <name>...)
 #
-# sets the variables to the paths of the linker script and the C file.
+# links the program, which must link each overlay's object library,
+# mg64_<name>, with the script, and builds the C file into it.
 
-function(mg64_write_overlay_sections)
-    cmake_parse_arguments(PARSE_ARGV 0 arg "" "LINKER_SCRIPT;SOURCE" "OVERLAYS")
-    if(NOT arg_OVERLAYS OR NOT arg_LINKER_SCRIPT OR NOT arg_SOURCE)
-        message(FATAL_ERROR "mg64_write_overlay_sections needs OVERLAYS, LINKER_SCRIPT and SOURCE")
+function(mg64_gather_overlay_variables)
+    cmake_parse_arguments(PARSE_ARGV 0 arg "" "TARGET" "OVERLAYS")
+    if(NOT arg_TARGET OR NOT arg_OVERLAYS)
+        message(FATAL_ERROR "mg64_gather_overlay_variables needs TARGET and OVERLAYS")
     endif()
 
     if(WIN32)
@@ -56,7 +56,8 @@ function(mg64_write_overlay_sections)
             "${prefix}_bss_start, ${prefix}_bss_end},\n")
     endforeach()
 
-    set(script_path "${CMAKE_CURRENT_BINARY_DIR}/generated/overlay_sections.ld")
+    set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated/${arg_TARGET}")
+    set(script_path "${generated_dir}/overlay_sections.ld")
     file(CONFIGURE OUTPUT "${script_path}" CONTENT [=[
 /* Written by port/cmake/OverlaySections.cmake; don't edit */
 SECTIONS
@@ -74,7 +75,7 @@ SECTIONS
 INSERT AFTER .bss;
 ]=] @ONLY)
 
-    set(source_path "${CMAKE_CURRENT_BINARY_DIR}/generated/overlay_sections.c")
+    set(source_path "${generated_dir}/overlay_sections.c")
     file(CONFIGURE OUTPUT "${source_path}" CONTENT [=[
 /* Written by port/cmake/OverlaySections.cmake; don't edit */
 #include <rom_file_offsets.h>
@@ -91,6 +92,7 @@ const OverlaySections *GetOverlaySections(int *count) {
 }
 ]=] @ONLY)
 
-    set(${arg_LINKER_SCRIPT} "${script_path}" PARENT_SCOPE)
-    set(${arg_SOURCE} "${source_path}" PARENT_SCOPE)
+    target_sources(${arg_TARGET} PRIVATE "${source_path}")
+    target_link_options(${arg_TARGET} PRIVATE "LINKER:-T,${script_path}")
+    set_property(TARGET ${arg_TARGET} APPEND PROPERTY LINK_DEPENDS "${script_path}")
 endfunction()
