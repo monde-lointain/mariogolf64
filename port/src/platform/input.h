@@ -41,6 +41,10 @@ void DisconnectGamepad(uint32_t instanceId);
 // game asked for since the last time
 void UpdateControllers(void);
 
+// Takes a key's event, SDL_EVENT_KEY_DOWN or _UP, so that a key pressed and
+// let go between two updates still plays the first port at the next
+void HandleKeyEvent(const SDL_Event *event);
+
 // Plays a script into the first port from now on, or stops with NULL. The
 // game's reads of the port count its frames from 0, and each read gets
 // what the script holds at that frame, or the devices' state before the

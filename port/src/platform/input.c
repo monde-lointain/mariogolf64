@@ -41,6 +41,10 @@ static const InputScript *f_Script;
 static InputRecorder *f_Recorder;
 static bool f_HasRecordingFailed;
 static long f_FirstPortReadCount; // The game's frames, as it reads once each
+// The keys pressed since the last update, which may be let go already,
+// and the keyboard as the update plays it; the platform's thread's alone
+static bool f_TappedKeys[SDL_SCANCODE_COUNT];
+static bool f_Keys[SDL_SCANCODE_COUNT];
 // The touch controls, the platform's thread's alone
 static TouchScreen f_TouchScreen;
 static TouchLayout f_TouchLayout;
@@ -100,6 +104,7 @@ void InitControllers(void) {
     }
 
     SDL_free(gamepads);
+    SDL_zeroa(f_TappedKeys);
     LiftAllTouches(&f_TouchPad);
     f_IsTouchShown = IS_TOUCH_FIRST && f_Ports[0].gamepad == NULL;
 }
@@ -177,6 +182,20 @@ void DisconnectGamepad(uint32_t instanceId) {
     }
 }
 
+// The keyboard's state, with the keys pressed since the last update
+static const bool *ReadKeys(void) {
+    int count = 0;
+    const bool *state = SDL_GetKeyboardState(&count);
+    int i;
+
+    for (i = 0; i < SDL_SCANCODE_COUNT; i++) {
+        f_Keys[i] = (i < count && state[i]) || f_TappedKeys[i];
+    }
+
+    SDL_zeroa(f_TappedKeys);
+    return f_Keys;
+}
+
 // Adds what the touch controls play to the first port's other devices,
 // and hides them while another device plays
 static void PlayTouchControls(OSContPad *pad) {
@@ -191,7 +210,7 @@ static void PlayTouchControls(OSContPad *pad) {
 }
 
 void UpdateControllers(void) {
-    const bool *keys = SDL_GetKeyboardState(NULL);
+    const bool *keys = ReadKeys();
     const Uint64 now = SDL_GetTicks();
     const bool isRenewal = now - f_LastRumbleRenewal >= RUMBLE_RENEW_MS;
     int i;
@@ -320,6 +339,13 @@ void PcSetRumble(int port, int isOn) {
         SDL_LockMutex(f_Lock);
         f_Ports[port].wantsRumble = isOn != 0;
         SDL_UnlockMutex(f_Lock);
+    }
+}
+
+void HandleKeyEvent(const SDL_Event *event) {
+    SDL_assert(event != NULL);
+    if (event->type == SDL_EVENT_KEY_DOWN && (unsigned)event->key.scancode < SDL_SCANCODE_COUNT) {
+        f_TappedKeys[event->key.scancode] = true;
     }
 }
 

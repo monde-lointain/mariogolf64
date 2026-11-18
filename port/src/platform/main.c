@@ -618,6 +618,7 @@ static void HandleEvent(const SDL_Event *event) {
             DisconnectGamepad(event->gdevice.which);
             break;
         case SDL_EVENT_KEY_DOWN:
+            HandleKeyEvent(event);
             if (!event->key.repeat &&
                 (event->key.scancode == SDL_SCANCODE_F11 ||
                     (event->key.scancode == SDL_SCANCODE_RETURN &&

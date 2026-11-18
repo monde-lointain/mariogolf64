@@ -223,6 +223,62 @@ static void TestBriefPressLastsToRead(void) {
     DetachPad(&pads[1]);
 }
 
+// --- The keyboard ---
+
+// Sends a key's press or release, as SDL's events bring it, without the
+// keyboard's state, which SDL changes only for a real keyboard
+static void SendKey(SDL_Scancode key, bool isDown) {
+    SDL_Event event;
+
+    SDL_zero(event);
+    event.type = isDown ? SDL_EVENT_KEY_DOWN : SDL_EVENT_KEY_UP;
+    event.key.scancode = key;
+    event.key.down = isDown;
+    HandleKeyEvent(&event);
+}
+
+// A key pressed and let go before an update, as Android's Back comes in
+// one event pump, still plays the first port at that update, and only then
+static void TestKeyTapPlays(void) {
+    InitControllers();
+    SendKey(SDL_SCANCODE_C, true);
+    SendKey(SDL_SCANCODE_C, false);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == B_BUTTON);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == 0);
+
+    // A held key plays at every update, as SDL's keyboard state has it;
+    // that state isn't const, so the test may hold a key there
+    ((bool *)SDL_GetKeyboardState(NULL))[SDL_SCANCODE_X] = true;
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == A_BUTTON);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == A_BUTTON);
+    ((bool *)SDL_GetKeyboardState(NULL))[SDL_SCANCODE_X] = false;
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == 0);
+
+    // A release alone presses nothing
+    SendKey(SDL_SCANCODE_C, false);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == 0);
+
+    // The last key that SDL knows, and none past it
+    SendKey(SDL_SCANCODE_COUNT - 1, true);
+    SendKey(SDL_SCANCODE_COUNT, true);
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == 0);
+
+    // A tap before a restart doesn't play after it
+    SendKey(SDL_SCANCODE_X, true);
+    ShutdownControllers();
+    InitControllers();
+    UpdateControllers();
+    EXPECT(ReadButtons(0) == 0);
+    ShutdownControllers();
+}
+
 // --- The touch controls ---
 
 // A phone-sized screen, and a layout of it to find the controls by
@@ -377,6 +433,7 @@ int main(void) {
     TestPortsFillInOrder();
     TestMotors();
     TestBriefPressLastsToRead();
+    TestKeyTapPlays();
     TestTouchPlaysFirstPort();
     TestTouchStick();
     TestTouchHidesForOtherController();
