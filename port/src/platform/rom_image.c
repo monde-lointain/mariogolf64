@@ -19,6 +19,11 @@
 // data.
 #define SUPPORTED_CRC32 0x2FC4C216u
 #define SUPPORTED_SHA1 "e2c4e7a905b29529b49a1619a401fe699224829b"
+// Where the copy that the player chose is kept: beside the save
+#define STORE_ORGANIZATION "mariogolf64"
+#define STORE_APPLICATION "mariogolf64"
+#define STORED_ROM_NAME "baserom.us.z64"
+#define TEMPORARY_SUFFIX ".new"
 
 static const uint8_t f_BigEndianMagic[] = {0x80, 0x37, 0x12, 0x40};
 static const uint8_t f_HalfwordSwappedMagic[] = {0x37, 0x80, 0x40, 0x12};
@@ -145,4 +150,63 @@ uint8_t *LoadNamedRomImage(const char *path, const char *name, size_t *size) {
 
 uint8_t *LoadRomImage(const char *path, size_t *size) {
     return LoadNamedRomImage(path, path, size);
+}
+
+int FindRomPlace(const char *const *places, int count) {
+    SDL_PathInfo info;
+    int i;
+
+    SDL_assert(places != NULL || count == 0);
+    for (i = 0; i < count; i++) {
+        if (places[i] != NULL &&
+            SDL_GetPathInfo(places[i], &info) &&
+            info.type == SDL_PATHTYPE_FILE) {
+            return i;
+        }
+    }
+
+    return ROM_PLACE_NONE;
+}
+
+char *FindStoredRomPath(void) {
+    char *directory = SDL_GetPrefPath(STORE_ORGANIZATION, STORE_APPLICATION);
+    char *path = NULL;
+
+    if (directory == NULL) {
+        return NULL;
+    }
+
+    if (SDL_asprintf(&path, "%s%s", directory, STORED_ROM_NAME) < 0) {
+        path = NULL;
+    }
+
+    SDL_free(directory);
+    return path;
+}
+
+bool StoreRomImage(const char *path, const uint8_t *rom, size_t size) {
+    char *temporary = NULL;
+    bool isStored;
+
+    SDL_assert(path != NULL && rom != NULL);
+    if (SDL_asprintf(&temporary, "%s%s", path, TEMPORARY_SUFFIX) < 0) {
+        return false;
+    }
+
+    isStored = SDL_SaveFile(temporary, rom, size) && SDL_RenamePath(temporary, path);
+    if (!isStored) {
+        // Removing a file that isn't there sets SDL's error on some systems
+        char *reason = SDL_strdup(SDL_GetError());
+
+        (void)SDL_RemovePath(temporary);
+        SDL_SetError(
+            "Can't keep a copy of the ROM in %s: %s",
+            path,
+            reason != NULL ? reason : "out of memory"
+        );
+        SDL_free(reason);
+    }
+
+    SDL_free(temporary);
+    return isStored;
 }

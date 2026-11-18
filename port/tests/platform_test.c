@@ -1,7 +1,7 @@
 /*
  * Tests of the platform layer's parts that need no window or device: the
- * ROM's byte orders and check, the controllers' scripts and recordings,
- * the save memory's file, and the presenter's fit and pixels.
+ * ROM's byte orders, check and kept copy, the controllers' scripts and
+ * recordings, the save memory's file, and the presenter's fit and pixels.
  */
 
 #include <SDL3/SDL.h>
@@ -160,6 +160,83 @@ static void TestRomRejections(void) {
 
     (void)SDL_RemovePath(path);
     SDL_free(rom);
+}
+
+// Whether the file at path holds exactly size bytes of data
+static bool HoldsBytes(const char *path, const void *data, size_t size) {
+    size_t heldSize = 0;
+    void *held = SDL_LoadFile(path, &heldSize);
+    bool isSame = held != NULL && heldSize == size && SDL_memcmp(held, data, size) == 0;
+
+    SDL_free(held);
+    return isSame;
+}
+
+// The first place that holds a file is the ROM's, whatever the file holds,
+// past the places that are none, hold nothing or hold a folder
+static void TestFindsRomPlace(void) {
+    static const char absent[] = "platform_test_absent.z64";
+    static const char folder[] = "platform_test_folder_rom.z64";
+    static const char first[] = "platform_test_first.z64";
+    static const char second[] = "platform_test_second.z64";
+    const char *places[5];
+
+    (void)SDL_RemovePath(absent);
+    EXPECT(SDL_CreateDirectory(folder));
+    WriteTestFile(first, "x", 1);
+    WriteTestFile(second, "y", 1);
+    places[0] = NULL;
+    places[1] = absent;
+    places[2] = folder;
+    places[3] = first;
+    places[4] = second;
+    EXPECT(FindRomPlace(places, 5) == 3);
+    EXPECT(FindRomPlace(places + 4, 1) == 0);
+    EXPECT(FindRomPlace(places, 3) == ROM_PLACE_NONE);
+    EXPECT(FindRomPlace(places, 0) == ROM_PLACE_NONE);
+
+    (void)SDL_RemovePath(folder);
+    (void)SDL_RemovePath(first);
+    (void)SDL_RemovePath(second);
+}
+
+// A copy of the player's ROM is written whole, over any copy before it,
+// and leaves nothing behind where it can't be written
+static void TestStoresRomImage(void) {
+    static const char path[] = "platform_test_stored.z64";
+    static const char temporary[] = "platform_test_stored.z64.new";
+    static const char unwritable[] = "platform_test_no_such_folder/stored.z64";
+    static const char folder[] = "platform_test_folder.z64";
+    static const char folderTemporary[] = "platform_test_folder.z64.new";
+    static const uint8_t longer[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+    (void)SDL_RemovePath(path);
+    // What a store cut off by a crash left
+    EXPECT(SDL_SaveFile(temporary, "stale", 5));
+    EXPECT(StoreRomImage(path, longer, sizeof(longer)));
+    EXPECT(HoldsBytes(path, longer, sizeof(longer)));
+    EXPECT(!SDL_GetPathInfo(temporary, NULL));
+
+    // A shorter copy leaves none of the longer one's end
+    EXPECT(StoreRomImage(path, f_BigEndianStart, sizeof(f_BigEndianStart)));
+    EXPECT(HoldsBytes(path, f_BigEndianStart, sizeof(f_BigEndianStart)));
+    EXPECT(!SDL_GetPathInfo(temporary, NULL));
+
+    // Nowhere to write
+    SDL_ClearError();
+    EXPECT(!StoreRomImage(unwritable, longer, sizeof(longer)));
+    EXPECT(SDL_strstr(SDL_GetError(), unwritable) != NULL);
+
+    // Written beside, but not renamed into place, over a folder
+    (void)SDL_RemovePath(folderTemporary);
+    EXPECT(SDL_CreateDirectory(folder));
+    SDL_ClearError();
+    EXPECT(!StoreRomImage(folder, longer, sizeof(longer)));
+    EXPECT(SDL_strstr(SDL_GetError(), folder) != NULL);
+    EXPECT(!SDL_GetPathInfo(folderTemporary, NULL));
+
+    (void)SDL_RemovePath(folder);
+    (void)SDL_RemovePath(path);
 }
 
 // Reads the first port's buttons as the game does once a frame
@@ -383,6 +460,8 @@ int main(void) {
     TestSupportedRom();
     TestRomChecksum();
     TestRomRejections();
+    TestFindsRomPlace();
+    TestStoresRomImage();
     TestScriptedFrames();
     TestRecordsReadFrames();
     TestSaveMemory();
