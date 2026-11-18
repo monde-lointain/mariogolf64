@@ -40,6 +40,22 @@ SDL_GPUShader *CreateGpuShader(
     uint32_t uniformBufferCount
 );
 
+// Starts a command buffer on the backend's device, once no other thread is
+// recording one: each thread waits for the last one started to be
+// submitted. SDL_GPU lets threads record at once, but on the Pixel 7 Pro's
+// Mali-G710 the presenter's and the renderer's, recorded together, lost
+// the device. Gives NULL, with SDL_GetError saying why, where SDL can't
+// start one, and then no thread is held up.
+SDL_GPUCommandBuffer *BeginGpuCommands(void);
+
+// Submits a command buffer from BeginGpuCommands, giving whether SDL took
+// it, and lets the next thread start one
+bool SubmitGpuCommands(SDL_GPUCommandBuffer *commands);
+
+// As SubmitGpuCommands, giving a fence for the commands' end, or NULL
+// where SDL didn't take them
+SDL_GPUFence *SubmitGpuCommandsWithFence(SDL_GPUCommandBuffer *commands);
+
 uint32_t GpuBackendScale(void);
 
 // The texture that holds a color target, scaled

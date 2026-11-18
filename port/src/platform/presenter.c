@@ -214,29 +214,27 @@ static void ClearSwapchain(SDL_GPUCommandBuffer *commands, SDL_GPUTexture *swapc
     SDL_EndGPURenderPass(SDL_BeginGPURenderPass(commands, &target, 1, NULL));
 }
 
-// Draws the frame buffer, or black for NULL, into the swapchain. Gives
-// whether it holds the shown target's lock, which must last until the
-// commands that read the target are submitted.
-static bool DrawScreen(
+// The renderer's target that shows the frame buffer
+typedef struct ShownTarget {
+    GfxTarget *target; // NULL where the screen comes from memory
+    uint16_t width;
+    uint16_t height;
+} ShownTarget;
+
+// Draws the frame buffer, or black for NULL, into the swapchain, from the
+// shown target where there is one
+static void DrawScreen(
     SDL_GPUCommandBuffer *commands,
     SDL_GPUTexture *swapchain,
     uint32_t width,
     uint32_t height,
-    const void *framebuffer
+    const void *framebuffer,
+    const ShownTarget *shown
 ) {
-    uint16_t targetWidth;
-    uint16_t targetHeight;
-    GfxTarget *target;
-
     if (framebuffer == NULL) {
         ClearSwapchain(commands, swapchain);
-        return false;
     }
-
-    // The lock keeps the renderer from releasing the target until the
-    // blit that reads it is submitted
-    target = LockShownTarget(framebuffer, &targetWidth, &targetHeight);
-    if (target != NULL) {
+    else if (shown->target != NULL) {
         const uint32_t scale = GpuBackendScale();
 
         BlitScreen(
@@ -244,17 +242,15 @@ static bool DrawScreen(
             swapchain,
             width,
             height,
-            GpuTargetTexture(target),
-            targetWidth * scale,
-            targetHeight * scale
+            GpuTargetTexture(shown->target),
+            shown->width * scale,
+            shown->height * scale
         );
-        return true;
     }
-
-    UnlockShownTarget();
-    UploadMemoryScreen(commands, framebuffer);
-    BlitScreen(commands, swapchain, width, height, f_MemoryScreen, SCREEN_WIDTH, SCREEN_HEIGHT);
-    return false;
+    else {
+        UploadMemoryScreen(commands, framebuffer);
+        BlitScreen(commands, swapchain, width, height, f_MemoryScreen, SCREEN_WIDTH, SCREEN_HEIGHT);
+    }
 }
 
 void PresentFramebuffer(const void *framebuffer, const OverlayShape *shapes, int shapeCount) {
@@ -262,26 +258,36 @@ void PresentFramebuffer(const void *framebuffer, const OverlayShape *shapes, int
     SDL_GPUTexture *swapchain = NULL;
     Uint32 width = 0;
     Uint32 height = 0;
-    bool isTargetLocked;
+    ShownTarget shown;
 
     SDL_assert(f_Device != NULL);
-    commands = SDL_AcquireGPUCommandBuffer(f_Device);
+    // The shown target's lock keeps the renderer from releasing the target
+    // until the blit that reads it is submitted. It's taken before the
+    // command buffer, as the renderer takes it before its own.
+    SDL_zero(shown);
+    if (framebuffer != NULL) {
+        shown.target = LockShownTarget(framebuffer, &shown.width, &shown.height);
+        if (shown.target == NULL) {
+            UnlockShownTarget();
+        }
+    }
+
+    commands = BeginGpuCommands();
     if (commands == NULL) {
         SDL_Log("Can't present: %s", SDL_GetError());
-        return;
     }
-
-    if (!SDL_AcquireGPUSwapchainTexture(commands, f_Window, &swapchain, &width, &height) ||
+    else if (!SDL_AcquireGPUSwapchainTexture(commands, f_Window, &swapchain, &width, &height) ||
         swapchain == NULL) {
         // Minimized, or the GPU is behind: nothing to show this time
-        SDL_SubmitGPUCommandBuffer(commands);
-        return;
+        SubmitGpuCommands(commands);
+    }
+    else {
+        DrawScreen(commands, swapchain, width, height, framebuffer, &shown);
+        DrawShapeOverlay(commands, swapchain, width, height, shapes, shapeCount);
+        SubmitGpuCommands(commands);
     }
 
-    isTargetLocked = DrawScreen(commands, swapchain, width, height, framebuffer);
-    DrawShapeOverlay(commands, swapchain, width, height, shapes, shapeCount);
-    SDL_SubmitGPUCommandBuffer(commands);
-    if (isTargetLocked) {
+    if (shown.target != NULL) {
         UnlockShownTarget();
     }
 }

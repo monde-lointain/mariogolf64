@@ -19,6 +19,9 @@
 #define SKIPPED_EXIT_CODE 77
 // How far a channel may stray, in 5-bit steps
 #define CHANNEL_TOLERANCE 1
+// Long enough for a second thread, were it free to, to start recording
+#define RECORDING_WAIT_MS 5
+#define RECORDING_ROUNDS 20
 
 static u16 f_ColorImage[IMAGE_WIDTH * IMAGE_HEIGHT] __attribute__((aligned(64)));
 static u16 f_DepthImage[IMAGE_WIDTH * IMAGE_HEIGHT] __attribute__((aligned(64)));
@@ -429,6 +432,50 @@ static void TestTwoCycleAlphaCompare(void) {
     EXPECT_PIXEL(1, 1, 255, 0, 0);
 }
 
+static SDL_GPUDevice *f_Device;
+static SDL_AtomicInt f_HasSecondBegun;
+
+// The second thread: starts a command buffer, says so, then submits it
+static int SDLCALL BeginSecondCommands(void *unused) {
+    SDL_GPUCommandBuffer *commands = BeginGpuCommands();
+
+    (void)unused;
+    SDL_SetAtomicInt(&f_HasSecondBegun, 1);
+    return commands != NULL && SubmitGpuCommands(commands);
+}
+
+// While one thread records, another that starts a command buffer waits
+// until the first is submitted, with or without a fence
+static void TestOneThreadRecordsAtOnce(void) {
+    int round;
+
+    for (round = 0; round < RECORDING_ROUNDS; round++) {
+        SDL_GPUCommandBuffer *commands = BeginGpuCommands();
+        SDL_Thread *second;
+        int hasSecondSubmitted = 0;
+
+        EXPECT(commands != NULL);
+        SDL_SetAtomicInt(&f_HasSecondBegun, 0);
+        second = SDL_CreateThread(BeginSecondCommands, "second", NULL);
+        EXPECT(second != NULL);
+        SDL_Delay(RECORDING_WAIT_MS);
+        EXPECT(SDL_GetAtomicInt(&f_HasSecondBegun) == 0);
+        if ((round % 2) == 0) {
+            EXPECT(SubmitGpuCommands(commands));
+        }
+        else {
+            SDL_GPUFence *fence = SubmitGpuCommandsWithFence(commands);
+
+            EXPECT(fence != NULL);
+            SDL_ReleaseGPUFence(f_Device, fence);
+        }
+
+        SDL_WaitThread(second, &hasSecondSubmitted);
+        EXPECT(SDL_GetAtomicInt(&f_HasSecondBegun) == 1);
+        EXPECT(hasSecondSubmitted == 1);
+    }
+}
+
 static SDL_GPUDevice *CreateDevice(void) {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         // A machine with no display can still have a GPU
@@ -444,6 +491,7 @@ static SDL_GPUDevice *CreateDevice(void) {
 int main(void) {
     SDL_GPUDevice *device = CreateDevice();
 
+    f_Device = device;
     if (device == NULL) {
         printf("gpu_backend_test: skipped, with no GPU: %s\n", SDL_GetError());
         return SKIPPED_EXIT_CODE;
@@ -461,6 +509,7 @@ int main(void) {
     TestDepth();
     TestSecondCycleTexel();
     TestTwoCycleAlphaCompare();
+    TestOneThreadRecordsAtOnce();
     ShutdownRdp();
     ShutdownGpuBackend();
 

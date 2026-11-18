@@ -10,13 +10,14 @@
  *
  * Everything here runs on the game's graphics thread, apart from
  * presenting, which runs on the window's thread with its own command
- * buffer.
+ * buffer. The two threads record their command buffers one at a time.
  */
 
 #include "sdl_gpu_backend.h"
 
 #include <SDL3/SDL_assert.h>
 #include <SDL3/SDL_gpu.h>
+#include <SDL3/SDL_mutex.h>
 #include <SDL3/SDL_stdinc.h>
 
 #include "frame.h"
@@ -74,6 +75,8 @@ static struct {
     uint32_t stagingHeight;
     uint32_t noiseSeed;
     FramesInFlight framesInFlight;
+    // Held from the start of a command buffer until it's submitted
+    SDL_Mutex *recordingLock;
 } f_Gpu;
 
 static uint32_t GrownSize(uint32_t needed) {
@@ -410,6 +413,11 @@ void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale) {
     SDL_assert(device != NULL && scale >= 1);
     SDL_zero(f_Gpu);
     f_Gpu.device = device;
+    f_Gpu.recordingLock = SDL_CreateMutex();
+    if (f_Gpu.recordingLock == NULL) {
+        PcFatalError("Can't create the GPU's recording lock: %s", SDL_GetError());
+    }
+
     f_Gpu.scale = scale;
     f_Gpu.depthFormat = ChooseDepthFormat();
     f_Gpu.vertexShader = CreateGpuShader(
@@ -473,6 +481,7 @@ void ShutdownGpuBackend(void) {
     SDL_ReleaseGPUTransferBuffer(f_Gpu.device, f_Gpu.upload.buffer);
     SDL_ReleaseGPUTransferBuffer(f_Gpu.device, f_Gpu.pixelUpload.buffer);
     SDL_ReleaseGPUTransferBuffer(f_Gpu.device, f_Gpu.pixelDownload.buffer);
+    SDL_DestroyMutex(f_Gpu.recordingLock);
     SDL_zero(f_Gpu);
 }
 
@@ -516,8 +525,35 @@ void BackendDestroyTarget(GfxTarget *target) {
     SDL_free(target);
 }
 
+SDL_GPUCommandBuffer *BeginGpuCommands(void) {
+    SDL_GPUCommandBuffer *commands;
+
+    SDL_assert(f_Gpu.recordingLock != NULL);
+    SDL_LockMutex(f_Gpu.recordingLock);
+    commands = SDL_AcquireGPUCommandBuffer(f_Gpu.device);
+    if (commands == NULL) {
+        SDL_UnlockMutex(f_Gpu.recordingLock);
+    }
+
+    return commands;
+}
+
+bool SubmitGpuCommands(SDL_GPUCommandBuffer *commands) {
+    bool isSubmitted = SDL_SubmitGPUCommandBuffer(commands);
+
+    SDL_UnlockMutex(f_Gpu.recordingLock);
+    return isSubmitted;
+}
+
+SDL_GPUFence *SubmitGpuCommandsWithFence(SDL_GPUCommandBuffer *commands) {
+    SDL_GPUFence *fence = SDL_SubmitGPUCommandBufferAndAcquireFence(commands);
+
+    SDL_UnlockMutex(f_Gpu.recordingLock);
+    return fence;
+}
+
 static SDL_GPUCommandBuffer *AcquireCommandBuffer(void) {
-    SDL_GPUCommandBuffer *commands = SDL_AcquireGPUCommandBuffer(f_Gpu.device);
+    SDL_GPUCommandBuffer *commands = BeginGpuCommands();
 
     if (commands == NULL) {
         PcFatalError("Can't acquire a GPU command buffer: %s", SDL_GetError());
@@ -527,7 +563,7 @@ static SDL_GPUCommandBuffer *AcquireCommandBuffer(void) {
 }
 
 static void Submit(SDL_GPUCommandBuffer *commands) {
-    if (!SDL_SubmitGPUCommandBuffer(commands)) {
+    if (!SubmitGpuCommands(commands)) {
         PcFatalError("Can't submit GPU commands: %s", SDL_GetError());
     }
 }
@@ -536,7 +572,7 @@ static void Submit(SDL_GPUCommandBuffer *commands) {
 // are more than FRAMES_IN_FLIGHT, so that the CPU never runs far ahead of
 // the GPU. Its fence also covers the copies submitted before it.
 static void SubmitFrame(SDL_GPUCommandBuffer *commands) {
-    SDL_GPUFence *fence = SDL_SubmitGPUCommandBufferAndAcquireFence(commands);
+    SDL_GPUFence *fence = SubmitGpuCommandsWithFence(commands);
     SDL_GPUFence *oldest;
 
     if (fence == NULL) {
@@ -824,7 +860,7 @@ void BackendReadTarget(GfxTarget *target, uint32_t width, uint32_t height, uint3
     SDL_DownloadFromGPUTexture(copy, &region, &destination);
     SDL_EndGPUCopyPass(copy);
 
-    fence = SDL_SubmitGPUCommandBufferAndAcquireFence(commands);
+    fence = SubmitGpuCommandsWithFence(commands);
     if (fence == NULL) {
         PcFatalError("Can't submit a read of a target: %s", SDL_GetError());
     }
