@@ -75,6 +75,16 @@ static void TestNamesEveryButton(void) {
     FreeInputScript(script);
 }
 
+// The frames reach the largest that a 32-bit long holds, on every host
+static void TestLastFrame(void) {
+    InputScript *script = Parse("2147483647 A");
+    OSContPad pad;
+
+    EXPECT(script != NULL && FindScriptedPad(script, 2147483647L, &pad));
+    EXPECT(pad.button == A_BUTTON);
+    FreeInputScript(script);
+}
+
 // The stick's axes reach 80 either way, and no further
 static void TestStickLimits(void) {
     InputScript *script = Parse("1 stick=80,-80");
@@ -88,11 +98,13 @@ static void TestStickLimits(void) {
     EXPECT(FailsOnLine("1 stick=0,-81", 1));
 }
 
-// Bad lines: a frame that isn't a number, is negative or doesn't
-// increase, an unknown or misspelled word, and a malformed stick
+// Bad lines: a frame that isn't a number, is negative, is past what a
+// 32-bit long holds or doesn't increase, an unknown or misspelled word, and a malformed stick
 static void TestRejectsBadLines(void) {
     EXPECT(FailsOnLine("START", 1));
     EXPECT(FailsOnLine("-1 A", 1));
+    EXPECT(FailsOnLine("2147483648 A", 1));
+    EXPECT(FailsOnLine("4294967296 A", 1));
     EXPECT(FailsOnLine("12x A", 1));
     EXPECT(FailsOnLine("10 A\n10 B", 2));
     EXPECT(FailsOnLine("10 A\n\n9 B", 3));
@@ -138,6 +150,7 @@ int main(void) {
     TestHoldsEachLine();
     TestLeastScripts();
     TestNamesEveryButton();
+    TestLastFrame();
     TestStickLimits();
     TestRejectsBadLines();
     TestManyLines();

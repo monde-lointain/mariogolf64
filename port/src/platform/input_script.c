@@ -56,12 +56,19 @@ static bool FindButton(const char *name, u16 *button) {
     return false;
 }
 
-// Reads a whole word as a number within limits
+// Reads a whole word as a number within limits. It reads as a long long,
+// 64 bits on every host, where Windows' long has 32 and its strtol would
+// give a larger number as the largest long, within the limits.
 static bool ReadNumber(const char *word, long low, long high, long *value) {
     char *end;
+    long long number = SDL_strtoll(word, &end, 10);
 
-    *value = SDL_strtol(word, &end, 10);
-    return end != word && *end == '\0' && *value >= low && *value <= high;
+    if (end == word || *end != '\0' || number < low || number > high) {
+        return false;
+    }
+
+    *value = (long)number;
+    return true;
 }
 
 // Reads "X,Y" into the pad's stick
