@@ -21,4 +21,8 @@ int **GetOverlayAPointers(void);
 // Overlay B has no variables, only this
 int AddInOverlayB(int a, int b);
 
+// Overlay C's variables: one with an initial value and one cleared
+int *GetOverlayCValue(void);
+int *GetOverlayCZero(void);
+
 #endif

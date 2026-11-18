@@ -2,8 +2,9 @@
  * Tests port/cmake/OverlaySections.cmake: that the linker script it writes
  * gathers each overlay's variables between the bounds that
  * GetOverlaySections gives, on the platform's own linker and loader. The
- * program has two overlays (see overlay_sections/): A with variables of
- * every kind, and B with none, which some linkers would drop a section for.
+ * program has three overlays (see overlay_sections/): A with variables of
+ * every kind, B with none, which some linkers would drop a section for, and
+ * C, with variables that follow A's in the snapshot.
  * And that port/src/os/memory.c's snapshot puts an overlay's variables back
  * as they were linked, which it does by copying their sections whole.
  */
@@ -23,6 +24,7 @@
 enum {
     SEGMENT_A = 1,
     SEGMENT_B = 2,
+    SEGMENT_C = 3,
 };
 
 // A variable of the program's own, outside every overlay
@@ -56,9 +58,10 @@ static void TestListsEachOverlay(void) {
     int count;
 
     EXPECT(GetOverlaySections(&count) != NULL);
-    EXPECT(count == 2);
+    EXPECT(count == 3);
     EXPECT(FindSections(SEGMENT_A) != NULL);
     EXPECT(FindSections(SEGMENT_B) != NULL);
+    EXPECT(FindSections(SEGMENT_C) != NULL);
 }
 
 static void TestBoundsOverlayVariables(void) {
@@ -146,6 +149,19 @@ static void TestResetsOverlayVariables(void) {
     EXPECT(f_MainValue == 30);
 }
 
+// Resetting the overlay after A finds its own variables in the snapshot,
+// past A's
+static void TestResetsLaterOverlay(void) {
+    *GetOverlayCValue() = 110;
+    *GetOverlayCZero() = 12;
+    *GetOverlayAValue() = 71;
+
+    osPcResetSegment(SEGMENT_C);
+    EXPECT(*GetOverlayCValue() == 11);
+    EXPECT(*GetOverlayCZero() == 0);
+    EXPECT(*GetOverlayAValue() == 71);
+}
+
 int main(void) {
     TestListsEachOverlay();
     TestBoundsOverlayVariables();
@@ -153,5 +169,6 @@ int main(void) {
     TestGivesEmptyBoundsWithoutVariables();
     TestLoadsInitialValues();
     TestResetsOverlayVariables();
+    TestResetsLaterOverlay();
     return ReportTestResults("overlay_sections_test");
 }

@@ -194,10 +194,10 @@ add_test(NAME nested_functions_test
 )
 
 # The linker script that gathers overlays' variables, linked into a program
-# of its own with two overlays, in place of the doubles' empty table
+# of its own with three overlays, in place of the doubles' empty table
 include(OverlaySections)
 set(sections_overlays "")
-foreach(overlay IN ITEMS sections_a sections_b)
+foreach(overlay IN ITEMS sections_a sections_b sections_c)
     string(REPLACE "sections_" "" letter "${overlay}")
     add_library(mg64_${overlay} OBJECT overlay_sections/overlay_${letter}.c)
     target_link_libraries(mg64_${overlay} PRIVATE mg64_port_warnings)
@@ -206,7 +206,7 @@ endforeach()
 # A sanitizer's checks give the overlay without variables data of their own
 target_compile_options(mg64_sections_b PRIVATE -fno-sanitize=all)
 mg64_write_overlay_sections(
-    OVERLAYS sections_a sections_b
+    OVERLAYS sections_a sections_b sections_c
     LINKER_SCRIPT sections_linker_script
     SOURCE sections_source
 )
