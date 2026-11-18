@@ -116,6 +116,34 @@ static void TestFrameCountsStartAtOne(void) {
     EXPECT(options.frameLimit == 29478 && options.gameFrameLimit == 12345);
 }
 
+// A number must be the option's whole word: not empty, and with nothing
+// after its digits
+static void TestNumbersAreWholeWords(void) {
+    Options options;
+
+    EXPECT(!PARSE(&options, "--scale", "2x"));
+    EXPECT(!PARSE(&options, "--scale", ""));
+    EXPECT(!PARSE(&options, "--frames", "10abc"));
+    EXPECT(!PARSE(&options, "--frames", "1.5"));
+    EXPECT(!PARSE(&options, "--frames", ""));
+    EXPECT(!PARSE(&options, "--game-frames", "7 8"));
+    EXPECT(!PARSE(&options, "--game-frames", "x"));
+}
+
+// The counts end at the largest 32-bit number on every host, the largest
+// long where it is 32 bits wide, as on Windows
+static void TestFrameCountsEndAtLargestInt32(void) {
+    Options options;
+
+    EXPECT(PARSE(&options, "--frames", "2147483647"));
+    EXPECT(options.frameLimit == 2147483647L);
+    EXPECT(!PARSE(&options, "--frames", "2147483648"));
+    EXPECT(!PARSE(&options, "--frames", "99999999999999999999"));
+    EXPECT(PARSE(&options, "--game-frames", "2147483647"));
+    EXPECT(options.gameFrameLimit == 2147483647L);
+    EXPECT(!PARSE(&options, "--game-frames", "2147483648"));
+}
+
 // An unknown option, a second ROM or an option without its value is refused
 static void TestOtherWordsAreRefused(void) {
     Options options;
@@ -134,6 +162,8 @@ int main(void) {
     TestSwitchesSetTheirFields();
     TestScaleIsWithinItsLimits();
     TestFrameCountsStartAtOne();
+    TestNumbersAreWholeWords();
+    TestFrameCountsEndAtLargestInt32();
     TestOtherWordsAreRefused();
     return ReportTestResults("options_test");
 }
