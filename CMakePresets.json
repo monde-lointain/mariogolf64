@@ -80,6 +80,26 @@
             "toolchainFile": "${sourceDir}/port/cmake/toolchains/mingw-w64-x86_64.cmake"
         },
         {
+            "name": "macos",
+            "displayName": "macOS, with Apple's Clang",
+            "inherits": "pc",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            }
+        },
+        {
+            "name": "macos-sanitize",
+            "displayName": "macOS, an Apple Clang debug build with AddressSanitizer and UBSan, without KMC GCC's meanings",
+            "inherits": "macos",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "MG64_SANITIZERS": "address;undefined",
+                "MG64_KMC_SEMANTICS": "OFF"
+            }
+        },
+        {
             "name": "android-arm64",
             "displayName": "64-bit Arm Android, cross-compiled with the NDK",
             "inherits": "pc",
@@ -121,6 +141,14 @@
         {
             "name": "windows-mingw",
             "configurePreset": "windows-mingw"
+        },
+        {
+            "name": "macos",
+            "configurePreset": "macos"
+        },
+        {
+            "name": "macos-sanitize",
+            "configurePreset": "macos-sanitize"
         },
         {
             "name": "android-arm64",
@@ -191,6 +219,20 @@
             "environment": {
                 "WINEDEBUG": "-all"
             }
+        },
+        {
+            "name": "macos",
+            "inherits": "pc",
+            "configurePreset": "macos"
+        },
+        {
+            "name": "macos-sanitize",
+            "inherits": "pc",
+            "configurePreset": "macos-sanitize",
+            "environment": {
+                "ASAN_OPTIONS": "detect_stack_use_after_return=1",
+                "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+            }
         }
     ],
     "workflowPresets": [
@@ -248,6 +290,22 @@
                 {"type": "configure", "name": "windows-mingw"},
                 {"type": "build", "name": "windows-mingw"},
                 {"type": "test", "name": "windows-mingw"}
+            ]
+        },
+        {
+            "name": "macos",
+            "steps": [
+                {"type": "configure", "name": "macos"},
+                {"type": "build", "name": "macos"},
+                {"type": "test", "name": "macos"}
+            ]
+        },
+        {
+            "name": "macos-sanitize",
+            "steps": [
+                {"type": "configure", "name": "macos-sanitize"},
+                {"type": "build", "name": "macos-sanitize"},
+                {"type": "test", "name": "macos-sanitize"}
             ]
         }
     ]

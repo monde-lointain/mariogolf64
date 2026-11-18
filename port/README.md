@@ -48,11 +48,18 @@ finds it.
 | `linux-clang-tysan`    | An optimized Clang 23 build with TypeSanitizer, too     |
 | `linux-clang-tsan`     | An optimized Clang build with ThreadSanitizer           |
 | `windows-mingw`        | 64-bit Windows, cross-compiled with MinGW-w64           |
+| `macos`                | macOS, with Apple's Clang                               |
+| `macos-sanitize`       | The same, a debug build with AddressSanitizer and UBSan |
 | `android-arm64`        | 64-bit Arm Android, cross-compiled with the NDK         |
 
 Each preset builds into `build/pc/<preset>`. `cmake --workflow --preset
 <preset>` configures, builds and runs the tests in one step, as CI does;
 `windows-mingw` runs its tests through Wine where it is installed.
+
+`macos` and `macos-sanitize` appear only on a Mac, and have not yet run on
+one. They need Apple's Command Line Tools (`xcode-select --install`), CMake
+3.30 or newer, Ninja, Python 3.10 or newer, glslang and SPIRV-Cross. The
+shaders are translated to Metal's language for SDL_GPU there.
 
 `android-arm64` builds the app for 64-bit Arm phones and tablets with
 Android 10 or newer, the first to require Vulkan, which SDL_GPU draws with
