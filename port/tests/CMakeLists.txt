@@ -82,6 +82,12 @@ mg64_add_port_test(gu_test
     LIBRARIES mg64_gu
 )
 
+# The sine and cosine that the game and the gu transforms take
+mg64_add_port_test(gu_sine_test
+    SOURCES gu_sine_test.c
+    LIBRARIES mg64_gu
+)
+
 mg64_add_port_test(frame_test
     SOURCES frame_test.c
     LIBRARIES mg64_gfx SDL3::SDL3
