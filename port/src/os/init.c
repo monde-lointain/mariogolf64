@@ -50,8 +50,8 @@ void PcFatalError(const char *format, ...) {
     va_start(arguments, format);
     SDL_vsnprintf(message, sizeof(message), format, arguments);
     va_end(arguments);
-    fprintf(stderr, "mariogolf64: %s\n", message);
-    fflush(stderr);
+    // SDL's log reaches the standard error, or Android's log
+    SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "%s", message);
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Mario Golf", message, NULL);
     abort();
 }
