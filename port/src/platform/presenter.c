@@ -2,7 +2,8 @@
  * The presenter. Each retrace it blits one texture to the swapchain: the
  * renderer's target for the frame buffer, at the renderer's scale, or a
  * texture of the screen's size that it fills from memory when the CPU drew
- * the frame. The blit clears the bars in the same pass.
+ * the frame. The blit clears the bars in the same pass. Shapes such as the
+ * touch controls go over it, in a pass of their own.
  *
  * The presenter doesn't wait for the swapchain: when the GPU is still busy
  * with earlier frames, it skips the frame, so that the retraces, which
@@ -14,6 +15,7 @@
 #include "color_images.h"
 #include "rcp.h"
 #include "sdl_gpu_backend.h"
+#include "shape_overlay.h"
 
 #define SCREEN_PIXELS (SCREEN_WIDTH * SCREEN_HEIGHT)
 #define BYTES_PER_TEXEL 4
@@ -125,6 +127,11 @@ bool InitPresenter(SDL_GPUDevice *device, SDL_Window *window, SDL_GPUPresentMode
         return false;
     }
 
+    if (!InitShapeOverlay(device, SDL_GetGPUSwapchainTextureFormat(device, window))) {
+        ShutdownPresenter();
+        return false;
+    }
+
     return true;
 }
 
@@ -133,6 +140,7 @@ void ShutdownPresenter(void) {
         return;
     }
 
+    ShutdownShapeOverlay();
     SDL_ReleaseGPUTransferBuffer(f_Device, f_Upload);
     SDL_ReleaseGPUTexture(f_Device, f_MemoryScreen);
     SDL_ReleaseWindowFromGPUDevice(f_Device, f_Window);
@@ -206,33 +214,23 @@ static void ClearSwapchain(SDL_GPUCommandBuffer *commands, SDL_GPUTexture *swapc
     SDL_EndGPURenderPass(SDL_BeginGPURenderPass(commands, &target, 1, NULL));
 }
 
-void PresentFramebuffer(const void *framebuffer) {
-    SDL_GPUCommandBuffer *commands;
-    SDL_GPUTexture *swapchain = NULL;
-    Uint32 width = 0;
-    Uint32 height = 0;
+// Draws the frame buffer, or black for NULL, into the swapchain. Gives
+// whether it holds the shown target's lock, which must last until the
+// commands that read the target are submitted.
+static bool DrawScreen(
+    SDL_GPUCommandBuffer *commands,
+    SDL_GPUTexture *swapchain,
+    uint32_t width,
+    uint32_t height,
+    const void *framebuffer
+) {
     uint16_t targetWidth;
     uint16_t targetHeight;
     GfxTarget *target;
 
-    SDL_assert(f_Device != NULL);
-    commands = SDL_AcquireGPUCommandBuffer(f_Device);
-    if (commands == NULL) {
-        SDL_Log("Can't present: %s", SDL_GetError());
-        return;
-    }
-
-    if (!SDL_AcquireGPUSwapchainTexture(commands, f_Window, &swapchain, &width, &height) ||
-        swapchain == NULL) {
-        // Minimized, or the GPU is behind: nothing to show this time
-        SDL_SubmitGPUCommandBuffer(commands);
-        return;
-    }
-
     if (framebuffer == NULL) {
         ClearSwapchain(commands, swapchain);
-        SDL_SubmitGPUCommandBuffer(commands);
-        return;
+        return false;
     }
 
     // The lock keeps the renderer from releasing the target until the
@@ -250,15 +248,42 @@ void PresentFramebuffer(const void *framebuffer) {
             targetWidth * scale,
             targetHeight * scale
         );
-        SDL_SubmitGPUCommandBuffer(commands);
-        UnlockShownTarget();
-        return;
+        return true;
     }
 
     UnlockShownTarget();
     UploadMemoryScreen(commands, framebuffer);
     BlitScreen(commands, swapchain, width, height, f_MemoryScreen, SCREEN_WIDTH, SCREEN_HEIGHT);
+    return false;
+}
+
+void PresentFramebuffer(const void *framebuffer, const OverlayShape *shapes, int shapeCount) {
+    SDL_GPUCommandBuffer *commands;
+    SDL_GPUTexture *swapchain = NULL;
+    Uint32 width = 0;
+    Uint32 height = 0;
+    bool isTargetLocked;
+
+    SDL_assert(f_Device != NULL);
+    commands = SDL_AcquireGPUCommandBuffer(f_Device);
+    if (commands == NULL) {
+        SDL_Log("Can't present: %s", SDL_GetError());
+        return;
+    }
+
+    if (!SDL_AcquireGPUSwapchainTexture(commands, f_Window, &swapchain, &width, &height) ||
+        swapchain == NULL) {
+        // Minimized, or the GPU is behind: nothing to show this time
+        SDL_SubmitGPUCommandBuffer(commands);
+        return;
+    }
+
+    isTargetLocked = DrawScreen(commands, swapchain, width, height, framebuffer);
+    DrawShapeOverlay(commands, swapchain, width, height, shapes, shapeCount);
     SDL_SubmitGPUCommandBuffer(commands);
+    if (isTargetLocked) {
+        UnlockShownTarget();
+    }
 }
 
 bool SaveScreenImage(const void *framebuffer, const char *path) {

@@ -296,6 +296,16 @@ set_tests_properties(gpu_backend_test PROPERTIES
     ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0"
 )
 
+mg64_add_port_test(shape_overlay_test
+    SOURCES shape_overlay_test.c
+    LIBRARIES mg64_gpu mg64_gfx SDL3::SDL3
+)
+# As for gpu_backend_test
+set_tests_properties(shape_overlay_test PROPERTIES
+    SKIP_RETURN_CODE 77
+    ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0"
+)
+
 mg64_add_port_test(kmc_math_test
     SOURCES kmc_math_test.c
     LIBRARIES mg64_kmc

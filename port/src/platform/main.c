@@ -602,7 +602,7 @@ static void WaitWhileUnfocused(void) {
             HandleEvent(&event);
         }
 
-        PresentFramebuffer(f_ShownFramebuffer);
+        PresentFramebuffer(f_ShownFramebuffer, NULL, 0);
     }
 
     SDL_Log("Resumed at game frame %ld", CountGameFrames());
@@ -655,7 +655,7 @@ static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
         }
 
         if (f_Window != NULL) {
-            PresentFramebuffer(f_ShownFramebuffer);
+            PresentFramebuffer(f_ShownFramebuffer, NULL, 0);
         }
 
         frameCount++;

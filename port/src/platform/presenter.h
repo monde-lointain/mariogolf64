@@ -13,6 +13,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "port/overlay_shape.h"
+
 // The N64's screen, as the game sets the video interface
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
@@ -37,9 +39,10 @@ bool InitPresenter(SDL_GPUDevice *device, SDL_Window *window, SDL_GPUPresentMode
 void ShutdownPresenter(void);
 
 // Shows the frame buffer at framebuffer, an address in the N64's memory,
-// or black for NULL. What the renderer drew there comes from the GPU; what
-// the CPU drew comes from memory.
-void PresentFramebuffer(const void *framebuffer);
+// or black for NULL, with up to OVERLAY_MAX_SHAPES shapes over it. What the
+// renderer drew there comes from the GPU; what the CPU drew comes from
+// memory.
+void PresentFramebuffer(const void *framebuffer, const OverlayShape *shapes, int shapeCount);
 
 // Writes the frame buffer at framebuffer, as the N64 shows it, to a PNG
 // file at path, after bringing its memory up to date with the GPU's

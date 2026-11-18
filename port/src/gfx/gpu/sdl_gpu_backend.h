@@ -8,6 +8,7 @@
 
 #include <SDL3/SDL_gpu.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "frame.h"
@@ -23,6 +24,21 @@ void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale);
 
 // Waits for the GPU and releases everything that the backend created
 void ShutdownGpuBackend(void);
+
+// Creates a shader from code in both of the forms that the build makes,
+// SPIR-V and MSL, giving the form that the device takes. Stops the program
+// when it can't, as the shaders are the program's own.
+SDL_GPUShader *CreateGpuShader(
+    SDL_GPUDevice *device,
+    SDL_GPUShaderStage stage,
+    const unsigned char *spirv,
+    size_t spirvSize,
+    const unsigned char *msl,
+    size_t mslSize,
+    uint32_t samplerCount,
+    uint32_t storageBufferCount,
+    uint32_t uniformBufferCount
+);
 
 uint32_t GpuBackendScale(void);
 

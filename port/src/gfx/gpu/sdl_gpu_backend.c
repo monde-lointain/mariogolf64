@@ -136,7 +136,8 @@ static void ReserveTransfer(
     transfer->size = info.size;
 }
 
-static SDL_GPUShader *CreateShader(
+SDL_GPUShader *CreateGpuShader(
+    SDL_GPUDevice *device,
     SDL_GPUShaderStage stage,
     const unsigned char *spirv,
     size_t spirvSize,
@@ -146,7 +147,7 @@ static SDL_GPUShader *CreateShader(
     uint32_t storageBufferCount,
     uint32_t uniformBufferCount
 ) {
-    SDL_GPUShaderFormat formats = SDL_GetGPUShaderFormats(f_Gpu.device);
+    SDL_GPUShaderFormat formats = SDL_GetGPUShaderFormats(device);
     SDL_GPUShaderCreateInfo info;
     SDL_GPUShader *shader;
 
@@ -171,7 +172,7 @@ static SDL_GPUShader *CreateShader(
         PcFatalError("The GPU takes neither SPIR-V nor MSL shaders");
     }
 
-    shader = SDL_CreateGPUShader(f_Gpu.device, &info);
+    shader = SDL_CreateGPUShader(device, &info);
     if (shader == NULL) {
         PcFatalError("Can't create a shader: %s", SDL_GetError());
     }
@@ -411,7 +412,8 @@ void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale) {
     f_Gpu.device = device;
     f_Gpu.scale = scale;
     f_Gpu.depthFormat = ChooseDepthFormat();
-    f_Gpu.vertexShader = CreateShader(
+    f_Gpu.vertexShader = CreateGpuShader(
+        device,
         SDL_GPU_SHADERSTAGE_VERTEX,
         rdp_vert_spirv,
         sizeof(rdp_vert_spirv),
@@ -421,7 +423,8 @@ void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale) {
         0,
         0
     );
-    f_Gpu.fragmentShader = CreateShader(
+    f_Gpu.fragmentShader = CreateGpuShader(
+        device,
         SDL_GPU_SHADERSTAGE_FRAGMENT,
         rdp_frag_spirv,
         sizeof(rdp_frag_spirv),
