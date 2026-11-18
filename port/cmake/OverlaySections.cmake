@@ -2,8 +2,8 @@
 #
 # On the N64 an overlay's variables took their initial values each time the
 # overlay was read from ROM, and its bss was cleared. The port links every
-# overlay into the program, so it keeps a copy of each overlay's initialized
-# variables from start-up and copies it back when the overlay loads.
+# overlay into the program, so it keeps a copy of each overlay's variables
+# from start-up, data and bss, and copies it back when the overlay loads.
 #
 # A linker script gathers the .data and .bss input sections of each overlay's
 # object files, which CMake writes under the directory of the overlay's

@@ -14,7 +14,8 @@ void PcSendInterruptMessage(OSMesgQueue *queue, OSMesg message);
 // Readies the scheduler's lock and the threads' slots
 void PcInitScheduler(void);
 
-// Takes a snapshot of every overlay's variables, for osPcResetSegment
+// Takes a snapshot of every overlay's variables, data and bss, as they are
+// now, for osPcResetSegment
 void PcInitSegments(void);
 
 // Starts the clock that osGetTime and osGetCount read

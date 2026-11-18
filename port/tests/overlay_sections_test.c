@@ -123,13 +123,16 @@ void PcFatalError(const char *format, ...) {
     exit(ReportTestResults("overlay_sections_test"));
 }
 
-// Resetting an overlay's segment gives back its variables' linked values,
-// and leaves the program's own alone. Its copies span the whole of each
-// section, the padding that a sanitizer puts between variables included.
+// Resetting an overlay's segment gives back its variables' values when
+// the snapshot was taken: those linked, and any that start-up wrote before
+// it, as it fills arrays from the ROM, in data or bss; and leaves the
+// program's own alone. Its copies span the whole of each section, the
+// padding that a sanitizer puts between variables included.
 static void TestResetsOverlayVariables(void) {
     int **pointers = GetOverlayAPointers();
     int i;
 
+    *GetOverlayAOtherZero() = 9;
     PcInitSegments();
     *GetOverlayAValue() = 70;
     *GetOverlayAZero() = 5;
@@ -142,7 +145,7 @@ static void TestResetsOverlayVariables(void) {
     osPcResetSegment(SEGMENT_A);
     EXPECT(*GetOverlayAValue() == 7);
     EXPECT(*GetOverlayAZero() == 0);
-    EXPECT(*GetOverlayAOtherZero() == 0);
+    EXPECT(*GetOverlayAOtherZero() == 9);
     for (i = 0; i < SECTIONS_A_POINTER_COUNT; i++) {
         EXPECT(pointers[i] == GetOverlayAValue());
     }

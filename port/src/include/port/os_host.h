@@ -27,7 +27,9 @@ extern "C" {
 #endif
 
 /* Readies the threads, the overlays' snapshots and the clock. Call once,
-   before any other routine of libultra's. */
+   before any other routine of libultra's. The snapshots keep the overlays'
+   variables as they are then, to put back when the game loads an overlay
+   again. */
 void PcInitOs(void);
 
 /* Gives libultra the cartridge's ROM, in the N64's byte order. The memory

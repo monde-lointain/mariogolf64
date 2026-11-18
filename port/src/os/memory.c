@@ -193,9 +193,9 @@ void osWritebackDCacheAll(void) {
 }
 
 #ifdef IS_ADDRESS_SANITIZED
-// Copies and clears a section's bytes unchecked, padding included. Byte by
-// byte, as memcpy and memset are checked whatever their caller; neither
-// GCC nor Clang makes these loops calls of them, at any level.
+// Copies a section's bytes unchecked, padding included. Byte by byte, as
+// memcpy is checked whatever its caller; neither GCC nor Clang makes this
+// loop a call of it, at any level.
 __attribute__((no_sanitize_address)) static void CopySectionBytes(
     void *to,
     const void *from,
@@ -209,22 +209,9 @@ __attribute__((no_sanitize_address)) static void CopySectionBytes(
         out[i] = in[i];
     }
 }
-
-__attribute__((no_sanitize_address)) static void ClearSectionBytes(void *to, size_t size) {
-    u8 *out = to;
-    size_t i;
-
-    for (i = 0; i < size; i++) {
-        out[i] = 0;
-    }
-}
 #else
 static void CopySectionBytes(void *to, const void *from, size_t size) {
     SDL_memcpy(to, from, size);
-}
-
-static void ClearSectionBytes(void *to, size_t size) {
-    SDL_memset(to, 0, size);
 }
 #endif
 
@@ -234,6 +221,18 @@ static size_t MeasureSection(const unsigned char *start, const unsigned char *en
     return (uintptr_t)end - (uintptr_t)start;
 }
 
+static size_t MeasureDataSection(const OverlaySections *sections) {
+    return MeasureSection(sections->dataStart, sections->dataEnd);
+}
+
+static size_t MeasureBssSection(const OverlaySections *sections) {
+    return MeasureSection(sections->bssStart, sections->bssEnd);
+}
+
+// The snapshot holds the bss as well as the data: what start-up has
+// written into either before it, such as the arrays that the port fills
+// from the ROM, a compiler may put in either, where the arrays' initializers
+// hold only zeros
 void PcInitSegments(void) {
     size_t snapshotSize = 0;
     u8 *cursor;
@@ -242,7 +241,7 @@ void PcInitSegments(void) {
     f_OverlaySections = GetOverlaySections(&f_OverlayCount);
     for (i = 0; i < f_OverlayCount; i++) {
         snapshotSize +=
-            MeasureSection(f_OverlaySections[i].dataStart, f_OverlaySections[i].dataEnd);
+            MeasureDataSection(&f_OverlaySections[i]) + MeasureBssSection(&f_OverlaySections[i]);
     }
 
     f_OverlaySnapshots = SDL_malloc(snapshotSize + 1);
@@ -252,10 +251,12 @@ void PcInitSegments(void) {
 
     cursor = f_OverlaySnapshots;
     for (i = 0; i < f_OverlayCount; i++) {
-        size_t size = MeasureSection(f_OverlaySections[i].dataStart, f_OverlaySections[i].dataEnd);
+        const OverlaySections *sections = &f_OverlaySections[i];
 
-        CopySectionBytes(cursor, f_OverlaySections[i].dataStart, size);
-        cursor += size;
+        CopySectionBytes(cursor, sections->dataStart, MeasureDataSection(sections));
+        cursor += MeasureDataSection(sections);
+        CopySectionBytes(cursor, sections->bssStart, MeasureBssSection(sections));
+        cursor += MeasureBssSection(sections);
     }
 }
 
@@ -265,18 +266,18 @@ void osPcResetSegment(u32 segmentNumber) {
 
     for (i = 0; i < f_OverlayCount; i++) {
         const OverlaySections *sections = &f_OverlaySections[i];
-        size_t size = MeasureSection(sections->dataStart, sections->dataEnd);
 
         if (sections->segmentNumber == segmentNumber) {
-            CopySectionBytes(sections->dataStart, snapshot, size);
-            ClearSectionBytes(
+            CopySectionBytes(sections->dataStart, snapshot, MeasureDataSection(sections));
+            CopySectionBytes(
                 sections->bssStart,
-                MeasureSection(sections->bssStart, sections->bssEnd)
+                snapshot + MeasureDataSection(sections),
+                MeasureBssSection(sections)
             );
             return;
         }
 
-        snapshot += size;
+        snapshot += MeasureDataSection(sections) + MeasureBssSection(sections);
     }
 
     // The main segment and the hole editor are never reloaded, and have no

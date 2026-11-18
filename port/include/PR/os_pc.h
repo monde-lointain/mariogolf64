@@ -107,7 +107,8 @@ void osPcFillRomArray(const OSPcRomArray *array);
 
 /* Puts the variables of the code segment with the number that
    rom_file_offsets.h gives it back to their values at start-up, as reading
-   the segment from ROM and clearing its bss did on the N64. */
+   the segment from ROM and clearing its bss did on the N64: those that
+   PcInitOs found, the arrays filled from the ROM before it included. */
 void osPcResetSegment(u32 segmentNumber);
 
 /* Blocks the calling thread until the next interrupt, for a thread that
