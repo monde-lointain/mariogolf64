@@ -99,3 +99,13 @@ bool ParseOptions(int argc, char **argv, Options *options) {
 
     return true;
 }
+
+bool HasRunReachedLimit(const Options *options, long frames, long gameFrames) {
+    bool isLimited;
+
+    SDL_assert(options != NULL && frames >= 0 && gameFrames >= 0);
+    isLimited = options->frameLimit != 0 || options->gameFrameLimit != 0;
+    return !isLimited ||
+        (options->frameLimit != 0 && frames >= options->frameLimit) ||
+        (options->gameFrameLimit != 0 && gameFrames >= options->gameFrameLimit);
+}

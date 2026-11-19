@@ -175,7 +175,11 @@ from (its CRC-32), and a replay must start from the same save:
     mariogolf64 --headless --game-frames N --save session-start.sra \
         --input-script session.txt baserom.us.z64
 
-where N is the frame that the recording ends at, as its last line says.
+where N is the frame that the recording ends at, as its last line says. A
+run that stops short of N, as when the window is closed or the host ends the
+program, logs how far it got and exits with a failure, so that a script can
+tell it from a finished replay; its `--screenshot` shows the frame it
+stopped at.
 
 `--record` won't overwrite a file, so a recording can't be lost to a
 reused name. Each line is written as soon as it is made, so a session cut

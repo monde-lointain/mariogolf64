@@ -12,10 +12,12 @@
  * --headless draws without a window, and --frames ends the program after N
  * retraces, writing the screen it last showed to the --screenshot file, for
  * tests and machines without a display. --game-frames ends it once the game
- * has run N frames, as a script counts them. Headless, each retrace waits for
- * the game to finish with the last, and the next follows at once, with no
- * wait for the clock. --input-script plays the first
- * controller from a script, as input_script.h describes, and --record
+ * has run N frames, as a script counts them. Headless, each retrace waits
+ * for the game to finish with the last, and the next follows at once, with
+ * no wait for the clock. A run that stops short of its limit, as when the
+ * window closes or the host ends the program, still writes the screen but
+ * fails, since the screen isn't the one asked for. --input-script plays the
+ * first controller from a script, as input_script.h describes, and --record
  * writes what the game reads from it as such a script, to a new file.
  *
  * Without a ROM, it looks for the settings' ROM, or else baserom.us.z64
@@ -599,8 +601,9 @@ static void WaitWhileUnfocused(void) {
 // that the game sees every one, wherever the host is slow, and the next
 // follows at once: what the game computes doesn't depend on the clock, which
 // only its debugging meters read. A run in real time logs its stalls, and
-// pauses, if the settings say so, while the window is unfocused.
-static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
+// pauses, if the settings say so, while the window is unfocused. Returns the
+// retraces raised.
+static long RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
     const Uint64 period = SDL_NS_PER_SECOND / RETRACES_PER_SECOND;
     Uint64 next = SDL_GetTicksNS();
     long frameCount = 0;
@@ -659,6 +662,8 @@ static void RunRetraces(long frameLimit, long gameFrameLimit, bool isLockstep) {
             next = now;
         }
     }
+
+    return frameCount;
 }
 
 // --- Ending ---
@@ -843,6 +848,9 @@ int main(int argc, char *argv[]) {
     uint8_t *rom;
     size_t romSize = 0;
     bool isRomMissing;
+    long frames;
+    long gameFrames;
+    bool isFinished;
 
     if (!ParseOptions(argc, argv, &options) || !LoadInputScript(options.inputScriptPath, &script)) {
         return EXIT_FAILURE;
@@ -910,8 +918,18 @@ int main(int argc, char *argv[]) {
     FillGameRomArrays();
     PcInitOs();
     PcBootNuSystem();
-    RunRetraces(options.frameLimit, options.gameFrameLimit, options.isHeadless);
-    if (!ShutDown(options.screenshotPath)) {
+    frames = RunRetraces(options.frameLimit, options.gameFrameLimit, options.isHeadless);
+    gameFrames = CountGameFrames();
+    isFinished = HasRunReachedLimit(&options, frames, gameFrames);
+    if (!isFinished) {
+        SDL_Log(
+            "Stopped short of the limit, after %ld retraces and %ld game frames",
+            frames,
+            gameFrames
+        );
+    }
+
+    if (!ShutDown(options.screenshotPath) || !isFinished) {
         FreeInputScript(script);
         SDL_free(rom);
         return EXIT_FAILURE;

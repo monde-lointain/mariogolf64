@@ -27,4 +27,10 @@ typedef struct Options {
 // and gives false
 bool ParseOptions(int argc, char **argv, Options *options);
 
+// Whether a run that stopped after the given retraces and game frames had
+// reached a limit that the options set. Without a limit, any stop ends the
+// run as it should; with one, a stop before it, as when the player closes
+// the window or the host ends the program, leaves the run unfinished.
+bool HasRunReachedLimit(const Options *options, long frames, long gameFrames);
+
 #endif

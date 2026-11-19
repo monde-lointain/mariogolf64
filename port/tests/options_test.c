@@ -156,6 +156,42 @@ static void TestOtherWordsAreRefused(void) {
     EXPECT(!PARSE(&options, "--scale"));
 }
 
+// Without limits
+static const Options f_Unlimited = {0};
+// With a limit on the retraces, or on the game's frames
+static const Options f_TenRetraces = {.frameLimit = 10};
+static const Options f_HundredGameFrames = {.gameFrameLimit = 100};
+// With both, of which the first reached ends the run
+static const Options f_BothLimits = {.frameLimit = 10, .gameFrameLimit = 100};
+
+// A run without limits ends whenever it stops, even before its first frame
+static void TestUnlimitedRunEndsAnywhere(void) {
+    EXPECT(HasRunReachedLimit(&f_Unlimited, 0, 0));
+    EXPECT(HasRunReachedLimit(&f_Unlimited, 1, 0));
+    EXPECT(HasRunReachedLimit(&f_Unlimited, 2147483647L, 2147483647L));
+}
+
+// A limited run is finished at its limit and past it, not one frame short,
+// whatever the other count, which no limit governs
+static void TestLimitedRunEndsAtItsLimit(void) {
+    EXPECT(!HasRunReachedLimit(&f_TenRetraces, 0, 0));
+    EXPECT(!HasRunReachedLimit(&f_TenRetraces, 9, 2147483647L));
+    EXPECT(HasRunReachedLimit(&f_TenRetraces, 10, 0));
+    EXPECT(HasRunReachedLimit(&f_TenRetraces, 11, 0));
+    EXPECT(!HasRunReachedLimit(&f_HundredGameFrames, 0, 0));
+    EXPECT(!HasRunReachedLimit(&f_HundredGameFrames, 2147483647L, 99));
+    EXPECT(HasRunReachedLimit(&f_HundredGameFrames, 0, 100));
+    EXPECT(HasRunReachedLimit(&f_HundredGameFrames, 0, 101));
+}
+
+// With both limits, reaching either finishes the run
+static void TestEitherLimitEndsRun(void) {
+    EXPECT(!HasRunReachedLimit(&f_BothLimits, 9, 99));
+    EXPECT(HasRunReachedLimit(&f_BothLimits, 10, 99));
+    EXPECT(HasRunReachedLimit(&f_BothLimits, 9, 100));
+    EXPECT(HasRunReachedLimit(&f_BothLimits, 10, 100));
+}
+
 int main(void) {
     TestNoOptionsLeavesAllUnset();
     TestPathsGoToTheirFields();
@@ -165,5 +201,8 @@ int main(void) {
     TestNumbersAreWholeWords();
     TestFrameCountsEndAtLargestInt32();
     TestOtherWordsAreRefused();
+    TestUnlimitedRunEndsAnywhere();
+    TestLimitedRunEndsAtItsLimit();
+    TestEitherLimitEndsRun();
     return ReportTestResults("options_test");
 }
