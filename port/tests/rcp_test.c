@@ -522,6 +522,110 @@ static void TestRomOrderList(void) {
     EXPECT(f_Gpu.vertices[2].color == 0xFFFF0000);
 }
 
+// Puts the big-endian words of a G_DL that pushes ADDRESS at WORDS
+static void PutRomCall(uint32_t *words, uint32_t address) {
+    words[0] = SDL_Swap32BE((uint32_t)G_DL << 24);
+    words[1] = SDL_Swap32BE(address);
+}
+
+static void PutRomEnd(uint32_t *words) {
+    words[0] = SDL_Swap32BE((uint32_t)G_ENDDL << 24);
+    words[1] = 0;
+}
+
+// A table of the game's own lists, as the game branches to by an entry's
+// offset: two lists that set the primitive color's green, each ended
+static Gfx f_GameTable[] = {
+    gsDPSetPrimColor(0, 0, 0, 64, 0, 255),
+    gsSPEndDisplayList(),
+    gsDPSetPrimColor(0, 0, 0, 255, 0, 255),
+    gsSPEndDisplayList(),
+};
+
+// Runs LIST through segment 6, with TABLE as segment 9, and returns the
+// green of the primitive color that the frame's one triangle has; 0 unless
+// a list sets it
+static float RunListAndReadGreen(const void *list, uintptr_t table) {
+    Gfx *gfx = BeginTriangles(f_DisplayList, G_SHADE | G_SHADING_SMOOTH);
+
+    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
+    gSPSegment(gfx++, 6, list);
+    gSPSegment(gfx++, 9, table);
+    gSPDisplayList(gfx++, osPcSegmentAddress(6, 0));
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    ResetCapture();
+    RunList(gfx);
+    return f_Gpu.materialCount == 0 ? -1.0f : f_Gpu.materials[0].primitiveColor[1];
+}
+
+// A list from ROM reaches another from ROM in bytes as they are
+static void TestRomListCallsIntoRomList(void) {
+    static uint8_t romData[48];
+    uint32_t *words = (uint32_t *)romData;
+
+    PutRomCall(&words[0], 0x06000000 + 24);
+    PutRomEnd(&words[2]);
+    words[6] = SDL_Swap32BE((uint32_t)G_SETPRIMCOLOR << 24);
+    words[7] = SDL_Swap32BE(0x0080FFFF);
+    PutRomEnd(&words[8]);
+    osPcMarkRomOrder(romData, sizeof(romData));
+    EXPECT_NEAR(RunListAndReadGreen(romData, (uintptr_t)f_GameTable), 128.0 / 255.0, 1e-6);
+    osPcUnmarkRomOrder(romData, sizeof(romData));
+}
+
+// A list from ROM in data whose first bytes the host has written, as a
+// model's frame data starts with joint matrices that the host computes, is
+// still read in bytes as it is
+static void TestRomListCallsPastHostWrittenData(void) {
+    static uint8_t romData[16];
+    static uint8_t frameData[48];
+    uint32_t *words = (uint32_t *)romData;
+    uint32_t *frameWords = (uint32_t *)frameData;
+
+    PutRomCall(&words[0], 0x09000000 + 32);
+    PutRomEnd(&words[2]);
+    frameWords[8] = SDL_Swap32BE((uint32_t)G_SETPRIMCOLOR << 24);
+    frameWords[9] = SDL_Swap32BE(0x0060FFFF);
+    PutRomEnd(&frameWords[10]);
+    osPcMarkRomOrder(romData, sizeof(romData));
+    osPcMarkRomOrder(frameData + 32, sizeof(frameData) - 32);
+    EXPECT_NEAR(RunListAndReadGreen(romData, (uintptr_t)frameData), 96.0 / 255.0, 1e-6);
+    osPcUnmarkRomOrder(frameData + 32, sizeof(frameData) - 32);
+    osPcUnmarkRomOrder(romData, sizeof(romData));
+}
+
+// A list from ROM reaches the host's list in RDRAM, through a segment of an
+// N64 address, in bytes as they are
+static void TestRomListCallsIntoRdram(void) {
+    static uint8_t romData[16];
+    uint32_t *words = (uint32_t *)romData;
+    Gfx *rdramList = (Gfx *)&osPcRdram[0x100000 + 32];
+
+    PutRomCall(&words[0], 0x09000000 + 32);
+    PutRomEnd(&words[2]);
+    gDPSetPrimColor(&rdramList[0], 0, 0, 0, 200, 0, 255);
+    gSPEndDisplayList(&rdramList[1]);
+    osPcMarkRomOrder(romData, sizeof(romData));
+    EXPECT_NEAR(RunListAndReadGreen(romData, 0x100000), 200.0 / 255.0, 1e-6);
+    osPcUnmarkRomOrder(romData, sizeof(romData));
+    SDL_memset(rdramList, 0, 2 * sizeof(Gfx));
+}
+
+// A list of the game's own counts its way into another in the host's
+// bytes, by a segment's address of either kind
+static void TestGameListCallsIntoGameList(void) {
+    Gfx caller[2];
+
+    gSPDisplayList(&caller[0], osPcSegmentAddress(9, 2 * sizeof(Gfx)));
+    gSPEndDisplayList(&caller[1]);
+    EXPECT_NEAR(RunListAndReadGreen(caller, (uintptr_t)f_GameTable), 1.0, 1e-6);
+
+    gSPDisplayList(&caller[0], 0x09000000 + (2 * sizeof(Gfx)));
+    EXPECT_NEAR(RunListAndReadGreen(caller, (uintptr_t)f_GameTable), 1.0, 1e-6);
+}
+
 // A texture loaded from a color image that the GPU has drawn reads what it
 // drew, which comes back to memory first
 static void TestTextureFromDrawnImage(void) {
@@ -792,6 +896,10 @@ int main(void) {
     TestDepthClear();
     TestN64Addresses();
     TestRomOrderList();
+    TestRomListCallsIntoRomList();
+    TestRomListCallsPastHostWrittenData();
+    TestRomListCallsIntoRdram();
+    TestGameListCallsIntoGameList();
     TestTextureFromDrawnImage();
     TestShownTarget();
     TestCpuWritesOutliveDrawing();
