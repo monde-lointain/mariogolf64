@@ -68,7 +68,7 @@ Recorded in `09-get-character.txt`.
 
 | ID   | Note                                                                       | Status |
 |------|----------------------------------------------------------------------------|--------|
-| 09-1 | Luigi's button triangles are surrounded by black                           | open |
+| 09-1 | Luigi's button triangles are surrounded by black                           | fixed in 4ba29360 |
 
 ## Session 10: Toad Highlands tournament
 
