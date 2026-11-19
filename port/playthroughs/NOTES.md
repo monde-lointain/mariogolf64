@@ -32,7 +32,7 @@ Recorded in `02-first-holes.txt`.
 | 02-5 | Preview line is solid instead of dashed                                    | open |
 | 02-6 | Yardage text seems to clip/wrap improperly                                 | open |
 | 02-7 | Gleam off ball while flying looks black                                    | open |
-| 02-8 | When zoomed in on cup during putting, unnatural green block appears from below it | open |
+| 02-8 | When zoomed in on cup during putting, unnatural green block appears from below it | fixed in 28baab46 |
 
 Every note from sessions 01 and 02 was seen again in sessions 03 to 11.
 Sessions 05, 06, 08 and 11 brought no new notes.
@@ -77,7 +77,7 @@ Recorded in `10-toad-tournament.txt`.
 | ID   | Note                                                                       | Status |
 |------|----------------------------------------------------------------------------|--------|
 | 10-1 | Froze briefly at the scorecard between hole 9 and hole 10                  | open; not seen in replays, headless or windowed, with the save and a recording on the SSD: the save there (frame 12451) takes about 3 ms, as at 11 other holes, and no game frame waits more than 3 retraces, nor any retrace more than 12 ms on the RTX 4070; play in a window now logs each stall with its game frame (see `port/README.md`) |
-| 10-2 | A blue background appears around the spinning Toad trophy                  | open |
+| 10-2 | A blue background appears around the spinning Toad trophy                  | fixed in 28baab46 |
 
 ## Found by replays and comparisons
 
