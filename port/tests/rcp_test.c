@@ -433,6 +433,82 @@ static void TestAlphaCompareModes(void) {
     );
 }
 
+// Draws the triangle under a render mode whose blender's first cycle takes
+// first times its factor plus second times its own; the second cycle, which
+// one-cycle mode leaves out, passes the color
+static Gfx *DrawBlendedTriangle(Gfx *gfx, u32 flags, u32 first, u32 a, u32 second, u32 b) {
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(
+        gfx++,
+        flags | GBL_c1(first, a, second, b),
+        GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
+    );
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    return gfx;
+}
+
+static uint32_t BlendShapeOf(int materialIndex) {
+    return (f_Gpu.materials[materialIndex].modes & MATERIAL_BLEND_MASK) >> MATERIAL_BLEND_SHIFT;
+}
+
+static uint16_t BlendingKey(DestinationFactor destination) {
+    return (uint16_t)(PIPELINE_BLEND | (destination << PIPELINE_DESTINATION_SHIFT));
+}
+
+// Forced blending shapes the GPU's blending by where memory's color enters
+// the blender's last cycle, and memory's factor; without it, the first
+// color passes. One-cycle mode blends with the first cycle's settings.
+static void TestBlendShapes(void) {
+    Gfx *gfx = BeginTriangles(f_DisplayList, G_SHADE | G_SHADING_SMOOTH);
+
+    ResetCapture();
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gfx = DrawBlendedTriangle(gfx, 0, G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM);
+    gfx = DrawBlendedTriangle(gfx, FORCE_BL, G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA);
+    gfx = DrawBlendedTriangle(gfx, FORCE_BL, G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_IN, G_BL_1MA);
+    gfx = DrawBlendedTriangle(gfx, FORCE_BL, G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM);
+    gfx = DrawBlendedTriangle(gfx, FORCE_BL, G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_FOG, G_BL_1MA);
+    gfx = DrawBlendedTriangle(gfx, FORCE_BL, G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM);
+    gfx = DrawBlendedTriangle(gfx, FORCE_BL, G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_0);
+    // Two cycles blend with memory in the second alone
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPSetRenderMode(
+        gfx++,
+        GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1),
+        FORCE_BL | GBL_c2(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM)
+    );
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(
+        gfx++,
+        GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1),
+        FORCE_BL | GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA)
+    );
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+
+    EXPECT(f_Gpu.materialCount == 9 && f_Gpu.drawCount == 9);
+    EXPECT(BlendShapeOf(0) == BLEND_FIRST_ONLY);
+    EXPECT(f_Gpu.draws[0].pipelineKey == 0);
+    EXPECT(BlendShapeOf(1) == BLEND_FIRST_OVER_MEMORY);
+    EXPECT(f_Gpu.draws[1].pipelineKey == BlendingKey(DESTINATION_ONE_MINUS_SOURCE_ALPHA));
+    EXPECT(BlendShapeOf(2) == BLEND_SECOND_OVER_MEMORY);
+    EXPECT(f_Gpu.draws[2].pipelineKey == BlendingKey(DESTINATION_SOURCE_ALPHA));
+    EXPECT(BlendShapeOf(3) == BLEND_KEEP_MEMORY);
+    EXPECT(f_Gpu.draws[3].pipelineKey == BlendingKey(DESTINATION_ONE));
+    EXPECT(BlendShapeOf(4) == BLEND_NO_MEMORY);
+    EXPECT(f_Gpu.draws[4].pipelineKey == 0);
+    EXPECT(BlendShapeOf(5) == BLEND_FIRST_OVER_MEMORY);
+    EXPECT(f_Gpu.draws[5].pipelineKey == BlendingKey(DESTINATION_DESTINATION_ALPHA));
+    EXPECT(BlendShapeOf(6) == BLEND_FIRST_OVER_MEMORY);
+    EXPECT(f_Gpu.draws[6].pipelineKey == BlendingKey(DESTINATION_ZERO));
+    EXPECT(BlendShapeOf(7) == BLEND_KEEP_MEMORY);
+    EXPECT(f_Gpu.draws[7].pipelineKey == BlendingKey(DESTINATION_ONE));
+    EXPECT(BlendShapeOf(8) == BLEND_FIRST_OVER_MEMORY);
+    EXPECT(f_Gpu.draws[8].pipelineKey == BlendingKey(DESTINATION_ONE_MINUS_SOURCE_ALPHA));
+}
+
 // A fill of the depth image clears it for the next pass that tests depth,
 // rather than drawing
 static void TestDepthClear(void) {
@@ -929,6 +1005,7 @@ int main(void) {
     TestClipRatio();
     TestTexelsOfEachCycle();
     TestAlphaCompareModes();
+    TestBlendShapes();
     TestDepthClear();
     TestN64Addresses();
     TestRomOrderList();
