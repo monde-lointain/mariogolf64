@@ -16,7 +16,7 @@ Recorded in `01-opening-and-menus.txt` and `01b-options.txt`.
 | 01-1 | The lines coming from Luigi's head in the intro look black instead of white | fixed in 02188566 |
 | 01-2 | Peach's gem has a black diamond shape around it                            | fixed in 4ba29360 |
 | 01-3 | There's clipping around the logo while the club is spinning                | open |
-| 01-4 | Occasionally garbage will appear on the black background between menu transitions | open |
+| 01-4 | Occasionally garbage will appear on the black background between menu transitions | fixed in 242e0406 |
 | 01-5 | Game crashes when "Erase Data" is selected                                 | fixed in 3619e6f6; replaying the session also needed 0e8e49d1, b6c9b679 and 925280c9 |
 
 ## Session 02: first holes
