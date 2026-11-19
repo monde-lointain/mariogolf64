@@ -166,6 +166,65 @@ static void TestFillRectangle(void) {
     EXPECT_NEAR(f_Gpu.vertices[5].position[1], -1.0, 1e-6);
 }
 
+// The vertices stored for a list of one texture rectangle in the cycle type,
+// its corners in quarter pixels
+static uint32_t CountTextureRectangleVertices(
+    u32 cycleType,
+    int left,
+    int top,
+    int right,
+    int bottom
+) {
+    Gfx *gfx = BeginList(f_DisplayList);
+
+    ResetCapture();
+    gDPSetCycleType(gfx++, cycleType);
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gSPTextureRectangle(gfx++, left, top, right, bottom, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    RunList(gfx);
+    return f_Gpu.vertexCount;
+}
+
+// The vertices stored for a list of one fill, its corners in pixels
+static uint32_t CountFillRectangleVertices(int left, int top, int right, int bottom) {
+    Gfx *gfx = BeginList(f_DisplayList);
+
+    ResetCapture();
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPFillRectangle(gfx++, left, top, right, bottom);
+    RunList(gfx);
+    return f_Gpu.vertexCount;
+}
+
+// The RDP draws a rectangle's rows from its top down to its bottom and each
+// from its left to its right, so one whose top isn't above its bottom, or
+// left left of its right, draws nothing
+static void TestReversedRectanglesDrawNothing(void) {
+    // A top that wraps in its 12 bits past the bottom, as a ball's or
+    // shadow's does when it's projected about an image's height below the
+    // screen
+    EXPECT(CountTextureRectangleVertices(G_CYC_1CYCLE, 4 << 2, -4, 8 << 2, 4 << 2) == 0);
+    // A quarter pixel above the bottom, at it and below it
+    EXPECT(CountTextureRectangleVertices(G_CYC_1CYCLE, 4 << 2, (4 << 2) - 1, 8 << 2, 4 << 2) == 6);
+    EXPECT(CountTextureRectangleVertices(G_CYC_1CYCLE, 4 << 2, 4 << 2, 8 << 2, 4 << 2) == 0);
+    EXPECT(CountTextureRectangleVertices(G_CYC_1CYCLE, 4 << 2, (4 << 2) + 1, 8 << 2, 4 << 2) == 0);
+    // And the same of the right
+    EXPECT(CountTextureRectangleVertices(G_CYC_1CYCLE, (8 << 2) - 1, 0, 8 << 2, 4 << 2) == 6);
+    EXPECT(CountTextureRectangleVertices(G_CYC_1CYCLE, 8 << 2, 0, 8 << 2, 4 << 2) == 0);
+    EXPECT(CountTextureRectangleVertices(G_CYC_1CYCLE, (8 << 2) + 1, 0, 8 << 2, 4 << 2) == 0);
+    // Fills and copies cover whole pixels, the bottom row and right column
+    // too, so a row or column past them is the first that draws nothing
+    EXPECT(CountFillRectangleVertices(0, 4, 7, 4) == 6);
+    EXPECT(CountFillRectangleVertices(0, 5, 7, 4) == 0);
+    EXPECT(CountFillRectangleVertices(7, 0, 7, 4) == 6);
+    EXPECT(CountFillRectangleVertices(8, 0, 7, 4) == 0);
+    EXPECT(CountTextureRectangleVertices(G_CYC_COPY, 0, 4 << 2, 7 << 2, 4 << 2) == 6);
+    EXPECT(CountTextureRectangleVertices(G_CYC_COPY, 0, 5 << 2, 7 << 2, 4 << 2) == 0);
+    EXPECT(CountTextureRectangleVertices(G_CYC_COPY, 7 << 2, 0, 7 << 2, 4 << 2) == 6);
+    EXPECT(CountTextureRectangleVertices(G_CYC_COPY, 8 << 2, 0, 7 << 2, 4 << 2) == 0);
+}
+
 static Vp f_Viewport = {{
     {IMAGE_WIDTH * 2, IMAGE_HEIGHT * 2, G_MAXZ / 2, 0},
     {IMAGE_WIDTH * 2, IMAGE_HEIGHT * 2, G_MAXZ / 2, 0},
@@ -1143,6 +1202,7 @@ int main(void) {
     InitRdp();
     InitRsp();
     TestFillRectangle();
+    TestReversedRectanglesDrawNothing();
     TestTriangleTransform();
     TestNearPlaneClipping();
     TestFogBehindEye();

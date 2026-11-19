@@ -1002,6 +1002,15 @@ typedef struct Rectangle {
     float texCoords[3][2];
 } Rectangle;
 
+// Whether the RDP draws nothing of the rectangle: it draws rows from the top
+// down to the bottom, and each from the left to the right, so nothing where
+// either pair is the wrong way round. A ball or shadow projected about a
+// whole image's height below the screen leaves its rectangle so, its edges
+// wrapped in their 12 bits to either side of 0.
+static bool IsRectangleEmpty(const Rectangle *rectangle) {
+    return rectangle->right <= rectangle->left || rectangle->bottom <= rectangle->top;
+}
+
 static void StoreRectangle(
     const Rectangle *rectangle,
     int tileIndex,
@@ -1017,6 +1026,10 @@ static void StoreRectangle(
     float yScale;
     float depth;
     int i;
+
+    if (IsRectangleEmpty(rectangle)) {
+        return;
+    }
 
     vertices =
         BeginPrimitive(rectangle->bottom, 6, tileIndex, kind, usesPrimitiveDepth, &materialIndex);
