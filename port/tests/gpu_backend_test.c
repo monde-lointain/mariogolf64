@@ -29,6 +29,9 @@ static Gfx f_DisplayList[DISPLAY_LIST_LENGTH];
 static Mtx f_Identity;
 // Scales the vertices' coordinates of 128 down to 1
 static Mtx f_Shrink;
+// Scales x and y as f_Shrink does, and makes w 1 more than z / 64, so that
+// a vertex's distance sets how far it is
+static Mtx f_Recede;
 static Vp f_Viewport = {{
     {IMAGE_WIDTH * 2, IMAGE_HEIGHT * 2, G_MAXZ / 2, 0},
     {IMAGE_WIDTH * 2, IMAGE_HEIGHT * 2, G_MAXZ / 2, 0},
@@ -48,6 +51,34 @@ static void MakeDiagonal(Mtx *matrix, int32_t scale) {
     words[8] = fraction << 16;
     words[10] = fraction;
     words[13] = fraction << 16;
+}
+
+// A matrix of these elements, in the RSP's split 16.16 form: the whole
+// halves of the elements in order, then their fractions
+static void MakeMatrix(Mtx *matrix, const float elements[4][4]) {
+    uint32_t *words = (uint32_t *)matrix->m;
+    int i;
+
+    SDL_zerop(matrix);
+    for (i = 0; i < 16; i++) {
+        uint32_t fixed = (uint32_t)(int32_t)SDL_lroundf(elements[i / 4][i % 4] * 65536.0f);
+        int shift = (i % 2) == 0 ? 16 : 0;
+
+        words[i / 2] |= (fixed >> 16) << shift;
+        words[8 + (i / 2)] |= (fixed & 0xFFFF) << shift;
+    }
+}
+
+// A vertex that f_Recede puts at x and y over the image, from -1 to 1, at
+// distance w, with texture coordinate s in texels
+static void PlaceVertex(Vtx *vertex, float x, float y, float w, int s) {
+    SDL_zerop(vertex);
+    vertex->v.ob[0] = (s16)(x * w * 128.0f);
+    vertex->v.ob[1] = (s16)(y * w * 128.0f);
+    vertex->v.ob[2] = (s16)((w - 1.0f) * 64.0f);
+    vertex->v.tc[0] = (s16)(s << 5);
+    vertex->v.cn[1] = 0xFF;
+    vertex->v.cn[3] = 0xFF;
 }
 
 static Gfx *BeginList(Gfx *gfx) {
@@ -432,6 +463,61 @@ static void TestTwoCycleAlphaCompare(void) {
     EXPECT_PIXEL(1, 1, 255, 0, 0);
 }
 
+// Texture coordinates change across a receding surface as the RDP finds
+// them, by perspective: as their ratios to w, divided by w's reciprocal
+static void TestPerspectiveTexture(void) {
+    static u16 texture[32 * 2] __attribute__((aligned(8)));
+    static Vtx vertices[4];
+    Gfx *gfx = BeginList(f_DisplayList);
+    int i;
+
+    // Texels 0 to 9 are yellow, 10 to 19 blue and the rest white
+    for (i = 0; i < 32 * 2; i++) {
+        int s = i % 32;
+
+        texture[i] = s < 10 ? GPACK_RGBA5551(255, 255, 0, 1) :
+            s < 20          ? GPACK_RGBA5551(0, 0, 255, 1) :
+                              GPACK_RGBA5551(255, 255, 255, 1);
+    }
+
+    gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 0, 1));
+    gfx = BeginTriangles(gfx, G_SHADE | G_SHADING_SMOOTH, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gSPMatrix(gfx++, &f_Recede, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, 1, 0, 0, 0, TEXEL0, 0, 0, 0, 1);
+    gDPLoadTextureBlock(
+        gfx++,
+        texture,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        32,
+        2,
+        0,
+        G_TX_CLAMP,
+        G_TX_CLAMP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    // The left edge is at distance 1 and the right at 4, with s from 0 to 32
+    PlaceVertex(&vertices[0], -1.0f, -1.0f, 1.0f, 0);
+    PlaceVertex(&vertices[1], 1.0f, -1.0f, 4.0f, 32);
+    PlaceVertex(&vertices[2], 1.0f, 1.0f, 4.0f, 32);
+    PlaceVertex(&vertices[3], -1.0f, 1.0f, 1.0f, 0);
+    gSPVertex(gfx++, vertices, 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    RunList(gfx);
+
+    // A fraction f of the way across, s is 8f / (1 - 0.75f): 6.4 halfway,
+    // where without perspective it would be 16, and 13.7 at three
+    // quarters, rather than 24
+    EXPECT_PIXEL(IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2, 255, 255, 0);
+    EXPECT_PIXEL(IMAGE_WIDTH * 3 / 4, IMAGE_HEIGHT / 2, 0, 0, 255);
+}
+
 static SDL_GPUDevice *f_Device;
 static SDL_AtomicInt f_HasSecondBegun;
 
@@ -499,6 +585,15 @@ int main(void) {
 
     MakeDiagonal(&f_Identity, 0x10000);
     MakeDiagonal(&f_Shrink, 0x10000 / 128);
+    MakeMatrix(
+        &f_Recede,
+        (const float[4][4]) {
+            {1.0f / 128.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 1.0f / 128.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 1.0f / 64.0f},
+            {0.0f, 0.0f, 0.0f, 1.0f},
+        }
+    );
     InitGpuBackend(device, 2);
     InitRdp();
     InitRsp();
@@ -509,6 +604,7 @@ int main(void) {
     TestDepth();
     TestSecondCycleTexel();
     TestTwoCycleAlphaCompare();
+    TestPerspectiveTexture();
     TestOneThreadRecordsAtOnce();
     ShutdownRdp();
     ShutdownGpuBackend();
