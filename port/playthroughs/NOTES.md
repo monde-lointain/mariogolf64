@@ -85,7 +85,7 @@ Not noted while playing, but seen in the port's own runs.
 
 | ID  | Note                                                                       | Status |
 |-----|----------------------------------------------------------------------------|--------|
-| R-1 | A black wedge in the sky, top right, only in windowed runs; the RSP's sky triangles match a headless run's | open |
+| R-1 | A black wedge in the sky, top right, only in windowed runs; the RSP's sky triangles match a headless run's | fixed in 869026f5; it showed only on lavapipe, headless or not |
 | R-2 | Frames differ from ares by up to a few thousand pixels: slightly darker overall, dither, two-texture blends, the tree line, the HUD and shadows | open |
 | R-3 | AddressSanitizer stopped session 02's replay on choosing the mode: a preset's empty bet slot read before the stakes table | fixed in 6062eae5 |
 | R-4 | On the RTX 4070 each new blend state's pipeline takes about 59 ms to create, on first use, so the first screens hitch four times | open |
