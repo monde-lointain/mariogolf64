@@ -285,8 +285,10 @@ static uint64_t HashTmemRange(uint64_t hash, const Tmem *tmem, uint32_t start, u
     return hash;
 }
 
-static bool IsColorIndexed(const RdpTile *tile, PaletteType paletteType) {
-    return tile->format == G_IM_FMT_CI && paletteType != PALETTE_NONE;
+// With the TLUT on, the RDP looks up the texels of every format but YUV in
+// the palette, as it does CI's, whatever the tile says they are
+static bool ReadsPalette(const RdpTile *tile, PaletteType paletteType) {
+    return tile->format != G_IM_FMT_YUV && paletteType != PALETTE_NONE;
 }
 
 TileTexture DescribeTileTexture(const Tmem *tmem, int tileIndex, PaletteType paletteType) {
@@ -327,7 +329,7 @@ TileTexture DescribeTileTexture(const Tmem *tmem, int tileIndex, PaletteType pal
         );
     }
 
-    if (IsColorIndexed(tile, paletteType)) {
+    if (ReadsPalette(tile, paletteType)) {
         if (tile->size == G_IM_SIZ_4b) {
             hash = HashTmemRange(
                 hash,
@@ -420,12 +422,20 @@ static uint32_t ExpandTexel(
 ) {
     uint32_t intensity;
 
-    if (IsColorIndexed(tile, paletteType)) {
-        if (tile->size == G_IM_SIZ_4b) {
-            bits |= (uint32_t)tile->palette << 4;
+    // A 4-bit texel indexes its tile's palette of sixteen, an 8-bit one all
+    // 256 entries, and a wider one the entries by its first 16 bits' top
+    // byte
+    if (ReadsPalette(tile, paletteType)) {
+        switch (tile->size) {
+            case G_IM_SIZ_4b:
+                return LookUpPalette(tmem, bits | ((uint32_t)tile->palette << 4), paletteType);
+            case G_IM_SIZ_8b:
+                return LookUpPalette(tmem, bits, paletteType);
+            case G_IM_SIZ_16b:
+                return LookUpPalette(tmem, bits >> 8, paletteType);
+            default:
+                return LookUpPalette(tmem, bits >> 24, paletteType);
         }
-
-        return LookUpPalette(tmem, bits & 0xFF, paletteType);
     }
 
     switch (tile->size) {

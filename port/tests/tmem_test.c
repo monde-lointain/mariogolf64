@@ -173,6 +173,86 @@ static void TestColorIndexPalettes(void) {
     EXPECT(decoded[1] == RGBA8(0x11, 0x11, 0x11, 0x11));
 }
 
+// Puts a palette of 256 entries in TMEM's upper half, entry i being a red
+// of i's top five bits and a blue of its low five, opaque when i is odd
+static void FillLargePalette(void) {
+    int i;
+
+    for (i = 0; i < 256; i++) {
+        uint16_t entry = (uint16_t)(((i >> 3) << 11) | ((i & 0x1F) << 1) | (i & 1));
+
+        f_Tmem.bytes[TMEM_PALETTE_START + (i * 8)] = (uint8_t)(entry >> 8);
+        f_Tmem.bytes[TMEM_PALETTE_START + (i * 8) + 1] = (uint8_t)entry;
+    }
+}
+
+static uint32_t PaletteEntry(int index) {
+    return ExpandRgba16((uint16_t)(((index >> 3) << 11) | ((index & 0x1F) << 1) | (index & 1)));
+}
+
+// With the TLUT on, the RDP looks texels of every format but YUV up in the
+// palette, as it does CI's: a 4-bit texel with its tile's palette above
+// it, an 8-bit texel as it is, and a 16- or 32-bit texel by its top byte
+static void TestPaletteServesEveryFormat(void) {
+    static const uint8_t texels[8] = {0x00, 0xFF, 0x3C, 0x81, 0x7E, 0x01, 0x80, 0xC3};
+    uint32_t decoded[16];
+    TileTexture texture;
+    TileTexture other;
+
+    memset(&f_Tmem, 0, sizeof(f_Tmem));
+    memcpy(f_Tmem.bytes, texels, sizeof(texels));
+    FillLargePalette();
+
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, 1, 0);
+    SetTileSize(G_TX_RENDERTILE, 8, 1);
+    texture = DescribeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16);
+    DecodeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16, &texture, decoded);
+    EXPECT(decoded[0] == PaletteEntry(0x00) && decoded[1] == PaletteEntry(0xFF));
+    EXPECT(decoded[2] == PaletteEntry(0x3C) && decoded[7] == PaletteEntry(0xC3));
+
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_IA, G_IM_SIZ_8b, 1, 0);
+    texture = DescribeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16);
+    DecodeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16, &texture, decoded);
+    EXPECT(decoded[3] == PaletteEntry(0x81));
+
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_IA, G_IM_SIZ_4b, 1, 0);
+    f_Tmem.tiles[G_TX_RENDERTILE].palette = 15;
+    SetTileSize(G_TX_RENDERTILE, 16, 1);
+    texture = DescribeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16);
+    DecodeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16, &texture, decoded);
+    EXPECT(decoded[0] == PaletteEntry(0xF0) && decoded[3] == PaletteEntry(0xFF));
+    EXPECT(decoded[5] == PaletteEntry(0xFC));
+
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, 0);
+    SetTileSize(G_TX_RENDERTILE, 4, 1);
+    texture = DescribeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16);
+    DecodeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16, &texture, decoded);
+    EXPECT(decoded[0] == PaletteEntry(0x00) && decoded[1] == PaletteEntry(0x3C));
+    EXPECT(decoded[3] == PaletteEntry(0x80));
+
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, 0);
+    SetTileSize(G_TX_RENDERTILE, 4, 1);
+    texture = DescribeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16);
+    DecodeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16, &texture, decoded);
+    EXPECT(decoded[0] == PaletteEntry(0x00) && decoded[1] == PaletteEntry(0x3C));
+    EXPECT(decoded[3] == PaletteEntry(0x80));
+
+    // YUV's texels aren't looked up
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_YUV, G_IM_SIZ_16b, 1, 0);
+    SetTileSize(G_TX_RENDERTILE, 4, 1);
+    texture = DescribeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16);
+    DecodeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16, &texture, decoded);
+    EXPECT(decoded[1] == RGBA8(0x3C, 0x3C, 0x3C, 0x3C));
+
+    // An I8 tile's texture follows the palette's entries
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, 1, 0);
+    SetTileSize(G_TX_RENDERTILE, 8, 1);
+    texture = DescribeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16);
+    f_Tmem.bytes[TMEM_PALETTE_START + (0xC3 * 8)] ^= 0x80;
+    other = DescribeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_RGBA16);
+    EXPECT(other.key != texture.key);
+}
+
 // Host memory holds 16- and 32-bit texels and palette entries as host
 // words, but 8-bit texels as the N64 does, though the game loads both as
 // 16-bit blocks
@@ -317,6 +397,7 @@ int main(void) {
     TestLoadTileRowEndsAndWrap();
     TestLoadTileNotesEachWordsOrder();
     TestColorIndexPalettes();
+    TestPaletteServesEveryFormat();
     TestHostOrderLoads();
     TestIntensityFormats();
     TestRgba16Expansion();
