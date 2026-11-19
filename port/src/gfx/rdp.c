@@ -703,7 +703,9 @@ static void BuildMaterial(int tileIndex, MaterialKind kind) {
         material->combine[3] = selectors;
     }
 
-    if (Field(high, G_MDSFT_TEXTFILT, 2) != 0) {
+    // Only the combiner's texels pass through the filter; the copy cycle
+    // copies them as they are
+    if (Field(high, G_MDSFT_TEXTFILT, 2) != 0 && kind == MATERIAL_KIND_COMBINED) {
         material->modes |= MATERIAL_FILTERED;
     }
 

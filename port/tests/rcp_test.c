@@ -478,6 +478,22 @@ static void TestTextureFilterModes(void) {
     EXPECT(!IsMaterialFiltered(6));
 }
 
+// The copy cycle copies texels as they are, whatever the filter, as the
+// RDP's copy pipeline has none: filtered, a copied picture's cut-out edges
+// mixed in its transparent texels' colors once drawn larger
+static void TestCopyCycleNeverFilters(void) {
+    Gfx *gfx = BeginList(f_DisplayList);
+
+    ResetCapture();
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gfx = DrawFilteredRectangle(gfx, G_CYC_COPY, G_TF_BILERP);
+    gfx = DrawFilteredRectangle(gfx, G_CYC_COPY, G_TF_AVERAGE);
+    RunList(gfx);
+
+    EXPECT(f_Gpu.materialCount == 1);
+    EXPECT(!IsMaterialFiltered(0));
+}
+
 // Draws the triangle under a render mode whose blender's first cycle takes
 // first times its factor plus second times its own; the second cycle, which
 // one-cycle mode leaves out, passes the color
@@ -1134,6 +1150,7 @@ int main(void) {
     TestTexelsOfEachCycle();
     TestAlphaCompareModes();
     TestTextureFilterModes();
+    TestCopyCycleNeverFilters();
     TestBlendShapes();
     TestUnforcedBlenderPassesFirstColor();
     TestDepthClear();
