@@ -657,8 +657,16 @@ static void BuildBlender(GfxMaterial *material, MaterialKind kind) {
     BlendShape shape = BLEND_FIRST_ONLY;
 
     material->blender = BlenderCycle(low, 0) | ((uint32_t)BlenderCycle(low, 1) << 8);
-    if (kind == MATERIAL_KIND_COMBINED && (low & FORCE_BL)) {
-        shape = ShapeBlender(BlenderCycle(low, isTwoCycle ? 1 : 0));
+    if (kind == MATERIAL_KIND_COMBINED) {
+        uint8_t lastCycle = BlenderCycle(low, isTwoCycle ? 1 : 0);
+
+        if (low & FORCE_BL) {
+            shape = ShapeBlender(lastCycle);
+        }
+        else if ((lastCycle & 3) == BLENDER_COLOR_MEMORY) {
+            // Unblended, the last cycle gives its first color as it is
+            shape = BLEND_KEEP_MEMORY;
+        }
     }
 
     if (kind != MATERIAL_KIND_COMBINED) {

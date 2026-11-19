@@ -509,6 +509,50 @@ static void TestBlendShapes(void) {
     EXPECT(f_Gpu.draws[8].pipelineKey == BlendingKey(DESTINATION_ONE_MINUS_SOURCE_ALPHA));
 }
 
+// Without forced blending the blender's last cycle gives its first color
+// as it is, which may be memory's: such a draw writes depth alone
+static void TestUnforcedBlenderPassesFirstColor(void) {
+    Gfx *gfx = f_DisplayList;
+
+    ResetCapture();
+    gDPSetDepthImage(gfx++, f_DepthImage);
+    gfx = BeginTriangles(gfx, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gfx =
+        DrawBlendedTriangle(gfx, Z_CMP | Z_UPD, G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM);
+    gfx = DrawBlendedTriangle(gfx, 0, G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPSetRenderMode(
+        gfx++,
+        GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1),
+        GBL_c2(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM)
+    );
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(
+        gfx++,
+        GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
+        GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
+    );
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+
+    EXPECT(f_Gpu.materialCount == 4 && f_Gpu.drawCount == 4);
+    EXPECT(BlendShapeOf(0) == BLEND_KEEP_MEMORY);
+    EXPECT(
+        f_Gpu.draws[0].pipelineKey ==
+        (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE | BlendingKey(DESTINATION_ONE))
+    );
+    EXPECT(BlendShapeOf(1) == BLEND_FIRST_ONLY);
+    EXPECT(f_Gpu.draws[1].pipelineKey == 0);
+    // In two cycles, the second cycle's first color passes
+    EXPECT(BlendShapeOf(2) == BLEND_KEEP_MEMORY);
+    EXPECT(f_Gpu.draws[2].pipelineKey == BlendingKey(DESTINATION_ONE));
+    EXPECT(BlendShapeOf(3) == BLEND_FIRST_ONLY);
+    EXPECT(f_Gpu.draws[3].pipelineKey == 0);
+}
+
 // A fill of the depth image clears it for the next pass that tests depth,
 // rather than drawing
 static void TestDepthClear(void) {
@@ -1006,6 +1050,7 @@ int main(void) {
     TestTexelsOfEachCycle();
     TestAlphaCompareModes();
     TestBlendShapes();
+    TestUnforcedBlenderPassesFirstColor();
     TestDepthClear();
     TestN64Addresses();
     TestRomOrderList();
