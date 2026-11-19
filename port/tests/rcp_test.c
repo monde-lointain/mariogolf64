@@ -433,6 +433,51 @@ static void TestAlphaCompareModes(void) {
     );
 }
 
+// Draws a textured rectangle in the given cycle type with the given filter,
+// as a material of its own
+static Gfx *DrawFilteredRectangle(Gfx *gfx, u32 cycleType, u32 filter) {
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, cycleType);
+    gDPSetTextureFilter(gfx++, filter);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gSPTextureRectangle(gfx++, 0, 0, 7 << 2, 7 << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    return gfx;
+}
+
+// Whether the material at this index samples its tiles with a filter
+static bool IsMaterialFiltered(int materialIndex) {
+    return (f_Gpu.materials[materialIndex].modes & MATERIAL_FILTERED) != 0;
+}
+
+// The combiner's texels are filtered under bilerp and averaging, in either
+// cycle type that combines, and point sampled otherwise
+static void TestTextureFilterModes(void) {
+    Gfx *gfx = BeginList(f_DisplayList);
+
+    ResetCapture();
+    gfx = DrawFilteredRectangle(gfx, G_CYC_1CYCLE, G_TF_POINT);
+    gfx = DrawFilteredRectangle(gfx, G_CYC_1CYCLE, G_TF_BILERP);
+    gfx = DrawFilteredRectangle(gfx, G_CYC_1CYCLE, G_TF_POINT);
+    gfx = DrawFilteredRectangle(gfx, G_CYC_1CYCLE, G_TF_AVERAGE);
+    gfx = DrawFilteredRectangle(gfx, G_CYC_2CYCLE, G_TF_POINT);
+    gfx = DrawFilteredRectangle(gfx, G_CYC_2CYCLE, G_TF_BILERP);
+    // The palette's mode, beside the filter's, leaves it alone
+    gDPSetTextureLUT(gfx++, G_TT_IA16);
+    gfx = DrawFilteredRectangle(gfx, G_CYC_1CYCLE, G_TF_POINT);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    RunList(gfx);
+
+    // Each differs from the last, so none is merged with it
+    EXPECT(f_Gpu.materialCount == 7);
+    EXPECT(!IsMaterialFiltered(0));
+    EXPECT(IsMaterialFiltered(1));
+    EXPECT(!IsMaterialFiltered(2));
+    EXPECT(IsMaterialFiltered(3));
+    EXPECT(!IsMaterialFiltered(4));
+    EXPECT(IsMaterialFiltered(5));
+    EXPECT(!IsMaterialFiltered(6));
+}
+
 // Draws the triangle under a render mode whose blender's first cycle takes
 // first times its factor plus second times its own; the second cycle, which
 // one-cycle mode leaves out, passes the color
@@ -1088,6 +1133,7 @@ int main(void) {
     TestClipRatio();
     TestTexelsOfEachCycle();
     TestAlphaCompareModes();
+    TestTextureFilterModes();
     TestBlendShapes();
     TestUnforcedBlenderPassesFirstColor();
     TestDepthClear();
