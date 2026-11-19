@@ -542,6 +542,11 @@ static Gfx f_GameTable[] = {
     gsSPEndDisplayList(),
 };
 
+// A table longer than 64 KB in the N64's commands, of ended lists, whose
+// last sets green
+#define LARGE_TABLE_LENGTH 8194
+static Gfx f_LargeTable[LARGE_TABLE_LENGTH];
+
 // Runs LIST through segment 6, with TABLE as segment 9, and returns the
 // green of the primitive color that the frame's one triangle has; 0 unless
 // a list sets it
@@ -558,6 +563,37 @@ static float RunListAndReadGreen(const void *list, uintptr_t table) {
     ResetCapture();
     RunList(gfx);
     return f_Gpu.materialCount == 0 ? -1.0f : f_Gpu.materials[0].primitiveColor[1];
+}
+
+// A list from ROM counts its way into a list of the game's own in the
+// N64's commands, of 8 bytes, as the game's tables of branches expect
+static void TestRomListCallsIntoGameList(void) {
+    static uint8_t romData[16];
+    uint32_t *words = (uint32_t *)romData;
+    uintptr_t table = (uintptr_t)f_GameTable;
+    int i;
+
+    osPcMarkRomOrder(romData, sizeof(romData));
+    // The table's second list, at the N64's 16 bytes in
+    PutRomCall(&words[0], 0x09000000 + (2 * 8));
+    PutRomEnd(&words[2]);
+    EXPECT_NEAR(RunListAndReadGreen(romData, table), 1.0, 1e-6);
+
+    PutRomCall(&words[0], 0x09000000);
+    EXPECT_NEAR(RunListAndReadGreen(romData, table), 64.0 / 255.0, 1e-6);
+
+    // The RSP's DMA drops an offset's low 3 bits
+    PutRomCall(&words[0], 0x09000000 + (2 * 8) + 4);
+    EXPECT_NEAR(RunListAndReadGreen(romData, table), 1.0, 1e-6);
+
+    // The segment's 24 bits of offset count
+    for (i = 0; i < LARGE_TABLE_LENGTH; i++) {
+        gSPEndDisplayList(&f_LargeTable[i]);
+    }
+    gDPSetPrimColor(&f_LargeTable[LARGE_TABLE_LENGTH - 2], 0, 0, 0, 32, 0, 255);
+    PutRomCall(&words[0], 0x09000000 + ((LARGE_TABLE_LENGTH - 2) * 8));
+    EXPECT_NEAR(RunListAndReadGreen(romData, (uintptr_t)f_LargeTable), 32.0 / 255.0, 1e-6);
+    osPcUnmarkRomOrder(romData, sizeof(romData));
 }
 
 // A list from ROM reaches another from ROM in bytes as they are
@@ -897,6 +933,7 @@ int main(void) {
     TestN64Addresses();
     TestRomOrderList();
     TestRomListCallsIntoRomList();
+    TestRomListCallsIntoGameList();
     TestRomListCallsPastHostWrittenData();
     TestRomListCallsIntoRdram();
     TestGameListCallsIntoGameList();

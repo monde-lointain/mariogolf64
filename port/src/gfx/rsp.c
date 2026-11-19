@@ -847,6 +847,24 @@ static DisplayList OpenDisplayList(const void *address) {
     return list;
 }
 
+// Opens the list that CALLER calls at ADDRESS. A list from ROM counts its
+// way into a list of the game's own in the N64's commands, of 8 bytes,
+// though each of the game's own is a Gfx: so the models from ROM reach the
+// game's tables of branches by an entry's offset. The RSP's DMA drops the
+// low 3 bits of the offset.
+static DisplayList OpenCalledList(const DisplayList *caller, uintptr_t address) {
+    const void *target = ResolveRcpAddress(&f_Rsp.memory, address);
+    uintptr_t base = f_Rsp.memory.segments[(address >> 24) & 0xF];
+    uint32_t commandIndex;
+
+    if (!caller->isRomOrder || osPcIsRomOrder(target) || (base >> 32) == 0) {
+        return OpenDisplayList(target);
+    }
+
+    commandIndex = ((uint32_t)address & 0x00FFFFFF) / ROM_COMMAND_SIZE;
+    return OpenDisplayList((const Gfx *)base + commandIndex);
+}
+
 void RunRspTask(const Gfx *displayList) {
     DisplayList stack[DISPLAY_LIST_DEPTH];
     int depth = 0;
@@ -905,7 +923,7 @@ void RunRspTask(const Gfx *displayList) {
                 MoveMemory(w0, ResolveRcpAddress(&f_Rsp.memory, w1));
                 break;
             case G_DL: {
-                DisplayList next = OpenDisplayList(ResolveRcpAddress(&f_Rsp.memory, w1));
+                DisplayList next = OpenCalledList(list, w1);
 
                 if (((w0 >> 16) & 0xFF) == G_DL_NOPUSH) {
                     *list = next;
