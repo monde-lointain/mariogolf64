@@ -89,3 +89,4 @@ Not noted while playing, but seen in the port's own runs.
 | R-2 | Frames differ from ares by up to a few thousand pixels: slightly darker overall, dither, two-texture blends, the tree line, the HUD and shadows | open |
 | R-3 | AddressSanitizer stopped session 02's replay on choosing the mode: a preset's empty bet slot read before the stakes table | fixed in 6062eae5 |
 | R-4 | On the RTX 4070 each new blend state's pipeline takes about 59 ms to create, on first use, so the first screens hitch four times | open |
+| R-5 | At 6x, the intro's distant skyline, a copied strip, was filtered: lighter where it met the sky, and its edges' alpha short of one | fixed in 0845c9ed; at 320x240 it moved the tree line closer to ares's, so R-2's tree line remains |
