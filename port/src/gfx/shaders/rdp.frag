@@ -85,7 +85,8 @@ layout(set = 3, binding = 0) uniform FrameConstants {
     uint noiseSeed;
 };
 
-layout(location = 0) in vec2 inTexCoord;
+// The texture coordinates over w, then w's reciprocal
+layout(location = 0) noperspective in vec3 inTexCoord;
 layout(location = 1) noperspective in vec4 inShade;
 layout(location = 2) flat in uint inMaterial;
 
@@ -265,7 +266,8 @@ void main() {
     bool isFiltered = (material.modes & MATERIAL_FILTERED) != 0u;
     // The RDP samples a pixel's texture at its top left corner, where the
     // host interpolates at its center. Upscaled, each target pixel does so.
-    vec2 texCoord = inTexCoord - (0.5 * (dFdx(inTexCoord) + dFdy(inTexCoord)));
+    vec2 centerTexCoord = inTexCoord.xy / inTexCoord.z;
+    vec2 texCoord = centerTexCoord - (0.5 * (dFdx(centerTexCoord) + dFdy(centerTexCoord)));
     CombinerInputs inputs;
 
     inputs.combined = vec4(0.0);

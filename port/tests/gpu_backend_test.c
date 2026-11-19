@@ -310,13 +310,9 @@ static void TestTranslucentBlend(void) {
     EXPECT_PIXEL(IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2, 127, 0, 128);
 }
 
-// Surfaces hide those behind them that come later, and not those before
-static void TestDepth(void) {
-    static Vtx near[4];
-    static Vtx far[4];
-    static Vtx nearer[4];
-    Gfx *gfx = BeginList(f_DisplayList);
-
+// Fills the depth image with the farthest depth, as games clear it, and
+// goes back to the color image
+static Gfx *ClearDepth(Gfx *gfx) {
     gDPSetDepthImage(gfx++, f_DepthImage);
     gDPSetCycleType(gfx++, G_CYC_FILL);
     gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
@@ -324,7 +320,16 @@ static void TestDepth(void) {
     gDPSetFillColor(gfx++, (GPACK_ZDZ(G_MAXFBZ, 0) << 16) | GPACK_ZDZ(G_MAXFBZ, 0));
     gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
     gDPPipeSync(gfx++);
-    gfx = BeginList(gfx);
+    return BeginList(gfx);
+}
+
+// Surfaces hide those behind them that come later, and not those before
+static void TestDepth(void) {
+    static Vtx near[4];
+    static Vtx far[4];
+    static Vtx nearer[4];
+    Gfx *gfx = ClearDepth(f_DisplayList);
+
     gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 0, 1));
     gfx = BeginTriangles(
         gfx,
@@ -518,6 +523,36 @@ static void TestPerspectiveTexture(void) {
     EXPECT_PIXEL(IMAGE_WIDTH * 3 / 4, IMAGE_HEIGHT / 2, 0, 0, 255);
 }
 
+// A surface that the GPU clips keeps its shade where a corner lies past
+// two edges of the image and the corners are at different distances.
+// Lavapipe, clipping such a surface in clip space with a depth image
+// bound, gave screen-linear shade no number at all.
+static void TestShadeClippedAtTwoEdges(void) {
+    static Vtx vertices[3];
+    Gfx *gfx = ClearDepth(f_DisplayList);
+
+    gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 0, 1));
+    gfx = BeginTriangles(
+        gfx,
+        G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH,
+        G_RM_ZB_OPA_SURF,
+        G_RM_ZB_OPA_SURF2
+    );
+    gSPMatrix(gfx++, &f_Recede, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    // Inside the RSP's clipping ratio of 2, so only the GPU clips them
+    PlaceVertex(&vertices[0], -1.1f, -1.1f, 1.0f, 0);
+    PlaceVertex(&vertices[1], 1.0f, -1.1f, 2.0f, 0);
+    PlaceVertex(&vertices[2], -1.1f, 1.0f, 4.0f, 0);
+    gSPVertex(gfx++, vertices, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+
+    // Next to the corner past both edges, then inside, then outside
+    EXPECT_PIXEL(1, IMAGE_HEIGHT - 2, 0, 255, 0);
+    EXPECT_PIXEL(IMAGE_WIDTH / 4, IMAGE_HEIGHT * 3 / 4, 0, 255, 0);
+    EXPECT_PIXEL(IMAGE_WIDTH * 3 / 4, IMAGE_HEIGHT / 4, 0, 0, 0);
+}
+
 static SDL_GPUDevice *f_Device;
 static SDL_AtomicInt f_HasSecondBegun;
 
@@ -605,6 +640,7 @@ int main(void) {
     TestSecondCycleTexel();
     TestTwoCycleAlphaCompare();
     TestPerspectiveTexture();
+    TestShadeClippedAtTwoEdges();
     TestOneThreadRecordsAtOnce();
     ShutdownRdp();
     ShutdownGpuBackend();
