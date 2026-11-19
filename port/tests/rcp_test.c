@@ -911,6 +911,45 @@ static void TestCpuWritesOutliveDrawing(void) {
     EXPECT(f_Gpu.writeCount == writeCount + 1);
 }
 
+// Zeroes f_ColorImage's memory and fills its target on the GPU, which leaves
+// the memory behind
+static void DrawOverZeroedImage(void) {
+    Gfx *gfx = BeginList(f_DisplayList);
+    int i;
+
+    for (i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT; i++) {
+        f_ColorImage[i] = 0;
+    }
+
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetFillColor(gfx++, 0);
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    RunList(gfx);
+    ResetCapture();
+}
+
+// The game's CPU reads a frame that the GPU drew, as CaptureHudAnimationFrame
+// does, once the native build's call has brought it to memory. A range that
+// misses the image leaves it on the GPU; one that holds only its first or
+// its last pixel brings the whole image.
+static void TestCpuReadsDrawing(void) {
+    const int lastPixel = (IMAGE_WIDTH * IMAGE_HEIGHT) - 1;
+
+    SyncRdpMemory(f_ColorImage, sizeof(f_ColorImage));
+    SyncRdpMemory(f_OtherImage, sizeof(f_OtherImage));
+    DrawOverZeroedImage();
+    osPcSyncRdpWrites(f_OtherImage, sizeof(f_OtherImage));
+    EXPECT(f_Gpu.readCount == 0);
+    osPcSyncRdpWrites(&f_ColorImage[0], sizeof(uint16_t));
+    EXPECT(f_Gpu.readCount == 1);
+    EXPECT(f_ColorImage[lastPixel] == GPACK_RGBA5551(255, 0, 0, 1));
+
+    DrawOverZeroedImage();
+    osPcSyncRdpWrites(&f_ColorImage[lastPixel], sizeof(uint16_t));
+    EXPECT(f_Gpu.readCount == 1);
+    EXPECT(f_ColorImage[0] == GPACK_RGBA5551(255, 0, 0, 1));
+}
+
 #define UNTOUCHED_PIXEL 0x1234
 
 // The height of the target that holds f_SmallImage
@@ -1062,6 +1101,7 @@ int main(void) {
     TestTextureFromDrawnImage();
     TestShownTarget();
     TestCpuWritesOutliveDrawing();
+    TestCpuReadsDrawing();
     TestImageSizedByDrawing();
     TestImageGrowsInPlace();
     TestShutdownReleasesTargets();

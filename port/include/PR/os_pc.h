@@ -111,6 +111,12 @@ void osPcFillRomArray(const OSPcRomArray *array);
    PcInitOs found, the arrays filled from the ROM before it included. */
 void osPcResetSegment(u32 segmentNumber);
 
+/* Brings the memory in a range up to date with what the RDP has drawn
+   there, for the CPU to read. The N64's RDP wrote its images to memory as it
+   drew; the port's draws them on the GPU and copies them back only when
+   something reads them. The renderer provides it. */
+void osPcSyncRdpWrites(const void *start, u32 size);
+
 /* Blocks the calling thread until the next interrupt, for a thread that
    would otherwise spin until an interrupt or another thread changes
    something */

@@ -4612,6 +4612,10 @@ void CaptureHudAnimationFrame(void) {
     }
 
     frame = (u32 *)nuGfxCfb_ptr;
+#ifdef TARGET_PC
+    // A native build's RDP leaves the frame on the GPU until it is read
+    osPcSyncRdpWrites(frame, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(u16));
+#endif
     f_IsFrameCapturePending = FALSE;
     if (f_HudAnimation == HUD_ANIMATION_TURN_AWAY || f_HudAnimation == HUD_ANIMATION_TILES) {
         s32 wordIndex = 0;

@@ -153,6 +153,10 @@ void SyncRdpMemory(const void *start, uintptr_t size) {
     }
 }
 
+void osPcSyncRdpWrites(const void *start, u32 size) {
+    SyncRdpMemory(start, size);
+}
+
 const void *ResolveRcpAddress(const RcpMemory *memory, uintptr_t address) {
     uintptr_t resolved;
 
