@@ -698,6 +698,64 @@ static void TestDepthClear(void) {
     EXPECT(f_Gpu.draws[0].pipelineKey == (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE));
 }
 
+// A fill of the color image between the depth image's clear and its use
+// leaves that clear pending
+static void TestDepthClearOutlastsColorFill(void) {
+    Gfx *gfx = f_DisplayList;
+
+    ResetCapture();
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+    gDPSetDepthImage(gfx++, f_DepthImage);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_DepthImage);
+    gDPSetFillColor(gfx++, (GPACK_ZDZ(0x2000, 0) << 16) | GPACK_ZDZ(0x2000, 0));
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    gDPPipeSync(gfx++);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_ColorImage);
+    gDPSetFillColor(gfx++, 0);
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    gfx = BeginTriangles(gfx, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+
+    // A pass clears only before its first draw, so the triangle has its own
+    EXPECT(f_Gpu.passCount == 2);
+    EXPECT(f_Gpu.passes[0].depth == NULL);
+    EXPECT(f_Gpu.passes[1].depth != NULL && f_Gpu.passes[1].clearsDepth);
+    EXPECT_NEAR(f_Gpu.passes[1].depthClearValue, 8192.0 / 16383.0, 1e-6);
+}
+
+// Of two fills of the depth image before its use, the later clears it
+static void TestLaterDepthFillWins(void) {
+    Gfx *gfx = f_DisplayList;
+
+    ResetCapture();
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+    gDPSetDepthImage(gfx++, f_DepthImage);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_DepthImage);
+    gDPSetFillColor(gfx++, (GPACK_ZDZ(0x1000, 0) << 16) | GPACK_ZDZ(0x1000, 0));
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    gDPPipeSync(gfx++);
+    gDPSetFillColor(gfx++, (GPACK_ZDZ(0x3000, 0) << 16) | GPACK_ZDZ(0x3000, 0));
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    gDPPipeSync(gfx++);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_ColorImage);
+    gfx = BeginTriangles(gfx, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+
+    // Taking the clear forgets it, so the second triangle shares the pass
+    EXPECT(f_Gpu.passCount == 1);
+    EXPECT(f_Gpu.passes[0].clearsDepth);
+    EXPECT_NEAR(f_Gpu.passes[0].depthClearValue, 12288.0 / 16383.0, 1e-6);
+}
+
 // A list from ROM holds the N64's words, big-endian, and reaches its
 // vertices through a segment
 // The ROM's data holds the N64's addresses, which lead into RDRAM as the
@@ -1214,6 +1272,8 @@ int main(void) {
     TestBlendShapes();
     TestUnforcedBlenderPassesFirstColor();
     TestDepthClear();
+    TestDepthClearOutlastsColorFill();
+    TestLaterDepthFillWins();
     TestN64Addresses();
     TestRomOrderList();
     TestRomListCallsIntoRomList();
