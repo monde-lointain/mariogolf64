@@ -3,6 +3,7 @@
  * the frames that the interpreter sends it.
  */
 
+#include <SDL3/SDL_assert.h>
 #include <SDL3/SDL_endian.h>
 #include <SDL3/SDL_stdinc.h>
 #include <ultra64.h>
@@ -698,6 +699,122 @@ static void TestDepthClear(void) {
     EXPECT(f_Gpu.draws[0].pipelineKey == (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE));
 }
 
+// Fills the other image in the fill cycle, as a color image, from left,
+// top to right, bottom in pixels, within a scissor scissorRight wide, with
+// the depth image elsewhere; then draws a triangle that tests depth against
+// the other image's memory
+static void FillThenDrawOnDepth(
+    uint32_t depth,
+    int scissorRight,
+    int left,
+    int top,
+    int right,
+    int bottom
+) {
+    Gfx *gfx = f_DisplayList;
+
+    ResetCapture();
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, scissorRight, IMAGE_HEIGHT);
+    gDPSetDepthImage(gfx++, f_DepthImage);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_OtherImage);
+    gDPSetFillColor(gfx++, (GPACK_ZDZ(depth, 0) << 16) | GPACK_ZDZ(depth, 0));
+    gDPFillRectangle(gfx++, left, top, right, bottom);
+    gDPPipeSync(gfx++);
+    gDPSetDepthImage(gfx++, f_OtherImage);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_ColorImage);
+    gfx = BeginTriangles(gfx, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+}
+
+// The pass that draws the triangle after FillThenDrawOnDepth
+static const GfxPass *DepthPass(void) {
+    EXPECT(f_Gpu.passCount == 2);
+    EXPECT(f_Gpu.passes[1].depth != NULL && f_Gpu.passes[1].depth->isDepth);
+    return &f_Gpu.passes[1];
+}
+
+// The game clears memory that it uses as a depth image only later, as the
+// saved frame's depth, by filling it as a color image: a fill of the whole
+// image, in the fill cycle, both draws and clears that memory's depth for
+// its next use as the depth image. A fill short of any edge leaves
+// depth as it was.
+static void TestColorFillClearsLaterDepth(void) {
+    const GfxPass *pass;
+
+    FillThenDrawOnDepth(G_MAXFBZ, IMAGE_WIDTH, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    EXPECT(f_Gpu.passes[0].depth == NULL);
+    EXPECT(f_Gpu.draws[0].pipelineKey == PIPELINE_WRITE_ALPHA);
+    pass = DepthPass();
+    EXPECT(pass->clearsDepth);
+    EXPECT_NEAR(pass->depthClearValue, 1.0, 1e-6);
+    EXPECT(f_Gpu.draws[1].pipelineKey == (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE));
+
+    FillThenDrawOnDepth(0x1000, IMAGE_WIDTH, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    pass = DepthPass();
+    EXPECT(pass->clearsDepth);
+    EXPECT_NEAR(pass->depthClearValue, 4096.0 / 16383.0, 1e-6);
+
+    FillThenDrawOnDepth(G_MAXFBZ, IMAGE_WIDTH, 1, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    EXPECT(!DepthPass()->clearsDepth);
+    FillThenDrawOnDepth(G_MAXFBZ, IMAGE_WIDTH, 0, 1, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    EXPECT(!DepthPass()->clearsDepth);
+    FillThenDrawOnDepth(G_MAXFBZ, IMAGE_WIDTH, 0, 0, IMAGE_WIDTH - 2, IMAGE_HEIGHT - 1);
+    EXPECT(!DepthPass()->clearsDepth);
+    FillThenDrawOnDepth(G_MAXFBZ, IMAGE_WIDTH, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 2);
+    EXPECT(!DepthPass()->clearsDepth);
+
+    // A scissor wider than the image reaches only the image's edge
+    FillThenDrawOnDepth(G_MAXFBZ, IMAGE_WIDTH + 8, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    EXPECT(DepthPass()->clearsDepth);
+}
+
+// Fills the depth image, then noteCount other images whole as color
+// images, then draws a triangle that tests depth: whether the depth
+// image's clear is still pending
+static bool DoesDepthClearOutlastFills(int noteCount) {
+    static uint16_t images[4][IMAGE_WIDTH * IMAGE_HEIGHT];
+    const GfxPass *pass;
+    Gfx *gfx = f_DisplayList;
+    int i;
+
+    SDL_assert(noteCount <= (int)SDL_arraysize(images));
+    ResetCapture();
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+    gDPSetDepthImage(gfx++, f_DepthImage);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_DepthImage);
+    gDPSetFillColor(gfx++, (GPACK_ZDZ(0x2000, 0) << 16) | GPACK_ZDZ(0x2000, 0));
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    for (i = 0; i < noteCount; i++) {
+        gDPPipeSync(gfx++);
+        gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, images[i]);
+        gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_ColorImage);
+    gfx = BeginTriangles(gfx, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+
+    pass = &f_Gpu.passes[f_Gpu.passCount - 1];
+    EXPECT(pass->depth != NULL);
+    return pass->clearsDepth;
+}
+
+// The RDP keeps four pending clears: three fills of other memory leave the
+// depth image's waiting, and a fourth drops it, the oldest
+static void TestDepthClearNotesHoldFour(void) {
+    EXPECT(!DoesDepthClearOutlastFills(4));
+    EXPECT(DoesDepthClearOutlastFills(3));
+}
+
 // A fill of the color image between the depth image's clear and its use
 // leaves that clear pending
 static void TestDepthClearOutlastsColorFill(void) {
@@ -1272,6 +1389,8 @@ int main(void) {
     TestBlendShapes();
     TestUnforcedBlenderPassesFirstColor();
     TestDepthClear();
+    TestColorFillClearsLaterDepth();
+    TestDepthClearNotesHoldFour();
     TestDepthClearOutlastsColorFill();
     TestLaterDepthFillWins();
     TestN64Addresses();

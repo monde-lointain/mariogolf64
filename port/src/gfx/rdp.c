@@ -44,6 +44,15 @@
 #define CYCLE_COPY 2
 #define CYCLE_FILL 3
 
+#define DEPTH_CLEAR_MAX 4
+
+// A fill of memory, as the depth image or as a color image, that the next
+// draw to use that memory as the depth image clears depth to
+typedef struct DepthClear {
+    const uint8_t *address; // NULL for an unused entry
+    float value;
+} DepthClear;
+
 typedef struct TileSamplerCache {
     bool isValid;
     GfxTileSampler sampler;
@@ -71,9 +80,9 @@ typedef struct RdpState {
     ColorImage *colorImage; // NULL until a draw needs it
     const uint8_t *depthImageAddress;
 
-    // A fill of the depth image that waits for the next draw to use it
-    const uint8_t *depthClearAddress;
-    float depthClearValue;
+    // The fills that wait for a draw to use their memory as the depth
+    // image, oldest first
+    DepthClear depthClears[DEPTH_CLEAR_MAX];
 
     TileSamplerCache samplers[RDP_TILE_COUNT];
     bool isMaterialDirty;
@@ -865,16 +874,47 @@ static bool UseColorImageTarget(float bottom) {
     return true;
 }
 
-static void UseDepthTarget(void) {
-    GfxTarget *depth = UseDepthImage(f_Rdp.depthImageAddress, f_Rdp.colorImage);
-    float clearValue = -1.0f;
+// Notes that the memory at address holds value as depth throughout, in
+// place of any older note of it. When the notes are full the oldest goes.
+static void NoteDepthClear(const uint8_t *address, float value) {
+    int replaced = 0;
+    int i;
 
-    if (f_Rdp.depthClearAddress == f_Rdp.depthImageAddress) {
-        clearValue = f_Rdp.depthClearValue;
-        f_Rdp.depthClearAddress = NULL;
+    SDL_assert(address != NULL);
+    for (i = 0; i < DEPTH_CLEAR_MAX; i++) {
+        if (f_Rdp.depthClears[i].address == address) {
+            replaced = i;
+        }
     }
 
-    UseFrameDepth(&f_Frame, depth, clearValue);
+    SDL_memmove(
+        &f_Rdp.depthClears[replaced],
+        &f_Rdp.depthClears[replaced + 1],
+        (DEPTH_CLEAR_MAX - 1 - replaced) * sizeof(DepthClear)
+    );
+    f_Rdp.depthClears[DEPTH_CLEAR_MAX - 1].address = address;
+    f_Rdp.depthClears[DEPTH_CLEAR_MAX - 1].value = value;
+}
+
+// The depth that a fill left the memory at address, forgetting the fill, or
+// a negative value when no fill waits for it
+static float TakeDepthClear(const uint8_t *address) {
+    int i;
+
+    for (i = 0; i < DEPTH_CLEAR_MAX; i++) {
+        if (f_Rdp.depthClears[i].address == address) {
+            f_Rdp.depthClears[i].address = NULL;
+            return f_Rdp.depthClears[i].value;
+        }
+    }
+
+    return -1.0f;
+}
+
+static void UseDepthTarget(void) {
+    GfxTarget *depth = UseDepthImage(f_Rdp.depthImageAddress, f_Rdp.colorImage);
+
+    UseFrameDepth(&f_Frame, depth, TakeDepthClear(f_Rdp.depthImageAddress));
 }
 
 // Readies the frame for a primitive of vertexCount vertices, reaching down
@@ -1102,17 +1142,30 @@ static uint32_t FillColorForImage(void) {
     return ExpandRgba16((uint16_t)(color >> 16));
 }
 
+// Whether the rectangle covers all that the scissor lets the RDP draw
+static bool DoesRectangleCoverScissor(const Rectangle *rectangle) {
+    return rectangle->left <= f_Rdp.scissor.left &&
+        rectangle->top <= f_Rdp.scissor.top &&
+        rectangle->right >= SDL_min(f_Rdp.scissor.right, f_Rdp.colorImageWidth) &&
+        rectangle->bottom >= f_Rdp.scissor.bottom;
+}
+
 static void DrawRdpFillRectangle(uint32_t w0, uint32_t w1) {
     Rectangle rectangle;
 
     if (IsDrawingDepthImage()) {
-        f_Rdp.depthClearAddress = f_Rdp.depthImageAddress;
-        f_Rdp.depthClearValue = DecodeDepthImageValue(f_Rdp.fillColor);
+        NoteDepthClear(f_Rdp.depthImageAddress, DecodeDepthImageValue(f_Rdp.fillColor));
         return;
     }
 
     PlaceRectangle(&rectangle, w0, w1);
     if (CycleType() == CYCLE_FILL) {
+        // The game fills the saved frame's depth as a color image before it
+        // uses it as the depth image
+        if (f_Rdp.colorImageAddress != NULL && DoesRectangleCoverScissor(&rectangle)) {
+            NoteDepthClear(f_Rdp.colorImageAddress, DecodeDepthImageValue(f_Rdp.fillColor));
+        }
+
         StoreRectangle(&rectangle, 0, MATERIAL_KIND_FILL, FillColorForImage());
     }
     else {
