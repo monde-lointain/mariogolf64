@@ -7,6 +7,7 @@
 #include <SDL3/SDL.h>
 #include <ultra64.h>
 
+#include "color_images.h"
 #include "rcp.h"
 #include "rsp.h"
 #include "sdl_gpu_backend.h"
@@ -19,6 +20,8 @@
 #define SKIPPED_EXIT_CODE 77
 // How far a channel may stray, in 5-bit steps
 #define CHANNEL_TOLERANCE 1
+// The largest scale that tests read a target at in full
+#define SCALE_MAX 6
 // Long enough for a second thread, were it free to, to start recording
 #define RECORDING_WAIT_MS 5
 #define RECORDING_ROUNDS 20
@@ -26,6 +29,8 @@
 static u16 f_ColorImage[IMAGE_WIDTH * IMAGE_HEIGHT] __attribute__((aligned(64)));
 static u16 f_DepthImage[IMAGE_WIDTH * IMAGE_HEIGHT] __attribute__((aligned(64)));
 static Gfx f_DisplayList[DISPLAY_LIST_LENGTH];
+static SDL_GPUDevice *f_Device;
+static uint32_t f_TargetPixels[(IMAGE_WIDTH * SCALE_MAX) * (IMAGE_HEIGHT * SCALE_MAX)];
 static Mtx f_Identity;
 // Scales the vertices' coordinates of 128 down to 1
 static Mtx f_Shrink;
@@ -292,6 +297,115 @@ static void TestFilteredTexelsOneForOne(void) {
     EXPECT_PIXEL(10, 10, 255, 255, 0);
 }
 
+// Reads the color image's target at its full scale into f_TargetPixels,
+// RGBA8 with red lowest, giving its width
+static uint32_t ReadScaledTarget(void) {
+    uint32_t scale = GpuBackendScale();
+    uint16_t width;
+    uint16_t height;
+    GfxTarget *target = LockShownTarget((const uint8_t *)f_ColorImage, &width, &height);
+    SDL_GPUTransferBufferCreateInfo info;
+    SDL_GPUTransferBuffer *buffer;
+    SDL_GPUTextureRegion region;
+    SDL_GPUTextureTransferInfo destination;
+    SDL_GPUCommandBuffer *commands;
+    SDL_GPUCopyPass *copy;
+    SDL_GPUFence *fence;
+
+    SDL_assert(target != NULL);
+    SDL_assert(scale <= SCALE_MAX);
+    SDL_zero(info);
+    info.usage = SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD;
+    info.size = width * scale * height * scale * (uint32_t)sizeof(uint32_t);
+    buffer = SDL_CreateGPUTransferBuffer(f_Device, &info);
+    SDL_zero(region);
+    region.texture = GpuTargetTexture(target);
+    region.w = width * scale;
+    region.h = height * scale;
+    region.d = 1;
+    SDL_zero(destination);
+    destination.transfer_buffer = buffer;
+    commands = BeginGpuCommands();
+    copy = SDL_BeginGPUCopyPass(commands);
+    SDL_DownloadFromGPUTexture(copy, &region, &destination);
+    SDL_EndGPUCopyPass(copy);
+    fence = SubmitGpuCommandsWithFence(commands);
+    UnlockShownTarget();
+    SDL_WaitForGPUFences(f_Device, true, &fence, 1);
+    SDL_ReleaseGPUFence(f_Device, fence);
+    SDL_memcpy(f_TargetPixels, SDL_MapGPUTransferBuffer(f_Device, buffer, false), info.size);
+    SDL_UnmapGPUTransferBuffer(f_Device, buffer);
+    SDL_ReleaseGPUTransferBuffer(f_Device, buffer);
+    return region.w;
+}
+
+// Readies rectangles of the RGBA16 texture's texels, width by height of
+// them, point sampled and wrapping, in the 1-cycle mode
+static Gfx *BeginTexturedRectangles(Gfx *gfx, const u16 *texture, int width, int height) {
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, 1, 0, 0, 0, TEXEL0, 0, 0, 0, 1);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPLoadTextureBlock(
+        gfx++,
+        texture,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        width,
+        height,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    return gfx;
+}
+
+// The RDP counts a texture coordinate's steps in 1/1024 texel, so a pixel
+// that a step of 1023/1024 texel brings 1/1024 short of a texel's edge
+// takes the texel before; upscaled, so does the target's pixel at its
+// corner, and those after it within the pixel take the next
+static void TestUpscaledTexelsKeepFineSteps(void) {
+    static u16 texture[8] __attribute__((aligned(8)));
+    Gfx *gfx = BeginList(f_DisplayList);
+    uint32_t scale = GpuBackendScale();
+    uint32_t width;
+    int wrongCount = 0;
+    uint32_t x;
+    uint32_t y;
+    int i;
+
+    for (i = 0; i < 8; i++) {
+        texture[i] = (i & 1) ? GPACK_RGBA5551(0, 0, 0, 1) : GPACK_RGBA5551(255, 255, 255, 1);
+    }
+
+    gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 255, 1));
+    gfx = BeginTexturedRectangles(gfx, texture, 8, 1);
+    gSPTextureRectangle(gfx++, 0, 0, 8 << 2, 1 << 2, G_TX_RENDERTILE, 0, 0, 1023, 1 << 10);
+    RunList(gfx);
+
+    width = ReadScaledTarget();
+    for (y = 0; y < scale; y++) {
+        for (x = 0; x < 8 * scale; x++) {
+            // At the corner of target pixel x, s is x / scale * 1023 / 1024
+            uint32_t texel = (x * 1023) / (scale * 1024);
+            uint32_t expected = (texel & 1) ? 0xFF000000u : 0xFFFFFFFFu;
+
+            wrongCount += f_TargetPixels[(y * width) + x] != expected;
+        }
+    }
+
+    if (wrongCount != 0) {
+        fprintf(stderr, "%d pixels of a finely stepped rectangle are wrong\n", wrongCount);
+    }
+
+    EXPECT(wrongCount == 0);
+}
+
 // A translucent surface mixes its color with memory's by its alpha
 static void TestTranslucentBlend(void) {
     static Vtx vertices[4];
@@ -553,7 +667,6 @@ static void TestShadeClippedAtTwoEdges(void) {
     EXPECT_PIXEL(IMAGE_WIDTH * 3 / 4, IMAGE_HEIGHT / 4, 0, 0, 0);
 }
 
-static SDL_GPUDevice *f_Device;
 static SDL_AtomicInt f_HasSecondBegun;
 
 // The second thread: starts a command buffer, says so, then submits it
@@ -650,6 +763,14 @@ int main(void) {
     InitGpuBackend(device, 1);
     InitRdp();
     TestFilteredTexelsOneForOne();
+    ShutdownRdp();
+    ShutdownGpuBackend();
+
+    // At the player's usual scale, each pixel of memory spans six of the
+    // target's
+    InitGpuBackend(device, 6);
+    InitRdp();
+    TestUpscaledTexelsKeepFineSteps();
     ShutdownRdp();
     ShutdownGpuBackend();
     SDL_DestroyGPUDevice(device);
