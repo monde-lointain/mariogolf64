@@ -38,6 +38,10 @@
 #define BLEND_NO_MEMORY 3u
 #define BLEND_KEEP_MEMORY 4u
 
+// Steps a texel that the RDP counts texture coordinates in, its deltas'
+// ten bits of fraction
+#define TEXCOORD_GRID 1024.0
+
 #define TILE_AXIS_CLAMP 0x10u
 #define TILE_AXIS_MIRROR 0x20u
 #define TILE_AXIS_MASK_BITS 0x0Fu
@@ -267,7 +271,11 @@ void main() {
     // The RDP samples a pixel's texture at its top left corner, where the
     // host interpolates at its center. Upscaled, each target pixel does so.
     vec2 centerTexCoord = inTexCoord.xy / inTexCoord.z;
-    vec2 texCoord = centerTexCoord - (0.5 * (dFdx(centerTexCoord) + dFdy(centerTexCoord)));
+    vec2 cornerTexCoord = centerTexCoord - (0.5 * (dFdx(centerTexCoord) + dFdy(centerTexCoord)));
+    // A corner often falls on a texel's edge, where the host's rounding
+    // would take the texel before as often as the one after. Snapping it
+    // to the RDP's steps puts it where the RDP's exact arithmetic would.
+    vec2 texCoord = round(cornerTexCoord * TEXCOORD_GRID) / TEXCOORD_GRID;
     CombinerInputs inputs;
 
     inputs.combined = vec4(0.0);

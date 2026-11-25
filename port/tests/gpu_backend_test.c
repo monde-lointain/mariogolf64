@@ -365,6 +365,58 @@ static Gfx *BeginTexturedRectangles(Gfx *gfx, const u16 *texture, int width, int
     return gfx;
 }
 
+// Upscaled, each target pixel takes the texel at its own corner, so a
+// rectangle that starts on a texel's corner shows only that texel and the
+// ones after it, never a sliver of the texels before
+static void TestUpscaledTexelsStartAtTheirCorner(void) {
+    static u16 texture[16 * 32] __attribute__((aligned(8)));
+    Gfx *gfx = BeginList(f_DisplayList);
+    int darkCount = 0;
+    uint32_t width;
+    int x;
+    int y;
+    int i;
+
+    // White from s 8 and t 16, where each rectangle starts, black before
+    for (i = 0; i < 16 * 32; i++) {
+        bool isWhite = (i % 16) >= 8 && (i / 16) >= 16;
+
+        texture[i] = isWhite ? GPACK_RGBA5551(255, 255, 255, 1) : GPACK_RGBA5551(0, 0, 0, 1);
+    }
+
+    gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 255, 1));
+    gfx = BeginTexturedRectangles(gfx, texture, 16, 32);
+    for (y = 0; y < IMAGE_HEIGHT; y += 8) {
+        for (x = 0; x < IMAGE_WIDTH; x += 8) {
+            gSPTextureRectangle(
+                gfx++,
+                x << 2,
+                y << 2,
+                (x + 8) << 2,
+                (y + 8) << 2,
+                G_TX_RENDERTILE,
+                8 << 5,
+                16 << 5,
+                1 << 10,
+                1 << 10
+            );
+        }
+    }
+
+    RunList(gfx);
+
+    width = ReadScaledTarget();
+    for (i = 0; i < (int)(width * IMAGE_HEIGHT * GpuBackendScale()); i++) {
+        darkCount += f_TargetPixels[i] != 0xFFFFFFFFu;
+    }
+
+    if (darkCount != 0) {
+        fprintf(stderr, "%d pixels of upscaled rectangles are not white\n", darkCount);
+    }
+
+    EXPECT(darkCount == 0);
+}
+
 // The RDP counts a texture coordinate's steps in 1/1024 texel, so a pixel
 // that a step of 1023/1024 texel brings 1/1024 short of a texel's edge
 // takes the texel before; upscaled, so does the target's pixel at its
@@ -770,6 +822,7 @@ int main(void) {
     // target's
     InitGpuBackend(device, 6);
     InitRdp();
+    TestUpscaledTexelsStartAtTheirCorner();
     TestUpscaledTexelsKeepFineSteps();
     ShutdownRdp();
     ShutdownGpuBackend();
