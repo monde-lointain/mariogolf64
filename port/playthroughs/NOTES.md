@@ -28,7 +28,7 @@ Recorded in `02-first-holes.txt`.
 | 02-1 | Cracks in the tiles in the hole preview                                    | open |
 | 02-2 | Hole disappears when zoom into flag occurs                                 | open |
 | 02-3 | Course does not redraw when turning to aim                                 | open |
-| 02-4 | Black circular shadows overlapping preview line when moving camera with C buttons | open |
+| 02-4 | Black circular shadows overlapping preview line when moving camera with C buttons | fixed in 46973715; they were the ball's shadow and sprite rectangles, drawn as columns once their edges wrapped |
 | 02-5 | Preview line is solid instead of dashed                                    | open |
 | 02-6 | Yardage text seems to clip/wrap improperly                                 | open |
 | 02-7 | Gleam off ball while flying looks black                                    | open |
