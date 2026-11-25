@@ -113,7 +113,9 @@ typedef struct GfxMaterial {
 // Fills and copies write alpha, which holds the coverage of 16-bit images;
 // other draws leave it as it was
 #define PIPELINE_WRITE_ALPHA 0x80
-#define PIPELINE_KEY_COUNT 0x100
+// Writes depth and no color, as a fill of part of the depth image does
+#define PIPELINE_DEPTH_ONLY 0x100
+#define PIPELINE_KEY_COUNT 0x200
 
 typedef enum DestinationFactor {
     DESTINATION_ZERO,

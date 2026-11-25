@@ -873,6 +873,230 @@ static void TestLaterDepthFillWins(void) {
     EXPECT_NEAR(f_Gpu.passes[0].depthClearValue, 12288.0 / 16383.0, 1e-6);
 }
 
+// The key of a draw that fills part of the depth image
+#define DEPTH_FILL_KEY (PIPELINE_DEPTH_WRITE | PIPELINE_DEPTH_ONLY)
+
+// Starts a list that fills the depth image within a scissor right pixels
+// wide
+static Gfx *BeginDepthFills(Gfx *gfx, int right) {
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, right, IMAGE_HEIGHT);
+    gDPSetDepthImage(gfx++, f_DepthImage);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_DepthImage);
+    return gfx;
+}
+
+// Fills the depth image with depth from left, top to right, bottom in
+// pixels, both corners drawn
+static Gfx *FillDepth(Gfx *gfx, uint32_t depth, int left, int top, int right, int bottom) {
+    gDPSetFillColor(gfx++, (GPACK_ZDZ(depth, 0) << 16) | GPACK_ZDZ(depth, 0));
+    gDPFillRectangle(gfx++, left, top, right, bottom);
+    gDPPipeSync(gfx++);
+    return gfx;
+}
+
+// Draws a triangle into the color image that tests depth, and runs the list
+static void DrawOnDepth(Gfx *gfx) {
+    gfx = BeginTriangles(gfx, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+}
+
+// Checks that the six vertices from first cover left, top to right, bottom
+// in pixels, exclusive, at depth
+static void ExpectDepthFillAt(
+    uint32_t first,
+    int left,
+    int top,
+    int right,
+    int bottom,
+    float depth
+) {
+    float minimum[2] = {1e9f, 1e9f};
+    float maximum[2] = {-1e9f, -1e9f};
+    uint32_t i;
+
+    EXPECT(first + 6 <= f_Gpu.vertexCount);
+    for (i = first; i < first + 6 && i < f_Gpu.vertexCount; i++) {
+        const GfxVertex *vertex = &f_Gpu.vertices[i];
+        // Back from clip space to the image's pixels
+        float x = (vertex->position[0] + 1.0f) * (IMAGE_WIDTH / 2);
+        float y = (1.0f - vertex->position[1]) * (IMAGE_HEIGHT / 2);
+
+        minimum[0] = SDL_min(minimum[0], x);
+        minimum[1] = SDL_min(minimum[1], y);
+        maximum[0] = SDL_max(maximum[0], x);
+        maximum[1] = SDL_max(maximum[1], y);
+        EXPECT_NEAR(vertex->position[2], depth, 1e-6);
+        EXPECT_NEAR(vertex->position[3], 1.0, 1e-6);
+    }
+
+    EXPECT_NEAR(minimum[0], left, 1e-4);
+    EXPECT_NEAR(minimum[1], top, 1e-4);
+    EXPECT_NEAR(maximum[0], right, 1e-4);
+    EXPECT_NEAR(maximum[1], bottom, 1e-4);
+}
+
+// A fill of part of the depth image waits for the image's next use, then
+// draws its depth there, after any clear and before the draw that uses it.
+// It writes no color, and isn't held to the scissor of that draw.
+static void TestPartialDepthFillDraws(void) {
+    Gfx *gfx = BeginDepthFills(f_DisplayList, IMAGE_WIDTH);
+    const GfxRect wholeImage = {0, 0, IMAGE_WIDTH, IMAGE_HEIGHT};
+
+    ResetCapture();
+    gfx = FillDepth(gfx, G_MAXFBZ, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    gfx = FillDepth(gfx, 0, 8, 4, 23, 11);
+    gfx = BeginTriangles(gfx, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, 4, 4);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+
+    // Drawing the fill forgets it, so the second triangle shares the first's
+    // draw
+    EXPECT(f_Gpu.passCount == 1);
+    EXPECT(f_Gpu.passes[0].clearsDepth);
+    EXPECT_NEAR(f_Gpu.passes[0].depthClearValue, 1.0, 1e-6);
+    EXPECT(f_Gpu.drawCount == 2);
+    EXPECT(f_Gpu.draws[1].vertexCount == 6);
+    EXPECT(f_Gpu.draws[0].pipelineKey == DEPTH_FILL_KEY);
+    EXPECT(f_Gpu.draws[0].vertexCount == 6);
+    EXPECT(SDL_memcmp(&f_Gpu.draws[0].scissor, &wholeImage, sizeof(wholeImage)) == 0);
+    ExpectDepthFillAt(f_Gpu.draws[0].firstVertex, 8, 4, 24, 12, 0.0f);
+    EXPECT(f_Gpu.draws[1].pipelineKey == (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE));
+}
+
+// Fills the depth image from left, top to right, bottom within a scissor
+// scissorRight wide, then draws on it: whether the fill cleared rather
+// than drew
+static bool DoesDepthFillClear(int scissorRight, int left, int top, int right, int bottom) {
+    Gfx *gfx = BeginDepthFills(f_DisplayList, scissorRight);
+    bool isDrawn;
+
+    ResetCapture();
+    gfx = FillDepth(gfx, 0x2000, left, top, right, bottom);
+    DrawOnDepth(gfx);
+    isDrawn = f_Gpu.drawCount != 0 && f_Gpu.draws[0].pipelineKey == DEPTH_FILL_KEY;
+    EXPECT(f_Gpu.passCount == 1);
+    EXPECT(f_Gpu.passes[0].clearsDepth != isDrawn);
+    return f_Gpu.passes[0].clearsDepth;
+}
+
+// A fill clears the depth image when it covers what the scissor lets it
+// reach, and draws when it falls short of any edge by a pixel
+static void TestDepthFillClearsOnlyWhole(void) {
+    EXPECT(DoesDepthFillClear(IMAGE_WIDTH, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1));
+    EXPECT(!DoesDepthFillClear(IMAGE_WIDTH, 1, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1));
+    EXPECT(!DoesDepthFillClear(IMAGE_WIDTH, 0, 1, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1));
+    EXPECT(!DoesDepthFillClear(IMAGE_WIDTH, 0, 0, IMAGE_WIDTH - 2, IMAGE_HEIGHT - 1));
+    EXPECT(!DoesDepthFillClear(IMAGE_WIDTH, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 2));
+    // The scissor, not the image, bounds what a fill must cover
+    EXPECT(DoesDepthFillClear(16, 0, 0, 15, IMAGE_HEIGHT - 1));
+    EXPECT(DoesDepthFillClear(IMAGE_WIDTH + 8, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1));
+}
+
+// A fill draws only what its scissor lets it reach, on every side
+static void TestDepthFillKeepsItsScissor(void) {
+    Gfx *gfx = BeginDepthFills(f_DisplayList, 16);
+
+    ResetCapture();
+    gfx = FillDepth(gfx, 0, 8, 4, 23, 11);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 8, 4, 16, IMAGE_HEIGHT);
+    gfx = FillDepth(gfx, 0, 0, 0, 23, 11);
+    DrawOnDepth(gfx);
+
+    EXPECT(f_Gpu.draws[0].pipelineKey == DEPTH_FILL_KEY);
+    EXPECT(f_Gpu.draws[0].vertexCount == 12);
+    ExpectDepthFillAt(0, 8, 4, 16, 12, 0.0f);
+    ExpectDepthFillAt(6, 8, 4, 16, 12, 0.0f);
+}
+
+// Fills reach the depth image in their order, and a clear drops those
+// before it
+static void TestDepthFillsKeepTheirOrder(void) {
+    Gfx *gfx = BeginDepthFills(f_DisplayList, IMAGE_WIDTH);
+
+    ResetCapture();
+    gfx = FillDepth(gfx, 0, 0, 0, 31, 7);
+    gfx = FillDepth(gfx, 0x2000, IMAGE_WIDTH - 1, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    gfx = FillDepth(gfx, G_MAXFBZ, 16, 0, 47, 7);
+    DrawOnDepth(gfx);
+
+    EXPECT(!f_Gpu.passes[0].clearsDepth);
+    EXPECT(f_Gpu.draws[0].pipelineKey == DEPTH_FILL_KEY);
+    EXPECT(f_Gpu.draws[0].vertexCount == 18);
+    ExpectDepthFillAt(0, 0, 0, 32, 8, 0.0f);
+    ExpectDepthFillAt(6, IMAGE_WIDTH - 1, 0, IMAGE_WIDTH, IMAGE_HEIGHT, 8192.0f / 16383.0f);
+    ExpectDepthFillAt(12, 16, 0, 48, 8, 1.0f);
+
+    gfx = BeginDepthFills(f_DisplayList, IMAGE_WIDTH);
+    ResetCapture();
+    gfx = FillDepth(gfx, 0, 0, 0, 31, 7);
+    gfx = FillDepth(gfx, 0x2000, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    DrawOnDepth(gfx);
+
+    EXPECT(f_Gpu.passes[0].clearsDepth);
+    EXPECT_NEAR(f_Gpu.passes[0].depthClearValue, 8192.0 / 16383.0, 1e-6);
+    EXPECT(f_Gpu.drawCount == 1);
+    EXPECT(f_Gpu.draws[0].pipelineKey == (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE));
+}
+
+// A fill waits for its own depth image, past draws that use another
+static void TestDepthFillWaitsForItsImage(void) {
+    Gfx *gfx = BeginDepthFills(f_DisplayList, IMAGE_WIDTH);
+
+    ResetCapture();
+    gfx = FillDepth(gfx, 0, 8, 4, 23, 11);
+    gDPSetDepthImage(gfx++, f_OtherImage);
+    gfx = BeginTriangles(gfx, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gDPPipeSync(gfx++);
+    gDPSetDepthImage(gfx++, f_DepthImage);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+
+    EXPECT(f_Gpu.drawCount == 3);
+    EXPECT(f_Gpu.draws[0].pipelineKey == (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE));
+    EXPECT(f_Gpu.draws[1].pipelineKey == DEPTH_FILL_KEY);
+    EXPECT(f_Gpu.draws[2].pipelineKey == (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE));
+    EXPECT(f_Gpu.passCount == 2);
+    EXPECT(f_Gpu.passes[0].depth != f_Gpu.passes[1].depth);
+}
+
+// Fills count fills of the depth image, each a pixel wide in its own
+// column, then draws on it: the column of the first fill drawn, or -1
+static int FindFirstDepthFillDrawn(int count) {
+    Gfx *gfx = BeginDepthFills(f_DisplayList, IMAGE_WIDTH);
+    int i;
+
+    ResetCapture();
+    for (i = 0; i < count; i++) {
+        gfx = FillDepth(gfx, 0, i, 0, i, IMAGE_HEIGHT - 1);
+    }
+
+    DrawOnDepth(gfx);
+    if (f_Gpu.draws[0].pipelineKey != DEPTH_FILL_KEY) {
+        return -1;
+    }
+
+    EXPECT(f_Gpu.draws[0].vertexCount == 6 * (uint32_t)SDL_min(count, 4));
+    return (int)SDL_lroundf((f_Gpu.vertices[0].position[0] + 1.0f) * (IMAGE_WIDTH / 2));
+}
+
+// The RDP keeps four fills waiting; a fifth drops the oldest
+static void TestDepthFillsHoldFour(void) {
+    EXPECT(FindFirstDepthFillDrawn(1) == 0);
+    EXPECT(FindFirstDepthFillDrawn(4) == 0);
+    EXPECT(FindFirstDepthFillDrawn(5) == 1);
+}
+
 // A list from ROM holds the N64's words, big-endian, and reaches its
 // vertices through a segment
 // The ROM's data holds the N64's addresses, which lead into RDRAM as the
@@ -1393,6 +1617,12 @@ int main(void) {
     TestDepthClearNotesHoldFour();
     TestDepthClearOutlastsColorFill();
     TestLaterDepthFillWins();
+    TestPartialDepthFillDraws();
+    TestDepthFillClearsOnlyWhole();
+    TestDepthFillKeepsItsScissor();
+    TestDepthFillsKeepTheirOrder();
+    TestDepthFillWaitsForItsImage();
+    TestDepthFillsHoldFour();
     TestN64Addresses();
     TestRomOrderList();
     TestRomListCallsIntoRomList();

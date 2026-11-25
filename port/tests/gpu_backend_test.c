@@ -523,6 +523,39 @@ static void TestDepth(void) {
     EXPECT_PIXEL(IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2, 0, 0, 255);
 }
 
+// A fill of part of the depth image sets the depth there alone, nearer or
+// farther than it was, and draws no color
+static void TestPartialDepthFill(void) {
+    static Vtx far[4];
+    Gfx *gfx = ClearDepth(f_DisplayList);
+
+    // The nearest depth over the left half, then the farthest over its
+    // left half
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_DepthImage);
+    gDPSetFillColor(gfx++, (GPACK_ZDZ(0, 0) << 16) | GPACK_ZDZ(0, 0));
+    gDPFillRectangle(gfx++, 0, 0, (IMAGE_WIDTH / 2) - 1, IMAGE_HEIGHT - 1);
+    gDPPipeSync(gfx++);
+    gDPSetFillColor(gfx++, (GPACK_ZDZ(G_MAXFBZ, 0) << 16) | GPACK_ZDZ(G_MAXFBZ, 0));
+    gDPFillRectangle(gfx++, 0, 0, (IMAGE_WIDTH / 4) - 1, IMAGE_HEIGHT - 1);
+    gDPPipeSync(gfx++);
+    gfx = BeginList(gfx);
+    gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 255, 1));
+    gfx = BeginTriangles(
+        gfx,
+        G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH,
+        G_RM_ZB_OPA_SURF,
+        G_RM_ZB_OPA_SURF2
+    );
+    gfx = DrawQuad(gfx, far, 64, 0xFF, 0, 0);
+    RunList(gfx);
+    EXPECT_PIXEL(0, IMAGE_HEIGHT / 2, 255, 0, 0);
+    EXPECT_PIXEL((IMAGE_WIDTH / 4) - 1, IMAGE_HEIGHT / 2, 255, 0, 0);
+    EXPECT_PIXEL(IMAGE_WIDTH / 4, IMAGE_HEIGHT / 2, 0, 0, 255);
+    EXPECT_PIXEL((IMAGE_WIDTH / 2) - 1, IMAGE_HEIGHT / 2, 0, 0, 255);
+    EXPECT_PIXEL(IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2, 255, 0, 0);
+    EXPECT_PIXEL(IMAGE_WIDTH * 3 / 4, IMAGE_HEIGHT / 2, 255, 0, 0);
+}
+
 // Fills a texture of 4 by 4 texels with one color
 static void FillTexture(u16 *texels, u16 color) {
     int i;
@@ -802,6 +835,7 @@ int main(void) {
     TestCopiedTexture();
     TestTranslucentBlend();
     TestDepth();
+    TestPartialDepthFill();
     TestSecondCycleTexel();
     TestTwoCycleAlphaCompare();
     TestPerspectiveTexture();

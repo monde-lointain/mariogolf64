@@ -53,6 +53,21 @@ typedef struct DepthClear {
     float value;
 } DepthClear;
 
+#define DEPTH_FILL_MAX 4
+// The vertices of a rectangle's two triangles
+#define RECTANGLE_VERTEX_COUNT 6
+
+// A fill of part of the depth image, in its pixels, that the next draw to
+// use that memory as the depth image draws first
+typedef struct DepthFill {
+    const uint8_t *address; // NULL for an unused entry
+    float left;
+    float top;
+    float right;
+    float bottom;
+    float value;
+} DepthFill;
+
 typedef struct TileSamplerCache {
     bool isValid;
     GfxTileSampler sampler;
@@ -83,6 +98,9 @@ typedef struct RdpState {
     // The fills that wait for a draw to use their memory as the depth
     // image, oldest first
     DepthClear depthClears[DEPTH_CLEAR_MAX];
+    // Fills of part of a depth image that wait so, oldest first, the used
+    // entries before the unused
+    DepthFill depthFills[DEPTH_FILL_MAX];
 
     TileSamplerCache samplers[RDP_TILE_COUNT];
     bool isMaterialDirty;
@@ -876,11 +894,72 @@ static bool UseColorImageTarget(float bottom) {
 
 // Notes that the memory at address holds value as depth throughout, in
 // place of any older note of it. When the notes are full the oldest goes.
+// Forgets the waiting fills of part of the depth image at address
+static void ForgetDepthFills(const uint8_t *address) {
+    int keptCount = 0;
+    int i;
+
+    for (i = 0; i < DEPTH_FILL_MAX; i++) {
+        if (f_Rdp.depthFills[i].address != address) {
+            f_Rdp.depthFills[keptCount++] = f_Rdp.depthFills[i];
+        }
+    }
+
+    for (i = keptCount; i < DEPTH_FILL_MAX; i++) {
+        f_Rdp.depthFills[i].address = NULL;
+    }
+}
+
+static int CountDepthFills(void) {
+    int count = 0;
+
+    while (count < DEPTH_FILL_MAX && f_Rdp.depthFills[count].address != NULL) {
+        count++;
+    }
+
+    return count;
+}
+
+// Notes a fill of the depth image at address from left, top to right,
+// bottom, dropping the oldest fill when there are too many
+static void NoteDepthFill(
+    const uint8_t *address,
+    float left,
+    float top,
+    float right,
+    float bottom,
+    float value
+) {
+    int count = CountDepthFills();
+    DepthFill *fill;
+
+    SDL_assert(address != NULL);
+    SDL_assert(right > left && bottom > top);
+    if (count == DEPTH_FILL_MAX) {
+        SDL_memmove(
+            &f_Rdp.depthFills[0],
+            &f_Rdp.depthFills[1],
+            (DEPTH_FILL_MAX - 1) * sizeof(DepthFill)
+        );
+        count--;
+    }
+
+    fill = &f_Rdp.depthFills[count];
+    fill->address = address;
+    fill->left = left;
+    fill->top = top;
+    fill->right = right;
+    fill->bottom = bottom;
+    fill->value = value;
+}
+
 static void NoteDepthClear(const uint8_t *address, float value) {
     int replaced = 0;
     int i;
 
     SDL_assert(address != NULL);
+    // The clear covers whatever the earlier fills drew
+    ForgetDepthFills(address);
     for (i = 0; i < DEPTH_CLEAR_MAX; i++) {
         if (f_Rdp.depthClears[i].address == address) {
             replaced = i;
@@ -911,10 +990,25 @@ static float TakeDepthClear(const uint8_t *address) {
     return -1.0f;
 }
 
+static void DrawDepthFills(const uint8_t *address);
+
 static void UseDepthTarget(void) {
     GfxTarget *depth = UseDepthImage(f_Rdp.depthImageAddress, f_Rdp.colorImage);
 
     UseFrameDepth(&f_Frame, depth, TakeDepthClear(f_Rdp.depthImageAddress));
+    DrawDepthFills(f_Rdp.depthImageAddress);
+}
+
+// Whether the frame has room for a primitive of vertexCount vertices, and
+// for the fills of the depth image that may come first with their own
+// draw and material
+static bool HasRoomForPrimitive(uint32_t vertexCount) {
+    uint32_t fillCount = (uint32_t)CountDepthFills();
+
+    return HasFrameRoom(&f_Frame, vertexCount + (fillCount * RECTANGLE_VERTEX_COUNT), 0) &&
+        (fillCount == 0 ||
+            (f_Frame.drawCount + 1 < FRAME_DRAW_CAPACITY &&
+                f_Frame.materialCount + 1 < FRAME_MATERIAL_CAPACITY));
 }
 
 // Readies the frame for a primitive of vertexCount vertices, reaching down
@@ -930,7 +1024,7 @@ static GfxVertex *BeginPrimitive(
 ) {
     GfxRect scissor = f_Rdp.scissor;
 
-    if (!HasFrameRoom(&f_Frame, vertexCount, 0)) {
+    if (!HasRoomForPrimitive(vertexCount)) {
         FlushRdpFrame();
     }
 
@@ -1051,6 +1145,74 @@ static bool IsRectangleEmpty(const Rectangle *rectangle) {
     return rectangle->right <= rectangle->left || rectangle->bottom <= rectangle->top;
 }
 
+// The corners of a rectangle's two triangles, in their order: the upper
+// left is 0, the upper right 1, the lower left 2 and the lower right 3
+static const uint8_t f_RectangleCorners[RECTANGLE_VERTEX_COUNT] = {0, 1, 2, 2, 1, 3};
+
+// Places a rectangle's vertex at the corner of left, top to right, bottom
+// in the color image's pixels, at depth
+static void PlaceRectangleVertex(
+    GfxVertex *vertex,
+    int corner,
+    const float bounds[4],
+    float depth
+) {
+    float x = (corner & 1) ? bounds[2] : bounds[0];
+    float y = (corner & 2) ? bounds[3] : bounds[1];
+
+    float xScale = 2.0f / (float)ColorImageWidth(f_Rdp.colorImage);
+    float yScale = 2.0f / (float)ColorImageTargetHeight(f_Rdp.colorImage);
+
+    vertex->position[0] = (x * xScale) - 1.0f;
+    vertex->position[1] = 1.0f - (y * yScale);
+    vertex->position[2] = depth;
+    vertex->position[3] = 1.0f;
+}
+
+// Draws the waiting fills of part of the depth image at address into the
+// current pass's depth, in their order, and forgets them. They write no
+// color, and nothing of the material that the fragments read matters but
+// that it discards none of them.
+static void DrawDepthFills(const uint8_t *address) {
+    static const GfxMaterial noMaterial;
+    GfxRect wholeImage = {0, 0, 0, 0};
+    uint32_t materialIndex = 0;
+    bool hasMaterial = false;
+    int i;
+
+    wholeImage.right = ColorImageWidth(f_Rdp.colorImage);
+    wholeImage.bottom = ColorImageTargetHeight(f_Rdp.colorImage);
+    for (i = 0; i < DEPTH_FILL_MAX; i++) {
+        const DepthFill *fill = &f_Rdp.depthFills[i];
+        const float bounds[4] = {fill->left, fill->top, fill->right, fill->bottom};
+        GfxVertex *vertices;
+        int j;
+
+        if (fill->address != address) {
+            continue;
+        }
+
+        if (!hasMaterial) {
+            materialIndex = AddFrameMaterial(&f_Frame, &noMaterial);
+            hasMaterial = true;
+        }
+
+        vertices = AddFrameVertices(
+            &f_Frame,
+            RECTANGLE_VERTEX_COUNT,
+            PIPELINE_DEPTH_WRITE | PIPELINE_DEPTH_ONLY,
+            &wholeImage
+        );
+        SDL_memset(vertices, 0, RECTANGLE_VERTEX_COUNT * sizeof(GfxVertex));
+        for (j = 0; j < RECTANGLE_VERTEX_COUNT; j++) {
+            PlaceRectangleVertex(&vertices[j], f_RectangleCorners[j], bounds, fill->value);
+            vertices[j].material = materialIndex;
+        }
+    }
+
+    ForgetDepthFills(address);
+}
+
 static void StoreRectangle(
     const Rectangle *rectangle,
     int tileIndex,
@@ -1058,12 +1220,9 @@ static void StoreRectangle(
     uint32_t color
 ) {
     bool usesPrimitiveDepth = Field(f_Rdp.otherModeLow, G_MDSFT_ZSRCSEL, 1) != 0;
-    // The upper left, upper right, lower left and lower right
-    static const uint8_t cornerOrder[6] = {0, 1, 2, 2, 1, 3};
+    const float bounds[4] = {rectangle->left, rectangle->top, rectangle->right, rectangle->bottom};
     uint32_t materialIndex = 0;
     GfxVertex *vertices;
-    float xScale;
-    float yScale;
     float depth;
     int i;
 
@@ -1071,25 +1230,24 @@ static void StoreRectangle(
         return;
     }
 
-    vertices =
-        BeginPrimitive(rectangle->bottom, 6, tileIndex, kind, usesPrimitiveDepth, &materialIndex);
+    vertices = BeginPrimitive(
+        rectangle->bottom,
+        RECTANGLE_VERTEX_COUNT,
+        tileIndex,
+        kind,
+        usesPrimitiveDepth,
+        &materialIndex
+    );
     if (vertices == NULL) {
         return;
     }
 
-    xScale = 2.0f / (float)ColorImageWidth(f_Rdp.colorImage);
-    yScale = 2.0f / (float)ColorImageTargetHeight(f_Rdp.colorImage);
     depth = usesPrimitiveDepth ? PrimitiveDepth() : 0.0f;
-    for (i = 0; i < 6; i++) {
-        int corner = cornerOrder[i];
+    for (i = 0; i < RECTANGLE_VERTEX_COUNT; i++) {
+        int corner = f_RectangleCorners[i];
         GfxVertex *vertex = &vertices[i];
-        float x = (corner & 1) ? rectangle->right : rectangle->left;
-        float y = (corner & 2) ? rectangle->bottom : rectangle->top;
 
-        vertex->position[0] = (x * xScale) - 1.0f;
-        vertex->position[1] = 1.0f - (y * yScale);
-        vertex->position[2] = depth;
-        vertex->position[3] = 1.0f;
+        PlaceRectangleVertex(vertex, corner, bounds, depth);
         if (corner == 3) {
             // The lower right is the upper right moved as the lower left is
             vertex->texCoord[0] = rectangle->texCoords[1][0] + rectangle->texCoords[2][0] -
@@ -1150,15 +1308,39 @@ static bool DoesRectangleCoverScissor(const Rectangle *rectangle) {
         rectangle->bottom >= f_Rdp.scissor.bottom;
 }
 
-static void DrawRdpFillRectangle(uint32_t w0, uint32_t w1) {
-    Rectangle rectangle;
+// Fills the depth image: a fill of all that the scissor lets it reach
+// clears the image for its next use, and a fill of less waits to be drawn
+// then, within the scissor
+static void FillDepthImage(const Rectangle *rectangle) {
+    float value = DecodeDepthImageValue(f_Rdp.fillColor);
+    float left;
+    float top;
+    float right;
+    float bottom;
 
-    if (IsDrawingDepthImage()) {
-        NoteDepthClear(f_Rdp.depthImageAddress, DecodeDepthImageValue(f_Rdp.fillColor));
+    if (DoesRectangleCoverScissor(rectangle)) {
+        NoteDepthClear(f_Rdp.depthImageAddress, value);
         return;
     }
 
+    left = SDL_max(rectangle->left, (float)f_Rdp.scissor.left);
+    top = SDL_max(rectangle->top, (float)f_Rdp.scissor.top);
+    right = SDL_min(rectangle->right, (float)SDL_min(f_Rdp.scissor.right, f_Rdp.colorImageWidth));
+    bottom = SDL_min(rectangle->bottom, (float)f_Rdp.scissor.bottom);
+    if (right > left && bottom > top) {
+        NoteDepthFill(f_Rdp.depthImageAddress, left, top, right, bottom, value);
+    }
+}
+
+static void DrawRdpFillRectangle(uint32_t w0, uint32_t w1) {
+    Rectangle rectangle;
+
     PlaceRectangle(&rectangle, w0, w1);
+    if (IsDrawingDepthImage()) {
+        FillDepthImage(&rectangle);
+        return;
+    }
+
     if (CycleType() == CYCLE_FILL) {
         // The game fills the saved frame's depth as a color image before it
         // uses it as the depth image

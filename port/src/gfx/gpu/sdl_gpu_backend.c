@@ -214,6 +214,10 @@ static SDL_GPUColorTargetBlendState BlendState(uint16_t key) {
         blend.color_write_mask |= SDL_GPU_COLORCOMPONENT_A;
     }
 
+    if (key & PIPELINE_DEPTH_ONLY) {
+        blend.color_write_mask = 0;
+    }
+
     blend.enable_color_write_mask = true;
     if (key & PIPELINE_BLEND) {
         blend.enable_blend = true;
@@ -294,7 +298,7 @@ static SDL_GPUGraphicsPipeline *CreatePipeline(uint16_t key, bool hasDepth) {
 
     pipeline = SDL_CreateGPUGraphicsPipeline(f_Gpu.device, &info);
     if (pipeline == NULL) {
-        PcFatalError("Can't create the pipeline for key 0x%02X: %s", key, SDL_GetError());
+        PcFatalError("Can't create the pipeline for key 0x%03X: %s", key, SDL_GetError());
     }
 
     return pipeline;
