@@ -25,6 +25,9 @@ tags
 asm/
 assets/
 
+# The saves that playthroughs start from and end with (port/playthroughs)
+*.sra
+
 # Build outputs and local tooling
 build/
 .venv/
