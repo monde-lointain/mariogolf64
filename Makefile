@@ -41,7 +41,9 @@ TARGET      ?= mariogolf64
 TOOLS       := $(BASE)/tools
 # The tools' Python environment, which make creates from requirements.txt.
 # Setting PYTHON to another interpreter leaves its packages to you.
-VENV        := $(BASE)/.venv
+# Python 3.14 warns when it runs from a path through .., as a mod's
+# ../mariogolf64/.venv is, so a mod names the environment by its full path.
+VENV        := $(if $(filter .,$(BASE)),.venv,$(abspath $(BASE)/.venv))
 PYTHON      ?= $(VENV)/bin/python3
 # The copy of requirements.txt that the environment was last made from,
 # which make makes before anything that runs PYTHON, if PYTHON is its own
