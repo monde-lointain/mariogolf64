@@ -1,13 +1,16 @@
 """Writes the input script for a Stroke round that gives up each hole.
 
-Sessions 12 to 15 come from here, not from a recording: each picks a
+Sessions 12 to 16 come from here, not from a recording: each picks a
 character and a course, takes a tee shot on each of the 18 holes, gives up
 the hole from the pause menu, and goes back to the main menu. They start
 from the same save as sessions 01 to 10, with CRC-32 1F93B89D.
 
 The times are game frames, and fit that save: the menus' cursors start
 where it left them. The unlock code on the title screen opens every course
-and character, so that the script needs no other progress.
+and character but the last, Mario's Star, whose points it doesn't grant.
+A session that needs more turns on the game's debug mode, with its own
+code, and sets game flags in its flag panel: one opens all six courses,
+and another rolls the staff after the round.
 """
 
 from __future__ import annotations
@@ -15,6 +18,7 @@ from __future__ import annotations
 import argparse
 import pathlib
 import sys
+from typing import NamedTuple
 
 # Frames that a press is held for, unless it says otherwise
 PRESS_FRAMES = 3
@@ -29,7 +33,31 @@ UNLOCK_BUTTONS = {
     "r": "CRIGHT",
 }
 UNLOCK_START = 180
-UNLOCK_SPACING = 6
+CODE_SPACING = 6
+# The code that turns on debug mode, entered with Z, L and R held; its
+# letters are B and the C buttons
+DEBUG_CODE = "BBuududdudllrlrrlrBBlr"
+DEBUG_HELD = "Z L R"
+DEBUG_BUTTONS = {
+    "B": "B",
+    "u": "CUP",
+    "d": "CDOWN",
+    "l": "CLEFT",
+    "r": "CRIGHT",
+}
+# Without debug mode, the main menu takes A on One Player at this frame
+MENU_FRAME = 330
+# Frames from the title's START to the main menu's taking input
+MENU_OPENING = 34
+# In debug mode, holding L and pressing START opens and closes the flag
+# panel, a grid of FLAG_COLUMNS flags to a row with the first one chosen
+FLAG_COLUMNS = 16
+FLAG_ROWS = 8
+FLAG_SPACING = 8
+# The flags that open all six courses, and that roll the staff after the
+# round, as include/debug/game_flags.h numbers them
+FLAG_OPEN_SIX_COURSES = 0x5C
+FLAG_SHOW_STAFF_ROLL = 0x65
 # RIGHT presses on the mode menu from One Player to Stroke
 MODE_STEPS = 4
 MENU_SPACING = 40
@@ -42,14 +70,41 @@ NEXT_TEE = 600
 # The pause menu's Give Up entry, below Course View
 GIVE_UP_STEPS = 4
 ROUND_HOLES = 18
+# Frames from the last scorecard to the staff roll's taking A, which it
+# does from its frame 4300 on, about 4550 frames after the scorecard; and
+# from there through the boot logos into the attract hole
+STAFF_ROLL_END = 5000
+AFTER_STAFF_ROLL = 300
 
-# The sessions: number, file name, course, character, RIGHT presses on the
-# course menu, and RIGHT presses on Character Select
+
+class Session(NamedTuple):
+    """A generated session, and the presses that choose its round."""
+
+    number: int
+    slug: str
+    course: str
+    character: str
+    # RIGHT presses on the course menu, and on Character Select
+    course_steps: int
+    character_steps: int
+    # Game flags set in debug mode's flag panel, in order
+    flags: tuple[int, ...] = ()
+
+
 SESSIONS = (
-    (12, "koopa-park", "Koopa Park", "Plum", 1, 0),
-    (13, "shy-guy-desert", "Shy Guy Desert", "Bowser", 2, 6),
-    (14, "yoshis-island", "Yoshi's Island", "Luigi", 3, 2),
-    (15, "boo-valley", "Boo Valley", "Harry", 4, 4),
+    Session(12, "koopa-park", "Koopa Park", "Plum", 1, 0),
+    Session(13, "shy-guy-desert", "Shy Guy Desert", "Bowser", 2, 6),
+    Session(14, "yoshis-island", "Yoshi's Island", "Luigi", 3, 2),
+    Session(15, "boo-valley", "Boo Valley", "Harry", 4, 4),
+    Session(
+        16,
+        "marios-star",
+        "Mario's Star",
+        "Peach",
+        5,
+        1,
+        (FLAG_OPEN_SIX_COURSES, FLAG_SHOW_STAFF_ROLL),
+    ),
 )
 
 
@@ -60,38 +115,97 @@ class Script:
         """Start the script with nothing held."""
         self.lines: list[tuple[int, str]] = [(0, "")]
 
-    def press(self, frame: int, button: str, frames: int = PRESS_FRAMES) -> None:
-        """Hold the button from the frame for the given frames."""
+    def hold(self, frame: int, buttons: str) -> None:
+        """Hold the buttons, and only them, from the frame on."""
         if frame <= self.lines[-1][0]:
-            message = f"a press at frame {frame} is out of order"
+            message = f"a change at frame {frame} is out of order"
             raise ValueError(message)
-        self.lines.append((frame, button))
-        self.lines.append((frame + frames, ""))
+        self.lines.append((frame, buttons))
+
+    def press(
+        self, frame: int, button: str, frames: int = PRESS_FRAMES, held: str = ""
+    ) -> None:
+        """Press the button for the given frames, over what stays held."""
+        self.hold(frame, f"{held} {button}".strip())
+        self.hold(frame + frames, held)
 
     def text(self) -> str:
         """Return the lines, one change of the buttons on each."""
         return "".join(f"{frame} {held}".rstrip() + "\n" for frame, held in self.lines)
 
 
-def enter_menus(script: Script, course_steps: int, character_steps: int) -> int:
-    """Get from the opening to the first tee, and return the tee's frame."""
+def enter_code(script: Script, frame: int, letters: str, held: str = "") -> int:
+    """Enter a code on the title screen, and return the frame after it."""
+    buttons = DEBUG_BUTTONS if held else UNLOCK_BUTTONS
+    for letter in letters:
+        script.press(frame, buttons[letter], held=held)
+        frame += CODE_SPACING
+    return frame
+
+
+def set_flags(script: Script, frame: int, flags: tuple[int, ...]) -> int:
+    """Set flags in the flag panel, and return the frame that it closes on."""
+    script.hold(frame, "L")
+    script.hold(frame + 4, "L START")
+    script.hold(frame + 8, "")
+    frame += 30
+    row = 0
+    column = 0
+    for flag in flags:
+        if flag >= FLAG_ROWS * FLAG_COLUMNS:
+            message = f"flag {flag:#x} is below the panel's first page"
+            raise ValueError(message)
+        moves = (
+            ("DOWN", (flag // FLAG_COLUMNS) - row),
+            ("UP", row - (flag // FLAG_COLUMNS)),
+            ("RIGHT", (flag % FLAG_COLUMNS) - column),
+            ("LEFT", column - (flag % FLAG_COLUMNS)),
+        )
+        for button, count in moves:
+            for _ in range(count):
+                script.press(frame, button)
+                frame += FLAG_SPACING
+        script.press(frame, "A")
+        frame += FLAG_SPACING
+        row, column = divmod(flag, FLAG_COLUMNS)
+    frame += 20
+    script.hold(frame, "L")
+    script.hold(frame + 4, "L START")
+    script.hold(frame + 8, "")
+    return frame + 8
+
+
+def enter_title(script: Script, flags: tuple[int, ...]) -> int:
+    """Get from the opening to the main menu, and return its first frame."""
     script.press(164, "A", 5)
-    for index, letter in enumerate(UNLOCK_CODE):
-        script.press(UNLOCK_START + (index * UNLOCK_SPACING), UNLOCK_BUTTONS[letter])
-    script.press(296, "START", 4)
-    script.press(330, "A", 4)
-    for index in range(character_steps):
-        script.press(380 + (index * CHARACTER_SPACING), "RIGHT")
-    shift = character_steps * CHARACTER_SPACING
+    if not flags:
+        frame = enter_code(script, UNLOCK_START, UNLOCK_CODE)
+        script.press(frame + 20, "START", 4)
+        return frame + 20 + MENU_OPENING
+    script.hold(UNLOCK_START - 4, DEBUG_HELD)
+    frame = enter_code(script, UNLOCK_START + 2, DEBUG_CODE, DEBUG_HELD)
+    script.hold(frame, "")
+    frame = enter_code(script, frame + 12, UNLOCK_CODE)
+    script.press(frame + 24, "START", 4)
+    return set_flags(script, frame + 120, flags) + MENU_OPENING
+
+
+def enter_menus(script: Script, session: Session) -> int:
+    """Get from the opening to the first tee, and return the tee's frame."""
+    shift = enter_title(script, session.flags) - MENU_FRAME
+    script.press(330 + shift, "A", 4)
+    for index in range(session.character_steps):
+        script.press(380 + shift + (index * CHARACTER_SPACING), "RIGHT")
+    shift += session.character_steps * CHARACTER_SPACING
     script.press(380 + shift, "A", 4)
     for index in range(MODE_STEPS):
         script.press(500 + shift + (index * MENU_SPACING), "RIGHT")
     script.press(660 + shift, "A", 4)
-    for index in range(course_steps):
+    for index in range(session.course_steps):
         script.press(880 + shift + (index * MENU_SPACING), "RIGHT")
-    course_shift = shift + ((course_steps - 1) * MENU_SPACING)
-    script.press(940 + course_shift, "A", 4)
-    return 1600 + course_shift
+    shift += (session.course_steps - 1) * MENU_SPACING
+    script.press(940 + shift, "A", 4)
+    return 1600 + shift
 
 
 def give_up_hole(script: Script, tee: int) -> int:
@@ -111,10 +225,10 @@ def give_up_hole(script: Script, tee: int) -> int:
     return pause + 400
 
 
-def write_round(course_steps: int, character_steps: int, holes: int) -> tuple[str, int]:
+def write_round(session: Session, holes: int) -> tuple[str, int]:
     """Return a round's script without its comments, and its last frame."""
     script = Script()
-    tee = enter_menus(script, course_steps, character_steps)
+    tee = enter_menus(script, session)
     card = tee
     for _ in range(holes):
         card = give_up_hole(script, tee)
@@ -122,26 +236,31 @@ def write_round(course_steps: int, character_steps: int, holes: int) -> tuple[st
     # The results tally the round's points, then wait for another A
     script.press(card + 138, "A", 4)
     script.press(card + 238, "A", 4)
-    return script.text(), card + 550
+    if FLAG_SHOW_STAFF_ROLL not in session.flags:
+        return script.text(), card + 550
+    # The staff roll takes A once it has run its course, and goes back to
+    # the boot logos and the attract hole
+    script.press(card + STAFF_ROLL_END, "A", 4)
+    return script.text(), card + STAFF_ROLL_END + AFTER_STAFF_ROLL
 
 
 def write_session(number: int) -> tuple[str, str]:
     """Return a session's file name and its whole script."""
     for session in SESSIONS:
-        if session[0] == number:
+        if session.number == number:
             break
     else:
         message = f"no session {number}"
         raise ValueError(message)
-    _, slug, course, character, course_steps, character_steps = session
-    body, end = write_round(course_steps, character_steps, ROUND_HOLES)
+    body, end = write_round(session, ROUND_HOLES)
+    extra = ", in debug mode" if session.flags else ""
     text = (
-        f"# Generated from a template: Stroke at {course} with {character},"
-        " each hole a tee shot and Give Up\n"
+        f"# Generated from a template: Stroke at {session.course} with"
+        f" {session.character}{extra}, each hole a tee shot and Give Up\n"
         "# Starts from the save with CRC-32 1F93B89D\n"
         f"{body}# Ends at frame {end}\n"
     )
-    return f"{number:02d}-{slug}.txt", text
+    return f"{number:02d}-{session.slug}.txt", text
 
 
 def main() -> int:
@@ -153,7 +272,7 @@ def main() -> int:
     is_checking = bool(arguments.check)  # pyright: ignore[reportAny]
     wanted: list[int] = arguments.sessions  # pyright: ignore[reportAny]
     folder = pathlib.Path(__file__).resolve().parent
-    numbers = wanted or [session[0] for session in SESSIONS]
+    numbers = wanted or [session.number for session in SESSIONS]
     differing = 0
     for number in numbers:
         name, text = write_session(number)
