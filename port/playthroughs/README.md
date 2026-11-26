@@ -65,28 +65,28 @@ numbers: other raindrops, and in the end another save.
     that you play on:
 
     ```sh
-    cp ~/.local/share/mariogolf64/mariogolf64/mariogolf64.sra 12-start.sra
-    cp 12-start.sra 12-play.sra
+    cp ~/.local/share/mariogolf64/mariogolf64/mariogolf64.sra 16-start.sra
+    cp 16-start.sra 16-play.sra
     ```
 
 1.  Play the session in a window, recording the first controller:
 
     ```sh
-    build/pc/linux/port/src/mariogolf64 --save 12-play.sra \
-        --record port/playthroughs/12-my-goal.txt baserom.us.z64
+    build/pc/linux/port/src/mariogolf64 --save 16-play.sra \
+        --record port/playthroughs/16-my-goal.txt baserom.us.z64
     ```
 
 1.  When you reach the session's goal, close the window.
 1.  Add a row for the session to the table below, and add what looked
     wrong, with about when it happened, to `NOTES.md`.
-1.  Keep `12-start.sra` and `12-play.sra` outside the repository, so that
+1.  Keep `16-start.sra` and `16-play.sra` outside the repository, so that
     you can replay the session later.
 
 ## Sessions
 
 Each session has one goal, and takes 5 to 15 minutes unless it says
-otherwise. Sessions 01 to 10 start from the same save, with CRC-32
-1F93B89D. Session 11 starts from another, with CRC-32 7B17B522.
+otherwise. Sessions 01 to 10 and 12 to 15 start from the same save, with
+CRC-32 1F93B89D. Session 11 starts from another, with CRC-32 7B17B522.
 
 | Script                     | Goal                                                                                                                                       |
 |----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
@@ -102,7 +102,28 @@ otherwise. Sessions 01 to 10 start from the same save, with CRC-32
 | `09-get-character.txt`     | Play Get Character against Luigi to the end of the match. Takes up to 30 minutes.                                                          |
 | `10-toad-tournament.txt`   | Play the Tournament at Toad Highlands to the end, which adds its points and badges to the save. Takes about 30 minutes.                    |
 | `11-save.txt`              | Check the records, statistics, and unlocks in the save, then play one hole.                                                                |
+| `12-koopa-park.txt`        | Play Stroke on Koopa Park with Plum: a tee shot on each of the 18 holes, then Give Up. Ends at frame 35012, later than 10.                 |
+| `13-shy-guy-desert.txt`    | The same on Shy Guy Desert with Bowser.                                                                                                    |
+| `14-yoshis-island.txt`     | The same on Yoshi's Island with Luigi.                                                                                                     |
+| `15-boo-valley.txt`        | The same on Boo Valley with Harry.                                                                                                         |
 
 Sessions 09 and 10 are long, but they are the only way to reach the
 screens for unlocks and course points. The recorder records only the first
 controller, so no session plays the modes for 2 to 4 players.
+
+### Generated sessions
+
+Sessions 12 to 15 weren't recorded: `generate_round.py` writes them from
+a template, to reach each course's 18 holes, sky, and sunset without
+playing them out. Each enters the title screen's code that unlocks every
+course and character, so it needs no more progress than the others' save.
+The presses are timed for that save, whose menus start where it left
+their cursors. To change a session, change the template and run it:
+
+```sh
+python3 port/playthroughs/generate_round.py
+```
+
+The `playthrough_scripts_test` test checks that the scripts are what the
+template writes. As with a recording, keep the session's start save and
+the save that a headless replay leaves, to compare later replays with.

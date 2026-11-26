@@ -206,6 +206,12 @@ add_test(NAME nested_functions_test
         ${emulator_arguments}
 )
 
+# The generated playthroughs' scripts are what their template writes
+add_test(NAME playthrough_scripts_test
+    COMMAND "${Python3_EXECUTABLE}" -I
+        "${PROJECT_SOURCE_DIR}/port/playthroughs/generate_round.py" --check
+)
+
 # The linker script that gathers overlays' variables, linked into a program
 # of its own with three overlays, in place of the doubles' empty table
 include(OverlaySections)
