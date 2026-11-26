@@ -133,6 +133,13 @@ if(ANDROID)
     add_subdirectory(android)
 endif()
 
-if(BUILD_TESTING)
+# A cross build runs its tests through CMAKE_CROSSCOMPILING_EMULATOR, such
+# as Wine for Windows. Without one, CTest could only fail to start each test.
+if(BUILD_TESTING AND CMAKE_CROSSCOMPILING AND NOT CMAKE_CROSSCOMPILING_EMULATOR)
+    message(WARNING
+        "Nothing here runs ${CMAKE_SYSTEM_NAME} programs, so the tests are left out. "
+        "To run them, install Wine and configure again."
+    )
+elseif(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
