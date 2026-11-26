@@ -146,7 +146,7 @@ your edits, so you only run it again after you change `assets.txt`.
 | `asset_archive/`    | The asset archive's 2449 assets, named by ID. `tools/asset_archive.py` packs them. |
 | `text/`             | Messages and the staff roll as text. `tools/messages.py` encodes them.             |
 | `character_models/` | Each character's models, and the patches for its other palettes                    |
-| `microcode/`        | The RSP's boot, graphics, and audio microcode, as the ROM holds it               |
+| `microcode/`        | The RSP's boot, graphics, and audio microcode, as the ROM holds it                 |
 | Other folders       | The textures that `textures.txt` lists, as PNG files, under their C file's path    |
 
 The code finds each file through the linker script, so a file can change
