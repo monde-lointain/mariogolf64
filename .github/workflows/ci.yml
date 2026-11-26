@@ -1,0 +1,150 @@
+# Checks every push and pull request. No job has the original ROM, which no
+# repository may hold, so CI runs the checks that need none, as
+# CONTRIBUTING.md lists them: the format and the Python tools, every object
+# that needs no file from the ROM, and the PC port, whose tests make ROMs of
+# their own. The packages that each job installs are the ones that the
+# build guides in docs/building/ install.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Format and tools
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+
+      # The oldest Python that the tools support, so that a newer feature
+      # can't slip in
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.10"
+
+      - name: Install the compilers for the hoister's tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends gcc clang
+
+      - name: Check the C sources' format
+        run: make check-format
+
+      - name: Check the Python tools
+        run: make pycheck
+
+      - name: Test the Python tools
+        run: make tool-tests
+
+      - name: Test the nested-function hoister with GCC
+        run: python3 -I port/tests/nested_functions_test.py --compiler gcc
+
+      - name: Test the nested-function hoister with Clang
+        run: python3 -I port/tests/nested_functions_test.py --compiler clang
+
+  objects:
+    name: Objects (${{ matrix.toolchain }})
+    runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - toolchain: KMC GCC
+            make-arguments: ""
+          - toolchain: modern GCC
+            make-arguments: MODERN=1
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Install the MIPS binutils
+        if: matrix.make-arguments == ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends binutils-mips-linux-gnu
+
+      - name: Install libdragon's toolchain
+        if: matrix.make-arguments != ''
+        run: |
+          curl --fail --silent --show-error --location --remote-name \
+            https://github.com/n64brew/libdragon/releases/download/toolchain-continuous-prerelease/gcc-toolchain-mips64-x86_64.deb
+          sudo apt-get install --yes ./gcc-toolchain-mips64-x86_64.deb
+
+      # make installs KMC GCC first, from the releases that
+      # tools/install_kmc.py pins
+      - name: Compile every object that needs no file from the ROM
+        run: make objects -j"$(nproc)" ${{ matrix.make-arguments }}
+
+  port:
+    name: Port (${{ matrix.preset }})
+    runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [linux, linux-clang, linux-sanitize, linux-clang-sanitize, windows-mingw]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install the build's tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            cmake ninja-build glslang-tools pkg-config python3
+          case "${{ matrix.preset }}" in
+            windows-mingw)
+              sudo apt-get install --yes --no-install-recommends mingw-w64 wine
+              ;;
+            *)
+              sudo apt-get install --yes --no-install-recommends \
+                libusb-1.0-0-dev libudev-dev libdbus-1-dev libibus-1.0-dev \
+                libasound2-dev libpulse-dev libpipewire-0.3-dev \
+                libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev \
+                libxi-dev libxss-dev libxtst-dev libxkbcommon-dev \
+                libwayland-dev libdecor-0-dev libegl-dev libdrm-dev libgbm-dev
+              ;;
+          esac
+          # Clang's sanitizer runtimes, which apt installs with clang only
+          # as a recommendation
+          case "${{ matrix.preset }}" in
+            linux-clang*)
+              sudo apt-get install --yes --no-install-recommends clang libclang-rt-dev
+              ;;
+          esac
+
+      - name: Configure, build, and test
+        env:
+          # There's no sound card or GPU here, so the GPU's tests skip
+          # themselves
+          SDL_AUDIO_DRIVER: dummy
+        run: cmake --workflow --preset ${{ matrix.preset }}
+
+  macos:
+    name: macOS
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install the packages
+        run: brew install make python mips-linux-gnu-binutils cmake ninja glslang spirv-cross libusb
+
+      # KMC GCC's build for Apple silicon, and macOS's iconv
+      - name: Compile every object that needs no file from the ROM
+        run: gmake objects -j"$(sysctl -n hw.ncpu)"
+
+      - name: Configure, build, and test the port
+        env:
+          SDL_AUDIO_DRIVER: dummy
+        run: cmake --workflow --preset macos
