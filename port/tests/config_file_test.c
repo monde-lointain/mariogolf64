@@ -11,6 +11,7 @@
 
 #ifndef _WIN32
 #    include <sys/stat.h>
+#    include <unistd.h>
 #endif
 
 #define TEST_PATH "config_file_test.ini"
@@ -117,13 +118,19 @@ static void TestUnreadableFile(void) {
 
 #ifndef _WIN32
 // A file that the player can't read stays, rather than the defaults
-// taking its place
+// taking its place. A process that reads past permissions, as root does in
+// a container, can read the file, so there is nothing to check.
 static void TestLeavesUnreadableFile(void) {
     const char *text = "[audio]\nvolume = 30\n";
     Config config;
 
     WriteText(text);
     EXPECT(chmod(TEST_PATH, 0) == 0);
+    if (access(TEST_PATH, R_OK) == 0) {
+        SDL_Log("Skipping the unreadable file's test, as this process reads past permissions");
+        EXPECT(chmod(TEST_PATH, S_IRUSR | S_IWUSR) == 0);
+        return;
+    }
     EXPECT(LoadConfigFile(TEST_PATH, &config) == 1);
     EXPECT(config.volume == 100);
     EXPECT(chmod(TEST_PATH, S_IRUSR | S_IWUSR) == 0);
