@@ -380,15 +380,13 @@ extract:
 		$(PYTHON) $(TOOLS)/messages.py decode $(BASE)/$$text.bin $(BASE)/$$text.txt || exit; \
 	done
 
-tools: $(KMC_DIR)/gcc $(KMC_DIR)/as
+# KMC GCC and its assembler, from the releases that tools/install_kmc.py
+# pins. It needs only Python's standard library, so it runs before the
+# environment exists.
+tools: $(KMC_DIR)/gcc
 
 $(KMC_DIR)/gcc:
-	@mkdir -p $(KMC_DIR)
-	wget -q -O - https://github.com/decompals/mips-gcc-2.7.2/releases/latest/download/gcc-2.7.2-linux.tar.gz | tar xz -C $(KMC_DIR)
-
-$(KMC_DIR)/as:
-	@mkdir -p $(KMC_DIR)
-	wget -q -O - https://github.com/decompals/mips-binutils-2.6/releases/latest/download/binutils-2.6-linux.tar.gz | tar xz -C $(KMC_DIR)
+	python3 $(TOOLS)/install_kmc.py $(KMC_DIR)
 
 clean:
 	rm -rf $(BUILD_DIR)/src $(BUILD_DIR)/assets $(BUILD_DIR)/lib $(ROM) $(ELF) $(TEST_DIR) \

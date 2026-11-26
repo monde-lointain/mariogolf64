@@ -10,6 +10,8 @@ include = ["tools/*.py"]
 
 [tool.ruff.lint]
 select = ["ALL"]
+# vulture's own codes, which it reads from "# noqa" comments
+external = ["V"]
 ignore = [
   # The formatter handles these; ruff warns that they conflict with it.
   "COM812",
