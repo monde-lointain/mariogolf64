@@ -25,7 +25,7 @@ Recorded in `02-first-holes.txt`.
 
 | ID   | Note                                                                       | Status |
 |------|----------------------------------------------------------------------------|--------|
-| 02-1 | Cracks in the tiles in the hole preview                                    | open |
+| 02-1 | Cracks in the tiles in the hole preview                                    | open; where the course's finer tiles meet coarser ones, a corner of the fine ones lies up to 0.7 pixels off the coarse edge, leaving a sliver that nothing draws. The RDP's anti-aliasing draws every pixel that any coverage sample reaches, and its VI blends the partly covered ones, so the N64 hides it; the port, drawing pixel centers, shows it at 1x as ares's RDP does but upscaled as a line. Widening each triangle to its samples' reach closed it, but drew depth seams across characters and notched their outlines without the VI's blend |
 | 02-2 | Hole disappears when zoom into flag occurs                                 | fixed in 236e63e4; the game fills only the preview's box of the depth image, and the port cleared all of it to the nearest depth, so the course outside the box failed its depth test |
 | 02-3 | Course does not redraw when turning to aim                                 | fixed in 6bee8520; the game clears the frozen frame's depth by filling it as a color image, which the RDP never counted as a depth clear |
 | 02-4 | Black circular shadows overlapping preview line when moving camera with C buttons | fixed in 46973715; they were the ball's shadow and sprite rectangles, drawn as columns once their edges wrapped |
