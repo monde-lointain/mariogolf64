@@ -31,7 +31,7 @@ Recorded in `02-first-holes.txt`.
 | 02-4 | Black circular shadows overlapping preview line when moving camera with C buttons | fixed in 46973715; they were the ball's shadow and sprite rectangles, drawn as columns once their edges wrapped |
 | 02-5 | Preview line is solid instead of dashed                                    | not a port defect: ares's RDP draws the same dashes; its VI anti-aliases the partly covered stretches to near nothing, and the port renders without coverage or the VI's filter |
 | 02-6 | Yardage text seems to clip/wrap improperly                                 | fixed in 2099d5f9; upscaled, a glyph's first row of target pixels took the texel before its edge, a sliver of the glyph above it in the font |
-| 02-7 | Gleam off ball while flying looks black                                    | open |
+| 02-7 | Gleam off ball while flying looks black                                    | fixed in 46973715; it was the ball's shadow, a dark column beside the ball once the rectangle's edges wrapped |
 | 02-8 | When zoomed in on cup during putting, unnatural green block appears from below it | fixed in 28baab46 |
 
 Every note from sessions 01 and 02 was seen again in sessions 03 to 11.
