@@ -33,7 +33,14 @@ vpath assets/% $(ROOTS)
 # The ROM's name; a mod can give its own
 TARGET      ?= mariogolf64
 TOOLS       := $(BASE)/tools
-PYTHON      ?= $(BASE)/.venv/bin/python3
+# The tools' Python environment, which make creates from requirements.txt.
+# Setting PYTHON to another interpreter leaves its packages to you.
+VENV        := $(BASE)/.venv
+PYTHON      ?= $(VENV)/bin/python3
+# The copy of requirements.txt that the environment was last made from,
+# which make makes before anything that runs PYTHON, if PYTHON is its own
+VENV_STAMP  := $(VENV)/requirements.txt
+PYTHON_SETUP = $(if $(filter $(VENV)/bin/python3,$(PYTHON)),$(VENV_STAMP))
 KMC_DIR     := $(BASE)/tools/gcc_kmc
 # The original ROM, which make extract cuts the assets from
 BASEROM     := $(BASE)/baserom.us.z64
@@ -281,8 +288,12 @@ ENCODE_TEXT   = $(PYTHON) $(TOOLS)/messages.py encode $< $@
 
 # Every object that the build links, under its directory. When a change to
 # the layout makes the list again, make reads it in afresh before building
-# anything, so that a file added to the layout is built.
+# anything, so that a file added to the layout is built. The goals that
+# build nothing skip it, as making it needs the Python environment.
+SETUP_GOALS := tools clean distclean
+ifneq ($(filter-out $(SETUP_GOALS),$(or $(MAKECMDGOALS),all)),)
 include $(LAYOUT_MK)
+endif
 O_FILES := $(LINKED_SOURCES:%=$(BUILD_DIR)/%.o)
 
 # libultra 2.0J, built the way ultralib builds libgultra_rom except that the
@@ -368,7 +379,9 @@ ifneq ($(COMPARE),0)
 	@sha1sum -c $(BASE)/$(TARGET).sha1
 endif
 
-setup: tools extract
+# Everything that the matching build needs from outside the repository,
+# besides the original ROM, which only you can supply
+setup: tools $(PYTHON_SETUP) extract
 
 # Cuts the files that the game reads from the original ROM into the base's
 # assets/, once for every mod
@@ -496,8 +509,23 @@ $(TEST_ELF): $(O_FILES) $(TEST_O_FILES) $(TEST_BOOT) $(TEST_LD) $(SYMBOL_SCRIPT)
 	    $(SANITIZER_LIB)
 	@$(PYTHON) $(TOOLS)/check_link.py $@ $(TEST_LD) $(SYMBOL_SCRIPT) -- $(O_FILES)
 
+# The Python environment, made again whenever requirements.txt changes.
+# The list of objects needs it, and make reads that list in on every run,
+# so the environment is always made before anything else. uv makes it if
+# it's installed, and needs no venv module; otherwise Python's own venv
+# and pip do.
+$(VENV_STAMP): $(BASE)/requirements.txt
+	if command -v uv > /dev/null; then \
+	    uv venv --quiet --allow-existing $(VENV) && \
+	    VIRTUAL_ENV=$(VENV) uv pip install --quiet --requirement $<; \
+	else \
+	    python3 -m venv $(VENV) && \
+	    $(VENV)/bin/python3 -m pip install --quiet --disable-pip-version-check --requirement $<; \
+	fi
+	cp $< $@
+
 # The linker scripts, and the list of objects, from the layout
-$(LAYOUT_MK): $(LAYOUT) $(TOOLS)/layout.py
+$(LAYOUT_MK): $(LAYOUT) $(TOOLS)/layout.py | $(PYTHON_SETUP)
 	@mkdir -p $(dir $@)
 	$(PYTHON) $(TOOLS)/layout.py objects $< > $@
 
@@ -668,14 +696,14 @@ TEST_FORMAT_FILES = $(wildcard tests/*.c tests/target/*.c tests/target/*.h)
 
 format:
 	$(CLANG_FORMAT) -i $(FORMAT_FILES) $(TEST_FORMAT_FILES)
-	.venv/bin/ruff format --quiet
+	$(VENV)/bin/ruff format --quiet
 
 # Lints and type-checks the Python tools, with the settings in pyproject.toml
 pycheck:
-	.venv/bin/ruff format --check --quiet
-	.venv/bin/ruff check --quiet
-	.venv/bin/basedpyright --level warning
-	.venv/bin/vulture
+	$(VENV)/bin/ruff format --check --quiet
+	$(VENV)/bin/ruff check --quiet
+	$(VENV)/bin/basedpyright --level warning
+	$(VENV)/bin/vulture
 
 # Tests the Python tools; the tests that need the game's files skip until
 # they're extracted
