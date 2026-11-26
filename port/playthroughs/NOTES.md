@@ -60,7 +60,7 @@ Recorded in `07-mini-golf.txt`.
 
 | ID   | Note                                                                       | Status |
 |------|----------------------------------------------------------------------------|--------|
-| 07-1 | Walls appear enlarged on the Mini-Golf course                              | open |
+| 07-1 | Walls appear enlarged on the Mini-Golf course                              | fixed in 6b424bdb; the game restores a saved frame's depth by copying it into the depth buffer in copy mode, which the port copied only as color, so the walls drew over the scene; it now draws the copy into the depth target at scale |
 
 ## Session 09: Get Character against Luigi
 
