@@ -13,6 +13,10 @@ need your own copy of the ROM:
 |------------------|--------------------------------------------|
 | `baserom.us.z64` | `e2c4e7a905b29529b49a1619a401fe699224829b` |
 
+![A map of the code by source file, with every box green: 100% matched, 2,040 of 2,040 functions](docs/images/progress-map.svg)
+
+![A chart of the matched code, which rises from 0% on October 21, 2026 to 100% on November 14, 2026](docs/images/progress-history.svg)
+
 ## What you can build
 
 From the one source tree, you can build the following:

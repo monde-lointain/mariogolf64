@@ -1,0 +1,1244 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 614" width="880" height="614" font-family="&#x27;Segoe UI&#x27;, &#x27;Helvetica Neue&#x27;, Helvetica, Arial, sans-serif" role="img" aria-label="Mario Golf (USA): 100% of the code matched">
+<rect width="880" height="614" fill="#0d1117"/>
+<text x="18" y="46" font-size="28" font-weight="600" fill="#e6edf3">Mario Golf (USA)</text>
+<text x="18" y="72" font-size="14" fill="#8b949e">Nintendo 64 · mariogolf64.z64 · code matched byte for byte</text>
+<text x="862" y="52" font-size="40" font-weight="700" text-anchor="end"><tspan fill="#3fb950">100%</tspan></text>
+<text x="862" y="72" font-size="14" fill="#8b949e" text-anchor="end">2,040 of 2,040 functions · 1,309,608 of 1,309,608 bytes</text>
+<rect x="12" y="86" width="856" height="6" rx="3" fill="#161b22"/>
+<rect x="12" y="86" width="856" height="6" rx="3" fill="#d29922"/>
+<rect x="12" y="86" width="856" height="6" rx="3" fill="#3fb950"/>
+<g><rect x="14" y="106" width="394.7" height="240.1" rx="3" fill="#161b22"/>
+<text x="20" y="120" font-size="12" font-weight="600" fill="#e6edf3">src/round · 309.4 KB</text>
+<rect x="15" y="127" width="120.5" height="118.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/round_hud
+src/round/round_hud.c
+51.7 KB code, 100% matched, 100% fuzzy
+43 of 43 functions matched</title></rect>
+<text x="18" y="141" font-size="13" fill="#0d1117" pointer-events="none">round_hud</text>
+<rect x="15" y="245.8" width="120.5" height="99.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/turn
+src/round/turn.c
+43.2 KB code, 100% matched, 100% fuzzy
+64 of 64 functions matched</title></rect>
+<text x="18" y="259.8" font-size="13" fill="#0d1117" pointer-events="none">turn</text>
+<rect x="135.5" y="127" width="86.1" height="112.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/round_results
+src/round/round_results.c
+34.9 KB code, 100% matched, 100% fuzzy
+35 of 35 functions matched</title></rect>
+<text x="138.5" y="139" font-size="11" fill="#0d1117" pointer-events="none">round_results</text>
+<rect x="135.5" y="239.3" width="86.1" height="105.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/round_events
+src/round/round_events.c
+32.9 KB code, 100% matched, 100% fuzzy
+29 of 29 functions matched</title></rect>
+<text x="138.5" y="251.3" font-size="11" fill="#0d1117" pointer-events="none">round_events</text>
+<rect x="221.6" y="127" width="104.9" height="84.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/scorecard_drawing
+src/round/scorecard_drawing.c
+32.1 KB code, 100% matched, 100% fuzzy
+14 of 14 functions matched</title></rect>
+<text x="224.6" y="138" font-size="10" fill="#0d1117" pointer-events="none">scorecard_drawing</text>
+<rect x="326.6" y="127" width="81.1" height="84.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/computer_golfer
+src/round/computer_golfer.c
+24.8 KB code, 100% matched, 100% fuzzy
+32 of 32 functions matched</title></rect>
+<rect x="221.6" y="211.7" width="80.8" height="78.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/play
+src/round/play.c
+23.0 KB code, 100% matched, 100% fuzzy
+35 of 35 functions matched</title></rect>
+<text x="224.6" y="225.7" font-size="13" fill="#0d1117" pointer-events="none">play</text>
+<rect x="221.6" y="290.5" width="80.8" height="54.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/save_menu
+src/round/save_menu.c
+15.9 KB code, 100% matched, 100% fuzzy
+16 of 16 functions matched</title></rect>
+<text x="224.6" y="304.5" font-size="13" fill="#0d1117" pointer-events="none">save_menu</text>
+<rect x="302.4" y="211.7" width="58.1" height="64.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/club_slots
+src/round/club_slots.c
+13.5 KB code, 100% matched, 100% fuzzy
+8 of 8 functions matched</title></rect>
+<rect x="360.6" y="211.7" width="47.1" height="64.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/scorecard
+src/round/scorecard.c
+10.9 KB code, 100% matched, 100% fuzzy
+16 of 16 functions matched</title></rect>
+<rect x="302.4" y="276.1" width="35.5" height="69.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/pause_menu
+src/round/pause_menu.c
+8.9 KB code, 100% matched, 100% fuzzy
+13 of 13 functions matched</title></rect>
+<rect x="337.9" y="276.1" width="43.4" height="46.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/round_stats
+src/round/round_stats.c
+7.3 KB code, 100% matched, 100% fuzzy
+17 of 17 functions matched</title></rect>
+<rect x="337.9" y="322.7" width="43.4" height="22.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/scoring
+src/round/scoring.c
+3.5 KB code, 100% matched, 100% fuzzy
+12 of 12 functions matched</title></rect>
+<rect x="381.3" y="276.1" width="26.4" height="34.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/fireworks
+src/round/fireworks.c
+3.3 KB code, 100% matched, 100% fuzzy
+7 of 7 functions matched</title></rect>
+<rect x="381.3" y="310.4" width="26.4" height="17.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/tournament
+src/round/tournament.c
+1.7 KB code, 100% matched, 100% fuzzy
+5 of 5 functions matched</title></rect>
+<rect x="381.3" y="328.1" width="26.4" height="17" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/round/hole_intro
+src/round/hole_intro.c
+1.6 KB code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+</g>
+<g><rect x="14" y="350.1" width="394.7" height="221.9" rx="3" fill="#161b22"/>
+<text x="20" y="364.1" font-size="12" font-weight="600" fill="#e6edf3">src/menus · 286.2 KB</text>
+<rect x="15" y="371.1" width="113.4" height="199.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/main_menu
+src/menus/main_menu.c
+82.7 KB code, 100% matched, 100% fuzzy
+58 of 58 functions matched</title></rect>
+<text x="18" y="385.1" font-size="13" fill="#0d1117" pointer-events="none">main_menu</text>
+<rect x="128.4" y="371.1" width="81.7" height="105.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/player_stats
+src/menus/player_stats.c
+31.3 KB code, 100% matched, 100% fuzzy
+25 of 25 functions matched</title></rect>
+<text x="131.4" y="383.1" font-size="11" fill="#0d1117" pointer-events="none">player_stats</text>
+<rect x="128.4" y="476.2" width="81.7" height="94.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/save_screens
+src/menus/save_screens.c
+28.2 KB code, 100% matched, 100% fuzzy
+27 of 27 functions matched</title></rect>
+<text x="131.4" y="488.2" font-size="11" fill="#0d1117" pointer-events="none">save_screens</text>
+<rect x="210.1" y="371.1" width="75.6" height="95.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/transmit_menu
+src/menus/transmit_menu.c
+26.4 KB code, 100% matched, 100% fuzzy
+45 of 45 functions matched</title></rect>
+<rect x="285.7" y="371.1" width="62.3" height="95.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/tournament_menu
+src/menus/tournament_menu.c
+21.8 KB code, 100% matched, 100% fuzzy
+33 of 33 functions matched</title></rect>
+<rect x="348" y="371.1" width="59.7" height="95.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/course_stats_screen
+src/menus/course_stats_screen.c
+20.9 KB code, 100% matched, 100% fuzzy
+25 of 25 functions matched</title></rect>
+<rect x="210.1" y="467" width="89.8" height="57.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/character_select
+src/menus/character_select.c
+18.8 KB code, 100% matched, 100% fuzzy
+17 of 17 functions matched</title></rect>
+<rect x="210.1" y="524.3" width="89.8" height="46.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/menu
+src/menus/menu.c
+15.3 KB code, 100% matched, 100% fuzzy
+55 of 55 functions matched</title></rect>
+<text x="213.1" y="538.3" font-size="13" fill="#0d1117" pointer-events="none">menu</text>
+<rect x="299.9" y="467" width="50.2" height="52.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/best_times
+src/menus/best_times.c
+9.5 KB code, 100% matched, 100% fuzzy
+9 of 9 functions matched</title></rect>
+<rect x="299.9" y="519.1" width="50.2" height="51.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/course_select
+src/menus/course_select.c
+9.5 KB code, 100% matched, 100% fuzzy
+13 of 13 functions matched</title></rect>
+<rect x="350.1" y="467" width="57.5" height="36.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/character_table
+src/menus/character_table.c
+7.7 KB code, 100% matched, 100% fuzzy
+9 of 9 functions matched</title></rect>
+<rect x="350.1" y="503.8" width="57.5" height="30.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/help_board
+src/menus/help_board.c
+6.5 KB code, 100% matched, 100% fuzzy
+5 of 5 functions matched</title></rect>
+<rect x="350.1" y="534.6" width="21.4" height="36.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/title_screen
+src/menus/title_screen.c
+2.8 KB code, 100% matched, 100% fuzzy
+9 of 9 functions matched</title></rect>
+<rect x="371.5" y="534.6" width="19" height="28.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/password
+src/menus/password.c
+2.0 KB code, 100% matched, 100% fuzzy
+6 of 6 functions matched</title></rect>
+<rect x="390.5" y="534.6" width="17.1" height="28.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/cursor_box
+src/menus/cursor_box.c
+1.8 KB code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="371.5" y="563.1" width="30.6" height="7.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/unlocks
+src/menus/unlocks.c
+896 B code, 100% matched, 100% fuzzy
+5 of 5 functions matched</title></rect>
+<rect x="402.1" y="563.1" width="5.6" height="7.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/menus/confirm_wait
+src/menus/confirm_wait.c
+164 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+</g>
+<g><rect x="412.7" y="106" width="155.2" height="210.6" rx="3" fill="#161b22"/>
+<text x="418.7" y="120" font-size="12" font-weight="600" fill="#e6edf3">src/shot · 108.6 KB</text>
+<rect x="413.7" y="127" width="85.3" height="94.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/shot/particle_effects
+src/shot/particle_effects.c
+30.3 KB code, 100% matched, 100% fuzzy
+37 of 37 functions matched</title></rect>
+<rect x="499" y="127" width="67.9" height="94.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/shot/ball_simulation
+src/shot/ball_simulation.c
+24.1 KB code, 100% matched, 100% fuzzy
+11 of 11 functions matched</title></rect>
+<rect x="413.7" y="221.3" width="59.3" height="94.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/shot/golf_balls
+src/shot/golf_balls.c
+21.0 KB code, 100% matched, 100% fuzzy
+12 of 12 functions matched</title></rect>
+<rect x="472.9" y="221.3" width="54.6" height="56.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/shot/shot_labels
+src/shot/shot_labels.c
+11.6 KB code, 100% matched, 100% fuzzy
+4 of 4 functions matched</title></rect>
+<rect x="527.5" y="221.3" width="39.4" height="56.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/shot/shot_effects
+src/shot/shot_effects.c
+8.4 KB code, 100% matched, 100% fuzzy
+16 of 16 functions matched</title></rect>
+<rect x="472.9" y="278.1" width="44.2" height="37.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/shot/club
+src/shot/club.c
+6.2 KB code, 100% matched, 100% fuzzy
+25 of 25 functions matched</title></rect>
+<text x="475.9" y="292.1" font-size="13" fill="#0d1117" pointer-events="none">club</text>
+<rect x="517.2" y="278.1" width="41" height="37.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/shot/club_panel
+src/shot/club_panel.c
+5.8 KB code, 100% matched, 100% fuzzy
+8 of 8 functions matched</title></rect>
+<rect x="558.2" y="278.1" width="8.7" height="37.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/shot/shot_simulation
+src/shot/shot_simulation.c
+1.2 KB code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+</g>
+<g><rect x="571.9" y="106" width="153.7" height="210.6" rx="3" fill="#161b22"/>
+<text x="577.9" y="120" font-size="12" font-weight="600" fill="#e6edf3">src/cinematics</text>
+<rect x="572.9" y="127" width="151.7" height="102.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/cinematics/opening
+src/cinematics/opening.c
+58.3 KB code, 100% matched, 100% fuzzy
+29 of 29 functions matched</title></rect>
+<text x="575.9" y="141" font-size="13" fill="#0d1117" pointer-events="none">opening</text>
+<rect x="572.9" y="229.3" width="53.7" height="86.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/cinematics/opening_ball
+src/cinematics/opening_ball.c
+17.4 KB code, 100% matched, 100% fuzzy
+12 of 12 functions matched</title></rect>
+<rect x="626.6" y="229.3" width="48.8" height="86.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/cinematics/staff_roll
+src/cinematics/staff_roll.c
+15.8 KB code, 100% matched, 100% fuzzy
+24 of 24 functions matched</title></rect>
+<rect x="675.4" y="229.3" width="49.3" height="68.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/cinematics/opening_camera_editor
+src/cinematics/opening_camera_editor.c
+12.7 KB code, 100% matched, 100% fuzzy
+18 of 18 functions matched</title></rect>
+<rect x="675.4" y="297.8" width="49.3" height="17.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/cinematics/boot_logos
+src/cinematics/boot_logos.c
+3.3 KB code, 100% matched, 100% fuzzy
+4 of 4 functions matched</title></rect>
+</g>
+<g><rect x="729.6" y="106" width="136.4" height="210.6" rx="3" fill="#161b22"/>
+<text x="735.6" y="120" font-size="12" font-weight="600" fill="#e6edf3">src/course</text>
+<rect x="730.6" y="127" width="76.3" height="92.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/course/hole_builder
+src/course/hole_builder.c
+26.6 KB code, 100% matched, 100% fuzzy
+59 of 59 functions matched</title></rect>
+<text x="733.6" y="138" font-size="10" fill="#0d1117" pointer-events="none">hole_builder</text>
+<rect x="807" y="127" width="58" height="92.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/course/collision
+src/course/collision.c
+20.3 KB code, 100% matched, 100% fuzzy
+13 of 13 functions matched</title></rect>
+<text x="810" y="138" font-size="10" fill="#0d1117" pointer-events="none">collision</text>
+<rect x="730.6" y="219.4" width="62.6" height="61.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/course/terrain
+src/course/terrain.c
+14.6 KB code, 100% matched, 100% fuzzy
+44 of 44 functions matched</title></rect>
+<text x="733.6" y="233.4" font-size="13" fill="#0d1117" pointer-events="none">terrain</text>
+<rect x="730.6" y="281" width="62.6" height="34.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/course/pin
+src/course/pin.c
+8.2 KB code, 100% matched, 100% fuzzy
+10 of 10 functions matched</title></rect>
+<text x="733.6" y="295" font-size="13" fill="#0d1117" pointer-events="none">pin</text>
+<rect x="793.3" y="219.4" width="39.3" height="52.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/course/billboard
+src/course/billboard.c
+7.8 KB code, 100% matched, 100% fuzzy
+10 of 10 functions matched</title></rect>
+<rect x="832.6" y="219.4" width="32.4" height="52.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/course/hole_triangles
+src/course/hole_triangles.c
+6.4 KB code, 100% matched, 100% fuzzy
+7 of 7 functions matched</title></rect>
+<rect x="793.3" y="272" width="32.8" height="43.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/course/hole_loader
+src/course/hole_loader.c
+5.4 KB code, 100% matched, 100% fuzzy
+16 of 16 functions matched</title></rect>
+<rect x="826.1" y="272" width="38.9" height="27.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/course/hole_creatures
+src/course/hole_creatures.c
+4.1 KB code, 100% matched, 100% fuzzy
+8 of 8 functions matched</title></rect>
+<rect x="826.1" y="299.6" width="25.9" height="16" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/course/lz_decoder
+src/course/lz_decoder.c
+1.6 KB code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="852" y="299.6" width="13" height="16" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/course/course
+src/course/course.c
+804 B code, 100% matched, 100% fuzzy
+6 of 6 functions matched</title></rect>
+</g>
+<g><rect x="412.7" y="320.6" width="139.7" height="125.5" rx="3" fill="#161b22"/>
+<text x="418.7" y="334.6" font-size="12" font-weight="600" fill="#e6edf3">src/debug</text>
+<rect x="413.7" y="341.6" width="114.9" height="103.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/debug/hole_editor
+src/debug/hole_editor.c
+49.4 KB code, 100% matched, 100% fuzzy
+34 of 34 functions matched</title></rect>
+<text x="416.7" y="355.6" font-size="13" fill="#0d1117" pointer-events="none">hole_editor</text>
+<rect x="528.6" y="341.6" width="22.8" height="72.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/debug/performance_meter
+src/debug/performance_meter.c
+6.8 KB code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+<rect x="528.6" y="413.7" width="22.8" height="31.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/debug/debug_text
+src/debug/debug_text.c
+3.0 KB code, 100% matched, 100% fuzzy
+13 of 13 functions matched</title></rect>
+</g>
+<g><rect x="412.7" y="450.1" width="139.7" height="121.9" rx="3" fill="#161b22"/>
+<text x="418.7" y="464.1" font-size="12" font-weight="600" fill="#e6edf3">lib/ultralib</text>
+<rect x="413.7" y="471.1" width="27.4" height="27.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/audio/env
+lib/ultralib/src/audio/env.c
+3.2 KB code, 100% matched, 100% fuzzy
+7 of 7 functions matched</title></rect>
+<text x="416.7" y="483.1" font-size="11" fill="#0d1117" pointer-events="none">env</text>
+<rect x="413.7" y="498.8" width="27.4" height="25.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/audio/reverb
+lib/ultralib/src/audio/reverb.c
+2.9 KB code, 100% matched, 100% fuzzy
+8 of 8 functions matched</title></rect>
+<rect x="413.7" y="524" width="27.4" height="24" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/audio/load
+lib/ultralib/src/audio/load.c
+2.8 KB code, 100% matched, 100% fuzzy
+4 of 4 functions matched</title></rect>
+<rect x="413.7" y="548" width="27.4" height="23" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/libc/xldtob
+lib/ultralib/src/libc/xldtob.c
+2.6 KB code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+<rect x="441.1" y="471.1" width="24.7" height="25.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/contpfs
+lib/ultralib/src/io/contpfs.c
+2.6 KB code, 100% matched, 100% fuzzy
+7 of 7 functions matched</title></rect>
+<rect x="441.1" y="496.6" width="24.7" height="25.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/lookathil
+lib/ultralib/src/gu/lookathil.c
+2.6 KB code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="441.1" y="521.7" width="24.7" height="25" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/libc/xprintf
+lib/ultralib/src/libc/xprintf.c
+2.6 KB code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="441.1" y="546.6" width="24.7" height="24.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/sched/sched
+lib/ultralib/src/sched/sched.c
+2.5 KB code, 100% matched, 100% fuzzy
+14 of 14 functions matched</title></rect>
+<rect x="465.8" y="471.1" width="27.5" height="17.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/audio/drvrnew
+lib/ultralib/src/audio/drvrnew.c
+2.0 KB code, 100% matched, 100% fuzzy
+8 of 8 functions matched</title></rect>
+<rect x="493.3" y="471.1" width="23.6" height="17.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/lookat
+lib/ultralib/src/gu/lookat.c
+1.8 KB code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="516.9" y="471.1" width="19.8" height="17.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/lookatref
+lib/ultralib/src/gu/lookatref.c
+1.5 KB code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="536.8" y="471.1" width="14.6" height="17.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/gbpakcheckconnector
+lib/ultralib/src/io/gbpakcheckconnector.c
+1.1 KB code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="465.8" y="488.9" width="15.5" height="14.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/devmgr
+lib/ultralib/src/io/devmgr.c
+952 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="465.8" y="503.2" width="15.5" height="14.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/position
+lib/ultralib/src/gu/position.c
+952 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="465.8" y="517.6" width="15.5" height="14" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/align
+lib/ultralib/src/gu/align.c
+928 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="465.8" y="531.5" width="15.5" height="13.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/motor
+lib/ultralib/src/io/motor.c
+908 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="465.8" y="545.2" width="15.5" height="13.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/perspective
+lib/ultralib/src/gu/perspective.c
+888 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="465.8" y="558.6" width="15.5" height="12.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/vimgr
+lib/ultralib/src/io/vimgr.c
+824 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="481.3" y="488.9" width="14.3" height="12.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/rotaterpy
+lib/ultralib/src/gu/rotaterpy.c
+788 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="495.7" y="488.9" width="14.2" height="12.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/controller
+lib/ultralib/src/io/controller.c
+780 B code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+<rect x="509.9" y="488.9" width="14.1" height="12.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/viswapcontext
+lib/ultralib/src/io/viswapcontext.c
+776 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="524" y="488.9" width="13.8" height="12.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/timerintr
+lib/ultralib/src/os/timerintr.c
+760 B code, 100% matched, 100% fuzzy
+4 of 4 functions matched</title></rect>
+<rect x="537.8" y="488.9" width="13.5" height="12.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/initialize
+lib/ultralib/src/os/initialize.c
+744 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="481.3" y="501.7" width="11.3" height="14.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/rotate
+lib/ultralib/src/gu/rotate.c
+724 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="481.3" y="516.7" width="11.3" height="14.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/pfsisplug
+lib/ultralib/src/io/pfsisplug.c
+724 B code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+<rect x="481.3" y="531.6" width="11.3" height="14.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/audio/resample
+lib/ultralib/src/audio/resample.c
+684 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="481.3" y="545.7" width="11.3" height="13.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/ortho
+lib/ultralib/src/gu/ortho.c
+636 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="481.3" y="558.8" width="11.3" height="12.2" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/libc/xlitob
+lib/ultralib/src/libc/xlitob.c
+592 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="492.7" y="501.7" width="12.9" height="10.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/sptask
+lib/ultralib/src/io/sptask.c
+568 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="505.5" y="501.7" width="11.7" height="10.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/pfsgetstatus
+lib/ultralib/src/io/pfsgetstatus.c
+516 B code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+<rect x="517.2" y="501.7" width="11.7" height="10.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/contramwrite
+lib/ultralib/src/io/contramwrite.c
+516 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="528.9" y="501.7" width="11.3" height="10.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/gbpakinit
+lib/ultralib/src/io/gbpakinit.c
+500 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="540.2" y="501.7" width="11.1" height="10.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/epirawdma
+lib/ultralib/src/io/epirawdma.c
+492 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="492.7" y="512" width="10.7" height="10.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/contramread
+lib/ultralib/src/io/contramread.c
+488 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="503.3" y="512" width="10.4" height="10.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/contreaddata
+lib/ultralib/src/io/contreaddata.c
+476 B code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+<rect x="513.7" y="512" width="10.1" height="10.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/gbpakreadwrite
+lib/ultralib/src/io/gbpakreadwrite.c
+464 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="523.9" y="512" width="9.6" height="10.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/libc/ldiv
+lib/ultralib/src/libc/ldiv.c
+440 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="533.5" y="512" width="9.1" height="10.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/sinf
+lib/ultralib/src/gu/sinf.c
+416 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="542.6" y="512" width="8.7" height="10.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/pimgr
+lib/ultralib/src/io/pimgr.c
+400 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="492.7" y="522.7" width="9.1" height="10" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/mtxcatf
+lib/ultralib/src/gu/mtxcatf.c
+392 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="492.7" y="532.8" width="9.1" height="9.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/gbpakreadid
+lib/ultralib/src/io/gbpakreadid.c
+388 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="492.7" y="542.7" width="9.1" height="9.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/cartrominit
+lib/ultralib/src/io/cartrominit.c
+376 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="492.7" y="552.3" width="9.1" height="9.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/audio/mainbus
+lib/ultralib/src/audio/mainbus.c
+368 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="492.7" y="561.8" width="9.1" height="9.2" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/epirawread
+lib/ultralib/src/io/epirawread.c
+360 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="501.8" y="522.7" width="8" height="10.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/visetspecial
+lib/ultralib/src/io/visetspecial.c
+356 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="501.8" y="533.1" width="8" height="10.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/epirawwrite
+lib/ultralib/src/io/epirawwrite.c
+356 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="501.8" y="543.4" width="8" height="9.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/cosf
+lib/ultralib/src/gu/cosf.c
+336 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="501.8" y="553.2" width="8" height="9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/jammesg
+lib/ultralib/src/os/jammesg.c
+308 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="501.8" y="562.2" width="8" height="8.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/sendmesg
+lib/ultralib/src/os/sendmesg.c
+304 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="509.8" y="522.7" width="8.6" height="7.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/recvmesg
+lib/ultralib/src/os/recvmesg.c
+292 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="518.4" y="522.7" width="8.3" height="7.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/aisetfreq
+lib/ultralib/src/io/aisetfreq.c
+280 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="526.7" y="522.7" width="8.3" height="7.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/startthread
+lib/ultralib/src/os/startthread.c
+280 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="534.9" y="522.7" width="8.3" height="7.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/gbpakgetstatus
+lib/ultralib/src/io/gbpakgetstatus.c
+280 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="543.2" y="522.7" width="8.1" height="7.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/gbpakpower
+lib/ultralib/src/io/gbpakpower.c
+276 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="509.8" y="530.6" width="7.2" height="8.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/audio/auxbus
+lib/ultralib/src/audio/auxbus.c
+268 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="509.8" y="539.3" width="7.2" height="8.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/vi
+lib/ultralib/src/io/vi.c
+260 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="509.8" y="547.7" width="7.2" height="8.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/mtxcatl
+lib/ultralib/src/gu/mtxcatl.c
+256 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="509.8" y="556" width="7.2" height="7.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/piacs
+lib/ultralib/src/io/piacs.c
+232 B code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+<rect x="509.8" y="563.5" width="7.2" height="7.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/siacs
+lib/ultralib/src/io/siacs.c
+232 B code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+<rect x="517" y="530.6" width="7.3" height="7.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/crc
+lib/ultralib/src/io/crc.c
+232 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="524.4" y="530.6" width="7" height="7.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/scale
+lib/ultralib/src/gu/scale.c
+220 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="531.3" y="530.6" width="6.8" height="7.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/destroythread
+lib/ultralib/src/os/destroythread.c
+216 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="538.2" y="530.6" width="6.6" height="7.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/audio/save
+lib/ultralib/src/audio/save.c
+208 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="544.8" y="530.6" width="6.6" height="7.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/createthread
+lib/ultralib/src/os/createthread.c
+208 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="517" y="538" width="6.9" height="7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/pirawdma
+lib/ultralib/src/io/pirawdma.c
+208 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="517" y="545" width="6.9" height="6.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/setthreadpri
+lib/ultralib/src/os/setthreadpri.c
+200 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="517" y="551.8" width="6.9" height="6.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/translate
+lib/ultralib/src/gu/translate.c
+196 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="517" y="558.4" width="6.9" height="6.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/gbpaksetbank
+lib/ultralib/src/io/gbpaksetbank.c
+192 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="517" y="564.9" width="6.9" height="6.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/stopthread
+lib/ultralib/src/os/stopthread.c
+180 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="523.9" y="538" width="7.1" height="5.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/audio/sl
+lib/ultralib/src/audio/sl.c
+172 B code, 100% matched, 100% fuzzy
+4 of 4 functions matched</title></rect>
+<rect x="531" y="538" width="7.1" height="5.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/seteventmesg
+lib/ultralib/src/os/seteventmesg.c
+172 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="538" y="538" width="6.7" height="5.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/sirawdma
+lib/ultralib/src/io/sirawdma.c
+164 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="544.8" y="538" width="6.6" height="5.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/contquery
+lib/ultralib/src/io/contquery.c
+160 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="523.9" y="543.7" width="6.3" height="5.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/dpsetnextbuf
+lib/ultralib/src/io/dpsetnextbuf.c
+152 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="523.9" y="549.3" width="6.3" height="5.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/epidma
+lib/ultralib/src/io/epidma.c
+148 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="523.9" y="554.8" width="6.3" height="5.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/aisetnextbuf
+lib/ultralib/src/io/aisetnextbuf.c
+148 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="523.9" y="560.3" width="6.3" height="5.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/settimer
+lib/ultralib/src/os/settimer.c
+148 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="523.9" y="565.8" width="6.3" height="5.2" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/libc/string
+lib/ultralib/src/libc/string.c
+140 B code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+<rect x="530.2" y="543.7" width="5.8" height="5.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/libc/sprintf
+lib/ultralib/src/libc/sprintf.c
+140 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="536" y="543.7" width="5.8" height="5.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/sprawdma
+lib/ultralib/src/io/sprawdma.c
+140 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="541.8" y="543.7" width="5.4" height="5.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/gettime
+lib/ultralib/src/os/gettime.c
+132 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="547.2" y="543.7" width="4.1" height="5.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/pfsselectbank
+lib/ultralib/src/io/pfsselectbank.c
+100 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="530.2" y="549.4" width="4.7" height="4.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/viblack
+lib/ultralib/src/io/viblack.c
+92 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="534.9" y="549.4" width="4.5" height="4.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/visetevent
+lib/ultralib/src/io/visetevent.c
+88 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="539.4" y="549.4" width="4.3" height="4.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/virtualtophysical
+lib/ultralib/src/os/virtualtophysical.c
+84 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="543.6" y="549.4" width="3.9" height="4.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/dpctr
+lib/ultralib/src/io/dpctr.c
+76 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="547.5" y="549.4" width="3.9" height="4.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/sptaskyielded
+lib/ultralib/src/io/sptaskyielded.c
+76 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="530.2" y="554" width="4.1" height="4.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/visetmode
+lib/ultralib/src/io/visetmode.c
+76 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="530.2" y="558.3" width="4.1" height="4.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/sirawread
+lib/ultralib/src/io/sirawread.c
+76 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="530.2" y="562.7" width="4.1" height="4.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/audio/heapalloc
+lib/ultralib/src/audio/heapalloc.c
+72 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="530.2" y="566.9" width="4.1" height="4.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/yieldthread
+lib/ultralib/src/os/yieldthread.c
+72 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="534.3" y="554" width="3.8" height="4.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/resetglobalintmask
+lib/ultralib/src/os/resetglobalintmask.c
+72 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="534.3" y="558.3" width="3.8" height="4.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/sirawwrite
+lib/ultralib/src/io/sirawwrite.c
+72 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="534.3" y="562.7" width="3.8" height="4.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/epilinkhandle
+lib/ultralib/src/io/epilinkhandle.c
+68 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="534.3" y="566.9" width="3.8" height="4.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/visetyscale
+lib/ultralib/src/io/visetyscale.c
+68 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="538.1" y="554" width="4.7" height="3.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/viswapbuf
+lib/ultralib/src/io/viswapbuf.c
+68 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="542.8" y="554" width="4.4" height="3.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/setglobalintmask
+lib/ultralib/src/os/setglobalintmask.c
+64 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="547.2" y="554" width="4.1" height="3.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/vigetmode
+lib/ultralib/src/io/vigetmode.c
+60 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="538.1" y="557.4" width="3.4" height="3.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/vigetcurrframebuf
+lib/ultralib/src/io/vigetcurrframebuf.c
+56 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="541.6" y="557.4" width="3.4" height="3.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/vigetnextframebuf
+lib/ultralib/src/io/vigetnextframebuf.c
+56 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="545" y="557.4" width="3.2" height="3.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/audio/heapinit
+lib/ultralib/src/audio/heapinit.c
+52 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="548.2" y="557.4" width="3.2" height="3.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/audio/copy
+lib/ultralib/src/audio/copy.c
+52 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="538.1" y="561.2" width="3.4" height="3.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/os/thread
+lib/ultralib/src/os/thread.c
+52 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="538.1" y="564.7" width="3.4" height="3.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/io/spsetpc
+lib/ultralib/src/io/spsetpc.c
+48 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="538.1" y="568" width="3.4" height="3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/ultralib/src/gu/random
+lib/ultralib/src/gu/random.c
+44 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="541.5" y="561.2" width="3.6" height="2.6" fill="#3fb950"><title>lib/ultralib/src/libc/syncprintf
+lib/ultralib/src/libc/syncprintf.c
+40 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="545.2" y="561.2" width="3.3" height="2.6" fill="#3fb950"><title>lib/ultralib/src/os/createmesgqueue
+lib/ultralib/src/os/createmesgqueue.c
+36 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="548.4" y="561.2" width="2.9" height="2.6" fill="#3fb950"><title>lib/ultralib/src/io/pigetcmdq
+lib/ultralib/src/io/pigetcmdq.c
+32 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="541.5" y="563.8" width="2.7" height="2.4" fill="#3fb950"><title>lib/ultralib/src/audio/filter
+lib/ultralib/src/audio/filter.c
+28 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="541.5" y="566.2" width="2.7" height="2.4" fill="#3fb950"><title>lib/ultralib/src/io/sptaskyield
+lib/ultralib/src/io/sptaskyield.c
+28 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="541.5" y="568.6" width="2.7" height="2.4" fill="#3fb950"><title>lib/ultralib/src/os/afterprenmi
+lib/ultralib/src/os/afterprenmi.c
+28 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="544.3" y="563.8" width="2.4" height="2.4" fill="#3fb950"><title>lib/ultralib/src/os/getthreadpri
+lib/ultralib/src/os/getthreadpri.c
+24 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="546.6" y="563.8" width="2.4" height="2.4" fill="#3fb950"><title>lib/ultralib/src/io/sp
+lib/ultralib/src/io/sp.c
+24 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="549" y="563.8" width="2.4" height="2.4" fill="#3fb950"><title>lib/ultralib/src/io/dp
+lib/ultralib/src/io/dp.c
+24 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="544.3" y="566.1" width="2.1" height="2.7" fill="#3fb950"><title>lib/ultralib/src/io/si
+lib/ultralib/src/io/si.c
+24 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="544.3" y="568.8" width="2.1" height="2.2" fill="#3fb950"><title>lib/ultralib/src/io/ai
+lib/ultralib/src/io/ai.c
+20 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="546.4" y="566.1" width="2.3" height="1.6" fill="#3fb950"><title>lib/ultralib/src/io/aigetlen
+lib/ultralib/src/io/aigetlen.c
+16 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="546.4" y="567.7" width="2.3" height="1.6" fill="#3fb950"><title>lib/ultralib/src/io/aigetstat
+lib/ultralib/src/io/aigetstat.c
+16 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="546.4" y="569.4" width="2.3" height="1.6" fill="#3fb950"><title>lib/ultralib/src/io/dpsetstat
+lib/ultralib/src/io/dpsetstat.c
+16 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="548.7" y="566.1" width="2.7" height="1.4" fill="#3fb950"><title>lib/ultralib/src/io/spgetstat
+lib/ultralib/src/io/spgetstat.c
+16 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="548.7" y="567.5" width="2.7" height="1.4" fill="#3fb950"><title>lib/ultralib/src/io/spsetstat
+lib/ultralib/src/io/spsetstat.c
+16 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="548.7" y="568.9" width="1.3" height="2.1" fill="#3fb950"><title>lib/ultralib/src/os/getcurrfaultthread
+lib/ultralib/src/os/getcurrfaultthread.c
+12 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="550" y="568.9" width="1.3" height="2.1" fill="#3fb950"><title>lib/ultralib/src/io/vigetcurrcontext
+lib/ultralib/src/io/vigetcurrcontext.c
+12 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+</g>
+<g><rect x="556.3" y="320.6" width="105" height="136.8" rx="3" fill="#161b22"/>
+<text x="562.3" y="334.6" font-size="12" font-weight="600" fill="#e6edf3">src/screen</text>
+<rect x="557.3" y="341.6" width="103" height="80.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/screen/sky_and_hud_animations
+src/screen/sky_and_hud_animations.c
+34.3 KB code, 100% matched, 100% fuzzy
+26 of 26 functions matched</title></rect>
+<rect x="557.3" y="422.2" width="75.4" height="34.2" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/screen/screen_layers
+src/screen/screen_layers.c
+10.6 KB code, 100% matched, 100% fuzzy
+28 of 28 functions matched</title></rect>
+<rect x="632.8" y="422.2" width="27.6" height="15.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/screen/scene_colors
+src/screen/scene_colors.c
+1.8 KB code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+<rect x="632.8" y="437.6" width="17.6" height="18.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/screen/rcp_init
+src/screen/rcp_init.c
+1.4 KB code, 100% matched, 100% fuzzy
+6 of 6 functions matched</title></rect>
+<rect x="650.4" y="437.6" width="10" height="18.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/screen/animated_box
+src/screen/animated_box.c
+792 B code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+</g>
+<g><rect x="556.3" y="461.4" width="105" height="110.6" rx="3" fill="#161b22"/>
+<text x="562.3" y="475.4" font-size="12" font-weight="600" fill="#e6edf3">characters</text>
+<rect x="557.3" y="482.4" width="53.5" height="88.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/characters/character
+src/characters/character.c
+20.6 KB code, 100% matched, 100% fuzzy
+48 of 48 functions matched</title></rect>
+<rect x="610.9" y="482.4" width="49.5" height="58.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/characters/reaction
+src/characters/reaction.c
+12.6 KB code, 100% matched, 100% fuzzy
+25 of 25 functions matched</title></rect>
+<rect x="610.9" y="541.1" width="48.3" height="29.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/characters/character_model
+src/characters/character_model.c
+6.3 KB code, 100% matched, 100% fuzzy
+15 of 15 functions matched</title></rect>
+<rect x="659.2" y="541.1" width="1.2" height="29.9" fill="#3fb950"><title>src/characters/character_sound
+src/characters/character_sound.c
+160 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+</g>
+<g><rect x="665.4" y="320.6" width="108.2" height="107.1" rx="3" fill="#161b22"/>
+<text x="671.4" y="334.6" font-size="12" font-weight="600" fill="#e6edf3">src/camera</text>
+<rect x="666.4" y="341.6" width="84.2" height="85.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/camera/shot_camera
+src/camera/shot_camera.c
+31.4 KB code, 100% matched, 100% fuzzy
+40 of 40 functions matched</title></rect>
+<text x="669.4" y="353.6" font-size="11" fill="#0d1117" pointer-events="none">shot_camera</text>
+<rect x="750.6" y="341.6" width="22" height="49.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/camera/view_projection
+src/camera/view_projection.c
+4.8 KB code, 100% matched, 100% fuzzy
+11 of 11 functions matched</title></rect>
+<rect x="750.6" y="391.2" width="22" height="35.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/camera/camera_framing
+src/camera/camera_framing.c
+3.4 KB code, 100% matched, 100% fuzzy
+6 of 6 functions matched</title></rect>
+</g>
+<g><rect x="777.5" y="320.6" width="88.5" height="107.1" rx="3" fill="#161b22"/>
+<text x="783.5" y="334.6" font-size="12" font-weight="600" fill="#e6edf3">src/game</text>
+<rect x="778.5" y="341.6" width="86.5" height="85.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/game/game
+src/game/game.c
+32.6 KB code, 100% matched, 100% fuzzy
+24 of 24 functions matched</title></rect>
+<text x="781.5" y="355.6" font-size="13" fill="#0d1117" pointer-events="none">game</text>
+</g>
+<g><rect x="665.4" y="431.7" width="83.2" height="69.5" rx="3" fill="#161b22"/>
+<text x="671.4" y="445.7" font-size="12" font-weight="600" fill="#e6edf3">src/text</text>
+<rect x="666.4" y="452.7" width="81.2" height="47.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/text/text
+src/text/text.c
+20.4 KB code, 100% matched, 100% fuzzy
+39 of 39 functions matched</title></rect>
+<text x="669.4" y="466.7" font-size="13" fill="#0d1117" pointer-events="none">text</text>
+</g>
+<g><rect x="665.4" y="505.2" width="83.2" height="66.8" rx="3" fill="#161b22"/>
+<text x="671.4" y="519.2" font-size="12" font-weight="600" fill="#e6edf3">lib/libmus</text>
+<rect x="666.4" y="526.2" width="59.1" height="44.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libmus/src/player
+lib/libmus/src/player.c
+14.3 KB code, 100% matched, 100% fuzzy
+109 of 109 functions matched</title></rect>
+<text x="669.4" y="540.2" font-size="13" fill="#0d1117" pointer-events="none">player</text>
+<rect x="725.5" y="526.2" width="22.1" height="20.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libmus/src/player_fx
+lib/libmus/src/player_fx.c
+2.5 KB code, 100% matched, 100% fuzzy
+13 of 13 functions matched</title></rect>
+<rect x="725.5" y="546.8" width="13.8" height="15.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libmus/src/aud_dma
+lib/libmus/src/aud_dma.c
+1.2 KB code, 100% matched, 100% fuzzy
+6 of 6 functions matched</title></rect>
+<rect x="739.3" y="546.8" width="8.3" height="15.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libmus/src/aud_thread
+lib/libmus/src/aud_thread.c
+716 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="725.5" y="562.5" width="9.1" height="8.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libmus/src/aud_sched
+lib/libmus/src/aud_sched.c
+428 B code, 100% matched, 100% fuzzy
+4 of 4 functions matched</title></rect>
+<rect x="734.6" y="562.5" width="6.8" height="8.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libmus/src/lib_memory
+lib/libmus/src/lib_memory.c
+320 B code, 100% matched, 100% fuzzy
+6 of 6 functions matched</title></rect>
+<rect x="741.4" y="562.5" width="6.2" height="8.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libmus/src/aud_samples
+lib/libmus/src/aud_samples.c
+292 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+</g>
+<g><rect x="752.6" y="431.7" width="56.9" height="61.1" rx="3" fill="#161b22"/>
+<rect x="753.6" y="432.7" width="40" height="23.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nusched
+lib/libnusys/src/nusched.c
+3.7 KB code, 100% matched, 100% fuzzy
+14 of 14 functions matched</title></rect>
+<rect x="793.6" y="432.7" width="14.9" height="23.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontrmbmgr
+lib/libnusys/src/nucontrmbmgr.c
+1.4 KB code, 100% matched, 100% fuzzy
+9 of 9 functions matched</title></rect>
+<rect x="753.6" y="456.2" width="14.1" height="20.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nugfxtaskmgr
+lib/libnusys/src/nugfxtaskmgr.c
+1.1 KB code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+<rect x="753.6" y="477.1" width="14.1" height="14.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontmgr
+lib/libnusys/src/nucontmgr.c
+820 B code, 100% matched, 100% fuzzy
+9 of 9 functions matched</title></rect>
+<rect x="767.7" y="456.2" width="12.5" height="15.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nusimgr
+lib/libnusys/src/nusimgr.c
+748 B code, 100% matched, 100% fuzzy
+6 of 6 functions matched</title></rect>
+<rect x="767.7" y="471.2" width="12.5" height="10.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontgbpakfwrite
+lib/libnusys/src/nucontgbpakfwrite.c
+528 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="767.7" y="481.8" width="12.5" height="9.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nugfxsetcfb
+lib/libnusys/src/nugfxsetcfb.c
+492 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="780.2" y="456.2" width="11.7" height="9.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontgbpakfread
+lib/libnusys/src/nucontgbpakfread.c
+460 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="791.9" y="456.2" width="8.5" height="9.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontgbpakmgr
+lib/libnusys/src/nucontgbpakmgr.c
+332 B code, 100% matched, 100% fuzzy
+8 of 8 functions matched</title></rect>
+<rect x="800.3" y="456.2" width="8.2" height="9.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nuboot
+lib/libnusys/src/nuboot.c
+320 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="780.2" y="466" width="6.8" height="10.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nugfxthread
+lib/libnusys/src/nugfxthread.c
+296 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="780.2" y="476.9" width="6.8" height="7.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nupireadrom
+lib/libnusys/src/nupireadrom.c
+212 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="780.2" y="484.7" width="6.8" height="7.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontrmbmodeset
+lib/libnusys/src/nucontrmbmodeset.c
+192 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="787" y="466" width="7.8" height="6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nupireadwritesram
+lib/libnusys/src/nupireadwritesram.c
+188 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="794.8" y="466" width="6.8" height="6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nugfxinit_ex2
+lib/libnusys/src/nugfxinit_ex2.c
+164 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="801.7" y="466" width="6.8" height="6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nupiinitsram
+lib/libnusys/src/nupiinitsram.c
+164 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="787" y="472.1" width="5.3" height="7.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nusicallbackadd
+lib/libnusys/src/nusicallbackadd.c
+160 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="787" y="479.7" width="5.3" height="6.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontdatagetex
+lib/libnusys/src/nucontdatagetex.c
+132 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="787" y="486" width="5.3" height="5.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nusicallbackremove
+lib/libnusys/src/nusicallbackremove.c
+120 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="792.3" y="472.1" width="5.8" height="5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nugfxretracewait
+lib/libnusys/src/nugfxretracewait.c
+116 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="798.1" y="472.1" width="5.8" height="5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontrmbcheck
+lib/libnusys/src/nucontrmbcheck.c
+116 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="803.9" y="472.1" width="4.6" height="5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontrmbstart
+lib/libnusys/src/nucontrmbstart.c
+92 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="792.3" y="477.1" width="4.5" height="5.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontgbpakopen
+lib/libnusys/src/nucontgbpakopen.c
+92 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="792.3" y="482.2" width="4.5" height="5.1" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontdatalock
+lib/libnusys/src/nucontdatalock.c
+92 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="792.3" y="487.3" width="4.5" height="4.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontgbpakreadwrite
+lib/libnusys/src/nucontgbpakreadwrite.c
+80 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="796.8" y="477.1" width="4.1" height="3.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nupiinit
+lib/libnusys/src/nupiinit.c
+64 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="800.9" y="477.1" width="3.8" height="3.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nugfxfuncset
+lib/libnusys/src/nugfxfuncset.c
+60 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="804.7" y="477.1" width="3.8" height="3.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontgbpakreadid
+lib/libnusys/src/nucontgbpakreadid.c
+60 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="796.8" y="481" width="3.9" height="3.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nuprenmifuncset
+lib/libnusys/src/nuprenmifuncset.c
+56 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="796.8" y="484.6" width="3.9" height="3.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nugfxswapcfbfuncset
+lib/libnusys/src/nugfxswapcfbfuncset.c
+56 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="796.8" y="488.2" width="3.9" height="3.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontgbpakgetstatus
+lib/libnusys/src/nucontgbpakgetstatus.c
+56 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="800.7" y="481" width="3.9" height="3.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontgbpakpower
+lib/libnusys/src/nucontgbpakpower.c
+56 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="804.6" y="481" width="3.9" height="3.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontgbpakcheck
+lib/libnusys/src/nucontgbpakcheck.c
+56 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="800.7" y="484.6" width="3.1" height="4.2" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnusys/src/nucontinit
+lib/libnusys/src/nucontinit.c
+52 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="800.7" y="488.8" width="3.1" height="2.9" fill="#3fb950"><title>lib/libnusys/src/nugfxdisplayoff
+lib/libnusys/src/nugfxdisplayoff.c
+36 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="803.8" y="484.6" width="2.3" height="3.4" fill="#3fb950"><title>lib/libnusys/src/nucontrmbforcestop
+lib/libnusys/src/nucontrmbforcestop.c
+32 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="806.2" y="484.6" width="2.3" height="3.4" fill="#3fb950"><title>lib/libnusys/src/nucontqueryread
+lib/libnusys/src/nucontqueryread.c
+32 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="803.8" y="488.1" width="1.9" height="3.7" fill="#3fb950"><title>lib/libnusys/src/nugfxswapcfb
+lib/libnusys/src/nugfxswapcfb.c
+28 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="805.7" y="488.1" width="2.7" height="2.2" fill="#3fb950"><title>lib/libnusys/src/nugfxtaskallendwait
+lib/libnusys/src/nugfxtaskallendwait.c
+24 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="805.7" y="490.3" width="2.7" height="1.5" fill="#3fb950"><title>lib/libnusys/src/nugfxdisplayon
+lib/libnusys/src/nugfxdisplayon.c
+16 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+</g>
+<g><rect x="813.5" y="431.7" width="52.5" height="61.1" rx="3" fill="#161b22"/>
+<rect x="814.5" y="432.7" width="25.4" height="24.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_reverb
+lib/libnaudio/src/n_reverb.c
+2.5 KB code, 100% matched, 100% fuzzy
+6 of 6 functions matched</title></rect>
+<rect x="839.9" y="432.7" width="25.1" height="24.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_env
+lib/libnaudio/src/n_env.c
+2.4 KB code, 100% matched, 100% fuzzy
+5 of 5 functions matched</title></rect>
+<rect x="814.5" y="457.5" width="23.2" height="19.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_load
+lib/libnaudio/src/n_load.c
+1.8 KB code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+<rect x="814.5" y="477" width="23.2" height="14.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_synthesizer
+lib/libnaudio/src/n_synthesizer.c
+1.3 KB code, 100% matched, 100% fuzzy
+8 of 8 functions matched</title></rect>
+<rect x="837.7" y="457.5" width="20" height="16.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_drvrNew
+lib/libnaudio/src/n_drvrNew.c
+1.3 KB code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="857.7" y="457.5" width="7.3" height="16.3" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_resample
+lib/libnaudio/src/n_resample.c
+476 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="837.7" y="473.8" width="8.9" height="13.2" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_synallocvoice
+lib/libnaudio/src/n_synallocvoice.c
+472 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="837.7" y="487" width="8.9" height="4.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_synsetvol
+lib/libnaudio/src/n_synsetvol.c
+168 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="846.6" y="473.8" width="6.2" height="6.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_auxbus
+lib/libnaudio/src/n_auxbus.c
+160 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="846.6" y="480.3" width="6.2" height="6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_synsetfxmix
+lib/libnaudio/src/n_synsetfxmix.c
+148 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="846.6" y="486.3" width="6.2" height="5.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_synstartvoice
+lib/libnaudio/src/n_synstartvoice.c
+136 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="852.8" y="473.8" width="6.1" height="5.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_synsetpan
+lib/libnaudio/src/n_synsetpan.c
+132 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="858.9" y="473.8" width="6.1" height="5.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_synsetpitch
+lib/libnaudio/src/n_synsetpitch.c
+132 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="852.8" y="479.2" width="6.2" height="5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_sl
+lib/libnaudio/src/n_sl.c
+124 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="859" y="479.2" width="6" height="5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_mainbus
+lib/libnaudio/src/n_mainbus.c
+120 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="852.8" y="484.2" width="3.8" height="7.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_synstopvoice
+lib/libnaudio/src/n_synstopvoice.c
+116 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="856.6" y="484.2" width="5.1" height="3.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_synallocfx
+lib/libnaudio/src/n_synallocfx.c
+80 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="856.6" y="488.1" width="5.1" height="3.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_synaddplayer
+lib/libnaudio/src/n_synaddplayer.c
+76 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="861.7" y="484.2" width="3.3" height="5.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libnaudio/src/n_save
+lib/libnaudio/src/n_save.c
+76 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="861.7" y="489.9" width="2.2" height="1.8" fill="#3fb950"><title>lib/libnaudio/src/n_syndelete
+lib/libnaudio/src/n_syndelete.c
+16 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="863.9" y="489.9" width="1.1" height="1.8" fill="#3fb950"><title>lib/libnaudio/src/n_synfreefx
+lib/libnaudio/src/n_synfreefx.c
+8 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+</g>
+<g><rect x="752.6" y="496.8" width="41.1" height="75.2" rx="3" fill="#161b22"/>
+<rect x="753.6" y="497.8" width="39.1" height="21.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/system/main
+src/system/main.c
+3.3 KB code, 100% matched, 100% fuzzy
+19 of 19 functions matched</title></rect>
+<text x="756.6" y="511.8" font-size="13" fill="#0d1117" pointer-events="none">main</text>
+<rect x="753.6" y="519.3" width="20.8" height="28.2" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/system/crash_screen
+src/system/crash_screen.c
+2.3 KB code, 100% matched, 100% fuzzy
+5 of 5 functions matched</title></rect>
+<rect x="774.4" y="519.3" width="18.2" height="28.2" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/system/heap
+src/system/heap.c
+2.0 KB code, 100% matched, 100% fuzzy
+12 of 12 functions matched</title></rect>
+<rect x="753.6" y="547.5" width="21.1" height="23.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/system/asset
+src/system/asset.c
+2.0 KB code, 100% matched, 100% fuzzy
+11 of 11 functions matched</title></rect>
+<rect x="774.7" y="547.5" width="17.9" height="22.7" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/system/overlay_manager
+src/system/overlay_manager.c
+1.6 KB code, 100% matched, 100% fuzzy
+9 of 9 functions matched</title></rect>
+<rect x="774.7" y="570.2" width="17.9" height="0.8" fill="#3fb950"><title>src/system/entry
+src/system/entry.s
+60 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+</g>
+<g><rect x="797.7" y="496.8" width="32.2" height="48.2" rx="3" fill="#161b22"/>
+<rect x="798.7" y="497.8" width="30.2" height="35.8" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/audio/sound
+src/audio/sound.c
+4.6 KB code, 100% matched, 100% fuzzy
+26 of 26 functions matched</title></rect>
+<rect x="798.7" y="533.5" width="30.2" height="10.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/audio/music
+src/audio/music.c
+1.4 KB code, 100% matched, 100% fuzzy
+15 of 15 functions matched</title></rect>
+</g>
+<g><rect x="833.8" y="496.8" width="32.2" height="48.2" rx="3" fill="#161b22"/>
+<rect x="834.8" y="497.8" width="30.2" height="19" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/math/math_library
+src/math/math_library.c
+2.5 KB code, 100% matched, 100% fuzzy
+4 of 4 functions matched</title></rect>
+<rect x="834.8" y="516.8" width="19.6" height="27.2" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/math/curve
+src/math/curve.c
+2.3 KB code, 100% matched, 100% fuzzy
+6 of 6 functions matched</title></rect>
+<rect x="854.5" y="516.8" width="10.5" height="15" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/math/math_util
+src/math/math_util.c
+696 B code, 100% matched, 100% fuzzy
+8 of 8 functions matched</title></rect>
+<rect x="854.5" y="531.8" width="10.5" height="12.2" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/math/matrix_conversion
+src/math/matrix_conversion.c
+568 B code, 100% matched, 100% fuzzy
+4 of 4 functions matched</title></rect>
+</g>
+<g><rect x="797.7" y="549" width="45.2" height="23" rx="3" fill="#161b22"/>
+<rect x="798.7" y="550" width="12.2" height="21" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libkmc/src/longlong
+lib/libkmc/src/longlong.s
+1.2 KB code, 100% matched, 100% fuzzy
+8 of 8 functions matched</title></rect>
+<rect x="810.9" y="550" width="11.3" height="21" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libkmc/src/trig
+lib/libkmc/src/trig.c
+1.1 KB code, 100% matched, 100% fuzzy
+4 of 4 functions matched</title></rect>
+<rect x="822.2" y="550" width="19.6" height="11.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libkmc/src/atan
+lib/libkmc/src/atan.c
+1.1 KB code, 100% matched, 100% fuzzy
+3 of 3 functions matched</title></rect>
+<rect x="822.2" y="561.6" width="5.8" height="9.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libkmc/src/strcmp
+lib/libkmc/src/strcmp.c
+260 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="828" y="561.6" width="5.5" height="9.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libkmc/src/floatdidf
+lib/libkmc/src/floatdidf.s
+248 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="833.5" y="561.6" width="8.4" height="4.9" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libkmc/src/memset
+lib/libkmc/src/memset.c
+196 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="833.5" y="566.5" width="5" height="4.5" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libkmc/src/matherror
+lib/libkmc/src/matherror.c
+108 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+<rect x="838.5" y="566.5" width="3.3" height="4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>lib/libkmc/src/rand
+lib/libkmc/src/rand.c
+64 B code, 100% matched, 100% fuzzy
+2 of 2 functions matched</title></rect>
+<rect x="838.5" y="570.5" width="3.3" height="0.5" fill="#3fb950"><title>lib/libkmc/src/matherr
+lib/libkmc/src/matherr.c
+8 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+</g>
+<g><rect x="846.8" y="549" width="19.2" height="10.4" rx="3" fill="#161b22"/>
+<rect x="847.8" y="550" width="17.2" height="8.4" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/controllers/controller_paks
+src/controllers/controller_paks.c
+1.1 KB code, 100% matched, 100% fuzzy
+12 of 12 functions matched</title></rect>
+</g>
+<g><rect x="846.8" y="563.4" width="19.2" height="8.6" rx="3" fill="#161b22"/>
+<rect x="847.8" y="564.4" width="16.6" height="6.6" fill="#3fb950" stroke="#161b22" stroke-width="1"><title>src/save/awards
+src/save/awards.c
+920 B code, 100% matched, 100% fuzzy
+4 of 4 functions matched</title></rect>
+<rect x="864.5" y="564.4" width="0.5" height="6.6" fill="#3fb950"><title>src/save/sram
+src/save/sram.c
+28 B code, 100% matched, 100% fuzzy
+1 of 1 functions matched</title></rect>
+</g>
+<rect x="16" y="587" width="14" height="14" rx="2" fill="#3fb950"/>
+<text x="36" y="598" font-size="13" fill="#8b949e">matched</text>
+<text x="864" y="598" font-size="13" fill="#8b949e" text-anchor="end">box area = code size</text>
+</svg>
