@@ -1,0 +1,117 @@
+# Recorded by mariogolf64 on 2026-11-17 at 13:14
+# Starts from the save with CRC-32 1F93B89D
+0
+164 A
+169
+188 A
+191
+208 A
+213
+227 stick=80,-8
+230 stick=79,-9
+231
+244 A
+247
+274 stick=80,-4
+275 stick=80,-7
+276 stick=79,-10
+277
+280 stick=76,-18
+281 stick=79,-14
+282 stick=79,-12
+283 stick=41,-9
+284
+292 A
+295
+414 A
+418
+433 A
+437
+459 L
+463 L stick=-5,33
+464 L stick=-4,80
+474 L stick=-5,80
+475 L stick=-7,54
+476
+490 LEFT
+498
+516 LEFT
+522
+539 A
+542 A stick=-8,40
+543 stick=-5,80
+544 stick=-6,80
+563 A stick=-6,80
+568 stick=-6,80
+599 A stick=-6,80
+605 stick=-6,80
+728 stick=-8,80
+729 stick=-10,79
+730 L stick=-6,48
+731 L stick=-2,10
+732 L
+808
+842 RIGHT
+844 CUP CRIGHT RIGHT
+852 CUP CRIGHT
+854 B CUP CRIGHT
+858 CUP CRIGHT
+859 CUP CRIGHT RIGHT
+879 CUP
+880
+890 A
+892
+895 A
+899
+913 stick=-39,20
+914 stick=-68,42
+915 stick=-67,44
+916 stick=-65,47
+917 stick=-62,50
+918 stick=-57,57
+919 stick=23,66
+920 stick=63,50
+921 stick=68,42
+922 stick=76,23
+923 stick=2,5
+924 stick=-54,2
+925 stick=-79,-11
+928 A stick=-79,-10
+933 stick=-79,-10
+934 stick=-79,-11
+953 A stick=-79,-11
+957 stick=-79,-11
+979 stick=-79,-10
+980 stick=-80,-9
+1022 stick=-80,-5
+1023 stick=-80,-2
+1024 stick=-80,1
+1026 stick=-80,2
+1028 stick=-80,5
+1029 stick=-78,8
+1030 stick=-57,8
+1031 stick=-2,-1
+1032
+1094 L
+1159
+1204 B
+1208
+1217 LEFT
+1228
+1233 A
+1236
+1257 A
+1262
+1293 A
+1295
+1387 L
+1456
+1516 A
+1519
+1536 A
+1540
+1857 A
+1861
+1939 B
+1942
+# Ends at frame 2107
