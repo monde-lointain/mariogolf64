@@ -1086,8 +1086,10 @@ void DrawRdpTriangle(
     const RspDrawState *state
 ) {
     const RspVertex *corners[3] = {first, second, third};
-    bool usesDepth = (state->geometryMode & G_ZBUFFER) != 0;
     bool usesPrimitiveDepth = Field(f_Rdp.otherModeLow, G_MDSFT_ZSRCSEL, 1) != 0;
+    // The primitive's depth takes the place of the triangle's own, which
+    // the RSP sends only under G_ZBUFFER
+    bool usesDepth = (state->geometryMode & G_ZBUFFER) != 0 || usesPrimitiveDepth;
     bool isFlat = (state->geometryMode & G_SHADING_SMOOTH) == 0;
     uint32_t materialIndex = 0;
     GfxVertex *vertices;

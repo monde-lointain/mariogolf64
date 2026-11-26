@@ -775,6 +775,15 @@ static void TestDepthSources(void) {
     EXPECT(f_Gpu.vertexCount == 3);
 }
 
+// The RDP puts the primitive's depth in place of a triangle's own, so a
+// triangle that the RSP sends without depth, as the game sends the letters
+// it draws about the ball, still tests and writes the primitive's
+static void TestTrianglesWithoutDepthTakePrimitives(void) {
+    DrawDepthSourcedTriangle(0, G_ZS_PRIM);
+    EXPECT(f_Gpu.draws[0].pipelineKey == (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE));
+    ExpectVertexDepths(3, PRIMITIVE_DEPTH_SHARE);
+}
+
 // Fills the other image in the fill cycle, as a color image, from left,
 // top to right, bottom in pixels, within a scissor scissorRight wide, with
 // the depth image elsewhere; then draws a triangle that tests depth against
@@ -1690,6 +1699,7 @@ int main(void) {
     TestUnforcedBlenderPassesFirstColor();
     TestDepthClear();
     TestDepthSources();
+    TestTrianglesWithoutDepthTakePrimitives();
     TestColorFillClearsLaterDepth();
     TestDepthClearNotesHoldFour();
     TestDepthClearOutlastsColorFill();
