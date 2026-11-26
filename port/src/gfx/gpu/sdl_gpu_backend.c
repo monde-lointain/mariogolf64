@@ -733,6 +733,8 @@ static void UploadFrame(SDL_GPUCommandBuffer *commands, const GfxFrame *frame) {
     SDL_EndGPUCopyPass(copy);
 }
 
+// Begins the pass's render pass. One without draws only clears its depth,
+// so it leaves out its target, which it would load and store for nothing.
 static SDL_GPURenderPass *BeginPass(SDL_GPUCommandBuffer *commands, const GfxPass *pass) {
     SDL_GPUColorTargetInfo color;
     SDL_GPUDepthStencilTargetInfo depth;
@@ -755,6 +757,10 @@ static SDL_GPURenderPass *BeginPass(SDL_GPUCommandBuffer *commands, const GfxPas
         depth.load_op = SDL_GPU_LOADOP_CLEAR;
         depth.clear_depth = pass->clearsDepth ? pass->depthClearValue : 1.0f;
         pass->depth->needsClear = false;
+    }
+
+    if (pass->drawCount == 0) {
+        return SDL_BeginGPURenderPass(commands, NULL, 0, &depth);
     }
 
     return SDL_BeginGPURenderPass(commands, &color, 1, &depth);
@@ -815,6 +821,7 @@ static void ClearNewDepth(SDL_GPUCommandBuffer *commands, const GfxPass *pass) {
     SDL_GPURenderPass *render;
 
     clear.clearsDepth = false;
+    clear.drawCount = 0;
     render = BeginPass(commands, &clear);
     if (render == NULL) {
         PcFatalError("Can't begin a render pass: %s", SDL_GetError());
