@@ -394,9 +394,11 @@ include $(wildcard $(MOD_ROOTS:%=%/mod.mk))
 # wrote, would otherwise leave a target that the next run takes as built
 .DELETE_ON_ERROR:
 
+# macOS has shasum but not sha1sum, which read the same list of hashes
 all: $(ROM)
 ifneq ($(COMPARE),0)
-	@sha1sum -c $(BASE)/$(TARGET).sha1
+	@if command -v sha1sum > /dev/null; then sha1sum -c $(BASE)/$(TARGET).sha1; \
+	else shasum -a 1 -c $(BASE)/$(TARGET).sha1; fi
 endif
 
 # Everything that the matching build needs from outside the repository,
