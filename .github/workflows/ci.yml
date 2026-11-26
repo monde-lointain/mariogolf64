@@ -70,11 +70,14 @@ jobs:
         with:
           python-version: "3.14"
 
+      # The runner installs amd64v3 packages, among which apt lists no MIPS
+      # binutils, so these come from the baseline packages
       - name: Install the MIPS binutils
         if: matrix.make-arguments == ''
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends binutils-mips-linux-gnu
+          sudo apt-get -o APT::Architecture-Variants= update
+          sudo apt-get -o APT::Architecture-Variants= install --yes --no-install-recommends \
+            binutils-mips-linux-gnu
 
       - name: Install libdragon's toolchain
         if: matrix.make-arguments != ''
