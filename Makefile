@@ -114,10 +114,11 @@ MODERN_TARGETFLAGS := -G0 -march=vr4300 -mabi=32 -mfix4300 -mno-abicalls -fno-PI
 MODERN_LIBS  = $(shell $(MODERN_CC) $(MODERN_TARGETFLAGS) -print-libgcc-file-name)
 
 # The GNU binutils for MIPS that assemble, link and copy the matching
-# build: the first of these whose ld is installed. Debian and Ubuntu package
-# mips-linux-gnu-, Fedora mips64-linux-gnu-, and libdragon's toolchain is
-# mips64-elf-. Set CROSS to choose others.
-MATCHING_CROSS_CHOICES := mips-linux-gnu- mips64-linux-gnu- $(MODERN_CROSS)
+# build: the first of these whose ld is installed. Debian, Ubuntu and
+# Homebrew package mips-linux-gnu-, Fedora mips64-linux-gnu-, the AUR
+# mips64-elf-, and libdragon's toolchain is mips64-elf- in N64_INST. Set
+# CROSS to choose others.
+MATCHING_CROSS_CHOICES := mips-linux-gnu- mips64-linux-gnu- mips64-elf- $(MODERN_CROSS)
 
 # The two toolchains, and what differs between their builds. Each build has
 # its own directory, so that no build links another's objects.
