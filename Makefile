@@ -9,6 +9,12 @@
 # for the build. Each of these folders' mod.mk, if it has one, is read
 # before the rules below, to add its own.
 
+# macOS's own make is GNU Make 3.81, from 2006, which this makefile isn't
+# written or tested for
+ifneq ($(filter 3.%,$(MAKE_VERSION)),)
+$(error GNU Make $(MAKE_VERSION) is too old: use 4.0 or later, such as Homebrew's gmake)
+endif
+
 # This repository's folder, as the makefile that includes this one names it
 BASE        := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 MODS        ?=
