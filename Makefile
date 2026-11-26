@@ -685,8 +685,11 @@ objects: $(filter-out $(ASSET_O_FILES),$(O_FILES))
 # The sources are UTF-8, but the game's strings are Shift-JIS. KMC GCC
 # compiles a Shift-JIS copy, and the line marker keeps its messages
 # pointing at the source. -I adds back the source's own directory, which
-# GCC searches first for quoted includes, in each of ROOTS.
-ICONV := iconv -f UTF-8 -t SHIFT_JIS
+# GCC searches first for quoted includes, in each of ROOTS. CP932,
+# Microsoft's Shift-JIS, gives the same bytes as glibc's SHIFT_JIS for
+# every character in the sources, but macOS's iconv reads SHIFT_JIS's 0x5C
+# and 0x7E as yen and overline, and wouldn't pass C's \ and ~ through.
+ICONV := iconv -f UTF-8 -t CP932
 
 $(BUILD_DIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
