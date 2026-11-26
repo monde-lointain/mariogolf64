@@ -22,6 +22,16 @@ sudo apt update
 sudo apt install build-essential git python3 python3-venv binutils-mips-linux-gnu
 ```
 
+If apt reports `Unable to locate package binutils-mips-linux-gnu`, your
+system installs the packages built for newer CPUs, called amd64v3, as
+Ubuntu's cloud images and GitHub's runners do. Apt then doesn't list
+Ubuntu's MIPS binutils. Install them from the baseline packages:
+
+```sh
+sudo apt -o APT::Architecture-Variants= update
+sudo apt -o APT::Architecture-Variants= install binutils-mips-linux-gnu
+```
+
 ## Get the source
 
 1.  Clone the repository:
