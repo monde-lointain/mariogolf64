@@ -103,6 +103,140 @@ static void TestTextureUploads(void) {
     EXPECT(!HasFrameRoom(&f_Frame, 0, FRAME_TEXEL_CAPACITY));
 }
 
+// A strip of six rows from source, at the same place in both targets
+static GfxCopy Strip(GfxTarget *source, uint16_t top) {
+    GfxCopy copy;
+
+    SDL_zero(copy);
+    copy.source = source;
+    copy.sourceX = 8;
+    copy.sourceY = top;
+    copy.x = 8;
+    copy.y = top;
+    copy.width = 304;
+    copy.height = 6;
+    return copy;
+}
+
+// A copy goes before the draws of its pass, so one that follows a draw
+// starts another pass over the same target, and lengthens no copy of the
+// pass before; draws may follow copies
+static void TestCopiesPrecedeDraws(void) {
+    GfxCopy copy = Strip(TARGET_B, 8);
+
+    ResetFrame(&f_Frame);
+    BeginFramePass(&f_Frame, TARGET_A);
+    AddFrameCopy(&f_Frame, TARGET_A, &copy);
+    EXPECT(f_Frame.passCount == 1 && f_Frame.passes[0].copyCount == 1);
+    EXPECT(f_Frame.passes[0].firstCopy == 0 && f_Frame.copyCount == 1);
+    EXPECT(f_Frame.copies[0].source == TARGET_B && f_Frame.copies[0].height == 6);
+
+    AddFrameVertices(&f_Frame, 3, 0, &f_FullRect);
+    EXPECT(f_Frame.passCount == 1 && f_Frame.passes[0].drawCount == 1);
+
+    // Even carrying on the first copy's rows, which it mustn't join
+    copy = Strip(TARGET_B, 14);
+    AddFrameCopy(&f_Frame, TARGET_A, &copy);
+    EXPECT(f_Frame.passCount == 2 && f_Frame.passes[1].target == TARGET_A);
+    EXPECT(f_Frame.passes[1].firstCopy == 1 && f_Frame.passes[1].copyCount == 1);
+    EXPECT(f_Frame.passes[1].drawCount == 0 && f_Frame.copies[0].height == 6);
+}
+
+// A copy into another target than the current pass's starts a pass, as a
+// draw does, and so does one with no pass before it
+static void TestCopyStartsItsTargetsPass(void) {
+    GfxCopy copy = Strip(TARGET_A, 8);
+
+    ResetFrame(&f_Frame);
+    AddFrameCopy(&f_Frame, TARGET_B, &copy);
+    EXPECT(f_Frame.passCount == 1 && f_Frame.passes[0].target == TARGET_B);
+    EXPECT(f_Frame.passes[0].depth == NULL && f_Frame.passes[0].copyCount == 1);
+
+    copy = Strip(TARGET_B, 8);
+    AddFrameCopy(&f_Frame, TARGET_A, &copy);
+    EXPECT(f_Frame.passCount == 2 && f_Frame.passes[1].target == TARGET_A);
+    EXPECT(f_Frame.passes[1].firstCopy == 1);
+}
+
+// The game copies an image a strip of rows at a time: a strip that carries
+// on where the last copy of the pass ended, in both targets, lengthens it
+static void TestCopiedStripsJoin(void) {
+    GfxCopy copy = Strip(TARGET_B, 8);
+
+    ResetFrame(&f_Frame);
+    BeginFramePass(&f_Frame, TARGET_A);
+    AddFrameCopy(&f_Frame, TARGET_A, &copy);
+    copy = Strip(TARGET_B, 14);
+    AddFrameCopy(&f_Frame, TARGET_A, &copy);
+    copy = Strip(TARGET_B, 20);
+    copy.height = 2;
+    AddFrameCopy(&f_Frame, TARGET_A, &copy);
+    EXPECT(f_Frame.copyCount == 1 && f_Frame.passes[0].copyCount == 1);
+    EXPECT(f_Frame.copies[0].sourceY == 8 && f_Frame.copies[0].y == 8);
+    EXPECT(f_Frame.copies[0].height == 14 && f_Frame.copies[0].width == 304);
+}
+
+// Strips that don't carry on the last copy stay apart: a gap or an overlap
+// of rows, other columns, another source, or other rows in either target
+static void TestCopiesThatDontAdjoinStayApart(void) {
+    GfxCopy copies[8];
+    int i;
+
+    for (i = 0; i < 8; i++) {
+        copies[i] = Strip(TARGET_B, 8);
+    }
+
+    copies[1] = Strip(TARGET_B, 15); // A gap
+    copies[2] = Strip(TARGET_B, 13); // An overlap
+    copies[3] = Strip(TARGET_B, 14);
+    copies[3].sourceX = 9;
+    copies[4] = Strip(TARGET_B, 14);
+    copies[4].x = 9;
+    copies[5] = Strip(TARGET_B, 14);
+    copies[5].width = 300;
+    copies[6] = Strip(OTHER_DEPTH, 14);
+    copies[7] = Strip(TARGET_B, 14);
+    copies[7].y = 30;
+    for (i = 1; i < 8; i++) {
+        ResetFrame(&f_Frame);
+        BeginFramePass(&f_Frame, TARGET_A);
+        AddFrameCopy(&f_Frame, TARGET_A, &copies[0]);
+        AddFrameCopy(&f_Frame, TARGET_A, &copies[i]);
+        EXPECT(f_Frame.copyCount == 2 && f_Frame.passes[0].copyCount == 2);
+        EXPECT(f_Frame.copies[0].height == 6);
+    }
+
+    // Only the source's rows lead on
+    ResetFrame(&f_Frame);
+    copies[1] = Strip(TARGET_B, 14);
+    copies[1].sourceY = 30;
+    AddFrameCopy(&f_Frame, TARGET_A, &copies[0]);
+    AddFrameCopy(&f_Frame, TARGET_A, &copies[1]);
+    EXPECT(f_Frame.copyCount == 2);
+}
+
+// A frame with no room for another copy needs flushing
+static void TestCopiesFillTheFrame(void) {
+    uint16_t i;
+
+    ResetFrame(&f_Frame);
+    for (i = 0; i < FRAME_COPY_CAPACITY - 1; i++) {
+        GfxCopy copy = Strip(TARGET_B, (uint16_t)(i * 7));
+
+        AddFrameCopy(&f_Frame, TARGET_A, &copy);
+    }
+
+    EXPECT(f_Frame.copyCount == FRAME_COPY_CAPACITY - 1);
+    EXPECT(HasFrameRoom(&f_Frame, 0, 0));
+    {
+        GfxCopy copy = Strip(TARGET_B, 0);
+
+        AddFrameCopy(&f_Frame, TARGET_A, &copy);
+    }
+
+    EXPECT(!HasFrameRoom(&f_Frame, 0, 0));
+}
+
 int main(void) {
     InitFrame(&f_Frame);
     TestDrawsMerge();
@@ -110,5 +244,10 @@ int main(void) {
     TestDepthSplitsPasses();
     TestMaterialsShared();
     TestTextureUploads();
+    TestCopiesPrecedeDraws();
+    TestCopyStartsItsTargetsPass();
+    TestCopiedStripsJoin();
+    TestCopiesThatDontAdjoinStayApart();
+    TestCopiesFillTheFrame();
     return ReportTestResults("frame_test");
 }

@@ -391,7 +391,154 @@ static void TestTextureKeys(void) {
     EXPECT(DescribeTileTexture(&f_Tmem, G_TX_RENDERTILE, PALETTE_NONE).key != firstKey);
 }
 
+#define SOURCE_WIDTH 16
+#define SOURCE_HEIGHT 8
+
+static uint8_t f_SourceImage[SOURCE_WIDTH * SOURCE_HEIGHT * 2];
+
+// Where LoadSourcePart puts its texels, in TMEM's words
+#define SOURCE_TMEM_WORDS 4
+
+// Loads columns 4 to 11 of rows 2 to 5 of the 16 by 8 RGBA16 image, two
+// words a row, and sets the render tile to read them where they went
+static void LoadSourcePart(void) {
+    TextureImage source = {f_SourceImage, G_IM_FMT_RGBA, G_IM_SIZ_16b, SOURCE_WIDTH};
+    RdpTile *tile = &f_Tmem.tiles[G_TX_RENDERTILE];
+
+    memset(&f_Tmem, 0, sizeof(f_Tmem));
+    SetTile(G_TX_LOADTILE, G_IM_FMT_RGBA, G_IM_SIZ_16b, 2, SOURCE_TMEM_WORDS);
+    LoadTmemTile(&f_Tmem, &source, G_TX_LOADTILE, 4 << 2, 2 << 2, 11 << 2, 5 << 2);
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_RGBA, G_IM_SIZ_16b, 2, SOURCE_TMEM_WORDS);
+    tile->upperLeftS = 4 << 2;
+    tile->upperLeftT = 2 << 2;
+    tile->lowerRightS = 11 << 2;
+    tile->lowerRightT = 5 << 2;
+}
+
+static bool FindRenderTileSource(uint32_t s, uint32_t t, uint32_t width, uint32_t height) {
+    TileSource source;
+
+    return FindTileSource(&f_Tmem, G_TX_RENDERTILE, s, t, width, height, &source);
+}
+
+// A tile's texels that one LoadTile put in TMEM come from the image's rows,
+// from the texel that the tile's upper left loaded
+static void TestTileSourceOfLoadedTexels(void) {
+    TileSource source = {NULL, 0};
+
+    LoadSourcePart();
+    EXPECT(FindTileSource(&f_Tmem, G_TX_RENDERTILE, 4, 2, 8, 4, &source));
+    EXPECT(source.address == &f_SourceImage[((2 * SOURCE_WIDTH) + 4) * 2]);
+    EXPECT(source.imageWidth == SOURCE_WIDTH);
+    EXPECT(FindTileSource(&f_Tmem, G_TX_RENDERTILE, 6, 3, 4, 2, &source));
+    EXPECT(source.address == &f_SourceImage[((3 * SOURCE_WIDTH) + 6) * 2]);
+}
+
+// Texels outside what the load put there have no source
+static void TestTileSourceStaysInTheLoad(void) {
+    LoadSourcePart();
+    EXPECT(FindRenderTileSource(4, 2, 8, 4));
+    EXPECT(!FindRenderTileSource(5, 2, 8, 4));
+    EXPECT(!FindRenderTileSource(4, 3, 8, 4));
+    EXPECT(!FindRenderTileSource(4, 2, 9, 4));
+    EXPECT(!FindRenderTileSource(4, 2, 8, 5));
+    EXPECT(!FindRenderTileSource(3, 2, 8, 4));
+    EXPECT(!FindRenderTileSource(4, 1, 8, 4));
+}
+
+// Only a tile that reads the load's TMEM as it was written, texel for
+// texel, has a source
+static void TestTileSourceNeedsTheLoadsLayout(void) {
+    RdpTile *tile = &f_Tmem.tiles[G_TX_RENDERTILE];
+
+    LoadSourcePart();
+    tile->tmemAddress = (SOURCE_TMEM_WORDS + 1) * TMEM_WORD_SIZE;
+    EXPECT(!FindRenderTileSource(4, 2, 8, 4));
+    tile->tmemAddress = 0;
+    EXPECT(!FindRenderTileSource(4, 2, 8, 4));
+
+    LoadSourcePart();
+    tile->lineBytes = 3 * TMEM_WORD_SIZE;
+    EXPECT(!FindRenderTileSource(4, 2, 4, 2));
+
+    LoadSourcePart();
+    tile->size = G_IM_SIZ_8b;
+    EXPECT(!FindRenderTileSource(4, 2, 8, 4));
+
+    LoadSourcePart();
+    tile->s.maskBits = 3;
+    EXPECT(!FindRenderTileSource(4, 2, 8, 4));
+
+    LoadSourcePart();
+    tile->t.maskBits = 3;
+    EXPECT(!FindRenderTileSource(4, 2, 8, 4));
+
+    LoadSourcePart();
+    tile->s.shift = 1;
+    EXPECT(!FindRenderTileSource(4, 2, 8, 4));
+
+    LoadSourcePart();
+    tile->t.shift = 1;
+    EXPECT(!FindRenderTileSource(4, 2, 8, 4));
+
+    LoadSourcePart();
+    tile->upperLeftT = (2 << 2) | 1;
+    EXPECT(!FindRenderTileSource(4, 2, 8, 4));
+
+    LoadSourcePart();
+    tile->upperLeftS = (4 << 2) | 2;
+    EXPECT(!FindRenderTileSource(4, 2, 8, 4));
+}
+
+// Before any load, and after a later load of another kind, TMEM's bytes
+// are of unknown origin
+static void TestTileSourceEndsAtTheNextLoad(void) {
+    TextureImage source = {f_SourceImage, G_IM_FMT_RGBA, G_IM_SIZ_16b, SOURCE_WIDTH};
+
+    LoadSourcePart();
+    f_Tmem.lastLoad.address = NULL;
+    EXPECT(!FindRenderTileSource(4, 2, 8, 4));
+    memset(&f_Tmem, 0, sizeof(f_Tmem));
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0);
+    EXPECT(!FindRenderTileSource(0, 0, 1, 1));
+
+    LoadSourcePart();
+    LoadTmemBlock(&f_Tmem, &source, G_TX_LOADTILE, 0, 0, 7, 0);
+    EXPECT(!FindRenderTileSource(4, 2, 8, 4));
+
+    LoadSourcePart();
+    SetTile(7, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, TMEM_PALETTE_START / TMEM_WORD_SIZE);
+    LoadTmemPalette(&f_Tmem, &source, 7, 0, 0, 15 << 2, 0);
+    EXPECT(!FindRenderTileSource(4, 2, 8, 4));
+}
+
+// A LoadTile of 32-bit texels, which TMEM splits between its halves, or of
+// 8-bit ones, leaves no source even for a 16-bit tile reading its TMEM
+static void TestTileSourceOnlyOfSixteenBitLoads(void) {
+    TextureImage wide = {f_SourceImage, G_IM_FMT_RGBA, G_IM_SIZ_32b, SOURCE_WIDTH / 2};
+    TextureImage narrow = {f_SourceImage, G_IM_FMT_I, G_IM_SIZ_8b, SOURCE_WIDTH * 2};
+
+    memset(&f_Tmem, 0, sizeof(f_Tmem));
+    SetTile(G_TX_LOADTILE, G_IM_FMT_RGBA, G_IM_SIZ_32b, 2, 0);
+    LoadTmemTile(&f_Tmem, &wide, G_TX_LOADTILE, 0, 0, 3 << 2, 3 << 2);
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_RGBA, G_IM_SIZ_16b, 2, 0);
+    SetTileSize(G_TX_RENDERTILE, 4, 4);
+    EXPECT(!FindRenderTileSource(0, 0, 4, 4));
+
+    memset(&f_Tmem, 0, sizeof(f_Tmem));
+    SetTile(G_TX_LOADTILE, G_IM_FMT_I, G_IM_SIZ_8b, 2, 0);
+    LoadTmemTile(&f_Tmem, &narrow, G_TX_LOADTILE, 0, 0, 15 << 2, 3 << 2);
+    SetTile(G_TX_RENDERTILE, G_IM_FMT_RGBA, G_IM_SIZ_16b, 2, 0);
+    SetTileSize(G_TX_RENDERTILE, 4, 4);
+    EXPECT(!FindRenderTileSource(0, 0, 4, 4));
+}
+
 int main(void) {
+    TestTileSourceOfLoadedTexels();
+    TestTileSourceStaysInTheLoad();
+    TestTileSourceNeedsTheLoadsLayout();
+    TestTileSourceEndsAtTheNextLoad();
+    TestTileSourceOnlyOfSixteenBitLoads();
     TestLoadTileRoundTrip();
     TestLoadBlockDxt();
     TestLoadTileRowEndsAndWrap();

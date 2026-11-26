@@ -144,6 +144,7 @@ void ResetRdpForTask(void) {
     // A task starts with no color image of its own, but the RDP's other
     // state carries over from the last, as on the N64
     f_Rdp.colorImage = NULL;
+    BeginColorImagesTask();
 }
 
 void InvalidateRdpMaterial(void) {
@@ -1357,6 +1358,98 @@ static void DrawRdpFillRectangle(uint32_t w0, uint32_t w1) {
     }
 }
 
+// Whether the copy mode takes the tile's texels from texCoords a texel to a
+// pixel, down and across, raw as a target holds them: whole RGBA texels, a
+// step of one each way, no palette, and no alpha compare to leave any out,
+// into a 16-bit image. A negative coordinate passes, to find no texels in
+// TMEM.
+static bool IsCopyOneToOne(int tileIndex, uint32_t texCoords, uint32_t texSteps, bool isFlipped) {
+    const RdpTile *tile = &f_Rdp.tmem.tiles[tileIndex];
+
+    return !isFlipped &&
+        texSteps == ((4u << 10) << 16 | (1u << 10)) &&
+        (texCoords & 0x001F001Fu) == 0 &&
+        tile->format == G_IM_FMT_RGBA &&
+        Field(f_Rdp.otherModeHigh, G_MDSFT_TEXTLUT, 2) == 0 &&
+        Field(f_Rdp.otherModeLow, G_MDSFT_ALPHACOMPARE, 2) == 0 &&
+        f_Rdp.colorImageSize == G_IM_SIZ_16b;
+}
+
+// Copies the rectangle's pixels, within the scissor, from the target that
+// holds the texels' image to the color image's, at the renderer's scale,
+// when there is one; the texels start at whole texel s, t. Returns whether
+// it copied them.
+static bool CopyHeldPixels(const Rectangle *rectangle, int tileIndex, uint32_t s, uint32_t t) {
+    GfxTarget *destination;
+    GfxTarget *source;
+    TileSource texels;
+    GfxCopy copy;
+    int left;
+    int top;
+    int right;
+    int bottom;
+
+    if (IsRectangleEmpty(rectangle)) {
+        return false;
+    }
+
+    if (!HasFrameRoom(&f_Frame, 0, 0)) {
+        FlushRdpFrame();
+    }
+
+    // The color image comes first: making it can drop an image that its
+    // memory overlaps
+    if (!UseColorImageTarget(rectangle->bottom)) {
+        return false;
+    }
+
+    left = SDL_max((int)rectangle->left, (int)f_Rdp.scissor.left);
+    top = SDL_max((int)rectangle->top, (int)f_Rdp.scissor.top);
+    right = SDL_min((int)rectangle->right, (int)f_Rdp.scissor.right);
+    right = SDL_min(right, (int)ColorImageWidth(f_Rdp.colorImage));
+    bottom = SDL_min((int)rectangle->bottom, (int)f_Rdp.scissor.bottom);
+    bottom = SDL_min(bottom, (int)ColorImageTargetHeight(f_Rdp.colorImage));
+    if (right <= left || bottom <= top) {
+        return false;
+    }
+
+    s += (uint32_t)(left - (int)rectangle->left);
+    t += (uint32_t)(top - (int)rectangle->top);
+    if (!FindTileSource(
+            &f_Rdp.tmem,
+            tileIndex,
+            s,
+            t,
+            (uint32_t)(right - left),
+            (uint32_t)(bottom - top),
+            &texels
+        )) {
+        return false;
+    }
+
+    destination = ColorImageTarget(f_Rdp.colorImage);
+    source = FindPixelsTarget(
+        texels.address,
+        texels.imageWidth,
+        (uint16_t)(right - left),
+        (uint16_t)(bottom - top),
+        &copy.sourceX,
+        &copy.sourceY
+    );
+    if (source == NULL || source == destination) {
+        return false;
+    }
+
+    copy.source = source;
+    copy.x = (uint16_t)left;
+    copy.y = (uint16_t)top;
+    copy.width = (uint16_t)(right - left);
+    copy.height = (uint16_t)(bottom - top);
+    AddFrameCopy(&f_Frame, destination, &copy);
+    MarkColorImageDrawn(f_Rdp.colorImage);
+    return true;
+}
+
 void DrawRdpTextureRectangle(
     uint32_t w0,
     uint32_t w1,
@@ -1376,6 +1469,13 @@ void DrawRdpTextureRectangle(
 
     PlaceRectangle(&rectangle, w0, w1);
     if (CycleType() == CYCLE_COPY) {
+        // Copying between the targets keeps the renderer's scale, which a
+        // draw of the texels that memory holds would lose
+        if (IsCopyOneToOne(tileIndex, texCoords, texSteps, isFlipped) &&
+            CopyHeldPixels(&rectangle, tileIndex, texCoords >> 21, (texCoords & 0xFFFF) >> 5)) {
+            return;
+        }
+
         // Copying steps four texels at a time
         sStep /= 4.0f;
         kind = MATERIAL_KIND_COPY;

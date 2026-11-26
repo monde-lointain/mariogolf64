@@ -756,6 +756,51 @@ static void DrawPass(SDL_GPUCommandBuffer *commands, const GfxFrame *frame, cons
     SDL_EndGPURenderPass(render);
 }
 
+// Copies the pass's pixels into its target, at the target's scale, in one
+// copy pass
+static void CopyPassPixels(
+    SDL_GPUCommandBuffer *commands,
+    const GfxFrame *frame,
+    const GfxPass *pass
+) {
+    SDL_GPUCopyPass *copy = SDL_BeginGPUCopyPass(commands);
+    uint32_t scale = f_Gpu.scale;
+    uint32_t i;
+
+    SDL_assert(!pass->target->isDepth);
+    for (i = pass->firstCopy; i < pass->firstCopy + pass->copyCount; i++) {
+        const GfxCopy *pixels = &frame->copies[i];
+        SDL_GPUTextureLocation from;
+        SDL_GPUTextureLocation to;
+
+        // Only color targets are copied in part, which every backend allows
+        SDL_assert(!pixels->source->isDepth);
+        SDL_assert(pixels->sourceX + pixels->width <= pixels->source->width);
+        SDL_assert(pixels->sourceY + pixels->height <= pixels->source->height);
+        SDL_assert(pixels->x + pixels->width <= pass->target->width);
+        SDL_assert(pixels->y + pixels->height <= pass->target->height);
+        SDL_zero(from);
+        from.texture = pixels->source->texture;
+        from.x = pixels->sourceX * scale;
+        from.y = pixels->sourceY * scale;
+        SDL_zero(to);
+        to.texture = pass->target->texture;
+        to.x = pixels->x * scale;
+        to.y = pixels->y * scale;
+        SDL_CopyGPUTextureToTexture(
+            copy,
+            &from,
+            &to,
+            pixels->width * scale,
+            pixels->height * scale,
+            1,
+            false
+        );
+    }
+
+    SDL_EndGPUCopyPass(copy);
+}
+
 void BackendExecuteFrame(const GfxFrame *frame) {
     SDL_GPUCommandBuffer *commands;
     uint32_t i;
@@ -770,6 +815,11 @@ void BackendExecuteFrame(const GfxFrame *frame) {
     SDL_PushGPUFragmentUniformData(commands, 0, &f_Gpu.noiseSeed, sizeof(f_Gpu.noiseSeed));
     for (i = 0; i < frame->passCount; i++) {
         const GfxPass *pass = &frame->passes[i];
+
+        // A pass's copies come before its draws
+        if (pass->copyCount != 0) {
+            CopyPassPixels(commands, frame, pass);
+        }
 
         if (pass->drawCount != 0 || pass->clearsDepth) {
             DrawPass(commands, frame, pass);

@@ -143,6 +143,19 @@ typedef struct GfxDraw {
 // A color image of the game's, which the GPU renders into
 typedef struct GfxTarget GfxTarget;
 
+// Pixels of another target to copy into a pass's, at the same scale: what
+// the game copies between its images in the RDP's copy mode
+typedef struct GfxCopy {
+    GfxTarget *source;
+    uint16_t sourceX;
+    uint16_t sourceY;
+    uint16_t x; // Where they go in the pass's target
+    uint16_t y;
+    uint16_t width;
+    uint16_t height;
+} GfxCopy;
+
+// The copies of a pass happen before its draws
 typedef struct GfxPass {
     GfxTarget *target;
     GfxTarget *depth; // NULL when no draw tests or writes depth
@@ -150,6 +163,8 @@ typedef struct GfxPass {
     float depthClearValue;
     uint32_t firstDraw;
     uint32_t drawCount;
+    uint32_t firstCopy;
+    uint32_t copyCount;
 } GfxPass;
 
 // A texture of the atlas to fill from the frame's texels
@@ -175,6 +190,8 @@ typedef struct GfxFrame {
     uint32_t uploadCount;
     uint32_t *texels;
     uint32_t texelCount;
+    GfxCopy *copies;
+    uint32_t copyCount;
 } GfxFrame;
 
 // How much a frame holds before it must be flushed
@@ -184,6 +201,7 @@ typedef struct GfxFrame {
 #define FRAME_PASS_CAPACITY 256
 #define FRAME_UPLOAD_CAPACITY 4096
 #define FRAME_TEXEL_CAPACITY (4 * 1024 * 1024)
+#define FRAME_COPY_CAPACITY 256
 
 void InitFrame(GfxFrame *frame);
 void ResetFrame(GfxFrame *frame);
@@ -211,6 +229,11 @@ GfxVertex *AddFrameVertices(
     uint16_t pipelineKey,
     const GfxRect *scissor
 );
+
+// Copies pixels into target ahead of any draw into it that follows. A copy
+// that carries on the rows of the pass's last copy, from the same source,
+// lengthens that copy.
+void AddFrameCopy(GfxFrame *frame, GfxTarget *target, const GfxCopy *copy);
 
 // Reserves texels for a texture of the atlas, to be uploaded at its place
 uint32_t *AddFrameTextureUpload(

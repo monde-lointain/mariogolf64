@@ -28,6 +28,7 @@
 
 static u16 f_ColorImage[IMAGE_WIDTH * IMAGE_HEIGHT] __attribute__((aligned(64)));
 static u16 f_DepthImage[IMAGE_WIDTH * IMAGE_HEIGHT] __attribute__((aligned(64)));
+static u16 f_SourceImage[IMAGE_WIDTH * IMAGE_HEIGHT] __attribute__((aligned(64)));
 static Gfx f_DisplayList[DISPLAY_LIST_LENGTH];
 static SDL_GPUDevice *f_Device;
 static uint32_t f_TargetPixels[(IMAGE_WIDTH * SCALE_MAX) * (IMAGE_HEIGHT * SCALE_MAX)];
@@ -297,13 +298,13 @@ static void TestFilteredTexelsOneForOne(void) {
     EXPECT_PIXEL(10, 10, 255, 255, 0);
 }
 
-// Reads the color image's target at its full scale into f_TargetPixels,
-// RGBA8 with red lowest, giving its width
-static uint32_t ReadScaledTarget(void) {
+// Reads the image's target at its full scale into f_TargetPixels, RGBA8
+// with red lowest, giving its width
+static uint32_t ReadScaledImage(const u16 *image) {
     uint32_t scale = GpuBackendScale();
     uint16_t width;
     uint16_t height;
-    GfxTarget *target = LockShownTarget((const uint8_t *)f_ColorImage, &width, &height);
+    GfxTarget *target = LockShownTarget((const uint8_t *)image, &width, &height);
     SDL_GPUTransferBufferCreateInfo info;
     SDL_GPUTransferBuffer *buffer;
     SDL_GPUTextureRegion region;
@@ -337,6 +338,11 @@ static uint32_t ReadScaledTarget(void) {
     SDL_UnmapGPUTransferBuffer(f_Device, buffer);
     SDL_ReleaseGPUTransferBuffer(f_Device, buffer);
     return region.w;
+}
+
+// Reads the color image's target at its full scale into f_TargetPixels
+static uint32_t ReadScaledTarget(void) {
+    return ReadScaledImage(f_ColorImage);
 }
 
 // Readies rectangles of the RGBA16 texture's texels, width by height of
@@ -795,6 +801,106 @@ static void TestOneThreadRecordsAtOnce(void) {
     }
 }
 
+// The game copies a frame that it drew, a texel to a pixel, to show it
+// again. Upscaled, the copy keeps the frame's detail finer than the N64's
+// pixels: its checks four of the target's pixels across, of a texture
+// stepped by one and a half texels a pixel each way, stay so in the copy.
+static void TestCopyKeepsUpscaledDetail(void) {
+    static uint32_t sourcePixels[(IMAGE_WIDTH * SCALE_MAX) * (IMAGE_HEIGHT * SCALE_MAX)];
+    static u16 texture[8 * 8] __attribute__((aligned(8)));
+    uint32_t scale = GpuBackendScale();
+    Gfx *gfx = f_DisplayList;
+    int wrongCount = 0;
+    uint32_t width;
+    uint32_t x;
+    uint32_t y;
+    int i;
+
+    for (i = 0; i < 8 * 8; i++) {
+        bool isBlack = ((i % 8) + (i / 8)) & 1;
+
+        texture[i] = isBlack ? GPACK_RGBA5551(0, 0, 0, 1) : GPACK_RGBA5551(255, 255, 255, 1);
+    }
+
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_SourceImage);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+    gfx = BeginTexturedRectangles(gfx, texture, 8, 8);
+    gSPTextureRectangle(
+        gfx++,
+        0,
+        0,
+        IMAGE_WIDTH << 2,
+        IMAGE_HEIGHT << 2,
+        G_TX_RENDERTILE,
+        0,
+        0,
+        3 << 9,
+        3 << 9
+    );
+    gSPEndDisplayList(gfx++);
+    RunRspTask(f_DisplayList);
+
+    gfx = BeginList(f_DisplayList);
+    gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 255, 1));
+    gDPSetCycleType(gfx++, G_CYC_COPY);
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPLoadTextureTile(
+        gfx++,
+        f_SourceImage,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        IMAGE_WIDTH,
+        0,
+        8,
+        4,
+        23,
+        9,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gSPTextureRectangle(
+        gfx++,
+        2 << 2,
+        10 << 2,
+        17 << 2,
+        15 << 2,
+        G_TX_RENDERTILE,
+        8 << 5,
+        4 << 5,
+        4 << 10,
+        1 << 10
+    );
+    RunList(gfx);
+
+    width = ReadScaledImage(f_SourceImage);
+    SDL_memcpy(sourcePixels, f_TargetPixels, sizeof(sourcePixels));
+    EXPECT(ReadScaledTarget() == width);
+    for (y = 0; y < 6 * scale; y++) {
+        for (x = 0; x < 16 * scale; x++) {
+            uint32_t from = (((4 * scale) + y) * width) + (8 * scale) + x;
+            uint32_t to = (((10 * scale) + y) * width) + (2 * scale) + x;
+
+            wrongCount += f_TargetPixels[to] != sourcePixels[from];
+        }
+    }
+
+    if (wrongCount != 0) {
+        fprintf(stderr, "%d pixels of an upscaled copy differ from the source\n", wrongCount);
+    }
+
+    EXPECT(wrongCount == 0);
+    // The fill around the copy stays
+    EXPECT(f_TargetPixels[((10 * scale) * width) + (2 * scale) - 1] == 0xFFFF0000u);
+    EXPECT(f_TargetPixels[(((10 * scale) - 1) * width) + (2 * scale)] == 0xFFFF0000u);
+}
+
 static SDL_GPUDevice *CreateDevice(void) {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         // A machine with no display can still have a GPU
@@ -858,6 +964,7 @@ int main(void) {
     InitRdp();
     TestUpscaledTexelsStartAtTheirCorner();
     TestUpscaledTexelsKeepFineSteps();
+    TestCopyKeepsUpscaledDetail();
     ShutdownRdp();
     ShutdownGpuBackend();
     SDL_DestroyGPUDevice(device);

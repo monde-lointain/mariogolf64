@@ -128,6 +128,7 @@ void LoadTmemBlock(
 
     SDL_assert(tileIndex >= 0 && tileIndex < RDP_TILE_COUNT && lastTexel >= upperLeftS);
     SetTileCorners(tile, upperLeftS, upperLeftT, lastTexel, dxt);
+    tmem->lastLoad.address = NULL;
     if (image->size == G_IM_SIZ_32b) {
         // Two texels to a word in each half of TMEM
         wordCount = (texelCount + 1) / 2;
@@ -165,6 +166,32 @@ void LoadTmemBlock(
     }
 }
 
+// Notes where a LoadTile put its texels, if they are 16-bit ones that it
+// laid out a row to a line of TMEM
+static void NoteTileLoad(
+    Tmem *tmem,
+    const TextureImage *image,
+    const RdpTile *tile,
+    uint32_t firstColumn,
+    uint32_t firstRow,
+    uint32_t columnCount,
+    uint32_t rowCount
+) {
+    TileLoad *load = &tmem->lastLoad;
+
+    if (image->size != G_IM_SIZ_16b) {
+        load->address = NULL;
+        return;
+    }
+
+    load->address = ImageTexelAddress(image, firstColumn, firstRow);
+    load->imageWidth = image->width;
+    load->tmemAddress = tile->tmemAddress;
+    load->lineBytes = tile->lineBytes;
+    load->columnCount = (uint16_t)columnCount;
+    load->rowCount = (uint16_t)rowCount;
+}
+
 void LoadTmemTile(
     Tmem *tmem,
     const TextureImage *image,
@@ -184,6 +211,7 @@ void LoadTmemTile(
     SDL_assert(tileIndex >= 0 && tileIndex < RDP_TILE_COUNT);
     SDL_assert(lowerRightS >= upperLeftS && lowerRightT >= upperLeftT);
     SetTileCorners(tile, upperLeftS, upperLeftT, lowerRightS, lowerRightT);
+    NoteTileLoad(tmem, image, tile, firstColumn, firstRow, texelsPerRow, rowCount);
     for (row = 0; row < rowCount; row++) {
         const uint8_t *source = ImageTexelAddress(image, firstColumn, firstRow + row);
         uint32_t destination = tile->tmemAddress + (row * tile->lineBytes);
@@ -223,6 +251,7 @@ void LoadTmemPalette(
 
     SDL_assert(tileIndex >= 0 && tileIndex < RDP_TILE_COUNT && lowerRightS >= upperLeftS);
     SetTileCorners(tile, upperLeftS, upperLeftT, lowerRightS, lowerRightT);
+    tmem->lastLoad.address = NULL;
     for (entry = 0; entry < entryCount; entry++) {
         uint32_t destination =
             (tile->tmemAddress + (entry * PALETTE_ENTRY_STRIDE)) & TMEM_ADDRESS_MASK;
@@ -486,4 +515,50 @@ void DecodeTileTexture(
             *rgba++ = ExpandTexel(tmem, tile, FetchTexelBits(tmem, tile, s, t), paletteType);
         }
     }
+}
+
+bool FindTileSource(
+    const Tmem *tmem,
+    int tileIndex,
+    uint32_t s,
+    uint32_t t,
+    uint32_t width,
+    uint32_t height,
+    TileSource *source
+) {
+    const TileLoad *load = &tmem->lastLoad;
+    const RdpTile *tile;
+    uint32_t firstColumn;
+    uint32_t firstRow;
+
+    SDL_assert(tileIndex >= 0 && tileIndex < RDP_TILE_COUNT && source != NULL);
+    tile = &tmem->tiles[tileIndex];
+    // The tile must read TMEM a texel to a texel, from whole texels, as the
+    // load laid it out
+    if (load->address == NULL ||
+        tile->size != G_IM_SIZ_16b ||
+        tile->tmemAddress != load->tmemAddress ||
+        tile->lineBytes != load->lineBytes ||
+        tile->s.maskBits != 0 ||
+        tile->t.maskBits != 0 ||
+        tile->s.shift != 0 ||
+        tile->t.shift != 0 ||
+        (tile->upperLeftS & 3) != 0 ||
+        (tile->upperLeftT & 3) != 0) {
+        return false;
+    }
+
+    firstColumn = tile->upperLeftS >> 2;
+    firstRow = tile->upperLeftT >> 2;
+    if (s < firstColumn ||
+        t < firstRow ||
+        (s - firstColumn) + width > load->columnCount ||
+        (t - firstRow) + height > load->rowCount) {
+        return false;
+    }
+
+    source->address = load->address +
+        (((((uintptr_t)(t - firstRow)) * load->imageWidth) + (s - firstColumn)) * 2);
+    source->imageWidth = load->imageWidth;
+    return true;
 }

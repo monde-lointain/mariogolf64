@@ -31,6 +31,7 @@ void InitFrame(GfxFrame *frame) {
     frame->passes = AllocateArray(FRAME_PASS_CAPACITY, sizeof(GfxPass));
     frame->uploads = AllocateArray(FRAME_UPLOAD_CAPACITY, sizeof(GfxTextureUpload));
     frame->texels = AllocateArray(FRAME_TEXEL_CAPACITY, sizeof(uint32_t));
+    frame->copies = AllocateArray(FRAME_COPY_CAPACITY, sizeof(GfxCopy));
 }
 
 void ResetFrame(GfxFrame *frame) {
@@ -40,6 +41,7 @@ void ResetFrame(GfxFrame *frame) {
     frame->passCount = 0;
     frame->uploadCount = 0;
     frame->texelCount = 0;
+    frame->copyCount = 0;
 }
 
 static GfxPass *CurrentPass(GfxFrame *frame) {
@@ -55,6 +57,7 @@ static GfxPass *AppendPass(GfxFrame *frame, GfxTarget *target, GfxTarget *depth)
     pass->target = target;
     pass->depth = depth;
     pass->firstDraw = frame->drawCount;
+    pass->firstCopy = frame->copyCount;
     return pass;
 }
 
@@ -92,7 +95,8 @@ bool HasFrameRoom(const GfxFrame *frame, uint32_t vertexCount, uint32_t texelCou
         frame->materialCount < FRAME_MATERIAL_CAPACITY &&
         frame->drawCount < FRAME_DRAW_CAPACITY &&
         frame->passCount < FRAME_PASS_CAPACITY &&
-        frame->uploadCount < FRAME_UPLOAD_CAPACITY;
+        frame->uploadCount < FRAME_UPLOAD_CAPACITY &&
+        frame->copyCount < FRAME_COPY_CAPACITY;
 }
 
 uint32_t AddFrameMaterial(GfxFrame *frame, const GfxMaterial *material) {
@@ -111,6 +115,39 @@ static bool IsSameRect(const GfxRect *first, const GfxRect *second) {
         first->top == second->top &&
         first->right == second->right &&
         first->bottom == second->bottom;
+}
+
+// Whether next carries on copy's rows, from the same source's same columns
+// to the same columns
+static bool DoesCopyCarryOn(const GfxCopy *copy, const GfxCopy *next) {
+    return next->source == copy->source &&
+        next->sourceX == copy->sourceX &&
+        next->x == copy->x &&
+        next->width == copy->width &&
+        next->sourceY == copy->sourceY + copy->height &&
+        next->y == copy->y + copy->height;
+}
+
+void AddFrameCopy(GfxFrame *frame, GfxTarget *target, const GfxCopy *copy) {
+    GfxPass *pass = CurrentPass(frame);
+
+    SDL_assert(target != NULL && copy->source != NULL && copy->source != target);
+    if (pass == NULL || pass->target != target || pass->drawCount != 0) {
+        pass = AppendPass(frame, target, NULL);
+    }
+
+    if (pass->copyCount != 0) {
+        GfxCopy *last = &frame->copies[frame->copyCount - 1];
+
+        if (DoesCopyCarryOn(last, copy)) {
+            last->height = (uint16_t)(last->height + copy->height);
+            return;
+        }
+    }
+
+    SDL_assert(frame->copyCount < FRAME_COPY_CAPACITY);
+    frame->copies[frame->copyCount++] = *copy;
+    pass->copyCount++;
 }
 
 GfxVertex *AddFrameVertices(

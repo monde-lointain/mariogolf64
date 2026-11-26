@@ -27,6 +27,7 @@ struct ColorImage {
     bool isMemoryBehind; // The GPU has drawn what memory lacks
     uint64_t memoryHash; // Of the memory, when it last agreed with the target
     uint64_t lastUse;
+    uint64_t unwrittenTask; // The task in which memory last matched memoryHash
     GfxTarget *target;
 };
 
@@ -41,6 +42,10 @@ static ColorImage f_ColorImages[COLOR_IMAGE_COUNT_MAX];
 static DepthImage f_DepthImages[DEPTH_IMAGE_COUNT_MAX];
 static SDL_Mutex *f_Lock;
 static uint64_t f_UseCount;
+// The RDP's tasks so far. Each counts itself as it starts, so no image's
+// unwrittenTask, 0 when it's made, matches the task before it's found
+// unwritten.
+static uint64_t f_TaskCount;
 // The pixels passing between memory and a target, at the largest size
 static uint32_t *f_Pixels;
 static uint32_t f_PixelCapacity;
@@ -398,6 +403,68 @@ GfxTarget *UseDepthImage(const uint8_t *address, const ColorImage *colorImage) {
     free->height = colorImage->targetHeight;
     free->target = BackendCreateTarget(colorImage->width, colorImage->targetHeight, true);
     return free->target;
+}
+
+void BeginColorImagesTask(void) {
+    f_TaskCount++;
+}
+
+// Whether the CPU hasn't written the image's memory since it last agreed
+// with the target, hashing the memory once a task
+static bool IsImageUnwritten(ColorImage *image) {
+    if (image->unwrittenTask != f_TaskCount) {
+        if (HashImageMemory(image) != image->memoryHash) {
+            return false;
+        }
+
+        image->unwrittenTask = f_TaskCount;
+    }
+
+    return true;
+}
+
+GfxTarget *FindPixelsTarget(
+    const uint8_t *address,
+    uint16_t imageWidth,
+    uint16_t width,
+    uint16_t height,
+    uint16_t *x,
+    uint16_t *y
+) {
+    GfxTarget *target = NULL;
+    int i;
+
+    SDL_assert(address != NULL && imageWidth != 0 && width != 0 && height != 0);
+    SDL_assert(x != NULL && y != NULL);
+    SDL_LockMutex(f_Lock);
+    for (i = 0; i < COLOR_IMAGE_COUNT_MAX; i++) {
+        ColorImage *image = &f_ColorImages[i];
+        // An address before the image wraps to a row past its end
+        uintptr_t offset = (uintptr_t)address - (uintptr_t)image->address;
+        uintptr_t pixel = offset / 2;
+        uintptr_t column = pixel % imageWidth;
+        uintptr_t row = pixel / imageWidth;
+
+        if (image->address == NULL ||
+            image->bytesPerPixel != 2 ||
+            image->width != imageWidth ||
+            (offset % 2) != 0 ||
+            column + width > image->width ||
+            row + height > image->height) {
+            continue;
+        }
+
+        if (IsImageUnwritten(image)) {
+            *x = (uint16_t)column;
+            *y = (uint16_t)row;
+            target = image->target;
+        }
+
+        break;
+    }
+
+    SDL_UnlockMutex(f_Lock);
+    return target;
 }
 
 bool HasUnsyncedColorImage(const uint8_t *start, uintptr_t size) {

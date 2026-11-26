@@ -69,11 +69,29 @@ typedef struct TextureImage {
     bool isHostOrder; // Its 16- and 32-bit texels are host words
 } TextureImage;
 
+// Where the last load put its texels, when it was a LoadTile of 16-bit
+// texels: one row of the image to each line of TMEM, as they were
+typedef struct TileLoad {
+    const uint8_t *address; // The first texel loaded, or NULL for no such load
+    uint16_t imageWidth; // Texels from one of the image's rows to the next
+    uint16_t tmemAddress;
+    uint16_t lineBytes;
+    uint16_t columnCount;
+    uint16_t rowCount;
+} TileLoad;
+
 typedef struct Tmem {
     _Alignas(16) uint8_t bytes[TMEM_SIZE];
     bool isHostOrderWord[TMEM_SIZE / TMEM_WORD_SIZE];
     RdpTile tiles[RDP_TILE_COUNT];
+    TileLoad lastLoad;
 } Tmem;
+
+// Where a tile's texels lie in memory: the image's rows that they came from
+typedef struct TileSource {
+    const uint8_t *address; // The first texel's
+    uint16_t imageWidth; // Texels from one row to the next
+} TileSource;
 
 // The texels of a tile's texture: how many there are each way, and how to
 // find them in TMEM
@@ -127,6 +145,19 @@ void DecodeTileTexture(
     PaletteType paletteType,
     const TileTexture *texture,
     uint32_t *rgba
+);
+
+// Whether the tile's 16-bit texels from s, t, width by height of them, are
+// as the last load, a LoadTile, copied them from an image's rows, and if so
+// where those rows lie
+bool FindTileSource(
+    const Tmem *tmem,
+    int tileIndex,
+    uint32_t s,
+    uint32_t t,
+    uint32_t width,
+    uint32_t height,
+    TileSource *source
 );
 
 // One RGBA16 texel as RGBA8, red in the lowest byte

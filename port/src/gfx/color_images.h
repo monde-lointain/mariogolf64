@@ -58,6 +58,23 @@ void MarkColorImageDrawn(ColorImage *image);
 // address
 GfxTarget *UseDepthImage(const uint8_t *address, const ColorImage *colorImage);
 
+// Starts a task of the RDP's. The CPU doesn't write the images during one,
+// so an image found unwritten by it stays so until the next.
+void BeginColorImagesTask(void);
+
+// The target that holds width by height 16-bit pixels from address, in rows
+// imageWidth pixels apart, and where they lie in it: the target of an image
+// whose memory the CPU hasn't written since the two last agreed. NULL when
+// no image holds them all.
+GfxTarget *FindPixelsTarget(
+    const uint8_t *address,
+    uint16_t imageWidth,
+    uint16_t width,
+    uint16_t height,
+    uint16_t *x,
+    uint16_t *y
+);
+
 // Whether any image with drawing that its memory lacks overlaps the bytes
 bool HasUnsyncedColorImage(const uint8_t *start, uintptr_t size);
 

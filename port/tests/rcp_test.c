@@ -21,6 +21,7 @@
 #define CAPTURE_VERTEX_MAX 256
 #define CAPTURE_DRAW_MAX 16
 #define CAPTURE_PASS_MAX 8
+#define CAPTURE_COPY_MAX 8
 #define READ_BACK_COLOR 0xFF0000FFu // Opaque red
 
 // The targets that the double has created and not destroyed
@@ -42,6 +43,8 @@ static struct {
     uint32_t drawCount;
     GfxPass passes[CAPTURE_PASS_MAX];
     uint32_t passCount;
+    GfxCopy copies[CAPTURE_COPY_MAX];
+    uint32_t copyCount;
     uint32_t uploadCount;
     uint32_t firstTexel; // The first texel of the frame's first upload
     int frameCount;
@@ -56,6 +59,10 @@ static uint16_t f_DepthImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static uint16_t f_OtherImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static uint16_t f_SmallImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static uint16_t f_GrowingImage[IMAGE_WIDTH * IMAGE_HEIGHT];
+static uint16_t f_CopiedImage[IMAGE_WIDTH * IMAGE_HEIGHT];
+static uint16_t f_PlainTexture[IMAGE_WIDTH * IMAGE_HEIGHT]; // Never drawn
+static uint16_t f_ShortImage[IMAGE_WIDTH * IMAGE_HEIGHT];
+static uint16_t f_WideImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static Gfx f_DisplayList[256];
 
 GfxTarget *BackendCreateTarget(uint32_t width, uint32_t height, bool isDepth) {
@@ -92,6 +99,8 @@ void BackendExecuteFrame(const GfxFrame *frame) {
     SDL_memcpy(f_Gpu.draws, frame->draws, f_Gpu.drawCount * sizeof(GfxDraw));
     f_Gpu.passCount = SDL_min(frame->passCount, CAPTURE_PASS_MAX);
     SDL_memcpy(f_Gpu.passes, frame->passes, f_Gpu.passCount * sizeof(GfxPass));
+    f_Gpu.copyCount = SDL_min(frame->copyCount, CAPTURE_COPY_MAX);
+    SDL_memcpy(f_Gpu.copies, frame->copies, f_Gpu.copyCount * sizeof(GfxCopy));
     f_Gpu.uploadCount = frame->uploadCount;
     if (frame->uploadCount != 0) {
         f_Gpu.firstTexel = frame->texels[frame->uploads[0].texelOffset];
@@ -1387,7 +1396,8 @@ static void TestGameListCallsIntoGameList(void) {
 }
 
 // A texture loaded from a color image that the GPU has drawn reads what it
-// drew, which comes back to memory first
+// drew, which comes back to memory first. Flipped, the copy can't be made
+// between the targets.
 static void TestTextureFromDrawnImage(void) {
     Gfx *gfx = BeginList(f_DisplayList);
 
@@ -1418,7 +1428,7 @@ static void TestTextureFromDrawnImage(void) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    gSPTextureRectangle(gfx++, 0, 0, 7 << 2, 7 << 2, G_TX_RENDERTILE, 0, 0, 4 << 10, 1 << 10);
+    gSPTextureRectangleFlip(gfx++, 0, 0, 7 << 2, 7 << 2, G_TX_RENDERTILE, 0, 0, 4 << 10, 1 << 10);
     RunList(gfx);
 
     EXPECT(f_Gpu.readCount == 1);
@@ -1673,6 +1683,421 @@ static void TestShutdownReleasesTargets(void) {
     EXPECT(f_LiveTargetCount == 1);
 }
 
+// The columns of f_CopiedImage that the copy tests load
+#define COPIED_FIRST_COLUMN 8
+#define COPIED_COLUMN_COUNT 16
+
+// Draws the first rowCount rows of the image on the GPU in a task of their
+// own, then starts a list that copies into f_ColorImage
+static Gfx *BeginCopyList(void *image, int rowCount) {
+    Gfx *gfx = BeginList(f_DisplayList);
+
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, image);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetFillColor(gfx++, (GPACK_RGBA5551(0, 255, 0, 1) << 16) | GPACK_RGBA5551(0, 255, 0, 1));
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, rowCount - 1);
+    RunList(gfx);
+
+    gfx = BeginList(f_DisplayList);
+    gDPSetCycleType(gfx++, G_CYC_COPY);
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    return gfx;
+}
+
+// Loads rowCount rows of the image from firstRow, of its copied columns, as
+// the game loads the saved frame's strips
+static Gfx *LoadRows(Gfx *gfx, const void *image, int imageWidth, int firstRow, int rowCount) {
+    gDPLoadTextureTile(
+        gfx++,
+        image,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        imageWidth,
+        0,
+        COPIED_FIRST_COLUMN,
+        firstRow,
+        COPIED_FIRST_COLUMN + COPIED_COLUMN_COUNT - 1,
+        firstRow + rowCount - 1,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    return gfx;
+}
+
+// Copies the loaded rows from firstRow to x, y, a texel to a pixel
+static Gfx *CopyRows(Gfx *gfx, int x, int y, int firstRow, int rowCount) {
+    gSPTextureRectangle(
+        gfx++,
+        x << 2,
+        y << 2,
+        (x + COPIED_COLUMN_COUNT - 1) << 2,
+        (y + rowCount - 1) << 2,
+        G_TX_RENDERTILE,
+        COPIED_FIRST_COLUMN << 5,
+        firstRow << 5,
+        4 << 10,
+        1 << 10
+    );
+    return gfx;
+}
+
+// The target that holds the image, as the presenter would find it
+static GfxTarget *FindImageTarget(const void *image) {
+    uint16_t width;
+    uint16_t height;
+    GfxTarget *target = LockShownTarget(image, &width, &height);
+
+    UnlockShownTarget();
+    return target;
+}
+
+// A copy, a texel to a pixel, of an image's rows that the GPU has drawn
+// copies its target's pixels into the color image's, at the renderer's
+// scale, rather than drawing them as the CPU would read them; the color
+// image's memory is then behind, as after a draw
+static void TestCopyBetweenDrawnImages(void) {
+    Gfx *gfx = BeginCopyList(f_CopiedImage, IMAGE_HEIGHT);
+    int readCount;
+
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 2, 10, 4, 6);
+    ResetCapture();
+    RunList(gfx);
+
+    EXPECT(f_Gpu.vertexCount == 0 && f_Gpu.drawCount == 0);
+    EXPECT(f_Gpu.copyCount == 1 && f_Gpu.passCount == 1);
+    EXPECT(f_Gpu.passes[0].copyCount == 1 && f_Gpu.passes[0].firstCopy == 0);
+    EXPECT(f_Gpu.passes[0].target == FindImageTarget(f_ColorImage));
+    EXPECT(f_Gpu.copies[0].source == FindImageTarget(f_CopiedImage));
+    EXPECT(f_Gpu.copies[0].sourceX == COPIED_FIRST_COLUMN && f_Gpu.copies[0].sourceY == 4);
+    EXPECT(f_Gpu.copies[0].x == 2 && f_Gpu.copies[0].y == 10);
+    EXPECT(f_Gpu.copies[0].width == COPIED_COLUMN_COUNT && f_Gpu.copies[0].height == 6);
+
+    readCount = f_Gpu.readCount;
+    osPcSyncRdpWrites(f_ColorImage, sizeof(f_ColorImage));
+    EXPECT(f_Gpu.readCount == readCount + 1);
+}
+
+// The game copies the saved frame a strip at a time, each loaded alone:
+// strips that carry on one another become one copy
+static void TestCopiedStripsBecomeOne(void) {
+    Gfx *gfx = BeginCopyList(f_CopiedImage, IMAGE_HEIGHT);
+
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 2, 10, 4, 6);
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 10, 2);
+    gfx = CopyRows(gfx, 2, 16, 10, 2);
+    ResetCapture();
+    RunList(gfx);
+
+    EXPECT(f_Gpu.copyCount == 1 && f_Gpu.vertexCount == 0);
+    EXPECT(f_Gpu.copies[0].sourceY == 4 && f_Gpu.copies[0].height == 8);
+}
+
+// The scissor cuts a copy as it cuts a draw, and the source's pixels shift
+// with its edges
+static void TestCopyKeepsToTheScissor(void) {
+    Gfx *gfx = BeginCopyList(f_CopiedImage, IMAGE_HEIGHT);
+
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 4, 12, 14, 14);
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 0, 10, 4, 6);
+    ResetCapture();
+    RunList(gfx);
+
+    EXPECT(f_Gpu.copyCount == 1);
+    EXPECT(f_Gpu.copies[0].x == 4 && f_Gpu.copies[0].sourceX == COPIED_FIRST_COLUMN + 4);
+    EXPECT(f_Gpu.copies[0].width == 10);
+    EXPECT(f_Gpu.copies[0].y == 12 && f_Gpu.copies[0].sourceY == 6);
+    EXPECT(f_Gpu.copies[0].height == 2);
+}
+
+// Whether a list that loads rows 4 to 9 of the image and copies them, with
+// the change made between, draws them rather than copying targets. The list
+// first draws drawnRowCount rows of drawnImage.
+static bool DoesChangedCopyDraw(
+    const void *image,
+    int imageWidth,
+    void *drawnImage,
+    int drawnRowCount,
+    Gfx *(*change)(Gfx *gfx)
+) {
+    Gfx *gfx = BeginCopyList(drawnImage, drawnRowCount);
+
+    gfx = LoadRows(gfx, image, imageWidth, 4, 6);
+    gfx = change(gfx);
+    ResetCapture();
+    RunList(gfx);
+    if (f_Gpu.copyCount == 0 && f_Gpu.vertexCount == 6) {
+        return true;
+    }
+
+    EXPECT(f_Gpu.copyCount == 1 && f_Gpu.vertexCount == 0);
+    return false;
+}
+
+static Gfx *CopyAsIs(Gfx *gfx) {
+    return CopyRows(gfx, 2, 10, 4, 6);
+}
+
+static Gfx *CopyFlipped(Gfx *gfx) {
+    gSPTextureRectangleFlip(
+        gfx++,
+        2 << 2,
+        10 << 2,
+        17 << 2,
+        15 << 2,
+        G_TX_RENDERTILE,
+        COPIED_FIRST_COLUMN << 5,
+        4 << 5,
+        4 << 10,
+        1 << 10
+    );
+    return gfx;
+}
+
+// Two texels across to a pixel
+static Gfx *CopyStretched(Gfx *gfx) {
+    gSPTextureRectangle(
+        gfx++,
+        2 << 2,
+        10 << 2,
+        9 << 2,
+        15 << 2,
+        G_TX_RENDERTILE,
+        COPIED_FIRST_COLUMN << 5,
+        4 << 5,
+        8 << 10,
+        1 << 10
+    );
+    return gfx;
+}
+
+// Two rows down to a pixel
+static Gfx *CopyRowsSkipped(Gfx *gfx) {
+    gSPTextureRectangle(
+        gfx++,
+        2 << 2,
+        10 << 2,
+        17 << 2,
+        12 << 2,
+        G_TX_RENDERTILE,
+        COPIED_FIRST_COLUMN << 5,
+        4 << 5,
+        4 << 10,
+        2 << 10
+    );
+    return gfx;
+}
+
+// From half a texel in
+static Gfx *CopyFromBetweenTexels(Gfx *gfx) {
+    gSPTextureRectangle(
+        gfx++,
+        2 << 2,
+        10 << 2,
+        16 << 2,
+        15 << 2,
+        G_TX_RENDERTILE,
+        (COPIED_FIRST_COLUMN << 5) | 16,
+        4 << 5,
+        4 << 10,
+        1 << 10
+    );
+    return gfx;
+}
+
+// From half a row down
+static Gfx *CopyFromBetweenRows(Gfx *gfx) {
+    gSPTextureRectangle(
+        gfx++,
+        2 << 2,
+        10 << 2,
+        17 << 2,
+        14 << 2,
+        G_TX_RENDERTILE,
+        COPIED_FIRST_COLUMN << 5,
+        (4 << 5) | 16,
+        4 << 10,
+        1 << 10
+    );
+    return gfx;
+}
+
+// The alpha compare leaves out texels whose alpha is clear
+static Gfx *CopyComparingAlpha(Gfx *gfx) {
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gfx = CopyAsIs(gfx);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    return gfx;
+}
+
+// The render tile set again as the load left it, but for its format
+static Gfx *SetRenderTileFormat(Gfx *gfx, u32 format) {
+    gDPSetTile(
+        gfx++,
+        format,
+        G_IM_SIZ_16b,
+        (COPIED_COLUMN_COUNT * 2) / 8,
+        0,
+        G_TX_RENDERTILE,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOLOD
+    );
+    return gfx;
+}
+
+static Gfx *CopyRgbaTileSetAgain(Gfx *gfx) {
+    return CopyAsIs(SetRenderTileFormat(gfx, G_IM_FMT_RGBA));
+}
+
+// Copying moves texels raw, which a draw of other formats doesn't
+static Gfx *CopyIntensityAlphaTile(Gfx *gfx) {
+    return CopyAsIs(SetRenderTileFormat(gfx, G_IM_FMT_IA));
+}
+
+static Gfx *CopyThroughPalette(Gfx *gfx) {
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gfx = CopyAsIs(gfx);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    return gfx;
+}
+
+static Gfx *CopyIntoWideImage(Gfx *gfx) {
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, IMAGE_WIDTH / 2, f_ColorImage);
+    return CopyAsIs(gfx);
+}
+
+static Gfx *CopyInOneCycle(Gfx *gfx) {
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    return CopyAsIs(gfx);
+}
+
+// Whether a list that draws f_CopiedImage, then copies rows 4 to 9 of the
+// image with the change made, draws them rather than copying targets
+static bool DoesCopyDraw(const void *image, int imageWidth, Gfx *(*change)(Gfx *gfx)) {
+    return DoesChangedCopyDraw(image, imageWidth, f_CopiedImage, IMAGE_HEIGHT, change);
+}
+
+// Copies with nothing that a target holds, or that don't take a texel to a
+// pixel as copying between targets does, draw as before
+static void TestCopiesThatDraw(void) {
+    EXPECT(!DoesCopyDraw(f_CopiedImage, IMAGE_WIDTH, CopyAsIs));
+    EXPECT(DoesCopyDraw(f_CopiedImage, IMAGE_WIDTH, CopyFlipped));
+    EXPECT(DoesCopyDraw(f_CopiedImage, IMAGE_WIDTH, CopyStretched));
+    EXPECT(DoesCopyDraw(f_CopiedImage, IMAGE_WIDTH, CopyRowsSkipped));
+    EXPECT(DoesCopyDraw(f_CopiedImage, IMAGE_WIDTH, CopyFromBetweenTexels));
+    EXPECT(DoesCopyDraw(f_CopiedImage, IMAGE_WIDTH, CopyFromBetweenRows));
+    EXPECT(DoesCopyDraw(f_CopiedImage, IMAGE_WIDTH, CopyComparingAlpha));
+    EXPECT(DoesCopyDraw(f_CopiedImage, IMAGE_WIDTH, CopyIntoWideImage));
+    EXPECT(DoesCopyDraw(f_CopiedImage, IMAGE_WIDTH, CopyInOneCycle));
+    EXPECT(!DoesCopyDraw(f_CopiedImage, IMAGE_WIDTH, CopyRgbaTileSetAgain));
+    EXPECT(DoesCopyDraw(f_CopiedImage, IMAGE_WIDTH, CopyIntensityAlphaTile));
+    EXPECT(DoesCopyDraw(f_CopiedImage, IMAGE_WIDTH, CopyThroughPalette));
+    // Memory that no image holds, rows of another width, and the color
+    // image's own pixels
+    EXPECT(DoesCopyDraw(f_PlainTexture, IMAGE_WIDTH, CopyAsIs));
+    EXPECT(DoesCopyDraw(f_CopiedImage, IMAGE_WIDTH / 2, CopyAsIs));
+    EXPECT(DoesCopyDraw(f_ColorImage, IMAGE_WIDTH, CopyAsIs));
+    // Texels from between two of the image's pixels
+    EXPECT(DoesCopyDraw((const uint8_t *)f_CopiedImage + 1, IMAGE_WIDTH, CopyAsIs));
+}
+
+// Whether a copy of 16 columns of f_CopiedImage's rows 4 to 9, from
+// firstColumn, draws them rather than copying targets
+static bool DoesCopyFromColumnDraw(int firstColumn) {
+    Gfx *gfx = BeginCopyList(f_CopiedImage, IMAGE_HEIGHT);
+
+    gDPLoadTextureTile(
+        gfx++,
+        f_CopiedImage,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        IMAGE_WIDTH,
+        0,
+        firstColumn,
+        4,
+        firstColumn + 15,
+        9,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gSPTextureRectangle(
+        gfx++,
+        2 << 2,
+        10 << 2,
+        17 << 2,
+        15 << 2,
+        G_TX_RENDERTILE,
+        firstColumn << 5,
+        4 << 5,
+        4 << 10,
+        1 << 10
+    );
+    ResetCapture();
+    RunList(gfx);
+    return f_Gpu.copyCount == 0 && f_Gpu.vertexCount == 6;
+}
+
+// Texels loaded from rows of 16-bit texels that a 32-bit image of their
+// width holds, and from past the end of an image's row, draw: no target
+// holds them so. Up to the row's end, they copy.
+static void TestCopyOfPixelsNoTargetHoldsDraws(void) {
+    Gfx *gfx = BeginList(f_DisplayList);
+
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, IMAGE_WIDTH / 2, f_WideImage);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPFillRectangle(gfx++, 0, 0, (IMAGE_WIDTH / 2) - 1, IMAGE_HEIGHT - 1);
+    RunList(gfx);
+    EXPECT(
+        DoesChangedCopyDraw(f_WideImage, IMAGE_WIDTH / 2, f_CopiedImage, IMAGE_HEIGHT, CopyAsIs)
+    );
+
+    EXPECT(!DoesCopyFromColumnDraw(IMAGE_WIDTH - 16));
+    EXPECT(DoesCopyFromColumnDraw(IMAGE_WIDTH - 15));
+}
+
+// An image holds the rows that drawing has reached, so a copy of rows below
+// them draws memory's: one row short of the copy's last, then up to it
+static void TestCopyNeedsDrawnRows(void) {
+    EXPECT(DoesChangedCopyDraw(f_ShortImage, IMAGE_WIDTH, f_ShortImage, 9, CopyAsIs));
+    EXPECT(!DoesChangedCopyDraw(f_ShortImage, IMAGE_WIDTH, f_ShortImage, 10, CopyAsIs));
+}
+
+// Once the CPU writes the source's memory, which the target never saw, a
+// later task's copy draws what memory holds
+static void TestCopyAfterCpuWritesDraws(void) {
+    Gfx *gfx = BeginCopyList(f_CopiedImage, IMAGE_HEIGHT);
+
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    RunList(gfx);
+    f_CopiedImage[(5 * IMAGE_WIDTH) + COPIED_FIRST_COLUMN] ^= 0x0100;
+
+    gfx = BeginList(f_DisplayList);
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 2, 10, 4, 6);
+    ResetCapture();
+    RunList(gfx);
+    EXPECT(f_Gpu.copyCount == 0 && f_Gpu.vertexCount == 6);
+}
+
 int main(void) {
     static const int16_t depthProjection[4][4] = {
         {1, 0, 0, 0},
@@ -1723,6 +2148,13 @@ int main(void) {
     TestCpuReadsDrawing();
     TestImageSizedByDrawing();
     TestImageGrowsInPlace();
+    TestCopyBetweenDrawnImages();
+    TestCopiedStripsBecomeOne();
+    TestCopyKeepsToTheScissor();
+    TestCopiesThatDraw();
+    TestCopyNeedsDrawnRows();
+    TestCopyOfPixelsNoTargetHoldsDraws();
+    TestCopyAfterCpuWritesDraws();
     TestShutdownReleasesTargets();
     return ReportTestResults("rcp_test");
 }
