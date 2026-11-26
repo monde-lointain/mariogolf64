@@ -310,7 +310,7 @@ ENCODE_TEXT   = $(PYTHON) $(TOOLS)/messages.py encode $< $@
 # the layout makes the list again, make reads it in afresh before building
 # anything, so that a file added to the layout is built. The goals that
 # build nothing skip it, as making it needs the Python environment.
-SETUP_GOALS := tools clean distclean
+SETUP_GOALS := help tools clean distclean
 ifneq ($(filter-out $(SETUP_GOALS),$(or $(MAKECMDGOALS),all)),)
 include $(LAYOUT_MK)
 endif
@@ -387,7 +387,7 @@ $(BUILD_DIR)/src/system/main_bss.c.o: INCLUDES += $(call include_dirs,$(LIBMUS_D
 MOD_SETTINGS :=
 include $(wildcard $(MOD_ROOTS:%=%/mod.mk))
 
-.PHONY: all setup tools extract clean distclean check-shiftable check-alignment equivalence \
+.PHONY: all help setup tools extract objects clean distclean check-shiftable check-alignment equivalence \
         sanitize test target-tests format check-format lint typecheck pycheck tool-tests FORCE
 
 # A recipe that fails after writing its target, such as a check of what it
@@ -400,6 +400,25 @@ ifneq ($(COMPARE),0)
 	@if command -v sha1sum > /dev/null; then sha1sum -c $(BASE)/$(TARGET).sha1; \
 	else shasum -a 1 -c $(BASE)/$(TARGET).sha1; fi
 endif
+
+help:
+	@echo 'Goals:'
+	@echo '  all             build the ROM and, if it should match, check its SHA-1 (default)'
+	@echo '  setup           install KMC GCC and the Python tools, and extract the assets'
+	@echo '  objects         compile everything that needs no file from the original ROM'
+	@echo '  test            run the unit tests on both builds in ares n64-harness'
+	@echo '  check-shiftable check that the code links with its code and data moved'
+	@echo '  format          format the C sources and the Python tools'
+	@echo '  check-format    check the C sources format as make format leaves them'
+	@echo '  pycheck         lint and type-check the Python tools'
+	@echo '  tool-tests      test the Python tools'
+	@echo '  lint            run clang-tidy on the game code'
+	@echo '  clean           remove this build; distclean removes every build and the assets'
+	@echo 'Settings, such as make MODERN=1:'
+	@echo '  NON_MATCHING=1  build a ROM whose code and data can move'
+	@echo '  MODERN=1        build with modern GCC from libdragon (N64_INST=$(N64_INST))'
+	@echo '  CROSS=PREFIX    the MIPS binutils to use (found: $(CROSS))'
+	@echo 'See README.md for the rest.'
 
 # Everything that the matching build needs from outside the repository,
 # besides the original ROM, which only you can supply
@@ -645,6 +664,14 @@ $(BUILD_DIR)/assets/%.inc.c: assets/%.png $(TOOLS)/png_to_c.py
 $(foreach png,$(TEXTURE_PNGS),$(eval \
   $(patsubst assets/%/,$(BUILD_DIR)/src/%.c.o,$(dir $(png))): \
       $(BUILD_DIR)/$(png:.png=.inc.c)))
+
+# Compiles and assembles every object that needs nothing cut from the
+# original ROM: all but the files of assets, the microcode and the C
+# files that include textures. It checks the code where there is no ROM,
+# such as in CI.
+ASSET_O_FILES := $(filter %.bin.o,$(O_FILES)) $(BUILD_DIR)/src/system/microcode.s.o \
+                 $(patsubst assets/%/,$(BUILD_DIR)/src/%.c.o,$(dir $(TEXTURE_PNGS)))
+objects: $(filter-out $(ASSET_O_FILES),$(O_FILES))
 
 # The sources are UTF-8, but the game's strings are Shift-JIS. KMC GCC
 # compiles a Shift-JIS copy, and the line marker keeps its messages
