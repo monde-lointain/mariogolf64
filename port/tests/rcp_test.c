@@ -710,9 +710,11 @@ static void TestDepthClear(void) {
     EXPECT(f_Gpu.draws[0].pipelineKey == (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE));
 }
 
-// The primitive's depth, of the most, 0x7FFF, and as the GPU's depth
+// The primitive's depth, and as the GPU's depth. The RSP gives the RDP a
+// vertex's depth in 32 units for each of the viewport's, so the farthest
+// that a vertex reaches, the viewport's G_MAXZ, is G_MAXZ * 32 to the RDP.
 #define PRIMITIVE_DEPTH 0x2000
-#define PRIMITIVE_DEPTH_SHARE (8192.0 / 32767.0)
+#define PRIMITIVE_DEPTH_SHARE (8192.0 / (G_MAXZ * 32.0))
 
 // Adds to a list the depth-buffered opaque mode, with the depth image set,
 // depth taken from the source, and the primitive's depth PRIMITIVE_DEPTH
@@ -793,6 +795,28 @@ static void TestTrianglesWithoutDepthTakePrimitives(void) {
     DrawDepthSourcedTriangle(0, G_ZS_PRIM);
     EXPECT(f_Gpu.draws[0].pipelineKey == (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE));
     ExpectVertexDepths(3, PRIMITIVE_DEPTH_SHARE);
+}
+
+// The game works out a sprite's primitive depth on the scale on which the
+// RSP passes a vertex's depth to the RDP, so a primitive at a vertex's
+// depth lies at the vertex's depth on the GPU as well, and the small steps
+// by which the game puts a sprite before the ground keep their order
+static void TestPrimitiveDepthMatchesVertexDepth(void) {
+    double vertexDepth;
+    Gfx *gfx;
+
+    DrawDepthSourcedTriangle(G_ZBUFFER, G_ZS_PIXEL);
+    vertexDepth = f_Gpu.vertices[0].position[2] / f_Gpu.vertices[0].position[3];
+
+    gfx = BeginTriangles(f_DisplayList, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    ResetCapture();
+    gfx = SourceDepth(gfx, G_ZS_PRIM);
+    // f_Triangle's z of 0 lies at the viewport's G_MAXZ / 2
+    gDPSetPrimDepth(gfx++, (G_MAXZ / 2) * 32, 0);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+    ExpectVertexDepths(3, vertexDepth);
 }
 
 // Fills the other image in the fill cycle, as a color image, from left,
@@ -2508,6 +2532,7 @@ int main(void) {
     TestDepthClear();
     TestDepthSources();
     TestTrianglesWithoutDepthTakePrimitives();
+    TestPrimitiveDepthMatchesVertexDepth();
     TestColorFillClearsLaterDepth();
     TestDepthClearNotesHoldFour();
     TestDepthClearOutlastsColorFill();

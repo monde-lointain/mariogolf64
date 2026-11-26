@@ -37,7 +37,11 @@
 // The depth that a cleared depth image reads as
 #define DEPTH_FAR 1.0f
 #define DEPTH_IMAGE_MAX 0x3FFF
-#define PRIMITIVE_DEPTH_MAX 0x7FFF
+// The primitive's depth is 15 bits, on the scale on which the RSP gives
+// the RDP a vertex's depth: 32 units for each of the viewport's, which
+// reaches G_MAXZ, the depth that the RSP's vertices make 1
+#define PRIMITIVE_DEPTH_MASK 0x7FFF
+#define PRIMITIVE_DEPTH_FAR (G_MAXZ * 32.0f)
 
 // The cycle types, as othermode's field holds them
 #define CYCLE_TWO 1
@@ -1106,7 +1110,7 @@ static GfxVertex *BeginPrimitive(
 }
 
 static float PrimitiveDepth(void) {
-    return (float)(f_Rdp.primitiveDepth & PRIMITIVE_DEPTH_MAX) / PRIMITIVE_DEPTH_MAX;
+    return (float)(f_Rdp.primitiveDepth & PRIMITIVE_DEPTH_MASK) / PRIMITIVE_DEPTH_FAR;
 }
 
 static uint32_t PackShade(const uint8_t color[4]) {
