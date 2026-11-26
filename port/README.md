@@ -341,6 +341,13 @@ color image that a task sets becomes a render target, and a texture loaded
 from a render target's memory samples that target. The finished frame and
 its depth are copied back into the memory where the game reads them.
 
+The render targets hold 8 bits for each color channel, where the N64's
+frame buffer held 5. The port leaves out the RDP's color dither, which
+only hid that loss: NuSystem turns on the video interface's dither filter,
+which rebuilds each pixel's lost bits from its neighbors, so the console
+shows close to what the port draws. The port keeps the alpha dither,
+which with the alpha compare makes a primitive partly transparent.
+
 The shaders are GLSL, compiled to SPIR-V for Vulkan. On Apple's systems,
 the build also translates them to Metal's shading language with
 SPIRV-Cross.
