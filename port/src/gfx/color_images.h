@@ -75,6 +75,30 @@ GfxTarget *FindPixelsTarget(
     uint16_t *y
 );
 
+// The depth target that holds width by height pixels of depth from
+// address, in rows imageWidth pixels apart, where they lie in it, and the
+// use of the depth image that it stamps: the target of the depth image of
+// that memory that the GPU drew last, when it drew it since the color
+// image that holds the pixels and no write of it waits. NULL when there is
+// no such image. The caller has found the pixels' color image unwritten by
+// the CPU since, as FindPixelsTarget does.
+GfxTarget *FindDepthPixelsTarget(
+    const uint8_t *address,
+    uint16_t imageWidth,
+    uint16_t width,
+    uint16_t height,
+    uint16_t *x,
+    uint16_t *y,
+    uint64_t *use
+);
+
+// Records that a write of the depth image at address waits for its next
+// use, so its targets lack it until then
+void MarkDepthImageBehind(const uint8_t *address);
+
+// Whether target is still a depth image's, unused since its use was use
+bool IsDepthTargetUnchanged(const GfxTarget *target, uint64_t use);
+
 // Whether any image with drawing that its memory lacks overlaps the bytes
 bool HasUnsyncedColorImage(const uint8_t *start, uintptr_t size);
 

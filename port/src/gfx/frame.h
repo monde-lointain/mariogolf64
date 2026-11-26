@@ -115,7 +115,12 @@ typedef struct GfxMaterial {
 #define PIPELINE_WRITE_ALPHA 0x80
 // Writes depth and no color, as a fill of part of the depth image does
 #define PIPELINE_DEPTH_ONLY 0x100
-#define PIPELINE_KEY_COUNT 0x200
+// Writes the depth that the draw's source target holds, at the texture
+// coordinates, which are the source's pixels
+#define PIPELINE_DEPTH_COPY 0x200
+#define PIPELINE_KEY_COUNT 0x400
+// The key of a draw that copies depth from another depth target
+#define DEPTH_COPY_KEY (PIPELINE_DEPTH_COPY | PIPELINE_DEPTH_WRITE | PIPELINE_DEPTH_ONLY)
 
 typedef enum DestinationFactor {
     DESTINATION_ZERO,
@@ -133,15 +138,16 @@ typedef struct GfxRect {
     uint16_t bottom;
 } GfxRect;
 
+// A color image of the game's, which the GPU renders into, or a depth image
+typedef struct GfxTarget GfxTarget;
+
 typedef struct GfxDraw {
     uint32_t firstVertex;
     uint32_t vertexCount;
     uint16_t pipelineKey;
     GfxRect scissor;
+    GfxTarget *source; // The depth target that a depth copy reads, or NULL
 } GfxDraw;
-
-// A color image of the game's, which the GPU renders into
-typedef struct GfxTarget GfxTarget;
 
 // Pixels of another target to copy into a pass's, at the same scale: what
 // the game copies between its images in the RDP's copy mode
@@ -229,6 +235,20 @@ GfxVertex *AddFrameVertices(
     uint16_t pipelineKey,
     const GfxRect *scissor
 );
+
+// Appends vertices to the current pass that copy depth from source, a depth
+// target that isn't the pass's, extending its last draw when that copies
+// from source with the same scissor; returns where they go
+GfxVertex *AddFrameDepthCopyVertices(
+    GfxFrame *frame,
+    GfxTarget *source,
+    uint32_t vertexCount,
+    const GfxRect *scissor
+);
+
+// Whether next carries on copy's rows, from the same source's same columns
+// to the same columns
+bool DoesCopyCarryOn(const GfxCopy *copy, const GfxCopy *next);
 
 // Copies pixels into target ahead of any draw into it that follows. A copy
 // that carries on the rows of the pass's last copy, from the same source,

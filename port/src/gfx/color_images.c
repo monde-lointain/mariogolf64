@@ -35,6 +35,8 @@ typedef struct DepthImage {
     const uint8_t *address;
     uint16_t width;
     uint16_t height;
+    uint64_t lastUse; // Counted with the color images' uses
+    bool lacksWrite; // A write of its memory waits for its next use
     GfxTarget *target;
 } DepthImage;
 
@@ -381,6 +383,8 @@ GfxTarget *UseDepthImage(const uint8_t *address, const ColorImage *colorImage) {
             depth->address == address &&
             depth->width == colorImage->width &&
             depth->height == colorImage->targetHeight) {
+            depth->lastUse = ++f_UseCount;
+            depth->lacksWrite = false;
             return depth->target;
         }
 
@@ -401,6 +405,8 @@ GfxTarget *UseDepthImage(const uint8_t *address, const ColorImage *colorImage) {
     free->address = address;
     free->width = colorImage->width;
     free->height = colorImage->targetHeight;
+    free->lastUse = ++f_UseCount;
+    free->lacksWrite = false;
     free->target = BackendCreateTarget(colorImage->width, colorImage->targetHeight, true);
     return free->target;
 }
@@ -423,7 +429,10 @@ static bool IsImageUnwritten(ColorImage *image) {
     return true;
 }
 
-GfxTarget *FindPixelsTarget(
+// The 16-bit image that holds width by height pixels from address, in rows
+// imageWidth pixels apart, and where they lie in it; NULL when none does.
+// Images don't overlap, so at most one does.
+static ColorImage *FindPixelsImage(
     const uint8_t *address,
     uint16_t imageWidth,
     uint16_t width,
@@ -431,12 +440,8 @@ GfxTarget *FindPixelsTarget(
     uint16_t *x,
     uint16_t *y
 ) {
-    GfxTarget *target = NULL;
     int i;
 
-    SDL_assert(address != NULL && imageWidth != 0 && width != 0 && height != 0);
-    SDL_assert(x != NULL && y != NULL);
-    SDL_LockMutex(f_Lock);
     for (i = 0; i < COLOR_IMAGE_COUNT_MAX; i++) {
         ColorImage *image = &f_ColorImages[i];
         // An address before the image wraps to a row past its end
@@ -454,17 +459,132 @@ GfxTarget *FindPixelsTarget(
             continue;
         }
 
-        if (IsImageUnwritten(image)) {
-            *x = (uint16_t)column;
-            *y = (uint16_t)row;
-            target = image->target;
-        }
+        *x = (uint16_t)column;
+        *y = (uint16_t)row;
+        return image;
+    }
 
-        break;
+    return NULL;
+}
+
+GfxTarget *FindPixelsTarget(
+    const uint8_t *address,
+    uint16_t imageWidth,
+    uint16_t width,
+    uint16_t height,
+    uint16_t *x,
+    uint16_t *y
+) {
+    GfxTarget *target = NULL;
+    ColorImage *image;
+    uint16_t column;
+    uint16_t row;
+
+    SDL_assert(address != NULL && imageWidth != 0 && width != 0 && height != 0);
+    SDL_assert(x != NULL && y != NULL);
+    SDL_LockMutex(f_Lock);
+    image = FindPixelsImage(address, imageWidth, width, height, &column, &row);
+    if (image != NULL && IsImageUnwritten(image)) {
+        *x = column;
+        *y = row;
+        target = image->target;
     }
 
     SDL_UnlockMutex(f_Lock);
     return target;
+}
+
+// Whether the GPU has drawn the depth image since the color image that
+// holds pixels of its memory, with no write of it waiting: its target then
+// holds what the RDP would have left in that memory, unless the CPU wrote
+// it since
+static bool IsDepthNewest(const DepthImage *depth, const ColorImage *pixelsImage) {
+    return !depth->lacksWrite && pixelsImage->lastUse < depth->lastUse;
+}
+
+void MarkDepthImageBehind(const uint8_t *address) {
+    int i;
+
+    SDL_assert(address != NULL);
+    SDL_LockMutex(f_Lock);
+    for (i = 0; i < DEPTH_IMAGE_COUNT_MAX; i++) {
+        if (f_DepthImages[i].address == address) {
+            f_DepthImages[i].lacksWrite = true;
+        }
+    }
+
+    SDL_UnlockMutex(f_Lock);
+}
+
+GfxTarget *FindDepthPixelsTarget(
+    const uint8_t *address,
+    uint16_t imageWidth,
+    uint16_t width,
+    uint16_t height,
+    uint16_t *x,
+    uint16_t *y,
+    uint64_t *use
+) {
+    const DepthImage *found = NULL;
+    const ColorImage *pixelsImage;
+    uint16_t pixelsX;
+    uint16_t pixelsY;
+    int i;
+
+    SDL_assert(address != NULL && imageWidth != 0 && width != 0 && height != 0);
+    SDL_assert(x != NULL && y != NULL && use != NULL);
+    SDL_LockMutex(f_Lock);
+    // The caller copied the pixels from this image, so it's there
+    pixelsImage = FindPixelsImage(address, imageWidth, width, height, &pixelsX, &pixelsY);
+    SDL_assert(pixelsImage != NULL);
+    for (i = 0; pixelsImage != NULL && i < DEPTH_IMAGE_COUNT_MAX; i++) {
+        const DepthImage *depth = &f_DepthImages[i];
+        // An address before the image wraps to a row past its end
+        uintptr_t offset = (uintptr_t)address - (uintptr_t)depth->address;
+        uintptr_t pixel = offset / 2;
+        uintptr_t column = pixel % imageWidth;
+        uintptr_t row = pixel / imageWidth;
+
+        if (depth->target == NULL ||
+            depth->width != imageWidth ||
+            (offset % 2) != 0 ||
+            column + width > depth->width ||
+            row + height > depth->height) {
+            continue;
+        }
+
+        // Of the depth images of the memory, which differ in height, the
+        // last drawn holds it
+        if (found == NULL || depth->lastUse > found->lastUse) {
+            found = depth;
+            *x = (uint16_t)column;
+            *y = (uint16_t)row;
+        }
+    }
+
+    if (found != NULL && !IsDepthNewest(found, pixelsImage)) {
+        found = NULL;
+    }
+
+    SDL_UnlockMutex(f_Lock);
+    if (found == NULL) {
+        return NULL;
+    }
+
+    *use = found->lastUse;
+    return found->target;
+}
+
+bool IsDepthTargetUnchanged(const GfxTarget *target, uint64_t use) {
+    int i;
+
+    for (i = 0; i < DEPTH_IMAGE_COUNT_MAX; i++) {
+        if (f_DepthImages[i].target == target && f_DepthImages[i].lastUse == use) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool HasUnsyncedColorImage(const uint8_t *start, uintptr_t size) {

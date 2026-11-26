@@ -237,6 +237,29 @@ static void TestCopiesFillTheFrame(void) {
     EXPECT(!HasFrameRoom(&f_Frame, 0, 0));
 }
 
+// A depth copy is a draw that reads its source: copies from one source
+// extend one draw, while another source, or none, starts another
+static void TestDepthCopiesKeepTheirSource(void) {
+    ResetFrame(&f_Frame);
+    BeginFramePass(&f_Frame, TARGET_A);
+    UseFrameDepth(&f_Frame, DEPTH, -1.0f);
+    AddFrameDepthCopyVertices(&f_Frame, OTHER_DEPTH, 6, &f_FullRect);
+    AddFrameDepthCopyVertices(&f_Frame, OTHER_DEPTH, 6, &f_FullRect);
+    EXPECT(f_Frame.drawCount == 1 && f_Frame.draws[0].vertexCount == 12);
+    EXPECT(f_Frame.draws[0].source == OTHER_DEPTH);
+    EXPECT(f_Frame.draws[0].pipelineKey == DEPTH_COPY_KEY);
+
+    AddFrameDepthCopyVertices(&f_Frame, TARGET_B, 6, &f_FullRect);
+    EXPECT(f_Frame.drawCount == 2 && f_Frame.draws[1].source == TARGET_B);
+
+    AddFrameVertices(&f_Frame, 3, DEPTH_COPY_KEY, &f_FullRect);
+    EXPECT(f_Frame.drawCount == 3 && f_Frame.draws[2].source == NULL);
+
+    AddFrameDepthCopyVertices(&f_Frame, TARGET_B, 6, &f_HalfRect);
+    EXPECT(f_Frame.drawCount == 4 && f_Frame.draws[3].firstVertex == 21);
+    EXPECT(f_Frame.passCount == 1 && f_Frame.passes[0].drawCount == 4);
+}
+
 int main(void) {
     InitFrame(&f_Frame);
     TestDrawsMerge();
@@ -249,5 +272,6 @@ int main(void) {
     TestCopiedStripsJoin();
     TestCopiesThatDontAdjoinStayApart();
     TestCopiesFillTheFrame();
+    TestDepthCopiesKeepTheirSource();
     return ReportTestResults("frame_test");
 }

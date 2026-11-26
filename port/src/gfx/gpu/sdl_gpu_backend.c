@@ -24,6 +24,7 @@
 #include "frames_in_flight.h"
 #include "gfx_backend.h"
 #include "port/os_host.h"
+#include "shaders/depth_copy.frag.h"
 #include "shaders/rdp.frag.h"
 #include "shaders/rdp.vert.h"
 #include "texture_cache.h"
@@ -54,12 +55,19 @@ typedef struct GrowableTransfer {
     uint32_t size;
 } GrowableTransfer;
 
+// The fragment shaders' uniforms, the same for all of a frame's draws
+typedef struct FrameConstants {
+    uint32_t noiseSeed;
+    uint32_t scale;
+} FrameConstants;
+
 static struct {
     SDL_GPUDevice *device;
     uint32_t scale;
     SDL_GPUTextureFormat depthFormat;
     SDL_GPUShader *vertexShader;
     SDL_GPUShader *fragmentShader;
+    SDL_GPUShader *depthCopyShader;
     // By pipeline key, without and with a depth target
     SDL_GPUGraphicsPipeline *pipelines[PIPELINE_KEY_COUNT][2];
     SDL_GPUTexture *atlas;
@@ -264,8 +272,10 @@ static SDL_GPUGraphicsPipeline *CreatePipeline(uint16_t key, bool hasDepth) {
     colorTarget.blend_state = BlendState(key);
 
     SDL_zero(info);
+    SDL_assert(hasDepth || !(key & PIPELINE_DEPTH_COPY));
     info.vertex_shader = f_Gpu.vertexShader;
-    info.fragment_shader = f_Gpu.fragmentShader;
+    info.fragment_shader =
+        (key & PIPELINE_DEPTH_COPY) ? f_Gpu.depthCopyShader : f_Gpu.fragmentShader;
     info.vertex_input_state.vertex_buffer_descriptions = &vertexBuffer;
     info.vertex_input_state.num_vertex_buffers = 1;
     info.vertex_input_state.vertex_attributes = attributes;
@@ -315,12 +325,15 @@ static SDL_GPUGraphicsPipeline *UsePipeline(uint16_t key, bool hasDepth) {
     return *pipeline;
 }
 
+// Depth targets are sampled too, by draws that copy depth between them
+#define DEPTH_USAGE (SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER)
+
 static SDL_GPUTextureFormat ChooseDepthFormat(void) {
     if (SDL_GPUTextureSupportsFormat(
             f_Gpu.device,
             SDL_GPU_TEXTUREFORMAT_D32_FLOAT,
             SDL_GPU_TEXTURETYPE_2D,
-            SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET
+            DEPTH_USAGE
         )) {
         return SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
     }
@@ -446,6 +459,17 @@ void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale) {
         1,
         1
     );
+    f_Gpu.depthCopyShader = CreateGpuShader(
+        device,
+        SDL_GPU_SHADERSTAGE_FRAGMENT,
+        depth_copy_frag_spirv,
+        sizeof(depth_copy_frag_spirv),
+        depth_copy_frag_msl,
+        sizeof(depth_copy_frag_msl),
+        1,
+        0,
+        1
+    );
     f_Gpu.atlas = CreateTexture(
         COLOR_FORMAT,
         SDL_GPU_TEXTUREUSAGE_SAMPLER,
@@ -477,6 +501,7 @@ void ShutdownGpuBackend(void) {
 
     SDL_ReleaseGPUShader(f_Gpu.device, f_Gpu.vertexShader);
     SDL_ReleaseGPUShader(f_Gpu.device, f_Gpu.fragmentShader);
+    SDL_ReleaseGPUShader(f_Gpu.device, f_Gpu.depthCopyShader);
     SDL_ReleaseGPUTexture(f_Gpu.device, f_Gpu.atlas);
     SDL_ReleaseGPUTexture(f_Gpu.device, f_Gpu.staging);
     SDL_ReleaseGPUSampler(f_Gpu.device, f_Gpu.atlasSampler);
@@ -510,8 +535,7 @@ GfxTarget *BackendCreateTarget(uint32_t width, uint32_t height, bool isDepth) {
     target->needsClear = isDepth;
     target->texture = CreateTexture(
         isDepth ? f_Gpu.depthFormat : COLOR_FORMAT,
-        isDepth ? SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET :
-                  SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER,
+        isDepth ? DEPTH_USAGE : SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER,
         width * f_Gpu.scale,
         height * f_Gpu.scale,
         1
@@ -713,6 +737,7 @@ static void DrawPass(SDL_GPUCommandBuffer *commands, const GfxFrame *frame, cons
     SDL_GPUBufferBinding vertexBinding = {f_Gpu.vertices.buffer, 0};
     SDL_GPUTextureSamplerBinding atlasBinding = {f_Gpu.atlas, f_Gpu.atlasSampler};
     SDL_GPUGraphicsPipeline *boundPipeline = NULL;
+    const GfxTarget *boundSource = NULL; // The atlas's binding when NULL
     GfxRect boundScissor;
     bool hasScissor = false;
     bool hasDepth = pass->depth != NULL;
@@ -736,6 +761,19 @@ static void DrawPass(SDL_GPUCommandBuffer *commands, const GfxFrame *frame, cons
         if (pipeline != boundPipeline) {
             SDL_BindGPUGraphicsPipeline(render, pipeline);
             boundPipeline = pipeline;
+        }
+
+        // A depth copy samples its source where other draws sample the atlas
+        if (draw->source != boundSource) {
+            SDL_GPUTextureSamplerBinding sourceBinding = atlasBinding;
+
+            if (draw->source != NULL) {
+                SDL_assert(draw->source->isDepth && draw->source != pass->depth);
+                sourceBinding.texture = draw->source->texture;
+            }
+
+            SDL_BindGPUFragmentSamplers(render, 0, &sourceBinding, 1);
+            boundSource = draw->source;
         }
 
         if (!hasScissor || SDL_memcmp(&draw->scissor, &boundScissor, sizeof(boundScissor)) != 0) {
@@ -803,6 +841,7 @@ static void CopyPassPixels(
 
 void BackendExecuteFrame(const GfxFrame *frame) {
     SDL_GPUCommandBuffer *commands;
+    FrameConstants constants;
     uint32_t i;
 
     if (frame->passCount == 0 && frame->uploadCount == 0) {
@@ -812,7 +851,9 @@ void BackendExecuteFrame(const GfxFrame *frame) {
     commands = AcquireCommandBuffer();
     UploadFrame(commands, frame);
     f_Gpu.noiseSeed++;
-    SDL_PushGPUFragmentUniformData(commands, 0, &f_Gpu.noiseSeed, sizeof(f_Gpu.noiseSeed));
+    constants.noiseSeed = f_Gpu.noiseSeed;
+    constants.scale = f_Gpu.scale;
+    SDL_PushGPUFragmentUniformData(commands, 0, &constants, sizeof(constants));
     for (i = 0; i < frame->passCount; i++) {
         const GfxPass *pass = &frame->passes[i];
 

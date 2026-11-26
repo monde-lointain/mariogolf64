@@ -53,20 +53,23 @@ typedef struct DepthClear {
     float value;
 } DepthClear;
 
-#define DEPTH_FILL_MAX 4
+#define DEPTH_WRITE_MAX 4
 // The vertices of a rectangle's two triangles
 #define RECTANGLE_VERTEX_COUNT 6
 
-// A fill of part of the depth image, in its pixels, that the next draw to
-// use that memory as the depth image draws first
-typedef struct DepthFill {
+// A write of part of the depth image, in its pixels, that the next draw to
+// use that memory as the depth image draws first: a fill of value, or a
+// copy of another depth target's pixels
+typedef struct DepthWrite {
     const uint8_t *address; // NULL for an unused entry
     float left;
     float top;
     float right;
     float bottom;
     float value;
-} DepthFill;
+    GfxCopy copy; // A copy's pixels; the source is NULL for a fill
+    uint64_t sourceUse; // A copy's source's use when copied
+} DepthWrite;
 
 typedef struct TileSamplerCache {
     bool isValid;
@@ -98,9 +101,9 @@ typedef struct RdpState {
     // The fills that wait for a draw to use their memory as the depth
     // image, oldest first
     DepthClear depthClears[DEPTH_CLEAR_MAX];
-    // Fills of part of a depth image that wait so, oldest first, the used
+    // Writes of part of a depth image that wait so, oldest first, the used
     // entries before the unused
-    DepthFill depthFills[DEPTH_FILL_MAX];
+    DepthWrite depthWrites[DEPTH_WRITE_MAX];
 
     TileSamplerCache samplers[RDP_TILE_COUNT];
     bool isMaterialDirty;
@@ -895,34 +898,56 @@ static bool UseColorImageTarget(float bottom) {
 
 // Notes that the memory at address holds value as depth throughout, in
 // place of any older note of it. When the notes are full the oldest goes.
-// Forgets the waiting fills of part of the depth image at address
-static void ForgetDepthFills(const uint8_t *address) {
+// Forgets the waiting writes of part of the depth image at address
+static void ForgetDepthWrites(const uint8_t *address) {
     int keptCount = 0;
     int i;
 
-    for (i = 0; i < DEPTH_FILL_MAX; i++) {
-        if (f_Rdp.depthFills[i].address != address) {
-            f_Rdp.depthFills[keptCount++] = f_Rdp.depthFills[i];
+    for (i = 0; i < DEPTH_WRITE_MAX; i++) {
+        if (f_Rdp.depthWrites[i].address != address) {
+            f_Rdp.depthWrites[keptCount++] = f_Rdp.depthWrites[i];
         }
     }
 
-    for (i = keptCount; i < DEPTH_FILL_MAX; i++) {
-        f_Rdp.depthFills[i].address = NULL;
+    for (i = keptCount; i < DEPTH_WRITE_MAX; i++) {
+        f_Rdp.depthWrites[i].address = NULL;
     }
 }
 
-static int CountDepthFills(void) {
+static int CountDepthWrites(void) {
     int count = 0;
 
-    while (count < DEPTH_FILL_MAX && f_Rdp.depthFills[count].address != NULL) {
+    while (count < DEPTH_WRITE_MAX && f_Rdp.depthWrites[count].address != NULL) {
         count++;
     }
 
     return count;
 }
 
+// A new write of the depth image at address, after the others, dropping
+// the oldest write when there are too many
+static DepthWrite *AppendDepthWrite(const uint8_t *address) {
+    int count = CountDepthWrites();
+    DepthWrite *write;
+
+    SDL_assert(address != NULL);
+    if (count == DEPTH_WRITE_MAX) {
+        SDL_memmove(
+            &f_Rdp.depthWrites[0],
+            &f_Rdp.depthWrites[1],
+            (DEPTH_WRITE_MAX - 1) * sizeof(DepthWrite)
+        );
+        count--;
+    }
+
+    write = &f_Rdp.depthWrites[count];
+    SDL_zerop(write);
+    write->address = address;
+    return write;
+}
+
 // Notes a fill of the depth image at address from left, top to right,
-// bottom, dropping the oldest fill when there are too many
+// bottom
 static void NoteDepthFill(
     const uint8_t *address,
     float left,
@@ -931,22 +956,11 @@ static void NoteDepthFill(
     float bottom,
     float value
 ) {
-    int count = CountDepthFills();
-    DepthFill *fill;
+    DepthWrite *fill;
 
-    SDL_assert(address != NULL);
     SDL_assert(right > left && bottom > top);
-    if (count == DEPTH_FILL_MAX) {
-        SDL_memmove(
-            &f_Rdp.depthFills[0],
-            &f_Rdp.depthFills[1],
-            (DEPTH_FILL_MAX - 1) * sizeof(DepthFill)
-        );
-        count--;
-    }
-
-    fill = &f_Rdp.depthFills[count];
-    fill->address = address;
+    MarkDepthImageBehind(address);
+    fill = AppendDepthWrite(address);
     fill->left = left;
     fill->top = top;
     fill->right = right;
@@ -954,13 +968,44 @@ static void NoteDepthFill(
     fill->value = value;
 }
 
+// Notes a copy of pixels into the depth image at address from their
+// source, a depth target at its use sourceUse. A copy that carries on the
+// rows of the last write, a copy from the same source, lengthens it.
+static void NoteDepthCopy(const uint8_t *address, const GfxCopy *pixels, uint64_t sourceUse) {
+    int count = CountDepthWrites();
+    DepthWrite *copy;
+
+    SDL_assert(pixels->source != NULL && pixels->width != 0 && pixels->height != 0);
+    if (count != 0) {
+        DepthWrite *last = &f_Rdp.depthWrites[count - 1];
+
+        if (last->address == address &&
+            last->copy.source != NULL &&
+            last->sourceUse == sourceUse &&
+            DoesCopyCarryOn(&last->copy, pixels)) {
+            last->copy.height = (uint16_t)(last->copy.height + pixels->height);
+            last->bottom += (float)pixels->height;
+            return;
+        }
+    }
+
+    copy = AppendDepthWrite(address);
+    copy->left = (float)pixels->x;
+    copy->top = (float)pixels->y;
+    copy->right = (float)(pixels->x + pixels->width);
+    copy->bottom = (float)(pixels->y + pixels->height);
+    copy->copy = *pixels;
+    copy->sourceUse = sourceUse;
+}
+
 static void NoteDepthClear(const uint8_t *address, float value) {
     int replaced = 0;
     int i;
 
     SDL_assert(address != NULL);
-    // The clear covers whatever the earlier fills drew
-    ForgetDepthFills(address);
+    MarkDepthImageBehind(address);
+    // The clear covers whatever the earlier writes drew
+    ForgetDepthWrites(address);
     for (i = 0; i < DEPTH_CLEAR_MAX; i++) {
         if (f_Rdp.depthClears[i].address == address) {
             replaced = i;
@@ -991,24 +1036,24 @@ static float TakeDepthClear(const uint8_t *address) {
     return -1.0f;
 }
 
-static void DrawDepthFills(const uint8_t *address);
+static void DrawDepthWrites(const uint8_t *address, const GfxTarget *depth);
 
 static void UseDepthTarget(void) {
     GfxTarget *depth = UseDepthImage(f_Rdp.depthImageAddress, f_Rdp.colorImage);
 
     UseFrameDepth(&f_Frame, depth, TakeDepthClear(f_Rdp.depthImageAddress));
-    DrawDepthFills(f_Rdp.depthImageAddress);
+    DrawDepthWrites(f_Rdp.depthImageAddress, depth);
 }
 
 // Whether the frame has room for a primitive of vertexCount vertices, and
-// for the fills of the depth image that may come first with their own
-// draw and material
+// for the writes of the depth image that may come first, each with its own
+// draw, and the fills with their material
 static bool HasRoomForPrimitive(uint32_t vertexCount) {
-    uint32_t fillCount = (uint32_t)CountDepthFills();
+    uint32_t writeCount = (uint32_t)CountDepthWrites();
 
-    return HasFrameRoom(&f_Frame, vertexCount + (fillCount * RECTANGLE_VERTEX_COUNT), 0) &&
-        (fillCount == 0 ||
-            (f_Frame.drawCount + 1 < FRAME_DRAW_CAPACITY &&
+    return HasFrameRoom(&f_Frame, vertexCount + (writeCount * RECTANGLE_VERTEX_COUNT), 0) &&
+        (writeCount == 0 ||
+            (f_Frame.drawCount + writeCount < FRAME_DRAW_CAPACITY &&
                 f_Frame.materialCount + 1 < FRAME_MATERIAL_CAPACITY));
 }
 
@@ -1172,11 +1217,32 @@ static void PlaceRectangleVertex(
     vertex->position[3] = 1.0f;
 }
 
-// Draws the waiting fills of part of the depth image at address into the
+// Draws a copy into the current pass's depth: the texture coordinates are
+// the source's pixels
+static void DrawDepthCopy(const DepthWrite *copy, const GfxRect *scissor) {
+    const float bounds[4] = {copy->left, copy->top, copy->right, copy->bottom};
+    GfxVertex *vertices =
+        AddFrameDepthCopyVertices(&f_Frame, copy->copy.source, RECTANGLE_VERTEX_COUNT, scissor);
+    int i;
+
+    SDL_memset(vertices, 0, RECTANGLE_VERTEX_COUNT * sizeof(GfxVertex));
+    for (i = 0; i < RECTANGLE_VERTEX_COUNT; i++) {
+        int corner = f_RectangleCorners[i];
+
+        PlaceRectangleVertex(&vertices[i], corner, bounds, 0.0f);
+        vertices[i].texCoord[0] =
+            (float)(copy->copy.sourceX + ((corner & 1) ? copy->copy.width : 0));
+        vertices[i].texCoord[1] =
+            (float)(copy->copy.sourceY + ((corner & 2) ? copy->copy.height : 0));
+    }
+}
+
+// Draws the waiting writes of part of the depth image at address into the
 // current pass's depth, in their order, and forgets them. They write no
-// color, and nothing of the material that the fragments read matters but
-// that it discards none of them.
-static void DrawDepthFills(const uint8_t *address) {
+// color. Of the material that a fill's fragments read, nothing matters but
+// that it discards none of them. A copy whose source has been drawn on or
+// dropped since is dropped too: the RDP read the depth that is gone.
+static void DrawDepthWrites(const uint8_t *address, const GfxTarget *depth) {
     static const GfxMaterial noMaterial;
     GfxRect wholeImage = {0, 0, 0, 0};
     uint32_t materialIndex = 0;
@@ -1185,13 +1251,22 @@ static void DrawDepthFills(const uint8_t *address) {
 
     wholeImage.right = ColorImageWidth(f_Rdp.colorImage);
     wholeImage.bottom = ColorImageTargetHeight(f_Rdp.colorImage);
-    for (i = 0; i < DEPTH_FILL_MAX; i++) {
-        const DepthFill *fill = &f_Rdp.depthFills[i];
+    for (i = 0; i < DEPTH_WRITE_MAX; i++) {
+        const DepthWrite *fill = &f_Rdp.depthWrites[i];
         const float bounds[4] = {fill->left, fill->top, fill->right, fill->bottom};
         GfxVertex *vertices;
         int j;
 
         if (fill->address != address) {
+            continue;
+        }
+
+        if (fill->copy.source != NULL) {
+            if (fill->copy.source != depth &&
+                IsDepthTargetUnchanged(fill->copy.source, fill->sourceUse)) {
+                DrawDepthCopy(fill, &wholeImage);
+            }
+
             continue;
         }
 
@@ -1213,7 +1288,7 @@ static void DrawDepthFills(const uint8_t *address) {
         }
     }
 
-    ForgetDepthFills(address);
+    ForgetDepthWrites(address);
 }
 
 static void StoreRectangle(
@@ -1375,10 +1450,31 @@ static bool IsCopyOneToOne(int tileIndex, uint32_t texCoords, uint32_t texSteps,
         f_Rdp.colorImageSize == G_IM_SIZ_16b;
 }
 
+// Notes a copy, for the color image's memory's next use as the depth image,
+// of the depth that the GPU drew into the copied pixels' memory as the
+// depth image, when it drew there last
+static void NoteDepthOfCopy(const TileSource *texels, const GfxCopy *pixels) {
+    GfxCopy depth = *pixels;
+    uint64_t sourceUse;
+
+    depth.source = FindDepthPixelsTarget(
+        texels->address,
+        texels->imageWidth,
+        pixels->width,
+        pixels->height,
+        &depth.sourceX,
+        &depth.sourceY,
+        &sourceUse
+    );
+    if (depth.source != NULL) {
+        NoteDepthCopy(f_Rdp.colorImageAddress, &depth, sourceUse);
+    }
+}
+
 // Copies the rectangle's pixels, within the scissor, from the target that
 // holds the texels' image to the color image's, at the renderer's scale,
-// when there is one; the texels start at whole texel s, t. Returns whether
-// it copied them.
+// when there is one, along with any depth drawn into their memory; the
+// texels start at whole texel s, t. Returns whether it copied them.
 static bool CopyHeldPixels(const Rectangle *rectangle, int tileIndex, uint32_t s, uint32_t t) {
     GfxTarget *destination;
     GfxTarget *source;
@@ -1447,6 +1543,7 @@ static bool CopyHeldPixels(const Rectangle *rectangle, int tileIndex, uint32_t s
     copy.height = (uint16_t)(bottom - top);
     AddFrameCopy(&f_Frame, destination, &copy);
     MarkColorImageDrawn(f_Rdp.colorImage);
+    NoteDepthOfCopy(&texels, &copy);
     return true;
 }
 

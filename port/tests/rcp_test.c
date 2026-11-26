@@ -62,6 +62,8 @@ static uint16_t f_GrowingImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static uint16_t f_CopiedImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static uint16_t f_PlainTexture[IMAGE_WIDTH * IMAGE_HEIGHT]; // Never drawn
 static uint16_t f_ShortImage[IMAGE_WIDTH * IMAGE_HEIGHT];
+// A color image of half the rows, whose depth image has as many
+static uint16_t f_HalfImage[IMAGE_WIDTH * (IMAGE_HEIGHT / 2)];
 static uint16_t f_WideImage[IMAGE_WIDTH * IMAGE_HEIGHT];
 static Gfx f_DisplayList[256];
 
@@ -2098,6 +2100,387 @@ static void TestCopyAfterCpuWritesDraws(void) {
     EXPECT(f_Gpu.copyCount == 0 && f_Gpu.vertexCount == 6);
 }
 
+// Saves a frame's depth as the game does, in a task of its own: fills
+// f_CopiedImage whole as a color image, then draws a triangle into scene,
+// a color image of sceneHeight rows, that writes depth with depth, memory
+// within f_CopiedImage, as the depth image. Gives the depth target that
+// the triangle wrote.
+static GfxTarget *SaveDepthOf(uint16_t *depth, uint16_t *scene, int sceneHeight) {
+    Gfx *gfx = BeginList(f_DisplayList);
+
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_CopiedImage);
+    gDPSetFillColor(gfx++, (GPACK_ZDZ(G_MAXFBZ, 0) << 16) | GPACK_ZDZ(G_MAXFBZ, 0));
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    gDPPipeSync(gfx++);
+    gDPSetDepthImage(gfx++, depth);
+    gfx = BeginTriangles(gfx, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, scene);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, IMAGE_WIDTH, sceneHeight);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    ResetCapture();
+    RunList(gfx);
+    EXPECT(f_Gpu.passCount != 0 && f_Gpu.passes[f_Gpu.passCount - 1].depth != NULL);
+    return f_Gpu.passes[f_Gpu.passCount - 1].depth;
+}
+
+static GfxTarget *SaveDepth(void) {
+    return SaveDepthOf(f_CopiedImage, f_ColorImage, IMAGE_HEIGHT);
+}
+
+// Loads 16 columns from firstColumn of rowCount rows from firstRow of
+// f_CopiedImage, and copies them to x, y
+static Gfx *CopyColumns(Gfx *gfx, int firstColumn, int firstRow, int rowCount, int x, int y) {
+    gDPLoadTextureTile(
+        gfx++,
+        f_CopiedImage,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        IMAGE_WIDTH,
+        0,
+        firstColumn,
+        firstRow,
+        firstColumn + COPIED_COLUMN_COUNT - 1,
+        firstRow + rowCount - 1,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gSPTextureRectangle(
+        gfx++,
+        x << 2,
+        y << 2,
+        (x + COPIED_COLUMN_COUNT - 1) << 2,
+        (y + rowCount - 1) << 2,
+        G_TX_RENDERTILE,
+        firstColumn << 5,
+        firstRow << 5,
+        4 << 10,
+        1 << 10
+    );
+    return gfx;
+}
+
+// Starts a list that copies into f_DepthImage, both the color and the
+// depth image, as the game restores the saved frame's depth
+static Gfx *BeginDepthCopyList(void) {
+    Gfx *gfx = BeginList(f_DisplayList);
+
+    gDPSetDepthImage(gfx++, f_DepthImage);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_DepthImage);
+    gDPSetCycleType(gfx++, G_CYC_COPY);
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    return gfx;
+}
+
+// Ends the list with a triangle into f_ColorImage that tests depth on
+// f_DepthImage, runs it, and gives the triangle's pass
+static const GfxPass *DrawOnCopiedDepth(Gfx *gfx) {
+    gDPPipeSync(gfx++);
+    ResetCapture();
+    DrawOnDepth(gfx);
+    EXPECT(f_Gpu.passCount != 0);
+    return &f_Gpu.passes[f_Gpu.passCount - 1];
+}
+
+// Whether the pass draws a depth copy from source first, and the draw that
+// tests depth after it
+static bool DoesPassCopyDepth(const GfxPass *pass, const GfxTarget *source) {
+    const GfxDraw *copy = &f_Gpu.draws[pass->firstDraw];
+
+    return pass->drawCount == 2 &&
+        copy->pipelineKey == DEPTH_COPY_KEY &&
+        copy->source == source &&
+        f_Gpu.draws[pass->firstDraw + 1].source == NULL &&
+        f_Gpu.draws[pass->firstDraw + 1].pipelineKey ==
+        (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE);
+}
+
+// Checks that the six vertices from first cover left, top to right, bottom
+// in pixels, exclusive, and read the source's pixels from sourceX, sourceY
+static void ExpectDepthCopyAt(
+    uint32_t first,
+    int left,
+    int top,
+    int right,
+    int bottom,
+    int sourceX,
+    int sourceY
+) {
+    uint32_t i;
+
+    ExpectDepthFillAt(first, left, top, right, bottom, 0.0f);
+    for (i = first; i < first + 6 && i < f_Gpu.vertexCount; i++) {
+        const GfxVertex *vertex = &f_Gpu.vertices[i];
+        float x = (vertex->position[0] + 1.0f) * (IMAGE_WIDTH / 2);
+        float y = (1.0f - vertex->position[1]) * (IMAGE_HEIGHT / 2);
+
+        EXPECT_NEAR(vertex->texCoord[0] - x, sourceX - left, 1e-4);
+        EXPECT_NEAR(vertex->texCoord[1] - y, sourceY - top, 1e-4);
+    }
+}
+
+// The game restores a saved frame's depth by copying the memory that held
+// it as the depth image into the depth image's memory. The GPU drew that
+// depth into a depth target, not memory, so the copy reads it there: the
+// depth image's next use draws the copy into its target first, a draw
+// that writes no color, before the draw that uses it.
+static void TestCopyOfDrawnDepthDrawsIt(void) {
+    GfxTarget *saved = SaveDepth();
+    Gfx *gfx = BeginDepthCopyList();
+    const GfxPass *pass;
+    const GfxRect wholeImage = {0, 0, IMAGE_WIDTH, IMAGE_HEIGHT};
+
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 2, 10, 4, 6);
+    pass = DrawOnCopiedDepth(gfx);
+
+    // The color copy still happens, as the colors that memory holds
+    EXPECT(f_Gpu.copyCount == 1);
+    EXPECT(pass->depth != NULL && pass->depth != saved);
+    EXPECT(DoesPassCopyDepth(pass, saved));
+    EXPECT(f_Gpu.draws[pass->firstDraw].vertexCount == 6);
+    EXPECT(SDL_memcmp(&f_Gpu.draws[pass->firstDraw].scissor, &wholeImage, sizeof(wholeImage)) == 0);
+    ExpectDepthCopyAt(f_Gpu.draws[pass->firstDraw].firstVertex, 2, 10, 18, 16, 8, 4);
+}
+
+// The strips of the saved frame's depth become one copy, as its colors do
+static void TestDepthStripsBecomeOne(void) {
+    GfxTarget *saved = SaveDepth();
+    Gfx *gfx = BeginDepthCopyList();
+    const GfxPass *pass;
+
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 2, 10, 4, 6);
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 10, 2);
+    gfx = CopyRows(gfx, 2, 16, 10, 2);
+    pass = DrawOnCopiedDepth(gfx);
+
+    EXPECT(DoesPassCopyDepth(pass, saved));
+    EXPECT(f_Gpu.draws[pass->firstDraw].vertexCount == 6);
+    ExpectDepthCopyAt(f_Gpu.draws[pass->firstDraw].firstVertex, 2, 10, 18, 18, 8, 4);
+}
+
+// A copy that ends at the saved depth's last row and column still lies
+// within its depth image, so it copies depth
+static void TestDepthCopyReachesTheImageEdge(void) {
+    GfxTarget *saved = SaveDepth();
+    Gfx *gfx = BeginDepthCopyList();
+    const GfxPass *pass;
+
+    gfx = CopyColumns(
+        gfx,
+        IMAGE_WIDTH - COPIED_COLUMN_COUNT,
+        IMAGE_HEIGHT - 6,
+        6,
+        2,
+        IMAGE_HEIGHT - 6
+    );
+    pass = DrawOnCopiedDepth(gfx);
+
+    EXPECT(DoesPassCopyDepth(pass, saved));
+    ExpectDepthCopyAt(
+        f_Gpu.draws[pass->firstDraw].firstVertex,
+        2,
+        IMAGE_HEIGHT - 6,
+        2 + COPIED_COLUMN_COUNT,
+        IMAGE_HEIGHT,
+        IMAGE_WIDTH - COPIED_COLUMN_COUNT,
+        IMAGE_HEIGHT - 6
+    );
+}
+
+// The depth image drawn under a color image of half the rows has half the
+// rows: a copy of its last rows copies its depth, and one of the rows past
+// them, which it lacks, copies none
+static void TestDepthCopyNeedsDrawnDepthRows(void) {
+    GfxTarget *saved = SaveDepthOf(f_CopiedImage, f_HalfImage, IMAGE_HEIGHT / 2);
+    Gfx *gfx = BeginDepthCopyList();
+
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, (IMAGE_HEIGHT / 2) - 6, 6);
+    gfx = CopyRows(gfx, 2, 10, (IMAGE_HEIGHT / 2) - 6, 6);
+    EXPECT(DoesPassCopyDepth(DrawOnCopiedDepth(gfx), saved));
+
+    SaveDepthOf(f_CopiedImage, f_HalfImage, IMAGE_HEIGHT / 2);
+    gfx = BeginDepthCopyList();
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, (IMAGE_HEIGHT / 2) - 5, 6);
+    gfx = CopyRows(gfx, 2, 10, (IMAGE_HEIGHT / 2) - 5, 6);
+    EXPECT(DrawOnCopiedDepth(gfx)->drawCount == 1);
+}
+
+// Depth drawn into memory that a color image holds from its fourth row is
+// newer than that color image, so a copy of the memory copies it, from
+// four rows higher in the depth target
+static void TestDepthWithinColorImageCopies(void) {
+    GfxTarget *saved = SaveDepthOf(&f_CopiedImage[4 * IMAGE_WIDTH], f_ColorImage, IMAGE_HEIGHT);
+    Gfx *gfx = BeginDepthCopyList();
+    const GfxPass *pass;
+
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 8, 6);
+    gfx = CopyRows(gfx, 2, 10, 8, 6);
+    pass = DrawOnCopiedDepth(gfx);
+
+    EXPECT(DoesPassCopyDepth(pass, saved));
+    ExpectDepthCopyAt(f_Gpu.draws[pass->firstDraw].firstVertex, 2, 10, 18, 16, 8, 4);
+}
+
+// A strip copied after the saved depth is drawn on again doesn't lengthen
+// the copy before: that copy read what is gone, so only the later strip
+// copies depth
+static void TestRedrawnDepthStartsAnotherCopy(void) {
+    GfxTarget *saved = SaveDepth();
+    const GfxPass *pass;
+    Gfx *gfx = BeginDepthCopyList();
+
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 2, 10, 4, 6);
+    gDPPipeSync(gfx++);
+    gDPSetDepthImage(gfx++, f_CopiedImage);
+    gfx = BeginTriangles(gfx, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gDPPipeSync(gfx++);
+    gDPSetDepthImage(gfx++, f_DepthImage);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_DepthImage);
+    gDPSetCycleType(gfx++, G_CYC_COPY);
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 10, 2);
+    gfx = CopyRows(gfx, 2, 16, 10, 2);
+    pass = DrawOnCopiedDepth(gfx);
+
+    EXPECT(DoesPassCopyDepth(pass, saved));
+    ExpectDepthCopyAt(f_Gpu.draws[pass->firstDraw].firstVertex, 2, 16, 18, 18, 8, 10);
+}
+
+// Draws as the color image into memory that was drawn on as the depth
+// image, in a task of its own: what memory holds is then the color image's
+static void FillCopiedImageAsColor(void) {
+    Gfx *gfx = BeginList(f_DisplayList);
+
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetDepthImage(gfx++, f_DepthImage);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_CopiedImage);
+    gDPSetFillColor(gfx++, 0);
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, 3);
+    RunList(gfx);
+}
+
+// Fills the saved depth's rows from top to bottom as the depth image, in a
+// task of its own: the fill waits for the memory's next use as the depth
+// image, so its target lacks it
+static void FillCopiedImageAsDepth(int top, int bottom) {
+    Gfx *gfx = BeginList(f_DisplayList);
+
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetDepthImage(gfx++, f_CopiedImage);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_CopiedImage);
+    gfx = FillDepth(gfx, 0, 0, top, IMAGE_WIDTH - 1, bottom);
+    RunList(gfx);
+}
+
+// A copy of memory whose depth target no longer holds it copies no depth:
+// when the color image drew there since, a fill or clear of it as the
+// depth image waits, or the CPU wrote there since
+static void TestCopyOfStaleDepthCopiesNone(void) {
+    Gfx *gfx;
+
+    SaveDepth();
+    FillCopiedImageAsColor();
+    gfx = BeginDepthCopyList();
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 2, 10, 4, 6);
+    EXPECT(DrawOnCopiedDepth(gfx)->drawCount == 1);
+
+    SaveDepth();
+    FillCopiedImageAsDepth(4, 9);
+    gfx = BeginDepthCopyList();
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 2, 10, 4, 6);
+    EXPECT(DrawOnCopiedDepth(gfx)->drawCount == 1);
+
+    SaveDepth();
+    FillCopiedImageAsDepth(0, IMAGE_HEIGHT - 1);
+    gfx = BeginDepthCopyList();
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 2, 10, 4, 6);
+    EXPECT(DrawOnCopiedDepth(gfx)->drawCount == 1);
+
+    SaveDepth();
+    f_CopiedImage[(5 * IMAGE_WIDTH) + COPIED_FIRST_COLUMN] ^= 0x0100;
+    gfx = BeginDepthCopyList();
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 2, 10, 4, 6);
+    EXPECT(DrawOnCopiedDepth(gfx)->drawCount == 1);
+}
+
+// A depth copy waits for the depth image's next use; drawing on the
+// copied depth in the meantime leaves the copy nothing sure to read
+static void TestDepthDrawnAfterCopyCopiesNone(void) {
+    Gfx *gfx;
+
+    SaveDepth();
+    gfx = BeginDepthCopyList();
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 2, 10, 4, 6);
+    gDPPipeSync(gfx++);
+    gDPSetDepthImage(gfx++, f_CopiedImage);
+    gfx = BeginTriangles(gfx, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gDPSetDepthImage(gfx++, f_DepthImage);
+    EXPECT(DrawOnCopiedDepth(gfx)->drawCount == 1);
+}
+
+// A fill of the whole depth image after a copy into it covers the copy
+static void TestDepthClearCoversCopy(void) {
+    const GfxPass *pass;
+    Gfx *gfx;
+
+    SaveDepth();
+    gfx = BeginDepthCopyList();
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 2, 10, 4, 6);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gfx = FillDepth(gfx, G_MAXFBZ, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    pass = DrawOnCopiedDepth(gfx);
+    EXPECT(pass->clearsDepth && pass->drawCount == 1);
+}
+
+// Fills of part of the depth image and copies into it draw in the order
+// that the game made them
+static void TestDepthWritesKeepTheirOrder(void) {
+    GfxTarget *saved = SaveDepth();
+    const GfxPass *pass;
+    Gfx *gfx = BeginDepthCopyList();
+
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gfx = FillDepth(gfx, 0, 0, 0, 3, 3);
+    gDPSetCycleType(gfx++, G_CYC_COPY);
+    gfx = LoadRows(gfx, f_CopiedImage, IMAGE_WIDTH, 4, 6);
+    gfx = CopyRows(gfx, 2, 10, 4, 6);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gfx = FillDepth(gfx, 0, 4, 4, 7, 7);
+    pass = DrawOnCopiedDepth(gfx);
+
+    EXPECT(pass->drawCount == 4);
+    EXPECT(f_Gpu.draws[pass->firstDraw].pipelineKey == DEPTH_FILL_KEY);
+    EXPECT(f_Gpu.draws[pass->firstDraw + 1].pipelineKey == DEPTH_COPY_KEY);
+    EXPECT(f_Gpu.draws[pass->firstDraw + 1].source == saved);
+    EXPECT(f_Gpu.draws[pass->firstDraw + 2].pipelineKey == DEPTH_FILL_KEY);
+    ExpectDepthFillAt(f_Gpu.draws[pass->firstDraw + 2].firstVertex, 4, 4, 8, 8, 0.0f);
+}
+
 int main(void) {
     static const int16_t depthProjection[4][4] = {
         {1, 0, 0, 0},
@@ -2155,6 +2538,16 @@ int main(void) {
     TestCopyNeedsDrawnRows();
     TestCopyOfPixelsNoTargetHoldsDraws();
     TestCopyAfterCpuWritesDraws();
+    TestCopyOfDrawnDepthDrawsIt();
+    TestDepthStripsBecomeOne();
+    TestDepthCopyReachesTheImageEdge();
+    TestDepthCopyNeedsDrawnDepthRows();
+    TestRedrawnDepthStartsAnotherCopy();
+    TestDepthWithinColorImageCopies();
+    TestCopyOfStaleDepthCopiesNone();
+    TestDepthDrawnAfterCopyCopiesNone();
+    TestDepthClearCoversCopy();
+    TestDepthWritesKeepTheirOrder();
     TestShutdownReleasesTargets();
     return ReportTestResults("rcp_test");
 }

@@ -117,9 +117,7 @@ static bool IsSameRect(const GfxRect *first, const GfxRect *second) {
         first->bottom == second->bottom;
 }
 
-// Whether next carries on copy's rows, from the same source's same columns
-// to the same columns
-static bool DoesCopyCarryOn(const GfxCopy *copy, const GfxCopy *next) {
+bool DoesCopyCarryOn(const GfxCopy *copy, const GfxCopy *next) {
     return next->source == copy->source &&
         next->sourceX == copy->sourceX &&
         next->x == copy->x &&
@@ -150,11 +148,14 @@ void AddFrameCopy(GfxFrame *frame, GfxTarget *target, const GfxCopy *copy) {
     pass->copyCount++;
 }
 
-GfxVertex *AddFrameVertices(
+// Appends vertices to the current pass, extending its last draw when the
+// key, scissor and source are the same
+static GfxVertex *AddDrawVertices(
     GfxFrame *frame,
     uint32_t vertexCount,
     uint16_t pipelineKey,
-    const GfxRect *scissor
+    const GfxRect *scissor,
+    GfxTarget *source
 ) {
     GfxPass *pass = CurrentPass(frame);
     GfxDraw *draw = NULL;
@@ -164,7 +165,9 @@ GfxVertex *AddFrameVertices(
     SDL_assert(frame->vertexCount + vertexCount <= FRAME_VERTEX_CAPACITY);
     if (pass->drawCount != 0) {
         draw = &frame->draws[frame->drawCount - 1];
-        if (draw->pipelineKey != pipelineKey || !IsSameRect(&draw->scissor, scissor)) {
+        if (draw->pipelineKey != pipelineKey ||
+            !IsSameRect(&draw->scissor, scissor) ||
+            draw->source != source) {
             draw = NULL;
         }
     }
@@ -176,6 +179,7 @@ GfxVertex *AddFrameVertices(
         draw->vertexCount = 0;
         draw->pipelineKey = pipelineKey;
         draw->scissor = *scissor;
+        draw->source = source;
         pass->drawCount++;
     }
 
@@ -183,6 +187,27 @@ GfxVertex *AddFrameVertices(
     draw->vertexCount += vertexCount;
     frame->vertexCount += vertexCount;
     return vertices;
+}
+
+GfxVertex *AddFrameVertices(
+    GfxFrame *frame,
+    uint32_t vertexCount,
+    uint16_t pipelineKey,
+    const GfxRect *scissor
+) {
+    return AddDrawVertices(frame, vertexCount, pipelineKey, scissor, NULL);
+}
+
+GfxVertex *AddFrameDepthCopyVertices(
+    GfxFrame *frame,
+    GfxTarget *source,
+    uint32_t vertexCount,
+    const GfxRect *scissor
+) {
+    const GfxPass *pass = CurrentPass(frame);
+
+    SDL_assert(source != NULL && pass != NULL && pass->depth != NULL && pass->depth != source);
+    return AddDrawVertices(frame, vertexCount, DEPTH_COPY_KEY, scissor, source);
 }
 
 uint32_t *AddFrameTextureUpload(

@@ -901,6 +901,130 @@ static void TestCopyKeepsUpscaledDetail(void) {
     EXPECT(f_TargetPixels[(((10 * scale) - 1) * width) + (2 * scale)] == 0xFFFF0000u);
 }
 
+// The game saves a frame's depth by drawing with other memory as the depth
+// image, and restores it by copying that memory into the depth image's in
+// the copy mode. Upscaled, the restored depth keeps its edges finer than
+// the N64's pixels: a quad behind a saved triangle shows only where the
+// triangle's depth didn't reach, pixel for pixel of the target.
+static void TestCopiedDepthKeepsUpscaledEdges(void) {
+    static uint32_t savedPixels[(IMAGE_WIDTH * SCALE_MAX) * (IMAGE_HEIGHT * SCALE_MAX)];
+    static Vtx triangle[3];
+    static Vtx far[4];
+    static const s16 corners[3][2] = {{-128, -128}, {128, -128}, {-128, 128}};
+    uint32_t scale = GpuBackendScale();
+    Gfx *gfx = f_DisplayList;
+    int wrongCount = 0;
+    uint32_t width;
+    uint32_t i;
+
+    for (i = 0; i < 3; i++) {
+        SDL_zero(triangle[i]);
+        triangle[i].v.ob[0] = corners[i][0];
+        triangle[i].v.ob[1] = corners[i][1];
+        triangle[i].v.ob[2] = -64;
+        triangle[i].v.cn[1] = 0xFF;
+        triangle[i].v.cn[3] = 0xFF;
+    }
+
+    // The saved depth's memory, cleared as a color image, then drawn on
+    // as the depth image under a green triangle
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_SourceImage);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetFillColor(gfx++, (GPACK_ZDZ(G_MAXFBZ, 0) << 16) | GPACK_ZDZ(G_MAXFBZ, 0));
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    gDPPipeSync(gfx++);
+    gfx = BeginList(gfx);
+    gDPSetDepthImage(gfx++, f_SourceImage);
+    gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 0, 1));
+    gfx = BeginTriangles(
+        gfx,
+        G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH,
+        G_RM_ZB_OPA_SURF,
+        G_RM_ZB_OPA_SURF2
+    );
+    gSPVertex(gfx++, triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+    width = ReadScaledTarget();
+    SDL_memcpy(savedPixels, f_TargetPixels, sizeof(savedPixels));
+
+    // The copy of all of it into the depth image's memory
+    gfx = f_DisplayList;
+    gDPSetDepthImage(gfx++, f_DepthImage);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_DepthImage);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+    gDPSetCycleType(gfx++, G_CYC_COPY);
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPLoadTextureTile(
+        gfx++,
+        f_SourceImage,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        IMAGE_WIDTH,
+        0,
+        0,
+        0,
+        IMAGE_WIDTH - 1,
+        IMAGE_HEIGHT - 1,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gSPTextureRectangle(
+        gfx++,
+        0,
+        0,
+        (IMAGE_WIDTH - 1) << 2,
+        (IMAGE_HEIGHT - 1) << 2,
+        G_TX_RENDERTILE,
+        0,
+        0,
+        4 << 10,
+        1 << 10
+    );
+    gDPPipeSync(gfx++);
+
+    // A red quad behind the triangle, over blue
+    gfx = BeginList(gfx);
+    gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 255, 1));
+    gfx = BeginTriangles(
+        gfx,
+        G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH,
+        G_RM_ZB_OPA_SURF,
+        G_RM_ZB_OPA_SURF2
+    );
+    gfx = DrawQuad(gfx, far, 0, 0xFF, 0, 0);
+    RunList(gfx);
+
+    EXPECT(ReadScaledTarget() == width);
+    for (i = 0; i < (IMAGE_WIDTH * scale) * (IMAGE_HEIGHT * scale); i++) {
+        bool isSaved = savedPixels[i] == 0xFF00FF00u;
+
+        wrongCount += f_TargetPixels[i] != (isSaved ? 0xFFFF0000u : 0xFF0000FFu);
+    }
+
+    if (wrongCount != 0) {
+        fprintf(
+            stderr,
+            "%d pixels of an upscaled depth copy differ from the saved depth\n",
+            wrongCount
+        );
+    }
+
+    EXPECT(wrongCount == 0);
+    // Both sides of the triangle's edge are within the image
+    EXPECT(savedPixels[0] == 0xFF00FF00u);
+    EXPECT(savedPixels[((IMAGE_HEIGHT * scale) * width) - 1] == 0xFF000000u);
+}
+
 static SDL_GPUDevice *CreateDevice(void) {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         // A machine with no display can still have a GPU
@@ -965,6 +1089,7 @@ int main(void) {
     TestUpscaledTexelsStartAtTheirCorner();
     TestUpscaledTexelsKeepFineSteps();
     TestCopyKeepsUpscaledDetail();
+    TestCopiedDepthKeepsUpscaledEdges();
     ShutdownRdp();
     ShutdownGpuBackend();
     SDL_DestroyGPUDevice(device);

@@ -85,8 +85,10 @@ layout(set = 2, binding = 0) uniform sampler2DArray atlas;
 layout(std430, set = 2, binding = 1) readonly buffer Materials {
     Material materials[];
 };
+// As depth_copy.frag has them, which reads the scale
 layout(set = 3, binding = 0) uniform FrameConstants {
     uint noiseSeed;
+    uint scale;
 };
 
 // The texture coordinates over w, then w's reciprocal
