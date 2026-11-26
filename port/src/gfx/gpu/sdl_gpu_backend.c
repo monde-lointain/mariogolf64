@@ -325,6 +325,46 @@ static SDL_GPUGraphicsPipeline *UsePipeline(uint16_t key, bool hasDepth) {
     return *pipeline;
 }
 
+// A pipeline that the game's draws use: its key, and whether its pass has
+// a depth target
+typedef struct PipelineUse {
+    uint16_t key;
+    bool hasDepth;
+} PipelineUse;
+
+#define ALPHA_BLEND \
+    (PIPELINE_BLEND | (DESTINATION_ONE_MINUS_SOURCE_ALPHA << PIPELINE_DESTINATION_SHIFT))
+#define ADDITIVE_BLEND (PIPELINE_BLEND | (DESTINATION_ONE << PIPELINE_DESTINATION_SHIFT))
+#define DEPTH_BUFFERED (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE)
+
+// Every pipeline that the recorded sessions' draws use. A driver that
+// compiles a pipeline afresh, as on a game's first start, takes tens of
+// milliseconds over each, which would stall the first frame to draw with
+// it, so InitGpuBackend makes these first. Others are made when first used.
+static const PipelineUse f_PipelinesToPrepare[] = {
+    {0, false},
+    {0, true},
+    {PIPELINE_DEPTH_WRITE, true},
+    {DEPTH_BUFFERED, true},
+    {ADDITIVE_BLEND | PIPELINE_DEPTH_WRITE, true},
+    {ADDITIVE_BLEND | DEPTH_BUFFERED, true},
+    {ALPHA_BLEND, false},
+    {ALPHA_BLEND, true},
+    {ALPHA_BLEND | PIPELINE_DEPTH_TEST, true},
+    {ALPHA_BLEND | DEPTH_BUFFERED, true},
+    {PIPELINE_WRITE_ALPHA, false},
+    {PIPELINE_DEPTH_ONLY | PIPELINE_DEPTH_WRITE, true},
+    {DEPTH_COPY_KEY, true},
+};
+
+static void PreparePipelines(void) {
+    size_t i;
+
+    for (i = 0; i < SDL_arraysize(f_PipelinesToPrepare); i++) {
+        (void)UsePipeline(f_PipelinesToPrepare[i].key, f_PipelinesToPrepare[i].hasDepth);
+    }
+}
+
 // Depth targets are sampled too, by draws that copy depth between them
 #define DEPTH_USAGE (SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER)
 
@@ -484,6 +524,7 @@ void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale) {
     );
     // The shader fetches texels itself, so the sampler never filters
     f_Gpu.atlasSampler = CreateSampler(SDL_GPU_FILTER_NEAREST);
+    PreparePipelines();
 }
 
 void ShutdownGpuBackend(void) {
