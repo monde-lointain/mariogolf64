@@ -788,12 +788,18 @@ LINT_JOBS ?= 4
 # clang can't parse everything GCC 2.7 accepts, such as nested functions,
 # so only the naming and macro diagnostics fail the check, each printed
 # once though a header's repeats for every file that includes it. The
-# rest stay in the log.
+# rest stay in the log. As the parse errors make run-clang-tidy fail
+# anyway, the check fails on its own errors, such as finding no
+# clang-tidy, by their messages, so that a lint that never ran can't pass.
 LINT_CHECKS := readability-identifier-naming|bugprone-macro-parentheses
+LINT_RUN_ERRORS := ^error: |^Unable to run clang-tidy
 
 lint: $(BUILD_DIR)/compile_commands.json
+	@command -v $(CLANG_TIDY) > /dev/null || \
+	    { echo 'make lint: no run-clang-tidy found; set CLANG_TIDY to one' >&2; exit 1; }
 	@$(CLANG_TIDY) -p $(BUILD_DIR) -j $(LINT_JOBS) -quiet $(LINT_FILES) \
 		> $(BUILD_DIR)/lint.log 2>&1 || true
+	@! grep -E '$(LINT_RUN_ERRORS)' $(BUILD_DIR)/lint.log
 	@! grep -E '\[($(LINT_CHECKS))' $(BUILD_DIR)/lint.log | sort -u | grep .
 
 # Linking the game's and the libraries' code as LTO bytecode compares each
