@@ -1,10 +1,9 @@
 # Mario Golf 64 decompilation
 
 This project is a matching decompilation of *Mario Golf* for the Nintendo 64,
-North American release. Apart from a few short routines in assembly, the
-game's code is C source that compiles back to the original code, byte for
-byte. The same source also builds a
-native PC port for Linux, Windows, macOS, and Android.
+North American release. The game's code is C source that compiles back to
+the original code, byte for byte. The same source also builds a native PC
+port for Linux, Windows, macOS, and Android.
 
 The repository holds no data from the game. To build anything that runs, you
 need your own copy of the ROM:
