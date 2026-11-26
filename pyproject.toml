@@ -33,12 +33,16 @@ ignore = [
 # The tools' tests are modules that unittest finds on its own, and use its
 # assertions, as the project runs them with the standard library alone
 "tools/tests/*" = ["INP001", "PT009", "PT027"]
+# A module that the tools import, which, unlike the others, isn't also a
+# program
+"tools/binutils.py" = ["INP001"]
 
 [tool.ruff.lint.isort]
 # The tools import each other, since Python puts a script's directory on
 # the path
 known-first-party = [
   "asset_archive",
+  "binutils",
   "decode_asset",
   "heap_region",
 ]

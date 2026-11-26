@@ -39,6 +39,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import cast, final
 
+from binutils import binutil
+
 SUMMARY = "Run the sanitized build and report the checks of its code that failed."
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_BUILD = ROOT / "build" / "sanitize"
@@ -47,7 +49,7 @@ DEFAULT_FRAMES = 3000
 ELF_NAME = "mariogolf64.elf"
 ROM_NAME = "mariogolf64.z64"
 MAP_NAME = "mariogolf64.map"
-OBJDUMP = "mips-linux-gnu-objdump"
+OBJDUMP = binutil("objdump")
 
 # The video frames that each run command covers before the frame of logic
 # is read again, and how many runs may pass without the game moving on

@@ -107,12 +107,20 @@ MODERN_TARGETFLAGS := -G0 -march=vr4300 -mabi=32 -mfix4300 -mno-abicalls -fno-PI
 # inlines. It is only found when a link needs it.
 MODERN_LIBS  = $(shell $(MODERN_CC) $(MODERN_TARGETFLAGS) -print-libgcc-file-name)
 
+# The GNU binutils for MIPS that assemble, link and copy the matching
+# build: the first of these whose ld is installed. Debian and Ubuntu package
+# mips-linux-gnu-, Fedora mips64-linux-gnu-, and libdragon's toolchain is
+# mips64-elf-. Set CROSS to choose others.
+MATCHING_CROSS_CHOICES := mips-linux-gnu- mips64-linux-gnu- $(MODERN_CROSS)
+
 # The two toolchains, and what differs between their builds. Each build has
 # its own directory, so that no build links another's objects.
 ifeq ($(MODERN),0)
 BUILD_DIR   := build$(if $(filter-out 0,$(NON_MATCHING)),/nonmatching)
-CROSS       := mips-linux-gnu-
-BIN_FORMAT  := elf32-tradbigmips
+ifeq ($(filter environment command line,$(origin CROSS)),)
+CROSS       := $(firstword $(foreach prefix,$(MATCHING_CROSS_CHOICES),\
+                 $(if $(shell command -v $(prefix)ld),$(prefix))) mips-linux-gnu-)
+endif
 CC          := COMPILER_PATH=$(KMC_DIR) $(KMC_DIR)/gcc
 # KMC GCC reads VR4300MUL from the environment to work around the VR4300
 # multiplication bug, as ultralib's build does
@@ -148,7 +156,6 @@ GC_FLAGS    :=
 else
 BUILD_DIR   := build/$(if $(filter-out 0,$(SANITIZE)),sanitize,modern)
 CROSS       := $(MODERN_CROSS)
-BIN_FORMAT  := elf32-bigmips
 CC          := $(MODERN_CC)
 LIB_CC      := $(CC)
 # Each routine and object in a section of its own, which the link drops
@@ -237,9 +244,22 @@ TEXT_FILES  := assets/text/messages assets/text/staff_roll
 # this to the folder of its own copy, so that several mods' changes add up.
 TEXT_SOURCE := assets/text
 
+# Bare-metal binutils, whose names end in -elf-, and Linux ones name the
+# o32 ABI's object format and linker emulation differently. A linker for
+# mips64 links 64-bit code unless told otherwise.
+ifneq ($(filter %-elf-,$(CROSS)),)
+BIN_FORMAT  := elf32-bigmips
+LD_EMULATION := elf32ebmip
+else
+BIN_FORMAT  := elf32-tradbigmips
+LD_EMULATION := elf32btsmip
+endif
 AS          := $(CROSS)as
-LD          := $(CROSS)ld
+LD          := $(CROSS)ld -m $(LD_EMULATION)
 OBJCOPY     := $(CROSS)objcopy
+# The tools that read the objects and ELF files run the same binutils
+# (see tools/binutils.py)
+export CROSS
 
 # Each library's headers are in its own include directory. NuSystem's is
 # included through its converted copy, as the rule below explains. The

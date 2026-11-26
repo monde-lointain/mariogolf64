@@ -81,6 +81,7 @@ from pathlib import Path
 from struct import iter_unpack
 from typing import cast, final
 
+from binutils import binutil
 from heap_region import read_main_region
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -424,7 +425,7 @@ class Build:
     def __post_init__(self) -> None:
         """Read the symbols and sections of the build."""
         elf = str(self.directory / ELF_NAME)
-        headers = run_tool("mips-linux-gnu-objdump", "-h", elf)
+        headers = run_tool(binutil("objdump"), "-h", elf)
         for match in OBJDUMP_SECTION.finditer(headers):
             name = match.group(1)
             size, vma, lma = (int(match.group(index), 16) for index in (2, 3, 4))
@@ -434,7 +435,7 @@ class Build:
         self.rom_sections.sort()
         self.rom_starts = [start for start, _end, _name in self.rom_sections]
         source = ""
-        table = run_tool("mips-linux-gnu-objdump", "-t", elf)
+        table = run_tool(binutil("objdump"), "-t", elf)
         for match in OBJDUMP_SYMBOL.finditer(table):
             binding, kind, section, name = match.group(2, 3, 4, 6)
             address, size = int(match.group(1), 16), int(match.group(5), 16)
@@ -690,7 +691,7 @@ class GameSymbols:
     def __init__(self, directory: Path) -> None:
         """Read the game's objects in DIRECTORY."""
         object_files = sorted(str(path) for path in directory.glob(GAME_OBJECT_FILES))
-        listing = run_tool("mips-linux-gnu-nm", "--defined-only", *object_files)
+        listing = run_tool(binutil("nm"), "--defined-only", *object_files)
         self.globals: frozenset[str] = frozenset(
             match.group(2)
             for match in NM_SYMBOL.finditer(listing)

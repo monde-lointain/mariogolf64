@@ -24,6 +24,8 @@ import sys
 from pathlib import Path
 from typing import cast, final
 
+from binutils import binutil
+
 SUMMARY = "Run a test ROM's unit tests on ares and print their report."
 DEFAULT_HARNESS = os.environ.get("N64_HARNESS", "n64-harness")
 # About twenty seconds of the console's time. The tests take about eleven.
@@ -90,7 +92,7 @@ class Symbols:
     def __init__(self, elf: Path) -> None:
         """Read ELF's symbols."""
         listing = subprocess.run(
-            ["mips-linux-gnu-nm", "-S", str(elf)],
+            [binutil("nm"), "-S", str(elf)],
             capture_output=True,
             text=True,
             check=True,

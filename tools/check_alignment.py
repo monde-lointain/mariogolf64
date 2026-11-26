@@ -41,9 +41,11 @@ import sys
 from pathlib import Path
 from typing import cast, final
 
+from binutils import binutil
+
 SUMMARY = "Check that each static buffer the RCP or a DMA uses asks for 8 bytes."
 
-OBJDUMP = "mips-linux-gnu-objdump"
+OBJDUMP = binutil("objdump")
 DEFAULT_CLANG_QUERY = "clang-query-23"
 COMPILE_COMMANDS = "compile_commands.json"
 OBJECT_SUFFIX = ".o"

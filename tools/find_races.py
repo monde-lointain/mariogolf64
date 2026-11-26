@@ -44,6 +44,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import cast, final
 
+from binutils import binutil
+
 SUMMARY = "Find the CPU stores that race the RCP's reads of a queued frame."
 
 ELF_NAME = "mariogolf64.elf"
@@ -149,7 +151,7 @@ class Program:
 
     def __init__(self, elf: Path) -> None:
         """Read ELF's symbols."""
-        table = run_tool("mips-linux-gnu-objdump", "-t", str(elf))
+        table = run_tool(binutil("objdump"), "-t", str(elf))
         self.addresses: dict[str, int] = {}
         for match in SYMBOL_LINE.finditer(table):
             _ = self.addresses.setdefault(
@@ -169,7 +171,7 @@ class Program:
         """Find where nuGfxTaskStart returns from writing back the data cache."""
         start = self.addresses["nuGfxTaskStart"]
         listing = run_tool(
-            "mips-linux-gnu-objdump",
+            binutil("objdump"),
             "-d",
             f"--start-address={start:#x}",
             f"--stop-address={start + WRITEBACK_SEARCH_SIZE:#x}",

@@ -38,8 +38,10 @@ from pathlib import Path
 from struct import iter_unpack
 from typing import final
 
-OBJDUMP = "mips-linux-gnu-objdump"
-NM = "mips-linux-gnu-nm"
+from binutils import binutil
+
+OBJDUMP = binutil("objdump")
+NM = binutil("nm")
 USAGE = "usage: check_link.py ELF SCRIPTS -- OBJECTS"
 SEPARATOR = "--"
 MAP_SUFFIX = ".map"
