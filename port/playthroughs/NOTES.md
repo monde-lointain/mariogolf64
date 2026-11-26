@@ -44,7 +44,7 @@ Recorded in `03-shot-controls.txt`.
 | ID   | Note                                                                       | Status |
 |------|----------------------------------------------------------------------------|--------|
 | 03-1 | "PIKA" text appears in the ball's spot when the ball falls into the cup, blue and red or blue and gold by turns | fixed in 639c0f7f; the game draws "PIKA" about the ball without G_ZBUFFER but at the primitive's depth, which the cup's wall hides on the N64, and the port tested a triangle's depth only under G_ZBUFFER |
-| 03-2 | When raining, the rain occasionally covers the entire screen, which is distracting and unlike the real game | open |
+| 03-2 | When raining, the rain occasionally covers the entire screen, which is distracting and unlike the real game | open; each raindrop is a line about a pixel wide, drawn at its tail's primitive depth without G_ZBUFFER, which the port drew with no depth test until 639c0f7f and now hides behind nearer ground as the N64 does. Headless replays of sessions 03, 08, 09 and 10, at 1x and 6x and before and after that commit, show no frame where rain covers the screen, so the moment needs a screenshot or the frame |
 
 ## Session 04: pause menu
 
