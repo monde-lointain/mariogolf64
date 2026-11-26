@@ -115,12 +115,7 @@ typedef struct GfxMaterial {
 #define PIPELINE_WRITE_ALPHA 0x80
 // Writes depth and no color, as a fill of part of the depth image does
 #define PIPELINE_DEPTH_ONLY 0x100
-// Writes the depth that the draw's source target holds, at the texture
-// coordinates, which are the source's pixels
-#define PIPELINE_DEPTH_COPY 0x200
-#define PIPELINE_KEY_COUNT 0x400
-// The key of a draw that copies depth from another depth target
-#define DEPTH_COPY_KEY (PIPELINE_DEPTH_COPY | PIPELINE_DEPTH_WRITE | PIPELINE_DEPTH_ONLY)
+#define PIPELINE_KEY_COUNT 0x200
 
 typedef enum DestinationFactor {
     DESTINATION_ZERO,
@@ -146,11 +141,12 @@ typedef struct GfxDraw {
     uint32_t vertexCount;
     uint16_t pipelineKey;
     GfxRect scissor;
-    GfxTarget *source; // The depth target that a depth copy reads, or NULL
 } GfxDraw;
 
 // Pixels of another target to copy into a pass's, at the same scale: what
-// the game copies between its images in the RDP's copy mode
+// the game copies between its images in the RDP's copy mode. A copy from a
+// depth target goes into the pass's depth, and one from a color target into
+// the pass's target.
 typedef struct GfxCopy {
     GfxTarget *source;
     uint16_t sourceX;
@@ -161,11 +157,13 @@ typedef struct GfxCopy {
     uint16_t height;
 } GfxCopy;
 
-// The copies of a pass happen before its draws
+// The copies of a pass happen before its depth's clear and its draws, so a
+// pass that copies depth doesn't clear it
 typedef struct GfxPass {
     GfxTarget *target;
     GfxTarget *depth; // NULL when no draw tests or writes depth
     bool clearsDepth;
+    bool copiesDepth; // Whether any of its copies go into its depth
     float depthClearValue;
     uint32_t firstDraw;
     uint32_t drawCount;
@@ -236,19 +234,15 @@ GfxVertex *AddFrameVertices(
     const GfxRect *scissor
 );
 
-// Appends vertices to the current pass that copy depth from source, a depth
-// target that isn't the pass's, extending its last draw when that copies
-// from source with the same scissor; returns where they go
-GfxVertex *AddFrameDepthCopyVertices(
-    GfxFrame *frame,
-    GfxTarget *source,
-    uint32_t vertexCount,
-    const GfxRect *scissor
-);
-
 // Whether next carries on copy's rows, from the same source's same columns
 // to the same columns
 bool DoesCopyCarryOn(const GfxCopy *copy, const GfxCopy *next);
+
+// Copies the depth that copy's source, a depth target, holds into the
+// current pass's depth, ahead of any draw that follows: a copy after the
+// pass's draws, or into the depth that it clears, starts another pass over
+// its target and depth
+void AddFrameDepthCopy(GfxFrame *frame, const GfxCopy *copy);
 
 // Copies pixels into target ahead of any draw into it that follows. A copy
 // that carries on the rows of the pass's last copy, from the same source,

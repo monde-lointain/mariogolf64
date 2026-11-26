@@ -24,7 +24,6 @@
 #include "frames_in_flight.h"
 #include "gfx_backend.h"
 #include "port/os_host.h"
-#include "shaders/depth_copy.frag.h"
 #include "shaders/rdp.frag.h"
 #include "shaders/rdp.vert.h"
 #include "texture_cache.h"
@@ -58,7 +57,6 @@ typedef struct GrowableTransfer {
 // The fragment shaders' uniforms, the same for all of a frame's draws
 typedef struct FrameConstants {
     uint32_t noiseSeed;
-    uint32_t scale;
 } FrameConstants;
 
 static struct {
@@ -67,7 +65,6 @@ static struct {
     SDL_GPUTextureFormat depthFormat;
     SDL_GPUShader *vertexShader;
     SDL_GPUShader *fragmentShader;
-    SDL_GPUShader *depthCopyShader;
     // By pipeline key, without and with a depth target
     SDL_GPUGraphicsPipeline *pipelines[PIPELINE_KEY_COUNT][2];
     SDL_GPUTexture *atlas;
@@ -272,10 +269,8 @@ static SDL_GPUGraphicsPipeline *CreatePipeline(uint16_t key, bool hasDepth) {
     colorTarget.blend_state = BlendState(key);
 
     SDL_zero(info);
-    SDL_assert(hasDepth || !(key & PIPELINE_DEPTH_COPY));
     info.vertex_shader = f_Gpu.vertexShader;
-    info.fragment_shader =
-        (key & PIPELINE_DEPTH_COPY) ? f_Gpu.depthCopyShader : f_Gpu.fragmentShader;
+    info.fragment_shader = f_Gpu.fragmentShader;
     info.vertex_input_state.vertex_buffer_descriptions = &vertexBuffer;
     info.vertex_input_state.num_vertex_buffers = 1;
     info.vertex_input_state.vertex_attributes = attributes;
@@ -354,7 +349,6 @@ static const PipelineUse f_PipelinesToPrepare[] = {
     {ALPHA_BLEND | DEPTH_BUFFERED, true},
     {PIPELINE_WRITE_ALPHA, false},
     {PIPELINE_DEPTH_ONLY | PIPELINE_DEPTH_WRITE, true},
-    {DEPTH_COPY_KEY, true},
 };
 
 static void PreparePipelines(void) {
@@ -365,8 +359,8 @@ static void PreparePipelines(void) {
     }
 }
 
-// Depth targets are sampled too, by draws that copy depth between them
-#define DEPTH_USAGE (SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER)
+// Depth targets are never sampled: copies between them are copy passes
+#define DEPTH_USAGE SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET
 
 static SDL_GPUTextureFormat ChooseDepthFormat(void) {
     if (SDL_GPUTextureSupportsFormat(
@@ -504,17 +498,6 @@ void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale) {
         1,
         1
     );
-    f_Gpu.depthCopyShader = CreateGpuShader(
-        device,
-        SDL_GPU_SHADERSTAGE_FRAGMENT,
-        depth_copy_frag_spirv,
-        sizeof(depth_copy_frag_spirv),
-        depth_copy_frag_msl,
-        sizeof(depth_copy_frag_msl),
-        1,
-        0,
-        1
-    );
     f_Gpu.atlas = CreateTexture(
         COLOR_FORMAT,
         SDL_GPU_TEXTUREUSAGE_SAMPLER,
@@ -547,7 +530,6 @@ void ShutdownGpuBackend(void) {
 
     SDL_ReleaseGPUShader(f_Gpu.device, f_Gpu.vertexShader);
     SDL_ReleaseGPUShader(f_Gpu.device, f_Gpu.fragmentShader);
-    SDL_ReleaseGPUShader(f_Gpu.device, f_Gpu.depthCopyShader);
     SDL_ReleaseGPUTexture(f_Gpu.device, f_Gpu.atlas);
     SDL_ReleaseGPUTexture(f_Gpu.device, f_Gpu.staging);
     SDL_ReleaseGPUSampler(f_Gpu.device, f_Gpu.atlasSampler);
@@ -783,7 +765,6 @@ static void DrawPass(SDL_GPUCommandBuffer *commands, const GfxFrame *frame, cons
     SDL_GPUBufferBinding vertexBinding = {f_Gpu.vertices.buffer, 0};
     SDL_GPUTextureSamplerBinding atlasBinding = {f_Gpu.atlas, f_Gpu.atlasSampler};
     SDL_GPUGraphicsPipeline *boundPipeline = NULL;
-    const GfxTarget *boundSource = NULL; // The atlas's binding when NULL
     GfxRect boundScissor;
     bool hasScissor = false;
     bool hasDepth = pass->depth != NULL;
@@ -809,19 +790,6 @@ static void DrawPass(SDL_GPUCommandBuffer *commands, const GfxFrame *frame, cons
             boundPipeline = pipeline;
         }
 
-        // A depth copy samples its source where other draws sample the atlas
-        if (draw->source != boundSource) {
-            SDL_GPUTextureSamplerBinding sourceBinding = atlasBinding;
-
-            if (draw->source != NULL) {
-                SDL_assert(draw->source->isDepth && draw->source != pass->depth);
-                sourceBinding.texture = draw->source->texture;
-            }
-
-            SDL_BindGPUFragmentSamplers(render, 0, &sourceBinding, 1);
-            boundSource = draw->source;
-        }
-
         if (!hasScissor || SDL_memcmp(&draw->scissor, &boundScissor, sizeof(boundScissor)) != 0) {
             SDL_Rect scissor;
 
@@ -840,35 +808,56 @@ static void DrawPass(SDL_GPUCommandBuffer *commands, const GfxFrame *frame, cons
     SDL_EndGPURenderPass(render);
 }
 
-// Copies the pass's pixels into its target, at the target's scale, in one
-// copy pass
+// Clears a depth target that nothing has written yet, in a render pass of
+// its own, before a copy into part of it
+static void ClearNewDepth(SDL_GPUCommandBuffer *commands, const GfxPass *pass) {
+    GfxPass clear = *pass;
+    SDL_GPURenderPass *render;
+
+    clear.clearsDepth = false;
+    render = BeginPass(commands, &clear);
+    if (render == NULL) {
+        PcFatalError("Can't begin a render pass: %s", SDL_GetError());
+    }
+
+    SDL_EndGPURenderPass(render);
+}
+
+// Copies the pass's pixels into its target, or into its depth from a depth
+// target, at the targets' scale, in one copy pass. Vulkan and Metal copy
+// part of a depth target; Direct3D 12 promises only whole ones.
 static void CopyPassPixels(
     SDL_GPUCommandBuffer *commands,
     const GfxFrame *frame,
     const GfxPass *pass
 ) {
-    SDL_GPUCopyPass *copy = SDL_BeginGPUCopyPass(commands);
+    SDL_GPUCopyPass *copy;
     uint32_t scale = f_Gpu.scale;
     uint32_t i;
 
-    SDL_assert(!pass->target->isDepth);
+    SDL_assert(!pass->target->isDepth && !(pass->copiesDepth && pass->clearsDepth));
+    if (pass->copiesDepth && pass->depth->needsClear) {
+        ClearNewDepth(commands, pass);
+    }
+
+    copy = SDL_BeginGPUCopyPass(commands);
     for (i = pass->firstCopy; i < pass->firstCopy + pass->copyCount; i++) {
         const GfxCopy *pixels = &frame->copies[i];
+        GfxTarget *destination = pixels->source->isDepth ? pass->depth : pass->target;
         SDL_GPUTextureLocation from;
         SDL_GPUTextureLocation to;
 
-        // Only color targets are copied in part, which every backend allows
-        SDL_assert(!pixels->source->isDepth);
+        SDL_assert(destination != NULL && destination != pixels->source);
         SDL_assert(pixels->sourceX + pixels->width <= pixels->source->width);
         SDL_assert(pixels->sourceY + pixels->height <= pixels->source->height);
-        SDL_assert(pixels->x + pixels->width <= pass->target->width);
-        SDL_assert(pixels->y + pixels->height <= pass->target->height);
+        SDL_assert(pixels->x + pixels->width <= destination->width);
+        SDL_assert(pixels->y + pixels->height <= destination->height);
         SDL_zero(from);
         from.texture = pixels->source->texture;
         from.x = pixels->sourceX * scale;
         from.y = pixels->sourceY * scale;
         SDL_zero(to);
-        to.texture = pass->target->texture;
+        to.texture = destination->texture;
         to.x = pixels->x * scale;
         to.y = pixels->y * scale;
         SDL_CopyGPUTextureToTexture(
@@ -898,7 +887,6 @@ void BackendExecuteFrame(const GfxFrame *frame) {
     UploadFrame(commands, frame);
     f_Gpu.noiseSeed++;
     constants.noiseSeed = f_Gpu.noiseSeed;
-    constants.scale = f_Gpu.scale;
     SDL_PushGPUFragmentUniformData(commands, 0, &constants, sizeof(constants));
     for (i = 0; i < frame->passCount; i++) {
         const GfxPass *pass = &frame->passes[i];

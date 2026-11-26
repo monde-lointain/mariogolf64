@@ -33,7 +33,6 @@ target_link_libraries(mg64_gpu
 mg64_compile_shaders(mg64_gpu SHADERS
     shaders/rdp.vert
     shaders/rdp.frag
-    shaders/depth_copy.frag
     shaders/overlay.vert
     shaders/overlay.frag
 )

@@ -901,19 +901,15 @@ static void TestCopyKeepsUpscaledDetail(void) {
     EXPECT(f_TargetPixels[(((10 * scale) - 1) * width) + (2 * scale)] == 0xFFFF0000u);
 }
 
-// The game saves a frame's depth by drawing with other memory as the depth
-// image, and restores it by copying that memory into the depth image's in
-// the copy mode. Upscaled, the restored depth keeps its edges finer than
-// the N64's pixels: a quad behind a saved triangle shows only where the
-// triangle's depth didn't reach, pixel for pixel of the target.
-static void TestCopiedDepthKeepsUpscaledEdges(void) {
-    static uint32_t savedPixels[(IMAGE_WIDTH * SCALE_MAX) * (IMAGE_HEIGHT * SCALE_MAX)];
+// Saves a frame's depth as the game does: clears f_SourceImage as a color
+// image, then draws a green triangle over black that writes depth with it
+// as the depth image. Keeps the target's pixels in savedPixels and gives
+// its width.
+static uint32_t SaveTriangleDepth(uint32_t *savedPixels) {
     static Vtx triangle[3];
-    static Vtx far[4];
     static const s16 corners[3][2] = {{-128, -128}, {128, -128}, {-128, 128}};
-    uint32_t scale = GpuBackendScale();
     Gfx *gfx = f_DisplayList;
-    int wrongCount = 0;
+    uint32_t scale = GpuBackendScale();
     uint32_t width;
     uint32_t i;
 
@@ -926,8 +922,6 @@ static void TestCopiedDepthKeepsUpscaledEdges(void) {
         triangle[i].v.cn[3] = 0xFF;
     }
 
-    // The saved depth's memory, cleared as a color image, then drawn on
-    // as the depth image under a green triangle
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_SourceImage);
     gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
     gDPSetCycleType(gfx++, G_CYC_FILL);
@@ -948,12 +942,24 @@ static void TestCopiedDepthKeepsUpscaledEdges(void) {
     gSP1Triangle(gfx++, 0, 1, 2, 0);
     RunList(gfx);
     width = ReadScaledTarget();
-    SDL_memcpy(savedPixels, f_TargetPixels, sizeof(savedPixels));
+    SDL_memcpy(savedPixels, f_TargetPixels, (IMAGE_WIDTH * scale) * (IMAGE_HEIGHT * scale) * 4);
+    // Both sides of the triangle's edge are within the image
+    EXPECT(savedPixels[0] == 0xFF00FF00u);
+    EXPECT(savedPixels[((IMAGE_HEIGHT * scale) * width) - 1] == 0xFF000000u);
+    return width;
+}
 
-    // The copy of all of it into the depth image's memory
-    gfx = f_DisplayList;
-    gDPSetDepthImage(gfx++, f_DepthImage);
-    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, f_DepthImage);
+// Copies the saved depth's columns from the left into depth's memory, as
+// both the color and depth image, in the copy mode, and fills the color
+// image blue. Then, in a task of its own, so that the copy is the first
+// write of depth's target in its frame, draws a red quad behind the saved
+// triangle, with depth as the depth image.
+static void CopySavedDepthUnderQuad(u16 *depth, int columnCount) {
+    static Vtx far[4];
+    Gfx *gfx = f_DisplayList;
+
+    gDPSetDepthImage(gfx++, depth);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, depth);
     gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
     gDPSetCycleType(gfx++, G_CYC_COPY);
     gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
@@ -968,7 +974,7 @@ static void TestCopiedDepthKeepsUpscaledEdges(void) {
         0,
         0,
         0,
-        IMAGE_WIDTH - 1,
+        columnCount - 1,
         IMAGE_HEIGHT - 1,
         0,
         G_TX_NOMIRROR | G_TX_WRAP,
@@ -982,7 +988,7 @@ static void TestCopiedDepthKeepsUpscaledEdges(void) {
         gfx++,
         0,
         0,
-        (IMAGE_WIDTH - 1) << 2,
+        (columnCount - 1) << 2,
         (IMAGE_HEIGHT - 1) << 2,
         G_TX_RENDERTILE,
         0,
@@ -992,9 +998,11 @@ static void TestCopiedDepthKeepsUpscaledEdges(void) {
     );
     gDPPipeSync(gfx++);
 
-    // A red quad behind the triangle, over blue
     gfx = BeginList(gfx);
     gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 255, 1));
+    RunList(gfx);
+
+    gfx = BeginList(f_DisplayList);
     gfx = BeginTriangles(
         gfx,
         G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH,
@@ -1003,14 +1011,39 @@ static void TestCopiedDepthKeepsUpscaledEdges(void) {
     );
     gfx = DrawQuad(gfx, far, 0, 0xFF, 0, 0);
     RunList(gfx);
+}
 
-    EXPECT(ReadScaledTarget() == width);
+// Counts the target's pixels that differ from the red quad behind the
+// saved triangle: hidden, so blue, where the saved pixels show the
+// triangle in the columns that the copy reached, and red elsewhere
+static int CountQuadPixelsWrong(const uint32_t *savedPixels, uint32_t width, int columnCount) {
+    uint32_t scale = GpuBackendScale();
+    int wrongCount = 0;
+    uint32_t i;
+
     for (i = 0; i < (IMAGE_WIDTH * scale) * (IMAGE_HEIGHT * scale); i++) {
-        bool isSaved = savedPixels[i] == 0xFF00FF00u;
+        bool isCopied = (i % width) < (uint32_t)columnCount * scale;
+        bool isHidden = isCopied && savedPixels[i] == 0xFF00FF00u;
 
-        wrongCount += f_TargetPixels[i] != (isSaved ? 0xFFFF0000u : 0xFF0000FFu);
+        wrongCount += f_TargetPixels[i] != (isHidden ? 0xFFFF0000u : 0xFF0000FFu);
     }
 
+    return wrongCount;
+}
+
+// The game saves a frame's depth by drawing with other memory as the depth
+// image, and restores it by copying that memory into the depth image's in
+// the copy mode. Upscaled, the restored depth keeps its edges finer than
+// the N64's pixels: a quad behind a saved triangle shows only where the
+// triangle's depth didn't reach, pixel for pixel of the target.
+static void TestCopiedDepthKeepsUpscaledEdges(void) {
+    static uint32_t savedPixels[(IMAGE_WIDTH * SCALE_MAX) * (IMAGE_HEIGHT * SCALE_MAX)];
+    uint32_t width = SaveTriangleDepth(savedPixels);
+    int wrongCount;
+
+    CopySavedDepthUnderQuad(f_DepthImage, IMAGE_WIDTH);
+    EXPECT(ReadScaledTarget() == width);
+    wrongCount = CountQuadPixelsWrong(savedPixels, width, IMAGE_WIDTH);
     if (wrongCount != 0) {
         fprintf(
             stderr,
@@ -1020,9 +1053,29 @@ static void TestCopiedDepthKeepsUpscaledEdges(void) {
     }
 
     EXPECT(wrongCount == 0);
-    // Both sides of the triangle's edge are within the image
-    EXPECT(savedPixels[0] == 0xFF00FF00u);
-    EXPECT(savedPixels[((IMAGE_HEIGHT * scale) * width) - 1] == 0xFF000000u);
+}
+
+// A copy into part of depth memory that no draw has used yet leaves the
+// rest of its new target as far as a cleared one: the quad behind the
+// saved triangle shows in all the columns that the copy didn't reach
+static void TestCopyIntoNewDepthLeavesTheRestFar(void) {
+    static uint32_t savedPixels[(IMAGE_WIDTH * SCALE_MAX) * (IMAGE_HEIGHT * SCALE_MAX)];
+    static u16 newDepthImage[IMAGE_WIDTH * IMAGE_HEIGHT] __attribute__((aligned(64)));
+    uint32_t width = SaveTriangleDepth(savedPixels);
+    int wrongCount;
+
+    CopySavedDepthUnderQuad(newDepthImage, IMAGE_WIDTH / 2);
+    EXPECT(ReadScaledTarget() == width);
+    wrongCount = CountQuadPixelsWrong(savedPixels, width, IMAGE_WIDTH / 2);
+    if (wrongCount != 0) {
+        fprintf(
+            stderr,
+            "%d pixels of a depth copy into a new target differ from the saved depth\n",
+            wrongCount
+        );
+    }
+
+    EXPECT(wrongCount == 0);
 }
 
 static SDL_GPUDevice *CreateDevice(void) {
@@ -1090,6 +1143,7 @@ int main(void) {
     TestUpscaledTexelsKeepFineSteps();
     TestCopyKeepsUpscaledDetail();
     TestCopiedDepthKeepsUpscaledEdges();
+    TestCopyIntoNewDepthLeavesTheRestFar();
     ShutdownRdp();
     ShutdownGpuBackend();
     SDL_DestroyGPUDevice(device);

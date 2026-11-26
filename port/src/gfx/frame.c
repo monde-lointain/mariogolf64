@@ -78,7 +78,7 @@ void UseFrameDepth(GfxFrame *frame, GfxTarget *depth, float clearValue) {
     if (pass->depth != NULL && pass->depth != depth) {
         pass = AppendPass(frame, pass->target, depth);
     }
-    else if (isClearing && pass->drawCount != 0) {
+    else if (isClearing && (pass->drawCount != 0 || pass->copiesDepth)) {
         pass = AppendPass(frame, pass->target, depth);
     }
 
@@ -148,14 +148,29 @@ void AddFrameCopy(GfxFrame *frame, GfxTarget *target, const GfxCopy *copy) {
     pass->copyCount++;
 }
 
+void AddFrameDepthCopy(GfxFrame *frame, const GfxCopy *copy) {
+    GfxPass *pass = CurrentPass(frame);
+
+    SDL_assert(pass != NULL && pass->depth != NULL);
+    SDL_assert(copy->source != NULL && copy->source != pass->depth);
+    if (pass->drawCount != 0 || pass->clearsDepth) {
+        pass = AppendPass(frame, pass->target, pass->depth);
+    }
+
+    SDL_assert(frame->copyCount < FRAME_COPY_CAPACITY);
+    frame->copies[frame->copyCount++] = *copy;
+    pass->copyCount++;
+    pass->copiesDepth = true;
+}
+
 // Appends vertices to the current pass, extending its last draw when the
-// key, scissor and source are the same
-static GfxVertex *AddDrawVertices(
+// key and scissor are the same; returns where they go for the caller to
+// fill
+GfxVertex *AddFrameVertices(
     GfxFrame *frame,
     uint32_t vertexCount,
     uint16_t pipelineKey,
-    const GfxRect *scissor,
-    GfxTarget *source
+    const GfxRect *scissor
 ) {
     GfxPass *pass = CurrentPass(frame);
     GfxDraw *draw = NULL;
@@ -165,9 +180,7 @@ static GfxVertex *AddDrawVertices(
     SDL_assert(frame->vertexCount + vertexCount <= FRAME_VERTEX_CAPACITY);
     if (pass->drawCount != 0) {
         draw = &frame->draws[frame->drawCount - 1];
-        if (draw->pipelineKey != pipelineKey ||
-            !IsSameRect(&draw->scissor, scissor) ||
-            draw->source != source) {
+        if (draw->pipelineKey != pipelineKey || !IsSameRect(&draw->scissor, scissor)) {
             draw = NULL;
         }
     }
@@ -179,7 +192,6 @@ static GfxVertex *AddDrawVertices(
         draw->vertexCount = 0;
         draw->pipelineKey = pipelineKey;
         draw->scissor = *scissor;
-        draw->source = source;
         pass->drawCount++;
     }
 
@@ -187,27 +199,6 @@ static GfxVertex *AddDrawVertices(
     draw->vertexCount += vertexCount;
     frame->vertexCount += vertexCount;
     return vertices;
-}
-
-GfxVertex *AddFrameVertices(
-    GfxFrame *frame,
-    uint32_t vertexCount,
-    uint16_t pipelineKey,
-    const GfxRect *scissor
-) {
-    return AddDrawVertices(frame, vertexCount, pipelineKey, scissor, NULL);
-}
-
-GfxVertex *AddFrameDepthCopyVertices(
-    GfxFrame *frame,
-    GfxTarget *source,
-    uint32_t vertexCount,
-    const GfxRect *scissor
-) {
-    const GfxPass *pass = CurrentPass(frame);
-
-    SDL_assert(source != NULL && pass != NULL && pass->depth != NULL && pass->depth != source);
-    return AddDrawVertices(frame, vertexCount, DEPTH_COPY_KEY, scissor, source);
 }
 
 uint32_t *AddFrameTextureUpload(

@@ -237,27 +237,68 @@ static void TestCopiesFillTheFrame(void) {
     EXPECT(!HasFrameRoom(&f_Frame, 0, 0));
 }
 
-// A depth copy is a draw that reads its source: copies from one source
-// extend one draw, while another source, or none, starts another
-static void TestDepthCopiesKeepTheirSource(void) {
+// A depth copy goes into the pass's depth ahead of its draws, as a color
+// copy goes into its target, so one that follows a draw starts another
+// pass over the same target and depth. A color copy joins the depth copies
+// of a pass without draws.
+static void TestDepthCopiesPrecedeDraws(void) {
+    GfxCopy depthCopy = Strip(OTHER_DEPTH, 8);
+    GfxCopy colorCopy = Strip(TARGET_B, 8);
+
     ResetFrame(&f_Frame);
     BeginFramePass(&f_Frame, TARGET_A);
     UseFrameDepth(&f_Frame, DEPTH, -1.0f);
-    AddFrameDepthCopyVertices(&f_Frame, OTHER_DEPTH, 6, &f_FullRect);
-    AddFrameDepthCopyVertices(&f_Frame, OTHER_DEPTH, 6, &f_FullRect);
-    EXPECT(f_Frame.drawCount == 1 && f_Frame.draws[0].vertexCount == 12);
-    EXPECT(f_Frame.draws[0].source == OTHER_DEPTH);
-    EXPECT(f_Frame.draws[0].pipelineKey == DEPTH_COPY_KEY);
+    AddFrameDepthCopy(&f_Frame, &depthCopy);
+    EXPECT(f_Frame.passCount == 1 && f_Frame.passes[0].copyCount == 1);
+    EXPECT(f_Frame.passes[0].copiesDepth);
+    EXPECT(f_Frame.copyCount == 1 && f_Frame.copies[0].source == OTHER_DEPTH);
+    EXPECT(f_Frame.copies[0].y == 8 && f_Frame.copies[0].height == 6);
 
-    AddFrameDepthCopyVertices(&f_Frame, TARGET_B, 6, &f_FullRect);
-    EXPECT(f_Frame.drawCount == 2 && f_Frame.draws[1].source == TARGET_B);
+    AddFrameVertices(&f_Frame, 3, PIPELINE_DEPTH_TEST, &f_FullRect);
+    EXPECT(f_Frame.passCount == 1 && f_Frame.passes[0].drawCount == 1);
 
-    AddFrameVertices(&f_Frame, 3, DEPTH_COPY_KEY, &f_FullRect);
-    EXPECT(f_Frame.drawCount == 3 && f_Frame.draws[2].source == NULL);
+    depthCopy = Strip(OTHER_DEPTH, 14);
+    AddFrameDepthCopy(&f_Frame, &depthCopy);
+    EXPECT(f_Frame.passCount == 2);
+    EXPECT(f_Frame.passes[1].target == TARGET_A && f_Frame.passes[1].depth == DEPTH);
+    EXPECT(!f_Frame.passes[1].clearsDepth && f_Frame.passes[1].copiesDepth);
+    EXPECT(f_Frame.passes[1].firstCopy == 1 && f_Frame.passes[1].copyCount == 1);
+    EXPECT(f_Frame.passes[1].firstDraw == 1 && f_Frame.passes[1].drawCount == 0);
 
-    AddFrameDepthCopyVertices(&f_Frame, TARGET_B, 6, &f_HalfRect);
-    EXPECT(f_Frame.drawCount == 4 && f_Frame.draws[3].firstVertex == 21);
-    EXPECT(f_Frame.passCount == 1 && f_Frame.passes[0].drawCount == 4);
+    AddFrameCopy(&f_Frame, TARGET_A, &colorCopy);
+    EXPECT(f_Frame.passCount == 2 && f_Frame.passes[1].copyCount == 2);
+    EXPECT(f_Frame.copies[2].source == TARGET_B);
+}
+
+// A pass's copies come before its depth's clear, so a pass never both
+// clears its depth and copies into it: a depth copy after a clear, or a
+// clear after a depth copy, starts another pass. A clear after a color
+// copy stays in its pass, as the two write different targets.
+static void TestDepthCopiesFollowClears(void) {
+    GfxCopy depthCopy = Strip(OTHER_DEPTH, 8);
+    GfxCopy colorCopy = Strip(TARGET_B, 8);
+
+    ResetFrame(&f_Frame);
+    BeginFramePass(&f_Frame, TARGET_A);
+    UseFrameDepth(&f_Frame, DEPTH, 1.0f);
+    AddFrameDepthCopy(&f_Frame, &depthCopy);
+    EXPECT(f_Frame.passCount == 2);
+    EXPECT(f_Frame.passes[0].clearsDepth && f_Frame.passes[0].depthClearValue == 1.0f);
+    EXPECT(f_Frame.passes[0].copyCount == 0 && !f_Frame.passes[0].copiesDepth);
+    EXPECT(!f_Frame.passes[1].clearsDepth && f_Frame.passes[1].copiesDepth);
+    EXPECT(f_Frame.passes[1].depth == DEPTH && f_Frame.passes[1].copyCount == 1);
+
+    UseFrameDepth(&f_Frame, DEPTH, 0.5f);
+    EXPECT(f_Frame.passCount == 3 && f_Frame.passes[2].clearsDepth);
+    EXPECT(f_Frame.passes[2].depthClearValue == 0.5f && f_Frame.passes[2].copyCount == 0);
+    EXPECT(!f_Frame.passes[1].clearsDepth);
+
+    ResetFrame(&f_Frame);
+    BeginFramePass(&f_Frame, TARGET_A);
+    AddFrameCopy(&f_Frame, TARGET_A, &colorCopy);
+    UseFrameDepth(&f_Frame, DEPTH, 1.0f);
+    EXPECT(f_Frame.passCount == 1 && f_Frame.passes[0].clearsDepth);
+    EXPECT(f_Frame.passes[0].copyCount == 1 && !f_Frame.passes[0].copiesDepth);
 }
 
 int main(void) {
@@ -272,6 +313,7 @@ int main(void) {
     TestCopiedStripsJoin();
     TestCopiesThatDontAdjoinStayApart();
     TestCopiesFillTheFrame();
-    TestDepthCopiesKeepTheirSource();
+    TestDepthCopiesPrecedeDraws();
+    TestDepthCopiesFollowClears();
     return ReportTestResults("frame_test");
 }

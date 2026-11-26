@@ -62,8 +62,8 @@ typedef struct DepthClear {
 #define RECTANGLE_VERTEX_COUNT 6
 
 // A write of part of the depth image, in its pixels, that the next draw to
-// use that memory as the depth image draws first: a fill of value, or a
-// copy of another depth target's pixels
+// use that memory as the depth image writes first: a fill of value from
+// left, top to right, bottom, or a copy of another depth target's pixels
 typedef struct DepthWrite {
     const uint8_t *address; // NULL for an unused entry
     float left;
@@ -997,16 +997,11 @@ static void NoteDepthCopy(const uint8_t *address, const GfxCopy *pixels, uint64_
             last->sourceUse == sourceUse &&
             DoesCopyCarryOn(&last->copy, pixels)) {
             last->copy.height = (uint16_t)(last->copy.height + pixels->height);
-            last->bottom += (float)pixels->height;
             return;
         }
     }
 
     copy = AppendDepthWrite(address);
-    copy->left = (float)pixels->x;
-    copy->top = (float)pixels->y;
-    copy->right = (float)(pixels->x + pixels->width);
-    copy->bottom = (float)(pixels->y + pixels->height);
     copy->copy = *pixels;
     copy->sourceUse = sourceUse;
 }
@@ -1059,15 +1054,17 @@ static void UseDepthTarget(void) {
 }
 
 // Whether the frame has room for a primitive of vertexCount vertices, and
-// for the writes of the depth image that may come first, each with its own
-// draw, and the fills with their material
+// for the writes of the depth image that may come first: each fill a draw,
+// with their material, and each copy a copy, in a pass of its own
 static bool HasRoomForPrimitive(uint32_t vertexCount) {
     uint32_t writeCount = (uint32_t)CountDepthWrites();
 
     return HasFrameRoom(&f_Frame, vertexCount + (writeCount * RECTANGLE_VERTEX_COUNT), 0) &&
         (writeCount == 0 ||
             (f_Frame.drawCount + writeCount < FRAME_DRAW_CAPACITY &&
-                f_Frame.materialCount + 1 < FRAME_MATERIAL_CAPACITY));
+                f_Frame.materialCount + 1 < FRAME_MATERIAL_CAPACITY &&
+                f_Frame.copyCount + writeCount < FRAME_COPY_CAPACITY &&
+                f_Frame.passCount + writeCount < FRAME_PASS_CAPACITY));
 }
 
 // Readies the frame for a primitive of vertexCount vertices, reaching down
@@ -1230,31 +1227,26 @@ static void PlaceRectangleVertex(
     vertex->position[3] = 1.0f;
 }
 
-// Draws a copy into the current pass's depth: the texture coordinates are
-// the source's pixels
-static void DrawDepthCopy(const DepthWrite *copy, const GfxRect *scissor) {
-    const float bounds[4] = {copy->left, copy->top, copy->right, copy->bottom};
-    GfxVertex *vertices =
-        AddFrameDepthCopyVertices(&f_Frame, copy->copy.source, RECTANGLE_VERTEX_COUNT, scissor);
-    int i;
+// Copies depth into the current pass's depth, within its image of width by
+// height pixels, which are those of the color image's target
+static void CopyDepth(const GfxCopy *copy, uint16_t width, uint16_t height) {
+    GfxCopy within = *copy;
 
-    SDL_memset(vertices, 0, RECTANGLE_VERTEX_COUNT * sizeof(GfxVertex));
-    for (i = 0; i < RECTANGLE_VERTEX_COUNT; i++) {
-        int corner = f_RectangleCorners[i];
-
-        PlaceRectangleVertex(&vertices[i], corner, bounds, 0.0f);
-        vertices[i].texCoord[0] =
-            (float)(copy->copy.sourceX + ((corner & 1) ? copy->copy.width : 0));
-        vertices[i].texCoord[1] =
-            (float)(copy->copy.sourceY + ((corner & 2) ? copy->copy.height : 0));
+    if (within.x >= width || within.y >= height) {
+        return;
     }
+
+    within.width = SDL_min(within.width, (uint16_t)(width - within.x));
+    within.height = SDL_min(within.height, (uint16_t)(height - within.y));
+    AddFrameDepthCopy(&f_Frame, &within);
 }
 
-// Draws the waiting writes of part of the depth image at address into the
-// current pass's depth, in their order, and forgets them. They write no
-// color. Of the material that a fill's fragments read, nothing matters but
-// that it discards none of them. A copy whose source has been drawn on or
-// dropped since is dropped too: the RDP read the depth that is gone.
+// Writes the waiting writes of part of the depth image at address into the
+// current pass's depth, in their order, and forgets them. A fill is a draw
+// that writes no color; of the material that its fragments read, nothing
+// matters but that it discards none of them. A copy whose source has been
+// drawn on or dropped since is dropped: the RDP read the depth that is
+// gone.
 static void DrawDepthWrites(const uint8_t *address, const GfxTarget *depth) {
     static const GfxMaterial noMaterial;
     GfxRect wholeImage = {0, 0, 0, 0};
@@ -1277,7 +1269,7 @@ static void DrawDepthWrites(const uint8_t *address, const GfxTarget *depth) {
         if (fill->copy.source != NULL) {
             if (fill->copy.source != depth &&
                 IsDepthTargetUnchanged(fill->copy.source, fill->sourceUse)) {
-                DrawDepthCopy(fill, &wholeImage);
+                CopyDepth(&fill->copy, wholeImage.right, wholeImage.bottom);
             }
 
             continue;
