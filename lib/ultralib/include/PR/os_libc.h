@@ -80,19 +80,24 @@ extern "C" {
 
 /* byte string operations */
 
+/*
+ * The names in parentheses are declared as they are even where the host's
+ * C library defines them as function-like macros, as macOS does to check
+ * buffer sizes, since such a macro expands only before a "(".
+ */
 #ifndef MODERN_CC
-extern void     bcopy(const void *, void *, int);
+extern void     (bcopy)(const void *, void *, int);
 extern int      bcmp(const void *, const void *, int);
-extern void     bzero(void *, int);
+extern void     (bzero)(void *, int);
 #else
-extern void     bcopy(const void *, void *, size_t);
+extern void     (bcopy)(const void *, void *, size_t);
 extern int      bcmp(const void *, const void *, size_t);
-extern void     bzero(void *, size_t);
+extern void     (bzero)(void *, size_t);
 #endif
 
 /* Printf */
 
-extern int		sprintf(char *s, const char *fmt, ...);
+extern int		(sprintf)(char *s, const char *fmt, ...);
 extern void		osSyncPrintf(const char *fmt, ...);
 
 
