@@ -26,7 +26,8 @@ void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale);
 void ShutdownGpuBackend(void);
 
 // Creates a shader from code in both of the forms that the build makes,
-// SPIR-V and MSL, giving the form that the device takes. Stops the program
+// SPIR-V and, on Apple's platforms, MSL, giving the form that the device
+// takes. Stops the program
 // when it can't, as the shaders are the program's own.
 SDL_GPUShader *CreateGpuShader(
     SDL_GPUDevice *device,

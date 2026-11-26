@@ -1,7 +1,7 @@
 # Cross-compiles the port for 64-bit Windows with MinGW-w64's GCC, as the
-# windows-mingw preset does. The build's own tools (Python, glslang and
-# spirv-cross) run on the host, so programs are found there, and libraries
-# and headers only in MinGW's root.
+# windows-mingw preset does. The build's own tools, Python and glslang, run
+# on the host, so programs are found there, and libraries and headers only
+# in MinGW's root.
 #
 # CMAKE_CROSSCOMPILING_EMULATOR lets CTest run the tests through Wine, where
 # it is installed.

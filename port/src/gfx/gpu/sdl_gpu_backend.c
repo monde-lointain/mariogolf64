@@ -399,7 +399,12 @@ SDL_GPUDevice *CreateGpuDevice(bool isDebug) {
     (void)SDL_SetBooleanProperty(properties, SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, isDebug);
     (void)
         SDL_SetBooleanProperty(properties, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN, true);
-    (void)SDL_SetBooleanProperty(properties, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_MSL_BOOLEAN, true);
+    // Only Apple's builds carry MSL, as only Apple's GPUs take it
+    (void)SDL_SetBooleanProperty(
+        properties,
+        SDL_PROP_GPU_DEVICE_CREATE_SHADERS_MSL_BOOLEAN,
+        MG64_SHADERS_MSL
+    );
     (void)SDL_SetBooleanProperty(
         properties,
         SDL_PROP_GPU_DEVICE_CREATE_FEATURE_CLIP_DISTANCE_BOOLEAN,
