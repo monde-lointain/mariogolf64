@@ -2,6 +2,9 @@ ipl3checksum
 # The texture and asset tools
 numpy
 pillow
+# make format and check-format, pinned, as each version formats a little
+# differently
+clang-format==23.1.5
 # make pycheck
 ruff
 basedpyright

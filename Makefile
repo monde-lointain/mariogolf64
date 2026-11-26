@@ -388,7 +388,7 @@ MOD_SETTINGS :=
 include $(wildcard $(MOD_ROOTS:%=%/mod.mk))
 
 .PHONY: all setup tools extract clean distclean check-shiftable check-alignment equivalence \
-        sanitize test target-tests format lint typecheck pycheck tool-tests FORCE
+        sanitize test target-tests format check-format lint typecheck pycheck tool-tests FORCE
 
 # A recipe that fails after writing its target, such as a check of what it
 # wrote, would otherwise leave a target that the next run takes as built
@@ -444,7 +444,7 @@ check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SYMBOL_SCRIPT) $(SANITIZER_LIB)
 # layout (see tools/check_alignment.py). It reads the alignment that each
 # buffer asks for from the modern build's objects, whose -fdata-sections
 # gives each its own section.
-CLANG_QUERY ?= clang-query-23
+CLANG_QUERY ?= $(call first_installed,clang-query-23 clang-query)
 ifneq ($(MODERN),0)
 check-alignment: $(O_FILES) $(BUILD_DIR)/compile_commands.json
 	@$(PYTHON) $(TOOLS)/check_alignment.py $(BUILD_DIR) --clang-query $(CLANG_QUERY) \
@@ -710,7 +710,11 @@ endif
 
 # What follows checks the base's own sources and tools, from its folder.
 
-CLANG_FORMAT ?= clang-format-23
+# The first of the named programs that's installed, or else the first named
+first_installed = $(firstword $(foreach program,$1,$(if $(shell command -v $(program)),$(program))) $1)
+
+# The clang-format that requirements.txt pins
+CLANG_FORMAT ?= $(VENV)/bin/clang-format
 FORMAT_FILES  = $(shell git ls-files 'src/*.c' 'src/*.h' 'include/*.h' '$(LIBKMC_DIR)/*.[ch]')
 # The tests are formatted too, but not Unity, which is kept as upstream has
 # it, and they aren't linted, as the lint's compile commands are the game's
@@ -719,6 +723,11 @@ TEST_FORMAT_FILES = $(wildcard tests/*.c tests/target/*.c tests/target/*.h)
 format:
 	$(CLANG_FORMAT) -i $(FORMAT_FILES) $(TEST_FORMAT_FILES)
 	$(VENV)/bin/ruff format --quiet
+
+# Fails on each C file that make format would change; ruff's own check is
+# part of pycheck
+check-format:
+	@$(CLANG_FORMAT) --dry-run --Werror $(FORMAT_FILES) $(TEST_FORMAT_FILES)
 
 # Lints and type-checks the Python tools, with the settings in pyproject.toml
 pycheck:
@@ -732,7 +741,7 @@ pycheck:
 tool-tests:
 	PYTHONPATH=tools $(PYTHON) -m unittest discover --start-directory tools/tests
 
-CLANG_TIDY ?= run-clang-tidy-23
+CLANG_TIDY ?= $(call first_installed,run-clang-tidy-23 run-clang-tidy)
 # libkmc is KMC's C library, which keeps the C library's names
 LINT_FILES = $(filter-out $(LIBKMC_DIR)/%,$(filter %.c,$(FORMAT_FILES)))
 
