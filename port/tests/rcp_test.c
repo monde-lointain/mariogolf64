@@ -699,6 +699,82 @@ static void TestDepthClear(void) {
     EXPECT(f_Gpu.draws[0].pipelineKey == (PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE));
 }
 
+// The primitive's depth, of the most, 0x7FFF, and as the GPU's depth
+#define PRIMITIVE_DEPTH 0x2000
+#define PRIMITIVE_DEPTH_SHARE (8192.0 / 32767.0)
+
+// Adds to a list the depth-buffered opaque mode, with the depth image set,
+// depth taken from the source, and the primitive's depth PRIMITIVE_DEPTH
+// with the 16th bit set, which the RDP ignores
+static Gfx *SourceDepth(Gfx *gfx, u32 source) {
+    gDPSetDepthImage(gfx++, f_DepthImage);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gDPSetDepthSource(gfx++, source);
+    gDPSetPrimDepth(gfx++, 0x8000 | PRIMITIVE_DEPTH, 0);
+    return gfx;
+}
+
+// Draws f_Triangle under the geometry mode, with depth from the source
+static void DrawDepthSourcedTriangle(u32 geometryMode, u32 source) {
+    Gfx *gfx = BeginTriangles(f_DisplayList, geometryMode | G_SHADE | G_SHADING_SMOOTH);
+
+    ResetCapture();
+    gfx = SourceDepth(gfx, source);
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+}
+
+// Draws a texture rectangle with depth from the source
+static void DrawDepthSourcedRectangle(u32 source) {
+    Gfx *gfx = BeginList(f_DisplayList);
+
+    ResetCapture();
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gfx = SourceDepth(gfx, source);
+    gSPTextureRectangle(gfx++, 0, 0, 8 << 2, 8 << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    RunList(gfx);
+}
+
+// Expects each of the first count vertices captured at the depth
+static void ExpectVertexDepths(uint32_t count, double depth) {
+    uint32_t i;
+
+    EXPECT(f_Gpu.vertexCount == count);
+    for (i = 0; i < count && i < f_Gpu.vertexCount; i++) {
+        const GfxVertex *vertex = &f_Gpu.vertices[i];
+
+        EXPECT_NEAR(vertex->position[2] / vertex->position[3], depth, 1e-6);
+    }
+}
+
+// A triangle with depth takes the primitive's depth where the depth source
+// says so, and its own otherwise. A rectangle, which has none of its own,
+// tests and writes the primitive's, and otherwise draws without depth, as
+// does a triangle that the RSP sends without depth. (The RDP would test
+// and write a depth of zero for those two.)
+static void TestDepthSources(void) {
+    const uint16_t depthKey = PIPELINE_DEPTH_TEST | PIPELINE_DEPTH_WRITE;
+
+    DrawDepthSourcedTriangle(G_ZBUFFER, G_ZS_PRIM);
+    EXPECT(f_Gpu.draws[0].pipelineKey == depthKey);
+    ExpectVertexDepths(3, PRIMITIVE_DEPTH_SHARE);
+    DrawDepthSourcedTriangle(G_ZBUFFER, G_ZS_PIXEL);
+    EXPECT(f_Gpu.draws[0].pipelineKey == depthKey);
+    // The viewport's scale, half the most, G_MAXZ, rounded down, for z 0
+    ExpectVertexDepths(3, (double)(G_MAXZ / 2) / G_MAXZ);
+    DrawDepthSourcedRectangle(G_ZS_PRIM);
+    EXPECT(f_Gpu.draws[0].pipelineKey == depthKey);
+    ExpectVertexDepths(6, PRIMITIVE_DEPTH_SHARE);
+    DrawDepthSourcedRectangle(G_ZS_PIXEL);
+    EXPECT(f_Gpu.draws[0].pipelineKey == 0);
+    EXPECT(f_Gpu.vertexCount == 6);
+    DrawDepthSourcedTriangle(0, G_ZS_PIXEL);
+    EXPECT(f_Gpu.draws[0].pipelineKey == 0);
+    EXPECT(f_Gpu.vertexCount == 3);
+}
+
 // Fills the other image in the fill cycle, as a color image, from left,
 // top to right, bottom in pixels, within a scissor scissorRight wide, with
 // the depth image elsewhere; then draws a triangle that tests depth against
@@ -1613,6 +1689,7 @@ int main(void) {
     TestBlendShapes();
     TestUnforcedBlenderPassesFirstColor();
     TestDepthClear();
+    TestDepthSources();
     TestColorFillClearsLaterDepth();
     TestDepthClearNotesHoldFour();
     TestDepthClearOutlastsColorFill();
