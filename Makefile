@@ -131,6 +131,7 @@ CROSS       := $(firstword $(foreach prefix,$(MATCHING_CROSS_CHOICES),\
                  $(if $(shell command -v $(prefix)ld),$(prefix))) mips-linux-gnu-)
 endif
 CC          := COMPILER_PATH=$(KMC_DIR) $(KMC_DIR)/gcc
+COMPILER    := $(KMC_DIR)/gcc
 # KMC GCC reads VR4300MUL from the environment to work around the VR4300
 # multiplication bug, as ultralib's build does
 LIB_CC      := VR4300MUL=ON $(CC)
@@ -166,6 +167,7 @@ else
 BUILD_DIR   := build/$(if $(filter-out 0,$(SANITIZE)),sanitize,modern)
 CROSS       := $(MODERN_CROSS)
 CC          := $(MODERN_CC)
+COMPILER    :=
 LIB_CC      := $(CC)
 # Each routine and object in a section of its own, which the link drops
 # unless something refers to it (see tools/layout.py). The tests'
@@ -324,6 +326,9 @@ ifneq ($(filter-out $(SETUP_GOALS),$(or $(MAKECMDGOALS),all)),)
 include $(LAYOUT_MK)
 endif
 O_FILES := $(LINKED_SOURCES:%=$(BUILD_DIR)/%.o)
+# The first build in a fresh clone, such as make objects, installs KMC GCC
+# before it compiles anything. libdragon's toolchain is installed by hand.
+$(O_FILES): | $(COMPILER)
 
 # libultra 2.0J, built the way ultralib builds libgultra_rom except that the
 # game's copy was compiled with signed chars
