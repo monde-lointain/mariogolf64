@@ -52,7 +52,7 @@ Recorded in `04-pause-menu.txt`.
 
 | ID   | Note                                                                       | Status |
 |------|----------------------------------------------------------------------------|--------|
-| 04-1 | Trees on hole 1 appear to alias into other trees                           | open |
+| 04-1 | Trees on hole 1 appear to alias into other trees                           | fixed in 799670b6; the aiming view copies a saved frame, which the port read back at 320x240 and drew in 6-pixel blocks; it now copies between targets at scale |
 
 ## Session 07: Mini-Golf
 
