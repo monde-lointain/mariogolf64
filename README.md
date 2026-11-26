@@ -17,6 +17,12 @@ need your own copy of the ROM:
 
 ![A chart of the matched code, which rises from 0% on October 21, 2026 to 100% on November 14, 2026](docs/images/progress-history.svg)
 
+## AI disclosure
+
+AI was heavily used for matching in this project. Human guidance was
+consistently provided to enforce a consistent style and ensure that the
+decompiled code was readable and natural looking.
+
 ## What you can build
 
 From the one source tree, you can build the following:
