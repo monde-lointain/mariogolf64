@@ -44,8 +44,6 @@ macOS comes with GNU Make 3.81, which is too old for the build. Homebrew's
     cp /path/to/your/rom.z64 baserom.us.z64
     ```
 
-    Git ignores this file, so you can't commit it by mistake.
-
 ## Build the matching ROM
 
 1.  Set up the build:

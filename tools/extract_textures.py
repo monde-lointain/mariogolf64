@@ -5,8 +5,8 @@
 
 Each line of textures.txt gives a texture's ROM offset, format, width,
 height and PNG path; '#' starts a comment. The PNGs go under assets/,
-which is never committed, and png_to_c.py turns them back into the C
-initializers that the files include.
+and png_to_c.py turns them back into the C initializers that the files
+include.
 """
 
 from pathlib import Path

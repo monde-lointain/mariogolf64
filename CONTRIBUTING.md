@@ -6,10 +6,6 @@ matching ROM, as your [build guide](README.md#get-started) describes.
 
 ## Ground rules
 
-- **Never commit data from the game.** Don't commit a ROM, in whole or in
-  part, or the game's models, textures, sounds, music, or text. Don't commit
-  disassembly that a tool dumped from the ROM. `.gitignore` keeps out
-  `*.z64`, `*.n64`, `*.v64`, `asm/`, and `assets/`, but check what you stage.
 - **Keep the matching ROM matching.** After a change to the game's code,
   `make` must still end with `build/mariogolf64.z64: OK`. A fix for the
   original's undefined behavior belongs behind `#ifdef AVOID_UB`, which

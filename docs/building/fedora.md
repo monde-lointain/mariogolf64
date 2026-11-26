@@ -38,8 +38,6 @@ to convert the game's Japanese text for KMC GCC.
     cp /path/to/your/rom.z64 baserom.us.z64
     ```
 
-    Git ignores this file, so you can't commit it by mistake.
-
 ## Build the matching ROM
 
 1.  Set up the build:

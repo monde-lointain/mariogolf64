@@ -51,8 +51,6 @@ the [AUR](https://aur.archlinux.org/packages/mips64-elf-binutils).
     cp /path/to/your/rom.z64 baserom.us.z64
     ```
 
-    Git ignores this file, so you can't commit it by mistake.
-
 ## Build the matching ROM
 
 1.  Set up the build:

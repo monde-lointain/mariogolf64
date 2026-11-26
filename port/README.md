@@ -11,8 +11,8 @@ folder holds everything else that the program needs:
   SDL_GPU.
 - The platform layer: the window, input, audio, saves, and settings.
 
-The port holds no data from the game. The program reads your ROM when it
-starts, and takes every model, texture, sound, and song from it.
+The program reads every model, texture, sound, and song from your ROM when
+it starts.
 
 ## Build the port
 

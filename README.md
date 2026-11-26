@@ -5,8 +5,7 @@ North American release. The game's code is C source that compiles back to
 the original code, byte for byte. The same source also builds a native PC
 port for Linux, Windows, macOS, and Android.
 
-The repository holds no data from the game. To build anything that runs, you
-need your own copy of the ROM:
+To build anything that runs, you need your own copy of the ROM:
 
 | File             | SHA-1                                      |
 |------------------|--------------------------------------------|
@@ -182,5 +181,4 @@ includes the decompilation of the game and of KMC's C library in
 their authors' notices: libultra from the
 [ultralib](https://github.com/decompals/ultralib) decompilation, and
 n_audio, NuSystem, and libmus from the N64 developer kits. *Mario Golf* and its
-data belong to Nintendo and Camelot. This repository holds none of the
-game's data: no ROM, models, textures, sounds, or music.
+data belong to Nintendo and Camelot.
