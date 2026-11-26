@@ -22,6 +22,14 @@ if(ANDROID)
     enable_language(CXX)
 endif()
 
+# The renderer tells the host's addresses from the N64's by whether they
+# need more than 32 bits. A position-independent executable loads above
+# 4 GiB on every 64-bit host, but a GCC that links programs at a fixed
+# address by default, such as Fedora's, would put their data below it.
+include(CheckPIESupported)
+check_pie_supported()
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 if(PROJECT_IS_TOP_LEVEL)
     include(CTest)
 endif()

@@ -126,6 +126,15 @@ static GfxFrame f_Frame;
 static bool f_IsFrameReady;
 
 void InitRdp(void) {
+    // ResolveRcpAddress tells the host's addresses from the N64's by
+    // whether they need more than 32 bits, so the program's own data must
+    // lie above 4 GiB, as it does in a position-independent executable
+    if (((uintptr_t)&f_Rdp >> 32) == 0) {
+        PcFatalError(
+            "The program's data lies below 4 GiB: build it as a position-independent executable"
+        );
+    }
+
     if (!f_IsFrameReady) {
         InitFrame(&f_Frame);
         InitTextureCache();
