@@ -1589,7 +1589,8 @@ void InsertRankedRecord(PlayRecord *record) {
     if ((s8)record->scoreKind & SCORE_KIND_RECORDED) {
         records = f_SaveData.rankedRecords;
         newPriority = GetRecordPriority(record);
-        lowestPriority = 0x40000000; // Above any priority
+        // Above any priority
+        lowestPriority = 0x40000000;
         lowestIndex = 0;
 
         switch (record->scoreKind & SCORE_KIND_MASK) {
@@ -1768,7 +1769,8 @@ Outcome SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
     Boolean hasIllegalState;
     s32 index;
 
-    playerCount = PLAYER_COUNT_MAX; // The limit, until the count is known
+    // The limit, until the count is known
+    playerCount = PLAYER_COUNT_MAX;
     players = f_SaveData.savedPlayers[slotIndex];
     game = &f_SaveData.savedGames[slotIndex];
     if (!isContinuing) {
@@ -2663,8 +2665,8 @@ void ComputeRoundStatistics(void) {
     g_CourseStatFigures[COURSE_COUNT].bestDrive = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].bestScore = g_CourseStatFigures[0].bestScore;
     g_CourseStatFigures[COURSE_COUNT].bestDrive = g_CourseStatFigures[0].bestDrive;
-    unplayedRoundCount =
-        g_CourseStatFigures[COURSE_COUNT].roundCount; // Read back after being zeroed
+    // Read back after being zeroed
+    unplayedRoundCount = g_CourseStatFigures[COURSE_COUNT].roundCount;
     for (; courseIndex != COURSE_COUNT; courseIndex++) {
         if (unplayedRoundCount < g_CourseStatFigures[courseIndex].roundCount) {
             if (!hasPlayedCourse) {

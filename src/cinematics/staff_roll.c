@@ -333,7 +333,7 @@ static s32 f_CastIndex = 0;
 static Boolean f_IsReactionShown = FALSE;
 static f32 f_UnreadValue = 0.0f;
 static s32 f_ViewShrinkStartFrame = NEVER_FRAME;
-static s32 f_UnusedWord UNUSED = 0; // Unused
+static s32 f_UnusedWord UNUSED = 0;
 /* clang-format off */
 // How far right each character moves the next one
 static u8 f_StaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {

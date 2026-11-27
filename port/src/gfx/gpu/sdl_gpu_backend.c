@@ -196,7 +196,8 @@ SDL_GPUShader *CreateGpuShader(
     else if (formats & SDL_GPU_SHADERFORMAT_MSL) {
         info.format = SDL_GPU_SHADERFORMAT_MSL;
         info.code = msl;
-        info.code_size = mslSize - 1; // Without its terminating zero
+        // The size leaves out the terminating zero
+        info.code_size = mslSize - 1;
         info.entrypoint = "main0";
     }
     else {

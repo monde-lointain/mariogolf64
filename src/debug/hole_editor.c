@@ -1588,7 +1588,7 @@ void UpdateTriangleSlopes(void);
 // zooms in, L or Z with R zooms out, and Z with the stick orbits the
 // camera around the corner.
 void UpdateTriangleEditor(void) {
-    Mat4 unusedMatrices[2] UNUSED; // The game's frame has room for two matrices
+    Mat4 unusedMatrices[2] UNUSED;
     f32 stepRight;
     f32 stepUp;
     f32 stepY;
@@ -2052,7 +2052,7 @@ void UpdateWallEditor(void) {
     char text[DEBUG_TEXT_BUFFER_SIZE];
     Vtx_t *corners[TRIANGLE_VERTEX_COUNT];
     Vtx_t *nextCorners[TRIANGLE_VERTEX_COUNT];
-    Mat4 unusedMatrices[2] UNUSED; // The game's frame has room for two matrices
+    Mat4 unusedMatrices[2] UNUSED;
     f32 stepRight;
     f32 stepUp;
     f32 stepY;
