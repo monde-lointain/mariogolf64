@@ -20,8 +20,7 @@ typedef enum SettingKind {
     SETTING_INT,
     SETTING_WINDOW_SIZE,
     SETTING_WINDOW_POSITION,
-    SETTING_PRESENT,
-    SETTING_ANTIALIASING,
+    SETTING_CHOICE,
     SETTING_CONTROL
 } SettingKind;
 
@@ -34,6 +33,8 @@ typedef struct Setting {
     int min; // For SETTING_INT, its least and greatest values
     int max;
     const char *comment; // Lines to explain it, or NULL
+    // For SETTING_CHOICE, the names of its enum's values in order, then NULL
+    const char *const *names;
 } Setting;
 
 // A stretch of the text, not ended by a NUL
@@ -101,8 +102,11 @@ static const struct {
     {SDL_SCANCODE_KP_COMMA, "Keypad Comma"},
 };
 
-static const char *const f_PresentNames[] = {"mailbox", "vsync", "immediate"};
-static const char *const f_AntialiasingNames[] = {"off", "2x", "4x", "8x"};
+// A choice's field holds its value's index, which takes an int's size
+static const char *const f_PresentNames[] = {"mailbox", "vsync", "immediate", NULL};
+SDL_COMPILE_TIME_ASSERT(present_size, sizeof(PresentChoice) == sizeof(int));
+static const char *const f_AntialiasingNames[] = {"off", "2x", "4x", "8x", NULL};
+SDL_COMPILE_TIME_ASSERT(antialiasing_size, sizeof(AntialiasingChoice) == sizeof(int));
 
 #define FIELD(name) offsetof(Config, name)
 #define CONTROL(key, control) {"controls", (key), SETTING_CONTROL, (control), 0, 0, NULL}
@@ -134,20 +138,22 @@ static const Setting f_Settings[] = {
     {"video", "fullscreen", SETTING_BOOL, FIELD(isFullscreen), 0, 0, "Whether to start fullscreen"},
     {"video",
         "present",
-        SETTING_PRESENT,
+        SETTING_CHOICE,
         FIELD(present),
         0,
         0,
         "mailbox shows the newest frame at each refresh, vsync shows every frame\n"
-        "and may wait, and immediate shows each at once and may tear"},
+        "and may wait, and immediate shows each at once and may tear",
+        f_PresentNames},
     {"video",
         "antialiasing",
-        SETTING_ANTIALIASING,
+        SETTING_CHOICE,
         FIELD(antialiasing),
         0,
         0,
         "off, 2x, 4x or 8x: how many samples a pixel to draw edges with, or the\n"
-        "most that the GPU has"},
+        "most that the GPU has",
+        f_AntialiasingNames},
     {"window",
         "width",
         SETTING_WINDOW_SIZE,
@@ -338,6 +344,20 @@ static int FindName(Span span, const char *const *names, int count) {
     return -1;
 }
 
+// Sets a choice's field to the index of the name that the span gives
+static bool ParseChoice(Span span, const char *const *names, void *field) {
+    int i;
+
+    for (i = 0; names[i] != NULL; i++) {
+        if (IsSpanIgnoringCase(span, names[i])) {
+            SDL_memcpy(field, &i, sizeof(i));
+            return true;
+        }
+    }
+
+    return false;
+}
+
 static bool ParseWindowSize(Span span, int *value) {
     int size;
 
@@ -485,27 +505,8 @@ static bool ParseSetting(const Setting *setting, Span value, Config *config) {
             return ParseWindowSize(value, SettingField(config, setting));
         case SETTING_WINDOW_POSITION:
             return ParseWindowPosition(value, config);
-        case SETTING_PRESENT: {
-            const int index = FindName(value, f_PresentNames, (int)SDL_arraysize(f_PresentNames));
-
-            if (index < 0) {
-                return false;
-            }
-
-            config->present = (PresentChoice)index;
-            return true;
-        }
-        case SETTING_ANTIALIASING: {
-            const int index =
-                FindName(value, f_AntialiasingNames, (int)SDL_arraysize(f_AntialiasingNames));
-
-            if (index < 0) {
-                return false;
-            }
-
-            config->antialiasing = (AntialiasingChoice)index;
-            return true;
-        }
+        case SETTING_CHOICE:
+            return ParseChoice(value, setting->names, SettingField(config, setting));
         case SETTING_CONTROL:
             return ParseControl(value, &config->bindings, (PadControl)setting->offset);
         default:
@@ -765,6 +766,22 @@ static void AppendPadSource(TextBuilder *builder, PadSource source) {
     }
 }
 
+// The name of the value that a choice's field holds
+static const char *ChoiceName(const char *const *names, const void *field) {
+    int index;
+    int i;
+
+    SDL_memcpy(&index, field, sizeof(index));
+    for (i = 0; names[i] != NULL; i++) {
+        if (i == index) {
+            return names[i];
+        }
+    }
+
+    SDL_assert(!"a choice's field holds no name's index");
+    return names[0];
+}
+
 static void AppendSettingValue(TextBuilder *builder, const Setting *setting, const Config *config) {
     const void *field = ConstSettingField(config, setting);
     int i;
@@ -785,13 +802,8 @@ static void AppendSettingValue(TextBuilder *builder, const Setting *setting, con
                 AppendText(builder, "%d, %d", config->windowX, config->windowY);
             }
             break;
-        case SETTING_PRESENT:
-            SDL_assert((size_t)config->present < SDL_arraysize(f_PresentNames));
-            AppendText(builder, "%s", f_PresentNames[config->present]);
-            break;
-        case SETTING_ANTIALIASING:
-            SDL_assert((size_t)config->antialiasing < SDL_arraysize(f_AntialiasingNames));
-            AppendText(builder, "%s", f_AntialiasingNames[config->antialiasing]);
+        case SETTING_CHOICE:
+            AppendText(builder, "%s", ChoiceName(setting->names, field));
             break;
         case SETTING_CONTROL:
             for (i = 0; i < PAD_SOURCES_PER_CONTROL; i++) {
