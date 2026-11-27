@@ -129,7 +129,6 @@ static Radians f_MarkerPulseAngle = 0.0f;
 static Mtx f_SpanBarTranslation;
 static Mtx f_SpanBarScale;
 
-// Not static: the original left these to the linker's common block
 ImageAsset *f_ClubPanelImage;
 ImageAsset *f_ShotModeImage;
 
@@ -371,8 +370,7 @@ void DrawClubPanel(Gfx **displayListHead) {
     s32 fill;
     PlayerState playerState;
     s32 tick;
-    // Also the end tick and medium tick index, to match: a counter of their own
-    // for either gives 54 words differing, and for both 88
+    // Also the end tick and medium tick index
     s32 group;
     s32 emptyLeft;
 
@@ -556,8 +554,6 @@ void DrawClubPanel(Gfx **displayListHead) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    // The original branches on both tests: only the second gives 321 words
-    // differing (89 in shape), and the two as an && chain 325 (95)
     if (playerState != PLAYER_STATE_AIMING) {
         if (playerState == PLAYER_STATE_SETTING_POWER) {
             f_ChosenPowerFill = fill;

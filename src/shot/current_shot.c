@@ -1,5 +1,5 @@
 /*
- * The shot being set up, defined volatile under KMC as the original's; see
+ * The shot being set up, defined volatile under KMC; see
  * current_shot.h.
  */
 

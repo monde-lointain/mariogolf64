@@ -285,10 +285,9 @@ typedef s32 BunkerBurial;
 #define STOP_SPEED_MAX 30
 #define STOP_SLOPE_PULL_MAX 500.0f
 // Off the green and off a steep slope, a ball slower than this this many
-// steps after its last bounce stops. It is 2 km/h, as 2% of 100 km/h: the
-// original's constant is a double that is not KilometersPerHour(2) but a
-// hundredth of twice the float KilometersPerHour(100), and the double factor
-// is why both simulations compare the speed as a double.
+// steps after its last bounce stops. It is 2 km/h, as 2% of 100 km/h: a
+// double that is not KilometersPerHour(2) but a hundredth of twice the float
+// KilometersPerHour(100), so both simulations compare the speed as a double.
 #define OFF_GREEN_STOP_SPEED_MAX (KilometersPerHour(100) * 0.02)
 #define OFF_GREEN_STOP_STEPS 90
 

@@ -49,10 +49,10 @@ typedef s32 ImpactPointState;
 #define GAUGE_FULL_FRAME 30
 #define GAUGE_IMPACT_FRAME (2 * GAUGE_FULL_FRAME)
 
-// The original defined g_CurrentShot volatile, and only game.c saw the
-// qualifier; current_shot.c and game.c define READS_CURRENT_SHOT_VOLATILE to
-// see it under KMC. Nothing needs it: the planning thread copies the shot only
-// once the game thread has started it. Other builds drop it.
+// g_CurrentShot is volatile under KMC only in current_shot.c and game.c,
+// which define READS_CURRENT_SHOT_VOLATILE. Nothing needs it: the planning
+// thread copies the shot only once the game thread has started it. Other
+// builds drop it.
 #if defined(__IS_KMC__) && defined(READS_CURRENT_SHOT_VOLATILE)
 #    define CURRENT_SHOT_VOLATILE volatile
 #else

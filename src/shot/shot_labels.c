@@ -172,7 +172,6 @@ static s8 f_TagOffsetsY[CORNER_COUNT] = {12, 12, -12, -12};
 static Radians f_OutOfBoundsPulseAngle = 0.0f;
 static s32 f_PinFlagWaveFrame = 0;
 
-// Not static: the original left it to the linker's common block
 u8 g_UnusedBytesAfterFlagWaveFrame[4];
 
 // Draws the tags of the players' balls, moving each to a corner that is clear
@@ -370,12 +369,7 @@ void DrawShotLabels(Gfx **displayListHead) {
             f_ShotLabels[playerIndex].y = point.y + f_TagOffsetsY[f_ShotLabels[playerIndex].corner];
             // Each search, with a flag of its own, tries corners until one is clear,
             // placing the tag there and leaving for the shared corner store, or until
-            // it runs out, leaving the tag where it was. To match: ending endless
-            // loops with a break and a test of the tries gives 12 words differing,
-            // all in shape; placing the tag after the label instead 205, 29 in shape;
-            // storing the corner in each search and breaking out 176, 82 in shape;
-            // and testing the flag after the searches, which needs one flag for both,
-            // 144 to 318. One flag for both searches gives 26 words, none in shape.
+            // it runs out, leaving the tag where it was.
             f_ShotLabels[playerIndex].depth = point.depth;
             if (labelMode == SHOT_LABELS_OVERHEAD) {
                 for (cornerOffset = 0; cornerOffset != CORNER_COUNT; cornerOffset++) {

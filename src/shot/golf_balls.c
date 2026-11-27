@@ -82,7 +82,7 @@
 // The ball's radius in course units, at a pin scale of one
 #define BALL_RADIUS 0x600
 // The ball's model sits this far below its position: a fifth of its radius
-// in world units. A double, as the original divides in double precision.
+// in world units. A double, so that the division is in double precision.
 #define BALL_MODEL_DROP_DIVISOR (WORLD_TO_COURSE_SCALE * 5.0)
 // An afterimage is left each time the ball moves this far, in world units per
 // course unit of the ball's radius: a tenth of the radius while fast, six
@@ -399,7 +399,7 @@ static s32 f_BallAfterimageLength = AFTERIMAGE_LENGTH_MAX;
 static s32 f_UnusedBallFrame = 0;
 static s32 f_BallRollFrame = 0;
 
-// Left empty in the original, and nothing calls it
+// Does nothing, and nothing calls it
 void UnusedGolfBallStub(void) {
 }
 
@@ -922,136 +922,6 @@ typedef s32 BallSprite;
 // place of a ball that has a marker player; the ball's afterimages; the
 // hole's route points while GAME_FLAG_SHOW_ROUTE_POINTS is set; and the
 // "PIKA" models while the current ball is nearer than PIKA_BALL_DEPTH.
-//
-// Both frame counters step before the display list is built, as the original
-// loads f_BallRollFrame before the first command's store, and the list opens
-// with two syncs. isCurrentBallAboveGround is set where it is declared: the
-// original zeroes its stack slot in the delay slot of the turn step's test,
-// before anything else.
-//
-// Each drawn ball's block declares primDepth. Reload gives the pseudos it
-// spills from the start their slots in the order of their numbers, and the
-// original's slot for the depth comes after those of the display list
-// temporaries made before the ball loop.
-//
-// The no-marker test and the marker colors' switch each read the marker
-// player from the ball. Read once into an s8 local, combine folds the
-// local's sign extension into its load and, finding no earlier insn to carry
-// the dead shift's death, leaves a use of it further up the ball's block.
-// The use gets no register, so reload gives it a stack slot that nothing
-// reads, and the frame grows by 8 bytes.
-//
-// The water shade has a variable of its own, set to the ball's scaled height
-// and taken from 100 in a second statement. The conversion and the
-// difference then set the one pseudo, which dies at the clamp and keeps $v1
-// up to the color's word, as in the original. Written in one statement the
-// conversion gets a temporary of its own, and with the shadow's shade
-// variable in its place the clamp sets the variable again and the color's
-// mask makes a copy of it.
-//
-// The sprite branches share one sync after their chain, which the original
-// reaches by jumping from each branch. The far dot's rectangle goes through
-// gSPStretchedTextureRectangle like the others, so its vertical step is
-// worked out from its own edges: the original shifts ballPoint.y - 1, keeps
-// that and takes 4 from it for the top, and measures the step from the kept
-// shift to the shifted ballPoint.y plus 4.
-//
-// Each arm of the shadow's depth subtracts BALL_DEPTH_BIAS itself, as the
-// ball's arms do. With one subtraction after the arms the sums take their
-// registers in the other order.
-//
-// The shadow's size is scaled through an f32 variable that starts as one
-// part in 0x7F, the shade's full value, and is multiplied by the shade
-// before the size is multiplied by it. The constant and the product are
-// then one pseudo, which keeps $f2 while the shade and the size pass
-// through $f0 in turn, as in the original; as one expression the product
-// is a temporary that takes $f0, and the size goes through $f2.
-//
-// The afterimages' loop tests i != f_BallAfterimageLength, as the original's
-// bne against the reloaded length shows. The route points' depth has a
-// local of its own, where the shadow's depth would serve.
-//
-// After the loops, the cycle type is set through AppendSyncedRdpState,
-// which declares the command's pointer before its sync's. That swaps the
-// stack slots the two pointers are spilled to, 0x27C and 0x284, into the
-// original's order.
-//
-// The "PIKA" texture's address is aligned to 8 bytes, as TextureAddress
-// does. The models' test reads the shown alpha as f_GolfBalls[i].alpha,
-// beside ball's other fields, and is split in two so that the ball's surface
-// is read into a variable between the halves: the original loads the surface
-// in the delay slot of the branch that tests isCurrentBallAboveGround, where
-// one test reading ball->surface->sinkDepth loads it after the branch and
-// leaves a nop in the slot.
-//
-// Measured against the match, as words differing and how many of them in
-// shape:
-//
-//   One sync opening the display list                      555 (77), frame +8
-//   f_BallRollFrame stepped after the first render mode     66 (30)
-//   f_UnusedBallFrame stepped after the request frame is
-//   stored, or the request frame stored first                4 (0)
-//   f_UnusedBallFrame stepped after the texture LUT         28 (4)
-//   isCurrentBallAboveGround set after the step's test       2 (2)
-//   The ball loop testing != GOLF_BALL_COUNT                 4 (4)
-//   primDepth declared in the function                     276 (0)
-//   The marker player in an s8 local                       206 (10), frame -8
-//   The marker player in an s32 local                       15 (11)
-//   The marker colors' last case as the default            319 (29)
-//   The water shade through shade, in one statement (the
-//   old draft)                                               6 (0)
-//   The water shade through shade, in two statements        74 (0)
-//   The water shade in one statement                        14 (0)
-//   The water shade set to 100, the height taken from it    11 (7)
-//   The water shade set to less the height, 100 added       19 (3)
-//   The water shade as a u8                                 11 (3)
-//   The height in waterShade, shade set to 100 less it       6 (0)
-//   A sync ending each sprite branch                       496 (58)
-//   The far dot's steps written out, the vertical one
-//   from ballPoint.y - 1 to ballPoint.y + 1, shifted (the
-//   old draft)                                               8 (4)
-//   The same, ending at the shifted ballPoint.y plus 4      49 (5)
-//   The far dot's top as QuarterPixels(ballPoint.y) - 8     97 (71)
-//   The far dot's top as QuarterPixels(ballPoint.y - 2)     53 (7)
-//   The far dot's left as QuarterPixels(ballPoint.x - 1)   112 (70)
-//   The shadow's bias subtracted once, after the arms      205 (13)
-//   The size as shade times the product of the scale and
-//   the size, in one expression (the old draft)              6 (0)
-//   The scale set to the shade times the constant            8 (0)
-//   The scale set to the shade, then multiplied or
-//   divided by the constant                                  8 (0)
-//   The size multiplied by the scale times the shade         8 (0)
-//   The last statement as size = shadowScale * size          6 (0)
-//   The scale multiplied by the size, then the size set
-//   to the shade times the scale                             4 (0)
-//   The same, set to the scale times the shade              14 (0)
-//   The scale multiplied by the size as well, then copied
-//   to it                                                    6 (0)
-//   The scale set where it is declared                      18 (12)
-//   The scale as an f64                                     15 (13)
-//   The afterimages' loop testing < the length              93 (5), frame -8
-//   The route points' depth in shadowDepth                   6 (0)
-//   The tail's cycle type after a plain sync, whether or
-//   not its other states go through the macro                8 (0)
-//   The "PIKA" texture's address unaligned                  70 (10)
-//   The shown alpha read through ball                       31 (23)
-//   One test reading ball->surface->sinkDepth (the old
-//   draft), or the split test's second half reading it       1 (1)
-//   One test setting the variable in a comma expression      1 (1)
-//   The split test reading into surface                     22 (0)
-//   One test setting surface in a comma expression          23 (1)
-//   The surface read before the first half                   6 (4)
-//   The alpha's test split off as well                       7 (3)
-//
-// Also matching: f_BallRollFrame stepped before f_UnusedBallFrame, after the
-// request frame is stored, or after the texture LUT; the opening's cycle
-// type through AppendSyncedRdpState, or the tail's other states as well as
-// its cycle type; isCurrentBallAboveGround set just before the step's test;
-// a default that breaks in the marker colors' switch; waterShade declared in
-// its block, after shade, or last; its clamp before the render mode; the far
-// dot's steps written out from its own edges; shadowScale declared in a
-// block or last, or its statements spelled shade * shadowScale and
-// size * shadowScale; and pikaBallSurface declared in its block or last.
 void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     Gfx *gfx = g_DisplayListHead;
     ScreenPoint ballPoint;
@@ -1209,7 +1079,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     for (i = 0; i < GOLF_BALL_COUNT; i++) {
         ball = &f_GolfBalls[i];
         if (ball->alpha > 0) {
-// A shadow stays behind the last ball drawn, which the original
+// A shadow stays behind the last ball drawn, which the matching build
 // leaves unset until a ball is drawn, and declares here
 #ifndef AVOID_UB
             s32 primDepth;
@@ -1268,7 +1138,6 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                             ball->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
                             ball->position[AXIS_Z] * WORLD_TO_COURSE_SCALE
                         );
-                        // The height is set first and taken from 100 after, to match
                         waterShade = (s32)(((ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE) -
                                                groundHeight) *
                             0.0032552085f);
@@ -1528,8 +1397,6 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                         shade = FULL_SHADOW_SHADE;
                     }
 
-                    // The scale starts as the constant and is multiplied by the
-                    // shade, to match
                     shadowScale = 1.0f / FULL_SHADOW_SHADE;
                     shadowScale *= shade;
                     size *= shadowScale;
@@ -1823,7 +1690,6 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     }
 
     gDPPipeSync(gfx++);
-    // The cycle type's pointer is declared before its sync's, to match
     AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
@@ -1877,7 +1743,6 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
             if (ball->markerPlayerIndex == BALL_NO_MARKER &&
                 f_GolfBalls[i].alpha == BALL_SHOWN &&
                 (g_IsCupViewShown || ball->isInCup != TRUE)) {
-                // The surface is read between the test's halves, to match
                 pikaBallSurface = ball->surface;
                 if ((!isCurrentBallAboveGround || pikaBallSurface->sinkDepth == SINK_DEPTH_NONE) &&
                     ball->alpha > 0) {

@@ -3885,8 +3885,7 @@ void GenerateClub(ClubIndex clubIndex) {
     for (shotMode = 0; shotMode < SHOT_MODE_COUNT; shotMode++) {
         f_ClubTestShot.shotMode = shotMode;
 
-        // The target distance is in yards until it is scaled below; the reuse
-        // matches
+        // The target distance is in yards until it is scaled below
         targetDistance = GetShotDistance(club, shotMode);
         osSyncPrintf(
             "Generation Club%d PowerMode%d TargetDist %d\n",
@@ -3945,10 +3944,7 @@ void GenerateClub(ClubIndex clubIndex) {
                     club->power[shotMode] = longPower * 3 / 4;
                 }
                 else {
-                    // error holds the fraction too, which keeps local-alloc from
-                    // tying fabsf's operand to its result; only a set in these arms
-                    // does it. A fraction local at either scope, an initialized or
-                    // zeroed error, a magnitude local or f32 casts leave the tie
+                    // error holds the fraction here
                     error =
                         (f32)(targetDistance - shortDistance) / (f32)(longDistance - shortDistance);
                     club->power[shotMode] = InterpolatePower(shortPower, longPower, error);
@@ -4089,8 +4085,6 @@ void InitClubs(void) {
         for (clubIndex = 0; clubIndex < STOCK_CLUB_SET_COUNT * CLUB_SET_SIZE; clubIndex++) {
             club = &g_Clubs[clubIndex];
 
-            // Casting away const matches: GCC moves loads through const pointers
-            // ahead of stores
             parameters = (ClubParameters *)GetClubParameters(clubIndex);
             club->power[0] = parameters->power[0];
             club->power[1] = parameters->power[1];
@@ -4114,51 +4108,6 @@ void InitClubs(void) {
 // MAX_LAUNCH_POWER, of the shot mode's reach. With GAME_FLAG_GENERATE_CLUBS
 // set, it is found by test-firing the first set's putter instead.
 // InterpolatePuttPower is a nested function, a GNU C extension.
-//
-// The test-firing keeps the mode in a variable of its own, testShotMode, to
-// match: the original copies shotMode from $s0 into $fp as the flag's test
-// branches, reads the table with $s0 and test-fires with $fp. The search is
-// GenerateClub's, where the mode is a local that counts the modes, which may
-// be how the original came by the copy. Without it 23 words differ, 3 in
-// shape. Where the copy is made before GetShotDistance, and whether the test
-// shot's mode is set from it, set with it in one statement or read back into
-// it, changes nothing; made after GetShotDistance it gives 102 words (24 in
-// shape), and made at its declaration GCC ties it to the parameter again, for
-// the same 23 (3). Neither can it get the copy from an inline function's
-// parameter: GCC won't inline a function that holds a nested one, so the
-// test-firing can't move into a helper, and with the table's lookup in one 16
-// words differ, 4 in shape.
-//
-// The long half's read of the putter's power sits in a block of its own, to
-// match. The original keeps the hoisted address of the putter's power for the
-// mode in $s2 and shortDistance in $s3. global-alloc places the saved values
-// by priority: targetDistance's is 4756 and shortDistance's 4500, and the
-// address, with 12 references over a live length of 85, has 4235, so without
-// the block, or with plain braces, it comes after shortDistance, the two swap
-// registers and 24 words differ, none in shape. flow weights a reference by
-// its loop depth, and a loop that runs once still counts, so the block gives
-// the address a 13th reference and a priority of 4588, between the two. It
-// lifts longPower's priority too, from 4105 to 4421, which leaves it below
-// shortDistance's. Any one of the loop's three stores of the power in a
-// block matches as well, as does a block around the read and the distance's
-// copy after it. The short half's read in a block lifts shortPower past
-// longPower instead and gives 24 words; two blocks, around both reads or
-// around the long half's read and store, take the address past
-// targetDistance for the same 24; and the first store, before the loop, in a
-// block gives 96 (30 in shape).
-//
-// The long half stores the new power once after its arms and the short half
-// in each arm. With the block, the long half storing through power in each
-// arm or straight from each arm's expression matches if the short half
-// stores once, and so does the short half storing straight from each arm;
-// both halves storing once gives 44 words, and the other four pairings,
-// among them GenerateClub's straight stores in all four arms, 24, none in
-// shape. No pairing matches without the block.
-//
-// fabsf is an abs.s in volatile inline assembly, and the error may as well
-// be taken in the test itself. With GCC's built-in fabsf 18 words differ (12
-// in shape); negating the error by an if gives 11 (7), and a ?: on the
-// integer difference 7 (3).
 s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
     BallSimulation simulation;
     Club *putter;
@@ -4176,7 +4125,7 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
     s32 initialPowerNumerator;
     f32 error;
     s32 power;
-    // The mode the putter is test-fired in: a copy of shotMode, to match
+    // The mode the putter is test-fired in: a copy of shotMode
     ShotMode testShotMode;
 
     s32 InterpolatePuttPower(s32 from, s32 to, f32 fraction) {
@@ -4234,7 +4183,6 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
         }
 
         if (distance > targetDistance) {
-            // In a block of its own to match, as the header comment explains
             IN_OWN_BLOCK(longPower = putter->power[testShotMode]);
             longDistance = distance;
             if (longDistance == shortDistance) {
@@ -4565,8 +4513,7 @@ void UpdateClubControls(void) {
     }
 }
 
-// The limit is a parameter, not a constant, so that the comparison loads it
-// into a register as in the original
+// Whether distance is beyond limit
 static inline Boolean IsFartherThan(s32 distance, s32 limit) {
     return distance > limit;
 }

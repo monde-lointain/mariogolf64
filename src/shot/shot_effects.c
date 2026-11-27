@@ -146,7 +146,6 @@ static Mtx f_SwingTrailMatrices[SWING_TRAIL_MATRIX_COUNT][2];
 static Vec3 f_SwingTrailOuterPath[SWING_TRAIL_PATH_LENGTH];
 static Vec3 f_SwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH];
 
-// Not static: the original left it to the linker's common block
 u8 g_UnusedBytesAfterInnerTrailPath[0x18];
 
 void ResetShotEffects(void) {
@@ -575,7 +574,7 @@ void DrawSparks(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-// Left empty in the original, as are the two routines after it. Only the last
+// Does nothing, as do the two routines after it. Only the last
 // is called, by the round HUD while the shot effects module is loaded.
 void FirstUnusedShotEffectsStub(void) {
 }
@@ -589,19 +588,6 @@ void DrawShotEffectsHud(Gfx **displayListHead UNUSED) {
 // Starts the trail of a swing of the given kind, recording the path of the
 // club through the swing's next frames, or with SWING_TRAIL_KIND_CLEAR stops it
 // at once. Any other kind lets the trail fade out quickly.
-//
-// Each kind sets its own sample count, as the samples' buffer holds up to
-// SWING_TRAIL_MAX_SAMPLES: with the count set in two branches, cse can't
-// tell its value at the sample loop's entry test, which reloads it, as the
-// original's does, and cross-jumping then merges the two stores. One store
-// of SWING_TRAIL_SAMPLES gives 23 words differing, 21 in shape, as GCC
-// knows the count and drops the test; with the state set fourth, after the
-// alpha, 6 differ (2 in shape).
-//
-// The eight trail statics from f_SwingTrailPathLength to f_SwingTrailAlpha
-// lie side by side, but as the fields of one struct they gave 40 words (14
-// in shape) against an older draft's 9, and DrawSwingTrail, which matches,
-// then differs in 155.
 void StartSwingTrail(SwingTrailKind kind) {
     f32 samples[SWING_TRAIL_AXIS_COUNT][SWING_TRAIL_SAMPLES_MAX];
     Vec3 point;
@@ -807,11 +793,6 @@ void DrawSwingTrail(Gfx **displayListHead, CameraMatrices *matrices) {
 
         f_SwingTrailHead--;
         if (f_SwingTrailHead < 0) {
-            // Storing 1 first keeps the 1 in a register through the loop, for
-            // step == 1, to match: storing SWING_TRAIL_MATRIX_COUNT - 1 at once
-            // gives 7 words differing, all in shape, also with a for loop or a
-            // decrement within the test; adding the count gives 21, testing
-            // step > 0 3 and step != 0 7, and a two-pass for loop 15 to 17
             f_SwingTrailHead = 1;
             f_SwingTrailHead = SWING_TRAIL_MATRIX_COUNT - f_SwingTrailHead;
         }
