@@ -45,8 +45,6 @@ char *GetGameBoyCharacterName(s32 gameBoyCharacterIndex) {
 
 // Records the transfer mode; mode 0 also empties every Game Boy character slot
 void ResetGameBoyTransfer(TransferMode transferMode) {
-    // Storing the mode through a pointer is there to match: storing it to
-    // g_GameBoyTransfer directly gives 7 words differing, 1 in shape
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     s32 index;
 

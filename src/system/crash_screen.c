@@ -25,8 +25,7 @@
 
 #define FAULT_THREAD_STACK_SIZE 0x2000
 
-// Prints f_FaultText at the column and row of the screen. PrintMessage takes
-// s8 text, as the original reads its characters signed.
+// Prints f_FaultText at the column and row of the screen
 #define PrintFaultMessage(column, row) PrintMessage((s8 *)f_FaultText, (column), (row))
 
 // A value of a bit field of a register, and the text that describes it
@@ -40,13 +39,12 @@ static OSThread *f_FaultedThread;
 // RunFaultThread clears it, and nothing reads it
 static s32 f_UnusedFaultThreadValue;
 
-// The fault thread and its stack. No routine reads them, as the thread's
-// creation was compiled out, but the bss here holds exactly an OSThread and
-// then an 8 KB stack.
+// The fault thread and its stack, which no routine reads, as nothing creates
+// the thread
 static OSThread f_FaultThread UNUSED;
 static u8 f_FaultThreadStack[FAULT_THREAD_STACK_SIZE] UNUSED;
 
-// Never created, as its creation was compiled out with the fault thread's
+// Never created, as the fault thread isn't
 static OSMesgQueue f_FaultMessageQueue;
 
 FILE_STATIC char f_FaultText[FAULT_TEXT_SIZE];
@@ -56,7 +54,7 @@ static s32 f_UnusedFaultContextValue = 0;
 // The debug text row of the next line of the fault report
 static s32 f_FaultTextRow = 7;
 
-// Only menu.c reads it, but the target has it first in this file's rodata
+// Only menu.c reads it
 const char g_EmptyString[] = "";
 
 OSThread *__osGetCurrFaultedThread(void);
@@ -64,9 +62,7 @@ void RunFaultThread(void *arg);
 void PrintFaultContext(OSThread *thread);
 void PrintRegisterFields(u32 registerValue, char *name, RegisterFieldValue *fields);
 
-// Does nothing. The fault thread's start-up messages are in the ROM and
-// the frame has room for the arguments of a thread creation, so the
-// original started the fault thread here in code that was compiled out.
+// Does nothing; the fault thread is never started
 void RunBootHook(void) {
     if (FALSE) {
         osSyncPrintf("\n=>mp\n");
@@ -93,9 +89,6 @@ void RunFaultThread(void *arg UNUSED) {
         }
     }
 }
-
-// These tables follow the routines that use string literals before them,
-// whose strings the original has ahead of the tables' in rodata.
 
 // The fields of the cause register, ending with an empty mask
 static RegisterFieldValue f_CauseFields[] = {
@@ -201,21 +194,6 @@ void PrintFaultText(void) {
 void PrintFaultContext(OSThread *thread) {
     __OSThreadContext *context = &thread->context;
 
-    // The arms are the same, and written out to match: the compiler merges
-    // them and drops the test, but only once the registers are allocated.
-    // Until then they end context's block, so that
-    // - neither CSE pass knows context to be thread plus 0x20 where its
-    //   fields are read, so they aren't read at thread's offsets;
-    // - the scheduler can't move context's setting down to the first call;
-    // - context is left to global-alloc, which gives it $s1 after local-alloc
-    //   has given the text buffer's address $s0.
-    // With the value stored once, 294 words differ, 6 of them in shape, and
-    // stored in a block of its own 278 (4); the conditional operator gives
-    // 294 (6), and an if without the else 201 (3). Setting context after the
-    // arms, or reading the fields through thread, gives 200 (2), and setting
-    // it in each arm 6 (6). The arms after the title give 25 (9). Testing
-    // thread's id gives 4 (4); testing context, or the value itself, matches
-    // too.
     if (thread != NULL) {
         f_UnusedFaultContextValue = 0;
     }

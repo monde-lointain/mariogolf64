@@ -160,10 +160,9 @@ void ResetSaveData(void);
 void InitSaveData(void);
 void RecordDisplayListLength(u32 commandCount);
 void WriteSaveData(void);
-// The option queries return a byte, but the original's main_menu.c,
-// shot_camera.c and sound.c use the whole return register, as if the result
-// were a word. Those files define WIDENS_CHOSEN_OPTIONS to see it so, unless
-// AVOID_UB is set.
+// The option queries return a byte, but main_menu.c, shot_camera.c and
+// sound.c use the whole return register, as if the result were a word. Those
+// files define WIDENS_CHOSEN_OPTIONS to see it so, unless AVOID_UB is set.
 #if defined(AVOID_UB) || !defined(WIDENS_CHOSEN_OPTIONS)
 Boolean8 IsMusicOffChosen(void);
 Boolean8 IsMonoChosen(void);

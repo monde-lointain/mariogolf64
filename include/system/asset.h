@@ -62,8 +62,7 @@
 #    define LargeImageTexels(image) ((u8 *)(image) + LARGE_PALETTED_TEXELS_OFFSET)
 #endif
 #define ImagePalette(image) ((PaletteColor *)ImageBody(image))
-// The same, offset bytes in, as for a frame of an image that holds several.
-// They add the two offsets first, as the original does.
+// The same, offset bytes in, as for a frame of an image that holds several
 #define ImageBodyAt(image, offset) ((u8 *)(image) + ((offset) + IMAGE_HEADER_SIZE))
 #define ImagePaletteAt(image, offset) ((PaletteColor *)ImageBodyAt(image, offset))
 #define ImageTexelsAt(image, offset) ((u8 *)(image) + ((offset) + PALETTED_TEXELS_OFFSET))
@@ -216,7 +215,7 @@ typedef s32 MenuArrow;
 
 // An asset's number in the archive. Routines that take one in a register take
 // it as a WideAssetId, and the tables that store one signed hold a
-// SignedAssetId: the original's code differs with each width.
+// SignedAssetId.
 typedef u16 AssetId;
 typedef s32 WideAssetId;
 typedef s16 SignedAssetId;
@@ -239,8 +238,7 @@ typedef struct AssetFile {
 // An asset whose first word holds how the rest is encoded (top byte) and
 // its size once decoded (the other 24 bits)
 typedef struct EncodedAsset {
-    // Nothing uses these bytes, but each EncodedAsset is a stack local, and
-    // without them the frames no longer match
+    // Nothing uses these bytes
     u8 unusedBeforeMethod[8];
     s32 method;
     s32 encodedSize; // The whole file's, including that word

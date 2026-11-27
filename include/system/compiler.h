@@ -7,14 +7,12 @@
 #ifndef COMPILER_H
 #define COMPILER_H
 
-// Follows the declarator of a variable or parameter that nothing reads but
-// that the original keeps, often for the size of its stack frame
+// Follows the declarator of a variable or parameter that nothing reads
 #define UNUSED __attribute__((unused))
 
 // Begins the definition of a variable that only its own file uses. The
-// original made such variables global, so the matching build keeps them
-// global for main_bss.c or the overlay's common block to place where the
-// original's linker did. Other builds make them static.
+// matching build keeps such variables global, for main_bss.c or the overlay's
+// common block to place. Other builds make them static.
 #ifdef __IS_KMC__
 #    define FILE_STATIC
 #else
@@ -32,11 +30,9 @@
 #    define ORDERED_BSS
 #endif
 
-// The return type of a routine that returns no value but that the original
-// declared to return one. KMC GCC keeps v0 live to the end of such a
-// routine, which its scheduling shows, so the matching build declares it
-// s32. Other builds declare it void, so nothing can read the value it never
-// sets.
+// The return type of a routine that returns no value. The matching build
+// declares it s32; other builds declare it void, so nothing can read the
+// value it never sets.
 #ifdef __IS_KMC__
 #    define NO_RESULT s32
 #else
@@ -88,10 +84,8 @@
 #    define UNUSED_FUNCTION UNUSED
 #endif
 
-// Marks what a pointer parameter points to as unchanged by the routine. KMC
-// GCC treats memory read through a const pointer as unchanging, which
-// compiles the routine differently, so the matching build's pointer stays
-// plain.
+// Marks what a pointer parameter points to as unchanged by the routine. The
+// matching build's pointer stays plain.
 #ifdef __IS_KMC__
 #    define READ_ONLY
 #else
@@ -113,19 +107,18 @@
 // stored with sdc1, and the stack's top is the end of the array.
 #define STACK_ALIGNED __attribute__((aligned(8)))
 
-// Compiles statements in a block of their own, to match. KMC GCC schedules
-// instructions and reuses values only within a basic block, and the
-// original's code shows block boundaries around some statements where its
-// source has none that survives. A loop that runs once gives them back.
+// Compiles statements in a basic block of their own, as a loop that runs
+// once. KMC GCC schedules instructions and reuses values only within a basic
+// block.
 #define IN_OWN_BLOCK(statements) \
     do { \
         statements; \
     } \
     while (FALSE)
 
-// Makes an assignment the way GCC makes one whose value is used, to match:
-// it copies the value to a register and stores the register, where a
-// statement's constant would be stored directly.
+// Makes an assignment the way GCC makes one whose value is used: it copies
+// the value to a register and stores the register, where a statement's
+// constant would be stored directly.
 #define ASSIGN_FOR_VALUE(assignment) ({ assignment; })
 
 // The stack pointer's current value. The asm is volatile so that GCC can't

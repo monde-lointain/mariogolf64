@@ -142,8 +142,6 @@ void InitOverlayManager(void) {
         g_ModuleRdpRequestFrames[i] = RDP_REQUEST_FRAME_NEVER;
     }
 
-    // The unsigned compare is there to match: a signed one gives 2 words
-    // differing, a u32 index 4, and != 10
     for (i = 0; (u32)i < OVERLAY_COUNT; i++) {
         moduleIds = f_Overlays[i].moduleIds;
         moduleIndex = 0;
@@ -271,9 +269,9 @@ Boolean LoadOverlay(s32 overlayId) {
         moduleIds = overlay->moduleIds;
 #ifdef AVOID_UB
         // Display lists queued in earlier frames may still read textures and
-        // vertices in the memory the overlay replaces. The original relies on
-        // CanLoadOverlay's RDP_REQUEST_FRAMES_IN_USE, which most modules
-        // don't record and which the queue of tasks can outlast.
+        // vertices in the memory the overlay replaces. Without the wait, only
+        // CanLoadOverlay's RDP_REQUEST_FRAMES_IN_USE guards them, which most
+        // modules don't record and which the queue of tasks can outlast.
         nuGfxTaskAllEndWait();
 #endif
 #ifdef TARGET_PC
@@ -353,8 +351,8 @@ void UnloadOverlay(s32 overlayId) {
 }
 
 // Reports a call into a module whose overlay isn't loaded, twice, and
-// returns FALSE so that the caller's test fails. The module number is missing
-// from the format's arguments in the original.
+// returns FALSE so that the caller's test fails. The format's module number
+// has no argument.
 Boolean ReportModuleNotAlive(ModuleId moduleId UNUSED) {
     if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
         osSyncPrintf("Module %d not alive !!!!!!!!!!!!!!!!!!!!!!!!!!!\n");

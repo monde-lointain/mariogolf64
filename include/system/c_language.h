@@ -4,9 +4,7 @@
  * members and bytes.
  *
  * An enum whose values variables hold is paired with a typedef of the
- * integer type that the original stores them in, which the variables take.
- * The enum's own type would be an int, and unsigned if no constant is
- * negative, either of which compiles to different code from the original's.
+ * integer type that stores them, which the variables take.
  */
 
 #ifndef C_LANGUAGE_H
@@ -17,8 +15,8 @@
 #    include <stddef.h>
 #endif
 
-// Zero is false and any other value true, as C tests it. The sized forms
-// match the original's storage for a flag.
+// Zero is false and any other value true, as C tests it. The sized forms are
+// for flags stored in fewer bytes.
 typedef s32 Boolean;
 typedef u32 UBoolean;
 typedef s16 Boolean16;
@@ -36,7 +34,7 @@ typedef s32 Outcome;
 #define ARRAY_COUNT(array) (s32)(sizeof(array) / sizeof((array)[0]))
 // The size of a struct member, without an instance to apply sizeof to
 #define MemberSize(type, member) (s32)sizeof(((type *)0)->member)
-// How many bytes into a struct a member starts. The original takes the
+// How many bytes into a struct a member starts. The N64 build takes the
 // member's address in a struct at zero, which a host's wider pointers would
 // truncate.
 #ifdef TARGET_PC

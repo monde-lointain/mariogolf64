@@ -114,15 +114,13 @@ typedef u8 HaltState;
 // A ControllerState counts the stick as pressing a direction past this
 #define STATE_STICK_DIRECTION_MIN 30
 
-// The original's variables are defined in the order of its data and bss
-
 Boolean8 g_IsDebugEnabled = FALSE;
 Boolean g_HasExpansionPak = FALSE;
 static volatile HaltState f_DebugHaltState = HALT_STATE_DISALLOWED;
 Boolean g_HasThreeFrameBuffers = FALSE;
 s32 g_FramesPerSecond = 0;
 
-// The original reserves these bytes, but nothing reads them
+// Reserved, but nothing reads them
 static u8 f_UnusedBytesAfterFramesPerSecond[4] UNUSED = {0};
 
 static u16 *f_Framebuffers[FRAMEBUFFER_COUNT] = {
@@ -254,10 +252,10 @@ void RunHeartbeatLoop(void) {
 // Divides the start of g_WorkArea among the character slots.
 //
 // SetCharacterBuffer rounds each buffer up to a page, so the spacing that the
-// rounding leaves follows where g_WorkArea starts in its page. The original's
-// starts 0xD00 into one, which spaces them as its first page boundary would.
-// Builds with other layouts divide it from that boundary, so that their
-// buffers lie as the original's do wherever g_WorkArea lands.
+// rounding leaves follows where g_WorkArea starts in its page. The matching
+// build's starts 0xD00 into one, which spaces them as its first page boundary
+// would. Builds with other layouts divide it from that boundary, so that their
+// buffers lie as the matching build's do wherever g_WorkArea lands.
 void AssignCharacterBuffers(void) {
     s32 bufferSize = GetCharacterBufferSize();
 #ifdef NON_MATCHING
@@ -414,9 +412,6 @@ s32 GetStickDirection(s32 stick, s32 previousDirection, u32 pressThreshold, u32 
             stick = previousDirection;
         }
 
-        // A jump to the shared return, to match: returning the direction here,
-        // or as a ternary, or leaving early on each failed test gives 6 words
-        // differing, 4 in shape, and a direction local 12, 8 in shape
         if (stick != 0) {
             goto HAS_DIRECTION;
         }

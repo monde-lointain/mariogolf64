@@ -47,7 +47,7 @@ typedef s32 BlockTag;
 // The native port links each block to another by the signed distance in
 // bytes from it, not by a pointer, so that a header is 16 bytes there as it
 // is on the N64. Every block takes the same room, and the game's memory runs
-// out where the original's does. A heap's blocks and the sentinel that it
+// out where the N64's does. A heap's blocks and the sentinel that it
 // keeps are in the program's own memory, osPcRdram or its other variables,
 // so a distance fits in 32 bits.
 #ifdef TARGET_PC
@@ -66,9 +66,7 @@ typedef struct MemoryBlock {
 
 // The link from a block to another, and the routines that read and set a
 // block's next and previous blocks. These take the block itself, not its
-// address: KMC GCC compiles a member of &f_Heaps[i].sentinel differently
-// from the same member of f_Heaps[i].sentinel, and (*block).next as it does
-// block->next.
+// address.
 #ifdef TARGET_PC
 _Static_assert(sizeof(MemoryBlock) == 16, "A block's header is the N64's size");
 
@@ -113,13 +111,13 @@ typedef struct Heap {
 } Heap;
 
 static Heap f_Heaps[HEAP_COUNT];
-// The main memory's heap is laid out as a Heap is, but the original keeps
-// its parts in separate variables, which changes the code that uses them.
+// The main memory's heap, laid out as a Heap is but kept in separate
+// variables.
 //
-// Under KMC the sentinel is volatile, as InitHeapRegions needs it to match.
-// The qualifier does no work: the allocating and freeing routines mask
-// interrupts around their work on the list, and the pointers that link the
-// list reach the sentinel without it. Other builds declare it plain.
+// Under KMC the sentinel is volatile. The qualifier does no work: the
+// allocating and freeing routines mask interrupts around their work on the
+// list, and the pointers that link the list reach the sentinel without it.
+// Other builds declare it plain.
 #ifdef __IS_KMC__
 static volatile MemoryBlock f_MemorySentinel;
 #else
@@ -281,9 +279,8 @@ void FreeFromHeap(HeapIndex heapIndex, void *pointerToBlock) {
 // Fills the main memory's heap with the main region, and with the Expansion
 // Pak's memory if there is one
 void InitHeapRegions(Boolean hasExpansionPak) {
-    // Nested, a GNU C extension, as in the original: the calls pass a static
-    // chain that it saves but never uses. The casts on &f_MemorySentinel only
-    // drop the qualifier, which the pointers that link the list don't carry.
+    // Nested, a GNU C extension. The casts on &f_MemorySentinel only drop the
+    // qualifier, which the pointers that link the list don't carry.
     void AddMemoryRegion(void *start, void *end) {
         MemoryBlock *block = start;
         u32 size = BytesBetween(start, end);
@@ -297,23 +294,6 @@ void InitHeapRegions(Boolean hasExpansionPak) {
         SetPreviousBlock(f_MemorySentinel, block);
     }
 
-    // The original stores the sentinel's size and tag before anything else,
-    // and loads its previous back from memory to set next. Both come of the
-    // sentinel being volatile: the scheduler keeps volatile accesses in the
-    // order written, and a chained assignment reads a volatile target back
-    // after storing it, where it would otherwise hand the stored value on
-    // (expr.c, store_expr). Setting next from previous in a statement of its
-    // own matches too, as does clearing the free size before these stores.
-    //
-    // With the sentinel not volatile, the chained assignment gives 10 words
-    // differing (4 in shape) and the separate statements 6 (4), as cse takes
-    // the address just stored for the value read. Casts to a volatile
-    // MemoryBlock match only at all three of the size's store, the tag's
-    // store and previous's read; a volatile previous member gives 12 (8).
-    // With the sentinel volatile, setting next to &f_MemorySentinel rather
-    // than to previous gives 10 (4), chaining previous = next = 6 (0),
-    // storing the tag before the size 4 (0), and storing through a pointer
-    // local to the sentinel 9 (7).
     f_MemorySentinel.size = 0;
     f_MemorySentinel.tag = BLOCK_SENTINEL;
     f_MemorySentinel.next = f_MemorySentinel.previous =

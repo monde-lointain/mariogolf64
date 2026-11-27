@@ -12,7 +12,7 @@
 // The physical address of a KSEG0 address, which the RCP reads. Ultralib's
 // OS_K0_TO_PHYSICAL subtracts from a char pointer, which takes it out of its
 // object, so other builds than the matching one subtract from the address as
-// a number, which KMC GCC compiles differently.
+// a number.
 // The native port's RCP reads the host's memory, so there an address is
 // its own physical address.
 #if defined(__IS_KMC__)

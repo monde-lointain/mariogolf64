@@ -12,8 +12,8 @@
 #include "system/c_language.h"
 
 // The memory the game gives the general pool, which ends where the screen
-// effects keep their captured frames. Every build gives it the original's
-// size, so that the allocator chooses the same blocks and runs out at the
+// effects keep their captured frames. Every build gives it the same size,
+// so that the allocator chooses the same blocks and runs out at the
 // same point however the code before it is laid out. The shiftable layout
 // fails to link if the overlays' regions reach into it (see
 // tools/shiftable_ld.py).

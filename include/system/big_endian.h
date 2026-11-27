@@ -52,7 +52,7 @@ static inline void ConvertWordsFromBigEndian(void *start, u32 size) {
 #else
 #    define FromBigEndian16(value) (value)
 #    define FromBigEndian32(value) (value)
-// Statements that would store a value over itself, which KMC GCC compiles
+// The N64's values are already in its order, so these do nothing
 #    define ConvertFromBigEndian16(lvalue) ((void)0)
 #    define ConvertFromBigEndian32(lvalue) ((void)0)
 #    define ConvertHalvesFromBigEndian(start, size) ((void)0)

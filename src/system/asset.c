@@ -60,7 +60,7 @@ typedef struct ChunkReader {
     u32 remaining; // Unread bytes of the asset
 } ChunkReader;
 
-// DecodeHalfwordRuns' buffer is 0x10 bytes larger, to match
+// DecodeHalfwordRuns' buffer, 0x10 bytes larger
 typedef struct LargeChunkReader {
     u8 rawChunk[ASSET_CHUNK_SIZE + 0x20];
     s32 position;
@@ -68,7 +68,7 @@ typedef struct LargeChunkReader {
 } LargeChunkReader;
 
 static AssetFile f_AssetFilePool[ASSET_FILE_POOL_SIZE];
-// The original reserves these bytes, but nothing reads them
+// Reserved, but nothing reads them
 static u8 f_UnusedBufferAfterAssetFilePool[0x40] UNUSED;
 // For the message when a read runs past a file's end
 FILE_STATIC WideAssetId f_LastOpenedAssetId;
@@ -262,9 +262,6 @@ void DecodeHalfwordRuns(u8 *buffer, EncodedAsset *asset) {
             highByte = chunk[reader.position];
             AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
             lowByte = chunk[reader.position];
-            // The run's length is copied here, rather than looped to itself, to
-            // match: looping to runLength gives 24 words differing (none in
-            // shape), and copying it after the next advance 30 (2)
             repeatCount = runLength;
             AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
             for (index = 0; index != repeatCount; index++) {
