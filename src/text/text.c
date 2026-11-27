@@ -32,8 +32,7 @@ typedef struct MessageTable {
     TextSpan messages[1]; // messageCount of them, then the codes
 } MessageTable;
 
-// The table entry of message ID, by pointer arithmetic to match: indexing
-// the messages gives 4 to 14 words differing, none in shape
+// The table entry of message ID
 #define MessageSpanAt(id) (f_Messages->messages + (id))
 
 #define ASSET_TEXT_SMALL_FONT 0x4B3
@@ -417,9 +416,7 @@ void SetTextSlot(
             MeasureMessage(messageId, FONT_SIZE_LARGE, &width, &height, slot);
         }
 
-        // The pointer, used only for the message comparison, is there to match:
-        // comparing through f_TextSlots[slot] gives 6 words differing (4 in
-        // shape), and writing every field through the pointer 75 (33)
+        // Used only for the message comparison
         textSlot = &f_TextSlots[slot];
         halfWidth = width / 2;
         halfHeight = height / 2;
@@ -1506,7 +1503,7 @@ void SetUpGradientTextDrawing(Gfx **displayListHead, s32 gradient) {
 }
 
 // Measures a string of character codes, at the font size. Only the large
-// font can be proportional. The two loops differ in form to match.
+// font can be proportional.
 s32 MeasureText(READ_ONLY char *text, s32 fontSize, TextFlags flags) {
     s32 width = 0;
     MessageCode code;
@@ -2318,9 +2315,6 @@ void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text)
 void DrawCenteredShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text) {
     Gfx *gfx = *displayListHead;
 
-    // The copy of x and the s16 are there to match: summing a width from 0
-    // instead gives 12 words differing (6 to 8 in shape), a right edge
-    // without the copy 14 to 20, and an s32 right edge 20
     s32 left = x;
     s16 right = x;
     s32 letterIndex;
@@ -2610,10 +2604,7 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
     return PackHalfSize(width, height);
 }
 
-// Packs texel coordinates into a vertex's texture coordinates. It is a
-// macro, as an inline function compiles differently from the original, and
-// it joins the halves with | where TexcoordWord adds them, which also
-// compiles differently.
+// Packs texel coordinates into a vertex's texture coordinates
 #define PackTextureCoordinates(s, t) ((TexelCoordinate(s) << 16) | TexelCoordinate(t))
 
 // Draws the sprites of a group of glyphs. The fonts are four-bit images
@@ -2633,7 +2624,7 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
     s32 bottom;
 
 // A code that is neither a glyph nor an icon keeps the last sprite's
-// texture coordinates, which the original leaves unset before the first
+// texture coordinates, which the matching build leaves unset before the first
 #ifdef AVOID_UB
     s = 0;
     t = 0;
@@ -2978,7 +2969,7 @@ s32 GetDigitGlyphTop(char code) {
     }
 }
 
-// Unused; it is there to match
+// Unused
 const s32 g_UnusedTextData[2] = {0, 0};
 
 // Draws text in the digit font
@@ -2987,9 +2978,9 @@ void DrawDigitText(Gfx **displayListHead, s32 x, s32 y, READ_ONLY char *text) {
     s32 index;
 
     gDPPipeSync(gfx++);
-// The original ends at g_PrintBuffer's terminator rather than text's. Most
-// callers pass g_PrintBuffer, but DrawBirdieBadgeCount passes "*" while
-// g_PrintBuffer still holds the last frame's count, so the original draws
+// The matching build ends at g_PrintBuffer's terminator rather than text's.
+// Most callers pass g_PrintBuffer, but DrawBirdieBadgeCount passes "*" while
+// g_PrintBuffer still holds the last frame's count, so the game draws
 // a glyph for the terminator after the star, and from a three-digit count
 // on reads past the literal.
 #ifdef AVOID_UB

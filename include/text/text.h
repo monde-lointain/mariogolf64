@@ -185,10 +185,8 @@ void SetTextSlotValue(s32 value, s32 slot, s32 valueIndex);
 void SetTextName(char *name);
 // SetTextSlot reads only each color's low byte, but its callers pass the
 // colors as ints without narrowing them. text.c, which defines it with u8
-// colors, takes the definition's form. With the u8 form everywhere, only
-// help_board.c's and pause_menu.c's objects differ of the 20 files that call
-// it, and DrawRingShotRecords' draft gives 35 words differing (3 in shape)
-// rather than 26 (0).
+// colors, takes the definition's form, and so does every file once AVOID_UB
+// is set.
 #if defined(AVOID_UB) || defined(DEFINES_SET_TEXT_SLOT)
 void SetTextSlot(
     s32 x,
@@ -231,9 +229,9 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group);
 void SetUpPerspectiveTextDrawing(Gfx **displayListHead);
 void RevealTextSlot(s32 slot);
 Boolean IsTextSlotRevealed(s32 slot);
-// save_menu.c defines OMITS_MEASURE_TEXT_FLAGS, as its one call leaves out
-// MeasureText's flags. It is there to match: passing the flags gives 5 words
-// differing in DrawGameSaveMenu, 1 in shape.
+// save_menu.c's one call leaves out MeasureText's flags unless AVOID_UB is
+// set, so the file defines OMITS_MEASURE_TEXT_FLAGS for a prototype without
+// them.
 #if defined(AVOID_UB) || !defined(OMITS_MEASURE_TEXT_FLAGS)
 s32 MeasureText(READ_ONLY char *text, s32 fontSize, TextFlags flags);
 #else
@@ -246,7 +244,7 @@ void DrawCenteredSmallText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *
 void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
 void DrawCondensedShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
 void DrawCenteredNarrowText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
-// The original's shot_labels.c calls DrawCenteredShadowedText without a
+// shot_labels.c calls DrawCenteredShadowedText without a
 // prototype, passing x and y as they are rather than as s16s. It defines
 // CALLS_CENTERED_SHADOWED_TEXT_UNPROTOTYPED to do so, unless AVOID_UB is set.
 #if !defined(AVOID_UB) && defined(CALLS_CENTERED_SHADOWED_TEXT_UNPROTOTYPED)
