@@ -178,8 +178,8 @@
 #define BACKDROP_STRIP_STEP 6
 #define BACKDROP_STRIP_HEIGHT 8
 #define BACKDROP_LAST_STRIP_HEIGHT 2
-// Written with | because the target computes it without a branch, and + or a
-// plain ?: branches
+// A backdrop strip's height: BACKDROP_STRIP_HEIGHT, or
+// BACKDROP_LAST_STRIP_HEIGHT for the last strip
 #define StripHeight(strip) \
     (BACKDROP_LAST_STRIP_HEIGHT | \
         ((strip) != BACKDROP_STRIP_COUNT - 1 ? \
@@ -1508,7 +1508,7 @@ static inline void GrowSunGlare(void) {
 
 #ifdef AVOID_UB
 // The scheduler runs UpdateSunGlare as each frame's task ends, and it reads
-// that frame's z-buffer where the sun is. The original reads f_SunScreenX
+// that frame's z-buffer where the sun is. The matching build reads f_SunScreenX
 // and f_SunScreenY, which the graphics thread may already have moved for a
 // frame queued after, so which pixel it reads depends on how far the RDP
 // lags. Each framebuffer keeps where the sun was in the frame queued to it
@@ -1765,7 +1765,7 @@ void BlendSkyColors(void) {
                      [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyTimeIndex + 1];
     for (skyIndex = 0; skyIndex != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; skyIndex++) {
 #ifdef AVOID_UB
-        // The original also writes the other matrix buffer's vertices, which
+        // The matching build also writes the other matrix buffer's vertices, which
         // the RSP may still be reading for the previous frame. Each frame
         // blends the buffer it draws, so they need not be written now.
         if (skyIndex % MATRIX_BUFFER_COUNT != g_MatrixBufferIndex) {
@@ -1808,14 +1808,12 @@ void BlendSkyColors(void) {
 // g_SkyImage and g_CourseSkyImage, recolored to match
 void InitSkyColors(void) {
     EncodedAsset asset;
-    // Pads the frame to the target's size; without it 58 words differ
     u8 unused[0x10] UNUSED;
     s32 blended[RGB_CHANNEL_COUNT];
     SkyColors *colors;
     SkyColors *from;
     SkyColors *to;
-    // One index for the vertex groups and the palette colors, to match: an
-    // index of its own for the palette gives 106 differing words
+    // Counts the vertex groups and the palette colors
     s32 i;
     s32 channel;
     u16 color;
@@ -1845,9 +1843,7 @@ void InitSkyColors(void) {
                        [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyTimeIndex];
     to = &g_SkyColors[GetCourseRecordIndex()]
                      [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyTimeIndex + 1];
-    // Unused. Defined here, after the color lookups, since a nested function
-    // defined before them changes how GCC keeps the lookups' addresses, and only
-    // a block can hold a definition after statements.
+    // An unused nested function, a GNU C extension
     {
         UNUSED_FUNCTION s32 Lerp(s32 start, s32 end, f32 fraction) {
             return start * (1.0f - fraction) + end * fraction;
@@ -2353,7 +2349,6 @@ void UpdateSky(CameraView *view, s32 viewIndex) {
     Radians *pitches;
     f32 pitchScale; // Narrower fields of view move the horizon further for each radian of pitch
     Vec3 direction;
-    // The original frame has room for this; without it 48 words differ
     s32 unused[8] UNUSED;
     Vtx *vertices;
     f32 slope;
@@ -2615,8 +2610,6 @@ void DrawSky(Gfx **displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED, s
     Gfx *gfx = *displayListHead;
     SkyColors *colors;
     Mat4 matrix;
-    // The original frame has room for this; without it 194 words differ, none
-    // in shape
     s32 unused[16] UNUSED;
     Vec3 rotation;
     Vec3 translation;
@@ -2964,11 +2957,6 @@ void DrawSky(Gfx **displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED, s
 
 // Draws the sky and, below it, the course's backdrop in strips that follow the
 // camera's yaw and pitch
-//
-// Compute the center shift before the display-list writes, to match their
-// scheduling. Initialize the scaled height, center fraction and viewport
-// height in that order. Folding the center fraction into the expression,
-// or making it const, swaps $f0 and $f2 in 18 instructions.
 void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
     Gfx *gfx;
     Boolean isNibbleImage;
@@ -2989,7 +2977,7 @@ void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
     gfx = *displayListHead;
     {
         f32 scaledHeight = view->zoom * FULL_VIEW_HEIGHT;
-        // Center the backdrop in the height difference between the two views.
+        // Centers the backdrop in the height difference between the two views
         f32 centerFraction = 0.5f;
         f32 viewportHeight = view->viewportCenterY - (view->scissorY * 2);
 
@@ -3453,40 +3441,6 @@ void HandleFrameBufferSwap(void *frameBuffer UNUSED) {
 // drawing it at half brightness, blurring the scene with the last frame, or
 // splitting the frame into halves that slide apart. When a fade ends,
 // the unread f_UnusedFadeEndCount counts up, wrapping at FADE_COUNT_PERIOD.
-//
-// Much of it is written to match. The counts below are of the words that
-// differ with one thing changed, and in brackets how many of those differ in
-// shape:
-//
-// - frame points to the last frame for the motion blur, set just before its
-//   loop or in the loop's header. The combiner folds that load into the
-//   loop's copy of it, but the two references it removes stay counted, so
-//   global-alloc counts frame as used 5 times over 155 instructions and
-//   places it ahead of the strips' 0xE7000000, used 9 times over 444, in
-//   $s3. Reload then needs a register, and takes the saved one whose pseudos
-//   are used least, the lowest of those level: $s3, which leaves frame in a
-//   stack slot. With a pointer of the motion blur's own, or the buffer indexed
-//   itself, frame is used 3 times and gets no register; reload takes $s4
-//   from the strips' 0x04000400, which needs a slot as well, in a frame 8
-//   bytes larger: 134 (18) and 138 (20). frame set at the start of the
-//   motion blur's branch gives 126 (8), set after the primitive color 142
-//   (8), and with the loop indexing the buffer all the same 4 (2).
-// - The strip loops index frame by strip, a count of their own that each
-//   header steps ahead of i, which puts the strip address's step and
-//   setting where the original's are. The second loop indexed by i gives
-//   2 (2), stepping i first 101 (31), counted by strip alone 60 (2), and
-//   stepping a pointer of its own 115 (29); its height from strip gives
-//   43 (5), and its rows 191 (49). The last loop stepping i first gives
-//   2 (0), indexed by i less the border 88 (28), stepping frame 151 (21),
-//   and with a row variable in place of i 46 (0). The motion blur's loop
-//   indexed by strip as well gives 2 (2).
-// - The second loop reads f_HudAnimationFramesLeft once, after loading the
-//   strip. Read at each of its three uses it gives 104 (30), and read at
-//   the start of the body 38 (24).
-// - Each loop declares its own height, an s32. One height for the three
-//   gives 130 (12); an s16 gives 4 (2) in the motion blur's loop, 98 (30)
-//   in the second and 54 (4) in the last, and the last loop's strip bottom
-//   in a local 55 (5).
 void DrawFadeAnimation(Gfx **displayListHead) {
     // The frame drawn: the captured one, or the last one for the motion blur
     u16 *frame = (u16 *)f_CapturedFrame;
@@ -3494,7 +3448,7 @@ void DrawFadeAnimation(Gfx **displayListHead) {
     Boolean isTileSet;
     // The strip, or in the last loop its top row
     s32 i;
-    // The strip of the captured frame, stepped beside i to match
+    // The strip of the captured frame, stepped beside i
     s32 strip;
 
     if (f_HudAnimationFramesLeft > 0) {
@@ -4268,7 +4222,7 @@ void DrawTileAnimation(void) {
 #define GridVertex(row, column) ((column) + ((row) * TILE_GRID_COLUMN_COUNT))
 // The grid vertices at the corners of the tile at a row and column. The lower
 // ones are counted on from the upper left in the grid's row order, a row's
-// vertices further on, and not as the next row's, to match.
+// vertices further on.
 #define TileUpperLeft(row, column) GridVertex(row, column)
 #define TileUpperRight(row, column) GridVertex(row, (column) + 1)
 #define TileLowerLeft(row, column) GridVertex(row, (column) + TILE_GRID_COLUMN_COUNT)
@@ -4277,71 +4231,7 @@ static Mtx f_TurnAwayMatrices[MATRIX_BUFFER_COUNT];
 
 void DrawTurnAwayAnimation(void);
 
-// Draws HUD_ANIMATION_TURN_AWAY.
-//
-// All four of a tile's corners are named from the tile's own row, the lower
-// ones a row's vertices further on in the column, so that the row's product
-// with the grid's column count is one value they share. Where it draws the
-// textured tiles the original keeps that product and the upper right's sum of
-// it and 1 in registers stepped once a row, $s3 and $s5 for the upper rows, and
-// adds the lower corners' 6 and 7 to the product inside the column loop. loop.c
-// moves the product out of the column loop for its long life, and the upper
-// right's sum with it as the product's last use; the lower corners' sums each
-// last one instruction, too short a life for it to move them out of so long a
-// loop. The backs' loop is short and all four are moved out of it.
-//
-// Named as the next row's, the lower corners have a product of their own, which
-// is moved out of the column loops as well. With each row's first vertex in a
-// local set outside the column loop, the upper right's sum stays in the loop
-// with the others.
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   The lower corners as the next row's, GridVertex(row + 1,
-//   ...), in all three loops                                  158 (36)
-//   The same in the upper rows' textured loop alone           102 (20)
-//   The same in the backs' loop alone                         8 (2)
-//   The same in the lower rows' loop alone                    48 (14)
-//   The lower left alone as the next row's, in the upper
-//   rows' textured loop                                       20 (8)
-//   The same in the lower rows' loop                          19 (11)
-//   The lower right alone as the next row's, in the upper
-//   rows' textured loop                                       50 (14)
-//   The same in the backs' loop                               8 (2)
-//   The same in the lower rows' loop                          37 (9)
-//   Each row's first vertex in a local and the corners added
-//   to it, in both textured loops                             51 (17)
-//   The same in all three loops                               125 (21)
-//   The same in the upper rows' textured loop alone           77 (15)
-//   The same in the lower rows' loop alone                    50 (12)
-//   The same in both textured loops, with the vertex after it
-//   in a second local                                         22 (10)
-//   The old draft: the first vertex in a local, the lower
-//   corners as the next row's and the upper rows' lower right
-//   in a local                                                45 (11)
-//   GridVertex as an inline function                          213 (53)
-//   GridVertex with the row's product first                   24 (0)
-//   The upper right as the upper left plus 1                  99 (21)
-//   The lower right as the lower left plus 1                  111 (11)
-//   The lower left as the upper left plus a row's vertices    121 (21)
-//   The tile's width set first and overridden for the last
-//   column, in both textured loops                            34 (6)
-//   The same in the upper rows' loop alone                    24 (4)
-//   The same in the lower rows' loop alone                    10 (2)
-//   The row loops' tests as <                                 11 (11)
-//   The column loops' tests as <                              20 (12)
-//   The lower right in a local, in both textured loops        14 (4)
-//   The same in either loop alone                             6 (2)
-//   The lower left in a local, in both textured loops         14 (4)
-//   The same in either loop alone                             4 (2)
-//   The upper right in a local, in both textured loops        38 (4)
-//   The same in the upper rows' loop alone                    28 (2)
-//   The same in the lower rows' loop alone                    10 (2)
-//   The upper left in a local, in both textured loops         72 (0)
-//
-// Also matching: the backs' lower left as the next row's; the lower right's
-// offset written as 1 plus a row's vertices; the tile's width chosen by a
-// conditional operator; and the upper left in a local in either one of the
-// textured loops.
+// Draws HUD_ANIMATION_TURN_AWAY
 void DrawTurnAwayAnimation(void) {
     Vec3 rotation;
     Vec3 translation;
@@ -4557,44 +4447,6 @@ void DrawTurnAwayAnimation(void) {
 }
 
 // Copies the frame that a HUD animation that has just started breaks apart
-//
-// Much of it is written to match. The counts below are of the words that
-// differ with one thing changed, and in brackets how many of those differ in
-// shape:
-//
-// - i and j each count loops in several branches. global-alloc ranks a
-//   register by its references over its life, summed over every loop that
-//   uses it, and of two that rank level places the lower-numbered first. j,
-//   with 43 references over 86 instructions, ranks level with the tile
-//   copy's row offset, 15 over 18, and so is placed ahead of it and takes
-//   $a1 in every loop. With counters of their own the slice copy's words
-//   give 12, the grid's columns 64 and the tiles' columns 96; the slice
-//   copy's words counted with i give 24. The fade and negative copies'
-//   words with counters of their own give 60 (either alone 46), with j 112,
-//   and with the tile copy's wordIndex 90 (2). The tiles' rows with a
-//   counter of their own give 52; the grid's rows match with one too.
-// - The slice copy sets its row before j. Set first, j lives one instruction
-//   longer, ranks below the tile copy's row offset and takes $a2: 54 (2).
-// - The fade, negative and slice copies step the word's counter in the
-//   loop's header, after the column. Stepped ahead of the column, or where
-//   the word is stored, the fade and negative copies give 4 and the slice
-//   copy 16. The tile copy's is stepped where the word is stored; in the
-//   header after the column it gives 2.
-// - The tile copy adds the tile's start to the row and column last. Added
-//   to the column first it gives 4, and added first or second 99 (1).
-//   Worked out in the index, with no tileStart, it gives 95 (13) and a
-//   frame of 8 bytes where the original has none.
-// - Each of the grid's stores works its x out from the column and its y
-//   from the row. An x stepped in the loops' headers gives 4 (2) stepped
-//   first, 12 (4) after the column and 24 (12) last; a y set once a row
-//   gives 21 (3).
-// - The grid's vertex pointers step in the loops' headers, after the
-//   column: at the end of the body, or ahead of the column, 48 (12).
-// - The last column is a loop of one pass whose x is worked out from the
-//   column like the others', as the original adds the spacing to it: with
-//   TILE_GRID_RIGHT stored, 43 (5), and without the loop 116 (18).
-// - Each vertex's coordinates are stored in turn: the two x's, the y's and
-//   the z's in pairs give 6 (6).
 void CaptureHudAnimationFrame(void) {
     u32 *frame;
     s32 tileStart;
@@ -4702,23 +4554,7 @@ void CaptureHudAnimationFrame(void) {
 }
 
 // Draws the slice animation from the captured frame, a strip at a time; each
-// strip syncs before its rectangle and after it, as the original's twelve
-// commands a strip show.
-//
-// The column's left edge is worked out once per slice, and the strip's right
-// edge, in quarter pixels, at each strip's start, as the original computes
-// both edges' rectangle words before the strip loop; with the right edge
-// worked out in the rectangle 132 words differ, with it in pixels 90, and
-// with the left edge set at each strip 97. Each strip's top is worked out
-// from the strip index, as the original copies the slice's top into a
-// register only after the column's edges.
-//
-// The slice's top is the slice row times SLICE_HEIGHT, worked out once per
-// slice: loop's strength reduction then gives the top a register of its
-// own, cleared after the slices' loop tests the slice count, among the strip
-// commands' hoisted constants, as the original's is. Keeping a running top
-// that steps by SLICE_HEIGHT gives 5 words (3 in shape), clearing it before
-// that test, and multiplying the row out in each strip's top 96.
+// strip syncs before its rectangle and after it.
 void DrawSliceAnimation(void) {
     s32 frame;
     s32 sliceCount;

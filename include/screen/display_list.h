@@ -99,13 +99,7 @@ static inline void SetLightColor(Light *light, s32 red, s32 green, s32 blue) {
 // commands; it advances twice. setState is a gDPSet... macro, followed by
 // its state arguments. Those arguments must not modify displayList.
 // Like the SDK's GBI macros, this expands to a block: brace callers' if/else
-// bodies. A do/while wrapper introduces a block boundary in KMC's optimizer.
-//
-// Declaring the state command's pointer before the sync's swaps the stack
-// slots of the two pointers when neither gets a register, matching the
-// original's slots.
-// A macro keeps that declaration in the caller; an inline function changes
-// register allocation. Named variadic arguments support KMC's pre-C99 GCC.
+// bodies. Named variadic arguments support KMC's pre-C99 GCC.
 #define AppendSyncedRdpState(displayList, setState, stateArguments...) \
     { \
         Gfx *stateCommand; \

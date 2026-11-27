@@ -87,13 +87,12 @@ enum FadeDirection {
     FADE_IN
 };
 
-// The screen fade's color, a channel to a word. One object and not three
-// globals, to match DrawScreenFade
 typedef s32 FadeDirection;
 
 extern s32 g_ScreenFadeDuration;
 extern s32 g_ScreenFadeFramesLeft;
 extern FadeDirection g_ScreenFadeKind;
+// The screen fade's color, a channel to a word
 extern RgbColor g_ScreenFadeColor;
 // Draws textures with their own colors, cut at their alpha
 extern Gfx g_DecalTextureSetup[];

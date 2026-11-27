@@ -71,10 +71,7 @@
 #define HALF_TURN_LAST_ROW_OFFSET 111
 #define HALF_TURN_PAIR(column, row) texelPairs[((row) * HALF_TURN_PAIRS_PER_ROW) + (column)]
 // Marks the eight octants' points two rows deep, then steps the circle.
-// The offsets are clamped to keep the points on the picture. This and
-// MarkOctantPoints are plain blocks: as do { } while (0), each gives GCC's
-// loop pass another loop: with one radiusOffset for both octant pairs, 370
-// to 396 words differed, against 108 with plain blocks.
+// The offsets are clamped to keep the points on the picture.
 #define MarkCirclePoints(operation) \
     { \
         radiusColumnOffset = radius; \
@@ -690,22 +687,7 @@ void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount) {
     g_ScreenFadeColor.blue = blue;
 }
 
-// Covers the screen with the fade's color, at the opacity it has reached.
-//
-// The color's channels are members of one object, passed straight to the
-// macro, to match. The scheduler takes a member's read to depend on the display
-// list's stores before it (true_dependence, both being in structures), so the
-// primitive color's first word isn't ready to place until the reads are. That
-// leaves sched1, working from the block's end, a cycle between green's read
-// and red's with only the constants' halves ready, and it places the or of
-// the rectangle step's low half there: the original loads the step from its
-// stack slot after red's read, sets bit 0x400 after blue's and stores it back.
-//
-// Three separate globals aren't taken to depend on the stores: passed straight
-// 308 words differ (56 in shape), through u8 locals 10 (8), through s32
-// locals 36 (12). An array of three words matches as well. The members
-// through u8 locals give 56 (36), through s32 locals 90 (46). With blue alone
-// outside the object it still matches, with green 6 (6), with red 308 (50).
+// Covers the screen with the fade's color, at the opacity it has reached
 void DrawScreenFade(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 alpha;
@@ -874,23 +856,6 @@ PromptResult UpdatePrompt(ControllerState *controller) {
 
 // Draws the open prompt: a cloud that grows in and shrinks away, with Yes
 // and No under its message once it has opened. The chosen answer bobs.
-//
-// The cloud's edges come from a bottom local, the middle moved down by
-// half the cloud's height; written into the rectangle, 15 words differ,
-// 5 in shape. The choices' edges add halfHeight and a quarter of the
-// cloud to CHOICES_MIDDLE_Y in that order, as the quarter first folds
-// the top into middle - (halfHeight - constant) (20 words, 2 in shape).
-// Each half's texels are addressed from the header by half rather than
-// through a stepped offset, which leaves the offset's register to the
-// loop's start as the original does (26 words, 4 in shape, with a
-// stepped offset).
-//
-// The chosen answer's halfHeight starts at its rest size and adds the
-// bob in a statement of its own. That is the one form with no other
-// reason to exist: the extra reference ranks halfHeight ahead of
-// halfWidth in global-alloc, and in one statement, as halfWidth is, the
-// two swap registers (84 words). The pad in the choices' block is a last
-// resort as well; without it the frame is 8 bytes smaller (36 words).
 void DrawPrompt(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     Prompt *prompt = &f_Prompts[f_PromptIndex];
@@ -985,7 +950,6 @@ void DrawPrompt(Gfx **displayListHead) {
     }
 
     if (f_PromptState == PROMPT_STATE_CHOOSING) {
-        // Pads the frame to match; without it 36 words differ
         s32 unused[2] UNUSED;
 
         f_ChoiceBobAngle += DegreesToRadians(CHOICE_BOB_STEP_DEGREES);
@@ -1102,14 +1066,6 @@ void MarkHalfTurnCircle(u32 *texelPairs, s32 centerColumn, s32 centerRow, s32 ra
 // point covers two texels across and two rows down. While the picture is
 // showing the bits are cleared, which reveals the texels; otherwise they
 // are set, which hides them again.
-//
-// The radius's offset has a variable for each octant pair, as a column
-// offset in the first and a row offset in the second, and the second pair
-// sets it before stepOffset. With one radiusOffset for both pairs, the
-// loop-invariant alpha mask took $t0 ahead of it and 108 words differed;
-// the split alone gives 104 and the order alone 264. Subtracting error's step
-// as (step * 2) + 1 keeps the loop pass from making it an induction variable,
-// which error - 1 - (step * 2) lets it do.
 void MarkHalfTurnCircle(u32 *texelPairs, s32 centerColumn, s32 centerRow, s32 radius) {
     s32 step = 0;
     s32 error = radius;
@@ -1215,9 +1171,7 @@ void DrawHalfTurn(Gfx **displayListHead) {
         else {
             f_HalfTurnState = HALF_TURN_STATE_DONE;
 
-            // Any nonzero value makes HideHalfTurn free the picture; the state's
-            // value is there to match: storing TRUE gives 3 words differing (1 in
-            // shape), and leaving the store out 4 (2)
+            // Any nonzero value makes HideHalfTurn free the picture
             f_IsHalfTurnShown = HALF_TURN_STATE_LEAVING;
             HideHalfTurn();
             return;

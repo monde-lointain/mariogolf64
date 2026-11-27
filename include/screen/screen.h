@@ -19,10 +19,9 @@
 // Screen coordinates in display lists are in quarter pixels
 #define QUARTER_PIXEL_SHIFT 2
 #define QUARTER_PIXELS_PER_PIXEL (1 << QUARTER_PIXEL_SHIFT)
-// A screen position in pixels, in the quarter pixels display lists take. It
-// shifts rather than multiplies, since the GBI's masks fold differently
-// around a multiply. A position left of or above the screen is negative,
-// which C leaves the shift of undefined, and the multiply gives the same.
+// A screen position in pixels, in the quarter pixels display lists take. A
+// position left of or above the screen is negative, which C leaves undefined
+// to shift, and the multiply gives the same.
 #ifdef AVOID_UB
 #    define QuarterPixels(pixels) ((pixels) * QUARTER_PIXELS_PER_PIXEL)
 #else
