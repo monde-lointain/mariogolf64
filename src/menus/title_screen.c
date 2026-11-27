@@ -282,9 +282,8 @@ void UnloadTitleScreen(void) {
     SetFillColor(0, 0, 0);
 }
 
-// Whether the title screen goes back to the logos: on B with debugging
-// on, or once it has idled long enough. It is a macro, as an inline
-// function compiles differently from the original.
+// Whether the title screen goes back to the logos: on B with debugging on, or
+// once it has idled long enough
 #define IsLeavingForLogos(pressedButtons) \
     ((((pressedButtons) & B_BUTTON) && g_IsDebugEnabled) || \
         (f_TitleFrame == TITLE_IDLE_FRAME_COUNT))

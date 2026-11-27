@@ -601,54 +601,6 @@ void SetPlankMotion(s32 motion) {
 // Draws the planks that shut over the screen from its left and right. They are
 // drawn in strips, and each group of PLANK_GROUP_STRIP_COUNT strips slides
 // PLANK_GROUP_LAG pixels behind the group above it.
-//
-// The original divides the strip's index for its group in an arm for each of
-// the two motions, though the arms are the same. loop.c so finds the division's
-// magic number, 0x92492493, set twice in the loop, takes the second set as
-// matching the first, and weighs the two as one movable with savings of 2 and a
-// life of 2 insns. Times its threshold of 62 that is 248, over the loop's 110
-// insns, so the number is moved out of the loop, into $s7. The last jump pass
-// then merges the arms, which end alike, and drops the test between them,
-// leaving one division. Written once, the number has savings of 1 and a life of
-// 1, and 62 falls short of the loop's 101 insns: it is loaded inside the loop,
-// the saved registers shift by one and the group takes $s0 rather than $v1.
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   The division written once                                 70 (16)
-//   The same with the group held in bottom (the old draft)    56 (10)
-//   The two arms with the group held in bottom                53 (5)
-//   The division in each arm of a conditional operator        70 (16)
-//   The division in an inline function called once            70 (16)
-//   The division written once after one of the strip's
-//   height, its quotient unused                               14 (0)
-//   The lag taken from the slide in each arm as well          14 (0)
-//   A switch on the motion, the whole of the slide worked out
-//   in a case for each                                        53 (13)
-//   The same with the closing case the default too            11 (9)
-//   The same with one case for both                           109 (21)
-//   The same with a default for both                          70 (16)
-//   The group as a u32                                        2 (2)
-//   The group as an s16                                       7 (3)
-//   The group as a u8                                         4 (4)
-//   The group clamped by a conditional operator               7 (3)
-//   The slide clamped to its least first                      13 (9)
-//   The motion tested as not shut, with the arms swapped      7 (7)
-//   The slide set to the middle, then worked out if not shut  6 (6)
-//   The top worked out before the pipe sync                   12 (2)
-//   The bottom worked out before the pipe sync                20 (10)
-//   Both worked out before the pipe sync                      22 (10)
-//   The bottom as the top plus the strip's height             81 (13)
-//   The bottom's border and height summed first               5 (3)
-//   The bottom written into stripHeight                       52 (2)
-//   The loop's test as <                                      4 (4)
-//
-// Also matching: the arms' test as closing, as not closing or as not opening;
-// the group's clamp in each arm as well; the whole of the slide worked out in
-// each arm, under an else if and an else or under a switch's opening case and
-// its default; an inline function for the division called in each arm; the
-// group declared in its block or before top; the bottom worked out before the
-// top; and the strip's height set by an if and an else, or tested as the last
-// strip's with the heights swapped.
 void DrawPlanks(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -710,7 +662,6 @@ void DrawPlanks(Gfx **displayListHead) {
             slide = PLANKS_MIDDLE;
         }
         else {
-            // Worked out in an arm for each motion, to match
             if (f_PlankMotion == PLANKS_OPENING) {
                 plankGroup = stripIndex / PLANK_GROUP_STRIP_COUNT;
             }
@@ -788,7 +739,6 @@ void DrawRingShotSelect(Gfx **displayListHead) {
     s32 stripIndex;
     s16 arrowFrame;
     s32 push;
-    // Pads the frame to match; without it 203 words differ
     u8 unusedBuffer[0x1C] UNUSED;
 
     if (f_LoadedScreen == COURSE_SELECT_RING_SHOT) {
@@ -912,8 +862,7 @@ void DrawRingShotSelect(Gfx **displayListHead) {
         SetUpTextDrawing(&gfx);
         SetTextColor(&gfx, 255, 255, 255);
         // The text slot is stripIndex, which the strip loop leaves at
-        // COURSE_IMAGE_STRIP_COUNT (2): the original keeps that count in a saved
-        // register rather than loading a constant slot
+        // COURSE_IMAGE_STRIP_COUNT (2)
         SetTextSlot(
             SCREEN_WIDTH / 2,
             42,
@@ -1237,22 +1186,8 @@ void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY) {
     *displayListHead = gfx;
 }
 
-// Spins the chosen hole's star; the position is unused, the stars are
-// always in one place
-//
-// The spinning star's and the spinning empty star's images go through
-// one variable, which the original keeps in $fp for both; separate
-// locals spill and give the texture loads' constants callee-saved
-// registers, growing the frame (219 words differing, 129 in shape).
-//
-// Each star's left and top edges are set once its size is chosen, and
-// its edges written from them as DrawMenuRingShotStars writes its own.
-// The top, the same for every star, is still set on each pass: the
-// original loads the 88 into a register there and adds the bottom edge's
-// height to the half growth before adding the top. With STARS_TOP
-// written in the edges, fold-const joins it with the height, and the
-// closest form, a variable for the height's half, left 21 words
-// differing, 5 in shape.
+// Spins the chosen hole's star. The position goes unused, as the stars are
+// always in one place.
 void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UNUSED) {
     EncodedAsset asset;
     SaveData *save = GetSaveData();
@@ -1275,8 +1210,6 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
     s32 top;
     s32 tile;
     CourseIndex courseIndex;
-    // The spinning star's image and then the spinning empty star's, in one
-    // variable as the original keeps both in $fp
     ImageAsset *spinningImage = f_StarImages[f_StarBufferIndex];
 
     LoadSmallPalette(&gfx, TILE_SPINNING_STAR, ImagePalette(spinningImage));

@@ -287,23 +287,6 @@ static u8 ReverseBits(u8 bits) {
     return reversed;
 }
 
-// The original keeps the fourth parameter live through the loop: no
-// pseudo there takes $a3, so i is in $t0 and each later value one
-// register higher, as global-alloc's find_reg skips a register that a
-// conflicting pseudo prefers, and only a copy of $a3 prefers it. Testing
-// the parameter around the store, with the same store in both arms, does
-// that: jump2 merges the arms after register allocation and then deletes
-// the test, a branch to the next instruction, leaving no trace in the
-// code. The arms reach the character through a pointer to the alphabet's
-// entry, which gives the entry's address a register of its own ($v0) as
-// the original does.
-//
-// The identical arms are the one form here with no other reason to
-// exist, kept as the last resort: without the test 34 words differ, 2 in
-// shape, and returning the parameter in place of 0, which also keeps it
-// live, copies $a3 to $v0. With the test and the entry read directly, 4
-// words differ, none in shape; the parameter's type, pointer walks,
-// symbol locals, helpers and u8 or u16 counters gave no closer form.
 Outcome WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 variant) {
     s32 symbolIndex;
     char **spellings;
@@ -405,7 +388,6 @@ Outcome DecodeTournamentPassword(u8 *code, char *password) {
 }
 
 void EncodeScorePassword(ScoreReport *report, char *password) {
-    // Pads the frame to match; without it 80 words differ
     u8 unusedBuffer[8] UNUSED;
     u8 symbols[SCORE_PASSWORD_LENGTH];
     ScoreReport clampedReport;

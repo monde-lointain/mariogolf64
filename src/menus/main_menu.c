@@ -299,7 +299,6 @@ void DrawNarrowMenuBoard(Gfx **displayListHead);
 void DrawLargeMenuBanner(Gfx **displayListHead);
 void DrawMenuTitleScreen(Gfx **displayListHead);
 
-// Not static: the original left these to the linker's common block
 // Frames until each menu character fidgets, or FIDGETING while it does
 s32 g_MenuFidgetDelays[PLAYER_COUNT_MAX];
 // How far the course select's banners slide as the bet pages come and go
@@ -2287,15 +2286,13 @@ void CheckControllersAndSetPans(void) {
     }
 
     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-        // Taking the player's address first makes the loop step a pointer
-        // through g_Players, as the original does
         (&g_Players[playerIndex])->soundPan =
             f_PlayerSoundPans[g_GameState.playerCount - 1][playerIndex];
     }
 }
 
-// Left empty in the original; called after LoadMenuResources when a hole
-// is loaded from the menu
+// Left empty; called after LoadMenuResources when a hole is loaded from the
+// menu
 void OnMenuResourcesLoaded(void) {
 }
 
@@ -2366,8 +2363,6 @@ void SetUpChosenGame(void) {
         }
 
         if (IsHoleChoiceMode(g_GameState.gameMode)) {
-            // Through a pointer, as the original keeps the address in a register for
-            // every store
             holeSelection = &g_GameState.holeSelection;
             *holeSelection = f_StartingHoleSelection;
             if (COURSE_SELECT_LAYOUT == COURSE_SELECT_LAYOUT_HOLES) {
@@ -2611,8 +2606,6 @@ void UpdateMenuTitleScreen(void) {
         return;
     }
 
-    // titleChoice is moved through the array's bytes, which keeps its address in
-    // a register as the original does
     if (g_MenuRepeatButtons & U_JPAD) {
         g_MenuMemory.titleChoice--;
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -3727,9 +3720,6 @@ void UpdateMiniGolfCourseSelect(void) {
     if (Abs(g_MenuMemory.miniGolfRecordSlide) != 0) {
         direction = g_MenuMemory.miniGolfRecordSlide >= 0 ? 1 : -1;
         step = MINI_GOLF_RECORD_SLIDE_STEP;
-        // A variable rather than a constant, to match: testing the slide's sign
-        // as 1 or -1 itself, either way round, gives 8 words differing, 2 to 4
-        // in shape, and setting the variable before the direction 8, none
         positiveSign = 1;
         g_MenuMemory.miniGolfRecordSlide -= direction * step;
 
@@ -4669,68 +4659,6 @@ void DrawMenuScreen(Gfx **displayListHead) {
 
 // Draws the chosen layers of the menu's backdrop: the course backdrop, the
 // board and the banner
-//
-// The banner's strips count with stripIndex, as the board's do, and work out
-// their texels' offset in one expression. Each edge of a strip is one sum in
-// its command: a part of the banner's top, the strip's own top as the counter
-// times the strip's height, the bob offset, and the rest of the banner's top.
-// loop.c then steps the product from 0 in a register of its own and leaves
-// the bob offset to be added to it for each edge, as the original does. With
-// the banner's top as one constant the edges' adds come out another way, and
-// most such forms keep one more value in a saved register through the whole
-// function. Any two parts other than 0 give the same code, so only their sum
-// is known (BOBBING_BANNER_TOP).
-//
-// The per-screen layer's switch has a case that ends the display list and
-// returns, as the code after the switch does. jump2 finds the case's code
-// the same as the tail, cross-jumps the two and deletes the branch, which
-// leaves the original's dead read of g_MenuScreen and its test in place. The
-// case is the one form here with no other reason to exist, and which screen
-// it names is unknown: any but MENU_SCREEN_TITLE gives the same code.
-//
-// The clamped scenery counts its loaded rows in a variable, as its comment
-// explains.
-//
-// Measured against the match, in words differing (and how many in shape):
-//
-//   The banner's strips counted by a variable of their own  618 (420)
-//   The texels' offset through a local of counter times width 4 (4)
-//   The banner's top whole, before the product              598 (426)
-//   The banner's top whole, after the bob offset            275 (37)
-//   Both parts before the bob offset                        598 (426)
-//   Both parts after the bob offset                         275 (37)
-//   The top after the bob offset, the two in parentheses    285 (39)
-//   The bob offset first in each edge                       626 (424)
-//   The bottom's strip height after the bob offset, or last 648 (424)
-//   The bottom's product as the counter plus 1, times height 20 (10)
-//   A local for the first part plus the product               8 (2)
-//   A local for the product                                  37 (1)
-//   A local for the bob offset plus the product              34 (4)
-//   A local stepped by the height from 0 for the product    594 (426)
-//   bobOffset as an s16                                      68 (16)
-//   bobOffset as an s8                                       56 (18)
-//   bobOffset as a u16                                       85 (31)
-//   bobOffset zeroed before its test, with no else            3 (3)
-//   The bob offset's two constants as one                     6 (4)
-//   The banner's image read at each use, with no local      135 (39), frame -8
-//   MENU_SCREEN_TITLE as the returning case's screen          7 (5)
-//   A default that returns, in place of the case              7 (5)
-//   A case that breaks, an empty default or if, a (void) read 8 (6)
-//   No read of g_MenuScreen at all                            8 (6)
-//   A case and a default that sync and break, an else too     4 (2)
-//   The clamped scenery's loaded rows as the constant       811 (431), frame +8
-//   The rows' count set where it is declared                219 (29)
-//   The first strip's load counting its rows with it too    811 (431), frame +8
-//   The plain scenery's bottom edge from stripTop             3 (3)
-//   Without the unused GetMenuMemory call                   397 (3), frame +16
-//
-// Also matching: the bottom's strip height after the product; the product
-// before the first part in both edges; the bob offset as a conditional
-// expression; an if on one screen that returns, a case of two screens, or a
-// case, a default and an else that each sync and store the list's head; the
-// clamped scenery's texels as a sum, or the plain scenery's through
-// LargeImageTexelsAt; loadedRowCount declared before stripIndex, image before
-// bobOffset, or stripTop before shownRowCount.
 void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -4795,10 +4723,6 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
                 }
                 else {
                     gDPPipeSync(gfx++);
-                    // The loaded rows are counted in a variable here, to match: the
-                    // constant gives 811 words differing (431 in shape), setting the
-                    // count where it is declared 219 (29), and counting the rows in the
-                    // first strip's load too 811 (431)
                     loadedRowCount = COURSE_SCENE_STRIP_ROW_COUNT + COURSE_SCENE_SEAM_ROW_COUNT;
                     gDPLoadTextureBlock(
                         gfx++,
@@ -5084,8 +5008,6 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
             );
             gDPPipeSync(gfx++);
 
-            // The banner's top goes in two parts around the bob offset, to
-            // match
             gSPScisTextureRectangle(
                 gfx++,
                 QuarterPixels(MENU_BANNER_LEFT),
@@ -5535,76 +5457,6 @@ void DrawMenuBanner(Gfx **displayListHead) {
 // Draws the title screen: a plain-text menu under the board, the backdrop, the
 // labels that aren't chosen, and then the chosen ones lit, growing and
 // shrinking, all but New Game's.
-//
-// In the lit labels' loop the original steps a register by 5 beside the label
-// table's pointers and shifts it left by 8 for the label's offset into the
-// texels: loop.c has taken the first half of the product with the image's size
-// of 0x500, the index times 5, for an induction variable of its own. It steps
-// one when the variable's lifetime, times its benefit and a threshold, reaches
-// the loop's insn count. Written as labelIndex * TITLE_LABEL_IMAGE_SIZE the
-// index times 5 lasts one insn, up to its shift, and is worth 252 against the
-// lit loop's 268 insns, so it is worked out afresh on each pass, and the title
-// choice's pointer moves from $s0 to $t7 with it. The unlit loop has 195 insns,
-// and steps it either way.
-//
-// Counted in rows first, the offset is the row times TITLE_LABEL_ROW_SIZE,
-// which is expanded as a shift left by 6 with a note that it equals that
-// product. The first cse pass joins the row's shift by 2 to it, so the offset
-// is shifted by 8 from the index times 5 and nothing reads the row any more.
-// But the note now names the row's register, and as the pass counts a note's
-// registers as used when it deletes dead insns, the row's shift is left in. At
-// loop.c's turn the index times 5 is read twice, its lifetime is 2, it is worth
-// 504 and is stepped; flow deletes the row's shift afterwards. With the row
-// shifted left by 6 in the source there is no note, the row's insn is deleted
-// after cse, and the index times 5 lasts one insn again.
-//
-// The original's loops don't test the chosen choice's own label alike: the
-// unlit loop has bnel $v0, $s2 and the lit loop bnel $s2, $v0, where $s2 is
-// labelIndex. So that term is written out in each loop, the label's index last
-// in the first and first in the second, and IsChosenNewGameLabel holds the two
-// terms they share.
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   The old draft: each loop's offset as labelIndex *
-//   TITLE_LABEL_IMAGE_SIZE, and one test for both             62 (10)
-//   The lit labels' offset alone as that product              62 (10)
-//   That product from an inline function                      62 (10)
-//   That product in a statement expression                    8 (6)
-//   The same as labelIndex * TITLE_LABEL_HEIGHT *
-//   TITLE_LABEL_ROW_SIZE, with no row                         62 (10)
-//   The lit labels' row shifted left by 6                     62 (10)
-//   The lit labels' offset counted in blocks of 256 bytes
-//   first, 5 to a label                                       62 (10)
-//   The same counted first in a row's bytes, and multiplied
-//   by the height                                             4 (0)
-//   The lit labels' row as an s16                             16 (8)
-//   The lit labels' row as a u8                               13 (5)
-//   The lit labels' offset worked out before Transmit's test,
-//   and set again under it                                    4 (4)
-//   The lit labels' row worked out before Transmit's test     61 (11)
-//   Transmit's row set under the test, and the offset taken
-//   from the row after it                                     65 (11)
-//   The label's index swapped for Transmit's under the test,
-//   and multiplied after it                                   63 (15)
-//   labelOffset as a u16                                      25 (17)
-//   labelOffset as an s16                                     27 (19)
-//   The lit loop's test with the label's index last, as in
-//   the unlit loop's                                          2 (0)
-//   The unlit loop's test with the label's index first, as in
-//   the lit loop's                                            2 (0)
-//   The lit loop's test with the choice tested as not New
-//   Game before its label is compared                         8 (4)
-//   New Game's choice tested once for its two labels          30 (14)
-//   growth as an s32                                          124 (14)
-//   The loops' tests as <                                     8 (8)
-//
-// Also matching: the unlit labels' offset as the one product, or its row
-// shifted left by 6; row declared once for the function, or declared in its
-// block and set after; row or labelOffset as a u32; either product with its
-// operands the other way round; the row kept in labelOffset and multiplied
-// there; the row counted in pairs of rows and multiplied by the width; and the
-// lit labels' row from a statement expression or an inline function, multiplied
-// by the row's size where it is called.
 void DrawMenuTitleScreen(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 labelIndex;
@@ -5691,7 +5543,6 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
         TextureAddress(ImagePalette(g_MenuLabelImages[f_MenuLabelImageIndex]))
     );
     for (labelIndex = 0; labelIndex != TITLE_LABEL_COUNT; labelIndex++) {
-        // The chosen choice's label is compared the other way round here, to match
         if (IsChosenNewGameLabel(labelIndex) ||
             (labelIndex == g_MenuMemory.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE &&
                 g_MenuMemory.titleChoice != TITLE_CHOICE_NEW_GAME)) {
@@ -5699,7 +5550,6 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
                 labelOffset = TITLE_LABEL_TRANSMIT * TITLE_LABEL_IMAGE_SIZE;
             }
             else {
-                // Counted in rows first, to match
                 s32 row = labelIndex * TITLE_LABEL_HEIGHT;
 
                 labelOffset = row * TITLE_LABEL_ROW_SIZE;
@@ -5905,26 +5755,8 @@ void DrawSpinningStars(
 
 // Draws the mode select of screens 5, 23 and 26: the characters, the modes'
 // boards turning on their circle, the chosen mode's label, each player's
-// controller icon and label, and for a single player the birdie badges or
-// stars won.
-//
-// The original adds a zero to each board's truncated left edge and to its
-// strips' right edges (addu $v0, $zero, $v0, and ori $a1, $a1, 0 for the
-// chosen board), which no other function in the game does. Reload gives that
-// for a variable set once to zero that gets no register, and combine turns
-// the chosen board's add into an or, so those edges add wheelShiftX; without
-// it 93 words differ, 9 in shape.
-//
-// One variable, i, counts the draw-order sort's passes and the icon strips',
-// banner strips' and players' loops, and holds the chosen mode and the won
-// count's shift between them, as the original keeps all of them in $s1; the
-// register oracle lined the loops' counter up with that register.
-// Otherwise the original's code reads plainly: the loops end on bne tests,
-// the boards' loop loads g_MenuMemory's choice and spin directly on each
-// pass, the bob is added to the chosen board's top last,
-// areCharactersDrawn is a u8, which the original masks with andi 0xff
-// before testing it, and a board's turns, which go negative, and the angle
-// step are s32s, which the original multiplies without masking.
+// controller icon and label, and for a single player the birdie badges or stars
+// won.
 void DrawModeSelect(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     u16 perspectiveNormalization;
@@ -5932,7 +5764,6 @@ void DrawModeSelect(Gfx **displayListHead) {
     f32 boardX[WHEEL_SLOT_LIMIT];
     f32 boardY[WHEEL_SLOT_LIMIT];
     f32 boardScale[WHEEL_SLOT_LIMIT];
-    // Pads the frame to match; without it 604 words differ
     s32 unusedSlots[WHEEL_SLOT_LIMIT] UNUSED;
     s32 drawOrder[WHEEL_SLOT_LIMIT];
     s32 position[PLANE_AXIS_COUNT];
@@ -5957,14 +5788,6 @@ void DrawModeSelect(Gfx **displayListHead) {
     s32 labelIndex;
     s32 labelX;
     ImageAsset *image;
-    // Counts the sort's passes and the icon, banner strip and player loops, and
-    // holds the chosen mode and then the won count's shift, to match: the
-    // original keeps all of them in $s1. A local for the shift, declared
-    // anywhere or in each won count's block, gives 122 words differing (none
-    // in shape), as without the shift i outranks index for $s0; a local for
-    // the chosen mode gives 22 (6), and reading it where it's used 32 (24).
-    // Of the 63 ways of giving some of the six roles variables of their own,
-    // none matches without forcing registers.
     s32 i;
     CourseIndex courseIndex;
     s32 holeIndex;
@@ -6661,7 +6484,6 @@ void DrawMenuCharacters(Gfx **displayListHead) {
     Vec3 translation;
     Vec3 rotation;
     Vec3 scale;
-    // Pads the frame to match; without it 72 words differ
     s32 unused[12] UNUSED;
     Mat4 transform;
 
@@ -7118,43 +6940,21 @@ void DrawAnimationViewer(Gfx **displayListHead) {
 }
 
 // Draws the course select, or the bet settings and the handicaps' columns as
-// the two screens slide between them. The course select draws the water
-// plane, then the wheel of the open courses and the next one, or of the
-// mini-golf disc's images, the front one bobbing. With
-// COURSE_SELECT_LAYOUT_HOLES it draws the holes badges, and with
-// COURSE_SELECT_LAYOUT_AWARDS the course's birdie badge count and tournament
-// trophies. Then SlideBrickWall slides the stats panel's rows the way
-// g_BetPagesWallSlide picks; when that is 3 or 4, the chosen hole starts
-// loading once they stop.
-// The choice is copied into chosenSlot before each icon's mini golf test, to
-// match: the original reads it there and keeps it in $a3 until its test.
-// Testing choice itself, 5 words differ, all in shape, as GCC reloads it from
-// the stack; no natural form found needs the copy. A static inline helper
-// would make one, as GCC copies each argument of a parameter that isn't
-// const, but it copies the slot too: copies of both give 11 words, and a
-// helper drawing the whole icon gives 540 words, 172 in shape.
-//
-// The mini golf disc's centre is set in two arms, when the disc stops
-// spinning and when it has none yet, which cross-jumping merges into one
-// copy; joined with ||, 89 words differ, 5 in shape, and the texels and the
-// address of the local arrays swap registers.
-//
-// The course icons' palette is set before their texels, each read from the
-// table, as the mini golf discs' is. Setting the texels first and the palette
-// from them gave 24 words differing, 6 in shape, against 89 and 5 with the
-// joined test. Earlier, clearing the place count in the place loop's
-// initializer took 51 words differing to 49, and reading the slot in its own
-// block gave 40 words, 10 in shape.
+// the two screens slide between them. The course select draws the water plane,
+// then the wheel of the open courses and the next one, or of the mini-golf
+// disc's images, the front one bobbing. With COURSE_SELECT_LAYOUT_HOLES it
+// draws the holes badges, and with COURSE_SELECT_LAYOUT_AWARDS the course's
+// birdie badge count and tournament trophies. Then SlideBrickWall slides the
+// stats panel's rows the way g_BetPagesWallSlide picks; when that is 3 or 4,
+// the chosen hole starts loading once they stop.
 void DrawCourseSelect(Gfx **displayListHead) {
     Gfx *gfx;
     u16 perspectiveNormalization;
     u16 wheelPerspNorm;
-    // Pads the frame to match; without it 738 words differ
     u8 unusedStackBeforeIcons[0x10] UNUSED;
     f32 iconX[COURSE_COUNT];
     f32 iconY[COURSE_COUNT];
     f32 iconScale[COURSE_COUNT];
-    // Pads the frame to match; without it 706 words differ
     u8 unusedStackAfterIcons[0x18] UNUSED;
     s32 drawOrder[COURSE_COUNT];
     s16 places[TOURNAMENT_PLACE_COUNT];
@@ -7410,8 +7210,6 @@ void DrawCourseSelect(Gfx **displayListHead) {
             chosenIndex = choice;
             if (g_GameState.isMiniGolf == TRUE) {
                 palette = g_MiniGolfDiscImages[drawnIndex];
-                // Indexed as one row, to match: indexed by the buffer and the slot,
-                // 5 words differ, 1 in shape
                 texels = MenuIconImage(
                     (f_MiniGolfDiscBufferIndex * MINI_GOLF_DISC_IMAGE_COUNT) + drawnIndex
                 );
@@ -7804,10 +7602,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
             gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         }
 
-        // The wall stays still at other slides. An empty case for
-        // STATS_SLIDE_CURRENT compiles to the same tests but moves registers
-        // elsewhere (17 words, all in shape), and default for the slides out
-        // tests the tree differently (6, all in shape)
+        // The wall stays still at other slides
         switch (g_BetPagesWallSlide) {
             case STATS_SLIDE_OUT_RIGHT:
             case STATS_SLIDE_OUT_LEFT:
@@ -7984,12 +7779,7 @@ void DrawCourseSelectBanners(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 slide = g_CourseBannersSlide;
 
-    // Also the course's index into the name colors, to match: a courseIndex gives
-    // 34 words differing, none in shape
     s32 stripIndex;
-    // Also whether a full course is chosen, to match: an isFullCourse variable,
-    // or testing g_GameState.isMiniGolf directly, gives 5 words differing, 3 in
-    // shape, in the strip loop above; with a courseIndex too, 37 (3)
     s32 stripTop;
     s32 squeeze;
     CourseSelectLayout layout;
@@ -8595,24 +8385,8 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 #define ERASE_MESSAGE_PALETTE_BLUE 127
 
 // Draws the options screen: Mario and his shadow, each option's label, the
-// toggles' values on their banners with arrows beside the chosen one, the
-// sound test's lines when game flag 0x55 is set, and the erase window while it
-// is up.
-//
-// Mario's strips, the value banners' strips, the options' rows and the
-// arrows' passes are all counted with loopIndex. Counting Mario's strips
-// with a counter of their own gives 132 words differing, the banners' strips
-// 32, and every loop its own counter 58, none in shape; the toggles counted
-// with loopIndex in place of the banners' strips give 26.
-//
-// Each value banner strip's top is written out at each use, through
-// ValueStripTop, from the strip's top in the first option's row, which is
-// worked out before the toggle test. Working that out at each use instead
-// gives 136 words, 24 in shape, and at the top of the strip loop 6, none in
-// shape; as an s16 it gives 33 (7), and as a u8 85 (11). The original
-// doesn't mask the strip's top to a byte. A stripTop local set at the start
-// of the chosen banner's branch gives 2 words, 2 in shape, and 3 as a u8;
-// set before the toggle test for both branches, 125 (21).
+// toggles' values on their banners with arrows beside the chosen one, the sound
+// test's lines when game flag 0x55 is set, and the erase window while it is up.
 void DrawOptionsScreen(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
@@ -9118,7 +8892,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
         }
 
         if (f_SoundTestSong == NO_SONG) {
-            // The original passes the song, though STOP prints no number
+            // Passes the song, though STOP prints no number
             sprintf(g_PrintBuffer, "BGM TEST : STOP", f_SoundTestSong);
             DrawShadowedText(&gfx, SONG_TEST_X, TEST_NUMBER_Y, g_PrintBuffer);
         }
@@ -9285,7 +9059,7 @@ void DrawCaddySelect(Gfx **displayListHead) {
 void DrawBlankScreen(Gfx **displayListHead UNUSED) {
 }
 
-// Left empty in the original, and nothing calls it
+// Left empty, and nothing calls it
 void UnusedMenuStub(void) {
 }
 
@@ -9293,7 +9067,6 @@ void UnusedMenuStub(void) {
 // on through the frames that the spinning stars count too.
 void DrawSpinningBadge(Gfx **displayListHead, ImageAsset *image, s32 x, s32 y) {
     Gfx *gfx = *displayListHead;
-    // Pads the frame to match; without it 72 words differ
     s32 unused[8] UNUSED;
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -9552,7 +9325,6 @@ void DrawWavingToad(Gfx **displayListHead, s32 left, s32 top) {
     Gfx *gfx = *displayListHead;
     s16 stripIndex;
     s32 rowCount;
-    // Pads the frame to match; without it 70 words differ
     s32 unused[8] UNUSED;
 
     gDPPipeSync(gfx++);

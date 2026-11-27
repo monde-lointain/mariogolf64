@@ -81,9 +81,6 @@ void UnlockEverything(void) {
 void GrantWinsStarsAndBadges(void) {
     SaveData *save = GetSaveData();
 
-    // The star and badge loops reuse these for the course and the hole, to
-    // match: a courseIndex and hole of their own, declared before or after
-    // these, give 34 words differing, none in shape
     s32 row;
     s32 column;
 

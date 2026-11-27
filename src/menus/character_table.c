@@ -689,79 +689,10 @@ void DrawTableLines(Gfx **displayListHead) {
 // Draws the popup with the faces of the cursor cell's two characters and their
 // wins against each other, first moving it to the opposite corner if it would
 // cover the cursor.
-//
-// Each count's call is written once in every arm of a test that compares
-// the two counts, three arms for the row's and two for the column's, as
-// code that once told the leader's count from the other's might leave it.
-// The arms are the same, so jump2 merges them again and drops the tests,
-// but that comes after the registers are given out, and until then each
-// test and each copy of a call is one more reference to the counts. flow
-// counts 10 for rowWins and 9 for columnWins where one call each makes 5
-// and 5, and the copies lengthen their lives from 61 and 85 insns to 105
-// and 115. In global-alloc that lifts rowWins' priority from 1639 to 2857
-// and columnWins' from 1176 to 2347, around the 2727 of the face images'
-// base and above the 1886 of the column's character. So rowWins is placed
-// first and takes $s0, the base $s1, columnWins $s2 and the character $s3,
-// as in the original. With one call each the base is first, then the
-// character, and the counts take $s2 and $s3.
-//
-// A do-while (0) around a count's drawing weighs its references too, but
-// leaves its life alone: columnWins then has 1176, 1647, 2823 or 3176,
-// with 5, 7, 8 or 9 references, and never comes between the base and the
-// character.
-//
-// index serves the strip loop and both counts' offsets, to match.
-//
-// Measured against the match, in words differing (and how many in shape):
-//
-//   One call for each count (the old draft)                 48 (2)
-//   Two arms for each count                                 24 (2)
-//   Three arms for each count                               22 (0)
-//   The row's three arms, with one call for the column's    24 (0)
-//   The column's two arms, with one call for the row's      38 (2)
-//   Two arms for the row's count and three for the column's 22 (0)
-//   The row's second test as rowWins == columnWins          48 (12)
-//   The row's second test as columnWins != 0                24 (2)
-//   The row's tests as rowWins != 0 and columnWins != 0     59 (9)
-//   The column's test as columnWins != 0                    13 (7)
-//   The arms around the row's digits test as well           61 (21), frame -48
-//   The arms around the column's digits test as well        32 (10)
-//   The sign's call in two arms as well                     34 (2)
-//   The sign's call in three arms, with one for each count  58 (2)
-//   One call each, the row's count in a do-while (0)        24 (0)
-//   The same, with the column's count and the sign in one   22 (0)
-//   The same, with the row's call alone in its do-while     18 (0)
-//   One call each, each count in a do-while (0)             26 (2)
-//   The column's call in each arm of its digits test        49 (45)
-//   The row's digits test without its repeated arm          73 (11), frame +24
-//   The row's digits test as three separate ifs             153 (17), frame +16
-//   The row's digits test without its lower bounds          45 (3), frame +8
-//   The column's digits test without its lower bounds       8 (6)
-//   An offset variable apart from index for the counts      38 (0)
-//   rowWins read before columnWins                          8 (0)
-//   The column's character read before the row's            10 (2)
-//   The counts as s16                                       87 (19)
-//   The counts as u8                                        161 (65), frame +16
-//   The counts as u32                                       4 (4)
-//   The counts read through a MatchupRecord pointer         37 (17)
-//   A local for the column's index                          32 (4)
-//   The face modes as an if and an else on == hidden        10 (4)
-//   A face mode variable of its own for the column          6 (0)
-//   memory declared before save                             46 (2)
-//
-// These match as well: the row's two tests in the other order, or its
-// second spelled columnWins > rowWins; the column's test as <, ==, != or
-// >= between the counts, or as rowWins != 0; two arms for the row's count
-// with three for the column's on columnWins > rowWins and rowWins != 0;
-// the counts declared in the other order; the row's index written out in
-// place of rowIndex; the face modes as conditional expressions, as an if
-// and an else on != hidden, or as an s32.
 void DrawTablePopup(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
-    // Counts the banner strips, then holds the x of each count of wins, to
-    // match
     s32 index;
     s32 row;
     CharacterIndex rowCharacter;
@@ -882,11 +813,9 @@ void DrawTablePopup(Gfx **displayListHead) {
         index = 4;
     }
     else {
-        // The same offset again, to match
         index = 4;
     }
 
-    // Each arm draws the same number, to match
     if (rowWins > columnWins) {
         DrawUnalignedMenuNumber(
             &gfx,
@@ -928,7 +857,6 @@ void DrawTablePopup(Gfx **displayListHead) {
         index = 58;
     }
 
-    // As with the row's count, to match
     if (columnWins > rowWins) {
         DrawUnalignedMenuNumber(
             &gfx,
@@ -1007,7 +935,7 @@ void MarkShownTableCharacters(void) {
                 (save->records.awards.matchups[row][column].winBits & WIN_COUNT_MASK) != 0;
         }
 
-        // The original stores these one entry early, over the grid's last character
+        // Stores these one entry early, over the grid's last character
         if (recordCount > 0) {
             f_TableCharacterVisibility[row - 1] = TABLE_CHARACTER_SHOWN;
         }

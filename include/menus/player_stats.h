@@ -99,7 +99,7 @@ void DrawBestShots(Gfx **displayListHead);
 void ReadBestShots(void);
 void LoadBestShotFaces(void);
 // DrawCharacterFace takes an s16 character and a u8 draw mode, but the
-// original's character_table.c passes the character, and save_screens.c the
+// matching build's character_table.c passes the character, and save_screens.c the
 // draw mode, without narrowing it. Those files define WIDENS_FACE_CHARACTER_INDEX
 // and WIDENS_FACE_DRAW_MODE to see the wide parameter, unless AVOID_UB is set.
 #if !defined(AVOID_UB) && defined(WIDENS_FACE_CHARACTER_INDEX)
@@ -121,7 +121,7 @@ void DrawCharacterFace(
     FaceCharacterIndexArgument characterIndex,
     FaceDrawModeArgument drawMode
 );
-// GetChosenBestShot returns an s16, but the original's main_menu.c uses the
+// GetChosenBestShot returns an s16, but the matching build's main_menu.c uses the
 // whole return register; it defines WIDENS_CHOSEN_BEST_SHOT to see a word,
 // unless AVOID_UB is set.
 #if !defined(AVOID_UB) && defined(WIDENS_CHOSEN_BEST_SHOT)

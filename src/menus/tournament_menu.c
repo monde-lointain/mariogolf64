@@ -610,50 +610,6 @@ void GetSaveDataAndMenuMemory(void) {
 // f_MenuWindowScaleX and f_MenuWindowScaleY, with each size held to 1 or more,
 // and the OK text above the buttons once it is open, unless okTextShown is
 // NO_OK_TEXT.
-//
-// Each cloud strip's edges are worked out from the window's center in the call,
-// the bottom as the top plus halfHeight. The original works out centerY -
-// halfHeight before the loop, onto the stack, and the left and right edges in
-// it. loop.c moves an invariant out of a loop when its threshold times the
-// invariant's lifetime reaches the loop's count of insns, and takes 3 from the
-// threshold for each one moved. The threshold is 58 once the strip height's
-// constant is moved, and with the top's subtraction in it the loop has 59
-// insns: the left edge, with a lifetime of 1, stays, and the top, with a
-// lifetime of 2, is moved. With the top worked out before the loop, 58 insns
-// are left, so the left edge is moved, onto the stack as well, in a frame 8
-// bytes larger.
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   The top in a windowTop local set before the loop          140 (16)
-//   The same, set in the for's first clause                   140 (14)
-//   The same, set as the loop's first statement               4 (2)
-//   The same, set before the call after a windowLeft local    138 (14)
-//   windowLeft and windowRight locals set before the call     166 (22)
-//   The bottom as centerY + (index * halfHeight)              75 (7)
-//   The bottom's strip offset and halfHeight grouped          45 (21)
-//   The bottom's offset as (index + 1) * halfHeight           54 (24)
-//   The top as centerY + (index * halfHeight) - halfHeight    76 (4)
-//   The strip offset first in both, before centerY            11 (5)
-//   The old draft: the top set in the for's first clause, the
-//   bottom as the offset, halfHeight and the top, and the
-//   button's half height held by an if                        34 (20)
-//   The button's half height held by an if                    60 (34)
-//   Every half held by an if                                  121 (55)
-//   A half held as (half > 0) ? half : 1                      64 (8)
-//   halfHeight held before halfWidth                          8 (0)
-//   halfHeight set after buttonHalfWidth                      4 (4)
-//   The float sizes held before the halves                    41 (41)
-//   index as an s32                                           247 (75)
-//   pulse and growth both cleared before the test             7 (3)
-//   Both cleared in the else                                  4 (0)
-//   growth as half of pulse after the test                    75 (19)
-//   The shrinking pulse's test under an else                  21 (7)
-//   f_MenuWindowState tested in place of IsMenuWindowOpen     12 (6)
-//
-// Also matching: the top in a windowTop local set just before the call, alone
-// or before a windowLeft local; a windowLeft local alone; the strip's top in a
-// local of its own, set in one statement; a half held as (half < 1) ? 1 : half;
-// and buttonX as a conditional expression.
 void DrawYesNoWindow(
     Gfx **displayListHead,
     s32 width,
@@ -817,7 +773,6 @@ void DrawYesNoWindow(
         }
 
         buttonY = centerY + windowHalfHeight - (s32)(f_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
-        // growth is cleared before the test and pulse in its else, to match
         growth = 0;
         if (index == chosenButton) {
             pulse = f_YesNoPulse;
@@ -888,37 +843,6 @@ void DrawYesNoWindow(
 // buttons with the chosen one pulsing, the Nintendo badge for a Nintendo
 // tournament, the course image, the picture and the OK text once the window is
 // open. The window grows and shrinks as DrawYesNoWindow's does.
-//
-// The badge's strips are placed from badgeX, a copy of centerX made before
-// their loop. The original loads centerX from the stack into $s4 there and
-// keeps it over the loop, where the cloud's loop loads it for each strip: with
-// centerX itself in the badge's loop, centerX takes a saved register for the
-// whole function and buttonHalfWidth goes to the stack. The cloud strips' edges
-// are worked out in the call as DrawYesNoWindow's are, for the reason given
-// there.
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   centerX in place of badgeX                                314 (64)
-//   badgeX set in the badge's loop                            314 (64)
-//   The cloud's top in a windowTop local set in the for's
-//   first clause                                              140 (12)
-//   The cloud strip's bottom as centerY + (index *
-//   halfHeight)                                               55 (7)
-//   The window's half width kept in badgeTop until the
-//   badge's top is set                                        30 (0)
-//   No windowLeft, its sum written in courseX's               60 (36)
-//   windowLeft set after courseTop                            60 (36)
-//   courseX set before courseTop                              78 (52)
-//   No pipe sync before the badge's rectangle                 59 (17)
-//   The old draft: no badgeX, the cloud's top set in the
-//   for's first clause, and the window's half width kept in
-//   badgeTop                                                  166 (26)
-//
-// Also matching: badgeX set after badgeTop, or before the badge's palette is
-// loaded; badgeX or halfWidth declared anywhere among the locals; the window's
-// half width kept in badgeX until the badge's loop; the cloud's top in a
-// windowTop local set just before the call; and a windowRight local for
-// pictureX.
 void DrawClubWindow(
     Gfx **displayListHead,
     s32 width,
@@ -1140,7 +1064,6 @@ void DrawClubWindow(
         }
 
         buttonY = centerY + windowHalfHeight - (s32)(f_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
-        // As in DrawYesNoWindow, to match
         growth = 0;
         if (index == chosenButton) {
             pulse = f_YesNoPulse;
@@ -1192,7 +1115,6 @@ void DrawClubWindow(
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         LoadLargePalette(&gfx, ImagePalette(f_NintendoBadge));
-        // A copy of centerX for the badge's loop, to match
         badgeX = centerX;
         badgeTop =
             (s32)(centerY - windowHalfHeight + (s32)(f_MenuWindowScaleY * NINTENDO_BADGE_OFFSET)) -
@@ -1270,7 +1192,7 @@ void DrawClubWindow(
     }
 
     pictureX = centerX + (windowWidth * 0.5f) - (s32)(f_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
-    // The original adds the scale here where it multiplies everywhere else
+    // Adds the scale here, where it multiplies everywhere else
     pictureY = centerY + windowHalfHeight - (s32)(f_MenuWindowScaleY + WINDOW_IMAGE_OFFSET_Y);
 
     LoadLargePalette(&gfx, f_MenuWindowPalette);
@@ -1323,7 +1245,7 @@ void DrawClubWindow(
 
 // Stretches the wide cloud image, in two strips, around a center; no routine
 // calls it.
-// The original never stores the list's end back through displayListHead
+// Never stores the list's end back through displayListHead
 void DrawUnusedWideCloud(
     Gfx **displayListHead,
     s32 centerX,
@@ -1335,8 +1257,6 @@ void DrawUnusedWideCloud(
 ) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
-    // One variable for both, to match: passing G_TF_BILERP directly, using
-    // halfWidth directly, or both, gives 28 words differing, 6 in shape
     s32 filterOrHalfWidth;
     s32 stripTop = centerY - stripHeight;
 
@@ -1446,13 +1366,8 @@ void ResetCodeEntry(void) {
 
 void UpdateClubWindow(void);
 
-// Each cursor move reads the coordinates into row and column, stepping one,
-// before it tests the key there. Set in all four moves, row and column aren't
-// set once, so the scheduler doesn't hurry their sign extensions ahead of the
-// stepped coordinate's store; the store then follows them, as in the
-// original, and local-alloc keeps the coordinate, its shift and its extension
-// in separate registers. Stepping the coordinate inside the key's index gave
-// 64 words differing, 18 in shape.
+// Runs the club tournament's code entry: typing the code with the cursor, the
+// details window once a code is entered, and the incorrect-code message
 void UpdateClubTournament(void) {
     MenuMemory *memory = GetMenuMemory();
     s32 index;
@@ -1501,8 +1416,8 @@ void UpdateClubTournament(void) {
             f_EditedCodeByteIndex = (f_EditedCodeByteIndex + 1) % TOURNAMENT_CODE_SIZE;
         }
 
-        // The original's unconditional steps cancel out, so a held direction
-        // changes the digit every frame
+        // The unconditional steps cancel out, so a held direction changes the
+        // digit every frame
         if (g_MenuControllerData[1].button & U_JPAD) {
             g_TournamentCode[f_EditedCodeByteIndex]++;
         }
@@ -1824,8 +1739,6 @@ void UpdateClubWindow(void) {
         }
     }
     else if ((pressedButtons & L_JPAD) || ((u16)pressedButtons & R_JPAD)) {
-        // The cast above stops the compiler from merging the two tests, which the
-        // original keeps apart
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         f_ClubWindowChoice ^= CLUB_CHOICE_FLIP;
     }
@@ -2416,8 +2329,6 @@ void DrawEnteredCode(Gfx **displayListHead) {
 // code, and returns a CodeKeyResult.
 CodeKeyResult PressCodeKey(void) {
     MenuMemory *memory = GetMenuMemory();
-    // Widened to match: an s8 column, or the field read in place, gives 26
-    // words differing, 2 in shape
     s32 column = memory->codeKeyColumn;
     CodeKeyResult keyResult = CODE_KEY_RESULT_TYPING;
     u8 key = f_CodeKeys[memory->codeKeyRow][column];

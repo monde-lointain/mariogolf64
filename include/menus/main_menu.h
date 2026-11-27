@@ -15,9 +15,7 @@
 #include "system/c_language.h"
 
 // The course select's layout, which the menus keep in the top byte of
-// g_MapCamera's mode. Reading it as a byte of the field rather than of the
-// whole camera lets the compiler move the read past display list words, as
-// the original does.
+// g_MapCamera's mode.
 #define COURSE_SELECT_LAYOUT (*(u8 *)&g_MapCamera.mode)
 
 enum CourseSelectLayout {

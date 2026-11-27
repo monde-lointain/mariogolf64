@@ -48,9 +48,6 @@ static Mtx f_CursorBoxTranslations[DRAW_BUFFER_COUNT];
 void LoadCursorBox(ImageAsset *image) {
     EncodedAsset asset;
 
-    // s32 sizes are there to match: u16 sizes give 12 words differing (none in
-    // shape), u32 48 (4) and s16 68 (14). Reading the sizes as the header's
-    // halfwords, rather than a byte at a time, gives 10 (10).
     s32 width;
     s32 height;
 
@@ -80,41 +77,6 @@ void LoadCursorBox(ImageAsset *image) {
 // Draws the cursor box with its top-left corner at the given screen position.
 // Each corner's red pulses with the sine of its own phase, which the four
 // corners start a quarter turn apart.
-//
-// The green and blue are variables, held to a channel's range as the red is
-// though they are constants. The original sets both in the loop, where it sets
-// the alpha in $s5 before the loop: the green in $s0, a saved register as its
-// life crosses sinf's call, and the blue in $a0 after the call. loop.c moves
-// out of a loop only a register set once in it, and its dump shows each of the
-// two with a second set, the one that holds it at zero or above. Stored as
-// constants, or as variables that are not held, they are set before the loop as
-// the alpha is.
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   The green and blue not held                               173 (11)
-//   The green held and not the blue                           135 (7)
-//   The blue held and not the green                           38 (2)
-//   The two held only above, or only below                    173 (11)
-//   The red set before the green                              173 (5)
-//   The green and then the blue set before the red            167 (5)
-//   The blue and then the green set before the red            169 (5)
-//   The blue set before the red and the green after it        8 (0)
-//   The green held before the red                             38 (2)
-//   The blue held before the red                              135 (7)
-//   Both held before the red                                  173 (11)
-//   The phase stepped in IN_OWN_BLOCK                         143 (11)
-//   The loop's test as corner < CURSOR_BOX_CORNER_COUNT       141 (11)
-//   u8 green and blue                                         173 (11)
-//   The alpha a variable too, held as the others are          139 (9)
-//   The red stored after the green and blue                   6 (0)
-//   boxY's difference written in the call                     2 (2)
-//   The old draft: the green and blue stored as constants and
-//   the phase stepped in IN_OWN_BLOCK                         42 (10)
-//
-// Also matching: the green set before the phase is stepped, or declared in the
-// loop's block with its value; the blue held before the green; all three held
-// above and then all three below; the alpha as a variable set after the blue
-// and not held; and the stepped phase in a local.
 void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
     Gfx *gfx = *displayListHead;
     s32 corner;
@@ -129,7 +91,6 @@ void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
     height = ReadImageHeight(f_CursorBoxImage);
     for (corner = 0; corner != CURSOR_BOX_CORNER_COUNT; corner++) {
         f_CursorCornerPhases[corner] += CURSOR_PHASE_STEP;
-        // The green is set before the red and the blue after it, to match
         green = CURSOR_GREEN;
         red = (s32)(sinf(f_CursorCornerPhases[corner]) * CURSOR_RED_SWING) + CURSOR_RED_MIDDLE;
         blue = CURSOR_BLUE;
@@ -141,7 +102,6 @@ void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
             red = 0;
         }
 
-        // Held as the red is, though they are constants, to match
         if (green > COLOR_CHANNEL_MAX) {
             green = COLOR_CHANNEL_MAX;
         }
@@ -174,7 +134,6 @@ void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
         2000.0f,
         1.0f
     );
-    // In a variable, to match
     boxY = (SCREEN_HEIGHT / 2) - CURSOR_BOX_HALF_SIZE - top;
     guTranslate(
         &f_CursorBoxTranslations[g_DrawBufferIndex],

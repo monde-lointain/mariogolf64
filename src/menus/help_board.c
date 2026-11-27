@@ -354,9 +354,8 @@ void UpdateHelpBoard(void) {
     }
 }
 
-// Whether a topic list arrow is shown: up while topics are above the
-// list, down while some are below. It is a macro, as an inline function
-// compiles differently from the original.
+// Whether a topic list arrow is shown: up while topics are above the list, down
+// while some are below
 #define IsTopicArrowShown(index) \
     ((((index) == MENU_ARROW_UP) && (f_FirstListedTopic > 0)) || \
         (((index) == MENU_ARROW_DOWN) && \

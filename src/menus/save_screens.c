@@ -388,7 +388,6 @@ static s32 f_ChosenModeIconHalfSize;
 static u8 f_UnusedBytesAfterModeIconSize[0x4] UNUSED;
 static u8 f_UnusedBufferAfterModeIconSize[0x88] UNUSED;
 
-// Not static: the original left these to the linker's common block
 PaletteColor g_MenuCharacterPalettes[CHARACTER_COUNT][LARGE_PALETTE_COLOR_COUNT] RCP_ALIGNED;
 // The face palette of each Ring Shot record's replay character
 PaletteColor g_ReplayFacePalettes[SAVE_MENU_SLOT_COUNT][LARGE_PALETTE_COLOR_COUNT] RCP_ALIGNED;
@@ -678,46 +677,8 @@ void UpdateRingShotRecords(void) {
 #define REPLAY_HUE_SWING 127.0f
 #define REPLAY_GLOW_DIVISOR 4
 
-// Each face's drawing sits in a block of its own, as a macro's do-while would
-// make it, to match. flow weights a reference by its loop depth, and a loop
-// that runs once still counts, so the references in the block weigh 4 where
-// they weighed 3. The face's vertical offset, itemIndex times the spacing, has
-// all of its references there and listIndex only its lookup and its step,
-// which lifts the offset's priority in global-alloc to 14400 and listIndex's
-// to 14285, from 10800 and 12571. So the offset is placed first and takes
-// $s2, as in the original, and listIndex takes $s3. Without the block, or
-// with plain braces, 26 words differ, none in shape.
-//
-// A block around the whole face loop gives 58 words (8 in shape), one that
-// ends before listIndex's step 3 (1), and one around the two draws alone 35
-// (1). A block from the face's draw to listIndex's step matches too; from the
-// cross's test to the step, or around the lookup and the draw mode alone, 26
-// differ (none). The declarations of itemIndex and listIndex in the other
-// order, and listIndex set before row or in the loop's header, match as well.
-//
-// The row icon's draws are counted with index, which also counts the strips
-// and the replay slots and holds each face's draw mode; counting them with
-// column, the hole columns' counter, gives 44 words differing, and with a
-// counter of their own 46, none in shape. Giving index's other uses variables
-// of their own costs words too: a strip counter gives 108, a face mode 232
-// (38 in shape) and a slot index 50.
-//
-// Stepping listIndex in the face's lookup, as
-// f_RingShotCharacterOrder[listIndex++], gives 11 words, 5 in shape;
-// indexing the order from listIndex plus itemIndex, with listIndex fixed,
-// gives 148 (16), and from the row's first character plus itemIndex 96 (26).
-//
-// The empty slot's dashes are counted with listIndex, which the original
-// keeps in one register with the face loop's. Counting them with drop or a
-// counter of their own gives 36 words differing, with itemIndex or
-// replayCourse 42, with row or replayHole 48 and with column 68, none in
-// shape. An s8 listIndex gives 44 words, 2 in shape, and extends it as a byte
-// at each use, where the original extends a halfword; setting listIndex
-// before the slot's test gives 5 (3).
 void DrawRingShotRecords(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    // Counts the strips and a row icon's draws, holds each face's draw mode and
-    // counts the replay slots, as the original's shared register needs
     s16 index;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
@@ -818,9 +779,6 @@ void DrawRingShotRecords(Gfx **displayListHead) {
         drop = (row == memory->ringShotRow) * RING_SHOT_CHOSEN_ICON_DROP;
         if ((row < openCourseCount) || (row == RING_SHOT_REPLAY_ROW)) {
             if (f_RingShotIconPositions[openCourseCount - 1][row] != 0) {
-                // The icon loop in a block of its own, as a macro's do-while would
-                // make it, to match: without it, or with plain braces, three saved
-                // values take each other's registers and 16 words differ
                 IN_OWN_BLOCK(for (index = 0; index != RING_SHOT_ICON_DRAW_COUNT; index++) {
                     if (row == 0) {
                         DrawRingShotRowIcon(
@@ -902,7 +860,6 @@ void DrawRingShotRecords(Gfx **displayListHead) {
             row = memory->ringShotRow;
             listIndex = memory->ringShotFirstCharacters[row];
             for (itemIndex = 0; itemIndex != RING_SHOT_SHOWN_CHARACTER_COUNT; itemIndex++) {
-                // In a block of its own to match, as the header comment explains
                 IN_OWN_BLOCK({
                     characterIndex = f_RingShotCharacterOrder[listIndex];
                     index = FACE_PLAIN;
@@ -1085,9 +1042,9 @@ void DrawRingShotRecords(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-// The original has 8 zero bytes in its rodata that nothing in the ROM
-// references, between DrawRingShotRecords's constants and LoadSaveGameBuffer's
-// jump table. The table is aligned to 8 bytes, so they may have held less
+// Zero bytes in the rodata that nothing in the ROM references, between
+// DrawRingShotRecords's constants and LoadSaveGameBuffer's jump table. The
+// table is aligned to 8 bytes, so they may have held less.
 static const char f_UnreferencedRodata[8] = {0};
 
 Boolean IsRingShotRecorded(RingShotRecord *record);
@@ -1441,9 +1398,6 @@ void LoadSaveGameBuffer(void *buffer, SaveGameBuffer bufferKind) {
                 ReadEncodedAsset(f_CourseImageBuffers[COURSE_IMAGE_BUFFER_FIRST], &asset);
             }
             else {
-                // Subtracting in a second statement is needed to match: one
-                // statement, with or without a course index local, gives 16 words
-                // differing, and indexing with the difference itself 13
                 miniGolfIndex = save->savedGames[gameIndex].state.courseIndex;
                 miniGolfIndex -= MINI_GOLF_COURSE_INDEX;
                 OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset);
@@ -1476,9 +1430,6 @@ void LoadSaveGameBuffer(void *buffer, SaveGameBuffer bufferKind) {
                 ReadEncodedAsset(f_CourseImageBuffers[COURSE_IMAGE_BUFFER_SECOND], &asset);
             }
             else {
-                // Subtracting in a second statement is needed to match: one
-                // statement, with or without a course index local, gives 16 words
-                // differing, and indexing with the difference itself 13
                 miniGolfIndex = save->savedGames[gameIndex].state.courseIndex;
                 miniGolfIndex -= MINI_GOLF_COURSE_INDEX;
                 OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset);
@@ -1560,8 +1511,6 @@ void ResetSavedGameControllers(void) {
     f_AssignedHumanCount = 0;
     gameIndex = memory->savedGameIndex;
     savedPlayers = save->savedPlayers[gameIndex];
-    // Through f_HumanPlayerCount, to match: reading the count into playerCount
-    // first gives 92 words differing, 10 in shape
     f_HumanPlayerCount = save->savedGames[gameIndex].state.playerCount;
     playerCount = f_HumanPlayerCount;
     for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
@@ -1710,12 +1659,7 @@ void UpdateSavedGames(void) {
     SaveData *save = GetSaveData();
     EncodedAsset asset;
     AssetFile file;
-    // Pads the frame to match; without it 28 words differ
     u8 unusedStack[0xA0] UNUSED;
-    // One index for the text slots, players, controllers and humans, to match:
-    // a variable of its own for the text slots gives 99 words differing (9 in
-    // shape), for the players 20 (2), for the humans 44 (2), for the
-    // controllers 46 (6), and for each 110 (10)
     s32 i;
     s32 miniGolfIndex;
 
@@ -2264,17 +2208,13 @@ void DrawSavedGames(Gfx **displayListHead) {
     f32 boardX[COURSE_COUNT];
     f32 boardY[COURSE_COUNT];
     f32 boardScale[COURSE_COUNT];
-    // Nothing uses them, but the original's frame has the room for them
     s32 unusedSlots[COURSE_COUNT] UNUSED;
     s32 drawOrder[COURSE_COUNT];
-    // Nothing uses it, but the original's frame has the room for it
     u8 unusedStack[8] UNUSED;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
-    // The board, or its place in the draw order. Also the chosen game's hole, to
-    // match: with a variable of its own for the hole, 6 words differ, none in
-    // shape.
+    // The board, or its place in the draw order
     s32 boardIndex;
     s32 key;
     Radians angle;
@@ -2288,13 +2228,10 @@ void DrawSavedGames(Gfx **displayListHead) {
     s32 stripLeft;
     s32 stripShownWidth;
     s32 gameIndex;
-    // Counts everything but the boards: the places in the draw order as they are
-    // sorted, the strips of each image and the text slots that the controller
-    // prompt clears. It is also the chosen game's index and then its course. The
-    // one variable does it all to match: with a variable of its own for the
-    // sorting, 44 words differ; for the boards' strips, 272; for the mode icons'
-    // strips, 178; for the name plate's strips, 28; for the chosen game's index,
-    // 10; for its course, 26; and for the text slots, 346.
+    // Counts everything but the boards: the places in the draw order as they
+    // are sorted, the strips of each image and the text slots that the
+    // controller prompt clears. It is also the chosen game's index and then its
+    // course.
     s32 index;
     s32 labelX;
     ModeIcon iconIndex;
@@ -2347,20 +2284,10 @@ void DrawSavedGames(Gfx **displayListHead) {
 
     for (boardIndex = 0; boardIndex != SAVED_GAME_COUNT; boardIndex++) {
         ScreenPoint point;
-        // The circle's x radius is a variable to match: the original keeps it in a
-        // register through the loop, where it loads the z radius on each pass.
-        // With the constant in the product, 26 words differ (8 in shape), and the
-        // frame is 8 bytes smaller.
         f32 radiusX = CAROUSEL_RADIUS_X;
-        // The angle between boards is a variable to match: the original multiplies
-        // by a 120 that it loads on each pass, where the compiler turns a
-        // multiplication by a constant into shifts. With the constant in the
-        // product, 34 words differ (20 in shape).
         s32 boardDegrees;
 
         slotOffset = (memory->savedGameIndex - boardIndex) % SAVED_GAME_COUNT;
-        // Set after the slot offset to match: set in its declaration, or before
-        // the slot offset, 24 words differ (10 in shape)
         boardDegrees = DEGREES_PER_TURN / SAVED_GAME_COUNT;
         angle = -DegreesToRadians(
             (slotOffset * boardDegrees) + (memory->savedGameTurn * BOARD_TURN_STEP_DEGREES)
@@ -2600,16 +2527,6 @@ void DrawSavedGames(Gfx **displayListHead) {
         labelX = (playerCount == 1) ? SINGLE_PLAYER_MODE_LABEL_X : MODE_LABEL_X;
         iconIndex = f_SaveMenuModeIcons[f_SavedGameModes[index]];
         gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_GameModeLabels)));
-        // The label's texels are worked out in the command, reading the game's mode
-        // and the mode's icon from their tables again, and the label's offset is
-        // read from its table at each use, to match. The original makes these reads
-        // ahead of the stores that advance gfx, though they follow the stores in
-        // the source. The compiler only moves a table's element so: a read through
-        // a pointer could be of gfx itself, which is in memory as the drawing
-        // functions take its address, and so stays behind the stores. With the
-        // mode read through a pointer, 64 words differ (40 in shape); with the
-        // offset read through one, 68 (32); with the texels in a local, 24 (4);
-        // and with them worked out from iconIndex, 198 (90).
         gDPLoadTextureBlock_4b(
             gfx++,
             TextureAddress(
@@ -2916,7 +2833,6 @@ void DrawSavedGolfers(Gfx **displayListHead) {
     Vec3 translation;
     Vec3 rotation;
     Vec3 scale;
-    // Pads the frame to match; without it 62 words differ
     s32 unused[12] UNUSED;
     Mat4 transform;
     Mat4 viewing;

@@ -127,8 +127,7 @@ typedef s32 SideArrow;
 // the totals page the course points
 #define TROPHY_SPACING 24
 #define TROPHY_SHIFT_LEFT 20
-// How far right of its course's position the place's trophy is. The spacing is
-// unsigned and 16 bits wide, as the original's sum is
+// How far right of its course's position the place's trophy is
 #define TrophyOffset(place) ((u16)((place) * TROPHY_SPACING) - TROPHY_SHIFT_LEFT)
 #define TROPHY_FRAME_DELAY 4
 #define POINTS_NEEDED_X 192
@@ -141,9 +140,9 @@ typedef s32 SideArrow;
 typedef struct TrophyPosition {
     s32 x;
 #ifdef __IS_KMC__
-    // Unsigned: the original drops the rectangle's clamp of a negative top
-    // edge where it works out the texture's t coordinate. Every position is
-    // below the top of the screen, so the clamp never applies either way.
+    // Unsigned, which drops the rectangle's clamp of a negative top edge.
+    // Every position is below the top of the screen, so the clamp never
+    // applies either way.
     u32 y;
 #else
     s32 y;
@@ -242,7 +241,6 @@ static u8 f_UnreadStatsBlock[0x188] UNUSED;
 // Reads every course's icon into the course stats' buffers
 void LoadCourseStatsIcons(ImageAsset **buffers) {
     EncodedAsset asset;
-    // Pads the frame to match; without it 24 words differ
     s32 unused[4] UNUSED;
     s16 imageIndex;
 
@@ -494,10 +492,8 @@ void DrawCourseStats(Gfx **displayListHead) {
     f32 iconX[WHEEL_SLOT_LIMIT];
     f32 iconY[WHEEL_SLOT_LIMIT];
     f32 iconScale[WHEEL_SLOT_LIMIT];
-    // Pads the frame to match; without it 180 words differ
     s32 unusedSlots[WHEEL_SLOT_LIMIT] UNUSED;
     s32 drawOrder[WHEEL_SLOT_LIMIT];
-    // Pads the frame to match; without it 170 words differ
     s32 unused[2] UNUSED;
     MenuMemory *memory = GetMenuMemory();
     s32 courseCount;
@@ -988,10 +984,6 @@ void DrawStatsBadgeCount(Gfx **displayListHead) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s16 badgeCount;
-    // A hole, then a course, then where the count moves to, to match: a
-    // separate holeIndex for the open course's holes, or an s16 countShift for
-    // the shift, gives 60 words differing (2 in shape), a courseIndex 64 (2),
-    // and an s32 countShift 72 (4)
     s16 index;
     s16 holeIndex;
     // The stats page after the open courses' pages shows every course
@@ -1056,72 +1048,7 @@ void DrawStatsBadgeCount(Gfx **displayListHead) {
 //
 // The rectangle is drawn with gSPScisTextureRectangle, which clamps each edge
 // at zero and, for a left or top edge off the screen, moves the texel
-// coordinate on by the edge times its step. All that is left of that in the
-// code is a shift of the top by 2 whose result nothing reads, left from the
-// test of the top's sign, and 16 bytes of the frame. combine, knowing the top
-// is 144 or 216, drops the bottom edge's clamp and the top's texel offset, and
-// where it can't place the note for the death of each one's register it leaves
-// a use of it. With nothing else reading them they get no hard register, and
-// reload gives each a stack slot of 8 bytes that nothing reads. The frame's
-// other five slots are displayListHead's, the arrow count's, the first arrow's
-// and the lone down arrow's test's, which the code reads at 0x4 to 0x1C, and
-// one for the texture table mode's word, which reload takes out of $s2 and
-// never reads back. With gSPTextureRectangle the frame is 16 bytes smaller,
-// which the old draft made up with an unused array.
-//
-// The top is an s16, as the count, the first arrow and the index are. As an
-// s32, the top's two shifts for the rectangle's words trade places and
-// registers.
-//
-// The rows below are tested where the down arrow is counted and again for the
-// first arrow, and cse joins the two: the original keeps the test's result in
-// $a1 and copies it under a branch on the count. Kept in a flag, the copy is
-// made without a branch. The lone down arrow's test in the loop tests the count
-// again, though firstArrow is only set for a count of one: loop.c moves the
-// test out as (arrowCount == 1) & firstArrow, the original's xori, sltiu and
-// and, kept at 0x1C($sp).
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   The old draft: gSPTextureRectangle, an s32 top and 16
-//   unused bytes                                              71 (11)
-//   gSPTextureRectangle, with no unused bytes                 96 (14)
-//   gSPTextureRectangle, with the unused bytes                72 (14)
-//   The unused bytes as well as gSPScisTextureRectangle       56 (0)
-//   top as an s32                                             8 (4)
-//   top as a u8                                               24 (4)
-//   top as a u32                                              55 (11)
-//   top as an s8                                              116 (30)
-//   The bottom edge as the top's quarter pixels plus the
-//   height's                                                  51 (3)
-//   The rows below tested once, in an s16 flag                113 (45)
-//   The same in an s32 flag                                   117 (47)
-//   The rows above in an s16 flag as well                     113 (45)
-//   The down arrow counted by adding its test                 18 (8)
-//   The first arrow as a conditional expression on the count  113 (45)
-//   The first arrow cleared, then set under the count's test  20 (8)
-//   The first arrow with the rows' test ahead of the count's  113 (57)
-//   firstArrow as an s32                                      28 (10)
-//   firstArrow as a u16                                       3 (3)
-//   arrowCount as an s32                                      65 (29)
-//   arrowCount as a u16                                       2 (2)
-//   arrowIndex as an s32                                      23 (7)
-//   arrowIndex as a u16                                       9 (9)
-//   The lone down arrow tested by firstArrow alone            146 (16)
-//   The same tested with firstArrow ahead of the count        10 (0)
-//   The top in one conditional expression, a down arrow's for
-//   a later arrow or a lone down arrow                        17 (15)
-//   The lone down arrow tested first, and the index in its
-//   else                                                      17 (13)
-//   The top chosen by the arrow's image, firstArrow +
-//   arrowIndex                                                191 (37)
-//   The arrow's image as arrowIndex + firstArrow              19 (1)
-//   The arrow's image offset as a product for each            41 (15)
-//   The loop's test as <                                      283 (37)
-//
-// Also matching: top as a u16; the top chosen by an if and an else, or set to
-// the up arrow's and then to the down arrow's under the index's test; the index
-// tested as zero with the tops swapped; arrowCount cleared and counted up under
-// a test for each arrow; and top declared before arrowIndex.
+// coordinate on by the edge times its step.
 void DrawStatsScrollArrows(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s16 arrowCount = f_FirstShownStat > 0;
@@ -1146,7 +1073,7 @@ void DrawStatsScrollArrows(Gfx **displayListHead) {
         gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImagePalette(f_CourseStatsDigitsAndArrows)));
         for (arrowIndex = 0; arrowIndex != arrowCount; arrowIndex++) {
             top = (arrowIndex != 0) ? STATS_DOWN_ARROW_TOP : STATS_UP_ARROW_TOP;
-            // A lone down arrow. The count is tested again, to match.
+            // A lone down arrow
             if (arrowCount == 1 && firstArrow) {
                 top = STATS_DOWN_ARROW_TOP;
             }
@@ -1192,15 +1119,6 @@ void DrawStatsScrollArrows(Gfx **displayListHead) {
 // Draws the course's spinning trophy in the color of each place won in its
 // tournament, stepping the spin's images, or on the totals the points needed to
 // open the next course.
-//
-// Each edge works out TrophyOffset anew, and that is there to match: the
-// rectangle's command casts its edges to s16, so GCC adds the shift left in 16
-// bits, as 0xFFEC in a register, and the scheduler puts the offset's
-// instructions among the first edge's, where they lengthen the life of the
-// left position's register and so decide which registers the edges get. With
-// the spacing in a u16 local, 48 words differ in those registers alone, and
-// with the whole offset in a local, 29 to 51. Without the cast to u16 the shift
-// left is added as -20 to each edge: 27 words differ.
 void DrawCourseTrophies(Gfx **displayListHead) {
     EncodedAsset asset;
     Gfx *gfx = *displayListHead;
@@ -1741,7 +1659,6 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
     s32 fraction;
     s32 digitIndex;
     u8 digit;
-    // Pads the frame to match; without it 112 words differ
     s32 unused[4] UNUSED;
 
     if (whole > DECIMAL_WHOLE_LIMIT) {
@@ -2011,12 +1928,6 @@ void DrawOffLabel(Gfx **displayListHead, s32 x, s32 y) {
 
 // Draws the green left and right arrows either side of a width centered on a
 // point, switching their blink frame every SIDE_ARROW_BLINK_FRAME_COUNT calls
-//
-// frameOffset is worked out before the palette load; after it, 264 words
-// differ. The arrow's image offset is added to frameOffset before the
-// image's address; added to the address in turn, 4 words differ, and with
-// frameOffset first, 2. Setting top at its declaration, not just before the
-// rectangle, gives 134 words, 38 in shape.
 void DrawBlinkingSideArrows(
     Gfx **displayListHead,
     ImageAsset *image,
@@ -2090,9 +2001,8 @@ void DrawBlinkingSideArrows(
     *displayListHead = gfx;
 }
 
-// Draws one of the four side arrow images, in either blink state, centered on
-// a point. The header size is held in a local, as the matching code needs:
-// with the constant, GCC folds the texels' offset differently.
+// Draws one of the four side arrow images, in either blink state, centered on a
+// point.
 void DrawGreenArrow(
     Gfx **displayListHead,
     ImageAsset *image,

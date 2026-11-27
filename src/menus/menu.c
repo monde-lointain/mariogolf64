@@ -65,9 +65,7 @@
 #define DONKEY_KONG_STAR_COUNT 30
 #define MAPLE_BADGE_COUNT 50
 
-// Where an imported character goes in the character grid. Holding column and
-// row as s32s loads them with lw where the original has lh, so the zero
-// halves before them stay separate fields that nothing reads.
+// Where an imported character goes in the character grid
 typedef struct ImportedCharacterCell {
     s16 unusedBeforeColumn;
     s16 column;
@@ -1218,7 +1216,6 @@ static s32 f_UnusedWordsAfterSaveCopyLocations[4] UNUSED = {0};
 void LoadMenuResources(void) {
     EncodedAsset asset;
     AssetFile file;
-    // The original frame has room for this; without it 44 words differ
     s32 unused[4] UNUSED;
     SaveData *save;
     s32 index;
@@ -1491,10 +1488,6 @@ s32 GetRecordPriority(PlayRecord *record) {
     kind = flaggedScoreKind & SCORE_KIND_MASK;
     priority = 0;
     par = record->hole.par;
-    // Kept in a variable, which the original's register choices need: the
-    // constant in its place swaps registers in 16 words, as do also initializing
-    // priority in its declaration, declaring bits, kind, par and priority in
-    // that order, clearing priority first or switching on the masked bits
     priorityMax = ALBATROSS_PRIORITY;
     if (flaggedScoreKind & SCORE_KIND_RECORDED) {
         switch (kind) {
@@ -1599,9 +1592,6 @@ void InsertRankedRecord(PlayRecord *record) {
         lowestPriority = 0x40000000; // Above any priority
         lowestIndex = 0;
 
-        // Every case sets the length, which the original needs to match: setting
-        // it once after the switch gives 113 words differing (1 in shape), once
-        // before it 71 (7), and using RANKED_GROUP_LENGTH in the loops 219 (31)
         switch (record->scoreKind & SCORE_KIND_MASK) {
             case SCORE_KIND_BIRDIE:
                 firstIndex = 0 * RANKED_GROUP_LENGTH;
@@ -1874,8 +1864,6 @@ void InsertBestTime(
     s32 runIndex;
     s32 scanIndex;
     s32 otherIndex;
-    // The original frame has room for this; without it 64 words differ, none in
-    // shape
     s32 unused[4] UNUSED;
 
     save = GetSaveData();
@@ -2106,8 +2094,7 @@ Boolean IsMetalMarioUnlocked(void) {
 // for more than one player, those whose matchup records show a win, the
 // unlocked ones and the imported ones, whose faces load too unless
 // skipsImportedFaces is set. playerCount is reused below as a record count and
-// a character id, to match: a winCount variable gives 50 words differing (none
-// in shape), and a character variable 4 (0).
+// a character id.
 void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     EncodedAsset asset;
     AssetFile file;
@@ -2115,8 +2102,6 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     s32 row;
     s32 column;
     s32 index;
-    // Also holds a grid entry at the end, to match: a gridEntry variable gives 4
-    // words differing, none in shape
     CharacterIndex characterIndex;
 
     save = GetSaveData();
@@ -2220,8 +2205,6 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
 void PlaceImportedCharacters(void) {
     s16 index;
     s16 byteIndex;
-    // Also the byte index of the first loops, to match: clearing the names with
-    // byteIndex gives 43 words differing, 3 in shape
     s16 count;
     char *name;
     u8 letter;
@@ -2401,7 +2384,6 @@ void InvalidateBrokenRingShotRecords(void) {
     s32 recordIndex;
     ScoreKind scoreKind;
     ScoreKind flaggedScoreKind;
-    // The original frame has room for this; without it 8 words differ
     s32 unused[2] UNUSED;
 
     save = GetSaveData();
@@ -2414,14 +2396,8 @@ void InvalidateBrokenRingShotRecords(void) {
 
         flaggedScoreKind = record->scoreKind;
         scoreKind = flaggedScoreKind;
-        // Masked in place, so that the test reads the loaded kind and the bounds
-        // read its copy, to match: testing scoreKind & SCORE_KIND_RECORDED gives 5
-        // words differing, 1 in shape
         flaggedScoreKind &= SCORE_KIND_RECORDED;
         if (flaggedScoreKind != 0) {
-            // Masking within the test keeps GCC from merging the two bounds into
-            // one unsigned test, to match: masking before the test gives 4 words
-            // differing, 4 in shape
             if ((scoreKind &= SCORE_KIND_MASK) >= SCORE_KIND_COUNT || scoreKind < 0) {
                 isInvalid[recordIndex] = TRUE;
             }
@@ -2594,8 +2570,7 @@ void ClearImportedCharacters(void) {
 
 // Works out g_CourseStatFigures from the saved course stats: each course's
 // figures, then those of all the courses in the last entry. Its counts are
-// floats, as the averages divide by them and the original compares them as
-// floats.
+// floats, as the averages divide by them.
 void ComputeRoundStatistics(void) {
     CourseStats *allCourseStats;
     CourseStats *courseStats;
@@ -2669,8 +2644,6 @@ void ComputeRoundStatistics(void) {
         }
     }
 
-    // Zeroed this early to match: zeroing it after the flag, or in the loop's
-    // for, gives 2 words differing
     courseIndex = 0;
     hasPlayedCourse = FALSE;
     g_CourseStatFigures[COURSE_COUNT].roundCount = 0.0f;
@@ -3031,7 +3004,6 @@ void TransferSaveData(SaveData *save, UBoolean8 isWrite) {
 
 // Reads the first intact copy; if neither is, the save data starts over
 SaveReadResult ReadSaveCopies(SaveData *save, UBoolean8 isInSram) {
-    // Only takes up stack; without it 52 words differ
     u8 unusedBuffer[0x90] UNUSED;
     u8 checkBuffer[0x40];
     SaveCheck *check;

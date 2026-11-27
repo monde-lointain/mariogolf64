@@ -245,16 +245,12 @@ void DrawBestTimes(Gfx **displayListHead) {
     f32 iconX[COURSE_COUNT];
     f32 iconY[COURSE_COUNT];
     f32 iconScale[COURSE_COUNT];
-    // Pads the frame to match; without it 238 words differ
     s32 unusedSlots[COURSE_COUNT] UNUSED;
     s32 drawOrder[COURSE_COUNT];
-    // Pads the frame to match; without it 228 words differ
     s32 unused[2] UNUSED;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s32 courseCount;
-    // Every loop but the dashes' counts with one of these two, as the original's
-    // registers show
     s16 index;
     s16 otherIndex;
     s32 key;
@@ -460,9 +456,6 @@ void DrawBestTimes(Gfx **displayListHead) {
             gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
             gDPPipeSync(gfx++);
             gDPSetTextureFilter(gfx++, G_TF_BILERP);
-            // Read into a local of its own to match: indexing with
-            // memory->bestTimesCourse gives 37 words differing (13 in shape), and
-            // with the bestTimesCourse read at the top 217 (27)
             holderCourse = memory->bestTimesCourse;
             characterIndex = save->records.bestTimeCharacters[holderCourse][otherIndex];
             DrawCharacterFace(
