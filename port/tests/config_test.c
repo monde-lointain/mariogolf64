@@ -74,7 +74,11 @@ static void TestDefaults(void) {
     EXPECT(config.renderScale == 0);
     EXPECT(!config.isFullscreen);
     EXPECT(config.present == PRESENT_MAILBOX);
+#if defined(SDL_PLATFORM_ANDROID) || defined(SDL_PLATFORM_IOS)
     EXPECT(config.antialiasing == ANTIALIASING_OFF);
+#else
+    EXPECT(config.antialiasing == ANTIALIASING_4X);
+#endif
     EXPECT(config.windowWidth == 0 && config.windowHeight == 0);
     EXPECT(!config.hasWindowPosition);
     EXPECT(config.pausesWhenUnfocused);

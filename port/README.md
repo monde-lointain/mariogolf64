@@ -125,7 +125,7 @@ The game keeps its settings in `config.ini` in your data folder, and
 writes the file, with a comment on each setting, when there is none. The
 settings include the ROM to play, the scale to draw at, full screen, the present mode
 (`mailbox`, `vsync`, or `immediate`), anti-aliasing (`off`, `2x`, `4x`,
-or `8x` samples a pixel, `off` by default), the window's size and place, whether
+or `8x` samples a pixel; `4x` by default, and `off` on Android), the window's size and place, whether
 to pause when another window has the focus, the volume, and the keys and
 gamepad controls for each N64 control.
 

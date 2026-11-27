@@ -224,13 +224,21 @@ static const char f_ControlsComment[] =
 
 // --- Settings ---
 
+// Phones' GPUs pay more for each sample than desktops' do, so they draw
+// with one by default
+#if defined(SDL_PLATFORM_ANDROID) || defined(SDL_PLATFORM_IOS)
+#define DEFAULT_ANTIALIASING ANTIALIASING_OFF
+#else
+#define DEFAULT_ANTIALIASING ANTIALIASING_4X
+#endif
+
 void SetDefaultConfig(Config *config) {
     SDL_assert(config != NULL);
     SDL_zerop(config);
     config->renderScale = 0;
     config->isFullscreen = false;
     config->present = PRESENT_MAILBOX;
-    config->antialiasing = ANTIALIASING_OFF;
+    config->antialiasing = DEFAULT_ANTIALIASING;
     config->pausesWhenUnfocused = true;
     config->volume = CONFIG_VOLUME_MAX;
     SetDefaultPadBindings(&config->bindings);
