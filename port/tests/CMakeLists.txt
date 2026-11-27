@@ -280,6 +280,10 @@ mg64_add_port_test(heap_test
 # The save data's two copies in SRAM, through menu.c's routines and a fake
 # SRAM; the rest of menu.c is linked against stubs that no test reaches
 mg64_encode_shift_jis(menu_copy "${PROJECT_SOURCE_DIR}/src/menus/menu.c")
+# The original clears a byte at each menu entry, which nothing reads
+set_property(SOURCE ${menu_copy} APPEND PROPERTY COMPILE_OPTIONS
+    "$<$<AND:$<C_COMPILER_ID:Clang>,$<VERSION_GREATER_EQUAL:$<C_COMPILER_VERSION>,23>>:-Wno-unused-but-set-global>"
+)
 mg64_add_port_test(save_copies_test
     SOURCES save_copies_test.c ${menu_copy} "${PROJECT_SOURCE_DIR}/src/math/math_util.c"
     LIBRARIES mg64_game_options
