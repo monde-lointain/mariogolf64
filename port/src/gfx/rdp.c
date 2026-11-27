@@ -141,10 +141,13 @@ void InitRdp(void) {
 
     if (!f_IsFrameReady) {
         InitFrame(&f_Frame);
-        InitTextureCache();
         InitColorImages();
         f_IsFrameReady = true;
     }
+
+    // The backend's atlas starts empty, so the cache forgets where it put
+    // the textures of a backend before
+    InitTextureCache();
 
     SDL_zero(f_Rdp);
     f_Rdp.isMaterialDirty = true;

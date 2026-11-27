@@ -1128,10 +1128,12 @@ int main(void) {
     ShutdownGpuBackend();
 
     // Upscaled, a pixel in memory averages the target's, so the N64's own
-    // sampling shows only at its resolution
+    // sampling shows only at its resolution. A texture drawn before is
+    // uploaded again to the new backend's atlas.
     InitGpuBackend(device, 1);
     InitRdp();
     TestFilteredTexelsOneForOne();
+    TestCopiedTexture();
     ShutdownRdp();
     ShutdownGpuBackend();
 
