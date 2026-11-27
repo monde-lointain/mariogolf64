@@ -277,6 +277,14 @@ mg64_add_port_test(heap_test
     LIBRARIES mg64_port_internal
 )
 
+# The save data's two copies in SRAM, through menu.c's routines and a fake
+# SRAM; the rest of menu.c is linked against stubs that no test reaches
+mg64_encode_shift_jis(menu_copy "${PROJECT_SOURCE_DIR}/src/menus/menu.c")
+mg64_add_port_test(save_copies_test
+    SOURCES save_copies_test.c ${menu_copy} "${PROJECT_SOURCE_DIR}/src/math/math_util.c"
+    LIBRARIES mg64_game_options
+)
+
 mg64_add_port_test(tmem_test
     SOURCES tmem_test.c
     LIBRARIES mg64_gfx
