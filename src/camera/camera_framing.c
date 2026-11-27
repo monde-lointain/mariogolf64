@@ -142,10 +142,6 @@ void FrameSpheres(f32 depthOffset) {
     f32 margin;
     s32 sphereIndex;
 
-    // The margin is a variable to match: the original loads it anew at each use,
-    // as the compiler does for a constant it keeps in a variable that gets no
-    // register. With the look-at distance a constant of its own, 20 words
-    // differ from the original's (2 in shape).
     margin = Z_MARGIN;
     yMin = FAR_EXTENT;
     xMin = yMin;
@@ -220,9 +216,6 @@ void FrameSpheres(f32 depthOffset) {
         osSyncPrintf("xd %f yd %f xzd %f yzd %f\n", eyeX, eyeY, horizontalEyeZ, verticalEyeZ);
     }
     eyeZ = horizontalEyeZ;
-    // Negated, as GCC keeps the negation of a floating-point comparison
-    // rather than inverting it: with verticalEyeZ > horizontalEyeZ, 4 words differ
-    // from the original's, all in shape
     if (!(verticalEyeZ <= horizontalEyeZ)) {
         eyeZ = verticalEyeZ;
     }
@@ -263,10 +256,7 @@ void FrameSpheres(f32 depthOffset) {
         }
     }
 
-    // The eye backs away until the nearest sphere is the margin in front of it.
-    // Its new depth has a variable of its own until the edges are worked out, to
-    // match: with the margin added to eyeZ itself, 236 words differ from the
-    // original's (30 in shape).
+    // The eye backs away until the nearest sphere is the margin in front of it
     clearEyeZ = margin - zMin + eyeZ;
     right = (clearEyeZ - horizontalEyeZ) * tan(FramingDegreesToRadians(rightAngle));
     left = (clearEyeZ - horizontalEyeZ) * tan(FramingDegreesToRadians(leftAngle));

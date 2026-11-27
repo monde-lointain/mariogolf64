@@ -60,9 +60,8 @@ void ClearHoleIntroText(void);
 void StopFlightCamera(void);
 void StopHoleFlyover(void);
 SurfaceTraits *GetBallSurfaceTraits(Player *player, ShotLaunch *shot);
-// ball_simulation.c defines WIDENS_AIM_SLOPE_ANGLE to declare the result as an
-// s32, which LaunchBallSimulation's code needs to match; as a
-// SignedBinaryAngle, 2 words differ, 2 in shape. AVOID_UB keeps the true type.
+// ball_simulation.c defines WIDENS_AIM_SLOPE_ANGLE to read the result as a
+// whole word. AVOID_UB keeps the true type.
 #if defined(AVOID_UB) || !defined(WIDENS_AIM_SLOPE_ANGLE)
 SignedBinaryAngle GetAimSlopeAngle(Player *player, ShotLaunch *shot);
 #else

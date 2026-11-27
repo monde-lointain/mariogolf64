@@ -118,8 +118,7 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp *viewport) {
         f_CpuScreenScaleY = -1.0f;
     }
     else {
-        // Overwritten at once; the stores are kept to match, as the original
-        // makes them: without them 68 words differ, 20 in shape
+        // Overwritten at once
         f_CpuScreenScaleX = -f_CpuViewportCenterX * f_CpuProjectionMatrix[0][0];
         f_CpuScreenScaleY = f_CpuViewportCenterY * f_CpuProjectionMatrix[1][1];
         f_CpuScreenScaleX =
@@ -139,14 +138,12 @@ s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
     f32 viewX;
     f32 viewY;
     f32 perspective;
-    // The screen offset of the side tested; testing the offsets directly gives
-    // 32 words differing, none in shape
+    // The screen offset of the side tested
     f32 screenEdge;
 
     depth = (f_CpuViewingMatrix[0][2] * x) + (f_CpuViewingMatrix[1][2] * y) +
         (f_CpuViewingMatrix[2][2] * z) + f_CpuViewingMatrix[3][2];
-    // The depth of the sphere's nearest point, taken apart to match: in one
-    // expression, 18 words differ, none in shape
+    // The depth of the sphere's nearest point
     depth -= radius;
     if ((s32)depth >= 0) {
         return SPHERE_BEHIND_CAMERA;
@@ -259,8 +256,7 @@ s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint *point) {
 }
 
 // Like ProjectPoint, without the screen depth. The viewing matrix's [1][0]
-// is left out of x, unlike in y. The depth is also assigned to viewY, which
-// the matching code needs: without it, GCC allocates other registers.
+// is left out of x, unlike in y.
 s32 ProjectPointToScreen(f32 x, f32 y, f32 z, ScreenPoint *point) {
     f32 depth;
     f32 viewX;
@@ -403,8 +399,6 @@ void SetTriangleNormal(
     Vtx_tn *second = (Vtx_tn *)((secondIndex * sizeof(Vtx)) + AddressNumber(vertices));
     Vtx_tn *third = (Vtx_tn *)((thirdIndex * sizeof(Vtx)) + AddressNumber(vertices));
     s32 firstEdgeX = second->ob[AXIS_X] - first->ob[AXIS_X];
-    // Written to read first's coordinate first, to match: second's y less
-    // first's gives 18 words differing, none in shape
     s32 firstEdgeY = -first->ob[AXIS_Y] + second->ob[AXIS_Y];
     s32 firstEdgeZ = second->ob[AXIS_Z] - first->ob[AXIS_Z];
     s32 secondEdgeX = third->ob[AXIS_X] - second->ob[AXIS_X];
