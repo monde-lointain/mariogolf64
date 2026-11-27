@@ -36,7 +36,7 @@ void BuildHole(CourseRecordIndex courseRecordIndex, s32 holeIndex);
 void SaveHoleFiles(s32 courseNumber, s32 holeNumber);
 void ToggleGroundTileBorders(void);
 // shadeVariant is 2 at a round's start, 0 at its end and 1 for the driving
-// range, but the original ignores it
+// range, but ShadeGround ignores it
 void ShadeGround(s32 shadeVariant);
 
 void BuildGroundDisplayLists(void);

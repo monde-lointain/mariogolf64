@@ -91,9 +91,7 @@ typedef s32 SurfaceKind;
 // How far above the tee a ball starts on the main courses
 #define TEE_HEIGHT 307.2f
 
-// Whether a ball on a surface kind is out of bounds, which costs a stroke.
-// These are macros, as an inline function compiles differently from the
-// original in computer_golfer.c.
+// Whether a ball on a surface kind is out of bounds, which costs a stroke
 #define IsOutOfBoundsKind(kind) \
     ((kind) == SURFACE_KIND_OUT_OF_BOUNDS || (kind) == SURFACE_KIND_OUT_OF_COURSE)
 // Whether a ball on a surface kind is lost: in water or out of bounds

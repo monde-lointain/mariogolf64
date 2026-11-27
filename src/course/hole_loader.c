@@ -354,10 +354,9 @@ void LoadHole(void) {
     ShrinkMiniGolfHolePoints();
 }
 
-// Whether ShrinkMiniGolfHole raises a shaded triangle's vertex, rather
-// than drops it. An odd triangle's last two vertices are raised, and an
-// even triangle's last one. It is a macro, as an inline function compiles
-// differently from the original.
+// Whether ShrinkMiniGolfHole raises a shaded triangle's vertex, rather than
+// drops it. An odd triangle's last two vertices are raised, and an even
+// triangle's last one.
 #define IsRaisedShadedVertex(index, vertexIndex) \
     ((((index) & 1) && (((vertexIndex) == 1) || ((vertexIndex) == 2))) || \
         (!((index) & 1) && ((vertexIndex) == 2)))

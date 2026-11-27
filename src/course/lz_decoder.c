@@ -1,6 +1,5 @@
 /*
  * The LZ decoders, which the loaders in hole_loader.c feed a chunk at a time.
- * The original has them at the start of that file's code.
  */
 
 #include "course/lz_decoder.h"
@@ -87,8 +86,8 @@ s32 DecodeLzChunk(LzStream *stream) {
         controlBits = FromBigEndian16(*input++);
         if (controlBits == 0) {
 #ifdef AVOID_UB
-            // From the first word, as the original copies them, in case the
-            // output trails the input in the same buffer
+            // From the first word, as the matching build copies them, in case
+            // the output trails the input in the same buffer
             for (literal = 0; literal < LZ_LITERAL_RUN_LENGTH; literal++) {
                 CopyLzWord(&output[literal], &input[literal]);
             }
@@ -205,8 +204,7 @@ s32 DecodePatchedLzChunk(LzStream *stream) {
 
     auto inline void ApplyPatchCommand(u16 command);
 
-    // Nested, so that it reaches the patch state through the static chain as the
-    // original does
+    // Nested, so that it reaches the patch state through the static chain
     inline void ApplyPatchCommand(u16 command) {
         s16 offset;
         u16 copiedWord;
@@ -266,9 +264,7 @@ s32 DecodePatchedLzChunk(LzStream *stream) {
         output = stream->outputStart;
         history = stream->history;
         // The first chunk enters the decode loop past the refill, as its control
-        // bits are already set; the jump is there to match. Skipping the refill
-        // on a first-call flag gives 77 words differing, 11 in shape, and the
-        // refill written before the loop and again at its end 150, 48 in shape
+        // bits are already set
         goto DECODE;
     }
 
@@ -334,9 +330,6 @@ DECODE:
 
             reference = FromBigEndian16(*input++);
 
-            // The u16 casts are redundant, but they are needed to match: without
-            // either or both, 5 words differ (1 to 3 in shape); with no casts, a
-            // u32 reference gives 5 and a u16 one 92
             if ((u16)reference == 0) {
                 return BytesBetween(stream->outputStart, output);
             }

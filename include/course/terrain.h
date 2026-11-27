@@ -98,7 +98,8 @@ enum TileMidpointSlot {
 // its layouts as a run: the bordered one's rows GROUND_TILE_TEXEL_ROW_LENGTH
 // texels apart, and the one without a border, which the hole builder
 // writes, GROUND_TILE_TEXEL_SPAN texels a row from the first texel. The
-// original indexes the first row past its end, which C leaves undefined.
+// matching build indexes the first row past its end, which C leaves
+// undefined.
 #ifdef AVOID_UB
 #    define TileTexelRun(texels) ((u16 *)(texels))
 #else
@@ -342,13 +343,7 @@ typedef struct PlaneTriangle {
 #define FLAT_TRIANGLE_LEG 0x100
 
 // Sets a triangle's corners to the club test's ground: level at height 0,
-// with a right angle at the origin and a leg along each of X and Z.
-//
-// It is an inline function to match. Taking the triangle's address ahead of
-// the stores, as the ball simulations' original code does, needs the address
-// in a variable; with the stores written to the local itself, the address is
-// only worked out for GetTrianglePlane's call after them. It is at file
-// scope, as one nested in StepOpeningBallSimulation changes 174 of its words.
+// with a right angle at the origin and a leg along each of X and Z
 static inline void SetFlatTriangle(PlaneTriangle *triangle) {
     triangle->corners[AXIS_X][0] = 0;
     triangle->corners[AXIS_X][1] = FLAT_TRIANGLE_LEG;
@@ -375,7 +370,7 @@ Outcome GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane);
 Vtx *GetGroundPoint(u32 column, u32 row);
 Vtx *GetGridVertex(u32 column, u32 row);
 NO_RESULT SetGroundPoint(s32 column, s32 row, Vtx_t *point);
-// The original's hole_editor.c calls SetGroundPointHeightAndShade without a
+// hole_editor.c calls SetGroundPointHeightAndShade without a
 // prototype, so BlendGroundAroundPoint's float height goes as a double, in the
 // registers of both the height and the shade: the routine takes the double's
 // high word as the height and its low word as the shade, and

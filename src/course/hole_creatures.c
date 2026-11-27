@@ -126,7 +126,6 @@ static Vtx f_MonkeyVertices[8] = {
 static ImageAsset *f_CheepCheepImages[2];
 static ImageAsset *f_MonkeyImage;
 
-// Not static: the original left it to the linker's common block
 HoleCreature f_HoleCreatures[HOLE_CREATURE_COUNT];
 
 void LoadHoleCreatureImages(void) {
@@ -229,15 +228,7 @@ void ClearHoleCreatures(void) {
     }
 }
 
-// Sends a Cheep Cheep leaping across the wind from below the ball.
-//
-// Each way of facing sets the velocity in an arm of its own, which
-// cross-jumping merges, and the rotation is set after the translation, as
-// the other creatures' transforms are. Negating the speed in the test and
-// setting the velocity once after it gives 14 words differing, 6 in shape,
-// as sched then lets the velocity's Z store slide past the position's
-// first load; clearing the rotation's X angle before the translation as
-// well gives 2.
+// Sends a Cheep Cheep leaping across the wind from below the ball
 void StartCheepCheepLeap(s32 startValue) {
     EncodedAsset asset;
     Vec3 translation;
@@ -310,7 +301,6 @@ void DrawHoleCreatures(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 creatureIndex;
     HoleCreature *creature;
-    // Pads the frame to match; without it 222 words differ
     f32 unused[6] UNUSED;
     Vec3 translation;
     Vec3 rotation;

@@ -86,9 +86,8 @@
 // The index in g_WorkArea.hole.tiles of a tile column and row
 #define TileIndex(tileColumn, tileRow) (((tileRow) * GROUND_TILE_COLUMN_COUNT) + (tileColumn))
 
-// Whether a midpoint on a tile's first row, or first column, is also kept
-// by the tile before it. They are macros, as inline functions compile
-// differently from the original.
+// Whether a midpoint on a tile's first row, or first column, is also kept by
+// the tile before it
 #define IsSharedWithPreviousTileRow(column, row) \
     (((column) & 1) && !PointSlot(row) && (PointTile(row) > 0))
 #define IsSharedWithPreviousTileColumn(column, row) \
@@ -306,11 +305,6 @@ static inline s32 GetCellCodeOffset(s32 cellEntry, s32 column, s32 row) {
 
 // Returns the terrain code at a code column and row, clamped to the grid,
 // or -1 where there is none.
-//
-// The cell is addressed by byte offset, column first, as in
-// ResetTerrainCodeCells: the row's offset first gives 22 words differing,
-// a flat index scaled after the sum 6 (4 in shape), and indexing the cells
-// by row and column 17 to 31.
 TerrainCode GetTerrainCode(s32 column, s32 row) {
     s32 cellEntry;
     s32 cellOffset;
@@ -503,8 +497,6 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     f32 weight;
     Surface surface;
 
-    // Copied, then shifted, to match: shifting in the copies gives 50 words
-    // differing, none in shape
     shiftedX = x;
     shiftedZ = z;
     shiftedX -= MINI_GOLF_TEXEL_WIDTH / 2;
@@ -543,9 +535,7 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
         }
 
         if (hit.tag == HOLE_TRIANGLE_KIND_FLAT) {
-            // Reuses i as the water height to match: a waterHeight variable,
-            // wherever it is declared, gives 4 words differing (none in shape), and
-            // comparing the height directly 37 (17)
+            // neighborIndex holds the water height here
             neighborIndex = WaterProbeHeight(fraction, MINI_GOLF_WATER_PROBE_REACH) + waterBias;
             if (neighborIndex < GetTerrainHeight(x, z)) {
                 return SURFACE_WATER_HAZARD;
@@ -638,34 +628,6 @@ f32 ConvertToFloat(s32 value) {
 
 // Returns the surface at a point: water if the water is above the ground,
 // otherwise the heaviest of the four nearest codes' surfaces.
-//
-// The original XORs the steps, each plus one, into $v1, then zeroes $v0 and
-// branches on it to the equal steps' arm before it branches on $v1 to the
-// other two. The steps' difference is first tested for being both below and
-// above 0, to match: fold makes the two tests one AND of their flags, combine
-// reduces the AND to a constant 0, and the branch on the 0's register stays,
-// ahead of the difference's own.
-//
-// With the steps compared directly 8 words differ, 8 in shape, and with the
-// difference compared with 0 alone 10 (6). The two tests in the other order
-// give 18 (4), the pair after the comparison with 0 gives 9 (3), and joined
-// to it by ?: instead of || 21 (7). Above 2 or equal to 1 for the second
-// test gives 21 (5); <= 0 for the comparison 2 (2); and the steps compared
-// directly after the pair 51 (5), with a frame 24 bytes smaller. The same
-// pair of tests on stepColumn gives 12 (0), and on distanceX matches. The
-// difference XORed without the ones, or subtracted, gives 9 (7), and as the
-// != of the steps plus one 47 (1).
-//
-// These also match: !stepDifference for the comparison; != 0 && == 0, or
-// < 0 && >= 1, for the pair; the XOR written out three times with no local;
-// the whole test as !((d >= 0 || d <= 0) && d != 0); and the pair in its own
-// if with a goto into the arm. A bit that is always clear, (d & 1) >> 1,
-// matches in such an if or before ?:, but before || gives 10 (6), as fold
-// ORs its flag with the comparison's and combine drops it. A local set to 0
-// gives 10 (6) too, since cse removes its branch. A 64-bit difference, whose
-// high word is a zeroed register with a branch of its own, gives 32 (10)
-// compared == 0 as a u64 and 33 (13) compared <= 0 as an s64, the pair in
-// $t0 and $t1; an s64 holding the == of the steps plus one gives 17 (5).
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     s8 surfaces[NEAREST_CODE_COUNT];
     f32 weights[NEAREST_CODE_COUNT];
@@ -701,7 +663,6 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     }
 
     if (FindHoleTriangleHit(x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
-        // Unused, but keeps the stack frame the same size as the original
         char unusedText[0x80] UNUSED;
 
         waterBias = WATER_BIAS;
@@ -805,7 +766,8 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     distanceX = Abs(GROUND_TEXEL_SIZE / 2 - fractionX);
     distanceZ = Abs(GROUND_TEXEL_SIZE / 2 - fractionZ);
     stepDifference = (stepColumn + 1) ^ (stepRow + 1);
-    // The difference is never both below and above 0; tested to match
+    // The difference is never both below and above 0, so only its being 0
+    // counts
     if ((stepDifference < 0 && stepDifference > 0) || stepDifference == 0) {
         weights[0] = weights[0] *
             ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
@@ -950,8 +912,8 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
         groundGreen = (groundColor >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
         surfaceColor = g_TerrainCodeColors[code];
 
-        // The original assigns the surface's blue to the ground's and never sets
-        // surfaceBlue.
+        // Assigns the surface's blue to the ground's, and never sets
+        // surfaceBlue
         groundBlue = (surfaceColor >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK;
 #ifdef AVOID_UB
         surfaceBlue = groundBlue;
@@ -1099,15 +1061,6 @@ void SetGridVertex(s32 column, s32 row, Vtx_t *point) {
 
 // Returns the ground point at a point column and row: a grid vertex, or a
 // tile's midpoint.
-//
-// The midpoint is found through the tile's midpoints, as SetGroundPoint
-// finds it, and both kinds of point are returned from one place. Returning
-// the midpoint where it is found makes 38 words differ, 2 in shape: the
-// final sum is then local to its block, and local allocation ties it to the
-// tile's midpoints and gives the slot's lookup other registers. Indexing
-// g_WorkArea.hole.midpoints with the tile and the slot directly makes 26
-// differ, 8 in shape, as sched mixes the tile's offset into the slot's
-// lookup; returning the grid vertex first makes 13 differ.
 Vtx *GetGroundPoint(u32 column, u32 row) {
     u32 tileRow;
     u32 tileColumn;
@@ -1207,8 +1160,6 @@ NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shad
                 point = &midpoints[f_PointSlots[PointSlot(row)][PointSlot(column)]];
                 point->v.ob[AXIS_Y] = height;
 
-                // The chained assignment is there to match: three separate stores,
-                // in either order, in all three places give 21 words differing
                 point->v.cn[RED_CHANNEL] = point->v.cn[GREEN_CHANNEL] = point->v.cn[BLUE_CHANNEL] =
                     shade;
             }
@@ -1222,8 +1173,6 @@ NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shad
                 point = &midpoints[f_PointSlots[GROUND_TILE_POINT_SPAN][PointSlot(column)]];
                 point->v.ob[AXIS_Y] = height;
 
-                // The chained assignment is there to match: three separate stores,
-                // in either order, in all three places give 21 words differing
                 point->v.cn[RED_CHANNEL] = point->v.cn[GREEN_CHANNEL] = point->v.cn[BLUE_CHANNEL] =
                     shade;
             }
@@ -1237,8 +1186,6 @@ NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shad
                 point = &midpoints[f_PointSlots[PointSlot(row)][GROUND_TILE_POINT_SPAN]];
                 point->v.ob[AXIS_Y] = height;
 
-                // The chained assignment is there to match: three separate stores,
-                // in either order, in all three places give 21 words differing
                 point->v.cn[RED_CHANNEL] = point->v.cn[GREEN_CHANNEL] = point->v.cn[BLUE_CHANNEL] =
                     shade;
             }
@@ -1666,9 +1613,7 @@ void MarkBillboardsOnMap(void) {
     }
 }
 
-// Whether, with debugging on, the first controller asks for the scene
-// menu. It is a macro, as an inline function compiles differently from
-// the original.
+// Whether, with debugging on, the first controller asks for the scene menu
 #define IsSceneMenuRequested() \
     (g_IsDebugEnabled && \
         (g_MenuControllerData[0].button & START_BUTTON) && \
@@ -1676,9 +1621,6 @@ void MarkBillboardsOnMap(void) {
 
 // Runs the debug scene menu and the update routine of the current debug scene
 void UpdateDebugScenes(void) {
-    // A local, rather than the constant, to match: comparing the box's state
-    // with BOX_OPEN itself, either way round or in a nested test, gives 17
-    // words differing, 5 in shape
     AnimatedBoxState openState = BOX_OPEN;
     s32 stickStep;
 
@@ -2010,9 +1952,8 @@ Boolean AreTrianglesDifferent(PlaneTriangle *first, PlaneTriangle *second) {
 #define NORMAL_PART_MAX 0x4000
 #define NORMAL_REDUCTION 256
 
-// Whether any of a normal's parts is longer than an integer plane's
-// normals may be. It is a macro, as an inline function compiles
-// differently from the original.
+// Whether any of a normal's parts is longer than an integer plane's normals may
+// be
 #define IsNormalTooLong(normalX, normalY, normalZ) \
     ((Abs(normalX) > NORMAL_PART_MAX) || \
         (Abs(normalY) > NORMAL_PART_MAX) || \
@@ -2033,10 +1974,6 @@ Outcome GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane) {
     s32 length;
 
     secondZ = triangle->corners[AXIS_Z][2] - triangle->corners[AXIS_Z][0];
-    // Split from the subtraction to match: as one statement, cast or written
-    // with a negation, 6 to 8 words differ, none in shape. Of the 720 orders of
-    // GetTrianglePlane's six differences with it in one statement, none
-    // matches; the best leave 2 words.
     firstY = triangle->corners[AXIS_Y][1];
     firstY -= triangle->corners[AXIS_Y][0];
     secondY = triangle->corners[AXIS_Y][2] - triangle->corners[AXIS_Y][0];
@@ -2094,10 +2031,6 @@ Outcome GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane) {
     f32 scale;
 
     secondZ = triangle->corners[AXIS_Z][2] - triangle->corners[AXIS_Z][0];
-    // Split from the subtraction to match: as one statement, cast or written
-    // with a negation, 6 to 8 words differ, none in shape. Of the 720 orders of
-    // GetTrianglePlane's six differences with it in one statement, none
-    // matches; the best leave 2 words.
     firstY = triangle->corners[AXIS_Y][1];
     firstY -= triangle->corners[AXIS_Y][0];
     secondY = triangle->corners[AXIS_Y][2] - triangle->corners[AXIS_Y][0];
@@ -2203,13 +2136,6 @@ s32 GetTerrainHeight(s32 x, s32 z) {
         return NO_GROUND_HEIGHT;
     }
 
-    // The first edge's far Y is read before the edges, to match: it is loaded
-    // two instructions before the rest. Subtracting it in place, in any of the
-    // 720 orders of the six edge subtractions, gives 2 or more words differing,
-    // none in shape; so does reading it into an s16, reading it after the
-    // second Z edge, or reaching each axis's corners through a row pointer.
-    // Reading all three Y corners first gives 4, and the first corner of each
-    // axis 50.
     firstEdgeEndY = triangle.corners[AXIS_Y][1];
     secondZ = triangle.corners[AXIS_Z][2] - triangle.corners[AXIS_Z][0];
     firstY = firstEdgeEndY - triangle.corners[AXIS_Y][0];
@@ -2244,7 +2170,6 @@ s32 GetGroundOrWaterHeight(s32 x, s32 z) {
     s32 waterHeight;
 
     if (FindHoleTriangleHit(x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
-        // Unused, but keeps the stack frame the same size as the original
         char unusedText[0x80] UNUSED;
 
         waterHeight = WaterProbeHeight(fraction, WATER_PROBE_REACH);
@@ -2256,6 +2181,5 @@ s32 GetGroundOrWaterHeight(s32 x, s32 z) {
     return height;
 }
 
-// The original ends its rodata with 8 zero bytes that nothing in the ROM
-// references
+// Zero bytes that end the file's rodata, which nothing in the ROM references
 static const char f_UnreferencedRodata[8] = {0};

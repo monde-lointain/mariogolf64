@@ -129,20 +129,16 @@ enum TriangleFacing {
 
 typedef s32 TriangleFacing;
 
-// How far a point is from a plane's front, in course units. It is a
-// macro, as an inline function compiles differently from the original.
+// How far a point is from a plane's front, in course units
 #define GetPlaneSide(plane, x, y, z) \
     (((plane).normal[AXIS_X] * (x)) + ((plane).normal[AXIS_Y] * (y)) + \
         ((plane).normal[AXIS_Z] * (z)) + ((plane).distance * WORLD_TO_COURSE_SCALE))
 
-// Whether all three of a triangle's corners are below the path. It is a
-// macro, as an inline function allocates registers differently from the
-// original.
+// Whether all three of a triangle's corners are below the path
 #define IsTriangleBelowPath(isFirstBelow, isSecondBelow, isThirdBelow) \
     ((isFirstBelow) && (isSecondBelow) && (isThirdBelow))
-// Whether a value is less than, or more than, every corner's, which are
-// in units. They are macros, as inline functions allocate registers
-// differently from the original.
+// Whether a value is less than, or more than, every corner's, which are in
+// units
 #define IsLessThanCorners(value, corners) \
     (((value) < (corners)[0] * WORLD_TO_COURSE_SCALE) && \
         ((value) < (corners)[1] * WORLD_TO_COURSE_SCALE) && \
@@ -152,9 +148,7 @@ typedef s32 TriangleFacing;
         ((corners)[1] * WORLD_TO_COURSE_SCALE < (value)) && \
         ((corners)[2] * WORLD_TO_COURSE_SCALE < (value)))
 
-// IsOffGround's test with signed bounds, which FindRingHit's draft comes
-// closer to matching with: IsOffGround gives 86 words differing (24 in shape)
-// against 32 (10)
+// IsOffGround's test with signed bounds
 #define IsOffGroundSigned(x, z) ((x) < 0 || (x) >= GROUND_WIDTH || (z) < 0 || (z) >= GROUND_LENGTH)
 
 // Whether a point is off the ground; a negative x or z is too, as an unsigned
@@ -168,38 +162,32 @@ static inline Boolean IsOffMiniGolfGround(s32 x, s32 z) {
     return ((u32)x >= MINI_GOLF_GROUND_SIZE) || ((u32)z >= MINI_GOLF_GROUND_SIZE);
 }
 
-// Whether two values are both negative or both not. It is a macro, as
-// an inline function compiles differently from the original.
+// Whether two values are both negative or both not
 #define HaveSameSign(first, second) \
     ((((first) >= 0) && ((second) >= 0)) || (((first) < 0) && ((second) < 0)))
 
-// Whether a path ends touching a plane or crosses it, from its ends'
-// sides of it. It is a macro, as an inline function compiles differently
-// from the original.
+// Whether a path ends touching a plane or crosses it, from its ends' sides of
+// it
 #define DoesPathMeetPlane(startSide, endSide) \
     ((fabsf(endSide) < PLANE_TOUCH_DISTANCE) || \
         (((startSide) > 0.0f) & ((endSide) < 0.0f)) || \
         (((startSide) < 0.0f) & ((endSide) > 0.0f)))
 
-// Whether a path ends within reach of a wall or crosses it, from its
-// ends' sides of it. It is a macro, as an inline function compiles
-// differently from the original.
+// Whether a path ends within reach of a wall or crosses it, from its ends'
+// sides of it
 #define DoesPathReachWall(startSide, endSide) \
     ((fabsf(endSide) < WALL_REACH_DISTANCE) || \
         (((startSide) >= 0.0f) & ((endSide) < 0.0f)) || \
         (((startSide) < 0.0f) & ((endSide) > 0.0f)))
 
-// Whether a path ends on a ring's plane or crosses it, from its ends'
-// sides of it. It is a macro, as an inline function compiles differently
-// from the original.
+// Whether a path ends on a ring's plane or crosses it, from its ends' sides of
+// it
 #define DoesPathMeetRingPlane(startSide, endSide) \
     (((endSide) == 0.0f) || \
         (((startSide) > 0.0f) && ((endSide) < 0.0f)) || \
         (((startSide) < 0.0f) && ((endSide) > 0.0f)))
 
-// Whether, in the mini-golf ground hit test, a path barely crosses a
-// plane. It is a macro, as an inline function compiles differently from
-// the original.
+// Whether, in the mini-golf ground hit test, a path barely crosses a plane
 #define IsBareCrossing(simulation, startSide, endSide) \
     (((simulation)->state == BALL_STATE_ROLLING) && \
         (fabsf((f32)((startSide) - (endSide))) < BARE_CROSSING_DISTANCE))
@@ -995,9 +983,7 @@ Boolean FindMiniGolfGroundHit(
     s32 firstRow;
     s32 column;
     s32 triangleCount;
-    // One index for the triangles and the search steps, to match: a searchStep
-    // variable for the steps gives 84 words differing (22 in shape) against the
-    // draft's 14 (6)
+    // Counts the triangles and the search steps
     s32 i;
     s32 hitIndex;
     s32 startSide;
@@ -1254,9 +1240,7 @@ Boolean FindGroundHit(
     s32 firstRow;
     s32 column;
     s32 triangleCount;
-    // One index for the triangles and the search steps, to match: a searchStep
-    // variable for the steps gives 77 words differing (19 in shape) against the
-    // draft's 7 (3)
+    // Counts the triangles and the search steps
     s32 i;
     s32 hitIndex;
     s32 startSide;
@@ -1522,11 +1506,6 @@ BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
 // hits, treating each billboard as standing across the ball's path. It
 // sets the hit mask cell there and the fraction of the way along the path,
 // which stays above 1 when nothing is hit, and returns whether something is.
-//
-// Keep declarations separate from initialization: KMC's register allocation
-// depends on declaration order, while its scheduler uses initialization
-// order to break ties. Initializing in declaration order puts fromY's stack
-// store before isHit's rather than after it, leaving two words different.
 s32 FindBillboardHit(
     s32 startX,
     s32 startY,
@@ -1692,61 +1671,6 @@ void MoveBallToCupEdge(BallSimulation *simulation) {
 // Finds whether a ball moving from one point to another hits the
 // flagstick or the flag. It sets the ball's new velocity and the fraction
 // of the way along the path, and returns which part it hits.
-//
-// Much of it is written to match. The counts below are of the words that
-// differ with one thing changed, and in brackets how many of those differ in
-// shape:
-// - The path's ends are copied into locals. Only toX, toZ and fromY are
-//   needed, declared in that order after i. The original keeps endZ in a
-//   slot of its own frame, where the parameter itself would be read from the
-//   caller's, where it was passed: without toZ the frame is 8 bytes smaller
-//   (113 words, 1 in shape). Without toX, it and i swap stack slots (14);
-//   without fromY the slots move and startX and startZ swap registers (98);
-//   with no copies 147 differ (1 in shape). Declared with y's between x's
-//   and z's they give 12, with z's first 16, with y's first or each end's in
-//   axis order 20, before i 26, after the deltas 44 (10) and last 52 (10).
-// - i is set in the loop's header rather than where it is declared (2), and
-//   the deltas are declared in axis order, ahead of nearestFraction and
-//   hitKind: x, z, y gives 4 (2), and those two declared first 18.
-// - The contact point's y has a variable of its own, set ahead of contactZ,
-//   and the height is taken from it after all three. The height straight
-//   from the sum gives 4 (4) before contactX and 8 (8) after contactZ,
-//   contactY after contactZ 8 (8), and the height before contactZ 4 (4).
-//   Clearing isFlagHit after the height's test gives 5 (5).
-// - The flag's test is an if inside an if: as one, with &&, 99 words differ
-//   (19 in shape) and the frame is 8 bytes larger.
-// - A path with both ends on one side of the cup continues from an else:
-//   testing for the miss first gives 4 (4). The hit fraction is set in the
-//   arms of an if/else: a conditional operator gives 7 (1), the arms swapped
-//   8 (8), and 0.0f set before an if 9 (5). startSide is worked out before
-//   endSide, which the other way round gives 44 (4).
-// - The half chord's square is kept in halfChord itself, which the arms of
-//   an if/else replace. The original works the square out in the half
-//   chord's register and takes its root in place, past a branch-likely with
-//   the radius set in its delay slot. A variable of its own for the square
-//   gives 8 (2), as an if/else or with the radius set first, a conditional
-//   operator 7 (3), and the arms swapped 4 (4).
-// - The direction's y is set with ASSIGN_FOR_VALUE, so that it is stored
-//   from a register, which cse makes the one that holds 0.0f for the half
-//   chord's test. That use, counted twice inside the loop, takes the
-//   register's count from 9 to 11, level with the register's that holds the
-//   flag's reach, and over its shorter life (476 insns against 482)
-//   global-alloc places it first: 0.0f takes $f24 and the reach $f26. As a
-//   plain statement the store is a sw of $zero and the two swap registers,
-//   32 (2).
-// - The direction's components are tested with |, for one branch, where ||
-//   gives 47 (13), and the contact offsets are ored themselves, where
-//   testing each with || gives 4 (2).
-// - The direction is scaled in axis order after it is normalized: z, x, y
-//   gives 16 (2), x, z, y 20 (2), and y scaled before normalizing 3 (3).
-// - The contact point moves along the direction on both axes, then becomes
-//   relative to the cup on both, in statements of their own and in the same
-//   variables: each axis finished in turn gives 28 (4), z made relative
-//   before x 9 (1), one statement an axis 66 (24), and the offsets in
-//   variables of their own 34.
-// - The bounce is clamped to its most whether or not the ball is flying,
-//   which with an else if gives 35 (3), and its velocity is set in axis
-//   order: y first gives 7 (5) and y last 2 (2).
 PinHit FindPinHit(
     s32 startX,
     s32 startY,
@@ -2016,10 +1940,6 @@ Outcome GetTrianglePlaneCopy(PlaneTriangle *triangle, TrianglePlane *plane) {
     f32 scale;
 
     secondZ = triangle->corners[AXIS_Z][2] - triangle->corners[AXIS_Z][0];
-    // Split from the subtraction to match: as one statement, cast or written
-    // with a negation, 6 to 8 words differ, none in shape. Of the 720 orders of
-    // GetTrianglePlane's six differences with it in one statement, none
-    // matches; the best leave 2 words.
     firstY = triangle->corners[AXIS_Y][1];
     firstY -= triangle->corners[AXIS_Y][0];
     secondY = triangle->corners[AXIS_Y][2] - triangle->corners[AXIS_Y][0];
@@ -2268,8 +2188,6 @@ Boolean FindHoleTriangleHit(
         hit->corners[AXIS_Z][1] = hitTriangle->vertices[1].v.ob[AXIS_Z];
         hit->corners[AXIS_Z][2] = hitTriangle->vertices[2].v.ob[AXIS_Z];
 
-        // The kind is read from the table, as the original addresses it afresh;
-        // reading it through hitTriangle gives 78 words differing, 30 in shape
         hit->tag = g_WorkArea.hole.triangles[hitIndex].kind;
         *fraction = nearestFraction;
         return TRUE;
@@ -2327,9 +2245,6 @@ Boolean FindWallHit(
     s32 cornerIndex;
     Boolean isDebug = IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS);
 
-    // Set between the flag query and its test, as in FindHoleTriangleHit and
-    // FindRingHit; testing the query directly, with this set first, after the
-    // debug block or before the loop, gives 8 to 13 words differing
     hitIndex = NO_HOLE_TRIANGLE;
     if (isDebug) {
         PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
@@ -2427,9 +2342,6 @@ Boolean FindWallHit(
             hitFraction = 0.0f;
         }
 
-        // Negated, to match: GCC keeps the negation of a floating-point
-        // comparison rather than inverting it, so hitFraction >=
-        // nearestFraction branches differently
         if (!(hitFraction < nearestFraction)) {
             continue;
         }
@@ -2842,9 +2754,7 @@ Boolean FindWallHit(
         edgeCrosses[0] =
             ((cornersU[1] - cornersU[0]) * (hitPointV - (cornersV[0] * WORLD_TO_COURSE_SCALE))) -
             ((cornersV[1] - cornersV[0]) * (hitPointU - (cornersU[0] * WORLD_TO_COURSE_SCALE)));
-        // k holds the sides the edges cross on from here, to match: a sides
-        // local of its own, declared anywhere, gives 559 words differing
-        // rather than 535, 85 in shape either way
+        // k holds the sides the edges cross on from here
         if (edgeCrosses[0] < 0) {
             cornerIndex = EDGE_SIDE_NEGATIVE;
         }
@@ -2916,12 +2826,6 @@ Boolean FindWallHit(
 // checksHeight, only walls at the ball's height count, and a ball high
 // above the ground, where course y points down, is left alone. It returns
 // a value only for a ball off the ground.
-//
-// Each arm of the wall's push sets isPushed itself; set once before the
-// test, the arms keep their products and sums in other float registers and
-// 43 words differ (3 in shape). The corner push sets y between x and z,
-// which puts its store after the corner's load as in the original; set
-// first, 2 words differ (2 in shape), and set last, 4 (4).
 s32 PushBallOutOfWalls(BallSimulation *simulation, Boolean checksHeight) {
     PlaneTriangle wall;
     TrianglePlane plane;
@@ -3006,9 +2910,7 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, Boolean checksHeight) {
             side = (plane.normal[AXIS_X] * x) + (plane.normal[AXIS_Y] * y) +
                 (plane.normal[AXIS_Z] * z) + (plane.distance * WORLD_TO_COURSE_SCALE);
             osSyncPrintf("?");
-            // The original tests whether the magnitude is less than the distance,
-            // a c.lt.s, and skips the wall when it isn't; testing >= gives 4
-            // differing words (4 in shape), fabs 11 (9) and AbsFloat 45 (9)
+            // Skips a wall the ball isn't touching
             if (!(fabsf(side) < WALL_TOUCH_DISTANCE)) {
                 continue;
             }
@@ -3133,15 +3035,12 @@ s32 FindRingHit(
     f32 endSide;
     f32 sideChange;
     f32 hitFraction;
-    // The original frame has room for this; without it 92 words differ, 2 in
-    // shape, and 106 (10) before the hit point had locals
     s32 unused[4] UNUSED;
     s32 hitX;
     s32 hitY;
     s32 hitZ;
     Boolean isDebug = IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS);
 
-    // After the flag query, so this fills the debug branch's delay slot.
     hitRingNumber = NO_RING_NUMBER;
     if (isDebug) {
         PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);

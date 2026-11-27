@@ -141,8 +141,7 @@ typedef s8 HoleAssetKind8;
 #define FAIRWAY_STRIPE_OFFSET (FAIRWAY_STRIPE_WIDTH / 2)
 #define MINI_GOLF_CHECK_WIDTH 4
 #define MINI_GOLF_CHECK_DEPTH 8
-// Whether a green cell lies within one cell of other terrain. It is a macro,
-// as an inline function compiles differently from the original.
+// Whether a green cell lies within one cell of other terrain
 #define IsGreenEdge(code, nearestCode, nearestDistance) \
     ((code) == TERRAIN_CODE_GREEN && \
         (code) != (nearestCode) && \
@@ -221,7 +220,7 @@ typedef struct GroundLightColor {
 #define HEIGHT_STEP_SCALE_COUNT 32
 // The band's heights are filled with NO_HEIGHT four at a time, as doubles
 #define HEIGHTS_PER_FILL 4
-// DrawBandHeights spins this many times after each band; the original has it
+// DrawBandHeights spins this many times after each band
 #define BAND_DELAY_LOOP_COUNT 0x2000
 
 // The points of a tile's grid, edges included, that MeasureGroundTiles averages
@@ -658,7 +657,7 @@ void MoveRingsToEnd(void);
 
 // The objects before the loader thread's stack are defined in order, as the
 // stack is global; see ORDERED_BSS. KMC aligns the statics it allocates
-// more strictly than the others, so the ordered ones state the original's
+// more strictly than the others, so the ordered ones state the N64 build's
 // alignment where it differs.
 // The index of the paint logic that BuildHole paints with
 static CourseIndex f_PaintLogic ORDERED_BSS = 0;
@@ -710,14 +709,6 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 countMax) {
     squares[0] = 0.0f;
     row = 0;
     while (row < span) {
-        // The block of their own gives the row counter its register; without it,
-        // or with plain braces, 20 words differ, none in shape. A for loop storing
-        // squares[row + 1] gives 29, and one counting from 1 to span 35 to 39.
-        // Without it, row and the distance loop's stepped squares pointer swap
-        // $t0 and $t1; flow.c weights each reference by its loop depth, which
-        // the block's loop notes raise. Every declaration order of row and
-        // column gives the 20, the sum's operands swapped 22, a do-while loop
-        // 37, and counting with column, i, count or nearestRow 26 to 72
         IN_OWN_BLOCK(
             row++; squares[row] = (f32)(row * row) * (OFFSET_DISTANCE_SCALE * OFFSET_DISTANCE_SCALE)
         );
@@ -794,10 +785,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 countMax) {
 // ground grid square that covers the band. Where triangles overlap, it averages
 // their heights. A band at or past GROUND_TILE_ROW_COUNT is left untouched.
 void DrawBandHeights(s16 *heights, s32 band) {
-    // corners[4] is where the corners are swapped; it is there to match, as the
-    // original stores each swapped pointer in the frame slot after corners[3],
-    // 0x20($sp). A Vtx* of its own, declared before or after corners, is also
-    // stored in the frame, but the frame is 8 bytes smaller.
+    // corners[4] is where the corners are swapped
     Vtx *corners[5];
     s32 cachedSpan;
     f32 cachedReciprocal;
@@ -821,8 +809,7 @@ void DrawBandHeights(s16 *heights, s32 band) {
         //
         // DrawHeightRow is a nested function, a GNU C extension. It rescales
         // x and height in place, x to a map column and height to a fixed-point
-        // texel height, to match: the original's schedule of the caller's
-        // shifts needs both parameters assigned more than once.
+        // texel height.
         inline void DrawHeightRow(s32 x, s32 height, s32 toX, s32 toHeight, s32 rowZ) {
             s32 width;
             s32 rowSpanCount;
@@ -971,8 +958,9 @@ void DrawBandHeights(s16 *heights, s32 band) {
     cachedSpan = -1;
     if (band < GROUND_TILE_ROW_COUNT) {
 #ifdef AVOID_UB
-        // The original stores the shorts as pairs and copies them as doubles,
-        // which strict aliasing lets the compiler assume are other objects
+        // The matching build stores the shorts as pairs and copies them as
+        // doubles, which strict aliasing lets the compiler assume are other
+        // objects
         for (column = 0; column < HEIGHT_BAND_ROW_COUNT * MAP_COLUMN_COUNT; column++) {
             heights[column] = NO_HEIGHT;
         }
@@ -1055,8 +1043,6 @@ void ResetTerrainCodeCells(void) {
     g_TerrainCodeBlockCount = 0;
     for (row = 0; row < TERRAIN_CODE_CELL_ROW_COUNT; row++) {
         for (column = TERRAIN_CODE_CELL_COLUMN_COUNT - 1; column >= 0; column--) {
-            // Addressed by byte offset to match: indexing the cells gives 23 words
-            // differing, 7 in shape
             cellOffset = (row * TERRAIN_CODE_CELL_ROW_SIZE) + (column * TERRAIN_CODE_CELL_SIZE);
             *(s16 *)AddressPast(g_TerrainCodeCells, cellOffset) = -1;
         }
@@ -1182,13 +1168,8 @@ s32 PaintDefaultCourse(
 // A paint logic like PaintMainCourse with pale rough, out-of-bounds ground
 // painted 0xBEEF, and TERRAIN_CODE_NO_DROP_GROUND painted as
 // cart way away from more of it. Neither the paint-logic table nor any code
-// refers to it.
-//
-// To match, the cart way's color where the other terrain isn't one cell away
-// is the gray mottled by a random value that is always 0, written as the
-// sibling logics mottle their no-drop ground: the original zeroes $t0, which
-// nothing reads, in the delay slot of the range test, and stores the same
-// gray in each of the two arms.
+// refers to it. The cart way's color where the other terrain isn't one cell
+// away is the gray mottled by a random value that is always 0.
 s32 PaintPaleRoughCourse(
     TerrainCode code,
     TerrainCode nearestCode,
@@ -1201,15 +1182,7 @@ s32 PaintPaleRoughCourse(
     s32 random;
     s32 fairwayRandom;
 
-    // To match, no seed is drawn for the cart way's mottle. The zero isn't
-    // carried past the switch's jump, so the mottle's two reads last until
-    // combine, which knows the value of a register that is set once and folds
-    // the color. It leaves a use of the register in the arm, so the zero
-    // keeps a register, and with three references counted that register is
-    // allocated ahead of z's and is $t0. With one read, local-alloc replaces
-    // a register set once and read once by its constant and drops the set: 9
-    // words differ (5 in shape). Set in the cart-way arm instead, the zero is
-    // folded away at once: 18 (10).
+    // No seed is drawn for the cart way's mottle
     random = 0;
 
     switch (code) {
@@ -1266,16 +1239,7 @@ s32 PaintPaleRoughCourse(
                 color = Rgba16(0, 0, 31, 0);
             }
             else {
-                // Both colors are the same gray, which the original stores in
-                // each arm: the mottle is folded after cse, so only the jump
-                // pass is left to see that the arms are the same, and it moves
-                // the second arm's store ahead of the test without dropping
-                // the first's. With the plain gray in both arms and no zero,
-                // the test goes and a stack frame comes: 18 words differ (10
-                // in shape). With the mottle in the first arm, 3 (1); with the
-                // test reversed or as a conditional expression, 3 (3); with
-                // the mottle stored before the test, or the code set in each
-                // arm, 5 (3)
+                // Both colors are the same gray
                 if (nearestDistance == 1) {
                     color = Rgba16(18, 18, 18, 1);
                 }
@@ -2048,13 +2012,9 @@ s32 PaintDrivingRange(
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
-// Returns the map texel at a column and row of the whole hole's map, adding the
-// base, the texel's offset and the tile's in that order as the original does.
-// The callers have ruled out negative rows and columns, so dividing the row, as
-// the column is, finds the same tile as shifting it. Shifting the row gives 36
-// words differing (6 in shape) in EncodeCodeMap and 40 (6) in LoadCodeMap, also
-// with a tileColumn local; adding the offsets before the base gives 2 (0) in
-// each, and the tile's offset before the texel's 14 (0) and 6 (0).
+// Returns the map texel at a column and row of the whole hole's map. The
+// callers have ruled out negative rows and columns, so dividing the row, as
+// the column is, finds the same tile as shifting it.
 static inline u16 *GetMapTexel(s32 column, s32 row) {
     s32 tileOffset = ((column / GROUND_TILE_TEXEL_SPAN) +
                          ((row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)) *
@@ -2067,10 +2027,6 @@ static inline u16 *GetMapTexel(s32 column, s32 row) {
 
 // Returns the map texel at a column and row, or 0 off the map
 static inline u16 ReadMapTexel(s32 column, s32 row) {
-    // The separate tests are there to match: one || test gives 43 words differing
-    // (15 in shape) in EncodeCodeMap, 63 (15) in SaveHoleFiles and 59 (15) in
-    // CleanCodeMap, and one && test for being on the map 51 (17), 103 (17) and
-    // 67 (17)
     if (column < 0) {
         return 0;
     }
@@ -2108,8 +2064,6 @@ void EncodeCodeMap(void) {
 
 // Sets the map texel at a column and row, unless it is off the map
 static inline void WriteMapTexel(s32 column, s32 row, u16 color) {
-    // The separate tests are there to match: one || test gives 43 words differing
-    // (15 in shape) in LoadCodeMap, and one && test for being on the map 49 (13)
     if (column < 0) {
         return;
     }
@@ -2177,8 +2131,6 @@ void LoadToolCodeMap(void) {
 #define CodeIndex(column, row) (((row) * MAP_COLUMN_COUNT) + (column))
 
 // The index in the code map of the code a step away from a column and row.
-// The row's step is taken before the row's codes are counted and the
-// column's after the column is added, to match.
 #define NeighborCodeIndex(column, row, columnStep, rowStep) \
     ((((row) + (rowStep)) * MAP_COLUMN_COUNT) + (column) + (columnStep))
 
@@ -2198,7 +2150,7 @@ static inline void SetBuildCode(s32 index, u8 code) {
 // code, if they are equal and it differs. The neighbors are a step away
 // each side. The code before is read twice, and the code after again to
 // fill with. The index and the code before are kept in the caller's
-// variables, and the block is no loop that runs once, to match.
+// variables.
 #define FillCodeGap(index, previous, column, row, columnStep, rowStep) \
     { \
         s32 code; \
@@ -2226,93 +2178,6 @@ static inline void SetBuildCode(s32 index, u8 code) {
 // Encodes the map as EncodeCodeMap does, then runs the clean-up passes, each
 // filling the codes that differ from two equal neighbors, along the row and
 // then down the column. There are no passes, so it only encodes the map.
-//
-// The original keeps the index of the code it is at in one register, $a0,
-// through the encoding and the passes alike, setting it ahead of each read and
-// each store and adding it to the buffer's address. So the index is one
-// variable of the function's, set in a statement of its own each time. Along
-// the row the code before's index is the cell's less one, and the cell's is
-// copied to $t0 for the fill; up the column it is the column added to the row
-// above's offset, which loop.c steps beside the row. A neighbor's index is
-// written to give both: the row's step is taken before the row is scaled, and
-// the column's is added after the column. With the column's step added to the
-// column first, or the steps added to the cell's index, the sums are grouped
-// another way; with no index, loop.c steps the cell's beside the column; and
-// set in GetCode's argument, the index is copied for the fill up the column as
-// well.
-//
-// The code before the cell is kept in one variable for both directions. A
-// variable that lives in one block gets its register from local-alloc, the
-// lowest one free; one read in more than a block is left to the global
-// allocator, which takes them in order of priority, the references weighted by
-// loop depth, times their logarithm, over the length of the life
-// (allocno_compare in global.c). The original has the code after's address in
-// $a1, the code before in $a2 and the buffer's address in $a3. In a variable of
-// the gap's own, the code before lives within the test's block and takes $a1
-// ahead of the address, which lasts into the fill. Shared by the two directions
-// it waits for the global allocator, where the address comes first, with 20
-// references over 11 instructions, and the code before, with 16 over 18, ties
-// with the buffer's address, with 24 over 27, and goes ahead of it for its
-// lower register number. A loop that runs once around the fill counts it a
-// level deeper: the buffer's address then has 25 references and goes ahead of
-// the code before, so FillCodeGap's block is a plain one.
-//
-// The code before is read twice for the test, and the code after again for the
-// fill, as the original reads them. The encoding sets its cursor from the same
-// index, as the original has it in $a0 there too; with the sum written where
-// the buffer is indexed, it takes $v1.
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   The old draft: GetCode and SetCode given the column and
-//   row, with no index, and FillCodeGap an inline function    88 (12)
-//   The code before in a variable of FillCodeGap's own        26 (0)
-//   The code before as a u8                                   26 (0)
-//   The code before as an s16 or a u16                        4 (0)
-//   The cell's code shared by the two directions as well      60 (0)
-//   The cell's code shared in place of the code before        52 (0)
-//   The code before's second read shared as well              26 (0)
-//   FillCodeGap's block as a loop that runs once              7 (7)
-//   The fill alone in a loop that runs once                   34 (0)
-//   The test as previous != code                              4 (0)
-//   The test as next == previousAgain                         46 (0)
-//   The neighbors compared ahead of the cell                  96 (8)
-//   The second comparison in an if inside the first's         68 (18)
-//   The code before read once                                 90 (8)
-//   The gap filled from the code after's first read           112 (4)
-//   The code before read ahead of the cell's                  68 (6)
-//   The code after read ahead of the code before's second
-//   read                                                      94 (8)
-//   The code after read ahead of both reads of the code
-//   before                                                    90 (12)
-//   The code before's first read taken into previousAgain and
-//   its second into previous                                  66 (0)
-//   The index set in GetCode's argument                       7 (5)
-//   The index in a variable of FillCodeGap's own              4 (0)
-//   The encoding's cursor set with no index                   4 (0)
-//   The encoding's code stored by SetCode                     144 (12)
-//   No index, each sum written in GetCode's or SetCode's
-//   argument                                                  137 (35)
-//   A neighbor's index with the column's step added to the
-//   column first, or as CodeIndex of the stepped column and
-//   row                                                       42 (18)
-//   A neighbor's index with the column and its step ahead of
-//   the row's offset                                          42 (18)
-//   A neighbor's index as the cell's plus the steps           60 (24)
-//   CodeIndex with the column ahead of the row's offset       8 (0)
-//   The encoding's loops' tests as !=                         25 (9)
-//   The passes' loops' tests as !=                            8 (8)
-//   The passes' count tested as > 0                           4 (4)
-//   ReadMapTexel's tests as one ||                            59 (15)
-//   ReadMapTexel's tests as one && for being on the map       67 (17)
-//
-// Also matching: the code before declared for the function, or as a u32; the
-// code after shared by the two directions as well; the gap's other codes as u8
-// or u32; the two comparisons anded with &; the fill kept in an s32, or read
-// back through the build cursor with no local; GetCode adding the index to the
-// buffer, returning an s32, or as a macro; SetCode as a macro; the column's
-// test or the row's with its halves the other way round; the column's as one
-// unsigned comparison; the encoding's index written as a neighbor's with no
-// steps; index as a u32, or declared first; and passCount declared last.
 void CleanCodeMap(void) {
     s32 passCount = 0;
     s32 column;
@@ -2323,7 +2188,6 @@ void CleanCodeMap(void) {
     f_BuildBuffer = f_BuildCursor;
     for (row = 0; row < MAP_ROW_COUNT; row++) {
         for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-            // Kept in the index the passes use, to match
             index = CodeIndex(column, row);
             f_BuildCursor = &f_BuildBuffer[index];
             *f_BuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
@@ -2333,7 +2197,7 @@ void CleanCodeMap(void) {
     for (; passCount != 0; passCount--) {
         for (row = 0; row < MAP_ROW_COUNT; row++) {
             for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-                // The code before the cell's, in one variable for both directions, to match
+                // The code before the cell's, in one variable for both directions
                 s32 previous;
 
                 if (column > 0 && column < MAP_COLUMN_COUNT - 1) {
@@ -2380,38 +2244,7 @@ static inline s32 GetCellCodeOffset(s32 cellEntry, u32 column, u32 row) {
 }
 
 // Sets a map texel's code in a block of packed codes, two to a byte, with
-// the even column's code in the high bits. The words that differ are
-// PaintGroundTiles', which this is part of.
-//
-// The odd column's offset within the block is worked out in a block of its
-// own, and the code block's offset added after it, to match. The original
-// keeps the byte's offset in $v0 and the byte in $v1 here. The store's basic
-// block has three quantities: the offset, the code block's shift and the
-// byte. With three, local-alloc's block_alloc orders them by hand, comparing
-// quantities 0 and 1, then 1 and 2, then 0 and 1 again whatever the first
-// two steps swapped, so the offset is placed first, and takes $v0, unless
-// the shift outranks it and the byte outranks the shift. They rank by
-// floor_log2(refs) * refs / life, and flow counts each reference once and
-// once more for every loop around it. Inside the three loops the offset's 9
-// references count 36 over a life of 16, which is 112500, the shift's 2
-// count 8 over 2, 120000, and the byte's 6 count 24 over 6, 160000, so the
-// byte is placed first and takes $v0, with the offset in $v1. The even
-// columns' stores hold them that way, so jump2 merges the end of this store
-// with theirs: 26 words differ, 6 in shape. The block's loop notes end
-// before the code block's shift and bring the offset's count to 41, 128125,
-// above the shift.
-//
-// Only the column's half in the block, with the row's part and the code
-// block's added after it, matches too (39). The whole offset in the block
-// gives 26 (6) again, as the shift's count rises with it to 10, 150000,
-// above the offset's 43, 134375. Indexing in place with GetPackedCodeOffset,
-// or the same statements without the block, gives 26 (6).
-//
-// The even column's code is shifted into a local before the byte is read, to
-// match: the original shifts it between the load and the mask. Shifted in
-// the store's expression, here 105 words differ (13 in shape), in the cell's
-// store below 142 (14), and in both 131 (1). Working the offset out as the
-// odd column's is gives 7 (3) with both stores done so.
+// the even column's code in the high bits
 static inline void SetPackedTerrainCode(s32 block, u32 column, u32 row, s32 code) {
     if (column & 1) {
         s32 offset;
@@ -2461,23 +2294,12 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
                 *word++ = fill;
             }
 
-            // The original works the offset out again; storing through
-            // cellOffset gives PaintGroundTiles 125 words differing, 15 in
-            // shape
+            // Works the offset out again
             CellAt(GetCellOffset(column, row)) = block | TERRAIN_CODE_CELL_BLOCK;
             SetPackedTerrainCode(block, column, row, code);
         }
     }
     else {
-        // The stores are written out to match, as the original masks the
-        // cell's marker after each column's test: calling
-        // SetPackedTerrainCode with the masked marker gives PaintGroundTiles
-        // 52 words differing, 4 in shape, GetPackedCodeOffset with it in the
-        // even column's store 51 (3), and the byte's offset worked out once,
-        // into i, 147 (19). The odd column's store matches with or without
-        // SetPackedTerrainCode's block: the mask and the shift make a
-        // quantity of two registers that ranks level with the byte, 160000,
-        // so local-alloc places the offset first either way.
         if (column & 1) {
             g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cellEntry, column, row)] =
                 (g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cellEntry, column, row)] &
@@ -2498,13 +2320,6 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
 // Paints the map's texels from the code map with the course's paint logic, sets
 // each terrain code's color, and stores the painted terrain codes in their
 // cells.
-//
-// The texel loop steps column in its header, with texelIndex, to match: when
-// the code blocks run out the original leaves SetCellTerrainCode with a
-// branch-likely that steps texelIndex in its delay slot. Stepped at the end
-// of the body, plainly or in a block of its own, 3 words differ, all in
-// shape. The stores in SetPackedTerrainCode and SetCellTerrainCode are
-// written to match too, as their comments say.
 void PaintGroundTiles(void) {
     GridOffset offsets[PAINT_OFFSET_COUNT];
     u32 codePaintings[TERRAIN_CODE_COUNT];
@@ -2536,9 +2351,6 @@ void PaintGroundTiles(void) {
     nextCode = f_BuildCursor;
     searchSpans = f_PaintLogics[f_PaintLogic].searchSpans;
 
-    // row is there to match: counting with column or an s32 codeIndex of its
-    // own gives 16 words differing, with texelIndex 40, none in shape, and
-    // with code 194, 10 in shape
     for (row = 0; row < TERRAIN_CODE_COUNT; row++) {
         codePaintings[row] = paint(row, row, 0, 0, 0);
         g_TerrainCodeColors[codePaintings[row] & TERRAIN_CODE_MASK] =
@@ -2560,11 +2372,6 @@ void PaintGroundTiles(void) {
                     if (nearestDistance < 0) {
                         painting = codePaintings[code];
 
-                        // The goto is there to match: testing for a fixed painting first
-                        // in an if-else, and searching and painting in its else, gives 6
-                        // words differing, all in shape; testing for no search first
-                        // gives 111 (31), and keeping the nesting with the paint call in
-                        // both arms 111 (29)
                         goto PAINTED;
                     }
 
@@ -2603,7 +2410,6 @@ PAINTED:
 // Cleans up the terrain code map and repaints the ground tiles from it,
 // or, if that was done last, restores the code map from before
 void ToggleCodeMapCleanup(void) {
-    // Unused; it is there to match; without it 8 words differ
     u8 unused[0x640] UNUSED;
 
     if (!f_IsCodeMapCleaned) {
@@ -2774,8 +2580,6 @@ void BuildHole(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
     u32 size;
     s32 pointsSize;
 
-    // The repeated case is there to match: testing both courses with ||
-    // gives 9 words differing (7 in shape), and a switch 10
     if (courseRecordIndex == COURSE_RECORD_SHY_GUY_DESERT) {
         FillGroundNoise(GROUND_NOISE_RANGE, LIGHT_GROUND_NOISE_BASE);
     }
@@ -3057,8 +2861,7 @@ void ClearHolePoints(void) {
         g_HolePoints.aimPoints[i][AXIS_Y] = 0;
         g_HolePoints.aimPoints[i][AXIS_Z] = 0;
 
-        // The dereference is there to match: indexing AXIS_X gives 7 words
-        // differing, 5 in shape
+        // Clears the route point's x
         *g_HolePoints.routePoints[i] = 0;
         g_HolePoints.routePoints[i][AXIS_Z] = 0;
     }
@@ -3068,9 +2871,7 @@ void ClearHolePoints(void) {
 void ResetBuildBuffer(void) {
     f_BuildCursor = BUILD_BUFFER_START;
     f_BuildBuffer = f_BuildCursor;
-    // Rewinds the cursor to the buffer, as the file routines do after a read;
-    // the original makes all three stores, and any two of them, chained or
-    // not, give 4 words differing, 2 in shape
+    // Rewinds the cursor to the buffer, as the file routines do after a read
     f_BuildCursor = f_BuildBuffer;
 }
 
@@ -3289,7 +3090,6 @@ void ReadBillboards(void) {
 // Reads the hole triangles' kinds and corner positions from the hole's triangle
 // file
 void ReadHoleTriangles(void) {
-    // Unused; it is there to match; without it 18 words differ
     u8 unused[0x10] UNUSED;
     u8 triangleCount;
     HoleTriangleKind8 kind;
@@ -3441,9 +3241,6 @@ void ReadVertexX(s16 *coordinate, s32 vertexFlags) {
 // bytes, or one byte scaled up by one of three shifts
 void ReadVertexY(s16 *coordinate, s32 vertexFlags) {
     *coordinate = 0;
-    // The u8 cast is there to match: without it 2 words differ, 2 in shape;
-    // shifting before masking gives 4, a u32 cast 7, and a u8 flags parameter
-    // 16 in each reader
     switch ((u8)(vertexFlags & VERTEX_FLAG_Y_ENCODING) >> VERTEX_FLAG_Y_ENCODING_SHIFT) {
         case VERTEX_ENCODING_BYTE:
             ReadFileBytes(coordinate, 1);
@@ -3471,9 +3268,6 @@ void ReadVertexY(s16 *coordinate, s32 vertexFlags) {
 // bytes, or one byte scaled up by one of three shifts
 void ReadVertexZ(s16 *coordinate, s32 vertexFlags) {
     *coordinate = 0;
-    // The u8 cast is there to match: without it 2 words differ, 2 in shape;
-    // shifting before masking gives 4, a u32 cast 7, and a u8 flags parameter
-    // 16 in each reader
     switch ((u8)(vertexFlags & VERTEX_FLAG_Z_ENCODING) >> VERTEX_FLAG_Z_ENCODING_SHIFT) {
         case VERTEX_ENCODING_BYTE:
             ReadFileBytes(coordinate, 1);
@@ -3610,18 +3404,6 @@ static inline u16 *GetShadowedTexel(u32 column, u32 row) {
 // texels are kept, and bright ones are darkened the most. A row with no texel
 // within the width ends the shadow once one has started. Billboards with a
 // texture in f_ShadowlessTextures cast no shadow.
-//
-// GetShadowedTexel adds byte offsets to the tiles, as GetMapTexel does,
-// and the brightness drops its floor in a statement of its own. With
-// these, where indexing the texel and subtracting the floor in the sum
-// gave 53 words, 13 in shape, 37 words differ, 11 in shape.
-//
-// The rest is the bodies of one statement, which have no braces. Each
-// braced block leaves a deleted note in the RTL, and loop.c measures a
-// hoisted constant's life in notes as well as insns. With braces, the
-// row loop is long enough that the constant 100, already moved out of
-// the column and row loops, also leaves the billboard loop; the original
-// sets it before each row. Hence the clang-format markers.
 void CastBillboardShadows(void) {
     Mat4 lightView;
     Vec3 lightPoint;
@@ -3960,17 +3742,7 @@ void GetGroundLightColors(GroundLightColor *light, GroundLightColor *shade) {
 // set, the others also fade toward white with height: up to HEIGHT_FADE_LIMIT,
 // fully when GAME_FLAG_FADE_HIGH_GROUND_FULLY is set, or not at all when
 // GAME_FLAG_NO_HIGH_GROUND_FADE is set.
-//
-// Neither offset height row has a variable: the original indexes heightRows
-// for each, at the edge tiles and the inner ones alike, and loop hoists the
-// indexing, which computes the leading row after column is set and keeps a
-// second copy of the trailing one. Holding the rows in trailingHeights and
-// leadingHeights gave 132 words differing, 14 in shape. The faded color is
-// built in color, a full word like the lit one, before it becomes the texel's;
-// built in the halfword texelColor itself, combine puts the alpha before the
-// channels in the last or, and 2 words differ.
 void ShadeGroundTiles(void) {
-    // Pads the frame to match; without it 182 words differ
     s32 unused[20] UNUSED;
     GroundLightColor light = {24, 22, 16};
     GroundLightColor shade;
@@ -4199,13 +3971,10 @@ void ShadeGroundTiles(void) {
 
                     shaded.alpha = texelColor & TEXEL_ALPHA_MASK;
 
-                    // The height test is always true here; the original has it
+                    // The height test is always true here
                     if (*heights >= 0 && isHighGroundFaded) {
                         fade = *heights * HEIGHT_FADE_SCALE;
-                        // Each limited branch clamps the fade itself, to match: clamping
-                        // once, after a test that leaves the disabled fade out, gives 160
-                        // differing words (30 in shape) against 132 (14), and giving the
-                        // disabled fade a zero limit 138 (20)
+                        // Each limited branch clamps the fade itself
                         if (isFadeUnlimited) {
                             fadeLimit = HEIGHT_FADE_FULL;
                             if (fade >= fadeLimit) {
@@ -4314,21 +4083,8 @@ static inline u16 ReadTileTexel(s32 tileColumn, s32 tileRow, s32 texelColumn, s3
     texelColumn = (texelColumn + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
     texelRow = (texelRow + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
 
-    // Each layout reads its texel itself, to match. Each arm then ends in its
-    // own load, which cross-jumping merges once the function is inlined, and
-    // the caller's block after the arms holds only single-cycle instructions,
-    // which the scheduler leaves in the source's order. With one read after the
-    // arms the load is in that block: its latency raises the priority of the
-    // store of the texel, and the scheduler puts the column's step ahead of the
-    // load, 12 words differing (4 in shape).
     if (g_WorkArea.hole.tiles[tileIndex]
             .texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0) {
-        // Moved to the tile in a statement of its own, to match: the original
-        // adds the tile's offset last, as the second operand. In one sum
-        // fold-const takes the first texel's address, a constant, into the
-        // innermost sum and the tile's offset comes out as the last
-        // addition's first operand; the twelve groupings of one sum give 4
-        // words differing (none in shape), 8 (none) or 10 (2)
         texel = &TileTexelRun(
                     g_WorkArea.hole.tiles[0].texels
                 )[(TILE_BORDER_BEFORE * GROUND_TILE_TEXEL_ROW_LENGTH) + TILE_BORDER_BEFORE] +
@@ -4337,11 +4093,6 @@ static inline u16 ReadTileTexel(s32 tileColumn, s32 tileRow, s32 texelColumn, s3
         return *texel;
     }
     else {
-        // One sum here: fold-const takes the first tile's texels, a constant,
-        // into the innermost sum with the tile's offset, as the original has
-        // them. Moved to the tile in a second statement, as above, gives 16
-        // (4); the tile's offset grouped with the first tile's texels in the
-        // source, 16 (4), and with the texel's offset, 8 (none)
         texel = (u16 *)((u8 *)g_WorkArea.hole.tiles[0].texels +
             (((texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn) * sizeof(u16)) +
             (tileIndex * sizeof(GroundTile)));
@@ -4448,18 +4199,14 @@ void ToggleGroundTileBorders(void) {
             texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0xFFFF;
 
 #ifdef AVOID_UB
-            // The original copies the texels as doubles, which strict aliasing
-            // lets the compiler assume are other objects
+            // The matching build copies the texels as doubles, which strict
+            // aliasing lets the compiler assume are other objects
             memcpy(
                 g_WorkArea.hole.tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn].texels,
                 texels,
                 sizeof(texels)
             );
 #else
-            // The source is set before the destination and its end kept in a
-            // variable, to match: the destination set first gives 4 words
-            // differing (2 in shape), and the end worked out in the loop's test
-            // 16 (none)
             source = (f64 *)texels;
             sourceEnd = (f64 *)&texels[GROUND_TILE_TEXEL_ROW_COUNT];
             destination =
@@ -4491,9 +4238,7 @@ void SetMiniGolfTileTextureCoordinates(s32 column, s32 row, Vtx_t *start, Vtx_t 
             TILE_TEXTURE_ORIGIN;
         vertex->tc[TEXTURE_AXIS_S] = coordinate;
 
-        // coord holds the row offset here, to match: an offset local of its own
-        // gives 8 words differing, 2 in shape, and the coordinate in one
-        // statement 6, 2 in shape
+        // coordinate holds the row offset here
         coordinate = (vertex->ob[AXIS_Z] * MINI_GOLF_TEXTURE_SCALE_Z) - (row << TILE_ORIGIN_SHIFT);
         vertex->tc[TEXTURE_AXIS_T] = TexelCoordinate(coordinate) + TILE_TEXTURE_ORIGIN;
     }
@@ -4515,16 +4260,13 @@ void SetTileTextureCoordinates(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
             TILE_TEXTURE_ORIGIN;
         vertex->tc[TEXTURE_AXIS_S] = coordinate;
 
-        // coord holds the row offset here, to match: an offset local of its own
-        // gives 8 words differing, 2 in shape, and the coordinate in one
-        // statement 6, 2 in shape
+        // coordinate holds the row offset here
         coordinate = vertex->ob[AXIS_Z] - (row << TILE_ORIGIN_SHIFT);
         vertex->tc[TEXTURE_AXIS_T] = TexelCoordinate(coordinate) + TILE_TEXTURE_ORIGIN;
     }
 }
 
-// Copies count vertices; copying them as f64s is there to match: copying the
-// structs gives 177 words differing in BuildGroundTileDisplayList, 93 in shape
+// Copies count vertices, as f64s
 static inline void CopyVertices(Vtx *destination, Vtx *source, s32 count) {
 #ifdef AVOID_UB
     // The doubles would be read and stored where strict aliasing lets the

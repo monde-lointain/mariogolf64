@@ -61,7 +61,7 @@
 #define RING_SCALE_ONE 1024.0f
 
 // A ring triangle's corners, by axis and then by corner. The words around
-// them are never used; they keep the original's stack layout.
+// them are never used.
 typedef struct RingCorners {
     s32 unusedBeforeCoordinates;
     s16 coordinates[AXIS_COUNT][TRIANGLE_VERTEX_COUNT];
@@ -104,10 +104,7 @@ void DimNextTranslucentTriangles(void) {
     f_DimsTranslucentTriangles = TRUE;
 }
 
-// Draws the hole's triangles other than the rings.
-//
-// The normalized edge's magnitude keeps its if, as the original negates it
-// in a branch; through fabsf 316 words differ (38 in shape).
+// Draws the hole's triangles other than the rings
 void DrawHoleTriangles(
     Gfx **displayListHead,
     CameraMatrices *matrices UNUSED,
@@ -343,26 +340,6 @@ void DrawHoleTriangles(
 
 // Draws the current player's rings; one past RING_STATE_SHOWN fades out while
 // sparkles circle it
-//
-// The sparkle loop has its own section counter, sparkleSection, and the next
-// side is masked to RING_SIDE_COUNT - 1 with &, as the original masks it:
-// the two together took the draft from 65 words differing (19 in shape)
-// to 16 (8). The mask alone gave 364 (14), since it shortens the outer
-// loop so that loop.c hoists one more display list command (0xDC08060A)
-// out of it; the counter alone changed nothing.
-//
-// Each pipe sync and the RDP state command after it goes through
-// AppendSyncedRdpState, which declares the command's pointer first, as
-// DrawHoleTriangles does. That puts the pointers of the pipe sync before
-// gDPSetTextureLUT and of gDPSetTextureLUT in the original's stack slots,
-// 0x144 and 0x13C, which follow the order the pointers are declared in;
-// it took the draft from 16 words differing (8 in shape) to 8 (8).
-//
-// The ring's matrix is indexed by ringIndex. loop.c strength-reduces that
-// index's address into a pointer of its own, which it starts after the
-// values it hoists out of the loop, as the original does. The draft
-// stepped a matrix pointer beside ringIndex, set before them, and 8 words
-// differed.
 void DrawRings(Gfx **displayListHead, CameraMatrices *matrices UNUSED, Camera *camera UNUSED) {
     Gfx *gfx = *displayListHead;
     Mat4 transform;

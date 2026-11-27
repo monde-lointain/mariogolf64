@@ -61,7 +61,7 @@ s32 FindBillboardHit(
     f32 *fraction
 );
 
-// The original's ball steppers call FindBillboardHit with a ninth
+// The matching build's ball steppers call FindBillboardHit with a ninth
 // argument, the simulation, which FindBillboardHit does not read. The cast
 // goes through a function of no arguments, which GCC takes as meant.
 // Calling through it is undefined, so otherwise the simulation is left out.

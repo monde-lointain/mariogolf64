@@ -218,9 +218,8 @@ void RevertBillboardManager(void) {
 const RgbColor g_BillboardLightColor = {255, 220, 160};
 const RgbColor g_BillboardEnvColor = {128, 64, 32};
 
-// Whether a point is near the edge of a course; no point of the
-// mini-golf course is. It is a macro, as an inline function compiles
-// differently from the original.
+// Whether a point is near the edge of a course; no point of the mini-golf
+// course is.
 #define IsNearCourseEdge(x, z) \
     (!g_GameState.isMiniGolf && \
         (((x) <= COURSE_EDGE_X_MIN) || \
@@ -295,9 +294,8 @@ void SortBillboardsByDepth(void) {
     }
 }
 
-// Whether a billboard's texture is one read in on demand, has been read
-// and is not the one loaded for drawing. It is a macro, as an inline function
-// compiles differently from the original.
+// Whether a billboard's texture is one read in on demand, has been read and is
+// not the one loaded for drawing
 #define NeedsTextureLoad(billboard, textureIndex) \
     (((billboard)->textureIndex != f_LoadedTextureIndex) && \
         (f_BillboardTextures[textureIndex].loadMode == TEXTURE_LOADED_ON_DEMAND) && \
@@ -388,7 +386,6 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
     RgbColor envColor = g_BillboardEnvColor;
     Vec3 viewDirection;
     Vec3 lightDirection;
-    // Nothing uses it, but the original's frame has the room for it
     Vec3 unusedVector UNUSED;
     Radians lightPitch;
     Radians lightYaw;
@@ -588,10 +585,7 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
         }
 
         // Never true, as this loop draws no fading billboard that would set
-        // the flag, and the compiler drops the test: it only leaves the
-        // flag's unread register and 16 unused bytes of the frame. So the
-        // mode restored here is a guess; the match needs the test against
-        // TRUE, the flag cleared and any command drawn
+        // the flag
         if (hasTranslucentMode == TRUE && alpha == OPAQUE_ALPHA) {
             hasTranslucentMode = FALSE;
             gDPPipeSync(gfx++);
@@ -617,9 +611,8 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
     g_DisplayListHead = gfx;
 }
 
-// Whether the billboards are hidden: by the game flag, while their heap
-// is not ready, or by the debug view. It is a macro, as an inline
-// function compiles differently from the original.
+// Whether the billboards are hidden: by the game flag, while their heap is not
+// ready, or by the debug view
 #define AreBillboardsHidden() \
     (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !f_IsHeapReady || IsDebugBButtonView())
 
