@@ -46,11 +46,10 @@ typedef f32 Degrees;
 typedef u16 BinaryAngle;
 // A binary angle stored signed, from minus a half turn to under a half turn
 typedef s16 SignedBinaryAngle;
-// An angle in binary angle units stored as a SignedBinaryAngle, as KMC
-// GCC's code stores one: truncated to a word, whose low half it keeps, so
-// that angles past a half turn wrap. C leaves converting a float outside a
-// short's range undefined, so other builds than the matching one truncate
-// to a word first.
+// An angle in binary angle units stored as a SignedBinaryAngle: truncated to
+// a word, whose low half it keeps, so that angles past a half turn wrap. C
+// leaves converting a float outside a short's range undefined, so builds that
+// avoid undefined behavior truncate to a word first.
 #ifdef AVOID_UB
 #    define TruncateToSignedBinaryAngle(angle) ((SignedBinaryAngle)(s32)(angle))
 #else
@@ -62,8 +61,8 @@ typedef s32 WideBinaryAngle;
 // Conversions between degrees and radians
 #define DegreesToRadians(degrees) ((degrees) * (M_PI / 180))
 #define RADIANS_TO_DEGREES (1.0 / ((f32)M_PI / 180.0))
-// The original's single-precision approximation of pi / 180, a step above
-// the nearest float
+// A single-precision approximation of pi / 180, a step above the nearest
+// float
 #define DEGREES_TO_RADIANS 0.017453294f
 /* clang-format off */
 
@@ -80,22 +79,15 @@ typedef s32 WideBinaryAngle;
     }
 /* clang-format on */
 
-// The magnitude of an integer. The game's code evaluates the value once,
-// into a variable of its own, as a GNU statement expression does. GCC's
-// built-in abs compiles differently: with it, the matched code of 10 files
-// changes.
+// The magnitude of an integer, evaluating the value once
 #define Abs(value) \
     ({ \
         s32 absValue = (value); \
         (absValue < 0) ? -absValue : absValue; \
     })
 
-// The magnitude of a float, as a compare and branch where fabsf compiles to
-// abs.s. It is a macro because the ball simulations compile further from the
-// original when these sites call an inline function instead: a static one
-// takes StepBallSimulation from 478 differing words to 580 and
-// StepOpeningBallSimulation from 247 to 472, and a function nested in
-// StepBallSimulation gives it 580 too.
+// The magnitude of a float, evaluating the value once. Unlike fabsf, it
+// leaves -0.0f negative.
 #define AbsFloat(value) \
     ({ \
         f32 absValue = (value); \
@@ -122,13 +114,7 @@ float acosf(float x);
 float atan2f(float y, float x);
 float atanf(float x);
 
-// The game's own fabsf, an abs.s in volatile inline assembly. Local-alloc
-// can't give its result the operand's register, as it can the built-in's,
-// and the scheduler keeps it in place. Every matched function compiles the
-// same with it, and DrawRoundHud and IsEasedEyeHeightZero, which differed
-// only at an abs.s, match with it; without volatile, 5 and 7 of their words
-// differ. The matched functions that need the built-in's abs.s take fabs
-// of a float, which GCC narrows to one.
+// The game's own fabsf, an abs.s instruction in inline assembly
 #ifdef __mips__
 static inline float fabsf(float value) {
     float magnitude;
@@ -141,9 +127,7 @@ static inline float fabsf(float value) {
 float fabsf(float value);
 #endif
 
-// Built into GCC, which compiles it to a sqrt.s instruction. Unlike fabsf, the
-// game uses the built-in: as inline assembly like fabsf's, volatile or not,
-// the matched code of 20 files compiles differently.
+// Built into GCC, which compiles it to a sqrt.s instruction
 float sqrtf(float value);
 
 #endif

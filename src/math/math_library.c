@@ -11,9 +11,7 @@ typedef union {
     s32 word;
 } FloatShape;
 
-// As in fdlibm, these are do-while (0) loops, which the original needs: as
-// plain blocks, fabsf gives 2 words differing, 2 in shape, and acosf 18, 2 in
-// shape
+// As in fdlibm, these are do-while (0) loops
 #define GET_FLOAT_WORD(destination, source) \
     do { \
         FloatShape shape; \
@@ -91,8 +89,10 @@ float acosf(float x) {
         return (x - x) / (x - x);
     }
 
-    if (magnitude < 0x3F000000) { // |x| < 0.5
-        if (magnitude <= 0x23000000) { // |x| <= 2^-57
+    // |x| < 0.5
+    if (magnitude < 0x3F000000) {
+        // |x| <= 2^-57
+        if (magnitude <= 0x23000000) {
             return f_HalfPiHigh + f_HalfPiLow;
         }
 
@@ -143,8 +143,8 @@ float acosf(float x) {
     }
 }
 
-// fdlibm adds this to results to raise the inexact exception, but the
-// compiler folds the sums, which round to the other constant alone.
+// fdlibm adds this to results to raise the inexact exception. The sums round
+// to the other constant alone.
 static const float f_Tiny = 1.0e-30f;
 static const float f_Zero = 0.0f;
 static const float f_QuarterPi = 7.8539818525e-01f;
@@ -291,7 +291,8 @@ float atanf(float x) {
 
     GET_FLOAT_WORD(word, x);
     magnitude = word & MAGNITUDE_MASK;
-    if (magnitude >= 0x50800000) { // |x| >= 2^34
+    // |x| >= 2^34
+    if (magnitude >= 0x50800000) {
         if (magnitude > INFINITY_WORD) {
             return x + x;
         }
@@ -304,8 +305,10 @@ float atanf(float x) {
         }
     }
 
-    if (magnitude < 0x3EE00000) { // |x| < 7/16
-        if (magnitude < 0x31000000) { // |x| < 2^-29
+    // |x| < 7/16
+    if (magnitude < 0x3EE00000) {
+        // |x| < 2^-29
+        if (magnitude < 0x31000000) {
             if (f_Huge + x > f_One) {
                 return x;
             }
@@ -315,8 +318,10 @@ float atanf(float x) {
     }
     else {
         x = fabsf(x);
-        if (magnitude < 0x3F980000) { // |x| < 19/16
-            if (magnitude < 0x3F300000) { // |x| < 11/16
+        // |x| < 19/16
+        if (magnitude < 0x3F980000) {
+            // |x| < 11/16
+            if (magnitude < 0x3F300000) {
                 reductionIndex = 0;
                 x = ((2.0f * x) - f_One) / (2.0f + x);
             }
@@ -326,7 +331,8 @@ float atanf(float x) {
             }
         }
         else {
-            if (magnitude < 0x401C0000) { // |x| < 39/16
+            // |x| < 39/16
+            if (magnitude < 0x401C0000) {
                 reductionIndex = 2;
                 x = (x - 1.5f) / (f_One + (1.5f * x));
             }

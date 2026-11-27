@@ -48,10 +48,6 @@ void ResetPath(void) {
 // takes one step per call through each line, and the position covers
 // a fraction of its remaining distance each step, in whole units, as pace
 // sets them (see PathPace); other paces keep the last path's.
-//
-// The points are structures, as the original's must have been: GCC takes a
-// store through a plain f32 pointer, at no offset, to alias any global, and
-// would hold the loads after position's first copy back behind it.
 s32 StepAlongPath(PathPoint *points, s32 pointCount, s32 pace, PathPoint *position) {
     s32 nextPointIndex;
     f32 stepsPerSegment;
@@ -200,9 +196,7 @@ void InitPeriodicSpline(f32 knotX[], f32 knotY[], f32 coefficients[]) {
         coefficients[index] = slopes[index] - slopes[index - 1];
     }
 
-    // slopes is reused from here as the column that the period adds, to match:
-    // an array of its own grows the frame, and gives 30 words differing
-    // (none in shape) declared after slopes, or 212 declared first
+    // slopes is reused from here as the column that the period adds
     slopes[1] = widths[0];
     slopes[SPLINE_SEGMENT_COUNT - 1] = widths[SPLINE_SEGMENT_COUNT - 1];
     slopes[SPLINE_SEGMENT_COUNT] = diagonal[SPLINE_SEGMENT_COUNT];

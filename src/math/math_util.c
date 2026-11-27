@@ -97,9 +97,6 @@ u16 ComputeCrc16(u8 *bytes, u32 size) {
 
     crc = CRC16_INITIAL_VALUE;
     if (size != 0) {
-        // The original adds the size to the address, size first; pointer
-        // arithmetic, as data + size, size + data, &data[size] or AddressPast,
-        // adds the address first, which leaves 2 words differing
         end = (u8 *)(size + AddressNumber(bytes));
         do {
             crc ^= *bytes;
