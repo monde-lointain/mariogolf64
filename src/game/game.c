@@ -8,10 +8,8 @@
 
 // The loader flag and the current shot are defined volatile, but KMC builds
 // declare them plain for most files; see hole_loader.h and current_shot.h.
-// This file reads both with the qualifier. DrawGame's loads of the flag match
-// the original that way, and BuildHorizonDynamicTextures keeps its unused load
-// of the current shot's player index, which flow would delete if it weren't
-// volatile.
+// This file reads both with the qualifier, so each read loads the value
+// again, even the one of the current shot's player index that nothing uses.
 #define READS_LOADER_FLAG_VOLATILE
 #define READS_CURRENT_SHOT_VOLATILE
 
@@ -646,7 +644,6 @@ void DrawSpinMesh(Gfx **displayListHead) {
                 G_TX_NOLOD,
                 G_TX_NOLOD
             );
-            // The original tests again here; the build depends on it
             isLastStrip = IsLastSpinStrip(batchIndex, stripIndex);
             stripHeight = isLastStrip ? SAVED_FRAME_LAST_STRIP_HEIGHT : SAVED_FRAME_STRIP_HEIGHT;
             gSPModifyVertex(
@@ -991,10 +988,7 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
         rowCount = DYNAMIC_TEXTURE_SIZE;
     }
     else {
-        // The value read here is never used, but the original loads it, as
-        // g_CurrentShot's volatile declaration makes it. A plain read without
-        // that gives 7 words differing, 5 in shape, and no read or an empty if
-        // 11 (7)
+        // Nothing uses the player index read here
         if (gameStep == GAME_STATE_TAKING_TURNS) {
             gameStep = g_CurrentShot.playerIndex;
         }
@@ -1694,92 +1688,9 @@ int __MusIntMemRemaining(void);
 #define FRAME_RATE_TEXT_COLUMN 3
 #define FRAME_RATE_TEXT_ROW 5
 
-// Returns the frame count, which the caller ignores
-//
-// The views are counted by viewIndex alone, and each camera is read as
-// g_Cameras[viewIndex]. Only the menu inset's hole keeps its view's address
-// in a variable, insetView, set in that arm. The loop pass takes the first
-// view's address out of the loop and makes insetView that address plus
-// viewIndex times a camera's size, which it reduces to a register stepped
-// by the size ($s4), beside the one it steps for the cameras' byte offset
-// ($s5). It zeroes the offset before it sets the pointer, as the original
-// does. The hoisted address gets no register of its own, so each other
-// &g_Cameras[viewIndex].view rebuilds it in $t1 and adds the offset, as in
-// the original. A camera pointer stepped in the loop's header ends up as
-// the same two registers, but set in the other order before the loop.
-//
-// The inset's backdrop takes the inset camera's view by its index, as the
-// course's inset view does, and the two calls share a tail that loads the
-// address as a constant.
-//
-// The isometric map's eye is worked out inside guLookAt's arguments. The
-// matrices pointer is then reloaded from the stack before the eye's
-// subtractions, as in the original; with the eye set in statements before
-// the call, it is reloaded after them.
-//
-// The far plane is clamped between the short far plane and the course's,
-// then set to the course's anyway, so both clamps are dead. The upper
-// clamp keeps the lower clamp's move, as the original does, whose bc1tl
-// branches to the very next instruction with the move in its delay slot:
-// flow deletes the upper clamp's move as dead but keeps its branch, which
-// still reads the clamped value, and jump2 then deletes the empty branch
-// with its compare.
-//
-// COURSE_FAR_CLIP is a double, unlike the other planes, so the upper
-// clamp compares in double precision. As a float, the clamped value takes
-// $f0 rather than the $f6 that the original gives it and the course's far
-// plane. The target keeps no trace of the upper clamp's bound: other
-// bounds, such as 0.0f or 1000.0f, match as well.
-//
-// Measured against the match, as words differing and how many of them in
-// shape:
-//
-//   The inset's view read as g_Cameras[viewIndex].view at each
-//     use, with no variable                                    478 (106)
-//   The inset's view read through courseView                   390 (54),
-//                                                              frame -8
-//   A camera pointer set in the inset's arm, for insetView     129 (33)
-//   insetView set at the loop's top                            356 (66)
-//   insetView set after matrices                               346 (58)
-//   The inset's field of view read through insetView           19 (9)
-//   The inset's scissor read through insetView                 154 (6)
-//   The inset's scissor read from g_Cameras[viewIndex].view    118 (6)
-//   The inset's backdrop given insetView, or
-//     &g_Cameras[viewIndex].view                               341 (51)
-//   The inset's pin given insetView                            93 (11),
-//                                                              frame -8
-//   The inset's pin given the inset camera's view by its index 3 (3)
-//   The course's pin given courseView                          216 (0)
-//   The course's view read as g_Cameras[viewIndex].view at
-//     each use, with no variable                               427 (83)
-//   A camera pointer stepped in the loop's header, the inset's
-//     view read through it or insetView set from it            81 (21)
-//   The same, with the pins' views through it as well          32 (14)
-//   The same, with the inset's backdrop through it too         27 (7)
-//   The same, with the eye set in statements (the old draft)   31 (9)
-//   insetView set from a camera pointer set at the loop's top  356 (66)
-//   The eye set in statements before guLookAt                  4 (2)
-//   The eye's x alone set in the arguments                     56 (16)
-//   The eye's y alone set in the arguments                     8 (6)
-//   The eye's x and y set in the arguments                     12 (6)
-//   The eye's z, or its y and z, set in the arguments          4 (2)
-//   The eye set in statements before the buffers are cleared   88 (22)
-//   Without the upper clamp, or without the lower              10 (8)
-//   Without either clamp                                       26 (18)
-//   The clamps joined by else                                  272 (12)
-//   The upper clamp first                                      13 (13)
-//   COURSE_FAR_CLIP as a float                                 12 (4)
-//   Without LoadProjection's unusedMatrix                      16 (0), and
-//                                                              16 (0),
-//                                                              frame +64,
-//                                                              there
-//   The view loop testing != 2                                 4 (4)
-//
-// Also matching: insetView set anywhere in its arm before guLookAtF, or
-// at the top of the inset screen's case; insetView declared in its arm
-// with its value, or after courseView; and the eye set in statements
-// after a variable is set to the viewing matrix's address, for guLookAt's
-// first argument.
+// Returns the frame count, which the caller ignores. The far plane is
+// clamped between the short far plane and the course's, then set to the
+// course's anyway, so both clamps go unused.
 s32 DrawGame(void) {
     Boolean usesFloatMatrices;
     CameraMatrices *matrices;
@@ -1814,7 +1725,6 @@ s32 DrawGame(void) {
     void LoadProjection(void) {
         Mat4 projection;
         Mat4 translation;
-        // Pads the frame to match
         Mat4 unusedMatrix UNUSED;
 
         if (usesFloatMatrices) {
@@ -2024,7 +1934,6 @@ s32 DrawGame(void) {
                     ClearBuffers(BUFFER_CLEAR_BY_LINE);
                 }
 
-                // The eye is set in the arguments, to match
                 guLookAt(
                     &matrices->viewing,
                     eyeX = g_MapCamera.view.eye[AXIS_X] - MAP_ISOMETRIC_OFFSET_X,
@@ -2123,9 +2032,6 @@ s32 DrawGame(void) {
                     FillScreen();
                 }
 
-                // The look-at is set within the call, to match: setting it before
-                // the call gives 59 words differing (21 in shape) against 41, or 63
-                // set in z, y, x order
                 guLookAt(
                     &matrices->viewing,
                     g_MapCamera.view.eye[AXIS_X],
@@ -2255,7 +2161,6 @@ s32 DrawGame(void) {
                     );
                     ConvertMatrixToFixed(matrices->perspectiveF, &matrices->perspective);
                     guTranslate(&matrices->placement, 0.0f, 0.0f, 0.0f);
-                    // Only this arm keeps its view's address in a variable, to match
                     insetView = &g_Cameras[cameraIndex].view;
                     guLookAtF(
                         matrices->viewingF,
@@ -3263,7 +3168,7 @@ void DrawResetFade(void) {
     gfx = f_DisplayLists[g_DrawBufferIndex];
     displayList = gfx;
 
-    // The original builds the frame in a loop that runs once
+    // Builds the frame in a loop that runs once
     for (passIndex = 0; passIndex != 1; passIndex++) {
         AppendRcpInit(g_DrawBufferIndex, &gfx);
         AppendBufferClear(BUFFER_CLEAR_DEPTH_ONLY, &gfx);
