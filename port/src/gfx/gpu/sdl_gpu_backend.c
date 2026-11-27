@@ -67,6 +67,8 @@ typedef struct GrowableTransfer {
 // The fragment shaders' uniforms, the same for all of a frame's draws
 typedef struct FrameConstants {
     uint32_t noiseSeed;
+    // Whether alpha gives a fragment's coverage where the pipeline lets it
+    uint32_t coversSamples;
 } FrameConstants;
 
 // Where the write_target shaders put the N64's pixels, as their std140
@@ -302,6 +304,7 @@ static SDL_GPUGraphicsPipeline *CreatePipeline(uint16_t key, bool hasDepth) {
     info.rasterizer_state.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
     info.rasterizer_state.enable_depth_clip = true;
     info.multisample_state.sample_count = f_Gpu.sampleCount;
+    info.multisample_state.enable_alpha_to_coverage = (key & PIPELINE_ALPHA_TO_COVERAGE) != 0;
     if (key & PIPELINE_DEPTH_DECAL) {
         info.rasterizer_state.enable_depth_bias = true;
         info.rasterizer_state.depth_bias_constant_factor = DECAL_DEPTH_BIAS;
@@ -332,9 +335,16 @@ static SDL_GPUGraphicsPipeline *CreatePipeline(uint16_t key, bool hasDepth) {
 }
 
 static SDL_GPUGraphicsPipeline *UsePipeline(uint16_t key, bool hasDepth) {
-    SDL_GPUGraphicsPipeline **pipeline = &f_Gpu.pipelines[key][hasDepth ? 1 : 0];
+    SDL_GPUGraphicsPipeline **pipeline;
 
     SDL_assert(key < PIPELINE_KEY_COUNT);
+    // One sample a pixel has no coverage to give, so those draws share the
+    // pipeline without it, and the shader's threshold covers them
+    if (f_Gpu.sampleCount == SDL_GPU_SAMPLECOUNT_1) {
+        key &= (uint16_t)~PIPELINE_ALPHA_TO_COVERAGE;
+    }
+
+    pipeline = &f_Gpu.pipelines[key][hasDepth ? 1 : 0];
     if (*pipeline == NULL) {
         *pipeline = CreatePipeline(key, hasDepth);
     }
@@ -358,6 +368,8 @@ typedef struct PipelineUse {
 // compiles a pipeline afresh, as on a game's first start, takes tens of
 // milliseconds over each, which would stall the first frame to draw with
 // it, so InitGpuBackend makes these first. Others are made when first used.
+// With one sample a pixel, the ones that take coverage from alpha are the
+// ones without it.
 static const PipelineUse f_PipelinesToPrepare[] = {
     {0, false},
     {0, true},
@@ -371,6 +383,10 @@ static const PipelineUse f_PipelinesToPrepare[] = {
     {ALPHA_BLEND | DEPTH_BUFFERED, true},
     {PIPELINE_WRITE_ALPHA, false},
     {PIPELINE_DEPTH_ONLY | PIPELINE_DEPTH_WRITE, true},
+    {PIPELINE_ALPHA_TO_COVERAGE, false},
+    {PIPELINE_ALPHA_TO_COVERAGE, true},
+    {PIPELINE_ALPHA_TO_COVERAGE | PIPELINE_DEPTH_WRITE, true},
+    {PIPELINE_ALPHA_TO_COVERAGE | DEPTH_BUFFERED, true},
 };
 
 static void PreparePipelines(void) {
@@ -1086,6 +1102,7 @@ void BackendExecuteFrame(const GfxFrame *frame) {
     UploadFrame(commands, frame);
     f_Gpu.noiseSeed++;
     constants.noiseSeed = f_Gpu.noiseSeed;
+    constants.coversSamples = f_Gpu.sampleCount != SDL_GPU_SAMPLECOUNT_1;
     SDL_PushGPUFragmentUniformData(commands, 0, &constants, sizeof(constants));
     for (i = 0; i < frame->passCount; i++) {
         const GfxPass *pass = &frame->passes[i];

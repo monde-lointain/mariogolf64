@@ -587,6 +587,31 @@ static uint16_t BlendingKey(DestinationFactor destination) {
     return (uint16_t)(PIPELINE_BLEND | (destination << PIPELINE_DESTINATION_SHIFT));
 }
 
+// Coverage times alpha, in a draw that the GPU doesn't blend, takes its
+// coverage from the fragment's alpha when the target has the samples for
+// it. Forced blending keeps the coverage whole, since the GPU blends by
+// alpha, and without CVG_X_ALPHA alpha leaves coverage as it is.
+static void TestCoverageTimesAlphaKeys(void) {
+    Gfx *gfx = BeginTriangles(f_DisplayList, G_SHADE | G_SHADING_SMOOTH);
+
+    ResetCapture();
+    gSPVertex(gfx++, f_Triangle, 3, 0);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF | CVG_X_ALPHA, G_RM_AA_XLU_SURF2 | CVG_X_ALPHA);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+
+    EXPECT(f_Gpu.drawCount == 3);
+    EXPECT(f_Gpu.draws[0].pipelineKey == PIPELINE_ALPHA_TO_COVERAGE);
+    EXPECT(f_Gpu.draws[1].pipelineKey == BlendingKey(DESTINATION_ONE_MINUS_SOURCE_ALPHA));
+    EXPECT(f_Gpu.draws[2].pipelineKey == 0);
+}
+
 // Forced blending shapes the GPU's blending by where memory's color enters
 // the blender's last cycle, and memory's factor; without it, the first
 // color passes. One-cycle mode blends with the first cycle's settings.
@@ -2581,6 +2606,7 @@ int main(void) {
     TestTextureFilterModes();
     TestCopyCycleNeverFilters();
     TestBlendShapes();
+    TestCoverageTimesAlphaKeys();
     TestUnforcedBlenderPassesFirstColor();
     TestDepthClear();
     TestDepthSources();

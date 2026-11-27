@@ -115,7 +115,10 @@ typedef struct GfxMaterial {
 #define PIPELINE_WRITE_ALPHA 0x80
 // Writes depth and no color, as a fill of part of the depth image does
 #define PIPELINE_DEPTH_ONLY 0x100
-#define PIPELINE_KEY_COUNT 0x200
+// Takes coverage from the fragment's alpha, as coverage times alpha does
+// in a draw that the GPU doesn't blend, where the target has the samples
+#define PIPELINE_ALPHA_TO_COVERAGE 0x200
+#define PIPELINE_KEY_COUNT 0x400
 
 typedef enum DestinationFactor {
     DESTINATION_ZERO,

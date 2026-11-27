@@ -353,6 +353,48 @@ static void TestGrownImageKeepsItsRows(void) {
     EXPECT(CountPixelsUnlike(image, expected) == 0);
 }
 
+// Draws a green rectangle over the left half of black under the render
+// mode, whose CVG_X_ALPHA lets alpha give its coverage, and returns the
+// green of the pixel at its middle
+static int DrawCoveredRectangle(u32 renderMode, u32 renderMode2, u8 alpha) {
+    Gfx *gfx = BeginList(f_DisplayList);
+    uint32_t pixel;
+
+    gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 0, 1));
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPSetRenderMode(gfx++, renderMode, renderMode2);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 255, 0, alpha);
+    gDPFillRectangle(gfx++, 0, 0, IMAGE_WIDTH / 2, IMAGE_HEIGHT);
+    RunList(gfx);
+    pixel = f_ColorImage[((IMAGE_HEIGHT / 2) * IMAGE_WIDTH) + (IMAGE_WIDTH / 4)];
+    return (int)(((pixel >> 6) & 0x1F) << 3);
+}
+
+#define EDGE_MODE G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2
+#define COVERED_XLU_MODE (G_RM_AA_XLU_SURF | CVG_X_ALPHA), (G_RM_AA_XLU_SURF2 | CVG_X_ALPHA)
+
+// With one sample a pixel, coverage times alpha draws a pixel whole where
+// alpha gives it most of its coverage, and not at all elsewhere
+static void TestCoverageTimesAlphaIsWholeWithOneSample(void) {
+    EXPECT(DrawCoveredRectangle(EDGE_MODE, 0x40) == 0);
+    EXPECT(DrawCoveredRectangle(EDGE_MODE, 0xC0) == 0xF8);
+}
+
+// With several, alpha covers as many of a pixel's samples as it would of
+// the N64's coverage, so the pixel resolves to as much of the color. A
+// blended draw, whose alpha already gives its share of the color, still
+// leaves its faintest fragments uncovered.
+static void TestCoverageTimesAlphaCoversSamples(void) {
+    int quarter = DrawCoveredRectangle(EDGE_MODE, 0x40);
+    int threeQuarters = DrawCoveredRectangle(EDGE_MODE, 0xC0);
+
+    EXPECT(quarter > 0 && quarter < 0x80);
+    EXPECT(threeQuarters > 0x80 && threeQuarters < 0xF8);
+    EXPECT(DrawCoveredRectangle(COVERED_XLU_MODE, 0x18) == 0);
+    EXPECT(DrawCoveredRectangle(COVERED_XLU_MODE, 0x80) == 0x80);
+}
+
 // A copy of a target holds what the source does, read back with no draw
 // between: the copy reaches the pixels that reads take, not only the
 // samples that draws do
@@ -1304,6 +1346,7 @@ static void TestMultisampled(SDL_GPUDevice *device) {
     InitRsp();
     EXPECT(GpuBackendSampleCount() == SDL_GPU_SAMPLECOUNT_4);
     TestEdgesBlendTheirSamples();
+    TestCoverageTimesAlphaCoversSamples();
     TestCpuPixelsStayUnderDraws();
     TestGrownImageKeepsItsRows();
     TestCopiedTargetReadsBack();
@@ -1376,6 +1419,7 @@ int main(void) {
     InitRdp();
     TestFilteredTexelsOneForOne();
     TestCopiedTexture();
+    TestCoverageTimesAlphaIsWholeWithOneSample();
     TestEdgesStayHardWithOneSample();
     ShutdownRdp();
     ShutdownGpuBackend();

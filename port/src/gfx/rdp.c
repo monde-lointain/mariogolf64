@@ -861,6 +861,11 @@ static uint16_t PipelineKey(bool usesDepth, MaterialKind kind) {
         key |= PIPELINE_BLEND | (uint16_t)(destination << PIPELINE_DESTINATION_SHIFT);
     }
 
+    // Blending already takes alpha's share of the color
+    if ((f_Rdp.material.modes & MATERIAL_ALPHA_COVERAGE) && shape == BLEND_FIRST_ONLY) {
+        key |= PIPELINE_ALPHA_TO_COVERAGE;
+    }
+
     return key;
 }
 

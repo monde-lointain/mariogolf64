@@ -87,6 +87,8 @@ layout(std430, set = 2, binding = 1) readonly buffer Materials {
 };
 layout(set = 3, binding = 0) uniform FrameConstants {
     uint noiseSeed;
+    // Whether the pipeline takes an unblended draw's coverage from alpha
+    uint coversSamples;
 };
 
 // The texture coordinates over w, then w's reciprocal
@@ -312,7 +314,14 @@ void main() {
         }
     }
 
+    // With samples to cover, an unblended draw's alpha covers its share of
+    // them, as alpha to coverage; otherwise the pixel is drawn whole or not
+    // at all
+    uint shape = (material.modes & MATERIAL_BLEND_MASK) >> MATERIAL_BLEND_SHIFT;
+    bool coversSamplesByAlpha = coversSamples != 0u && shape == BLEND_FIRST_ONLY;
+
     if ((material.modes & MATERIAL_ALPHA_COVERAGE) != 0u &&
+        !coversSamplesByAlpha &&
         combined.a < material.coverageThreshold) {
         discard;
     }
@@ -331,7 +340,7 @@ void main() {
     float alpha = BlenderAlpha((lastCycle >> 2) & 3u, combined.a, material);
     float secondFactor = BlenderFactor(lastCycle >> 6, alpha);
 
-    switch ((material.modes & MATERIAL_BLEND_MASK) >> MATERIAL_BLEND_SHIFT) {
+    switch (shape) {
         case BLEND_FIRST_OVER_MEMORY:
             outColor = vec4(BlenderColor(lastCycle & 3u, pixel, material) * alpha, alpha);
             break;
