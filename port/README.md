@@ -152,6 +152,7 @@ Options on the command line take precedence over the file:
 | `--game-frames N`     | Ends the run at game frame N.                                                                          |
 | `--screenshot PATH`   | Saves the last frame as a PNG image.                                                                   |
 | `--gpu-debug`         | Turns on SDL_GPU's debug mode, with the driver's validation.                                           |
+| `--version`           | Prints the version and the git revision that the program was built from, and exits.                    |
 
 An option that the program doesn't know makes it print the list of
 options and exit.

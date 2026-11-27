@@ -7,7 +7,7 @@
  *     mariogolf64 [--scale N] [--fullscreen] [--save PATH] [--config PATH]
  *                 [--gpu-debug] [--headless] [--frames N] [--game-frames N]
  *                 [--screenshot PATH]
- *                 [--input-script PATH] [--record PATH] [ROM]
+ *                 [--input-script PATH] [--record PATH] [--version] [ROM]
  *
  * --headless draws without a window, and --frames ends the program after N
  * retraces, writing the screen it last showed to the --screenshot file, for
@@ -19,6 +19,8 @@
  * fails, since the screen isn't the one asked for. --input-script plays the
  * first controller from a script, as input_script.h describes, and --record
  * writes what the game reads from it as such a script, to a new file.
+ * --version prints the program's version and the revision it was built
+ * from, and ends.
  *
  * Without a ROM, it looks for the settings' ROM, or else baserom.us.z64
  * beside the program, then in the current directory. Without --save, the
@@ -51,6 +53,7 @@
 #include "sdl_gpu_backend.h"
 #include "stall_watch.h"
 #include "system/rom_arrays.h"
+#include "version.h"
 #include "window_place.h"
 
 #define WINDOW_TITLE "Mario Golf"
@@ -885,7 +888,16 @@ int main(int argc, char *argv[]) {
     long gameFrames;
     bool isFinished;
 
-    if (!ParseOptions(argc, argv, &options) || !LoadInputScript(options.inputScriptPath, &script)) {
+    if (!ParseOptions(argc, argv, &options)) {
+        return EXIT_FAILURE;
+    }
+
+    SDL_Log("mariogolf64 %s (%s)", g_PortVersion, g_PortRevision);
+    if (options.isVersionShown) {
+        return EXIT_SUCCESS;
+    }
+
+    if (!LoadInputScript(options.inputScriptPath, &script)) {
         return EXIT_FAILURE;
     }
 

@@ -21,6 +21,7 @@ typedef struct Options {
     bool isFullscreen;
     bool isGpuDebug;
     bool isHeadless;
+    bool isVersionShown; // To print the version and end
 } Options;
 
 // Reads the command line into the options, or logs what is wrong with it

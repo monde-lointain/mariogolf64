@@ -48,6 +48,7 @@ static void TestNoOptionsLeavesAllUnset(void) {
     EXPECT(!options.isFullscreen);
     EXPECT(!options.isGpuDebug);
     EXPECT(!options.isHeadless);
+    EXPECT(!options.isVersionShown);
 }
 
 // Each path goes to its own field, and a word that isn't an option is the ROM
@@ -82,10 +83,14 @@ static void TestSwitchesSetTheirFields(void) {
 
     EXPECT(PARSE(&options, "--headless"));
     EXPECT(options.isHeadless && !options.isFullscreen && !options.isGpuDebug);
+    EXPECT(!options.isVersionShown);
     EXPECT(PARSE(&options, "--fullscreen"));
     EXPECT(!options.isHeadless && options.isFullscreen && !options.isGpuDebug);
     EXPECT(PARSE(&options, "--gpu-debug"));
     EXPECT(!options.isHeadless && !options.isFullscreen && options.isGpuDebug);
+    EXPECT(PARSE(&options, "--version"));
+    EXPECT(!options.isHeadless && !options.isFullscreen && !options.isGpuDebug);
+    EXPECT(options.isVersionShown);
 }
 
 // The scale goes from 1 to CONFIG_SCALE_MAX

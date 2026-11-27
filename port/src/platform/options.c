@@ -17,7 +17,7 @@ static void PrintUsage(const char *program) {
         "Usage: %s [--scale N] [--fullscreen] [--save PATH] [--config PATH] [--gpu-debug] "
         "[--headless] "
         "[--frames N] [--game-frames N] [--screenshot PATH] [--input-script PATH] "
-        "[--record PATH] [ROM]",
+        "[--record PATH] [--version] [ROM]",
         program
     );
 }
@@ -87,6 +87,9 @@ bool ParseOptions(int argc, char **argv, Options *options) {
         }
         else if (SDL_strcmp(argument, "--gpu-debug") == 0) {
             options->isGpuDebug = true;
+        }
+        else if (SDL_strcmp(argument, "--version") == 0) {
+            options->isVersionShown = true;
         }
         else if (argument[0] != '-' && options->romPath == NULL) {
             options->romPath = argument;
