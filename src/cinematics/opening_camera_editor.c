@@ -42,7 +42,6 @@ static s32 f_SnapshotIndex = 0;
 // Whether the second controller moves the eye rather than the look-at point
 static Boolean f_IsSecondControllerOnEye = FALSE;
 
-// Not static: the original left it to the linker's common block
 Vec3 f_CameraSnapshots[SNAPSHOT_COUNT][SNAPSHOT_POINT_COUNT];
 
 // Starts the editor with its eye at (0, -100, 100) looking at the origin, and
@@ -223,9 +222,7 @@ void MoveEditorPoint(EditorPoint pointIndex, f32 x, f32 y, f32 z, s32 frameCount
     g_CameraEditor.targets[pointIndex][AXIS_Y] = y;
     g_CameraEditor.targets[pointIndex][AXIS_Z] = z;
 
-    // The arguments become the offsets, and x the larger of the ground ones.
-    // The magnitudes come from fabs in double precision, which GCC narrows to
-    // abs.s: fabsf gives 28 differing words, and fabs without the casts 18
+    // The arguments become the offsets, and x the larger of the ground ones
     x -= g_CameraEditor.points[pointIndex][AXIS_X];
     y -= g_CameraEditor.points[pointIndex][AXIS_Y];
     z -= g_CameraEditor.points[pointIndex][AXIS_Z];
@@ -356,8 +353,6 @@ void ZoomEditorCamera(EditorPoint pointIndex, f32 distance, s32 frameCount) {
         g_CameraEditor.zoomTopSpeed = change / (frameCount - easeFrameCount);
         speed = g_CameraEditor.zoomTopSpeed;
         g_CameraEditor.zoomAcceleration = speed / (easeFrameCount + 1);
-        // The braking distance in double precision, to match; a float quarter or
-        // a division by 4 gives 9 differing words
         g_CameraEditor.zoomBrakingDistance = fabsf(change) * (1.0 / EDITOR_EASE_SHARE);
     }
 
@@ -457,8 +452,8 @@ void StopEditorMoves(void) {
 
 // The flags of the point that moves around the pivot. When neither point
 // carries the other or is the pivot, the loop over the points leaves the
-// index past them, and the original reads the field after the flags, the
-// eye's move axis, which never has the flags of a turn, a tilt or a zoom.
+// index past them, and the matching build reads the field after the flags,
+// the eye's move axis, which never has the flags of a turn, a tilt or a zoom.
 #ifdef AVOID_UB
 #    define MovingPointFlags(pointIndex) \
         ((pointIndex) < EDITOR_POINT_COUNT ? g_CameraEditor.flags[pointIndex] : 0)
@@ -471,91 +466,6 @@ void StopEditorMoves(void) {
 // the zoom, the turn and the tilt around the pivot point do the same. The point
 // that moves around the pivot is then placed from the heading, pitch and
 // distance.
-//
-// The zoom works in the points' variables: the distance before it is kept in z,
-// its target in offsetZ, and the length of what is left after its step in
-// distance. A variable is one register to GCC's allocator, and the original
-// keeps a point's offsetZ and the zoom's target both in $f18, and takes both
-// square roots into $f12. With a variable of its own the zoom's target takes
-// $f6, as offsetZ then does, and the three loads of the point's target move up
-// to $f18, $f16 and $f10 from $f16, $f10 and $f6. Tested where it is taken, the
-// zoom's square root is left in $f0.
-//
-// The turn and the tilt read what is left of them from the editor at each use:
-// the original copies its first read to another register in the delay slot of
-// the test against zero, and takes the magnitude for the braking test from the
-// first. Read once into a local, there is no copy. Each is done if a step would
-// leave more to go than there is, and takes the step if not, in the two arms of
-// one test: the original sets isDone in the delay slot of that test's branch
-// and clears it among the step's stores. Set once ahead of the test, its 1 is
-// loaded before what is left is read. The turn's arrival is tested after both
-// arms, for a turn that isn't done, as the original tests isDone ahead of it.
-//
-// The eight flag tests before the pivot is let go each clear isDone, which
-// jump.c turns into the original's chain of ands with each test negated; in one
-// expression, fold merges them into two mask tests. They come inside the test
-// for a leader, as the original branches on hasLeader ahead of them. The
-// zoom's, the turn's and the tilt's speed tests read the speed first, as the
-// original loads it ahead of the top speed. The pitch's cosine has a variable
-// of its own in each of the two blocks that work out the direction.
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   The old draft                                             71 (27)
-//   The zoom's target in a variable of its own, declared
-//   anywhere                                                  36 (0)
-//   The zoom's target in offsetX                              26 (0)
-//   The zoom's target in offsetY                              20 (0)
-//   The zoom's target in scale                                80 (0)
-//   The zoom's target in x or y                               36 (0)
-//   The zoom's target read before the distance                4 (0)
-//   The zoom's square root tested where it is taken, or kept
-//   in scale, offsetX or a variable of its own                4 (0)
-//   The distance before the zoom read where it is used        70 (4)
-//   The same in a variable of its own                         70 (0)
-//   The same in distance or x                                 68 (0)
-//   The same in y                                             64 (0)
-//   What is left of the zoom kept in offsetX                  14 (0)
-//   The zoom's end tested with no isDone                      14 (8)
-//   The zoom's isDone set to the comparison                   8 (8)
-//   The length of what is left of the zoom taken with fabsf   18 (10)
-//   The zoom's distance set from offsetZ when it is done      4 (4)
-//   What is left of the turn, or of the tilt, read once into
-//   a local                                                   7 (3)
-//   Both read once into locals                                14 (6)
-//   The turn's step under the negated test, and isDone set in
-//   its else                                                  2 (2)
-//   The turn's arrival tested in the step's arm               15 (11)
-//   isDone set ahead of the turn's test, or the tilt's, with
-//   no else                                                   12 (10)
-//   The old draft's turn: isDone set at its start, and the
-//   arrival tested in the step                                17 (21)
-//   The old draft's tilt: isDone set at its start             4 (4)
-//   Both of those                                             21 (25)
-//   The pitch's cosine in one variable for both blocks        142 (0)
-//   The velocity's length in a speed variable of its own      12 (0)
-//   The velocity kept in the offsets' variables               36 (0)
-//   The offsets' squares summed x, z, y                       22 (0)
-//   The velocity's squares summed x, z, y                     16 (0)
-//   An arrived point's target copied x, z, y                  14 (0)
-//   x's arrival test with its offset taken into offsetX       10 (4)
-//   The eight flag tests as one expression with &&            51 (33)
-//   The same with &                                           169 (25)
-//   The pivot let go under hasLeader && isDone, after the
-//   flag tests                                                9 (3)
-//   The zoom's speed test, or the turn's, with the top speed
-//   first                                                     10 (0)
-//   The points' loop's test as <                              21 (9)
-//   hasMoved declared after index                             4 (0)
-//
-// Also matching: the zoom's test as distance >= gap; its isDone cleared after
-// the square root; zoomLeft declared for the function, or its difference
-// squared in place; the turn's arrival under an if of its own inside isDone's;
-// the tilt's step under the negated test, with isDone set in its else; the
-// pitch's cosine kept in x, in either block or both, or set after its
-// declaration; the velocity's variables declared for the function; the point's
-// top speed test with the velocity's length first; KeepTopSpeed as a plain
-// block or a bare if; and x, offsetZ, distance, gap or isDone declared
-// elsewhere.
 void UpdateCameraEditor(void) {
     Boolean hasMoved = FALSE;
     // Whether a point carries the other, and later whether one is a pivot
@@ -763,12 +673,12 @@ void UpdateCameraEditor(void) {
     if (MovingPointFlags(pointIndex) & EDITOR_FLAG_ZOOMING) {
         f32 zoomLeft;
 
-        // Kept in the points' variables, to match: the distance before the zoom
-        // in z, its target in offsetZ, and further on the length of what is
-        // left in distance
+        // The points' variables hold the distance before the zoom in z, its
+        // target in offsetZ, and further on the length of what is left in
+        // distance
         z = g_CameraEditor.distance;
         offsetZ = g_CameraEditor.zoomTarget;
-// In the original, gap is unset when there is no braking distance; this
+// In the matching build, gap is unset when there is no braking distance; this
 // stops the zoom once a step brings it no closer
 #ifdef AVOID_UB
         gap = fabsf(offsetZ - z);
@@ -834,7 +744,7 @@ void UpdateCameraEditor(void) {
             }
         }
 
-        // A step that would leave more to turn ends it. isDone is set in each arm, to match.
+        // A step that would leave more to turn ends it
         if (fabsf(g_CameraEditor.turnLeft) <
             fabsf(g_CameraEditor.turnLeft - g_CameraEditor.turnSpeed)) {
             isDone = TRUE;
@@ -879,7 +789,7 @@ void UpdateCameraEditor(void) {
             }
         }
 
-        // As for the turn, to match
+        // A step that would leave more to tilt ends it
         if (fabsf(g_CameraEditor.tiltLeft) <
             fabsf(g_CameraEditor.tiltLeft - g_CameraEditor.tiltSpeed)) {
             isDone = TRUE;

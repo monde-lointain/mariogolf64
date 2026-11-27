@@ -267,7 +267,8 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
     for (index = 0; index < BALL_SIMULATION_COUNT; index++) {
         g_BallSimulations[index].position[AXIS_X] = RESET_BALL_X;
         g_BallSimulations[index].position[AXIS_Y] = RESET_BALL_Y;
-        rand(); // The original has it
+        // Draws a random number that goes unused
+        rand();
         g_BallSimulations[index].position[AXIS_Z] = RESET_BALL_Z;
         g_BallSimulations[index].velocity[AXIS_X] = rand() & RESET_BALL_SPEED_MASK;
         g_BallSimulations[index].velocity[AXIS_Y] = RESET_BALL_VELOCITY_Y;
@@ -490,9 +491,6 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
             }
         }
 
-        // The rest of the step in an if instead of this goto gives the same code.
-        // The goto stays as in StepBallSimulation, where the same test needs it to
-        // match.
         if (simulation->state == BALL_STATE_STOPPED) {
             goto SETTLE;
         }
@@ -527,10 +525,7 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
             }
             else {
                 // Each hit test's result in turn: the putter's ground contact,
-                // the billboard's hit, then the hole triangle's. One variable
-                // holds all three to match: the original copies the first and
-                // the last out of $v0 before testing them, as it does for a
-                // variable set in several places.
+                // the billboard's hit, then the hole triangle's
                 Boolean found;
 
                 if (IsStrokeOrTrialLaunch(simulation->purpose) &&
@@ -716,11 +711,8 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                         }
                     }
 
-                    // The opening plays no flagstick sound, but the original
-                    // copies the speed out of $f0 as if for a later use. The
-                    // volume StepBallSimulation plays that sound at is such a
-                    // use, and all of it compiles away; that it is what the
-                    // original had here is a guess.
+                    // Works out the volume of a flagstick sound, which the
+                    // opening doesn't play
                     if (pinHit == PIN_HIT_FLAGSTICK) {
                         BallSpeed speed = GetOpeningLength2D(
                             simulation->velocity[AXIS_X],
@@ -853,15 +845,8 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                                 }
 
                                 // pull first holds the ball's depth into the
-                                // pull's range, and is scaled by the alignment
-                                // in a statement of its own, to match. The
-                                // original works the depth out before atan2's
-                                // call, where the scheduler puts it; written
-                                // there, the depth uses CUP_PULL_OUTER_RADIUS
-                                // too soon after the range test does for
-                                // loop.c to hoist the constant from the
-                                // substep loop, and it gets $f24 where the
-                                // original loads it at each use.
+                                // pull's range, and is then scaled by the
+                                // alignment
                                 angle = atan2(toCup[AXIS_Z], toCup[AXIS_X]);
                                 alignment = 1.0f - alignment;
                                 pull = CUP_PULL_OUTER_RADIUS - (f32)cupDistance;
@@ -895,10 +880,6 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                                     simulation->velocity[AXIS_Z]
                                 );
 
-                                // The speed's test is written as not at least
-                                // the limit to match: the original tests it
-                                // with c.le.s and bc1t, where < compiles to
-                                // c.lt.s and bc1f.
                                 if (!((f32)speed >= OPENING_LIP_OUT_SPEED_MAX) &&
                                     simulation->state == BALL_STATE_ROLLING) {
                                     f32 keptFraction = speed * (1.0f / LIP_OUT_FULL_SPEED);
@@ -1167,10 +1148,6 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                 simulation->surface = SURFACE_FAIRWAY;
             }
             else {
-                // In its own block for the notes that leaves: they end the
-                // first cse pass's path from GetTrianglePlane's call, so the
-                // bounce works out plane's address anew, as the original does,
-                // rather than keep it in $s0.
                 IN_OWN_BLOCK(simulation->surface = SURFACE_WATER_HAZARD);
                 if (simulation->bounceCount == 1) {
                     simulation->firstBounceSurface = simulation->surface;
@@ -1683,12 +1660,7 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                 }
             }
 
-            // Nothing reads groundGap; it is here to match. With startY still
-            // in use after the gravity's arms, the drop to the ground and the
-            // velocity get the original's $v1 and $a1 in them, and the four
-            // arms share one store, as the original's do. What the original
-            // did with startY here is unknown: other sums of it tested and
-            // set in a branch work as well, but Abs and an empty test don't.
+            // Nothing reads groundGap
             {
                 s32 groundGap = groundHeight - startY;
 
@@ -1711,12 +1683,8 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
                     }
                 }
                 else {
-                    // The opening plays no rolling sound, but the original
-                    // copies the speed out of $v0 before testing it, as if
-                    // for a later use. A volume like the one
-                    // StepBallSimulation sets for that sound is such a use,
-                    // and all of it compiles away; that it is what the
-                    // original had here is a guess.
+                    // Works out the volume of a rolling sound, which the
+                    // opening doesn't play
                     SoundVolume volume = speed * ROLL_VOLUME_PER_SPEED;
 
                     if (volume > ROLL_VOLUME_MAX) {
@@ -1831,8 +1799,7 @@ ROLLED:
             }
 
             // height goes on to hold the wind's scale, and windX and windZ the
-            // wind's push along each axis, to match: the original keeps each
-            // pair of values in one register.
+            // wind's push along each axis
             height = simulation->startPosition[AXIS_Y] - simulation->position[AXIS_Y];
             if (height <= 0.0f) {
                 windX = simulation->windVelocityX * LOW_WIND_SCALE;
@@ -1965,25 +1932,6 @@ SETTLE:
 // A cut-down copy of LaunchBallSimulation. It always takes the club test's
 // entry, picks a lie blend of 0, leaves out the slopes, rain and wind, and
 // prints the launch velocity to the debug output.
-//
-// groundHeight also holds the club's doubled side spin, to match. Doubled in
-// the sum, fold moves CLUB_SIDE_SPIN_SCALE onto sideSign, where the original
-// doubles club->sideSpin before multiplying by sideSign (4 words differ, none
-// in shape). Doubled in a variable of its own, local-alloc ties the club's
-// value, its doubling and the product into one quantity. That ties on priority
-// with shot->offsetX and comes first by number, so it takes $v1 and leaves
-// the offset $a0, where the original has them the other way round (14, none).
-// As groundHeight is also used in an earlier block, its register is left to
-// global-alloc, and the product alone ranks below the offset, which takes
-// $v1. groundHeight then gets $a0, as $v0 and $v1 are taken where the ground
-// height is.
-//
-// Doubling it where it is loaded gives 4 words (none in shape), doubling it
-// in the sum 12 (none), and multiplying it by sideSign in a third statement,
-// or writing sideSign second in the product, 2 (none). Reusing purpose gives
-// 6 (none), index 22 (2), rumbles 32 (4) and speed 56 (46). Loading and
-// doubling it before the yaw matches too, as does doubling it by adding it to
-// itself or by a shift.
 s32 LaunchOpeningBallSimulation(
     BallSimulation *simulation,
     LaunchPurpose purpose,
@@ -2059,8 +2007,6 @@ s32 LaunchOpeningBallSimulation(
             ONE_PER_PERCENT;
     }
     else {
-        // In a local, to match: scaling by the constant itself gives 19 words
-        // differing (11 in shape), against 4 (0)
         s32 percent = CLUB_TEST_SPEED_HALF_PERCENTS;
 
         speed = speed * percent / HALF_PERCENTS_PER_ONE;
@@ -2074,7 +2020,7 @@ s32 LaunchOpeningBallSimulation(
     pitch +=
         (f32)club->offsetPitch * shot->offsetY * (DEGREES_TO_RADIANS / OFFSET_Y_PER_PITCH_STEP);
     yawRadians = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;
-    // Reused to match, as the header comment explains
+    // groundHeight holds the club's doubled side spin from here
     groundHeight = club->sideSpin;
     groundHeight *= CLUB_SIDE_SPIN_SCALE;
     simulation->sideSpin = (((((sideSign * impactEffect->sideSpinChange) + shot->offsetX) *

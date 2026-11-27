@@ -251,9 +251,7 @@
 // The scissor height that gives a zoom of 2
 #define UNIT_ZOOM_HEIGHT 224
 
-// Sets frames to count clamped to 0 through limit. Its do-while is there to
-// match: as a plain block, RunStaffRollTimeline's draft goes from 254 words
-// differing, none in shape, to 262, 8 in shape.
+// Sets frames to count clamped to 0 through limit
 #define ClampFrames(frames, count, limit) \
     do { \
         (frames) = (count); \
@@ -267,9 +265,7 @@
     while (FALSE)
 
 // Sets a view's scissor box, viewport center and zoom for a frame of
-// its shrink to the screen's upper right. Its do-while is there to
-// match: as a plain block, RunStaffRollTimeline's draft goes from 254 words
-// differing, none in shape, to 322, 34 in shape.
+// its shrink to the screen's upper right
 #define ShrinkView(view, frames) \
     do { \
         f32 progress = (frames); \
@@ -630,7 +626,6 @@ void BisectFramingPitch(Radians pitch, Radians yaw, f32 depthOffset) {
     Vec3 eye;
     Vec3 lookAt;
     CoursePoint point;
-    // Pads the frame to match; without it 40 words differ
     u8 unusedBuffer[0x10] UNUSED;
     Radians buriedPitch = -QUARTER_TURN_RADIANS;
     s32 step = 0;
@@ -688,8 +683,6 @@ void RunStaffRollTimeline(s32 frame) {
             RANDOM_PITCH_SCALE * PITCH_UNIT_TO_RADIANS;
     }
 
-    // The GetAnimationEventFrame calls whose results are dropped are there to
-    // match
     f_CastFramingPitch += g_ControllerStates[PITCH_CONTROLLER].stickY * PITCH_STICK_RATE;
     SetCharacterLights();
     if (frame == 0) {
@@ -1390,8 +1383,7 @@ void DrawStaffRoll(Gfx **displayListHead) {
     s32 fadeAlpha;
     s32 closingAlpha;
     s32 pass;
-    // Counts the rows, then the strips; sharing it is there to match: a row or
-    // stripIndex variable gives 70 words differing, none in shape
+    // Counts the rows, then the strips
     s32 index;
     s32 lineIndex;
     s32 stripHeight;
@@ -1714,8 +1706,9 @@ void DrawStaffLine(Gfx **displayListHead, s32 left, s32 top, s32 lineIndex) {
     s32 lineStart = STAFF_LINE(f_StaffText, lineIndex)->start;
     s32 length = STAFF_LINE(f_StaffText, lineIndex)->length;
     s32 firstCharacter = FIRST_STAFF_CHARACTER(f_StaffText);
-    s32 width; // Unused; it is there to match
-    s32 height; // Unused; it is there to match
+    // The line's measurements, which nothing reads
+    s32 width;
+    s32 height;
     s32 index;
     s32 character;
     s32 row;

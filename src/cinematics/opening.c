@@ -759,7 +759,6 @@ static u8 f_UnusedBytesAfterCharacterBuffers[4] UNUSED;
 static void *f_OpeningBillboardHeap;
 static Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT][OPENING_SHOT_DASH_COUNT_MAX];
 
-// Not static: the original left these to the linker's common block
 CameraEditor g_CameraEditor;
 // The cue that the opening's script has given for setting up its characters,
 // from 0 to OPENING_CUE_COUNT - 1, or OPENING_CUE_INVALID,
@@ -1166,9 +1165,7 @@ void DrawOpeningShotPath(CameraMatrices *matrices UNUSED) {
 #define BABY_MARIO_RIDE_DONKEY_KONG_ANIMATION 0x11
 #define TOAD_WAVE_FLAG_ANIMATION 0x10
 
-// Places the cue slot's character, leaving the point's height unset. It is a
-// plain block, as the gbi macros are; as a do-while (0) loop,
-// UpdateOpeningCharacters has 28 words differing, 10 in shape.
+// Places the cue slot's character, leaving the point's height unset
 #define PlaceCueCharacter(point, x, z, heading) \
     { \
         (point)[0] = (x); \
@@ -2404,7 +2401,7 @@ void UpdateOpening(void) {
                     f_OpeningCue = OPENING_CUE_PEACH_WAVE;
                     g_HoleSetup.conditions.lightPitch = 0x1000;
 
-                    // Stored as a signed value, as the original does
+                    // -0x7800 wraps to the binary angle 0x8800
                     *(s16 *)&g_HoleSetup.conditions.lightYaw = -0x7800;
                     f_OpeningScene++;
                 }
@@ -3451,8 +3448,6 @@ void UpdateOpening(void) {
 // Draws the camera editor's look-at marker, the characters and the opening's
 // overlays
 void DrawOpening(CameraMatrices *matrices, Gfx **displayListHead) {
-    // Unused; they give the stack frame the original's size; without any one of
-    // them 80 words differ
     Mat4 unusedMatrix UNUSED;
     Vec3 unusedPoints[4] UNUSED;
     Gfx *gfx = *displayListHead;
@@ -3559,7 +3554,6 @@ void DrawNameLogos(Gfx **displayListHead) {
         if (f_IsNameSlotShown[slot]) {
             gDPPipeSync(gfx++);
             gDPPipeSync(gfx++);
-            // The original takes the command's slot first, which orders the stack
             cycleTypeCommand = gfx++;
             gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
             gDPPipeSync(gfx++);
@@ -4065,8 +4059,6 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                     f_LogoBallLastPosition[AXIS_X] = f_OpeningBallPositions[slot][AXIS_X];
                     f_LogoBallLastPosition[AXIS_Y] = f_OpeningBallPositions[slot][AXIS_Y];
                     f_LogoBallLastPosition[AXIS_Z] = f_OpeningBallPositions[slot][AXIS_Z];
-                    // fabs, in double precision, which GCC narrows to abs.s; fabsf
-                    // here and below gives 44 differing words
                     rollAngle = fabs(rollAngle);
                     if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
                         f_LogoBallFrame++;
@@ -4098,8 +4090,6 @@ void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
                         f_OpeningBallPositions[slot][AXIS_Z]
                     );
                     gDPPipeSync(gfx++);
-                    // The original takes these two commands' slots in locals of their
-                    // own, which orders the spilled pointers' stack slots
                     cycleTypeCommand = gfx++;
                     gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
                     {
@@ -4649,10 +4639,6 @@ void LoadOpeningImpactLines(void) {
 
 // Draws blinking impact lines around the burst for a few frames, once
 // f_AreImpactLinesShown is set.
-//
-// Each pipe sync and the RDP state command after it goes through
-// AppendSyncedRdpState, to match: the plain pairs give 16 words differing,
-// none in shape.
 void DrawOpeningImpactLines(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 frame;
@@ -4687,24 +4673,8 @@ void DrawOpeningImpactLines(Gfx **displayListHead) {
             for (stripIndex = 0, row = IMPACT_LINES_STRIP_COUNT - 1;
                 stripIndex != IMPACT_LINES_STRIP_COUNT;
                 stripIndex++) {
-                // Set on each pass, as the original works out the rectangle's shifted
-                // left and right edges once, outside the loop, and keeps them on the
-                // stack. Written as the constant, the edges fold into the commands,
-                // 342 words differing (32 in shape); set once, at its declaration or
-                // before the loop, 264 (32). The width in a variable set before the
-                // loop swaps the operands of one or, 2 (none)
                 left = IMPACT_LINES_LEFT;
 
-                // The original loads the bottom edge once for both of the strip's
-                // edges, and adds the strip height to the row's offset for the top.
-                // The edge is a variable here, which loop.c moves out of the loop;
-                // the constant written for each edge gives 49 (13). The bottom is
-                // set in two steps and the offset stepped so that loop.c takes
-                // neither edge for an induction variable of the row: the bottom in
-                // one statement is reduced to a counter of its own, 188 (58), and
-                // the top as the edge less the offset plus the height gives 163
-                // (61). The top in two steps as well gives 44 (12), and both edges
-                // worked out from the row without the offset 10 (none)
                 bottomEdge = IMPACT_LINES_BOTTOM;
                 offset = row * IMPACT_LINES_STRIP_HEIGHT;
                 bottom = bottomEdge;
@@ -5055,17 +5025,7 @@ void LoadOpeningBurst(void) {
 // How many frames the burst shows for, once f_IsBurstShown is set
 #define BURST_FRAME_COUNT 4
 
-// Draws a yellow burst for a few frames, stretched over the burst's corners.
-//
-// The rectangle is a scissored one, as the original divides 0x8000 by the
-// width and height at run time: the clamps in gSPScisTextureRectangle read
-// the steps again, and GCC then keeps the divisions, where with
-// gSPTextureRectangle it folds them into constants and 470 words differ
-// (86 in shape). The width and height are worked out only once the burst
-// is drawn; set where they're declared, 246 words differ (60 in shape).
-// Each pipe sync and the RDP state command after it goes through
-// AppendSyncedRdpState, as in DrawHoleTriangles: plain pairs give 16 words
-// (0 in shape).
+// Draws a yellow burst for a few frames, stretched over the burst's corners
 void DrawOpeningBurst(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 left = BURST_LEFT;
@@ -5214,7 +5174,6 @@ void DrawOpeningShotBall(Gfx **displayListHead) {
                 f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE
             );
             gDPPipeSync(gfx++);
-            // The original takes the command's slot first, which orders the stack
             renderModeCommand = gfx++;
             gDPSetRenderMode(renderModeCommand, G_RM_CLD_SURF, G_RM_CLD_SURF2);
             gDPSetCombineLERP(
@@ -5335,9 +5294,6 @@ void DrawOpeningShotBall(Gfx **displayListHead) {
                     G_TX_NOLOD
                 );
                 if (g_CameraEditor.distance > SHOT_BALL_FAR_DISTANCE) {
-                    // Kept in a local, unlike the near branch's, to match:
-                    // ShotBallHalfWidth at each use gives 33 words differing (1 in
-                    // shape), and stripHeight as the local 41 (1)
                     size = ShotBallHalfWidth();
                     left = ballPoint.x - size;
                     right = left + SHOT_BALL_DOT_SIZE;
@@ -5567,25 +5523,9 @@ void LoadOpeningLogo(void) {
 // the club spirals in to them, a shine sweeps across, and the logo shrinks
 // into place. Meanwhile the screen behind it fades to gray and then white.
 // The logo is only drawn when isDrawn is 1, but moves on every call.
-//
-// The fade colors are set red first, as the original stores them. Each pipe
-// sync and the RDP state command after it go through AppendSyncedRdpState,
-// which declares the command's pointer first, as DrawHoleTriangles does;
-// only the color dither's pair changes the code alone. While the logo
-// shrinks, the L letter's position and scale are stepped before the club's,
-// as a focused permuter run suggested, and the club's strips are counted
-// with j, as the letters' halves are.
-//
-// The L letter's bounce indexes the tables with i, which is LOGO_LETTER_L
-// there, as the other letters' bounce does. Indexed with LOGO_LETTER_L,
-// cse kept f_LogoLetterSquashFrames' entry's address in a register and
-// derived f_LogoLetterSpeeds' from it, where the original does the reverse:
-// 30 words differed, 6 in shape, and 5 with only the speeds indexed by i.
 void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
     Gfx *gfx = *displayListHead;
     s32 texelsOffset;
-    // Kept apart, unlike the shine pass's, to match: sharing texelsOffset gives
-    // 50 words differing (14 in shape) against the draft's 38 (6)
     s32 letterTexelsOffset;
     LogoLetterIndex logoLetter;
     LogoLetterIndex letterIndex;
@@ -6290,8 +6230,6 @@ void DrawOpeningSparks(Gfx **displayListHead) {
     }
 
     if (f_OpeningSparksState == SPARKS_FLYING) {
-        // The original takes these two commands' slots in locals of their own,
-        // which orders the spilled pointers' stack slots
         syncCommand = gfx++;
         gDPPipeSync(syncCommand);
         gDPPipeSync(gfx++);

@@ -296,9 +296,6 @@ void DrawBootLogos(Gfx **displayListHead) {
         case BOOT_LOGO_N64:
             gDPPipeSync(gfx++);
             gDPSetTextureLUT(gfx++, G_TT_NONE);
-            // Each fade's alpha is set before its color command, to match: clamped
-            // in the command, the N64 logo's fade-in is clamped after the command's
-            // first word is stored, where the original clamps it first
             if (f_BootLogoFrame > FADE_OUT_FIRST_FRAME) {
                 s32 fadeOutAlpha = MAX(FadeOutAlpha(f_BootLogoFrame), 0);
 
