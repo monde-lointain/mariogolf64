@@ -142,7 +142,7 @@
 
 // Frames since the reaction began
 static s32 f_ReactionFrame = 0;
-static s32 f_UnusedReactionWord UNUSED = 0; // Unused; it is there to match
+static s32 f_UnusedReactionWord UNUSED = 0;
 
 // The third light is set by the framing routines that light the golfer
 static Lights3 f_ReactionLights = gdSPDefLights3(
@@ -189,17 +189,14 @@ static u8 f_UnusedBufferAfterSpotRoughness[32] UNUSED;
 
 static Boolean8 f_HasReactionSpot;
 
-// Whether the reaction views drop the eye and raise what they look at.
-// It is a macro, as an inline function compiles differently from the
-// original.
+// Whether the reaction views drop the eye and raise what they look at
 #define IsReactionViewLow() \
     (IsGameFlagSet(GAME_FLAG_LOW_REACTION_VIEWS) || \
         ((g_Scene != SCENE_STAFF_ROLL) && (g_GameState.isSuddenDeath == TRUE)))
 
 // Whether a spot this rough should become the reaction spot: it does when
 // there is none yet, or when it is less than half as rough as one that is
-// not smooth enough. It is a macro, as an inline function compiles
-// differently from the original.
+// not smooth enough.
 #define IsBetterReactionSpot(roughness) \
     (!f_HasReactionSpot || \
         (((roughness) * 2 < f_ReactionSpotRoughness) && \
@@ -656,7 +653,6 @@ void FrameMarioReaction(u32 slotIndex, CameraView *view) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     f32 distance;
     f32 focus[AXIS_COUNT];
-    // Pads the frame to match; without it 66 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 lightDirection[AXIS_COUNT];
     f32 lightOrigin[AXIS_COUNT];
@@ -746,7 +742,6 @@ void FrameWarioReaction(u32 slotIndex, CameraView *view) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     f32 distance;
     f32 focus[AXIS_COUNT];
-    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -830,7 +825,6 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * BABY_MARIO_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
-    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 eastward;
     f32 southward;
@@ -892,7 +886,6 @@ void FrameYoshiReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
-    // Pads the frame to match; without it 28 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -950,7 +943,6 @@ void FrameBowserReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
-    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -1019,7 +1011,6 @@ void FrameAzaleaReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
-    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -1059,7 +1050,6 @@ void FrameDonkeyKongReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
-    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -1098,7 +1088,6 @@ void FrameReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
-    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -1137,7 +1126,6 @@ void FramePeachReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
-    // Pads the frame to match; without it 32 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -1180,7 +1168,6 @@ void FrameSherryReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
-    // Pads the frame to match; without it 36 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 highestHeight;
 
@@ -1231,7 +1218,6 @@ void FrameKidReaction(u32 slotIndex, CameraView *view) {
         f_ReactionFrame * REACTION_ZOOM_RATE
     );
     f32 focus[AXIS_COUNT];
-    // Pads the frame to match; without it 36 words differ
     u8 unusedBuffer[0x40] UNUSED;
     f32 turn = (f_ReactionFrame - f_ReactionFrameCount) * KID_TURN_STEP;
     f32 highestHeight;
@@ -1412,7 +1398,6 @@ void GetReactionSpot(CoursePoint point) {
 void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
     f32 ahead[AXIS_COUNT];
     CoursePoint spot;
-    // Pads the frame to match; without it 48 words differ
     u8 unusedBuffer[0x80] UNUSED;
     Radians heading;
     Radians pitch;

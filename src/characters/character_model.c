@@ -1087,7 +1087,6 @@ const CharacterModel g_OpeningCharacterModels[OPENING_CHARACTER_MODEL_COUNT] = {
 // interpolated between the keys around the frame, or held at the nearest key
 // outside them or past g_CurrentAnimationEndFrame.
 void AnimateCharacterJoints(u32 slotIndex) {
-    // Nothing uses them, but the original's frame has the room for them
     Mat4 unusedMatrices[3] UNUSED;
     Mat4 translationMatrix;
     Mat4 jointMatrix;
@@ -1217,10 +1216,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
                     joint->rotations[joint->rotationSpan.startKeyIndex][3] * QUATERNION_SCALE;
             }
             else {
-                // Its own, as the original allocates it within the branch
                 f32 rotationProgress;
-                // A variable of its own to match: with rotationProgress scaled in
-                // place, 35 words differ from the original's (27 in shape)
                 Radians coveredAngle;
 
                 spanIndex = joint->rotationSpan.startKeyIndex;
@@ -1237,8 +1233,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
                     (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
                 // Nearly equal rotations are blended linearly, where the sines below
                 // would be near zero. progress holds the next span's weight from
-                // here to match: with a variable of its own, 20 words differ from
-                // the original's
+                // here.
                 if (1.0 - dot < SLERP_THRESHOLD) {
                     progress = rotationProgress;
                     spanWeight = 1.0 - progress;
@@ -1507,14 +1502,10 @@ PointLookup GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *posi
             return POINT_LOOKUP_FOUND;
         }
 
-        // The chained assignment is there to match: three separate stores, in
-        // either order, in both places give 17 words differing, 13 in shape
         position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
         return POINT_LOOKUP_NO_POINT;
     }
 
-    // The chained assignment is there to match: three separate stores, in
-    // either order, in both places give 17 words differing, 13 in shape
     position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
     return POINT_LOOKUP_NO_SLOT;
 }
@@ -1548,8 +1539,6 @@ PointLookup GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position)
 
     result = GetCharacterPointModelPosition(slotIndex, pointId, modelPosition);
     if (result < POINT_LOOKUP_FOUND) {
-        // The chained assignment is there to match: three separate stores, in
-        // either order, give 8 words differing, all in shape
         position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
     }
     else {

@@ -167,12 +167,6 @@ typedef struct JointAnimation {
 
 // Sets the matrix to the rotation of the quaternion (x, y, z, w), whatever its
 // length; a zero quaternion gives the identity.
-//
-// AnimateCharacterJoints and UpdateJointKeyframeSpans need it as an inline
-// function to match: written out in AnimateCharacterJoints, 257 of its words
-// differ from the original's (55 in shape), and as a plain static function
-// 158 (88). It sets the rotation's elements by column for the same reason: by
-// row, 213 words differ (23 in shape).
 static inline void QuaternionToMatrix(Quaternion quaternion, Mat4 matrix) {
     f32 lengthSquared = (quaternion[AXIS_X] * quaternion[AXIS_X]) +
         (quaternion[AXIS_Y] * quaternion[AXIS_Y]) + (quaternion[AXIS_Z] * quaternion[AXIS_Z]) +

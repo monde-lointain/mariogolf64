@@ -76,8 +76,7 @@ static inline CharacterAnimation *ModelAnimations(const CharacterModel *model) {
     ((AnimatedTexture *)CharacterModelTable(model, CHARACTER_MODEL_TEXTURES))
 
 // Where a segment address into the frame data points in the slot's copy being
-// written. With the copy's address first, the texture routines' registers
-// swap.
+// written
 #define FrameDataAddress(slot, address) \
     (SEGMENT_OFFSET(address) + AddressNumber((slot)->frameData[(slot)->frameDataIndex]))
 
@@ -165,8 +164,7 @@ static inline CharacterAnimation *ModelAnimations(const CharacterModel *model) {
     )
 
 // Looks up the slot in use at slotIndex into *slot, and tells whether there is
-// one. Taking the slot's address keeps it on the stack, as the texture
-// routines' originals do.
+// one
 static inline Boolean FindUsedSlot(u32 slotIndex, CharacterSlot **slot) {
     *slot = GetUsedCharacterSlot(slotIndex);
     return *slot != NULL;
@@ -677,9 +675,7 @@ s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode sh
     }
 
     {
-        // An unused nested function, a GNU C extension. Defined here rather than
-        // among the declarations, it leaves GetBallDistance's registers as they
-        // are in the original.
+        // An unused nested function, a GNU C extension
         UNUSED_FUNCTION f32 GetVectorLength(f32 x, f32 y, f32 z) {
             return sqrtf(x * x + y * y + z * z);
         }
@@ -899,15 +895,8 @@ s32 GetImpactEventFrame(u32 slotIndex) {
     return GetAnimationEventFrame(slotIndex, IMPACT_EVENT_ANIMATION_INDEX, ANIMATION_EVENT_IMPACT);
 }
 
-// Gives each of the slot's animated triangles its default texture.
-//
-// The original's frame has 0x40 bytes nothing uses below the slot, which it
-// keeps on the stack, so the slot is found through its address; without the
-// unused bytes 18 words differ, and with the slot taken from the return value
-// 68. Walking the triangles with a for loop, or clearing triangleIndex at the
-// loop, gives 27.
+// Gives each of the slot's animated triangles its default texture
 void ResetTriangleTextures(u32 slotIndex) {
-    // Pads the frame to match
     u8 unused[0x40] UNUSED;
     s32 triangleIndex = 0;
     CharacterSlot *slot;
@@ -933,22 +922,12 @@ void ResetTriangleTextures(u32 slotIndex) {
 
 // Shows the keyed textures of the slot's playing texture animations, then
 // advances each one a frame. The arguments after the slot are unused.
-//
-// The unused bytes, the slot found through its address and the while loop
-// are as ResetTriangleTextures'. The 0x80 bytes above the slot come after
-// its address is taken; declared with unusedHead, 10 words differ, and
-// without them 20. With pointers to the state and the animation, 111 words
-// differed; reading the state's frame once into stateFrame and indexing the
-// states in the key loop made 80, indexing them in the animation loop 33,
-// storing the copy count before the test rather than in each branch 16, and
-// declaring keyIndex before key, which swaps their registers, 0.
 void AdvanceTextureAnimations(
     u32 slotIndex,
     s32 unused UNUSED,
     s32 frameLastDigit UNUSED,
     s32 frame UNUSED
 ) {
-    // Pads the frame to match, with unusedTail
     u8 unusedHead[0x40] UNUSED;
     s32 triangleIndex = 0;
     CharacterSlot *slot;
@@ -1054,12 +1033,7 @@ NO_RESULT PlayTextureAnimation(u32 slotIndex, s32 index) {
 
 // Gives the slot's triangles that the texture animation changes their default
 // texture. Nothing calls it.
-//
-// Laid out as ResetTriangleTextures: without the unused bytes 22 words
-// differ, with the slot taken from the return value 76, and with a for loop
-// 27. Indexing the key sets in the test, rather than through keySet, gives 4.
 void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
-    // Pads the frame to match
     u8 unused[0x40] UNUSED;
     s32 triangleIndex = 0;
     CharacterSlot *slot;
@@ -1195,9 +1169,6 @@ void LoadCharacter(u32 slotIndex, CharacterIndex characterIndex, s32 modelKind) 
         slot->frameData[0] = OS_PHYSICAL_TO_K0(
             osVirtualToPhysical((void *)(UnsignedAddress)slot->model->frameDataStart)
         );
-        // Added as integers, the size first, to match: adding the size to a u8
-        // pointer, on either side, or adding the integers pointer first gives 4
-        // words differing, none in shape
         slot->frameData[1] = (void *)(frameDataSize + AddressNumber(slot->frameData[0]));
         slot->frameData[2] = (void *)(frameDataSize + AddressNumber(slot->frameData[1]));
         memcpy(slot->frameData[1], slot->frameData[0], frameDataSize);
@@ -1598,7 +1569,6 @@ void AnimateCharacter(u32 slotIndex) {
 // AnimateCharacterJoints does, working out the joint transforms but leaving
 // them unused. Nothing calls it.
 void UpdateJointKeyframeSpans(u32 slotIndex) {
-    // Nothing uses them, but the original's frame has the room for them
     Mat4 unusedMatrices[3] UNUSED;
     Mat4 translationMatrix;
     Mat4 jointMatrix;
@@ -1727,10 +1697,7 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
                     joint->rotations[joint->rotationSpan.startKeyIndex][3] * QUATERNION_SCALE;
             }
             else {
-                // Its own, as the original allocates it within the branch
                 f32 rotationProgress;
-                // A variable of its own to match: with rotationProgress scaled in
-                // place, 35 words differ from the original's (27 in shape)
                 Radians coveredAngle;
 
                 spanIndex = joint->rotationSpan.startKeyIndex;
@@ -1747,8 +1714,7 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
                     (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
                 // Nearly equal rotations are blended linearly, where the sines below
                 // would be near zero. progress holds the next span's weight from
-                // here to match: with a variable of its own, 20 words differ from
-                // the original's
+                // here.
                 if (1.0 - dot < SLERP_THRESHOLD) {
                     progress = rotationProgress;
                     spanWeight = 1.0 - progress;
@@ -2051,16 +2017,8 @@ void SetCharacterLights(void) {
         f_ImpactFlashLights[1].a.l = (lights).a.l; \
     }
 
-// Draws the character in the slot with its lights, alpha and culling
-//
-// Each weather's arm calls AddReactionLight and falls back to its own lights,
-// and jump2 merges the two arms' identical tails, as the original does. Naming
-// each lights table in place lets fold add the first light's offset to the
-// table's address before the index's, so cse shares table + 8 between
-// gSPSetLights2 and CopyLightsForImpactFlash. Choosing the table into a
-// pointer and falling back once after the test adds the offset last: 99 words
-// differed, 15 in shape, or 71 (7) with the fallback's gSPSetLights2 in a
-// block of its own.
+// Draws the character in the slot with its lights, alpha and culling. Each
+// weather's arm calls AddReactionLight and falls back to its own lights.
 void DrawCharacter(u32 slotIndex) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     Gfx *gfx = g_DisplayListHead;
@@ -2239,27 +2197,13 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
 }
 
 // Whether DrawCharacterAndShadow draws for a camera: OPENING_CAMERA, or any
-// but the inset while g_AreCharactersDrawn is set. It is a macro, as an inline
-// function compiles differently from the original.
+// but the inset while g_AreCharactersDrawn is set
 #define IsCharacterDrawnForCamera(cameraIndex) \
     (((cameraIndex) == OPENING_CAMERA) || (((cameraIndex) != INSET_CAMERA) && g_AreCharactersDrawn))
 
 // Returns the yaw of the impact flash's light for a character's yaw: the yaw
 // itself for a left-handed player, who stands mirrored, and its negation for
 // a right-handed one.
-//
-// To match, the negation is set first and the yaw copied over it under the
-// test, which is the original's code: it loads the yaw into $f0 before it
-// reads isLefty, negates it into $f12 in the delay slot of the branch, and
-// copies it over on the fall-through. Picked by a conditional expression,
-// here or in the call's argument, the yaw is loaded straight into $f12 and
-// negated in place, as expr.c expands such an expression in one operand when
-// one arm negates the other: 14 words of DrawCharacterAndShadow differ (6 in
-// shape). So it is with the yaw set first and negated under the opposite
-// test, and with isLefty taken as the s8 it is; an if and an else, or two
-// returns, give 53 (23). Reading isLefty here, and so after the negation,
-// gives 8 (4), and the pick in statements of the caller, which come before
-// the light's address is worked out, 33 (25).
 static inline f32 GetImpactFlashYaw(f32 yaw, Boolean isLefty) {
     f32 flashYaw;
 
@@ -2287,8 +2231,6 @@ void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotI
     PlaneTriangle triangle;
     TrianglePlane plane;
     Mat4 projection;
-    // The original frame has room for this; without it 204 words differ, none
-    // in shape
     Mat4 unusedMatrix UNUSED;
     Gfx *gfx;
     CharacterSlot *slot;
