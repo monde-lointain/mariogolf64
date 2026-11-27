@@ -4089,7 +4089,7 @@ void DrawColorTest(Gfx **displayListHead) {
     );
     gDPPipeSync(gfx++);
 
-    // The casts read only the low halves, as the target does
+    // The position passes as halfwords, so only its low halves count
     DrawCenteredLargeText(&gfx, f_TestTextX, f_TestTextY, "ｻﾝﾌﾟﾙABCDEFG");
     gDPPipeSync(gfx++);
     PrintDebugText(

@@ -780,7 +780,6 @@ void UpdateGolfBalls(void) {
 
             if (f_BallAfterimageFrameCount % AFTERIMAGE_SLOW_FADE_PERIOD == 0) {
                 for (i = 0; i != f_BallAfterimageLength; i++) {
-                    // -= rather than --, which loop.c reduces with another address
                     if (f_BallAfterimages[i].alpha > 0) {
                         f_BallAfterimages[i].alpha -= 1;
                     }

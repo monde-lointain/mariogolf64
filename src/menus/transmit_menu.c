@@ -1286,7 +1286,7 @@ Boolean HaveAllRumblePaks(void) {
     return haveAll;
 }
 
-// A macro rather than an inline function, which leaves a store-flag result
+// Whether all four C buttons are held
 #define AreAllCButtonsHeld(buttons) \
     ((((buttons) & (L_CBUTTONS | D_CBUTTONS | U_CBUTTONS)) == \
          (L_CBUTTONS | D_CBUTTONS | U_CBUTTONS)) && \

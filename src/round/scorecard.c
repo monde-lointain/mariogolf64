@@ -942,7 +942,7 @@ void AnimateScorecard(void) {
                 g_Scorecard.x -= slideSpeed;
             }
 
-            // The target stores the y offset back unchanged here
+            // Stores the y offset back unchanged
             g_Scorecard.y = g_Scorecard.y;
             if (g_Scorecard.stateTime == SCORECARD_CLOSE_TIME) {
                 FreeScorecard();

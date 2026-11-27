@@ -177,8 +177,7 @@ void *AllocFromHeap(HeapIndex heapIndex, u32 size) {
     heap = &f_Heaps[heapIndex];
     mask = osSetIntMask(OS_IM_NONE);
 
-    // The size is reused for the block's, to match: a blockSize local of its
-    // own gives 66 words differing, 8 in shape
+    // From here on, size is the whole block's, header included
     size = RoundUpTo(size + sizeof(MemoryBlock), BLOCK_ALIGNMENT);
     bestSize = NO_BLOCK_SIZE;
     block = NextBlock(heap->sentinel);
@@ -341,8 +340,7 @@ void *AllocMemory(u32 size) {
     largestFreeSize = 0;
     mask = osSetIntMask(OS_IM_NONE);
 
-    // The size is reused for the block's, to match: a blockSize local of its
-    // own gives 66 words differing, 8 in shape
+    // From here on, size is the whole block's, header included
     size = RoundUpTo(size + sizeof(MemoryBlock), BLOCK_ALIGNMENT);
     bestSize = NO_BLOCK_SIZE;
     bestBlock = NULL;
