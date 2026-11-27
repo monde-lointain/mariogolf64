@@ -286,15 +286,16 @@ static uint8_t *ChooseRom(size_t *size) {
 
 // The renderer draws at a whole multiple of the N64's resolution: the
 // least that covers the display's height
-static int ChooseRenderScale(void) {
+static int ChooseRenderScale(ScreenFit fit) {
     const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
     int scale = WINDOW_SCALE;
 
-    if (mode != NULL && mode->h > 0) {
+    if (mode != NULL && mode->w > 0 && mode->h > 0) {
         const float density = (mode->pixel_density > 0.0f) ? mode->pixel_density : 1.0f;
-        const int pixels = (int)SDL_ceilf((float)mode->h * density);
+        const uint32_t width = (uint32_t)SDL_ceilf((float)mode->w * density);
+        const uint32_t height = (uint32_t)SDL_ceilf((float)mode->h * density);
 
-        scale = (pixels + SCREEN_HEIGHT - 1) / SCREEN_HEIGHT;
+        scale = (int)ChooseScreenScale(width, height, fit);
     }
 
     return SDL_clamp(scale, 1, CONFIG_SCALE_MAX);
@@ -397,6 +398,17 @@ static SDL_Window *CreateGameWindow(bool isFullscreen) {
     return window;
 }
 
+static ScreenFit ScreenFitOf(FitChoice choice) {
+    switch (choice) {
+        case FIT_INTEGER:
+            return SCREEN_FIT_INTEGER;
+        case FIT_STRETCH:
+            return SCREEN_FIT_STRETCH;
+        default:
+            return SCREEN_FIT_ASPECT;
+    }
+}
+
 static SDL_GPUSampleCount SampleCountOf(AntialiasingChoice choice) {
     switch (choice) {
         case ANTIALIASING_2X:
@@ -427,12 +439,18 @@ static bool OpenWindow(const Options *options) {
         }
 
         f_StartsFullscreen = options->isFullscreen;
-        if (!InitPresenter(f_Device, f_Window, PresentModeOf(f_Config.present))) {
+        if (!InitPresenter(
+                f_Device,
+                f_Window,
+                PresentModeOf(f_Config.present),
+                ScreenFitOf(f_Config.fit)
+            )) {
             return false;
         }
     }
 
-    scale = (options->renderScale > 0) ? options->renderScale : ChooseRenderScale();
+    scale = (options->renderScale > 0) ? options->renderScale :
+                                         ChooseRenderScale(ScreenFitOf(f_Config.fit));
     InitGpuBackend(f_Device, (uint32_t)scale, SampleCountOf(f_Config.antialiasing));
     // SDL_GPUSampleCount counts up from one sample in powers of two
     SDL_Log(

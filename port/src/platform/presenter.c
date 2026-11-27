@@ -24,12 +24,22 @@ static SDL_GPUDevice *f_Device;
 static SDL_Window *f_Window;
 static SDL_GPUTexture *f_MemoryScreen; // The CPU's frames
 static SDL_GPUTransferBuffer *f_Upload;
+static ScreenFit f_Fit;
 
-SDL_Rect FitScreenToWindow(uint32_t windowWidth, uint32_t windowHeight) {
+SDL_Rect FitScreenToWindow(uint32_t windowWidth, uint32_t windowHeight, ScreenFit fit) {
+    const uint32_t multiple = SDL_min(windowWidth / SCREEN_WIDTH, windowHeight / SCREEN_HEIGHT);
     SDL_Rect area;
 
+    if (fit == SCREEN_FIT_STRETCH) {
+        area.w = (int)windowWidth;
+        area.h = (int)windowHeight;
+    }
+    else if (fit == SCREEN_FIT_INTEGER && multiple != 0) {
+        area.w = (int)(multiple * SCREEN_WIDTH);
+        area.h = (int)(multiple * SCREEN_HEIGHT);
+    }
     // Whichever side runs out first limits the screen
-    if ((uint64_t)windowWidth * SCREEN_HEIGHT <= (uint64_t)windowHeight * SCREEN_WIDTH) {
+    else if ((uint64_t)windowWidth * SCREEN_HEIGHT <= (uint64_t)windowHeight * SCREEN_WIDTH) {
         area.w = (int)windowWidth;
         area.h = (int)(((uint64_t)windowWidth * SCREEN_HEIGHT) / SCREEN_WIDTH);
     }
@@ -41,6 +51,28 @@ SDL_Rect FitScreenToWindow(uint32_t windowWidth, uint32_t windowHeight) {
     area.x = ((int)windowWidth - area.w) / 2;
     area.y = ((int)windowHeight - area.h) / 2;
     return area;
+}
+
+uint32_t ChooseScreenScale(uint32_t displayWidth, uint32_t displayHeight, ScreenFit fit) {
+    uint32_t scale;
+
+    if (fit == SCREEN_FIT_INTEGER) {
+        scale = SDL_min(displayWidth / SCREEN_WIDTH, displayHeight / SCREEN_HEIGHT);
+    }
+    else {
+        scale = (displayHeight + SCREEN_HEIGHT - 1) / SCREEN_HEIGHT;
+    }
+
+    return SDL_max(scale, 1u);
+}
+
+SDL_GPUFilter PickScreenFilter(uint32_t sourceWidth, uint32_t sourceHeight, SDL_Rect area) {
+    SDL_assert(sourceWidth != 0 && sourceHeight != 0);
+    if ((uint32_t)area.w % sourceWidth == 0 && (uint32_t)area.h % sourceHeight == 0) {
+        return SDL_GPU_FILTER_NEAREST;
+    }
+
+    return SDL_GPU_FILTER_LINEAR;
 }
 
 // Each 5-bit channel fills 8 bits by repeating its top bits, so that full
@@ -78,7 +110,12 @@ SDL_GPUPresentMode PickPresentMode(SDL_GPUPresentMode wanted, bool hasMailbox, b
     return SDL_GPU_PRESENTMODE_VSYNC;
 }
 
-bool InitPresenter(SDL_GPUDevice *device, SDL_Window *window, SDL_GPUPresentMode wanted) {
+bool InitPresenter(
+    SDL_GPUDevice *device,
+    SDL_Window *window,
+    SDL_GPUPresentMode wanted,
+    ScreenFit fit
+) {
     SDL_GPUPresentMode mode;
 
     SDL_GPUTextureCreateInfo texture;
@@ -87,6 +124,7 @@ bool InitPresenter(SDL_GPUDevice *device, SDL_Window *window, SDL_GPUPresentMode
     SDL_assert(device != NULL && window != NULL);
     f_Device = device;
     f_Window = window;
+    f_Fit = fit;
     if (!SDL_ClaimWindowForGPUDevice(device, window)) {
         SDL_Log("Can't show the GPU's frames in the window: %s", SDL_GetError());
         return false;
@@ -184,7 +222,7 @@ static void BlitScreen(
     uint32_t screenWidth,
     uint32_t screenHeight
 ) {
-    const SDL_Rect area = FitScreenToWindow(swapchainWidth, swapchainHeight);
+    const SDL_Rect area = FitScreenToWindow(swapchainWidth, swapchainHeight, f_Fit);
     SDL_GPUBlitInfo blit;
 
     SDL_zero(blit);
@@ -198,7 +236,7 @@ static void BlitScreen(
     blit.destination.h = (Uint32)area.h;
     blit.load_op = SDL_GPU_LOADOP_CLEAR;
     blit.clear_color.a = 1.0f;
-    blit.filter = SDL_GPU_FILTER_LINEAR;
+    blit.filter = PickScreenFilter(screenWidth, screenHeight, area);
     SDL_BlitGPUTexture(commands, &blit);
 }
 

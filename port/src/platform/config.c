@@ -107,6 +107,8 @@ static const char *const f_PresentNames[] = {"mailbox", "vsync", "immediate", NU
 SDL_COMPILE_TIME_ASSERT(present_size, sizeof(PresentChoice) == sizeof(int));
 static const char *const f_AntialiasingNames[] = {"off", "2x", "4x", "8x", NULL};
 SDL_COMPILE_TIME_ASSERT(antialiasing_size, sizeof(AntialiasingChoice) == sizeof(int));
+static const char *const f_FitNames[] = {"aspect", "integer", "stretch", NULL};
+SDL_COMPILE_TIME_ASSERT(fit_size, sizeof(FitChoice) == sizeof(int));
 
 #define FIELD(name) offsetof(Config, name)
 #define CONTROL(key, control) {"controls", (key), SETTING_CONTROL, (control), 0, 0, NULL}
@@ -134,7 +136,7 @@ static const Setting f_Settings[] = {
         0,
         CONFIG_SCALE_MAX,
         "How many times the N64's 320x240 to draw at, from 1 to 8, or 0 to cover\n"
-        "the display's height"},
+        "the display's height, or with fit = integer, the most that fits it"},
     {"video", "fullscreen", SETTING_BOOL, FIELD(isFullscreen), 0, 0, "Whether to start fullscreen"},
     {"video",
         "present",
@@ -154,6 +156,16 @@ static const Setting f_Settings[] = {
         "off, 2x, 4x or 8x: how many samples a pixel to draw edges with, or the\n"
         "most that the GPU has",
         f_AntialiasingNames},
+    {"video",
+        "fit",
+        SETTING_CHOICE,
+        FIELD(fit),
+        0,
+        0,
+        "aspect fills as much of the window as the N64's 4:3 shape allows,\n"
+        "integer shows it at a whole multiple of 320x240 so that its pixels are\n"
+        "even, and stretch fills the whole window",
+        f_FitNames},
     {"window",
         "width",
         SETTING_WINDOW_SIZE,
@@ -245,6 +257,7 @@ void SetDefaultConfig(Config *config) {
     config->isFullscreen = false;
     config->present = PRESENT_MAILBOX;
     config->antialiasing = DEFAULT_ANTIALIASING;
+    config->fit = FIT_ASPECT;
     config->pausesWhenUnfocused = true;
     config->volume = CONFIG_VOLUME_MAX;
     SetDefaultPadBindings(&config->bindings);

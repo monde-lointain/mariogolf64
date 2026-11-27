@@ -360,15 +360,79 @@ static void TestSaveMemory(void) {
 // --- The presenter ---
 
 static void TestFitScreen(void) {
-    SDL_Rect area = FitScreenToWindow(640, 480);
+    SDL_Rect area = FitScreenToWindow(640, 480, SCREEN_FIT_ASPECT);
 
     EXPECT(area.x == 0 && area.y == 0 && area.w == 640 && area.h == 480);
     // A wide window has bars at the sides
-    area = FitScreenToWindow(1920, 1080);
+    area = FitScreenToWindow(1920, 1080, SCREEN_FIT_ASPECT);
     EXPECT(area.w == 1440 && area.h == 1080 && area.x == 240 && area.y == 0);
     // A tall one at the top and bottom
-    area = FitScreenToWindow(800, 1000);
+    area = FitScreenToWindow(800, 1000, SCREEN_FIT_ASPECT);
     EXPECT(area.w == 800 && area.h == 600 && area.x == 0 && area.y == 200);
+}
+
+// The largest whole multiple of the screen that fits, centered
+static void TestFitScreenByWholeMultiples(void) {
+    SDL_Rect area = FitScreenToWindow(1920, 1080, SCREEN_FIT_INTEGER);
+
+    EXPECT(area.w == 1280 && area.h == 960 && area.x == 320 && area.y == 60);
+    area = FitScreenToWindow(960, 720, SCREEN_FIT_INTEGER);
+    EXPECT(area.w == 960 && area.h == 720 && area.x == 0 && area.y == 0);
+    // A pixel short of a multiple takes the one below
+    area = FitScreenToWindow(959, 720, SCREEN_FIT_INTEGER);
+    EXPECT(area.w == 640 && area.h == 480 && area.x == 159 && area.y == 120);
+    area = FitScreenToWindow(960, 719, SCREEN_FIT_INTEGER);
+    EXPECT(area.w == 640 && area.h == 480 && area.x == 160 && area.y == 119);
+    // A tall window is limited by its width
+    area = FitScreenToWindow(700, 1000, SCREEN_FIT_INTEGER);
+    EXPECT(area.w == 640 && area.h == 480 && area.x == 30 && area.y == 260);
+    // In a window smaller than the screen, it keeps the screen's shape
+    area = FitScreenToWindow(319, 240, SCREEN_FIT_INTEGER);
+    EXPECT(area.w == 319 && area.h == 239 && area.x == 0 && area.y == 0);
+    area = FitScreenToWindow(320, 240, SCREEN_FIT_INTEGER);
+    EXPECT(area.w == 320 && area.h == 240);
+}
+
+static void TestFitScreenByStretching(void) {
+    SDL_Rect area = FitScreenToWindow(1920, 1080, SCREEN_FIT_STRETCH);
+
+    EXPECT(area.x == 0 && area.y == 0 && area.w == 1920 && area.h == 1080);
+}
+
+// The scale to draw at for a display: the least that covers its height, or
+// for whole multiples, the most that fits it, so that fullscreen shows
+// the drawing one for one
+static void TestScreenScale(void) {
+    EXPECT(ChooseScreenScale(1920, 1080, SCREEN_FIT_ASPECT) == 5);
+    EXPECT(ChooseScreenScale(1920, 960, SCREEN_FIT_ASPECT) == 4);
+    EXPECT(ChooseScreenScale(1920, 961, SCREEN_FIT_ASPECT) == 5);
+    EXPECT(ChooseScreenScale(1920, 1080, SCREEN_FIT_STRETCH) == 5);
+    EXPECT(ChooseScreenScale(1920, 1080, SCREEN_FIT_INTEGER) == 4);
+    EXPECT(ChooseScreenScale(2560, 1440, SCREEN_FIT_INTEGER) == 6);
+    // A tall display is limited by its width
+    EXPECT(ChooseScreenScale(1279, 2400, SCREEN_FIT_INTEGER) == 3);
+    // A display smaller than the screen still draws at 1
+    EXPECT(ChooseScreenScale(300, 200, SCREEN_FIT_INTEGER) == 1);
+    EXPECT(ChooseScreenScale(300, 200, SCREEN_FIT_ASPECT) == 1);
+}
+
+// A whole multiple of the source's pixels, one for one or more, is shown
+// sharp; anything else is filtered
+static void TestScreenFilter(void) {
+    SDL_Rect area = {320, 60, 1280, 960};
+
+    EXPECT(PickScreenFilter(320, 240, area) == SDL_GPU_FILTER_NEAREST);
+    EXPECT(PickScreenFilter(1280, 960, area) == SDL_GPU_FILTER_NEAREST);
+    EXPECT(PickScreenFilter(1920, 1440, area) == SDL_GPU_FILTER_LINEAR);
+    area.w = 1440;
+    area.h = 1080;
+    EXPECT(PickScreenFilter(320, 240, area) == SDL_GPU_FILTER_LINEAR);
+    // Both sides must be multiples
+    area.w = 1280;
+    EXPECT(PickScreenFilter(320, 240, area) == SDL_GPU_FILTER_LINEAR);
+    area.w = 1440;
+    area.h = 960;
+    EXPECT(PickScreenFilter(320, 240, area) == SDL_GPU_FILTER_LINEAR);
 }
 
 static void TestScreenPixels(void) {
@@ -466,6 +530,10 @@ int main(void) {
     TestRecordsReadFrames();
     TestSaveMemory();
     TestFitScreen();
+    TestFitScreenByWholeMultiples();
+    TestFitScreenByStretching();
+    TestScreenFilter();
+    TestScreenScale();
     TestScreenPixels();
     TestReadsScreenWhateverTheCpuReadItAs();
     TestPresentModeFallbacks();

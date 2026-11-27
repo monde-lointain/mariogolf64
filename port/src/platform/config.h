@@ -45,12 +45,20 @@ typedef enum AntialiasingChoice {
     ANTIALIASING_8X
 } AntialiasingChoice;
 
+// How the N64's screen fills the window
+typedef enum FitChoice {
+    FIT_ASPECT, // As large as fits at its 4:3 shape
+    FIT_INTEGER, // At a whole multiple of its 320x240, for even pixels
+    FIT_STRETCH // The whole window
+} FitChoice;
+
 typedef struct Config {
     char romPath[CONFIG_PATH_SIZE]; // Empty to look for the default
     int renderScale; // 0 to fit the display, or 1 to CONFIG_SCALE_MAX
     bool isFullscreen;
     PresentChoice present;
     AntialiasingChoice antialiasing;
+    FitChoice fit;
     int windowWidth; // 0 for the default, or within the limits above
     int windowHeight;
     bool hasWindowPosition; // Whether windowX and windowY place it
