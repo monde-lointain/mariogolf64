@@ -212,6 +212,13 @@ add_test(NAME playthrough_scripts_test
         "${PROJECT_SOURCE_DIR}/port/playthroughs/generate_round.py" --check
 )
 
+# The template's parts, each on its own; -B keeps the template's import
+# from leaving compiled bytecode beside it
+add_test(NAME playthrough_template_test
+    COMMAND "${Python3_EXECUTABLE}" -I -B
+        "${PROJECT_SOURCE_DIR}/port/playthroughs/generate_round_test.py"
+)
+
 # The linker script that gathers overlays' variables, linked into a program
 # of its own with three overlays, in place of the doubles' empty table
 include(OverlaySections)

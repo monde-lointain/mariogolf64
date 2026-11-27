@@ -131,5 +131,7 @@ python3 port/playthroughs/generate_round.py
 ```
 
 The `playthrough_scripts_test` test checks that the scripts are what the
-template writes. As with a recording, keep the session's start save and
+template writes, and `playthrough_template_test` checks the template's
+parts on their own, to say which one broke: the order of presses, the
+title codes, the flag panel's cursor, or the choice of session. As with a recording, keep the session's start save and
 the save that a headless replay leaves, to compare later replays with.
