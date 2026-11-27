@@ -384,7 +384,7 @@ typedef s32 HolePointMode;
 #    define UncachedFrameAddress(address) AddressPast((address), KSEG1_OFFSET)
 #endif
 
-// A plain if leaves GCC to invert the condition, which the game's code does not
+// Reports a failed assertion at lineNumber of the editor's source file
 #define AssertInEditor(condition, lineNumber) \
     ((condition) ? (void)0 : ReportFailedAssertion("EX", "c:/usgolf64/hiedit.c", lineNumber))
 
@@ -758,7 +758,7 @@ typedef struct TriangleSlope {
 // The size of the buffer that GetEditorBuffer returns
 #define EDITOR_BUFFER_SIZE 0x40000
 
-// The editor's bss, in the original's address order: KMC allocates a file's
+// The editor's bss, in its N64 address order: KMC allocates a file's
 // uninitialized statics in the order they are defined.
 static CoursePoint f_SavedCorners[SAVED_CORNER_COUNT];
 static CoursePoint f_UnusedSavedCorners[SAVED_CORNER_COUNT] UNUSED;
@@ -942,7 +942,6 @@ Boolean HasDeadTriangleNearPoint(s32 column, s32 row);
 void UpdateGroundPointEditor(void) {
     Vtx_t points[POINT_MOVE_COUNT + 1]; // Each move saves its point into the next move's slot
     char text[DEBUG_TEXT_BUFFER_SIZE];
-    // The game's frame has room for another point; without it 16 words differ
     Vtx_t unusedPoint UNUSED;
     Boolean madeDeadTriangle;
 
@@ -1595,10 +1594,10 @@ void UpdateTriangleEditor(void) {
     f32 stepY;
     f32 stepX;
     f32 stepZ;
-    f32 moveY; // The scaled y step; stepY itself would compile differently
+    f32 moveY; // The scaled y step
     TriangleEdit editKind;
     s32 corner;
-    f64 cameraDistance; // As a literal, GCC would fold it into the angles before the zoom
+    f64 cameraDistance;
     Vtx_t *lookAtVertex;
 
     editKind = TRIANGLE_EDIT_NONE;
@@ -1646,8 +1645,6 @@ void UpdateTriangleEditor(void) {
             (sin((u16)f_TriangleCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
         stepZ = (-sin((u16)f_TriangleCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) +
             (cos((u16)f_TriangleCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
-        // Scaled in two steps; in one expression GCC would multiply 10 by the zoom
-        // first
         {
             f32 scaledX = stepX * CORNER_STEP_SCALE;
             f32 scaledY = stepY * CORNER_STEP_SCALE;
@@ -1807,10 +1804,10 @@ void UpdateRingEditor(void) {
     f32 stepY;
     f32 stepX;
     f32 stepZ;
-    f32 moveY; // The scaled y step; stepY itself would compile differently
+    f32 moveY; // The scaled y step
     TriangleEdit editKind;
     s32 corner;
-    f64 cameraDistance; // As a literal, GCC would fold it into the angles before the zoom
+    f64 cameraDistance;
     Vtx_t *lookAtVertex;
 
     editKind = TRIANGLE_EDIT_NONE;
@@ -1880,8 +1877,6 @@ void UpdateRingEditor(void) {
             (sin((u16)f_RingCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
         stepZ = (-sin((u16)f_RingCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) +
             (cos((u16)f_RingCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
-        // Scaled in two steps; in one expression GCC would multiply 10 by the zoom
-        // first
         {
             f32 scaledX = stepX * CORNER_STEP_SCALE;
             f32 scaledY = stepY * CORNER_STEP_SCALE;
@@ -2063,11 +2058,11 @@ void UpdateWallEditor(void) {
     f32 stepY;
     f32 stepX;
     f32 stepZ;
-    f32 moveY; // The scaled y step; stepY itself would compile differently
+    f32 moveY; // The scaled y step
     TriangleEdit editKind;
     Boolean isDropping;
     s32 corner;
-    f64 cameraDistance; // As a literal, GCC would fold it into the angles before the zoom
+    f64 cameraDistance;
     Vtx_t *lookAtVertex;
 
     editKind = TRIANGLE_EDIT_NONE;
@@ -2126,8 +2121,6 @@ void UpdateWallEditor(void) {
         stepX = (-sin((u16)f_WallCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepUp) +
             (cos((u16)f_WallCameraYawAngle * BINARY_ANGLE_TO_RADIANS) * stepRight);
 
-        // Scaled in two steps; in one expression GCC would multiply 10 by the zoom
-        // first
         {
             f32 scaledX = stepRight * CORNER_STEP_SCALE;
             f32 scaledY = stepY * CORNER_STEP_SCALE;
@@ -2323,7 +2316,6 @@ void UpdateWallEditor(void) {
 // for each one.
 void PutObjectsOnGround(void) {
     Mat4 translation;
-    // The game's frame has room for a second matrix; without it 28 words differ
     Mat4 unusedMatrix UNUSED;
     s32 height;
     s32 i;
@@ -2467,7 +2459,7 @@ void UpdateHeightEditor(void) {
     CursorDirection direction;
     s32 columnStep;
     s32 rowStep;
-    f64 cameraDistance; // As a literal, GCC would fold it into the angles before the zoom
+    f64 cameraDistance;
 
     // Moves every ground point's height by change
     void ChangeGroundHeight(s32 change) {
@@ -3192,10 +3184,6 @@ void ShapeGroundFromCodes(void) {
                         treePositions[treeCount][GROUND_AXIS_Z] = z;
                         treeCount++;
 
-                        // The limit is checked at the end of each block, to match: one
-                        // check here alone gives 178 words differing, 28 in shape, the
-                        // limit in the row and column loops' conditions 193, 37 in
-                        // shape, and every check but this one 121, 1 in shape
                         if (treeCount == BILLBOARD_COUNT) {
                             goto PLANTED;
                         }
@@ -3454,12 +3442,11 @@ void UpdateHoleFileMenu(void) {
 // out, and Z with the stick orbits the camera around the tree.
 void UpdateTreeEditor(void) {
     Mat4 translation;
-    // The game's frame has room for a second matrix; without it 28 words differ
     Mat4 unusedMatrix UNUSED;
     TriangleEdit editKind;
     s32 billboardIndex;
     s32 height;
-    f64 cameraDistance; // As a literal, GCC would fold it into the angles before the zoom
+    f64 cameraDistance;
 
     PrintDebugText("KIND", TREE_TEXT_COLUMN, TREE_KIND_LABEL_ROW);
     PrintDebugText("        ", TREE_TEXT_COLUMN, TREE_KIND_TEXT_ROW);
@@ -3682,9 +3669,7 @@ void BlendGroundAroundPoint(u32 column, u32 row, s32 radius, s32 falloff) {
     radiusSquared = radius * radius;
     for (rowOffset = -radius; rowOffset <= radius; rowOffset++) {
         if (row + rowOffset < GROUND_POINT_ROW_COUNT) {
-            // halfWidth holds its square until the root, to match: a
-            // halfWidthSquared local, wherever it is declared, gives 46 words
-            // differing (0 in shape)
+            // halfWidth holds its square until the root
             halfWidth = radiusSquared - (rowOffset * rowOffset);
             if (halfWidth < 0) {
                 halfWidth = 0;
@@ -3929,50 +3914,6 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
 //
 // GetMidpointVertex and SetEditorCombineMode are nested functions, a GNU C
 // extension.
-//
-// To match, with the words that differ from the original's otherwise and how
-// many of them differ in shape:
-// - GridVertex is an inline function, as in DrawGround: as a macro it gives
-//   2009 words (5 in shape) and a frame 8 bytes smaller.
-// - It keeps no tile column. The edge tests and the mirrored points work the
-//   column out from half and groupTile at each use, the points from the
-//   half's first cell column: with a tileColumn local for the edge tests,
-//   36 words (22), and with the points' column worked out as the tile's
-//   times its cells, 1584 (82).
-// - The mirrored S line is a local of the fine tiles' loop, set once per
-//   tile from firstTileS.
-// - Each snapped edge's segment offset goes through a local, as in
-//   DrawGround: with a gSPSegment in each arm of the test, 1613 words (21).
-// - half, vertices, start and current are declared in that order, with
-//   firstTileS after them (160 words in the earlier order, and 184 with
-//   firstTileS in the half's block), topSlot beside the other slots (102 in
-//   the half's block), groupDetail in the row's block (174 with the
-//   routine's locals) and finePass last in the fine tiles' loop (150 with
-//   the routine's locals, 12 declared first in the loop).
-// - The three later pass loops each have a counter of their own: sharing one
-//   among all three gives 54 words, and between any two 36.
-// - The medium and coarse groups step their slots top, middle and bottom,
-//   then the tile index and the slope index, at the end of the tile loop's
-//   body, and rewind the slots in that order. With the medium groups' slope
-//   index first and top slot last, 24 words; with the coarse groups' steps
-//   in the loop's header and a hidden tile skipped by continue, 28 (8).
-// - A cell's mirror bit is masked out of the tile's bits in one expression:
-//   read into isMirrored and masked there, 28 words.
-// - The checkerboard parity adds groupTile to the row (4 words the other
-//   way round), and the fine tile's first vertex column adds the tile's
-//   offset to the half's first column (2 words).
-//
-// As in DrawGround, LoadEditorTileTexture adds the tile's place in its group
-// to firstTileS, since the original steps the tile's left S and its place's
-// end by 0x80 in each tile loop, and a fine tile drawn from its display list
-// steps the tile index itself and continues. The hidden groups' arm comes
-// last, after the coarse groups' >= test, as the original lays it out. Each
-// mirrored-cell block declares its own point, st, pointRow and pointColumn,
-// and under the test texture works out a point's texture coordinates before
-// setting the test tile's size. A map tile's checker color names its red and
-// blue before the color command. terrainStyle is tested at each use, as the
-// original reloads it and branches on it; a flag for it compiles to an sltu
-// that the original doesn't have.
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainStyle) {
     UBoolean8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; // For the current and the last fine tile
     Boolean keepsCombineMode;

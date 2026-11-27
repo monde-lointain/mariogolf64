@@ -145,14 +145,11 @@ void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
     s32 fontIndex;
     s32 textureIndex;
     s32 character;
-    // The glyph's first word in the font, copied to fontIndex to match:
-    // computing fontIndex directly gives 14 words differing, 2 in shape
+    // The glyph's first word in the font, which fontIndex starts from
     s32 glyphFontIndex;
 
     for (index = 0; index < length; index++) {
-        // Signed to match; either way a byte past 0x7F is drawn as FIRST_GLYPH.
-        // Reading it unsigned, by cast or as the plain char, gives 2 words
-        // differing, both in shape.
+        // A byte past 0x7F is drawn as FIRST_GLYPH
         character = (s8)*text;
         if (character == '\0') {
             break;
@@ -433,9 +430,7 @@ void AddToDebugLog(char *text) {
 void ShowDebugLog(void) {
     s32 textIndex = ARRAY_COUNT(f_DebugText) -
         ((f_DebugLogShownLineCount + LOG_BOTTOM_MARGIN) * TEXT_COLUMN_COUNT);
-    // The line is reused for the cursor's line, to match: a cursorLine local,
-    // or the division written into logIndex, gives 30 words differing, 2 in
-    // shape
+    // The cursor's line at first, then each shown line
     s32 line = f_DebugLogCursor / TEXT_COLUMN_COUNT;
     s32 logIndex =
         (((line - f_DebugLogShownLineCount) * TEXT_COLUMN_COUNT) + ARRAY_COUNT(f_DebugLog)) %

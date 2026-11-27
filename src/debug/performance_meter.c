@@ -307,9 +307,9 @@ static void DrawDigits(Gfx **displayListHead, u16 x, u16 y, char *text) {
 }
 
 // Folds a bar's length into its running average, which starts at the first
-// length, and its maximum. The lengths are compared unsigned, as in the
-// original. It is a macro so that it updates the statistics by name, rather
-// than through pointers to them.
+// length, and its maximum. The lengths are compared unsigned. It is a macro
+// so that it updates the statistics by name, rather than through pointers to
+// them.
 #define KeepBarStats(average, maximum, length) \
     { \
         if ((average) == 0) { \
@@ -344,7 +344,7 @@ void DrawPerformanceMeter(
     s32 rdpBarLength;
     u32 vertexIndex;
 
-    // The readout never prints these lengths; they are kept to match
+    // The readout never prints these lengths
     s32 audioBarLength UNUSED;
     s32 rdpCommandBarLength UNUSED;
     s32 rdpPipeBarLength UNUSED;
@@ -354,7 +354,7 @@ void DrawPerformanceMeter(
     u32 viMode;
     u32 scale;
 
-// The original leaves scale unset in other video modes than NTSC's, and the
+// The matching build leaves scale unset in other video modes than NTSC's, and the
 // readout's lengths unset when no graphics task ran
 #ifdef AVOID_UB
     scale = 1;
@@ -371,8 +371,6 @@ void DrawPerformanceMeter(
         scale = 2;
     }
 
-    // The chained assignments are there to match: separate stores give 32 to 38
-    // words differing for the x pair, and 60 to 64 for the y pair
     f_MeterViewport.vp.vscale[0] = f_MeterViewport.vp.vtrans[0] = SCREEN_WIDTH * 2 * scale;
     f_MeterViewport.vp.vscale[1] = f_MeterViewport.vp.vtrans[1] = SCREEN_HEIGHT * 2 * scale;
     gSPViewport(gfx++, &f_MeterViewport);
@@ -552,9 +550,6 @@ void DrawPerformanceMeter(
     startX = BAR_START_X;
     for (i = 0; i < nuDebTaskPerfPtr->gfxTaskCnt; i++) {
         vertexIndex = i * QUAD_VERTEX_COUNT;
-        // The RDP counters are loaded into the 64-bit taskTime before they are
-        // converted. Converting each as it is read gives 180 words differing (150
-        // in shape) for the three, or 138 (126) with the counter cast to s64.
         taskTime = nuDebTaskPerfPtr->gfxTaskTime[i].dpCnt[NU_DEB_DP_CMD_CTR];
         taskTime = RdpCountToMicroseconds(taskTime);
         barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
