@@ -46,6 +46,16 @@ typedef f32 Degrees;
 typedef u16 BinaryAngle;
 // A binary angle stored signed, from minus a half turn to under a half turn
 typedef s16 SignedBinaryAngle;
+// An angle in binary angle units stored as a SignedBinaryAngle, as KMC
+// GCC's code stores one: truncated to a word, whose low half it keeps, so
+// that angles past a half turn wrap. C leaves converting a float outside a
+// short's range undefined, so other builds than the matching one truncate
+// to a word first.
+#ifdef AVOID_UB
+#    define TruncateToSignedBinaryAngle(angle) ((SignedBinaryAngle)(s32)(angle))
+#else
+#    define TruncateToSignedBinaryAngle(angle) (angle)
+#endif
 // A binary angle held in a full word, as some routines take and return one
 typedef s32 WideBinaryAngle;
 
