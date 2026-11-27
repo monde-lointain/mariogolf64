@@ -386,67 +386,9 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
 #define BytesPastTableImage(member) \
     (MemberOffset(Scorecard, member) - MemberOffset(Scorecard, tableImage))
 
-// Closes the scorecard: frees the images that OpenScorecard loaded for the
-// game mode and clears its text slots. It stops any rumble even if the
-// scorecard was already closed.
-//
-// Each run of frees loads its first image's address and passes the others as
-// offsets from it, which is what cse makes of constant addresses. After the
-// last run, though, the original keeps tableImage's address in a register of
-// its own, and the faces' loop steps two pointers that start as that register
-// plus the arrays' offsets from tableImage. So tableImage's address is in a
-// variable, and the loop takes each array's address from it into a local. The
-// loop pass moves those two sums out of the loop and steps a pointer from
-// each. Written in the calls, the sums stay in the loop: only the counter's
-// part is stepped, and tableImage's address is added to it each time.
-//
-// cse has by then written tableImage's address as totalLabelsImage's less
-// 0x80, and its second pass would rewrite the moved sums as offsets from
-// totalLabelsImage's register too, leaving tableImage's address without a
-// register. It can't once that register has been set again. So
-// totalLabelsImage is freed through a variable, image, and image is set to
-// tableImage's address before that is freed. cse passes tableImage's own
-// register to the call, and flow deletes the store as dead. The target tells
-// only that such a store was there, not what it stored or where between
-// tableImage's address and the loop it stood.
-//
-// Measured against the match, as words differing and how many of them in
-// shape:
-//
-//     Every address written out, with no variables (the old
-//     draft)                                                  33 (3)
-//     tableImage's address in its variable, without image     33 (3)
-//     image freeing totalLabelsImage, but not set again       33 (3)
-//     image set to tableImage's address only                  33 (3)
-//     image freeing labelsImage or raisedPanelImage, in
-//     place of totalLabelsImage                               33 (3)
-//     image freeing each of the run's images                  17 (7)
-//     image set again before tableImage's address is taken    10 (6)
-//     image set to tableImage's address as a constant, and
-//     tableImage copied from it after the call                18 (0)
-//     One variable for both                                   18 (0)
-//     tableImage set where it is declared                     25 (7), frame -8
-//     tableImage set before the run                           17 (3)
-//     The arrays' addresses written in the calls              12 (0)
-//     A local for one of the arrays only                      10 (0)
-//     The arrays read as g_Scorecard's members in the calls   10 (6)
-//     The arrays' offsets taken between g_Scorecard's own
-//     addresses, with BytesBetween                            7 (3)
-//     The arrays' addresses set before the loop               48 (8)
-//     Pointers stepped in the loop's header                   50 (4)
-//     Pointers set before the loop and stepped in its body    24 (4)
-//     The palettes freed before the faces                     4 (0)
-//     The faces' loop with a counter of its own               22 (0)
-//     The faces' loop testing < the player count              33 (5), frame -8
-//
-// Also matching: image set to tableImage's address or to NULL anywhere from
-// tableImage's statement to the loop's header, with tableImage passed to the
-// call; image set to tableImage's address as a constant, and tableImage
-// copied from it before the call; tableImage set just after totalLabelsImage
-// is freed; the arrays' locals declared in the function and set in the loop,
-// set in the other order, or set to tableImage plus a count of pointers;
-// image as a void pointer or a u8 pointer; and the two variables declared in
-// the other order, or before the counters.
+// Closes the scorecard: frees the images that OpenScorecard loaded for the game
+// mode and clears its text slots. It stops any rumble even if the scorecard was
+// already closed.
 void FreeScorecard(void) {
     s32 i;
     s32 imageIndex;
@@ -506,7 +448,6 @@ void FreeScorecard(void) {
                 break;
         }
 
-        // Freed through image, which is set again below, to match
         image = &g_Scorecard.totalLabelsImage;
         FreeMemory(image);
         FreeMemory(&g_Scorecard.labelsImage);
@@ -515,12 +456,9 @@ void FreeScorecard(void) {
         FreeMemory(&g_Scorecard.scoresPanelImage);
         FreeMemory(&g_Scorecard.raisedPanelImage);
         tableImage = &g_Scorecard.tableImage;
-        // Sets image again, so that tableImage's address keeps a register, to
-        // match
         image = tableImage;
         FreeMemory(image);
         for (i = 0; i != g_GameState.playerCount; i++) {
-            // Each array is reached from tableImage's address, to match
             ImageAsset **faceImages =
                 (ImageAsset **)AddressPast(tableImage, BytesPastTableImage(faceImages));
             PaletteColor **facePalettes =
@@ -571,9 +509,7 @@ void StartScorecardTally(s32 layout) {
                     songId = SONG_HOLE_LOST;
                 }
                 else {
-                    // A jump to the other branch's halved song, to match: setting the
-                    // song here instead gives 16 words differing, 2 in shape, and
-                    // setting the halved song before the tests 13, 5 in shape
+                    // A tie plays the halved song
                     goto HALVED;
                 }
             }
@@ -787,7 +723,6 @@ void SetScorecardLayout(ScorecardLayout layout) {
     s32 scoresToPar[PLAYER_COUNT_MAX];
     s32 holesWon[MATCH_PLAYER_COUNT];
     s32 skinsRanks[PLAYER_COUNT_MAX];
-    // The original frame has room for this; without it 16 words differ
     s32 unused[4] UNUSED;
     s32 i;
     s32 j;
@@ -1056,10 +991,6 @@ void AnimateScorecard(void) {
 void TurnScorecardPage(u16 buttons) {
     RoundHud *hud;
     s32 pageCount = g_Scorecard.pageCount;
-    // Read through a pointer, which the call loads after the sound ID; GCC
-    // copies a global argument into a register before the call's other
-    // arguments. Casts, a local for the channel, sound or pan, a masked pan
-    // or its terms swapped all load the channel first
     SoundChannel *channel = &g_NextSoundChannel;
 
     if (pageCount > 1) {
@@ -1588,7 +1519,6 @@ Boolean LoadResultCharacters(void) {
     LoadCharacter(1, g_Players[1].characterIndex + CHARACTER_COUNT, g_Players[1].paletteIndex);
     songId = SONG_MATCH_RESULT;
     if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-        // The original passes the strokes through song's register
         songId = g_Players[0].holes[holeIndex].strokeCount;
         if (songId < g_Players[1].holes[holeIndex].strokeCount) {
             songId = SONG_HOLE_WON;

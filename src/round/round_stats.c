@@ -87,11 +87,9 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
 // tallied, with endHole itself once no player is HOLE_STATUS_PLAYING
 void TallySkins(s32 endHole) {
     s32 playerIndex;
-    // Also the player whose total is cleared, to match: clearing the totals with
-    // player gives 6 words differing, none in shape
+    // Also the player whose total is cleared
     s32 hole;
-    // Also whether anyone is still playing, to match: an isAnyonePlaying variable
-    // gives 12 words differing, none in shape
+    // Also whether anyone is still playing
     s32 winner;
     s32 skins;
 
@@ -347,8 +345,6 @@ void UpdateContest(Boolean isHoleOver) {
 // moving.
 void RecordCourseRound(void) {
     CourseStats *courseStats = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
-    // Reading g_RoundStats through a pointer is there to match: reading it
-    // directly gives 45 words differing, 13 in shape
     RoundStats *stats = &g_RoundStats;
     CourseRecord *course = &g_CourseRecords[g_GameState.courseIndex];
     Boolean isAtRoundLimit;
@@ -525,8 +521,6 @@ void StartRoundStats(void) {
     g_RoundStats.measuredDriveCount = 0;
     g_RoundStats.averagedDriveCount = 0;
 
-    // The pointer arithmetic is there to match: indexing the course stats
-    // gives 18 words differing, none in shape
     g_RoundStats.longestDrive = (save->records.courseStats + g_GameState.courseIndex)->longestDrive;
     g_RoundStats.averagedDriveTotal = 0;
     g_RoundStats.isDriveAveraged = FALSE;
@@ -542,16 +536,12 @@ void RestartRoundStats(void) {
     g_RoundStats.measuredDriveCount = 0;
     g_RoundStats.averagedDriveCount = 0;
 
-    // The pointer arithmetic is there to match: indexing the course stats
-    // gives 18 words differing, none in shape
     g_RoundStats.longestDrive = (save->records.courseStats + g_GameState.courseIndex)->longestDrive;
     g_RoundStats.isDriveAveraged = FALSE;
 }
 
 // Only the first player's holes count
 void RecordHoleStats(void) {
-    // Reading g_RoundStats through a pointer is there to match: reading it
-    // directly gives 64 words differing, 26 in shape
     RoundStats *stats;
 
     GetSaveData();
@@ -580,8 +570,6 @@ void RecordHoleStats(void) {
 
 // Returns whether the drive is the longest yet
 Boolean RecordDrive(void) {
-    // Reading g_RoundStats through a pointer is there to match: reading it
-    // directly gives 20 words differing, 14 in shape
     RoundStats *stats = &g_RoundStats;
     Club *club = GetSelectedClub();
 
@@ -610,9 +598,6 @@ void SettleHoleBets(void) {
     s32 count;
     s32 score;
 
-    // The Las Vegas pointers are there to match: reading both entries directly
-    // gives 44 words differing (8 in shape), the rate alone 18 (4), the tally
-    // alone 26 (4), and the rate as a value 10 (2)
     s8 *lasVegasRate;
     s16 *lasVegasTally;
 
@@ -642,17 +627,12 @@ void SettleHoleBets(void) {
         }
     }
 
-    // Declared after SettleNassau to match the stack layout: declared before it,
-    // 130 words differ, none in shape
     s32 scores[PLAYER_COUNT_MAX];
-    // Pads the frame to match; without it 24 words differ
     s32 unused[8] UNUSED;
 
     if (g_GameState.betRates[BET_STROKES] > 0) {
         for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             for (j = 0; j != g_GameState.playerCount; j++) {
-                // Load the rival first without reversing the comparison, to match:
-                // testing i != j gives 6 words differing, and j != i 2, none in shape
                 s32 rivalIndex = j;
                 if (playerIndex != rivalIndex) {
                     score = g_Players[playerIndex].strokeCount +
@@ -714,9 +694,7 @@ void SettleHoleBets(void) {
             bet = BET_SKINS;
         }
         else {
-            // The store is dead, as each case that reads count sets it first, but
-            // the original has it: without it, or with it before or after the
-            // test instead, 14 words differ, 10 in shape
+            // The store is dead, as each case that reads count sets it first
             count = 0;
         }
 

@@ -62,7 +62,7 @@ enum ContactStyle {
 typedef s32 ContactStyle;
 
 // Whether a ContactStyle shows the long-shot effect; Wario's and the Game Boy's
-// ball 7 show a spark trail instead. The original tests with & rather than &&
+// ball 7 show a spark trail instead.
 #define ShowsLongShotEffect(style) \
     (((style) != CONTACT_STYLE_GAME_BOY_BALL_7) & ((style) != CONTACT_STYLE_WARIO))
 

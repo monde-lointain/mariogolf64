@@ -358,9 +358,7 @@ void DrawMatchResult(Gfx **displayListHead) {
     s32 playerIndex;
     s32 x;
     s32 holeIndex;
-    // holeIndex again, for the player's own record, to match: indexing with
-    // holeIndex, or both with holeNumber - 1, gives 6 words differing, none in
-    // shape
+    // holeIndex again, for the player's own record
     s32 ownHole;
     Gfx *gfx = *displayListHead;
 
@@ -662,69 +660,6 @@ void DrawStandingsPage(Gfx **displayListHead) {
 // each player, their face, the tiles of the holes they still need and a mark
 // for each hole won. Once the hole's result is tallied, it animates the
 // winner's new mark.
-//
-// Each of the tiles' edges is written as its row's or column's product, its
-// constant, and then the scorecard's x or y. GCC folds such a sum by moving the
-// constant across to the term added last, so the constant is added to the
-// scorecard's coordinate and the product to that, which is what the original
-// has for every edge: an addiu on the coordinate, then an addu with the
-// product's register. Where the scorecard's x is grouped with the constant in
-// the source, as the old draft had the edge between the second and third
-// pieces, the constant is moved onto the product instead, and loop.c steps j *
-// 25 + 52 in a register of its own beside j * 25.
-//
-// The row's offset is i * MATCH_ROW_SPACING in each edge, and not a variable
-// stepped by the rows' loop. The product doesn't change in the columns' loop,
-// so loop.c moves it out, to $s3. In the rows' loop it then steps a register by
-// 80 in the product's place, and $s3 is left a copy of that, made ahead of each
-// row's columns. With no saved register left for it, the stepped one is kept on
-// the stack, at 0x6C($sp), and the address of the display list's head, moved
-// out of both loops, takes $s7. A variable stepped in the source has no copy:
-// it takes $s7 itself and the address goes to the stack.
-//
-// The tiles' texel offsets are worked out once a tile, ahead of the calls, and
-// the arrow's rise is read once, ahead of the strokes' test, as the original
-// does both.
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   The old draft's tiles: the row's offset in a variable
-//   stepped by the rows' loop and added to the scorecard's y,
-//   and the middle edge's x grouped with its constant         46 (40)
-//   The row's offset in a variable stepped by the rows' loop,
-//   the edges as they are                                     107 (13)
-//   The same with the scorecard's y added first               122 (24)
-//   The row's offset in a variable set to the product as each
-//   row starts                                                55 (9)
-//   The middle edge's x grouped with its constant in both
-//   pieces                                                    107 (65)
-//   The same in the second piece's right edge alone           98 (66)
-//   The tiles' edges with the scorecard's y added first       11 (11)
-//   The same with the scorecard's y and the constant in
-//   brackets                                                  147 (75)
-//   The same with the row's product added last                153 (75)
-//   The tiles' edges with the scorecard's x added first       29 (9)
-//   The tiles' loops' tests as <                              61 (9)
-//   The tiles' texel offsets scaled in each call, with no
-//   locals                                                    316 (104)
-//   The marks' edges with the scorecard's y added first       3 (3)
-//   The marks' columns' test as <                             59 (5)
-//   The moving mark's edges with the scorecard's y added
-//   first                                                     46 (6)
-//   The needed wins' text with the scorecard's y added first  8 (8)
-//   The arrow's rise taken from the constant, as ARROW_TOP -
-//   arrowRise + g_Scorecard.y                                 90 (26)
-//   The rise negated where it is read                         101 (23)
-//   The rise read in each call, with no local                 16 (16)
-//   The tallied hole read once for the mark and the arrow     10 (2)
-//   The holes to share out halved with no shareCount          20 (8)
-//   The wins counted with no countEnd                         20 (10)
-//   wins[0] cleared before wins[1]                            4 (0)
-//
-// Also matching: the tiles' edges with the constant ahead of the product; the
-// wide tile's with the scorecard's x first; the moving mark's with the bounce
-// first; the bounce clamped by an if; the mark's image index kept in j; the
-// arrow's rise read after the tallied hole; and the display list's head stored
-// through a copy of its pointer.
 void DrawMatchPage(Gfx **displayListHead) {
     s32 wins[MATCH_PLAYER_COUNT];
     Gfx *gfx;
@@ -764,7 +699,6 @@ void DrawMatchPage(Gfx **displayListHead) {
     // Each halved hole leaves one fewer to win
     countEnd = g_Scorecard.skinsCarryover.intoLastHole;
     halvedCount = 0;
-    // The second is cleared first, to match
     wins[1] = 0;
     wins[0] = 0;
     for (i = GetFirstHoleIndex(); i != countEnd; i++) {
@@ -964,7 +898,6 @@ void DrawMatchPage(Gfx **displayListHead) {
         G_TX_NOLOD
     );
     gDPPipeSync(gfx++);
-    // Each edge has the row's offset as a product and the scorecard's x or y last, to match
     for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
         for (j = 0; j != winsNeeded; j++) {
             imageLeft = (j % TILES_PER_IMAGE_ROW) * TILE_PIECE_WIDTH;
@@ -1159,7 +1092,7 @@ void DrawMatchPage(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        // The arrow rises as the count goes on. Its rise is negated first in each sum, to match.
+        // The arrow rises as the count goes on
         arrowRise = g_Scorecard.skinsCarryover.onLastHole;
         holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
         if (g_Players[0].holes[holeIndex].strokeCount < g_Players[1].holes[holeIndex].strokeCount) {
@@ -1477,65 +1410,6 @@ static const char f_BlankBetName[] = " ";
 // Draws the bets page: each bet being played, its rate, any pot carried over,
 // and what each player has won on it and in total. A bet with a rate of zero is
 // grayed out.
-//
-// The bet images' loop and the pots' loop count their columns in j, the
-// variable that counts the crossings' rows before them and the tallies' bets
-// after. The original keeps all four of those in $s2, and a variable is one
-// pseudo register to GCC's allocator, which gives it one register for the whole
-// of the function. Counted in column, or in a variable of their own, the
-// columns are allocated apart from j: the instructions stay the same, but the
-// saved registers are dealt out differently from the bet images' loop on.
-//
-// Each column's left is written as the column's product with the spacing. The
-// loop pass reduces the product to a register stepped by the spacing, as the
-// original has, and the stepped register is not quite a variable stepped in the
-// source. In the crossings' loop the product is first moved out of the rows'
-// loop into a register of its own, which is then left as a copy of the stepped
-// one, made on each pass ahead of the rows' loop; a left stepped in the source
-// has no copy. In the names' loop the stepped register is cleared after the
-// addresses moved out of the loop are loaded, where a variable is cleared
-// before them.
-//
-// The bet images' texels are aligned to 8 bytes, as TextureAddress does, and
-// the dash is named for its place in the read-only data rather than written
-// where it is drawn.
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   The bet images' columns counted in column, with the
-//   totals heading's                                          304 (0)
-//   The pots' columns counted in column                       122 (0)
-//   Both counted in column                                    114 (0)
-//   Both counted in column, the tallies' in a variable of
-//   their own                                                 90 (0)
-//   Both counted in a variable of their own                   90 (0)
-//   The bet images' alone in a variable of their own          26 (0)
-//   The pots' alone in a variable of their own                122 (0)
-//   The crossings' left in a variable stepped by the spacing  39 (5)
-//   The crossings' left in a variable set to the product on
-//   each pass                                                 39 (3)
-//   The subtitles' left in a variable stepped by the spacing  28 (6)
-//   The names' left in a variable stepped by the spacing      14 (2)
-//   The bet images', the rates' or the tallies' left in a
-//   variable stepped beside the column                        2 (2)
-//   All seven loops' lefts stepped in one variable            144 (20)
-//   The old draft, with five stepped lefts and the columns
-//   counted in column                                         52 (22)
-//   The column lines' and crossings' edges with the
-//   scorecard's x first                                       39 (15)
-//   The same with the product last                            91 (19)
-//   The crossings' top with the scorecard's y first and the
-//   row's product last                                        54 (4)
-//   The bet images' texels not aligned                        4 (2)
-//   The bet images' loop or the pots' clearing i before j     2 (0)
-//   The bet images' loop's test or the subtitles' as <        4 (4)
-//   The tallies' column stepped before a tally is drawn       4 (4)
-//
-// Also matching: the column lines' left in a variable stepped by the spacing;
-// the subtitles', the names' or the rates' columns counted in j, or all three;
-// the tallies' columns counted in a variable of their own; the column lines'
-// and crossings' edges, or the bet images', with the constant ahead of the
-// product; the pots' column stepped under an if; and the locals declared in any
-// of seven other orders.
 void DrawBetsPage(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 i;
@@ -1709,7 +1583,6 @@ void DrawBetsPage(Gfx **displayListHead) {
     }
 
     gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-    // The columns are counted in j, to match
     j = 0;
     for (i = 0; i != BET_COUNT; i++) {
         if (g_GameState.betRates[i] != UNSET_BET_RATE) {
@@ -1895,8 +1768,7 @@ void DrawBetsPage(Gfx **displayListHead) {
     DrawSmallText(&gfx, g_Scorecard.x + 31, g_Scorecard.y + CARRY_OVER_SECOND_TOP, "v");
     DrawSmallText(&gfx, g_Scorecard.x + 39, g_Scorecard.y + CARRY_OVER_SECOND_TOP, "e");
     DrawSmallText(&gfx, g_Scorecard.x + 45, g_Scorecard.y + CARRY_OVER_SECOND_TOP, "r");
-    // A pot holds its bet's rate plus whatever ties carried over. The columns
-    // are counted in j here too, to match.
+    // A pot holds its bet's rate plus whatever ties carried over
     j = 0;
     for (i = 0; i != BET_COUNT; i++) {
         if (g_GameState.betRates[i] > 0) {
@@ -2255,91 +2127,6 @@ void FormatLeaderboardRow(char *row, TournamentStanding *standing) {
 // Draws the tournament leaderboard's page. Rows flip over in turn to show the
 // new standings, and the player's row shows their face and, if their place
 // changed, an arrow.
-//
-// The faces' loop finds the player's row through a pointer of its own to the
-// row's standing. Worked out as a pointer, the standings' address is set in an
-// insn of its own, which loop.c can move out of the loop; indexed in place it
-// is part of the load's address and stays in. loop.c moves out a value set once
-// and used once if its threshold is no less than the loop's insn count, and the
-// threshold starts at 61 in a loop with calls and drops by 3 for each value
-// moved. This loop has 45 insns. topRow's address, which cse takes from
-// flipTime's, the standings' address, the -1, the display list call's two words
-// and the pipe sync's first are moved at 61 down to 46, to $s1, $s7, $s6, $s4,
-// $s3 and $s2, and the texture table mode's two words, met at 43, are left in
-// the loop, as in the original. With the standing indexed in place the loop has
-// 43 insns and both of those words are moved too, which takes a saved register
-// more than there are, so displayListHead is kept on the stack. Read through
-// standing, the new standings' pointer, the row's address takes that variable's
-// saved register and not $v1, with the same result. The old draft put the
-// display list call in a block of its own, which kept the frame's size but read
-// topRow and g_Scorecard.x at their addresses.
-//
-// The arrow's half size is set to a fall's ahead of the fall's test, and a
-// fall's pulse is added to it: the original loads the 8.0 into $f20 before the
-// test, and halfSize, which then lasts across sinf's call, is kept in that
-// saved register for either arm. Set in each arm, it takes $f6 and the 8.0 is
-// loaded after the call.
-//
-// The arrow's left edge is the scorecard's x, plus the center, less the rounded
-// half size. GCC regroups that as x - (roundedHalfSize - 32), which is what the
-// original works out; written that way in the source, it is regrouped as (x +
-// 32) - roundedHalfSize. The texel step is divided once, in a local worked out
-// ahead of the rounding, so that its 16384.0 is loaded straight after the
-// rounding's 0.5; worked out later, or in the call, the load comes three
-// instructions later.
-//
-// The bottom flaps have a shade of their own, bottomFlapShade, as the original
-// keeps theirs in another register than the rows' and the name flaps'. The
-// rows' angle test is negated, as GCC keeps the negation of a floating-point
-// comparison rather than inverting it.
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   The old draft                                             81 (35)
-//   The old draft's faces' loop: the standing indexed in
-//   place, and the display list call in a block of its own    57 (23)
-//   The standing indexed in place, with no block              91 (21)
-//   The pointer, with the display list call in a block of its
-//   own                                                       64 (22)
-//   The pointer, with the texture table mode in a block of
-//   its own                                                   46 (26)
-//   The row's standing read through standing                  110 (12)
-//   The faces' loop's test as <                               4 (4)
-//   halfSize set in each arm, to the pulse plus the arm's
-//   half size                                                 16 (6)
-//   halfSize set to a fall's before the row's test            4 (4)
-//   A rise's half size set and then added to as well, in its
-//   arm                                                       7 (1)
-//   halfSize set to a rise's first, and added to for a rise   12 (6)
-//   The arrow's left edge as g_Scorecard.x - (roundedHalfSize
-//   - ARROW_CENTER_X)                                         10 (8)
-//   The same as g_Scorecard.x - roundedHalfSize +
-//   ARROW_CENTER_X                                            8 (6)
-//   The same as ARROW_CENTER_X - roundedHalfSize +
-//   g_Scorecard.x                                             10 (8)
-//   The arrow's right edge with the center added last         12 (10)
-//   The same with the scorecard's x added last, or with the
-//   center and the half size in brackets                      12 (6)
-//   No texelStep, the division written in both of the call's
-//   steps                                                     4 (4)
-//   texelStep worked out after the rounding, or after
-//   texelStart                                                4 (4)
-//   The arrow's top in a local worked out before texelStep    8 (2)
-//   The same worked out just before the call                  8 (0)
-//   The arrow's top with the scorecard's y added first        19 (13)
-//   The arrows' loop's test as <                              4 (4)
-//   One shade for all the flaps, with no bottomFlapShade      23 (5)
-//   shade as a u8                                             67 (45)
-//   bottomFlapShade as a u8                                   26 (18)
-//   halfSize as an f64                                        43 (33)
-//   The rows' angle test as <=, with no negation              4 (4)
-//
-// Also matching: rowStanding declared for the function; a pointer to the
-// standing's contestantId in its place; the arrows' loop reading its standing
-// through a pointer too; the face's top with the row's product first; a fall's
-// half size as the pulse plus halfSize; the arrow's left edge with the center
-// ahead of the scorecard's x; the arrow's top with no brackets; texelStep as an
-// f32; and the names' loop indexing the standings for the contestant each time,
-// with no contestantId.
 void DrawLeaderboardPage(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     TournamentStanding *standing;
@@ -2388,8 +2175,6 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
         if (row * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
             shade = COLOR_CHANNEL_MAX;
-            // The angle's test is negated, to match: GCC keeps the negation of a
-            // floating-point comparison rather than inverting it
             if (g_Scorecard.content.isRowFlipping[row] == TRUE &&
                 !(g_Scorecard.content.rowFlipAngles[row] > FLAP_EDGE_ON_ANGLE)) {
                 shade = (sinf(g_Scorecard.content.rowFlipAngles[row]) * FLAP_SHADE_RANGE) +
@@ -2775,7 +2560,6 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
 
     if (g_Scorecard.content.flipTime > LAST_ROW_FLIP_TIME) {
         for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
-            // Read through a pointer of this loop's own, to match
             TournamentStanding *rowStanding = &g_TournamentStandings[g_Scorecard.topRow + row];
 
             if (rowStanding->contestantId == PLAYER_CONTESTANT) {
@@ -2836,7 +2620,8 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
         for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
             if (g_TournamentStandings[g_Scorecard.topRow + row].contestantId == PLAYER_CONTESTANT &&
                 g_Scorecard.placeChange != PLACE_HELD) {
-                // Set to a fall's first, and added to for one, to match
+                // The arrow pulses around its size: smaller for a fall, larger
+                // for a rise
                 halfSize = FELL_ARROW_HALF_SIZE;
                 if (g_Scorecard.placeChange & PLACE_FELL) {
                     gDPSetEnvColor(gfx++, 0xA0, 0xA0, 0xFF, OPAQUE_ALPHA);
@@ -2853,7 +2638,6 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                     halfSize = (ARROW_PULSE_SIZE * sinf(f_ArrowPulseAngle)) + ROSE_ARROW_HALF_SIZE;
                 }
 
-                // Worked out ahead of the rounding, to match
                 texelStep = (TEXEL_STEP_ONE * ARROW_IMAGE_SIZE / 2) / halfSize;
                 roundedHalfSize = halfSize + 0.5f;
                 // Starts the texels part of a texel in, as far as the rect's rounding
@@ -2887,10 +2671,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
 
 // The scores page: the front nine above the back nine, each with a row of
 // hole numbers, a row of pars and a row for each player
-// DrawScoresPage compares it with FALSE in four tests rather than negate it, to
-// match: negating any one gives 8 to 11 words differing from the original's,
-// and all four 39. The fifth, for the handicap strokes' rows, negates it:
-// compared with FALSE there, 8 words differ.
+// Whether the game mode is played as a match, hole by hole
 #define IsMatchPlayMode() \
     (g_GameState.gameMode == GAME_MODE_MATCH_GAME || \
         g_GameState.gameMode == GAME_MODE_GET_CHARACTER || \
@@ -3002,25 +2783,16 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
 #define BADGE_GLOW_STEP DegreesToRadians(10)
 #define BADGE_GLOW_RANGE 30
 
-// Draws the scores page: the par and each player's score of every hole, in
-// the color of how it stands to par. In the match modes it shows who won each
-// hole instead, and in the skins modes the skins won. A single player also
-// sees their putts and strokes over par, and in a tournament the holes whose
-// birdie badge they hold.
-//
-// The sums that place the rows take their terms in the original's order: the
-// nine's top, the row's top, the player's offset and then g_Scorecard.y. The
-// compiler folds a sum's constants as it reads them, so another order gives
-// other code: with the player's offset ahead of the row's top in the scores'
-// rows, 360 words differ from the original's (72 in shape).
+// Draws the scores page: the par and each player's score of every hole, in the
+// color of how it stands to par. In the match modes it shows who won each hole
+// instead, and in the skins modes the skins won. A single player also sees
+// their putts and strokes over par, and in a tournament the holes whose birdie
+// badge they hold.
 void DrawScoresPage(Gfx **displayListHead) {
     s32 frontPar = 0;
     s32 backPar = 0;
     Gfx *gfx = *displayListHead;
     s8 handicapStrokes[SCORE_ROW_COUNT][COURSE_HOLE_COUNT];
-    // The nines' tops are variables to match, though nothing changes them: with
-    // the constants in their place, 619 words differ from the original's (275 in
-    // shape)
     s32 frontTop = FRONT_NINE_TOP;
     s32 backTop = BACK_NINE_TOP;
     CourseRecord *course;
@@ -3028,17 +2800,11 @@ void DrawScoresPage(Gfx **displayListHead) {
     s32 pulseGreen;
     s32 pulseBlue;
     s32 cellAlpha;
-    // Declared after the cells' alpha to match, as the stack slots follow the
-    // declarations' order: declared ahead of the nines' tops, with backPar here,
-    // 16 words differ
     s32 firstHole = GetFirstHoleIndex();
     s32 rowSpacing;
     // How a player stands: in the one-on-one match modes, the holes they lead
     // by; in the skins modes, the skins they have won; and otherwise their
     // strokes over par on each hole in turn, and then their net score to par.
-    // The one variable holds them all, to match: with a variable of its own for
-    // the holes led, 53 words differ; for the skins, 33; for the strokes over
-    // par, 170; and for the net score, 5.
     s32 standing;
     s32 colorIndex;
     s32 extraTop;
@@ -3047,10 +2813,7 @@ void DrawScoresPage(Gfx **displayListHead) {
     // The two counters. i counts each loop that stands alone, the holes of the
     // handicap strokes' rows, the cells' columns, and the players of the scores
     // and the rows of the handicap strokes' marks; j counts the other loop of
-    // each of those pairs, and the holes of the badges. They take these roles to
-    // match: with i and j exchanged in the handicap strokes' loops, 34 words
-    // differ; in either of the cells' pairs, 22; and in the marks', 12. With a
-    // counter of their own for the scores' holes, or for the badges', 214 differ.
+    // each of those pairs, and the holes of the badges.
     s32 i;
     s32 j;
     Awards *awards;
@@ -3071,12 +2834,6 @@ void DrawScoresPage(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_POINT);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-    // Empty, for the notes it leaves ahead of the switch, to match: the original
-    // reads f_ScoresStyle directly before the first case's test, where without
-    // the block the scheduler moves the read ahead of the course's address and
-    // the last command's stores, and 16 words differ (10 in shape). With the
-    // command in the block, 22 differ (14); with an empty test of the style in
-    // the block's place, 21 (13).
     IN_OWN_BLOCK(;);
     switch (f_ScoresStyle) {
         case SCORES_STYLE_YELLOW:
@@ -3132,7 +2889,7 @@ void DrawScoresPage(Gfx **displayListHead) {
             cellAlpha = 0x9F;
             break;
         case SCORES_STYLE_OPAQUE:
-// The cells are opaque, so the original leaves their alpha unset
+// The cells are opaque, so the matching build leaves their alpha unset
 #ifdef AVOID_UB
             cellAlpha = OPAQUE_ALPHA;
 #endif
@@ -3910,8 +3667,6 @@ void DrawScoresPage(Gfx **displayListHead) {
             extraTop = EXTRA_ROW_TOP;
             if (isPuttsShown) {
                 extraTop += PLAYER_ROW_SPACING;
-                // The player's offset is grouped with the row's top to match, here
-                // and on the back nine: ungrouped, 48 words differ (4 in shape)
                 DrawSmallText(
                     &gfx,
                     g_Scorecard.x + PUTTS_LABEL_LEFT,
@@ -3921,10 +3676,6 @@ void DrawScoresPage(Gfx **displayListHead) {
             }
 
             if (isOverShown) {
-                // The label's top is taken before extraTop moves on to the next
-                // row, and the label drawn after, to match, here and on the back
-                // nine: with the label drawn from extraTop and the row moved on
-                // after it, 8 words differ for each nine (4 in shape).
                 s32 labelTop = frontTop + extraTop;
 
                 extraTop += PLAYER_ROW_SPACING;
@@ -4260,8 +4011,6 @@ void DrawScoresPage(Gfx **displayListHead) {
                 }
 
                 overTop = PUTTS_TOP;
-                // The player's offset is grouped with the putts' top to match:
-                // ungrouped, 373 words differ (27 in shape)
                 if (isPuttsShown) {
                     if (g_Players[i].holes[j].puttCount == UNCOUNTED_PUTTS) {
                         sprintf(g_PrintBuffer, "%c", NO_SCORE_CODE);
@@ -4475,65 +4224,9 @@ void DrawScoresPage(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-// Draws each player's row of bet tallies in the digit font, with their total
-// at the end. The bet columns show g_PrintBuffer as it already stands, and
-// are skipped when the bet rate at the player's index is zero or unset.
-//
-// Each digit loop works out its glyph's place in two variables of its own. x
-// is the column's left edge plus the digit index times the glyph's size, which
-// loop.c reduces to a register stepped by the glyph's size. y is set to the
-// row's offset, and the rows' top is added to it after x is set. With x's
-// statement between y's two, loop.c can't take them for consecutive sets and
-// leaves y in the loop: it moves the row's offset out, and with it the bottom
-// edge, which cse has by then written as the offset plus a constant, but the
-// top edge's add stays at each digit, as in the original. The player loop
-// then steps the offset and the bottom edge in registers of their own. The
-// totals' loop gets them moved to after its entry test, which a player's
-// pass can jump over, so there they stay copies of the stepped registers, as
-// the original's are.
-//
-// The nested ifs make GCC compare the bet rate with zero and UNSET_BET_RATE in
-// turn, as the original does.
-//
-// Measured against the match, as words differing and how many of them in
-// shape:
-//
-//   x and y declared in the function, for both loops       151 (23), frame -8
-//   x so declared, with y in each loop                     117 (19), frame -8
-//   y so declared, with x in each loop                      86 (8)
-//   This form in the bets' loop only, the totals' with x
-//   stepped in its header and its edges written as sums     85 (11), frame -8
-//   This form in the totals' loop only, the bets' so        100 (30), frame -24
-//   y set after x, its two statements together              81 (19), frame -16
-//   y set whole in one statement                            81 (19), frame -16
-//   The top added to y in each edge, or no y at all         88 (20), frame -16
-//   A local for the bottom edge, set after the top's add    78 (12), frame -8
-//   y from a row offset variable set at each player          9 (5)
-//   y as an s16                                            116 (24), frame -8
-//   y as a u16                                              48 (12)
-//   x as an s16                                             26 (12)
-//   The scorecard's x added where x is set                 161 (47), frame -8
-//   The scorecard's x added in a statement after the top   160 (52), frame -8
-//   x written out in each edge, a glyph local between y's   15 (7)
-//   x stepped in the loops' headers, the same local there   10 (8)
-//   x stepped in the headers and copied between y's         87 (23), frame -16
-//   The glyph read through a pointer walked with the index  25 (11)
-//   An inline function for the digit, adding the top to y   91 (15), frame -8
-//   The edges as sums of a row offset, x stepped (the old
-//   draft)                                                  22 (12)
-//   One if with both of the bet rate's tests                18 (10)
-//   The column stepped in its loop's header, after the bet   8 (0)
-//   The column set before its loop                          16 (2)
-//   The total summed after the ifs                         117 (29), frame +8
-//   The player loop testing < the player count              57 (5), frame -8
-//
-// Also matching: y set to the rows' top, with the row's offset added after x;
-// a local for the glyph's character set between y's statements, with x before
-// or after y; x and y declared without values and set in the same order;
-// x and y declared in the function under different names for each loop; x's
-// product before the column; y or x as a u32; the bottom edge with the glyph's
-// size first; the column stepped in its loop's header before the bet;
-// and the total zeroed in the bet loop's header.
+// Draws each player's row of bet tallies in the digit font, with their total at
+// the end. The bet columns show g_PrintBuffer as it already stands, and are
+// skipped when the bet rate at the player's index is zero or unset.
 void DrawBetTallies(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 playerIndex;
@@ -4567,7 +4260,6 @@ void DrawBetTallies(Gfx **displayListHead) {
                         s32 y = playerIndex * BET_TALLY_ROW_SPACING;
                         s32 x = column + (digit * DIGIT_GLYPH_SIZE);
 
-                        // The rows' top is added after x is set, to match
                         y += BET_TALLY_TOP;
                         DrawTextureRectangle(
                             &gfx,
@@ -4593,7 +4285,6 @@ void DrawBetTallies(Gfx **displayListHead) {
             s32 y = playerIndex * BET_TALLY_ROW_SPACING;
             s32 x = BET_TOTAL_LEFT + (digit * DIGIT_GLYPH_SIZE);
 
-            // As in the bets' loop, to match
             y += BET_TALLY_TOP;
             DrawTextureRectangle(
                 &gfx,

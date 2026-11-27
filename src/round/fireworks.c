@@ -224,9 +224,7 @@ Boolean HaveFireworksStayedFreed(void) {
     return f_FireworkState < FIREWORKS_FREED - STAYED_FREED_CALL_COUNT;
 }
 
-// The random part of a firework's launch height, 0 to 3. A function rather
-// than inline code to match: LaunchFirework's draft gives 50 differing words
-// with it, 69 with guRandom() % 4 written in place, and 68 with & 3.
+// The random part of a firework's launch height, 0 to 3
 static inline s32 RandomLaunchHeightJitter(void) {
     return guRandom() % FIREWORK_LAUNCH_HEIGHT_JITTER;
 }
@@ -251,10 +249,6 @@ void LaunchFirework(Firework *firework, s32 fireworkIndex UNUSED) {
     originY = heightJitter + FIREWORK_LAUNCH_HEIGHT;
     for (row = 0; row != height; row++) {
         for (column = 0; column != width; column++) {
-            // Through the cells' address, not by indexing them: GCC builds the
-            // index as an array reference instead, and 92 words differ. The cell's
-            // index is added as a whole; adding the column and the row's offset
-            // one at a time, 10 words differ
             if (*(firework->shape->cells + (column + (row * width))) == SHAPE_PARTICLE_CELL) {
                 firework->particles[particleIndex].x = originX;
                 firework->particles[particleIndex].y = originY;
@@ -276,14 +270,10 @@ void LaunchFirework(Firework *firework, s32 fireworkIndex UNUSED) {
 // path
 void UpdateAndDrawFireworks(Gfx **displayListHead) {
     Gfx *gfx;
-    // The original frame has room for this; without it 136 words differ
     s32 unused[12] UNUSED;
     Mat4 transform;
-    // The original frame has room for this too; without it 100 words differ
     s32 unusedAfter[6] UNUSED;
-    // One index for the fireworks and the particles, to match: a particleIndex
-    // for the particles gives 34 words differing, and for the updated particles
-    // alone 62, none in shape
+    // One index for the fireworks and the particles
     s32 i;
     s32 index;
     FireworkParticle *particle;
@@ -291,8 +281,7 @@ void UpdateAndDrawFireworks(Gfx **displayListHead) {
     f32 directionX;
     f32 directionY;
     f32 inverseSpeed;
-    // The particle's speed, until it scales into its trail's length, to match:
-    // a separate speed variable gives 30 words differing, none in shape
+    // The particle's speed, until it scales into its trail's length
     f32 length;
     f32 tailScale;
     s32 timer;

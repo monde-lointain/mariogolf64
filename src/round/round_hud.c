@@ -823,8 +823,8 @@ void PrepareHoleDisplay(void) {
 }
 
 // The vertices of the hole flag's grid at index grid of all its sides'
-// buffers. The original indexes the first side's buffers past their end; the
-// modern build splits the index into a side and a buffer.
+// buffers. The matching build indexes the first side's buffers past their
+// end; the modern build splits the index into a side and a buffer.
 #ifdef AVOID_UB
 #    define HoleFlagGridVertices(grid) \
         (f_HoleFlagVertices[(grid) / MATRIX_BUFFER_COUNT][(grid) % MATRIX_BUFFER_COUNT])
@@ -835,10 +835,7 @@ void PrepareHoleDisplay(void) {
 // Lays out the wind flag and builds the projections the HUD draws with
 void InitRoundHud(void) {
     s32 gridIndex;
-    // Also the back grids' rows and the shades' index, to match: a backRow for
-    // the back grids gives 20 words differing, and counting the shades with
-    // column 48, with a vertexIndex of their own 50 and with grid 88, all in
-    // registers only
+    // Also the back grids' rows and the shades' index
     s32 row;
     s32 column;
 
@@ -1110,7 +1107,7 @@ void FreeSceneryImages(void) {
 
 // Sets up the billboard manager's heap, once per round
 void InitScenery(void) {
-    // Left from code that loaded assets here; without it 8 words differ
+    // Left from code that loaded assets here
     EncodedAsset unusedAsset UNUSED;
 
     if (f_SceneryState == SCENERY_UNLOADED) {
@@ -1136,7 +1133,6 @@ void FreeScenery(void) {
 // Updates the shot panel for a new shot: the ball's height above the cup and
 // distance from it, the lie's image, and the scores that the game mode shows.
 void StartShotPanel(void) {
-    // Pads the frame to match; without it 25 words differ
     u8 unusedStack[0x20] UNUSED;
     EncodedAsset asset;
     s32 height;
@@ -1562,8 +1558,6 @@ void DrawLandingReaction(Gfx **displayListHead) {
             );
             // Mini golf and the green measure in feet
             if (g_GameState.isMiniGolf || surfaceTraits->kind == SURFACE_KIND_GREEN) {
-                // One per branch, so each is allocated within its block, to match: one
-                // declared at the top gives 22 words differing, none in shape
                 s32 hundredths = distance * (FEET_PER_YARD * HUNDREDTHS_PER_WHOLE) * YARDS_PER_UNIT;
 
                 sprintf(
@@ -1735,13 +1729,7 @@ typedef struct GridScreenPoint {
 } GridScreenPoint;
 
 // The index of the grid's point at a row and column, in a function that holds
-// the grid's width in columnCount.
-//
-// DrawGreenGrid writes the index out at each use, to match: with a local
-// holding it, 8 words differ from the original's in the pass that samples the
-// ground, 4 in the one that projects the points and 40 in the lines across
-// the aim; with a row's start stepped beside the row, 8 in the sampling pass
-// and 16 in the projecting one. The lines along the aim match either way.
+// the grid's width in columnCount
 #define GridPointIndex(row, column) (((row) * columnCount) + (column))
 
 // Sets red, green and blue for a point of the grid from its slope. White
@@ -1792,7 +1780,6 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     Vec3 points[GREEN_GRID_POINT_COUNT];
     GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
     s32 slopes[GREEN_GRID_POINT_COUNT];
-    // Nothing uses them, but the original's frame has the room for them
     Vec3 unusedPoints[GREEN_GRID_POINT_COUNT] UNUSED;
     CoursePoint center;
     ScreenPoint projected;
@@ -1807,9 +1794,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     s32 row;
     s32 column;
     // The row and column in both the lines across the aim and the lines along
-    // it, to match: with a row of their own for the lines along the aim, 56
-    // words differ from the original's; with a column of their own, 14; and
-    // with the earlier passes' row and column in both, 96.
+    // it
     s32 drawnRow;
     s32 drawnColumn;
     s32 rowPosition;
@@ -1834,8 +1819,8 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 deltaY;
     f32 scale;
 
-// The original sets the column count only before the grid's loops, so
-// the landing spacing and the centering read it unset
+// The matching build sets the column count only before the grid's loops,
+// so the landing spacing and the centering read it unset
 #ifdef AVOID_UB
     columnCount = GREEN_GRID_COLUMN_COUNT;
 #endif
@@ -1847,23 +1832,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     }
 
     club = GetSelectedClub();
-    // A 64-bit copy that nothing reads, taken inside two tests, to match, as
-    // in DrawWindSpeed: the original's code has a basic block's end between
-    // the club's call and the heading's read, and no branch there. The copy's
-    // libcall block lasts until flow, so the tests last until the jump pass
-    // after reload, and local-alloc sees their label: the club, living across
-    // it, is left to global-alloc and gets $s1 ahead of the shot's distance.
-    // Two jumps reach the label, so the path that cse follows from the
-    // function's start ends there as well, and the 1 that the cup view's test
-    // loads isn't kept in a saved register for the ground query marker, which
-    // the original loads a 1 of its own for. With one test, or two joined by
-    // &&, which compile to one jump, cse skips around the block.
-    //
-    // What the original tested is a guess: the display list in the inner
-    // test, or as the outer one, or the cup view inside, match alike. Without
-    // the copy 89 words differ from the original's; with one test, or the
-    // two joined by &&, 49; with a 32-bit copy 89; and with an empty do-while
-    // (0) in the tests' place 83.
+    // A 64-bit copy that nothing reads, taken inside two tests
     if (club != NULL) {
         if (gfx != NULL) {
             unusedClub = (u32)(AddressNumber(club));
@@ -1924,9 +1893,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     centering = 0.5f - (columnCount * 0.5f);
     originX = (forwardX * shift) + (sideX * centering);
     originZ = (forwardZ * shift) + (sideZ * centering);
-    // forwardX and forwardZ hold the row's step from here, to match: with
-    // variables of the step's own, 161 words differ from the original's; with
-    // one for x alone, 76; and with one for z alone, 66
+    // forwardX and forwardZ hold the row's step from here
     forwardX = -cosf(yaw) * rowSpacing;
     forwardZ = -sinf(yaw) * rowSpacing;
     if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
@@ -2096,8 +2063,6 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
         // The lines across the aim, one quad between each pair of points in a row
         for (drawnRow = 0; drawnRow != rowCount;) {
             for (drawnColumn = 0; drawnColumn != columnCount; drawnColumn++) {
-                // The tint has variables of each pass's own, to match: with one set
-                // for both passes, 142 words differ from the original's
                 s32 red;
                 s32 green;
                 s32 blue;
@@ -2256,9 +2221,6 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                 s32 blue;
                 s32 point = GridPointIndex(drawnRow, drawnColumn);
 
-                // The next row's point is reached as a row's points on from this
-                // one, to match: indexed by the next row, 108 words differ from the
-                // original's
                 if (screenPoints[point].isVisible != TRUE ||
                     screenPoints[point + columnCount].isVisible != TRUE) {
                     continue;
@@ -2443,8 +2405,6 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
             guMtxIdent(&f_BallTrailMatrix);
             gDPPipeSync(gfx++);
             gDPPipeSync(gfx++);
-            // Through a pointer of its own, to match: gfx++ in the macro gives 8
-            // words differing, none in shape
             cycleTypeCommand = gfx++;
             gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
             gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
@@ -2478,9 +2438,7 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
                     deltaX = f_BallTrailPoints[pointIndex].x - f_BallTrailPoints[pointIndex + 1].x;
                     deltaY = f_BallTrailPoints[pointIndex].y - f_BallTrailPoints[pointIndex + 1].y;
 
-                    // The empty branch for a segment of no length is there to match:
-                    // testing for a nonzero delta with ||, or negating the test, gives 11
-                    // words differing, all in shape; | doesn't match either
+                    // A segment of no length is left undrawn
                     if (deltaX == 0.0f && deltaY == 0.0f) {
                     }
                     else {
@@ -2630,28 +2588,11 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     }
 
     windSpeed = g_HoleSetup.conditions.windSpeed;
-    // A 64-bit copy that nothing reads, taken when there is wind, to match:
-    // the original's code has a basic block's end between the wind speed's
-    // read and its conversion, and no branch there. KMC GCC widens to 64 bits
-    // in a libcall block, which the dead code removal after cse leaves alone
-    // and flow deletes, so the test, now around nothing, lasts until the jump
-    // pass after reload. sched1 and local-alloc still see its label: the
-    // conversion's block is scheduled by itself, with the divisor's
-    // reciprocal first and in $v1, and the wind speed, living across the
-    // label, is left to global-alloc and gets $a0.
-    //
-    // Without the test 99 words differ, 31 in shape, with the frame 8 bytes
-    // smaller. A 32-bit or f64 copy, or the 64-bit product, isn't a libcall
-    // block and gives 41 (31), as with no test. An empty do-while (0) in the
-    // test's place, whose loop notes local-alloc doesn't see, gives 16 (2),
-    // and the conversion IN_OWN_BLOCK 109 (31). The scaling before the test
-    // gives 18 (4), and the wind speed kept in speed 100 (24).
+    // A 64-bit copy that nothing reads, taken when there is wind
     if (windSpeed != 0) {
         unusedWindSpeed = windSpeed;
     }
 
-    // The pulse is stepped after the conversion, to match: before it 4 words
-    // differ, 4 in shape, and before the test 18 (18)
     speed = (windSpeed * WIND_SPEED_TO_METERS_SCALE) / WIND_SPEED_TO_METERS_DIVISOR;
     f_WindIconPulseAngle += WIND_ICON_PULSE_STEP;
     if (speed >= WIND_SPEED_TWO_DIGITS) {
@@ -2832,7 +2773,6 @@ void DrawWindIndicator(Gfx **displayListHead, f32 x, f32 y) {
     Vec3 viewDirection;
     Vec3 rotation;
     Vec3 translation;
-    // Pads the frame to match; without it 72 words differ
     Vec3 unusedScale UNUSED;
     Mat4 matrix;
     Mat4 transform;
@@ -2954,10 +2894,8 @@ void AdjustHudOffset(void) {
 void DrawShotPanelIcons(Gfx **displayListHead, CameraView *view UNUSED) {
     Vec3 rotation;
     Vec3 translation;
-    // Pads the frame to match; without it 222 words differ
     Vec3 unusedScale UNUSED;
     Mat4 matrix;
-    // Pads the frame to match; without it 218 words differ
     s32 unused[18] UNUSED;
     Gfx *gfx;
     Club *club;
@@ -3670,15 +3608,12 @@ void DrawShotEffect(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-// Waves the hole's flag in the wind. A shade swings down the flagstick side
-// of the flag and spreads across it, faster the stronger the wind. Each
-// vertex then bulges out of the flag by its shade, and the columns draw in to
-// make up for the bulges.
+// Waves the hole's flag in the wind. A shade swings down the flagstick side of
+// the flag and spreads across it, faster the stronger the wind. Each vertex
+// then bulges out of the flag by its shade, and the columns draw in to make up
+// for the bulges.
 //
-// factor and otherFactor hold several unrelated factors in turn, as in the
-// original; separate variables change the registers. calmOwnShare is worked
-// out ahead of its use because doing so puts the zero for the skew factors
-// in factor's register first, as the original does.
+// factor and otherFactor hold several unrelated factors in turn.
 void WaveHoleFlag(void) {
     s32 row;
     s32 column;
@@ -4356,13 +4291,10 @@ void DrawColorTest(Gfx **displayListHead) {
 // and scores, the shot panel's labels, distances and club, and the debugging
 // aids that game flags turn on
 void DrawRoundHud(CameraView *view) {
-    // Pads the frame to match; without it 126 words differ
     s32 unused[2] UNUSED;
     s32 percentRange[2];
     Club *club;
     s32 scoreboardX;
-    // Declared after scoreboardX so that its spill slot follows; declared
-    // first, 40 words differ
     Boolean hasHandicap;
     s32 i;
     s32 ringCount;

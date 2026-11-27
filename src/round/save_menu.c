@@ -313,34 +313,8 @@ ModeIcon GetModeIconIndex(GameState *state) {
 }
 
 // Opens the save menu on the saved games (SAVE_MENU_GAMES) or the replay
-// records (SAVE_MENU_REPLAYS), loading its images and putting the cursor on
-// the first free slot.
-//
-// Each mode icon's two images are read in both arms of the icon test, and GCC
-// merges the arms' identical tails, as the original does. The original steps
-// $s1 over each slot's second image, sets the first image's $s2 from it as
-// $s1 - 4, and holds the default frames' address in $s6, which it loads before
-// both. The second image is stored through a pointer the loop steps, to match:
-// loop.c moves the first image's address out of the loop, and cse2 rewrites
-// it as the pointer's less 4. The default frames are read through a pointer
-// set before that one, to match: the scheduler keeps the order of the loads
-// before the loop, and loop.c would put the frames' address, read directly,
-// after the pointer's.
-//
-// With the frames read directly, or their pointer declared after the image's,
-// 4 words differ, 0 in shape, the two addresses' loads swapped; with the
-// frames' pointer set with the function's locals, 4 (4). A pointer to the
-// whole table matches if only the default frames are read through it, and
-// gives 10 words (6) if the icon's frames are too. Stepping the image's
-// pointer at the end of the loop's body, setting it in the loop's initializer,
-// and setting it as f_ModeIconImages[0] + 1 all match; stepping it after slot
-// gives 4 words (0). Setting it in each pass, as &f_ModeIconImages[slot][1],
-// gives 5 words (1): loop.c loads its first address into a temporary and
-// copies that into the pointer's register. Naming both images directly gives
-// 46 words (2), as loop.c combines the two stores into one register; writing
-// the first image through the pointer, as second[-1], 4 (2); a stepped pointer
-// for each image 10 (0); and one stepped pointer to the slot's pair of images
-// 12 (2).
+// records (SAVE_MENU_REPLAYS), loading its images and putting the cursor on the
+// first free slot.
 void OpenSaveMenu(SaveMenuList kind) {
     EncodedAsset encodedAsset;
     AssetFile file;
@@ -685,9 +659,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
     SaveData *save;
     s32 row;
 
-    // Counts rows, icon halves or golfers. Sharing one variable is there to
-    // match: a variable of its own for the rows gives 411 words differing (3 in
-    // shape), for the icon halves 12 (0), and for the golfers 54 (0)
+    // Counts rows, icon halves or golfers
     s32 index;
     s32 strip;
     s32 stripHeight;
@@ -851,8 +823,6 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
         LoadLargePalette(&gfx, ImagePalette(f_SaveMenuTitleImage));
         imageLeft = TITLE_IMAGE_LEFT;
 
-        // The strips are counted with row. Reusing it is there to match: counting
-        // them with strip gives 114 words differing, none in shape
         for (row = 0; row != TITLE_STRIP_COUNT; row++) {
             drawnHeight = TITLE_STRIP_DRAWN_HEIGHT;
             if (row == TITLE_STRIP_COUNT - 1) {
@@ -1598,8 +1568,6 @@ ReplayMenuState UpdateReplaySaveMenu(ControllerState *controller) {
 
             if (controller->pressedButtons & A_BUTTON) {
                 if (f_CursorIndex >= 0 && f_CursorIndex < RING_SHOT_RECORD_COUNT) {
-                    // The pointer arithmetic is there to match: indexing the records
-                    // gives 2 words differing, none in shape
                     if ((save->ringShotRecords + f_CursorIndex)->scoreKind & SCORE_KIND_RECORDED) {
                         g_PauseScreen = PAUSE_SCREEN_PROMPT;
                         OpenPrompt(PROMPT_OVERWRITE_REPLAY);
@@ -1678,9 +1646,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
     SaveData *save;
     s32 row;
 
-    // Counts strips or records. Sharing one variable is there to match: a
-    // variable of its own for the strips, or for the records, gives 174 words
-    // differing, none in shape
+    // Counts strips or records
     s32 index;
     s32 stripHeight;
     s32 titleBob;
@@ -2137,8 +2103,6 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
         f_ReplayTitleBobAngle += DegreesToRadians(TITLE_BOB_DEGREES_PER_FRAME);
         LoadLargePalette(&gfx, ImagePalette(f_NamePlateImage));
         for (index = 0; index != NAME_PLATE_STRIP_COUNT; index++) {
-            // The strips' tops step by the constant: stepping them by stripHeight
-            // gives 76 words differing, 6 in shape
             stripHeight = TITLE_PANEL_STRIP_HEIGHT;
             LoadTextureBlock(
                 &gfx,

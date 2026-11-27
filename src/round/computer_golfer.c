@@ -460,10 +460,6 @@ s32 GetSideSlope(void) {
     reachZ = 2.0f * (direction[AXIS_X] * SIDE_SLOPE_SAMPLE_REACH);
     for (sampleIndex = 1; sampleIndex < (s32)(distance * (1.0f / SIDE_SLOPE_SAMPLE_SPACING));
         sampleIndex++) {
-        // Setting along inside the x term is there to match: setting it first
-        // gives 2 words differing (2 in shape) in either order of its product,
-        // 4 to 30 in the other operand orders of the terms, 6 with z first, and
-        // writing its product out in both terms 10 (8)
         sampleX = f_Shot.ballPosition[AXIS_X] +
             ((along = sampleIndex * SIDE_SLOPE_SAMPLE_SPACING) * direction[AXIS_X]);
         sampleZ = f_Shot.ballPosition[AXIS_Z] + (along * direction[AXIS_Z]);
@@ -787,8 +783,6 @@ s32 PlanShot(CurrentShot *plannedShot) {
             // The carry per unit of f_Shot.powerGaugeFrame at the mean percent
             reach = reach * (percentRange[1] + percentRange[0]) /
                 (2 * PERCENT_PER_WHOLE * GAUGE_FULL_FRAME);
-            // Holding f_Shot.powerGaugeFrame in distance is there to match: a
-            // powerFrame local of its own gives 26 words differing, none in shape
             distance = (rand() & 3) + (distance / reach);
             if (GetClubBoldness() >= BOLD_CLUB_CHOICE) {
                 distance = distance * POWER_GAUGE_FRAME_BOOST;
@@ -968,7 +962,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
 
             f_TrialShot.impactGaugeFrame += mishit;
 
-            // Never printed; the original has it, and its string is in the ROM
+            // Never printed
             if (FALSE) {
                 osSyncPrintf("Dahuri = %d\n", mishit);
             }
@@ -1039,8 +1033,6 @@ s32 PlanCupDistance(ShotMode shotMode UNUSED) {
         windFollow = (cupX * windX) + (cupZ * windZ);
         osSyncPrintf("WindFollow%f\n", windFollow);
 
-        // Turning windFollow into the distance ratio is there to match: a ratio
-        // local of its own gives 8 words differing, none in shape
         windFollow = (-windFollow * WIND_FOLLOW_FRACTION) + 1.0f;
         osSyncPrintf("WindCareRatio%f\n", windFollow);
         if (windFollow < WIND_DISTANCE_RATIO_MIN) {
@@ -1379,7 +1371,7 @@ s32 ChooseHoleStrokeTarget(void) {
                 holeIndices[entry] = groupHoleIndices[groupCount];
                 strokes[entry] = groupStrokes[groupCount];
 
-                // Reads handicaps rather than groupHandicaps; the original has it
+                // Reads handicaps rather than groupHandicaps
                 handicaps[entry] = handicaps[groupCount];
                 groupCount++;
             }
@@ -1569,13 +1561,13 @@ s32 ChooseHoleStrokeTarget(void) {
     osSyncPrintf("\n");
     for (index = 0; index < COURSE_HOLE_COUNT; index++) {
         if (holeIndices[index] == g_GameState.holeIndex) {
-            // The comma is in the original's string
+            // The comma is in the string
             osSyncPrintf("++ %d\n,", strokes[index]);
             return strokes[index];
         }
     }
 
-// The original reads past the holes, into the next course record's name
+// The matching build reads past the holes, into the next course record's name
 #ifdef AVOID_UB
     return g_HoleSetup.par;
 #else
@@ -1637,7 +1629,7 @@ s32 PlanRoute(s8 *route) {
             }
 
             distance = IntLength2D(currentX - f_Route.x[index], currentZ - f_Route.z[index]);
-            // Unused; it is there to match
+            // Measures the point's distance from the tee, which goes unused
             IntLength2D(
                 f_Route.x[index] - g_HoleSetup.teePosition[AXIS_X],
                 f_Route.z[index] - g_HoleSetup.teePosition[AXIS_Z]
@@ -1662,8 +1654,6 @@ s32 PlanRoute(s8 *route) {
         }
     }
 
-    // Counting the route in index is there to match: a routeLength local gives
-    // 64 words differing, none in shape
     index = 0;
     for (orderIndex = orderCount - 1; orderIndex >= 0; orderIndex--) {
         if (order[orderIndex] != pointCount - 1) {
@@ -1819,9 +1809,6 @@ void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ)
             osSyncPrintf("PointList[%d] = (%d, %d)\n", index, pointX[index], pointZ[index]);
         }
 
-        // Reading the cup's position through g_HoleSetup here and below is there
-        // to match: a cupZ local read once gives 35 words differing (11 in
-        // shape), and cupX and cupZ locals 47 (19)
         pointX[pointCount] = g_HoleSetup.cupPosition[AXIS_X];
         pointZ[pointCount] = g_HoleSetup.cupPosition[AXIS_Z];
         order[pointCount] = END_ROUTE_POINT;
@@ -1879,8 +1866,6 @@ void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ)
     endRating = GetLandingRating(GetSurfaceTraitsAt(endX, endZ)->kind);
     osSyncPrintf("TALevel %d\n", endRating);
 
-    // Counting the steps in index is there to match: a step local gives 289
-    // words differing, 27 in shape
     for (index = 0; index < (reach * TARGET_STEPS_PER_UNIT) + EXTRA_TARGET_STEP_COUNT; index++) {
         along = TARGET_STEP_YARDS * (index * UNITS_PER_YARD);
         alongX = (along * cosAngle) + endX;
@@ -2014,14 +1999,9 @@ void ChooseLongShot(
     s32 *targetZ,
     ShotMode *shotMode
 ) {
-    // The original frame has room for this; without it 34 words differ, none in
-    // shape
     s32 pad[44] UNUSED;
     ShotMode shotModes[STROKE_SHOT_MODE_COUNT];
     s32 index;
-    // normalMode is there to match: the constant in its place as the argument
-    // gives 3 words differing (3 in shape), and as the stored mode or in both
-    // places 5 (3)
     ShotMode normalMode;
     s32 strokeCount;
 
@@ -2037,7 +2017,6 @@ void ChooseLongShot(
     *shotMode = shotModes[strokeCount];
 }
 
-// It is a macro, as an inline function compiles differently from the original
 #define IsOffFairway(surfaceKind) \
     ((surfaceKind) != SURFACE_KIND_FAIRWAY && \
         (surfaceKind) != SURFACE_KIND_FAIRWAY_FAIR_LIE && \
@@ -2060,9 +2039,6 @@ Boolean IsLineOffFairway(CoursePoint from, CoursePoint to) {
     distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
     angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
     for (step = 0; step < distance * YARDS_PER_UNIT; step++) {
-        // Setting stepLength in the loop is there to match: setting it before
-        // the loop gives 7 words differing (7 in shape), and the constant in
-        // its place 26
         stepLength = UNITS_PER_YARD;
         x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
         z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
@@ -2093,9 +2069,6 @@ s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge) {
     osSyncPrintf("StartPoint = (%d, %d)\n", from[AXIS_X], from[AXIS_Z]);
     osSyncPrintf("EndPoint = (%d, %d)\n", to[AXIS_X], to[AXIS_Z]);
     for (step = 1; step < (distance * YARDS_PER_UNIT) + 1; step++) {
-        // Setting stepLength in the loop is there to match: setting it before
-        // the loop gives 7 words differing (7 in shape), and the constant in
-        // its place 26
         stepLength = UNITS_PER_YARD;
         x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
         z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
@@ -2145,9 +2118,6 @@ void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
     peak[AXIS_X] = from[AXIS_X];
     peak[AXIS_Z] = from[AXIS_Z];
     for (step = 1; step < distance * YARDS_PER_UNIT; step++) {
-        // Setting stepLength in the loop is there to match: setting it before
-        // the loop gives 26 words differing (6 in shape), and the constant in
-        // its place 46
         stepLength = UNITS_PER_YARD;
         x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
         z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
@@ -2181,7 +2151,7 @@ ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
         g_HoleSetup.cupPosition[AXIS_X] - f_Shot.ballPosition[AXIS_X],
         g_HoleSetup.cupPosition[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]
     );
-    // Unused; it is there to match
+    // Looks up the lie's traits, which go unused
     GetSurfaceTraits(f_Shot.surface);
     if (IsLineOffFairway(f_Shot.ballPosition, g_HoleSetup.cupPosition) == TRUE) {
         osSyncPrintf("Appr60 Return point 1\n");
@@ -2280,50 +2250,13 @@ ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
 // better than the best so far, and 1 once it has evaluated the trial, or
 // abandoned it, and adjusted f_Shot's power, mode or aim for the next one.
 //
-// GetPowerGaugeFrame is nested in the block that calls it, a GNU C extension,
-// as in the original: StepTrialShot passes it a stack address in $v0 as the
-// static chain, which it stores. GCC compiles a nested function at its
-// definition, and rest_of_compilation sets cse_not_expected, which isn't saved
-// across it, so the code after the definition is expanded with constant
-// addresses inside its memory references, as the original's is there, and the
-// code before it with the addresses in registers. Nested at the start of the
-// routine, 185 words differ (123 in shape); at the start of the evaluation
-// block, 148 (106); at the start of the ratio's test, 56 (32); at the start
-// of the test for too much power, 57 (33); and as a routine of its own, with
-// or without a store standing in for the static chain's, 71 (27).
-//
-// A poor landing's evaluation sits in a block of its own, as a macro's
-// do-while would make it, to match. The original loads
-// POOR_LANDING_EVALUATION into $v0 and sums it into $v1. local-alloc ranks a
-// block's quantities by floor_log2(refs) * refs / life, and outside a loop
-// the sum's 4 references over a life of 8 tie with the constant's 2 over a
-// life of 2; the tie goes to the lower quantity number, the sum's, which
-// takes $v0. flow counts a reference twice in a loop, even one that runs
-// once, and the logarithm then ranks the constant's 4 references above the
-// sum's 8, so the constant takes $v0.
-//
-// Without the block, or with plain braces, 12 words differ (4 in shape). A
-// block around the whole if, one that ends after the out-of-bounds test, and
-// one around the whole else arm from the EVALUATE label match too. One around
-// the sum alone, the out-of-bounds test alone or both tests gives 24 (6), and
-// one around the water hazard's test 12 (4). The kind read into a local
-// inside the block, before or after the sum, matches; read before the block
-// it gives 12 (6), and with only its read and the sum in the block 4 (4).
-//
-// The heading's correction ends the arm for a finished trial, and the next
-// try's aim change is the else arm, both reaching the one return: with an
-// early return in the arm instead, 21 words differ (7 in shape), and with a
-// do-while (0) around the correction 14 (4). The aim change's step as an
-// if/else subtracting or adding gives 23 (13); adding the step or its
-// negation, chosen by ?:, 15 (7); and choosing by ?: between the heading
-// minus and plus the step 23 (9).
+// GetPowerGaugeFrame is nested in the block that calls it, a GNU C extension.
 s32 StepTrialShot(void) {
     PlaneTriangle hit;
     f32 fraction;
     StepFlags stepFlags;
     BallState ballState;
-    // A copy of flags, to match: reading flags gives 19 words differing, 3 in
-    // shape
+    // The step's flags, kept for the lip-out and landing checks
     StepFlags stepFlagsCopy;
     s32 velocityY;
     s32 bounceCount;
@@ -2387,8 +2320,7 @@ s32 StepTrialShot(void) {
     ballState = f_TrialSimulation.state;
     if (ballState != BALL_STATE_STOPPED) {
         // A loop that runs once, so that the step's checks can break out to the
-        // end point's update; the original has no loop here, and jumping to a
-        // label instead gives 38 words differing, 20 in shape
+        // end point's update
         do {
             velocityY = f_TrialSimulation.velocity[AXIS_Y];
             bounceCount = f_TrialSimulation.bounceCount;
@@ -2487,11 +2419,7 @@ s32 StepTrialShot(void) {
                 f_TrialEvaluation = POOR_LANDING_EVALUATION;
             }
 
-            // A long putt is evaluated even if it holed out. The goto into the
-            // evaluation, to match: a flag set by an if here and tested with the
-            // holed-out one gives 14 words differing, 8 in shape; the flag
-            // assigned this test 21, 7; and this test moved into the holed-out
-            // one's 35, 17.
+            // A long putt is evaluated even if it holed out
             if (g_Players[f_Shot.playerIndex].strokeCount + 1 <
                     g_HoleSetup.par + f_HoleTargetToPar &&
                 f_HoleTargetToPar > 0 &&
@@ -2531,7 +2459,6 @@ EVALUATE:
                 GetSurfaceTraitsAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind
             );
             if (GetLandingRating(surfaceTraits->kind) < targetRating) {
-                // In a block of its own to match, as the header comment explains
                 IN_OWN_BLOCK({
                     f_TrialEvaluation += POOR_LANDING_EVALUATION;
                     if (IsOutOfBoundsKind(surfaceTraits->kind)) {
@@ -2563,9 +2490,7 @@ EVALUATE:
             par = g_HoleSetup.par;
             if (GetSurfaceTraitsAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
                 SURFACE_KIND_GREEN) {
-                // The stroke this shot would be. Counting it in strokes with ++
-                // gives 4 words differing (none in shape), and adding it in the
-                // subtraction 17 (3)
+                // The stroke this shot would be
                 s32 shotStroke = strokeCount + 1;
 
                 strokesOver = shotStroke - (par + f_HoleTargetToPar);
@@ -2868,7 +2793,6 @@ WideBinaryAngle GetAngleDifference(WideBinaryAngle angle, WideBinaryAngle otherA
 // The angle within which the wind counts as following the shot
 #define FOLLOWING_WIND_ANGLE 10000
 
-// It is a macro, as an inline function compiles differently from the original
 #define IsWindSpeedInRange(lowest, limit) \
     (g_HoleSetup.conditions.windSpeed >= (lowest) && g_HoleSetup.conditions.windSpeed < (limit))
 
@@ -2997,7 +2921,6 @@ ShotOffsetIndex ChooseShotOffset(void) {
 #define CLUB_TYPE_LAST_IRON 10
 
 // Whether the shot's club lies between the slots of the two club types
-// It is a macro, as an inline function compiles differently from the original
 #define IsShotClubOfTypes(firstType, lastType) \
     (f_Shot.clubSlot >= FindClubSlot(f_Shot.playerIndex, (firstType)) && \
         FindClubSlot(f_Shot.playerIndex, (lastType)) >= f_Shot.clubSlot)
@@ -3052,9 +2975,6 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
     sampleCount = 0;
     lostCount = 0;
     for (step = 1; step < distance * TENS_OF_YARDS_PER_UNIT; step++) {
-        // Setting stepLength in the loop is there to match: setting it before
-        // the loop gives 8 words differing (8 in shape), and the constant in
-        // its place 26
         stepLength = UNITS_PER_YARD;
         x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
         z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
@@ -3078,43 +2998,11 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
 // of bounds, off the course or in a water hazard
 //
 // Its loop is a cut-down copy of StepTrialShot's step, and it keeps that step's
-// read of the fall speed, which nothing here uses, to match. The original holds
-// &f_TrialSimulation.velocity[AXIS_Y] in $s0 through the loop, passes
-// StepBallSimulation that address less 0x28 and reads the loop's state 0x64
-// past it, and nothing in the loop reads the fall speed itself. GCC expands
-// the read as the address into a register and a load through it; jump deletes
-// the load, whose value is unused, and leaves the address, and cse's
-// use_related_value then derives the simulation's address and the state's
-// from it. That leaves the simulation's address with one use, the call's
-// argument, and in a loop with calls loop.c substitutes such a register's
-// value into its use rather than move it out of the loop.
-//
-// Without the read 6 words differ, 4 in shape: the loop keeps the simulation's
-// own address and reads the state from its constant address. Reading the
-// bounce count as well, as StepTrialShot does, matches too, as do the read
-// after the count, the read declared in the loop's body and an empty test of
-// the fall speed. The read after the step or before the loop gives the same 6
-// words (4), and through a simulation pointer 14 (6); a read of the bounce
-// count alone, the state or another axis's speed gives 6 (0), biased by that
-// field's offset instead.
-//
-// The step limit's report is written inside the loop and the original has it
-// after the result's checks, jumping back to them: loop.c moves a block that
-// ends in a jump out of its loop to a barrier outside it, here the one that
-// ends the first FALSE report. The original's rodata has the FALSE text before
-// the TRUE one, though the TRUE report's code comes first, so the FALSE report
-// is written twice, before and after the TRUE one, and jump's cross-jumping
-// then merges the first into the last. An else arm for the TRUE report matches
-// too. Testing the out-of-bounds kinds and the water hazard in separate ifs,
-// each with its own FALSE report, gives 8 words (6 in shape); the TRUE report
-// first, with one FALSE report after it, 24 (18); a result flag tested for the
-// reports 31 (25); a FALSE report for a ball that hasn't stopped before the
-// kind's tests 44 (34); and one condition for all three tests 18 (12). The
-// outside-course test before the step limit's gives 9 (5).
+// read of the fall speed, which nothing here uses.
 Boolean IsTrialShotSafe(void) {
     SurfaceKind surfaceKind;
     StepFlags stepFlags;
-    // Read and never used, to match
+    // Read and never used
     s32 velocityY UNUSED;
 
     f_TrialLaunch->heading = f_TrialShot.heading;

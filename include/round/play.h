@@ -82,8 +82,7 @@ enum LetterboxState {
 
 typedef s32 LetterboxState;
 
-// Whether a LetterboxState letterboxes the view. The original tests with &
-// rather than &&
+// Whether a LetterboxState letterboxes the view
 #define IsLetterboxState(state) \
     (((state) != LETTERBOX_STATE_NONE) & ((state) != LETTERBOX_STATE_UNUSED_AIMING))
 

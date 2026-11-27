@@ -204,7 +204,6 @@ typedef struct ChoiceBox {
 #define COLOR_WAVE_MIDDLE 127
 #define COLOR_WAVE_AMPLITUDE 127.0f
 
-// Not static: the original left these to the linker's common block
 Vec2 g_LiePanelPosition;
 Vec2 g_WindPanelPosition;
 
@@ -406,8 +405,8 @@ static ImageAsset *f_MenuCloudImage; // The pause menu's cloud, or the choice bo
 static ImageAsset *f_PauseArrowsImage;
 static ImageAsset *f_ChoiceBoxCursorImage;
 
-// Set while the player has taken a stroke on the hole, as UpdateTurns asks
-// for the menu. Not static: the original left it to the linker's common block.
+// Set while the player has taken a stroke on the hole, as UpdateTurns asks for
+// the menu.
 Boolean f_IsGiveUpAllowed;
 
 void HideRoundHud(void) {

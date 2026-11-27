@@ -510,7 +510,6 @@ static Mtx f_ShotPreviewMatrices[DRAW_BUFFER_COUNT][SHOT_PREVIEW_STEPS_MAX];
 // The shot preview's points
 static f32 f_ShotPreviewPoints[SHOT_PREVIEW_STEPS_MAX][AXIS_COUNT];
 
-// Not static: the original left it to the linker's common block
 s32 f_AimFrameCount;
 
 // Lets the Rumble Paks run again after nuContRmbForceStop
@@ -599,67 +598,8 @@ void KeepAimCameraOnCourse(void) {
 // screen, behind the ball while aiming, or looking back at it from past the
 // ball.
 //
-// Behind the ball, KeepAimCameraOnCourse is called in a block of its own. The
-// original keeps g_CurrentShot's address in $s0 from the heading's read and
-// reads aimCameraDistance through it for point's x and z, but reads the
-// ball's position by its addresses. cse's first pass stops at the block's
-// end and forgets the heading's register there: past it the distance's
-// address gets a register of its own, and the ball's coordinates are read as
-// offsets from that one. The second pass doesn't stop. It finds that the
-// distance's address is g_CurrentShot's register plus 0x34 and reads the
-// distance so, and it folds the ball's offsets back into addresses. Without
-// the block, the first pass makes every read an offset from g_CurrentShot's
-// register, the second folds them all into addresses, and the register is
-// left with the heading's read alone.
-//
-// The camera's greatest rise above the ball is built up in maxRise: the
-// distance in thousands, then its square, then that over the divisor. The
-// original keeps all three in $v1. With the distance in thousands in a local
-// of its own, it and its square trade $v0 and $v1.
-//
-// On the green, the look-at's height is worked out after its x and z; down
-// range, the tilt in world units has a local of its own, set just before the
-// look-at's height. On the mini golf course, point is set in axis order.
-// Looking back at the ball, the look-at's height comes from the center's,
-// which the original reloads from the stack.
-//
-// Measured against the match, as words differing and how many of them in
-// shape:
-//
-//   KeepAimCameraOnCourse outside a block, or in plain braces 11 (3)
-//   The first point's x in a block, in place of the call      7 (5)
-//   The first point's x and z in one, in place of the call    25 (9)
-//   The call before the heading is set, in a block or not     14 (6)
-//   The first point's distance read through a pointer         14 (4)
-//   The distance in thousands in a local, rise, with maxRise
-//   set to its square over the divisor                        23 (3)
-//   The same without the block (the old draft)                34 (6)
-//   rise squared into maxRise, and maxRise divided in place   16 (0)
-//   rise squared in place, and divided into maxRise           23 (3)
-//   maxRise squared and divided in one statement              7 (3)
-//   maxRise's square shifted right, not divided               7 (7)
-//   maxRise as an f32                                         36 (22)
-//   maxRise as an s16                                         29 (7)
-//   maxRise as a u32                                          74 (32)
-//   The ball's height added to maxRise before the clamp       4 (0)
-//   The probes' loop testing < the count                      23 (9)
-//   The eye's x and z stored before the first ground is read  45 (19)
-//   On the green, the look-at's height before its z           35 (31)
-//   The tilt scaled inside the look-at height's expression    13 (11)
-//   The tilt in world units set before the look-at's x        21 (9)
-//   Down range, point's y not set to the eye's                21 (1)
-//   On the mini golf course, point's z set before its y       8 (0)
-//   Looking back, the look-at's height from the ball's        3 (1)
-//   Looking back, without the middle's stores                 55 (37)
-//   Looking back, without point's first y                     10 (10)
-//   The current player's address taken with &                 4 (0)
-//
-// Also matching: the heading's statement in the block in place of the call,
-// or with it, or in a block of its own as well; the look-back's call in a
-// block too; maxRise's steps spelled maxRise = maxRise * maxRise and maxRise
-// = maxRise / AIM_CAMERA_RISE_DIVISOR; maxRise declared first in its branch,
-// or in the function; and the probe's offset written out at each use, with
-// no local.
+// The camera's greatest rise above the ball is the distance in thousands,
+// squared, over AIM_CAMERA_RISE_DIVISOR.
 void PlaceShotCamera(void) {
     Vec3 point;
     CoursePoint center;
@@ -740,7 +680,6 @@ void PlaceShotCamera(void) {
         f32 worldTilt;
 
         heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
-        // In a block of its own, to match
         IN_OWN_BLOCK(KeepAimCameraOnCourse());
         point[AXIS_X] =
             (cosf(heading) * g_CurrentShot.aimCameraDistance) + g_CurrentShot.ballPosition[AXIS_X];
@@ -786,7 +725,6 @@ void PlaceShotCamera(void) {
             point[AXIS_Y] = lowestGround + g_CurrentShot.aimCameraHeight;
         }
 
-        // Built up in place, to match
         riseMax = g_CurrentShot.aimCameraDistance / 1000;
         riseMax *= riseMax;
         riseMax /= AIM_CAMERA_RISE_DIVISOR;
@@ -949,8 +887,6 @@ void PlaceAimCamera(void) {
         eye[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
     }
 
-    // Holding the scale in a variable, and taking the camera's address for the
-    // first store, both keep the original's register choices and load order
     scale = COURSE_TO_WORLD_SCALE;
     (&g_Cameras[MAIN_CAMERA])->view.lookAt[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
     g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
@@ -1013,7 +949,6 @@ void UpdateImpactPointMode(void) {
 }
 
 void ResetAimCamera(void) {
-    // Pads the frame to match; without it 8 words differ
     s32 unused[4] UNUSED;
 
     g_CurrentShot.aimCameraDistance = AIM_CAMERA_START_DISTANCE;
@@ -1221,78 +1156,6 @@ void MoveAimCameraDistance(void) {
 // shot's heading with the D-pad, faster the longer it is held. While the
 // heading holds still, the scene is drawn from a saved frame, through two
 // framebuffers.
-//
-// Each stick branch takes its turn from the heading in 32 bits: the heading
-// before the turn is copied to an s32, after the stick's half is worked out and
-// before the speed. The original sign-extends the saved heading there, from $s1
-// into $v1, and loads g_AltHeading with lh while the speed is still being
-// divided. With -= on the heading itself, the difference is narrowed to 16 bits
-// and needs no extension: the aim's turn is subtracted from $s1 as it was
-// loaded, and g_AltHeading is loaded after the speed's absolute value is taken.
-//
-// The aim's branch also stores the new heading through a pointer, from a
-// variable of its own. The original copies g_CurrentShot's address from $a2,
-// through which the heading was saved, to $a3, and stores the heading through
-// $a3 once, after both arms of the speed's test. Without the pointer the
-// heading is saved and stored by its address, with no register for it. Without
-// the variable the pointer is the address's own register, with no copy, and
-// each arm of the speed's test ends in a store of its own.
-//
-// The heading is saved as a SignedBinaryAngle, where the stick is read: the
-// original loads it with lhu into $s1 and sign-extends it at each use, for the
-// aim's turn and for the test of whether it held still.
-//
-// Each D-pad branch counts through a pointer to f_AimTurnFrameCount of its own,
-// which the original keeps in $v1.
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   The aim's turn as -= on g_CurrentShot.heading, with the
-//   step multiplied by the speed under an if                  33 (5)
-//   The same, with g_AltHeading's turn as -= too (the old
-//   draft)                                                    39 (9)
-//   The aim's turn as -= of a conditional expression          29 (11)
-//   No shotHeading, newHeading stored to
-//   g_CurrentShot.heading                                     24 (12)
-//   No newHeading, the difference stored through shotHeading,
-//   or to g_CurrentShot.heading                               9 (3)
-//   oldHeading turned in place and stored                     35 (7)
-//   No oldHeading, the turn taken from heading                22 (12)
-//   oldHeading as a SignedBinaryAngle                         22 (12)
-//   oldHeading declared before step                           22 (6)
-//   oldHeading declared after speed                           22 (12)
-//   speed declared before step                                41 (15)
-//   shotHeading declared after speed                          20 (10)
-//   The step multiplied by the speed under an if, then taken
-//   from oldHeading                                           37 (5)
-//   The step as stickX >> 1                                   4 (2)
-//   An inline function for the step times the speed           33 (5)
-//   g_AltHeading's turn as -=, or taken from g_AltHeading
-//   with no oldHeading                                        6 (4)
-//   g_AltHeading's turn stored through a pointer              8 (2)
-//   g_AltHeading's oldHeading as a SignedBinaryAngle          23 (15)
-//   g_AltHeading's step multiplied by the speed under an if   7 (3)
-//   g_AltHeading's speed declared before its step             12 (12)
-//   The test as turnsAltHeading, with its branches swapped    54 (42)
-//   The saved heading as a BinaryAngle                        31 (11)
-//   The saved heading as an s32                               45 (13)
-//   stickX as an s8                                           91 (21)
-//   stickX as an s16                                          89 (23)
-//   The heading saved before the stick is read                21 (5)
-//   Both read after g_ImpactPointState's test                 26 (12)
-//   f_AimTurnFrameCount named in both D-pad branches          41 (19)
-//   f_AimTurnFrameCount named in one D-pad branch             20 (8)
-//   One pointer to f_AimTurnFrameCount for the function       40 (8)
-//
-// Also matching: newHeading declared and then set, set in an if and an else, or
-// as a conditional expression that subtracts in each arm; newHeading as a
-// SignedBinaryAngle; oldHeading read through shotHeading, or from
-// g_CurrentShot.heading; shotHeading as a pointer to g_CurrentShot; the aim's
-// step as an s16, or read from g_TurnController.stickX; either speed's absolute
-// value taken with an if; either speed tested == 0, with the arms swapped;
-// g_AltHeading's turn through a newHeading too, or with its oldHeading declared
-// before its step; the frame count copied to a local for the D-pad's turn; the
-// D-pad's speed as a conditional expression; and the shot's heading cast to s16
-// in the test of whether it held still.
 void TurnAim(Boolean turnsLookBackHeading) {
     s32 stickX = g_TurnController.stickX;
     SignedBinaryAngle heading = g_CurrentShot.heading;
@@ -1304,7 +1167,6 @@ void TurnAim(Boolean turnsLookBackHeading) {
     }
 
     if (!turnsLookBackHeading) {
-        // Turned in 32 bits and stored through a pointer, to match
         SignedBinaryAngle *shotHeading = &g_CurrentShot.heading;
         s32 step = stickX / 2;
         WideBinaryAngle oldHeading = heading;
@@ -1314,7 +1176,6 @@ void TurnAim(Boolean turnsLookBackHeading) {
         *shotHeading = newHeading;
     }
     else {
-        // Turned in 32 bits as well, to match
         s32 step = stickX / 2;
         WideBinaryAngle oldHeading = g_LookBackHeading;
         s32 speed = Abs(stickX / LOOK_BACK_STICK_SPEED_DIVISOR);
@@ -1327,7 +1188,6 @@ void TurnAim(Boolean turnsLookBackHeading) {
         f_AimTurnFrameCount = 0;
     }
     else if (dpad & L_JPAD) {
-        // Counted through a pointer of this branch's own, to match
         s32 *dpadFrames = &f_AimTurnFrameCount;
 
         if (*dpadFrames < 0) {
@@ -1339,7 +1199,6 @@ void TurnAim(Boolean turnsLookBackHeading) {
         }
     }
     else {
-        // As in the left branch, to match
         s32 *dpadFrames = &f_AimTurnFrameCount;
 
         if (*dpadFrames > 0) {
@@ -1385,8 +1244,7 @@ void TurnAim(Boolean turnsLookBackHeading) {
 
 // Clamps the aim camera's height between minHeight and AIM_CAMERA_MAX_HEIGHT,
 // and its distance between minDistance and maxDistance. Each view clamps all
-// four, as in the original, whose green and other views share their tails;
-// clamping the common bounds once after the views gives 24 differing words.
+// four.
 #define ClampAimCamera(heightMin, distanceMin, distanceMax) \
     { \
         if (g_CurrentShot.aimCameraHeight > (heightMin)) { \
@@ -2231,38 +2089,6 @@ void BuildShotPreview(ShotLaunch *shot, PlayerState playerState) {
 
 // Draws the shot preview that BuildShotPreview built. On the pause screen it is
 // instead a straight line on screen, from the ball to the preview's last point.
-//
-// For that line the original scales dx and dy to the line's half width in
-// place, in $f6 and $f4, and that both are set twice decides the order of the
-// insns that first set them. sched.c fills a block from its end, and raises the
-// priority of an insn that gives a register its only set (birthing_insn_p).
-// Were dx and dy set once, their conversions from the integer differences would
-// be such insns and would go last before fabsf's assembly, with the stores of
-// the scaled coordinates ahead of the subtractions; each scaled end coordinate
-// would die at its subtraction and local-alloc would give the difference its
-// register. Set again by the scaling they are not, so the stores, which fabsf's
-// operand does not wait on, go last: the four scaled coordinates outlive the
-// subtractions in $a1, $v1, $a2 and $a0, and both differences take $v0.
-//
-// Measured against the match, as words differing and how many of them in shape:
-//   The offsets as the products dy * scale and dx * scale, dx
-//   and dy set once                                           60 (12)
-//   The same with the squares summed dy's first (the old
-//   draft)                                                    56 (12)
-//   dy alone scaled in place, offsetY as dx * scale           42 (2)
-//   dx alone scaled in place, offsetX as dy * scale           58 (4)
-//   The squares summed dy's first                             6 (0)
-//   dy worked out before dx                                   28 (0)
-//   fabsf(dy) tested first                                    4 (0)
-//   No scale: each scaled as itself times the half width,
-//   divided by the length                                     41 (19)
-//   The offsets as s16                                        29 (17)
-//
-// Also matching: dy scaled before dx; both scaled where the offsets are set,
-// together or each before its offset; either scaling spelled out, with scale as
-// either operand; the half width divided by a length local in each scaling; no
-// offsets, with dy and dx cast where they are added; and the four coordinates
-// scaled into locals and stored after the differences.
 void DrawShotPreview(CameraMatrices *matrices) {
     ScreenPoint ball;
     ScreenPoint end;
@@ -2356,7 +2182,6 @@ void DrawShotPreview(CameraMatrices *matrices) {
         deltaY = end.y - ball.y;
         if (fabsf(deltaX) > 1.0f || fabsf(deltaY) > 1.0f) {
             scale = PUTT_PREVIEW_HALF_WIDTH / sqrtf((deltaX * deltaX) + (deltaY * deltaY));
-            // Both scaled in place, to match
             deltaX *= scale;
             deltaY *= scale;
             gSPLoadGeometryMode(g_DisplayListHead++, 0);
@@ -2784,7 +2609,7 @@ void StartPlayerShot(s32 playerIndex) {
     ResetShotOffsetMarker();
 }
 
-// Left empty in the original; called after each step of a flying ball
+// Does nothing; called after each step of a flying ball
 void OnBallStepped(Player *player UNUSED) {
 }
 
@@ -2975,8 +2800,6 @@ void StartTurnRumble(s32 playerIndex) {
                         TURN_RUMBLE_FRAME_COUNT
                     );
                     break;
-                // The empty cases are there to match: without them, with one or a
-                // default, or with an if for the 0 case, 23 words differ, 9 in shape
                 case PFS_ERR_NOPACK:
                     break;
                 case PFS_ERR_CONTRFAIL:
@@ -3187,62 +3010,6 @@ void ShowHoleOutBanner(s32 playerIndex) {
     }
 }
 
-// UpdateTurns holds ten functions nested in it, a GNU C extension. GCC
-// passes them the parent's frame in $v0, its static chain, and they read
-// the parent's playerIndex through it.
-//
-// Its three debug blocks are written in place. The original's ball placement
-// was expanded with the constant addresses inside its memory references: GCC
-// compiles each nested function at its definition, and rest_of_compilation sets
-// cse_not_expected, which push_function_context doesn't save, so the rest of
-// UpdateTurns is expanded with it set. A separate inline helper is expanded
-// first, under its own init_function_start, which clears it, so memory_address
-// puts each constant address in a register; as a helper, the ball placement
-// kept the ball's X address in a register and CSE reached Z through it with an
-// offset, where the original loads and stores each through its own lui. Written
-// in place, the ball placement gave 90 words (48 in shape) against 146 (78) as
-// a helper.
-//
-// Many forms follow the original's code rather than the shortest C.
-// Tests that the original branches on separately are nested, not joined
-// with &&: the hole-out song's Speed Golf and Ring Shot tests, Speed
-// Golf outside, and the debug step's trigger and camera tests. The
-// letterbox test before the debug output is written "== FALSE", for
-// which the original ors both comparisons. The cup distance goes through
-// a float, as round_hud.c's does. The hole-out song switch lists its
-// modes in the order the original places their bodies, and the score
-// switch gives a bogey a case before the default so that GCC builds the
-// original's jump table. The planning tests read f_ShotSource itself
-// after each loop, and the poll counts are zeroed first in the planning
-// block. A player out of the group game has the hole's strokes and the
-// stroke count zeroed by one chained assignment.
-//
-// Where the original sets a value in a branch's delay slot, the draft
-// sets it in an arm of that branch: the holed-out reaction and notable
-// shot work out the score to par before the hole-in-one test; a Ring
-// Shot's reaction is the bogey's in an else arm; the turn's start tests
-// the shot's rest first, in one chain with the speed-golf hole intro and
-// aiming; the stroke limit sets the reaction state once, after the
-// speed-golf penalty, and the Ring Shot's par test sets it in its own
-// arm, which keeps those tails from being cross-jumped together. Where
-// the original shares code by cross-jumping, each arm has its own copy:
-// the song tempo's calls, PlaceTargetPoint in each arm of the units
-// test, and nextState set before ForceStopRumble in the Ring Shot
-// hole-out. The next state is set after the one-on-one match's handicap
-// scoring, which calls GetCourseRecordIndex with no argument, as the
-// ambient sounds' lookups do. The debug ball move holds the Z trigger
-// test in a flag, as the original shifts the bit down and masks it,
-// which GCC does only for a bit test stored as a value. The training
-// choice box's reaction test and the frame test at the end are written
-// in place, as inline helpers reload their constants and addresses for
-// each call.
-//
-// Preparing the aim, nextState is set to PLAYER_STATE_AIMING at the top
-// of the case, though the HUD test at its end always overwrites it. This
-// is the one form here with no other reason to exist: the original
-// compares f_ShotSource with nextState's $s3, which cse does only when
-// nextState already holds the 2 that the comparison needs, and without
-// the store 3 words differ.
 // Whether the stopwatches run in a player state: from aiming to the flight
 #define IsTimedState(state) \
     ((state) == PLAYER_STATE_AIMING || \
@@ -3291,6 +3058,11 @@ void ShowHoleOutBanner(s32 playerIndex) {
 #define ONLOOKERS_BANNER_FRAME 30
 #define LONG_PUTT_BANNER_FRAME 29
 
+// Runs a frame of each player's turn state machine: starting the turn, aiming,
+// setting power and impact, the swing, the ball's flight and rest, the
+// reactions and the hole's end. The debug game flags add their own output.
+//
+// UpdateTurns holds ten functions nested in it, a GNU C extension.
 void UpdateTurns(void) {
     s32 playerIndex;
     PlayerState state;
@@ -3686,10 +3458,8 @@ void UpdateTurns(void) {
                         }
                         else if (g_GameState.gameMode != GAME_MODE_SPEED_GOLF) {
                             if (g_GameState.gameMode != GAME_MODE_RING_SHOT) {
-                                // The tests below take this as the hole's score to par, one
-                                // stroke more than the count. Subtracting par less one from
-                                // the count gives 83 words differing, 45 in shape, against
-                                // 77 and 43
+                                // The tests below take this as the hole's score
+                                // to par, one stroke more than the count.
                                 ScoreToPar scoreToPar =
                                     (g_Players[playerIndex].strokeCount + 1) - g_HoleSetup.par;
 
@@ -3838,6 +3608,7 @@ void UpdateTurns(void) {
                 StartTurnRumble(g_GameState.currentPlayerIndex);
                 break;
             case PLAYER_STATE_PREPARING_AIM:
+                // Overwritten by the HUD test at the end of the case
                 nextState = PLAYER_STATE_AIMING;
                 f_ShotLaunch.clubSlot = g_CurrentShot.clubSlot;
                 f_ShotLaunch.shotMode = g_CurrentShot.shotMode;
@@ -4159,13 +3930,8 @@ void UpdateTurns(void) {
                     );
                     f_IsSwingAnimationStarted = FALSE;
                     if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
-                        // Debug flag 0x47: prints where the ball lies, and the second
-                        // controller moves it while Z is held. In its own block, which
-                        // frees the buffer's slot when the flag's test ends, so it shares
-                        // one slot with the other debug buffers, as in the original's
-                        // frame; declared in the flag's block, the frame grows from the
-                        // original's 0x118 bytes to 0x1A0 and 170 words differ (36 in
-                        // shape), and in a do-while 82 (36), against 68 (36).
+                        // Debug flag 0x47: prints where the ball lies, and the
+                        // second controller moves it while Z is held
                         {
                             char text[DEBUG_TEXT_BUFFER_SIZE];
                             Boolean isMovingBall;
@@ -4526,14 +4292,8 @@ void UpdateTurns(void) {
                 if (g_IsDebugEnabled &&
                     (g_TurnController.pressedButtons & (B_BUTTON | D_CBUTTONS))) {
                     g_CurrentShot.impactGaugeFrame = g_CurrentShot.gaugeFrame;
-                    // B gives full power and on-mark timing, C-down on-mark timing
-                    // alone. With one store after the B test, the first CSE pass
-                    // folds the clamp's upper test below and the second its lower
-                    // test, where the original loads the timing back for both. A
-                    // store in each arm keeps a join between the stores and the
-                    // clamp until cross-jumping merges them: 77 words differ, 43 in
-                    // shape, against 91 and 57, or 101 and 59 with the one store
-                    // before the B test.
+                    // B gives full power and on-mark timing, C-down on-mark
+                    // timing alone.
                     if (g_TurnController.pressedButtons & B_BUTTON) {
                         f_ShotLaunch.power = LAUNCH_POWER_MAX;
                         f_ShotLaunch.impactTiming = 0;

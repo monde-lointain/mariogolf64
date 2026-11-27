@@ -133,7 +133,7 @@ u32 g_GroundDrawFrame;
 CurrentShot g_SavedShots[PLAYER_COUNT_MAX];
 Player g_SavedPlayers[PLAYER_COUNT_MAX];
 ShotLaunch g_LastShotLaunch;
-// Nothing reads it; it keeps its room in the original's bss
+// Nothing reads it
 FILE_STATIC u8 f_UnreadPlayBuffer[0xDEC] UNUSED;
 
 FILE_STATIC UBoolean8 f_IsGroundTileNearby[GROUND_TILE_COUNT];
@@ -302,9 +302,8 @@ void SetUpFlaggedRound(void) {
             g_GameState.playerCount = 2;
             g_GameState.step = GAME_STATE_START;
             g_GameState.gameMode = GAME_MODE_MATCH_GAME;
-
-        // The original has no break here, so the default case overrides this one
-        // Falls through
+            // No break here, so the default case overrides this one
+            // Falls through
         default:
             g_GameState.playerCount = 3;
             g_GameState.courseIndex = 0;
@@ -382,8 +381,6 @@ void SetUpPlayers(void) {
             }
         }
 
-        // The index variable is there to match: indexing player 0 directly gives
-        // 12 words differing, 6 in shape
         playerIndex = 0;
         for (slot = NOTABLE_SHOT_COUNT - 1; slot >= 0; slot--) {
             g_Players[playerIndex].notableShotCounts[slot] = 0;
@@ -557,9 +554,6 @@ Boolean IsHoleOver(void) {
     }
 
     if (g_GameState.replayKind == REPLAY_KIND_NONE) {
-        // In its own block to match: without it, or in plain braces, 6 words
-        // differ, and moving the players' done-or-waiting loop into an inline
-        // helper, in 3 forms, leaves 63-86 lines of the diff differing
         IN_OWN_BLOCK(
             if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                 g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
@@ -574,11 +568,6 @@ Boolean IsHoleOver(void) {
                     }
                 }
 
-                // Through isDone, returning in its own block, to match. The block's
-                // loop labels part the store from the return, so jump's store-flag
-                // conversion (jump.c, "Try to use a conditional move") can't make the
-                // test a set-on-equal, which the original lacks. Returning TRUE gives
-                // 5 words; returning isDone outside a block, or in plain braces, 16.
                 if (playerIndex == g_GameState.playerCount) {
                     isDone = TRUE;
                     IN_OWN_BLOCK(return isDone);
@@ -599,10 +588,6 @@ Boolean IsHoleOver(void) {
                     }
                 }
 
-                // Clearing isDone, though it is clear already, returning it, unlike
-                // the FALSE above, and setting it in its own block, to match, as
-                // above: setting it outside a block, or in plain braces, gives 12
-                // words, and returning TRUE or FALSE directly 11
                 isDone = FALSE;
                 if (playerIndex == g_GameState.playerCount) {
                     IN_OWN_BLOCK(isDone = TRUE);
@@ -627,9 +612,7 @@ Boolean IsHoleOver(void) {
     return isDone;
 }
 
-// Whether the first player tees off after the second on the next hole.
-// It is a macro, as an inline function compiles differently from the
-// original.
+// Whether the first player tees off after the second on the next hole
 #define TeesAfter(player, other) \
     (g_Players[player].strokeCount > g_Players[other].strokeCount || \
         (g_Players[player].strokeCount == g_Players[other].strokeCount && \
@@ -674,10 +657,6 @@ void SetNextTeeOrder(void) {
         }
     }
 
-    // The copy loop in a block of its own is there to match; without it, or in
-    // plain braces, 38 words differ, none in shape, counting it with j 46 and
-    // with a counter of its own 60; of every choice of i or j for the five
-    // loops, alternating them from i or from j is closest, at 34
     IN_OWN_BLOCK(for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
         g_Players[playerIndex].teeOrder = orders[playerIndex];
     });
@@ -1380,10 +1359,6 @@ void UpdatePlay(void) {
                                     f_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
                                     g_SubModuleState = SUB_MODULE_SWAP_PENDING;
                                     g_PendingSubModuleId = MODULE_SAVE_MENU;
-                                    // Past the step's store, to match: setting nextStep here
-                                    // instead, before or after the module swap, gives 15 words
-                                    // differing, 3 in shape, and each branch setting
-                                    // f_HoleEndStep itself 24, 16 in shape
                                     goto DIM_BACKDROP;
                                 }
 
@@ -1668,9 +1643,6 @@ DIM_BACKDROP:
                         switch (UpdatePrompt(&g_TurnController)) {
                             case PROMPT_RESULT_SKIP_REPLAY:
                                 LeaveReplaySaveMenu();
-                                // The result, 6, is HOLE_END_STEP_RING_SHOT_FREE_SLOT. Storing
-                                // it matches: storing the step's name shares the other arms'
-                                // store and is a word shorter
                                 f_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
                                 OpenPrompt(NO_PROMPT);
                                 break;
@@ -1941,58 +1913,8 @@ void ClearNearbyGroundTiles(void) {
 // every other tile so that the texture tiles seamlessly, under
 // GAME_FLAG_TEST_GROUND_TEXTURE.
 //
-// Each coordinate is copied to an s32, and its offset in the tile is taken
-// as a remainder before the tile's number as a quotient. GCC works the
-// remainder out as the coordinate less the quotient times the size, with the
-// quotient in the offset's own register on the way. cse then finds that the
-// tile's division is the one just done, and makes the tile a copy of that
-// quotient: the original's move of each tile number from $a0 to $v1. Read
-// straight from the point, the coordinate is a short, and the remainder is
-// taken in 16 bits and sign-extended.
-//
-// One offset and one copy serve both axes. With an offset for each, the
-// offsets take $v0 and the coordinates $a0, where the original has $a0 and
-// $a1.
-//
 // An offset of the tile's size stores the size's texel coordinate, which is
-// what the other arm would store; without the test the original's beq is
-// gone.
-//
-// Measured against the match, as words differing and how many of them in
-// shape:
-//
-//   The tile's quotient before the offset's remainder       34 (4)
-//   The coordinate read from the point in each, with or
-//   without a cast to s32                                   52 (10)
-//   The copy as an s16                                      52 (10)
-//   The copy as a u16                                       36 (28)
-//   The copy as a u32                                       26 (20)
-//   A copy for each axis, or one declared in a block
-//   around each                                             50 (4)
-//   An offset for each axis, or so declared                 44 (0)
-//   The offset as an s16                                    44 (12)
-//   The offset as a u16                                     42 (10)
-//   The offset as the coordinate less the tile times the
-//   size, after the tile                                    46 (6)
-//   The same from the point, with an offset for each axis
-//   and no copy (the old draft)                             30 (6)
-//   The quotient set in the offset and copied to the
-//   tile, then the offset as the coordinate less the
-//   tile times the size                                     34 (4)
-//   The offset as coordinate & (size - 1)                   33 (11)
-//   An inline function for the mirrored offset              54 (8)
-//   The same, taking the coordinate as an s16               52 (16)
-//   No test of the offset against the size                  36 (22)
-//   That test as ==, with its arms swapped                   8 (4)
-//   0x100 added in each arm of the test                     25 (17)
-//   The coordinates read through GetGroundPoint again       23 (17)
-//   The row loop or the column loop testing !=               4 (4)
-//
-// Also matching: the three locals declared in any order; the tile as an
-// s16, u16 or u32, one for each axis, or declared in a block; no tile at
-// all, with the quotient written in the mirror's test; that test as & 1 or
-// != 0; the offset as a u32; and the mirror or the offset's test as a
-// conditional expression.
+// what the other arm would store.
 void RebuildGroundTextureCoordinates(void) {
     Vtx_t point;
     s32 row;
@@ -2005,8 +1927,6 @@ void RebuildGroundTextureCoordinates(void) {
     for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
         for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
             point = GetGroundPoint(column, row)->v;
-            // The remainder comes before the quotient, both taken from an s32
-            // copy, to match
             coordinate = point.ob[AXIS_X];
             offset = coordinate % TEST_TEXTURE_TILE_SIZE;
             tileIndex = coordinate / TEST_TEXTURE_TILE_SIZE;
@@ -2124,44 +2044,12 @@ void RebuildGroundTextureCoordinates(void) {
         shiftT \
     )
 
-// Draws the ground's tiles, each at a detail that its distance picks. The
-// tiles go down two halves in rows of four, and a fine tile snaps the edge
-// vertices it shares with coarser neighbors so that no gaps open between them.
+// Draws the ground's tiles, each at a detail that its distance picks. The tiles
+// go down two halves in rows of four, and a fine tile snaps the edge vertices
+// it shares with coarser neighbors so that no gaps open between them.
 //
-// To match, with the words that differ from the original's otherwise and how
-// many of them differ in shape:
-// - GridVertex is an inline function that returns a local, so the compiler
-//   works out a half's first column, the column after it and that column's
-//   parity once per half, and keeps each on the stack, as the original does.
-//   As a macro it gives 843 words (97 in shape) and a frame 0x48 bytes
-//   smaller, and returning the address without the local 712 (12).
-// - The half's first column is written out at each use. In a local set once
-//   per half it gives 1100 words (68) and a frame 0x10 bytes smaller.
-// - The fine tiles work out their column at each test for the ground's left
-//   and right edges: in a local, 602 words (12).
-// - The fine and the medium groups each declare their own k: one declared for
-//   the row, or with the routine's locals, gives 272 words (50).
-// - The loop over a fine tile's vertex segments has a counter of its own and
-//   sets the segment's offset into a local. Counted in j it gives 64 words
-//   and in segmentIndex 44; with the offset written as gSPSegment's argument,
-//   53 (21).
-// - vertices, start and current are declared in that order, and firstTileS
-//   with them rather than in the half's block, so their stack slots fall in
-//   the original's order: start and current first gives 46 words, and
-//   firstTileS in the half's block 52.
-// - The culling loop takes the tile's address into a local (10 words, 2 in
-//   shape, without it) and sets the hidden detail in the visibility test's
-//   else arm (6, all in shape, when set ahead of the test).
-// - A medium tile among fine ones draws its quads a row at a time, where
-//   DrawTileQuads goes down the columns: with DrawTileQuads, 16 words.
-// - That tile's vertex columns add the tile's offset to the half's first
-//   column: the other way round, 2 words.
-//
-// LoadTileTexture adds the tile's place in its group to firstTileS, the
-// half's first S, since the original steps two registers by 0x80 in each tile
-// loop: written as the tile's column times 128, loop.c can't make the shift a
-// giv. A fine tile drawn from its display list steps the tile index itself and
-// continues, as the original goes straight from there to the next tile.
+// A fine tile drawn from its display list steps the tile index itself and
+// continues.
 void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
     UBoolean8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; // For the current and the last fine tile
     Gfx *gfx;

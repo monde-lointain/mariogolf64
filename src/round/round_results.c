@@ -415,9 +415,9 @@ void OpenRoundResults(RoundResultsRequest request) {
     f_ResultsState = RESULTS_SLIDING_IN;
 }
 
-// Adds to the save the average points of the players that have them,
-// scaled by the course's rate, counting them with index. A macro, since the
-// original repeats it for each mode.
+// Adds to the save the average points of the players that have them, scaled by
+// the course's rate, counting them with index. It passes
+// g_GameState.courseIndex to GetCourseRecordIndex, which ignores it.
 #define AddRoundPoints(save, index) \
     { \
         s32 counted_; \
@@ -456,49 +456,6 @@ void OpenRoundResults(RoundResultsRequest request) {
 // players' results and ranks for the game mode, adds the round's course points
 // to the save and starts the results' song. It does nothing if the results are
 // already loaded.
-//
-// The club tournament's results loop sits in a block of its own, as a macro's
-// do-while would make it, to match. The original keeps k in $s2 and the loop's
-// stepped result address in $s1. flow weights a reference by its loop depth,
-// and a loop that runs once still counts, so the block lifts the address's 7
-// references to 11 over a live length of 12, priority 27500 in global-alloc,
-// where k has 59 over 121, priority 24380: the address takes $s1 first.
-// Without the block, or with plain braces, the address's priority is 11666 and
-// k's 22314, so k takes $s1 and 54 words differ, none in shape. A block inside
-// the loop, around its statement, gives the same 54. In the block, counting
-// the results with i, with j or with a counter of their own gives 159, 191 or
-// 175 words, 7 in shape. With the stroke results' loop in a block as well, the
-// function still matches.
-//
-// k also counts the tally, the tournament's standings and the skins' totals
-// and ranks. None of the other choices of counter differs in shape: counting
-// the Game Boy experience loop or the stroke results with k gives 70 words;
-// the bet loop, the portrait loop or both with k 62, 60 or 68; the tally with
-// a counter of its own 90, all three tallies with i or j 158 or 128, and any
-// one of them 110 or 58; the tournament's standings or the skins' totals with
-// i 110, and the skins' ranks 112.
-//
-// The match game reads the last hole into holeEnd before clearing the results,
-// as the matched scorecard_drawing.c reads its countEnd, and the original loads
-// it in GetFirstHoleIndex's delay slot; testing g_GameState.holeIndex in the
-// loop gives 17 words (3 in shape). Its clear is written as
-// f_PlayerResults[0] = f_PlayerResults[1] = 0, which stores the second result
-// first, as the original does; two statements in that order give 10 words (8
-// in shape), and in the other order 6 (6). The tournament's cap adds the prize
-// before the earned points, as the subtraction before it does; the other
-// order in its test gives 8 words (2 in shape), and in its sum as well 10 (2).
-//
-// The original keeps the earned points' address in $a1 across the tally and
-// builds it again in $a0 after GetCourseRecordIndex, the address forms GCC
-// gives a struct's fields; as two separate s32s they are addressed through $at
-// each time, and 93 words differ, 25 in shape.
-//
-// The tournament's open course count is stored first, as the original does, and
-// the ranks are counted in f_PlayerRanks itself. The tournament finds the
-// player's standing through a pointer to the standing it tests. AddRoundPoints
-// passes g_GameState.courseIndex to GetCourseRecordIndex, which ignores it, as
-// the original loads it into $a0 before both calls; play.c passes the same
-// field where it opens the scorecard.
 void LoadRoundResults(void) {
     EncodedAsset asset;
     AssetFile file;
@@ -634,7 +591,6 @@ void LoadRoundResults(void) {
     }
 
     if (g_GameState.isClubTournament) {
-        // In a block of its own to match, as the header comment explains
         IN_OWN_BLOCK(for (k = 0; k != g_GameState.playerCount; k++) {
             f_PlayerResults[k] = GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), k);
         });
@@ -1715,9 +1671,6 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        // The top is written out and the bottom's offset kept in a local, unlike
-        // the colored title's, to match: writing the bottom out too gives 35
-        // words differing, 5 in shape
         stripBottomOffset = f_CourseNoticeShift + NOTICE_TITLE_STRIP_HEIGHT;
         DrawTextureRectangle(
             &gfx,
@@ -2344,19 +2297,6 @@ void SetResultsBanner(BannerState state, BannerKind kind) {
 
 // Draws the banner of a round's result, and the trophy above a top three
 // tournament place
-//
-// The trophy's frame advances in two arms, one for the fast tally and one on
-// the shine's tick, which cross-jumping merges into one copy, as the
-// original has it. Each arm reads course twice, which lifts its global-alloc
-// priority above the trophy loops' row values (342 and 340), so it takes $s6
-// as in the original. Joining the two tests with ||, course's priority is
-// 266 and it gets $fp: 32 words differ, none in shape. Against the joined
-// test, assigning course later or before the kind test, narrower or
-// unsigned types, reading frameCount through g_GameState, regrouping the
-// trophy heights and other forms of the frame's wrap gave 32 to 74 words; a
-// struct for each course's trophy sizes 52, and a helper for the two
-// identical trophy-part loops 207 taking the course, or 295 taking its
-// sizes' address.
 void DrawResultsBanner(Gfx **displayListHead) {
     Gfx *gfx;
     s32 i;
@@ -2945,8 +2885,6 @@ Boolean UpdateTournamentResults(ControllerState *controller) {
                         f_TallySpeed = FAST_TALLY_SPEED;
                     }
                     {
-                        // Through a pointer, to match: naming f_PrizePoints directly
-                        // gives 117 words differing, 7 in shape
                         s32 *points = &f_PrizePoints;
 
                         *points -= f_TallySpeed;
@@ -3092,7 +3030,6 @@ enum ScorePasswordStep {
 // TRUE then.
 Boolean ShowScorePassword(ControllerState *controller) {
     ScoreReport report;
-    // Pads the frame to match; without it 16 words differ
     s32 unused[2] UNUSED;
 
     GetSaveData();
@@ -3151,45 +3088,6 @@ enum PointsStep {
 
 // Counts the earned course points into the save, showing a notice when they
 // open a course, then returns TRUE once A is pressed
-//
-// When starting the tally, the original reads the player count for the
-// portrait loop's entry test through the address of g_GameState.gameMode,
-// kept in $a0, though nothing else uses that address. A test of the game mode
-// that changes nothing leaves that behind, and the do-while (0) before the
-// loop is one. What the original's test was for can't be recovered. Without
-// it the count is read from its own address, and 5 words differ, 1 in shape.
-// Each part of it is needed:
-//
-// - The first store to j is dead, but only flow finds that out, so the
-//   branch around it lasts until the final jump pass. That pass deletes it as
-//   a branch to the next instruction, with the loads of the mode and the
-//   constant that feed it (jump.c, delete_computation), but not the address,
-//   which the count's read uses by then. Until then the mode and the constant
-//   hold $v1 and $v0, so global allocation gives the address $a0. A test
-//   against GAME_MODE_STROKE, which needs no constant loaded, or against both
-//   GAME_MODE_SKINS_MATCH and GAME_MODE_CLUB_SLOTS, which folds into one range
-//   test, leaves the address in $v1: 6 words differ, none in shape.
-// - The loop's end note ends the first cse pass's block but not the second's
-//   (cse.c, cse_end_of_basic_block), so only the second pass finds the mode's
-//   address in a register at the entry test and rewrites the count's as that
-//   register plus 4 (cse.c, use_related_value). Where the first pass does the
-//   rewriting, the second folds the sum back into the count's own address:
-//   in plain braces the same statements give the 5 words.
-// - The second store keeps the branch's label inside the loop. Without it, or
-//   with it after the loop, jump points the branch past the loop's end note
-//   and the first pass follows it there: the 5 words again.
-//
-// Each of the other 12 modes after GAME_MODE_STROKE matches too, as do a !=
-// test, a switch with the one case, stores of the player count, stores to
-// overshoot, stores to i with the loop's own left out, and a for (;;) loop
-// ending in a break. Storing 1 or 0 in an if and else, equal values in both
-// stores, or a conditional expression's value all give the 5 words. Setting
-// a pointer to &g_GameState.gameMode in both arms of the if before the loop
-// and reading the count as its second word, with no test, gives 6 words,
-// none in shape: the address stays in $v0.
-//
-// Ending the loops on < rather than != gives 37 words (5 in shape) for i's
-// loop, 67 (5) for j's and 70 (10) for both.
 Boolean UpdateCoursePointsResults(ControllerState *controller) {
     EncodedAsset asset;
     s32 playerIndex;
@@ -4134,7 +4032,6 @@ void DrawPlayersResults(Gfx **displayListHead) {
 // any bets and Course Points.
 void DrawMatchResults(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    // Pads the frame to match; without it 110 words differ
     s32 unused[4] UNUSED;
     s32 standingShift[MATCH_PLAYER_COUNT];
     s32 betShift = FOUR_DIGIT_BET_SHIFT;
@@ -4782,13 +4679,6 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
 
 // The results card, its game mode's results, the bobbing title and the players'
 // portraits.
-//
-// The title's sub-texel offsets are both worked out before either is
-// doubled, and the rectangle adds the texel row to the doubled T offset:
-// converting and doubling each offset in one statement, or doubling the S
-// offset before converting the T one, gives 42 words differing, and adding
-// the row before the rectangle 4, where the original doubles the T offset in
-// a call's delay slot.
 void DrawRoundResults(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     f32 titleX;
@@ -4965,8 +4855,6 @@ void DrawRoundResults(Gfx **displayListHead) {
         f_TitleBobAngle += FINAL_RESULTS_TITLE_BOB_STEP;
         LoadLargePalette(&gfx, ImagePalette(f_FinalResultsTitleImage));
         for (i = 0; i != FINAL_RESULTS_TITLE_STRIP_COUNT; i++) {
-            // Setting the usual height first and the last strip's in an if, or
-            // testing for not the last strip, gives 10 words differing, 6 in shape
             if (i == FINAL_RESULTS_TITLE_STRIP_COUNT - 1) {
                 stripHeight = FINAL_RESULTS_TITLE_LAST_STRIP_HEIGHT;
             }

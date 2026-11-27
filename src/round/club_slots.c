@@ -407,9 +407,7 @@ void FreeClubSlots(void) {
 void GiveSlotClubs(s32 playerIndex) {
     Player *player;
     s32 starCount;
-    // Counts the slots, then the reels; it is reused to match: a reel variable
-    // for the reels gives 30 words differing, and counting the slots with slot
-    // 44, none in shape
+    // Counts the slots, then the reels
     s32 index;
     ClubSlot clubSlot;
     s32 symbolIndex;
@@ -462,9 +460,8 @@ void GiveSlotClubs(s32 playerIndex) {
     }
 }
 
-// Whether the next reel stops: on A, once the wait is too long, when the
-// player is the computer, or while GAME_FLAG_FAST_AUTOPLAY is. It is a macro,
-// as an inline function compiles differently from the original.
+// Whether the next reel stops: on A, once the wait is too long, when the player
+// is the computer, or while GAME_FLAG_FAST_AUTOPLAY is
 #define IsReelStopping(controllerIndex, player) \
     ((g_ControllerStates[controllerIndex].pressedButtons & A_BUTTON) || \
         (f_StopWaitTime > REEL_STOP_WAIT_TIME) || \
@@ -556,24 +553,9 @@ s32 GetClubSlotsState(void) {
     return f_ClubSlotsState;
 }
 
-// The machine strips' loop counts their top in the face loop's counter, as
-// the original keeps both in $s4; a top of its own leaves the counter and
-// &gfx, hoisted out of the face loop, in each other's registers, which gives
-// 24 words differing, none in shape, or 22 with the strip loop's steps in
-// this order. Stepping the top before the texel offset gives 2 words;
-// setting it first gives 4, and both 6.
-//
-// Each face image is read into faceImage before its texture load, as the
-// original reads it ahead of the call's other arguments; passing the lookups
-// straight to LoadTextureBlock gives 16 or 14 words differing. Testing the
-// counter with < gives 77.
-//
-// The next frame is opened and read in an if and an else, one per animation
-// set, and GCC merges the two reads. Choosing the asset with ?: and reading
-// once after it gives 31 words, 3 in shape: cse's extended block ends at the
-// ?:'s join, so the read shifts the counter again, and loop.c, combining the
-// two shifts, finds it worth stepping the result instead. Opening in an if
-// and an else with one read after them gives 7 words, all in shape.
+// Draws the club slots: the reels and their shading inside the slot machine,
+// the stop buttons pushed so far, START! while the reels speed up, the
+// players' faces and the logo
 void DrawClubSlots(Gfx **displayListHead) {
     Mat4 matrix;
     Vec3 translation;
@@ -609,7 +591,6 @@ void DrawClubSlots(Gfx **displayListHead) {
                 if (f_Slots->reelAngles[reelIndex] < SYMBOL_ANGLE) {
                     f_Slots->reelAngles[reelIndex] += STOPPING_REEL_SPEED;
                     if (f_Slots->reelAngles[reelIndex] > SYMBOL_ANGLE) {
-                        // Its own in each loop, as the original allocates it there
                         s32 symbolIndex;
                         f_Slots->reelAngles[reelIndex] -= SYMBOL_ANGLE;
                         f_Slots->reelPositions[reelIndex]++;
@@ -755,7 +736,6 @@ void DrawClubSlots(Gfx **displayListHead) {
         );
         gSPVertex(gfx++, f_Slots->reelVertices, REEL_VERTEX_COUNT, 0);
         for (quadIndex = 0; quadIndex != REEL_QUAD_COUNT; quadIndex++) {
-            // Its own in each loop, as the original allocates it there
             s32 symbolIndex;
             symbolIndex = f_Slots->reelPositions[reelIndex] - quadIndex;
             if (symbolIndex >= REEL_SYMBOL_COUNT / 2) {
@@ -997,9 +977,6 @@ void DrawClubSlots(Gfx **displayListHead) {
 
         gDPPipeSync(gfx++);
         LoadLargePalette(&gfx, ImagePalette(f_Slots->startImage));
-        // The button loop's counter steps the strips too, as in the original,
-        // which keeps both in $s4; a counter of their own, declared before or
-        // after stripIndex, takes $t0 and gives 97 words differing, 7 in shape
         texelOffset = LARGE_PALETTED_TEXELS_OFFSET;
         for (buttonOrStartStripIndex = 0; buttonOrStartStripIndex != START_STRIP_COUNT;
             buttonOrStartStripIndex++) {
@@ -1115,9 +1092,7 @@ void DrawClubSlots(Gfx **displayListHead) {
                             ReadEncodedAsset(f_Slots->faceImages[topOrPlayerIndex][1], &asset);
                         }
 
-                        // f_FaceBufferIndex is cleared twice; it is there to match:
-                        // clearing it only after the frame index gives 2 words
-                        // differing, both in shape, and only first 4, 2 in shape
+                        // f_FaceBufferIndex is cleared twice
                         f_FaceBufferIndex = 0;
                         f_StarCount = 0;
                         f_IsShowingResult = FALSE;
@@ -1195,8 +1170,7 @@ void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scal
     Gfx *gfx;
     s32 starCount;
     s32 symbolIndex;
-    // Counts the reels, then the strips; it is reused to match: a reel or
-    // stripIndex variable gives 8 words differing, none in shape
+    // Counts the reels, then the strips
     s32 index;
     s32 shineTime;
     f32 width;

@@ -191,10 +191,9 @@ MatchSide GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
     return MATCH_SIDE_NONE;
 }
 
-// Whether the hole is halved for the side that the standing says is
-// dormie: it is when that side is done with the hole and its net score is no
-// more than one over the other side's. It is a macro, as an inline
-// function compiles differently from the original.
+// Whether the hole is halved for the side that the standing says is dormie: it
+// is when that side is done with the hole and its net score is no more than one
+// over the other side's
 #define IsHalvedForDormie(standing, dormieStanding, dormieIndex, otherIndex) \
     (((standing) == (dormieStanding)) && \
         (g_Players[dormieIndex].holeStatus != HOLE_STATUS_PLAYING) && \
