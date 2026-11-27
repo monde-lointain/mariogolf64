@@ -11,6 +11,11 @@
  * Everything here runs on the game's graphics thread, apart from
  * presenting, which runs on the window's thread with its own command
  * buffer. The two threads record their command buffers one at a time.
+ *
+ * Multisampled, each color target is drawn into a texture with several
+ * samples a pixel, which every render pass resolves into a second texture
+ * of one. Reads, copies and the presenter take the resolved texture; only
+ * draws use the samples.
  */
 
 #include "sdl_gpu_backend.h"
@@ -26,6 +31,8 @@
 #include "port/os_host.h"
 #include "shaders/rdp.frag.h"
 #include "shaders/rdp.vert.h"
+#include "shaders/write_target.frag.h"
+#include "shaders/write_target.vert.h"
 #include "texture_cache.h"
 
 #define COLOR_FORMAT SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM
@@ -36,7 +43,10 @@
 #define DECAL_SLOPE_BIAS (-1.0f)
 
 struct GfxTarget {
-    SDL_GPUTexture *texture;
+    SDL_GPUTexture *texture; // Drawn into, with the backend's samples a pixel
+    // The texture's samples resolved, which reads, copies and the presenter
+    // take: the texture itself where it has one sample a pixel
+    SDL_GPUTexture *resolved;
     uint32_t width; // The N64's pixels; the texture is scaled
     uint32_t height;
     bool isDepth;
@@ -59,9 +69,18 @@ typedef struct FrameConstants {
     uint32_t noiseSeed;
 } FrameConstants;
 
+// Where the write_target shaders put the N64's pixels, as their std140
+// block lays it out
+typedef struct WritePlacement {
+    uint32_t top; // In the target's pixels
+    uint32_t scale;
+    uint32_t unused[2];
+} WritePlacement;
+
 static struct {
     SDL_GPUDevice *device;
     uint32_t scale;
+    SDL_GPUSampleCount sampleCount;
     SDL_GPUTextureFormat depthFormat;
     SDL_GPUShader *vertexShader;
     SDL_GPUShader *fragmentShader;
@@ -69,6 +88,8 @@ static struct {
     SDL_GPUGraphicsPipeline *pipelines[PIPELINE_KEY_COUNT][2];
     SDL_GPUTexture *atlas;
     SDL_GPUSampler *atlasSampler;
+    // Writes the staging texture's pixels to a multisampled target
+    SDL_GPUGraphicsPipeline *writePipeline;
     GrowableBuffer vertices;
     GrowableBuffer materials;
     GrowableTransfer upload;
@@ -280,6 +301,7 @@ static SDL_GPUGraphicsPipeline *CreatePipeline(uint16_t key, bool hasDepth) {
     info.rasterizer_state.cull_mode = SDL_GPU_CULLMODE_NONE;
     info.rasterizer_state.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
     info.rasterizer_state.enable_depth_clip = true;
+    info.multisample_state.sample_count = f_Gpu.sampleCount;
     if (key & PIPELINE_DEPTH_DECAL) {
         info.rasterizer_state.enable_depth_bias = true;
         info.rasterizer_state.depth_bias_constant_factor = DECAL_DEPTH_BIAS;
@@ -399,7 +421,8 @@ static SDL_GPUTexture *CreateTexture(
     SDL_GPUTextureUsageFlags usage,
     uint32_t width,
     uint32_t height,
-    uint32_t layerCount
+    uint32_t layerCount,
+    SDL_GPUSampleCount sampleCount
 ) {
     SDL_GPUTextureCreateInfo info;
     SDL_GPUTexture *texture;
@@ -412,6 +435,7 @@ static SDL_GPUTexture *CreateTexture(
     info.height = height;
     info.layer_count_or_depth = layerCount;
     info.num_levels = 1;
+    info.sample_count = sampleCount;
     texture = SDL_CreateGPUTexture(f_Gpu.device, &info);
     if (texture == NULL) {
         PcFatalError("Can't create a %ux%u texture: %s", width, height, SDL_GetError());
@@ -465,7 +489,71 @@ SDL_GPUDevice *CreateGpuDevice(bool isDebug) {
     return device;
 }
 
-void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale) {
+// The most samples a pixel, up to the count asked for, that the device has
+// for both the color targets and the depth targets
+static SDL_GPUSampleCount ChooseSampleCount(SDL_GPUSampleCount requested) {
+    SDL_GPUSampleCount count = requested;
+
+    while (count > SDL_GPU_SAMPLECOUNT_1 &&
+        !(SDL_GPUTextureSupportsSampleCount(f_Gpu.device, COLOR_FORMAT, count) &&
+            SDL_GPUTextureSupportsSampleCount(f_Gpu.device, f_Gpu.depthFormat, count))) {
+        count--;
+    }
+
+    return count;
+}
+
+// The pipeline that draws the staging texture's pixels into a multisampled
+// target, as the presenter's blits do into one that isn't
+static SDL_GPUGraphicsPipeline *CreateWritePipeline(void) {
+    SDL_GPUColorTargetDescription colorTarget;
+    SDL_GPUGraphicsPipelineCreateInfo info;
+    SDL_GPUGraphicsPipeline *pipeline;
+
+    SDL_zero(colorTarget);
+    colorTarget.format = COLOR_FORMAT;
+    SDL_zero(info);
+    info.vertex_shader = CreateGpuShader(
+        f_Gpu.device,
+        SDL_GPU_SHADERSTAGE_VERTEX,
+        write_target_vert_spirv,
+        sizeof(write_target_vert_spirv),
+        write_target_vert_msl,
+        sizeof(write_target_vert_msl),
+        0,
+        0,
+        0
+    );
+    info.fragment_shader = CreateGpuShader(
+        f_Gpu.device,
+        SDL_GPU_SHADERSTAGE_FRAGMENT,
+        write_target_frag_spirv,
+        sizeof(write_target_frag_spirv),
+        write_target_frag_msl,
+        sizeof(write_target_frag_msl),
+        1,
+        0,
+        1
+    );
+    info.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
+    info.rasterizer_state.fill_mode = SDL_GPU_FILLMODE_FILL;
+    info.rasterizer_state.cull_mode = SDL_GPU_CULLMODE_NONE;
+    // The device has no depth clamping (see CreateGpuDevice)
+    info.rasterizer_state.enable_depth_clip = true;
+    info.multisample_state.sample_count = f_Gpu.sampleCount;
+    info.target_info.color_target_descriptions = &colorTarget;
+    info.target_info.num_color_targets = 1;
+    pipeline = SDL_CreateGPUGraphicsPipeline(f_Gpu.device, &info);
+    SDL_ReleaseGPUShader(f_Gpu.device, info.vertex_shader);
+    SDL_ReleaseGPUShader(f_Gpu.device, info.fragment_shader);
+    if (pipeline == NULL) {
+        PcFatalError("Can't create the pipeline that writes targets: %s", SDL_GetError());
+    }
+
+    return pipeline;
+}
+
+void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale, SDL_GPUSampleCount sampleCount) {
     SDL_assert(device != NULL && scale >= 1);
     SDL_zero(f_Gpu);
     f_Gpu.device = device;
@@ -476,6 +564,7 @@ void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale) {
 
     f_Gpu.scale = scale;
     f_Gpu.depthFormat = ChooseDepthFormat();
+    f_Gpu.sampleCount = ChooseSampleCount(sampleCount);
     f_Gpu.vertexShader = CreateGpuShader(
         device,
         SDL_GPU_SHADERSTAGE_VERTEX,
@@ -503,10 +592,15 @@ void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale) {
         SDL_GPU_TEXTUREUSAGE_SAMPLER,
         ATLAS_SIDE,
         ATLAS_SIDE,
-        ATLAS_LAYER_COUNT
+        ATLAS_LAYER_COUNT,
+        SDL_GPU_SAMPLECOUNT_1
     );
     // The shader fetches texels itself, so the sampler never filters
     f_Gpu.atlasSampler = CreateSampler(SDL_GPU_FILTER_NEAREST);
+    if (f_Gpu.sampleCount != SDL_GPU_SAMPLECOUNT_1) {
+        f_Gpu.writePipeline = CreateWritePipeline();
+    }
+
     PreparePipelines();
 }
 
@@ -528,6 +622,7 @@ void ShutdownGpuBackend(void) {
         SDL_ReleaseGPUGraphicsPipeline(f_Gpu.device, f_Gpu.pipelines[key][1]);
     }
 
+    SDL_ReleaseGPUGraphicsPipeline(f_Gpu.device, f_Gpu.writePipeline);
     SDL_ReleaseGPUShader(f_Gpu.device, f_Gpu.vertexShader);
     SDL_ReleaseGPUShader(f_Gpu.device, f_Gpu.fragmentShader);
     SDL_ReleaseGPUTexture(f_Gpu.device, f_Gpu.atlas);
@@ -547,7 +642,11 @@ uint32_t GpuBackendScale(void) {
 }
 
 SDL_GPUTexture *GpuTargetTexture(const GfxTarget *target) {
-    return target->texture;
+    return target->resolved;
+}
+
+static bool IsMultisampled(const GfxTarget *target) {
+    return target->resolved != target->texture;
 }
 
 GfxTarget *BackendCreateTarget(uint32_t width, uint32_t height, bool isDepth) {
@@ -561,13 +660,41 @@ GfxTarget *BackendCreateTarget(uint32_t width, uint32_t height, bool isDepth) {
     target->height = height;
     target->isDepth = isDepth;
     target->needsClear = isDepth;
-    target->texture = CreateTexture(
-        isDepth ? f_Gpu.depthFormat : COLOR_FORMAT,
-        isDepth ? DEPTH_USAGE : SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER,
+    if (isDepth) {
+        // Depth is drawn with color's samples, and never resolved
+        target->texture = CreateTexture(
+            f_Gpu.depthFormat,
+            DEPTH_USAGE,
+            width * f_Gpu.scale,
+            height * f_Gpu.scale,
+            1,
+            f_Gpu.sampleCount
+        );
+        target->resolved = target->texture;
+        return target;
+    }
+
+    target->resolved = CreateTexture(
+        COLOR_FORMAT,
+        SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER,
         width * f_Gpu.scale,
         height * f_Gpu.scale,
-        1
+        1,
+        SDL_GPU_SAMPLECOUNT_1
     );
+    target->texture = target->resolved;
+    if (f_Gpu.sampleCount != SDL_GPU_SAMPLECOUNT_1) {
+        // A multisampled texture can only be drawn into, or copied
+        target->texture = CreateTexture(
+            COLOR_FORMAT,
+            SDL_GPU_TEXTUREUSAGE_COLOR_TARGET,
+            width * f_Gpu.scale,
+            height * f_Gpu.scale,
+            1,
+            f_Gpu.sampleCount
+        );
+    }
+
     return target;
 }
 
@@ -576,7 +703,11 @@ void BackendDestroyTarget(GfxTarget *target) {
         return;
     }
 
-    // SDL_GPU keeps the texture until the work that uses it is done
+    // SDL_GPU keeps the textures until the work that uses them is done
+    if (IsMultisampled(target)) {
+        SDL_ReleaseGPUTexture(f_Gpu.device, target->resolved);
+    }
+
     SDL_ReleaseGPUTexture(f_Gpu.device, target->texture);
     SDL_free(target);
 }
@@ -642,25 +773,69 @@ static void SubmitFrame(SDL_GPUCommandBuffer *commands) {
     }
 }
 
-void BackendCopyTarget(GfxTarget *source, GfxTarget *destination, uint32_t width, uint32_t height) {
-    SDL_GPUCommandBuffer *commands = AcquireCommandBuffer();
-    SDL_GPUCopyPass *copy = SDL_BeginGPUCopyPass(commands);
+// Copies a rectangle of the N64's pixels between two textures of the same
+// samples a pixel, at the targets' scale
+static void CopyPixels(
+    SDL_GPUCopyPass *copy,
+    SDL_GPUTexture *source,
+    uint32_t sourceX,
+    uint32_t sourceY,
+    SDL_GPUTexture *destination,
+    uint32_t x,
+    uint32_t y,
+    uint32_t width,
+    uint32_t height
+) {
+    uint32_t scale = f_Gpu.scale;
     SDL_GPUTextureLocation from;
     SDL_GPUTextureLocation to;
 
     SDL_zero(from);
+    from.texture = source;
+    from.x = sourceX * scale;
+    from.y = sourceY * scale;
     SDL_zero(to);
-    from.texture = source->texture;
-    to.texture = destination->texture;
-    SDL_CopyGPUTextureToTexture(
-        copy,
-        &from,
-        &to,
-        width * f_Gpu.scale,
-        height * f_Gpu.scale,
-        1,
-        false
-    );
+    to.texture = destination;
+    to.x = x * scale;
+    to.y = y * scale;
+    SDL_CopyGPUTextureToTexture(copy, &from, &to, width * scale, height * scale, 1, false);
+}
+
+// Copies a color target's samples and its resolved pixels alike, so that
+// the resolved texture stays the samples' resolve without a render pass
+static void CopyColorPixels(
+    SDL_GPUCopyPass *copy,
+    const GfxTarget *source,
+    uint32_t sourceX,
+    uint32_t sourceY,
+    const GfxTarget *destination,
+    uint32_t x,
+    uint32_t y,
+    uint32_t width,
+    uint32_t height
+) {
+    CopyPixels(copy, source->texture, sourceX, sourceY, destination->texture, x, y, width, height);
+    if (IsMultisampled(source)) {
+        CopyPixels(
+            copy,
+            source->resolved,
+            sourceX,
+            sourceY,
+            destination->resolved,
+            x,
+            y,
+            width,
+            height
+        );
+    }
+}
+
+void BackendCopyTarget(GfxTarget *source, GfxTarget *destination, uint32_t width, uint32_t height) {
+    SDL_GPUCommandBuffer *commands = AcquireCommandBuffer();
+    SDL_GPUCopyPass *copy = SDL_BeginGPUCopyPass(commands);
+
+    SDL_assert(!source->isDepth && !destination->isDepth);
+    CopyColorPixels(copy, source, 0, 0, destination, 0, 0, width, height);
     SDL_EndGPUCopyPass(copy);
     Submit(commands);
 }
@@ -743,6 +918,12 @@ static SDL_GPURenderPass *BeginPass(SDL_GPUCommandBuffer *commands, const GfxPas
     color.texture = pass->target->texture;
     color.load_op = SDL_GPU_LOADOP_LOAD;
     color.store_op = SDL_GPU_STOREOP_STORE;
+    if (IsMultisampled(pass->target)) {
+        // The samples are kept for the next pass to draw over
+        color.store_op = SDL_GPU_STOREOP_RESOLVE_AND_STORE;
+        color.resolve_texture = pass->target->resolved;
+    }
+
     if (pass->depth == NULL) {
         return SDL_BeginGPURenderPass(commands, &color, 1, NULL);
     }
@@ -831,15 +1012,15 @@ static void ClearNewDepth(SDL_GPUCommandBuffer *commands, const GfxPass *pass) {
 }
 
 // Copies the pass's pixels into its target, or into its depth from a depth
-// target, at the targets' scale, in one copy pass. Vulkan and Metal copy
-// part of a depth target; Direct3D 12 promises only whole ones.
+// target, at the targets' scale, in one copy pass. Vulkan copies part of a
+// depth target or a multisampled one; Direct3D 12 promises only whole
+// ones, and Metal is unconfirmed.
 static void CopyPassPixels(
     SDL_GPUCommandBuffer *commands,
     const GfxFrame *frame,
     const GfxPass *pass
 ) {
     SDL_GPUCopyPass *copy;
-    uint32_t scale = f_Gpu.scale;
     uint32_t i;
 
     SDL_assert(!pass->target->isDepth && !(pass->copiesDepth && pass->clearsDepth));
@@ -851,31 +1032,38 @@ static void CopyPassPixels(
     for (i = pass->firstCopy; i < pass->firstCopy + pass->copyCount; i++) {
         const GfxCopy *pixels = &frame->copies[i];
         GfxTarget *destination = pixels->source->isDepth ? pass->depth : pass->target;
-        SDL_GPUTextureLocation from;
-        SDL_GPUTextureLocation to;
 
         SDL_assert(destination != NULL && destination != pixels->source);
         SDL_assert(pixels->sourceX + pixels->width <= pixels->source->width);
         SDL_assert(pixels->sourceY + pixels->height <= pixels->source->height);
         SDL_assert(pixels->x + pixels->width <= destination->width);
         SDL_assert(pixels->y + pixels->height <= destination->height);
-        SDL_zero(from);
-        from.texture = pixels->source->texture;
-        from.x = pixels->sourceX * scale;
-        from.y = pixels->sourceY * scale;
-        SDL_zero(to);
-        to.texture = destination->texture;
-        to.x = pixels->x * scale;
-        to.y = pixels->y * scale;
-        SDL_CopyGPUTextureToTexture(
-            copy,
-            &from,
-            &to,
-            pixels->width * scale,
-            pixels->height * scale,
-            1,
-            false
-        );
+        if (destination->isDepth) {
+            CopyPixels(
+                copy,
+                pixels->source->texture,
+                pixels->sourceX,
+                pixels->sourceY,
+                destination->texture,
+                pixels->x,
+                pixels->y,
+                pixels->width,
+                pixels->height
+            );
+        }
+        else {
+            CopyColorPixels(
+                copy,
+                pixels->source,
+                pixels->sourceX,
+                pixels->sourceY,
+                destination,
+                pixels->x,
+                pixels->y,
+                pixels->width,
+                pixels->height
+            );
+        }
     }
 
     SDL_EndGPUCopyPass(copy);
@@ -922,7 +1110,8 @@ static SDL_GPUTexture *UseStaging(uint32_t width, uint32_t height) {
             SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER,
             f_Gpu.stagingWidth,
             f_Gpu.stagingHeight,
-            1
+            1,
+            SDL_GPU_SAMPLECOUNT_1
         );
     }
 
@@ -958,7 +1147,7 @@ static void BlitTexture(
 void BackendReadTarget(GfxTarget *target, uint32_t width, uint32_t height, uint32_t *rgba) {
     uint32_t byteCount = width * height * (uint32_t)sizeof(uint32_t);
     SDL_GPUCommandBuffer *commands = AcquireCommandBuffer();
-    SDL_GPUTexture *source = target->texture;
+    SDL_GPUTexture *source = target->resolved;
     SDL_GPUTextureRegion region;
     SDL_GPUTextureTransferInfo destination;
     SDL_GPUCopyPass *copy;
@@ -972,7 +1161,7 @@ void BackendReadTarget(GfxTarget *target, uint32_t width, uint32_t height, uint3
         source = UseStaging(width, height);
         BlitTexture(
             commands,
-            target->texture,
+            target->resolved,
             width * f_Gpu.scale,
             height * f_Gpu.scale,
             source,
@@ -1012,6 +1201,47 @@ void BackendReadTarget(GfxTarget *target, uint32_t width, uint32_t height, uint3
     SDL_UnmapGPUTransferBuffer(f_Gpu.device, f_Gpu.pixelDownload.buffer);
 }
 
+// Draws the staging texture's top rows into a multisampled target, each of
+// the N64's pixels a square of the target's, and resolves the target
+static void DrawStagingIntoTarget(
+    SDL_GPUCommandBuffer *commands,
+    GfxTarget *target,
+    uint32_t width,
+    uint32_t firstRow,
+    uint32_t rowCount
+) {
+    SDL_GPUColorTargetInfo color;
+    SDL_GPUViewport viewport;
+    SDL_GPUTextureSamplerBinding staging = {f_Gpu.staging, f_Gpu.atlasSampler};
+    WritePlacement placement;
+    SDL_GPURenderPass *render;
+
+    SDL_zero(color);
+    color.texture = target->texture;
+    color.load_op = SDL_GPU_LOADOP_LOAD;
+    color.store_op = SDL_GPU_STOREOP_RESOLVE_AND_STORE;
+    color.resolve_texture = target->resolved;
+    SDL_zero(placement);
+    placement.top = firstRow * f_Gpu.scale;
+    placement.scale = f_Gpu.scale;
+    SDL_PushGPUFragmentUniformData(commands, 0, &placement, sizeof(placement));
+    render = SDL_BeginGPURenderPass(commands, &color, 1, NULL);
+    if (render == NULL) {
+        PcFatalError("Can't begin a render pass: %s", SDL_GetError());
+    }
+
+    SDL_zero(viewport);
+    viewport.y = (float)placement.top;
+    viewport.w = (float)(width * f_Gpu.scale);
+    viewport.h = (float)(rowCount * f_Gpu.scale);
+    viewport.max_depth = 1.0f;
+    SDL_BindGPUGraphicsPipeline(render, f_Gpu.writePipeline);
+    SDL_SetGPUViewport(render, &viewport);
+    SDL_BindGPUFragmentSamplers(render, 0, &staging, 1);
+    SDL_DrawGPUPrimitives(render, 3, 1, 0, 0);
+    SDL_EndGPURenderPass(render);
+}
+
 void BackendWriteTarget(
     GfxTarget *target,
     uint32_t width,
@@ -1038,7 +1268,8 @@ void BackendWriteTarget(
     SDL_memcpy(mapped, rgba, byteCount);
     SDL_UnmapGPUTransferBuffer(f_Gpu.device, f_Gpu.pixelUpload.buffer);
 
-    if (f_Gpu.scale != 1) {
+    // Only a blit or a draw scales, and only a draw reaches samples
+    if (f_Gpu.scale != 1 || IsMultisampled(target)) {
         destinationTexture = UseStaging(width, rowCount);
         destinationRow = 0;
     }
@@ -1057,7 +1288,10 @@ void BackendWriteTarget(
     SDL_UploadToGPUTexture(copy, &source, &destination, false);
     SDL_EndGPUCopyPass(copy);
 
-    if (f_Gpu.scale != 1) {
+    if (IsMultisampled(target)) {
+        DrawStagingIntoTarget(commands, target, width, firstRow, rowCount);
+    }
+    else if (f_Gpu.scale != 1) {
         // Each of the N64's pixels becomes a square of the target's
         BlitTexture(
             commands,

@@ -19,8 +19,10 @@
 SDL_GPUDevice *CreateGpuDevice(bool isDebug);
 
 // Readies the backend to draw with the device, into targets scale times the
-// N64's resolution each way. The device must outlive the backend.
-void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale);
+// N64's resolution each way, with up to sampleCount samples a pixel: the
+// most that the device has for both the color and the depth format. The
+// device must outlive the backend.
+void InitGpuBackend(SDL_GPUDevice *device, uint32_t scale, SDL_GPUSampleCount sampleCount);
 
 // Waits for the GPU and releases everything that the backend created
 void ShutdownGpuBackend(void);

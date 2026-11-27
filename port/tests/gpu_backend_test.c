@@ -8,6 +8,7 @@
 #include <ultra64.h>
 
 #include "color_images.h"
+#include "gfx_backend.h"
 #include "rcp.h"
 #include "rsp.h"
 #include "sdl_gpu_backend.h"
@@ -198,6 +199,187 @@ static void TestShadedTriangles(void) {
     EXPECT_PIXEL(0, 0, 0, 255, 0);
     EXPECT_PIXEL(IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2, 0, 255, 0);
     EXPECT_PIXEL(IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1, 0, 255, 0);
+}
+
+// Draws a green triangle over black, its long edge across the image from
+// corner to corner, so that the edge crosses many pixels partway
+static void DrawDiagonalEdge(void) {
+    static Vtx vertices[3];
+    static const s16 corners[3][2] = {{-128, -128}, {128, -128}, {-128, 128}};
+    Gfx *gfx = BeginList(f_DisplayList);
+    int i;
+
+    gfx = FillImage(gfx, GPACK_RGBA5551(0, 0, 0, 1));
+    gfx = BeginTriangles(gfx, G_SHADE | G_SHADING_SMOOTH, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    for (i = 0; i < 3; i++) {
+        Vtx_t *vertex = &vertices[i].v;
+
+        SDL_zerop(vertex);
+        vertex->ob[0] = corners[i][0];
+        vertex->ob[1] = corners[i][1];
+        vertex->cn[1] = 0xFF;
+        vertex->cn[3] = 0xFF;
+    }
+
+    gSPVertex(gfx++, vertices, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    RunList(gfx);
+}
+
+// The pixels whose green is neither black's nor the triangle's
+static int CountBlendedPixels(void) {
+    int count = 0;
+    int i;
+
+    for (i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT; i++) {
+        int green = (f_ColorImage[i] >> 6) & 0x1F;
+
+        if (green > CHANNEL_TOLERANCE && green < 0x1F - CHANNEL_TOLERANCE) {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+// With one sample a pixel, a pixel is in a triangle or out of it
+static void TestEdgesStayHardWithOneSample(void) {
+    DrawDiagonalEdge();
+    EXPECT(CountBlendedPixels() == 0);
+    EXPECT_PIXEL(1, 1, 0, 255, 0);
+    EXPECT_PIXEL(IMAGE_WIDTH - 2, IMAGE_HEIGHT - 2, 0, 0, 0);
+}
+
+// Multisampled, a pixel that an edge crosses mixes the colors on each side,
+// and those it doesn't cross keep theirs. The edge crosses at least one
+// pixel in each row.
+static void TestEdgesBlendTheirSamples(void) {
+    DrawDiagonalEdge();
+    EXPECT(CountBlendedPixels() >= IMAGE_HEIGHT / 2);
+    EXPECT(CountBlendedPixels() <= IMAGE_WIDTH * 2);
+    EXPECT_PIXEL(1, 1, 0, 255, 0);
+    EXPECT_PIXEL(IMAGE_WIDTH - 2, IMAGE_HEIGHT - 2, 0, 0, 0);
+}
+
+#define WHITE GPACK_RGBA5551(255, 255, 255, 1)
+
+// Fills an image with red and blue, in a pattern that steps by one pixel
+// across and down and by more every seven, as the CPU might draw
+static void DrawCpuPattern(u16 *image) {
+    int i;
+
+    for (i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT; i++) {
+        bool isRed = ((i % IMAGE_WIDTH) + (i / IMAGE_WIDTH) + (i / 7)) & 1;
+
+        image[i] = isRed ? GPACK_RGBA5551(255, 0, 0, 1) : GPACK_RGBA5551(0, 0, 255, 1);
+    }
+}
+
+// Fills the rectangle white, whatever the scissor around it
+static Gfx *FillRows(Gfx *gfx, int left, int top, int right, int bottom) {
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetFillColor(gfx++, ((u32)WHITE << 16) | WHITE);
+    gDPFillRectangle(gfx++, left, top, right, bottom);
+    gDPPipeSync(gfx++);
+    return gfx;
+}
+
+// The image's pixels whose channels stray from the expected image's
+static int CountPixelsUnlike(const u16 *image, const u16 *expected) {
+    int wrongCount = 0;
+    int i;
+
+    for (i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT; i++) {
+        if (!IsChannelNear(image[i], 11, ((expected[i] >> 11) & 0x1F) << 3) ||
+            !IsChannelNear(image[i], 6, ((expected[i] >> 6) & 0x1F) << 3) ||
+            !IsChannelNear(image[i], 1, ((expected[i] >> 1) & 0x1F) << 3)) {
+            wrongCount++;
+        }
+    }
+
+    return wrongCount;
+}
+
+// The CPU's pixels reach the target before the next draws, which cover
+// only what they draw: a fill of the top left corner leaves the rest of a
+// pattern written to memory as it was
+static void TestCpuPixelsStayUnderDraws(void) {
+    static u16 expected[IMAGE_WIDTH * IMAGE_HEIGHT];
+    Gfx *gfx = BeginList(f_DisplayList);
+    int i;
+
+    DrawCpuPattern(f_ColorImage);
+    DrawCpuPattern(expected);
+    for (i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT; i++) {
+        if ((i % IMAGE_WIDTH) < 4 && (i / IMAGE_WIDTH) < 4) {
+            expected[i] = WHITE;
+        }
+    }
+
+    gfx = FillRows(gfx, 0, 0, 3, 3);
+    RunList(gfx);
+    EXPECT(CountPixelsUnlike(f_ColorImage, expected) == 0);
+}
+
+// An image that the drawing reaches further down grows, keeping what was
+// drawn above and taking the CPU's rows below: a fill of the top rows
+// under a scissor that ends there, then one of the bottom rows under one
+// that doesn't, leaves the pattern between them
+static void TestGrownImageKeepsItsRows(void) {
+    static u16 image[IMAGE_WIDTH * IMAGE_HEIGHT] __attribute__((aligned(64)));
+    static u16 expected[IMAGE_WIDTH * IMAGE_HEIGHT];
+    Gfx *gfx = f_DisplayList;
+    int i;
+
+    DrawCpuPattern(image);
+    DrawCpuPattern(expected);
+    for (i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT; i++) {
+        int row = i / IMAGE_WIDTH;
+
+        if (row < 8 || row >= IMAGE_HEIGHT - 4) {
+            expected[i] = WHITE;
+        }
+    }
+
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, IMAGE_WIDTH, image);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, IMAGE_WIDTH, 8);
+    gfx = FillRows(gfx, 0, 0, IMAGE_WIDTH - 1, 7);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+    gfx = FillRows(gfx, 0, IMAGE_HEIGHT - 4, IMAGE_WIDTH - 1, IMAGE_HEIGHT - 1);
+    gSPEndDisplayList(gfx++);
+    RunRspTask(f_DisplayList);
+    SyncRdpMemory(image, sizeof(image));
+    EXPECT(CountPixelsUnlike(image, expected) == 0);
+}
+
+// A copy of a target holds what the source does, read back with no draw
+// between: the copy reaches the pixels that reads take, not only the
+// samples that draws do
+static void TestCopiedTargetReadsBack(void) {
+    static uint32_t pattern[IMAGE_WIDTH * IMAGE_HEIGHT];
+    static uint32_t copied[IMAGE_WIDTH * IMAGE_HEIGHT];
+    GfxTarget *source = BackendCreateTarget(IMAGE_WIDTH, IMAGE_HEIGHT, false);
+    GfxTarget *destination = BackendCreateTarget(IMAGE_WIDTH, IMAGE_HEIGHT, false);
+    int wrongCount = 0;
+    int i;
+
+    for (i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT; i++) {
+        bool isRed = ((i % IMAGE_WIDTH) + (i / IMAGE_WIDTH) + (i / 7)) & 1;
+
+        pattern[i] = isRed ? 0xFF0000FFu : 0xFFFF0000u;
+    }
+
+    BackendWriteTarget(source, IMAGE_WIDTH, 0, IMAGE_HEIGHT, pattern);
+    BackendCopyTarget(source, destination, IMAGE_WIDTH, IMAGE_HEIGHT);
+    BackendReadTarget(destination, IMAGE_WIDTH, IMAGE_HEIGHT, copied);
+    for (i = 0; i < IMAGE_WIDTH * IMAGE_HEIGHT; i++) {
+        wrongCount += copied[i] != pattern[i];
+    }
+
+    EXPECT(wrongCount == 0);
+    BackendDestroyTarget(destination);
+    BackendDestroyTarget(source);
 }
 
 // A copy of a texture lays its texels on the pixels one for one, read from
@@ -943,9 +1125,12 @@ static uint32_t SaveTriangleDepth(uint32_t *savedPixels) {
     RunList(gfx);
     width = ReadScaledTarget();
     SDL_memcpy(savedPixels, f_TargetPixels, (IMAGE_WIDTH * scale) * (IMAGE_HEIGHT * scale) * 4);
-    // Both sides of the triangle's edge are within the image
-    EXPECT(savedPixels[0] == 0xFF00FF00u);
-    EXPECT(savedPixels[((IMAGE_HEIGHT * scale) * width) - 1] == 0xFF000000u);
+    // Both sides of the triangle's edge, which runs from the image's top
+    // left corner to its bottom right, are within the image
+    EXPECT(savedPixels[((((IMAGE_HEIGHT - 3) * scale) + (scale / 2)) * width) + (2 * scale)] ==
+        0xFF00FF00u);
+    EXPECT(savedPixels[(((2 * scale) + (scale / 2)) * width) + ((IMAGE_WIDTH - 3) * scale)] ==
+        0xFF000000u);
     return width;
 }
 
@@ -1013,9 +1198,18 @@ static void CopySavedDepthUnderQuad(u16 *depth, int columnCount) {
     RunList(gfx);
 }
 
+static bool IsByteNear(uint32_t pixel, int shift, uint32_t expected) {
+    int byte = (int)((pixel >> shift) & 0xFF);
+
+    return SDL_abs(byte - (int)expected) <= 1;
+}
+
 // Counts the target's pixels that differ from the red quad behind the
 // saved triangle: hidden, so blue, where the saved pixels show the
-// triangle in the columns that the copy reached, and red elsewhere
+// triangle in the columns that the copy reached, and red elsewhere. A
+// multisampled pixel that the triangle's edge crossed is hidden at the
+// samples that the triangle covered, so it is as much blue as the saved
+// one is green.
 static int CountQuadPixelsWrong(const uint32_t *savedPixels, uint32_t width, int columnCount) {
     uint32_t scale = GpuBackendScale();
     int wrongCount = 0;
@@ -1023,9 +1217,11 @@ static int CountQuadPixelsWrong(const uint32_t *savedPixels, uint32_t width, int
 
     for (i = 0; i < (IMAGE_WIDTH * scale) * (IMAGE_HEIGHT * scale); i++) {
         bool isCopied = (i % width) < (uint32_t)columnCount * scale;
-        bool isHidden = isCopied && savedPixels[i] == 0xFF00FF00u;
+        uint32_t hidden = isCopied ? (savedPixels[i] >> 8) & 0xFF : 0;
+        uint32_t pixel = f_TargetPixels[i];
 
-        wrongCount += f_TargetPixels[i] != (isHidden ? 0xFFFF0000u : 0xFF0000FFu);
+        wrongCount += !IsByteNear(pixel, 0, 0xFF - hidden) || !IsByteNear(pixel, 8, 0) ||
+            !IsByteNear(pixel, 16, hidden) || (pixel >> 24) != 0xFF;
     }
 
     return wrongCount;
@@ -1090,6 +1286,48 @@ static SDL_GPUDevice *CreateDevice(void) {
     return CreateGpuDevice(true);
 }
 
+// The tests whose pixels don't hang on how many samples a pixel has, run
+// again with four, where the GPU can: every target is multisampled, and
+// read, copied and shown through its resolved texture
+static void TestMultisampled(SDL_GPUDevice *device) {
+    if (!SDL_GPUTextureSupportsSampleCount(
+            device,
+            SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
+            SDL_GPU_SAMPLECOUNT_4
+        )) {
+        printf("gpu_backend_test: multisampled tests skipped, with no 4x MSAA\n");
+        return;
+    }
+
+    InitGpuBackend(device, 1, SDL_GPU_SAMPLECOUNT_4);
+    InitRdp();
+    InitRsp();
+    TestEdgesBlendTheirSamples();
+    TestCpuPixelsStayUnderDraws();
+    TestGrownImageKeepsItsRows();
+    TestCopiedTargetReadsBack();
+    TestFill();
+    TestCopiedTexture();
+    TestTranslucentBlend();
+    TestDepth();
+    TestPartialDepthFill();
+    TestSecondCycleTexel();
+    TestTwoCycleAlphaCompare();
+    ShutdownRdp();
+    ShutdownGpuBackend();
+
+    InitGpuBackend(device, 6, SDL_GPU_SAMPLECOUNT_4);
+    InitRdp();
+    TestCpuPixelsStayUnderDraws();
+    TestGrownImageKeepsItsRows();
+    TestCopiedTargetReadsBack();
+    TestCopyKeepsUpscaledDetail();
+    TestCopiedDepthKeepsUpscaledEdges();
+    TestCopyIntoNewDepthLeavesTheRestFar();
+    ShutdownRdp();
+    ShutdownGpuBackend();
+}
+
 int main(void) {
     SDL_GPUDevice *device = CreateDevice();
 
@@ -1110,10 +1348,13 @@ int main(void) {
             {0.0f, 0.0f, 0.0f, 1.0f},
         }
     );
-    InitGpuBackend(device, 2);
+    InitGpuBackend(device, 2, SDL_GPU_SAMPLECOUNT_1);
     InitRdp();
     InitRsp();
     TestFill();
+    TestCpuPixelsStayUnderDraws();
+    TestGrownImageKeepsItsRows();
+    TestCopiedTargetReadsBack();
     TestShadedTriangles();
     TestCopiedTexture();
     TestTranslucentBlend();
@@ -1130,24 +1371,29 @@ int main(void) {
     // Upscaled, a pixel in memory averages the target's, so the N64's own
     // sampling shows only at its resolution. A texture drawn before is
     // uploaded again to the new backend's atlas.
-    InitGpuBackend(device, 1);
+    InitGpuBackend(device, 1, SDL_GPU_SAMPLECOUNT_1);
     InitRdp();
     TestFilteredTexelsOneForOne();
     TestCopiedTexture();
+    TestEdgesStayHardWithOneSample();
     ShutdownRdp();
     ShutdownGpuBackend();
 
     // At the player's usual scale, each pixel of memory spans six of the
     // target's
-    InitGpuBackend(device, 6);
+    InitGpuBackend(device, 6, SDL_GPU_SAMPLECOUNT_1);
     InitRdp();
     TestUpscaledTexelsStartAtTheirCorner();
+    TestCpuPixelsStayUnderDraws();
+    TestGrownImageKeepsItsRows();
+    TestCopiedTargetReadsBack();
     TestUpscaledTexelsKeepFineSteps();
     TestCopyKeepsUpscaledDetail();
     TestCopiedDepthKeepsUpscaledEdges();
     TestCopyIntoNewDepthLeavesTheRestFar();
     ShutdownRdp();
     ShutdownGpuBackend();
+    TestMultisampled(device);
     SDL_DestroyGPUDevice(device);
     SDL_Quit();
     return ReportTestResults("gpu_backend_test");

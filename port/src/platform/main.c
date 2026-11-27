@@ -426,7 +426,7 @@ static bool OpenWindow(const Options *options) {
         SCREEN_WIDTH * scale,
         SCREEN_HEIGHT * scale
     );
-    InitGpuBackend(f_Device, (uint32_t)scale);
+    InitGpuBackend(f_Device, (uint32_t)scale, SDL_GPU_SAMPLECOUNT_1);
     InitRdp();
     InitRsp();
     return true;

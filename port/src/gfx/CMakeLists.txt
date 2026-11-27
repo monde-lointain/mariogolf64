@@ -35,4 +35,6 @@ mg64_compile_shaders(mg64_gpu SHADERS
     shaders/rdp.frag
     shaders/overlay.vert
     shaders/overlay.frag
+    shaders/write_target.vert
+    shaders/write_target.frag
 )
