@@ -2200,10 +2200,12 @@ Boolean FindHoleTriangleHit(
                 // Each cross product tells which side of an edge the hit is on,
                 // seen from above. The third repeats the first edge, so the edge
                 // from the third corner back to the first is never tested.
-                edgeCrosses[0] = ((triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0]) *
-                                     (hitZ - WorldToCourse(triangle.corners[AXIS_Z][0]))) -
-                    ((triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0]) *
-                        (hitX - WorldToCourse(triangle.corners[AXIS_X][0])));
+                edgeCrosses[0] = EdgeCross(
+                    triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0],
+                    triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0],
+                    hitX - WorldToCourse(triangle.corners[AXIS_X][0]),
+                    hitZ - WorldToCourse(triangle.corners[AXIS_Z][0])
+                );
                 if (edgeCrosses[0] < 0) {
                     sides = EDGE_SIDE_NEGATIVE;
                 }
@@ -2211,10 +2213,12 @@ Boolean FindHoleTriangleHit(
                     sides = (edgeCrosses[0] == 0) ? EDGE_SIDE_ON : EDGE_SIDE_POSITIVE;
                 }
 
-                edgeCrosses[1] = ((triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][1]) *
-                                     (hitZ - WorldToCourse(triangle.corners[AXIS_Z][1]))) -
-                    ((triangle.corners[AXIS_Z][2] - triangle.corners[AXIS_Z][1]) *
-                        (hitX - WorldToCourse(triangle.corners[AXIS_X][1])));
+                edgeCrosses[1] = EdgeCross(
+                    triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][1],
+                    triangle.corners[AXIS_Z][2] - triangle.corners[AXIS_Z][1],
+                    hitX - WorldToCourse(triangle.corners[AXIS_X][1]),
+                    hitZ - WorldToCourse(triangle.corners[AXIS_Z][1])
+                );
                 if (edgeCrosses[1] < 0) {
                     sides &= EDGE_SIDE_NEGATIVE;
                 }
@@ -2226,10 +2230,12 @@ Boolean FindHoleTriangleHit(
                 }
 
                 if (sides != 0) {
-                    edgeCrosses[2] = ((triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0]) *
-                                         (hitZ - WorldToCourse(triangle.corners[AXIS_Z][0]))) -
-                        ((triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0]) *
-                            (hitX - WorldToCourse(triangle.corners[AXIS_X][0])));
+                    edgeCrosses[2] = EdgeCross(
+                        triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0],
+                        triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0],
+                        hitX - WorldToCourse(triangle.corners[AXIS_X][0]),
+                        hitZ - WorldToCourse(triangle.corners[AXIS_Z][0])
+                    );
                     if (edgeCrosses[2] < 0) {
                         sides &= EDGE_SIDE_NEGATIVE;
                     }

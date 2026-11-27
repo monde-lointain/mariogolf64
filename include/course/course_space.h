@@ -30,6 +30,20 @@ typedef s32 CoursePoint[AXIS_COUNT];
 #    define WorldToCourse(value) ((value) << WORLD_TO_COURSE_SHIFT)
 #endif
 
+// The cross product of a triangle's edge, in world units, with a point's
+// offset from the edge's start, in course units, which tells the side of
+// the edge that the point is on. Far from the edge it overflows a word,
+// which the N64's multiply and subtract wrap. C leaves a signed overflow
+// undefined, so other builds than the matching one work out the same bits
+// unsigned.
+#ifdef AVOID_UB
+#    define EdgeCross(edgeU, edgeV, offsetU, offsetV) \
+        ((s32)(((u32)(edgeU) * (u32)(offsetV)) - ((u32)(edgeV) * (u32)(offsetU))))
+#else
+#    define EdgeCross(edgeU, edgeV, offsetU, offsetV) \
+        (((edgeU) * (offsetV)) - ((edgeV) * (offsetU)))
+#endif
+
 // Course point units in a yard, a foot and a meter
 #define UNITS_PER_YARD 14045.184f
 #define UNITS_PER_FOOT 4681.728f
