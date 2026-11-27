@@ -21,6 +21,7 @@ typedef enum SettingKind {
     SETTING_WINDOW_SIZE,
     SETTING_WINDOW_POSITION,
     SETTING_PRESENT,
+    SETTING_ANTIALIASING,
     SETTING_CONTROL
 } SettingKind;
 
@@ -101,6 +102,7 @@ static const struct {
 };
 
 static const char *const f_PresentNames[] = {"mailbox", "vsync", "immediate"};
+static const char *const f_AntialiasingNames[] = {"off", "2x", "4x", "8x"};
 
 #define FIELD(name) offsetof(Config, name)
 #define CONTROL(key, control) {"controls", (key), SETTING_CONTROL, (control), 0, 0, NULL}
@@ -138,6 +140,14 @@ static const Setting f_Settings[] = {
         0,
         "mailbox shows the newest frame at each refresh, vsync shows every frame\n"
         "and may wait, and immediate shows each at once and may tear"},
+    {"video",
+        "antialiasing",
+        SETTING_ANTIALIASING,
+        FIELD(antialiasing),
+        0,
+        0,
+        "off, 2x, 4x or 8x: how many samples a pixel to draw edges with, or the\n"
+        "most that the GPU has"},
     {"window",
         "width",
         SETTING_WINDOW_SIZE,
@@ -220,6 +230,7 @@ void SetDefaultConfig(Config *config) {
     config->renderScale = 0;
     config->isFullscreen = false;
     config->present = PRESENT_MAILBOX;
+    config->antialiasing = ANTIALIASING_OFF;
     config->pausesWhenUnfocused = true;
     config->volume = CONFIG_VOLUME_MAX;
     SetDefaultPadBindings(&config->bindings);
@@ -474,6 +485,17 @@ static bool ParseSetting(const Setting *setting, Span value, Config *config) {
             }
 
             config->present = (PresentChoice)index;
+            return true;
+        }
+        case SETTING_ANTIALIASING: {
+            const int index =
+                FindName(value, f_AntialiasingNames, (int)SDL_arraysize(f_AntialiasingNames));
+
+            if (index < 0) {
+                return false;
+            }
+
+            config->antialiasing = (AntialiasingChoice)index;
             return true;
         }
         case SETTING_CONTROL:
@@ -758,6 +780,10 @@ static void AppendSettingValue(TextBuilder *builder, const Setting *setting, con
         case SETTING_PRESENT:
             SDL_assert((size_t)config->present < SDL_arraysize(f_PresentNames));
             AppendText(builder, "%s", f_PresentNames[config->present]);
+            break;
+        case SETTING_ANTIALIASING:
+            SDL_assert((size_t)config->antialiasing < SDL_arraysize(f_AntialiasingNames));
+            AppendText(builder, "%s", f_AntialiasingNames[config->antialiasing]);
             break;
         case SETTING_CONTROL:
             for (i = 0; i < PAD_SOURCES_PER_CONTROL; i++) {

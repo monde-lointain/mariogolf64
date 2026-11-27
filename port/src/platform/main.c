@@ -397,6 +397,19 @@ static SDL_Window *CreateGameWindow(bool isFullscreen) {
     return window;
 }
 
+static SDL_GPUSampleCount SampleCountOf(AntialiasingChoice choice) {
+    switch (choice) {
+        case ANTIALIASING_2X:
+            return SDL_GPU_SAMPLECOUNT_2;
+        case ANTIALIASING_4X:
+            return SDL_GPU_SAMPLECOUNT_4;
+        case ANTIALIASING_8X:
+            return SDL_GPU_SAMPLECOUNT_8;
+        default:
+            return SDL_GPU_SAMPLECOUNT_1;
+    }
+}
+
 static bool OpenWindow(const Options *options) {
     int scale;
 
@@ -420,13 +433,15 @@ static bool OpenWindow(const Options *options) {
     }
 
     scale = (options->renderScale > 0) ? options->renderScale : ChooseRenderScale();
+    InitGpuBackend(f_Device, (uint32_t)scale, SampleCountOf(f_Config.antialiasing));
+    // SDL_GPUSampleCount counts up from one sample in powers of two
     SDL_Log(
-        "Drawing with %s at %dx%d",
+        "Drawing with %s at %dx%d, %d sample(s) a pixel",
         SDL_GetGPUDeviceDriver(f_Device),
         SCREEN_WIDTH * scale,
-        SCREEN_HEIGHT * scale
+        SCREEN_HEIGHT * scale,
+        1 << (int)GpuBackendSampleCount()
     );
-    InitGpuBackend(f_Device, (uint32_t)scale, SDL_GPU_SAMPLECOUNT_1);
     InitRdp();
     InitRsp();
     return true;

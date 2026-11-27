@@ -41,6 +41,7 @@ static bool IsSameConfig(const Config *a, const Config *b) {
         a->renderScale == b->renderScale &&
         a->isFullscreen == b->isFullscreen &&
         a->present == b->present &&
+        a->antialiasing == b->antialiasing &&
         a->windowWidth == b->windowWidth &&
         a->windowHeight == b->windowHeight &&
         a->hasWindowPosition == b->hasWindowPosition &&
@@ -73,6 +74,7 @@ static void TestDefaults(void) {
     EXPECT(config.renderScale == 0);
     EXPECT(!config.isFullscreen);
     EXPECT(config.present == PRESENT_MAILBOX);
+    EXPECT(config.antialiasing == ANTIALIASING_OFF);
     EXPECT(config.windowWidth == 0 && config.windowHeight == 0);
     EXPECT(!config.hasWindowPosition);
     EXPECT(config.pausesWhenUnfocused);
@@ -121,6 +123,7 @@ static void TestEverySettingReadsBack(void) {
     written.renderScale = CONFIG_SCALE_MAX;
     written.isFullscreen = true;
     written.present = PRESENT_IMMEDIATE;
+    written.antialiasing = ANTIALIASING_8X;
     written.windowWidth = CONFIG_WINDOW_SIZE_MIN;
     written.windowHeight = CONFIG_WINDOW_SIZE_MAX;
     written.hasWindowPosition = true;
@@ -264,6 +267,21 @@ static void TestPresentChoices(void) {
     EXPECT(AcceptsSetting("video", "present = vsync\npresent = mailbox", &config));
     EXPECT(config.present == PRESENT_MAILBOX);
     EXPECT(!AcceptsSetting("video", "present = fifo", &config));
+}
+
+static void TestAntialiasingChoices(void) {
+    Config config;
+
+    EXPECT(AcceptsSetting("video", "antialiasing = 2x", &config));
+    EXPECT(config.antialiasing == ANTIALIASING_2X);
+    EXPECT(AcceptsSetting("video", "antialiasing = 4X", &config));
+    EXPECT(config.antialiasing == ANTIALIASING_4X);
+    EXPECT(AcceptsSetting("video", "antialiasing = 8x", &config));
+    EXPECT(config.antialiasing == ANTIALIASING_8X);
+    EXPECT(AcceptsSetting("video", "antialiasing = 4x\nantialiasing = off", &config));
+    EXPECT(config.antialiasing == ANTIALIASING_OFF);
+    EXPECT(!AcceptsSetting("video", "antialiasing = 16x", &config));
+    EXPECT(!AcceptsSetting("video", "antialiasing = 4", &config));
 }
 
 // The path is the whole value, after the first =, trimmed; the longest
@@ -567,6 +585,7 @@ int main(void) {
     TestWindowSizeLimits();
     TestWindowPosition();
     TestPresentChoices();
+    TestAntialiasingChoices();
     TestRomPath();
     TestControlSources();
     TestBadControlsKeepTheirSources();

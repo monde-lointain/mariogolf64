@@ -1302,6 +1302,7 @@ static void TestMultisampled(SDL_GPUDevice *device) {
     InitGpuBackend(device, 1, SDL_GPU_SAMPLECOUNT_4);
     InitRdp();
     InitRsp();
+    EXPECT(GpuBackendSampleCount() == SDL_GPU_SAMPLECOUNT_4);
     TestEdgesBlendTheirSamples();
     TestCpuPixelsStayUnderDraws();
     TestGrownImageKeepsItsRows();

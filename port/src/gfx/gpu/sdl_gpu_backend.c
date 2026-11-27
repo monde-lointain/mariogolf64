@@ -641,6 +641,10 @@ uint32_t GpuBackendScale(void) {
     return f_Gpu.scale;
 }
 
+SDL_GPUSampleCount GpuBackendSampleCount(void) {
+    return f_Gpu.sampleCount;
+}
+
 SDL_GPUTexture *GpuTargetTexture(const GfxTarget *target) {
     return target->resolved;
 }

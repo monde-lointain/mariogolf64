@@ -61,6 +61,9 @@ SDL_GPUFence *SubmitGpuCommandsWithFence(SDL_GPUCommandBuffer *commands);
 
 uint32_t GpuBackendScale(void);
 
+// The samples a pixel that the backend chose to draw with
+SDL_GPUSampleCount GpuBackendSampleCount(void);
+
 // The texture that holds a color target, scaled
 SDL_GPUTexture *GpuTargetTexture(const GfxTarget *target);
 
